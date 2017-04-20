@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -51,6 +52,21 @@ public class ReportParameter implements Serializable {
 	private String chainedDepends;
 	private boolean chainedParent;
 	private Map<String, String> lovValuesAsString;
+	private Map<String, String> defaultValueLovValues;
+
+	/**
+	 * @return the defaultValueLovValues
+	 */
+	public Map<String, String> getDefaultValueLovValues() {
+		return defaultValueLovValues;
+	}
+
+	/**
+	 * @param defaultValueLovValues the defaultValueLovValues to set
+	 */
+	public void setDefaultValueLovValues(Map<String, String> defaultValueLovValues) {
+		this.defaultValueLovValues = defaultValueLovValues;
+	}
 
 	/**
 	 * @return the lovValuesAsString
@@ -539,9 +555,17 @@ public class ReportParameter implements Serializable {
 				String htmlValue = getHtmlValue();
 				if (StringUtils.equalsIgnoreCase(htmlValue, lovValue)) {
 					return true;
-				} else {
-					return false;
+				} 
+				
+				if (MapUtils.isNotEmpty(defaultValueLovValues)) {
+					for (String value : defaultValueLovValues.keySet()) {
+						if (StringUtils.equalsIgnoreCase(value, lovValue)) {
+							return true;
+						}
+					}
 				}
+				
+				return false;
 			case MultiValue:
 				//compare lov value to default values or passed values
 				String defaultValueSetting = parameter.getDefaultValue();
@@ -561,6 +585,15 @@ public class ReportParameter implements Serializable {
 						}
 					}
 				}
+
+				if (MapUtils.isNotEmpty(defaultValueLovValues)) {
+					for (String value : defaultValueLovValues.keySet()) {
+						if (StringUtils.equalsIgnoreCase(value, lovValue)) {
+							return true;
+						}
+					}
+				}
+
 				return false;
 			default:
 				return false;

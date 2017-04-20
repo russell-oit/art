@@ -21,6 +21,8 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.report.Report;
+import art.report.ReportService;
 import art.user.User;
 import art.utils.ActionResult;
 import java.sql.ResultSet;
@@ -53,14 +55,17 @@ public class ParameterService {
 	private static final Logger logger = LoggerFactory.getLogger(ParameterService.class);
 
 	private final DbService dbService;
+	private final ReportService reportService;
 
 	@Autowired
-	public ParameterService(DbService dbService) {
+	public ParameterService(DbService dbService, ReportService reportService) {
 		this.dbService = dbService;
+		this.reportService = reportService;
 	}
 
 	public ParameterService() {
 		dbService = new DbService();
+		reportService = new ReportService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PARAMETERS AP";
@@ -101,6 +106,9 @@ public class ParameterService {
 			parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			parameter.setCreatedBy(rs.getString("CREATED_BY"));
 			parameter.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+			Report defaultValueReport = reportService.getReport(rs.getInt("DEFAULT_VALUE_REPORT_ID"));
+			parameter.setDefaultValueReport(defaultValueReport);
 
 			return type.cast(parameter);
 		}
@@ -330,16 +338,23 @@ public class ParameterService {
 		} else {
 			dataType = parameter.getDataType().getValue();
 		}
+		
+		Integer defaultValueReportId;
+		if(parameter.getDefaultValueReport()==null){
+			defaultValueReportId=0;
+		} else {
+			defaultValueReportId=parameter.getDefaultValueReport().getReportId();
+		}
 
 		int affectedRows;
 		if (newRecord) {
 			String sql = "INSERT INTO ART_PARAMETERS"
 					+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
-					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, USE_LOV,"
-					+ " LOV_REPORT_ID, USE_RULES_IN_LOV,"
+					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, DEFAULT_VALUE_REPORT_ID,"
+					+ " HIDDEN, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
 					+ " DRILLDOWN_COLUMN_INDEX,"
 					+ " USE_DIRECT_SUBSTITUTION, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 17) + ")";
 
 			Object[] values = {
 				parameter.getParameterId(),
@@ -350,6 +365,7 @@ public class ParameterService {
 				parameter.getHelpText(),
 				dataType,
 				parameter.getDefaultValue(),
+				defaultValueReportId,
 				BooleanUtils.toInteger(parameter.isHidden()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
 				parameter.getLovReportId(),
@@ -364,8 +380,8 @@ public class ParameterService {
 		} else {
 			String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
 					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
-					+ " HIDDEN=?, USE_LOV=?, LOV_REPORT_ID=?, USE_RULES_IN_LOV=?,"
-					+ " DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
+					+ " DEFAULT_VALUE_REPORT_ID=?, HIDDEN=?, USE_LOV=?, LOV_REPORT_ID=?,"
+					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
 
@@ -377,6 +393,7 @@ public class ParameterService {
 				parameter.getHelpText(),
 				dataType,
 				parameter.getDefaultValue(),
+				defaultValueReportId,
 				BooleanUtils.toInteger(parameter.isHidden()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
 				parameter.getLovReportId(),

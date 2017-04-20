@@ -55,6 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -69,6 +70,7 @@ import org.slf4j.LoggerFactory;
 public class ReportRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportRunner.class);
+
 	private final StringBuilder querySb;
 	private boolean useRules = false;
 	private PreparedStatement psQuery; // this is the ps object produced by this query
@@ -443,7 +445,7 @@ public class ReportRunner {
 	private void applyParameterPlaceholders(StringBuilder sb) {
 		logger.debug("Entering applyParameterPlaceholders");
 
-		if (reportParamsMap == null || reportParamsMap.isEmpty()) {
+		if (MapUtils.isEmpty(reportParamsMap)) {
 			return;
 		}
 
@@ -728,6 +730,10 @@ public class ReportRunner {
 	 */
 	public void execute(int resultSetType, boolean overrideUseRules, boolean newUseRules)
 			throws SQLException {
+
+		if (report == null) {
+			throw new IllegalStateException("report is null");
+		}
 
 		reportType = report.getReportType();
 		displayResultset = report.getDisplayResultset();
@@ -1154,7 +1160,7 @@ public class ReportRunner {
 			}
 
 			if (reportParam.getParameter().getParameterType() != ParameterType.SingleValue) {
-				throw new IllegalArgumentException("Non-single value parameter should not be used in dynamic sql: " + paramName);
+				throw new IllegalArgumentException("Non single-value parameter should not be used in dynamic sql: " + paramName);
 			}
 
 			Object actualParameterValue = reportParam.getEffectiveActualParameterValue();
@@ -1266,14 +1272,14 @@ public class ReportRunner {
 
 		String querySql = sb.toString();
 
-		//replace :USERNAME with currently logged in user's username
+		//replace :USERNAME: with currently logged in user's username
 		if (user != null) {
 			String username = user.getUsername();
 			String replaceString = Matcher.quoteReplacement("'" + username + "'"); //quote in case it contains special regex characters
 			querySql = querySql.replaceAll("(?iu):username:", replaceString); //(?iu) makes replace case insensitive across unicode characters
 		}
 
-		//replace :DATE with current date
+		//replace :DATE: with current date
 		Date now = new Date();
 
 		String dateFormat = "yyyy-MM-dd";
@@ -1281,7 +1287,7 @@ public class ReportRunner {
 		String date = dateFormatter.format(now);
 		querySql = querySql.replaceAll("(?iu):date:", "'" + date + "'"); //postgresql has casting syntax like ::date
 
-		//replace :TIME with current date and time
+		//replace :TIME: with current date and time
 		String timeFormat = "yyyy-MM-dd HH:mm:ss";
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		String time = timeFormatter.format(now);

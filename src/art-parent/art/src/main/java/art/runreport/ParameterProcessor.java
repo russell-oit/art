@@ -136,18 +136,16 @@ public class ParameterProcessor {
 
 		setLovValues(reportParamsMap, user);
 
+		setDefaultValueLovValues(reportParamsMap, user);
+
 		ParameterProcessorResult result = new ParameterProcessorResult();
-
 		result.setReportParamsList(reportParamsList);
-
 		result.setReportParamsMap(reportParamsMap);
 
 		ReportOptions reportOptions = processReportOptions(passedValuesMap);
-
 		result.setReportOptions(reportOptions);
 
 		ChartOptions chartOptions = processChartOptions(passedValuesMap);
-
 		result.setChartOptions(chartOptions);
 
 		setIsChainedParent(reportParamsList);
@@ -192,6 +190,46 @@ public class ParameterProcessor {
 						if (lovReportRunner != null) {
 							lovReportRunner.close();
 						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Populates default values for parameters which use a default value report
+	 *
+	 * @param reportParamsMap the report parameters
+	 * @param user the user under whose permission the report is being run
+	 * @throws SQLException
+	 */
+	private void setDefaultValueLovValues(Map<String, ReportParameter> reportParamsMap,
+			User user) throws SQLException {
+
+		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+			ReportParameter reportParam = entry.getValue();
+			Parameter param = reportParam.getParameter();
+			Report defaultValueReport = param.getDefaultValueReport();
+
+			if (defaultValueReport != null) {
+				ReportRunner defaultValueLovReportRunner = null;
+				try {
+					defaultValueLovReportRunner = new ReportRunner();
+					defaultValueLovReportRunner.setUser(user);
+					defaultValueLovReportRunner.setReport(defaultValueReport);
+					defaultValueLovReportRunner.setReportParamsMap(reportParamsMap);
+					defaultValueLovReportRunner.setUseDynamicDatasource(false);
+					
+					Map<Object, String> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
+					if (reportParam.getPassedParameterValues() == null) {
+						reportParam.getActualParameterValues().addAll(lovValues.keySet());
+					}
+					
+					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
+					reportParam.setDefaultValueLovValues(lovValuesAsString);
+				} finally {
+					if (defaultValueLovReportRunner != null) {
+						defaultValueLovReportRunner.close();
 					}
 				}
 			}

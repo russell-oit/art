@@ -34,7 +34,7 @@ Edit parameter definition
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
-	
+
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
@@ -43,9 +43,9 @@ Edit parameter definition
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="parameters"]').parent().addClass('active');
 
@@ -63,7 +63,7 @@ Edit parameter definition
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
-				
+
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
@@ -213,6 +213,19 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="col-md-4 control-label " for="defaultValueReport.reportId">
+						<spring:message code="parameters.label.defaultValueReport"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="defaultValueReport.reportId" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+								<option data-divider="true"></option>
+							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
+						</form:select>
+						<form:errors path="defaultValueReport.reportId" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="control-label col-md-4" for="hidden">
 						<spring:message code="parameters.label.hidden"/>
 					</label>
@@ -239,7 +252,7 @@ Edit parameter definition
 					<div class="col-md-8">
 						<form:select path="lovReportId" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
-							<option data-divider="true"></option>
+								<option data-divider="true"></option>
 							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
 						</form:select>
 						<form:errors path="lovReportId" cssClass="error"/>

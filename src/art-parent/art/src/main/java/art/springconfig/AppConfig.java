@@ -17,6 +17,7 @@
  */
 package art.springconfig;
 
+import art.report.StringToReport;
 import art.usergroup.StringToUserGroup;
 import art.utils.StringToDouble;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +62,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToUserGroup stringToUserGroup;
+	
+	@Autowired
+	private StringToReport stringToReport;
 
 	@Autowired
 	private StringToDouble stringToDouble;
@@ -164,6 +168,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	public void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(stringToUserGroup);
 		registry.addConverter(stringToDouble);
+		registry.addConverter(stringToReport);
 	}
 
 	@Bean

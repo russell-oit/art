@@ -74,8 +74,7 @@ public class ChainedParameterController {
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportRunner.setReportParamsMap(reportParamsMap);
 
-			boolean useRules = false;
-			values = reportRunner.getLovValues(useRules);
+			values = reportRunner.getLovValues();
 		} catch (SQLException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);
 		} finally {

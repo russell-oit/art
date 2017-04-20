@@ -19,6 +19,7 @@ package art.parameter;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.report.Report;
 import art.utils.ArtUtils;
 import java.io.Serializable;
 import java.util.Date;
@@ -49,6 +50,21 @@ public class Parameter implements Serializable {
 	private String description;
 	private String createdBy;
 	private String updatedBy;
+	private Report defaultValueReport;
+
+	/**
+	 * @return the defaultValueReport
+	 */
+	public Report getDefaultValueReport() {
+		return defaultValueReport;
+	}
+
+	/**
+	 * @param defaultValueReport the defaultValueReport to set
+	 */
+	public void setDefaultValueReport(Report defaultValueReport) {
+		this.defaultValueReport = defaultValueReport;
+	}
 	
 	/**
 	 * @return the createdBy

@@ -22,7 +22,6 @@ import art.datasource.Datasource;
 import art.enums.AccessLevel;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
-import art.parameter.Parameter;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
