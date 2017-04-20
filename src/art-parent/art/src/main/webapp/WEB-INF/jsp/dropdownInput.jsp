@@ -16,12 +16,29 @@ Display report parameter that uses dropdown input
 <select class="form-control"
 		name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-		${reportParam.parameter.parameterType == 'MultiValue' ? "multiple size='5'" : ""}>
-	
+		${reportParam.parameter.parameterType == 'MultiValue' ? 'multiple data-actions-box="true"' : ""}>
+
 	<c:if test="${reportParam.parameter.parameterType == 'MultiValue'}">
 		<option value="ALL_ITEMS"><spring:message code="reports.text.allItems"/></option>
 	</c:if>
 	<c:forEach var="lovValue" items="${lovValues}">
-		<option value="${encode:forHtmlAttribute(lovValue.key)}" ${reportParam.htmlValue == lovValue.key ? "selected" : ""}>${encode:forHtmlContent(lovValue.value)}</option>
+		<option value="${encode:forHtmlAttribute(lovValue.key)}" ${reportParam.parameter.defaultValue == lovValue.key ? "selected" : ""}>${encode:forHtmlContent(lovValue.value)}</option>
 	</c:forEach>
 </select>
+		
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
+
+<script type="text/javascript">
+	$('#${encode:forJavaScript(reportParam.htmlElementName)}').selectpicker({
+		liveSearch: true,
+		noneSelectedText: '${nothingSelectedText}',
+		noneResultsText: '${noResultsMatchText}',
+		countSelectedText: '${selectedCountText}',
+		selectAllText: '${selectAllText}',
+		deselectAllText: '${deselectAllText}'
+	});
+</script>
