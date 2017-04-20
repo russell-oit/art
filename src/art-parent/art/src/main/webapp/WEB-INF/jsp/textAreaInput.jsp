@@ -15,4 +15,4 @@ Display report parameter that uses textarea input
 <%-- https://stackoverflow.com/questions/2202999/why-is-textarea-filled-with-mysterious-white-spaces --%>
 <textarea rows="5" class="form-control"
 		  name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-		  id="${encode:forHtmlAttribute(reportParam.htmlElementName)}">${reportParam.htmlValue}</textarea>
+		  id="${encode:forHtmlAttribute(reportParam.htmlElementName)}">${encode:forHtmlContent(reportParam.htmlValue)}</textarea>

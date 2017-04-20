@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
-import org.owasp.encoder.Encode;
 
 /**
  * Represents a report parameter
@@ -342,11 +341,12 @@ public class ReportParameter implements Serializable {
 					List<Object> valueList = (List<Object>) value;
 					for (int i = 0; i < valueList.size(); i++) {
 						String htmlValue = String.valueOf(valueList.get(i));
-						htmlValue = Encode.forHtmlContent(htmlValue);
 						values.add(htmlValue);
 					}
 					//https://stackoverflow.com/questions/8627902/new-line-in-text-area
-					return StringUtils.join(values, "&#10;");
+					//https://stackoverflow.com/questions/7693994/how-to-convert-ascii-code-0-255-to-a-string-of-the-associated-character
+					int NEWLINE_CHAR_ASCII = 10;
+					return StringUtils.join(values, String.valueOf(Character.toChars(NEWLINE_CHAR_ASCII)));
 				} else {
 					return String.valueOf(value);
 				}
