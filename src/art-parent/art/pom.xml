@@ -25,7 +25,7 @@
 	
 	<properties>
 		<poi.version>3.14</poi.version>
-		<owasp.encoder.version>1.2</owasp.encoder.version>
+		<owasp.encoder.version>1.2.1</owasp.encoder.version>
 		<thymeleaf.version>3.0.3.RELEASE</thymeleaf.version>
 		<xdocreport.version>2.0.0</xdocreport.version>
 	</properties>
