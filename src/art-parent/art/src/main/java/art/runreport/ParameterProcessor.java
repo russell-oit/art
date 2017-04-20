@@ -469,6 +469,14 @@ public class ParameterProcessor {
 				dateValue = DateUtils.addMonths(now, offset);
 			} else if (StringUtils.startsWithIgnoreCase(period, "year")) {
 				dateValue = DateUtils.addYears(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "hour")) {
+				dateValue = DateUtils.addHours(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "min")) {
+				dateValue = DateUtils.addMinutes(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "sec")) {
+				dateValue = DateUtils.addSeconds(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "milli")) {
+				dateValue = DateUtils.addMilliseconds(now, offset);
 			} else {
 				throw new IllegalArgumentException("Invalid period: " + period);
 			}
