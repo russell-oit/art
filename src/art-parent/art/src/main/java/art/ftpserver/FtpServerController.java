@@ -171,7 +171,9 @@ public class FtpServerController {
 				ftpServerService.updateFtpServer(ftpServer, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", ftpServer.getName());
+			
+			String recordName = ftpServer.getName() + " (" + ftpServer.getFtpServerId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/ftpServers";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

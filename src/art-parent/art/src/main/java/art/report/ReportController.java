@@ -303,7 +303,9 @@ public class ReportController {
 				reportService.updateReport(report, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", report.getName());
+			
+			String recordName = report.getName() + " (" + report.getReportId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 			redirectAttributes.addFlashAttribute("record", report);
 			return "redirect:/reportsConfig";
 		} catch (SQLException | RuntimeException | IOException ex) {

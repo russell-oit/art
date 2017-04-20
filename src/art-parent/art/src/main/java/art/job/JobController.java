@@ -343,7 +343,8 @@ public class JobController {
 
 			saveJobParameters(request, job.getJobId());
 
-			redirectAttributes.addFlashAttribute("recordName", job.getName());
+			String recordName = job.getName() + " (" + job.getJobId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 			redirectAttributes.addFlashAttribute("record", job);
 			return "redirect:/" + nextPage;
 		} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {

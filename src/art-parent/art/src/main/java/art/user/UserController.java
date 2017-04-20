@@ -248,7 +248,9 @@ public class UserController {
 				}
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", user.getUsername());
+			
+			String recordName = user.getUsername() + " (" + user.getUserId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			saveUserGroups(user);
 			

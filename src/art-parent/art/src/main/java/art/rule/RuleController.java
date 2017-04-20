@@ -160,7 +160,9 @@ public class RuleController {
 				ruleService.updateRule(rule, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", rule.getName());
+			
+			String recordName = rule.getName() + " (" + rule.getRuleId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/rules";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

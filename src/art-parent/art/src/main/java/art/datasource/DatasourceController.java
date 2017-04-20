@@ -140,7 +140,7 @@ public class DatasourceController {
 		datasource.setDatasourceType(DatasourceType.JDBC);
 
 		model.addAttribute("datasource", datasource);
-		
+
 		return showEditDatasource("add", model);
 	}
 
@@ -212,7 +212,8 @@ public class DatasourceController {
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
 
-			redirectAttributes.addFlashAttribute("recordName", datasource.getName());
+			String recordName = datasource.getName() + " (" + datasource.getDatasourceId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/datasources";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

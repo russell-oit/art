@@ -94,11 +94,11 @@ public class ParameterController {
 
 		return response;
 	}
-	
+
 	@RequestMapping(value = "/deleteParameters", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteParameters(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteParameters: ids={}", (Object)ids);
+		logger.debug("Entering deleteParameters: ids={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -127,7 +127,7 @@ public class ParameterController {
 		param.setParameterType(ParameterType.SingleValue);
 
 		model.addAttribute("parameter", param);
-		
+
 		return showEditParameter("add", model);
 	}
 
@@ -168,7 +168,9 @@ public class ParameterController {
 				parameterService.updateParameter(parameter, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", parameter.getName());
+
+			String recordName = parameter.getName() + " (" + parameter.getParameterId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/parameters";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -202,7 +204,7 @@ public class ParameterController {
 		model.addAttribute("dataTypes", ParameterDataType.list());
 
 		model.addAttribute("action", action);
-		
+
 		return "editParameter";
 	}
 }

@@ -149,7 +149,9 @@ public class UserGroupController {
 				userGroupService.updateUserGroup(group, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", group.getName());
+			
+			String recordName = group.getName() + " (" + group.getUserGroupId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/userGroups";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

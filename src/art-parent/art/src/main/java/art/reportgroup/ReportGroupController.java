@@ -160,7 +160,9 @@ public class ReportGroupController {
 				reportGroupService.updateReportGroup(group, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", group.getName());
+			
+			String recordName = group.getName() + " (" + group.getReportGroupId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/reportGroups";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

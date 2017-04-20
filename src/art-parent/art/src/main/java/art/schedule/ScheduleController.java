@@ -171,7 +171,9 @@ public class ScheduleController {
 				scheduleService.updateSchedule(schedule, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", schedule.getName());
+			
+			String recordName = schedule.getName() + " (" + schedule.getScheduleId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/schedules";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
