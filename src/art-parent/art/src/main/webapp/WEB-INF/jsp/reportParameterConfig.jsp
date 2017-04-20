@@ -27,7 +27,7 @@
 
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
-	
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
@@ -38,7 +38,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -85,7 +85,7 @@
 						bootbox.alert(message);
 					}
 				});
-				
+
 				var table = oTable.api();
 
 				$('#deleteRecords').click(function () {
@@ -189,7 +189,9 @@
 						<td>${reportParameter.position}</td>
 						<td>${reportParameter.reportParameterId}</td>
 						<td data-toggle="tooltip" title="${dragToReorderText}">
-							${encode:forHtmlContent(reportParameter.parameter.name)}(${reportParameter.parameter.parameterId})
+							<a href="${pageContext.request.contextPath}/editParameter?id=${reportParameter.parameter.parameterId}">
+								${encode:forHtmlContent(reportParameter.parameter.name)}(${reportParameter.parameter.parameterId})
+							</a>
 						</td>							
 						<td>
 							<div class="btn-group">

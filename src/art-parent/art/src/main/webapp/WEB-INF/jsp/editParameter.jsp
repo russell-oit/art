@@ -180,7 +180,7 @@ Edit parameter definition
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="helpText" maxlength="120" class="form-control"/>
+							<form:input path="helpText" maxlength="500" class="form-control"/>
 							<spring:message code="parameters.help.helpText" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -208,7 +208,7 @@ Edit parameter definition
 						<spring:message code="parameters.label.defaultValue"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="defaultValue" maxlength="80" class="form-control"/>
+						<form:textarea path="defaultValue" rows="3" class="form-control"/>
 						<form:errors path="defaultValue" cssClass="error"/>
 					</div>
 				</div>
