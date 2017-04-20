@@ -326,7 +326,7 @@ public class ReportParameter implements Serializable {
 
 		if (value == null) {
 			return "";
-		} 
+		}
 
 		ParameterDataType parameterDataType = parameter.getDataType();
 		switch (parameterDataType) {
@@ -515,6 +515,51 @@ public class ReportParameter implements Serializable {
 				default:
 					throw new IllegalStateException("Unexpected parameter type: " + parameterType);
 			}
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if the given lov value should be selected in the
+	 * parameter dropdown list
+	 *
+	 * @param lovValue the lov value
+	 * @return code>true</code> if the given lov value should be selected in the
+	 * parameter dropdown list
+	 */
+	public boolean selectLovValue(String lovValue) {
+		ParameterType parameterType = parameter.getParameterType();
+
+		switch (parameterType) {
+			case SingleValue:
+				//compare lov value to actual parameter value - default value or passed value
+				String htmlValue = getHtmlValue();
+				if (StringUtils.equalsIgnoreCase(htmlValue, lovValue)) {
+					return true;
+				} else {
+					return false;
+				}
+			case MultiValue:
+				//compare lov value to default values or passed values
+				String defaultValueSetting = parameter.getDefaultValue();
+				if (defaultValueSetting != null) {
+					String defaultValues[] = defaultValueSetting.split("\\r?\\n");
+					for (String defaultValue : defaultValues) {
+						if (StringUtils.equalsIgnoreCase(defaultValue, lovValue)) {
+							return true;
+						}
+					}
+				}
+
+				if (passedParameterValues != null) {
+					for (String passedValue : passedParameterValues) {
+						if (StringUtils.equalsIgnoreCase(passedValue, lovValue)) {
+							return true;
+						}
+					}
+				}
+				return false;
+			default:
+				return false;
 		}
 	}
 }
