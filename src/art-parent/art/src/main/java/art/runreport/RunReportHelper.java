@@ -156,38 +156,7 @@ public class RunReportHelper {
 		//prepare report parameters
 		ParameterProcessor paramProcessor = new ParameterProcessor();
 		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
-
-		Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-
-		for (ReportParameter reportParam : reportParamsList) {
-			Parameter param = reportParam.getParameter();
-			if (param.isUseLov()) {
-				//get applicable lov values.
-				//don't run chained parameters. their values will be
-				//loaded dynamically depending on parent and depends paremeter values
-				if (!reportParam.isChained()) {
-					ReportRunner lovReportRunner = null;
-					try {
-						lovReportRunner = new ReportRunner();
-						int lovReportId = param.getLovReportId();
-						Report lovReport = reportService.getReport(lovReportId);
-						lovReportRunner.setUser(sessionUser);
-						lovReportRunner.setReport(lovReport);
-						lovReportRunner.setReportParamsMap(reportParamsMap);
-						lovReportRunner.setUseDynamicDatasource(false);
-						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
-						reportParam.setLovValues(lovValues);
-						Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
-						reportParam.setLovValuesAsString(lovValuesAsString);
-					} finally {
-						if (lovReportRunner != null) {
-							lovReportRunner.close();
-						}
-					}
-				}
-			}
-		}
 
 		ReportType reportType = report.getReportType();
 

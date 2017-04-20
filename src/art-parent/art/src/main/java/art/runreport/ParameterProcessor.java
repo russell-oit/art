@@ -133,7 +133,7 @@ public class ParameterProcessor {
 
 		handleAllValues(reportParamsMap, user);
 
-		setLovValues(reportParamsMap);
+		setLovValues(reportParamsMap, user);
 
 		ParameterProcessorResult result = new ParameterProcessorResult();
 
@@ -158,30 +158,39 @@ public class ParameterProcessor {
 	 * Populates lov values for all lov parameters
 	 *
 	 * @param reportParamsMap the report parameters
+	 * @param user the user under whose permission the report is being run
 	 * @throws SQLException
 	 */
-	private void setLovValues(Map<String, ReportParameter> reportParamsMap) throws SQLException {
+	private void setLovValues(Map<String, ReportParameter> reportParamsMap,
+			User user) throws SQLException {
+
 		ReportService reportService = new ReportService();
+		
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			ReportParameter reportParam = entry.getValue();
 			Parameter param = reportParam.getParameter();
 			if (param.isUseLov()) {
-				ReportRunner lovReportRunner = null;
-				try {
-					lovReportRunner = new ReportRunner();
-					int lovReportId = param.getLovReportId();
-					Report lovReport = reportService.getReport(lovReportId);
-					lovReportRunner.setReport(lovReport);
-					lovReportRunner.setReportParamsMap(reportParamsMap);
-					lovReportRunner.setUseDynamicDatasource(false);
-					boolean useRules = false; //don't apply rules so as to get all values
-					Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(useRules);
-					reportParam.setLovValues(lovValues);
-					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
-					reportParam.setLovValuesAsString(lovValuesAsString);
-				} finally {
-					if (lovReportRunner != null) {
-						lovReportRunner.close();
+				//get applicable lov values.
+				//don't run chained parameters. their values will be
+				//loaded dynamically depending on parent and depends paremeter values
+				if (!reportParam.isChained()) {
+					ReportRunner lovReportRunner = null;
+					try {
+						lovReportRunner = new ReportRunner();
+						int lovReportId = param.getLovReportId();
+						Report lovReport = reportService.getReport(lovReportId);
+						lovReportRunner.setUser(user);
+						lovReportRunner.setReport(lovReport);
+						lovReportRunner.setReportParamsMap(reportParamsMap);
+						lovReportRunner.setUseDynamicDatasource(false);
+						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
+						reportParam.setLovValues(lovValues);
+						Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
+						reportParam.setLovValuesAsString(lovValuesAsString);
+					} finally {
+						if (lovReportRunner != null) {
+							lovReportRunner.close();
+						}
 					}
 				}
 			}
