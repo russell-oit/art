@@ -22,7 +22,7 @@ import org.springframework.core.convert.converter.Converter;
 
 /**
  * Spring converter for string (report group id) to report group object
- * 
+ *
  * @author Timothy Anyona
  */
 public class StringToReportGroup implements Converter<String, ReportGroup> {
@@ -30,12 +30,12 @@ public class StringToReportGroup implements Converter<String, ReportGroup> {
 	@Override
 	public ReportGroup convert(String s) {
 		int id = NumberUtils.toInt(s);
-		
+
 		//get value from database instead of new object with only id populated? not necessary?
-		ReportGroup group=new ReportGroup();
+		ReportGroup group = new ReportGroup();
 		group.setReportGroupId(id);
-		
+
 		return group;
 	}
-	
+
 }

@@ -35,21 +35,14 @@ public class StringToReport implements Converter<String, Report> {
 
 	private static final Logger logger = LoggerFactory.getLogger(StringToReport.class);
 
-	@Autowired
-	private ReportService reportService;
-
 	@Override
 	public Report convert(String s) {
 		int id = NumberUtils.toInt(s);
-
-		Report report = null;
-
-		try {
-			report = reportService.getReport(id);
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-		}
-
+		
+		//get value from database instead of new object with only id populated? not necessary?
+		Report report = new Report();
+		report.setReportId(id);
+		
 		return report;
 	}
 
