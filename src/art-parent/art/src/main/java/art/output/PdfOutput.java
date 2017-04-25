@@ -25,6 +25,8 @@ import com.lowagie.text.pdf.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates pdf output. See
@@ -35,13 +37,17 @@ import java.util.Date;
  */
 public class PdfOutput extends StandardOutput {
 
+	private static final Logger logger = LoggerFactory.getLogger(PdfOutput.class);
+
 	private Document document;
 	private PdfPTable table;
 	private PdfPCell cell;
-	private final float headergray = 0.9F;
+	private final float headergray = 0.9f;
 	private FontSelector fsBody; //fonts to use for document body
 	private FontSelector fsHeading; //fonts to use for document title and column headings
 	public final String PDF_AUTHOR_ART = "ART - http://art.sourceforge.net";
+	public final float RIGHT_MARGIN = 72f;
+	public final float BOTTOM_MARGIN = 72f;
 
 	/**
 	 * Resets global variables in readiness for output generation. Especially
@@ -65,15 +71,18 @@ public class PdfOutput extends StandardOutput {
 
 			//set document margins
 			//document with 72pt (1 inch) margins for left, right, top, bottom
-			document = new Document(pageSize, 72, 72, 72, 72);
+			document = new Document(pageSize, 72, RIGHT_MARGIN, 72, BOTTOM_MARGIN);
 
-			PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));
+			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));
 			document.addTitle(reportName);
 			document.addAuthor(PDF_AUTHOR_ART);
 
-			HeaderFooter footer = new HeaderFooter(new Phrase(""), true);
-			footer.setAlignment(Element.ALIGN_CENTER);
-			document.setFooter(footer);
+//			HeaderFooter footer = new HeaderFooter(new Phrase(""), true);
+//			footer.setAlignment(Element.ALIGN_RIGHT);
+//			footer.setBorder(Rectangle.NO_BORDER);
+//			document.setFooter(footer);
+			PdfEventHandler pdfEventHandler = new PdfEventHandler();
+			writer.setPageEvent(pdfEventHandler);
 
 			document.open();
 
@@ -233,7 +242,7 @@ public class PdfOutput extends StandardOutput {
 //		cell.setGrayFill((oddline ? evengray : oddgray));
 		table.addCell(cell);
 	}
-	
+
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
@@ -255,7 +264,7 @@ public class PdfOutput extends StandardOutput {
 //		cell.setGrayFill((oddline ? evengray : oddgray));
 		table.addCell(cell);
 	}
-	
+
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
@@ -289,10 +298,10 @@ public class PdfOutput extends StandardOutput {
 		cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 		cell.setPaddingLeft(5f);
 		cell.setPaddingRight(5f);
-		
+
 		table.addCell(cell);
 	}
-	
+
 	@Override
 	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
 		cell = new PdfPCell(new Paragraph(fsHeading.process(formattedValue)));
@@ -300,7 +309,7 @@ public class PdfOutput extends StandardOutput {
 		cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 		cell.setPaddingLeft(5f);
 		cell.setPaddingRight(5f);
-		
+
 		table.addCell(cell);
 	}
 

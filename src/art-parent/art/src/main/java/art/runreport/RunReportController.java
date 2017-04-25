@@ -235,6 +235,8 @@ public class RunReportController {
 				default:
 				//do nothing
 			}
+			
+			RunReportHelper runReportHelper = new RunReportHelper();
 
 			//output page header. if showInline, page header and footer already exist. 
 			if (!showInline) {
@@ -244,7 +246,6 @@ public class RunReportController {
 				boolean allowSelectParameters = Boolean.parseBoolean(request.getParameter("allowSelectParameters"));
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
-					RunReportHelper runReportHelper = new RunReportHelper();
 					runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
 				}
 
@@ -316,7 +317,7 @@ public class RunReportController {
 				}
 
 				//get resultset type to use
-				int resultSetType = getResultSetType(reportType);
+				int resultSetType = runReportHelper.getResultSetType(reportType);
 
 				//run query
 				long queryStartTime = System.currentTimeMillis();
@@ -326,7 +327,6 @@ public class RunReportController {
 				// display status information, parameters and final sql
 				if (showReportHeaderAndFooter) {
 					String shortDescription = report.getShortDescription();
-					RunReportHelper runReportHelper = new RunReportHelper();
 					shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
 					String description = "";
@@ -452,34 +452,6 @@ public class RunReportController {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Returns the resultset type to use for a given report type
-	 *
-	 * @param reportType the report type
-	 * @return the resultset type to use
-	 */
-	private int getResultSetType(ReportType reportType) {
-		//is scroll insensitive much slower than forward only?
-		int resultSetType;
-		if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
-				|| reportType == ReportType.FreeMarker || reportType.isXDocReport()
-				|| reportType == ReportType.Group || reportType.isChart()
-				|| reportType == ReportType.Thymeleaf
-				|| reportType == ReportType.Dygraphs) {
-			//need scrollable resultset for jasper art report, jxls art report,
-			//freemarker, xdocreport, thymeleaf, dygraphs in order to display record count
-			//need scrollable resultset in order to generate group report
-			//need scrollable resultset for charts for show data option
-			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
-		} else {
-			//report types will determine the record count e.g. for standard output reports
-			//or no way to determine record count e.g. with jasper reports template report
-			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
-		}
-
-		return resultSetType;
 	}
 
 	/**

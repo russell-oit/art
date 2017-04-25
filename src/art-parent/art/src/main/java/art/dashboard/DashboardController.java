@@ -17,16 +17,34 @@
  */
 package art.dashboard;
 
+import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportOutputGenerator;
+import art.runreport.ReportRunner;
 import art.runreport.RunReportHelper;
+import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
+import art.utils.FilenameHelper;
+import com.lowagie.text.Chunk;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.ColumnText;
+import com.lowagie.text.pdf.PdfCopy;
+import com.lowagie.text.pdf.PdfCopy.PageStamp;
+import com.lowagie.text.pdf.PdfImportedPage;
+import com.lowagie.text.pdf.PdfReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -47,6 +65,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -97,7 +116,7 @@ public class DashboardController {
 		String errorPage = "reportError";
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
-		List<ReportParameter> reportParamsList = null;
+		List<ReportParameter> reportParamsList;
 
 		try {
 			Report report = reportService.getReport(reportId);
@@ -137,10 +156,10 @@ public class DashboardController {
 				model.addAttribute("dashboard", dashboard);
 			}
 
+			pdfDashboard(paramProcessorResult, report, sessionUser, locale);
+
 			model.addAttribute("reportName", report.getName());
-		} catch (SQLException | RuntimeException
-				| ParseException | IOException | SAXException
-				| ParserConfigurationException | XPathExpressionException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 			return errorPage;
@@ -798,5 +817,140 @@ public class DashboardController {
 		logger.debug("dashboardTitle='{}'", dashboardTitle);
 
 		return dashboardTitle;
+	}
+
+	private void pdfDashboard(ParameterProcessorResult paramProcessorResult,
+			Report dashboardReport, User user, Locale locale) throws Exception {
+
+		Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+
+		String dashboardXml = dashboardReport.getReportSource();
+		logger.debug("dashboardXml='{}'", dashboardXml);
+
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document document = builder.parse(new InputSource(new StringReader(dashboardXml)));
+		rootNode = document.getDocumentElement();
+
+		xPath = XPathFactory.newInstance().newXPath();
+
+		List<Integer> reportIds = new ArrayList<>();
+
+		ReportType dashboardReportType = dashboardReport.getReportType();
+		if (dashboardReportType == ReportType.Dashboard) {
+			NodeList objectIdNodes = (NodeList) xPath.evaluate("COLUMN/PORTLET/OBJECTID", rootNode, XPathConstants.NODESET);
+			//http://viralpatel.net/blogs/java-xml-xpath-tutorial-parse-xml/
+			for (int i = 0; i < objectIdNodes.getLength(); i++) {
+				String objectIdString = objectIdNodes.item(i).getFirstChild().getNodeValue();
+				reportIds.add(Integer.parseInt(objectIdString));
+			}
+
+			NodeList queryIdNodes = (NodeList) xPath.evaluate("COLUMN/PORTLET/QUERYID", rootNode, XPathConstants.NODESET);
+			for (int i = 0; i < queryIdNodes.getLength(); i++) {
+				String queryIdString = queryIdNodes.item(i).getFirstChild().getNodeValue();
+				reportIds.add(Integer.parseInt(queryIdString));
+			}
+
+			NodeList reportIdNodes = (NodeList) xPath.evaluate("COLUMN/PORTLET/REPORTID", rootNode, XPathConstants.NODESET);
+			for (int i = 0; i < reportIdNodes.getLength(); i++) {
+				String reportIdString = reportIdNodes.item(i).getFirstChild().getNodeValue();
+				reportIds.add(Integer.parseInt(reportIdString));
+			}
+		}
+
+		List<String> reportFileNames = new ArrayList<>();
+
+		ReportFormat reportFormat = ReportFormat.pdf;
+
+		for (Integer reportId : reportIds) {
+			Report report = reportService.getReport(reportId);
+			ReportType reportType = report.getReportType();
+
+			if (reportType.isStandardOutput() || reportType.isChart()) {
+				ReportRunner reportRunner = new ReportRunner();
+				reportRunner.setUser(user);
+				reportRunner.setReport(report);
+				reportRunner.setReportParamsMap(reportParamsMap);
+
+				RunReportHelper runReportHelper = new RunReportHelper();
+				int resultSetType = runReportHelper.getResultSetType(reportType);
+
+				reportRunner.execute(resultSetType);
+
+				FilenameHelper filenameHelper = new FilenameHelper();
+				String baseFileName = filenameHelper.getBaseFilename(report);
+				String exportPath = Config.getReportsExportPath();
+				String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
+				String fileName = baseFileName + "." + extension;
+				String outputFileName = exportPath + fileName;
+
+				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+
+				reportOutputGenerator.setIsJob(true);
+
+				FileOutputStream fos = new FileOutputStream(outputFileName);
+				try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"))) {
+					reportOutputGenerator.generateOutput(report, reportRunner,
+							reportFormat, locale, paramProcessorResult, writer, outputFileName, user, messageSource);
+				} finally {
+					fos.close();
+				}
+
+				reportFileNames.add(outputFileName);
+			}
+		}
+
+		FilenameHelper filenameHelper = new FilenameHelper();
+		String baseFileName = filenameHelper.getBaseFilename(dashboardReport);
+		String exportPath = Config.getReportsExportPath();
+		String extension = filenameHelper.getFilenameExtension(dashboardReport, dashboardReportType, ReportFormat.pdf);
+		String fileName = baseFileName + "." + extension;
+		String outputFileName = exportPath + fileName;
+
+		//http://itext.2136553.n4.nabble.com/Merging-Problem-td3177394.html
+		//https://stackoverflow.com/questions/34818288/itext-2-1-7-pdfcopy-addpagepage-cant-find-page-reference
+		//http://tutorialspointexamples.com/itext-merge-pdf-files-in-java/
+		//https://stackoverflow.com/questions/23062345/function-that-can-use-itext-to-concatenate-merge-pdfs-together-causing-some
+		if (CollectionUtils.isNotEmpty(reportFileNames)) {
+			//pdfcopy with throw an error if no pages are added
+			File outputFile = new File(outputFileName);
+			com.lowagie.text.Document doc = new com.lowagie.text.Document();
+			FileOutputStream outputStream = new FileOutputStream(outputFile);
+			PdfCopy copy = new PdfCopy(doc, outputStream);
+			doc.open();
+			//https://dkbalachandar.wordpress.com/2016/06/09/itext-pdf-page-header-with-title-and-number/
+			Rectangle pageSize = PageSize.A4.rotate();
+			float x=pageSize.getRight(72);
+			float y=pageSize.getBottom(72);
+			int pageCount = 0;
+			for (String reportFileName : reportFileNames) {
+				PdfReader reader = new PdfReader(reportFileName);
+				int totalPages = reader.getNumberOfPages();
+				for (int i = 1; i <= totalPages; i++) {
+					pageCount++;
+					PdfImportedPage page = copy.getImportedPage(reader, i);
+					PageStamp stamp = copy.createPageStamp(page);
+					Chunk chunk = new Chunk(String.format("%d", pageCount));
+					if (i == 1) {
+						chunk.setLocalDestination("p" + pageCount);
+					}
+					//http://developers.itextpdf.com/examples/stamping-content-existing-pdfs-itext5/header-and-footer-examples
+//					float x = reader.getPageSize(i).getRight(72);
+//					float y = reader.getPageSize(i).getBottom(70);
+					ColumnText.showTextAligned(stamp.getUnderContent(),
+							com.lowagie.text.Element.ALIGN_RIGHT, new Phrase(chunk),
+							x, y, 0);
+					stamp.alterContents();
+					copy.addPage(page);
+				}
+			}
+			doc.close();
+
+//			for (String reportFileName : reportFileNames) {
+//				File reportFile = new File(reportFileName);
+//				reportFile.delete();
+//			}
+		}
+
 	}
 }

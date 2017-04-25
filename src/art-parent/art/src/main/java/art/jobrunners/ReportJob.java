@@ -1274,7 +1274,7 @@ public class ReportJob implements org.quartz.Job {
 		//generate output
 		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
-		reportOutputGenerator.setJobId(jobId);
+		reportOutputGenerator.setIsJob(true);
 		Locale locale = Locale.getDefault();
 
 		try {
@@ -1323,7 +1323,7 @@ public class ReportJob implements org.quartz.Job {
 		//generate output
 		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
-		reportOutputGenerator.setJobId(jobId);
+		reportOutputGenerator.setIsJob(true);
 		Locale locale = Locale.getDefault();
 
 		ResultSet rs = null;
@@ -1678,7 +1678,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	public ParameterProcessorResult buildParameters(int reportId, int jId,
 			User user) throws SQLException {
-		
+
 		logger.debug("Entering buildParameters: reportId={}, jId={}", reportId, jId);
 
 		ParameterProcessorResult paramProcessorResult = null;

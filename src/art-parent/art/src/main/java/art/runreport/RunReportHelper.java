@@ -29,6 +29,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ import org.slf4j.LoggerFactory;
 public class RunReportHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunReportHelper.class);
-	
+
 	private boolean useDynamicDatasource = true;
 
 	/**
@@ -528,5 +529,33 @@ public class RunReportHelper {
 		}
 
 		return outputString;
+	}
+
+	/**
+	 * Returns the resultset type to use for a given report type
+	 *
+	 * @param reportType the report type
+	 * @return the resultset type to use
+	 */
+	public int getResultSetType(ReportType reportType) {
+		//is scroll insensitive much slower than forward only?
+		int resultSetType;
+		if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
+				|| reportType == ReportType.FreeMarker || reportType.isXDocReport()
+				|| reportType == ReportType.Group || reportType.isChart()
+				|| reportType == ReportType.Thymeleaf
+				|| reportType == ReportType.Dygraphs) {
+			//need scrollable resultset for jasper art report, jxls art report,
+			//freemarker, xdocreport, thymeleaf, dygraphs in order to display record count
+			//need scrollable resultset in order to generate group report
+			//need scrollable resultset for charts for show data option
+			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+		} else {
+			//report types will determine the record count e.g. for standard output reports
+			//or no way to determine record count e.g. with jasper reports template report
+			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+		}
+
+		return resultSetType;
 	}
 }

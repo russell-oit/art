@@ -119,11 +119,25 @@ public class ReportOutputGenerator {
 	private static final Logger logger = LoggerFactory.getLogger(ReportOutputGenerator.class);
 
 	//optional variables for generateOutput() method
-	private int jobId;
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 	private ServletContext servletContext;
 	private DrilldownService drilldownService;
+	private boolean isJob = false;
+
+	/**
+	 * @return the isJob
+	 */
+	public boolean isIsJob() {
+		return isJob;
+	}
+
+	/**
+	 * @param isJob the isJob to set
+	 */
+	public void setIsJob(boolean isJob) {
+		this.isJob = isJob;
+	}
 
 	/**
 	 * @return the drilldownService
@@ -137,20 +151,6 @@ public class ReportOutputGenerator {
 	 */
 	public void setDrilldownService(DrilldownService drilldownService) {
 		this.drilldownService = drilldownService;
-	}
-
-	/**
-	 * @return the jobId
-	 */
-	public int getJobId() {
-		return jobId;
-	}
-
-	/**
-	 * @param jobId the jobId to set
-	 */
-	public void setJobId(int jobId) {
-		this.jobId = jobId;
 	}
 
 	/**
@@ -235,11 +235,6 @@ public class ReportOutputGenerator {
 
 		ResultSet rs = null;
 		Integer rowsRetrieved = null;
-
-		boolean isJob = false;
-		if (jobId > 0) {
-			isJob = true;
-		}
 
 		if (!isJob) {
 			Objects.requireNonNull(request, "request must not be null");
