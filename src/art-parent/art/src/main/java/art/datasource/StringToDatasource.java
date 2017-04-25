@@ -19,12 +19,14 @@ package art.datasource;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
 /**
  * Spring converter from string (datasource id) to datasource object
  * 
  * @author Timothy Anyona
  */
+@Component
 public class StringToDatasource implements Converter<String, Datasource> {
 
 	@Override

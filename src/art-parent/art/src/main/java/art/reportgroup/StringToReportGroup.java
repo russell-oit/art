@@ -19,12 +19,14 @@ package art.reportgroup;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
 /**
  * Spring converter for string (report group id) to report group object
  *
  * @author Timothy Anyona
  */
+@Component
 public class StringToReportGroup implements Converter<String, ReportGroup> {
 
 	@Override

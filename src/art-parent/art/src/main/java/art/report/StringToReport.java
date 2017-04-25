@@ -17,11 +17,9 @@
  */
 package art.report;
 
-import java.sql.SQLException;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -32,8 +30,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class StringToReport implements Converter<String, Report> {
-
-	private static final Logger logger = LoggerFactory.getLogger(StringToReport.class);
 
 	@Override
 	public Report convert(String s) {
