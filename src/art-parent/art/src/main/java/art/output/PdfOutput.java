@@ -73,7 +73,7 @@ public class PdfOutput extends StandardOutput {
 			//document with 72pt (1 inch) margins for left, right, top, bottom
 			document = new Document(pageSize, 72, RIGHT_MARGIN, 72, BOTTOM_MARGIN);
 
-			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));
+			PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));
 			document.addTitle(reportName);
 			document.addAuthor(PDF_AUTHOR_ART);
 
@@ -81,14 +81,12 @@ public class PdfOutput extends StandardOutput {
 //			footer.setAlignment(Element.ALIGN_RIGHT);
 //			footer.setBorder(Rectangle.NO_BORDER);
 //			document.setFooter(footer);
-			PdfEventHandler pdfEventHandler = new PdfEventHandler();
-			writer.setPageEvent(pdfEventHandler);
 
 			document.open();
 
 			table = new PdfPTable(totalColumnCount); //use total column count insead of resultset column count because of crosstab output
 			table.getDefaultCell().setBorder(0);
-			table.setWidthPercentage(100F); //default is 80
+			table.setWidthPercentage(100); //default is 80
 			table.setHeaderRows(1);
 
 			fsBody = new FontSelector();

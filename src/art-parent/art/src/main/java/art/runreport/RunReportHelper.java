@@ -180,8 +180,6 @@ public class RunReportHelper {
 
 		boolean enableReportFormats;
 		switch (reportType) {
-			case Dashboard:
-			case GridstackDashboard:
 			case Mondrian:
 			case MondrianXmla:
 			case SqlServerXmla:
@@ -460,6 +458,11 @@ public class RunReportHelper {
 				case XDocReportFreeMarkerPptx:
 				case XDocReportVelocityPptx:
 					formats.add("pptx");
+					break;
+				case Dashboard:
+				case GridstackDashboard:
+					formats.add("html");
+					formats.add("pdf");
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected report type: " + reportType);

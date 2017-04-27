@@ -49,6 +49,9 @@
 					</script>
 
 					<c:choose>
+						<c:when test="${reportFormat == 'pdf'}">
+							<jsp:include page="/WEB-INF/jsp/showDashboardFileLink.jsp"/>
+						</c:when>
 						<c:when test="${reportType == 'Dashboard'}">
 							<jsp:include page="/WEB-INF/jsp/showDashboardInline.jsp"/>
 						</c:when>

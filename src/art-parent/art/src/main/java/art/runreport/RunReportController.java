@@ -46,6 +46,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,6 +176,11 @@ public class RunReportController {
 				//so use redirect
 				return "redirect:/showAnalysis";
 			}
+			
+			long totalTimeSeconds = 0;
+			long fetchTimeSeconds = 0;
+			
+			long overallStartTime = System.currentTimeMillis(); //overall start time
 
 			//get report format to use
 			ReportFormat reportFormat;
@@ -255,9 +261,6 @@ public class RunReportController {
 				writer.flush();
 			}
 
-			long totalTime = 0;
-			long fetchTime = 0;
-
 			List<ReportParameter> reportParamsList = null;
 
 			if (reportType == ReportType.Text) {
@@ -280,8 +283,6 @@ public class RunReportController {
 
 				//run report
 				Integer rowsRetrieved = null; //use Integer in order to have unknown status e.g. for template reports for which you can't know the number of rows in the report
-
-				long overallStartTime = System.currentTimeMillis(); //overall start time
 
 				reportRunner = new ReportRunner();
 				reportRunner.setUser(sessionUser);
@@ -340,8 +341,9 @@ public class RunReportController {
 
 //					String reportInfo = "<b>" + reportName + "</b>"
 //							+ description + " :: " + startTimeString;
-					String reportInfo = "<h4>" + reportName + "<small>"
-							+ description + " :: " + startTimeString + "</small></h4>";
+					String reportInfo = "<h4>" + Encode.forHtmlContent(reportName) + "<small>"
+							+ Encode.forHtmlContent(description) + " :: "
+							+ Encode.forHtmlContent(startTimeString) + "</small></h4>";
 
 					displayReportInfo(writer, reportInfo);
 
@@ -403,16 +405,15 @@ public class RunReportController {
 				// is "cached and transmitted" over the network by the servlet engine.
 				long overallEndTime = System.currentTimeMillis();
 
-				totalTime = (overallEndTime - overallStartTime) / (1000);
-				fetchTime = (queryEndTime - queryStartTime) / (1000);
-				double preciseTotalTime = (overallEndTime - overallStartTime) / (double) 1000;
-				NumberFormat nf = NumberFormat.getInstance(request.getLocale());
-				DecimalFormat df = (DecimalFormat) nf;
+				totalTimeSeconds = (overallEndTime - overallStartTime) / (1000);
+				fetchTimeSeconds = (queryEndTime - queryStartTime) / (1000);
+				double preciseTotalTimeSeconds = (overallEndTime - overallStartTime) / (double) 1000;
+				DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(request.getLocale());
 				df.applyPattern("#,##0.0##");
 
 				if (showReportHeaderAndFooter) {
 					Object[] value = {
-						df.format(preciseTotalTime)
+						df.format(preciseTotalTimeSeconds)
 					};
 
 					String msg = messageSource.getMessage("reports.text.timeTakenInSeconds", value, locale);
@@ -436,7 +437,7 @@ public class RunReportController {
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
 			}
 
-			ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, reportFormat.getValue(), reportParamsList);
+			ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
 		} catch (Exception ex) {
 			logger.error("Error. {}, {}", report, sessionUser, ex);
 			if (report != null) {

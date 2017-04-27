@@ -95,9 +95,6 @@ public class PdfChart {
 			}
 			document.addTitle(title);
 			document.addAuthor("ART - http://art.sourceforge.net");
-//			HeaderFooter footer = new HeaderFooter(new Phrase(""), false);
-//			footer.setAlignment(Element.ALIGN_CENTER);
-//			document.setFooter(footer);
 			document.open();
 
 			//set fonts to be used, in case custom font is defined

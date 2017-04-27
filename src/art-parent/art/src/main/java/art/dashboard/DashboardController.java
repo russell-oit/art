@@ -31,13 +31,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.FilenameHelper;
-import com.lowagie.text.Chunk;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.ColumnText;
 import com.lowagie.text.pdf.PdfCopy;
-import com.lowagie.text.pdf.PdfCopy.PageStamp;
 import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
 import java.io.File;
@@ -49,8 +43,12 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -111,12 +109,20 @@ public class DashboardController {
 
 		logger.debug("Entering showDashboard: reportId={}", reportId);
 
-		ReportType reportType;
+		long startTime = System.currentTimeMillis();
 
 		String errorPage = "reportError";
-
 		User sessionUser = (User) session.getAttribute("sessionUser");
+
+		String reportFormatString = request.getParameter("reportFormat");
+		ReportFormat reportFormat = ReportFormat.toEnum(reportFormatString, ReportFormat.html);
+
 		List<ReportParameter> reportParamsList;
+		ReportType reportType;
+
+		String description = "";
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
+		String startTimeString = df.format(new Date(startTime));
 
 		try {
 			Report report = reportService.getReport(reportId);
@@ -148,15 +154,27 @@ public class DashboardController {
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportParamsList = paramProcessorResult.getReportParamsList();
 
-			if (reportType == ReportType.Dashboard) {
-				Dashboard dashboard = buildDashboard(report, request, locale, reportParamsMap);
-				model.addAttribute("dashboard", dashboard);
-			} else if (reportType == ReportType.GridstackDashboard) {
-				GridstackDashboard dashboard = buildGridstackDashboard(report, request, locale, reportParamsMap);
-				model.addAttribute("dashboard", dashboard);
-			}
+			if (reportFormat == ReportFormat.pdf) {
+				pdfDashboard(paramProcessorResult, report, sessionUser, locale, request);
 
-			pdfDashboard(paramProcessorResult, report, sessionUser, locale);
+				RunReportHelper runReportHelper = new RunReportHelper();
+
+				String shortDescription = report.getShortDescription();
+				shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
+
+				shortDescription = StringUtils.trim(shortDescription);
+				if (StringUtils.length(shortDescription) > 0) {
+					description = " :: " + shortDescription;
+				}
+			} else {
+				if (reportType == ReportType.Dashboard) {
+					Dashboard dashboard = buildDashboard(report, request, locale, reportParamsMap);
+					model.addAttribute("dashboard", dashboard);
+				} else if (reportType == ReportType.GridstackDashboard) {
+					GridstackDashboard dashboard = buildGridstackDashboard(report, request, locale, reportParamsMap);
+					model.addAttribute("dashboard", dashboard);
+				}
+			}
 
 			model.addAttribute("reportName", report.getName());
 		} catch (Exception ex) {
@@ -167,13 +185,33 @@ public class DashboardController {
 
 		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
 
-		final int NOT_APPLICABLE = -1;
-		int totalTime = NOT_APPLICABLE;
-		int fetchTime = NOT_APPLICABLE;
+		final long NOT_APPLICABLE = -1;
+		long totalTimeSeconds = NOT_APPLICABLE;
+		long fetchTimeSeconds = NOT_APPLICABLE;
 
-		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "dashboard", reportParamsList);
+		long endTime = System.currentTimeMillis();
 
-		if (reportType == ReportType.GridstackDashboard) {
+		if (reportFormat == ReportFormat.pdf) {
+			totalTimeSeconds = (endTime - startTime) / (1000);
+			double preciseTotalTimeSeconds = (endTime - startTime) / (double) 1000;
+			DecimalFormat df2 = (DecimalFormat) NumberFormat.getInstance(locale);
+			df2.applyPattern("#,##0.0##");
+			String formattedTotalTime = df2.format(preciseTotalTimeSeconds);
+			request.setAttribute("timeTakenSeconds", formattedTotalTime);
+			
+			request.setAttribute("description", description);
+			request.setAttribute("startTimeString", startTimeString);
+		}
+
+		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, "dashboard", reportParamsList);
+
+		if (reportFormat == ReportFormat.pdf) {
+			if (showInline) {
+				return "showDashboardFileLink";
+			} else {
+				return "showDashboard";
+			}
+		} else if (reportType == ReportType.GridstackDashboard) {
 			if (showInline) {
 				return "showGridstackDashboardInline";
 			} else {
@@ -820,7 +858,8 @@ public class DashboardController {
 	}
 
 	private void pdfDashboard(ParameterProcessorResult paramProcessorResult,
-			Report dashboardReport, User user, Locale locale) throws Exception {
+			Report dashboardReport, User user, Locale locale,
+			HttpServletRequest request) throws Exception {
 
 		Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 
@@ -852,6 +891,25 @@ public class DashboardController {
 			}
 
 			NodeList reportIdNodes = (NodeList) xPath.evaluate("COLUMN/PORTLET/REPORTID", rootNode, XPathConstants.NODESET);
+			for (int i = 0; i < reportIdNodes.getLength(); i++) {
+				String reportIdString = reportIdNodes.item(i).getFirstChild().getNodeValue();
+				reportIds.add(Integer.parseInt(reportIdString));
+			}
+		} else if (dashboardReportType == ReportType.GridstackDashboard) {
+			NodeList objectIdNodes = (NodeList) xPath.evaluate("ITEM/OBJECTID", rootNode, XPathConstants.NODESET);
+			//http://viralpatel.net/blogs/java-xml-xpath-tutorial-parse-xml/
+			for (int i = 0; i < objectIdNodes.getLength(); i++) {
+				String objectIdString = objectIdNodes.item(i).getFirstChild().getNodeValue();
+				reportIds.add(Integer.parseInt(objectIdString));
+			}
+
+			NodeList queryIdNodes = (NodeList) xPath.evaluate("ITEM/QUERYID", rootNode, XPathConstants.NODESET);
+			for (int i = 0; i < queryIdNodes.getLength(); i++) {
+				String queryIdString = queryIdNodes.item(i).getFirstChild().getNodeValue();
+				reportIds.add(Integer.parseInt(queryIdString));
+			}
+
+			NodeList reportIdNodes = (NodeList) xPath.evaluate("ITEM/REPORTID", rootNode, XPathConstants.NODESET);
 			for (int i = 0; i < reportIdNodes.getLength(); i++) {
 				String reportIdString = reportIdNodes.item(i).getFirstChild().getNodeValue();
 				reportIds.add(Integer.parseInt(reportIdString));
@@ -907,6 +965,10 @@ public class DashboardController {
 		String fileName = baseFileName + "." + extension;
 		String outputFileName = exportPath + fileName;
 
+		request.setAttribute("reportFormat", "pdf");
+		request.setAttribute("fileName", fileName);
+		request.setAttribute("report", dashboardReport);
+
 		//http://itext.2136553.n4.nabble.com/Merging-Problem-td3177394.html
 		//https://stackoverflow.com/questions/34818288/itext-2-1-7-pdfcopy-addpagepage-cant-find-page-reference
 		//http://tutorialspointexamples.com/itext-merge-pdf-files-in-java/
@@ -918,38 +980,20 @@ public class DashboardController {
 			FileOutputStream outputStream = new FileOutputStream(outputFile);
 			PdfCopy copy = new PdfCopy(doc, outputStream);
 			doc.open();
-			//https://dkbalachandar.wordpress.com/2016/06/09/itext-pdf-page-header-with-title-and-number/
-			Rectangle pageSize = PageSize.A4.rotate();
-			float x=pageSize.getRight(72);
-			float y=pageSize.getBottom(72);
-			int pageCount = 0;
 			for (String reportFileName : reportFileNames) {
 				PdfReader reader = new PdfReader(reportFileName);
 				int totalPages = reader.getNumberOfPages();
 				for (int i = 1; i <= totalPages; i++) {
-					pageCount++;
 					PdfImportedPage page = copy.getImportedPage(reader, i);
-					PageStamp stamp = copy.createPageStamp(page);
-					Chunk chunk = new Chunk(String.format("%d", pageCount));
-					if (i == 1) {
-						chunk.setLocalDestination("p" + pageCount);
-					}
-					//http://developers.itextpdf.com/examples/stamping-content-existing-pdfs-itext5/header-and-footer-examples
-//					float x = reader.getPageSize(i).getRight(72);
-//					float y = reader.getPageSize(i).getBottom(70);
-					ColumnText.showTextAligned(stamp.getUnderContent(),
-							com.lowagie.text.Element.ALIGN_RIGHT, new Phrase(chunk),
-							x, y, 0);
-					stamp.alterContents();
 					copy.addPage(page);
 				}
 			}
 			doc.close();
 
-//			for (String reportFileName : reportFileNames) {
-//				File reportFile = new File(reportFileName);
-//				reportFile.delete();
-//			}
+			for (String reportFileName : reportFileNames) {
+				File reportFile = new File(reportFileName);
+				reportFile.delete();
+			}
 		}
 
 	}

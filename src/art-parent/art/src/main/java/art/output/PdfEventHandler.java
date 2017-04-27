@@ -34,25 +34,13 @@ import com.lowagie.text.pdf.PdfWriter;
 public class PdfEventHandler extends PdfPageEventHelper {
 
 	//http://developers.itextpdf.com/examples/itext-action-second-edition/chapter-5#225-moviecountries1.java
-	private PdfTemplate total;
-
-	@Override
-	public void onOpenDocument(PdfWriter writer, Document document) {
-		total = writer.getDirectContent().createTemplate(30, 16);
-	}
 
 	@Override
 	public void onEndPage(PdfWriter writer, Document document) {
 		Rectangle pageSize = document.getPageSize();
 		ColumnText.showTextAligned(writer.getDirectContent(), Element.ALIGN_RIGHT,
-				new Phrase(String.format("%d of", writer.getPageNumber())),
+				new Phrase(String.format("%d", writer.getPageNumber())),
 				pageSize.getRight(72), pageSize.getBottom(72), 0);
 	}
 
-	@Override
-	public void onCloseDocument(PdfWriter writer, Document document) {
-		ColumnText.showTextAligned(total, Element.ALIGN_LEFT,
-				new Phrase(String.valueOf(writer.getPageNumber() - 1)),
-				2, 2, 0);
-	}
 }

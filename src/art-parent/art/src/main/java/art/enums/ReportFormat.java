@@ -156,6 +156,23 @@ public enum ReportFormat {
 		}
 		throw new IllegalArgumentException("Invalid report format: " + value);
 	}
+	
+	/**
+	 * Converts a value to an enum. If the conversion fails, the specified
+	 * default is returned
+	 *
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
+	 */
+	public static ReportFormat toEnum(String value, ReportFormat defaultEnum) {
+		for (ReportFormat v : values()) {
+			if (v.value.equalsIgnoreCase(value)) {
+				return v;
+			}
+		}
+		return defaultEnum;
+	}
 
 	/**
 	 * Returns this enum option's description
