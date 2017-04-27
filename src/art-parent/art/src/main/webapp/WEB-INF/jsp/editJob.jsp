@@ -65,7 +65,6 @@
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
@@ -220,6 +219,9 @@
 				} else if (reportTypeId === 141) {
 					//fixed width
 					list.append(new Option('--', '--'));
+				} else if (reportTypeId === 110 || reportTypeId === 129) {
+					//dashboard
+					list.append(new Option('${pdfText}', 'pdf'));
 				} else {
 					switch (jobType) {
 						case 'Alert':
@@ -359,6 +361,7 @@
 	</jsp:attribute>
 
 	<jsp:body>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<spring:url var="formUrl" value="/saveJob"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="job">
 			<fieldset>

@@ -554,7 +554,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, chartOptions.getWidth(), chartOptions.getHeight());
 				break;
 			case pdf:
-				PdfChart.createPdf(chart, outputFileName, title, data, reportParamsList);
+				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList);
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported report format: " + reportFormat);

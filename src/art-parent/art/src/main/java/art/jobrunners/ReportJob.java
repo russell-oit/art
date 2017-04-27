@@ -19,6 +19,7 @@ package art.jobrunners;
 
 import art.cache.CacheHelper;
 import art.connectionpool.DbConnections;
+import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.enums.JobType;
@@ -972,7 +973,9 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			//run report
+			if(!reportType.isDashboard()){
 			reportRunner.execute(resultSetType);
+			}
 
 			//get email message fields
 			String message = job.getMailMessage();
@@ -1197,13 +1200,14 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @param reportRunner the report runner to use
 	 * @param paramProcessorResult the parameter processor result
+	 * @param user the user under whose permission the report is run
 	 * @return the full path to the output file used
 	 * @throws Exception
 	 */
 	private String generateOutputFile(ReportRunner reportRunner,
 			ParameterProcessorResult paramProcessorResult, User user) throws Exception {
 
-		logger.debug("Entering generateOutputFile");
+		logger.debug("Entering generateOutputFile: user={}", user);
 
 		Report report = job.getReport();
 		ReportType reportType = report.getReportType();
@@ -1224,7 +1228,7 @@ public class ReportJob implements org.quartz.Job {
 
 		if (StringUtils.isNotBlank(fixedFileName)) {
 			if (!FinalFilenameValidator.isValid(fixedFileName)) {
-				throw new IllegalArgumentException("Invalid fixed file name - " + fixedFileName);
+				throw new IllegalArgumentException(String.format("Invalid fixed file name: '%s'", fixedFileName));
 			}
 
 			if (job.getRunsToArchive() > 0) {
@@ -1240,7 +1244,7 @@ public class ReportJob implements org.quartz.Job {
 				if (fixedFile.exists()) {
 					boolean fileDeleted = fixedFile.delete();
 					if (!fileDeleted) {
-						logger.warn("Could not delete fixed file: " + fullFixedFileName);
+						logger.warn("Could not delete fixed file: '{}'", fullFixedFileName);
 					}
 				}
 			}
@@ -1255,38 +1259,44 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("fileName = '{}'", fileName);
 
 		if (!FinalFilenameValidator.isValid(fileName)) {
-			throw new IllegalArgumentException("Invalid file name - " + fileName);
+			throw new IllegalArgumentException(String.format("Invalid file name: '%s'", fileName));
 		}
 
 		String outputFileName = exportPath + fileName;
 
-		//create html file to output to as required
-		FileOutputStream fos = null;
-		PrintWriter writer = null;
-
-		if (reportFormat.isHtml() || reportFormat == ReportFormat.xml
-				|| reportFormat == ReportFormat.rss20
-				|| reportType == ReportType.FixedWidth) {
-			fos = new FileOutputStream(outputFileName);
-			writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
-		}
-
-		//generate output
-		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
-
-		reportOutputGenerator.setIsJob(true);
 		Locale locale = Locale.getDefault();
 
-		try {
-			reportOutputGenerator.generateOutput(report, reportRunner,
-					reportFormat, locale, paramProcessorResult, writer, outputFileName, user, messageSource);
-		} finally {
-			if (writer != null) {
-				writer.close();
+		if (reportType.isDashboard()) {
+			PdfDashboard.generatePdf(paramProcessorResult, report, user, locale, outputFileName, messageSource);
+		} else {
+			//create html file to output to as required
+			FileOutputStream fos = null;
+			PrintWriter writer = null;
+
+			if (reportFormat.isHtml() || reportFormat == ReportFormat.xml
+					|| reportFormat == ReportFormat.rss20
+					|| reportType == ReportType.FixedWidth) {
+				fos = new FileOutputStream(outputFileName);
+				writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
 			}
 
-			if (fos != null) {
-				fos.close();
+			//generate output
+			ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+
+			reportOutputGenerator.setIsJob(true);
+
+			try {
+				reportOutputGenerator.generateOutput(report, reportRunner,
+						reportFormat, locale, paramProcessorResult, writer,
+						outputFileName, user, messageSource);
+			} finally {
+				if (writer != null) {
+					writer.close();
+				}
+
+				if (fos != null) {
+					fos.close();
+				}
 			}
 		}
 

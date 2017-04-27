@@ -112,7 +112,7 @@ Display section to allow selecting of report parameters and initiate running of 
 		});
 
 		//Enable Bootstrap-Select
-		$('.selectpicker').selectpicker();
+//		$('.selectpicker').selectpicker();
 
 		//activate dropdown-hover. to make bootstrap-select open on hover
 		//must come after bootstrap-select initialization
@@ -168,6 +168,7 @@ Display section to allow selecting of report parameters and initiate running of 
 					case 'htmlDataTable':
 					case 'htmlFancy':
 					case 'htmlPlain':
+					case 'html':
 						$('#printButton').show();
 						break;
 					default:
@@ -177,13 +178,13 @@ Display section to allow selecting of report parameters and initiate running of 
 		}
 
 		//show/hide email button
-		var enableEmail = ${enableEmail};
-		if (enableEmail) {
+		if (${enableEmail}) {
 			switch (reportFormat) {
 				case 'htmlGrid':
 				case 'htmlDataTable':
 				case 'htmlFancy':
 				case 'htmlPlain':
+				case 'html':
 					$('#emailButton').hide();
 					break;
 				default:

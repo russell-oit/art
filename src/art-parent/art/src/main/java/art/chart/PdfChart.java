@@ -18,6 +18,7 @@
 package art.chart;
 
 import art.enums.PdfPageSize;
+import art.output.PdfHelper;
 import art.output.PdfOutput;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -57,13 +58,15 @@ public class PdfChart {
 	 * @param reportParamsList the report parameters to be displayed, or null or
 	 * empty
 	 */
-	public static void createPdf(JFreeChart chart, String filename, String title,
+	public static void generatePdf(JFreeChart chart, String filename, String title,
 			RowSetDynaClass data, java.util.List<ReportParameter> reportParamsList) {
 
 		logger.debug("Entering createPdf: filename='{}', title='{}'", filename, title);
-		
+
 		Objects.requireNonNull(chart, "chart must not be null");
 		Objects.requireNonNull(filename, "filename must not be null");
+
+		PdfHelper pdfHelper = new PdfHelper();
 
 		Rectangle pageSize;
 		PdfPageSize pageSizeSetting = Config.getSettings().getPdfPageSize();
@@ -85,7 +88,11 @@ public class PdfChart {
 				throw new IllegalArgumentException("Unexpected pdf page size setting: " + pageSizeSetting);
 		}
 
-		Document document = new Document(pageSize, 72, 72, 36, 36); //document with 72pt (1 inch) margins for left, right, top, bottom
+		final float LEFT_MARGIN = 72f;
+		final float RIGHT_MARGIN = 72f;
+		final float TOP_MARGIN = 36f;
+		final float BOTTOM_MARGIN = 36f;
+		Document document = new Document(pageSize, LEFT_MARGIN, RIGHT_MARGIN, TOP_MARGIN, BOTTOM_MARGIN);
 
 		try {
 			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filename));
@@ -94,17 +101,17 @@ public class PdfChart {
 				title = ""; //null title will cause an exception
 			}
 			document.addTitle(title);
-			document.addAuthor("ART - http://art.sourceforge.net");
+			document.addAuthor(pdfHelper.PDF_AUTHOR_ART);
 			document.open();
 
 			//set fonts to be used, in case custom font is defined
 			FontSelector fsBody = new FontSelector();
 			FontSelector fsHeading = new FontSelector();
-			PdfOutput pdfo = new PdfOutput();
-			pdfo.setFontSelectors(fsBody, fsHeading);
+			pdfHelper.setFontSelectors(fsBody, fsHeading);
 
 			//output parameters if any
-			pdfo.outputSelectedParameters(document, fsBody, reportParamsList);
+			PdfOutput pdfOutput = new PdfOutput();
+			pdfOutput.outputSelectedParameters(document, fsBody, reportParamsList);
 
 			//create chart in pdf						
 			DefaultFontMapper mapper = new DefaultFontMapper();

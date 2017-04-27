@@ -348,8 +348,6 @@ public class RunReportHelper {
 			case Update:
 			case CrosstabHtml:
 			case TabularHtml:
-			case Dashboard:
-			case GridstackDashboard:
 			case Text:
 			case Mondrian:
 			case MondrianXmla:

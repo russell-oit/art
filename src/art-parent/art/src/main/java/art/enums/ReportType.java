@@ -62,8 +62,6 @@ public enum ReportType {
 	 */
 	public boolean canSchedule() {
 		switch (this) {
-			case Dashboard:
-			case GridstackDashboard:
 			case Mondrian:
 			case MondrianXmla:
 			case SqlServerXmla:

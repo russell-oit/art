@@ -45,9 +45,6 @@ public class PdfOutput extends StandardOutput {
 	private final float headergray = 0.9f;
 	private FontSelector fsBody; //fonts to use for document body
 	private FontSelector fsHeading; //fonts to use for document title and column headings
-	public final String PDF_AUTHOR_ART = "ART - http://art.sourceforge.net";
-	public final float RIGHT_MARGIN = 72f;
-	public final float BOTTOM_MARGIN = 72f;
 
 	/**
 	 * Resets global variables in readiness for output generation. Especially
@@ -67,21 +64,25 @@ public class PdfOutput extends StandardOutput {
 		try {
 			resetVariables();
 
+			PdfHelper pdfHelper = new PdfHelper();
+
 			Rectangle pageSize = getPageSize();
 
 			//set document margins
 			//document with 72pt (1 inch) margins for left, right, top, bottom
-			document = new Document(pageSize, 72, RIGHT_MARGIN, 72, BOTTOM_MARGIN);
+			final float LEFT_MARGIN = 72f;
+			final float RIGHT_MARGIN = 72f;
+			final float TOP_MARGIN = 72f;
+			final float BOTTOM_MARGIN = 72f;
+			document = new Document(pageSize, LEFT_MARGIN, RIGHT_MARGIN, TOP_MARGIN, BOTTOM_MARGIN);
 
 			PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));
 			document.addTitle(reportName);
-			document.addAuthor(PDF_AUTHOR_ART);
-
+			document.addAuthor(pdfHelper.PDF_AUTHOR_ART);
 //			HeaderFooter footer = new HeaderFooter(new Phrase(""), true);
 //			footer.setAlignment(Element.ALIGN_RIGHT);
 //			footer.setBorder(Rectangle.NO_BORDER);
 //			document.setFooter(footer);
-
 			document.open();
 
 			table = new PdfPTable(totalColumnCount); //use total column count insead of resultset column count because of crosstab output
@@ -91,7 +92,7 @@ public class PdfOutput extends StandardOutput {
 
 			fsBody = new FontSelector();
 			fsHeading = new FontSelector();
-			setFontSelectors(fsBody, fsHeading);
+			pdfHelper.setFontSelectors(fsBody, fsHeading);
 		} catch (DocumentException | IOException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -323,36 +324,4 @@ public class PdfOutput extends StandardOutput {
 		}
 	}
 
-	/**
-	 * Sets font selector objects to be used for body text and header text
-	 *
-	 * @param body
-	 * @param header
-	 */
-	public void setFontSelectors(FontSelector body, FontSelector header) {
-		//use fontselector and potentially custom fonts with specified encoding
-		//to enable display of more non-ascii characters
-		//first font added to selector wins
-
-		//use custom font if defined			
-		if (Config.isUseCustomPdfFont()) {
-			String fontName = Config.getSettings().getPdfFontName();
-			String encoding = Config.getSettings().getPdfFontEncoding();
-			boolean embedded = Config.getSettings().isPdfFontEmbedded();
-
-			Font bodyFont = FontFactory.getFont(fontName, encoding, embedded);
-			bodyFont.setSize(8);
-			bodyFont.setStyle(Font.NORMAL);
-			body.addFont(bodyFont);
-
-			Font headingFont = FontFactory.getFont(fontName, encoding, embedded);
-			headingFont.setSize(10);
-			headingFont.setStyle(Font.BOLD);
-			header.addFont(headingFont);
-		}
-
-		//add default font after custom font			
-		body.addFont(FontFactory.getFont(BaseFont.HELVETICA, 8, Font.NORMAL));
-		header.addFont(FontFactory.getFont(BaseFont.HELVETICA, 10, Font.BOLD));
-	}
 }

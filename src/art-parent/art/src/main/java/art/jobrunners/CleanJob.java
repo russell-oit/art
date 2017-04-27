@@ -78,16 +78,19 @@ public class CleanJob implements org.quartz.Job {
 		validExtensions.add("slk");
 		validExtensions.add("gz");
 		validExtensions.add("tsv");
+		validExtensions.add("odt");
+		validExtensions.add("ods");
+		validExtensions.add("docx");
+		validExtensions.add("pptx");
+		validExtensions.add("csv");
+		validExtensions.add("txt");
 
 		for (File file : files) {
 			// Delete the file if it is older than DELETE_FILES_MINUTES
 			if (FileUtils.isFileOlder(file, limit)) {
 				String extension = FilenameUtils.getExtension(file.getName()).toLowerCase(Locale.ENGLISH);
 				if (file.isDirectory() || validExtensions.contains(extension)) {
-					boolean deleted = FileUtils.deleteQuietly(file);
-					if (!deleted) {
-						logger.warn("File not deleted: {}", file);
-					}
+					FileUtils.deleteQuietly(file);
 				}
 			}
 		}

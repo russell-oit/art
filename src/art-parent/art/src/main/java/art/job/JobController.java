@@ -345,7 +345,6 @@ public class JobController {
 
 			String recordName = job.getName() + " (" + job.getJobId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
-			redirectAttributes.addFlashAttribute("record", job);
 			return "redirect:/" + nextPage;
 		} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {
 			logger.error("Error", ex);

@@ -314,26 +314,6 @@ Display user jobs and jobs configuration
 			<div class="alert alert-success alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
-				<c:if test="${record != null}">
-					&nbsp;
-					<div class="btn-group">
-						<a class="btn btn-default" 
-						   href="${pageContext.request.contextPath}/editJob?id=${record.jobId}&nextPage=${nextPage}">
-							<spring:message code="page.action.edit"/>
-						</a>
-					</div>
-					<div class="btn-group">
-						<button type="button" id="runSingle" class="btn btn-default"
-								data-id="${record.jobId}" data-name="${encode:forHtmlAttribute(record.name)}">
-							<spring:message code="jobs.action.run"/>
-						</button>
-						<button type="button" id="runLaterSingle" class="btn btn-default"
-								data-id="${record.jobId}" data-name="${encode:forHtmlAttribute(record.name)}"
-								data-toggle="modal">
-							<spring:message code="jobs.action.runLater"/>
-						</button>
-					</div>
-				</c:if>
 			</div>
 		</c:if>
 
