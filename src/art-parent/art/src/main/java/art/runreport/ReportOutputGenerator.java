@@ -251,6 +251,14 @@ public class ReportOutputGenerator {
 			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
 
+			//for pdf dashboards, more parameters may be passed than a relevant for a report
+			List<ReportParameter> applicableReportParamsList = new ArrayList<>();
+			for (ReportParameter reportParam : reportParamsList) {
+				if (report.getReportId() == reportParam.getReport().getReportId()) {
+					applicableReportParamsList.add(reportParam);
+				}
+			}
+
 			int reportId = report.getReportId();
 			ReportType reportType = report.getReportType();
 
@@ -263,7 +271,7 @@ public class ReportOutputGenerator {
 						jrOutput.setResultSet(rs);
 					}
 
-					jrOutput.generateReport(report, reportParamsList, reportFormat, fullOutputFilename);
+					jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
 				} else if (reportType.isJxls()) {
 					JxlsOutput jxlsOutput = new JxlsOutput();
 					if (reportType == ReportType.JxlsArt) {
@@ -271,7 +279,7 @@ public class ReportOutputGenerator {
 						jxlsOutput.setResultSet(rs);
 					}
 
-					jxlsOutput.generateReport(report, reportParamsList, fullOutputFilename);
+					jxlsOutput.generateReport(report, applicableReportParamsList, fullOutputFilename);
 				}
 
 				rowsRetrieved = getResultSetRowCount(rs);
@@ -329,7 +337,7 @@ public class ReportOutputGenerator {
 
 				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
-				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, reportParamsList, swapAxes);
+				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes);
 
 				//store data for potential use in html and pdf output
 				RowSetDynaClass data = null;
@@ -364,7 +372,7 @@ public class ReportOutputGenerator {
 							secondaryReportRunner.execute();
 							secondaryResultSet = secondaryReportRunner.getResultSet();
 							swapAxes = false;
-							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, reportParamsList, swapAxes);
+							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes);
 							secondaryCharts.add(secondaryChart);
 						} finally {
 							DatabaseUtils.close(secondaryResultSet);
@@ -419,7 +427,7 @@ public class ReportOutputGenerator {
 
 				standardOutput.setWriter(writer);
 				standardOutput.setFullOutputFileName(fullOutputFilename);
-				standardOutput.setReportParamsList(reportParamsList); //used to show selected parameters and drilldowns
+				standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
 				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
 				standardOutput.setLocale(locale);
 				standardOutput.setReportName(report.getName());
@@ -468,17 +476,17 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.FreeMarker) {
 				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
 				rs = reportRunner.getResultSet();
-				freemarkerOutput.generateReport(report, reportParamsList, rs, writer);
+				freemarkerOutput.generateReport(report, applicableReportParamsList, rs, writer);
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType == ReportType.Thymeleaf) {
 				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
 				rs = reportRunner.getResultSet();
-				thymeleafOutput.generateReport(report, reportParamsList, rs, writer);
+				thymeleafOutput.generateReport(report, applicableReportParamsList, rs, writer);
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType.isXDocReport()) {
 				XDocReportOutput xdocReportOutput = new XDocReportOutput();
 				rs = reportRunner.getResultSet();
-				xdocReportOutput.generateReport(report, reportParamsList, rs, reportFormat, fullOutputFilename);
+				xdocReportOutput.generateReport(report, applicableReportParamsList, rs, reportFormat, fullOutputFilename);
 				rowsRetrieved = getResultSetRowCount(rs);
 				if (!isJob) {
 					displayFileLink(fileName);
@@ -1014,8 +1022,8 @@ public class ReportOutputGenerator {
 				request.setAttribute("options", options);
 				request.setAttribute("data", jsonData);
 				request.setAttribute("templateFileName", templateFileName);
-				
-				switch(reportType){
+
+				switch (reportType) {
 					case Leaflet:
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showLeaflet.jsp").include(request, response);
 						break;

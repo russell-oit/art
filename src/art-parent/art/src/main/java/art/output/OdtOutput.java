@@ -20,6 +20,7 @@ package art.output;
 import art.reportparameter.ReportParameter;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.common.field.Fields;
 import org.odftoolkit.simple.style.Font;
@@ -79,7 +80,7 @@ public class OdtOutput extends StandardOutput {
 
 	@Override
 	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
-		if (reportParamsList == null || reportParamsList.isEmpty()) {
+		if (CollectionUtils.isEmpty(reportParamsList)) {
 			return;
 		}
 

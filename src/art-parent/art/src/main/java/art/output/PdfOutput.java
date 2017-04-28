@@ -25,6 +25,7 @@ import com.lowagie.text.pdf.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,7 +154,7 @@ public class PdfOutput extends StandardOutput {
 	 * @param reportParamsList the report parameters
 	 */
 	public void outputSelectedParameters(Document doc, FontSelector fs, java.util.List<ReportParameter> reportParamsList) {
-		if (reportParamsList == null || reportParamsList.isEmpty()) {
+		if (CollectionUtils.isEmpty(reportParamsList)) {
 			return;
 		}
 

@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.io.FilenameUtils;
@@ -93,6 +94,21 @@ public abstract class StandardOutput {
 	private String requestBaseUrl;
 	protected int currentColumnIndex;
 	protected boolean isJob;
+	protected Report report;
+
+	/**
+	 * @return the report
+	 */
+	public Report getReport() {
+		return report;
+	}
+
+	/**
+	 * @param report the report to set
+	 */
+	public void setReport(Report report) {
+		this.report = report;
+	}
 
 	/**
 	 * @param isJob the isJob to set
@@ -530,6 +546,12 @@ public abstract class StandardOutput {
 
 		logger.debug("Entering generateTabularOutput");
 
+		Objects.requireNonNull(rs, "rs must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		Objects.requireNonNull(report, "report must not be null");
+
+		this.report = report;
+
 		StandardOutputResult result = new StandardOutputResult();
 
 		//initialize number formatters
@@ -701,8 +723,8 @@ public abstract class StandardOutput {
 
 			for (int i = 1; i <= resultSetColumnCount; i++) {
 				String columnName = rsmd.getColumnLabel(i);
-				if (columnFormatIds.contains(String.valueOf(i)) ||
-						(StringUtils.isNotBlank(columnName) && columnFormatIds.contains(columnName))) {
+				if (columnFormatIds.contains(String.valueOf(i))
+						|| (StringUtils.isNotBlank(columnName) && columnFormatIds.contains(columnName))) {
 					String format = columnFormatDetails.get(String.valueOf(i));
 					if (format == null) {
 						format = columnFormatDetails.get(columnName);

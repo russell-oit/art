@@ -22,6 +22,7 @@ import art.servlets.Config;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
@@ -95,7 +96,7 @@ public class Rss20Output extends StandardOutput {
 
 	@Override
 	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
-		if (reportParamsList == null || reportParamsList.isEmpty()) {
+		if (CollectionUtils.isEmpty(reportParamsList)) {
 			return;
 		}
 

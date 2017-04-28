@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -147,7 +148,7 @@ public class DocxOutput extends StandardOutput {
 
 	@Override
 	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
-		if (reportParamsList == null || reportParamsList.isEmpty()) {
+		if (CollectionUtils.isEmpty(reportParamsList)) {
 			return;
 		}
 

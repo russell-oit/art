@@ -21,6 +21,7 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.owasp.encoder.Encode;
 
 /**
@@ -50,7 +51,7 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
-		if (reportParamsList == null || reportParamsList.isEmpty()) {
+		if (CollectionUtils.isEmpty(reportParamsList)) {
 			return;
 		}
 
