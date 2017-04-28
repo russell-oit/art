@@ -14,5 +14,6 @@ Display report parameter that uses text input
 
 <input type='text' class="form-control"
 	   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
+	   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 	   value="${encode:forHtmlAttribute(reportParam.htmlValue)}">
 

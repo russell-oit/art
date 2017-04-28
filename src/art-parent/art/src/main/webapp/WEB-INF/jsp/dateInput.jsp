@@ -14,6 +14,7 @@ Display input for date and datetime parameters
 <div class='input-group date datepicker'>
 	<input type='text' class="form-control"
 		   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
+		   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   value="${encode:forHtmlAttribute(reportParam.htmlValue)}">
 	<span class="input-group-addon">
 		<span class="glyphicon glyphicon-calendar"></span>
