@@ -236,8 +236,6 @@ public class RunReportHelper {
 		boolean enableShowSql;
 		boolean enableShowSelectedParameters;
 		switch (reportType) {
-			case Dashboard:
-			case GridstackDashboard:
 			case Mondrian:
 			case MondrianXmla:
 			case SqlServerXmla:
@@ -258,6 +256,10 @@ public class RunReportHelper {
 				if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 					enableShowSql = true;
 				} else {
+					enableShowSql = false;
+				}
+
+				if (reportType.isDashboard()) {
 					enableShowSql = false;
 				}
 

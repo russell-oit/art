@@ -26,12 +26,16 @@ import art.runreport.ReportRunner;
 import art.user.User;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,7 +44,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Controller for chained parameter calls
- * 
+ *
  * @author Timothy Anyona
  */
 @Controller
@@ -48,20 +52,25 @@ public class ChainedParameterController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChainedParameterController.class);
 
+	@Autowired
+	private ReportService reportService;
+
 	@RequestMapping(value = "/getLovValues", method = RequestMethod.GET)
 	public @ResponseBody
-	Map<String, String> getLovValues(@RequestParam("reportId") Integer reportId,
+	List<Map<String, String>> getLovValues(@RequestParam("reportId") Integer reportId,
 			HttpSession session, HttpServletRequest request) {
 
 		logger.debug("Entering getLovValues: reportId={}", reportId);
+
+		//encapsulate values in a list (will be a json array) to ensure values
+		//are displayed in the order given
+		List<Map<String, String>> list = new ArrayList<>();
 
 		Map<String, String> values = new HashMap<>();
 
 		ReportRunner reportRunner = null;
 
 		try {
-			ReportService reportService = new ReportService();
-
 			reportRunner = new ReportRunner();
 			Report report = reportService.getReport(reportId);
 			reportRunner.setReport(report);
@@ -83,6 +92,12 @@ public class ChainedParameterController {
 			}
 		}
 
-		return values;
+		for (Entry<String, String> entry : values.entrySet()) {
+			Map<String, String> value = new HashMap<>();
+			value.put(entry.getKey(), entry.getValue());
+			list.add(value);
+		}
+
+		return list;
 	}
 }
