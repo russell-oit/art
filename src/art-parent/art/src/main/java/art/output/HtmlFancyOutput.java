@@ -43,14 +43,12 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
-		String escapedValue = Encode.forHtmlContent(value);
-		out.println("<th>" + escapedValue + "</th>");
+		out.println("<th>" + value + "</th>");
 	}
 
 	@Override
 	public void addHeaderCellAlignLeft(String value) {
-		String escapedValue = Encode.forHtmlContent(value);
-		out.println("<th class='text-left'>" + escapedValue + "</th>");
+		out.println("<th class='text-left'>" + value + "</th>");
 	}
 
 	@Override

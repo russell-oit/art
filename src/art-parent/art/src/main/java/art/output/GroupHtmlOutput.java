@@ -56,9 +56,8 @@ public class GroupHtmlOutput extends GroupOutput {
 	 * @param value the value to output
 	 */
     private void addCellToMainHeader(String value) {
-		String escapedValue = Encode.forHtmlContent(value);
         mainHeader.append("<td>");
-        mainHeader.append(escapedValue);
+        mainHeader.append(value);
         mainHeader.append("</td>");
     }
 
@@ -68,9 +67,8 @@ public class GroupHtmlOutput extends GroupOutput {
 	 * @param value the value to output
 	 */
     private void addCellToSubHeader(String value) {
-		String escapedValue = Encode.forHtmlContent(value);
         subHeader.append("<td>");
-        subHeader.append(escapedValue);
+        subHeader.append(value);
         subHeader.append("</td>");
     }
 
@@ -105,8 +103,7 @@ public class GroupHtmlOutput extends GroupOutput {
 	 * @param value the value to output
 	 */
     private void addCellToLine(String value) {
-		String escapedValue = Encode.forHtmlContent(value);
-        out.println("<td class='data'>" + escapedValue + "</td>");
+        out.println("<td class='data'>" + value + "</td>");
     }
 
 	/**
@@ -116,8 +113,7 @@ public class GroupHtmlOutput extends GroupOutput {
 	 * @param numOfCells 
 	 */
     private void addErrorCell(String value, int numOfCells) {
-		String escapedValue = Encode.forHtmlContent(value);
-        out.println("<td colspan='" + numOfCells + "' class='qeattr' align='left'>" + escapedValue + "</td>");
+        out.println("<td colspan='" + numOfCells + "' class='qeattr' align='left'>" + value + "</td>");
     }
 
 	/**

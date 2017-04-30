@@ -542,6 +542,7 @@ public class JobController {
 					jobTypes.add(JobType.JustRun);
 				} else if (reportType.isChart() || reportType.isXDocReport()
 						|| reportType == ReportType.Group
+						|| reportType == ReportType.FixedWidth
 						|| reportType == ReportType.JasperReportsArt
 						|| reportType == ReportType.JxlsArt) {
 					jobTypes.add(JobType.EmailAttachment);
@@ -550,7 +551,7 @@ public class JobController {
 					jobTypes.add(JobType.CondPublish);
 					jobTypes.add(JobType.Print);
 				} else {
-					jobTypes = JobType.list();
+					jobTypes.addAll(JobType.list());
 				}
 			}
 		}

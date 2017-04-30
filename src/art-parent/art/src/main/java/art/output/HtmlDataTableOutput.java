@@ -128,14 +128,12 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
-		String escapedValue = Encode.forHtmlContent(value);
-		out.println("<th>" + escapedValue + "</th>");
+		out.println("<th>" + value + "</th>");
 	}
 
 	@Override
 	public void addHeaderCellAlignLeft(String value) {
-		String escapedValue = Encode.forHtmlContent(value);
-		out.println("<th style='text-align: left'>" + escapedValue + "</th>");
+		out.println("<th style='text-align: left'>" + value + "</th>");
 	}
 
 	@Override
