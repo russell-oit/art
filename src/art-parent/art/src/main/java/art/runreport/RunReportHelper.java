@@ -288,8 +288,6 @@ public class RunReportHelper {
 
 		boolean enablePrint;
 		switch (reportType) {
-			case Dashboard:
-			case GridstackDashboard:
 			case Mondrian:
 			case MondrianXmla:
 			case SqlServerXmla:
@@ -310,11 +308,7 @@ public class RunReportHelper {
 				enablePrint = false;
 				break;
 			default:
-				if (reportType.isChart()) {
-					enablePrint = false;
-				} else {
-					enablePrint = true;
-				}
+				enablePrint = true;
 		}
 		request.setAttribute("enablePrint", enablePrint);
 

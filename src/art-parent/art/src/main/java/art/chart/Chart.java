@@ -381,7 +381,10 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	//returns true if the data for the chart has expired
 	@Override
 	public boolean hasExpired(Map<String, Object> params, Date since) {
-		return true;
+		//https://sourceforge.net/p/cewolf/discussion/192228/thread/5cc8447e/
+		//https://coderanch.com/t/500782/OutOfMemory-CeWolf-JFreeChart
+		//https://coderanch.com/t/546785/Storage-Method-cewolf
+		return false;
 	}
 
 	//returns a unique identifier for the class

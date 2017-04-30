@@ -48,8 +48,7 @@ Display a chart report
 		chartid="${htmlElementId}" 
 		renderer="/cewolf" 
 		width="${chart.chartOptions.width}" 
-		height="${chart.chartOptions.height}"
-		removeAfterRender="true">
+		height="${chart.chartOptions.height}">
 
 		<c:choose>
 			<c:when test="${(not empty chart.hyperLinks) || (not empty chart.drilldownLinks)}">

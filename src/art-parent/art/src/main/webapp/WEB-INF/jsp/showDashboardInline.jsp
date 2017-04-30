@@ -12,7 +12,7 @@
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 
-<div class="container-fluid">
+<div id="reportOutput" class="container-fluid">
 	<div class="col-md-12">
 		<div class="row">
 			<h2>${encode:forHtmlContent(dashboard.title)}  
