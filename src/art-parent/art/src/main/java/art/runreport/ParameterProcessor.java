@@ -181,7 +181,6 @@ public class ParameterProcessor {
 						lovReportRunner.setUser(user);
 						lovReportRunner.setReport(lovReport);
 						lovReportRunner.setReportParamsMap(reportParamsMap);
-						lovReportRunner.setUseDynamicDatasource(false);
 						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
 						reportParam.setLovValues(lovValues);
 						Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
@@ -218,7 +217,6 @@ public class ParameterProcessor {
 					defaultValueLovReportRunner.setUser(user);
 					defaultValueLovReportRunner.setReport(defaultValueReport);
 					defaultValueLovReportRunner.setReportParamsMap(reportParamsMap);
-					defaultValueLovReportRunner.setUseDynamicDatasource(false);
 					
 					Map<Object, String> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
 					if (reportParam.getPassedParameterValues() == null) {

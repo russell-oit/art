@@ -57,22 +57,6 @@ public class RunReportHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunReportHelper.class);
 
-	private boolean useDynamicDatasource = true;
-
-	/**
-	 * @return the useDynamicDatasource
-	 */
-	public boolean isUseDynamicDatasource() {
-		return useDynamicDatasource;
-	}
-
-	/**
-	 * @param useDynamicDatasource the useDynamicDatasource to set
-	 */
-	public void setUseDynamicDatasource(boolean useDynamicDatasource) {
-		this.useDynamicDatasource = useDynamicDatasource;
-	}
-
 	/**
 	 * Returns the connection to use for running the given report
 	 *
@@ -89,11 +73,14 @@ public class RunReportHelper {
 		Connection conn;
 
 		Integer dynamicDatasourceId = null;
-		if (reportParams != null && useDynamicDatasource) {
+		if (reportParams != null) {
 			for (ReportParameter reportParam : reportParams) {
 				if (reportParam.getParameter().getDataType() == ParameterDataType.Datasource) {
-					dynamicDatasourceId = (Integer) reportParam.getEffectiveActualParameterValue();
-					break;
+					String[] passedValues = reportParam.getPassedParameterValues();
+					if (passedValues != null && StringUtils.isNotBlank(passedValues[0])) {
+						dynamicDatasourceId = (Integer) reportParam.getEffectiveActualParameterValue();
+						break;
+					}
 				}
 			}
 		}
