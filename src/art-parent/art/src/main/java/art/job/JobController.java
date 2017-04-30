@@ -19,6 +19,7 @@ package art.job;
 
 import art.datasource.DatasourceService;
 import art.enums.JobType;
+import art.enums.ReportType;
 import art.ftpserver.FtpServerService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
@@ -37,6 +38,7 @@ import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -284,8 +286,9 @@ public class JobController {
 	public String addJob(Model model, HttpServletRequest request, HttpSession session) {
 		logger.debug("Entering addJob");
 
+		Job job = new Job();
+
 		try {
-			Job job = new Job();
 			job.setActive(true);
 
 			String reportIdString = request.getParameter("reportId");
@@ -309,7 +312,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJob("add", model);
+		return showEditJob("add", model, job);
 	}
 
 	@RequestMapping(value = "/saveJob", method = RequestMethod.POST)
@@ -323,7 +326,7 @@ public class JobController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditJob(action, model);
+			return showEditJob(action, model, job);
 		}
 
 		try {
@@ -351,7 +354,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJob(action, model);
+		return showEditJob(action, model, job);
 	}
 
 	@RequestMapping(value = "/saveJobs", method = RequestMethod.POST)
@@ -451,12 +454,15 @@ public class JobController {
 
 		logger.debug("Entering editJob: id={}", id);
 
+		Job job = null;
+
 		try {
-			Job job = jobService.getJob(id);
+			job = jobService.getJob(id);
 			model.addAttribute("job", job);
 
 			ReportJob reportJob = new ReportJob();
-			int reportId = job.getReport().getReportId();
+			Report report = job.getReport();
+			int reportId = report.getReportId();
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id, sessionUser);
 			addParameters(model, paramProcessorResult);
@@ -465,7 +471,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJob("edit", model);
+		return showEditJob("edit", model, job);
 	}
 
 	/**
@@ -510,14 +516,46 @@ public class JobController {
 	 *
 	 * @param action "add" or "edit"
 	 * @param model the spring model
+	 * @param job the job that is being scheduled
 	 * @return the jsp file to display
 	 */
-	private String showEditJob(String action, Model model) {
+	private String showEditJob(String action, Model model, Job job) {
 		logger.debug("Entering showEditJob: action='{}'", action);
 
 		model.addAttribute("action", action);
 
-		model.addAttribute("jobTypes", JobType.list());
+		List<JobType> jobTypes = new ArrayList<>();
+
+		if (job != null) { //may be null in case an error occurred while getting ready to display the page
+			Report report = job.getReport();
+			if (report != null) {
+				int reportTypeId = report.getReportTypeId(); //use reportTypeId as reportType not filled
+				ReportType reportType = ReportType.toEnum(reportTypeId);
+
+				if (reportType.isDashboard()
+						|| reportType == ReportType.JasperReportsTemplate
+						|| reportType == ReportType.JxlsTemplate) {
+					jobTypes.add(JobType.EmailAttachment);
+					jobTypes.add(JobType.Publish);
+					jobTypes.add(JobType.Print);
+				} else if (reportType == ReportType.Update) {
+					jobTypes.add(JobType.JustRun);
+				} else if (reportType.isChart() || reportType.isXDocReport()
+						|| reportType == ReportType.Group
+						|| reportType == ReportType.JasperReportsArt
+						|| reportType == ReportType.JxlsArt) {
+					jobTypes.add(JobType.EmailAttachment);
+					jobTypes.add(JobType.Publish);
+					jobTypes.add(JobType.CondEmailAttachment);
+					jobTypes.add(JobType.CondPublish);
+					jobTypes.add(JobType.Print);
+				} else {
+					jobTypes = JobType.list();
+				}
+			}
+		}
+
+		model.addAttribute("jobTypes", jobTypes);
 
 		try {
 			model.addAttribute("dynamicRecipientReports", reportService.getDynamicRecipientReports());

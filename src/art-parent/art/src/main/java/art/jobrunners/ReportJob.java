@@ -973,8 +973,8 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			//run report
-			if(!reportType.isDashboard()){
-			reportRunner.execute(resultSetType);
+			if (!reportType.isDashboard()) {
+				reportRunner.execute(resultSetType);
 			}
 
 			//get email message fields

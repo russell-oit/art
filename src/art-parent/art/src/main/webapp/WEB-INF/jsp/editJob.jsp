@@ -203,6 +203,9 @@
 				} else if (reportTypeId === 122) {
 					//freemarker
 					list.append(new Option('${htmlText}', 'html'));
+				} else if (reportTypeId === 131) {
+					//thymeleaf
+					list.append(new Option('${htmlText}', 'html'));
 				} else if (reportTypeId === 123 || reportTypeId === 124) {
 					//xdocreport docx
 					list.append(new Option('${docxText}', 'docx'));
@@ -222,6 +225,9 @@
 				} else if (reportTypeId === 110 || reportTypeId === 129) {
 					//dashboard
 					list.append(new Option('${pdfText}', 'pdf'));
+				} else if (reportTypeId === 1) {
+					//group
+					list.append(new Option('${xlsxText}', 'xlsx'));
 				} else {
 					switch (jobType) {
 						case 'Alert':
