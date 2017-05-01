@@ -19,6 +19,7 @@ package art.report;
 
 import art.datasource.DatasourceService;
 import art.enums.AccessLevel;
+import art.enums.PageOrientation;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.jobrunners.ReportJob;
@@ -492,6 +493,7 @@ public class ReportController {
 			model.addAttribute("reportTypes", ReportType.list());
 			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));
 			model.addAttribute("reportFormats", ReportFormat.list());
+			model.addAttribute("pageOrientations", PageOrientation.list());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

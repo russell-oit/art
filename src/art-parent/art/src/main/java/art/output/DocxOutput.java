@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.enums.PageOrientation;
 import art.enums.PdfPageSize;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -90,7 +91,7 @@ public class DocxOutput extends StandardOutput {
 	}
 
 	/**
-	 * Sets the document page size
+	 * Sets the document page size. A4 portrait or landscape
 	 */
 	private void setPageSize() {
 		//https://stackoverflow.com/questions/20188953/how-to-set-page-orientation-for-word-document
@@ -109,30 +110,20 @@ public class DocxOutput extends StandardOutput {
 		}
 		CTPageSz pageSize = section.getPgSz();
 
-		PdfPageSize pageSizeSetting = Config.getSettings().getPdfPageSize();
-		switch (pageSizeSetting) {
-			case A4:
+		PageOrientation pageOrientation=report.getPageOrientation();
+		switch (pageOrientation) {
+			case Portrait:
 				pageSize.setOrient(STPageOrientation.PORTRAIT);
 				pageSize.setW(BigInteger.valueOf(595 * 20));
 				pageSize.setH(BigInteger.valueOf(842 * 20));
 				break;
-			case A4Landscape:
+			case Landscape:
 				pageSize.setOrient(STPageOrientation.LANDSCAPE);
 				pageSize.setW(BigInteger.valueOf(842 * 20));
 				pageSize.setH(BigInteger.valueOf(595 * 20));
 				break;
-			case Letter:
-				pageSize.setOrient(STPageOrientation.PORTRAIT);
-				pageSize.setW(BigInteger.valueOf(612 * 20));
-				pageSize.setH(BigInteger.valueOf(792 * 20));
-				break;
-			case LetterLandscape:
-				pageSize.setOrient(STPageOrientation.LANDSCAPE);
-				pageSize.setW(BigInteger.valueOf(792 * 20));
-				pageSize.setH(BigInteger.valueOf(612 * 20));
-				break;
 			default:
-				throw new IllegalArgumentException("Unexpected page size setting: " + pageSizeSetting);
+				throw new IllegalArgumentException(String.format("Unexpected page orientation: %s", pageOrientation));
 		}
 	}
 

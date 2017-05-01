@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
 import java.io.*;
@@ -46,7 +47,7 @@ public class XlsxOutput extends StandardOutput {
 	private static final Logger logger = LoggerFactory.getLogger(XlsxOutput.class);
 
 	private SXSSFWorkbook wb;
-	private SXSSFSheet sh;
+	private SXSSFSheet sheet;
 	private CellStyle headerStyle;
 	private CellStyle bodyStyle;
 	private CellStyle dateStyle;
@@ -73,7 +74,7 @@ public class XlsxOutput extends StandardOutput {
 	 */
 	private void resetVariables() {
 		wb = null;
-		sh = null;
+		sheet = null;
 		row = null;
 		cell = null;
 		currentRow = 0;
@@ -116,11 +117,18 @@ public class XlsxOutput extends StandardOutput {
 			wb = new SXSSFWorkbook(wb_template);
 			wb.setCompressTempFiles(true);
 
-			sh = wb.getSheetAt(0);
-			sh.setRandomAccessWindowSize(100);// keep 100 rows in memory, exceeding rows will be flushed to disk
+			sheet = wb.getSheetAt(0);
+			sheet.setRandomAccessWindowSize(100);// keep 100 rows in memory, exceeding rows will be flushed to disk
 			//https://poi.apache.org/spreadsheet/quick-guide.html#Autofit
 			//https://poi.apache.org/apidocs/org/apache/poi/xssf/streaming/SXSSFSheet.html#autoSizeColumn(int)
-			sh.trackAllColumnsForAutoSizing();
+			sheet.trackAllColumnsForAutoSizing();
+			
+			sheet.getPrintSetup().setPaperSize(PrintSetup.A4_PAPERSIZE);
+			
+			PageOrientation pageOrientation = report.getPageOrientation();
+			if (pageOrientation == PageOrientation.Landscape) {
+				sheet.getPrintSetup().setLandscape(true);
+			}
 
 			styles = new HashMap<>();
 
@@ -259,7 +267,7 @@ public class XlsxOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		row = sh.createRow(currentRow++);
+		row = sheet.createRow(currentRow++);
 		cellNumber = 0;
 	}
 
@@ -283,7 +291,7 @@ public class XlsxOutput extends StandardOutput {
 	public void endOutput() {
 		//https://poi.apache.org/spreadsheet/quick-guide.html#Autofit
 		for (int i = 0; i < totalColumnCount; i++) {
-			sh.autoSizeColumn(i);
+			sheet.autoSizeColumn(i);
 		}
 
 		try {

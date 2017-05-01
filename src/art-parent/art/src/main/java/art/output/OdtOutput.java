@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
 import java.util.Date;
 import java.util.List;
@@ -65,8 +66,14 @@ public class OdtOutput extends StandardOutput {
 	public void init() {
 		try {
 			resetVariables();
+			
 			document = TextDocument.newTextDocument();
-			setLandscapeOrientation();
+			
+			PageOrientation pageOrientation = report.getPageOrientation();
+			if (pageOrientation == PageOrientation.Landscape) {
+				setLandscapeOrientation();
+			}
+			
 			createPageNumbers();
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -85,7 +92,6 @@ public class OdtOutput extends StandardOutput {
 		pageLayout.setProperty(OdfPageLayoutProperties.PrintOrientation, "landscape");
 		pageLayout.setProperty(OdfPageLayoutProperties.PageHeight, "210.01mm");
 		pageLayout.setProperty(OdfPageLayoutProperties.PageWidth, "297mm");
-//		pageLayout.setProperty(OdfPageLayoutProperties.NumFormat, "1");
 	}
 
 	@Override

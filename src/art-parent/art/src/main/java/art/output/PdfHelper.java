@@ -17,9 +17,14 @@
  */
 package art.output;
 
+import art.enums.PageOrientation;
+import art.enums.PdfPageSize;
+import art.report.Report;
 import art.servlets.Config;
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.FontSelector;
 import java.util.Objects;
@@ -34,6 +39,34 @@ public class PdfHelper {
 	public final String PDF_AUTHOR_ART = "ART - http://art.sourceforge.net";
 
 	/**
+	 * Returns the page size to use for the document
+	 *
+	 * @param report the report, not null
+	 * @return the page size to use
+	 * @throws IllegalArgumentException
+	 */
+	public Rectangle getPageSize(Report report) throws IllegalArgumentException {
+		Objects.requireNonNull(report, "report must not be null");
+
+		Rectangle pageSize;
+
+		PageOrientation pageOrientation = report.getPageOrientation();
+		
+		switch (pageOrientation) {
+			case Portrait:
+				pageSize = PageSize.A4;
+				break;
+			case Landscape:
+				pageSize = PageSize.A4.rotate();
+				break;
+			default:
+				throw new IllegalArgumentException(String.format("Unexpected page orientation: %s", pageOrientation));
+		}
+
+		return pageSize;
+	}
+
+	/**
 	 * Sets font selector objects to be used for body text and header text
 	 *
 	 * @param body the font selector for body text, not null
@@ -43,7 +76,7 @@ public class PdfHelper {
 		//use fontselector and potentially custom fonts with specified encoding
 		//to enable display of more non-ascii characters
 		//first font added to selector wins
-		
+
 		Objects.requireNonNull(body, "body must not be null");
 		Objects.requireNonNull(header, "header must not be null");
 

@@ -23,6 +23,7 @@ import art.dbutils.DatabaseUtils;
 import art.connectionpool.DbConnections;
 import art.datasource.DatasourceService;
 import art.enums.AccessLevel;
+import art.enums.PageOrientation;
 import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
@@ -136,6 +137,7 @@ public class ReportService {
 			report.setNullStringDisplay(rs.getString("NULL_STRING_DISPLAY"));
 			report.setFetchSize(rs.getInt("FETCH_SIZE"));
 			report.setOptions(rs.getString("REPORT_OPTIONS"));
+			report.setPageOrientation(PageOrientation.toEnum(rs.getString("PAGE_ORIENTATION"), PageOrientation.Portrait));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -146,6 +148,8 @@ public class ReportService {
 
 			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
 			report.setDatasource(datasource);
+			
+			
 
 			setChartOptions(report);
 
@@ -581,9 +585,9 @@ public class ReportService {
 					+ " HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
 					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
-					+ " REPORT_OPTIONS,"
+					+ " REPORT_OPTIONS, PAGE_ORIENTATION,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 33) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 34) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -617,6 +621,7 @@ public class ReportService {
 				report.getNullStringDisplay(),
 				report.getFetchSize(),
 				report.getOptions(),
+				report.getPageOrientation().getValue(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -632,7 +637,7 @@ public class ReportService {
 					+ " HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
 					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?, LOCALE=?,"
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
-					+ " REPORT_OPTIONS=?,"
+					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -667,6 +672,7 @@ public class ReportService {
 				report.getNullStringDisplay(),
 				report.getFetchSize(),
 				report.getOptions(),
+				report.getPageOrientation().getValue(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

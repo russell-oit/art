@@ -21,6 +21,7 @@ import art.drilldown.Drilldown;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.report.ChartOptions;
+import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.utils.DrilldownLinkHelper;
 import net.sf.cewolfart.ChartPostProcessor;
@@ -537,13 +538,16 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 * @param outputFileName the full path of the file name to use
 	 * @param data for pdf format, if it is required to show the chart data
 	 * together with the image. Null if show data is not required.
+	 * @param report the report for the chart
 	 * @throws IOException
 	 * @throws DatasetProduceException
 	 * @throws ChartValidationException
 	 * @throws PostProcessingException
 	 */
-	public void generateFile(ReportFormat reportFormat, String outputFileName, RowSetDynaClass data)
-			throws IOException, DatasetProduceException, ChartValidationException, PostProcessingException {
+	public void generateFile(ReportFormat reportFormat, String outputFileName,
+			RowSetDynaClass data, Report report)
+			throws IOException, DatasetProduceException, ChartValidationException,
+			PostProcessingException {
 
 		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}'", reportFormat, outputFileName);
 
@@ -557,10 +561,10 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, chartOptions.getWidth(), chartOptions.getHeight());
 				break;
 			case pdf:
-				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList);
+				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList, report);
 				break;
 			default:
-				throw new IllegalArgumentException("Unsupported report format: " + reportFormat);
+				throw new IllegalArgumentException(String.format("Unsupported report format: %s", reportFormat));
 		}
 	}
 

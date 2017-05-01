@@ -18,6 +18,7 @@
 package art.report;
 
 import art.datasource.Datasource;
+import art.enums.PageOrientation;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.utils.XmlParser;
@@ -77,6 +78,21 @@ public class Report implements Serializable {
 	private String nullStringDisplay;
 	private int fetchSize;
 	private String options;
+	private PageOrientation pageOrientation = PageOrientation.Portrait;
+
+	/**
+	 * @return the pageOrientation
+	 */
+	public PageOrientation getPageOrientation() {
+		return pageOrientation;
+	}
+
+	/**
+	 * @param pageOrientation the pageOrientation to set
+	 */
+	public void setPageOrientation(PageOrientation pageOrientation) {
+		this.pageOrientation = pageOrientation;
+	}
 
 	/**
 	 * @return the options

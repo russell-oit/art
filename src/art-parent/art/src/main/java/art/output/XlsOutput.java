@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.enums.PageOrientation;
 import art.enums.ZipType;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
@@ -32,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.slf4j.Logger;
@@ -115,6 +117,14 @@ public class XlsOutput extends StandardOutput {
 			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 			wb = new HSSFWorkbook();
 			sheet = wb.createSheet(sheetName);
+			
+			sheet.getPrintSetup().setPaperSize(PrintSetup.A4_PAPERSIZE);
+			
+			PageOrientation pageOrientation = report.getPageOrientation();
+			if (pageOrientation == PageOrientation.Landscape) {
+				//https://stackoverflow.com/questions/6743615/apache-poi-change-page-format-for-excel-worksheet
+				sheet.getPrintSetup().setLandscape(true);
+			}
 
 			HSSFFont headerFont = wb.createFont();
 			headerFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);

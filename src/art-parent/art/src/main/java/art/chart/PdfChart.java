@@ -20,6 +20,7 @@ package art.chart;
 import art.enums.PdfPageSize;
 import art.output.PdfHelper;
 import art.output.PdfOutput;
+import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import com.lowagie.text.*;
@@ -51,42 +52,26 @@ public class PdfChart {
 	/**
 	 * Saves the chart to a pdf file
 	 *
-	 * @param chart the chart object
-	 * @param filename the full file path to use
+	 * @param chart the chart object, not null
+	 * @param filename the full file path to use, not null
 	 * @param title the chart title, or null, or blank
 	 * @param data the data to be displayed with the chart image, or null
 	 * @param reportParamsList the report parameters to be displayed, or null or
 	 * empty
+	 * @param report the report for the chart, not null
 	 */
 	public static void generatePdf(JFreeChart chart, String filename, String title,
-			RowSetDynaClass data, java.util.List<ReportParameter> reportParamsList) {
+			RowSetDynaClass data, java.util.List<ReportParameter> reportParamsList,
+			Report report) {
 
-		logger.debug("Entering createPdf: filename='{}', title='{}'", filename, title);
+		logger.debug("Entering createPdf: filename='{}', title='{}', report={}",
+				filename, title, report);
 
 		Objects.requireNonNull(chart, "chart must not be null");
 		Objects.requireNonNull(filename, "filename must not be null");
 
 		PdfHelper pdfHelper = new PdfHelper();
-
-		Rectangle pageSize;
-		PdfPageSize pageSizeSetting = Config.getSettings().getPdfPageSize();
-
-		switch (pageSizeSetting) {
-			case A4:
-				pageSize = PageSize.A4;
-				break;
-			case A4Landscape:
-				pageSize = PageSize.A4.rotate();
-				break;
-			case Letter:
-				pageSize = PageSize.LETTER;
-				break;
-			case LetterLandscape:
-				pageSize = PageSize.LETTER.rotate();
-				break;
-			default:
-				throw new IllegalArgumentException("Unexpected pdf page size setting: " + pageSizeSetting);
-		}
+		Rectangle pageSize = pdfHelper.getPageSize(report);
 
 		final float LEFT_MARGIN = 72f;
 		final float RIGHT_MARGIN = 72f;

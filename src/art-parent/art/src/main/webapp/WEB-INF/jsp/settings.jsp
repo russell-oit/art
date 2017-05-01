@@ -506,20 +506,6 @@ Settings configuration page
 				<fieldset>
 					<legend>PDF</legend>
 					<div class="form-group">
-						<label class="control-label col-md-5">
-							<spring:message code="settings.label.pdfPageSize"/>
-						</label>
-						<div class="col-md-7">
-							<c:forEach var="pageSize" items="${pdfPageSizes}">
-								<label class="radio-inline">
-									<form:radiobutton path="pdfPageSize"
-													  value="${pageSize}"/> ${pageSize.description}
-								</label>
-							</c:forEach>
-							<form:errors path="pdfPageSize" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
 						<label class="control-label col-md-5" for="pdfFontName">
 							<spring:message code="settings.label.pdfFontName"/>
 						</label>

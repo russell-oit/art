@@ -611,8 +611,16 @@ Edit report page
 					default:
 						$("#fetchSizeDiv").show();
 				}
+
+				//show/hide page orientation
+				if (reportTypeId <= 1 || reportTypeId === 101) {
+					$("#pageOrientationDiv").show();
+				} else {
+					$("#pageOrientationDiv").hide();
+				}
 			}
 		</script>
+
 
 	</jsp:attribute>
 
@@ -958,6 +966,22 @@ Edit report page
 					<div class="col-md-8">
 						<form:input path="fetchSize" maxlength="5" class="form-control"/>
 						<form:errors path="fetchSize" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="pageOrientationDiv" class="form-group">
+					<label class="control-label col-md-4" for="pageOrientation">
+						<spring:message code="reports.label.pageOrientation"/>
+					</label>
+					<div class="col-md-8">
+						<c:forEach var="pageOrientation" items="${pageOrientations}">
+							<label class="radio-inline">
+								<form:radiobutton path="pageOrientation"
+												  value="${pageOrientation}"/>
+								<spring:message code="${pageOrientation.localizedDescription}"/>
+							</label>
+						</c:forEach>
+						<form:errors path="pageOrientation" cssClass="error"/>
 					</div>
 				</div>
 

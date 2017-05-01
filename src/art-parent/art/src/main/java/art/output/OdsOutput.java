@@ -17,12 +17,16 @@
  */
 package art.output;
 
+import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.odftoolkit.odfdom.dom.element.style.StyleMasterPageElement;
+import org.odftoolkit.odfdom.dom.style.props.OdfPageLayoutProperties;
+import org.odftoolkit.odfdom.incubator.doc.style.OdfStylePageLayout;
 import org.odftoolkit.odfdom.type.Color;
 import org.odftoolkit.simple.SpreadsheetDocument;
 import org.odftoolkit.simple.style.Font;
@@ -76,6 +80,11 @@ public class OdsOutput extends StandardOutput {
 			//so append sheet and remove the first one created by default
 			table = document.appendSheet(reportName);
 			document.removeSheet(0);
+			
+			PageOrientation pageOrientation = report.getPageOrientation();
+			if (pageOrientation == PageOrientation.Landscape) {
+				setLandscapeOrientation();
+			}
 
 			String fontFamilyName = "Arial";
 
@@ -89,6 +98,20 @@ public class OdsOutput extends StandardOutput {
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+
+	/**
+	 * Sets the document page size to A4 Landscape
+	 */
+	private void setLandscapeOrientation() {
+		//https://dentrassi.de/2012/08/27/setting-the-page-size-and-orientation-with-odfdom-for-tables-aka-spreadsheets/
+		//https://stackoverflow.com/questions/18108452/how-can-the-page-size-page-orientation-and-page-margins-of-an-ods-spreadsheet
+		StyleMasterPageElement defaultPage = document.getOfficeMasterStyles().getMasterPage("Default");
+		String pageLayoutName = defaultPage.getStylePageLayoutNameAttribute();
+		OdfStylePageLayout pageLayout = defaultPage.getAutomaticStyles().getPageLayout(pageLayoutName);
+		pageLayout.setProperty(OdfPageLayoutProperties.PrintOrientation, "landscape");
+		pageLayout.setProperty(OdfPageLayoutProperties.PageHeight, "210.01mm");
+		pageLayout.setProperty(OdfPageLayoutProperties.PageWidth, "297mm");
 	}
 
 	@Override
@@ -169,7 +192,7 @@ public class OdsOutput extends StandardOutput {
 		cell.setDoubleValue(value);
 		cell.setFont(totalFont);
 	}
-	
+
 	@Override
 	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
 		addCellTotal(totalValue);

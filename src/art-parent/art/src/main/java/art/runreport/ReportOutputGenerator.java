@@ -383,7 +383,7 @@ public class ReportOutputGenerator {
 				}
 
 				if (isJob) {
-					chart.generateFile(reportFormat, fullOutputFilename, data);
+					chart.generateFile(reportFormat, fullOutputFilename, data, report);
 				} else {
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
@@ -401,7 +401,7 @@ public class ReportOutputGenerator {
 							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
 						}
 					} else {
-						chart.generateFile(reportFormat, fullOutputFilename, data);
+						chart.generateFile(reportFormat, fullOutputFilename, data, report);
 						displayFileLink(fileName);
 					}
 					rowsRetrieved = getResultSetRowCount(rs);
