@@ -28,7 +28,6 @@ import org.odftoolkit.odfdom.incubator.doc.style.OdfStylePageLayout;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.common.field.Fields;
 import org.odftoolkit.simple.style.Font;
-import org.odftoolkit.simple.style.PageLayoutProperties;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
 import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Row;
