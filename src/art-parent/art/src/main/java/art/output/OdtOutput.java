@@ -21,9 +21,13 @@ import art.reportparameter.ReportParameter;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.odftoolkit.odfdom.dom.element.style.StyleMasterPageElement;
+import org.odftoolkit.odfdom.dom.style.props.OdfPageLayoutProperties;
+import org.odftoolkit.odfdom.incubator.doc.style.OdfStylePageLayout;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.common.field.Fields;
 import org.odftoolkit.simple.style.Font;
+import org.odftoolkit.simple.style.PageLayoutProperties;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
 import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Row;
@@ -62,10 +66,26 @@ public class OdtOutput extends StandardOutput {
 		try {
 			resetVariables();
 			document = TextDocument.newTextDocument();
+			setLandscapeOrientation();
 			createPageNumbers();
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+
+	/**
+	 * Sets the document page size to A4 Landscape
+	 */
+	private void setLandscapeOrientation() {
+		//https://dentrassi.de/2012/08/27/setting-the-page-size-and-orientation-with-odfdom-for-tables-aka-spreadsheets/
+		//https://stackoverflow.com/questions/18108452/how-can-the-page-size-page-orientation-and-page-margins-of-an-ods-spreadsheet
+		StyleMasterPageElement defaultPage = document.getOfficeMasterStyles().getMasterPage("Standard");
+		String pageLayoutName = defaultPage.getStylePageLayoutNameAttribute();
+		OdfStylePageLayout pageLayout = defaultPage.getAutomaticStyles().getPageLayout(pageLayoutName);
+		pageLayout.setProperty(OdfPageLayoutProperties.PrintOrientation, "landscape");
+		pageLayout.setProperty(OdfPageLayoutProperties.PageHeight, "210.01mm");
+		pageLayout.setProperty(OdfPageLayoutProperties.PageWidth, "297mm");
+//		pageLayout.setProperty(OdfPageLayoutProperties.NumFormat, "1");
 	}
 
 	@Override
@@ -133,7 +153,7 @@ public class OdtOutput extends StandardOutput {
 		String formattedValue = formatNumericValue(value);
 		outputCellText(formattedValue);
 	}
-	
+
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		outputCellText(formattedValue);
@@ -144,7 +164,7 @@ public class OdtOutput extends StandardOutput {
 		String formattedValue = formatDateValue(value);
 		outputCellText(formattedValue);
 	}
-	
+
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		outputCellText(formattedValue);
@@ -155,18 +175,18 @@ public class OdtOutput extends StandardOutput {
 		row = table.appendRow();
 		cellNumber = 0;
 	}
-	
+
 	@Override
-	public void addCellTotal(Double value){
+	public void addCellTotal(Double value) {
 		String formattedValue = formatNumericValue(value);
-		
+
 		cell = row.getCellByIndex(cellNumber++);
 		Paragraph paragraph = cell.addParagraph(formattedValue);
 		Font font = paragraph.getFont();
 		font.setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
 		paragraph.setFont(font);
 	}
-	
+
 	@Override
 	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
 		cell = row.getCellByIndex(cellNumber++);

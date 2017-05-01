@@ -26,8 +26,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generates pdf output. See
@@ -37,8 +35,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class PdfOutput extends StandardOutput {
-
-	private static final Logger logger = LoggerFactory.getLogger(PdfOutput.class);
 
 	private Document document;
 	private PdfPTable table;

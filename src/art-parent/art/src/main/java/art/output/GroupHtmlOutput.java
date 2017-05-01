@@ -21,7 +21,6 @@ import art.servlets.Config;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import org.owasp.encoder.Encode;
 
 /**
  * Generates group html reports
