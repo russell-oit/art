@@ -95,6 +95,21 @@ public abstract class StandardOutput {
 	protected int currentColumnIndex;
 	protected boolean isJob;
 	protected Report report;
+	protected boolean pdfPageNumbers = true;
+
+	/**
+	 * @return the pdfPageNumbers
+	 */
+	public boolean isPdfPageNumbers() {
+		return pdfPageNumbers;
+	}
+
+	/**
+	 * @param pdfPageNumbers the pdfPageNumbers to set
+	 */
+	public void setPdfPageNumbers(boolean pdfPageNumbers) {
+		this.pdfPageNumbers = pdfPageNumbers;
+	}
 
 	/**
 	 * @return the report

@@ -59,13 +59,15 @@ public class PdfChart {
 	 * @param reportParamsList the report parameters to be displayed, or null or
 	 * empty
 	 * @param report the report for the chart, not null
+	 * @param pdfPageNumbers whether page numbers should be included in pdf
+	 * output
 	 */
 	public static void generatePdf(JFreeChart chart, String filename, String title,
 			RowSetDynaClass data, java.util.List<ReportParameter> reportParamsList,
-			Report report) {
+			Report report, boolean pdfPageNumbers) {
 
-		logger.debug("Entering createPdf: filename='{}', title='{}', report={}",
-				filename, title, report);
+		logger.debug("Entering generatePdf: filename='{}', title='{}', report={}, "
+				+ "pdfPageNumbers={}", filename, title, report, pdfPageNumbers);
 
 		Objects.requireNonNull(chart, "chart must not be null");
 		Objects.requireNonNull(filename, "filename must not be null");
@@ -87,6 +89,11 @@ public class PdfChart {
 			}
 			document.addTitle(title);
 			document.addAuthor(pdfHelper.PDF_AUTHOR_ART);
+
+			if (pdfPageNumbers) {
+				pdfHelper.addPageNumbers(document);
+			}
+
 			document.open();
 
 			//set fonts to be used, in case custom font is defined

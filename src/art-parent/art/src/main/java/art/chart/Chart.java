@@ -539,17 +539,20 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 * @param data for pdf format, if it is required to show the chart data
 	 * together with the image. Null if show data is not required.
 	 * @param report the report for the chart
+	 * @param pdfPageNumbers whether page numbers should be included in pdf
+	 * output
 	 * @throws IOException
 	 * @throws DatasetProduceException
 	 * @throws ChartValidationException
 	 * @throws PostProcessingException
 	 */
 	public void generateFile(ReportFormat reportFormat, String outputFileName,
-			RowSetDynaClass data, Report report)
+			RowSetDynaClass data, Report report, boolean pdfPageNumbers)
 			throws IOException, DatasetProduceException, ChartValidationException,
 			PostProcessingException {
 
-		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}'", reportFormat, outputFileName);
+		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}', "
+				+ "report={}, pdfPageNumbers={}", reportFormat, outputFileName, report, pdfPageNumbers);
 
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
@@ -561,7 +564,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, chartOptions.getWidth(), chartOptions.getHeight());
 				break;
 			case pdf:
-				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList, report);
+				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList, report, pdfPageNumbers);
 				break;
 			default:
 				throw new IllegalArgumentException(String.format("Unsupported report format: %s", reportFormat));

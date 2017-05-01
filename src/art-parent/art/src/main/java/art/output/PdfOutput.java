@@ -76,10 +76,11 @@ public class PdfOutput extends StandardOutput {
 			PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));
 			document.addTitle(reportName);
 			document.addAuthor(pdfHelper.PDF_AUTHOR_ART);
-//			HeaderFooter footer = new HeaderFooter(new Phrase(""), true);
-//			footer.setAlignment(Element.ALIGN_RIGHT);
-//			footer.setBorder(Rectangle.NO_BORDER);
-//			document.setFooter(footer);
+
+			if (pdfPageNumbers) {
+				pdfHelper.addPageNumbers(document);
+			}
+
 			document.open();
 
 			table = new PdfPTable(totalColumnCount); //use total column count insead of resultset column count because of crosstab output

@@ -124,6 +124,21 @@ public class ReportOutputGenerator {
 	private ServletContext servletContext;
 	private DrilldownService drilldownService;
 	private boolean isJob = false;
+	private boolean pdfPageNumbers = true;
+
+	/**
+	 * @return the pdfPageNumbers
+	 */
+	public boolean isPdfPageNumbers() {
+		return pdfPageNumbers;
+	}
+
+	/**
+	 * @param pdfPageNumbers the pdfPageNumbers to set
+	 */
+	public void setPdfPageNumbers(boolean pdfPageNumbers) {
+		this.pdfPageNumbers = pdfPageNumbers;
+	}
 
 	/**
 	 * @return the isJob
@@ -383,7 +398,7 @@ public class ReportOutputGenerator {
 				}
 
 				if (isJob) {
-					chart.generateFile(reportFormat, fullOutputFilename, data, report);
+					chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers);
 				} else {
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
@@ -401,7 +416,7 @@ public class ReportOutputGenerator {
 							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
 						}
 					} else {
-						chart.generateFile(reportFormat, fullOutputFilename, data, report);
+						chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers);
 						displayFileLink(fileName);
 					}
 					rowsRetrieved = getResultSetRowCount(rs);
@@ -433,6 +448,7 @@ public class ReportOutputGenerator {
 				standardOutput.setReportName(report.getName());
 				standardOutput.setMessageSource(messageSource);
 				standardOutput.setIsJob(isJob);
+				standardOutput.setPdfPageNumbers(pdfPageNumbers);
 
 				if (request != null) {
 					String contextPath = request.getContextPath();

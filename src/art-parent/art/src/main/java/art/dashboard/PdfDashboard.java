@@ -29,7 +29,13 @@ import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.FilenameHelper;
+import com.lowagie.text.Chunk;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.ColumnText;
 import com.lowagie.text.pdf.PdfCopy;
+import com.lowagie.text.pdf.PdfCopy.PageStamp;
 import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
 import java.io.File;
@@ -158,11 +164,13 @@ public class PdfDashboard {
 				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
 				reportOutputGenerator.setIsJob(true);
+				reportOutputGenerator.setPdfPageNumbers(false);
 
 				FileOutputStream fos = new FileOutputStream(reportFileName);
 				try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"))) {
 					reportOutputGenerator.generateOutput(report, reportRunner,
-							reportFormat, locale, paramProcessorResult, writer, reportFileName, user, messageSource);
+							reportFormat, locale, paramProcessorResult, writer,
+							reportFileName, user, messageSource);
 				} finally {
 					fos.close();
 				}
@@ -182,11 +190,32 @@ public class PdfDashboard {
 			FileOutputStream outputStream = new FileOutputStream(outputFile);
 			PdfCopy copy = new PdfCopy(doc, outputStream);
 			doc.open();
+
+			//https://dkbalachandar.wordpress.com/2016/06/09/itext-pdf-page-header-with-title-and-number/
+			Rectangle pageSize = PageSize.A4;
+			float x = pageSize.getRight(72);
+			float y = pageSize.getBottom(72);
+			int pageCount = 0;
+
 			for (String reportFileName : reportFileNames) {
 				PdfReader reader = new PdfReader(reportFileName);
 				int totalPages = reader.getNumberOfPages();
 				for (int i = 1; i <= totalPages; i++) {
 					PdfImportedPage page = copy.getImportedPage(reader, i);
+
+					//add page numbers
+					pageCount++;
+					PageStamp stamp = copy.createPageStamp(page);
+					Chunk chunk = new Chunk(String.format("%d", pageCount));
+					if (i == 1) {
+						chunk.setLocalDestination("p" + pageCount);
+					}
+					//http://developers.itextpdf.com/examples/stampingcontentexistingpdfsitext5/headerandfooterexamples
+					ColumnText.showTextAligned(stamp.getUnderContent(),
+							com.lowagie.text.Element.ALIGN_RIGHT, new Phrase(chunk),
+							x, y, 0);
+					stamp.alterContents();
+
 					copy.addPage(page);
 				}
 			}

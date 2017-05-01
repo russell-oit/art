@@ -21,9 +21,13 @@ import art.enums.PageOrientation;
 import art.enums.PdfPageSize;
 import art.report.Report;
 import art.servlets.Config;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
+import com.lowagie.text.HeaderFooter;
 import com.lowagie.text.PageSize;
+import com.lowagie.text.Phrase;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.FontSelector;
@@ -39,6 +43,18 @@ public class PdfHelper {
 	public final String PDF_AUTHOR_ART = "ART - http://art.sourceforge.net";
 
 	/**
+	 * Adds page numbers to a pdf document
+	 * 
+	 * @param document the pdf document
+	 */
+	public void addPageNumbers(Document document) {
+		HeaderFooter footer = new HeaderFooter(new Phrase(""), true);
+		footer.setAlignment(Element.ALIGN_RIGHT);
+		footer.setBorder(Rectangle.NO_BORDER);
+		document.setFooter(footer);
+	}
+
+	/**
 	 * Returns the page size to use for the document
 	 *
 	 * @param report the report, not null
@@ -51,7 +67,7 @@ public class PdfHelper {
 		Rectangle pageSize;
 
 		PageOrientation pageOrientation = report.getPageOrientation();
-		
+
 		switch (pageOrientation) {
 			case Portrait:
 				pageSize = PageSize.A4;
