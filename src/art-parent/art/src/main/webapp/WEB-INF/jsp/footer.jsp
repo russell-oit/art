@@ -17,8 +17,7 @@ Footer that appears on all pages
 	<div class="container"> 
 		<span class="navbar-text text-muted">
 			<a href="http://art.sourceforge.net">ART</a>
-			&nbsp; A Reporting Tool 
-			&nbsp; ${artVersion}
+			&nbsp; A Reporting Tool &nbsp;${artVersion}
 		</span>
 		<c:if test="${not empty administratorEmail}">
 			<span class="navbar-text pull-right">
