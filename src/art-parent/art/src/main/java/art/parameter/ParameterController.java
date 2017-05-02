@@ -19,7 +19,10 @@ package art.parameter;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.report.Report;
 import art.report.ReportService;
+import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterService;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
@@ -27,6 +30,7 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +59,9 @@ public class ParameterController {
 
 	@Autowired
 	private ReportService reportService;
+
+	@Autowired
+	private ReportParameterService reportParameterService;
 
 	@RequestMapping(value = "/parameters", method = RequestMethod.GET)
 	public String showParameters(Model model) {
@@ -120,15 +127,21 @@ public class ParameterController {
 	}
 
 	@RequestMapping(value = "/addParameter", method = RequestMethod.GET)
-	public String addParameter(Model model) {
+	public String addParameter(Model model,
+			@RequestParam(value = "reportId", required = false) Integer reportId) {
+
 		logger.debug("Entering addParameter");
 
 		Parameter param = new Parameter();
 		param.setParameterType(ParameterType.SingleValue);
 
+		if (reportId == null) {
+			param.setShared(true);
+		}
+
 		model.addAttribute("parameter", param);
 
-		return showEditParameter("add", model);
+		return showEditParameter("add", model, reportId);
 	}
 
 	@RequestMapping(value = "/editParameter", method = RequestMethod.GET)
@@ -142,12 +155,12 @@ public class ParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditParameter("edit", model);
+		return showEditParameter("edit", model, null);
 	}
 
 	@RequestMapping(value = "/saveParameter", method = RequestMethod.POST)
 	public String saveParameter(@ModelAttribute("parameter") @Valid Parameter parameter,
-			@RequestParam("action") String action,
+			@RequestParam("action") String action, @RequestParam("reportId") Integer reportId,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
@@ -156,13 +169,18 @@ public class ParameterController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditParameter(action, model);
+			return showEditParameter(action, model, reportId);
 		}
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add")) {
 				parameterService.addParameter(parameter, sessionUser);
+				if (reportId != null) {
+					ReportParameter reportParameter = new ReportParameter();
+					reportParameter.setParameter(parameter);
+					reportParameterService.addReportParameter(reportParameter, reportId);
+				}
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
 				parameterService.updateParameter(parameter, sessionUser);
@@ -171,13 +189,18 @@ public class ParameterController {
 
 			String recordName = parameter.getName() + " (" + parameter.getParameterId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
-			return "redirect:/parameters";
+
+			if (reportId != null) {
+				return "redirect:/reportParameterConfig?reportId=" + reportId;
+			} else {
+				return "redirect:/parameters";
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditParameter(action, model);
+		return showEditParameter(action, model, reportId);
 	}
 
 	/**
@@ -187,7 +210,7 @@ public class ParameterController {
 	 * @param model the model to use
 	 * @return the jsp file to display
 	 */
-	private String showEditParameter(String action, Model model) {
+	private String showEditParameter(String action, Model model, Integer reportId) {
 		logger.debug("Entering showEditParameter: action='{}'", action);
 
 		try {
@@ -204,6 +227,7 @@ public class ParameterController {
 		model.addAttribute("dataTypes", ParameterDataType.list());
 
 		model.addAttribute("action", action);
+		model.addAttribute("reportId", reportId);
 
 		return "editParameter";
 	}

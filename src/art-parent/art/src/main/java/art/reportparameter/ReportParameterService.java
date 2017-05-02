@@ -19,6 +19,7 @@ package art.reportparameter;
 
 import art.dbutils.DbService;
 import art.parameter.ParameterService;
+import art.report.Report;
 import art.report.ReportService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -236,14 +237,17 @@ public class ReportParameterService {
 	/**
 	 * Adds a new report parameter to the database
 	 *
-	 * @param param the report parameter
+	 * @param reportParam the report parameter
 	 * @param reportId the report id
 	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
-	public synchronized int addReportParameter(ReportParameter param, int reportId) throws SQLException {
-		logger.debug("Entering addReportParameter: param={}, reportId={}", param, reportId);
+	public synchronized int addReportParameter(ReportParameter reportParam, int reportId)
+			throws SQLException {
+
+		logger.debug("Entering addReportParameter: reportParam={}, reportId={}",
+				reportParam, reportId);
 
 		//generate new id
 		String sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
@@ -277,11 +281,15 @@ public class ReportParameterService {
 		}
 		logger.debug("newPosition={}", newPosition);
 
-		param.setReportParameterId(newId);
-		param.setPosition(newPosition);
-		param.getReport().setReportId(reportId);
-
-		saveReportParameter(param, true);
+		reportParam.setReportParameterId(newId);
+		reportParam.setPosition(newPosition);
+		
+		Report report = new Report();
+		report.setReportId(reportId);
+		
+		reportParam.setReport(report);
+		
+		saveReportParameter(reportParam, true);
 
 		return newId;
 	}

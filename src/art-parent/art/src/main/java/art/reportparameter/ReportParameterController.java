@@ -124,10 +124,11 @@ public class ReportParameterController {
 
 		try {
 			ReportParameter reportParameter = reportParameterService.getReportParameter(id);
-			model.addAttribute("reportParameter", reportParameter);
-			if (reportParameter != null) {
-				reportId = reportParameter.getReport().getReportId();
+			if (reportParameter == null) {
+				throw new IllegalArgumentException(String.format("Report parameter not found: %d", id));
 			}
+			model.addAttribute("reportParameter", reportParameter);
+			reportId = reportParameter.getReport().getReportId();
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -142,7 +143,8 @@ public class ReportParameterController {
 			@RequestParam("reportId") Integer reportId,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
-		logger.debug("Entering saveReportParameter: reportParameter={}, action='{}', reportId={}", reportParameter, action, reportId);
+		logger.debug("Entering saveReportParameter: reportParameter={}, action='{}', "
+				+ "reportId={}", reportParameter, action, reportId);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
@@ -186,7 +188,10 @@ public class ReportParameterController {
 
 		try {
 			model.addAttribute("reportName", reportService.getReportName(reportId));
-			model.addAttribute("parameters", parameterService.getAllParameters());
+
+			if (StringUtils.equals(action, "add")) {
+				model.addAttribute("parameters", parameterService.getSharedParameters());
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

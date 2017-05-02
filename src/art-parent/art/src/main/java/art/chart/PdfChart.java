@@ -17,7 +17,6 @@
  */
 package art.chart;
 
-import art.enums.PdfPageSize;
 import art.output.PdfHelper;
 import art.output.PdfOutput;
 import art.report.Report;

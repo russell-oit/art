@@ -127,6 +127,21 @@ public class ParameterService {
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
+	
+	/**
+	 * Returns shared parameters
+	 *
+	 * @return shared parameters
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public List<Parameter> getSharedParameters() throws SQLException {
+		logger.debug("Entering getSharedParameters");
+
+		String sql = SQL_SELECT_ALL + " WHERE SHARED=1";
+		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
+		return dbService.query(sql, h);
+	}
 
 	/**
 	 * Returns a parameter
@@ -351,10 +366,10 @@ public class ParameterService {
 			String sql = "INSERT INTO ART_PARAMETERS"
 					+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
 					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, DEFAULT_VALUE_REPORT_ID,"
-					+ " HIDDEN, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
+					+ " HIDDEN, SHARED, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
 					+ " DRILLDOWN_COLUMN_INDEX,"
 					+ " USE_DIRECT_SUBSTITUTION, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 17) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 18) + ")";
 
 			Object[] values = {
 				parameter.getParameterId(),
@@ -367,6 +382,7 @@ public class ParameterService {
 				parameter.getDefaultValue(),
 				defaultValueReportId,
 				BooleanUtils.toInteger(parameter.isHidden()),
+				BooleanUtils.toInteger(parameter.isShared()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
 				parameter.getLovReportId(),
 				BooleanUtils.toInteger(parameter.isUseRulesInLov()),
@@ -380,7 +396,7 @@ public class ParameterService {
 		} else {
 			String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
 					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
-					+ " DEFAULT_VALUE_REPORT_ID=?, HIDDEN=?, USE_LOV=?, LOV_REPORT_ID=?,"
+					+ " DEFAULT_VALUE_REPORT_ID=?, HIDDEN=?, SHARED=?, USE_LOV=?, LOV_REPORT_ID=?,"
 					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
@@ -395,6 +411,7 @@ public class ParameterService {
 				parameter.getDefaultValue(),
 				defaultValueReportId,
 				BooleanUtils.toInteger(parameter.isHidden()),
+				BooleanUtils.toInteger(parameter.isShared()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
 				parameter.getLovReportId(),
 				BooleanUtils.toInteger(parameter.isUseRulesInLov()),

@@ -17,7 +17,6 @@
  */
 package art.enums;
 
-import static art.enums.PageOrientation.values;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

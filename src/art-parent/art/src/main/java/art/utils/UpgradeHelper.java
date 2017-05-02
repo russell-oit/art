@@ -546,28 +546,33 @@ public class UpgradeHelper {
 				//create parameter definition
 				sql = "INSERT INTO ART_PARAMETERS"
 						+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
-						+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, USE_LOV,"
+						+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, SHARED, USE_LOV,"
 						+ " LOV_REPORT_ID, USE_RULES_IN_LOV,"
 						+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION)"
-						+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
+						+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
 
 				ParameterType parameterType;
-				String paramType = (String) parameter.get("PARAM_TYPE");
-				if (StringUtils.equals(paramType, "M")) {
+				String parameterTypeString = (String) parameter.get("PARAM_TYPE");
+				if (StringUtils.equals(parameterTypeString, "M")) {
 					parameterType = ParameterType.MultiValue;
 				} else {
 					parameterType = ParameterType.SingleValue;
 				}
 
-				ParameterDataType dataType;
-				String dtType = (String) parameter.get("PARAM_DATA_TYPE");
-				dataType = ParameterDataType.toEnum(dtType);
+				String dataTypeString = (String) parameter.get("PARAM_DATA_TYPE");
+				ParameterDataType dataType = ParameterDataType.toEnum(dataTypeString);
 
-				String useLov = (String) parameter.get("USE_LOV");
-				String useRulesInLov = (String) parameter.get("APPLY_RULES_TO_LOV");
-				String useDirectSubstitution = (String) parameter.get("DIRECT_SUBSTITUTION");
+				String useLovString = (String) parameter.get("USE_LOV");
+				boolean useLov=BooleanUtils.toBoolean(useLovString);
+				
+				String useRulesInLovString = (String) parameter.get("APPLY_RULES_TO_LOV");
+				boolean useRulesInLov = BooleanUtils.toBoolean(useRulesInLovString);
+				
+				String useDirectSubstitutionString = (String) parameter.get("DIRECT_SUBSTITUTION");
+				boolean useDirectSubstitution=BooleanUtils.toBoolean(useDirectSubstitutionString);
 
 				boolean hidden = false;
+				boolean shared = false;
 				Object[] values = {
 					maxParameterId,
 					(String) parameter.get("PARAM_LABEL"), //name. meaning of name and label interchanged
@@ -577,12 +582,13 @@ public class UpgradeHelper {
 					(String) parameter.get("DESCRIPTION"), //help text
 					dataType.getValue(),
 					(String) parameter.get("DEFAULT_VALUE"),
-					hidden,
-					BooleanUtils.toBoolean(useLov),
+					BooleanUtils.toInteger(hidden),
+					BooleanUtils.toInteger(shared),
+					BooleanUtils.toInteger(useLov),
 					(Integer) parameter.get("LOV_QUERY_ID"),
-					BooleanUtils.toBoolean(useRulesInLov),
+					BooleanUtils.toInteger(useRulesInLov),
 					(Integer) parameter.get("DRILLDOWN_COLUMN"),
-					BooleanUtils.toBoolean(useDirectSubstitution)
+					BooleanUtils.toInteger(useDirectSubstitution)
 				};
 
 				dbService.update(sql, values);

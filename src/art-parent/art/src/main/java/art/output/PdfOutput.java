@@ -17,9 +17,7 @@
  */
 package art.output;
 
-import art.enums.PdfPageSize;
 import art.reportparameter.ReportParameter;
-import art.servlets.Config;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import java.io.FileOutputStream;

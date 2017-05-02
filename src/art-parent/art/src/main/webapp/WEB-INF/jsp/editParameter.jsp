@@ -105,6 +105,8 @@ Edit parameter definition
 				</c:if>
 
 				<input type="hidden" name="action" value="${action}">
+				<input type="hidden" name="reportId" value="${reportId}">
+
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
@@ -223,6 +225,16 @@ Edit parameter definition
 							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
 						</form:select>
 						<form:errors path="defaultValueReport.reportId" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="shared">
+						<spring:message code="parameters.label.shared"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="shared" id="shared" class="switch-yes-no"/>
+						</div>
 					</div>
 				</div>
 				<div class="form-group">

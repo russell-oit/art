@@ -25,14 +25,14 @@
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
-	
+
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -79,7 +79,7 @@
 
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="reportId" value="${reportId}">
-				<input type="hidden" name="report.reportId" value="${reportId}">
+				
 				<form:hidden path="position"/>
 
 				<div class="form-group">
@@ -103,12 +103,20 @@
 						<spring:message code="page.text.parameter"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="parameter.parameterId" class="form-control selectpicker">
-							<c:forEach var="parameter" items="${parameters}">
-								<form:option value="${parameter.parameterId}">${parameter.name} (${parameter.parameterId})</form:option>
-							</c:forEach>
-						</form:select>
-						<form:errors path="parameter.parameterId" cssClass="error"/>
+						<c:choose>
+							<c:when test="${action == 'add'}">
+								<form:select path="parameter.parameterId" class="form-control selectpicker">
+									<c:forEach var="parameter" items="${parameters}">
+										<form:option value="${parameter.parameterId}">${encode:forHtmlContent(parameter.name)} (${parameter.parameterId})</form:option>
+									</c:forEach>
+								</form:select>
+								<form:errors path="parameter.parameterId" cssClass="error"/>
+							</c:when>
+							<c:when test="${action == 'edit'}">
+								<form:hidden path="parameter.parameterId"/>
+								${encode:forHtmlContent(reportParameter.parameter.name)} (${reportParameter.parameter.parameterId})
+							</c:when>
+						</c:choose>
 					</div>
 				</div>
 				<div class="form-group">

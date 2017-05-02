@@ -18,7 +18,6 @@
 package art.output;
 
 import art.enums.PageOrientation;
-import art.enums.PdfPageSize;
 import art.report.Report;
 import art.servlets.Config;
 import com.lowagie.text.Document;

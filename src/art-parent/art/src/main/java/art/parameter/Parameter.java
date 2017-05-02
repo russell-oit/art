@@ -51,6 +51,21 @@ public class Parameter implements Serializable {
 	private String createdBy;
 	private String updatedBy;
 	private Report defaultValueReport;
+	private boolean shared;
+
+	/**
+	 * @return the shared
+	 */
+	public boolean isShared() {
+		return shared;
+	}
+
+	/**
+	 * @param shared the shared to set
+	 */
+	public void setShared(boolean shared) {
+		this.shared = shared;
+	}
 
 	/**
 	 * @return the defaultValueReport

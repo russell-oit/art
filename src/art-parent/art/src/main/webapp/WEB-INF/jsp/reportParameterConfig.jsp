@@ -161,7 +161,11 @@
 		<div style="margin-bottom: 10px;">
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/addReportParameter?reportId=${reportId}">
 				<i class="fa fa-plus"></i>
-				<spring:message code="page.action.add"/>
+				<spring:message code="parameters.button.addExisting"/>
+			</a>
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addParameter?reportId=${reportId}">
+				<i class="fa fa-plus"></i>
+				<spring:message code="parameters.button.addNew"/>
 			</a>
 			<button type="button" id="deleteRecords" class="btn btn-default">
 				<i class="fa fa-trash-o"></i>
@@ -182,7 +186,7 @@
 			<tbody>
 				<c:forEach var="reportParameter" items="${reportParameters}">
 					<tr data-id="${reportParameter.reportParameterId}" 
-						data-name="${encode:forHtmlAttribute(reportParameter.parameter.name)}"
+						data-name="${encode:forHtmlAttribute(reportParameter.parameter.name)} (${reportParameter.parameter.parameterId})"
 						id="${reportParameter.reportParameterId}">
 
 						<td></td>
@@ -190,8 +194,13 @@
 						<td>${reportParameter.reportParameterId}</td>
 						<td data-toggle="tooltip" title="${dragToReorderText}">
 							<a href="${pageContext.request.contextPath}/editParameter?id=${reportParameter.parameter.parameterId}">
-								${encode:forHtmlContent(reportParameter.parameter.name)}(${reportParameter.parameter.parameterId})
+								${encode:forHtmlContent(reportParameter.parameter.name)} (${reportParameter.parameter.parameterId})
 							</a>
+							<c:if test="${reportParameter.parameter.shared}">
+								<span class="label label-success">
+									<spring:message code="parameters.label.shared"/>
+								</span>
+							</c:if>
 						</td>							
 						<td>
 							<div class="btn-group">
