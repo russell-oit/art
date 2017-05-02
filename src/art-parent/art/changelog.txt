@@ -11,9 +11,9 @@ ART 3.0
 * Added ability to create reports based on Thymeleaf templates
 * Added ability to create reports based on MS Word (docx), LibreOffice Writer (odt) and MS PowerPoint (pptx) templates
 * Added docx, odt, ods report formats for tabular and jasper reports
-* Added gridstack dashboard report type
-* Have syntax highlighting during report creation
+* Added syntax highlighting during report creation
 * Added tabbed dashboards option
+* Added Gridstack Dashboard report type
 * Added ReactPivot report type
 * Added PivotTable.js report types
 * Added Dygraphs report types
@@ -23,10 +23,12 @@ ART 3.0
 * Added Datamaps report types
 * Added Leaflet report type
 * Added OpenLayers report type
+* Added Tabular Heatmap report type
 * Added ability to create csv output jobs
 * Added ability to create fixed width output jobs
 * Allow multi-value parameters with Oracle databases to have more than 1000 items
 * Added ability to schedule dashboard reports and output them as pdf
+* Allow for specifying specific colours to be used for given chart series
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7
 * Requires Servlet 3.0

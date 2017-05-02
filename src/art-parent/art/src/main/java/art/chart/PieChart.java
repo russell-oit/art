@@ -71,7 +71,6 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 		//category, value [, link]
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
-		setSeriesColorOptions(rsmd);
 		
 		while (rs.next()) {
 			String category = rs.getString(1);

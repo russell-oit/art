@@ -54,7 +54,6 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 	private static final Logger logger = LoggerFactory.getLogger(TimeSeriesBasedChart.class);
 	private static final long serialVersionUID = 1L;
 	private ReportType reportType;
-	private String dateFormat;
 
 	public TimeSeriesBasedChart(ReportType reportType) {
 		logger.debug("Entering TimeSeriesBasedChart: reportType={}", reportType);
@@ -113,16 +112,9 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 				int columnIndex = seriesIndex + 2 + hop; //start from column 2
 				String seriesName = rsmd.getColumnLabel(columnIndex);
-				if (isOptionsColumn(seriesName)) {
-					continue;
-				}
 				finalSeries.put(seriesIndex, new TimeSeries(seriesName));
 			}
 		}
-
-		setSeriesColorOptions(rsmd);
-
-		setDateFormat(rsmd);
 
 		int rowCount = 0;
 
@@ -175,9 +167,6 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
 					String seriesName = rsmd.getColumnLabel(columnIndex);
-					if (isOptionsColumn(seriesName)) {
-						continue;
-					}
 					double yValue = rs.getDouble(columnIndex);
 					addData(rs, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
 				}
@@ -190,23 +179,6 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		}
 
 		setDataset(dataset);
-	}
-
-	/**
-	 * Sets the optional date format property that defines a fixed date format
-	 * to use in the chart
-	 *
-	 * @param rsmd the resultset metadata
-	 * @throws SQLException
-	 */
-	private void setDateFormat(ResultSetMetaData rsmd) throws SQLException {
-		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-			String columnName = rsmd.getColumnLabel(i);
-			if (StringUtils.startsWithIgnoreCase(columnName, "dateFormat:")) {
-				dateFormat = StringUtils.substringAfter(columnName, ":");
-				break;
-			}
-		}
 	}
 
 	/**
@@ -225,7 +197,7 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			int seriesIndex, int itemIndex, double yValue, Date date, String seriesName) throws SQLException {
 
 		//add dataset value
-		switch(reportType){
+		switch (reportType) {
 			case TimeSeriesChart:
 				finalSeries.get(seriesIndex).add(new Millisecond(date), yValue);
 				break;
@@ -290,11 +262,12 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		postProcessChart(chart);
 
 		//set custom date format if applicable
-		if (StringUtils.isNotBlank(dateFormat)) {
+		if (extraOptions != null && StringUtils.isNotBlank(extraOptions.getDateFormat())) {
 			XYPlot plot = (XYPlot) chart.getPlot();
 			DateAxis axis = (DateAxis) plot.getDomainAxis();
-			axis.setDateFormatOverride(new SimpleDateFormat(dateFormat));
+			axis.setDateFormatOverride(new SimpleDateFormat(extraOptions.getDateFormat()));
 		}
 
 	}
+
 }

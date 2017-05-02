@@ -118,8 +118,6 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 			seriesCount = rsmd.getColumnCount() - 1 - hop; //1 for xValue column
 		}
 
-		setSeriesColorOptions(rsmd);
-
 		while (rs.next()) {
 			String categoryName = rs.getString(1);
 
@@ -143,9 +141,6 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
 					String seriesName = rsmd.getColumnLabel(columnIndex);
-					if (isOptionsColumn(seriesName)) {
-						continue;
-					}
 					double yValue = rs.getDouble(columnIndex);
 					addData(rs, dataset, seriesIndex, yValue, categoryName, seriesName);
 				}

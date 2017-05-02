@@ -286,7 +286,11 @@ Edit report page
 						$("#optionsDiv").show();
 						break;
 					default:
-						$("#optionsDiv").hide();
+						if (reportTypeId < 0) {
+							$("#optionsDiv").show();
+						} else {
+							$("#optionsDiv").hide();
+						}
 				}
 
 				//show/hide report source

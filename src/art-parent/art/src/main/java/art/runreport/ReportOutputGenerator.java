@@ -71,6 +71,7 @@ import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
 import art.reportoptions.DatamapsOptions;
 import art.reportoptions.FixedWidthOptions;
+import art.reportoptions.JFreeChartOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -1079,7 +1080,8 @@ public class ReportOutputGenerator {
 	private Chart prepareChart(Report report, ReportFormat reportFormat, Locale locale,
 			ResultSet rs, ChartOptions parameterChartOptions,
 			Map<String, ReportParameter> reportParamsMap,
-			List<ReportParameter> reportParamsList, boolean swapAxes) throws SQLException {
+			List<ReportParameter> reportParamsList, boolean swapAxes)
+			throws SQLException, IOException {
 
 		ReportType reportType = report.getReportType();
 		Chart chart = getChartInstance(reportType);
@@ -1097,6 +1099,13 @@ public class ReportOutputGenerator {
 		chart.setXAxisLabel(report.getxAxisLabel());
 		chart.setYAxisLabel(report.getyAxisLabel());
 		chart.setSwapAxes(swapAxes);
+
+		String optionsString = report.getOptions();
+		if (StringUtils.isNotBlank(optionsString)) {
+			ObjectMapper mapper = new ObjectMapper();
+			JFreeChartOptions options = mapper.readValue(optionsString, JFreeChartOptions.class);
+			chart.setExtraOptions(options);
+		}
 
 		Drilldown drilldown = null;
 		if (reportFormat == ReportFormat.html) {

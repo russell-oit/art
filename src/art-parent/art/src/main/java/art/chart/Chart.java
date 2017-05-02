@@ -22,6 +22,7 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.report.ChartOptions;
 import art.report.Report;
+import art.reportoptions.JFreeChartOptions;
 import art.reportparameter.ReportParameter;
 import art.utils.DrilldownLinkHelper;
 import net.sf.cewolfart.ChartPostProcessor;
@@ -48,6 +49,7 @@ import java.util.Map;
 import java.util.Objects;
 import net.sf.cewolfart.cpp.SeriesPaintProcessor;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -95,10 +97,24 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private boolean hasTooltips; //if true class must implement a ToolTipGenerator (otherwise showChart.jsp will fail on the <cewolf:map> tag)
 	private DrilldownLinkHelper drilldownLinkHelper;
 	private List<ReportParameter> reportParamsList;
-	protected Map<String, String> seriesColors;
 	private ReportType reportType;
 	private List<Chart> secondaryCharts;
 	protected boolean swapAxes;
+	protected JFreeChartOptions extraOptions;
+
+	/**
+	 * @return the extraOptions
+	 */
+	public JFreeChartOptions getExtraOptions() {
+		return extraOptions;
+	}
+
+	/**
+	 * @param extraOptions the extraOptions to set
+	 */
+	public void setExtraOptions(JFreeChartOptions extraOptions) {
+		this.extraOptions = extraOptions;
+	}
 
 	/**
 	 * @return the swapAxes
@@ -422,7 +438,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		processXAxisLabelLines(chart);
 		showPoints(chart);
 		rotateLabels(chart);
-		setSeriesColors(chart);
+		applySeriesColors(chart);
 		addSecondaryCharts(chart);
 	}
 
@@ -652,58 +668,23 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	}
 
 	/**
-	 * Sets custom series colors if so configured
+	 * Applies custom series colors if so configured
 	 *
 	 * @param chart the jfree chart to process
 	 */
-	private void setSeriesColors(JFreeChart chart) {
-		logger.debug("Entering setSeriesColors");
+	private void applySeriesColors(JFreeChart chart) {
+		logger.debug("Entering applySeriesColors");
+		
+		if(extraOptions == null){
+			return;
+		}
 
-		if (seriesColors == null || seriesColors.isEmpty()) {
+		if (MapUtils.isEmpty(extraOptions.getSeriesColors())) {
 			return;
 		}
 
 		SeriesPaintProcessor seriesPaintProcessor = new SeriesPaintProcessor();
-		seriesPaintProcessor.processChart(chart, seriesColors);
-	}
-
-	/**
-	 * Sets series color options as specified in the query sql
-	 *
-	 * @param rsmd the rsmd object for the chart resultset
-	 * @throws SQLException
-	 */
-	protected void setSeriesColorOptions(ResultSetMetaData rsmd) throws SQLException {
-		logger.debug("Entering setSeriesColorOptions");
-
-		seriesColors = new HashMap<>();
-		for (int i = 0; i < rsmd.getColumnCount(); i++) {
-			int columnIndex = i + 1;
-			String columnName = rsmd.getColumnLabel(columnIndex);
-			if (StringUtils.startsWithIgnoreCase(columnName, "seriesColor:")) {
-				String[] colorDetails = StringUtils.split(columnName, ":");
-				String seriesId = colorDetails[1];
-				String hexColorCode = colorDetails[2];
-				seriesColors.put(seriesId, hexColorCode);
-			}
-		}
-	}
-
-	/**
-	 * Returns <code>true</code> if the resultset column with the given name is
-	 * an options definition column
-	 *
-	 * @param columnName the column name
-	 * @return <code>true</code> if the resultset column with the given name is
-	 * an options definition column
-	 */
-	protected boolean isOptionsColumn(String columnName) {
-		if (StringUtils.startsWithIgnoreCase(columnName, "seriesColor:")
-				|| StringUtils.startsWithIgnoreCase(columnName, "dateFormat:")) {
-			return true;
-		} else {
-			return false;
-		}
+		seriesPaintProcessor.processChart(chart, extraOptions.getSeriesColors());
 	}
 
 	/**
