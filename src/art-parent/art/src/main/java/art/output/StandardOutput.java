@@ -305,14 +305,14 @@ public abstract class StandardOutput {
 	/**
 	 * Performs any initialization required by the output generator
 	 */
-	public void init() {
+	protected void init() {
 
 	}
 
 	/**
 	 * Outputs the report title
 	 */
-	public void addTitle() {
+	protected void addTitle() {
 
 	}
 
@@ -321,14 +321,14 @@ public abstract class StandardOutput {
 	 *
 	 * @param reportParamsList the selected report parameters
 	 */
-	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
+	protected void addSelectedParameters(List<ReportParameter> reportParamsList) {
 
 	}
 
 	/**
 	 * Performs initialization required before outputting the header
 	 */
-	public void beginHeader() {
+	protected void beginHeader() {
 
 	}
 
@@ -337,28 +337,28 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	public abstract void addHeaderCell(String value);
+	protected abstract void addHeaderCell(String value);
 
 	/**
 	 * Outputs a value to the header whose text is left aligned
 	 *
 	 * @param value the value to output
 	 */
-	public void addHeaderCellAlignLeft(String value) {
+	protected void addHeaderCellAlignLeft(String value) {
 		addHeaderCell(value);
 	}
 
 	/**
 	 * Performs any cleanup after outputting of the header
 	 */
-	public void endHeader() {
+	protected void endHeader() {
 
 	}
 
 	/**
 	 * Performs any initialization before resultset output begins
 	 */
-	public void beginRows() {
+	protected void beginRows() {
 
 	}
 
@@ -367,7 +367,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	public abstract void addCellString(String value);
+	protected abstract void addCellString(String value);
 
 	/**
 	 * For html output, the implementing class should perform escaping on the
@@ -375,7 +375,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value
 	 */
-	public void addCellStringUnsafe(String value) {
+	protected void addCellStringUnsafe(String value) {
 		addCellString(value);
 	}
 
@@ -384,7 +384,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	public abstract void addCellNumeric(Double value);
+	protected abstract void addCellNumeric(Double value);
 
 	/**
 	 * Outputs numeric value to the current row
@@ -393,7 +393,7 @@ public abstract class StandardOutput {
 	 * @param formattedValue the formatted string for the numeric value
 	 * @param sortValue the sort value to use
 	 */
-	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
+	protected void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		addCellNumeric(numericValue);
 	}
 
@@ -402,7 +402,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	public abstract void addCellDate(Date value);
+	protected abstract void addCellDate(Date value);
 
 	/**
 	 * Outputs a date value to the current row
@@ -411,33 +411,33 @@ public abstract class StandardOutput {
 	 * @param formattedValue the formatted string for the date value
 	 * @param sortValue the sort value to use
 	 */
-	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+	protected void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		addCellDate(dateValue);
 	}
 
 	/**
 	 * Closes the current row and opens a new one.
 	 */
-	public abstract void newRow();
+	protected abstract void newRow();
 
 	/**
 	 * Closes the current row
 	 */
-	public void endRow() {
+	protected void endRow() {
 
 	}
 
 	/**
 	 * Finalizes data output
 	 */
-	public void endRows() {
+	protected void endRows() {
 
 	}
 
 	/**
 	 * Begins output for the total row
 	 */
-	public void beginTotalRow() {
+	protected void beginTotalRow() {
 		newRow();
 	}
 
@@ -446,7 +446,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	public void addCellTotal(Double value) {
+	protected void addCellTotal(Double value) {
 		addCellNumeric(value);
 	}
 
@@ -457,21 +457,21 @@ public abstract class StandardOutput {
 	 * @param formattedValue the formatted string value
 	 * @param sortValue the sort value
 	 */
-	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
+	protected void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
 		addCellNumeric(totalValue, formattedValue, sortValue);
 	}
 
 	/**
 	 * Finalizes the total row
 	 */
-	public void endTotalRow() {
+	protected void endTotalRow() {
 		endRow();
 	}
 
 	/**
 	 * Closes report output. Any final cleanup should be done here.
 	 */
-	public abstract void endOutput();
+	protected abstract void endOutput();
 
 	/**
 	 * Formats a numberic value for display
@@ -479,7 +479,7 @@ public abstract class StandardOutput {
 	 * @param value the value to format
 	 * @return the string representation to display
 	 */
-	public String formatNumericValue(Double value) {
+	protected String formatNumericValue(Double value) {
 		String formattedValue;
 
 		if (value == null) {
@@ -497,7 +497,7 @@ public abstract class StandardOutput {
 	 * @param value the value to format
 	 * @return the string representation to display
 	 */
-	public String formatDateValue(Date value) {
+	protected String formatDateValue(Date value) {
 		String formattedValue;
 
 		if (value == null) {
@@ -515,7 +515,7 @@ public abstract class StandardOutput {
 	 * @param value the actual date
 	 * @return the sort value for the date
 	 */
-	public long getDateSortValue(Date value) {
+	protected long getDateSortValue(Date value) {
 		long sortValue;
 
 		if (value == null) {
@@ -533,7 +533,7 @@ public abstract class StandardOutput {
 	 * @param value the actual number
 	 * @return the sort value for the number
 	 */
-	public String getNumericSortValue(Double value) {
+	protected String getNumericSortValue(Double value) {
 		String sortValue;
 
 		if (value == null) {
@@ -543,6 +543,24 @@ public abstract class StandardOutput {
 		}
 
 		return sortValue;
+	}
+
+	/**
+	 * Returns the value to be used for tabular heatmaps
+	 * 
+	 * @param value the original value
+	 * @return the value to be used for tabular heatmaps
+	 */
+	protected double getHeatmapValue(Double value) {
+		double heatmapValue;
+		
+		if (value == null) {
+			heatmapValue = Double.MIN_VALUE;
+		} else {
+			heatmapValue = value;
+		}
+
+		return heatmapValue;
 	}
 
 	/**

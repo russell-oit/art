@@ -39,7 +39,7 @@ public class HtmlGridOutput extends StandardOutput {
 	@Override
 	public void beginHeader() {
 		out.println("<div style='border: 3px solid white'>");
-		out.println("<table class='sortable' name='maintable' id='maintable'"
+		out.println("<table class='sortable heatmap' name='maintable' id='maintable'"
 				+ " cellpadding='2' cellspacing='0'"
 				+ " style='margin: 0 auto; width: 100%'>");
 		out.println("<thead><tr>");
@@ -74,6 +74,7 @@ public class HtmlGridOutput extends StandardOutput {
 	@Override
 	public void addCellStringUnsafe(String value) {
 		String escapedValue = Encode.forHtmlContent(value);
+		
 		out.println("<td style='text-align: left'>" + escapedValue + "</td>");
 	}
 	
@@ -84,17 +85,26 @@ public class HtmlGridOutput extends StandardOutput {
 		
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
+		
+		double heatmapValue = getHeatmapValue(value);
 
 		out.println("<td style='text-align: right' sorttable_customkey='"
-				+ escapedSortValue + "' >" + escapedFormattedValue + "</td>");
+				+ escapedSortValue
+				+ "' data-value='" + heatmapValue + "'>"
+				+ escapedFormattedValue + "</td>");
 	}
 	
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue){
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
+		
+		double heatmapValue = getHeatmapValue(numericValue);
+		
 		out.println("<td style='text-align: right' sorttable_customkey='"
-				+ escapedSortValue + "' >" + escapedFormattedValue + "</td>");
+				+ escapedSortValue
+				+ "' data-value='" + heatmapValue + "'>"
+				+ escapedFormattedValue + "</td>");
 	}
 
 	@Override
@@ -111,6 +121,7 @@ public class HtmlGridOutput extends StandardOutput {
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		
 		out.println("<td style='text-align: left' sorttable_customkey='"
 				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}

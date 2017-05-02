@@ -199,7 +199,7 @@ public class RunReportHelper {
 				break;
 			default:
 				enableReportFormats = true;
-				List<String> reportFormats = getAvailableReportFormats(report.getReportType());
+				List<String> reportFormats = getAvailableReportFormats(reportType);
 				request.setAttribute("reportFormats", reportFormats);
 		}
 		request.setAttribute("enableReportFormats", enableReportFormats);
@@ -319,6 +319,7 @@ public class RunReportHelper {
 			case DatamapsFile:
 			case Leaflet:
 			case OpenLayers:
+			case TabularHeatmap:
 				enablePrintAlways = true;
 				break;
 			default:
@@ -354,6 +355,7 @@ public class RunReportHelper {
 			case DatamapsFile:
 			case Leaflet:
 			case OpenLayers:
+			case TabularHeatmap:
 				enableEmail = false;
 				break;
 			default:
@@ -444,6 +446,11 @@ public class RunReportHelper {
 				case GridstackDashboard:
 					formats.add("html");
 					formats.add("pdf");
+					break;
+				case TabularHeatmap:
+					formats.add("htmlDataTable");
+					formats.add("htmlFancy");
+					formats.add("htmlPlain");
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected report type: " + reportType);

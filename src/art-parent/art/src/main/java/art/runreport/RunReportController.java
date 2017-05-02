@@ -23,11 +23,13 @@ import art.enums.ReportType;
 import art.output.StandardOutput;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.TabularHeatmapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.FilenameHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
@@ -175,10 +177,10 @@ public class RunReportController {
 				//so use redirect
 				return "redirect:/showAnalysis";
 			}
-			
+
 			long totalTimeSeconds = 0;
 			long fetchTimeSeconds = 0;
-			
+
 			long overallStartTime = System.currentTimeMillis(); //overall start time
 
 			//get report format to use
@@ -240,7 +242,7 @@ public class RunReportController {
 				default:
 				//do nothing
 			}
-			
+
 			RunReportHelper runReportHelper = new RunReportHelper();
 
 			//output page header. if showInline, page header and footer already exist. 
@@ -396,6 +398,21 @@ public class RunReportController {
 					} else {
 						model.addAttribute("message", outputResult.getMessage());
 						return errorPage;
+					}
+
+					if (reportType == ReportType.TabularHeatmap) {
+						TabularHeatmapOptions options;
+						
+						String optionsString = report.getOptions();
+						if (StringUtils.isBlank(optionsString)) {
+							options = new TabularHeatmapOptions();
+						} else {
+							ObjectMapper mapper = new ObjectMapper();
+							options = mapper.readValue(optionsString, TabularHeatmapOptions.class);
+						}
+						
+						request.setAttribute("options", options);
+						servletContext.getRequestDispatcher("/WEB-INF/jsp/activateTabularHeatmap.jsp").include(request, response);
 					}
 				}
 

@@ -28,9 +28,9 @@ import java.util.List;
  */
 public enum ReportType {
 
-	//items will be displayed in the order they appear here in editReport.jsp
+	//items will be displayed in editReport.jsp in the order they appear here
 	Tabular(0), TabularHtml(103), Crosstab(101), CrosstabHtml(102),
-	Group(1), Update(100),
+	TabularHeatmap(148), Group(1), Update(100),
 	Dashboard(110), GridstackDashboard(129), Text(111), Mondrian(112),
 	MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
@@ -83,12 +83,13 @@ public enum ReportType {
 			case DatamapsFile:
 			case Leaflet:
 			case OpenLayers:
+			case TabularHeatmap:
 				return false;
 			default:
 				return true;
 		}
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if this is a leaflet or openlayers report
 	 *
@@ -435,10 +436,10 @@ public enum ReportType {
 
 	/**
 	 * Returns <code>true</code> if this is a tabular, crosstab, dynamic lov,
-	 * job recipients report type
+	 * job recipients, tabular heatmap report
 	 *
 	 * @return <code>true</code> if this is a tabular, crosstab, dynamic lov,
-	 * job recipients report type
+	 * job recipients, tabular heatmap report
 	 */
 	public boolean isStandardOutput() {
 		switch (this) {
@@ -448,6 +449,7 @@ public enum ReportType {
 			case CrosstabHtml:
 			case LovDynamic:
 			case JobRecipients:
+			case TabularHeatmap:
 				return true;
 			default:
 				return false;
@@ -647,6 +649,8 @@ public enum ReportType {
 				return "Leaflet";
 			case OpenLayers:
 				return "OpenLayers";
+			case TabularHeatmap:
+				return "Tabular: Heatmap";
 			default:
 				return this.name();
 		}

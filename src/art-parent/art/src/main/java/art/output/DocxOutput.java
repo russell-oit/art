@@ -18,9 +18,7 @@
 package art.output;
 
 import art.enums.PageOrientation;
-import art.enums.PdfPageSize;
 import art.reportparameter.ReportParameter;
-import art.servlets.Config;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -80,7 +78,7 @@ public class DocxOutput extends StandardOutput {
 	@Override
 	public void init() {
 		resetVariables();
-		
+
 		document = new XWPFDocument();
 		setPageSize();
 		try {
@@ -110,7 +108,7 @@ public class DocxOutput extends StandardOutput {
 		}
 		CTPageSz pageSize = section.getPgSz();
 
-		PageOrientation pageOrientation=report.getPageOrientation();
+		PageOrientation pageOrientation = report.getPageOrientation();
 		switch (pageOrientation) {
 			case Portrait:
 				pageSize.setOrient(STPageOrientation.PORTRAIT);
@@ -201,7 +199,7 @@ public class DocxOutput extends StandardOutput {
 		String formattedValue = formatNumericValue(value);
 		outputCellText(formattedValue);
 	}
-	
+
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		outputCellText(formattedValue);
@@ -212,7 +210,7 @@ public class DocxOutput extends StandardOutput {
 		String formattedValue = formatDateValue(value);
 		outputCellText(formattedValue);
 	}
-	
+
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		outputCellText(formattedValue);
@@ -223,11 +221,11 @@ public class DocxOutput extends StandardOutput {
 		row = table.createRow();
 		cellNumber = 0;
 	}
-	
+
 	@Override
-	public void addCellTotal(Double value){
+	public void addCellTotal(Double value) {
 		String formattedValue = formatNumericValue(value);
-		
+
 		cell = row.getCell(cellNumber++);
 		XWPFParagraph paragraph = cell.getParagraphs().get(0);
 
@@ -235,7 +233,7 @@ public class DocxOutput extends StandardOutput {
 		run.setBold(true);
 		run.setText(formattedValue);
 	}
-	
+
 	@Override
 	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
 		cell = row.getCell(cellNumber++);

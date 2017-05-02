@@ -282,6 +282,7 @@ Edit report page
 					case 145: //datamaps file
 					case 146: //leaflet
 					case 147: //openlayers
+					case 148: //tabular heatmap
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -563,6 +564,7 @@ Edit report page
 				switch (reportTypeId) {
 					case 0: //tabular
 					case 103: //tabular html
+					case 148: //tabular heatmap
 						$("#tabularFields").show();
 						break;
 					default:
@@ -620,7 +622,6 @@ Edit report page
 				}
 			}
 		</script>
-
 
 	</jsp:attribute>
 

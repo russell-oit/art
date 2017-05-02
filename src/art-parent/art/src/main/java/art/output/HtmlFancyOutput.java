@@ -37,7 +37,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void beginHeader() {
 		out.println("<div style='border: 3px solid white'>");
-		out.println("<table class='table table-condensed table-bordered table-striped'>");
+		out.println("<table class='table table-condensed table-bordered table-striped heatmap'>");
 		out.println("<thead><tr>");
 	}
 
@@ -92,15 +92,19 @@ public class HtmlFancyOutput extends StandardOutput {
 		String formattedValue = formatNumericValue(value);
 		
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-
+		
 		String cssClass;
 		if (evenRow) {
 			cssClass = "text-right";
 		} else {
 			cssClass = "text-right";
 		}
+		
+		double heatmapValue = getHeatmapValue(value);
 
-		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
+		out.println("<td class='" + cssClass
+				+ "' data-value='" + heatmapValue + "'>"
+				+ escapedFormattedValue + "</td>");
 	}
 	
 	@Override
@@ -113,8 +117,12 @@ public class HtmlFancyOutput extends StandardOutput {
 		} else {
 			cssClass = "text-right";
 		}
+		
+		double heatmapValue = getHeatmapValue(numericValue);
 
-		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
+		out.println("<td class='" + cssClass
+				+ "' data-value='" + heatmapValue + "'>"
+				+ escapedFormattedValue + "</td>");
 	}
 
 	@Override

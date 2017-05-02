@@ -71,15 +71,15 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 		if (StringUtils.isNotBlank(language)) {
 			String languageFileName = "dataTables_" + language + ".json";
-			
+
 			String languageFilePath = Config.getAppPath() + File.separator
 					+ "js" + File.separator
 					+ "dataTables" + File.separator
 					+ "i18n" + File.separator
 					+ languageFileName;
-			
+
 			File languageFile = new File(languageFilePath);
-			
+
 			if (languageFile.exists()) {
 				languageSetting = ", language: {url: '" + contextPath + "/js/dataTables/i18n/"
 						+ languageFileName + "'}";
@@ -122,7 +122,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 	@Override
 	public void beginHeader() {
 		out.println("<div>");
-		out.println("<table class='table table-bordered table-striped table-condensed' id='" + tableId + "'>");
+		out.println("<table class='table table-bordered table-striped table-condensed heatmap' id='" + tableId + "'>");
 		out.println("<thead><tr>");
 	}
 
@@ -151,7 +151,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 	public void addCellString(String value) {
 		out.println("<td style='text-align: left'>" + value + "</td>");
 	}
-	
+
 	@Override
 	public void addCellStringUnsafe(String value) {
 		String escapedValue = Encode.forHtmlContent(value);
@@ -162,11 +162,14 @@ public class HtmlDataTableOutput extends StandardOutput {
 	public void addCellNumeric(Double value) {
 		String formattedValue = formatNumericValue(value);
 		String sortValue = getNumericSortValue(value);
-		
+
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
 
-		out.println("<td style='text-align: right' data-order='" + escapedSortValue + "'>"
+		double heatmapValue = getHeatmapValue(value);
+
+		out.println("<td style='text-align: right' data-order='" + escapedSortValue
+				+ "' data-value='" + heatmapValue + "'>"
 				+ escapedFormattedValue + "</td>");
 	}
 
@@ -174,7 +177,11 @@ public class HtmlDataTableOutput extends StandardOutput {
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
-		out.println("<td style='text-align: right' data-order='" + escapedSortValue + "'>"
+
+		double heatmapValue = getHeatmapValue(numericValue);
+
+		out.println("<td style='text-align: right' data-order='" + escapedSortValue
+				+ "' data-value='" + heatmapValue + "'>"
 				+ escapedFormattedValue + "</td>");
 	}
 
@@ -182,7 +189,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
 		long sortValue = getDateSortValue(value);
-		
+
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
 		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
