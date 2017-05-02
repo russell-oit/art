@@ -50,7 +50,9 @@ public class DrilldownLinkHelper implements Serializable {
 	 * @param reportParamsList the report parameters, may be null
 	 * @throws SQLException
 	 */
-	public DrilldownLinkHelper(Drilldown drilldown, List<ReportParameter> reportParamsList) throws SQLException {
+	public DrilldownLinkHelper(Drilldown drilldown, List<ReportParameter> reportParamsList)
+			throws SQLException {
+		
 		Objects.requireNonNull(drilldown, "drilldown must not be null");
 
 		this.drilldown = drilldown;

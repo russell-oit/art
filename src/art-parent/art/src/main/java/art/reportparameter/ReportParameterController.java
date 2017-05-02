@@ -38,7 +38,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controller for report parameter configuration
- * 
+ *
  * @author Timothy Anyona
  */
 @Controller
@@ -88,11 +88,11 @@ public class ReportParameterController {
 
 		return response;
 	}
-	
+
 	@RequestMapping(value = "/deleteReportParameters", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReportParameters(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteReportParameters: ids={}",(Object) ids);
+		logger.debug("Entering deleteReportParameters: ids={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -112,7 +112,7 @@ public class ReportParameterController {
 		logger.debug("Entering addReportParameter: reportId={}", reportId);
 
 		model.addAttribute("reportParameter", new ReportParameter());
-		
+
 		return showEditReportParameter("add", model, reportId);
 	}
 
@@ -158,7 +158,13 @@ public class ReportParameterController {
 				reportParameterService.updateReportParameter(reportParameter);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", parameterService.getParameterName(reportParameter.getParameter().getParameterId()));
+
+			int paramId = reportParameter.getParameter().getParameterId();
+			String paramName = parameterService.getParameterName(paramId);
+
+			String recordName = paramName + " (" + paramId + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
+
 			return "redirect:/reportParameterConfig?reportId=" + reportId;
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -188,7 +194,7 @@ public class ReportParameterController {
 
 		model.addAttribute("reportId", reportId);
 		model.addAttribute("action", action);
-		
+
 		return "editReportParameter";
 	}
 
