@@ -128,7 +128,7 @@ public class ParameterService {
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
+
 	/**
 	 * Returns shared parameters
 	 *
@@ -307,7 +307,8 @@ public class ParameterService {
 
 		parameter.setParameterId(newId);
 
-		saveParameter(parameter, true, actionUser);
+		boolean newRecord = true;
+		saveParameter(parameter, newRecord, actionUser);
 
 		return newId;
 	}
@@ -354,12 +355,12 @@ public class ParameterService {
 		} else {
 			dataType = parameter.getDataType().getValue();
 		}
-		
+
 		Integer defaultValueReportId;
-		if(parameter.getDefaultValueReport()==null){
-			defaultValueReportId=0;
+		if (parameter.getDefaultValueReport() == null) {
+			defaultValueReportId = 0;
 		} else {
-			defaultValueReportId=parameter.getDefaultValueReport().getReportId();
+			defaultValueReportId = parameter.getDefaultValueReport().getReportId();
 		}
 
 		int affectedRows;

@@ -149,7 +149,7 @@ Reports configuration page
 						</a>
 						<a class="btn btn-default" 
 						   href="${pageContext.request.contextPath}/copyReport?id=${record.reportId}">
-							<spring:message code="reports.action.copy"/>
+							<spring:message code="page.action.copy"/>
 						</a>
 					</div>
 					<div class="btn-group">
@@ -257,7 +257,7 @@ Reports configuration page
 								<a class="btn btn-default" 
 								   href="${pageContext.request.contextPath}/copyReport?id=${report.reportId}">
 									<i class="fa fa-copy"></i>
-									<spring:message code="reports.action.copy"/>
+									<spring:message code="page.action.copy"/>
 								</a>
 							</div>
 							<div class="btn-group">

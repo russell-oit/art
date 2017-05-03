@@ -19,7 +19,6 @@ package art.parameter;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
-import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
@@ -30,7 +29,6 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,6 +157,23 @@ public class ParameterController {
 
 		return showEditParameter("edit", model, null, returnReportId);
 	}
+	
+	@RequestMapping(value = "/copyParameter", method = RequestMethod.GET)
+	public String copyParameter(@RequestParam("id") Integer id, Model model,
+			@RequestParam(value = "reportId", required = false) Integer reportId,
+			HttpSession session) {
+
+		logger.debug("Entering copyParameter: id={}", id);
+
+		try {
+			model.addAttribute("parameter", parameterService.getParameter(id));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditParameter("copy", model, reportId, null);
+	}
 
 	@RequestMapping(value = "/saveParameter", method = RequestMethod.POST)
 	public String saveParameter(@ModelAttribute("parameter") @Valid Parameter parameter,
@@ -178,7 +193,7 @@ public class ParameterController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (StringUtils.equals(action, "add")) {
+			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				parameterService.addParameter(parameter, sessionUser);
 				if (reportId != null) {
 					ReportParameter reportParameter = new ReportParameter();

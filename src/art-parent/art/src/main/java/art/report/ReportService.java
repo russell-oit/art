@@ -148,8 +148,6 @@ public class ReportService {
 
 			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
 			report.setDatasource(datasource);
-			
-			
 
 			setChartOptions(report);
 
@@ -489,7 +487,8 @@ public class ReportService {
 
 		report.setReportId(newId);
 
-		saveReport(report, true, actionUser);
+		boolean newRecord = true;
+		saveReport(report, newRecord, actionUser);
 
 		return newId;
 	}
