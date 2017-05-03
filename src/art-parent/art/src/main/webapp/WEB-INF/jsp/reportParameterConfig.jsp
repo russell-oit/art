@@ -193,7 +193,7 @@
 						<td>${reportParameter.position}</td>
 						<td>${reportParameter.reportParameterId}</td>
 						<td data-toggle="tooltip" title="${dragToReorderText}">
-							<a href="${pageContext.request.contextPath}/editParameter?id=${reportParameter.parameter.parameterId}">
+							<a href="${pageContext.request.contextPath}/editParameter?id=${reportParameter.parameter.parameterId}&returnReportId=${reportParameter.report.reportId}">
 								${encode:forHtmlContent(reportParameter.parameter.name)} (${reportParameter.parameter.parameterId})
 							</a>
 							<c:if test="${reportParameter.parameter.shared}">

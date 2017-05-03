@@ -583,7 +583,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList, report, pdfPageNumbers);
 				break;
 			default:
-				throw new IllegalArgumentException(String.format("Unsupported report format: %s", reportFormat));
+				throw new IllegalArgumentException("Unsupported report format: " + reportFormat);
 		}
 	}
 

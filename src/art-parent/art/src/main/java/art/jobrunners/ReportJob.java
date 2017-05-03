@@ -1228,7 +1228,7 @@ public class ReportJob implements org.quartz.Job {
 
 		if (StringUtils.isNotBlank(fixedFileName)) {
 			if (!FinalFilenameValidator.isValid(fixedFileName)) {
-				throw new IllegalArgumentException(String.format("Invalid fixed file name: '%s'", fixedFileName));
+				throw new IllegalArgumentException("Invalid fixed file name: " + fixedFileName);
 			}
 
 			if (job.getRunsToArchive() > 0) {
@@ -1259,7 +1259,7 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("fileName = '{}'", fileName);
 
 		if (!FinalFilenameValidator.isValid(fileName)) {
-			throw new IllegalArgumentException(String.format("Invalid file name: '%s'", fileName));
+			throw new IllegalArgumentException("Invalid file name: " + fileName);
 		}
 
 		String outputFileName = exportPath + fileName;

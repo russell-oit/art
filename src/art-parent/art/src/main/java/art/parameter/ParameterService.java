@@ -97,6 +97,7 @@ public class ParameterService {
 			parameter.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
 			parameter.setDefaultValue(rs.getString("DEFAULT_VALUE"));
 			parameter.setHidden(rs.getBoolean("HIDDEN"));
+			parameter.setShared(rs.getBoolean("SHARED"));
 			parameter.setUseLov(rs.getBoolean("USE_LOV"));
 			parameter.setLovReportId(rs.getInt("LOV_REPORT_ID"));
 			parameter.setUseRulesInLov(rs.getBoolean("USE_RULES_IN_LOV"));

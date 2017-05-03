@@ -121,7 +121,7 @@ public class DocxOutput extends StandardOutput {
 				pageSize.setH(BigInteger.valueOf(595 * 20));
 				break;
 			default:
-				throw new IllegalArgumentException(String.format("Unexpected page orientation: %s", pageOrientation));
+				throw new IllegalArgumentException("Unexpected page orientation: " + pageOrientation);
 		}
 	}
 

@@ -70,7 +70,7 @@ public enum PageOrientation {
 			}
 		}
 		//https://dzone.com/articles/java-string-format-examples
-		throw new IllegalArgumentException(String.format("Invalid page orientation: %s", value));
+		throw new IllegalArgumentException("Invalid page orientation: " + value);
 	}
 
 	/**

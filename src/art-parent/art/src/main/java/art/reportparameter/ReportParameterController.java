@@ -124,11 +124,10 @@ public class ReportParameterController {
 
 		try {
 			ReportParameter reportParameter = reportParameterService.getReportParameter(id);
-			if (reportParameter == null) {
-				throw new IllegalArgumentException(String.format("Report parameter not found: %d", id));
+			if (reportParameter != null) {
+				reportId = reportParameter.getReport().getReportId();
 			}
 			model.addAttribute("reportParameter", reportParameter);
-			reportId = reportParameter.getReport().getReportId();
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

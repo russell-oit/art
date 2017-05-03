@@ -75,7 +75,7 @@ public class PdfHelper {
 				pageSize = PageSize.A4.rotate();
 				break;
 			default:
-				throw new IllegalArgumentException(String.format("Unexpected page orientation: %s", pageOrientation));
+				throw new IllegalArgumentException("Unexpected page orientation: " + pageOrientation);
 		}
 
 		return pageSize;

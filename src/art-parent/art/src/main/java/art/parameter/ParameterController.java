@@ -130,7 +130,7 @@ public class ParameterController {
 	public String addParameter(Model model,
 			@RequestParam(value = "reportId", required = false) Integer reportId) {
 
-		logger.debug("Entering addParameter");
+		logger.debug("Entering addParameter: reportId={}", reportId);
 
 		Parameter param = new Parameter();
 		param.setParameterType(ParameterType.SingleValue);
@@ -141,12 +141,14 @@ public class ParameterController {
 
 		model.addAttribute("parameter", param);
 
-		return showEditParameter("add", model, reportId);
+		return showEditParameter("add", model, reportId, null);
 	}
 
 	@RequestMapping(value = "/editParameter", method = RequestMethod.GET)
-	public String editParameter(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editParameter: id={}", id);
+	public String editParameter(@RequestParam("id") Integer id, Model model,
+			@RequestParam(value = "returnReportId", required = false) Integer returnReportId) {
+
+		logger.debug("Entering editParameter: id={}, returnReportId={}", id, returnReportId);
 
 		try {
 			model.addAttribute("parameter", parameterService.getParameter(id));
@@ -155,21 +157,23 @@ public class ParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditParameter("edit", model, null);
+		return showEditParameter("edit", model, null, returnReportId);
 	}
 
 	@RequestMapping(value = "/saveParameter", method = RequestMethod.POST)
 	public String saveParameter(@ModelAttribute("parameter") @Valid Parameter parameter,
 			@RequestParam("action") String action, @RequestParam("reportId") Integer reportId,
+			@RequestParam("returnReportId") Integer returnReportId,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
-		logger.debug("Entering saveParameter: parameter={}, action='{}'", parameter, action);
+		logger.debug("Entering saveParameter: parameter={}, action='{}',"
+				+ " reportId={}, returnReportId={}", parameter, action, reportId, returnReportId);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditParameter(action, model, reportId);
+			return showEditParameter(action, model, reportId, returnReportId);
 		}
 
 		try {
@@ -190,8 +194,15 @@ public class ParameterController {
 			String recordName = parameter.getName() + " (" + parameter.getParameterId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
+			Integer reportParameterConfigReportId = null;
 			if (reportId != null) {
-				return "redirect:/reportParameterConfig?reportId=" + reportId;
+				reportParameterConfigReportId = reportId;
+			} else if (returnReportId != null) {
+				reportParameterConfigReportId = returnReportId;
+			}
+
+			if (reportParameterConfigReportId != null) {
+				return "redirect:/reportParameterConfig?reportId=" + reportParameterConfigReportId;
 			} else {
 				return "redirect:/parameters";
 			}
@@ -200,7 +211,7 @@ public class ParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditParameter(action, model, reportId);
+		return showEditParameter(action, model, reportId, returnReportId);
 	}
 
 	/**
@@ -208,10 +219,18 @@ public class ParameterController {
 	 *
 	 * @param action the action to be performed
 	 * @param model the model to use
+	 * @param reportId the report id of the report to add this parameter to,
+	 * null if not applicable
+	 * @param returnReportId the report id to display in the
+	 * reportParameterConfig page after saving the report, null if not
+	 * applicable
 	 * @return the jsp file to display
 	 */
-	private String showEditParameter(String action, Model model, Integer reportId) {
-		logger.debug("Entering showEditParameter: action='{}'", action);
+	private String showEditParameter(String action, Model model, Integer reportId,
+			Integer returnReportId) {
+
+		logger.debug("Entering showEditParameter: action='{}', reportId={},"
+				+ " returnReportId={}", action, reportId, returnReportId);
 
 		try {
 			model.addAttribute("lovReports", reportService.getLovReports());
@@ -228,6 +247,7 @@ public class ParameterController {
 
 		model.addAttribute("action", action);
 		model.addAttribute("reportId", reportId);
+		model.addAttribute("returnReportId", returnReportId);
 
 		return "editParameter";
 	}
