@@ -20,6 +20,7 @@ package art.output;
 import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -80,7 +81,7 @@ public class OdsOutput extends StandardOutput {
 			//so append sheet and remove the first one created by default
 			table = document.appendSheet(reportName);
 			document.removeSheet(0);
-			
+
 			PageOrientation pageOrientation = report.getPageOrientation();
 			if (pageOrientation == PageOrientation.Landscape) {
 				setLandscapeOrientation();
@@ -96,6 +97,7 @@ public class OdsOutput extends StandardOutput {
 
 			totalFont = new Font(fontFamilyName, StyleTypeDefinitions.FontStyle.BOLD, bodyFontSize, Color.BLACK);
 		} catch (Exception ex) {
+			endOutput();
 			throw new RuntimeException(ex);
 		}
 	}
@@ -128,11 +130,16 @@ public class OdsOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			newRow();
-			String paramLabel = reportParam.getParameter().getLabel();
-			String paramDisplayValues = reportParam.getDisplayValues();
-			addHeaderCell(paramLabel);
-			addCellString(paramDisplayValues);
+			try {
+				newRow();
+				String paramLabel = reportParam.getParameter().getLocalizedLabel(locale);
+				String paramDisplayValues = reportParam.getDisplayValues();
+				addHeaderCell(paramLabel);
+				addCellString(paramDisplayValues);
+			} catch (IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
 		}
 
 		newRow();
@@ -201,8 +208,10 @@ public class OdsOutput extends StandardOutput {
 	@Override
 	public void endOutput() {
 		try {
-			document.save(fullOutputFileName);
-			document.close();
+			if (document != null) {
+				document.save(fullOutputFileName);
+				document.close();
+			}
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}

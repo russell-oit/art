@@ -294,7 +294,7 @@ CREATE TABLE ART_USER_QUERY_GROUPS
 
 
 -- ART_PARAMETERS
--- Stores parameter definitions
+-- Stores parameter definitions, holding core parameter attributes
 
 -- HIDDEN: boolean
 -- SHARED: boolean
@@ -321,7 +321,8 @@ CREATE TABLE ART_PARAMETERS
 	LOV_REPORT_ID  INTEGER,
 	USE_RULES_IN_LOV INTEGER,
 	DRILLDOWN_COLUMN_INDEX INTEGER,
-	USE_DIRECT_SUBSTITUTION INTEGER,	
+	USE_DIRECT_SUBSTITUTION INTEGER,
+	PARAMETER_OPTIONS VARCHAR(4000),
 	CREATION_DATE TIMESTAMP,
 	CREATED_BY VARCHAR(50),
 	UPDATE_DATE TIMESTAMP,
@@ -331,7 +332,7 @@ CREATE TABLE ART_PARAMETERS
 
 
 -- ART_REPORT_PARAMETERS
--- Stores parameters used in reports
+-- Stores parameters used in reports, holding additional parameter attributes
 
 CREATE TABLE ART_REPORT_PARAMETERS
 (	

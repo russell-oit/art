@@ -231,7 +231,9 @@ Display section to allow selecting of report parameters and initiate running of 
 				<a data-toggle="collapse" href="#collapse1" class="btn btn-sm btn-default">
 					<spring:message code="jobs.text.parameters"/> <i class="fa fa-angle-down" aria-hidden="true"></i>
 				</a>
-				<label for="runInline" class="btn btn-primary btn-sm">Run</label>
+				<label for="runInline" class="btn btn-primary btn-sm">
+					<spring:message code="page.action.run"/>
+				</label>
 			</small>
 		</h3> 
 	</div>

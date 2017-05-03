@@ -180,7 +180,8 @@ public class ScheduleService {
 
 		schedule.setScheduleId(newId);
 
-		saveSchedule(schedule, true, actionUser);
+		boolean newRecord = true;
+		saveSchedule(schedule, newRecord, actionUser);
 
 		return newId;
 	}
@@ -196,7 +197,8 @@ public class ScheduleService {
 	public void updateSchedule(Schedule schedule, User actionUser) throws SQLException {
 		logger.debug("Entering updateSchedule: schedule={}, actionUser={}", schedule, actionUser);
 
-		saveSchedule(schedule, false, actionUser);
+		boolean newRecord = false;
+		saveSchedule(schedule, newRecord, actionUser);
 	}
 
 	/**

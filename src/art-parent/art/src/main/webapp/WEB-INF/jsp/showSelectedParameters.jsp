@@ -13,7 +13,8 @@
 <div class="well well-sm">
 	<c:forEach var="reportParamEntry" items="${reportParamEntries}">
 		<c:set var="reportParam" value="${reportParamEntry.value}"/>
-		<b>${encode:forHtmlContent(reportParam.parameter.label)}</b>: ${encode:forHtmlContent(reportParam.displayValues)}
+		<%-- if page included using servletContext.getRequestDispatcher(), pageContext.response.locale returns the OS locale and request.locale the browser locale? --%>
+		<b>${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(localeString))}</b>: ${encode:forHtmlContent(reportParam.displayValues)}
 		<br>
 	</c:forEach>
 </div>

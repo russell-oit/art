@@ -84,6 +84,7 @@ public class DocxOutput extends StandardOutput {
 		try {
 			createPageNumbers();
 		} catch (IOException | XmlException ex) {
+			endOutput();
 			throw new RuntimeException(ex);
 		}
 	}
@@ -121,6 +122,7 @@ public class DocxOutput extends StandardOutput {
 				pageSize.setH(BigInteger.valueOf(595 * 20));
 				break;
 			default:
+				endOutput();
 				throw new IllegalArgumentException("Unexpected page orientation: " + pageOrientation);
 		}
 	}
@@ -143,9 +145,15 @@ public class DocxOutput extends StandardOutput {
 
 		XWPFParagraph paragraph = document.createParagraph();
 		for (ReportParameter reportParam : reportParamsList) {
-			XWPFRun run = paragraph.createRun();
-			run.setText(reportParam.getNameAndDisplayValues());
-			run.addCarriageReturn();
+			try {
+				XWPFRun run = paragraph.createRun();
+				String labelAndDisplayValues = reportParam.getLocalizedLabelAndDisplayValues(locale);
+				run.setText(labelAndDisplayValues);
+				run.addCarriageReturn();
+			} catch (IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
 		}
 	}
 

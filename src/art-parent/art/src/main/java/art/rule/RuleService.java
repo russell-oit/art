@@ -178,6 +178,7 @@ public class RuleService {
 		dbService.update(sql, id);
 
 		result.setSuccess(true);
+		
 		return result;
 	}
 
@@ -208,6 +209,7 @@ public class RuleService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
+		
 		return result;
 	}
 
@@ -240,7 +242,8 @@ public class RuleService {
 
 		rule.setRuleId(newId);
 
-		saveRule(rule, true, actionUser);
+		boolean newRecord = true;
+		saveRule(rule, newRecord, actionUser);
 
 		return newId;
 	}
@@ -256,7 +259,8 @@ public class RuleService {
 	public void updateRule(Rule rule, User actionUser) throws SQLException {
 		logger.debug("Entering updateRule: rule={}, actionUser={}", rule, actionUser);
 
-		saveRule(rule, false, actionUser);
+		boolean newRecord = false;
+		saveRule(rule, newRecord, actionUser);
 	}
 
 	/**

@@ -504,7 +504,8 @@ public class ReportService {
 	public void updateReport(Report report, User actionUser) throws SQLException {
 		logger.debug("Entering updateReport: report={}, actionUser={}", report, actionUser);
 
-		saveReport(report, false, actionUser);
+		boolean newRecord = false;
+		saveReport(report, newRecord, actionUser);
 	}
 
 	/**
@@ -546,7 +547,8 @@ public class ReportService {
 	 * @throws SQLException
 	 */
 	private void saveReport(Report report, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveReport: report={}, newRecord={}, actionUser={}", report, newRecord, actionUser);
+		logger.debug("Entering saveReport: report={}, newRecord={}, actionUser={}",
+				report, newRecord, actionUser);
 
 		//set values for possibly null property objects
 		Integer reportGroupId; //database column doesn't allow null

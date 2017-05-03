@@ -103,6 +103,7 @@ public class ParameterService {
 			parameter.setUseRulesInLov(rs.getBoolean("USE_RULES_IN_LOV"));
 			parameter.setDrilldownColumnIndex(rs.getInt("DRILLDOWN_COLUMN_INDEX"));
 			parameter.setUseDirectSubstitution(rs.getBoolean("USE_DIRECT_SUBSTITUTION"));
+			parameter.setOptions(rs.getString("PARAMETER_OPTIONS"));
 			parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			parameter.setCreatedBy(rs.getString("CREATED_BY"));
@@ -324,7 +325,8 @@ public class ParameterService {
 	public void updateParameter(Parameter parameter, User actionUser) throws SQLException {
 		logger.debug("Entering updateParameter: parameter={}, actionUser={}", parameter, actionUser);
 
-		saveParameter(parameter, false, actionUser);
+		boolean newRecord = false;
+		saveParameter(parameter, newRecord, actionUser);
 	}
 
 	/**
@@ -369,9 +371,9 @@ public class ParameterService {
 					+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
 					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, DEFAULT_VALUE_REPORT_ID,"
 					+ " HIDDEN, SHARED, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
-					+ " DRILLDOWN_COLUMN_INDEX,"
-					+ " USE_DIRECT_SUBSTITUTION, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 18) + ")";
+					+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION, PARAMETER_OPTIONS,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 19) + ")";
 
 			Object[] values = {
 				parameter.getParameterId(),
@@ -390,6 +392,7 @@ public class ParameterService {
 				BooleanUtils.toInteger(parameter.isUseRulesInLov()),
 				parameter.getDrilldownColumnIndex(),
 				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),
+				parameter.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -400,6 +403,7 @@ public class ParameterService {
 					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
 					+ " DEFAULT_VALUE_REPORT_ID=?, HIDDEN=?, SHARED=?, USE_LOV=?, LOV_REPORT_ID=?,"
 					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
+					+ " PARAMETER_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
 
@@ -419,6 +423,7 @@ public class ParameterService {
 				BooleanUtils.toInteger(parameter.isUseRulesInLov()),
 				parameter.getDrilldownColumnIndex(),
 				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),
+				parameter.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()
@@ -468,7 +473,7 @@ public class ParameterService {
 		logger.debug("Entering getParameter: reportId={}, position={}", reportId, position);
 
 		String sql = SQL_SELECT_ALL
-				+ " INNER JOIN ART_REPORT_PARAMETERS ARP"
+				+ " INNER JOIN ART_REPORT_PARAMETERS ARP ON"
 				+ " ARP.PARAMETER_ID=AP.PARAMETER_ID"
 				+ " WHERE ARP.REPORT_ID=? AND ARP.PARAMETER_POSITION=?";
 

@@ -90,6 +90,7 @@ public class PdfOutput extends StandardOutput {
 			fsHeading = new FontSelector();
 			pdfHelper.setFontSelectors(fsBody, fsHeading);
 		} catch (DocumentException | IOException ex) {
+			endOutput();
 			throw new RuntimeException(ex);
 		}
 	}
@@ -102,6 +103,7 @@ public class PdfOutput extends StandardOutput {
 		try {
 			document.add(title);
 		} catch (DocumentException ex) {
+			endOutput();
 			throw new RuntimeException(ex);
 		}
 	}
@@ -132,16 +134,23 @@ public class PdfOutput extends StandardOutput {
 
 			//add list items
 			for (ReportParameter reportParam : reportParamsList) {
-				Phrase ph = fs.process(reportParam.getNameAndDisplayValues());
-				ph.setLeading(12); //set spacing before the phrase
-				ListItem listItem = new ListItem(ph);
-				list.add(listItem);
+				try {
+					String labelAndDisplayValues = reportParam.getLocalizedLabelAndDisplayValues(locale);
+					Phrase ph = fs.process(labelAndDisplayValues);
+					ph.setLeading(12); //set spacing before the phrase
+					ListItem listItem = new ListItem(ph);
+					list.add(listItem);
+				} catch (IOException ex) {
+					endOutput();
+					throw new RuntimeException(ex);
+				}
 			}
 
 			doc.add(list);
 
 			addNewline(doc, fs);
 		} catch (DocumentException ex) {
+			endOutput();
 			throw new RuntimeException(ex);
 		}
 	}
@@ -249,6 +258,7 @@ public class PdfOutput extends StandardOutput {
 				table.deleteBodyRows();
 				table.setSkipFirstHeader(true);
 			} catch (DocumentException ex) {
+				endOutput();
 				throw new RuntimeException(ex);
 			}
 		}
@@ -282,9 +292,15 @@ public class PdfOutput extends StandardOutput {
 	public void endOutput() {
 		// flush and close files
 		try {
-			addNewline(document, fsBody);
-			document.add(table);
-			document.close();
+			if (document != null) {
+				if (fsBody != null) {
+					addNewline(document, fsBody);
+				}
+				if (table != null) {
+					document.add(table);
+				}
+				document.close();
+			}
 		} catch (DocumentException ex) {
 			throw new RuntimeException(ex);
 		}

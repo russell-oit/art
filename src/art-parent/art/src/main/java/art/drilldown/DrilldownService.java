@@ -206,7 +206,8 @@ public class DrilldownService {
 		drilldown.setPosition(newPosition);
 		drilldown.setParentReportId(parentReportId);
 
-		saveDrilldown(drilldown, true);
+		boolean newRecord = true;
+		saveDrilldown(drilldown, newRecord);
 
 		return newId;
 	}
@@ -220,7 +221,8 @@ public class DrilldownService {
 	public void updateDrilldown(Drilldown drilldown) throws SQLException {
 		logger.debug("Entering updateDrilldown: drilldown={}", drilldown);
 
-		saveDrilldown(drilldown, false);
+		boolean newRecord = false;
+		saveDrilldown(drilldown, newRecord);
 	}
 
 	/**
@@ -231,7 +233,7 @@ public class DrilldownService {
 	 * @throws SQLException
 	 */
 	private void saveDrilldown(Drilldown drilldown, boolean newRecord) throws SQLException {
-		logger.debug("Entering saveDrilldown: drilldown={}", drilldown);
+		logger.debug("Entering saveDrilldown: drilldown={}, newRecord={}", drilldown, newRecord);
 
 		int affectedRows;
 		if (newRecord) {

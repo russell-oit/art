@@ -30,8 +30,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 // This is an attempt to create a decent streamable file
 // that is loaded both by Ooo and MS Excel
@@ -44,8 +42,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class SlkOutput extends StandardOutput {
-
-	private static final Logger logger = LoggerFactory.getLogger(SlkOutput.class);
 
 	private FileOutputStream fout;
 	private ZipOutputStream zout;
@@ -85,7 +81,7 @@ public class SlkOutput extends StandardOutput {
 	@Override
 	public void init() {
 		resetVariables();
-		
+
 		exportFileStrBuf = new StringBuilder(8 * 1024);
 		// insert slk header
 		// This is the Ooo header:
@@ -106,8 +102,9 @@ public class SlkOutput extends StandardOutput {
 				zout = new ZipOutputStream(fout);
 				zout.putNextEntry(ze);
 			}
-		} catch (IOException e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			endOutput();
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -128,13 +125,18 @@ public class SlkOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			newRow();
-			String paramLabel = reportParam.getParameter().getLabel();
-			String paramDisplayValues = reportParam.getDisplayValues();
-			addHeaderCell(paramLabel);
-			addCellString(paramDisplayValues);
+			try {
+				newRow();
+				String paramLabel = reportParam.getParameter().getLocalizedLabel(locale);
+				String paramDisplayValues = reportParam.getDisplayValues();
+				addHeaderCell(paramLabel);
+				addCellString(paramDisplayValues);
+			} catch (IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
 		}
-		
+
 		newRow();
 	}
 
@@ -184,22 +186,22 @@ public class SlkOutput extends StandardOutput {
 					.append(nfPlain.format(value.doubleValue())).append("\n");
 		}
 	}
-	
+
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
-					.append(columnCount++).append(";K\"").append(formattedValue).append("\"\n");
+				.append(columnCount++).append(";K\"").append(formattedValue).append("\"\n");
 	}
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue=Config.getDateDisplayString(value);
-		
+		String formattedValue = Config.getDateDisplayString(value);
+
 		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
 				.append(columnCount++).append(";K\"")
 				.append(formattedValue).append("\"\n");
 	}
-	
+
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
@@ -220,8 +222,9 @@ public class SlkOutput extends StandardOutput {
 				fout.write(buf);
 				fout.flush();
 				exportFileStrBuf = new StringBuilder(32 * 1024);
-			} catch (IOException e) {
-				logger.error("Error. Data not completed. Please narrow your search", e);
+			} catch (IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
 			}
 		}
 	}
@@ -240,19 +243,24 @@ public class SlkOutput extends StandardOutput {
 			exportFileStrBuf = null;
 
 			if (zout == null) {
-				fout.write(buf);
-				fout.flush();
+				if (fout != null) {
+					fout.write(buf);
+					fout.flush();
+				}
 			} else {
 				zout.write(buf);
 				zout.flush();
 				zout.close();
 				zout = null;
 			}
-			fout.close();
-			fout = null; // these nulls are because it seems to be a memory leak in some JVMs
 
-		} catch (IOException e) {
-			logger.error("Error", e);
+			if (fout != null) {
+				fout.close();
+			}
+
+			fout = null; // these nulls are because it seems to be a memory leak in some JVMs
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 }

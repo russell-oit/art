@@ -38,8 +38,6 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generates group xlsx output
@@ -47,8 +45,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class GroupXlsxOutput extends GroupOutput {
-
-	private static final Logger logger = LoggerFactory.getLogger(GroupXlsxOutput.class);
 
 	private FileOutputStream fout;
 	private XSSFWorkbook wb;
@@ -100,14 +96,15 @@ public class GroupXlsxOutput extends GroupOutput {
 			summaryFont.setBold(true);
 			summaryStyle = wb.createCellStyle();
 			summaryStyle.setFont(summaryFont);
-		} catch (IOException e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			endOutput();
+			throw new RuntimeException(ex);
 		}
 	}
 
 	/**
 	 * Outputs a value
-	 * 
+	 *
 	 * @param value the value to output
 	 */
 	private void addCell(String value) {
@@ -119,7 +116,7 @@ public class GroupXlsxOutput extends GroupOutput {
 
 	/**
 	 * Outputs a summary value
-	 * 
+	 *
 	 * @param value the value to output
 	 */
 	private void addSummaryCell(String value) {
@@ -131,7 +128,7 @@ public class GroupXlsxOutput extends GroupOutput {
 
 	/**
 	 * Outputs a numeric summary value
-	 * 
+	 *
 	 * @param value the value to output
 	 */
 	public void addSummaryCellNumeric(double value) {
@@ -159,18 +156,22 @@ public class GroupXlsxOutput extends GroupOutput {
 	/**
 	 * Finalizes output
 	 */
-	private void endLines() {
+	private void endOutput() {
 		try {
-			wb.write(fout);
-			fout.close();
+			if (fout != null) {
+				if (wb != null) {
+					wb.write(fout);
+				}
+				fout.close();
+			}
 		} catch (IOException ex) {
-			logger.error("Error", ex);
+			throw new RuntimeException(ex);
 		}
 	}
 
 	/**
 	 * Outputs a header value
-	 * 
+	 *
 	 * @param value the value to output
 	 */
 	private void addHeaderCell(String value) {
@@ -210,7 +211,7 @@ public class GroupXlsxOutput extends GroupOutput {
 			newLine();
 
 			beginLines();
-			
+
 			cmpStr = new StringBuilder();
 			List<String> summaryValues = new ArrayList<>();
 
@@ -292,12 +293,12 @@ public class GroupXlsxOutput extends GroupOutput {
 			addCell("Too many rows (>" + maxRows
 					+ "). Data not completed. Please narrow your search.");
 		}
-		
+
 		for (i = 0; i < colCount; i++) {
 			sheet.autoSizeColumn(i);
 		}
 
-		endLines();
+		endOutput();
 
 		return counter + 1; // number of rows
 	}

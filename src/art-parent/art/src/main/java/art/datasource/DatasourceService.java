@@ -122,6 +122,7 @@ public class DatasourceService {
 		dbService.update(sql, id);
 
 		result.setSuccess(true);
+
 		return result;
 	}
 
@@ -152,7 +153,7 @@ public class DatasourceService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
-		
+
 		return result;
 	}
 
@@ -185,7 +186,8 @@ public class DatasourceService {
 
 		datasource.setDatasourceId(newId);
 
-		saveDatasource(datasource, true, actionUser);
+		boolean newRecord = true;
+		saveDatasource(datasource, newRecord, actionUser);
 
 		return newId;
 	}
@@ -201,7 +203,8 @@ public class DatasourceService {
 	public void updateDatasource(Datasource datasource, User actionUser) throws SQLException {
 		logger.debug("Entering updateDatasource: datasource={}, actionUser={}", datasource, actionUser);
 
-		saveDatasource(datasource, false, actionUser);
+		boolean newRecord = false;
+		saveDatasource(datasource, newRecord, actionUser);
 	}
 
 	/**
@@ -338,7 +341,7 @@ public class DatasourceService {
 	@CacheEvict(value = "datasources", allEntries = true)
 	public void updateDatasources(MultipleDatasourceEdit multipleDatasourceEdit, User actionUser)
 			throws SQLException {
-		
+
 		logger.debug("Entering updateDatasources: multipleDatasourceEdit={}, actionUser={}",
 				multipleDatasourceEdit, actionUser);
 

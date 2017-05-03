@@ -22,11 +22,13 @@ import art.enums.ParameterType;
 import art.parameter.Parameter;
 import art.report.Report;
 import art.utils.ArtUtils;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.collections4.MapUtils;
@@ -297,7 +299,7 @@ public class ReportParameter implements Serializable {
 
 		return StringUtils.join(paramDisplayStrings, ", ");
 	}
-
+	
 	/**
 	 * Returns the parameter name and actual parameter values in a formatted
 	 * manner
@@ -306,7 +308,31 @@ public class ReportParameter implements Serializable {
 	 * manner
 	 */
 	public String getNameAndDisplayValues() {
+		return parameter.getName() + ": " + getDisplayValues();
+	}
+
+	/**
+	 * Returns the parameter label and actual parameter values in a formatted
+	 * manner
+	 *
+	 * @return the parameter label and actual parameter values in a formatted
+	 * manner
+	 */
+	public String getLabelAndDisplayValues() {
 		return parameter.getLabel() + ": " + getDisplayValues();
+	}
+
+	/**
+	 * Returns the parameter label and actual parameter values in a formatted
+	 * manner, parameter name being localized according to the given locale
+	 *
+	 * @param locale the locale object for the appropriate locale
+	 * @return the parameter label and actual parameter values in a formatted
+	 * manner, parameter name being localized according to the given locale
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedLabelAndDisplayValues(Locale locale) throws IOException {
+		return parameter.getLocalizedLabel(locale) + ": " + getDisplayValues();
 	}
 
 	/**
@@ -555,8 +581,8 @@ public class ReportParameter implements Serializable {
 				String htmlValue = getHtmlValue();
 				if (StringUtils.equalsIgnoreCase(htmlValue, lovValue)) {
 					return true;
-				} 
-				
+				}
+
 				if (MapUtils.isNotEmpty(defaultValueLovValues)) {
 					for (String value : defaultValueLovValues.keySet()) {
 						if (StringUtils.equalsIgnoreCase(value, lovValue)) {
@@ -564,7 +590,7 @@ public class ReportParameter implements Serializable {
 						}
 					}
 				}
-				
+
 				return false;
 			case MultiValue:
 				//compare lov value to default values or passed values

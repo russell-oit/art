@@ -702,6 +702,7 @@ public abstract class StandardOutput {
 
 		result.setSuccess(true);
 		result.setRowCount(rowCount);
+		
 		return result;
 	}
 

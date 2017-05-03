@@ -222,7 +222,8 @@ public class UserGroupService {
 
 		group.setUserGroupId(newId);
 
-		saveUserGroup(group, true, actionUser);
+		boolean newRecord = true;
+		saveUserGroup(group, newRecord, actionUser);
 
 		return newId;
 	}
@@ -238,7 +239,8 @@ public class UserGroupService {
 	public void updateUserGroup(UserGroup group, User actionUser) throws SQLException {
 		logger.debug("Entering updateUserGroup: group={}, actionUser={}", group, actionUser);
 
-		saveUserGroup(group, false, actionUser);
+		boolean newRecord = false;
+		saveUserGroup(group, newRecord, actionUser);
 	}
 
 	/**

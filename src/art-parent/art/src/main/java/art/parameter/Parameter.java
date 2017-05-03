@@ -21,8 +21,18 @@ import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.report.Report;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represent a parameter
@@ -30,6 +40,8 @@ import java.util.Date;
  * @author Timothy Anyona
  */
 public class Parameter implements Serializable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Parameter.class);
 
 	private static final long serialVersionUID = 1L;
 	private int parameterId;
@@ -52,6 +64,21 @@ public class Parameter implements Serializable {
 	private String updatedBy;
 	private Report defaultValueReport;
 	private boolean shared;
+	private String options;
+
+	/**
+	 * @return the options
+	 */
+	public String getOptions() {
+		return options;
+	}
+
+	/**
+	 * @param options the options to set
+	 */
+	public void setOptions(String options) {
+		this.options = options;
+	}
 
 	/**
 	 * @return the shared
@@ -80,7 +107,7 @@ public class Parameter implements Serializable {
 	public void setDefaultValueReport(Report defaultValueReport) {
 		this.defaultValueReport = defaultValueReport;
 	}
-	
+
 	/**
 	 * @return the createdBy
 	 */
@@ -336,7 +363,7 @@ public class Parameter implements Serializable {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int hash = 3;
@@ -358,28 +385,45 @@ public class Parameter implements Serializable {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Parameter{" + "parameterId=" + parameterId + '}';
 	}
-	
-	public String getHtmlElementName(){
+
+	/**
+	 * Returns the html element name that should be used for this parameter
+	 *
+	 * @return the html element name that should be used for this parameter
+	 */
+	public String getHtmlElementName() {
 		return "p-" + name;
 	}
-	
+
+	/**
+	 * Returns the default value string to be used in html elements. Null is
+	 * returned as an empty string.
+	 *
+	 * @return the default value string to be used in html elements
+	 */
 	public String getHtmlDefaultValue() {
-		String value=defaultValue;
-		
-		if(defaultValue==null){
-			value="";
+		String value = defaultValue;
+
+		if (defaultValue == null) {
+			value = "";
 		}
-		
+
 		return getHtmlValue(value);
 	}
-	
+
+	/**
+	 * Returns the string that should be used in html elements
+	 *
+	 * @param value the original value
+	 * @return the string that should be used in html elements
+	 */
 	public String getHtmlValue(Object value) {
-		switch(dataType){
+		switch (dataType) {
 			case Date:
 				//convert date to string that will be recognised by parameter processor class
 				return ArtUtils.isoDateFormatter.format(value);
@@ -388,5 +432,132 @@ public class Parameter implements Serializable {
 			default:
 				return String.valueOf(value);
 		}
+	}
+
+	/**
+	 * Returns the label to use for this parameter, given a particular locale,
+	 * taking into consideration the i18n options defined for the parameter
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the label to use for this parameter
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedLabel(Locale locale) throws IOException {
+		if (locale == null) {
+			return label;
+		} else {
+			return getLocalizedLabel(locale.toString());
+		}
+
+	}
+
+	/**
+	 * Returns the label to use for this parameter, given a particular locale,
+	 * taking into consideration the i18n options defined for the parameter
+	 *
+	 * @param localeString the string that represents the locale to use
+	 * @return the label to use for this parameter
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedLabel(String localeString) throws IOException {
+		String localizedLabel = label;
+
+		if (StringUtils.isNotBlank(options) && StringUtils.isNotBlank(localeString)) {
+			ObjectMapper mapper = new ObjectMapper();
+			ParameterOptions parameterOptions = mapper.readValue(options, ParameterOptions.class);
+			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nLabelOptions = i18nOptions.getLabel();
+				if (CollectionUtils.isNotEmpty(i18nLabelOptions)) {
+					//https://stackoverflow.com/questions/886955/breaking-out-of-nested-loops-in-java
+					//https://stackoverflow.com/questions/5097513/in-java-how-does-break-interact-with-nested-loops
+					boolean labelFound = false;
+					for (Map<String, String> i18nLabelOption : i18nLabelOptions) {
+						//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
+						// Get the first entry that the iterator returns
+						Entry<String, String> entry = i18nLabelOption.entrySet().iterator().next();
+						String localeSetting = entry.getKey();
+						String localeLabel = entry.getValue();
+						String[] locales = StringUtils.split(localeSetting, ",");
+						for (String locale : locales) {
+							if (StringUtils.equalsIgnoreCase(locale.trim(), localeString)) {
+								localizedLabel = localeLabel;
+								labelFound = true;
+								break;
+							}
+						}
+
+						if (labelFound) {
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return localizedLabel;
+	}
+
+	/**
+	 * Returns the help text to use for this parameter, given a particular
+	 * locale, taking into consideration the i18n options defined for the
+	 * parameter
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the help text to use for this parameter
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedHelpText(Locale locale) throws IOException {
+		if (locale == null) {
+			return helpText;
+		} else {
+			return getLocalizedHelpText(locale.toString());
+		}
+	}
+
+	/**
+	 * Returns the help text to use for this parameter, given a particular
+	 * locale, taking into consideration the i18n options defined for the
+	 * parameter
+	 *
+	 * @param localeString the string that represents the locale to use
+	 * @return the help text to use for this parameter
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedHelpText(String localeString) throws IOException {
+		String localizedHelpText = helpText;
+
+		if (StringUtils.isNotBlank(options) && StringUtils.isNotBlank(localeString)) {
+			ObjectMapper mapper = new ObjectMapper();
+			ParameterOptions parameterOptions = mapper.readValue(options, ParameterOptions.class);
+			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nHelpTextOptions = i18nOptions.getHelpText();
+				if (CollectionUtils.isNotEmpty(i18nHelpTextOptions)) {
+					boolean helpTextFound = false;
+					for (Map<String, String> i18nHelpTextOption : i18nHelpTextOptions) {
+						//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
+						// Get the first entry that the iterator returns
+						Entry<String, String> entry = i18nHelpTextOption.entrySet().iterator().next();
+						String localeSetting = entry.getKey();
+						String localeHelpText = entry.getValue();
+						String[] locales = StringUtils.split(localeSetting, ",");
+						for (String locale : locales) {
+							if (StringUtils.equalsIgnoreCase(locale.trim(), localeString)) {
+								localizedHelpText = localeHelpText;
+								helpTextFound = true;
+								break;
+							}
+						}
+
+						if (helpTextFound) {
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return localizedHelpText;
 	}
 }

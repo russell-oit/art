@@ -289,7 +289,8 @@ public class ReportParameterService {
 		
 		reportParam.setReport(report);
 		
-		saveReportParameter(reportParam, true);
+		boolean newRecord = true;
+		saveReportParameter(reportParam, newRecord);
 
 		return newId;
 	}
@@ -304,7 +305,8 @@ public class ReportParameterService {
 	public void updateReportParameter(ReportParameter param) throws SQLException {
 		logger.debug("Entering updateReportParameter: param={}", param);
 
-		saveReportParameter(param, false);
+		boolean newRecord = false;
+		saveReportParameter(param, newRecord);
 	}
 
 	/**

@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generates csv output. Also supports any delimiter, other than comma.
@@ -34,8 +32,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class CsvOutputArt extends StandardOutput {
-
-	private static final Logger logger = LoggerFactory.getLogger(CsvOutputArt.class);
 
 	private FileOutputStream fout;
 	private StringBuilder sb;
@@ -69,7 +65,8 @@ public class CsvOutputArt extends StandardOutput {
 				fout = new FileOutputStream(fullOutputFileName);
 			}
 		} catch (FileNotFoundException ex) {
-			logger.error("Error", ex);
+			endOutput();
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -86,6 +83,7 @@ public class CsvOutputArt extends StandardOutput {
 	@Override
 	public void addCellNumeric(Double value) {
 		String formattedValue;
+
 		if (value == null) {
 			formattedValue = "";
 		} else {
@@ -109,6 +107,7 @@ public class CsvOutputArt extends StandardOutput {
 	@Override
 	public void newRow() {
 		sb.append("\n");
+
 		if ((rowCount * totalColumnCount) > FLUSH_SIZE) {
 			try {
 				String tmpstr = sb.toString();
@@ -123,7 +122,8 @@ public class CsvOutputArt extends StandardOutput {
 
 				sb = new StringBuilder(8 * 1024);
 			} catch (IOException ex) {
-				logger.error("Error", ex);
+				endOutput();
+				throw new RuntimeException(ex);
 			}
 		}
 	}
@@ -135,15 +135,17 @@ public class CsvOutputArt extends StandardOutput {
 			byte[] buf = tmpstr.getBytes("UTF-8");
 
 			if (isJob) {
-				fout.write(buf);
-				fout.flush();
-				fout.close();
-				fout = null; // these nulls are because it seems to be a memory leak in some JVMs
+				if (fout != null) {
+					fout.write(buf);
+					fout.flush();
+					fout.close();
+					fout = null; // these nulls are because it seems to be a memory leak in some JVMs
+				}
 			} else {
 				out.write(tmpstr);
 			}
-		} catch (IOException e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -161,6 +163,7 @@ public class CsvOutputArt extends StandardOutput {
 	private String getQuotedValue(String value) {
 		String quotedValue = value;
 		String delimiter = options.getDelimiter();
+
 		if (StringUtils.isNotBlank(delimiter)) {
 			if (StringUtils.contains(value, delimiter)) {
 				String quoteChar = options.getQuoteChar();

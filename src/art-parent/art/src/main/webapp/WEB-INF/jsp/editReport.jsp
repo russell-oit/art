@@ -252,7 +252,7 @@ Edit report page
 				jsonEditor.setHighlightActiveLine(false);
 				jsonEditor.setShowPrintMargin(false);
 				jsonEditor.setOption("showLineNumbers", false);
-				document.getElementById('xmlEditor').style.fontSize = '14px';
+				document.getElementById('jsonEditor').style.fontSize = '14px';
 
 				var options = $('#options');
 				jsonEditor.getSession().setValue(options.val());
@@ -1238,7 +1238,7 @@ Edit report page
 
 				<div id="optionsDiv" class="form-group">
 					<label class="control-label col-md-12" style="text-align: center" for="options">
-						<spring:message code="reports.label.options"/>
+						<spring:message code="page.label.options"/>
 					</label>
 					<div class="col-md-12">
 						<form:hidden path="options"/>

@@ -19,6 +19,7 @@ package art.output;
 
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
@@ -96,9 +97,14 @@ public class HtmlPlainOutput extends StandardOutput {
 		out.println("<tr><td>");
 
 		for (ReportParameter reportParam : reportParamsList) {
-			String nameAndDisplayValues = reportParam.getNameAndDisplayValues();
-			String escapedNameAndDisplayValues = Encode.forHtmlContent(nameAndDisplayValues);
-			out.println(escapedNameAndDisplayValues);
+			String labelAndDisplayValues;
+			try {
+				labelAndDisplayValues = reportParam.getLocalizedLabelAndDisplayValues(locale);
+			} catch (IOException ex) {
+				labelAndDisplayValues = ex.toString();
+			}
+			String escapedLabelAndDisplayValues = Encode.forHtmlContent(labelAndDisplayValues);
+			out.println(escapedLabelAndDisplayValues);
 			out.println("<br>");
 		}
 
@@ -122,12 +128,12 @@ public class HtmlPlainOutput extends StandardOutput {
 	public void endHeader() {
 		out.println("</tr></thead>");
 	}
-	
+
 	@Override
 	public void beginRows() {
 		out.println("<tbody>");
 	}
-	
+
 	@Override
 	public void addCellString(String value) {
 		out.println("<td style='text-align: left'>" + value + "</td>");
@@ -136,17 +142,17 @@ public class HtmlPlainOutput extends StandardOutput {
 	@Override
 	public void addCellStringUnsafe(String value) {
 		String escapedValue = Encode.forHtmlContent(value);
-		
+
 		out.println("<td style='text-align: left'>" + escapedValue + "</td>");
 	}
-	
+
 	@Override
 	public void addCellNumeric(Double value) {
 		String formattedValue = formatNumericValue(value);
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-		
+
 		double heatmapValue = getHeatmapValue(value);
-		
+
 		out.println("<td style='text-align: right'"
 				+ "' data-value='" + heatmapValue + "'>"
 				+ escapedFormattedValue + "</td>");
@@ -155,9 +161,9 @@ public class HtmlPlainOutput extends StandardOutput {
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-		
+
 		double heatmapValue = getHeatmapValue(numericValue);
-		
+
 		out.println("<td style='text-align: right'"
 				+ "' data-value='" + heatmapValue + "'>"
 				+ escapedFormattedValue + "</td>");
@@ -167,14 +173,14 @@ public class HtmlPlainOutput extends StandardOutput {
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-		
+
 		out.println("<td style='text-align: left'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-		
+
 		out.println("<td style='text-align: left'>" + escapedFormattedValue + "</td>");
 	}
 
@@ -193,7 +199,7 @@ public class HtmlPlainOutput extends StandardOutput {
 	public void endRow() {
 		out.println("</tr>");
 	}
-	
+
 	@Override
 	public void endRows() {
 		out.println("</tbody>");
@@ -208,14 +214,14 @@ public class HtmlPlainOutput extends StandardOutput {
 	public void addCellTotal(Double value) {
 		String formattedValue = formatNumericValue(value);
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-		
+
 		out.println("<td style='text-align: right'><b>" + escapedFormattedValue + "</b></td>");
 	}
 
 	@Override
 	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-		
+
 		out.println("<td style='text-align: right'><b>" + escapedFormattedValue + "</b></td>");
 	}
 

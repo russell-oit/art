@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -139,7 +140,7 @@ public class UserGroupMembershipService {
 	public void addUserGroupMemberships(User user, List<UserGroup> userGroups) throws SQLException {
 		Objects.requireNonNull(user, "user must not be null");
 		
-		if (userGroups == null || userGroups.isEmpty()) {
+		if (CollectionUtils.isEmpty(userGroups)) {
 			return;
 		}
 

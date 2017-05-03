@@ -34,8 +34,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generates xlsx output
@@ -43,8 +41,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class XlsxOutput extends StandardOutput {
-
-	private static final Logger logger = LoggerFactory.getLogger(XlsxOutput.class);
 
 	private SXSSFWorkbook wb;
 	private SXSSFSheet sheet;
@@ -122,9 +118,9 @@ public class XlsxOutput extends StandardOutput {
 			//https://poi.apache.org/spreadsheet/quick-guide.html#Autofit
 			//https://poi.apache.org/apidocs/org/apache/poi/xssf/streaming/SXSSFSheet.html#autoSizeColumn(int)
 			sheet.trackAllColumnsForAutoSizing();
-			
+
 			sheet.getPrintSetup().setPaperSize(PrintSetup.A4_PAPERSIZE);
-			
+
 			PageOrientation pageOrientation = report.getPageOrientation();
 			if (pageOrientation == PageOrientation.Landscape) {
 				sheet.getPrintSetup().setLandscape(true);
@@ -137,7 +133,7 @@ public class XlsxOutput extends StandardOutput {
 			headerFont.setColor(IndexedColors.BLUE.getIndex());
 			short headerFontSize = 12;
 			headerFont.setFontHeightInPoints(headerFontSize);
-			
+
 			headerStyle = wb.createCellStyle();
 			headerStyle.setFont(headerFont);
 			headerStyle.setBorderBottom(CellStyle.BORDER_THIN);
@@ -147,7 +143,7 @@ public class XlsxOutput extends StandardOutput {
 			bodyFont.setColor(Font.COLOR_NORMAL);
 			short bodyFontSize = 10;
 			bodyFont.setFontHeightInPoints(bodyFontSize);
-			
+
 			bodyStyle = wb.createCellStyle();
 			bodyStyle.setFont(bodyFont);
 			styles.put("body", bodyStyle);
@@ -175,7 +171,7 @@ public class XlsxOutput extends StandardOutput {
 			totalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
 			totalFont.setColor(Font.COLOR_NORMAL);
 			totalFont.setFontHeightInPoints(bodyFontSize);
-			
+
 			totalStyle = wb.createCellStyle();
 			if (StringUtils.isNotBlank(numberFormat)) {
 				DataFormat poiFormat = wb.createDataFormat();
@@ -184,6 +180,7 @@ public class XlsxOutput extends StandardOutput {
 			totalStyle.setFont(totalFont);
 			styles.put("total", totalStyle);
 		} catch (IOException ex) {
+			endOutput();
 			throw new RuntimeException(ex);
 		}
 	}
@@ -203,11 +200,16 @@ public class XlsxOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			newRow();
-			String paramLabel = reportParam.getParameter().getLabel();
-			String paramDisplayValues = reportParam.getDisplayValues();
-			addHeaderCell(paramLabel);
-			addCellString(paramDisplayValues);
+			try {
+				newRow();
+				String paramLabel = reportParam.getParameter().getLocalizedLabel(locale);
+				String paramDisplayValues = reportParam.getDisplayValues();
+				addHeaderCell(paramLabel);
+				addCellString(paramDisplayValues);
+			} catch (IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
 		}
 
 		newRow();
@@ -281,7 +283,7 @@ public class XlsxOutput extends StandardOutput {
 			cell.setCellStyle(totalStyle);
 		}
 	}
-	
+
 	@Override
 	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
 		addCellTotal(totalValue);
@@ -295,21 +297,21 @@ public class XlsxOutput extends StandardOutput {
 		}
 
 		try {
-			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
-				wb.write(fout);
-			}
 
-			// dispose of temporary files backing this workbook on disk
-			wb.dispose();
+			if (wb != null) {
+				try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
+					wb.write(fout);
+				}
+
+				// dispose of temporary files backing this workbook on disk
+				wb.dispose();
+			}
 
 			//delete template file
 			File templateFile = new File(templateFileName);
-			boolean deleted = templateFile.delete();
-			if (!deleted) {
-				logger.warn("Template file not deleted: {}", templateFileName);
-			}
+			templateFile.delete();
 		} catch (IOException ex) {
-			logger.error("Error", ex);
+			throw new RuntimeException(ex);
 		}
 	}
 }

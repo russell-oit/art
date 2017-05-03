@@ -19,6 +19,7 @@ package art.output;
 
 import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
@@ -65,16 +66,17 @@ public class OdtOutput extends StandardOutput {
 	public void init() {
 		try {
 			resetVariables();
-			
+
 			document = TextDocument.newTextDocument();
-			
+
 			PageOrientation pageOrientation = report.getPageOrientation();
 			if (pageOrientation == PageOrientation.Landscape) {
 				setLandscapeOrientation();
 			}
-			
+
 			createPageNumbers();
 		} catch (Exception ex) {
+			endOutput();
 			throw new RuntimeException(ex);
 		}
 	}
@@ -110,7 +112,13 @@ public class OdtOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			document.addParagraph(reportParam.getNameAndDisplayValues());
+			try {
+				String labelAndDisplayValues = reportParam.getLocalizedLabelAndDisplayValues(locale);
+				document.addParagraph(labelAndDisplayValues);
+			} catch (IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
 		}
 	}
 
@@ -204,8 +212,10 @@ public class OdtOutput extends StandardOutput {
 	@Override
 	public void endOutput() {
 		try {
-			document.save(fullOutputFileName);
-			document.close();
+			if (document != null) {
+				document.save(fullOutputFileName);
+				document.close();
+			}
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}

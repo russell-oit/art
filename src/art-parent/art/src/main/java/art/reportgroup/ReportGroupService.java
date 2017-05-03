@@ -237,6 +237,7 @@ public class ReportGroupService {
 		dbService.update(sql, id);
 
 		result.setSuccess(true);
+		
 		return result;
 	}
 
@@ -300,7 +301,8 @@ public class ReportGroupService {
 
 		group.setReportGroupId(newId);
 
-		saveReportGroup(group, true, actionUser);
+		boolean newRecord = true;
+		saveReportGroup(group, newRecord, actionUser);
 
 		return newId;
 	}
@@ -316,7 +318,8 @@ public class ReportGroupService {
 	public void updateReportGroup(ReportGroup group, User actionUser) throws SQLException {
 		logger.debug("Entering updateReportGroup: group={}, actionUser={}", group, actionUser);
 
-		saveReportGroup(group, false, actionUser);
+		boolean newRecord = false;
+		saveReportGroup(group, newRecord, actionUser);
 	}
 
 	/**

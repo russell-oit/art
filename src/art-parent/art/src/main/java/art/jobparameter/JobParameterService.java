@@ -76,7 +76,7 @@ public class JobParameterService {
 			jobParam.setName(rs.getString("PARAM_NAME"));
 			jobParam.setValue(rs.getString("PARAM_VALUE"));
 //			jobParam.setParameterType(ParameterType.toEnum(rs.getString("PARAM_TYPE")));
-			jobParam.setParamTypeString(rs.getString("PARAM_TYPE"));
+			jobParam.setParamTypeString(rs.getString("PARAM_TYPE")); //might contain invalid type string
 
 			return type.cast(jobParam);
 		}

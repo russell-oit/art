@@ -56,6 +56,7 @@ public class FixedWidthOutput {
 	 * @param rs the resultset that contains the data to output
 	 * @param outputWriter the writer to output to
 	 * @param options options that determine the format of the output
+	 * @throws java.sql.SQLException
 	 */
 	public void generateOutput(ResultSet rs, Writer outputWriter, FixedWidthOptions options) throws SQLException {
 		logger.debug("Entering generateOutput");

@@ -339,8 +339,8 @@ public class JobService {
 		logger.debug("newId={}", newId);
 
 		job.setJobId(newId);
+		
 		boolean newRecord = true;
-
 		saveJob(job, newRecord, actionUser);
 
 		return newId;
@@ -358,7 +358,6 @@ public class JobService {
 		logger.debug("Entering updateJob: job={}, actionUser={}", job, actionUser);
 
 		boolean newRecord = false;
-
 		saveJob(job, newRecord, actionUser);
 	}
 

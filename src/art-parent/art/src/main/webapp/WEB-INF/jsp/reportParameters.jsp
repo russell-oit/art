@@ -18,10 +18,11 @@
 	<c:if test="${!reportParam.parameter.hidden}">
 		<div class="form-group">
 			<label class="control-label ${labelColClass}" for="${encode:forHtmlAttribute(reportParam.htmlElementName)}">
-				${encode:forHtmlContent(reportParam.parameter.label)}
+				${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(pageContext.response.locale))}
 			</label>
 			<div class="${inputColClass}">
-				<c:if test="${not empty fn:trim(reportParam.parameter.helpText)}">
+				<c:set var="help" value="${reportParam.parameter.getLocalizedHelpText(pageContext.response.locale)}"/>
+				<c:if test="${not empty fn:trim(help)}">
 					<div class="input-group">
 					</c:if>
 
@@ -56,7 +57,6 @@
 						</c:otherwise>
 					</c:choose>
 
-					<c:set var="help" value="${reportParam.parameter.helpText}"/>
 					<c:if test="${not empty fn:trim(help)}">
 						<span class="input-group-btn" >
 							<button class="btn btn-default" type="button"
@@ -66,7 +66,7 @@
 						</span>
 					</c:if>
 
-					<c:if test="${not empty fn:trim(reportParam.parameter.helpText)}">
+					<c:if test="${not empty fn:trim(help)}">
 					</div>
 				</c:if>
 			</div>

@@ -36,8 +36,6 @@ import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generates xls output
@@ -46,8 +44,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class XlsOutput extends StandardOutput {
-
-	private static final Logger logger = LoggerFactory.getLogger(XlsOutput.class);
 
 	private FileOutputStream fout;
 	private ZipOutputStream zout;
@@ -117,9 +113,9 @@ public class XlsOutput extends StandardOutput {
 			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 			wb = new HSSFWorkbook();
 			sheet = wb.createSheet(sheetName);
-			
+
 			sheet.getPrintSetup().setPaperSize(PrintSetup.A4_PAPERSIZE);
-			
+
 			PageOrientation pageOrientation = report.getPageOrientation();
 			if (pageOrientation == PageOrientation.Landscape) {
 				//https://stackoverflow.com/questions/6743615/apache-poi-change-page-format-for-excel-worksheet
@@ -131,7 +127,7 @@ public class XlsOutput extends StandardOutput {
 			headerFont.setColor(HSSFColor.BLUE.index);
 			short headerFontSize = 12;
 			headerFont.setFontHeightInPoints(headerFontSize);
-			
+
 			headerStyle = wb.createCellStyle();
 			headerStyle.setFont(headerFont);
 			headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
@@ -140,7 +136,7 @@ public class XlsOutput extends StandardOutput {
 			bodyFont.setColor(HSSFFont.COLOR_NORMAL);
 			short bodyFontSize = 10;
 			bodyFont.setFontHeightInPoints(bodyFontSize);
-			
+
 			bodyStyle = wb.createCellStyle();
 			bodyStyle.setFont(bodyFont);
 
@@ -165,7 +161,7 @@ public class XlsOutput extends StandardOutput {
 			totalFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 			totalFont.setColor(HSSFFont.COLOR_NORMAL);
 			totalFont.setFontHeightInPoints(bodyFontSize);
-			
+
 			totalStyle = wb.createCellStyle();
 			if (StringUtils.isNotBlank(numberFormat)) {
 				DataFormat poiFormat = wb.createDataFormat();
@@ -173,7 +169,8 @@ public class XlsOutput extends StandardOutput {
 			}
 			totalStyle.setFont(totalFont);
 		} catch (IOException ex) {
-			logger.error("Error", ex);
+			endOutput();
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -192,11 +189,16 @@ public class XlsOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			newRow();
-			String paramLabel = reportParam.getParameter().getLabel();
-			String paramDisplayValues = reportParam.getDisplayValues();
-			addHeaderCell(paramLabel);
-			addCellString(paramDisplayValues);
+			try {
+				newRow();
+				String paramLabel = reportParam.getParameter().getLocalizedLabel(locale);
+				String paramDisplayValues = reportParam.getDisplayValues();
+				addHeaderCell(paramLabel);
+				addCellString(paramDisplayValues);
+			} catch (IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
 		}
 
 		newRow();
@@ -269,7 +271,7 @@ public class XlsOutput extends StandardOutput {
 			cell.setCellStyle(totalStyle);
 		}
 	}
-	
+
 	@Override
 	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
 		addCellTotal(totalValue);
@@ -283,14 +285,21 @@ public class XlsOutput extends StandardOutput {
 
 		try {
 			if (zout == null) {
-				wb.write(fout);
+				if (wb != null && fout != null) {
+					wb.write(fout);
+				}
 			} else {
-				wb.write(zout);
+				if (wb != null) {
+					wb.write(zout);
+				}
 				zout.close();
 			}
-			fout.close();
+
+			if (fout != null) {
+				fout.close();
+			}
 		} catch (IOException ex) {
-			logger.error("Error", ex);
+			throw new RuntimeException(ex);
 		}
 	}
 }

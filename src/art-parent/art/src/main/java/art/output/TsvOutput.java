@@ -29,8 +29,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generates tsv output
@@ -39,8 +37,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class TsvOutput extends StandardOutput {
-
-	private static final Logger logger = LoggerFactory.getLogger(TsvOutput.class);
 
 	private FileOutputStream fout;
 	private ZipOutputStream zout;
@@ -88,7 +84,8 @@ public class TsvOutput extends StandardOutput {
 				gzout = new GZIPOutputStream(fout);
 			}
 		} catch (IOException ex) {
-			logger.error("Error", ex);
+			endOutput();
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -99,7 +96,13 @@ public class TsvOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			sb.append(reportParam.getNameAndDisplayValues());
+			try {
+				String labelAndDisplayValues = reportParam.getLocalizedLabelAndDisplayValues(locale);
+				sb.append(labelAndDisplayValues);
+			} catch (IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
 		}
 	}
 
@@ -117,13 +120,13 @@ public class TsvOutput extends StandardOutput {
 		} else {
 			sb.append(value.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '));
 			sb.append("\t");
-
 		}
 	}
 
 	@Override
 	public void addCellNumeric(Double value) {
 		String formattedValue;
+
 		if (value == null) {
 			formattedValue = "";
 		} else {
@@ -167,7 +170,8 @@ public class TsvOutput extends StandardOutput {
 
 				sb = new StringBuilder(8 * 1024);
 			} catch (IOException ex) {
-				logger.error("Error", ex);
+				endOutput();
+				throw new RuntimeException(ex);
 			}
 		}
 	}
@@ -183,27 +187,36 @@ public class TsvOutput extends StandardOutput {
 
 			switch (zipType) {
 				case None:
-					fout.write(buf);
-					fout.flush();
+					if (fout != null) {
+						fout.write(buf);
+						fout.flush();
+					}
 					break;
 				case Zip:
-					zout.write(buf);
-					zout.flush();
-					zout.close();
+					if (zout != null) {
+						zout.write(buf);
+						zout.flush();
+						zout.close();
+					}
 					break;
 				case Gzip:
-					gzout.write(buf);
-					gzout.flush();
-					gzout.close();
+					if (gzout != null) {
+						gzout.write(buf);
+						gzout.flush();
+						gzout.close();
+					}
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected zip type: " + zipType);
 			}
 
-			fout.close();
+			if (fout != null) {
+				fout.close();
+			}
+
 			fout = null; // these nulls are because it seems to be a memory leak in some JVMs
-		} catch (IOException e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 }

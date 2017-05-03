@@ -259,6 +259,7 @@ public class UserService {
 		dbService.update(sql, id);
 
 		result.setSuccess(true);
+		
 		return result;
 	}
 
@@ -353,7 +354,8 @@ public class UserService {
 
 		user.setUserId(newId);
 
-		saveUser(user, true, actionUser);
+		boolean newRecord = true;
+		saveUser(user, newRecord, actionUser);
 
 		return newId;
 	}
@@ -369,7 +371,8 @@ public class UserService {
 	public void updateUser(User user, User actionUser) throws SQLException {
 		logger.debug("Entering updateUser: user={}, actionUser={}", user, actionUser);
 
-		saveUser(user, false, actionUser);
+		boolean newRecord = false;
+		saveUser(user, newRecord, actionUser);
 	}
 
 	/**
