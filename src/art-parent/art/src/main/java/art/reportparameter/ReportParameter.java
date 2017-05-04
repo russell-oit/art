@@ -595,7 +595,7 @@ public class ReportParameter implements Serializable {
 			case MultiValue:
 				//compare lov value to default values or passed values
 				String defaultValueSetting = parameter.getDefaultValue();
-				if (defaultValueSetting != null) {
+				if (StringUtils.isNotEmpty(defaultValueSetting)) {
 					String defaultValues[] = defaultValueSetting.split("\\r?\\n");
 					for (String defaultValue : defaultValues) {
 						if (StringUtils.equalsIgnoreCase(defaultValue, lovValue)) {

@@ -162,8 +162,7 @@ public class DashboardController {
 				String shortDescription = report.getShortDescription();
 				shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
-				shortDescription = StringUtils.trim(shortDescription);
-				if (StringUtils.length(shortDescription) > 0) {
+				if (StringUtils.isNotBlank(shortDescription)) {
 					description = " :: " + shortDescription;
 				}
 			} else {

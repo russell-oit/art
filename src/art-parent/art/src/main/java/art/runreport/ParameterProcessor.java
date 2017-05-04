@@ -376,7 +376,7 @@ public class ParameterProcessor {
 				if (passedValues == null) {
 					//parameter value not specified. use default value
 					String defaultValue = param.getDefaultValue();
-					if (defaultValue != null) {
+					if (StringUtils.isNotEmpty(defaultValue)) {
 						String defaultValues[] = defaultValue.split("\\r?\\n");
 						actualValueStrings.addAll(Arrays.asList(defaultValues));
 					}

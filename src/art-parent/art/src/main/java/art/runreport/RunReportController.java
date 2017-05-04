@@ -332,8 +332,7 @@ public class RunReportController {
 					shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
 					String description = "";
-					shortDescription = StringUtils.trim(shortDescription);
-					if (StringUtils.length(shortDescription) > 0) {
+					if (StringUtils.isNotBlank(shortDescription)) {
 						description = " :: " + shortDescription;
 					}
 

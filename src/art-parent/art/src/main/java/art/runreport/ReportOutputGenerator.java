@@ -290,6 +290,7 @@ public class ReportOutputGenerator {
 					jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
 				} else if (reportType.isJxls()) {
 					JxlsOutput jxlsOutput = new JxlsOutput();
+					jxlsOutput.setLocale(locale);
 					if (reportType == ReportType.JxlsArt) {
 						rs = reportRunner.getResultSet();
 						jxlsOutput.setResultSet(rs);

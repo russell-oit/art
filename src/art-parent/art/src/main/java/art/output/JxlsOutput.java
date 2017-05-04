@@ -33,6 +33,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +52,23 @@ import org.slf4j.LoggerFactory;
 public class JxlsOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(JxlsOutput.class);
+	
 	private ResultSet resultSet;
+	private Locale locale;
+
+	/**
+	 * @return the locale
+	 */
+	public Locale getLocale() {
+		return locale;
+	}
+
+	/**
+	 * @param locale the locale to set
+	 */
+	public void setLocale(Locale locale) {
+		this.locale = locale;
+	}
 
 	/**
 	 * @param resultSet the resultSet to set
@@ -110,6 +127,7 @@ public class JxlsOutput {
 			}
 			
 			context.putVar("params", reportParams);
+			context.putVar("locale", locale);
 
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
