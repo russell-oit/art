@@ -510,7 +510,7 @@ public class ReportParameter implements Serializable {
 					switch (parameter.getDataType()) {
 						case Integer:
 						case Datasource:
-						case Number:
+						case Double:
 							finalValue = String.valueOf(value);
 							break;
 						case Date:
@@ -532,7 +532,7 @@ public class ReportParameter implements Serializable {
 					switch (parameter.getDataType()) {
 						case Integer:
 						case Datasource:
-						case Number:
+						case Double:
 							for (Object listValue : values) {
 								stringValues.add(String.valueOf(listValue));
 							}

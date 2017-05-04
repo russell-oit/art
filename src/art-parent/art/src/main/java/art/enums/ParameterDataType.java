@@ -28,7 +28,7 @@ import java.util.List;
  */
 public enum ParameterDataType {
 
-	Varchar("Varchar"), Text("Text"), Integer("Integer"), Number("Number"),
+	Varchar("Varchar"), Text("Text"), Integer("Integer"), Double("Double"),
 	Date("Date"), DateTime("DateTime"), Datasource("Datasource");
 	
 	private final String value;
@@ -45,7 +45,7 @@ public enum ParameterDataType {
 	public boolean isNumeric() {
 		switch(this){
 			case Integer:
-			case Number:
+			case Double:
 			case Datasource:
 				return true;
 			default:

@@ -468,7 +468,7 @@ public class ParameterProcessor {
 					String paramName = param.getName();
 					throw new IllegalArgumentException("Invalid integer value for parameter " + paramName + ": " + finalValue);
 				}
-			case Number:
+			case Double:
 				return Double.valueOf(finalValue);
 			default:
 				throw new IllegalArgumentException("Unknown numeric parameter data type: " + paramDataType);

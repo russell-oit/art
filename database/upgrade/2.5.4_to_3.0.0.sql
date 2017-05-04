@@ -492,6 +492,8 @@ ALTER TABLE ART_QUERIES ADD PAGE_ORIENTATION VARCHAR(20);
 -- add parameter_options column
 ALTER TABLE ART_PARAMETERS ADD PARAMETER_OPTIONS VARCHAR(4000);
 
+-- rename "number" parameter data type to "double"
+UPDATE ART_QUERY_FIELDS SET PARAM_DATA_TYPE='Double' WHERE PARAM_DATA_TYPE='NUMBER';
 
 
 -- add reference table for report types
