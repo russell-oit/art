@@ -450,7 +450,6 @@
 			<artifactId>jasperreports</artifactId>
 			<version>5.5.1</version>
 			<exclusions>
-				<!-- jasperreports refers to itext-2.1.7.js1 whose pom isn't available -->
 				<exclusion>
 					<groupId>com.lowagie</groupId>
 					<artifactId>itext</artifactId>

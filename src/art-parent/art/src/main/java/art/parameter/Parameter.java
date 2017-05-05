@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Represent a parameter
@@ -40,8 +38,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class Parameter implements Serializable {
-
-	private static final Logger logger = LoggerFactory.getLogger(Parameter.class);
 
 	private static final long serialVersionUID = 1L;
 	private int parameterId;
