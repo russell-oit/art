@@ -3,10 +3,11 @@
   <groupId>net.sf.spnego</groupId>
   <artifactId>spnego</artifactId>
   <versioning>
-    <release>r7</release>
+    <release>r9</release>
     <versions>
       <version>r7</version>
+      <version>r9</version>
     </versions>
-    <lastUpdated>20130610094433</lastUpdated>
+    <lastUpdated>20170509140500</lastUpdated>
   </versioning>
 </metadata>
