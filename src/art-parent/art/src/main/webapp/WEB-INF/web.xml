@@ -139,7 +139,7 @@
 	
 	<filter>
 		<filter-name>JPivotController</filter-name>
-		<filter-class>com.tonbeller.wcf.controller.RequestFilter</filter-class>
+		<filter-class>net.sf.wcfart.wcf.controller.RequestFilter</filter-class>
 		<init-param>
 			<description>URI of error page</description>
 			<param-name>errorJSP</param-name>
@@ -207,14 +207,14 @@
 	<!-- JPivot -->
 	<context-param>
 		<param-name>contextFactory</param-name>
-		<param-value>com.tonbeller.wcf.controller.RequestContextFactoryImpl</param-value>
+		<param-value>net.sf.wcfart.wcf.controller.RequestContextFactoryImpl</param-value>
 	</context-param>
 	<listener>
 		<listener-class>mondrian.web.taglib.Listener</listener-class>
 	</listener>
 	<!-- resources initializer -->
 	<listener>
-		<listener-class>com.tonbeller.tbutils.res.ResourcesFactoryContextListener</listener-class>
+		<listener-class>net.sf.wcfart.tbutils.res.ResourcesFactoryContextListener</listener-class>
 	</listener>
 	<servlet>
 		<servlet-name>MDXQueryServlet</servlet-name>
@@ -237,13 +237,13 @@
 		<description>Default configuration created for servlet.</description>
 		<display-name>GetChart</display-name>
 		<servlet-name>GetChart</servlet-name>
-		<servlet-class>com.tonbeller.jpivot.chart.GetChart</servlet-class>
+		<servlet-class>net.sf.jpivotart.jpivot.chart.GetChart</servlet-class>
 	</servlet>
 	<servlet>
 		<description>Default configuration created for servlet.</description>
 		<display-name>Print</display-name>
 		<servlet-name>Print</servlet-name>
-		<servlet-class>com.tonbeller.jpivot.print.PrintServlet</servlet-class>
+		<servlet-class>net.sf.jpivotart.jpivot.print.PrintServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DisplayChart</servlet-name>
@@ -261,15 +261,5 @@
 		<servlet-name>MondrianXmlaServlet</servlet-name>
 		<url-pattern>/xmla</url-pattern>
 	</servlet-mapping>
-	<jsp-config>
-		<taglib>
-			<taglib-uri>http://www.tonbeller.com/wcf</taglib-uri>
-			<taglib-location>/WEB-INF/wcf/wcf-tags.tld</taglib-location>
-		</taglib>
-		<taglib>
-			<taglib-uri>http://www.tonbeller.com/jpivot</taglib-uri>
-			<taglib-location>/WEB-INF/jpivot/jpivot-tags.tld</taglib-location>
-		</taglib>
-	</jsp-config>
 	<!-- End JPivot -->
 </web-app>

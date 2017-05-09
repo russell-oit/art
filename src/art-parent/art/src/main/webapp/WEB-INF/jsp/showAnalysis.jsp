@@ -9,8 +9,8 @@
 
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://www.tonbeller.com/jpivot" prefix="jp" %>
-<%@taglib uri="http://www.tonbeller.com/wcf" prefix="wcf" %>
+<%@taglib uri="http://sourceforge.net/projects/jpivot-art/tags" prefix="jp" %>
+<%@taglib uri="http://sourceforge.net/projects/wcf-art/tags" prefix="wcf" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
@@ -93,7 +93,7 @@
 
 
 									<%-- define a toolbar --%>
-									<wcf:toolbar id="${toolbarId}" bundle="com.tonbeller.jpivot.toolbar.resources">
+									<wcf:toolbar id="${toolbarId}" bundle="net.sf.jpivotart.jpivot.toolbar.resources">
 										<wcf:scriptbutton id="cubeNaviButton" tooltip="toolb.cube" img="cube" model="${navigatorVisible}"/>
 										<wcf:scriptbutton id="mdxEditButton" tooltip="toolb.mdx.edit" img="mdx-edit" model="${mdxEditVisible}"/>
 										<wcf:scriptbutton id="sortConfigButton" tooltip="toolb.table.config" img="sort-asc" model="${sortFormVisible}"/>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<xform style="manual" bundle="com.tonbeller.jpivot.table.resources">
+<xform style="manual" bundle="net.sf.jpivotart.jpivot.table.resources">
 <table border="1" cellspacing="0" cellpadding="2" id="mdxEditForm">
   <tr>
     <th colspan="2" class="xform-title">
@@ -8,7 +8,7 @@
         <tr>
           <th align="left" class="xform-title">fmt:mdxedit.title</th>
           <td align="right" class="xform-close-button">
-            <imgButton src="wcf/form/cancel.png" action="revert" label="fmt:mdxedit.close" hide="true" handler="com.tonbeller.wcf.form.ButtonHandler"/>
+            <imgButton src="wcf/form/cancel.png" action="revert" label="fmt:mdxedit.close" hide="true" handler="net.sf.wcfart.wcf.form.ButtonHandler"/>
           </td>
         </tr>
       </table>
@@ -27,8 +27,8 @@
     </td>
     <td align="right">
       <div align="right">
-        <button action="validate" label="fmt:mdxedit.apply" handler="com.tonbeller.wcf.form.ButtonHandler"/>
-        <button action="revert" label="fmt:mdxedit.reset" handler="com.tonbeller.wcf.form.ButtonHandler"/>
+        <button action="validate" label="fmt:mdxedit.apply" handler="net.sf.wcfart.wcf.form.ButtonHandler"/>
+        <button action="revert" label="fmt:mdxedit.reset" handler="net.sf.wcfart.wcf.form.ButtonHandler"/>
       </div>
     </td>
   </tr>

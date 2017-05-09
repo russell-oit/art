@@ -117,7 +117,7 @@
 		<!-- in-project repository for artifacts that are not in a public maven 
 		repository e.g. spnego, itext-asian-2.1.7 -->
 		<repository>
-			<id>art.local</id>
+			<id>art-local</id>
 			<name>art</name>
 			<url>file://${project.basedir}${file.separator}repo</url>
 		</repository>
@@ -127,20 +127,20 @@
 			<name>Pentaho</name>
 			<url>http://repository.pentaho.org/artifactory/repo</url>
 		</repository>
+		<!-- repository for jasperreports itext -->
+		<repository>
+			<id>jaspersoft-third-party</id>
+			<url>http://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/</url>
+		</repository>
 	</repositories>
 	
 	<dependencyManagement>
 		<dependencies>
+			<!-- use itext that comes with jasperreports to avoid warning with jasperreports pdf output -->
 			<dependency>
-				<groupId>commons-digester</groupId>
-				<artifactId>commons-digester</artifactId>
-				<version>2.1</version>
-			</dependency>
-			<!-- use dom4j that comes with jpivot -->
-			<dependency>
-				<groupId>dom4j</groupId>
-				<artifactId>dom4j</artifactId>
-				<version>1.3-jpivot</version>
+				<groupId>com.lowagie</groupId>
+				<artifactId>itext</artifactId>
+				<version>2.1.7.js5</version>
 			</dependency>
 			<!-- specify explicit c3p0 version until quartz upgrades to 0.9.1.2+.
 			c3p0 0.9.1.1 has a problem with some jdbc drivers, e.g. sun jdbc-odbc bridge,
@@ -166,13 +166,6 @@
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-ooxml</artifactId>
 				<version>${poi.version}</version>
-				<exclusions>
-					<!-- stax (dependency of xmlbeans) comes with java 1.6. -->
-					<exclusion>
-						<artifactId>stax-api</artifactId>
-						<groupId>stax</groupId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<!-- phoenix jdbc driver needs xercesImpl greater than 2.6.0 -->
 			<dependency>
@@ -250,6 +243,10 @@
 					<groupId>javax.el</groupId>
 					<artifactId>el-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet.jsp.jstl</groupId>
+					<artifactId>jstl-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<!-- end jstl -->
@@ -292,17 +289,16 @@
 			<version>3.1.1</version>
 		</dependency>
 		<dependency>
-			<groupId>com.tonbeller</groupId>
-			<artifactId>jpivot</artifactId>
-			<version>1.8.0-art</version>
+			<groupId>net.sf.jpivot-art</groupId>
+			<artifactId>jpivot-art</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>com.tonbeller</groupId>
-			<artifactId>jpivot-pom</artifactId>
-			<version>1.1</version>
-			<type>pom</type>
-		</dependency>
-		<!-- art needs/uses commons-beanutils-1.8.3+ -->
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
@@ -333,7 +329,7 @@
 		<dependency>
 			<groupId>net.sf.cewolf-art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>1.0.2</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -426,7 +422,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.1.7</version>
+			<version>1.2.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -448,27 +444,11 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>5.5.1</version>
+			<version>6.4.0</version>
 			<exclusions>
 				<exclusion>
-					<groupId>com.lowagie</groupId>
-					<artifactId>itext</artifactId>
-				</exclusion>
-				<!-- exclude old jfreechart that has jfree groupid -->
-				<exclusion>
-					<groupId>jfree</groupId>
-					<artifactId>jfreechart</artifactId>
-				</exclusion>
-				<!-- exclude old jcommon that has jfree groupid -->
-				<exclusion>
-					<groupId>jfree</groupId>
-					<artifactId>jcommon</artifactId>
-				</exclusion>
-				<!-- jdtcore used to compile Java expressions used in reports. likely 
-				also available in servlet container. inclusion may cause conflicts and errors -->
-				<exclusion>
-					<groupId>eclipse</groupId>
-					<artifactId>jdtcore</artifactId>
+					<groupId>org.olap4j</groupId>
+					<artifactId>olap4j</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -494,22 +474,6 @@
 		<dependency>
 			<groupId>com.lowagie</groupId>
 			<artifactId>itext</artifactId>
-			<version>2.1.7</version>
-			<exclusions>
-				<!-- bouncycastle jars used for encryption. not currently used by art -->
-				<exclusion>
-					<artifactId>bcprov-jdk14</artifactId>
-					<groupId>bouncycastle</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>bcmail-jdk14</artifactId>
-					<groupId>bouncycastle</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>bctsp-jdk14</artifactId>
-					<groupId>org.bouncycastle</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>pentaho</groupId>
@@ -528,10 +492,6 @@
 				<exclusion>
 					<groupId>javax.servlet</groupId>
 					<artifactId>servlet-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -660,5 +620,31 @@
 			<artifactId>commons-collections4</artifactId>
 			<version>4.1</version>
 		</dependency>
+		<!-- barcode4j dependencies -->
+		<dependency>
+			<groupId>net.sf.barcode4j</groupId>
+			<artifactId>barcode4j</artifactId>
+			<version>2.1</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-bridge</artifactId>
+			<version>1.8</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-svggen</artifactId>
+			<version>1.8</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>xmlgraphics-commons</artifactId>
+			<version>2.1</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- barcode4j dependencies -->
 	</dependencies>
 </project>

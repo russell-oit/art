@@ -24,6 +24,7 @@ import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
+import com.lowagie.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,9 +38,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.export.JRXhtmlExporter;
+import net.sf.jasperreports.engine.export.HtmlExporter;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
 import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
@@ -52,6 +53,12 @@ import net.sf.jasperreports.engine.util.JRElementsVisitor;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.util.JRVisitorSupport;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
+import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -156,62 +163,72 @@ public class JasperReportsOutput {
 			}
 
 			//export report
+			//https://stackoverflow.com/questions/27779612/export-jasperreports-in-html-format
 			switch (reportFormat) {
 				case pdf:
-					JasperExportManager.exportReportToPdfFile(jasperPrint, outputFileName);
+					//https://stackoverflow.com/questions/32318421/how-can-i-export-to-pdf-in-jasperreports-6-1-alternate-of-using-jrpdfexporter-s
+					//http://community.jaspersoft.com/questions/1038606/jasperreports-37-63-migration-how-replace-pdffont-font-mapping-code
+					//http://chager.de/encrypting-and-restricting-pdf-reports-build-with-jasperreports/
+					JRPdfExporter pdfExporter = new JRPdfExporter();
+
+					SimplePdfExporterConfiguration pdfConfiguration = new SimplePdfExporterConfiguration();
+					pdfConfiguration.setPermissions(PdfWriter.ALLOW_COPY | PdfWriter.ALLOW_PRINTING);
+					pdfExporter.setConfiguration(pdfConfiguration);
+
+					pdfExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+					pdfExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
+					pdfExporter.exportReport();
 					break;
 				case html:
-					JRXhtmlExporter htmlExporter = new JRXhtmlExporter();
-
-					htmlExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-					htmlExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
-
+					HtmlExporter htmlExporter = new HtmlExporter();
+					
+					htmlExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+					htmlExporter.setExporterOutput(new SimpleHtmlExporterOutput(outputFileName));
 					htmlExporter.exportReport();
 					break;
 				case xls:
 					JRXlsExporter xlsExporter = new JRXlsExporter();
-
-					xlsExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-					xlsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
-					xlsExporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
-					xlsExporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
-
+					
+					SimpleXlsReportConfiguration xlsConfiguration = new SimpleXlsReportConfiguration();
+					xlsConfiguration.setOnePagePerSheet(Boolean.FALSE);
+					xlsConfiguration.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
+					xlsExporter.setConfiguration(xlsConfiguration);
+					
+					xlsExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+					xlsExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					xlsExporter.exportReport();
 					break;
 				case xlsx:
 					JRXlsxExporter xlsxExporter = new JRXlsxExporter();
-
-					xlsxExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-					xlsxExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
-					xlsxExporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
-					xlsxExporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
-
+					
+					SimpleXlsxReportConfiguration xlsxConfiguration = new SimpleXlsxReportConfiguration();
+					xlsxConfiguration.setOnePagePerSheet(Boolean.FALSE);
+					xlsxConfiguration.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
+					xlsxExporter.setConfiguration(xlsxConfiguration);
+					
+					xlsxExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+					xlsxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					xlsxExporter.exportReport();
 					break;
 				case docx:
 					JRDocxExporter docxExporter = new JRDocxExporter();
-
-					docxExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-					docxExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
-
+					
+					docxExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+					docxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					docxExporter.exportReport();
 					break;
 				case odt:
 					JROdtExporter odtExporter = new JROdtExporter();
-
-					odtExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-					odtExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
-
+					
+					odtExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+					odtExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					odtExporter.exportReport();
 					break;
 				case ods:
 					JROdsExporter odsExporter = new JROdsExporter();
-
-					odsExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-					odsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
-					odsExporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
-					odsExporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
-
+					
+					odsExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+					odsExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					odsExporter.exportReport();
 					break;
 				default:

@@ -11,7 +11,7 @@
       Diagramoppsett
      </th>
      <td align="right" class="xform-close-button">
-      <imgButton src="wcf/form/cancel.png" action="revert" label="Lukk" hide="true" handler="com.tonbeller.wcf.form.ButtonHandler"/>
+      <imgButton src="wcf/form/cancel.png" action="revert" label="Lukk" hide="true" handler="net.sf.wcfart.wcf.form.ButtonHandler"/>
      </td>
     </tr>
    </table>
@@ -282,8 +282,8 @@
 
  <tr>
   <td align="right" colspan="4">
-    <button action="validate" label="OK" handler="com.tonbeller.wcf.form.ButtonHandler" hide="true"/>
-    <button action="revert" label="Avbryt" handler="com.tonbeller.wcf.form.ButtonHandler" hide="true"/>
+    <button action="validate" label="OK" handler="net.sf.wcfart.wcf.form.ButtonHandler" hide="true"/>
+    <button action="revert" label="Avbryt" handler="net.sf.wcfart.wcf.form.ButtonHandler" hide="true"/>
   </td>
  </tr>
 

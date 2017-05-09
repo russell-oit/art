@@ -14,7 +14,7 @@
   contentType="text/xml; charset=UTF-8" pageEncoding="ISO-8859-1"
   import="javax.servlet.http.*" %>
 
-<%@ taglib prefix="wcf" uri="http://www.tonbeller.com/wcf" %>
+<%@ taglib prefix="wcf" uri="http://sourceforge.net/projects/wcf-art/tags" %>
 
 <%--
   Displays XML of WCF Components in the Browser. Place a link

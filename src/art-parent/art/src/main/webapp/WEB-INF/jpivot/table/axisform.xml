@@ -101,10 +101,10 @@
 
   <tr>
     <td align="right" colspan="3">
-      <button action="revert" label="Cancel" handler="com.tonbeller.wcf.form.ButtonHandler" hide="true"/>
-      <button action="validate" label="OK" handler="com.tonbeller.wcf.form.ButtonHandler" hide="true"/>
-      <button action="revert" label="Revert" handler="com.tonbeller.wcf.form.ButtonHandler"/>
-      <button action="validate" label="Apply" handler="com.tonbeller.wcf.form.ButtonHandler"/>
+      <button action="revert" label="Cancel" handler="net.sf.wcfart.wcf.form.ButtonHandler" hide="true"/>
+      <button action="validate" label="OK" handler="net.sf.wcfart.wcf.form.ButtonHandler" hide="true"/>
+      <button action="revert" label="Revert" handler="net.sf.wcfart.wcf.form.ButtonHandler"/>
+      <button action="validate" label="Apply" handler="net.sf.wcfart.wcf.form.ButtonHandler"/>
     </td>
   </tr>
 

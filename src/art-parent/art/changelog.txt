@@ -31,6 +31,8 @@ ART 3.0
 * Added ability to schedule dashboard reports and output them as pdf
 * Allow for specifying specific colours to be used for given chart series
 * Allow for localization of parameter labels and help text
+* Enable use of barcode4j barcodes in jasperreports
+* Fix for context is readonly error on application startup
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7
 * Requires Servlet 3.0

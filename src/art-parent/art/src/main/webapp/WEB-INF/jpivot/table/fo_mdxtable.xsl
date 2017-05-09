@@ -129,7 +129,7 @@ exclude-result-prefixes="fo">
     </xsl:variable>
 
   <xsl:processing-instruction name="cocoon-format">type="text/xslfo"</xsl:processing-instruction>
-        <fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
+        <fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format" font-family="Arial">
             <fo:layout-master-set>
                 <fo:simple-page-master
                     master-name="simple"
@@ -157,9 +157,9 @@ exclude-result-prefixes="fo">
                       </xsl:choose>
                     </xsl:attribute>
 
-                    <fo:region-before extent="1cm"/>
+					<fo:region-body margin-bottom="1.5cm" margin-top="1.5cm"/>
+                    <fo:region-before extent="1cm" precedence="true"/>
                     <fo:region-after extent="1cm"/>
-                    <fo:region-body margin-bottom="1.5cm" margin-top="1.5cm"/>
                 </fo:simple-page-master>
             </fo:layout-master-set>
 
@@ -189,7 +189,7 @@ exclude-result-prefixes="fo">
                 <!-- Page content -->
                 <fo:flow flow-name="xsl-region-body">
                   <fo:block font-size="8pt"
-                        font-family="Verdana, Geneva, Arial, Helvetica, sans-serif">
+                        font-family="Verdana, Arial, Helvetica, sans-serif">
                             <fo:block>
                               <fo:marker marker-class-name="page-head">
                                 <!-- FOP compliant implementation, should use fo:leader with later versions -->
@@ -420,7 +420,7 @@ exclude-result-prefixes="fo">
   <fo:table-cell number-columns-spanned="{@colspan}" number-rows-spanned="{@rowspan}" border-style="solid" border-width="0.2mm" background-color="#FFFFFF">
     <xsl:apply-templates/>
     <!-- &#160; == &nbsp; -->
-    <xsl:text></xsl:text>
+	<fo:block>&#160;</fo:block>
     <!--</th>-->
   </fo:table-cell>
 

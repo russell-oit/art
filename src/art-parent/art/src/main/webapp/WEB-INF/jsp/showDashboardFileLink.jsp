@@ -12,14 +12,14 @@
 
 <br>
 <div class="reportBanner">
-	<span id="reportInfo">
+	<div id="reportInfo">
 		<h4>
 			<encode:forHtmlContent value="${reportName}"/>
 			<small>
 				${encode:forHtmlContent(description)} :: ${encode:forHtmlContent(startTimeString)}
 			</small>
 		</h4>
-	</span>
+	</div>
 </div>
 			
 <jsp:include page="/WEB-INF/jsp/showFileLink.jsp"/>
