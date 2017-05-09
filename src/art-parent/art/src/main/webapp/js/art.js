@@ -125,7 +125,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		urlElement.value = "jdbc:jtds:sqlserver://<server_name>/<database_name>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "sql-logging") {
-		driverElement.value = "net.sf.log4jdbc.DriverSpy";
+		driverElement.value = "net.sf.log4jdbc.sql.jdbcapi.DriverSpy";
 		urlElement.value = "jdbc:log4" + urlElement.value;
 		testSqlElement.value = "";
 	} else if (dbType === "db2") {
