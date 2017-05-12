@@ -118,7 +118,7 @@
 		repository e.g. spnego, itext-asian-2.1.7 -->
 		<repository>
 			<id>art-local</id>
-			<name>art</name>
+			<name>art-local</name>
 			<url>file://${project.basedir}${file.separator}repo</url>
 		</repository>
 		<!-- repository for mondrian -->
@@ -291,7 +291,7 @@
 		<dependency>
 			<groupId>net.sf.jpivot-art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
