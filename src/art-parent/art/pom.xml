@@ -291,7 +291,7 @@
 		<dependency>
 			<groupId>net.sf.jpivot-art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>1.0.2-SNAPSHOT</version>
+			<version>1.1.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -478,7 +478,7 @@
 		<dependency>
 			<groupId>net.sf.mondrian-art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>1.0.2-SNAPSHOT</version>
+			<version>1.0.2</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
