@@ -22,7 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import mondrian.xmla.impl.DynamicDatasourceXmlaServlet;
+import net.sf.mondrianart.mondrian.xmla.impl.DynamicDatasourceXmlaServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

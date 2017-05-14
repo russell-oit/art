@@ -460,7 +460,7 @@ name CDATA #REQUIRED
      access may be "all", "all_dimensions", or "none".
      If access is "all_dimensions", the role has access
      to all dimensions but still needs explicit access to cubes.
-     See mondrian.olap.Role#grant(mondrian.olap.Schema,int).
+     See net.sf.mondrianart.mondrian.olap.Role#grant(net.sf.mondrianart.mondrian.olap.Schema,int).
   -->
 <!ELEMENT SchemaGrant ((CubeGrant)*)>
 <!ATTLIST SchemaGrant
@@ -470,7 +470,7 @@ access (all|custom|none|all_dimensions) #REQUIRED
 <!--
      Grants (or denies) this role access to a cube.
      access may be "all" or "none".
-     See mondrian.olap.Role#grant(mondrian.olap.Cube,int).
+     See net.sf.mondrianart.mondrian.olap.Role#grant(net.sf.mondrianart.mondrian.olap.Cube,int).
   -->
 <!ELEMENT CubeGrant ((DimensionGrant)*,(HierarchyGrant)*)>
 <!ATTLIST CubeGrant
@@ -484,7 +484,7 @@ access (all|custom|none|all_dimensions) #REQUIRED
      Note that a role is implicitly given access to a dimension when it
      is given acess to a cube.
      See also the "all_dimensions" option of the "SchemaGrant" element.
-     See mondrian.olap.Role#grant(mondrian.olap.Dimension,int).
+     See net.sf.mondrianart.mondrian.olap.Role#grant(net.sf.mondrianart.mondrian.olap.Dimension,int).
   -->
 <!ELEMENT DimensionGrant EMPTY>
 <!ATTLIST DimensionGrant
@@ -498,7 +498,7 @@ access (all|custom|none|all_dimensions) #REQUIRED
      If access is "custom", you may also specify the
      attributes topLevel, bottomLevel, and
      the member grants.
-     See mondrian.olap.Role#grant(mondrian.olap.Hierarchy, int, mondrian.olap.Level).
+     See net.sf.mondrianart.mondrian.olap.Role#grant(net.sf.mondrianart.mondrian.olap.Hierarchy, int, net.sf.mondrianart.mondrian.olap.Level).
   -->
 <!ELEMENT HierarchyGrant ((MemberGrant)*)>
 <!ATTLIST HierarchyGrant
@@ -513,7 +513,7 @@ access (all|custom|none|all_dimensions) #REQUIRED
      Grants (or denies) this role access to a member.
      The children of this member inherit that access.
      You can implicitly see a member if you can see any of its children.
-     See mondrian.olap.Role#grant(mondrian.olap.Member,int).
+     See net.sf.mondrianart.mondrian.olap.Role#grant(net.sf.mondrianart.mondrian.olap.Member,int).
   -->
 <!ELEMENT MemberGrant EMPTY>
 <!ATTLIST MemberGrant

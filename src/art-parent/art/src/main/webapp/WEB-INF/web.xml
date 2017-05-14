@@ -210,7 +210,7 @@
 		<param-value>net.sf.wcfart.wcf.controller.RequestContextFactoryImpl</param-value>
 	</context-param>
 	<listener>
-		<listener-class>mondrian.web.taglib.Listener</listener-class>
+		<listener-class>net.sf.mondrianart.mondrian.web.taglib.Listener</listener-class>
 	</listener>
 	<!-- resources initializer -->
 	<listener>
@@ -218,7 +218,7 @@
 	</listener>
 	<servlet>
 		<servlet-name>MDXQueryServlet</servlet-name>
-		<servlet-class>mondrian.web.servlet.MdxQueryServlet</servlet-class>
+		<servlet-class>net.sf.mondrianart.mondrian.web.servlet.MdxQueryServlet</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>MondrianXmlaServlet</servlet-name>

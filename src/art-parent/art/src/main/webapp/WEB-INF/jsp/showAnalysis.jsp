@@ -147,7 +147,7 @@
 
 									<!-- render the table -->
 									<p> <br />
-									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true"/>
+									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true" localeString="${localeString}"/>
 									</p>
 
 									<p>

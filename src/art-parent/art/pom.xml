@@ -476,9 +476,9 @@
 			<artifactId>itext</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>pentaho</groupId>
-			<artifactId>mondrian</artifactId>
-			<version>3.4.1</version>
+			<groupId>net.sf.mondrian-art</groupId>
+			<artifactId>mondrian-art</artifactId>
+			<version>1.0.2-SNAPSHOT</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
@@ -500,6 +500,11 @@
 			<artifactId>olap4j</artifactId>
 			<version>1.2.0</version>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>5.4.1.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.owasp.encoder</groupId>
