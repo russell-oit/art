@@ -7,9 +7,7 @@
   <th colspan="2" class="xform-title">
    <table border="0" cellspacing="0" cellpadding="0" width="100%">
     <tr>
-     <th align="left" class="xform-title">
-      fmt:printform.title
-     </th>
+     <th align="left" class="xform-title">fmt:printform.title</th>
      <td align="right" class="xform-close-button">
       <imgButton src="wcf/form/cancel.png" action="revert" label="fmt:printform.close" hide="true" handler="net.sf.wcfart.wcf.form.ButtonHandler"/>
      </td>
