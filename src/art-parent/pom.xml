@@ -50,8 +50,8 @@
 						<source>${jdk.version}</source>
 						<target>${jdk.version}</target>
 						<debug>true</debug>
-						<showWarnings>true</showWarnings>
-						<showDeprecation>true</showDeprecation>
+<!--						<showWarnings>true</showWarnings>
+						<showDeprecation>true</showDeprecation>-->
 						<compilerArgs>
 							<arg>-Xlint</arg>
 						</compilerArgs>

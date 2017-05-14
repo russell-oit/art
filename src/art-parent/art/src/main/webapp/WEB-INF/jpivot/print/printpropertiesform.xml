@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<xform style="manual">
+<xform style="manual" bundle="net.sf.jpivotart.jpivot.table.resources">
 <table border="1" cellspacing="0" cellpadding="2">
 
  <tr>
@@ -8,10 +8,10 @@
    <table border="0" cellspacing="0" cellpadding="0" width="100%">
     <tr>
      <th align="left" class="xform-title">
-      Print Properties
+      fmt:printform.title
      </th>
      <td align="right" class="xform-close-button">
-      <imgButton src="wcf/form/cancel.png" action="revert" label="Close" hide="true" handler="net.sf.wcfart.wcf.form.ButtonHandler"/>
+      <imgButton src="wcf/form/cancel.png" action="revert" label="fmt:printform.close" hide="true" handler="net.sf.wcfart.wcf.form.ButtonHandler"/>
      </td>
     </tr>
    </table>
@@ -19,58 +19,57 @@
  </tr>
 
  <tr>
-  <td>Report Title</td>
+  <td>fmt:printform.reportTitle</td>
   <td>
-   <textField type="string" modelReference="reportTitle" size="30" title="enter a title for this report"/>
+   <textField type="string" modelReference="reportTitle" size="30" title="fmt:printform.reportTitleTooltip"/>
   </td>
  </tr>
  <tr>
-  <td>Page Orientation</td>
+  <td>fmt:printform.pageOrientation</td>
   <td>
       <listBox1 type="string" modelReference="pageOrientation">
-            <listItem value="portrait" label="Portrait"/>
-            <listItem value="landscape" label="Landscape"/>
+            <listItem value="portrait" label="fmt:printform.pageOrientationPortrait"/>
+            <listItem value="landscape" label="fmt:printform.pageOrientationLandscape"/>
        </listBox1>
   </td>
  </tr>
   <tr>
-  <td>Paper Size</td>
+  <td>fmt:printform.paperSize</td>
   <td>
      <listBox1 type="string" modelReference="paperType">
-	<listItem value="USletter" label="USletter"/>
+	<listItem value="USletter" label="US Letter"/>
 	<listItem value="A3" label="A3"/>
 	<listItem value="A4" label="A4"/>
 	<listItem value="A5" label="A5"/>
-	<listItem value="custom" label="custom"/>
-        <listItem value="auto" label="auto"/>
+	<listItem value="custom" label="fmt:printform.paperSizeCustom"/>
+        <listItem value="auto" label="fmt:printform.paperSizeAuto"/>
    </listBox1>
    </td>
   </tr>    
   <tr>
-  <td>Custom Height/Width</td>
+  <td>fmt:printform.customHeightWidth</td>
   <td>
-   <textField type="double" modelReference="pageHeight" size="4" title="enter Page Height (cm)"/>cm
-   <textField type="double" modelReference="pageWidth" size="4" title="enter Page Width (cm)"/>cm  (0=default A4)
+   <textField type="double" modelReference="pageHeight" size="4" title="fmt:printform.pageHeightTooltip"/>cm
+   <textField type="double" modelReference="pageWidth" size="4" title="fmt:printform.pageWidthTooltip"/>cm  (0=default A4)
   </td>
  </tr>
  
  <tr>
-  <td>Table Width</td>
+  <td>fmt:printform.tableWidth</td>
   <td>
    <checkBox modelReference="setTableWidth"/>(off = auto)
-   <textField type="double" modelReference="tableWidth" size="4" title="enter Table Width (cm)"/>cm
+   <textField type="double" modelReference="tableWidth" size="4" title="fmt:printform.tableWidthTooltip"/>cm
   </td>
  </tr>
   <tr >
-   <td colspan="2" align="left">Chart on separate page
-   <checkBox modelReference="chartPageBreak"/>
+   <td colspan="2" align="left">fmt:printform.chartSeparatePage <checkBox modelReference="chartPageBreak"/>
    </td>
   </tr>
   
  <tr>
   <td align="right" colspan="4">
-    <button action="validate" label="OK" handler="net.sf.wcfart.wcf.form.ButtonHandler" hide="true"/>
-    <button action="revert" label="Cancel" handler="net.sf.wcfart.wcf.form.ButtonHandler" hide="true"/>
+    <button action="validate" label="fmt:printform.ok" handler="net.sf.wcfart.wcf.form.ButtonHandler" hide="true"/>
+    <button action="revert" label="fmt:printform.cancel" handler="net.sf.wcfart.wcf.form.ButtonHandler" hide="true"/>
   </td>
  </tr>
 

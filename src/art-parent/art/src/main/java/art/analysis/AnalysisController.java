@@ -38,6 +38,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -65,7 +66,9 @@ public class AnalysisController {
 	private ReportService reportService;
 
 	@RequestMapping(value = "/showAnalysis", method = {RequestMethod.GET, RequestMethod.POST})
-	public String showAnalysis(HttpServletRequest request, Model model, HttpSession session) {
+	public String showAnalysis(HttpServletRequest request, Model model, HttpSession session,
+			Locale locale) {
+		
 		logger.debug("Entering showAnalysis");
 
 		try {
@@ -134,6 +137,8 @@ public class AnalysisController {
 					return errorPage;
 				}
 			}
+			
+			model.addAttribute("localeString", locale.toString());
 
 			prepareVariables(request, session, report, model);
 

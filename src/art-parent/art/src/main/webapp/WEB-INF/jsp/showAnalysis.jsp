@@ -85,7 +85,7 @@
 									<wcf:form id="${sortFormId}" xmlUri="/WEB-INF/jpivot/table/sortform.xml" model="${modelTableId}" visible="false"/>
 
 									<jp:print id="${printId}"/>
-									<wcf:form id="${printFormId}" xmlUri="/WEB-INF/jpivot/print/printpropertiesform.xml" model="${modelPrintId}" visible="false"/>
+									<wcf:form id="${printFormId}" xmlUri="/WEB-INF/jpivot/print/printpropertiesform.xml" model="${modelPrintId}" visible="false" localeString="${localeString}"/>
 
 									<jp:chart id="${chartId}" query="${modelQueryId}" visible="false"/>
 									<wcf:form id="${chartFormId}" xmlUri="/WEB-INF/jpivot/chart/chartpropertiesform.xml" model="${modelChartId}" visible="false"/>
@@ -118,7 +118,7 @@
 									</wcf:toolbar>
 
 									<%-- render toolbar --%>
-									<wcf:render ref="${toolbarId}" xslUri="/WEB-INF/jpivot/toolbar/htoolbar.xsl" xslCache="true" />
+									<wcf:render ref="${toolbarId}" xslUri="/WEB-INF/jpivot/toolbar/htoolbar.xsl" xslCache="true" localeString="${localeString}"/>
 
 									<p>
 										<%-- if there was an overflow, show error message --%>
@@ -129,40 +129,40 @@
 
 
 									<%-- render navigator --%>
-									<wcf:render ref="${navigatorId}" xslUri="/WEB-INF/jpivot/navi/navigator.xsl" xslCache="true" />
+									<wcf:render ref="${navigatorId}" xslUri="/WEB-INF/jpivot/navi/navigator.xsl" xslCache="true" localeString="${localeString}"/>
 
 									<%-- edit mdx --%>
 									<c:if test="${mdxEditIsVisible}">
-										<wcf:render ref="${mdxEditId}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true"/>
+										<wcf:render ref="${mdxEditId}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" localeString="${localeString}"/>
 									</c:if>
 
 									<%-- sort properties --%>
-									<wcf:render ref="${sortFormId}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true"/>
+									<wcf:render ref="${sortFormId}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" localeString="${localeString}"/>
 
 									<%-- chart properties --%>
-									<wcf:render ref="${chartFormId}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true"/>
+									<wcf:render ref="${chartFormId}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" localeString="${localeString}"/>
 
 									<%-- print properties --%>
-									<wcf:render ref="${printFormId}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true"/>
+									<wcf:render ref="${printFormId}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" localeString="${localeString}"/>
 
 									<!-- render the table -->
 									<p> <br />
-									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true"/>
+									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true" localeString="${localeString}"/>
 									</p>
 
 									<p>
 									<spring:message code="analysis.text.slicer"/>:
-									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxslicer.xsl" xslCache="true"/>
+									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxslicer.xsl" xslCache="true" localeString="${localeString}"/>
 									</p>
 
 									<p>
 										<!-- drill through table -->
-									<wcf:render ref="${queryDrillThroughTable}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true"/>
+									<wcf:render ref="${queryDrillThroughTable}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" localeString="${localeString}"/>
 									</p>
 
 									<p>
 										<!-- render chart -->
-									<wcf:render ref="${chartId}" xslUri="/WEB-INF/jpivot/chart/chart.xsl" xslCache="true"/>
+									<wcf:render ref="${chartId}" xslUri="/WEB-INF/jpivot/chart/chart.xsl" xslCache="true" localeString="${localeString}"/>
 									</p>
 
 								</form>

@@ -291,7 +291,7 @@
 		<dependency>
 			<groupId>net.sf.jpivot-art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
