@@ -157,7 +157,7 @@
 
 									<p>
 										<!-- drill through table -->
-									<wcf:render ref="${queryDrillThroughTable}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true"/>
+									<wcf:render ref="${queryDrillThroughTable}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" localeString="${localeString}"/>
 									</p>
 
 									<p>
