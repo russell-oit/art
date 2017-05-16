@@ -23,3 +23,5 @@ src/art-parent/art-ajaxtags/target/
 src/art-parent/art/nbactions.xml
 src/art-parent/art-mail/nbactions.xml
 src/art-parent/art-dbcp/nbactions.xml
+src/art-parent/saiku-service-art/nb-configuration.xml
+src/art-parent/saiku-service-art/target/

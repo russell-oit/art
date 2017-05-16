@@ -152,13 +152,6 @@ var SplashScreen = Backbone.View.extend({
 		if(Settings.BIPLUGIN5){
                 $(self.el).html(self.template());
 
-                if (Settings.LICENSE.licenseType != undefined &&
-                    Settings.LICENSE.licenseType != "trial" && Settings.LICENSE.licenseType != "Open Source License") {
-
-                    $(self.el).find(".enterprisetoggle").css("visibility", "hidden");
-
-
-				}
                 self.getContent();
 
                 self.getNews();
@@ -176,14 +169,6 @@ var SplashScreen = Backbone.View.extend({
                 //$(self.el).html(self.template()).appendTo($('body'));
                 $(self.el).html(self.template());
 
-                if (Settings.LICENSE.licenseType != undefined &&
-                    Settings.LICENSE.licenseType != "trial" && Settings.LICENSE.licenseType != "Open" +
-                    " Source License") {
-
-                    $(self.el).find(".enterprisetoggle").css("visibility", "hidden");
-
-
-				}
                 self.getContent();
 
                 self.getNews();
@@ -229,48 +214,6 @@ var SplashScreen = Backbone.View.extend({
 		});*/
 	},
     getContent: function(){
-        var that =this;
-        var license = new License();
-
-        $.ajax({
-            type: 'GET',
-            url: "http://meteorite.bi/content.json",
-            async: false,
-            contentType: "application/json",
-            dataType: 'jsonp',
-            jsonpCallback: 'jsonCallback2',
-            cache: true,
-            success: function(json) {
-
-                $(that.el).find("#dyn_content").html(json.item[0].content);
-                $(that.el).find(".responsive-container").fitVids();
-                    //$(self.el).html(self.template()).appendTo($('body'));
-                    $(self.el).html(that.template());
-
-                    if (Settings.LICENSE.licenseType != "trial" && Settings.LICENSE.licenseType != "Open Source" +
-                        " License") {
-
-                        $(self.el).find(".enterprisetoggle").css("visibility", "hidden");
-
-
-                    }
-
-            },
-            error: function(e) {
-
-                    //$(self.el).html(self.template()).appendTo($('body'));
-                    $(self.el).html(self.template());
-
-                    if (Settings.LICENSE.licenseType != "trial" && Settings.LICENSE.licenseType != "Open Source" +
-                        " License") {
-
-                        $(self.el).find(".enterprisetoggle").css("visibility", "hidden");
-
-
-                    }
-
-            }
-        });
 
     }
 

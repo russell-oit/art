@@ -22,8 +22,9 @@ var Settings = {
     LICENSE: {},
     BIPLUGIN: false,
     BIPLUGIN5: false,
-    BASE_URL: window.location.origin,
-    TOMCAT_WEBAPP: "/saiku",
+	BASE_URL: window.location.origin,
+    //TOMCAT_WEBAPP: "http://localhost:8080/saiku",
+	TOMCAT_WEBAPP: "/art/saiku2",
     REST_MOUNT_POINT: "/rest/saiku/",
     DIMENSION_PREFETCH: true,
     DIMENSION_SHOW_ALL: true,
@@ -88,7 +89,7 @@ var Settings = {
     MAPS_OPTIONS: {
         OSM: {
             maxZoom: 18,
-            attribution: '© <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a>'
+            attribution: 'Â© <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a>'
         },
         GMAPS: {
         }

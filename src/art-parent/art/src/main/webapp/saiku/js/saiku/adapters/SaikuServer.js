@@ -145,6 +145,9 @@ Backbone.sync = function(method, model, options) {
       success:      success,
       statusCode:   statuscode, 
       error:        failure,
+	  xhrFields: {
+                withCredentials: true
+          },
       async:        async//,
       //processData:  false
       /*
@@ -172,6 +175,9 @@ Backbone.sync = function(method, model, options) {
         };
       }
     }
+	
+//	Settings.ERRORS = 0;
+//	Saiku.ui.unblock(); 
 
     // Make the request
     $.ajax(params);

@@ -49,27 +49,5 @@ var AboutModal = Modal.extend({
         _.extend(this, args);
 
         this.options.title = '<span class="i18n">About</span> ' + Settings.VERSION;
-
-        this.bind('open', function() {
-            this.render_license_info();
-        });
-    },
-
-    render_license_info: function() {
-        var licenseType = Settings.LICENSE.licenseType === 'community_edition'
-            ? 'Open Source License'
-            : Settings.LICENSE.licenseType;
-        var expiration;
-
-        if (Settings.LICENSE.expiration) {
-            expiration = new Date(parseFloat(Settings.LICENSE.expiration));
-            this.$el.find('.item-license-expiration').show();
-            this.$el.find('.license-expiration').text(expiration.toLocaleDateString());
-        }
-
-        this.$el.find('.license-type').text(licenseType);
-        this.$el.find('.license-user-limit').text(Settings.LICENSE.userLimit);
-        this.$el.find('.license-name').text(Settings.LICENSE.name);
-        this.$el.find('.license-email').text(Settings.LICENSE.email);
     }
 });

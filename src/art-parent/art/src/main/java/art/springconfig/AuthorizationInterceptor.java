@@ -157,7 +157,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			return false;
 		}
 
-		if (canAccessPage(page, user, session, pathMinusContext)) {
+		if (StringUtils.startsWith(pathMinusContext, "/saiku2")
+				|| canAccessPage(page, user, session, pathMinusContext)) {
 			if (!Config.isArtDatabaseConfigured()) {
 				//if art database not configured, only allow access to artDatabase
 				if (!StringUtils.equals(page, "artDatabase")) {
