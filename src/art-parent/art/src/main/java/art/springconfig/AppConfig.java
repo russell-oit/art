@@ -161,7 +161,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		messageSource.setUseCodeAsDefaultMessage(true);
 		messageSource.setDefaultEncoding("UTF-8");
 		messageSource.setFallbackToSystemLocale(false);
-		messageSource.setCacheSeconds((int) TimeUnit.HOURS.toSeconds(1)); //check every x hours
+		messageSource.setCacheSeconds((int) TimeUnit.HOURS.toSeconds(1));
 		return messageSource;
 	}
 

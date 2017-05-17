@@ -113,7 +113,7 @@ public class SaikuRestController {
 	@GetMapping("/info/ui-settings")
 	public Map<String, Object> getUiSettings(){
 		Map<String, Object> uiSettings=new HashMap<>();
-		uiSettings.put("VERSION", "TEST VER");
+		uiSettings.put("VERSION", "saiku-art");
 		return uiSettings;
 	}
 	
