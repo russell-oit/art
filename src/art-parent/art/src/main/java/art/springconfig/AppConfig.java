@@ -31,7 +31,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -62,15 +61,12 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToUserGroup stringToUserGroup;
-	
+
 	@Autowired
 	private StringToReport stringToReport;
 
 	@Autowired
 	private StringToDouble stringToDouble;
-
-	@Autowired
-	private AuthorizationInterceptor authorizationInterceptor;
 
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
@@ -130,7 +126,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		resolver.setCharacterEncoding("UTF-8");
 		return resolver;
 	}
-	
+
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
@@ -139,6 +135,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		//https://stackoverflow.com/questions/11586757/spring-3-interceptor-order
 		registry.addInterceptor(localeChangeInterceptor);
 		registry.addInterceptor(mdcInterceptor);
+
+		AuthorizationInterceptor authorizationInterceptor = new AuthorizationInterceptor();
+		authorizationInterceptor.setApplicationContext(applicationContext);
 
 		//https://ant.apache.org/manual/dirtasks.html#patterns
 		//https://opensourceforgeeks.blogspot.co.ke/2016/01/difference-between-and-in-spring-mvc.html
@@ -151,14 +150,14 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	@Bean
 	public LocaleResolver localeResolver() {
 		CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver();
-		cookieLocaleResolver.setDefaultLocale(StringUtils.parseLocaleString("en"));
+		cookieLocaleResolver.setDefaultLocale(org.springframework.util.StringUtils.parseLocaleString("en"));
 		return cookieLocaleResolver;
 	}
 
 	@Bean
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-		messageSource.setBasenames("WEB-INF/i18n/ArtMessages");
+		messageSource.setBasenames("/WEB-INF/i18n/ArtMessages");
 		messageSource.setUseCodeAsDefaultMessage(true);
 		messageSource.setDefaultEncoding("UTF-8");
 		messageSource.setFallbackToSystemLocale(false);

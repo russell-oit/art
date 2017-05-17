@@ -27,13 +27,18 @@ import art.utils.ArtUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
@@ -53,6 +58,16 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 	//http://www.concretepage.com/spring/spring-mvc/spring-handlerinterceptor-annotation-example-webmvcconfigureradapter
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthorizationInterceptor.class);
+
+	private MessageSource messageSource;
+
+	private LocaleResolver localeResolver;
+	
+	private ApplicationContext applicationContext;
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
@@ -137,6 +152,15 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				}
 			}
 		}
+		
+		//autowiring in this class has problems.. 
+		messageSource = (MessageSource) applicationContext.getBean("messageSource");
+		localeResolver = (LocaleResolver) applicationContext.getBean("localeResolver");
+
+		//https://stackoverflow.com/questions/29902872/spring-how-to-get-the-actual-current-locale-like-it-works-for-messages
+		//https://stackoverflow.com/questions/10792551/how-to-obtain-a-current-user-locale-from-spring-without-passing-it-as-a-paramete
+		//https://stackoverflow.com/questions/24612568/localcontexthandler-usage
+		Locale locale = localeResolver.resolveLocale(request);
 
 		if (user == null) {
 			//no valid user available
@@ -151,10 +175,22 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (request.getQueryString() != null) {
 				nextPageAfterLogin = nextPageAfterLogin + "?" + request.getQueryString();
 			}
-			session.setAttribute("nextPageAfterLogin", nextPageAfterLogin);
-			request.setAttribute("message", message);
-			request.getRequestDispatcher("/login").forward(request, response);
-			return false;
+
+			if (StringUtils.startsWith(pathMinusContext, "/saiku2")) {
+				//for saiku rest calls, don't return/display html page in response. just return error status code and message
+				//https://stackoverflow.com/questions/21417256/spring-4-api-request-authentication
+				//https://stackoverflow.com/questions/377644/jquery-ajax-error-handling-show-custom-exception-messages
+				response.setStatus(401); //HttpServletResponse.SC_UNAUTHORIZED
+				String localizedMessage = messageSource.getMessage(message, null, locale);
+				response.setContentType(MediaType.TEXT_PLAIN.toString());
+				response.getWriter().write(localizedMessage);
+				return false;
+			} else {
+				session.setAttribute("nextPageAfterLogin", nextPageAfterLogin);
+				request.setAttribute("message", message);
+				request.getRequestDispatcher("/login").forward(request, response);
+				return false;
+			}
 		}
 
 		if (StringUtils.startsWith(pathMinusContext, "/saiku2")
@@ -162,18 +198,36 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (!Config.isArtDatabaseConfigured()) {
 				//if art database not configured, only allow access to artDatabase
 				if (!StringUtils.equals(page, "artDatabase")) {
-					request.setAttribute("message", "page.message.artDatabaseNotConfigured");
-					request.getRequestDispatcher("/accessDenied").forward(request, response);
-					return false;
+					message = "page.message.artDatabaseNotConfigured";
+					if (StringUtils.startsWith(pathMinusContext, "/saiku2")) {
+						response.setStatus(401); //HttpServletResponse.SC_UNAUTHORIZED
+						String localizedMessage = messageSource.getMessage(message, null, locale);
+						response.setContentType(MediaType.TEXT_PLAIN.toString());
+						response.getWriter().write(localizedMessage);
+						return false;
+					} else {
+						request.setAttribute("message", message);
+						request.getRequestDispatcher("/accessDenied").forward(request, response);
+						return false;
+					}
 				}
 			}
 			//authorisation is ok. display page
 			return true;
 		} else {
-			//show access denied page. 
-			//use forward instead of redirect so that the intended url remains in the browser
-			request.getRequestDispatcher("/accessDenied").forward(request, response);
-			return false;
+			if (StringUtils.startsWith(pathMinusContext, "/saiku2")) {
+				message = "page.message.accessDenied";
+				response.setStatus(401); //HttpServletResponse.SC_UNAUTHORIZED
+				String localizedMessage = messageSource.getMessage(message, null, locale);
+				response.setContentType(MediaType.TEXT_PLAIN.toString());
+				response.getWriter().write(localizedMessage);
+				return false;
+			} else {
+				//show access denied page. 
+				//use forward instead of redirect so that the intended url remains in the browser
+				request.getRequestDispatcher("/accessDenied").forward(request, response);
+				return false;
+			}
 		}
 	}
 

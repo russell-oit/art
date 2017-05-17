@@ -212,14 +212,12 @@ Header that appears at the top of all pages, except the login and logs pages
 							</a>
 						</li>
 					</c:if>
-					<c:if test="${sessionUser.accessLevel.value >= 0}">
-						<li>
-							<a href="${pageContext.request.contextPath}/language">
-								<i class="fa fa-comment"></i> 
-								<spring:message code="header.link.language"/>
-							</a>
-						</li>
-					</c:if>
+					<li>
+						<a href="${pageContext.request.contextPath}/language">
+							<i class="fa fa-comment"></i> 
+							<spring:message code="header.link.language"/>
+						</a>
+					</li>
 					<li>
 						<form method="POST" action="${pageContext.request.contextPath}/logout">
 							<button type="submit" class="btn btn-link navbar-btn">

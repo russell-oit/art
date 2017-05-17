@@ -88,7 +88,9 @@ Backbone.sync = function(method, model, options) {
     var errorLogout = function() {
         Settings.ERRORS++;
         if (Settings.ERRORS < Settings.ERROR_TOLERANCE) {
-          Saiku.session.logout();
+			if(Saiku.session){
+				Saiku.session.logout();
+			}
         } else {
           Saiku.ui.block("Communication problem with the server. Please reload the application...");
         }
@@ -106,6 +108,7 @@ Backbone.sync = function(method, model, options) {
       if (!isIE && typeof console != "undefined" && console && console.error) {
         console.error("Error performing " + type + " on " + url);
         console.error(errorThrown);
+		bootbox.alert(jqXHR.responseText);
       }
       if (options.error) {
         options.error(jqXHR, textStatus, errorThrown);

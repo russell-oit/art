@@ -318,5 +318,5 @@ public class ArtUtils {
 		cal.set(Calendar.MILLISECOND, 0);
 		return cal.getTime();
 	}
-
+	
 }

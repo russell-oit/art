@@ -28,7 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
+import org.saiku.olap.dto.SaikuCatalog;
 import org.saiku.olap.dto.SaikuConnection;
+import org.saiku.olap.dto.SaikuCube;
+import org.saiku.olap.dto.SaikuSchema;
 import org.saiku.service.util.dto.Plugin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -107,9 +110,36 @@ public class SaikuRestController {
 		return l;
 	}
 	
+	@GetMapping("/info/ui-settings")
+	public Map<String, Object> getUiSettings(){
+		Map<String, Object> uiSettings=new HashMap<>();
+		uiSettings.put("VERSION", "TEST VER");
+		return uiSettings;
+	}
+	
 	@GetMapping("/{username}/discover")
 	public List<SaikuConnection> discover(){
-		return Collections.emptyList();
+		List<SaikuConnection> connections=new ArrayList<>();
+		
+		List<SaikuCatalog> catalogs=new ArrayList<>();
+		
+		List<SaikuSchema> schemas=new ArrayList<>();
+		
+		List<SaikuCube> cubes =new ArrayList<>();
+		
+		SaikuCube cube=new SaikuCube("conn one", "unique cube name", "cube name", "cube caption", "catalog one", "schema one");
+		cubes.add(cube);
+		
+		SaikuSchema schema=new SaikuSchema("schema one", cubes);
+		schemas.add(schema);
+		
+		SaikuCatalog catalog=new SaikuCatalog("catalog one", schemas);
+		catalogs.add(catalog);
+		
+		SaikuConnection conn=new SaikuConnection("conn one",catalogs);
+		connections.add(conn);
+		
+		return connections;
 	}
 	
 }
