@@ -27,6 +27,7 @@ import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.jobrunners.CleanJob;
+import art.saiku.SaikuConnectionManager;
 import art.settings.CustomSettings;
 import art.settings.Settings;
 import art.utils.ArtUtils;
@@ -67,6 +68,8 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
+import org.saiku.olap.discover.OlapMetaExplorer;
+import org.saiku.olap.util.exception.SaikuOlapException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
@@ -102,6 +105,8 @@ public class Config extends HttpServlet {
 	private static final Map<String, String> languages = new TreeMap<>();
 	private static Configuration freemarkerConfig;
 	private static TemplateEngine thymeleafReportTemplateEngine;
+	private static SaikuConnectionManager saikuConnectionManager;
+	private static OlapMetaExplorer metaExplorer;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -397,7 +402,14 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(artVersion, upgradeFilePath, templatesPath);
-		} catch (SQLException ex) {
+
+			if (saikuConnectionManager == null) {
+				saikuConnectionManager = new SaikuConnectionManager();
+			}
+			saikuConnectionManager.init();
+			metaExplorer = null;
+			metaExplorer = new OlapMetaExplorer(saikuConnectionManager);
+		} catch (SQLException | SaikuOlapException ex) {
 			logger.error("Error", ex);
 		}
 	}
@@ -1007,5 +1019,30 @@ public class Config extends HttpServlet {
 	 */
 	public static Settings getSettings() {
 		return settings;
+	}
+
+	/**
+	 * Returns the saiku olap meta explorer
+	 *
+	 * @return the saiku olap meta explorer
+	 */
+	public static OlapMetaExplorer getSaikuMetaExplorer() {
+		return metaExplorer;
+	}
+
+	/**
+	 * Creates saiku connections given the current datasource configuration. If
+	 * they were already existing, they are destroyed, cleared and recreated
+	 *
+	 * @throws SaikuOlapException
+	 * @throws SQLException
+	 */
+	public static void createSaikuConnections() throws SaikuOlapException, SQLException {
+		if (saikuConnectionManager == null) {
+			saikuConnectionManager = new SaikuConnectionManager();
+		}
+		saikuConnectionManager.init();
+		metaExplorer = null;
+		metaExplorer = new OlapMetaExplorer(saikuConnectionManager);
 	}
 }

@@ -20,6 +20,7 @@ package art.datasource;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.AccessLevel;
+import art.enums.DatasourceType;
 import art.user.User;
 import art.utils.ActionResult;
 import java.sql.SQLException;
@@ -76,6 +77,22 @@ public class DatasourceService {
 
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+	
+	/**
+	 * Returns olap datasources
+	 *
+	 * @return olap datasources
+	 * @throws SQLException
+	 */
+	@Cacheable("datasources")
+	public List<Datasource> getOlapDatasources() throws SQLException {
+		logger.debug("Entering getOlapDatasources");
+		
+		String sql= SQL_SELECT_ALL + " WHERE DATASOURCE_TYPE=?";
+
+		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
+		return dbService.query(sql, h, DatasourceType.OLAP.getValue());
 	}
 
 	/**

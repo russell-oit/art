@@ -1,6 +1,7 @@
 ART is free software, licensed under the terms of
 the GNU General Public License as published by
-the Free Software Foundation, version 2 of the License.
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
 ART includes other free software components. 
 Some of these are licensed under the Apache Software License.

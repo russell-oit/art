@@ -119,7 +119,7 @@ public class DbConnections {
 		} else if (connectionPoolLibrary == ConnectionPoolLibrary.ArtDBCP) {
 			pool = new ArtDBCPConnectionPool();
 		} else {
-			throw new IllegalArgumentException("Unexpected connection pool library " + connectionPoolLibrary);
+			throw new IllegalArgumentException("Unexpected connection pool library: " + connectionPoolLibrary);
 		}
 
 		pool.create(datasourceInfo, maxPoolSize);

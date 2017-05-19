@@ -161,6 +161,14 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.relique.jdbc.csv.CsvDriver";
 		urlElement.value = "jdbc:relique:csv:<directory_with_csvs>";
 		testSqlElement.value = "";
+	} else if (dbType === "h2-server") {
+		driverElement.value = "org.h2.Driver";
+		urlElement.value = "jdbc:h2://<server>/<db-name>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "h2-embedded") {
+		driverElement.value = "org.h2.Driver";
+		urlElement.value = "jdbc:h2://<file_path>";
+		testSqlElement.value = "select 1";
 	}
 }
 

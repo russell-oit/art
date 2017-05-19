@@ -19,6 +19,7 @@ package art.datasource;
 
 import art.enums.DatasourceType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Properties;
 
 /**
  * Represents details common to report datasources and art database
@@ -240,5 +241,14 @@ public abstract class DatasourceInfo {
 	 */
 	public void setDriver(String driver) {
 		this.driver = driver;
+	}
+
+	public Properties getSaikuProperties() {
+		Properties properties = new Properties();
+		properties.put("username", username);
+		properties.put("password", password);
+		properties.put("driver", driver);
+		properties.put("location", url);
+		return properties;
 	}
 }

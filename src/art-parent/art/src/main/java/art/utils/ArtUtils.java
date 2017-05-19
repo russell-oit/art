@@ -220,8 +220,8 @@ public class ArtUtils {
 		databaseTypes.put("postgresql", "PostgreSQL");
 		databaseTypes.put("sqlserver-ms", "SQL Server (Microsoft driver)");
 		databaseTypes.put("sqlserver-jtds", "SQL Server (jTDS driver)");
-		databaseTypes.put("hsqldb-standalone", "HSQLDB (Standalone mode)");
-		databaseTypes.put("hsqldb-server", "HSQLDB (Server mode)");
+		databaseTypes.put("hsqldb-standalone", "HSQLDB Standalone");
+		databaseTypes.put("hsqldb-server", "HSQLDB Server");
 		databaseTypes.put("db2", "DB2 - driver not included");
 //		databaseTypes.put("generic-odbc", "Generic ODBC"); //generic jdbc-odbc will be removed in Java 8
 		databaseTypes.put("sql-logging", "SQL Logging");
@@ -230,6 +230,8 @@ public class ArtUtils {
 		databaseTypes.put("msaccess-ucanaccess", "MS Access (UCanAccess driver)");
 		databaseTypes.put("sqlite-xerial", "SQLite (Xerial driver)");
 		databaseTypes.put("csv-csvjdbc", "CSV (CsvJdbc driver)");
+		databaseTypes.put("h2-server", "H2 Server");
+		databaseTypes.put("h2-embedded", "H2 Embedded");
 
 		return databaseTypes;
 	}

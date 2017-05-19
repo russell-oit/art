@@ -112,34 +112,10 @@ public class SaikuRestController {
 	
 	@GetMapping("/info/ui-settings")
 	public Map<String, Object> getUiSettings(){
+		//optionally override properties of the Settings object in /saiku/js/saiku/Settings.js
 		Map<String, Object> uiSettings=new HashMap<>();
 		uiSettings.put("VERSION", "saiku-art");
 		return uiSettings;
-	}
-	
-	@GetMapping("/{username}/discover")
-	public List<SaikuConnection> discover(){
-		List<SaikuConnection> connections=new ArrayList<>();
-		
-		List<SaikuCatalog> catalogs=new ArrayList<>();
-		
-		List<SaikuSchema> schemas=new ArrayList<>();
-		
-		List<SaikuCube> cubes =new ArrayList<>();
-		
-		SaikuCube cube=new SaikuCube("conn one", "unique cube name", "cube name", "cube caption", "catalog one", "schema one");
-		cubes.add(cube);
-		
-		SaikuSchema schema=new SaikuSchema("schema one", cubes);
-		schemas.add(schema);
-		
-		SaikuCatalog catalog=new SaikuCatalog("catalog one", schemas);
-		catalogs.add(catalog);
-		
-		SaikuConnection conn=new SaikuConnection("conn one",catalogs);
-		connections.add(conn);
-		
-		return connections;
 	}
 	
 }

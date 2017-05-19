@@ -126,19 +126,13 @@ Edit datasource page
 				var datasourceType=$('input[name="datasourceType"]:checked').val();
 				
 				if (datasourceType === 'JDBC') {
-					$("#databaseTypeDiv").show();
 					$("#jndiDiv").show();
-					$("#driverDiv").show();
 					$("#testSqlDiv").show();
 					$("#connectionPoolTimeoutDiv").show();
-					$("#testConnection").show();
 				} else if (datasourceType === 'OLAP') {
-					$("#databaseTypeDiv").hide();
 					$("#jndiDiv").hide();
-					$("#driverDiv").hide();
 					$("#testSqlDiv").hide();
 					$("#connectionPoolTimeoutDiv").hide();
-					$("#testConnection").hide();
 				}
 			}
 		</script>

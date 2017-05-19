@@ -351,12 +351,12 @@ public class DatasourceController {
 
 		logger.debug("datasource.isActive()={}", datasource.isActive());
 		if (datasource.isActive()) {
-			if (datasource.getDatasourceType() == DatasourceType.JDBC) {
-				testConnection(jndi, driver, url, username, clearTextPassword);
-			}
+			testConnection(jndi, driver, url, username, clearTextPassword);
 
 			ArtDatabase artDbConfig = Config.getArtDbConfig();
 			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			
+			Config.createSaikuConnections();
 		}
 	}
 
@@ -382,8 +382,10 @@ public class DatasourceController {
 			if (jndi) {
 				conn = ArtUtils.getJndiConnection(url);
 			} else {
-				Class.forName(driver);
-				conn = DriverManager.getConnection(url, username, password);
+				if (StringUtils.isNotBlank(driver)) {
+					Class.forName(driver);
+					conn = DriverManager.getConnection(url, username, password);
+				}
 			}
 		} finally {
 			DatabaseUtils.close(conn);
