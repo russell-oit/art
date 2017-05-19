@@ -355,7 +355,7 @@ public class DatasourceController {
 
 			ArtDatabase artDbConfig = Config.getArtDbConfig();
 			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
-			
+
 			Config.createSaikuConnections();
 		}
 	}
@@ -384,6 +384,16 @@ public class DatasourceController {
 			} else {
 				if (StringUtils.isNotBlank(driver)) {
 					Class.forName(driver);
+					if (driver.equals("mondrian.olap4j.MondrianOlap4jDriver")) {
+						if (StringUtils.isNotBlank(username) && 
+								!StringUtils.contains(url, "JdbcUser")) {
+							url += "JdbcUser=" + username + ";";
+						}
+						if (StringUtils.isNotBlank(password) && 
+								!StringUtils.contains(url, "JdbcPassword")) {
+							url += "JdbcPassword=" + password + ";";
+						}
+					}
 					conn = DriverManager.getConnection(url, username, password);
 				}
 			}

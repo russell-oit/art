@@ -31,7 +31,7 @@ public class SaikuConnectionManager implements IConnectionManager {
 		}
 
 		DatasourceService datasourceService = new DatasourceService();
-		List<Datasource> olapDatasources = datasourceService.getOlapDatasources();
+		List<Datasource> olapDatasources = datasourceService.getOlap4jDatasources();
 		for (Datasource datasource : olapDatasources) {
 			if (StringUtils.isNotBlank(datasource.getDriver())) {
 				ds.put(datasource.getName(), datasource);

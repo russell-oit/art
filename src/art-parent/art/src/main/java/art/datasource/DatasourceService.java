@@ -80,19 +80,20 @@ public class DatasourceService {
 	}
 	
 	/**
-	 * Returns olap datasources
+	 * Returns olap4j datasources
 	 *
-	 * @return olap datasources
+	 * @return olap4j datasources
 	 * @throws SQLException
 	 */
 	@Cacheable("datasources")
-	public List<Datasource> getOlapDatasources() throws SQLException {
-		logger.debug("Entering getOlapDatasources");
+	public List<Datasource> getOlap4jDatasources() throws SQLException {
+		logger.debug("Entering getOlap4jDatasources");
 		
-		String sql= SQL_SELECT_ALL + " WHERE DATASOURCE_TYPE=?";
+		String sql= SQL_SELECT_ALL + " WHERE DRIVER IN('mondrian.olap4j.MondrianOlap4jDriver',"
+				+ "'org.olap4j.driver.xmla.XmlaOlap4jDriver')";
 
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
-		return dbService.query(sql, h, DatasourceType.OLAP.getValue());
+		return dbService.query(sql, h);
 	}
 
 	/**
