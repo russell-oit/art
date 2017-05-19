@@ -121,7 +121,7 @@
 			<name>art-local</name>
 			<url>file://${project.basedir}${file.separator}repo</url>
 		</repository>
-		<!-- repository for mondrian -->
+		<!-- repository for mondrian, olap4j-xmla -->
 		<repository>
 			<id>pentaho</id>
 			<name>Pentaho</name>
@@ -511,6 +511,16 @@
 			<artifactId>olap4j</artifactId>
 			<version>1.2.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.olap4j</groupId>
+			<artifactId>olap4j-xmla</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		<dependency>
+            <groupId>org.olap4j</groupId>
+            <artifactId>olap4j-xmlaserver</artifactId>
+            <version>1.2.0</version>
+        </dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>

@@ -74,6 +74,8 @@ public class ArtDatabaseController {
 		databaseTypes.remove("msaccess-ucanaccess");
 		databaseTypes.remove("sqlite-xerial");
 		databaseTypes.remove("csv-csvjdbc");
+		databaseTypes.remove("olap4j-mondrian");
+		databaseTypes.remove("olap4j-xmla");
 
 		return databaseTypes;
 	}

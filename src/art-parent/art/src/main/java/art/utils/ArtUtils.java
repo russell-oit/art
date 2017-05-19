@@ -232,6 +232,8 @@ public class ArtUtils {
 		databaseTypes.put("csv-csvjdbc", "CSV (CsvJdbc driver)");
 		databaseTypes.put("h2-server", "H2 Server");
 		databaseTypes.put("h2-embedded", "H2 Embedded");
+		databaseTypes.put("olap4j-mondrian", "Olap4j Mondrian");
+		databaseTypes.put("olap4j-xmla", "Olap4j XMLA");
 
 		return databaseTypes;
 	}

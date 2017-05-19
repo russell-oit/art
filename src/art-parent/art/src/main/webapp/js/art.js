@@ -169,6 +169,17 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.h2.Driver";
 		urlElement.value = "jdbc:h2://<file_path>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "olap4j-mondrian") {
+		//http://forums.pentaho.com/showthread.php?70625-Mondrian-begining-with-olap4j
+		//http://mondrian.pentaho.com/api/mondrian/olap4j/MondrianOlap4jDriver.html
+		driverElement.value = "mondrian.olap4j.MondrianOlap4jDriver";
+		urlElement.value = "jdbc:mondrian:Jdbc=<jdbc_url>; Catalog=<schema_file_path>; JdbcDrivers=<jdbc_driver>";
+		testSqlElement.value = "";
+	} else if (dbType === "olap4j-xmla") {
+		//http://www.olap4j.org/api/org/olap4j/driver/xmla/XmlaOlap4jDriver.html
+		driverElement.value = "org.olap4j.driver.xmla.XmlaOlap4jDriver";
+		urlElement.value = "jdbc:xmla:Server=<xmla_url>";
+		testSqlElement.value = "";
 	}
 }
 
