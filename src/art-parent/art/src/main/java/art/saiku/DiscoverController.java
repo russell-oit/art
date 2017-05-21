@@ -22,18 +22,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 import org.saiku.olap.discover.OlapMetaExplorer;
 import org.saiku.olap.dto.SaikuCatalog;
 import org.saiku.olap.dto.SaikuConnection;
 import org.saiku.olap.dto.SaikuCube;
+import org.saiku.olap.dto.SaikuCubeMetadata;
+import org.saiku.olap.dto.SaikuDimension;
+import org.saiku.olap.dto.SaikuMember;
 import org.saiku.olap.dto.SaikuSchema;
 import org.saiku.olap.util.exception.SaikuOlapException;
+import org.saiku.service.olap.OlapDiscoverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,7 +54,7 @@ public class DiscoverController {
 	private static final Logger logger = LoggerFactory.getLogger(DiscoverController.class);
 
 	@GetMapping
-	public List<SaikuConnection> discover() throws SQLException, SaikuOlapException {
+	public List<SaikuConnection> discover() throws SaikuOlapException {
 		List<SaikuConnection> connections = new ArrayList<>();
 
 		List<SaikuCatalog> catalogs = new ArrayList<>();
@@ -71,9 +77,43 @@ public class DiscoverController {
 
 		//return connections;
 		//return Collections.emptyList();
+		OlapDiscoverService olapDiscoverService = new OlapDiscoverService();
+		OlapMetaExplorer metaExplorer = Config.getSaikuMetaExplorer();
+		olapDiscoverService.setMetaExplorer(metaExplorer);
 		
-		OlapMetaExplorer metaExplorer=Config.getSaikuMetaExplorer();
-		return metaExplorer.getAllConnections();
+		return olapDiscoverService.getAllConnections();
 	}
 
+	@GetMapping("/{connection}")
+	public List<SaikuConnection> getConnections(@PathVariable("connection") String connectionName)
+			throws SaikuOlapException, SQLException {
+
+		OlapDiscoverService olapDiscoverService = new OlapDiscoverService();
+		OlapMetaExplorer metaExplorer = Config.getSaikuMetaExplorer();
+		olapDiscoverService.setMetaExplorer(metaExplorer);
+		
+		return olapDiscoverService.getConnection(connectionName);
+	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/metadata")
+	public SaikuCubeMetadata getMetadata(
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = new OlapDiscoverService();
+		OlapMetaExplorer metaExplorer = Config.getSaikuMetaExplorer();
+		olapDiscoverService.setMetaExplorer(metaExplorer);
+
+		List<SaikuDimension> dimensions = olapDiscoverService.getAllDimensions(cube);
+		List<SaikuMember> measures = olapDiscoverService.getMeasures(cube);
+		Map<String, Object> properties = olapDiscoverService.getProperties(cube);
+		return new SaikuCubeMetadata(dimensions, measures, properties);
+	}
 }

@@ -114,13 +114,17 @@ public class OlapMetaExplorer {
 		return connectionList;
 	}
 
-	public List<SaikuConnection> getAllConnections() throws SaikuOlapException, SQLException {
-		List<SaikuConnection> cubesList = new ArrayList<>();
-		for (String connectionName : connections.getAllOlapConnections().keySet()) {
-			cubesList.add(getConnection(connectionName));
+	public List<SaikuConnection> getAllConnections() throws SaikuOlapException {
+		try {
+			List<SaikuConnection> cubesList = new ArrayList<>();
+			for (String connectionName : connections.getAllOlapConnections().keySet()) {
+				cubesList.add(getConnection(connectionName));
+			}
+			Collections.sort(cubesList);
+			return cubesList;
+		} catch (SQLException ex) {
+			throw new SaikuOlapException(ex);
 		}
-		Collections.sort(cubesList);
-		return cubesList;
 	}
 
 
@@ -154,13 +158,17 @@ public class OlapMetaExplorer {
 		return cubesList;
 	}
 
-	public List<SaikuCube> getAllCubes() throws SaikuOlapException, SQLException {
-		List<SaikuCube> cubes = new ArrayList<>();
-		for (String connectionName : connections.getAllOlapConnections().keySet()) {
-			cubes.addAll(getCubes(connectionName));
+	public List<SaikuCube> getAllCubes() throws SaikuOlapException {
+		try {
+			List<SaikuCube> cubes = new ArrayList<>();
+			for (String connectionName : connections.getAllOlapConnections().keySet()) {
+				cubes.addAll(getCubes(connectionName));
+			}
+			Collections.sort(cubes, new SaikuCubeCaptionComparator());
+			return cubes;
+		} catch (SQLException ex) {
+			throw new SaikuOlapException(ex);
 		}
-		Collections.sort(cubes, new SaikuCubeCaptionComparator());
-		return cubes;
 	}
 
 	public Cube getNativeCube(SaikuCube cube) throws SaikuOlapException {
