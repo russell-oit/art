@@ -227,9 +227,11 @@ var OpenQuery = Backbone.View.extend({
         $( this.el ).find( '.for_queries' ).addClass( 'hide' );
         $( this.el ).find( '.for_folder' ).addClass( 'hide' );
         $( this.el ).find( '.add_folder' ).parent().addClass( 'hide' );
-
+		
+		$( this.el ).find( '.for_queries .run' ).parent().removeClass( 'hide' );
+		
         if (typeof query.acl != "undefined" && _.indexOf(query.acl, "READ") > -1) {
-            $( this.el ).find( '.for_queries .run' ).parent().removeClass( 'hide' );
+		 $( this.el ).find( '.for_queries .run' ).parent().removeClass( 'hide' );
         }
         if (typeof query.acl != "undefined" && _.indexOf(query.acl, "WRITE") > -1) {
             $( this.el ).find( '.for_queries .delete' ).parent().removeClass( 'hide' );
@@ -403,6 +405,8 @@ var OpenQuery = Backbone.View.extend({
         if(viewstate && !viewstate.hasOwnProperty('currentTarget')) {
             state = viewstate;
         }
+		
+		//console.log(query);
         
         if (item.fileType === 'saiku') {
             var tab = Saiku.tabs.add(new Workspace({ query: query, item: item, viewState: state, processURI: false }));

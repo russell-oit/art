@@ -22,7 +22,7 @@ public class SaikuConnectionManager implements IConnectionManager {
 	private Map<String, SaikuOlapConnection> connections = new HashMap<>();
 	private Map<String, Datasource> ds;
 
-	public void init() throws SaikuOlapException, SQLException {
+	public void init() throws SaikuOlapException {
 		if (ds == null) {
 			ds = new HashMap<>();
 		} else {
@@ -30,13 +30,18 @@ public class SaikuConnectionManager implements IConnectionManager {
 			ds.clear();
 		}
 
-		DatasourceService datasourceService = new DatasourceService();
-		List<Datasource> olapDatasources = datasourceService.getOlap4jDatasources();
-		for (Datasource datasource : olapDatasources) {
-			if (StringUtils.isNotBlank(datasource.getDriver())) {
-				ds.put(datasource.getName(), datasource);
+		try {
+			DatasourceService datasourceService = new DatasourceService();
+			List<Datasource> olapDatasources = datasourceService.getOlap4jDatasources();
+			for (Datasource datasource : olapDatasources) {
+				if (StringUtils.isNotBlank(datasource.getDriver())) {
+					ds.put(datasource.getName(), datasource);
+				}
 			}
+		} catch (SQLException ex) {
+			throw new SaikuOlapException(ex);
 		}
+		
 		this.connections = getAllConnections();
 	}
 
@@ -90,7 +95,7 @@ public class SaikuConnectionManager implements IConnectionManager {
 		throw new SaikuOlapException("Cannot find connection: (" + name + ")");
 	}
 
-	public void destroy() throws SaikuOlapException, SQLException {
+	public void destroy() throws SaikuOlapException {
 		Map<String, OlapConnection> saikuConnections = getAllOlapConnections();
 		if (saikuConnections != null && !saikuConnections.isEmpty()) {
 			for (OlapConnection con : saikuConnections.values()) {
@@ -125,7 +130,7 @@ public class SaikuConnectionManager implements IConnectionManager {
 		refreshInternalConnection(name, datasource);
 	}
 
-	public Map<String, SaikuOlapConnection> getAllConnections() throws SaikuOlapException, SQLException {
+	public Map<String, SaikuOlapConnection> getAllConnections() throws SaikuOlapException {
 		Map<String, SaikuOlapConnection> resultDs = new HashMap<>();
 
 		for (String name : ds.keySet()) {
@@ -150,7 +155,7 @@ public class SaikuConnectionManager implements IConnectionManager {
 		return null;
 	}
 
-	public Map<String, OlapConnection> getAllOlapConnections() throws SaikuOlapException, SQLException {
+	public Map<String, OlapConnection> getAllOlapConnections() throws SaikuOlapException {
 		Map<String, SaikuOlapConnection> saikuConnections = getAllConnections();
 		Map<String, OlapConnection> olapConnections = new HashMap<>();
 		for (SaikuOlapConnection con : saikuConnections.values()) {

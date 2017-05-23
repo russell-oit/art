@@ -259,7 +259,11 @@ function replaceTag(tag) {
 }
 
 function safe_tags_replace(str) {
+	if(str){
     return str.replace(/[&<>]/g, replaceTag);
+	} else {
+		return str;
+	}
 }
 
 if ($.blockUI) {

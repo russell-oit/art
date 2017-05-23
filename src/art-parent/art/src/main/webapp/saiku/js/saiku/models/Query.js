@@ -68,7 +68,9 @@ var Query = Backbone.Model.extend({
     },
 
     getProperty: function(key) {
+		if(this.model.properties){
         return this.model.properties[key];
+	}
     },
 
     syncSelectionsModalAndUpdateParameters: function() {
@@ -174,6 +176,7 @@ var Query = Backbone.Model.extend({
         this.workspace.adjust();
         this.workspace.trigger('query:fetch');
 		Saiku.i18n.translate();
+		
         var message = '<span class="processing_image">&nbsp;&nbsp;</span> <span class="i18n">Running query...</span> [&nbsp;<a class="cancel i18n" href="#cancel">Cancel</a>&nbsp;]';
         this.workspace.block(message);
 /*

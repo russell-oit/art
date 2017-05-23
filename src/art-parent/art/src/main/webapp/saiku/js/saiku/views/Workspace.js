@@ -642,6 +642,7 @@ var Workspace = Backbone.View.extend({
             return;
         }
 
+		
 
         // Find the selected cube
         if (this.selected_cube === undefined) {
@@ -653,11 +654,11 @@ var Workspace = Backbone.View.extend({
             $(this.el).find('.cubes')
                 .val(this.selected_cube);
         }
-
+		
         if (this.selected_cube) {
             // Create new DimensionList and MeasureList
             var cubeModel = Saiku.session.sessionworkspace.cube[this.selected_cube];
-
+			
             this.dimension_list = new DimensionList({
                 workspace: this,
                 cube: cubeModel
@@ -665,7 +666,7 @@ var Workspace = Backbone.View.extend({
             this.dimension_list.render();
 
             $(this.el).find('.metadata_attribute_wrapper').html('').append($(this.dimension_list.el));
-
+			
             if (!cubeModel.has('data')) {
                 cubeModel.fetch({ success: function() {
                     self.trigger('cube:loaded');

@@ -203,6 +203,16 @@
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
 		<!-- https://stackoverflow.com/questions/24262223/standard-way-of-adding-jslt-1-2-1-in-a-maven-project -->
@@ -517,10 +527,16 @@
 			<version>1.2.0</version>
 		</dependency>
 		<dependency>
-            <groupId>org.olap4j</groupId>
-            <artifactId>olap4j-xmlaserver</artifactId>
-            <version>1.2.0</version>
-        </dependency>
+			<groupId>org.olap4j</groupId>
+			<artifactId>olap4j-xmlaserver</artifactId>
+			<version>1.2.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>

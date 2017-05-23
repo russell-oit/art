@@ -17,6 +17,7 @@
  */
 package art.saiku;
 
+import art.report.Report;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;

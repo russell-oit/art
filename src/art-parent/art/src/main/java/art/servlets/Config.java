@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -125,10 +126,18 @@ public class Config extends HttpServlet {
 
 		//shutdown quartz scheduler
 		SchedulerUtils.shutdownScheduler();
+		
+		if(saikuConnectionManager!=null){
+			try {
+				saikuConnectionManager.destroy();
+			} catch (SaikuOlapException ex) {
+				logger.error("Error", ex);
+			}
+		}
 
 		//close database connections
 		DbConnections.closeAllConnections();
-
+		
 		//deregister jdbc drivers
 		deregisterJdbcDrivers();
 
