@@ -148,7 +148,6 @@ var SplashScreen = Backbone.View.extend({
     render: function(){
         var self = this;
 
-        var license = new License();
 		if(Settings.BIPLUGIN5){
                 $(self.el).html(self.template());
 

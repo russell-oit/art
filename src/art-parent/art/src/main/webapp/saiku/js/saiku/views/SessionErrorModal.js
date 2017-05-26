@@ -35,7 +35,7 @@ var SessionErrorModal = Modal.extend({
 
 	dummy: function() { return true;},
 
-	type: "info",
+	type: "info"
 
 	//message: _.template("There has been an error creating a session:<br> this.reportedissue>"
 

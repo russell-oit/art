@@ -217,3 +217,8 @@ td.chartDataHeader {
 .panel-group .panel {
   overflow: visible;
 }
+
+/* https://stackoverflow.com/questions/23509122/bootstrap-modal-overflowing-my-table-row */
+.modal-body {
+	overflow-x: auto;
+}
