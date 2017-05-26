@@ -151,7 +151,7 @@ public class RunReportController {
 
 			if (reportType.isDashboard()) {
 				return "forward:/showDashboard";
-			} else if (reportType.isOlap()) {
+			} else if (reportType.isJPivot()) {
 				//setting model attributes won't include parameters in the redirect request because
 				//we have setIgnoreDefaultModelOnRedirect in AppConfig.java
 				//use redirect attributes instead
@@ -175,7 +175,7 @@ public class RunReportController {
 				//using forward means adding runReport url-mapping to the jpivotcontroller filter-mapping in the web.xml file
 				//doing this results in errors as a result of the runReport page being handled by jpivotError
 				//so use redirect
-				return "redirect:/showAnalysis";
+				return "redirect:/showJPivot";
 			}
 
 			long totalTimeSeconds = 0;

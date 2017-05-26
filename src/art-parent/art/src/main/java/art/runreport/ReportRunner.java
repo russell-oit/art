@@ -437,7 +437,7 @@ public class ReportRunner {
 		String querySql = sb.toString();
 
 		//get and store param identifier order for use with jdbc preparedstatement
-		if (!reportType.isOlap()) {
+		if (!reportType.isJPivot()) {
 			Map<Integer, ReportParameter> jdbcParamOrder = new TreeMap<>(); //use treemap so that jdbc params are set in correct order
 			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 				String paramName = entry.getKey();
@@ -464,7 +464,7 @@ public class ReportRunner {
 
 		//replace direct substitution parameters
 		if (Config.getCustomSettings().isEnableDirectParameterSubstitution()
-				|| reportType.isOlap()) {
+				|| reportType.isJPivot()) {
 			RunReportHelper runReportHelper = new RunReportHelper();
 			String placeholderPrefix = "!";
 			querySql = runReportHelper.performDirectParameterSubstitution(querySql, placeholderPrefix, reportParamsMap);
@@ -736,9 +736,9 @@ public class ReportRunner {
 		switch (reportType) {
 			case JasperReportsTemplate:
 			case JxlsTemplate:
-			case Mondrian:
-			case MondrianXmla:
-			case SqlServerXmla:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
 			case LovStatic:
 			case PivotTableJsCsvLocal:
 			case PivotTableJsCsvServer:

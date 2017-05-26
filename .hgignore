@@ -25,3 +25,6 @@ src/art-parent/art-mail/nbactions.xml
 src/art-parent/art-dbcp/nbactions.xml
 src/art-parent/saiku-service-art/nb-configuration.xml
 src/art-parent/saiku-service-art/target/
+src/art-parent/saiku-service-art/.settings/
+src/art-parent/saiku-service-art/.classpath
+src/art-parent/saiku-service-art/.project

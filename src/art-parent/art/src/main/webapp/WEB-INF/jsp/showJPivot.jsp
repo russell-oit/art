@@ -1,5 +1,5 @@
 <%-- 
-    Document   : showAnalysis
+    Document   : showJPivot
     Created on : 22-Mar-2016, 07:26:30
     Author     : Timothy Anyona
 --%>
@@ -47,7 +47,7 @@
 
 					<% if (request.getParameter("action") == null && request.getParameter("null") == null) { %>
 					<c:choose>
-						<c:when test="${reportType == 'Mondrian'}">
+						<c:when test="${reportType == 'JPivotMondrian'}">
 							<jp:mondrianQuery id="${jpivotQueryId}" jdbcDriver="${databaseDriver}"
 											  jdbcUrl="${databaseUrl}" jdbcUser="${databaseUser}"
 											  jdbcPassword="${databasePassword}" catalogUri="${schemaFile}">
@@ -72,7 +72,7 @@
 						<tr><td>
 								<br />
 
-								<form action="showAnalysis" method="post">
+								<form action="showJPivot" method="post">
 									<input type="hidden" name="action" value="edit">
 									<input type="hidden" name="reportId" value="${reportId}">
 
@@ -151,7 +151,7 @@
 									</p>
 
 									<p>
-									<spring:message code="analysis.text.slicer"/>:
+									<spring:message code="jpivot.text.slicer"/>:
 									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxslicer.xsl" xslCache="true"/>
 									</p>
 
@@ -170,10 +170,10 @@
 							</td></tr>
 
 						<tr><td class="info">
-								<i><spring:message code="analysis.text.saveCurrentView"/></i>
+								<i><spring:message code="jpivot.text.saveCurrentView"/></i>
 								<br>
 
-								<form method="post" action="saveAnalysis">
+								<form method="post" action="saveJPivot">
 									<input type="hidden" name="pivotReportId" value="${reportId}" />
 									<table>
 										<tr><td>
@@ -182,7 +182,7 @@
 										<td>
 											<input type="text" name="newPivotName" value="" size="20" maxlength="40" />
 											<c:if test="${exclusiveAccess}">
-											<input type="checkbox" name="overwrite" /><spring:message code="analysis.text.overwrite"/> &nbsp;
+											<input type="checkbox" name="overwrite" /><spring:message code="jpivot.text.overwrite"/> &nbsp;
 											<input type="checkbox" name="delete" /><spring:message code="page.action.delete"/> &nbsp;
 										</c:if>
 										<button type="submit" id="save" class="btn btn-default action">

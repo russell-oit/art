@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.analysis;
+package art.jpivot;
 
 import art.datasource.Datasource;
 import art.enums.ReportType;
@@ -53,23 +53,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Controller for displaying pivot table reports
+ * Controller for displaying jpivot reports
  *
  * @author Timothy Anyona
  */
 @Controller
-public class AnalysisController {
+public class JPivotController {
 
-	private static final Logger logger = LoggerFactory.getLogger(AnalysisController.class);
+	private static final Logger logger = LoggerFactory.getLogger(JPivotController.class);
 
 	@Autowired
 	private ReportService reportService;
 
-	@RequestMapping(value = "/showAnalysis", method = {RequestMethod.GET, RequestMethod.POST})
-	public String showAnalysis(HttpServletRequest request, Model model, HttpSession session,
+	@RequestMapping(value = "/showJPivot", method = {RequestMethod.GET, RequestMethod.POST})
+	public String showJPivot(HttpServletRequest request, Model model, HttpSession session,
 			Locale locale) {
 		
-		logger.debug("Entering showAnalysis");
+		logger.debug("Entering showJPivot");
 
 		try {
 			int reportId = 0;
@@ -117,7 +117,7 @@ public class AnalysisController {
 				}
 			}
 
-			if (report.getReportType() == ReportType.Mondrian) {
+			if (report.getReportType() == ReportType.JPivotMondrian) {
 				String templateFileName = report.getTemplate();
 				String templatesPath = Config.getTemplatesPath();
 				String fullTemplateFileName = templatesPath + templateFileName;
@@ -147,7 +147,7 @@ public class AnalysisController {
 			model.addAttribute("error", ex);
 		}
 
-		return "showAnalysis";
+		return "showJPivot";
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class AnalysisController {
 			session.setAttribute("pivotTitle" + reportId, title);
 
 			Datasource datasource = report.getDatasource();
-			if (reportType == ReportType.Mondrian) {
+			if (reportType == ReportType.JPivotMondrian) {
 				String databaseUrl = datasource.getUrl().trim();
 				String databaseUser = datasource.getUsername().trim();
 				String databasePassword = datasource.getPassword();
@@ -222,13 +222,13 @@ public class AnalysisController {
 				model.addAttribute("xmlaUrl", xmlaUrl);
 
 				String xmlaDatasource = null;
-				if (reportType == ReportType.MondrianXmla) {
+				if (reportType == ReportType.JPivotMondrianXmla) {
 					//prepend provider if only datasource name provided
 					xmlaDatasource = report.getXmlaDatasource();
 					if (!StringUtils.startsWithIgnoreCase(xmlaDatasource, "provider=mondrian")) {
 						xmlaDatasource = "Provider=mondrian;DataSource=" + xmlaDatasource; //datasource name in datasources.xml file must be exactly the same
 					}
-				} else if (reportType == ReportType.SqlServerXmla) {
+				} else if (reportType == ReportType.JPivotSqlServerXmla) {
 					xmlaDatasource = "Provider=MSOLAP";
 
 				}
@@ -425,11 +425,11 @@ public class AnalysisController {
 		return "jpivotBusy";
 	}
 
-	@RequestMapping(value = "/saveAnalysis", method = RequestMethod.POST)
-	public String saveAnalysis(HttpServletRequest request,
+	@RequestMapping(value = "/saveJPivot", method = RequestMethod.POST)
+	public String saveJPivot(HttpServletRequest request,
 			HttpSession session, RedirectAttributes redirectAttributes) {
 
-		logger.debug("Entering saveAnalysis");
+		logger.debug("Entering saveJPivot");
 
 		try {
 			boolean overwriting;
@@ -451,7 +451,7 @@ public class AnalysisController {
 
 			//check if any modification made
 			if ((mdx == null || mdx.length() == 0) && !deleting) {
-				redirectAttributes.addFlashAttribute("message", "analysis.message.nothingToSave");
+				redirectAttributes.addFlashAttribute("message", "jpivot.message.nothingToSave");
 				return "redirect:/reportError";
 			}
 
@@ -474,12 +474,12 @@ public class AnalysisController {
 					report.setDescription(queryDescription);
 				}
 				reportService.updateReport(report, sessionUser);
-				redirectAttributes.addFlashAttribute("message", "analysis.message.reportSaved");
+				redirectAttributes.addFlashAttribute("message", "jpivot.message.reportSaved");
 				return "redirect:/success";
 			} else if (deleting) {
 				//delete query
 				reportService.deleteReport(reportId);
-				redirectAttributes.addFlashAttribute("message", "analysis.message.reportDeleted");
+				redirectAttributes.addFlashAttribute("message", "jpivot.message.reportDeleted");
 				return "redirect:/success";
 			} else {
 				//create new query based on current query
@@ -518,7 +518,7 @@ public class AnalysisController {
 				//give this user direct access to the view he has just created. so that he can update and overwrite it if desired
 				reportService.grantAccess(report, sessionUser);
 
-				redirectAttributes.addFlashAttribute("message", "analysis.message.reportAdded");
+				redirectAttributes.addFlashAttribute("message", "jpivot.message.reportAdded");
 				return "redirect:/success";
 			}
 		} catch (SQLException | RuntimeException ex) {

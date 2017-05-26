@@ -156,7 +156,7 @@
 	
 	<filter-mapping>
 		<filter-name>JPivotController</filter-name>
-		<url-pattern>/showAnalysis</url-pattern>
+		<url-pattern>/showJPivot</url-pattern>
 	</filter-mapping>
 	
 	

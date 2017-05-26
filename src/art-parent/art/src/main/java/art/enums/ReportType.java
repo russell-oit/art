@@ -31,8 +31,8 @@ public enum ReportType {
 	//items will be displayed in editReport.jsp in the order they appear here
 	Tabular(0), TabularHtml(103), Crosstab(101), CrosstabHtml(102),
 	TabularHeatmap(148), Group(1), Update(100),
-	Dashboard(110), GridstackDashboard(129), Text(111), Mondrian(112),
-	MondrianXmla(113), SqlServerXmla(114),
+	Dashboard(110), GridstackDashboard(129), Text(111), JPivotMondrian(112),
+	JPivotMondrianXmla(113), JPivotSqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122), Thymeleaf(131),
 	ReactPivot(130), PivotTableJs(132), PivotTableJsCsvLocal(133), PivotTableJsCsvServer(134),
@@ -62,9 +62,9 @@ public enum ReportType {
 	 */
 	public boolean canSchedule() {
 		switch (this) {
-			case Mondrian:
-			case MondrianXmla:
-			case SqlServerXmla:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
 			case Text:
 			case LovStatic:
 			case ReactPivot:
@@ -387,17 +387,17 @@ public enum ReportType {
 	}
 
 	/**
-	 * Returns <code>true</code> if this is a mondrian, mondrian xmla or sql
-	 * server xmla report type
+	 * Returns <code>true</code> if this is a jpivot mondrian, mondrian xmla or
+	 * sql server xmla report type
 	 *
-	 * @return <code>true</code> if this is a mondrian, mondrian xmla or sql
-	 * server xmla report type
+	 * @return <code>true</code> if this is a jpivot mondrian, mondrian xmla or
+	 * sql server xmla report type
 	 */
-	public boolean isOlap() {
+	public boolean isJPivot() {
 		switch (this) {
-			case Mondrian:
-			case MondrianXmla:
-			case SqlServerXmla:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
 				return true;
 			default:
 				return false;
@@ -543,12 +543,12 @@ public enum ReportType {
 				return "Dashboard: Gridstack";
 			case Text:
 				return "Text";
-			case Mondrian:
-				return "Pivot Table: Mondrian";
-			case MondrianXmla:
-				return "Pivot Table: Mondrian XMLA";
-			case SqlServerXmla:
-				return "Pivot Table: SQL Server XMLA";
+			case JPivotMondrian:
+				return "JPivot: Mondrian";
+			case JPivotMondrianXmla:
+				return "JPivot: Mondrian XMLA";
+			case JPivotSqlServerXmla:
+				return "JPivot: SQL Server XMLA";
 			case JasperReportsTemplate:
 				return "JasperReports: Template Query";
 			case JasperReportsArt:

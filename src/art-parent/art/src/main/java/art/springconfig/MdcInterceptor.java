@@ -57,7 +57,7 @@ public class MdcInterceptor extends HandlerInterceptorAdapter {
 
 		String xForwardedFor = request.getHeader("X-Forwarded-For");
 		if (xForwardedFor == null) {
-			//ensure it isn't null otherwise pivot table display will throw null pointer error
+			//ensure it isn't null otherwise jpivot display will throw null pointer error
 			xForwardedFor = "";
 		}
 		MDC.put("xForwardedFor", xForwardedFor);

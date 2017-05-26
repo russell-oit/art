@@ -362,7 +362,7 @@ Edit report page
 					case 112:
 					case 113:
 					case 114:
-						//pivot table
+						//jpivot
 						reportSourceType = "(MDX)";
 						break;
 					default:

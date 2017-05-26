@@ -167,9 +167,9 @@ public class RunReportHelper {
 
 		boolean enableReportFormats;
 		switch (reportType) {
-			case Mondrian:
-			case MondrianXmla:
-			case SqlServerXmla:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
 			case Update:
 			case Text:
 			case TabularHtml:
@@ -223,9 +223,9 @@ public class RunReportHelper {
 		boolean enableShowSql;
 		boolean enableShowSelectedParameters;
 		switch (reportType) {
-			case Mondrian:
-			case MondrianXmla:
-			case SqlServerXmla:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
 			case JasperReportsTemplate:
 			case JxlsTemplate:
 			case Text:
@@ -263,9 +263,9 @@ public class RunReportHelper {
 
 		boolean enableRunInline;
 		switch (reportType) {
-			case Mondrian:
-			case MondrianXmla:
-			case SqlServerXmla:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
 				enableRunInline = false;
 				break;
 			default:
@@ -275,9 +275,9 @@ public class RunReportHelper {
 
 		boolean enablePrint;
 		switch (reportType) {
-			case Mondrian:
-			case MondrianXmla:
-			case SqlServerXmla:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
 			case JxlsArt:
 			case JxlsTemplate:
 			case JasperReportsArt:
@@ -333,9 +333,9 @@ public class RunReportHelper {
 			case CrosstabHtml:
 			case TabularHtml:
 			case Text:
-			case Mondrian:
-			case MondrianXmla:
-			case SqlServerXmla:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
 			case FreeMarker:
 			case Thymeleaf:
 			case ReactPivot:

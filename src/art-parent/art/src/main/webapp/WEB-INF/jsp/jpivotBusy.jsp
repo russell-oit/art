@@ -29,7 +29,7 @@
 				<div class="container-fluid">
 					<div class="row">
 						<div class="col-md-6 col-md-offset-3 alert alert-warning text-center">
-							<spring:message code="analysis.message.jpivotQueryWait"/>
+							<spring:message code="jpivot.message.jpivotQueryWait"/>
 							<img src="${pageContext.request.contextPath}/images/spinner.gif">
 						</div>
 					</div>

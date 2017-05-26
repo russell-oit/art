@@ -256,8 +256,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				|| StringUtils.equals(page, "") //home page "/"
 				|| StringUtils.equals(page, "selectReportParameters")
 				|| StringUtils.equals(page, "showDashboard")
-				|| StringUtils.equals(page, "showAnalysis")
-				|| StringUtils.equals(page, "saveAnalysis")
+				|| StringUtils.equals(page, "showJPivot")
+				|| StringUtils.equals(page, "saveJPivot")
 				|| StringUtils.equals(page, "jpivotError")
 				|| StringUtils.equals(page, "jpivotBusy")
 				|| StringUtils.equals(page, "getSchedule")
