@@ -66,12 +66,12 @@ public class TestDrillReplace extends TestExtensionSupport implements DrillRepla
    * @see net.sf.jpivotart.jpivot.olap.navi.DrillReplace#drillUp(Hierarchy)
    */
   public void drillUp(Hierarchy hier) {
-    Set parents = new HashSet();
-    List memberList = new ArrayList();
+    Set<Object> parents = new HashSet<>();
+    List<Member> memberList = new ArrayList<>();
     TestAxis axis = TestOlapModelUtils.findAxis(model(), hier);
     int memberIndex = TestOlapModelUtils.indexOf(axis.getHierarchies(), hier);
-    loop: for (Iterator it = axis.getPositions().iterator(); it.hasNext();) {
-      TestPosition position = (TestPosition)it.next();
+    loop: for (Position pos : axis.getPositions()) {
+      TestPosition position = (TestPosition)pos;
       TestMember member = (TestMember)position.getMembers()[memberIndex];
       
       TestMember parent = member.getParentMember();
