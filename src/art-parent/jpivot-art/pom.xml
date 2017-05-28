@@ -118,7 +118,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>wcf-art</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
+			<version>3.0-beta12-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -158,9 +158,9 @@
 			<version>2.4.11</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.mondrian-art</groupId>
+			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>1.0.2</version>
+			<version>3.0-beta12-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>javacup</groupId>

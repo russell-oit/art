@@ -1,4 +1,4 @@
-1.2.0
+3.0.0
 * Incorporated as a module in the main art project - changed group id to net.sf.art
 
 1.1.2
