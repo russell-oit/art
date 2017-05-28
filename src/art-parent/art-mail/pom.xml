@@ -5,11 +5,10 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>3.0-beta12-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>art-mail</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>art-mail</name>

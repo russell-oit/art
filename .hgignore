@@ -46,3 +46,4 @@ src/art-parent/mondrian-art/.settings/
 src/art-parent/wcf-art/.classpath
 src/art-parent/wcf-art/.project
 src/art-parent/wcf-art/.settings/
+src/art-parent/nbactions.xml

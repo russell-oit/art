@@ -5,12 +5,11 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>3.0-beta12-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>art</artifactId>
 	<packaging>war</packaging>
-	<version>3.0-SNAPSHOT</version>
 
 	<name>art</name>
 	<url>http://art.sourceforge.net</url>
@@ -174,17 +173,17 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-dbcp</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<version>3.0-beta12-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>3.0-beta12-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>3.0-beta12-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -199,7 +198,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
+			<version>3.0-beta12-SNAPSHOT</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
