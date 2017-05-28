@@ -49,7 +49,7 @@ public class MemberSelectionModel extends DefaultSelectionModel {
     return super.isSelectable(item) && item instanceof Member;
   }
   
-  public void setOrderedSelection(List list) {
+  public void setOrderedSelection(List<Object> list) {
     super.setSelection(list);
     this.orderedSelection = list;
   }

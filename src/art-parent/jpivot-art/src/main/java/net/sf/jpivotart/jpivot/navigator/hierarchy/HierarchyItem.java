@@ -53,11 +53,11 @@ public class HierarchyItem implements Item, RequestListener{
   private Hierarchy hierarchy;
 
   // the selection in case this is contained in axis category
-  private List axisSelection;
+  private List<Object> axisSelection;
   private boolean axisSelectionDirty;
 
   // the selection in case this is contained in slicer category
-  private List<Member> slicerSelection;
+  private List<Object> slicerSelection;
   private boolean slicerSelectionDirty;
 
   // list of (calculated) members that are about to be deleted in this hierarchy
@@ -98,7 +98,7 @@ public class HierarchyItem implements Item, RequestListener{
 
   void initializeAxisSelection() {
     PlaceMembersOnAxes memberExtension = navigator.getMemberExtension();
-    axisSelection = new ArrayList();
+    axisSelection = new ArrayList<>();
     if (memberExtension != null) {
       List members = memberExtension.findVisibleMembers(hierarchy);
       axisSelection.addAll(members);
@@ -154,7 +154,7 @@ public class HierarchyItem implements Item, RequestListener{
    * Returns the axisSelection.
    * @return Set
    */
-  public List getAxisSelection() {
+  public List<Object> getAxisSelection() {
     if (axisSelection == null)
       initializeAxisSelection();
     return axisSelection;
@@ -164,7 +164,7 @@ public class HierarchyItem implements Item, RequestListener{
    * Returns the slicerSelection.
    * @return Set
    */
-  public List<Member> getSlicerSelection() {
+  public List<Object> getSlicerSelection() {
     if (slicerSelection == null)
       initializeSlicerSelection();
     return slicerSelection;
@@ -174,7 +174,7 @@ public class HierarchyItem implements Item, RequestListener{
    * Sets the axisSelection.
    * @param selection The axisSelection to set
    */
-  public void setAxisSelection(Collection selection) {
+  public void setAxisSelection(Collection<Object> selection) {
     if (selection.equals(axisSelection)) {
        // Nothing has changed, just return
        return;
@@ -182,7 +182,7 @@ public class HierarchyItem implements Item, RequestListener{
     clear();
     updateHierarchy(selection);
     if (axisSelection == null)
-      axisSelection = new ArrayList();
+      axisSelection = new ArrayList<>();
     else
       axisSelection.clear();
     axisSelection.addAll(selection);
@@ -195,7 +195,7 @@ public class HierarchyItem implements Item, RequestListener{
    * Sets the slicerSelection.
    * @param selection The slicerSelection to set
    */
-  public void setSlicerSelection(Collection<Member> selection) {
+  public void setSlicerSelection(Collection<Object> selection) {
     clear();
     updateHierarchy(selection);
     if (slicerSelection == null)
@@ -208,7 +208,7 @@ public class HierarchyItem implements Item, RequestListener{
     expression = null;
   }
 
-  private void  updateHierarchy(Collection<Member> selection) {
+  private void  updateHierarchy(Collection<Object> selection) {
     if (selection == null || selection.isEmpty()) 
       hierarchy = dimension.getHierarchies()[0];
     else {
@@ -216,7 +216,8 @@ public class HierarchyItem implements Item, RequestListener{
       // Because we added support for compound slicers extend
       // the previous che to every member of the selection
       // Member m = (Member) selection.iterator().next();
-    	for(Member m : selection){
+    	for(Object o : selection){
+			Member m = (Member) o;
 	      hierarchy = m.getLevel().getHierarchy();
 	      if (!hierarchy.getDimension().equals(dimension))
 	        logger.error("invalid dimension in " + hierarchy.getLabel());
@@ -257,7 +258,7 @@ public class HierarchyItem implements Item, RequestListener{
     this.slicerSelectionDirty = slicerSelectionDirty;
   }
 
-  public void setSelection(Collection selection) {
+  public void setSelection(Collection<Object> selection) {
     category.setSelection(this, selection);
   }
   /**

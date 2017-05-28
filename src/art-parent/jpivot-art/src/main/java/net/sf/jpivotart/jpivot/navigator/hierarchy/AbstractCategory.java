@@ -140,7 +140,7 @@ public abstract class AbstractCategory implements Category {
    */
   abstract void applyChanges();
 
-  abstract void setSelection(HierarchyItem item, Collection selection);
+  abstract void setSelection(HierarchyItem item, Collection<Object> selection);
   abstract String validateSelection(HierarchyItem item, Collection selection);
   public abstract boolean isSlicer();
 

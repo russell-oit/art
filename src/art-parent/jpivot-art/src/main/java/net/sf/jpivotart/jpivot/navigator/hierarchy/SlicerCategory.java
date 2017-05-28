@@ -70,7 +70,7 @@ class SlicerCategory extends AbstractCategory {
     navi.itemClicked(context, item, selection, false);
   }
 
-  void setSelection(HierarchyItem item, Collection selection) {
+  void setSelection(HierarchyItem item, Collection<Object> selection) {
     item.setSlicerSelection(selection);
   }
 
@@ -90,12 +90,12 @@ class SlicerCategory extends AbstractCategory {
     if (slicerExtension == null)
       return;
 
-    List<Member> memberList = new ArrayList<>();
+    List<Object> memberList = new ArrayList<>();
     for (Iterator it = items.iterator(); it.hasNext();) {
       HierarchyItem hi = (HierarchyItem) it.next();
       memberList.addAll(hi.getSlicerSelection());
     }
-    Member[] memberArr = memberList.toArray(new Member[memberList.size()]);
+    Member[] memberArr = (Member[]) memberList.toArray(new Member[memberList.size()]);
     slicerExtension.setSlicer(memberArr);
   }
 

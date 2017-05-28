@@ -67,7 +67,7 @@ class AxisCategory extends AbstractCategory {
     navi.itemClicked(context, item, selection, true);
   }
 
-  void setSelection(HierarchyItem item, Collection selection) {
+  void setSelection(HierarchyItem item, Collection<Object> selection) {
     item.setAxisSelection(selection);
   }
   
