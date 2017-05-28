@@ -13,8 +13,8 @@ import net.sf.jpivotart.jpivot.tags.StateManager.State;
 
 public class TestStateLogger extends Log4jStateLogger implements StateLogger {
 
-  Set active = new TreeSet();
-  List errors = new ArrayList();
+  Set<String> active = new TreeSet<>();
+  List<String> errors = new ArrayList<>();
   
   public void initialize(State s) {
     String name = s.getName();
