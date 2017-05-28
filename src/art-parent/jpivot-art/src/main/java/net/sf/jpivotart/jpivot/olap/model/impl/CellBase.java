@@ -32,7 +32,7 @@ public abstract class CellBase implements Cell {
   static Logger logger = Logger.getLogger(CellBase.class);
 
   protected String formattedValue;
-  private List properties = null;
+  private List<Property> properties = null;
 
   /**
    * @see net.sf.jpivotart.jpivot.olap.model.Cell#getValue()
@@ -64,7 +64,7 @@ public abstract class CellBase implements Cell {
     if (properties == null)
       return new Property[0];
     else
-      return (Property[]) properties.toArray(new Property[0]);
+      return properties.toArray(new Property[0]);
   }
 
   /**
@@ -75,8 +75,7 @@ public abstract class CellBase implements Cell {
     if (properties == null)
       return null;
 
-    for (Iterator iter = properties.iterator(); iter.hasNext();) {
-      Property prop = (Property) iter.next();
+    for (Property prop : properties) {
       if (prop.getName().equalsIgnoreCase(name))
         return prop;
 
@@ -106,7 +105,7 @@ public abstract class CellBase implements Cell {
     formattedValue = res.getFormattedValue();
     if (res.getProperties().size() > 0) {
       if (properties == null)
-        properties = new ArrayList();
+        properties = new ArrayList<>();
       properties.addAll(res.getProperties());
     }
   }
@@ -127,7 +126,7 @@ public abstract class CellBase implements Cell {
       pi.setLabel(prop);
       pi.setValue(value);
       if (properties == null)
-        properties = new ArrayList();
+        properties = new ArrayList<>();
       properties.add(pi);
     }
   }
