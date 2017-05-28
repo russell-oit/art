@@ -26,8 +26,8 @@ import java.util.Map;
 
 public class ModelSupport implements Model {
 
-  private Collection listeners = new ArrayList();
-  private Map extensionMap = new HashMap();
+  private Collection<ModelChangeListener> listeners = new ArrayList<>();
+  private Map<String, Extension> extensionMap = new HashMap<>();
   private Locale locale;
   private Model decoratedModel;
 
@@ -46,14 +46,14 @@ public class ModelSupport implements Model {
   }
 
   public Extension getExtension(String id) {
-    return (Extension) extensionMap.get(id);
+    return extensionMap.get(id);
   }
 
   /**
    * returns the extensions
    * @see Extension
    */
-  public Map getExtensions() {
+  public Map<String, Extension> getExtensions() {
     return extensionMap;
   }
 
@@ -98,9 +98,9 @@ public class ModelSupport implements Model {
   }
 
   public void fireModelChanged(ModelChangeEvent e) {
-    Iterator it = listeners.iterator();
-    while (it.hasNext())
-       ((ModelChangeListener) it.next()).modelChanged(e);
+	  for(ModelChangeListener listener : listeners){
+		  listener.modelChanged(e);
+	  }
   }
 
   public void fireStructureChanged() {
@@ -108,9 +108,9 @@ public class ModelSupport implements Model {
   }
 
   public void fireStructureChanged(ModelChangeEvent e) {
-    Iterator it = listeners.iterator();
-    while (it.hasNext())
-       ((ModelChangeListener) it.next()).structureChanged(e);
+	   for(ModelChangeListener listener : listeners){
+		  listener.structureChanged(e);
+	  }
   }
 
   /**
