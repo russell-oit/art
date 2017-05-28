@@ -54,10 +54,10 @@ public class XMLA_Level implements Level, MDXLevel, Exp {
 
   private Hierarchy hierarchy = null;
 
-  private List aMembers = null;
+  private List<XMLA_Member> aMembers = null;
   private XMLA_Model model;
 
-  private Map props = new HashMap(); // member properties , not SAP
+  private Map<String, XMLA_MemberProp> props = new HashMap<>(); // member properties , not SAP
 
   /**
    * c'tor
@@ -76,7 +76,7 @@ public class XMLA_Level implements Level, MDXLevel, Exp {
     return this.uniqueName.equals(other.getUniqueName());
   }
 
-  public void setMembers(List mList) {
+  public void setMembers(List<XMLA_Member> mList) {
     aMembers = mList;
   }
 
@@ -425,9 +425,9 @@ public class XMLA_Level implements Level, MDXLevel, Exp {
   public XMLA_Member[] getMembers() throws OlapException {
     // potentially killer function
     if (aMembers != null)
-      return (XMLA_Member[]) aMembers.toArray(new XMLA_Member[0]);
+      return aMembers.toArray(new XMLA_Member[0]);
     model.completeLevel(this); // get the level's members
-    return (XMLA_Member[]) aMembers.toArray(new XMLA_Member[0]);
+    return aMembers.toArray(new XMLA_Member[0]);
   }
 
   /**
@@ -472,7 +472,7 @@ public class XMLA_Level implements Level, MDXLevel, Exp {
   /**
    * @return props
    */
-  public Map getProps() {
+  public Map<String, XMLA_MemberProp> getProps() {
     return props;
   }
 
@@ -489,7 +489,7 @@ public class XMLA_Level implements Level, MDXLevel, Exp {
    * retrieve a property
    */
   public XMLA_MemberProp getProp(String xmlTag) {
-    return (XMLA_MemberProp) props.get(xmlTag);
+    return props.get(xmlTag);
   }
 
   /**
