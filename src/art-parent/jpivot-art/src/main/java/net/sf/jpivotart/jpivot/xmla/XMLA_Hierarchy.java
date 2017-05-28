@@ -62,7 +62,7 @@ public class XMLA_Hierarchy implements Hierarchy,Exp,MDXElement {
 
   private Dimension dimension = null;
 
-  private ArrayList aLevels = new ArrayList();
+  private ArrayList<Level> aLevels = new ArrayList<>();
 
   public XMLA_Hierarchy( XMLA_Model model) {
     this.model = model;
@@ -323,7 +323,7 @@ public class XMLA_Hierarchy implements Hierarchy,Exp,MDXElement {
    * @see net.sf.jpivotart.jpivot.olap.model.Hierarchy#getLevels()
    */
   public Level[] getLevels() {
-    return (Level[]) aLevels.toArray(new XMLA_Level[0]);
+    return aLevels.toArray(new XMLA_Level[0]);
   }
   /**
    * @see net.sf.jpivotart.jpivot.olap.model.Displayable#getLabel()
