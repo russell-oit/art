@@ -1759,14 +1759,14 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
 
         // we need quick remove in method removeLogicalNameFromList()
         // which is why this is a LinkedList.
-        private LinkedList logicalDimensionList;
-        private List physicalDimensionList;
-        private List enumMemberList;
+        private LinkedList<String> logicalDimensionList;
+        private List<List<net.sf.mondrianart.mondrian.olap.Member>> physicalDimensionList;
+        private List<net.sf.mondrianart.mondrian.olap.Member> enumMemberList;
 
         private QueryVisitor() {
-            this.logicalDimensionList = new LinkedList();
-            this.physicalDimensionList = new ArrayList();
-            this.enumMemberList = new ArrayList();
+            this.logicalDimensionList = new LinkedList<>();
+            this.physicalDimensionList = new ArrayList<>();
+            this.enumMemberList = new ArrayList<>();
 
         }
         public Object visit(net.sf.mondrianart.mondrian.mdx.UnresolvedFunCall call) {
@@ -1774,11 +1774,11 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
             if (call.getFunName().equalsIgnoreCase("children") ||
                     call.getFunName().equalsIgnoreCase("members" )) {
                 logicalDimensionList.add(call.toString());
-                enumMemberList = new ArrayList();
+                enumMemberList = new ArrayList<>();
                 physicalDimensionList.add(enumMemberList);
 
             } else if (call.getFunName().equals("{}")) {
-                enumMemberList = new ArrayList();
+                enumMemberList = new ArrayList<>();
                 physicalDimensionList.add(enumMemberList);
             }
 
@@ -1790,11 +1790,11 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
                     call.getFunName().equalsIgnoreCase("members" )) {
 
                 logicalDimensionList.add(call.toString());
-                enumMemberList = new ArrayList();
+                enumMemberList = new ArrayList<>();
                 physicalDimensionList.add(enumMemberList);
 
             } else if (call.getFunName().equals("{}")) {
-                enumMemberList = new ArrayList();
+                enumMemberList = new ArrayList<>();
                 physicalDimensionList.add(enumMemberList);
             }
 
@@ -1806,11 +1806,11 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
 
             return null;
         }
-        public LinkedList getLogicalModel() {
+        public LinkedList<String> getLogicalModel() {
             return logicalDimensionList;
         }
 
-        public List getPhysicalModel() {
+        public List<List<net.sf.mondrianart.mondrian.olap.Member>> getPhysicalModel() {
             return physicalDimensionList;
         }
 
@@ -1830,10 +1830,8 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
          * @return String version of mondrian Result object.
          */
         public void cleanUpPhysicalModel() {
-            List newList = new ArrayList();
-            // TODO: use iterator
-            for(int i = 0; i < physicalDimensionList.size(); i++) {
-                List aList = (List) physicalDimensionList.get(i);
+            List<List<net.sf.mondrianart.mondrian.olap.Member>> newList = new ArrayList<>();
+            for(List<net.sf.mondrianart.mondrian.olap.Member> aList : physicalDimensionList) {
                 if (aList.size() != 1 && allSameDimension(aList)) {
                     newList.add(aList);
                 }
@@ -1848,20 +1846,16 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
         }
         // debug out
         public void printLists() {
-           Iterator it = logicalDimensionList.iterator();
-           while(it.hasNext()) {
-              print((String)it.next());
+           for(String d : logicalDimensionList) {
+              print(d);
            }
            print(" going to print members ");
-           it = physicalDimensionList.iterator();
-           while(it.hasNext()) {
-               List list = (List)it.next();
-               Iterator ite = list.iterator();
-               while (ite.hasNext()) {
-                   print((net.sf.mondrianart.mondrian.olap.Member)ite.next());
-               }
-               print(" Going to print next member lists");
-           }
+		   for(List<net.sf.mondrianart.mondrian.olap.Member> list : physicalDimensionList){
+			   for(net.sf.mondrianart.mondrian.olap.Member member : list){
+				   print(member);
+			   }
+			   print(" Going to print next member lists");
+		   }
         }
 
         /** 

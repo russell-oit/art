@@ -28,7 +28,7 @@ public class MondrianHierarchy implements Hierarchy, MDXElement {
 
    private net.sf.mondrianart.mondrian.olap.Hierarchy monHierarchy;
    private MondrianDimension dimension;
-   private ArrayList aLevels;
+   private ArrayList<Level> aLevels;
    private MondrianModel model;
    private Resources resources;
    
@@ -43,7 +43,7 @@ public class MondrianHierarchy implements Hierarchy, MDXElement {
       this.dimension = dimension;
       this.model = model;
       this.resources = Resources.instance(model.getLocale(), MondrianHierarchy.class);
-      aLevels = new ArrayList();
+      aLevels = new ArrayList<>();
       dimension.addHierarchy(this);
    }
    
@@ -67,7 +67,7 @@ public class MondrianHierarchy implements Hierarchy, MDXElement {
 	 * @see net.sf.jpivotart.jpivot.olap.model.Hierarchy#getLevels()
 	 */
 	public Level[] getLevels() {
-		return (Level[]) aLevels.toArray( new MondrianLevel[0] );
+		return aLevels.toArray( new MondrianLevel[0] );
 	}
 
    public String getLabel() {
