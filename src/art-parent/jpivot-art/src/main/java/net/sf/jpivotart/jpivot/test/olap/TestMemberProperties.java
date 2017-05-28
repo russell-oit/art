@@ -37,10 +37,10 @@ public class TestMemberProperties extends TestExtensionSupport implements Member
   }
 
   /** maps level -> LevelProps */
-  HashMap levelMap = new HashMap();
+  HashMap<Level, LevelProps> levelMap = new HashMap<>();
   static class LevelProps {
-    Set names = new HashSet();
-    List metas = new ArrayList();
+    Set<String> names = new HashSet<>();
+    List<MemberPropertyMeta> metas = new ArrayList<>();
     boolean contains(String name) {
       return names.contains(name);
     }
@@ -49,7 +49,7 @@ public class TestMemberProperties extends TestExtensionSupport implements Member
       metas.add(m);
     }
     MemberPropertyMeta[] toArray() {
-      return (MemberPropertyMeta[]) metas.toArray(new MemberPropertyMeta[metas.size()]);
+      return metas.toArray(new MemberPropertyMeta[metas.size()]);
     }
   }
   
@@ -70,7 +70,7 @@ public class TestMemberProperties extends TestExtensionSupport implements Member
     Property[] p = member.getProperties();
     String scope = getPropertyScope(member);
     Level level = member.getLevel();
-    LevelProps levelProps = (LevelProps) levelMap.get(level);
+    LevelProps levelProps = levelMap.get(level);
     if (levelProps == null) {
       levelProps = new LevelProps();
       levelMap.put(level, levelProps);
@@ -94,7 +94,7 @@ public class TestMemberProperties extends TestExtensionSupport implements Member
     if (!initialized) {
       initialize();
     }
-    LevelProps levelProps = (LevelProps) levelMap.get(level);
+    LevelProps levelProps = levelMap.get(level);
     return levelProps.toArray();
   }
 
