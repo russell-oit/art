@@ -543,6 +543,7 @@ CUP$parser$actions(parser parser) {
 }
 
 /** Method with the actual generated action code. */
+@SuppressWarnings("unchecked")
 public final java_cup.runtime.Symbol CUP$parser$do_action(
   int                        CUP$parser$act_num,
   java_cup.runtime.lr_parser CUP$parser$parser,

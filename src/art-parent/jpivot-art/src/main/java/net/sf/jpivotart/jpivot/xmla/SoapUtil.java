@@ -120,7 +120,7 @@ public class SoapUtil {
     String dataSource,
     String catalog,
     String request,
-    Map restrictMap)
+    Map<String, String> restrictMap)
     throws SOAPException {
     MessageFactory mf = MessageFactory.newInstance();
     SOAPMessage msg = mf.createMessage();
