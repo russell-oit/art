@@ -65,12 +65,12 @@ public class Quax {
   private int generateMode = 0;
   private int generateIndex = -1; // we handle generate for only 1 dimension
   private Object expGenerate = null;
-  private Collection changeListeners = new ArrayList();
+  private Collection<QuaxChangeListener> changeListeners = new ArrayList<>();
   private QuaxUti uti;
-  private Map canExpandMemberMap = new HashMap();
-  private Map canExpandPosMap = new HashMap();
-  private Map canCollapseMemberMap = new HashMap();
-  private Map canCollapsePosMap = new HashMap();
+  private Map<Member, Boolean> canExpandMemberMap = new HashMap<>();
+  private Map<List<Member>, Boolean> canExpandPosMap = new HashMap<>();
+  private Map<Member, Boolean> canCollapseMemberMap = new HashMap<>();
+  private Map<List<Member>, Boolean> canCollapsePosMap = new HashMap<>();
 
   /**
    * c'tor
@@ -109,8 +109,7 @@ public class Quax {
    *          true if the memberset was changed by the navigator
    */
   public void changed(Object source, boolean changedMemberSet) {
-    for (Iterator iter = changeListeners.iterator(); iter.hasNext();) {
-      QuaxChangeListener listener = (QuaxChangeListener) iter.next();
+    for (QuaxChangeListener listener : changeListeners) {
       listener.quaxChanged(this, source, changedMemberSet);
     }
     canExpandMemberMap.clear();
@@ -419,9 +418,9 @@ public class Quax {
       return false;
 
     // first check the cache
-    List li = Arrays.asList(pathMembers);
+    List<Member> li = Arrays.asList(pathMembers);
     if (canExpandPosMap.containsKey(li)) {
-      Boolean bCanExpand = (Boolean) canExpandPosMap.get(li);
+      Boolean bCanExpand = canExpandPosMap.get(li);
       return bCanExpand.booleanValue();
     }
 
@@ -546,7 +545,7 @@ public class Quax {
 
     // first check the cache
     if (canExpandMemberMap.containsKey(member)) {
-      Boolean bCanExpand = (Boolean) canExpandMemberMap.get(member);
+      Boolean bCanExpand = canExpandMemberMap.get(member);
       return bCanExpand.booleanValue();
     }
 
@@ -579,7 +578,7 @@ public class Quax {
     nHierExclude = 0;
 
     final int iDim = this.dimIdx(uti.dimForMember(member));
-    final List nodesForMember = new ArrayList();
+    final List<TreeNode> nodesForMember = new ArrayList<>();
 
     // update the position member tree
     //  wherever we find monMember, expand it
@@ -654,9 +653,9 @@ public class Quax {
       return false;
 
     // first check the cache
-    List li = Arrays.asList(pathMembers);
+    List<Member> li = Arrays.asList(pathMembers);
     if (canCollapsePosMap.containsKey(li)) {
-      Boolean bCanCollapse = (Boolean) canCollapsePosMap.get(li);
+      Boolean bCanCollapse = canCollapsePosMap.get(li);
       return bCanCollapse.booleanValue();
     }
 
@@ -677,6 +676,7 @@ public class Quax {
    * @param mPath
    *          member path to be collapsed
    */
+  @SuppressWarnings("unchecked")
   public void collapse(final Member[] mPath) {
 
     if (qubonMode) {
@@ -764,7 +764,7 @@ public class Quax {
 
     // remove child Paths of mPath from position tree
     //  collect nodes to be deleted
-    final List removeList = new ArrayList();
+    final List<TreeNode> removeList = new ArrayList<>();
     posTreeRoot.walkChildren(new TreeNodeCallback() {
       /**
        * callback remove child nodes of member path, first collect nodes in workList
@@ -799,7 +799,7 @@ public class Quax {
               // if the set is empty thereafter, we will add the node
               //  to the remove list.
               int nArgs = uti.funCallArgCount(oExp);
-              List removeMembers = new ArrayList();
+              List<Object> removeMembers = new ArrayList<>();
               for (int i = 0; i < nArgs; i++) {
                 Object oSetMember = uti.funCallArg(oExp, i);
                 if (uti.checkDescendantO(mPath[iDim], oSetMember)) {
@@ -886,7 +886,7 @@ public class Quax {
 
     // first check the cache
     if (canCollapseMemberMap.containsKey(member)) {
-      Boolean bCanCollapse = (Boolean) canCollapseMemberMap.get(member);
+      Boolean bCanCollapse = canCollapseMemberMap.get(member);
       return bCanCollapse.booleanValue();
     }
 
@@ -918,7 +918,7 @@ public class Quax {
 
     final int iDim = this.dimIdx(uti.dimForMember(member));
 
-    final List nodesForMember = new ArrayList();
+    final List<TreeNode> nodesForMember = new ArrayList<>();
 
     // update the position member tree
     //  wherever we find a descendant node of monMember, split and remove it
@@ -1397,6 +1397,7 @@ public class Quax {
   /**
    * resolve the qubon mode unions and crossjoins only used in "old" expand mode
    */
+  @SuppressWarnings("unchecked")
   private void resolveUnions() {
     final List[] setLists = new List[nDimension];
     for (int i = 0; i < setLists.length; i++) {
@@ -1681,8 +1682,8 @@ public class Quax {
       SetExp setexp = new SetExp(generateMode, topcount, hiers[iDimension]);
       return setexp;
     }
-    List funCallList = collectFunCalls(iDimension);
-    List memberList = collectMembers(iDimension);
+    List<Object> funCallList = collectFunCalls(iDimension);
+    List<Object> memberList = collectMembers(iDimension);
     cleanupMemberList(funCallList, memberList, iDimension);
 
     if (funCallList.size() == 0 && memberList.size() == 1)
@@ -1799,10 +1800,10 @@ public class Quax {
    *
    * @param iDim
    */
-  private List collectFunCalls(final int iDim) {
+  private List<Object> collectFunCalls(final int iDim) {
     if (posTreeRoot == null)
-      return Collections.EMPTY_LIST;
-    final List funCallList = new ArrayList();
+      return Collections.emptyList();
+    final List<Object> funCallList = new ArrayList<>();
     posTreeRoot.walkChildren(new TreeNodeCallback() {
 
       /**
@@ -1843,12 +1844,12 @@ public class Quax {
    * @param funCallList
    * @param memberList
    */
-  private void cleanupMemberList(List funCallList, List memberList, int iDim) {
+  private void cleanupMemberList(List<Object> funCallList, List<Object> memberList, int iDim) {
     if (funCallList.size() > 0 && memberList.size() > 0) {
-      MemberLoop: for (Iterator itMem = memberList.iterator(); itMem.hasNext();) {
+      MemberLoop: for (Iterator<Object> itMem = memberList.iterator(); itMem.hasNext();) {
         Object oMember = itMem.next();
         Member m = uti.memberForObj(oMember);
-        for (Iterator itFun = funCallList.iterator(); itFun.hasNext();) {
+        for (Iterator<Object> itFun = funCallList.iterator(); itFun.hasNext();) {
           Object oFun = itFun.next();
           if (isMemberInFunCall(oFun, m, iDim)) {
             itMem.remove();
@@ -1864,10 +1865,10 @@ public class Quax {
    *
    * @param iDim
    */
-  List collectMembers(final int iDim) {
+  List<Object> collectMembers(final int iDim) {
     if (posTreeRoot == null)
-      return Collections.EMPTY_LIST;
-    final List memberList = new ArrayList();
+      return Collections.emptyList();
+    final List<Object> memberList = new ArrayList<>();
     posTreeRoot.walkChildren(new TreeNodeCallback() {
 
       /**
@@ -1946,7 +1947,7 @@ public class Quax {
    * @param oFun
    * @param list
    */
-  private void funToList(Object oFun, List list) {
+  private void funToList(Object oFun, List<Object> list) {
     if (uti.isFunCallTo(oFun, "Union")) {
       Object oArg0 = uti.funCallArg(oFun, 0);
       Object oArg1 = uti.funCallArg(oFun, 1);
@@ -1971,6 +1972,7 @@ public class Quax {
    * hierarchize the query axis position array
    */
   // this code is not working
+  @SuppressWarnings("unchecked")
   public void hierarchizePositions(final Member[][] aPosMem) {
 
     final int nDimension = aPosMem[0].length;
@@ -2105,10 +2107,10 @@ public class Quax {
     if (hiersChanged) {
       // count dimensions, set hierarchies
       TreeNode firstNode = posTreeRoot;
-      List hiersList = new ArrayList();
-      List children = firstNode.getChildren();
+      List<Hierarchy> hiersList = new ArrayList<>();
+      List<TreeNode> children = firstNode.getChildren();
       while (children.size() > 0) {
-        firstNode = (TreeNode) children.get(0);
+        firstNode = children.get(0);
         Object oExp = firstNode.getReference();
         Hierarchy hier;
         try {
@@ -2122,7 +2124,7 @@ public class Quax {
         ++nDimension;
         children = firstNode.getChildren();
       }
-      hiers = (Hierarchy[]) hiersList.toArray(new Hierarchy[0]);
+      hiers = hiersList.toArray(new Hierarchy[0]);
       nDimension = hiers.length;
       containsUF = new boolean[nDimension]; // init false
       ufMemberLists = new List[nDimension];
@@ -2306,7 +2308,7 @@ public class Quax {
         throw new IllegalArgumentException("Unknow Function - no member list, dimension=" + iHier
             + " function=" + e.getMessage());
 
-      List newList = new ArrayList();
+      List<Object> newList = new ArrayList<>();
       for (Iterator iter = ufMemberLists[iHier].iterator(); iter.hasNext();) {
         Member m = (Member) iter.next();
         if (!uti.checkDescendantM(member, m)) {
@@ -2334,14 +2336,14 @@ public class Quax {
     } else if (uti.isFunCallTo(oFun, "Members")) {
       Level level = member.getLevel();
       Object[] members = uti.getLevelMembers(level);
-      List remainder = new ArrayList();
+      List<Object> remainder = new ArrayList<>();
       for (int i = 0; i < members.length; i++) {
         if (!uti.checkDescendantO(member, members[i]))
           remainder.add(members[i]);
       }
       return uti.createMemberSet(remainder);
     } else if (uti.isFunCallTo(oFun, "{}")) {
-      List remainder = new ArrayList();
+      List<Object> remainder = new ArrayList<>();
       for (int i = 0; i < uti.funCallArgCount(oFun); i++) {
         Object om = uti.funCallArg(oFun, i);
         if (!uti.checkDescendantO(member, om))
@@ -2388,7 +2390,7 @@ public class Quax {
         throw new IllegalArgumentException("Unknow Function - no member list, dimension=" + iHier
             + " function=" + e.getMessage());
 
-      List newList = new ArrayList();
+      List<Object> newList = new ArrayList<>();
       for (Iterator iter = ufMemberLists[iHier].iterator(); iter.hasNext();) {
         Member m = (Member) iter.next();
         if (!member.equals(m)) {
