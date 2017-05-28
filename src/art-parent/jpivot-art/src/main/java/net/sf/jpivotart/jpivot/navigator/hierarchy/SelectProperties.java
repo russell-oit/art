@@ -50,6 +50,7 @@ import net.sf.wcfart.wcf.controller.RequestListener;
  */
 public class SelectProperties extends CategoryEditor implements ModelChangeListener {
 
+	@SuppressWarnings("unchecked")
 	private void sortCategory() {
 		if(categorySupportVisible == null) return;
 		List items = categorySupportVisible.getItems();
@@ -61,7 +62,7 @@ public class SelectProperties extends CategoryEditor implements ModelChangeListe
 		}
 		for (Iterator iterator = items.iterator(); iterator.hasNext();) {
 			MpmItem mpmItem = (MpmItem) iterator.next();
-			Integer index = (Integer)scopeMap.get(mpmItem.getMpm().getScope());
+			Integer index = scopeMap.get(mpmItem.getMpm().getScope());
 			if(index != null)
 				tempItems[index.intValue()].add(mpmItem);
 		}
@@ -107,10 +108,10 @@ public class SelectProperties extends CategoryEditor implements ModelChangeListe
 			if(cs.getItems().size()==0)
 				visiblePropertyMetas = null;
 			else {
-				List items = cs.getItems();
-				visiblePropertyMetas = new ArrayList();
-				for (Iterator iterator = items.iterator(); iterator.hasNext();) {
-					MpmItem mpmItem = (MpmItem) iterator.next();
+				List<Item> items = cs.getItems();
+				visiblePropertyMetas = new ArrayList<>();
+				for (Item item : items) {
+					MpmItem mpmItem = (MpmItem) item;
 					visiblePropertyMetas.add(mpmItem.getMpm());
 				}
 			}
@@ -185,7 +186,7 @@ public class SelectProperties extends CategoryEditor implements ModelChangeListe
 
 	private PropertySpanBuilder propertyConfig;
 
-	private List visiblePropertyMetas = null;
+	private List<MemberPropertyMeta> visiblePropertyMetas = null;
 
 	private List[] availablePropertiesColumns;
 
@@ -193,7 +194,7 @@ public class SelectProperties extends CategoryEditor implements ModelChangeListe
 
 	private CategorySupport categorySupportAvailable;
 
-	private Map scopeMap;
+	private Map<String, Integer> scopeMap;
 
 	/**
 	 * Constructor for SelectProperties.
@@ -249,7 +250,7 @@ public class SelectProperties extends CategoryEditor implements ModelChangeListe
 		logger.info("SelectProperties.initializeCategories()");
 		categories.clear();
 
-		scopeMap = new HashMap();
+		scopeMap = new HashMap<>();
 		categorySupportVisible = new CategorySupport(resources.getString("properties.visible"), "cat-visible.png");
 		categorySupportAvailable = new CategorySupport(resources.getString("properties.available"), "cat-available.png");
 		categories.add(categorySupportVisible);
@@ -263,12 +264,11 @@ public class SelectProperties extends CategoryEditor implements ModelChangeListe
 			return;
 		}
 
-		List itemListVisible = new ArrayList();
-		List itemListAvailable = new ArrayList();
+		List<Item> itemListVisible = new ArrayList<>();
+		List<Item> itemListAvailable = new ArrayList<>();
 
 		if (visiblePropertyMetas != null) {
-			for (Iterator iterator = visiblePropertyMetas.iterator(); iterator.hasNext();) {
-				MemberPropertyMeta mpm = (MemberPropertyMeta) iterator.next();
+			for (MemberPropertyMeta mpm :visiblePropertyMetas) {
 				itemListVisible.add(new MpmItem(mpm));
 			}
 		}
@@ -298,11 +298,10 @@ public class SelectProperties extends CategoryEditor implements ModelChangeListe
 		categorySupportAvailable.setItems(itemListAvailable);
 	}
 
-	private boolean existsInList(List visiblePropertyMetas, MpmItem mpmItem) {
+	private boolean existsInList(List<MemberPropertyMeta> visiblePropertyMetas, MpmItem mpmItem) {
 		if(visiblePropertyMetas == null) return false;
 
-		for (Iterator iterator = visiblePropertyMetas.iterator(); iterator.hasNext();) {
-			MemberPropertyMeta mpm = (MemberPropertyMeta) iterator.next();
+		for (MemberPropertyMeta mpm : visiblePropertyMetas) {
 			String tempString = mpm.getScope() + " [ " + mpm.getLabel() + " ]";
 			if(tempString.equals(mpmItem.getLabel()))
 				return true;
