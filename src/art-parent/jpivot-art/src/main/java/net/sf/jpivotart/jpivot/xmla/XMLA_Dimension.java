@@ -42,9 +42,9 @@ public class XMLA_Dimension implements Dimension, Exp, MDXElement {
   private boolean isVisible;
   private String description;
 
-  private ArrayList aHierarchies = new ArrayList();
+  private ArrayList<Hierarchy> aHierarchies = new ArrayList<>();
 
-  private Map props = new HashMap(); // member properties , SAP
+  private Map<String, XMLA_MemberProp> props = new HashMap<>(); // member properties , SAP
 
   // dimension types (not documented?) 
   public static final int MD_DIMTYPE_TIME = 1;
@@ -73,7 +73,7 @@ public class XMLA_Dimension implements Dimension, Exp, MDXElement {
    * @see net.sf.jpivotart.jpivot.olap.model.Dimension#getHierarchies()
    */
   public Hierarchy[] getHierarchies() {
-    return (Hierarchy[]) aHierarchies.toArray(new XMLA_Hierarchy[0]);
+    return aHierarchies.toArray(new XMLA_Hierarchy[0]);
   }
 
   /**
@@ -294,7 +294,7 @@ public class XMLA_Dimension implements Dimension, Exp, MDXElement {
   /**
     * @return props
     */
-  public Map getProps() {
+  public Map<String, XMLA_MemberProp> getProps() {
     return props;
   }
 
@@ -311,7 +311,7 @@ public class XMLA_Dimension implements Dimension, Exp, MDXElement {
    * retrieve a property
    */
   public XMLA_MemberProp getProp(String xmlTag) {
-    return (XMLA_MemberProp) props.get(xmlTag);
+    return props.get(xmlTag);
   }
 
   /**
