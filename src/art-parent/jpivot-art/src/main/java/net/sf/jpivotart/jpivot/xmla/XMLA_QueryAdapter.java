@@ -79,12 +79,10 @@ public class XMLA_QueryAdapter extends QueryAdapter implements QuaxChangeListene
   public void quaxChanged(Quax quax, Object source, boolean changedByNavi) {
     useQuax = true;
     // remove the parameters for this axis from the parsed query
-    Map paraMap = parsedQuery.getParaMap();
+    Map<String, Parameter> paraMap = parsedQuery.getParaMap();
     int iOrdinal = quax.getOrdinal();
-    Collection params = paraMap.values();
-    List removeList = new ArrayList();
-    for (Iterator iter = params.iterator(); iter.hasNext();) {
-      Parameter param = (Parameter) iter.next();
+    List<String> removeList = new ArrayList<>();
+    for (Parameter param : paraMap.values()) {
       int iAxis = param.getIAxis();
       if (iAxis == iOrdinal) {
         // the parameter was on the axis for the quax
@@ -92,8 +90,7 @@ public class XMLA_QueryAdapter extends QueryAdapter implements QuaxChangeListene
         removeList.add(param.getName().toUpperCase());
       }
     }
-    for (Iterator iter = removeList.iterator(); iter.hasNext();) {
-      String objToRemove = (String) iter.next();
+    for (String objToRemove : removeList) {
       paraMap.remove(objToRemove);
     }
   }
@@ -145,7 +142,7 @@ public class XMLA_QueryAdapter extends QueryAdapter implements QuaxChangeListene
       if (mPropExt != null)
         mprops = mPropExt.getVisibleProperties();
       if (mprops != null && mprops.length > 0) {
-        List dProps = new ArrayList();
+        List<CompoundId> dProps = new ArrayList<>();
         PropsLoop: for (int j = 0; j < mprops.length; j++) {
           String hierUname = mprops[j].getScope();
           XMLA_Hierarchy hier = ((XMLA_Model) model).lookupHierByUName(hierUname);
