@@ -176,7 +176,7 @@ public class MondrianResult extends ResultBase {
     }
 
     // second step: create the result data
-    axesList = new ArrayList();
+    axesList = new ArrayList<>();
     for (int i = 0; i < monAxes.length; i++) {
       axesList.add(new MondrianAxis(i, monAxes[i], mmodel));
       // check for OutOfMemory
@@ -237,7 +237,7 @@ public class MondrianResult extends ResultBase {
   public Axis[] getAxes() {
     if (monResult == null)
       return null; // todo error handling
-    return (Axis[]) axesList.toArray(new MondrianAxis[0]);
+    return axesList.toArray(new MondrianAxis[0]);
   }
 
 } // MondrianResult
