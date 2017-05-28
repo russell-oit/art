@@ -37,7 +37,7 @@ public class TestMemberDeleter extends TestExtensionSupport implements MemberDel
     System.out.println("deleting " + m.getLabel());
     TestHierarchy hier = (TestHierarchy) m.getLevel().getHierarchy();
     TestMember[] tm = hier.getRootMembers();
-    List list = new ArrayList();
+    List<Member> list = new ArrayList<>();
     for (int i = 0; i < tm.length; i++)
       list.add(tm[i]);
     list.remove(m);
