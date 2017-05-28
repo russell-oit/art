@@ -41,9 +41,9 @@ public abstract class ResultBase implements Result {
 
   private static String[] specialProps = { "arrow"};
 
-  protected List axesList;
+  protected List<Axis> axesList;
 
-  protected List aCells;
+  protected List<Object> aCells;
 
   protected Axis slicer;
 
@@ -53,8 +53,8 @@ public abstract class ResultBase implements Result {
 
   // c'tor
   public ResultBase(Model model) {
-    aCells = new ArrayList();
-    axesList = new ArrayList();
+    aCells = new ArrayList<>();
+    axesList = new ArrayList<>();
     this.model = model;
   }
 
@@ -88,7 +88,7 @@ public abstract class ResultBase implements Result {
    * @return List of cells
    * @see net.sf.jpivotart.jpivot.olap.model.Result#getCells()
    */
-  public List getCells() {
+  public List<Object> getCells() {
     return aCells;
   }
 
@@ -102,13 +102,13 @@ public abstract class ResultBase implements Result {
    * later in the result. Therefore : MDX hierarchize is needed
    */
   public void hierarchize(int iAxis) {
-    List posList = ((Axis) axesList.get(iAxis)).getPositions();
+    List<Position> posList = axesList.get(iAxis).getPositions();
     int nDim = axesList.size();
     int indexForAxis = nDim - 1 - iAxis;
     int[] ni = new int[nDim];
     int[] iFull = new int[nDim];
     for (int i = 0; i < nDim; i++) {
-      ni[i] = ((Axis) axesList.get(i)).getPositions().size() - 1;
+      ni[i] = axesList.get(i).getPositions().size() - 1;
     }
     int[] iSlice = new int[nDim - 1];
     CubeIndexIterator cubit = null;
@@ -135,8 +135,8 @@ public abstract class ResultBase implements Result {
 
     int iPos = 0;
     int nDimension = 0;
-    for (Iterator iter = posList.iterator(); iter.hasNext(); iPos++) {
-      PositionBase pos = (PositionBase) iter.next();
+    for (Position position : posList) {
+      PositionBase pos = (PositionBase) position;
       if (nDimension == 0)
         nDimension = pos.getMembers().length;
       pos.number = iPos;
@@ -169,7 +169,7 @@ public abstract class ResultBase implements Result {
     for (int i = 0; i < nc; i++)
       aCells.add(null);
     iPos = 0;
-    for (Iterator iter = posList.iterator(); iter.hasNext(); iPos++) {
+    for (Iterator<Position> iter = posList.iterator(); iter.hasNext(); iPos++) {
       PositionBase posBase = (PositionBase) iter.next();
       if (nDim > 1) {
         cubit.reset();
@@ -199,7 +199,7 @@ public abstract class ResultBase implements Result {
    * @param nDim
    * @return sort pos list
    */
-  private List sortPosList(List posList, final int iDim, int nDim) {
+  private List<Position> sortPosList(List posList, final int iDim, int nDim) {
 
     printPosList(posList, new PrintWriter(System.out), "Start sortPosList " + iDim);
 
@@ -207,14 +207,14 @@ public abstract class ResultBase implements Result {
       return posList;
 
     // collect members and assign first occurrence prio
-    final Map firstOcc = new HashMap();
+    final Map<Member, Integer> firstOcc = new HashMap<>();
     int k = 0;
     for (Iterator iter = posList.iterator(); iter.hasNext(); k++) {
       PositionBase posb = (PositionBase) iter.next();
       posb.parent = null;
       Member m = posb.getMembers()[iDim];
       if (!firstOcc.containsKey(m))
-        firstOcc.put(m, new Integer(k));
+        firstOcc.put(m, k);
     }
 
     // first step
@@ -340,8 +340,7 @@ public abstract class ResultBase implements Result {
           apar2 = ap2;
         }
 
-        int retcode = ((Integer) firstOcc.get(apar1)).intValue()
-            - ((Integer) firstOcc.get(apar2)).intValue();
+        int retcode = firstOcc.get(apar1) - firstOcc.get(apar2);
 
         return retcode;
       }
@@ -353,8 +352,8 @@ public abstract class ResultBase implements Result {
     // sort sublists next hierarchy
     if (iDim == nDim - 1)
       return posList;
-    List newPosList = new ArrayList();
-    List subList = new ArrayList();
+    List<Position> newPosList = new ArrayList<>();
+    List<Position> subList = new ArrayList<>();
     Member first = null;
     for (Iterator iter = posList.iterator(); iter.hasNext();) {
       PositionBase pb = (PositionBase) iter.next();
@@ -645,10 +644,9 @@ public abstract class ResultBase implements Result {
     ps.println("Slicer Axis ");
     printAxis(ps, slicer);
 
-    Iterator it = aCells.iterator();
     int ic = 0;
-    while (it.hasNext()) {
-      Cell c = (Cell) it.next();
+    for(Object o : aCells){
+      Cell c = (Cell) o;
       String val = c.getFormattedValue();
       ps.println("Cell " + ic++ + " Value=" + val);
     }
