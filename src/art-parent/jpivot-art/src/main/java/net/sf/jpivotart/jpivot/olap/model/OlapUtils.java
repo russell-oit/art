@@ -28,8 +28,8 @@ import net.sf.wcfart.tbutils.res.Resources;
  */
 public class OlapUtils {
 
-  static final Set infix = new HashSet();
-  static final Set prefix = new HashSet();
+  static final Set<String> infix = new HashSet<>();
+  static final Set<String> prefix = new HashSet<>();
   static {
     String[] s = new String[] { "and", "or", "xor", "*", "/", "+", "-", "%", "<", ">", "<=", ">=",
         "<>", "="};
@@ -41,7 +41,7 @@ public class OlapUtils {
   };
 
   static Resources resources = Resources.instance(OlapUtils.class);
-  static final Set singleRecordLevelNames = new HashSet();
+  static final Set<String> singleRecordLevelNames = new HashSet<>();
   static {
     String s = resources.getString("single.record.level");
     StringTokenizer st = new StringTokenizer(s);
@@ -88,12 +88,12 @@ public class OlapUtils {
    * creates a list of cells out of a matrix
    * @see #getCellMatrix
    */
-  public static List getCellList(Cell[][] matrix) {
+  public static List<Cell> getCellList(Cell[][] matrix) {
     if (matrix.length == 0)
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     int rows = matrix.length;
     int cols = matrix[0].length;
-    List list = new ArrayList(rows * cols);
+    List<Cell> list = new ArrayList(rows * cols);
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < cols; col++) {
         list.add(matrix[row][col]);
@@ -164,8 +164,8 @@ public class OlapUtils {
   /**
    * return the dimensions that are displayed on a visible axis
    */
-  public static Set getVisibleDimensions(OlapModel model) throws OlapException {
-    Set visible = new HashSet();
+  public static Set<Dimension> getVisibleDimensions(OlapModel model) throws OlapException {
+    Set<Dimension> visible = new HashSet<>();
     Axis[] axes = model.getResult().getAxes();
     for (int i = 0; i < axes.length; i++) {
       Hierarchy[] hiers = axes[i].getHierarchies();
@@ -178,9 +178,9 @@ public class OlapUtils {
   /**
    * return the dimensions that are on the slicer axis (all that are not visible)
    */
-  public static Set getSlicerDimensions(OlapModel model) throws OlapException {
-    Set visible = getVisibleDimensions(model);
-    Set slicer = new HashSet();
+  public static Set<Dimension> getSlicerDimensions(OlapModel model) throws OlapException {
+    Set<Dimension> visible = getVisibleDimensions(model);
+    Set<Dimension> slicer = new HashSet<>();
     Dimension[] dims = model.getDimensions();
     for (int i = 0; i < dims.length; i++) {
       if (!visible.contains(dims[i]))
@@ -238,8 +238,8 @@ public class OlapUtils {
   /**
    * Return a list of active dimensions on the slicer 
    */
-  public static Set getActiveSlicerDimensions(OlapModel model) throws OlapException {
-    Set active = new HashSet();
+  public static Set<Dimension> getActiveSlicerDimensions(OlapModel model) throws OlapException {
+    Set<Dimension> active = new HashSet<>();
     Axis slicer = model.getResult().getSlicer();
     Hierarchy[] hiers = slicer.getHierarchies();
     for (int j = 0; j < hiers.length; j++) {
@@ -251,8 +251,8 @@ public class OlapUtils {
   /**
    * Return a list of active dimensions on the slicer 
    */
-  public static Set getActiveSlicerHierarchies(OlapModel model) throws OlapException {
-    Set active = new HashSet();
+  public static Set<Hierarchy> getActiveSlicerHierarchies(OlapModel model) throws OlapException {
+    Set<Hierarchy> active = new HashSet<>();
     Axis slicer = model.getResult().getSlicer();
     Hierarchy[] hiers = slicer.getHierarchies();
     for (int j = 0; j < hiers.length; j++)
@@ -271,7 +271,7 @@ public class OlapUtils {
     
     Axis slicer = model.getResult().getSlicer();
     Set selectedSlicerDims = new HashSet();
-    Set selectedSlicerHiers = new HashSet();
+    Set<Hierarchy> selectedSlicerHiers = new HashSet<>();
     
     List positions = slicer.getPositions();
 
@@ -292,15 +292,14 @@ public class OlapUtils {
     /* Return hierarchies that are not on the rows or columns and for the selected
      * members, return the selected hierarchy
      */
-    Set slicerHiers = new HashSet();
+    Set<Hierarchy> slicerHiers = new HashSet<>();
     Dimension[] dims = model.getDimensions();
     for (int i = 0; i < dims.length; i++) {
       if (!visible.contains(dims[i])) {
         if (!selectedSlicerDims.contains(dims[i])) {
             slicerHiers.add(dims[i].getHierarchies()[0]);
         } else {
-          for (Iterator it = selectedSlicerHiers.iterator(); it.hasNext();) {
-            Hierarchy hier = (Hierarchy) it.next();
+          for (Hierarchy hier : selectedSlicerHiers) {
             Dimension dim = hier.getDimension();
             if (dim.equals(dims[i])) {
                 slicerHiers.add(hier);
