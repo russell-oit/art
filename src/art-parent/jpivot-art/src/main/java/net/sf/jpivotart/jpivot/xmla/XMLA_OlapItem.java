@@ -24,7 +24,7 @@ import net.sf.jpivotart.jpivot.olap.model.OlapItem;
 public class XMLA_OlapItem implements OlapItem {
 
   private int type;
-	private Map propMap = new HashMap();
+	private Map<String, String> propMap = new HashMap<>();
 	private String caption = null;
 	private String name;
 	private String uniqueName;
@@ -81,7 +81,7 @@ public class XMLA_OlapItem implements OlapItem {
     * @return property
     */
   public String getProperty(String propName) {
-    return (String) propMap.get(propName);
+    return propMap.get(propName);
   }
 
   
@@ -90,7 +90,7 @@ public class XMLA_OlapItem implements OlapItem {
    * key and value of type String
    * @return properties  property map
    */
-	public Map getProperties() {
+	public Map<String, String> getProperties() {
 		return propMap;
 	}
 
