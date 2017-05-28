@@ -31,7 +31,7 @@ class PropertyBuilder {
 
   private void addProperties(TestMember member, int level, int index) {
 
-    List pl = new ArrayList();
+    List<Property> pl = new ArrayList<>();
 
     // to test right alignment, we construct a "big" number together with "small" ones
     pl.add(new PropertyImpl("P", "" + ((index == 1) ? 10000 : index), Alignable.Alignment.RIGHT));
@@ -70,12 +70,12 @@ class PropertyBuilder {
       pl.add(new PropertyImpl("MyLabel.image", "http://sourceforge.net/sflogo.php?group_id=58645&type=4"));
     }
 
-    Property[] p = (Property[]) pl.toArray(new Property[0]);
+    Property[] p = pl.toArray(new Property[0]);
     member.setProperties(p);
 
     index = 0;
-    for (Iterator it = member.getChildMember().iterator(); it.hasNext();)
-      addProperties(((TestMember) it.next()), level + 1, index++);
+    for (TestMember testMember : member.getChildMember())
+      addProperties(testMember, level + 1, index++);
   }
 
 }
