@@ -41,7 +41,7 @@ import net.sf.wcfart.tbutils.testenv.Environment;
  */
 
 public class OlapModelProxy extends OlapModelDecorator implements HttpSessionBindingListener {
-  ArrayList listeners = new ArrayList();
+  ArrayList<ModelChangeListener> listeners = new ArrayList<>();
   public static final String DEFAULT_NAME = "default";
 
   private static final Logger logger = Logger.getLogger(OlapModelProxy.class);
@@ -199,16 +199,14 @@ public class OlapModelProxy extends OlapModelDecorator implements HttpSessionBin
 
   private void fireModelChanged() {
     ModelChangeEvent e = new ModelChangeEvent(this);
-    for (Iterator iter = listeners.iterator(); iter.hasNext();) {
-      ModelChangeListener l = (ModelChangeListener) iter.next();
+    for (ModelChangeListener l : listeners) {
       l.modelChanged(e);
     }
   }
 
   private void fireStructureChanged() {
     ModelChangeEvent e = new ModelChangeEvent(this);
-    for (Iterator iter = listeners.iterator(); iter.hasNext();) {
-      ModelChangeListener l = (ModelChangeListener) iter.next();
+    for (ModelChangeListener l : listeners) {
       l.structureChanged(e);
     }
   }
