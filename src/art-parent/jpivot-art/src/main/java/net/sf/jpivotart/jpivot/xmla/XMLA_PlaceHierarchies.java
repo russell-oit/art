@@ -87,8 +87,9 @@ public class XMLA_PlaceHierarchies extends ExtensionSupport implements PlaceHier
     boolean changedMemberSet = false;
     for (int i = 0; i < nDimension; i++) {
       if (memberExpressions[i] instanceof List) {
-        List memberList = (List) memberExpressions[i];
-        Exp[] members = (Exp[]) memberList.toArray(new Exp[0]);
+		  @SuppressWarnings("unchecked")
+        List<Exp> memberList = (List<Exp>) memberExpressions[i];
+        Exp[] members = memberList.toArray(new Exp[0]);
         if (members.length == 1)
           sets[i] = members[0];
         else
