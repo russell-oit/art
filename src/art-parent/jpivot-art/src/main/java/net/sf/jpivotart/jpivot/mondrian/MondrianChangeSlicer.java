@@ -65,7 +65,7 @@ public class MondrianChangeSlicer extends ExtensionSupport implements ChangeSlic
 
     Axis slicer = res.getSlicer();
     List positions = slicer.getPositions();
-    List members = new ArrayList();
+    List<Member> members = new ArrayList<>();
     for (Iterator iter = positions.iterator(); iter.hasNext();) {
       Position pos = (Position) iter.next();
       Member[] posMembers = pos.getMembers();
@@ -75,7 +75,7 @@ public class MondrianChangeSlicer extends ExtensionSupport implements ChangeSlic
       }
     }
 
-    return (Member[]) members.toArray(new Member[0]);
+    return members.toArray(new Member[0]);
   }
 
   /**
@@ -94,8 +94,8 @@ public class MondrianChangeSlicer extends ExtensionSupport implements ChangeSlic
       if (logInfo)
         logger.info("slicer set to null");
     } else {
-	      ArrayList collectedMemberExpressions = new ArrayList();
-	      ArrayList conditions = new ArrayList();
+	      ArrayList<Exp> collectedMemberExpressions = new ArrayList<>();
+	      ArrayList<Exp> conditions = new ArrayList<>();
 	      String prevHierarchyName = ""; 
 	      String hierarchyName = ""; 
 	      String mbrUniqueName = "";
@@ -107,10 +107,10 @@ public class MondrianChangeSlicer extends ExtensionSupport implements ChangeSlic
 	    	  if (!hierarchyName.equals(prevHierarchyName)) {
 	    		  if(collectedMemberExpressions.size()>0) {
 	    			  if (firstCondition) {
-	    				  f = new UnresolvedFunCall("{}", Syntax.Braces, (Exp[])collectedMemberExpressions.toArray(new Exp[collectedMemberExpressions.size()]));
+	    				  f = new UnresolvedFunCall("{}", Syntax.Braces, collectedMemberExpressions.toArray(new Exp[collectedMemberExpressions.size()]));
 	    			  } else {
-	    				  conditions.add(new UnresolvedFunCall("{}", Syntax.Braces, (Exp[])collectedMemberExpressions.toArray(new Exp[collectedMemberExpressions.size()])));
-	    				  f = new UnresolvedFunCall("CrossJoin", Syntax.Function, (Exp[])conditions.toArray(new Exp[conditions.size()]));
+	    				  conditions.add(new UnresolvedFunCall("{}", Syntax.Braces, collectedMemberExpressions.toArray(new Exp[collectedMemberExpressions.size()])));
+	    				  f = new UnresolvedFunCall("CrossJoin", Syntax.Function, conditions.toArray(new Exp[conditions.size()]));
 	    				  conditions.clear();
 	    			  }
 	   				  conditions.add(f);
@@ -127,12 +127,12 @@ public class MondrianChangeSlicer extends ExtensionSupport implements ChangeSlic
 	      
 	      // Add lastly collected member to filters conditions list
 		  if(collectedMemberExpressions.size()>0) {
-			  conditions.add(new UnresolvedFunCall("{}", Syntax.Braces, (Exp[])collectedMemberExpressions.toArray(new Exp[collectedMemberExpressions.size()])));
+			  conditions.add(new UnresolvedFunCall("{}", Syntax.Braces, collectedMemberExpressions.toArray(new Exp[collectedMemberExpressions.size()])));
 			  if (logInfo) logger.info("Added a new filter condition for Hierarchy: " + hierarchyName);
 		  }
 	      
 	      if (conditions.size() == 1) 
-	    	  monQuery.setSlicerAxis(new QueryAxis(false, (Exp)conditions.get(0), AxisOrdinal.StandardAxisOrdinal.SLICER, QueryAxis.SubtotalVisibility.Undefined));
+	    	  monQuery.setSlicerAxis(new QueryAxis(false, conditions.get(0), AxisOrdinal.StandardAxisOrdinal.SLICER, QueryAxis.SubtotalVisibility.Undefined));
 	      else {
 	    	  // SeraSoft - More dimensions selected. Build a CrossJoin function
 	    	  UnresolvedFunCall intersectConditions = new UnresolvedFunCall("Crossjoin", Syntax.Function, (Exp[])conditions.toArray(new Exp[conditions.size()]));
