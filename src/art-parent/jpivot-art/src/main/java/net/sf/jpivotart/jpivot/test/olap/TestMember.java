@@ -13,6 +13,7 @@
 package net.sf.jpivotart.jpivot.test.olap;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.sf.jpivotart.jpivot.olap.model.impl.MemberImpl;
 
@@ -23,14 +24,14 @@ import net.sf.jpivotart.jpivot.olap.model.impl.MemberImpl;
  */
 public class TestMember extends MemberImpl {
   TestMember parentMember;
-  ArrayList childMember = new ArrayList();
+  ArrayList<TestMember> childMember = new ArrayList<>();
   boolean visible;
 
   /**
    * Returns the childMember.
    * @return ArrayList
    */
-  public ArrayList getChildMember() {
+  public List<TestMember> getChildMember() {
     return childMember;
   }
 

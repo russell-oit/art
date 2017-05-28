@@ -37,7 +37,7 @@ public class MemberImpl extends PropertyHolderImpl implements Member {
     super(properties);
   }
 
-  public MemberImpl(List propertyList) {
+  public MemberImpl(List<Property> propertyList) {
     super(propertyList);
   }
 
