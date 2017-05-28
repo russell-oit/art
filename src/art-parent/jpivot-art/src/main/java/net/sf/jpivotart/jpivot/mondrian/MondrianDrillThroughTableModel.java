@@ -175,7 +175,7 @@ public class MondrianDrillThroughTableModel extends AbstractTableModel {
             }
             title = title.concat(" for "+columnTitles[columnTitles.length-1]);
             // loop through rows
-            List tempRows = new ArrayList();
+            List<TableRow> tempRows = new ArrayList<>();
             while (rs.next()) {
                 Object[] row = new Object[numCols];
                 // loop on columns, 1 based
@@ -188,7 +188,7 @@ public class MondrianDrillThroughTableModel extends AbstractTableModel {
                 listener.check();
             }
             rs.close();
-            rows = (TableRow[]) tempRows.toArray(new TableRow[0]);
+            rows = tempRows.toArray(new TableRow[0]);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("?", e);
