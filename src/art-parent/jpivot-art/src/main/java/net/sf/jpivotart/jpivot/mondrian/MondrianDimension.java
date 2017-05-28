@@ -26,14 +26,14 @@ import net.sf.wcfart.tbutils.res.Resources;
 public class MondrianDimension implements Dimension, MDXElement {
 
   private net.sf.mondrianart.mondrian.olap.Dimension monDimension = null;
-  private ArrayList aHierarchies;
+  private ArrayList<Hierarchy> aHierarchies;
   MondrianModel model;
   Resources resources;
 
   protected MondrianDimension(net.sf.mondrianart.mondrian.olap.Dimension monDimension, MondrianModel model) {
     this.monDimension = monDimension;
     this.model = model;
-    aHierarchies = new ArrayList();
+    aHierarchies = new ArrayList<>();
     resources = Resources.instance(model.getLocale(), MondrianDimension.class);
   }
 
@@ -49,7 +49,7 @@ public class MondrianDimension implements Dimension, MDXElement {
    * @see net.sf.mondrianart.mondrian.olap.Dimension#getHierarchies()
    */
   public Hierarchy[] getHierarchies() {
-    return (Hierarchy[]) aHierarchies.toArray(new MondrianHierarchy[0]);
+    return aHierarchies.toArray(new MondrianHierarchy[0]);
   }
 
   public boolean isTime() {
