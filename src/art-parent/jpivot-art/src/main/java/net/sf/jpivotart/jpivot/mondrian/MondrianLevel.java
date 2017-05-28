@@ -29,7 +29,7 @@ public class MondrianLevel implements Level, MDXElement, MDXLevel {
 
   private net.sf.mondrianart.mondrian.olap.Level monLevel;
   private MondrianHierarchy hierarchy;
-  private ArrayList aMembers;
+  private ArrayList<MondrianMember> aMembers;
   private MondrianModel model;
   private Resources resources;
 
@@ -47,7 +47,7 @@ public class MondrianLevel implements Level, MDXElement, MDXLevel {
     this.hierarchy = hierarchy;
     this.model = model;
     this.resources = Resources.instance(model.getLocale(), MondrianLevel.class);
-    aMembers = new ArrayList();
+    aMembers = new ArrayList<>();
     hierarchy.addLevel(this);
   }
 
