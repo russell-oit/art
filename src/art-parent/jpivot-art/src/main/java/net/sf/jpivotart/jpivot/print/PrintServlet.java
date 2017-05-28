@@ -133,7 +133,7 @@ public class PrintServlet extends HttpServlet {
 					String chartRef = "chart" + request.getParameter("cube");
 					String printRef = "print" + request.getParameter("cube");
 
-					Map parameters = new HashMap();
+					Map<String, Object> parameters = new HashMap<>();
 
 					OutputStream outStream = response.getOutputStream();
 					PrintWriter out = new PrintWriter(outStream);
@@ -204,8 +204,8 @@ public class PrintServlet extends HttpServlet {
 						DOMSource source = new DOMSource(document);
 						// set up xml transformation
 						Transformer transformer = XmlUtils.getTransformer(session, xslUri, xslCache);
-						for (Iterator it = parameters.keySet().iterator(); it.hasNext();) {
-							String name = (String) it.next();
+						for (Iterator<String> it = parameters.keySet().iterator(); it.hasNext();) {
+							String name = it.next();
 							Object value = parameters.get(name);
 							transformer.setParameter(name, value);
 						}
