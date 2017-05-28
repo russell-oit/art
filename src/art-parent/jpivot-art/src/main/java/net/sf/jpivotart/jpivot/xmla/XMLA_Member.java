@@ -57,7 +57,7 @@ public class XMLA_Member implements Member, MDXMember, Exp {
 
   private XMLA_Level level;
   private XMLA_Member parent = null;
-  private ArrayList aChildren = null;
+  private ArrayList<XMLA_Member> aChildren = null;
 
   //private Property[] properties = null;
   private List properties = new ArrayList();
@@ -466,20 +466,20 @@ public class XMLA_Member implements Member, MDXMember, Exp {
       if (childrenCardinality == 0)
         return new XMLA_Member[0];
       else
-        return (XMLA_Member[]) aChildren.toArray(new XMLA_Member[0]);
+        return aChildren.toArray(new XMLA_Member[0]);
     }
 
     // determine children
     model.retrieveMemberChildren(this); // will retrieve children
 
-    return (XMLA_Member[]) aChildren.toArray(new XMLA_Member[0]);
+    return aChildren.toArray(new XMLA_Member[0]);
   }
 
   /**
     * set list  of children.
     * @param aChildren List of children to be added
     */
-  public void setChildren(ArrayList aChildren) {
+  public void setChildren(ArrayList<XMLA_Member> aChildren) {
     this.aChildren = aChildren;
     if (aChildren == null)
       childrenCardinality = 0;

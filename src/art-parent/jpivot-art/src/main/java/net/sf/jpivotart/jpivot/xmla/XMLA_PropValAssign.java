@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
  */
 public class XMLA_PropValAssign {
 
-  private Map propMap = new HashMap();
+  private Map<String, List<ValAssign>> propMap = new HashMap<>();
   private int firstBit = 0;
   static private int LASTBIT = 15; // use FONTSIZE, < 2**16
 
@@ -35,7 +35,7 @@ public class XMLA_PropValAssign {
   /**
    * @param values - possible value assignments
    */
-  public void addProp(String prop, List values) {
+  public void addProp(String prop, List<String> values) {
     // how many bits do we need ? log(2, #values)
     int nValues = values.size();
     if (nValues == 0)
@@ -57,10 +57,9 @@ public class XMLA_PropValAssign {
       return;
     }
     
-    List vAssignList = new ArrayList();
+    List<ValAssign> vAssignList = new ArrayList<>();
     int iBitVal = 0;
-    for (Iterator iter = values.iterator(); iter.hasNext();) {
-      String val = (String) iter.next();
+    for (String val : values) {
       ValAssign vAssign = new ValAssign();
       vAssign.setVal(val);
       vAssign.setBitMask(mask);
@@ -77,21 +76,21 @@ public class XMLA_PropValAssign {
    * @param prop
    * @return the value assignment list
    */
-  public List getValAssignList(String prop) {
-    return (List) propMap.get(prop);
+  public List<ValAssign> getValAssignList(String prop) {
+    return propMap.get(prop);
   }
 
   /**
    * @return prop map
    */
-  public Map getPropMap() {
+  public Map<String, List<ValAssign>> getPropMap() {
     return propMap;
   }
 
   /**
    * @param map
    */
-  public void setPropMap(Map map) {
+  public void setPropMap(Map<String, List<ValAssign>> map) {
     propMap = map;
   }
   

@@ -1051,7 +1051,7 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     List mems = soap.discoverMem(catalog, cube, null, level.getHierUniqueName(), level
         .getUniqueName());
     // evaluate
-    ArrayList aNewMembers = new ArrayList();
+    ArrayList<Member> aNewMembers = new ArrayList<>();
     ArrayList<Member> aAllMembers = new ArrayList<>();
     evaluateMembers(mems, aNewMembers, aAllMembers);
     aMembers.addAll(aNewMembers);
@@ -1069,8 +1069,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     List mems = soap.discoverMemTree(catalog, cube, member.getUniqueName(), 1);
 
     // evaluate
-    ArrayList aNewMembers = new ArrayList();
-    ArrayList aAllMembers = new ArrayList();
+    ArrayList<Member> aNewMembers = new ArrayList<>();
+    ArrayList<Member> aAllMembers = new ArrayList<>();
     // one level, properties are delivered
     evaluateMembers(mems, aNewMembers, aAllMembers);
 
@@ -1122,8 +1122,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     }
 
     // evaluate
-    ArrayList aNewMembers = new ArrayList();
-    ArrayList aAllMembers = new ArrayList();
+    ArrayList<Member> aNewMembers = new ArrayList<>();
+    ArrayList<Member> aAllMembers = new ArrayList<>();
     // one level, properties are delivered
     evaluateMembers(mems, aNewMembers, aAllMembers);
     aMembers.addAll(aNewMembers);
@@ -1142,8 +1142,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     // 8 = self
     List mems = soap.discoverMemTree(catalog, cube, member.getUniqueName(), 8);
     // evaluate
-    ArrayList aNewMembers = new ArrayList();
-    ArrayList aAllMembers = new ArrayList();
+    ArrayList<Member> aNewMembers = new ArrayList<>();
+    ArrayList<Member> aAllMembers = new ArrayList<>();
     evaluateMembers(mems, aNewMembers, aAllMembers);
 
     /*
@@ -1187,8 +1187,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     List mems = soap.discoverMemTree(catalog, cube, uniqueName, 8);
 
     // evaluate
-    ArrayList aNewMembers = new ArrayList();
-    ArrayList aAllMembers = new ArrayList();
+    ArrayList<Member> aNewMembers = new ArrayList<>();
+    ArrayList<Member> aAllMembers = new ArrayList<>();
     evaluateMembers(mems, aNewMembers, aAllMembers);
     aMembers.addAll(aNewMembers);
     XMLA_Member member = (XMLA_Member) this.lookupMemberByUName(uniqueName);
@@ -1200,11 +1200,11 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    * @param member
    * @param aAllMembers
    */
-  private void setMemberChildren(XMLA_Member member, ArrayList aAllMembers) {
-    ArrayList aChildren = new ArrayList();
+  private void setMemberChildren(XMLA_Member member, ArrayList<Member> aAllMembers) {
+    ArrayList<XMLA_Member> aChildren = new ArrayList<>();
 
-    for (Iterator iter = aAllMembers.iterator(); iter.hasNext();) {
-      XMLA_Member mem = (XMLA_Member) iter.next();
+    for (Member member2 : aAllMembers) {
+      XMLA_Member mem = (XMLA_Member) member2;
       if (member.getUniqueName().equals(mem.getParentUniqueName()))
         aChildren.add(mem); // mem is a child
     }
@@ -1212,8 +1212,7 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     member.setChildren(aChildren);
     member.setChildrenOk(true);
 
-    for (Iterator iter = aChildren.iterator(); iter.hasNext();) {
-      XMLA_Member child = (XMLA_Member) iter.next();
+    for (XMLA_Member child : aChildren) {
       child.setParent(member);
       child.setParentOk(true);
     }
@@ -1252,7 +1251,7 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    * @param evalProps true, if properties should be evaluated
    * @param mems List of OlapItems
    */
-  private void evaluateMembers(List mems, List aNewMembers, List<Member> aAllMembers) {
+  private void evaluateMembers(List mems, List<Member> aNewMembers, List<Member> aAllMembers) {
 
     MLoop: for (Iterator iter = mems.iterator(); iter.hasNext();) {
       OlapItem oi = (OlapItem) iter.next();
