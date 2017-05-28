@@ -56,7 +56,7 @@ public class LevelAxisDecorator implements Axis {
   boolean[] skipAllMember;
   int totalLevelCount;
 
-  List positions;
+  List<Position> positions;
 
   /**
    * Constructor for LevelAxisDecorator.
@@ -164,7 +164,7 @@ public class LevelAxisDecorator implements Axis {
   /**
    * @see net.sf.jpivotart.jpivot.olap.model.Axis#getPositions()
    */
-  public List getPositions() {
+  public List<Position> getPositions() {
     return positions;
   }
 
