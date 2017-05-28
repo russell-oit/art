@@ -26,6 +26,7 @@ import net.sf.jpivotart.jpivot.core.ModelChangeEvent;
 import net.sf.jpivotart.jpivot.core.ModelChangeListener;
 import net.sf.jpivotart.jpivot.navigator.member.MemberSelectionModel;
 import net.sf.jpivotart.jpivot.olap.model.Axis;
+import net.sf.jpivotart.jpivot.olap.model.Dimension;
 import net.sf.jpivotart.jpivot.olap.model.Hierarchy;
 import net.sf.jpivotart.jpivot.olap.model.OlapException;
 import net.sf.jpivotart.jpivot.olap.model.OlapModel;
@@ -323,8 +324,8 @@ public class HierarchyNavigator extends CategoryEditor implements ModelChangeLis
    *
    * @return empty set if this component has not been rendered yet
    */
-  public Set getSlicerDimensions() {
-    Set set = new HashSet();
+  public Set<Dimension> getSlicerDimensions() {
+    Set<Dimension> set = new HashSet<>();
     for (Iterator it = slicerCategory.getItems().iterator(); it.hasNext();) {
       HierarchyItem hi = (HierarchyItem) it.next();
       set.add(hi.getHierarchy().getDimension());
