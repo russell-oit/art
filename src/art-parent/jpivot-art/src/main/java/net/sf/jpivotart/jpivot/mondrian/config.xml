@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<model class="net.sf.jpivotart.jpivot.mondrian.MondrianModel">
+  <extension id="drillExpandMember" class="net.sf.jpivotart.jpivot.olap.query.DrillExpandMemberExt"/>
+  <extension id="drillExpandPosition" class="net.sf.jpivotart.jpivot.olap.query.DrillExpandPositionExt"/>
+  <extension id="drillReplace" class="net.sf.jpivotart.jpivot.olap.query.DrillReplaceExt"/>
+  <extension id="swapAxes" class="net.sf.jpivotart.jpivot.mondrian.MondrianSwapAxes"/>
+  <extension id="memberTree" class="net.sf.jpivotart.jpivot.mondrian.MondrianMemberTree"/>
+  <extension id="sortRank" class="net.sf.jpivotart.jpivot.mondrian.MondrianSortRank"/>
+  <extension id="nonEmpty" class="net.sf.jpivotart.jpivot.mondrian.MondrianNonEmpty"/>
+  <extension id="mdxQuery" class="net.sf.jpivotart.jpivot.mondrian.MondrianMdxQuery"/>
+  <extension id="changeSlicer" class="net.sf.jpivotart.jpivot.mondrian.MondrianChangeSlicer"/>
+  <extension id="hierarchiesOnAxes" class="net.sf.jpivotart.jpivot.mondrian.MondrianPlaceHierarchies"/>
+  <extension id="membersOnAxes" class="net.sf.jpivotart.jpivot.mondrian.MondrianPlaceMembers"/>
+  <extension id="cache1" class="net.sf.jpivotart.jpivot.olap.model.CachingOlapModel"/>
+  <extension id="drillThrough" class="net.sf.jpivotart.jpivot.mondrian.MondrianDrillThrough"/>
+  <extension id="memberProperties" class="net.sf.jpivotart.jpivot.mondrian.MondrianMemberProperties"/>
+  <extension id="setParameter" class="net.sf.jpivotart.jpivot.mondrian.MondrianSetParameter"/>
+  <extension id="expressionParser" class="net.sf.jpivotart.jpivot.mondrian.MondrianExpressionParser"/>
+  <extension id="sqlAccess" class="net.sf.jpivotart.jpivot.mondrian.MondrianSqlAccess"/>
+</model>

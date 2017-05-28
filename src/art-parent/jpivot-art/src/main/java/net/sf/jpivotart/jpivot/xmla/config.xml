@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<model class="net.sf.jpivotart.jpivot.xmla.XMLA_Model">
+
+  <extension id="drillExpandMember" class="net.sf.jpivotart.jpivot.olap.query.DrillExpandMemberExt"/>
+  <extension id="drillExpandPosition" class="net.sf.jpivotart.jpivot.olap.query.DrillExpandPositionExt"/>
+  <extension id="drillReplace" class="net.sf.jpivotart.jpivot.olap.query.DrillReplaceExt"/>
+  <extension id="swapAxes" class="net.sf.jpivotart.jpivot.xmla.XMLA_SwapAxes"/>
+  <extension id="memberTree" class="net.sf.jpivotart.jpivot.xmla.XMLA_MemberTree"/>
+  <extension id="sortRank" class="net.sf.jpivotart.jpivot.xmla.XMLA_SortRank"/>
+  <extension id="nonEmpty" class="net.sf.jpivotart.jpivot.xmla.XMLA_NonEmpty"/>
+  <extension id="mdxQuery" class="net.sf.jpivotart.jpivot.xmla.XMLA_MdxQuery"/>
+  <extension id="hierarchiesOnAxes" class="net.sf.jpivotart.jpivot.xmla.XMLA_PlaceHierarchies"/>
+  <extension id="membersOnAxes" class="net.sf.jpivotart.jpivot.xmla.XMLA_PlaceMembers"/>
+  <extension id="changeSlicer" class="net.sf.jpivotart.jpivot.xmla.XMLA_ChangeSlicer"/>
+  <extension id="memberProperties" class="net.sf.jpivotart.jpivot.xmla.XMLA_MemberProperties"/>  
+  <extension id="cache1" class="net.sf.jpivotart.jpivot.olap.model.CachingOlapModel"/>
+  <extension id="drillThrough" class="net.sf.jpivotart.jpivot.xmla.XMLA_DrillThrough"/>
+ </model>

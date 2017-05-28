@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<model class="net.sf.jpivotart.jpivot.test.olap.TestOlapModel">
+  <extension id="drillExpandMember" class="net.sf.jpivotart.jpivot.test.olap.TestDrillExpandMember"/>
+  <extension id="drillExpandPosition" class="net.sf.jpivotart.jpivot.test.olap.TestDrillExpandPosition"/>
+  <extension id="drillReplace" class="net.sf.jpivotart.jpivot.test.olap.TestDrillReplace"/>
+  <extension id="swapAxes" class="net.sf.jpivotart.jpivot.test.olap.TestSwapAxes"/>
+  <extension id="memberTree" class="net.sf.jpivotart.jpivot.test.olap.TestMemberTree"/>
+  <extension id="sortRank" class="net.sf.jpivotart.jpivot.test.olap.TestSortRank"/>
+  <extension id="resetQuery" class="net.sf.jpivotart.jpivot.test.olap.TestResetQuery"/>
+  <extension id="nonEmpty" class="net.sf.jpivotart.jpivot.test.olap.TestNonEmpty"/>
+  <extension id="mdxQuery" class="net.sf.jpivotart.jpivot.test.olap.TestMdxQuery"/>
+  <extension id="changeSlicer" class="net.sf.jpivotart.jpivot.test.olap.TestChangeSlicer"/>
+  <extension id="hierarchiesOnAxes" class="net.sf.jpivotart.jpivot.test.olap.TestPlaceHierarchiesOnAxes"/>
+  <extension id="membersOnAxes" class="net.sf.jpivotart.jpivot.test.olap.TestPlaceMembersOnAxes"/>
+  <extension id="memberProperties" class="net.sf.jpivotart.jpivot.test.olap.TestMemberProperties"/>
+  <extension id="memberDeleter" class="net.sf.jpivotart.jpivot.test.olap.TestMemberDeleter"/>
+  <extension id="expressionParser" class="net.sf.jpivotart.jpivot.test.olap.TestExpressionParser"/>
+  <extension id="setParameter" class="net.sf.jpivotart.jpivot.test.olap.TestSetParameter"/>
+  <extension id="sqlAccess" class="net.sf.jpivotart.jpivot.test.olap.TestSqlAccess"/>
+  <extension id="cache1" class="net.sf.jpivotart.jpivot.olap.model.CachingOlapModel"/>
+</model>

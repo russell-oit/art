@@ -1,0 +1,18 @@
+1.1.0
+* Incorporated as a module in the main art project - changed group id to net.sf.art
+
+1.0.2
+* Added mondrianart package classes for dynamic calls
+* Added missing MondrianResource property files
+
+1.0.1
+* Updated eigenbase-xom to 1.3.1
+* Updated eigenbase-properties to 1.1.2
+* Updated eigenbase-resgen to 1.3.1
+
+1.0.0
+* Based on mondrian 3.4.1
+* Requires Java 7
+* Deleted gui package
+* Use olap4j 1.2.0
+* Use xalan 2.7.1

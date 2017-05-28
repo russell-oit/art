@@ -214,6 +214,37 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.art</groupId>
+			<artifactId>mondrian-art</artifactId>
+			<version>1.1.0-SNAPSHOT</version>
+			<exclusions>
+				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>jsp-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.art</groupId>
+			<artifactId>jpivot-art</artifactId>
+			<version>1.2.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<!-- add jstl 1.2.1 -->
 		<!-- https://stackoverflow.com/questions/24262223/standard-way-of-adding-jslt-1-2-1-in-a-maven-project -->
 		<dependency>
@@ -302,17 +333,6 @@
 			<groupId>com.unboundid</groupId>
 			<artifactId>unboundid-ldapsdk</artifactId>
 			<version>3.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jpivot-art</groupId>
-			<artifactId>jpivot-art</artifactId>
-			<version>1.1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
@@ -495,26 +515,6 @@
 		<dependency>
 			<groupId>com.lowagie</groupId>
 			<artifactId>itext</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.mondrian-art</groupId>
-			<artifactId>mondrian-art</artifactId>
-			<version>1.0.2</version>
-			<exclusions>
-				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>jsp-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.olap4j</groupId>

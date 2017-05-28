@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<table class="net.sf.jpivotart.jpivot.table.TableComponent">
+  <cellBuilder class="net.sf.jpivotart.jpivot.table.CellBuilderImpl"/>
+  <cornerBuilder class="net.sf.jpivotart.jpivot.table.CornerBuilderImpl"/>
+  <slicerBuilder class="net.sf.jpivotart.jpivot.table.SlicerBuilderImpl"/>
+  <rowAxisBuilder class="net.sf.jpivotart.jpivot.table.RowAxisBuilderImpl"/>
+  <columnAxisBuilder class="net.sf.jpivotart.jpivot.table.ColumnAxisBuilderImpl"/>
+  
+  <extension enabled="false" class="net.sf.jpivotart.jpivot.table.navi.DrillExpandMemberUI"/>
+  <extension enabled="true" class="net.sf.jpivotart.jpivot.table.navi.DrillExpandPositionUI"/>
+  <extension enabled="false" class="net.sf.jpivotart.jpivot.table.navi.DrillReplaceUI"/>
+  <extension class="net.sf.jpivotart.jpivot.table.navi.SwapAxesUI"/>
+  <extension class="net.sf.jpivotart.jpivot.table.navi.SortRankUI"/>
+  <extension class="net.sf.jpivotart.jpivot.table.navi.NonEmptyUI"/>
+  <extension class="net.sf.jpivotart.jpivot.table.navi.AxisStyleUI"/>
+  <extension class="net.sf.jpivotart.jpivot.table.navi.MdxQueryUI"/>
+  <extension enabled="false" class="net.sf.jpivotart.jpivot.table.navi.DrillThroughUI"/>
+  <extension class="net.sf.jpivotart.jpivot.excel.ExcelTableExtension"/>
+</table>

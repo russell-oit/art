@@ -28,3 +28,12 @@ src/art-parent/saiku-service-art/target/
 src/art-parent/saiku-service-art/.settings/
 src/art-parent/saiku-service-art/.classpath
 src/art-parent/saiku-service-art/.project
+src/art-parent/jpivot-art/nbactions.xml
+src/art-parent/jpivot-art/nb-configuration.xml
+src/art-parent/jpivot-art/target/
+src/art-parent/mondrian-art/nb-configuration.xml
+src/art-parent/mondrian-art/nbactions.xml
+src/art-parent/mondrian-art/target/
+src/art-parent/wcf-art/nb-configuration.xml
+src/art-parent/wcf-art/nbactions.xml
+src/art-parent/wcf-art/target/

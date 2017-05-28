@@ -1,0 +1,18 @@
+1.2.0
+* Incorporated as a module in the main art project - changed group id to net.sf.art
+
+1.1.2
+* Added localeString property to form and render tags
+* Enable fmt: specifiers in text nodes to end with a space
+
+1.1.1
+* Added localeString property to toolbar tag
+
+1.1.0
+* Use generics
+
+1.0.0
+* Based on jpivot-wcf 1.7
+* Requires Java 7
+* Built using maven
+* Addressed javadoc warnings
