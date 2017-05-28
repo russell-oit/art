@@ -83,7 +83,7 @@ public class SlicerBuilderImpl extends PartBuilderSupport implements SlicerBuild
     String scope = null;
     if (extension != null)
       scope = extension.getPropertyScope(m);
-    List list = new ArrayList();
+    List<Property> list = new ArrayList<>();
     for (int i = 0; i < src.length; i++) {
       Property p = src[i];
       if (PropertyUtils.isInline(p.getName()))
@@ -95,7 +95,7 @@ public class SlicerBuilderImpl extends PartBuilderSupport implements SlicerBuild
       else
         list.add(p);
     }
-    return (Property[])list.toArray(new Property[list.size()]);
+    return list.toArray(new Property[list.size()]);
   }
   
   MemberProperties getExtension() {
