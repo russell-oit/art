@@ -17,6 +17,7 @@ import java.util.List;
 
 import net.sf.jpivotart.jpivot.olap.model.Axis;
 import net.sf.jpivotart.jpivot.olap.model.Hierarchy;
+import net.sf.jpivotart.jpivot.olap.model.Position;
 import net.sf.jpivotart.jpivot.olap.model.Visitor;
 
 /**
@@ -29,8 +30,8 @@ public class XMLA_Axis implements Axis {
   private int ordinal;
   private int nHier = 0;
 
-  private List aHiers = new ArrayList();
-  private List aPositions = new ArrayList();
+  private List<Hierarchy> aHiers = new ArrayList<>();
+  private List<Position> aPositions = new ArrayList<>();
 
   /**
    * c'tor
@@ -72,14 +73,14 @@ public class XMLA_Axis implements Axis {
   /**
    * @see net.sf.jpivotart.jpivot.olap.model.Axis#getPositions()
    */
-  public List getPositions() {
+  public List<Position> getPositions() {
     return aPositions;
   }
   /**
    * @see net.sf.jpivotart.jpivot.olap.model.Axis#getHierarchies()
    */
   public Hierarchy[] getHierarchies() {
-    return (Hierarchy[])aHiers.toArray(new Hierarchy[0]);
+    return aHiers.toArray(new Hierarchy[0]);
   }
 
   /**
