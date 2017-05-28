@@ -34,8 +34,8 @@ public class PropertyHolderImpl implements PropertyHolder {
     this.properties = properties;
   }
 
-  public PropertyHolderImpl(List propertyList) {
-    this.properties = (Property[]) propertyList.toArray(new Property[propertyList.size()]);
+  public PropertyHolderImpl(List<Property> propertyList) {
+    this.properties = propertyList.toArray(new Property[propertyList.size()]);
   }
   
   /**

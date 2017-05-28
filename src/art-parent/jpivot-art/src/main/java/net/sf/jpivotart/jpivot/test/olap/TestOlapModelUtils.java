@@ -106,10 +106,9 @@ public class TestOlapModelUtils {
     return a;
   }
 
-  public static List findPositions(TestAxis axis, Member member) {
-    List list = new ArrayList();
-    for (Iterator it = axis.getPositions().iterator(); it.hasNext();) {
-      Object o = it.next();
+  public static List<Position> findPositions(TestAxis axis, Member member) {
+    List<Position> list = new ArrayList<>();
+    for (Position o : axis.getPositions()) {
       TestPosition p = (TestPosition) o;
       if (p.contains(member))
         list.add(p);

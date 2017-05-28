@@ -188,8 +188,8 @@ public class TestOlapModel extends ModelSupport implements OlapModel {
   /**
    * which positions in the result contain member
    */
-  public List findPositions(Member m) {
-    List list = new ArrayList();
+  public List<Position> findPositions(Member m) {
+    List<Position> list = new ArrayList<>();
     for (int i = 0; i < axes.length; i++)
       list.addAll(TestOlapModelUtils.findPositions(axes[i], m));
     return list;
