@@ -44,8 +44,8 @@ public class ScopedPropertyMetaSet {
    * @since 07.03.2005
    */
   class ScopeList {
-    List list = new ArrayList();
-    Map  map = new HashMap();
+    List<MemberPropertyMeta> list = new ArrayList<>();
+    Map<String, MemberPropertyMeta>  map = new HashMap<>();
     void add(MemberPropertyMeta mpm) {
       String name = mpm.getName();
       if (!map.containsKey(name)) {
@@ -54,19 +54,19 @@ public class ScopedPropertyMetaSet {
       }
     }
     void remove(MemberPropertyMeta mpm) {
-      mpm = (MemberPropertyMeta) map.get(mpm.getName());
+      mpm = map.get(mpm.getName());
       if (mpm == null)
         return;
       map.remove(mpm.getName());
       list.remove(mpm);
     }
     MemberPropertyMeta lookup(String name) {
-      return (MemberPropertyMeta) map.get(name);
+      return map.get(name);
     }
     boolean contains(String name) {
       return map.containsKey(name);
     }
-    Iterator iterator() {
+    Iterator<MemberPropertyMeta> iterator() {
       return list.iterator();
     }
   }
@@ -78,7 +78,7 @@ public class ScopedPropertyMetaSet {
   }
 
   // For every scope (=key) contains a ScopeList (=value) which contains the MemberPropertyMeta instances.
-  private Map scopeMap = new HashMap();
+  private Map<String, ScopeList> scopeMap = new HashMap<>();
 
   public void addAll(Collection memberPropertyMetas) {
     for (Iterator it = memberPropertyMetas.iterator(); it.hasNext();) {
@@ -113,8 +113,8 @@ public class ScopedPropertyMetaSet {
   }
 
   public void add(MemberPropertyMeta mpm) {
-    Object scope = mpm.getScope();
-    ScopeList scopeList = (ScopeList) scopeMap.get(scope);
+    String scope = mpm.getScope();
+    ScopeList scopeList = scopeMap.get(scope);
     if (scopeList == null) {
       scopeList = new ScopeList();
       scopeMap.put(scope, scopeList);
@@ -123,8 +123,8 @@ public class ScopedPropertyMetaSet {
   }
 
   public void remove(MemberPropertyMeta mpm) {
-    Object scope = mpm.getScope();
-    ScopeList scopeList = (ScopeList) scopeMap.get(scope);
+    String scope = mpm.getScope();
+    ScopeList scopeList = scopeMap.get(scope);
     if (scopeList == null)
       return;
     scopeList.remove(mpm);
@@ -155,14 +155,14 @@ public class ScopedPropertyMetaSet {
    * the <code>scope</code>.
    */
   public boolean contains(String scope, String name) {
-    ScopeList scopeList = (ScopeList) scopeMap.get(scope);
+    ScopeList scopeList = scopeMap.get(scope);
     if (scopeList == null)
       return false;
     return scopeList.contains(name);
   }
 
   MemberPropertyMeta lookup(String scope, String name) {
-    ScopeList scopeList = (ScopeList) scopeMap.get(scope);
+    ScopeList scopeList = scopeMap.get(scope);
     if (scopeList == null)
       return null;
     return scopeList.lookup(name);
@@ -175,10 +175,9 @@ public class ScopedPropertyMetaSet {
    * @return a new List that contains all the MemberPropertyMetas that are contained in <code>metas</code>
    * and are contained in this set (intersection). The order is not changed.
    */
-  public List intersectList(List metas) {
-    List list = new ArrayList();
-    for (Iterator it = metas.iterator(); it.hasNext();) {
-      MemberPropertyMeta mpm = (MemberPropertyMeta) it.next();
+  public List<MemberPropertyMeta> intersectList(List<MemberPropertyMeta> metas) {
+    List<MemberPropertyMeta> list = new ArrayList<>();
+    for (MemberPropertyMeta mpm : metas) {
       mpm = lookup(mpm.getScope(), mpm.getName());
       if (mpm != null)
         list.add(mpm);
@@ -190,12 +189,11 @@ public class ScopedPropertyMetaSet {
   /**
    * returns a list of Metas that pass the filter
    */
-  public List metaList(MemberPropertyMetaFilter filter) {
-    List list = new ArrayList();
-    for (Iterator it = scopeMap.values().iterator(); it.hasNext();) {
-      ScopeList scopeList = (ScopeList ) it.next();
-      for (Iterator vt = scopeList.iterator(); vt.hasNext();) {
-        MemberPropertyMeta meta = (MemberPropertyMeta) vt.next();
+  public List<MemberPropertyMeta> metaList(MemberPropertyMetaFilter filter) {
+    List<MemberPropertyMeta> list = new ArrayList<>();
+    for (ScopeList scopeList : scopeMap.values()) {
+      for (Iterator<MemberPropertyMeta> vt = scopeList.iterator(); vt.hasNext();) {
+        MemberPropertyMeta meta = vt.next();
         if (filter.accept(meta))
           list.add(meta);
       }
@@ -208,10 +206,9 @@ public class ScopedPropertyMetaSet {
    */
   public ScopedPropertyMetaSet metaSet(MemberPropertyMetaFilter filter) {
     ScopedPropertyMetaSet set = new ScopedPropertyMetaSet(extension);
-    for (Iterator it = scopeMap.values().iterator(); it.hasNext();) {
-      ScopeList scopeList = (ScopeList) it.next();
-      for (Iterator vt = scopeList.iterator(); vt.hasNext();) {
-        MemberPropertyMeta meta = (MemberPropertyMeta) vt.next();
+    for (ScopeList scopeList : scopeMap.values()) {
+      for (Iterator<MemberPropertyMeta> vt = scopeList.iterator(); vt.hasNext();) {
+        MemberPropertyMeta meta = vt.next();
         if (filter.accept(meta))
           set.add(meta);
       }
@@ -223,15 +220,14 @@ public class ScopedPropertyMetaSet {
    * @return sorted (!) array of all names - for test use only
    */
   String[] getAllNames() {
-    Set allNames = new TreeSet();
-    for (Iterator it = scopeMap.values().iterator(); it.hasNext();) {
-      ScopeList scopeList = (ScopeList) it.next();
-      for (Iterator vt = scopeList.iterator(); vt.hasNext();) {
-        MemberPropertyMeta meta = (MemberPropertyMeta) vt.next();
+    Set<String> allNames = new TreeSet<>();
+    for (ScopeList scopeList : scopeMap.values()) {
+      for (Iterator<MemberPropertyMeta> vt = scopeList.iterator(); vt.hasNext();) {
+        MemberPropertyMeta meta = vt.next();
         allNames.add(meta.getName());
       }
     }
-    return (String[]) allNames.toArray(new String[allNames.size()]);
+    return allNames.toArray(new String[allNames.size()]);
   }
 
   /**
