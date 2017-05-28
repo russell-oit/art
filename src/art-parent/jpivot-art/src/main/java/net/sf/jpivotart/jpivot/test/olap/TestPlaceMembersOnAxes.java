@@ -38,15 +38,14 @@ public class TestPlaceMembersOnAxes extends TestPlaceHierarchiesOnAxes implement
   /**
    * @see net.sf.jpivotart.jpivot.olap.navi.PlaceMembersOnAxes#findVisibleMembers(Hierarchy)
    */
-  public List findVisibleMembers(Hierarchy hier) {
-    List list = new ArrayList();
+  public List<Member> findVisibleMembers(Hierarchy hier) {
+    List<Member> list = new ArrayList<>();
     
     TestAxis[] axes = model().getAxes();
     for (int i = 0; i < axes.length; i++) {
       TestAxis axis = axes[i];
       // optimize: check against axis.getHierarchies()
-      for (Iterator it = axis.getPositions().iterator(); it.hasNext();) {
-        Position p = (Position)it.next();
+      for (Position p : axis.getPositions()) {
         Member[] members = p.getMembers();
         // optimize find the position of the member once
         for (int j = 0; j < members.length; j++) {
