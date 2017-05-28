@@ -55,7 +55,7 @@ public class ExpGenerator {
     List nodes = rootNode.getChildren();
 
     // single members (nDimension = 1) are enclosed in set brackets
-    List openSet = new ArrayList(); // collect single members
+    List<Object> openSet = new ArrayList<>(); // collect single members
     // loop over top level nodes
     NodeLoop: for (Iterator iter = nodes.iterator(); iter.hasNext();) {
       TreeNode node = (TreeNode) iter.next();
