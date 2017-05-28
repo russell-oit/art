@@ -24,7 +24,7 @@ public class AxisHeaderBuilderSupport implements AxisHeaderBuilder {
   class MySBContext implements SBContext {
     Element captionElem;
     String captionLabel;
-    List clickables = new ArrayList();
+    List<MenuItem> clickables = new ArrayList<>();
 
     public void setCaption(Element elem, String label) {
       this.captionElem = elem;
@@ -41,15 +41,14 @@ public class AxisHeaderBuilderSupport implements AxisHeaderBuilder {
         return;
       
       if (clickables.size() == 1) {
-        MenuItem mi = (MenuItem) clickables.get(0);
+        MenuItem mi = clickables.get(0);
         captionElem.setAttribute("href", mi.getHref());
         return;
       }
       
       PopUp pu = new PopUp();
       pu.setLabel(captionLabel);
-      for (Iterator it = clickables.iterator(); it.hasNext();) {
-        MenuItem mi = (MenuItem) it.next();
+      for (MenuItem mi : clickables) {
         pu.addItem(mi);
       }
       Element e = pu.render(captionElem.getOwnerDocument());
