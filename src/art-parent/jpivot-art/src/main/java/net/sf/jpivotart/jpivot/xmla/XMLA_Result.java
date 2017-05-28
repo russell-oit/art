@@ -39,7 +39,7 @@ public class XMLA_Result extends ResultBase implements QueryResultHandler {
   private FormatStringParser formatStringParser = new FormatStringParser();
   private int axisOrdinalMeasures = -1;
   private int nXPositions = 0;
-  private Map calcMeasurePos = new HashMap();
+  private Map<Integer, XMLA_Member> calcMeasurePos = new HashMap<>();
   private Map drillHeader;      
   private List drillRows; 
   
@@ -177,7 +177,7 @@ public class XMLA_Result extends ResultBase implements QueryResultHandler {
       if (member.getLevel().getHierarchy().getDimension().isMeasure()) {
         // calculated measure
         axisOrdinalMeasures = axisOrdinal;
-        calcMeasurePos.put(new Integer(positionOrdinal), member);
+        calcMeasurePos.put(positionOrdinal, member);
       }
     }
 
@@ -255,9 +255,9 @@ public class XMLA_Result extends ResultBase implements QueryResultHandler {
       int posX = iOrdinal - posY * nXPositions;
       XMLA_Member m = null;
       if (axisOrdinalMeasures == 0)
-        m = (XMLA_Member) calcMeasurePos.get(new Integer(posX));
+        m = calcMeasurePos.get(new Integer(posX));
       else if (axisOrdinalMeasures == 1)
-        m = (XMLA_Member) calcMeasurePos.get(new Integer(posY));
+        m = calcMeasurePos.get(new Integer(posY));
       if (m != null) {
         Map calcMeasurePropMap = ((XMLA_Model) model).getCalcMeasurePropMap();
         XMLA_PropValAssign cmprops = (XMLA_PropValAssign) calcMeasurePropMap.get(m.getUniqueName());
