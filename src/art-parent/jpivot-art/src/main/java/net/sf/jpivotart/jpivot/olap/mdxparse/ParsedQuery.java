@@ -13,7 +13,7 @@
 package net.sf.jpivotart.jpivot.olap.mdxparse;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +29,13 @@ public class ParsedQuery implements Exp {
 
   static Logger logger = Logger.getLogger(ParsedQuery.class);
 
-  List formulas = new ArrayList();
-  Map paraMap = new Hashtable();
+  List<Formula> formulas = new ArrayList<>();
+  Map<String, Parameter> paraMap = new HashMap<>();
   //List paramRefs = new ArrayList();
 
-  ArrayList axisDef = null;
+  ArrayList<QueryAxis> axisDef = null;
   String cube;
-  List cellProps = new ArrayList();
+  List<CompoundId> cellProps = new ArrayList();
 
   Exp slicer = null;
 
@@ -47,7 +47,7 @@ public class ParsedQuery implements Exp {
    */
   public void afterParse() throws OlapException {
     if (axisDef != null) {
-      axes = (QueryAxis[]) axisDef.toArray(new QueryAxis[0]);
+      axes = axisDef.toArray(new QueryAxis[0]);
       axisDef = null;
     }
     // collect Parameters
@@ -95,7 +95,7 @@ public class ParsedQuery implements Exp {
    * @return Formula[]
    */
   public Formula[] getFormulas() {
-    return (Formula[]) formulas.toArray(new Formula[0]);
+    return formulas.toArray(new Formula[0]);
   }
 
   public String toMdx() {
@@ -103,9 +103,8 @@ public class ParsedQuery implements Exp {
     boolean isFollow;
     if (formulas.size() > 0) {
       mdx.append("WITH ");
-      for (Iterator iter = formulas.iterator(); iter.hasNext();) {
+      for (Formula form : formulas) {
         mdx.append(' ');
-        Formula form = (Formula) iter.next();
         mdx.append(form.toMdx());
       }
       mdx.append(' ');
@@ -130,8 +129,7 @@ public class ParsedQuery implements Exp {
     // add CELL PROPERTIES VALUE, FORMATTED_VALUE, ...
     if (cellProps.size() > 0) {
       mdx.append(" CELL PROPERTIES VALUE, FORMATTED_VALUE");
-      for (Iterator iter = cellProps.iterator(); iter.hasNext();) {
-        CompoundId cid = (CompoundId) iter.next();
+      for (CompoundId cid : cellProps) {
         String str = cid.toMdx();
         if (str.equalsIgnoreCase("VALUE"))
           continue; // default
@@ -150,9 +148,8 @@ public class ParsedQuery implements Exp {
     boolean isFollow;
     if (formulas.size() > 0) {
       mdx.append("WITH ");
-      for (Iterator iter = formulas.iterator(); iter.hasNext();) {
+      for (Formula form : formulas) {
         mdx.append(' ');
-        Formula form = (Formula) iter.next();
         mdx.append(form.toMdx());
       }
       mdx.append(' ');
@@ -179,8 +176,7 @@ public class ParsedQuery implements Exp {
     // add CELL PROPERTIES VALUE, FORMATTED_VALUE, ...
     if (cellProps.size() > 0) {
       mdx.append(" CELL PROPERTIES VALUE, FORMATTED_VALUE");
-      for (Iterator iter = cellProps.iterator(); iter.hasNext();) {
-        CompoundId cid = (CompoundId) iter.next();
+      for (CompoundId cid : cellProps) {
         String str = cid.toMdx();
         if (str.equalsIgnoreCase("VALUE"))
           continue; // default
@@ -204,8 +200,7 @@ public class ParsedQuery implements Exp {
     ParsedQuery cloned = new ParsedQuery();
     if (formulas.size() > 0) {
       ArrayList clonedFormulas = new ArrayList();
-      for (Iterator iter = formulas.iterator(); iter.hasNext();) {
-        Formula form = (Formula) iter.next();
+      for (Formula form : formulas) {
         clonedFormulas.add(form.clone());
       }
       cloned.formulas = clonedFormulas;
@@ -248,8 +243,7 @@ public class ParsedQuery implements Exp {
 
     // walk Formulas
     int iAxis = -2;
-    for (Iterator iter = formulas.iterator(); iter.hasNext();) {
-      Formula formula = (Formula) iter.next();
+    for (Formula formula : formulas) {
       walkTreeForParams(formula.getExp(), iAxis);
       // dont forget the member properties
       for(int i = 0; i < formula.memberProperties.length; i++) {
@@ -348,7 +342,7 @@ public class ParsedQuery implements Exp {
   /**
    * @return parameter map
    */
-  public Map getParaMap() {
+  public Map<String, Parameter> getParaMap() {
     return paraMap;
   }
 
@@ -372,8 +366,8 @@ public class ParsedQuery implements Exp {
    * remove a formula
    */
   public void removeFormula(String uniqueName) {
-    for (Iterator iter = formulas.iterator(); iter.hasNext();) {
-      Formula formula = (Formula) iter.next();
+    for (Iterator<Formula> iter = formulas.iterator(); iter.hasNext();) {
+      Formula formula = iter.next();
       if (uniqueName.equals(formula.getUniqeName()))
         iter.remove();
     }
@@ -389,7 +383,7 @@ public class ParsedQuery implements Exp {
   /**
    * @return cell props
    */
-  public List getCellProps() {
+  public List<CompoundId> getCellProps() {
     return cellProps;
   }
 

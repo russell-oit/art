@@ -20,7 +20,7 @@ import java.util.Iterator;
  */
 public class CompoundId implements Exp {
 
-  private ArrayList names = new ArrayList();
+  private ArrayList<NamePart> names = new ArrayList<>();
 
   /**
    * c'tor
@@ -46,8 +46,7 @@ public class CompoundId implements Exp {
   public String[] toStringArray() {
     String[] ret = new String[names.size()];
     int i = 0;
-    for (Iterator iter = names.iterator(); iter.hasNext();) {
-      NamePart np = (NamePart) iter.next();
+    for (NamePart np : names) {
       ret[i++] = np.name;
     }
 
@@ -70,8 +69,7 @@ public class CompoundId implements Exp {
   public String toMdx() {
     String str = "";
     boolean isFollow = false;
-    for (Iterator iter = names.iterator(); iter.hasNext();) {
-      NamePart np = (NamePart) iter.next();
+    for (NamePart np : names) {
       if (isFollow)
         str += ".";
       isFollow = true;
@@ -91,8 +89,7 @@ public class CompoundId implements Exp {
    */
   public Object clone() {
     CompoundId cloned = new CompoundId();
-    for (Iterator iter = names.iterator(); iter.hasNext();) {
-      NamePart np = (NamePart) iter.next();
+    for (NamePart np : names) {
       cloned.append(np.name, np.isKey);
     } 
     return cloned;
