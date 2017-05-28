@@ -12,7 +12,7 @@
  */
 package net.sf.jpivotart.jpivot.mondrian;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.mondrianart.mondrian.olap.Category;
@@ -108,8 +108,8 @@ public class MondrianSetParameter extends ExtensionSupport implements SetParamet
    * @return Map containing parameter names (= keys) and strings to display value (= value)
    * @see net.sf.jpivotart.jpivot.olap.navi.SetParameter#getDisplayValues()
    */
-  public Map getDisplayValues() {
-    Map map = new Hashtable();
+  public Map<String, String> getDisplayValues() {
+    Map<String, String> map = new HashMap<>();
     MondrianModel model = (MondrianModel) getModel();
     net.sf.mondrianart.mondrian.olap.Query monQuery = 
         ((MondrianQueryAdapter) model.getQueryAdapter()).getMonQuery();
@@ -124,7 +124,7 @@ public class MondrianSetParameter extends ExtensionSupport implements SetParamet
         map.put(monParaName, value.toString());
         break;
       case Category.String:
-        map.put(monParaName, value);
+        map.put(monParaName, value.toString());
         break;
       case Category.Member:
         map.put(monParaName, ((net.sf.mondrianart.mondrian.olap.Member) value).getCaption());
