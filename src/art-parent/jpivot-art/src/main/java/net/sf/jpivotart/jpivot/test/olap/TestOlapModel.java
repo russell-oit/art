@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import net.sf.jpivotart.jpivot.core.ModelSupport;
 import net.sf.jpivotart.jpivot.olap.model.Axis;
+import net.sf.jpivotart.jpivot.olap.model.Cell;
 import net.sf.jpivotart.jpivot.olap.model.Dimension;
 import net.sf.jpivotart.jpivot.olap.model.Member;
 import net.sf.jpivotart.jpivot.olap.model.OlapException;
@@ -34,6 +35,7 @@ import net.sf.jpivotart.jpivot.olap.model.impl.CellImpl;
 import net.sf.jpivotart.jpivot.olap.model.impl.PropertyImpl;
 import net.sf.jpivotart.jpivot.olap.model.impl.ResultImpl;
 import net.sf.jpivotart.jpivot.olap.navi.DrillExpandMember;
+import net.sf.jpivotart.jpivot.olap.model.Position;
 
 /**
  * Created on 02.12.2002
@@ -119,7 +121,7 @@ public class TestOlapModel extends ModelSupport implements OlapModel {
     slicer = new TestAxis();
     TestPosition p = new TestPosition(slicer);
     p.setMembers(new TestMember[] { m });
-    List list = new ArrayList();
+    List<Position> list = new ArrayList<>();
     list.add(p);
     slicer.setPositions(list);
   }
@@ -138,7 +140,7 @@ public class TestOlapModel extends ModelSupport implements OlapModel {
       locale = Locale.getDefault();
     DecimalFormat fmt = (DecimalFormat) DecimalFormat.getInstance(locale);
     fmt.applyPattern("#,##0.00");
-    ArrayList cells = new ArrayList();
+    ArrayList<Cell> cells = new ArrayList<>();
     for (int i = 0; i < cellCount; i++) {
       CellImpl c = new CellImpl();
       if (false) {

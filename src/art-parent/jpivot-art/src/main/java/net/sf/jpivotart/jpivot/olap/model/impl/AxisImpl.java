@@ -27,7 +27,7 @@ import net.sf.jpivotart.jpivot.olap.model.Visitor;
  */
 public class AxisImpl implements Axis {
 
-  List positions = new ArrayList();
+  List<Position> positions = new ArrayList<>();
 
   /**
    * @return the hierarchies of the members of the first position.
@@ -37,7 +37,7 @@ public class AxisImpl implements Axis {
    */
   public Hierarchy[] getHierarchies() {
     if (positions.size() > 0) {
-      Position pos = (Position)positions.get(0);
+      Position pos = positions.get(0);
       Member[] members = pos.getMembers();
       Hierarchy[] hiers = new Hierarchy[members.length];
       for (int i = 0; i < members.length; i++)
@@ -51,7 +51,7 @@ public class AxisImpl implements Axis {
    * Returns the positions.
    * @return List
    */
-  public List getPositions() {
+  public List<Position> getPositions() {
     return positions;
   }
 
@@ -59,7 +59,7 @@ public class AxisImpl implements Axis {
    * Sets the positions.
    * @param positions The positions to set
    */
-  public void setPositions(List positions) {
+  public void setPositions(List<Position> positions) {
     this.positions = positions;
   }
 

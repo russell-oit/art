@@ -15,6 +15,7 @@ package net.sf.jpivotart.jpivot.olap.model.impl;
 import java.util.List;
 
 import net.sf.jpivotart.jpivot.olap.model.Axis;
+import net.sf.jpivotart.jpivot.olap.model.Cell;
 import net.sf.jpivotart.jpivot.olap.model.Result;
 import net.sf.jpivotart.jpivot.olap.model.Visitor;
 
@@ -25,7 +26,7 @@ import net.sf.jpivotart.jpivot.olap.model.Visitor;
  */
 public class ResultImpl implements Result {
 
-  List cells;
+  List<Cell> cells;
   Axis slicer;
   Axis[] axes;
   
@@ -48,7 +49,7 @@ public class ResultImpl implements Result {
    * Returns the cells.
    * @return List
    */
-  public List getCells() {
+  public List<Cell> getCells() {
     return cells;
   }
 
@@ -72,7 +73,7 @@ public class ResultImpl implements Result {
    * Sets the cells.
    * @param cells The cells to set
    */
-  public void setCells(List cells) {
+  public void setCells(List<Cell> cells) {
     this.cells = cells;
   }
 
