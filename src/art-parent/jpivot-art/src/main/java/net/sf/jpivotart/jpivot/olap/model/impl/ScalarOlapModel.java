@@ -12,6 +12,7 @@ import net.sf.jpivotart.jpivot.olap.model.Dimension;
 import net.sf.jpivotart.jpivot.olap.model.Member;
 import net.sf.jpivotart.jpivot.olap.model.OlapException;
 import net.sf.jpivotart.jpivot.olap.model.OlapModel;
+import net.sf.jpivotart.jpivot.olap.model.Position;
 import net.sf.jpivotart.jpivot.olap.model.Result;
 import net.sf.jpivotart.jpivot.olap.model.Visitor;
 
@@ -42,7 +43,7 @@ public class ScalarOlapModel extends ModelSupport implements OlapModel, Result {
   String ID;
 
   CellImpl cell;
-  List cells;
+  List<Object> cells;
   Axis[] axes;
   Axis slicer;
 
@@ -66,14 +67,14 @@ public class ScalarOlapModel extends ModelSupport implements OlapModel, Result {
 
     PositionImpl pos = new PositionImpl();
     pos.setMembers(new Member[] { measure});
-    List posns = new ArrayList(1);
+    List<Position> posns = new ArrayList<>(1);
     posns.add(pos);
     AxisImpl axis = new AxisImpl();
     axis.setPositions(posns);
     axes = new Axis[] { axis};
 
     cell = new CellImpl();
-    List list = new ArrayList(1);
+    List<Object> list = new ArrayList<>(1);
     list.add(cell);
     cells = Collections.unmodifiableList(list);
     
@@ -88,7 +89,7 @@ public class ScalarOlapModel extends ModelSupport implements OlapModel, Result {
   /**
    * returns a collection containing a single cell
    */
-  public List getCells() {
+  public List<Object> getCells() {
     return cells;
   }
 
