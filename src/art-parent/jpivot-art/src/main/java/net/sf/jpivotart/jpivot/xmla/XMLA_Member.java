@@ -60,7 +60,7 @@ public class XMLA_Member implements Member, MDXMember, Exp {
   private ArrayList<XMLA_Member> aChildren = null;
 
   //private Property[] properties = null;
-  private List properties = new ArrayList();
+  private List<Property> properties = new ArrayList<>();
 
   private boolean isCalculated; // for a formula member
 
@@ -400,7 +400,7 @@ public class XMLA_Member implements Member, MDXMember, Exp {
     if (isCalculated || properties.size() == 0)
       return new Property[0]; // or null ???
 
-    return (Property[]) properties.toArray(new Property[0]);
+    return properties.toArray(new Property[0]);
   }
 
   /**
@@ -429,8 +429,7 @@ public class XMLA_Member implements Member, MDXMember, Exp {
     if (isCalculated || properties.size() == 0)
       return null;
 
-    for (int i = 0; i < properties.size(); i++) {
-      Property prop = (Property) properties.get(i);
+    for (Property prop : properties) {
       if (name.equals(prop.getName()))
         return prop;
     }
