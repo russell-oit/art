@@ -171,14 +171,14 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * retrieve catalogs in data source
    * @return List of OlapItems for the catalogs
    */
-  public List discoverCat() throws OlapException {
-    final List cats = new ArrayList();
+  public List<XMLA_OlapItem> discoverCat() throws OlapException {
+    final List<XMLA_OlapItem> cats = new ArrayList<>();
 
     // restrictions
-    HashMap rHash = new HashMap(); // empty
+    HashMap<String, String> rHash = new HashMap<>(); // empty
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Content", "SchemaData");
 
@@ -212,14 +212,14 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * retrieve datasource properties
    * @return List of OlapItems for the datasource properties
    */
-  public List discoverDSProps() throws OlapException {
-    final List props = new ArrayList();
+  public List<XMLA_OlapItem> discoverDSProps() throws OlapException {
+    final List<XMLA_OlapItem> props = new ArrayList<>();
 
     // restrictions
-    HashMap rHash = new HashMap(); // empty
+    HashMap<String, String> rHash = new HashMap<>(); // empty
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Content", "SchemaData");
 
@@ -252,14 +252,14 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * retrieve cubes in data source
    * @return List of OlapItems for the cubes
    */
-  public List discoverCube(String cat) throws OlapException {
-    final List cubes = new ArrayList();
+  public List<XMLA_OlapItem> discoverCube(String cat) throws OlapException {
+    final List<XMLA_OlapItem> cubes = new ArrayList<>();
     // restrictions
-    HashMap rHash = new HashMap();
+    HashMap<String, String> rHash = new HashMap<>();
     rHash.put("CATALOG_NAME", cat);
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Content", "SchemaData");
     pHash.put("Catalog", cat); // needed, or else can only discover first catalog's cubes
@@ -294,15 +294,15 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * retrieve dimensions in data source
    * @return List of OlapItems for the dimensions
    */
-  public List discoverDim(String cat, String cube) throws OlapException {
-    final List dims = new ArrayList();
+  public List<XMLA_OlapItem> discoverDim(String cat, String cube) throws OlapException {
+    final List<XMLA_OlapItem> dims = new ArrayList<>();
     // restrictions
-    HashMap rHash = new HashMap();
+    HashMap<String, String> rHash = new HashMap<>();
     rHash.put("CATALOG_NAME", cat);
     rHash.put("CUBE_NAME", cube);
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Catalog", cat); // neccessary ???
     pHash.put("Content", "SchemaData");
@@ -347,18 +347,18 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * retrieve hierarchies in data source
    * @return List of OlapItems for the hierarchies
    */
-  public List discoverHier(String cat, String cube, String dimension) throws OlapException {
-    final List hiers = new ArrayList();
+  public List<XMLA_OlapItem> discoverHier(String cat, String cube, String dimension) throws OlapException {
+    final List<XMLA_OlapItem> hiers = new ArrayList<>();
 
     // restrictions
-    HashMap rHash = new HashMap();
+    HashMap<String, String> rHash = new HashMap<>();
     rHash.put("CATALOG_NAME", cat);
     rHash.put("CUBE_NAME", cube);
     if (dimension != null)
       rHash.put("DIMENSION_UNIQUE_NAME", dimension);
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Catalog", cat); // neccessary ???
     pHash.put("Content", "SchemaData");
@@ -401,13 +401,13 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * retrieve levels in data source
    * @return List of OlapItems for the levels
    */
-  public List discoverLev(String cat, String cube, String dimension, String hier)
+  public List<XMLA_OlapItem> discoverLev(String cat, String cube, String dimension, String hier)
       throws OlapException {
 
-    final List levels = new ArrayList();
+    final List<XMLA_OlapItem> levels = new ArrayList<>();
 
     // restrictions
-    HashMap rHash = new HashMap();
+    HashMap<String, String> rHash = new HashMap<>();
     rHash.put("CATALOG_NAME", cat);
     rHash.put("CUBE_NAME", cube);
     if (dimension != null)
@@ -416,7 +416,7 @@ public class XMLA_SOAP implements OlapDiscoverer {
       rHash.put("HIERARCHY_UNIQUE_NAME", dimension);
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Catalog", cat); // neccessary ???
     pHash.put("Content", "SchemaData");
@@ -461,12 +461,12 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * retrieve members in data source
    * @return List of OlapItems for the members
    */
-  public List discoverMem(String cat, String cube, String dimension, String hierarchy, String level)
+  public List<XMLA_OlapItem> discoverMem(String cat, String cube, String dimension, String hierarchy, String level)
       throws OlapException {
-    final List mems = new ArrayList();
+    final List<XMLA_OlapItem> mems = new ArrayList<>();
 
     // restrictions
-    HashMap rHash = new HashMap();
+    HashMap<String, String> rHash = new HashMap<>();
     rHash.put("CATALOG_NAME", cat);
     rHash.put("CUBE_NAME", cube);
     if (dimension != null)
@@ -477,7 +477,7 @@ public class XMLA_SOAP implements OlapDiscoverer {
       rHash.put("LEVEL_UNIQUE_NAME", level);
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Catalog", cat); // neccessary ???
     pHash.put("Content", "SchemaData");
@@ -538,19 +538,19 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * @see net.sf.jpivotart.jpivot.olap.model.OlapDiscoverer#discoverMemTree
    */
 
-  public List discoverMemTree(String cat, String cube, String member, int treeop)
+  public List<XMLA_OlapItem> discoverMemTree(String cat, String cube, String member, int treeop)
       throws OlapException {
-    final List mems = new ArrayList();
+    final List<XMLA_OlapItem> mems = new ArrayList<>();
 
     // restrictions
-    HashMap rHash = new HashMap();
+    HashMap<String, String> rHash = new HashMap<>();
     rHash.put("CATALOG_NAME", cat);
     rHash.put("CUBE_NAME", cube);
     rHash.put("MEMBER_UNIQUE_NAME", member);
     rHash.put("TREE_OP", String.valueOf(treeop));
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Catalog", cat); // neccessary ???
     pHash.put("Content", "SchemaData");
@@ -597,13 +597,13 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * retrieve data source properties
    * @return Map of key/value strings 
    */
-  public Map discoverDS() throws OlapException {
+  public Map<String, String> discoverDS() throws OlapException {
     // Microsoft wants restrictions
-    HashMap rHash = new HashMap();
+    HashMap<String, String> rHash = new HashMap<>();
 
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("Content", "Data");
-    final Map resultMap = new HashMap();
+    final Map<String, String> resultMap = new HashMap<>();
     Rowhandler rh = new Rowhandler() {
 
       public void handleRow(SOAPElement eRow, SOAPEnvelope envelope) {
@@ -647,12 +647,12 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * @throws OlapException
    * @see net.sf.jpivotart.jpivot.olap.model.OlapDiscoverer#discoverProp 
    */
-  public List discoverProp(String cat, String cube, String dimension, String hierarchy, String level)
+  public List<XMLA_OlapItem> discoverProp(String cat, String cube, String dimension, String hierarchy, String level)
       throws OlapException {
-    final List props = new ArrayList();
+    final List<XMLA_OlapItem> props = new ArrayList<>();
 
     // restrictions
-    HashMap rHash = new HashMap();
+    HashMap<String, String> rHash = new HashMap<>();
     rHash.put("CATALOG_NAME", cat);
     rHash.put("CUBE_NAME", cube);
     if (dimension != null)
@@ -663,7 +663,7 @@ public class XMLA_SOAP implements OlapDiscoverer {
       rHash.put("LEVEL_UNIQUE_NAME", level);
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Catalog", cat); // neccessary ???
     pHash.put("Content", "SchemaData");
@@ -708,16 +708,16 @@ public class XMLA_SOAP implements OlapDiscoverer {
    * @throws OlapException
    * @see net.sf.jpivotart.jpivot.olap.model.OlapDiscoverer#discoverProp 
    */
-  public List discoverSapVar(String cat, String cube) throws OlapException {
-    final List props = new ArrayList();
+  public List<XMLA_OlapItem> discoverSapVar(String cat, String cube) throws OlapException {
+    final List<XMLA_OlapItem> props = new ArrayList<>();
 
     // restrictions
-    HashMap rHash = new HashMap();
+    HashMap<String, String> rHash = new HashMap<>();
     rHash.put("CATALOG_NAME", cat);
     rHash.put("CUBE_NAME", cube);
 
     // properties   
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Catalog", cat); // neccessary ???
     pHash.put("Content", "SchemaData");
@@ -807,7 +807,7 @@ public class XMLA_SOAP implements OlapDiscoverer {
       //    <AxisFormat>TupleFormat</AxisFormat> oder "ClusterFormat"
       // </PropertyList>
       // </Properties>
-      Map paraList = new HashMap();
+      Map<String, String> paraList = new HashMap<>();
       paraList.put("DataSourceInfo", dataSource);
       paraList.put("Catalog", catalog);
       paraList.put("Format", "Multidimensional");
@@ -925,7 +925,7 @@ public class XMLA_SOAP implements OlapDiscoverer {
             String levUname = null;
             String displayInfo = null;
             Iterator it = eMem.getChildElements();
-            Map otherProps = new HashMap();
+            Map<String, String> otherProps = new HashMap<>();
             InnerLoop: while (it.hasNext()) {
               Node n = (Node) it.next();
               if (!(n instanceof SOAPElement))
@@ -1074,7 +1074,7 @@ public class XMLA_SOAP implements OlapDiscoverer {
     SOAPElement eStatement = eCommand.addChildElement(nSta);
     eStatement.addTextNode(query);
 
-    Map paraList = new HashMap();
+    Map<String, String> paraList = new HashMap<>();
     paraList.put("DataSourceInfo", dataSource);
     paraList.put("Catalog", catalog);
     //dsf : Note the use of tabular format instead of multidimensional. This is crucial 
@@ -1107,7 +1107,7 @@ public class XMLA_SOAP implements OlapDiscoverer {
     if (columnHeader == null)
       throw new OlapException("Excecute result has no rows element");
     
-	Map colNames = new HashMap();
+	Map<String, Integer> colNames = new HashMap<>();
     Iterator columnHeaderIt = columnHeader.getChildElements();
     int colIdx = 0;
     RowHeadLoop : while (columnHeaderIt.hasNext()) {
@@ -1124,7 +1124,7 @@ public class XMLA_SOAP implements OlapDiscoverer {
 
     // extract the data for each row
     
-    ArrayList drillRows = new ArrayList();
+    ArrayList<Map<String, String>> drillRows = new ArrayList<>();
     name = envelope.createName("row", "", ROWS_URI);
     Iterator rowIt = eRoot.getChildElements(name); 
     while  (rowIt.hasNext()) {
@@ -1136,7 +1136,7 @@ public class XMLA_SOAP implements OlapDiscoverer {
 		SOAPElement columnElement = child.getParentElement();
  		Iterator columnIterator = columnElement.getChildElements();
 
- 		Map dataRow = new HashMap();
+ 		Map<String, String> dataRow = new HashMap<>();
  		while (columnIterator.hasNext()) {
  		Object colObject = columnIterator.next();
  		if (colObject instanceof SOAPElement) {

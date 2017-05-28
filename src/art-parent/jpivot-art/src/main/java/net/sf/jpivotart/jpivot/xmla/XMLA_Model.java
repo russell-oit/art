@@ -1051,8 +1051,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     List mems = soap.discoverMem(catalog, cube, null, level.getHierUniqueName(), level
         .getUniqueName());
     // evaluate
-    ArrayList<Member> aNewMembers = new ArrayList<>();
-    ArrayList<Member> aAllMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aNewMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aAllMembers = new ArrayList<>();
     evaluateMembers(mems, aNewMembers, aAllMembers);
     aMembers.addAll(aNewMembers);
     level.setMembers(aAllMembers);
@@ -1069,8 +1069,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     List mems = soap.discoverMemTree(catalog, cube, member.getUniqueName(), 1);
 
     // evaluate
-    ArrayList<Member> aNewMembers = new ArrayList<>();
-    ArrayList<Member> aAllMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aNewMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aAllMembers = new ArrayList<>();
     // one level, properties are delivered
     evaluateMembers(mems, aNewMembers, aAllMembers);
 
@@ -1122,14 +1122,14 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     }
 
     // evaluate
-    ArrayList<Member> aNewMembers = new ArrayList<>();
-    ArrayList<Member> aAllMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aNewMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aAllMembers = new ArrayList<>();
     // one level, properties are delivered
     evaluateMembers(mems, aNewMembers, aAllMembers);
     aMembers.addAll(aNewMembers);
 
     // assign parent
-    XMLA_Member pmem = (XMLA_Member) aAllMembers.get(0);
+    XMLA_Member pmem = aAllMembers.get(0);
     member.setParent(pmem);
 
   }
@@ -1142,8 +1142,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     // 8 = self
     List mems = soap.discoverMemTree(catalog, cube, member.getUniqueName(), 8);
     // evaluate
-    ArrayList<Member> aNewMembers = new ArrayList<>();
-    ArrayList<Member> aAllMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aNewMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aAllMembers = new ArrayList<>();
     evaluateMembers(mems, aNewMembers, aAllMembers);
 
     /*
@@ -1187,8 +1187,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     List mems = soap.discoverMemTree(catalog, cube, uniqueName, 8);
 
     // evaluate
-    ArrayList<Member> aNewMembers = new ArrayList<>();
-    ArrayList<Member> aAllMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aNewMembers = new ArrayList<>();
+    ArrayList<XMLA_Member> aAllMembers = new ArrayList<>();
     evaluateMembers(mems, aNewMembers, aAllMembers);
     aMembers.addAll(aNewMembers);
     XMLA_Member member = (XMLA_Member) this.lookupMemberByUName(uniqueName);
@@ -1200,11 +1200,10 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    * @param member
    * @param aAllMembers
    */
-  private void setMemberChildren(XMLA_Member member, ArrayList<Member> aAllMembers) {
+  private void setMemberChildren(XMLA_Member member, ArrayList<XMLA_Member> aAllMembers) {
     ArrayList<XMLA_Member> aChildren = new ArrayList<>();
 
-    for (Member member2 : aAllMembers) {
-      XMLA_Member mem = (XMLA_Member) member2;
+    for (XMLA_Member mem : aAllMembers) {
       if (member.getUniqueName().equals(mem.getParentUniqueName()))
         aChildren.add(mem); // mem is a child
     }
@@ -1251,7 +1250,7 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    * @param evalProps true, if properties should be evaluated
    * @param mems List of OlapItems
    */
-  private void evaluateMembers(List mems, List<Member> aNewMembers, List<Member> aAllMembers) {
+  private void evaluateMembers(List mems, List<XMLA_Member> aNewMembers, List<XMLA_Member> aAllMembers) {
 
     MLoop: for (Iterator iter = mems.iterator(); iter.hasNext();) {
       OlapItem oi = (OlapItem) iter.next();
