@@ -26,7 +26,6 @@ import net.sf.jpivotart.jpivot.olap.model.Member;
 import net.sf.jpivotart.jpivot.olap.model.OlapException;
 import net.sf.jpivotart.jpivot.olap.model.OlapUtils;
 import net.sf.jpivotart.jpivot.olap.navi.ChangeSlicer;
-import net.sf.wcfart.tbutils.res.Resources;
 import net.sf.wcfart.wcf.catedit.Item;
 import net.sf.wcfart.wcf.controller.RequestContext;
 import net.sf.wcfart.wcf.selection.SelectionModel;
@@ -91,12 +90,12 @@ class SlicerCategory extends AbstractCategory {
     if (slicerExtension == null)
       return;
 
-    List memberList = new ArrayList();
+    List<Member> memberList = new ArrayList<>();
     for (Iterator it = items.iterator(); it.hasNext();) {
       HierarchyItem hi = (HierarchyItem) it.next();
       memberList.addAll(hi.getSlicerSelection());
     }
-    Member[] memberArr = (Member[]) memberList.toArray(new Member[memberList.size()]);
+    Member[] memberArr = memberList.toArray(new Member[memberList.size()]);
     slicerExtension.setSlicer(memberArr);
   }
 
