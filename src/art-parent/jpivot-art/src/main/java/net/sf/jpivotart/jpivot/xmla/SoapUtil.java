@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.soap.MessageFactory;
@@ -49,7 +50,7 @@ public class SoapUtil {
     SOAPElement eParent,
     String typeName,
     String listName,
-    Map params)
+    Map<String, String> params)
     throws SOAPException {
     Name nPara = envelope.createName(typeName);
     SOAPElement eType = eParent.addChildElement(nPara);
@@ -57,11 +58,9 @@ public class SoapUtil {
     SOAPElement eList = eType.addChildElement(nPara);
     if (params == null)
       return;
-    Set keys = params.keySet();
-    Iterator it = keys.iterator();
-    while (it.hasNext()) {
-      String tag = (String) it.next();
-      String value = (String) params.get(tag);
+    for (Entry<String, String> entry: params.entrySet()) {
+      String tag = entry.getKey();
+      String value = entry.getValue();
       nPara = envelope.createName(tag);
       SOAPElement eTag = eList.addChildElement(nPara);
       eTag.addTextNode(value);
@@ -152,7 +151,7 @@ public class SoapUtil {
     //    <Content>SchemaData</Content>
     // </PropertyList>
     // </Properties>
-    HashMap pHash = new HashMap();
+    HashMap<String, String> pHash = new HashMap<>();
     pHash.put("DataSourceInfo", dataSource);
     pHash.put("Catalog", catalog);
 

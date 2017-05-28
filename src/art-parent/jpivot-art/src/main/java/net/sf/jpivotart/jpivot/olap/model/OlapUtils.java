@@ -93,7 +93,7 @@ public class OlapUtils {
       return Collections.emptyList();
     int rows = matrix.length;
     int cols = matrix[0].length;
-    List<Cell> list = new ArrayList(rows * cols);
+    List<Cell> list = new ArrayList<>(rows * cols);
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < cols; col++) {
         list.add(matrix[row][col]);
@@ -270,7 +270,7 @@ public class OlapUtils {
     /* Get dimensions and hierarchies on the slicer */
     
     Axis slicer = model.getResult().getSlicer();
-    Set selectedSlicerDims = new HashSet();
+    Set<Dimension> selectedSlicerDims = new HashSet<>();
     Set<Hierarchy> selectedSlicerHiers = new HashSet<>();
     
     List positions = slicer.getPositions();
