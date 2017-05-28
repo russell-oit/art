@@ -34,8 +34,8 @@ import net.sf.jpivotart.jpivot.olap.model.VisitorSupportStrict;
  *
  */
 public class ExprStringConverter extends VisitorSupportStrict {
-  static final Set infix = new HashSet();
-  static final Set prefix = new HashSet();
+  static final Set<String> infix = new HashSet<>();
+  static final Set<String> prefix = new HashSet<>();
   static {
     String[] s =
       new String[] { "and", "or", "xor", "*", "/", "+", "-", "%", "<", ">", "<=", ">=", "<>", "=" };
