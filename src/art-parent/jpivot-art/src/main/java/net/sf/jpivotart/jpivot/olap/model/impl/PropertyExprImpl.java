@@ -61,7 +61,7 @@ public class PropertyExprImpl implements PropertyExpr {
    */
   public String[] getChoices() {
 
-    final List choices = new ArrayList();
+    final List<String> choices = new ArrayList<>();
 
     this.accept(new VisitorSupportSloppy() {
       // ParameterExpr not supported
@@ -83,7 +83,7 @@ public class PropertyExprImpl implements PropertyExpr {
       
     });
 
-    return (String[]) choices.toArray(new String[0]);
+    return choices.toArray(new String[0]);
   }
 
   /**
