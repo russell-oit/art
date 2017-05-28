@@ -78,11 +78,11 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
 
   private XMLA_Result result = null;
 
-  private List aDimensions = new ArrayList();
-  private List aHierarchies = new ArrayList();
-  private List aLevels = new ArrayList();
-  private List aMeasures = new ArrayList();
-  private List aMembers = new ArrayList();
+  private List<Dimension> aDimensions = new ArrayList<>();
+  private List<XMLA_Hierarchy> aHierarchies = new ArrayList<>();
+  private List<XMLA_Level> aLevels = new ArrayList<>();
+  private List<Member> aMeasures = new ArrayList<>();
+  private List<Member> aMembers = new ArrayList<>();
 
   private XMLA_QueryAdapter queryAdapter = null;
 
@@ -316,14 +316,14 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    * @see net.sf.jpivotart.jpivot.olap.model.OlapModel#getDimensions()
    */
   public Dimension[] getDimensions() {
-    return (Dimension[]) aDimensions.toArray(new Dimension[0]);
+    return aDimensions.toArray(new Dimension[0]);
   }
 
   /**
    * @see net.sf.jpivotart.jpivot.olap.model.OlapModel#getMeasures()
    */
   public Member[] getMeasures() {
-    return (Member[]) aMeasures.toArray(new Member[0]);
+    return aMeasures.toArray(new Member[0]);
   }
 
   /**
@@ -344,8 +344,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    */
   XMLA_Dimension lookupDimByUName(String uName) {
 
-    for (Iterator iter = aDimensions.iterator(); iter.hasNext();) {
-      XMLA_Dimension dim = (XMLA_Dimension) iter.next();
+    for (Dimension dimension : aDimensions) {
+      XMLA_Dimension dim = (XMLA_Dimension) dimension;
       if (dim.getUniqueName().equals(uName))
         return dim;
     }
@@ -360,8 +360,7 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    */
   XMLA_Hierarchy lookupHierByUName(String uName) {
 
-    for (Iterator iter = aHierarchies.iterator(); iter.hasNext();) {
-      XMLA_Hierarchy hier = (XMLA_Hierarchy) iter.next();
+    for (XMLA_Hierarchy hier : aHierarchies) {
       if (hier.getUniqueName().equals(uName))
         return hier;
     }
@@ -376,8 +375,7 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    */
   XMLA_Level lookupLevelByUName(String uName) {
 
-    for (Iterator iter = aLevels.iterator(); iter.hasNext();) {
-      XMLA_Level lev = (XMLA_Level) iter.next();
+    for (XMLA_Level lev : aLevels) {
       if (lev.getUniqueName().equals(uName))
         return lev;
     }
@@ -392,8 +390,8 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    */
   public Member lookupMemberByUName(String uName) {
 
-    for (Iterator iter = aMembers.iterator(); iter.hasNext();) {
-      XMLA_Member mem = (XMLA_Member) iter.next();
+    for (Member member : aMembers) {
+      XMLA_Member mem = (XMLA_Member) member;
       if (mem.getUniqueName().equals(uName))
         return mem;
     }
@@ -741,14 +739,13 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
 
     // now, as we got all hierarchies, assign them to the dimensions
     // first, create HashMap of dimensions
-    HashMap hDim = new HashMap();
-    for (Iterator iter = aDimensions.iterator(); iter.hasNext();) {
-      XMLA_Dimension dim = (XMLA_Dimension) iter.next();
+    HashMap<String, XMLA_Dimension> hDim = new HashMap<>();
+    for (Dimension dimension : aDimensions) {
+      XMLA_Dimension dim = (XMLA_Dimension) dimension;
       hDim.put(dim.getUniqueName(), dim);
     }
-    for (Iterator iter = aHierarchies.iterator(); iter.hasNext();) {
-      XMLA_Hierarchy hier = (XMLA_Hierarchy) iter.next();
-      XMLA_Dimension dim = (XMLA_Dimension) hDim.get(hier.getDimUniqueName());
+    for (XMLA_Hierarchy hier : aHierarchies) {
+      XMLA_Dimension dim = hDim.get(hier.getDimUniqueName());
       if (dim != null) {
         dim.addHier(hier);
         hier.setDimension(dim);
@@ -761,14 +758,12 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
 
     // now, as we got all Levels, assign them to the hierarchies
     // first, create HashMap of dimensions
-    HashMap hHier = new HashMap();
-    for (Iterator iter = aHierarchies.iterator(); iter.hasNext();) {
-      XMLA_Hierarchy hier = (XMLA_Hierarchy) iter.next();
+    HashMap<String, XMLA_Hierarchy> hHier = new HashMap<>();
+    for (XMLA_Hierarchy hier : aHierarchies) {
       hHier.put(hier.getUniqueName(), hier);
     }
-    for (Iterator iter = aLevels.iterator(); iter.hasNext();) {
-      XMLA_Level lev = (XMLA_Level) iter.next();
-      XMLA_Hierarchy hier = (XMLA_Hierarchy) hHier.get(lev.getHierUniqueName());
+    for (XMLA_Level lev : aLevels) {
+      XMLA_Hierarchy hier = hHier.get(lev.getHierUniqueName());
       if (hier != null) {
         hier.addLevel(lev);
         lev.setHierarchy(hier);
@@ -776,8 +771,7 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
     }
 
     // now go through levels of hierarchy and set the child/parent pointers
-    for (Iterator iter = aHierarchies.iterator(); iter.hasNext();) {
-      XMLA_Hierarchy hier = (XMLA_Hierarchy) iter.next();
+    for (XMLA_Hierarchy hier : aHierarchies) {
       adjustLevels(hier);
     }
 
@@ -1058,7 +1052,7 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
         .getUniqueName());
     // evaluate
     ArrayList aNewMembers = new ArrayList();
-    ArrayList aAllMembers = new ArrayList();
+    ArrayList<Member> aAllMembers = new ArrayList<>();
     evaluateMembers(mems, aNewMembers, aAllMembers);
     aMembers.addAll(aNewMembers);
     level.setMembers(aAllMembers);
@@ -1258,7 +1252,7 @@ public class XMLA_Model extends MdxOlapModel implements OlapModel, QueryAdapter.
    * @param evalProps true, if properties should be evaluated
    * @param mems List of OlapItems
    */
-  private void evaluateMembers(List mems, List aNewMembers, List aAllMembers) {
+  private void evaluateMembers(List mems, List aNewMembers, List<Member> aAllMembers) {
 
     MLoop: for (Iterator iter = mems.iterator(); iter.hasNext();) {
       OlapItem oi = (OlapItem) iter.next();
