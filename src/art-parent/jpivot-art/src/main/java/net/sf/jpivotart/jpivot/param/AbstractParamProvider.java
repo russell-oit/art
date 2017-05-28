@@ -11,17 +11,18 @@ import java.util.List;
 import net.sf.jpivotart.jpivot.olap.model.Member;
 import net.sf.jpivotart.jpivot.olap.model.OlapException;
 import net.sf.jpivotart.jpivot.olap.model.OlapModel;
+import net.sf.wcfart.wcf.param.SessionParam;
 
 public abstract class AbstractParamProvider implements ParameterProvider {
 
-  public List createSessionParams(OlapModel model, Member member) throws OlapException {
+  public List<SessionParam> createSessionParams(OlapModel model, Member member) throws OlapException {
     SqlAccess sa = (SqlAccess) model.getExtension(SqlAccess.ID);
     if (sa == null)
-      return Collections.EMPTY_LIST;
-    List list = new ArrayList();
+      return Collections.emptyList();
+    List<SessionParam> list = new ArrayList<>();
     addMemberParams(list, sa, member);
     return list;
   }
 
-  protected abstract void addMemberParams(List list, SqlAccess sa, Member member);
+  protected abstract void addMemberParams(List<SessionParam> list, SqlAccess sa, Member member);
 }

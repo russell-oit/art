@@ -33,7 +33,7 @@ public class PropertyParamProvider extends AbstractParamProvider {
     this.propertyName = propertyName;
   }
 
-  protected void addMemberParams(List list, SqlAccess sa, Member member) {
+  protected void addMemberParams(List<SessionParam> list, SqlAccess sa, Member member) {
     SessionParam param = sa.createParameter(member, paramName, propertyName);
     if (param != null) // !calculated, !all
       list.add(param);
