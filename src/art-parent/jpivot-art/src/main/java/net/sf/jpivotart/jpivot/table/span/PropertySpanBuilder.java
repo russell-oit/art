@@ -56,13 +56,13 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
   private static Logger logger = Logger.getLogger(PropertySpanBuilder.class);
 
   /** List of all visible Properties - these may be filled in by some GUI */
-  private List visiblePropertyMetas = null;
+  private List<MemberPropertyMeta> visiblePropertyMetas = null;
   private boolean showProperties = false;
 
   /**
    * for every property name contains an empty property with that name
    */
-  private Map emptyPropertyMap = new HashMap();
+  private Map<String, Property> emptyPropertyMap = new HashMap<>();
 
   /**
    * for every hierarchyIndex contains the names of all properties of all members 
@@ -81,8 +81,8 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
    * </ol>
    */
   static class AllPropertiesMap {
-    private Map map = new HashMap();
-    private Set set = new HashSet();
+    private Map<Member, List<Property>> map = new HashMap<>();
+    private Set<Member> set = new HashSet<>();
 
     void add(Member member) {
       if (member == null)
@@ -94,7 +94,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
 
       Property[] props = member.getProperties();
       props = PropertyUtils.normalize(props);
-      List list = new ArrayList();
+      List<Property> list = new ArrayList<>();
       for (int i = 0; i < props.length; i++) {
         Property p = props[i];
         // ignore inline properties
@@ -111,7 +111,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
   }
 
   class PropertyLookup {
-    Map map = new HashMap();
+    Map<String, Property> map = new HashMap<>();
     void clear() {
       map.clear();
     }
@@ -122,7 +122,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
       }
     }
     Property getProperty(String name) {
-      return (Property) map.get(name);
+      return map.get(name);
     }
   }
 
@@ -210,7 +210,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
     Set[] scopes = new Set[HCOUNT];
     Span[][] spans = spanCalc.getSpans();
     for (int hi = 0; hi < HCOUNT; hi++) {
-      Set set = new HashSet();
+      Set<Object> set = new HashSet<>();
       for (int pi = 0; pi < PCOUNT; pi++)
         set.add(getScope(spans[pi][hi]));
       scopes[hi] = set;
@@ -303,7 +303,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
    * span computation when a single property spans multiple cells of the table axis).
    */
   Property emptyProperty(String name, String label) {
-    Property p = (Property) emptyPropertyMap.get(name);
+    Property p = emptyPropertyMap.get(name);
     if (p != null)
       return p;
     PropertyImpl pi = new PropertyImpl();
@@ -328,7 +328,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
     propertyChangeSupport.firePropertyChange("showProperties", oldValue, newValue);
   }
 
-  public void setVisiblePropertyMetas(List metas) {
+  public void setVisiblePropertyMetas(List<MemberPropertyMeta> metas) {
     Object oldValue = visiblePropertyMetas;
     this.visiblePropertyMetas = metas;
     setVisiblePropertiesExtension();
@@ -368,7 +368,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
     BookmarkState x = new BookmarkState();
     x.setShowProperties(isShowProperties());
     if (visiblePropertyMetas != null) {
-      ArrayList metas = new ArrayList();
+      ArrayList<MemberPropertyMeta> metas = new ArrayList<>();
       metas.addAll(visiblePropertyMetas);
       x.setVisibleProperties(metas);
     }
@@ -395,7 +395,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
       return;
     }
     MemberPropertyMeta[] mps = new MemberPropertyMeta[visiblePropertyMetas.size()];
-    mps = (MemberPropertyMeta[]) visiblePropertyMetas.toArray(mps);
+    mps = visiblePropertyMetas.toArray(mps);
     extension.setVisibleProperties(mps);
   }
 

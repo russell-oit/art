@@ -14,6 +14,7 @@ package net.sf.jpivotart.jpivot.table.span;
 
 import java.beans.PropertyChangeListener;
 import java.util.List;
+import net.sf.jpivotart.jpivot.olap.model.MemberPropertyMeta;
 
 import net.sf.jpivotart.jpivot.ui.Available;
 import net.sf.wcfart.wcf.bookmarks.Bookmarkable;
@@ -42,7 +43,7 @@ public interface PropertyConfig extends Bookmarkable, Available {
    * @param metas list containing MemberPropertyMeta. Properties which are not 
    * present in the list will not be shown. If null, all properties are shown.
    */
-  void setVisiblePropertyMetas(List metas);
+  void setVisiblePropertyMetas(List<MemberPropertyMeta> metas);
   List getVisiblePropertyMetas();
   
   /**
