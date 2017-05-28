@@ -194,7 +194,7 @@ public class JPivotController {
 			//parameter ?null=null&... used to display the page when settings are changed from the olap navigator toolbar button
 
 			String template = report.getTemplate();
-			String schemaFile = Config.getRelativeTemplatesPath() + template;
+			String schemaFile = Config.getRelativeDefaultTemplatesPath() + template;
 			model.addAttribute("schemaFile", schemaFile);
 
 			ReportType reportType = report.getReportType();

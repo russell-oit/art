@@ -873,13 +873,22 @@ public class Config extends HttpServlet {
 	public static String getTemplatesPath() {
 		return workDirectoryPath + "templates" + File.separator;
 	}
+	
+	/**
+	 * Returns the full path to the default templates directory
+	 *
+	 * @return full path to the default templates directory
+	 */
+	public static String getDefaultTemplatesPath() {
+		return webinfPath + "work" + File.separator + "templates" + File.separator;
+	}
 
 	/**
-	 * Returns the relative path to the templates directory
+	 * Returns the relative path to the default templates directory
 	 *
-	 * @return relative path to the templates directory
+	 * @return relative path to the default templates directory
 	 */
-	public static String getRelativeTemplatesPath() {
+	public static String getRelativeDefaultTemplatesPath() {
 		return "/WEB-INF/work/templates/";
 	}
 

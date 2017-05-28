@@ -29,7 +29,7 @@ ART 3.0
 * Added ability to create csv output jobs
 * Added ability to create fixed width output jobs
 * Allow multi-value parameters with Oracle databases to have more than 1000 items
-* Added ability to schedule dashboard reports and output them as pdf
+* Added ability to output and schedule dashboard reports as pdf
 * Allow for specifying specific colours to be used for given chart series
 * Allow for localization of parameter labels and help text
 * Enable use of barcode4j barcodes in jasperreports

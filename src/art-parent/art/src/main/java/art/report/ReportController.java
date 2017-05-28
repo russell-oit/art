@@ -304,7 +304,7 @@ public class ReportController {
 				reportService.updateReport(report, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			
+
 			String recordName = report.getName() + " (" + report.getReportId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			redirectAttributes.addFlashAttribute("record", report);
@@ -618,6 +618,9 @@ public class ReportController {
 			case Leaflet:
 			case OpenLayers:
 				templatesPath = Config.getJsTemplatesPath();
+				break;
+			case JPivotMondrian:
+				templatesPath = Config.getDefaultTemplatesPath();
 				break;
 			default:
 				templatesPath = Config.getTemplatesPath();
