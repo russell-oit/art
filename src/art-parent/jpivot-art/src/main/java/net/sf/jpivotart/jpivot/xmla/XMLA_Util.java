@@ -126,13 +126,12 @@ public class XMLA_Util {
     if (depth <= lev.getDepth())
       return new XMLA_Member[0];
     //XMLA_Member[] currentMembers = new XMLA_Member[] { member };
-    List currentMembers = new ArrayList();
+    List<XMLA_Member> currentMembers = new ArrayList<>();
     currentMembers.add(member);
     while (depth > lev.getDepth()) {
       lev = lev.getChildLevel();
-      List aMembers = new ArrayList();
-      for (Iterator iter = currentMembers.iterator(); iter.hasNext();) {
-        XMLA_Member m = (XMLA_Member) iter.next();
+      List<XMLA_Member> aMembers = new ArrayList<>();
+      for (XMLA_Member m : currentMembers) {
         XMLA_Member[] mems = m.getChildren();
         for (int i = 0; i < mems.length; i++) {
           aMembers.add(mems[i]);
@@ -140,7 +139,7 @@ public class XMLA_Util {
       }
       currentMembers = aMembers;
     }
-    return (XMLA_Member[]) currentMembers.toArray(new XMLA_Member[0]);
+    return currentMembers.toArray(new XMLA_Member[0]);
   }
 
   /**
@@ -213,10 +212,10 @@ public class XMLA_Util {
    * @param iDim
    * @return members
    */
-  static List collectMembers(TreeNode root, final int iDim) {
+  static List<Exp> collectMembers(TreeNode root, final int iDim) {
     if (root == null)
       return null;
-    final List memberList = new ArrayList();
+    final List<Exp> memberList = new ArrayList<>();
     root.walkChildren(new TreeNodeCallback() {
 
       /**
@@ -255,7 +254,7 @@ public class XMLA_Util {
    * @param f
    * @param memberList
    */
-  static void resolveFunCallMembers(FunCall f, List memberList) throws OlapException {
+  static void resolveFunCallMembers(FunCall f, List<Exp> memberList) throws OlapException {
     if (f.isCallTo("Children")) {
       XMLA_Member m = (XMLA_Member) f.getArgs()[0];
       XMLA_Member[] members = m.getChildren();
