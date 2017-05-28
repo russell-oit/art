@@ -30,6 +30,10 @@ import net.sf.mondrianart.mondrian.olap.Syntax;
 
 import net.sf.jpivotart.jpivot.util.TreeNode;
 import net.sf.jpivotart.jpivot.util.TreeNodeCallback;
+import net.sf.mondrianart.mondrian.olap.Hierarchy;
+import net.sf.mondrianart.mondrian.olap.Level;
+import net.sf.mondrianart.mondrian.olap.Property;
+import net.sf.mondrianart.mondrian.rolap.RolapHierarchy;
 
 /**
  * @author hh
@@ -54,17 +58,17 @@ public class MondrianUtil {
         s += expString(args[i]);
       }
       s += "</function:" + name + ">";
-    } else if (exp instanceof net.sf.mondrianart.mondrian.olap.Member) {
-      net.sf.mondrianart.mondrian.olap.Member m = (net.sf.mondrianart.mondrian.olap.Member) exp;
+    } else if (exp instanceof Member) {
+      Member m = (Member) exp;
       s += "<member>" + m.getUniqueName() + "</member>";
     } else if (exp instanceof Parameter) {
-      net.sf.mondrianart.mondrian.olap.Parameter p = (net.sf.mondrianart.mondrian.olap.Parameter) exp;
+      Parameter p = (Parameter) exp;
       s += "<parameter>" + p.getName() + "</parameter>";
-    } else if (exp instanceof net.sf.mondrianart.mondrian.olap.Hierarchy) {
-      net.sf.mondrianart.mondrian.olap.Hierarchy h = (net.sf.mondrianart.mondrian.olap.Hierarchy) exp;
+    } else if (exp instanceof Hierarchy) {
+      Hierarchy h = (Hierarchy) exp;
       s += "<hier>" + h.getUniqueName() + "</hier>";
-    } else if (exp instanceof net.sf.mondrianart.mondrian.olap.Level) {
-      net.sf.mondrianart.mondrian.olap.Level l = (net.sf.mondrianart.mondrian.olap.Level) exp;
+    } else if (exp instanceof Level) {
+      Level l = (Level) exp;
       s += "<level>" + l.getUniqueName() + "</level>";
     } else {
       s += " <exp>" + exp.toString() + "</exp>";
@@ -78,7 +82,7 @@ public class MondrianUtil {
    * @param aMem2
    * @return true, if arrays are equal
    */
-  public static boolean compareMembers(net.sf.mondrianart.mondrian.olap.Member[] aMem1, net.sf.mondrianart.mondrian.olap.Member[] aMem2) {
+  public static boolean compareMembers(Member[] aMem1, Member[] aMem2) {
     if (aMem1.length != aMem2.length)
       return false;
     for (int i = 0; i < aMem1.length; i++) {
@@ -96,7 +100,7 @@ public class MondrianUtil {
    * @param mPath
    * @return display member array for debugging purposes
    */
-  public static String memberString(net.sf.mondrianart.mondrian.olap.Member[] mPath) {
+  public static String memberString(Member[] mPath) {
     if (mPath == null || mPath.length == 0)
       return "";
     StringBuffer sb = new StringBuffer();
@@ -114,12 +118,12 @@ public class MondrianUtil {
    * @param expandAllMember - true if an "All" member is to be expanded
    * @return Exp for top level members
    */
-  static Exp topLevelMembers(net.sf.mondrianart.mondrian.olap.Hierarchy monHier, boolean expandAllMember,
+  static Exp topLevelMembers(Hierarchy monHier, boolean expandAllMember,
       SchemaReader scr) {
 
     if (monHier.hasAll()) {
       // an "All" member is present -get it
-       net.sf.mondrianart.mondrian.olap.Member mona = ((net.sf.mondrianart.mondrian.rolap.RolapHierarchy)monHier).getAllMember();
+       Member mona = ((RolapHierarchy)monHier).getAllMember();
        if (mona != null) {
         if (!expandAllMember)
           return new MemberExpr(mona);
@@ -136,20 +140,19 @@ public class MondrianUtil {
     // does this call work with parent-child
     List topMembers = scr.getHierarchyRootMembers(monHier);
     if (topMembers.size() == 1)
-      return new MemberExpr((net.sf.mondrianart.mondrian.olap.Member)topMembers.get(0)); // single member
+      return new MemberExpr((Member)topMembers.get(0)); // single member
     else if (topMembers.size() == 0)
       return null; // possible if access control active
     
-    List list = new ArrayList(topMembers.size());
+    List<Member> list = new ArrayList<>(topMembers.size());
     for (int i = 0; i < topMembers.size(); i++) {
-        net.sf.mondrianart.mondrian.olap.Member m = (net.sf.mondrianart.mondrian.olap.Member)topMembers.get(i);
+        Member m = (Member)topMembers.get(i);
         if (isVisible(scr, m)) {
             list.add(m);
         }
     }
     
-    net.sf.mondrianart.mondrian.olap.Member[] topMemberArr = (net.sf.mondrianart.mondrian.olap.Member[]) 
-                    list.toArray(new net.sf.mondrianart.mondrian.olap.Member[list.size()]);
+    Member[] topMemberArr = list.toArray(new Member[list.size()]);
 
     return new UnresolvedFunCall("{}", Syntax.Braces, toExprArray(topMemberArr));
   }
@@ -169,19 +172,19 @@ public class MondrianUtil {
    * @param level
    * @return descendants
    */
-  public static net.sf.mondrianart.mondrian.olap.Member[] getMemberDescendants(SchemaReader scr,
-      net.sf.mondrianart.mondrian.olap.Member member, net.sf.mondrianart.mondrian.olap.Level level) {
+  public static Member[] getMemberDescendants(SchemaReader scr,
+      Member member, Level level) {
     int depth = level.getDepth();
-    net.sf.mondrianart.mondrian.olap.Level lev = member.getLevel();
+    Level lev = member.getLevel();
     if (depth <= lev.getDepth())
-      return new net.sf.mondrianart.mondrian.olap.Member[0];
-    List currentMembers = new ArrayList();
+      return new Member[0];
+    List<Member> currentMembers = new ArrayList();
     currentMembers.add(member);
     while (depth > lev.getDepth()) {
       lev = lev.getChildLevel();
       currentMembers = scr.getMemberChildren(currentMembers);
     }
-    return (net.sf.mondrianart.mondrian.olap.Member[])currentMembers.toArray(new net.sf.mondrianart.mondrian.olap.Member[0]);
+    return currentMembers.toArray(new Member[0]);
   }
 
   /**
@@ -296,7 +299,7 @@ public class MondrianUtil {
   static List collectMembers(TreeNode root, final int iDim, final SchemaReader scr) {
     if (root == null)
       return null;
-    final List memberList = new ArrayList();
+    final List<Member> memberList = new ArrayList<>();
     int ret = root.walkChildren(new TreeNodeCallback() {
 
       /**
@@ -311,12 +314,12 @@ public class MondrianUtil {
         // iDimNode == iDim
         //  node Exp must contain children of member[iDim]
         final Object ref = node.getReference();
-        if (ref instanceof net.sf.mondrianart.mondrian.olap.Member) {
-          net.sf.mondrianart.mondrian.olap.Member m = (net.sf.mondrianart.mondrian.olap.Member) ref;
+        if (ref instanceof Member) {
+          Member m = (Member) ref;
           if (!memberList.contains(m))
             memberList.add(m);
         } else if (ref instanceof MemberExpr) {
-          net.sf.mondrianart.mondrian.olap.Member m = ((MemberExpr) ref).getMember();
+          Member m = ((MemberExpr) ref).getMember();
           if (!memberList.contains(m))
             memberList.add(m);
         } else {
@@ -345,26 +348,26 @@ public class MondrianUtil {
    * @param memberList
    * @return true, if Funcalls could be handled, otherwise false
    */
-  static boolean resolveFunCallMembers(FunCall f, List memberList, SchemaReader scr) {
+  static boolean resolveFunCallMembers(FunCall f, List<Member> memberList, SchemaReader scr) {
     boolean canHandle = true;
     if (isCallTo(f, "Children")) {
-      net.sf.mondrianart.mondrian.olap.Member m = ((MemberExpr) f.getArg(0)).getMember();
-      List members = scr.getMemberChildren(m);
+      Member m = ((MemberExpr) f.getArg(0)).getMember();
+      List<Member> members = scr.getMemberChildren(m);
       for (int i = 0; i < members.size(); i++) {
         if (!memberList.contains(members.get(i)))
           memberList.add(members.get(i));
       }
     } else if (isCallTo(f, "Descendants")) {
-      net.sf.mondrianart.mondrian.olap.Member m = ((MemberExpr) f.getArg(0)).getMember();
-      net.sf.mondrianart.mondrian.olap.Level level = ((LevelExpr) f.getArg(1)).getLevel();
-      net.sf.mondrianart.mondrian.olap.Member[] members = MondrianUtil.getMemberDescendants(scr, m, level);
+      Member m = ((MemberExpr) f.getArg(0)).getMember();
+      Level level = ((LevelExpr) f.getArg(1)).getLevel();
+      Member[] members = MondrianUtil.getMemberDescendants(scr, m, level);
       for (int i = 0; i < members.length; i++) {
         if (!memberList.contains(members[i]))
           memberList.add(members[i]);
       }
     } else if (isCallTo(f, "Members")) {
-      net.sf.mondrianart.mondrian.olap.Level level = ((LevelExpr) f.getArg(0)).getLevel();
-      List members = scr.getLevelMembers(level, false);
+      Level level = ((LevelExpr) f.getArg(0)).getLevel();
+      List<Member> members = scr.getLevelMembers(level, false);
       for (int i = 0; i < members.size(); i++) {
         if (!memberList.contains(members.get(i)))
           memberList.add(members.get(i));
@@ -405,24 +408,23 @@ public class MondrianUtil {
    * @param member the Mondrian Member
    * @return "true" if Member is GUI visible
    */
-  public static boolean isVisible(SchemaReader scr, 
-                                  net.sf.mondrianart.mondrian.olap.Member member) {
+  public static boolean isVisible(SchemaReader scr, Member member) {
     if (! scr.isVisible(member)) {
       // Is Schema and Role visible
       return false;
     } else {
       // Is GUI visible
-      Object visible = member.getPropertyValue(net.sf.mondrianart.mondrian.olap.Property.VISIBLE.name);
+      Object visible = member.getPropertyValue(Property.VISIBLE.name);
       return !Boolean.FALSE.equals(visible);
     }
   }
   
-  public static net.sf.mondrianart.mondrian.olap.Hierarchy[] removeNull(net.sf.mondrianart.mondrian.olap.Hierarchy[] hierarchies) {
-    List list = new ArrayList();
+  public static Hierarchy[] removeNull(Hierarchy[] hierarchies) {
+    List<Hierarchy> list = new ArrayList<>();
     for (int i = 0; i < hierarchies.length; i++) {
       if (hierarchies[i] != null)
         list.add(hierarchies[i]);
     }
-    return (net.sf.mondrianart.mondrian.olap.Hierarchy[])list.toArray(new net.sf.mondrianart.mondrian.olap.Hierarchy[list.size()]);
+    return list.toArray(new Hierarchy[list.size()]);
   }
 } // End MondrianUtil.java
