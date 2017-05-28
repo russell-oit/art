@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.sf.mondrianart.mondrian.olap.Position;
 import net.sf.mondrianart.mondrian.olap.AxisOrdinal.StandardAxisOrdinal;
 
 import net.sf.jpivotart.jpivot.olap.model.Axis;
@@ -28,7 +27,7 @@ public class MondrianAxis implements Axis {
 
   private net.sf.mondrianart.mondrian.olap.Axis monAxis = null;
   private MondrianModel model = null;
-  private ArrayList aPositions = null;
+  private ArrayList<net.sf.jpivotart.jpivot.olap.model.Position> aPositions = null;
   private MondrianHierarchy[] hierarchies = null;
   private int ordinal; // -1 for slicer
 
@@ -41,7 +40,7 @@ public class MondrianAxis implements Axis {
     this.monAxis = monAxis;
     this.model = model;
 
-    aPositions = new ArrayList();
+    aPositions = new ArrayList<>();
     boolean foundQueryHierarchies = true;
     if (iOrdinal >= 0) {
       // it is not the slicer
@@ -67,7 +66,7 @@ public class MondrianAxis implements Axis {
     Iterator pit = monPositions.iterator();
     int i = 0;
     while (pit.hasNext()) {
-      Position monPosition = (Position) pit.next();
+      net.sf.mondrianart.mondrian.olap.Position monPosition = (net.sf.mondrianart.mondrian.olap.Position) pit.next();
       MondrianPosition position = new MondrianPosition(monPosition, iOrdinal, model);
       aPositions.add(position);
       if (iOrdinal == -1 || !foundQueryHierarchies) {
@@ -76,10 +75,10 @@ public class MondrianAxis implements Axis {
         if (i == 0) { 
           // first position only, as all positions have same hierarchies
           // create the hierarchies array
-          List l = new ArrayList();
-          Iterator mit = monPosition.iterator();
+          List<MondrianHierarchy> l = new ArrayList<>();
+          Iterator<net.sf.mondrianart.mondrian.olap.Member> mit = monPosition.iterator();
           while (mit.hasNext()) {
-            net.sf.mondrianart.mondrian.olap.Member monMember = (net.sf.mondrianart.mondrian.olap.Member) mit.next();
+            net.sf.mondrianart.mondrian.olap.Member monMember = mit.next();
             l.add(model.lookupHierarchy(monMember.getHierarchy().getUniqueName()));
           }
           hierarchies = (MondrianHierarchy[]) 
@@ -94,7 +93,7 @@ public class MondrianAxis implements Axis {
   /**
    * @see net.sf.jpivotart.jpivot.olap.model.Axis#getPositions()
    */
-  public List getPositions() {
+  public List<net.sf.jpivotart.jpivot.olap.model.Position> getPositions() {
     return aPositions;
   }
 

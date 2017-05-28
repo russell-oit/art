@@ -13,7 +13,6 @@
 
 package net.sf.jpivotart.jpivot.mondrian;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ import net.sf.mondrianart.mondrian.olap.Role;
 import net.sf.mondrianart.mondrian.olap.SchemaReader;
 import net.sf.mondrianart.mondrian.olap.Syntax;
 import net.sf.mondrianart.mondrian.olap.Util;
-import net.sf.mondrianart.mondrian.olap.type.NumericType;
 import net.sf.mondrianart.mondrian.olap.type.Type;
 import net.sf.mondrianart.mondrian.olap.ResultLimitExceededException;
 import net.sf.mondrianart.mondrian.olap.MemoryLimitExceededException;
@@ -141,13 +139,13 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
 
   private String currentMdx;
   private MondrianResult result = null;
-  private HashMap hDimensions = new HashMap();
-  private HashMap hHierarchies = new HashMap();
-  private HashMap hLevels = new HashMap();
-  private HashMap hMembers = new HashMap();
-  private ArrayList aMeasures = new ArrayList();
+  private HashMap<String, Dimension> hDimensions = new HashMap<>();
+  private HashMap<String, MondrianHierarchy> hHierarchies = new HashMap<>();
+  private HashMap<String, MondrianLevel> hLevels = new HashMap<>();
+  private HashMap<String, MondrianMember> hMembers = new HashMap<>();
+  private ArrayList<MondrianMember> aMeasures = new ArrayList<>();
 
-  private List aLogicalModel = new LinkedList();
+  private List<String> aLogicalModel = new LinkedList<>();
 
   private MondrianQueryAdapter queryAdapter = null;
   private Listener listener = null;
@@ -365,14 +363,14 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
    * @see net.sf.jpivotart.jpivot.olap.model.OlapModel#getDimensions()
    */
   public Dimension[] getDimensions() {
-    return (Dimension[]) hDimensions.values().toArray(new Dimension[0]);
+    return hDimensions.values().toArray(new Dimension[0]);
   }
 
   /**
    * @see net.sf.jpivotart.jpivot.olap.model.OlapModel#getMeasures()
    */
   public Member[] getMeasures() {
-    return (Member[]) aMeasures.toArray(new Member[0]);
+    return aMeasures.toArray(new Member[0]);
   }
 
   /**
@@ -677,7 +675,7 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
   public MondrianMember addMember(net.sf.mondrianart.mondrian.olap.Member monMember) {
     String uniqueName = monMember.getUniqueName();
     if (hMembers.containsKey(uniqueName)) {
-      return (MondrianMember) hMembers.get(uniqueName);
+      return hMembers.get(uniqueName);
     } else {
       net.sf.mondrianart.mondrian.olap.Level monLevel = monMember.getLevel();
       MondrianLevel level = this.lookupLevel(monLevel.getUniqueName());
@@ -696,7 +694,7 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
    */
   public void removeMember(String uniqueName) {
     if (hMembers.containsKey(uniqueName)) {
-      MondrianMember m = (MondrianMember) hMembers.get(uniqueName);
+      MondrianMember m = hMembers.get(uniqueName);
       if (aMeasures.contains(m))
         aMeasures.remove(m);
       hMembers.remove(uniqueName);
@@ -722,7 +720,7 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
    * @return the corresponding hierarchy
    */
   public MondrianHierarchy lookupHierarchy(String uniqueName) {
-    return (MondrianHierarchy) hHierarchies.get(uniqueName);
+    return hHierarchies.get(uniqueName);
   }
 
   /**
@@ -737,7 +735,7 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
     //  it is possible, that
     //  - the member was not loaded yet
     //  - the member was removed from the schema meanwhile
-    MondrianMember m = (MondrianMember) hMembers.get(uniqueName);
+    MondrianMember m = hMembers.get(uniqueName);
     if (m != null)
       return m;
     final SchemaReader scr = getSchemaReader();
@@ -777,7 +775,7 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
    * @return the corresponding level
    */
   public MondrianLevel lookupLevel(String uniqueName) {
-    return (MondrianLevel) hLevels.get(uniqueName);
+    return hLevels.get(uniqueName);
   }
 
   public Role getRole() {
@@ -807,11 +805,11 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
    * reset the model Hashtables.
    */
   private void resetMetaData(net.sf.mondrianart.mondrian.olap.Query monQuery) {
-    this.hDimensions = new HashMap();
-    this.hHierarchies = new HashMap();
-    this.hLevels = new HashMap();
-    this.hMembers = new HashMap();
-    this.aMeasures = new ArrayList();
+    this.hDimensions = new HashMap<>();
+    this.hHierarchies = new HashMap<>();
+    this.hLevels = new HashMap<>();
+    this.hMembers = new HashMap<>();
+    this.aMeasures = new ArrayList<>();
 
     // initialize meta data
     net.sf.mondrianart.mondrian.olap.Cube cube = monQuery.getCube();
@@ -1186,8 +1184,8 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
    * @param i the i-th hiararchy on that axis is the measures hierarchy
    */
   private Exp createMeasuresExp(MondrianAxis axis, int i) {
-    List measuresList = new ArrayList();
-    Set measuresSet = new HashSet();
+    List<Exp> measuresList = new ArrayList<>();
+    Set<MondrianMember> measuresSet = new HashSet<>();
     for (Iterator it = axis.getPositions().iterator(); it.hasNext();) {
       MondrianPosition mp = (MondrianPosition) it.next();
       MondrianMember member = (MondrianMember) mp.getMembers()[i];
@@ -1195,8 +1193,8 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
         measuresList.add(new MemberExpr(member.getMonMember()));
     }
     if (measuresList.size() == 1)
-      return (Exp) measuresList.get(0);
-    Exp[] args = (Exp[]) measuresList.toArray(new Exp[measuresList.size()]);
+      return measuresList.get(0);
+    Exp[] args = measuresList.toArray(new Exp[measuresList.size()]);
     return new UnresolvedFunCall("{}", Syntax.Braces, args);
   }
 
@@ -1644,9 +1642,9 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
                     List <net.sf.mondrianart.mondrian.olap.Id.Segment> uniqueNameParts = Util.parseIdentifier(memberName);                    
                     String dimension = uniqueNameParts.get(0).toString(); //name
 
-                    Iterator logicalIt = aLogicalModel.iterator();
+                    Iterator<String> logicalIt = aLogicalModel.iterator();
                     while (logicalIt.hasNext()) {
-                        String logicalName = (String) logicalIt.next();
+                        String logicalName = logicalIt.next();
 
                         // First see if the same dimension exists 
                         // between prev query and this query
@@ -1904,7 +1902,7 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
    */
   protected void removeLogicalNameFromList(final String hierName) {
       for (int i = 0; i < aLogicalModel.size(); i++) {
-          String listName = (String) aLogicalModel.get(i);
+          String listName = aLogicalModel.get(i);
           if (listName.startsWith(hierName)) {
               aLogicalModel.remove(i);
               break;
