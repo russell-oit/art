@@ -50,7 +50,8 @@
 						<c:when test="${reportType == 'JPivotMondrian'}">
 							<jp:mondrianQuery id="${jpivotQueryId}" jdbcDriver="${databaseDriver}"
 											  jdbcUrl="${databaseUrl}" jdbcUser="${databaseUser}"
-											  jdbcPassword="${databasePassword}" catalogUri="${schemaFile}">
+											  jdbcPassword="${databasePassword}" catalogUri="${schemaFile}"
+											  role="${roles}">
 								${query}
 							</jp:mondrianQuery>
 						</c:when>

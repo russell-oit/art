@@ -219,10 +219,11 @@ public class ReportRunner {
 		applyTags(querySb);
 		applyDynamicSql(querySb);
 		applyParameterPlaceholders(querySb); //question placeholder put here
-
-		//handle dynamic recipient label
 		applyDynamicRecipient(querySb);
-		applyRulesToQuery(querySb);
+
+		if (!report.getReportType().isJPivot()) {
+			applyRulesToQuery(querySb);
+		}
 
 		//generate final sql and revert question placeholder
 		String querySql = querySb.toString();

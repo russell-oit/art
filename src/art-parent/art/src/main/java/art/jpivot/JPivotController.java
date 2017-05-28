@@ -22,11 +22,15 @@ import art.enums.ReportType;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
+import art.reportrule.ReportRule;
+import art.reportrule.ReportRuleService;
+import art.ruleValue.RuleValueService;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.user.User;
+import art.usergroup.UserGroup;
 import net.sf.jpivotart.jpivot.olap.model.OlapModel;
 import net.sf.jpivotart.jpivot.olap.model.OlapModelDecorator;
 import net.sf.jpivotart.jpivot.olap.query.MdxOlapModel;
@@ -38,8 +42,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -65,10 +74,16 @@ public class JPivotController {
 	@Autowired
 	private ReportService reportService;
 
+	@Autowired
+	private ReportRuleService reportRuleService;
+
+	@Autowired
+	private RuleValueService ruleValueService;
+
 	@RequestMapping(value = "/showJPivot", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showJPivot(HttpServletRequest request, Model model, HttpSession session,
 			Locale locale) {
-		
+
 		logger.debug("Entering showJPivot");
 
 		try {
@@ -137,10 +152,10 @@ public class JPivotController {
 					return errorPage;
 				}
 			}
-			
+
 			model.addAttribute("localeString", locale.toString());
 
-			prepareVariables(request, session, report, model);
+			prepareVariables(request, session, report, model, sessionUser);
 
 		} catch (SQLException | RuntimeException | ParseException | MalformedURLException ex) {
 			logger.error("Error", ex);
@@ -158,13 +173,14 @@ public class JPivotController {
 	 * @param session
 	 * @param report
 	 * @param model
+	 * @param sessionUser
 	 * @throws NumberFormatException
 	 * @throws SQLException
 	 * @throws ParseException
 	 * @throws MalformedURLException
 	 */
 	private void prepareVariables(HttpServletRequest request, HttpSession session,
-			Report report, Model model)
+			Report report, Model model, User sessionUser)
 			throws NumberFormatException, SQLException, ParseException, MalformedURLException {
 
 		int reportId = report.getReportId();
@@ -199,6 +215,9 @@ public class JPivotController {
 				model.addAttribute("databaseUser", databaseUser);
 				model.addAttribute("databasePassword", databasePassword);
 				model.addAttribute("databaseDriver", databaseDriver);
+
+				String roles = getRolesString(reportId, sessionUser);
+				model.addAttribute("roles", roles);
 			} else {
 				//construct xmla url to incoporate username and password if present
 				String xmlaUrl = datasource.getUrl();
@@ -237,8 +256,6 @@ public class JPivotController {
 				String xmlaCatalog = report.getXmlaCatalog();
 				model.addAttribute("xmlaCatalog", xmlaCatalog);
 			}
-
-			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			ReportRunner reportRunner = null;
 			try {
@@ -394,6 +411,43 @@ public class JPivotController {
 		if (_mdxEdit != null && _mdxEdit.isVisible()) {
 			model.addAttribute("mdxEditIsVisible", true);
 		}
+	}
+
+	/**
+	 * Returns the roles string to use for jpivot mondrian roles configuration
+	 *
+	 * @param reportId the id of the current report
+	 * @param sessionUser the current session user
+	 * @return the roles string to use for jpivot mondrian roles configuration
+	 * @throws SQLException
+	 */
+	private String getRolesString(int reportId, User sessionUser) throws SQLException {
+		//get roles to be applied. use rule values are roles
+		List<String> roles = new ArrayList<>();
+		List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+
+		for (ReportRule reportRule : reportRules) {
+			int userId = sessionUser.getUserId();
+			int ruleId = reportRule.getRule().getRuleId();
+			List<String> userRuleValues = ruleValueService.getUserRuleValues(userId, ruleId);
+			roles.addAll(userRuleValues);
+
+			for (UserGroup userGroup : sessionUser.getUserGroups()) {
+				List<String> userGroupRuleValues = ruleValueService.getUserGroupRuleValues(userGroup.getUserGroupId(), ruleId);
+				roles.addAll(userGroupRuleValues);
+			}
+		}
+
+		//https://stackoverflow.com/questions/3317691/replace-elements-in-a-list-with-another
+		Collections.replaceAll(roles, ",", ",,");
+
+		//remove duplicates
+		//https://stackoverflow.com/questions/203984/how-do-i-remove-repeated-elements-from-arraylist
+		Set<String> distinctRoles = new LinkedHashSet<>(roles);
+
+		String rolesString = StringUtils.join(distinctRoles, ",");
+
+		return rolesString;
 	}
 
 	@RequestMapping(value = "/jpivotError", method = {RequestMethod.GET, RequestMethod.POST})

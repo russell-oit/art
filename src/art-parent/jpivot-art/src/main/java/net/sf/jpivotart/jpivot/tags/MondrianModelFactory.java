@@ -28,6 +28,7 @@ import net.sf.jpivotart.jpivot.mondrian.MondrianModel;
 import net.sf.wcfart.tbutils.res.Resources;
 import net.sf.wcfart.wcf.controller.RequestContext;
 import net.sf.wcfart.wcf.expr.ExprUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * creates a MondrianModel from config.xml
@@ -86,8 +87,8 @@ public class MondrianModelFactory {
       sb.append(";Locale=").append(cfg.getDynLocale());
 
     // debug
-    if (cfg.getRole() != null) {
-      sb.append(";Role=").append(cfg.getRole());
+    if (StringUtils.isNotBlank(cfg.getRole())) {
+      sb.append(";Role='").append(cfg.getRole()).append("'");
     }
     if (cfg.getDataSourceChangeListener() != null) {
         sb.append(";dataSourceChangeListener=").append(cfg.getDataSourceChangeListener());

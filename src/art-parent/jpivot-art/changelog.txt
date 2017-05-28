@@ -1,5 +1,6 @@
 3.0.0
 * Incorporated as a module in the main art project - changed group id to net.sf.art
+* Enclose roles list in apostrophe
 
 1.1.0
 * Use mondrian-art

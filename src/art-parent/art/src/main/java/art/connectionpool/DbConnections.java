@@ -78,7 +78,7 @@ public class DbConnections {
 		//use QueryRunner directly instead of DbService or DatasourceService to avoid circular references
 		String sql = "SELECT *"
 				+ " FROM ART_DATABASES"
-				+ " WHERE ACTIVE=1";
+				+ " WHERE ACTIVE=1 AND DATASOURCE_TYPE='" + DatasourceType.JDBC.getValue() + "'";
 
 		QueryRunner run = new QueryRunner(getArtDbDataSource());
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
