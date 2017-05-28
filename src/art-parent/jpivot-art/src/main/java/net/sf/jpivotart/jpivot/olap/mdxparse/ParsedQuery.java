@@ -35,7 +35,7 @@ public class ParsedQuery implements Exp {
 
   ArrayList<QueryAxis> axisDef = null;
   String cube;
-  List<CompoundId> cellProps = new ArrayList();
+  List<CompoundId> cellProps = new ArrayList<>();
 
   Exp slicer = null;
 
@@ -199,9 +199,9 @@ public class ParsedQuery implements Exp {
   public Object clone() {
     ParsedQuery cloned = new ParsedQuery();
     if (formulas.size() > 0) {
-      ArrayList clonedFormulas = new ArrayList();
+      ArrayList<Formula> clonedFormulas = new ArrayList<>();
       for (Formula form : formulas) {
-        clonedFormulas.add(form.clone());
+        clonedFormulas.add((Formula)form.clone());
       }
       cloned.formulas = clonedFormulas;
     }
