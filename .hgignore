@@ -37,3 +37,12 @@ src/art-parent/mondrian-art/target/
 src/art-parent/wcf-art/nb-configuration.xml
 src/art-parent/wcf-art/nbactions.xml
 src/art-parent/wcf-art/target/
+src/art-parent/jpivot-art/.classpath
+src/art-parent/jpivot-art/.project
+src/art-parent/jpivot-art/.settings/
+src/art-parent/mondrian-art/.classpath
+src/art-parent/mondrian-art/.project
+src/art-parent/mondrian-art/.settings/
+src/art-parent/wcf-art/.classpath
+src/art-parent/wcf-art/.project
+src/art-parent/wcf-art/.settings/
