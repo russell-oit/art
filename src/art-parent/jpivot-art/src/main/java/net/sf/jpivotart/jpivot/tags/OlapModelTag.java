@@ -34,7 +34,7 @@ public abstract class OlapModelTag extends BodyTagSupport {
 
   private static Logger logger = Logger.getLogger(OlapModelTag.class);
   
-  private List clickables;
+  private List<ClickableMember> clickables;
   private String queryName;
   private boolean stackMode = true;
 
@@ -51,7 +51,7 @@ public abstract class OlapModelTag extends BodyTagSupport {
   }
 
   public int doStartTag() throws JspException {
-    clickables = new ArrayList();
+    clickables = new ArrayList<>();
     return EVAL_BODY_BUFFERED;
   }
   
