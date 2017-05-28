@@ -25,10 +25,11 @@ import org.apache.regexp.RESyntaxException;
 
 import net.sf.jpivotart.jpivot.olap.model.Cell;
 import net.sf.jpivotart.jpivot.olap.model.CellFormatter;
+import net.sf.jpivotart.jpivot.olap.model.Property;
 import net.sf.wcfart.tbutils.res.Resources;
 
 public class FormatStringParser {
-  private static Map cellFormatters = new HashMap();
+  private static Map<String, CellFormatter> cellFormatters = new HashMap<>();
   private RE regex1;
   private RE regex2;
   private Logger logger = Logger.getLogger(FormatStringParser.class);
@@ -46,16 +47,16 @@ public class FormatStringParser {
 
   public static class Result {
     String formattedValue;
-    List properties;
+    List<Property> properties;
 
-    private Result(String formattedValue, List properties) {
+    private Result(String formattedValue, List<Property> properties) {
       this.formattedValue = formattedValue;
       this.properties = properties;
     }
     public String getFormattedValue() {
       return formattedValue;
     }
-    public List getProperties() {
+    public List<Property> getProperties() {
       return properties;
     }
   }
@@ -66,9 +67,9 @@ public class FormatStringParser {
       return new Result("", Collections.EMPTY_LIST);
     }
     
-    List properties = Collections.EMPTY_LIST;
+    List<Property> properties = Collections.emptyList();
     if (formattedValue.startsWith("|")) {
-      properties = new ArrayList();
+      properties = new ArrayList<>();
       String[] strs = formattedValue.substring(1).split("\\|");
       formattedValue = strs[0]; // original value
       for (int i = 1; i < strs.length; i++) {
@@ -118,7 +119,7 @@ public class FormatStringParser {
    */
   private CellFormatter getCellFormatter(String propValue) {
     synchronized (cellFormatters) {
-      CellFormatter cf = (CellFormatter) cellFormatters.get(propValue);
+      CellFormatter cf = cellFormatters.get(propValue);
       if (cf == null) {
         // not there, create new
         try {
