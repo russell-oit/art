@@ -35,7 +35,7 @@ public class ProtozoanOlapModel extends ScalarOlapModel {
     realModel.removeModelChangeListener(l);
   }
 
-  public List getCells() {
+  public List<Object> getCells() {
     List l = null;
     try {
       l = realModel.getResult().getCells();
@@ -44,7 +44,7 @@ public class ProtozoanOlapModel extends ScalarOlapModel {
     }
     if (l == null) return null;
 
-    List ret = new ArrayList();
+    List<Object> ret = new ArrayList<>();
     if(l.size() > idx) {
       ret.add(l.get(idx));
     } else {
