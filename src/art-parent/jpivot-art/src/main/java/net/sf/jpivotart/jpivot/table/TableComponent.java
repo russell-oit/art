@@ -65,7 +65,7 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
   
   // extensions, map for scripting, list for ordered initializing
   List extensionList = new ArrayList();
-  Map extensionMap = new HashMap();
+  Map<String, TableComponentExtension> extensionMap = new HashMap<>();
 
   // initialized from tag  
   OlapModel olapModel;
@@ -576,7 +576,7 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
   /**
    * provides access to the extensions thru JSP scripting
    */
-  public Map getExtensions() {
+  public Map<String, TableComponentExtension> getExtensions() {
     return extensionMap;
   }
 

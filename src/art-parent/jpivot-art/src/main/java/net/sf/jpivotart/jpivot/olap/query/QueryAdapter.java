@@ -117,7 +117,7 @@ public abstract class QueryAdapter {
 
       QuaxLoop : for (int i = 0; i < quaxes.length; i++) {
 
-        List positions = axes[iASwap(i)].getPositions();
+        List<Position> positions = axes[iASwap(i)].getPositions();
 
         // after a result for CalcSet.GENERATE was gotten
         //  we have to re-initialize the quax,
@@ -184,10 +184,9 @@ public abstract class QueryAdapter {
    * @param hierIndex
    * @return members of hier
    */
-  private List memListForHier(int hierIndex, List positions) {
-    List memList = new ArrayList();
-    PositionLoop : for (Iterator iter = positions.iterator(); iter.hasNext();) {
-      Position pos = (Position) iter.next();
+  private List memListForHier(int hierIndex, List<Position> positions) {
+    List<Member> memList = new ArrayList<>();
+    PositionLoop : for (Position pos : positions) {
       Member m = pos.getMembers()[hierIndex];
       if (!memList.contains(m))
         memList.add(m);
