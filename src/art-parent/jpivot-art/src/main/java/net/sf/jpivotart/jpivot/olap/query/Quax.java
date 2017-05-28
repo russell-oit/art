@@ -1472,9 +1472,9 @@ public class Quax {
   /**
    * collect tail nodes for all nodes matching member path
    */
-  private List collectTailNodes(TreeNode startNode, final Member[] mPath) {
+  private List<TreeNode> collectTailNodes(TreeNode startNode, final Member[] mPath) {
 
-    final List tailNodes = new ArrayList();
+    final List<TreeNode> tailNodes = new ArrayList<>();
     startNode.walkChildren(new TreeNodeCallback() {
 
       /**

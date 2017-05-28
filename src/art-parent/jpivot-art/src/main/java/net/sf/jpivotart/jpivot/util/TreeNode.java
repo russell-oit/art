@@ -23,7 +23,7 @@ import java.util.List;
 public class TreeNode {
 
   private TreeNode parent = null;
-  private List children = null;
+  private List<TreeNode> children = null;
   private Object reference;
 
   /**
@@ -33,7 +33,7 @@ public class TreeNode {
   public TreeNode(Object obj) {
     this.parent = null;
     this.reference = obj;
-    this.children = new ArrayList();
+    this.children = new ArrayList<>();
   }
 
   /**
@@ -71,8 +71,7 @@ public class TreeNode {
    */
   public TreeNode deepCopy() {
     TreeNode newNode = new TreeNode(reference);
-    for (Iterator iter = children.iterator(); iter.hasNext();) {
-      TreeNode child = (TreeNode) iter.next();
+    for (TreeNode child : children) {
       newNode.addChildNode(child.deepCopy());
     }
     return newNode;
@@ -89,8 +88,7 @@ public class TreeNode {
     TreeNode newNode = new TreeNode(reference);
     if (depth == 0)
       return newNode;
-    for (Iterator iter = children.iterator(); iter.hasNext();) {
-      TreeNode child = (TreeNode) iter.next();
+    for (TreeNode child : children) {
       newNode.addChildNode(child.deepCopyPrune(depth - 1));
     }
     return newNode;
@@ -118,8 +116,7 @@ public class TreeNode {
     code = callbackHandler.handleTreeNode(this);
     if (code != TreeNodeCallback.CONTINUE)
       return code;
-    ChildLoop: for (Iterator iter = children.iterator(); iter.hasNext();) {
-      TreeNode child = (TreeNode) iter.next();
+    ChildLoop: for (TreeNode child : children) {
       code = child.walkTree(callbackHandler);
       if (code >= TreeNodeCallback.CONTINUE_PARENT)
         return code;
@@ -133,8 +130,7 @@ public class TreeNode {
    */
   public int walkChildren(TreeNodeCallback callbackHandler) {
     int code = 0;
-    ChildLoop: for (Iterator iter = children.iterator(); iter.hasNext();) {
-      TreeNode child = (TreeNode) iter.next();
+    ChildLoop: for (TreeNode child : children) {
       code = callbackHandler.handleTreeNode(child);
       if (code >= TreeNodeCallback.CONTINUE_PARENT)
         return code;
@@ -150,7 +146,7 @@ public class TreeNode {
   /**
    * @return List of children
    */
-  public List getChildren() {
+  public List<TreeNode> getChildren() {
     return children;
   }
 
