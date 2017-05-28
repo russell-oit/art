@@ -24,7 +24,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 import javax.naming.Context;
@@ -63,7 +62,7 @@ public class ScriptableMondrianDrillThroughTableModel extends AbstractTableModel
   private String catalogExtension;
   private int maxResults;
   private String scriptRootUrl;
-  private List scripts = new ArrayList();
+  private List<ScriptColumn> scripts = new ArrayList<>();
   private GroovyScriptEngine scriptEngine = null;
 
   private DataSource dataSource;
@@ -163,24 +162,23 @@ public class ScriptableMondrianDrillThroughTableModel extends AbstractTableModel
       ResultSet rs = s.executeQuery(sql);
       ResultSetMetaData md = rs.getMetaData();
       int numCols = md.getColumnCount();
-      List columnTitlesList = new ArrayList();
+      List<String> columnTitlesList = new ArrayList<>();
       // set column headings
       for (int i = 0; i < numCols; i++) {
         //	columns are 1 based
         columnTitlesList.add(i, md.getColumnName(i + 1));
       }
       // loop on script columns
-      for (ListIterator sIt = scripts.listIterator(); sIt.hasNext();) {
-        final ScriptColumn sc = (ScriptColumn) sIt.next();
+      for (ScriptColumn sc : scripts) {
         columnTitlesList.add(sc.getPosition() - 1, sc.getTitle());
       }
-      columnTitles = (String[]) columnTitlesList.toArray(new String[0]);
+      columnTitles = columnTitlesList.toArray(new String[0]);
       // loop through rows
-      List tempRows = new ArrayList();
-      Map scriptInput = new HashMap();
+      List<TableRow> tempRows = new ArrayList<>();
+      Map<String, Object> scriptInput = new HashMap<>();
       Binding binding = new Binding();
       while (rs.next()) {
-        List rowList = new ArrayList();
+        List<Object> rowList = new ArrayList<>();
         scriptInput.clear();
         // loop on columns, 1 based
         for (int i = 0; i < numCols; i++) {
@@ -189,8 +187,7 @@ public class ScriptableMondrianDrillThroughTableModel extends AbstractTableModel
         }
         binding.setVariable("input", scriptInput);
         // loop on script columns
-        for (ListIterator sIt = scripts.listIterator(); sIt.hasNext();) {
-          final ScriptColumn sc = (ScriptColumn) sIt.next();
+        for (ScriptColumn sc : scripts) {
           scriptEngine.run(sc.getFile(), binding);
           final Object output = binding.getVariable("output");
           if (output instanceof Map) {
@@ -206,7 +203,7 @@ public class ScriptableMondrianDrillThroughTableModel extends AbstractTableModel
         tempRows.add(new DefaultTableRow(rowList.toArray()));
       }
       rs.close();
-      rows = (TableRow[]) tempRows.toArray(new TableRow[0]);
+      rows = tempRows.toArray(new TableRow[0]);
     } catch (Exception e) {
       e.printStackTrace();
       logger.error("?", e);
@@ -379,14 +376,14 @@ public class ScriptableMondrianDrillThroughTableModel extends AbstractTableModel
   /**
    * @return scripts
    */
-  public List getScripts() {
+  public List<ScriptColumn> getScripts() {
     return scripts;
   }
 
   /**
    * @param scripts
    */
-  public void setScripts(List scripts) {
+  public void setScripts(List<ScriptColumn> scripts) {
     this.scripts = scripts;
   }
 
