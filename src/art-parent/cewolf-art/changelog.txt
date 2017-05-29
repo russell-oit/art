@@ -1,5 +1,6 @@
 3.0.0
 * Incorporated as a module in the main art project - changed group id to net.sf.art
+* Commented out configuration state logging on startup
 
 1.1.0
 * Updated batik to 1.8

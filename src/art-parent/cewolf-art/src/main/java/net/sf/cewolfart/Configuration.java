@@ -55,7 +55,7 @@ public class Configuration implements Serializable {
 
 	/** package protected constructor triggered by servlet */
 	protected Configuration (ServletContext ctx) {
-        ctx.log("configuring cewolf app..");
+//        ctx.log("configuring cewolf app..");
         ctx.setAttribute(KEY, this);
 
         //retrieve the init config params
@@ -105,12 +105,12 @@ public class Configuration implements Serializable {
 				throw new RuntimeException(storageClassName + ".init() threw exception.");
 			}
 		}
-		ctx.log("using storage class " + storageClassName);
-		ctx.log("using overlibURL " + overlibURL);
-		ctx.log("max image width: " + maxImageWidth);
-		ctx.log("max image height: " + maxImageHeight);
-		ctx.log("debugging is turned " + (debugged ? "on" : "off"));
-		ctx.log("...done.");
+//		ctx.log("using storage class " + storageClassName);
+//		ctx.log("using overlibURL " + overlibURL);
+//		ctx.log("max image width: " + maxImageWidth);
+//		ctx.log("max image height: " + maxImageHeight);
+//		ctx.log("debugging is turned " + (debugged ? "on" : "off"));
+//		ctx.log("...done.");
 	}
 
 	private void initStorage (ServletContext ctx) throws CewolfException {
