@@ -62,7 +62,7 @@ public class XMLA_ChangeSlicer extends ExtensionSupport implements ChangeSlicer 
 
     Axis slicer = res.getSlicer();
     List positions = slicer.getPositions();
-    List members = new ArrayList();
+    List<Member> members = new ArrayList<>();
     for (Iterator iter = positions.iterator(); iter.hasNext();) {
       Position pos = (Position) iter.next();
       Member[] posMembers = pos.getMembers();
@@ -72,7 +72,7 @@ public class XMLA_ChangeSlicer extends ExtensionSupport implements ChangeSlicer 
       }
     }
 
-    return (Member[]) members.toArray(new Member[0]);
+    return members.toArray(new Member[0]);
   }
 
   /**
