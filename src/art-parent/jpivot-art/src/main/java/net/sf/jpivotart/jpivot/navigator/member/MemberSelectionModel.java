@@ -25,7 +25,7 @@ import net.sf.wcfart.wcf.selection.DefaultSelectionModel;
  */
 public class MemberSelectionModel extends DefaultSelectionModel {
   
-  List orderedSelection;
+  List<Object> orderedSelection;
 
   /**
    * Constructor for MemberSelectionModel.
