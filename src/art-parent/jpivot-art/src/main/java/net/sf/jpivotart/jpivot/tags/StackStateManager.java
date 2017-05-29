@@ -27,12 +27,11 @@ import java.util.Stack;
  * @since 15.02.2005
  */
 public class StackStateManager implements StateManager {
-  Stack stack = new Stack();
+  Stack<State> stack = new Stack<>();
   StateLogger logger = new Log4jStateLogger();
 
   private boolean stackContainsName(String name) {
-    for (Iterator it = stack.iterator(); it.hasNext();) {
-      State s = (State) it.next();
+    for (State s : stack) {
       if (name.equals(s.getName()))
         return true;
     }
@@ -58,7 +57,7 @@ public class StackStateManager implements StateManager {
   private State getCurrent() {
     if (stack.isEmpty())
       return null;
-    return (State) stack.peek();
+    return stack.peek();
   }
 
   /**
@@ -68,7 +67,7 @@ public class StackStateManager implements StateManager {
   public void initializeAndShow(State s) throws Exception {
     hideCurrent();
     while (stackContainsName(s.getName())) {
-      State t = (State) stack.pop();
+      State t = stack.pop();
       logger.destroy(s);
       t.destroy();
     }
@@ -97,10 +96,10 @@ public class StackStateManager implements StateManager {
     // unwind stack up to the requested name
     hideCurrent();
     while (!name.equals(s.getName())) {
-      State t = (State) stack.pop();
+      State t = stack.pop();
       logger.destroy(t);
       t.destroy();
-      s = (State) stack.peek();
+      s = stack.peek();
     }
     showCurrent();
   }
@@ -108,7 +107,7 @@ public class StackStateManager implements StateManager {
   public void destroyAll() throws Exception {
     hideCurrent();
     while (!stack.isEmpty()) {
-      State s = (State) stack.pop();
+      State s = stack.pop();
       logger.destroy(s);
       s.destroy();
     }
@@ -122,7 +121,7 @@ public class StackStateManager implements StateManager {
   public void destroyByName(String name) throws Exception {
     hideCurrent();
     while (stackContainsName(name)) {
-      State t = (State) stack.pop();
+      State t = stack.pop();
       logger.destroy(t);
       t.destroy();
     }
