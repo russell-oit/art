@@ -31,7 +31,7 @@ public class TestChangeSlicer extends TestExtensionSupport implements ChangeSlic
    * @see net.sf.jpivotart.jpivot.olap.navi.ChangeSlicer#getSlicer()
    */
   public Member[] getSlicer() {
-    List list = new ArrayList();
+    List<Member> list = new ArrayList<>();
     TestAxis axis = model().getSlicer();
     for (Iterator it = axis.getPositions().iterator(); it.hasNext(); ) {
       Position p = (Position)it.next();
@@ -39,7 +39,7 @@ public class TestChangeSlicer extends TestExtensionSupport implements ChangeSlic
         throw new IllegalArgumentException("slicer position must have exactly one member");
       list.add(p.getMembers()[0]);
     }
-    return (Member[])list.toArray(new Member[list.size()]);
+    return list.toArray(new Member[list.size()]);
   }
 
   /**
