@@ -24,7 +24,7 @@ import net.sf.jpivotart.jpivot.olap.navi.SetParameter;
  * @author av
  */
 public class TestSetParameter extends TestExtensionSupport implements SetParameter {
-  Map params = new HashMap();
+  Map<String, String> params = new HashMap<>();
   
   public void setParameter(String paramName, Expression paramValue) {
     String label = ((Displayable)paramValue).getLabel();
@@ -33,13 +33,13 @@ public class TestSetParameter extends TestExtensionSupport implements SetParamet
   }
   
   /** for scripting */
-  public Map getDisplayValues() {
+  public Map<String, String> getDisplayValues() {
     return params;
   }
   
   public String[] getParameterNames() {
-    Set keys = params.keySet();
-    return (String[]) keys.toArray(new String[keys.size()]);
+    Set<String> keys = params.keySet();
+    return keys.toArray(new String[keys.size()]);
   }
 
 }
