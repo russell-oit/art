@@ -82,7 +82,7 @@ public class MemberNavigator extends TreeComponent implements ModelChangeListene
   private String enableGroupingButtonId;
   private String disableGroupingButtonId;
   // contains a Tree (value) for a HierarchyArray (key)
-  private Map models = new HashMap();
+  private Map<HierarchyArray, TreeModel> models = new HashMap<>();
   private Resources resources;
 
   private int groupingMemberCount = 12;
@@ -182,7 +182,7 @@ public class MemberNavigator extends TreeComponent implements ModelChangeListene
       super(decoree);
     }
 
-    public MutableMemberTreeModelDecorator(TreeModel decoree, Comparator comp) {
+    public MutableMemberTreeModelDecorator(TreeModel decoree, Comparator<Object> comp) {
       super(decoree, comp);
     }
 
@@ -356,7 +356,7 @@ public class MemberNavigator extends TreeComponent implements ModelChangeListene
     if (!isAvailable())
       return;
     HierarchyArray hierarchyArray = new HierarchyArray(hierarchies);
-    TreeModel model = (TreeModel) models.get(hierarchyArray);
+    TreeModel model = models.get(hierarchyArray);
     if (model == null) {
       // build the decorator chain
       Locale locale = resources.getLocale();
@@ -398,7 +398,7 @@ public class MemberNavigator extends TreeComponent implements ModelChangeListene
     this.title = hierarchyArray.getLabel();
   }
 
-  public void setHierarchies(Hierarchy[] hiers, boolean allowChangeOrder, MemberSelectionModel selection, Collection deleted) {
+  public void setHierarchies(Hierarchy[] hiers, boolean allowChangeOrder, MemberSelectionModel selection, Collection<Object> deleted) {
     setHierarchies(hiers, allowChangeOrder);
     if (lazyFetchChildren) {
       EnumBoundedTreeModelDecorator boundedModel = (EnumBoundedTreeModelDecorator) findModel(EnumBoundedTreeModelDecorator.class);
@@ -408,7 +408,7 @@ public class MemberNavigator extends TreeComponent implements ModelChangeListene
     setSelectionModel(selection);
     if (expandSelected)
       expandSelected(false);
-    Set set = getDeleteNodeModel().getDeleted();
+    Set<Object> set = getDeleteNodeModel().getDeleted();
     set.clear();
     set.addAll(deleted);
   }
@@ -431,8 +431,7 @@ public class MemberNavigator extends TreeComponent implements ModelChangeListene
   }
 
   public void modelChanged(ModelChangeEvent e) {
-    for (Iterator it = models.values().iterator(); it.hasNext();) {
-      TreeModel model = (TreeModel) it.next();
+    for (TreeModel model : models.values()) {
       TreeModelAdapter tma = (TreeModelAdapter) findModel(model, TreeModelAdapter.class);
       tma.modelChanged();
     }
