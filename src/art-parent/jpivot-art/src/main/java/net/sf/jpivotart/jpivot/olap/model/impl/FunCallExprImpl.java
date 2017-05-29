@@ -50,9 +50,9 @@ public class FunCallExprImpl implements FunCallExpr {
     this.args = args;
   }
 
-  public FunCallExprImpl(String name, List args) {
+  public FunCallExprImpl(String name, List<Expression> args) {
     this.name = name;
-    this.args = (Expression[]) args.toArray(new Expression[args.size()]);
+    this.args = args.toArray(new Expression[args.size()]);
   }
 
   public Expression[] getArgs() {
@@ -66,8 +66,8 @@ public class FunCallExprImpl implements FunCallExpr {
   public void setArgs(Expression[] expressions) {
     args = expressions;
   }
-  public void setArgs(List list) {
-    this.args = (Expression[]) list.toArray(new Expression[list.size()]);
+  public void setArgs(List<Expression> list) {
+    this.args = list.toArray(new Expression[list.size()]);
   }
 
   public void setName(String string) {
