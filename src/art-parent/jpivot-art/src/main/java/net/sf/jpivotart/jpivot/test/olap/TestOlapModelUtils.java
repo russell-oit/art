@@ -37,16 +37,14 @@ public class TestOlapModelUtils {
 
   public static List getVisible(TestDimension dim) {
     TestHierarchy th = (TestHierarchy) dim.getHierarchies()[0];
-    List roots = Arrays.asList(th.getRootMembers());
-    ArrayList list = new ArrayList();
+    List<TestMember> roots = Arrays.asList(th.getRootMembers());
+    ArrayList<TestMember> list = new ArrayList<>();
     getVisible(roots, list);
     return list;
   }
 
-  static void getVisible(List members, ArrayList list) {
-    Iterator it = members.iterator();
-    while (it.hasNext()) {
-      TestMember m = (TestMember) it.next();
+  static void getVisible(List<TestMember> members, ArrayList<TestMember> list) {
+    for (TestMember m : members) {
       if (m.isVisible())
         list.add(m);
       getVisible(m.getChildMember(), list);
