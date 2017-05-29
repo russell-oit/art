@@ -802,7 +802,7 @@ public class XMLA_QuaxUti implements QuaxUti {
     else if (mList.size() == 1)
       return (Exp) mList.get(0);
     else {
-      Exp[] remExps = (Exp[]) mList.toArray(new Exp[0]);
+      Exp[] remExps = (Exp[])mList.toArray(new Exp[0]);
       return new FunCall("{}", remExps, FunCall.TypeBraces);
     }
   }

@@ -347,7 +347,7 @@ public class MondrianQuaxUti implements QuaxUti {
     } else if (isCallTo(f, "Members")) {
       net.sf.mondrianart.mondrian.olap.Level levExp = getLevelArg(f, 0);
       List members = scr.getLevelMembers(levExp, false);
-      List remainder = new ArrayList();
+      List<net.sf.mondrianart.mondrian.olap.Member> remainder = new ArrayList<>();
       for (int i = 0; i < members.size(); i++) {
         net.sf.mondrianart.mondrian.olap.Member currMember = (net.sf.mondrianart.mondrian.olap.Member)members.get(i);
         if (!currMember.isChildOrEqualTo(m))
@@ -355,7 +355,7 @@ public class MondrianQuaxUti implements QuaxUti {
       }
       return createMemberSet(remainder);
     } else if (isCallTo(f, "{}")) {
-      List remainder = new ArrayList();
+      List<net.sf.mondrianart.mondrian.olap.Member> remainder = new ArrayList<>();
       for (int i = 0; i < f.getArgs().length; i++) {
         net.sf.mondrianart.mondrian.olap.Member mExp = getMemberArg(f, i);
         if (mExp.isCalculatedInQuery())
@@ -402,7 +402,7 @@ public class MondrianQuaxUti implements QuaxUti {
     else if (mList.size() == 1)
       return mList.get(0);
     else {
-      Exp[] remExps = (Exp[]) mList.toArray(new Exp[0]);
+      Exp[] remExps = (Exp[])mList.toArray(new Exp[0]);
       return new UnresolvedFunCall("{}", Syntax.Braces, remExps);
     }
 
@@ -1070,7 +1070,7 @@ public class MondrianQuaxUti implements QuaxUti {
    * @see net.sf.jpivotart.jpivot.olap.query.QuaxUti#getChildren(java.lang.Object)
    */
   public Object[] getChildren(Object oMember) {
-    List members = scr.getMemberChildren(toMember(oMember));
+    List<net.sf.mondrianart.mondrian.olap.Member> members = scr.getMemberChildren(toMember(oMember));
     return members.toArray(new net.sf.mondrianart.mondrian.olap.Member[0]);
   }
 
@@ -1079,7 +1079,7 @@ public class MondrianQuaxUti implements QuaxUti {
    */
   public Object[] getLevelMembers(Level level) {
     net.sf.mondrianart.mondrian.olap.Level monLevel = ((MondrianLevel) level).getMonLevel();
-    List members = scr.getLevelMembers(monLevel, false);
+    List<net.sf.mondrianart.mondrian.olap.Member> members = scr.getLevelMembers(monLevel, false);
     return members.toArray(new net.sf.mondrianart.mondrian.olap.Member[0]);
   }
 
