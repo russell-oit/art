@@ -181,10 +181,10 @@ public class ChartFactory {
         BarRenderer renderer = new BarRenderer();
 
         if (tooltips) {
-            renderer.setToolTipGenerator(new StandardCategoryToolTipGenerator());
+            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
         }
         if (urls) {
-            renderer.setItemURLGenerator(urlGenerator);
+            renderer.setBaseItemURLGenerator(urlGenerator);
         }
         CategoryPlot plot = new CategoryPlot(data, categoryAxis, valueAxis, renderer);
         plot.setOrientation(orientation);
@@ -225,10 +225,10 @@ public class ChartFactory {
 
         //renderer.setLabelGenerator(new StandardCategoryLabelGenerator());
         if (tooltips) {
-            renderer.setToolTipGenerator(new StandardCategoryToolTipGenerator());
+            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
         }
         if (urls) {
-            renderer.setItemURLGenerator(urlGenerator);
+            renderer.setBaseItemURLGenerator(urlGenerator);
         }
 
         CategoryPlot plot = new CategoryPlot(data, categoryAxis, valueAxis, renderer);
@@ -271,10 +271,10 @@ public class ChartFactory {
         // create the renderer...
         StackedBarRenderer renderer = new StackedBarRenderer();
         if (tooltips) {
-            renderer.setToolTipGenerator(new StandardCategoryToolTipGenerator());
+            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
         }
         if (urls) {
-            renderer.setItemURLGenerator(urlGenerator);
+            renderer.setBaseItemURLGenerator(urlGenerator);
         }
 
         CategoryPlot plot = new CategoryPlot(data, categoryAxis, valueAxis, renderer);
@@ -320,9 +320,9 @@ public class ChartFactory {
             toolTipGenerator = new StandardCategoryToolTipGenerator();
         }
         if (urls) {
-            renderer.setItemURLGenerator(urlGenerator);
+            renderer.setBaseItemURLGenerator(urlGenerator);
         }
-        renderer.setToolTipGenerator(toolTipGenerator);
+        renderer.setBaseToolTipGenerator(toolTipGenerator);
 
         // create the plot...
         CategoryPlot plot = new CategoryPlot(data, categoryAxis, valueAxis, renderer);
@@ -363,13 +363,13 @@ public class ChartFactory {
         ValueAxis valueAxis = new NumberAxis(valueAxisLabel);
 
         LineAndShapeRenderer renderer = new LineAndShapeRenderer();
-        renderer.setLinesVisible(true);
-        renderer.setShapesVisible(false);
+        renderer.setBaseLinesVisible(true);
+        renderer.setBaseShapesVisible(false);
         if (tooltips) {
-            renderer.setToolTipGenerator(new StandardCategoryToolTipGenerator());
+            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
         }
         if (urls) {
-            renderer.setItemURLGenerator(urlGenerator);
+            renderer.setBaseItemURLGenerator(urlGenerator);
         }
         CategoryPlot plot = new CategoryPlot(data, categoryAxis, valueAxis, renderer);
         plot.setOrientation(orientation);
@@ -408,10 +408,10 @@ public class ChartFactory {
         ValueAxis valueAxis = new NumberAxis(valueAxisLabel);
         AreaRenderer renderer = new AreaRenderer();
         if (tooltips) {
-            renderer.setToolTipGenerator(new StandardCategoryToolTipGenerator());
+            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
         }
         if (urls) {
-            renderer.setItemURLGenerator(urlGenerator);
+            renderer.setBaseItemURLGenerator(urlGenerator);
         }
         CategoryPlot plot = new CategoryPlot(data, categoryAxis, valueAxis, renderer);
         plot.setOrientation(orientation);
@@ -450,10 +450,10 @@ public class ChartFactory {
 
         StackedAreaRenderer renderer = new StackedAreaRenderer();
         if (tooltips) {
-            renderer.setToolTipGenerator(new StandardCategoryToolTipGenerator());
+            renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
         }
         if (urls) {
-            renderer.setItemURLGenerator(urlGenerator);
+            renderer.setBaseItemURLGenerator(urlGenerator);
         }
 
         CategoryPlot plot = new CategoryPlot(data, categoryAxis, valueAxis, renderer);
