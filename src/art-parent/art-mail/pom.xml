@@ -45,7 +45,6 @@
 				<plugin>
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>3.0</version>
 					<configuration>
 						<basedir>${basedir}</basedir>
 						<header>${basedir}/src/license/header.txt</header>
@@ -82,7 +81,6 @@
 			<artifactId>javax.mail</artifactId>
 			<version>1.5.5</version>
 		</dependency>
-		<!-- slf4j version defined in art-parent -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>

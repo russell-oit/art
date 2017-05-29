@@ -61,12 +61,13 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<!-- http://blog.sonatype.com/2011/01/maven-how-to-merging-plugin-configuration-in-complex-projects/ -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<configuration>
-						<!--						<compilerArgs>
+												<compilerArgs>
 							<arg>-Xlint</arg>
-						</compilerArgs>-->
+						</compilerArgs>
 					</configuration>
 				</plugin>
 			</plugins>
