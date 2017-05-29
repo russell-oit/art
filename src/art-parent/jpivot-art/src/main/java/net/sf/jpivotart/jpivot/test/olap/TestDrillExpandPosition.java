@@ -48,7 +48,7 @@ public class TestDrillExpandPosition extends TestExtensionSupport implements Dri
 
 
   void expand(TestPosition position, TestMember member) {
-    List childPositions = new ArrayList();
+    List<TestPosition> childPositions = new ArrayList<>();
     TestAxis axis = position.getAxis();
     int memberIndex = position.indexOf(member);
 
@@ -74,7 +74,7 @@ public class TestDrillExpandPosition extends TestExtensionSupport implements Dri
    * removes all direct children
    */
   void collapse(TestPosition position, TestMember member) {
-    List list = getDescendantPositions(position, member);
+    List<Position> list = getDescendantPositions(position, member);
     int memberIndex = position.indexOf(member);
     for (Iterator it = list.iterator(); it.hasNext();) {
       TestPosition p = (TestPosition)it.next();
@@ -101,15 +101,15 @@ public class TestDrillExpandPosition extends TestExtensionSupport implements Dri
   /**
    * returns next positions, that contain descendants of member
    */
-  List getDescendantPositions(TestPosition position, TestMember member) {
+  List<Position> getDescendantPositions(TestPosition position, TestMember member) {
     TestAxis axis = position.getAxis();
     PositionSpan ps = new PositionSpan(axis, position, member);
-    Iterator iter = axis.getPositions().listIterator(ps.getEndIndex());
+    Iterator<Position> iter = axis.getPositions().listIterator(ps.getEndIndex());
     int memberIndex = position.indexOf(member);
-    List descendantPositions = new ArrayList();
+    List<Position> descendantPositions = new ArrayList<>();
     
     loop:while (iter.hasNext()) {
-      Position p = (Position)iter.next();
+      Position p = iter.next();
       TestMember candidate = (TestMember)p.getMembers()[memberIndex];
       if (candidate.getRootDistance() <= member.getRootDistance())
         break loop;
