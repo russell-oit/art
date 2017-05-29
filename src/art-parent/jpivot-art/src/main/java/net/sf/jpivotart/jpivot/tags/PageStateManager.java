@@ -9,7 +9,7 @@ import java.util.Map;
  * @since 15.02.2005
  */
 public class PageStateManager implements StateManager {
-  Map map = new HashMap();
+  Map<String, State> map = new HashMap<>();
   State current;
   StateLogger logger = new Log4jStateLogger();
 
@@ -31,7 +31,7 @@ public class PageStateManager implements StateManager {
     hideCurrent();
     
     // remove state with same name from map
-    State prev = (State) map.get(next.getName());
+    State prev = map.get(next.getName());
     if (prev != null) {
       logger.destroy(prev);
       prev.destroy();
@@ -48,7 +48,7 @@ public class PageStateManager implements StateManager {
    * makes the named state the visible one
    */
   public void showByName(String name) throws Exception {
-    State s = (State) map.get(name);
+    State s = map.get(name);
     if (s == null) {
       logger.error("could not find state for " + name);
       return;
@@ -66,8 +66,7 @@ public class PageStateManager implements StateManager {
   public void destroyAll() throws Exception {
     hideCurrent();
     current = null;
-    for (Iterator it = map.values().iterator(); it.hasNext();) {
-      State s = (State) it.next();
+    for (State s : map.values()) {
       logger.destroy(s);
       s.destroy();
     }
@@ -78,7 +77,7 @@ public class PageStateManager implements StateManager {
    * removes and destroys the named state
    */
   public void destroyByName(String name) throws Exception {
-    State s = (State) map.get(name);
+    State s = map.get(name);
     if (s == null) {
       logger.error("query " + name + " not found");
       return;
