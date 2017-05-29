@@ -29,7 +29,7 @@ public class MemberParamProvider extends AbstractParamProvider {
     this.paramName = paramName;
   }
 
-  protected void addMemberParams(List list, SqlAccess sa, Member member) {
+  protected void addMemberParams(List<SessionParam> list, SqlAccess sa, Member member) {
     SessionParam param = sa.createParameter(member, paramName);
     if (param != null) // !calculated, !all
       list.add(param);
