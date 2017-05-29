@@ -23,8 +23,8 @@ import java.util.Set;
 public class ExpressionPrinter extends VisitorSupportStrict {
   StringBuffer sb = new StringBuffer();
 
-  static final Set infix = new HashSet();
-  static final Set prefix = new HashSet();
+  static final Set<String> infix = new HashSet<>();
+  static final Set<String> prefix = new HashSet<>();
   static {
     String[] s = new String[] { "*", "/", "+", "-", "%", "<", ">", "<=", ">=", "<>", "=", "and", "or", "xor" };
     for (int i = 0; i < s.length; i++)
