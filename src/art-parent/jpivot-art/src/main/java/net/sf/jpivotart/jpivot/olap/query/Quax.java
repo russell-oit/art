@@ -1769,7 +1769,7 @@ public class Quax {
    * @param iDim
    */
   private List collectDrillup(final int iDim, final int[] maxLevel) {
-    final List drillupList = new ArrayList();
+    final List<Object> drillupList = new ArrayList<>();
     posTreeRoot.walkChildren(new TreeNodeCallback() {
 
       /**
@@ -1891,7 +1891,7 @@ public class Quax {
   /**
    * add a Funcall to Drillup list
    */
-  private void addFunCallToDrillup(List list, Object oFun, int[] maxLevel) {
+  private void addFunCallToDrillup(List<Object> list, Object oFun, int[] maxLevel) {
     if (uti.isFunCallTo(oFun, "Union")) {
       for (int i = 0; i < 2; i++) {
         Object fExp = uti.funCallArg(oFun, i);
