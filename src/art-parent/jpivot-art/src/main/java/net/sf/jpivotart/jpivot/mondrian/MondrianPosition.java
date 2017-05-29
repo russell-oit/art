@@ -38,7 +38,7 @@ public class MondrianPosition extends PositionBase {
     this.model = model;
     this.iAxis = iAxis;
     // extract the members
-    List l = new ArrayList();
+    List<net.sf.jpivotart.jpivot.olap.model.Member> l = new ArrayList<>();
     Iterator mit = monPosition.iterator();
     while (mit.hasNext()) {
       net.sf.mondrianart.mondrian.olap.Member monMember = (net.sf.mondrianart.mondrian.olap.Member) mit.next();
