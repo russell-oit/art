@@ -336,7 +336,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
     propertyChangeSupport.firePropertyChange("visiblePropertyMetas", oldValue, newValue);
   }
 
-  public List getVisiblePropertyMetas() {
+  public List<MemberPropertyMeta> getVisiblePropertyMetas() {
     return visiblePropertyMetas;
   }
 
@@ -404,7 +404,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
 		return null;
 	}
 	MemberPropertyMetaFilter inlineFilter = metaSet.createAllFilter();
-	List metaList = metaSet.metaList(inlineFilter);
+	List<MemberPropertyMeta> metaList = metaSet.metaList(inlineFilter);
 
 	List[] availablePropertyColumns = new List[1];
 	availablePropertyColumns[0] = metaList;
