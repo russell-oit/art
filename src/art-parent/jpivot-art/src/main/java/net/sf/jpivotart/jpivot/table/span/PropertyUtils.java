@@ -60,10 +60,10 @@ public class PropertyUtils {
    * maps multiple names in lower case to the 'standard' name of the inline property. Example:
    * 'image' and 'bild' (german) map to the standard property name 'image'.
    */
-  static Map inlineProps;
+  static Map<String, String> inlineProps;
 
   static {
-    Map map = new HashMap();
+    Map<String, String> map = new HashMap<>();
     int prefixLength = INLINE_PREFIX.length();
     Resources res = Resources.instance(PropertyUtils.class);
     for (Iterator it = res.keySet().iterator(); it.hasNext();) {
@@ -112,7 +112,7 @@ public class PropertyUtils {
   
   public static boolean isStyleProperty(String propertyName) {
     String name = propertyName.toLowerCase();
-    String value = (String)inlineProps.get(name);
+    String value = inlineProps.get(name);
     return STYLE_PROPERTY.equals(value);
   }
 
@@ -123,8 +123,8 @@ public class PropertyUtils {
   public static Property[] normalize(Property[] properties) {
     if (!needsNormalization(properties))
       return properties;
-    Map map = new HashMap();
-    List result = new ArrayList();
+    Map<String, PropertyImpl> map = new HashMap<>();
+    List<Property> result = new ArrayList<>();
     for (int i = 0; i < properties.length; i++) {
       Property src = properties[i];
       PropertyImpl parent = null;
@@ -135,7 +135,7 @@ public class PropertyUtils {
         nameBuffer.append(delimiterChar).append(token);
         String name = nameBuffer.toString();
 
-        PropertyImpl child = (PropertyImpl) map.get(name);
+        PropertyImpl child = map.get(name);
         if (child == null) {
           child = new PropertyImpl();
           child.setName(token);
@@ -153,7 +153,7 @@ public class PropertyUtils {
       parent.setLabel(src.getLabel());
       parent.setAlignment(src.getAlignment());
     }
-    return (Property[]) result.toArray(new Property[result.size()]);
+    return result.toArray(new Property[result.size()]);
   }
 
   private static boolean needsNormalization(Property[] properties) {
@@ -185,12 +185,12 @@ public class PropertyUtils {
    */
   public static void addInlineProperties(Element target, Property[] properties) {
     if (properties.length > 0) {
-      List list = new ArrayList();
+      List<Property> list = new ArrayList<>();
       for (int i = 0; i < properties.length; i++) {
         if (isInline(properties[i].getName()))
           list.add(properties[i]);
       }
-      properties = (Property[]) list.toArray(new Property[list.size()]);
+      properties = list.toArray(new Property[list.size()]);
       properties = normalize(properties);
       recurseAddProperties(target, properties, true);
     }
@@ -205,7 +205,7 @@ public class PropertyUtils {
       parent.appendChild(elem);
       if (inline) {
         String name = p.getName().toLowerCase();
-        name = (String) inlineProps.get(name);
+        name = inlineProps.get(name);
         elem.setAttribute("name", name);
       } else
         elem.setAttribute("name", p.getName());
@@ -221,8 +221,8 @@ public class PropertyUtils {
    * @return metas
    */
   public static MemberPropertyMeta[] getRootMetas(MemberPropertyMeta[] metas) {
-    Set nameSet = new HashSet();
-    List roots = new ArrayList();
+    Set<String> nameSet = new HashSet<>();
+    List<MemberPropertyMeta> roots = new ArrayList<>();
     // copy root properties
     for (int i = 0; i < metas.length; i++) {
       String name = metas[i].getName();
@@ -247,7 +247,7 @@ public class PropertyUtils {
         }
       }
     }
-    return (MemberPropertyMeta[]) roots.toArray(new MemberPropertyMeta[roots.size()]);
+    return roots.toArray(new MemberPropertyMeta[roots.size()]);
   }
 
   /**
@@ -257,10 +257,10 @@ public class PropertyUtils {
    * @return null or the property
    */
   public static Property getInlineProperty(Property[] props, String name) {
-    name = (String) inlineProps.get(name.toLowerCase());
+    name = inlineProps.get(name.toLowerCase());
     for (int i = 0; i < props.length; i++) {
       String s = props[i].getName().toLowerCase();
-      s = (String) inlineProps.get(s);
+      s = inlineProps.get(s);
       if (s != null && s.equals(name))
         return props[i];
     }
