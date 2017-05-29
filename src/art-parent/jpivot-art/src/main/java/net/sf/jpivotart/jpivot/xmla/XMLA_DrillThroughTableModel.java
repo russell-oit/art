@@ -221,7 +221,7 @@ public class XMLA_DrillThroughTableModel extends AbstractTableModel {
 
 		// populate rows
 		List dataRows   = drillResult.getDrillRows();
-		List tempRows = new ArrayList();
+		List<TableRow> tempRows = new ArrayList<>();
 		Iterator dataRowIt = dataRows.iterator();
 		while (dataRowIt.hasNext()) {
 			Object[] row = new Object[numCols];
@@ -237,7 +237,7 @@ public class XMLA_DrillThroughTableModel extends AbstractTableModel {
 			}
 			tempRows.add(new DefaultTableRow(row));
 		}
-		rows = (TableRow[]) tempRows.toArray(new TableRow[0]);
+		rows = tempRows.toArray(new TableRow[0]);
 		} catch (Exception e) {
 		e.printStackTrace();
 		logger.error("?", e);
