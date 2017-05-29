@@ -23,8 +23,8 @@ import java.util.List;
 public class SpanConfigSupport implements SpanConfig {
   
   int defaultDirection = SpanConfig.NO_SPAN;
-  List clsList = new ArrayList();
-  List dirList = new ArrayList();
+  List<Class<?>> clsList = new ArrayList<>();
+  List<Integer> dirList = new ArrayList<>();
   
   /**
    * sets the span direction for a specific class. The direction will be
@@ -36,7 +36,7 @@ public class SpanConfigSupport implements SpanConfig {
    * other classes will be recognized, because every class is assignable to
    * object.
    */
-  public void setDirection(Class clazz, int direction) {
+  public void setDirection(Class<?> clazz, int direction) {
      clsList.add(clazz);
      dirList.add(new Integer(direction));
   }
@@ -49,12 +49,12 @@ public class SpanConfigSupport implements SpanConfig {
     Object obj = span.getObject();
     if (obj == null)
       return defaultDirection;
-    Class clazz = obj.getClass();
+    Class<?> clazz = obj.getClass();
     int N = clsList.size();
     for (int i = 0; i < N; i++) {
-      Class c = (Class)clsList.get(i);
+      Class<?> c = (Class<?>)clsList.get(i);
       if (c.isAssignableFrom(clazz))
-        return ((Integer)dirList.get(i)).intValue();
+        return dirList.get(i);
     }
     // use default    
     return defaultDirection;
