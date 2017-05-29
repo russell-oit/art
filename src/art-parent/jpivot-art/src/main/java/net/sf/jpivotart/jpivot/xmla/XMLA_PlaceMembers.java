@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import net.sf.jpivotart.jpivot.olap.model.Hierarchy;
+import net.sf.jpivotart.jpivot.olap.model.Member;
 import net.sf.jpivotart.jpivot.olap.navi.PlaceMembersOnAxes;
 import net.sf.jpivotart.jpivot.olap.query.Quax;
 
@@ -61,7 +62,7 @@ public class XMLA_PlaceMembers extends XMLA_PlaceHierarchies implements PlaceMem
     // use query axis
     //  problem: if NON EMPTY is on, then a member, which is excluded by Non Empty
     //   will be visible, although not occuring in the result. OK?
-    List memberList = XMLA_Util.collectMembers(quax.getPosTreeRoot(), iDim);
+    List<Member> memberList = XMLA_Util.collectMembers(quax.getPosTreeRoot(), iDim);
 
     // use result
     //  problem: if NON EMPTY is on then a member, which is excluded by Non Empty

@@ -15,6 +15,7 @@ package net.sf.jpivotart.jpivot.olap.navi;
 import java.util.List;
 
 import net.sf.jpivotart.jpivot.olap.model.Hierarchy;
+import net.sf.jpivotart.jpivot.olap.model.Member;
 
 /**
  * allows to place a set of members on a visible query axis.
@@ -48,6 +49,6 @@ public interface PlaceMembersOnAxes extends PlaceHierarchiesOnAxes {
    * @return A list of Members
    * @see net.sf.jpivotart.jpivot.olap.model.Member
    */
-  List findVisibleMembers(Hierarchy hier);
+  List<Member> findVisibleMembers(Hierarchy hier);
   
 }

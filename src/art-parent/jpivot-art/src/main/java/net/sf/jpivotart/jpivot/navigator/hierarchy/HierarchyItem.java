@@ -100,7 +100,7 @@ public class HierarchyItem implements Item, RequestListener{
     PlaceMembersOnAxes memberExtension = navigator.getMemberExtension();
     axisSelection = new ArrayList<>();
     if (memberExtension != null) {
-      List members = memberExtension.findVisibleMembers(hierarchy);
+      List<Member> members = memberExtension.findVisibleMembers(hierarchy);
       axisSelection.addAll(members);
     }
   }

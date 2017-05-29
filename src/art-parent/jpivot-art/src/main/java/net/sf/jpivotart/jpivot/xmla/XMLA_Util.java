@@ -212,10 +212,10 @@ public class XMLA_Util {
    * @param iDim
    * @return members
    */
-  static List<Exp> collectMembers(TreeNode root, final int iDim) {
+  static List<Member> collectMembers(TreeNode root, final int iDim) {
     if (root == null)
       return null;
-    final List<Exp> memberList = new ArrayList<>();
+    final List<Member> memberList = new ArrayList<>();
     root.walkChildren(new TreeNodeCallback() {
 
       /**
@@ -254,7 +254,7 @@ public class XMLA_Util {
    * @param f
    * @param memberList
    */
-  static void resolveFunCallMembers(FunCall f, List<Exp> memberList) throws OlapException {
+  static void resolveFunCallMembers(FunCall f, List<Member> memberList) throws OlapException {
     if (f.isCallTo("Children")) {
       XMLA_Member m = (XMLA_Member) f.getArgs()[0];
       XMLA_Member[] members = m.getChildren();
@@ -283,7 +283,7 @@ public class XMLA_Util {
     } else if (f.isCallTo("{}")) {
       for (int i = 0; i < f.getArgs().length; i++) {
         if (!memberList.contains(f.getArgs()[i]))
-          memberList.add(f.getArgs()[i]);
+          memberList.add((Member)f.getArgs()[i]);
       }
     } else if (
     // we cannot handle this properly, just return members of base set

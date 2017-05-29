@@ -56,8 +56,8 @@ public class MondrianPlaceMembers extends MondrianPlaceHierarchies implements Pl
    * find all members of an hierarchy
    * @see net.sf.jpivotart.jpivot.olap.navi.PlaceMembersOnAxes#findVisibleMembers(Hierarchy)
    */
-  public List findVisibleMembers(Hierarchy hier) {
-    List<MondrianMember> memberList = null;
+  public List<Member> findVisibleMembers(Hierarchy hier) {
+    List<Member> memberList = null;
 
     MondrianModel model = (MondrianModel) getModel();
     MondrianQueryAdapter adapter = (MondrianQueryAdapter) model.getQueryAdapter();
@@ -65,7 +65,7 @@ public class MondrianPlaceMembers extends MondrianPlaceHierarchies implements Pl
     // find the Quax for this hier
     Quax quax = adapter.findQuax(hier.getDimension());
     if (quax == null)
-      return Collections.EMPTY_LIST; // should not occur
+      return Collections.emptyList(); // should not occur
 
     int iDim = quax.dimIdx(hier.getDimension());
 
@@ -81,7 +81,7 @@ public class MondrianPlaceMembers extends MondrianPlaceHierarchies implements Pl
     } catch (OlapException e) {
       e.printStackTrace();
       logger.error("findVisibleMembers: unexpected failure of getResult", e);
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
 
     // locate the appropriate result axis
