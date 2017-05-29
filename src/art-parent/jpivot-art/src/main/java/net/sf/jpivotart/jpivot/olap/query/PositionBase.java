@@ -26,7 +26,7 @@ public class PositionBase implements Position {
   protected Member[] members;
 
   // cellList, parent and number are temp variables used by hierarchize sort
-  public List cellList = null;
+  public List<Object> cellList = null;
   public PositionBase parent = null;
   public int number; 
 

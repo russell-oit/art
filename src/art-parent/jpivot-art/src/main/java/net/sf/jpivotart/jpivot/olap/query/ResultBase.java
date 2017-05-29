@@ -141,7 +141,7 @@ public abstract class ResultBase implements Result {
         nDimension = pos.getMembers().length;
       pos.number = iPos;
       if (pos.cellList == null)
-        pos.cellList = new ArrayList();
+        pos.cellList = new ArrayList<>();
       else
         pos.cellList.clear();
       if (nDim > 1) {
@@ -199,7 +199,7 @@ public abstract class ResultBase implements Result {
    * @param nDim
    * @return sort pos list
    */
-  private List<Position> sortPosList(List posList, final int iDim, int nDim) {
+  private List<Position> sortPosList(List<Position> posList, final int iDim, int nDim) {
 
     printPosList(posList, new PrintWriter(System.out), "Start sortPosList " + iDim);
 
@@ -220,11 +220,9 @@ public abstract class ResultBase implements Result {
     // first step
     // sort by level and original position to assure
     //  that any child follows its parent
-    Collections.sort(posList, new Comparator() {
-      public int compare(Object o1, Object o2) {
+    Collections.sort(posList, new Comparator<Position>() {
+      public int compare(Position pos1, Position pos2) {
         // compare two positions
-        Position pos1 = (Position) o1;
-        Position pos2 = (Position) o2;
         Member a1 = pos1.getMembers()[iDim];
         Member a2 = pos2.getMembers()[iDim];
 
@@ -268,8 +266,8 @@ public abstract class ResultBase implements Result {
 
     // third step
     // sort by hierarchy and member first ocurrence
-    Collections.sort(posList, new Comparator() {
-      public int compare(Object o1, Object o2) {
+    Collections.sort(posList, new Comparator<Position>() {
+      public int compare(Position o1, Position o2) {
         // compare two positions
         PositionBase pos1 = (PositionBase) o1;
         PositionBase pos2 = (PositionBase) o2;
@@ -386,7 +384,7 @@ public abstract class ResultBase implements Result {
   /**
    * print position list for debugging
    */
-  private void printPosList(List posList, PrintWriter wout, String label) {
+  private void printPosList(List<Position> posList, PrintWriter wout, String label) {
     wout.println(label);
     int n = 0;
     for (Iterator iter = posList.iterator(); iter.hasNext(); n++) {
@@ -555,7 +553,7 @@ public abstract class ResultBase implements Result {
 
       // print rows, each one starting with row headers
       wout.println("<tbody>");
-      Position[] positions = (Position[]) axes[1].getPositions().toArray(new Position[0]);
+      Position[] positions = axes[1].getPositions().toArray(new Position[0]);
       int n = 0;
       for (i = 0; i < positions.length; i++) {
         wout.println("<tr>");
@@ -593,7 +591,7 @@ public abstract class ResultBase implements Result {
   private static void renderColHeaders(PrintWriter wout, Axis axis) {
     // print position of axis as column headers
     wout.println("<th></th>");
-    Position[] positions = (Position[]) axis.getPositions().toArray(new Position[0]);
+    Position[] positions = axis.getPositions().toArray(new Position[0]);
     for (int i = 0; i < positions.length; i++) {
       Member[] members = positions[i].getMembers();
 
@@ -612,7 +610,7 @@ public abstract class ResultBase implements Result {
    * print row header from slicer axis
    */
   private static void renderSlicerRowHeader(Axis slicerax, PrintWriter wout) {
-    Position[] positions = (Position[]) slicerax.getPositions().toArray(new Position[0]);
+    Position[] positions = slicerax.getPositions().toArray(new Position[0]);
     String caption = "";
     for (int i = 0; i < positions.length; i++) {
       Member[] members = positions[i].getMembers();
