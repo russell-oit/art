@@ -196,11 +196,10 @@ public class XMLA_QueryAdapter extends QueryAdapter implements QuaxChangeListene
     // CELL PROPERTIES VALUE, FORMATTED_VALUE, FONT_SIZE
     Map cmpmap = ((XMLA_Model) model).getCalcMeasurePropMap();
     if (cmpmap != null && cmpmap.size() > 0) {
-      List cellProps = parsedQuery.getCellProps();
+      List<CompoundId> cellProps = parsedQuery.getCellProps();
       CompoundId cid = new CompoundId("FONT_SIZE", false);
       boolean found = false;
-      for (Iterator iter = cellProps.iterator(); iter.hasNext();) {
-        CompoundId ci = (CompoundId) iter.next();
+      for (CompoundId ci : cellProps) {
         if (ci.toMdx().equalsIgnoreCase("FONT_SIZE")) {
           found = true;
           break;
