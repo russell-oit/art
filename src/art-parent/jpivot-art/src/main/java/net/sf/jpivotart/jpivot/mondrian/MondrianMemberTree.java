@@ -67,8 +67,8 @@ public class MondrianMemberTree extends ExtensionSupport implements MemberTree {
     // members defined in both the cube and the query.
     SchemaReader scr = model.getSchemaReader();
     List<net.sf.mondrianart.mondrian.olap.Member> monMembers = scr.getHierarchyRootMembers(monHier);
-    ArrayList aMem = new ArrayList();
-    final List visibleRootMembers = new ArrayList();
+    ArrayList<Member> aMem = new ArrayList<>();
+    final List<Member> visibleRootMembers = new ArrayList<>();
     int k = monMembers.size();
     for (int i = 0; i < k; i++) {
       net.sf.mondrianart.mondrian.olap.Member monMember = (net.sf.mondrianart.mondrian.olap.Member) monMembers.get(i);
@@ -143,7 +143,7 @@ public class MondrianMemberTree extends ExtensionSupport implements MemberTree {
         }
     }
 
-    Member[] members = (Member[]) aMem.toArray(new Member[0]);
+    Member[] members = aMem.toArray(new Member[0]);
 
     // If there is no query result, do not sort
     if (!visibleRootMembers.isEmpty()) {
@@ -224,7 +224,7 @@ public class MondrianMemberTree extends ExtensionSupport implements MemberTree {
     SchemaReader scr = model.getSchemaReader();    
     List<net.sf.mondrianart.mondrian.olap.Member> monChildren = scr.getMemberChildren(monMember);
 
-    List list = new ArrayList(monChildren.size());
+    List<Member> list = new ArrayList<>(monChildren.size());
     for (int i = 0; i < monChildren.size(); i++) {
         net.sf.mondrianart.mondrian.olap.Member m = (net.sf.mondrianart.mondrian.olap.Member)monChildren.get(i);
         if (MondrianUtil.isVisible(scr, m)) {
@@ -266,7 +266,7 @@ public class MondrianMemberTree extends ExtensionSupport implements MemberTree {
     // order the children by order of appearance in Query result
     //  if there is no result available, do not sort
     Result res = model.currentResult();
-    final List visibleChildMembers = new ArrayList();
+    final List<Member> visibleChildMembers = new ArrayList<>();
     if (res != null) {
         // locate the appropriate result axis
         // find the Quax for this hier
@@ -304,7 +304,7 @@ public class MondrianMemberTree extends ExtensionSupport implements MemberTree {
             }
         }
     }
-    Member[] children = (Member[]) list.toArray(new Member[list.size()]);
+    Member[] children = list.toArray(new Member[list.size()]);
 
     if (res!=null){  //turned off
         Arrays.sort(children, new Comparator() {
