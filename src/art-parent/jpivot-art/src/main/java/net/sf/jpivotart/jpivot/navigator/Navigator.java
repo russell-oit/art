@@ -121,7 +121,7 @@ public class Navigator extends ComponentSupport implements ModelChangeListener, 
       // the selection is an unsorted set. 
       // Order the selected items into tree order.
       Set set = memberNav.getSelectionModel().getSelection();
-      List list = NodeSorter.preOrder(set, memberNav.getModel());
+      List<Object> list = NodeSorter.preOrder(set, memberNav.getModel());
       String errmesg = currentItem.validateSelection(list);
       if (errmesg != null)
         memberNav.setError(errmesg);

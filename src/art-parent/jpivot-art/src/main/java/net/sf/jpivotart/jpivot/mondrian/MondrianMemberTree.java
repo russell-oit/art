@@ -147,10 +147,8 @@ public class MondrianMemberTree extends ExtensionSupport implements MemberTree {
 
     // If there is no query result, do not sort
     if (!visibleRootMembers.isEmpty()) {
-        Arrays.sort(members, new Comparator() {
-          public int compare(Object arg0, Object arg1) {
-            Member m1 = (Member) arg0;
-            Member m2 = (Member) arg1;
+        Arrays.sort(members, new Comparator<Member>() {
+          public int compare(Member m1, Member m2) {
             int index1 = visibleRootMembers.indexOf(m1);
             int index2 = visibleRootMembers.indexOf(m2);
             if (index2 == -1)
@@ -307,10 +305,8 @@ public class MondrianMemberTree extends ExtensionSupport implements MemberTree {
     Member[] children = list.toArray(new Member[list.size()]);
 
     if (res!=null){  //turned off
-        Arrays.sort(children, new Comparator() {
-          public int compare(Object arg0, Object arg1) {
-            Member m1 = (Member) arg0;
-            Member m2 = (Member) arg1;
+        Arrays.sort(children, new Comparator<Member>() {
+          public int compare(Member m1, Member m2) {
             int index1 = visibleChildMembers.indexOf(m1);
             int index2 = visibleChildMembers.indexOf(m2);
             if (index2 == -1)

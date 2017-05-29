@@ -117,7 +117,7 @@ public class LevelAxisDecorator implements Axis {
   }
 
   void makePositions() {
-    positions = new ArrayList();
+    positions = new ArrayList<>();
     Iterator it = axis.getPositions().iterator();
     while (it.hasNext()) {
       Position p = (Position) it.next();

@@ -178,7 +178,7 @@ public class MondrianUtil {
     Level lev = member.getLevel();
     if (depth <= lev.getDepth())
       return new Member[0];
-    List<Member> currentMembers = new ArrayList();
+    List<Member> currentMembers = new ArrayList<>();
     currentMembers.add(member);
     while (depth > lev.getDepth()) {
       lev = lev.getChildLevel();

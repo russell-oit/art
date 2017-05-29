@@ -159,10 +159,8 @@ public class XMLA_MemberTree extends ExtensionSupport implements MemberTree {
   
     // If there is no query result, do not sort
     if (visibleRootMembers.size() != 0) {
-        Arrays.sort(members, new Comparator() {
-          public int compare(Object arg0, Object arg1) {
-            Member m1 = (Member) arg0;
-            Member m2 = (Member) arg1;
+        Arrays.sort(members, new Comparator<Member>() {
+          public int compare(Member m1, Member m2) {
             int index1 = visibleRootMembers.indexOf(m1);
             int index2 = visibleRootMembers.indexOf(m2);
             if (index2 == -1)
