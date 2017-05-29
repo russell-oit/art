@@ -361,7 +361,7 @@ public class XMLA_QuaxUti implements QuaxUti {
    * check level and add a member's parents children to list
    * @param m
    */
-  public void addMemberSiblings(List list, Member m, int[] maxLevel) {
+  public void addMemberSiblings(List<Object> list, Member m, int[] maxLevel) {
     XMLA_Member xm = (XMLA_Member) m;
     int level = ((XMLA_Level) xm.getLevel()).getDepth();
     if (level < maxLevel[0])
