@@ -44,7 +44,7 @@ public class MondrianPlaceMembers extends MondrianPlaceHierarchies implements Pl
    * @see net.sf.jpivotart.jpivot.olap.navi.PlaceMembersOnAxes#createMemberExpression(List)
    */
   public Object createMemberExpression(List members) {
-    ArrayList memberList = new ArrayList();
+    ArrayList<net.sf.mondrianart.mondrian.olap.Member> memberList = new ArrayList<>();
     for (Iterator iter = members.iterator(); iter.hasNext();) {
       MondrianMember mem = (MondrianMember) iter.next();
       memberList.add(mem.getMonMember());
@@ -57,7 +57,7 @@ public class MondrianPlaceMembers extends MondrianPlaceHierarchies implements Pl
    * @see net.sf.jpivotart.jpivot.olap.navi.PlaceMembersOnAxes#findVisibleMembers(Hierarchy)
    */
   public List findVisibleMembers(Hierarchy hier) {
-    List memberList = null;
+    List<MondrianMember> memberList = null;
 
     MondrianModel model = (MondrianModel) getModel();
     MondrianQueryAdapter adapter = (MondrianQueryAdapter) model.getQueryAdapter();
@@ -75,7 +75,7 @@ public class MondrianPlaceMembers extends MondrianPlaceHierarchies implements Pl
     // It would be possible to add it (again) to the axis, which must be avoided
 
     Result res = null;
-    memberList = new ArrayList();
+    memberList = new ArrayList<>();
     try {
       res = model.getResult();
     } catch (OlapException e) {
