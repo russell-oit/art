@@ -34,7 +34,7 @@ public abstract class OlapModelTag extends BodyTagSupport {
 
   private static Logger logger = Logger.getLogger(OlapModelTag.class);
   
-  private List<ClickableMember> clickables;
+  private List<Object> clickables;
   private String queryName;
   private boolean stackMode = true;
 

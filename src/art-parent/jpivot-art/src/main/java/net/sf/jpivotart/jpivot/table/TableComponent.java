@@ -170,10 +170,10 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
     }
   }
   
-  public Iterator clickableIterator() {
+  public Iterator<Object> clickableIterator() {
     ClickableExtension ce = (ClickableExtension) olapModel.getExtension(ClickableExtension.ID);
     if (ce == null)
-      return Collections.EMPTY_LIST.iterator();
+      return Collections.emptyListIterator();
     return ce.getClickables().iterator();
   }
 

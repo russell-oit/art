@@ -11,10 +11,10 @@ public interface ClickableExtension extends Extension {
    * List of ClickableMember
    * @see ClickableMember
    */
-  Collection getClickables();
+  Collection<Object> getClickables();
   /**
    * List of ClickableMember
    * @see ClickableMember
    */
-  void setClickables(Collection clickables);
+  void setClickables(Collection<Object> clickables);
 }
