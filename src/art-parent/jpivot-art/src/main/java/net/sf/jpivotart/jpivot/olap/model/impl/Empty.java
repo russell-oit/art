@@ -25,6 +25,7 @@ import net.sf.jpivotart.jpivot.olap.model.Hierarchy;
 import net.sf.jpivotart.jpivot.olap.model.Member;
 import net.sf.jpivotart.jpivot.olap.model.OlapException;
 import net.sf.jpivotart.jpivot.olap.model.OlapModel;
+import net.sf.jpivotart.jpivot.olap.model.Position;
 import net.sf.jpivotart.jpivot.olap.model.Result;
 import net.sf.jpivotart.jpivot.olap.model.Visitor;
 
@@ -112,8 +113,8 @@ public class Empty {
   }
 
   static class EmptyAxis implements Axis {
-    public List getPositions() {
-      return Collections.EMPTY_LIST;
+    public List<Position> getPositions() {
+      return Collections.emptyList();
     }
 
     public Hierarchy[] getHierarchies() {

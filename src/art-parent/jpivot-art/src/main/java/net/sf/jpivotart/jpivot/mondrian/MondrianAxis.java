@@ -18,6 +18,7 @@ import net.sf.mondrianart.mondrian.olap.AxisOrdinal.StandardAxisOrdinal;
 
 import net.sf.jpivotart.jpivot.olap.model.Axis;
 import net.sf.jpivotart.jpivot.olap.model.Hierarchy;
+import net.sf.jpivotart.jpivot.olap.model.Position;
 import net.sf.jpivotart.jpivot.olap.model.Visitor;
 
 /**
@@ -27,7 +28,7 @@ public class MondrianAxis implements Axis {
 
   private net.sf.mondrianart.mondrian.olap.Axis monAxis = null;
   private MondrianModel model = null;
-  private ArrayList<net.sf.jpivotart.jpivot.olap.model.Position> aPositions = null;
+  private ArrayList<Position> aPositions = null;
   private MondrianHierarchy[] hierarchies = null;
   private int ordinal; // -1 for slicer
 
@@ -93,7 +94,7 @@ public class MondrianAxis implements Axis {
   /**
    * @see net.sf.jpivotart.jpivot.olap.model.Axis#getPositions()
    */
-  public List<net.sf.jpivotart.jpivot.olap.model.Position> getPositions() {
+  public List<Position> getPositions() {
     return aPositions;
   }
 

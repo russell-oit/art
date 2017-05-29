@@ -24,7 +24,7 @@ public interface Axis extends Visitable, Decorator {
    * return the positions on this axis
    * @see Position
    */
-  List getPositions();
+  List<Position> getPositions();
   
   /**
    * returns the hierachies that are currently visible on this axis. 
