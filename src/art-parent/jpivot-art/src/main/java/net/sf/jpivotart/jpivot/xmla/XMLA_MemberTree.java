@@ -68,8 +68,8 @@ public class XMLA_MemberTree extends ExtensionSupport implements MemberTree {
       return null; // should not occur
 
     
-    final List visibleRootMembers = new ArrayList();
-    final List invisibleRootMembers = new ArrayList();
+    final List<Member> visibleRootMembers = new ArrayList<>();
+    final List<XMLA_Member> invisibleRootMembers = new ArrayList<>();
     
     Member[] rootMembers = new Member[0];
     try {
@@ -79,7 +79,7 @@ public class XMLA_MemberTree extends ExtensionSupport implements MemberTree {
     }
     // find the calculated members for this hierarchy
     //  show them together with root level members
-    ArrayList aCalcMem = new ArrayList();
+    ArrayList<XMLA_Member> aCalcMem = new ArrayList<>();
     ParsedQuery pq = ((XMLA_QueryAdapter) model.getQueryAdapter()).getParsedQuery();
     Formula[] formulas = pq.getFormulas();
 
@@ -150,12 +150,10 @@ public class XMLA_MemberTree extends ExtensionSupport implements MemberTree {
     for (int i = 0; i < k; i++) {
       members[i] = rootMembers[i];
     }
-    for (Iterator iter = aCalcMem.iterator(); iter.hasNext();) {
-      XMLA_Member calcMem = (XMLA_Member) iter.next();
+    for (XMLA_Member calcMem : aCalcMem) {
       members[k++] = calcMem;
     }        
-    for (Iterator iter = invisibleRootMembers.iterator(); iter.hasNext();) {
-        XMLA_Member invisibleMem = (XMLA_Member) iter.next();
+    for (XMLA_Member invisibleMem : invisibleRootMembers) {
         members[k++] = invisibleMem;
     }        
   
