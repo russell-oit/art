@@ -1,0 +1,106 @@
+/* ================================================================
+ * Cewolf : Chart enabling Web Objects Framework
+ * ================================================================
+ *
+ * Project Info:  http://cewolf.sourceforge.net
+ * Project Lead:  Guido Laures (guido@laures.de);
+ *
+ * (C) Copyright 2002, by Guido Laures, and contributers
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms
+ * of the GNU Lesser General Public License as published by the Free Software Foundation;
+ * either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with this
+ * library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+package net.sf.cewolfart.taglib.tags;
+
+import java.util.Map;
+
+import javax.servlet.jsp.JspException;
+
+import net.sf.cewolfart.DatasetProducer;
+import net.sf.cewolfart.taglib.DataAware;
+import net.sf.cewolfart.taglib.PlotContainer;
+import net.sf.cewolfart.taglib.PlotDefinition;
+import net.sf.cewolfart.taglib.TaglibConstants;
+
+/** 
+ * Tag &lt;sub-plot&gt; which defines a plot to overlay 
+ * @author Chris McCann
+ */
+public class PlotTag extends CewolfTag implements DataAware {
+
+	static final long serialVersionUID = 2559578308532086011L;
+
+    private PlotDefinition plotDefinition = new PlotDefinition();
+
+    public int doStartTag() throws JspException {
+        return EVAL_BODY_INCLUDE;
+    }
+    
+    public int doEndTag() throws JspException {
+        PlotContainer pc = (PlotContainer)findAncestorWithClass(this, PlotContainer.class);
+        if (pc == null) {
+            throw new JspException("&lt;plot&gt; must be nested in a PlotContainer tag like &lt;overlaid-chart&gt;");
+        }
+        pc.addPlot(plotDefinition);
+        return doAfterEndTag(EVAL_PAGE);
+    }
+
+    public void reset() {
+        plotDefinition = new PlotDefinition();
+    }
+
+    /**
+     * Setter for property type.
+     * @param type New value of property type.
+     */
+    public void setType(String type) {
+        plotDefinition.setType(type);
+    }
+
+    public void setDataProductionConfig(DatasetProducer dsp, Map<String,Object> params, boolean useCache) {
+        plotDefinition.setDataProductionConfig(dsp, params, useCache);
+    }
+    
+    /**
+     * Setter for property xAxisLabel. [tb]
+     * @param xAxisLabel New value of property xAxisLabel.
+     */
+    public void setXaxislabel(String xAxisLabel) {
+        plotDefinition.setXaxislabel(xAxisLabel);
+    }
+
+    /**
+     * Setter for property yAxisLabel. [tb]
+     * @param yAxisLabel New value of property xAxisLabel.
+     */
+    public void setYaxislabel(String yAxisLabel) {
+        plotDefinition.setYaxislabel(yAxisLabel);
+    }
+
+    /**
+     * Setter for property xAxisinteger. 
+     * @param xAxisInteger New value of property xAxisInteger.
+     */
+    public void setXaxisinteger (boolean xAxisInteger) {
+        plotDefinition.setXaxisinteger(xAxisInteger);
+    }
+
+    /**
+     * Setter for property yAxisInteger. 
+     * @param xAxisInteger New value of property xAxisInteger.
+     */
+    public void setYaxisinteger (boolean xAxisInteger) {
+        plotDefinition.setXaxisinteger(xAxisInteger);
+    }
+}

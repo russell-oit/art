@@ -1,0 +1,19 @@
+3.0.0
+* Incorporated as a module in the main art project - changed group id to net.sf.art
+
+1.1.0
+* Updated batik to 1.8
+
+1.0.2
+* Changed tooltip identifier from data-toggle='tooltip' to class="tooltip-chart"
+
+1.0.1
+* Added serialVersionUID for relevant classes
+
+1.0.0
+* Based on cewolf 1.2.4
+* Requires Java 7
+* Use SLF4J for logging
+* Enable use of bootstrap tooltips - if overliburl init-param is blank
+* Allow defining a custom color for a particular series only instead of having to define all from 0 to n
+* Use generics

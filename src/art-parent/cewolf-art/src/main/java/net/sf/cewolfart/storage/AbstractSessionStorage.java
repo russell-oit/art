@@ -1,0 +1,124 @@
+/* ================================================================
+ * Cewolf : Chart enabling Web Objects Framework
+ * ================================================================
+ *
+ * Project Info:  http://cewolf.sourceforge.net
+ * Project Lead:  Guido Laures (guido@laures.de);
+ *
+ * (C) Copyright 2002, by Guido Laures
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms
+ * of the GNU Lesser General Public License as published by the Free Software Foundation;
+ * either version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with this
+ * library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+package net.sf.cewolfart.storage;
+
+import java.io.Serializable;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
+
+import net.sf.cewolfart.CewolfException;
+import net.sf.cewolfart.ChartImage;
+import net.sf.cewolfart.Storage;
+import net.sf.cewolfart.taglib.util.KeyGenerator;
+
+/**
+ * @author glaures
+ */
+public abstract class AbstractSessionStorage implements Storage
+{
+	// to keep track of object getting added and removed from the storage
+	protected volatile static int stored=0, removed=0;
+	
+	private static final long serialVersionUID = 1L;
+
+  /**
+   * @see net.sf.cewolfart.Storage#storeChartImage(ChartImage, PageContext)
+   */
+	@Override
+  public String storeChartImage( ChartImage cid, PageContext pageContext ) throws CewolfException
+  {
+    if ( contains(cid, pageContext) )
+    {
+      return getKey(cid);
+    }
+    final HttpSession session = pageContext.getSession();
+    //String key = getKey(cid);
+    return storeChartImage(cid, session);
+  }
+
+  /**
+   * @see net.sf.cewolfart.Storage#getChartImage(String, javax.servlet.http.HttpServletRequest)
+   */
+  public ChartImage getChartImage( String id, HttpServletRequest request )
+  {
+    HttpSession session = request.getSession();
+    return (ChartImage) session.getAttribute(id);
+  }
+
+  public boolean contains( ChartImage cid, PageContext pageContext )
+  {
+    return pageContext.getSession().getAttribute(getKey(cid)) != null;
+  }
+
+  public final String getKey( ChartImage cid )
+  {
+    return String.valueOf(KeyGenerator.generateKey((Serializable) cid));
+  }
+
+  protected String storeChartImage( ChartImage cid, HttpSession session ) throws CewolfException
+  {
+    final String sessionKey = getKey(cid);
+    synchronized (session)
+    {
+      session.setAttribute(sessionKey, getCacheObject(cid));
+    }
+	synchronized (AbstractSessionStorage.class) {
+		stored++;
+		//System.out.println("stored="+stored+", removed="+removed);
+	}
+    return sessionKey;
+  }
+  
+	public String removeChartImage(String imgKey, HttpServletRequest request) throws CewolfException {
+		final HttpSession session = request.getSession();
+		if (session == null)
+		{
+			return imgKey;
+		}
+		return removeChartImage(imgKey, session);
+	}
+
+	protected String removeChartImage(String cid, HttpSession session) throws CewolfException {
+		synchronized (session) {
+			session.removeAttribute(cid);
+		}
+		synchronized (AbstractSessionStorage.class) {
+			removed++;
+			//System.out.println("stored="+stored+", removed="+removed);
+		}
+		return cid;
+	}
+
+  protected abstract Object getCacheObject( ChartImage cid ) throws CewolfException;
+
+  /**
+   * @see net.sf.cewolfart.Storage#init(ServletContext)
+   */
+  public void init( ServletContext servletContext ) throws CewolfException
+  {
+  }
+
+}

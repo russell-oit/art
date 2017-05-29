@@ -15,6 +15,7 @@
 	<modules>
 		<module>art-mail</module>
 		<module>art-dbcp</module>
+		<module>cewolf-art</module>
 		<module>saiku-service-art</module>
 		<module>wcf-art</module>
 		<module>mondrian-art</module>

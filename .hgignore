@@ -47,3 +47,9 @@ src/art-parent/wcf-art/.classpath
 src/art-parent/wcf-art/.project
 src/art-parent/wcf-art/.settings/
 src/art-parent/nbactions.xml
+src/art-parent/cewolf-art/.classpath
+src/art-parent/cewolf-art/.project
+src/art-parent/cewolf-art/.settings/
+src/art-parent/cewolf-art/nb-configuration.xml
+src/art-parent/cewolf-art/nbactions.xml
+src/art-parent/cewolf-art/target/

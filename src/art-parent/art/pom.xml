@@ -182,6 +182,11 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
+			<artifactId>cewolf-art</artifactId>
+			<version>3.0-beta12-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
 			<version>3.0-beta12-SNAPSHOT</version>
 			<exclusions>
@@ -341,11 +346,6 @@
 			<artifactId>spnego</artifactId>
 			<version>r9</version>
 			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.cewolf-art</groupId>
-			<artifactId>cewolf-art</artifactId>
-			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
