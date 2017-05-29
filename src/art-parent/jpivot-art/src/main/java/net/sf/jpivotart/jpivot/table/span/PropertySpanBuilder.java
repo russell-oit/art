@@ -217,7 +217,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
     }
 
     // for every column compute the visible MemberPropertyMetas
-    Set done = new HashSet();
+    Set<MemberPropertyMeta> done = new HashSet<>();
     for (int hi = 0; hi < HCOUNT; hi++) {
       // from all MemberPropertyMetas keep only those that match the scopes
       // of this column. Also remove all metas that denote inline properties.
@@ -349,17 +349,17 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
 
   public static class BookmarkState {
     boolean showProperties = false;
-    List visibleProperties = null;
+    List<MemberPropertyMeta> visibleProperties = null;
     public boolean isShowProperties() {
       return showProperties;
     }
-    public List getVisibleProperties() {
+    public List<MemberPropertyMeta> getVisibleProperties() {
       return visibleProperties;
     }
     public void setShowProperties(boolean b) {
       showProperties = b;
     }
-    public void setVisibleProperties(List list) {
+    public void setVisibleProperties(List<MemberPropertyMeta> list) {
       visibleProperties = list;
     }
   }

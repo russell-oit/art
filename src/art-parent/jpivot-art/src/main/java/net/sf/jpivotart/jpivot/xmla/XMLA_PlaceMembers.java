@@ -46,7 +46,7 @@ public class XMLA_PlaceMembers extends XMLA_PlaceHierarchies implements PlaceMem
    * find all members of an hierarchy
    * @see net.sf.jpivotart.jpivot.olap.navi.PlaceMembersOnAxes#findVisibleMembers(Hierarchy)
    */
-  public List findVisibleMembers(Hierarchy hier) {
+  public List<Member> findVisibleMembers(Hierarchy hier) {
 
     XMLA_Model model = (XMLA_Model) getModel();
     XMLA_QueryAdapter adapter = (XMLA_QueryAdapter) model.getQueryAdapter();
@@ -55,7 +55,7 @@ public class XMLA_PlaceMembers extends XMLA_PlaceHierarchies implements PlaceMem
     Quax quax = adapter.findQuax(hier.getDimension());
 
     if (quax == null)
-      return Collections.EMPTY_LIST; // should not occur
+      return Collections.emptyList(); // should not occur
 
     int iDim = quax.dimIdx(hier.getDimension());
 
