@@ -64,7 +64,7 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
   Resources resources;
   
   // extensions, map for scripting, list for ordered initializing
-  List extensionList = new ArrayList();
+  List<TableComponentExtension> extensionList = new ArrayList<>();
   Map<String, TableComponentExtension> extensionMap = new HashMap<>();
 
   // initialized from tag  
@@ -115,8 +115,8 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
     logger.info("initialize");
     super.initialize(context);
     resources = context.getResources(TableComponent.class);
-    for (Iterator it = extensionList.iterator(); it.hasNext();)
-       ((TableComponentExtension) it.next()).initialize(context, this);
+    for (TableComponentExtension extension : extensionList)
+       extension.initialize(context, this);
     columnAxisBuilder.initialize(context, this);
     rowAxisBuilder.initialize(context, this);
     cellBuilder.initialize(context, this);
@@ -134,21 +134,20 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
     cellBuilder.destroy(session);
     rowAxisBuilder.destroy(session);
     columnAxisBuilder.destroy(session);
-    for (Iterator it = extensionList.iterator(); it.hasNext();)
-       ((TableComponentExtension) it.next()).destroy(session);
+    for (TableComponentExtension extension : extensionList)
+       extension.destroy(session);
     super.destroy(session);
   }
 
   public Object retrieveBookmarkState(int levelOfDetail) {
     logger.info("retrieveBookmarkState");
-    Map map = (Map) super.retrieveBookmarkState(levelOfDetail);
+    Map<String, Object> map = (Map<String, Object>) super.retrieveBookmarkState(levelOfDetail);
     map.put("slicerBuilder", slicerBuilder.retrieveBookmarkState(levelOfDetail));
     map.put("cornerBuilder", cornerBuilder.retrieveBookmarkState(levelOfDetail));
     map.put("cellBuilder", cellBuilder.retrieveBookmarkState(levelOfDetail));
     map.put("rowAxisBuilder", rowAxisBuilder.retrieveBookmarkState(levelOfDetail));
     map.put("columnAxisBuilder", columnAxisBuilder.retrieveBookmarkState(levelOfDetail));
-    for (Iterator it = extensionList.iterator(); it.hasNext();) {
-      TableComponentExtension tce = (TableComponentExtension) it.next();
+    for (TableComponentExtension tce : extensionList) {
       map.put(tce.getId(), tce.retrieveBookmarkState(levelOfDetail));
     }
     return map;
@@ -165,8 +164,7 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
     cellBuilder.setBookmarkState(map.get("cellBuilder"));
     rowAxisBuilder.setBookmarkState(map.get("rowAxisBuilder"));
     columnAxisBuilder.setBookmarkState(map.get("columnAxisBuilder"));
-    for (Iterator it = extensionList.iterator(); it.hasNext();) {
-      TableComponentExtension tce = (TableComponentExtension) it.next();
+    for (TableComponentExtension tce : extensionList) {
       tce.setBookmarkState(map.get(tce.getId()));
     }
   }
@@ -194,8 +192,8 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
     cellBuilder.startBuild(context);
     cornerBuilder.startBuild(context);
     slicerBuilder.startBuild(context);
-    for (Iterator it = extensionList.iterator(); it.hasNext();)
-       ((TableComponentExtension) it.next()).startBuild(context);
+    for (TableComponentExtension tce : extensionList)
+       tce.startBuild(context);
     for (Iterator it = clickableIterator(); it.hasNext();)
       ((ClickableMember) it.next()).startRendering(context, this);
     logger.info("leave startBuild");
@@ -206,8 +204,8 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
    */
   private void stopBuild() {
     logger.info("enter stopBuild");
-    for (Iterator it = extensionList.iterator(); it.hasNext();)
-       ((TableComponentExtension) it.next()).stopBuild();
+    for (TableComponentExtension tce : extensionList)
+       tce.stopBuild();
     slicerBuilder.stopBuild();
     cornerBuilder.stopBuild();
     cellBuilder.stopBuild();
