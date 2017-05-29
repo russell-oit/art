@@ -44,7 +44,7 @@ public class TestMemberTree extends ExtensionSupport implements MemberTree {
    * @see net.sf.jpivotart.jpivot.olap.navi.MemberTree#getChildren(Member)
    */
   public Member[] getChildren(Member member) {
-    List list = ((TestMember)member).getChildMember();
+    List<TestMember> list = ((TestMember)member).getChildMember();
     return (Member[])list.toArray(new TestMember[list.size()]);
   }
 
