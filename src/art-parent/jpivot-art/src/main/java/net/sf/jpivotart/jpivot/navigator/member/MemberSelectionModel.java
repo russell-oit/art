@@ -54,7 +54,7 @@ public class MemberSelectionModel extends DefaultSelectionModel {
     this.orderedSelection = list;
   }
 
-  public List getOrderedSelection() {
+  public List<Object> getOrderedSelection() {
     return orderedSelection;
   }
 
