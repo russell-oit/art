@@ -25,7 +25,7 @@ import net.sf.jpivotart.jpivot.olap.navi.DrillExpandMember;
  */
 public class TestDrillExpandMember extends TestExtensionSupport implements DrillExpandMember {
 
-  HashSet expanded = new HashSet();
+  HashSet<Member> expanded = new HashSet<>();
 
   protected TestOlapModel model() {
     return (TestOlapModel) super.getModel();
