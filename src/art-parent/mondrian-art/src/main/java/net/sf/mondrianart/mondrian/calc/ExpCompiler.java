@@ -343,8 +343,7 @@ public interface ExpCompiler {
             // Strong typed above so don't need to check here
             Evaluator evaluator = (Evaluator) parameterValues[0];
             Validator validator = (Validator) parameterValues[1];
-            List<ResultStyle> resultStyles =
-                (List<ResultStyle>) parameterValues[2];
+            List<ResultStyle> resultStyles = (List<ResultStyle>) parameterValues[2];
 
             // Here there is bleed-through from the "calc.impl" implementation
             // directory into the "calc" interface definition directory.

@@ -144,8 +144,8 @@ public class Util extends XOMUtil {
             className = "net.sf.mondrianart.mondrian.util.UtilCompatibleJdk16";
         }
         try {
-            Class<UtilCompatible> clazz =
-                (Class<UtilCompatible>) Class.forName(className);
+			@SuppressWarnings("unchecked")
+            Class<UtilCompatible> clazz = (Class<UtilCompatible>) Class.forName(className);
             compatible = clazz.newInstance();
         } catch (ClassNotFoundException e) {
             throw Util.newInternal(e, "Could not load '" + className + "'");

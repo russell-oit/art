@@ -3087,7 +3087,7 @@ public class FunUtil extends Util {
     }
 
     static class SetWrapper {
-        List v = new ArrayList();
+        List<Object> v = new ArrayList<>();
         public int errorCount = 0, nullCount = 0;
 
         //private double avg = Double.NaN;

@@ -672,8 +672,8 @@ public class RolapSchemaReader
         }
 
         // Scan through mondrian and system properties.
-        List<Property> propertyList =
-            MondrianProperties.instance().getPropertyList();
+		@SuppressWarnings("unchecked")
+        List<Property> propertyList = MondrianProperties.instance().getPropertyList();
         for (Property property : propertyList) {
             if (property.getPath().equals(name)) {
                 return new SystemPropertyParameter(name, false);
