@@ -492,7 +492,7 @@ public class MemberNavigator extends TreeComponent implements ModelChangeListene
     return findModel(getModel(), clazz);
   }
 
-  private TreeModel findModel(TreeModel tm, Class clazz) {
+  private TreeModel findModel(TreeModel tm, Class<?> clazz) {
     while (true) {
       if (tm == null)
         return null;
