@@ -33,7 +33,7 @@ public class PropertyPrefixParamProvider extends AbstractParamProvider {
     this.propertyPrefix = propertyPrefix;
   }
 
-  protected void addMemberParams(List list, SqlAccess sa, Member member) {
+  protected void addMemberParams(List<SessionParam> list, SqlAccess sa, Member member) {
     int prefixLength = propertyPrefix.length();
     Property[] p = member.getProperties();
     for (int i = 0; i < p.length; i++) {
