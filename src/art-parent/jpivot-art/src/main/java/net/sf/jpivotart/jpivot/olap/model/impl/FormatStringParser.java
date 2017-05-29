@@ -64,7 +64,7 @@ public class FormatStringParser {
   public Result parse(Cell cell, String formattedValue) {
     if (formattedValue == null) {
       // SAP
-      return new Result("", Collections.EMPTY_LIST);
+      return new Result("", Collections.<Property>emptyList());
     }
     
     List<Property> properties = Collections.emptyList();
@@ -124,7 +124,7 @@ public class FormatStringParser {
         // not there, create new
         try {
           String className = resources.getString("cellfmt." + propValue);
-          Class clazz = Class.forName(className);
+          Class<?> clazz = Class.forName(className);
           Constructor ctor = clazz.getConstructor(new Class[0]);
           cf = (CellFormatter) ctor.newInstance(new Object[0]);
         } catch (Exception e) {

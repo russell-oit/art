@@ -141,6 +141,7 @@ public class TableComponent extends ComponentSupport implements ModelChangeListe
 
   public Object retrieveBookmarkState(int levelOfDetail) {
     logger.info("retrieveBookmarkState");
+	@SuppressWarnings("unchecked")
     Map<String, Object> map = (Map<String, Object>) super.retrieveBookmarkState(levelOfDetail);
     map.put("slicerBuilder", slicerBuilder.retrieveBookmarkState(levelOfDetail));
     map.put("cornerBuilder", cornerBuilder.retrieveBookmarkState(levelOfDetail));
