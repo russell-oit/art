@@ -63,6 +63,8 @@ import org.w3c.dom.Element;
 import net.sf.jpivotart.jpivot.core.ModelChangeEvent;
 import net.sf.jpivotart.jpivot.core.ModelChangeListener;
 import net.sf.jpivotart.jpivot.olap.model.Cell;
+import net.sf.jpivotart.jpivot.olap.model.Hierarchy;
+import net.sf.jpivotart.jpivot.olap.model.Level;
 import net.sf.jpivotart.jpivot.olap.model.Member;
 import net.sf.jpivotart.jpivot.olap.model.OlapModel;
 import net.sf.jpivotart.jpivot.olap.model.Position;
@@ -808,8 +810,8 @@ public class ChartComponent extends ComponentSupport implements ModelChangeListe
 	 */
         private String buildName( MemberTree myTree, Member [] members){
             String retValue = new String();
-            HashMap levelMap = new HashMap();
-            HashMap hierarchyMap = new HashMap();
+            HashMap<String, Level> levelMap = new HashMap<>();
+            HashMap<String, Hierarchy> hierarchyMap = new HashMap<>();
             for (int j=members.length-1;j>=0;j--){
                 Member member = members[j];
                 while (member!=null){
