@@ -311,7 +311,7 @@ public class XMLA_QuaxUti implements QuaxUti {
    * check level and add a member's uncles to list
    * @param m
    */
-  public void addMemberUncles(List list, Member m, int[] maxLevel) {
+  public void addMemberUncles(List<Object> list, Member m, int[] maxLevel) {
     XMLA_Member xm = (XMLA_Member) m;
 
     int parentLevel = ((XMLA_Level) xm.getLevel()).getDepth() - 1;
@@ -407,7 +407,7 @@ public class XMLA_QuaxUti implements QuaxUti {
    * check level and add a member to list
    * @param m
    */
-  public void addMemberChildren(List list, Member m, int[] maxLevel) {
+  public void addMemberChildren(List<Object> list, Member m, int[] maxLevel) {
     XMLA_Member xm = (XMLA_Member) m;
     int childLevel = ((XMLA_Level) xm.getLevel()).getDepth() + 1;
     if (childLevel < maxLevel[0])
@@ -445,7 +445,7 @@ public class XMLA_QuaxUti implements QuaxUti {
    * check level and add a members descendatns to list
    * @param m
    */
-  public void addMemberDescendants(List list, Member m, Level lev, int[] maxLevel) {
+  public void addMemberDescendants(List<Object> list, Member m, Level lev, int[] maxLevel) {
     XMLA_Member xm = (XMLA_Member) m;
     int parentLevel = ((XMLA_Level) xm.getLevel()).getDepth() - 1;
 
@@ -484,7 +484,7 @@ public class XMLA_QuaxUti implements QuaxUti {
   /**
    * check level and add a levels members to list
    */
-  public void addLevelMembers(List list, Level lev, int[] maxLevel) {
+  public void addLevelMembers(List<Object> list, Level lev, int[] maxLevel) {
 
     int level = ((XMLA_Level) lev).getDepth();
     if (level < maxLevel[0])
@@ -796,7 +796,7 @@ public class XMLA_QuaxUti implements QuaxUti {
    * @return null for empty lis, single member or set function otherwise
    * @see net.sf.jpivotart.jpivot.olap.query.QuaxUti#createMemberSet
    */
-  public Object createMemberSet(List mList) {
+  public Object createMemberSet(List<Object> mList) {
     if (mList.size() == 0)
       return null;
     else if (mList.size() == 1)

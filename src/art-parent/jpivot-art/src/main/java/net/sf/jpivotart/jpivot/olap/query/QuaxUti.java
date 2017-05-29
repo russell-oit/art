@@ -164,7 +164,7 @@ public interface QuaxUti {
     * @param mList list of members
     * @return null for empty lis, single member or set function otherwise
     */
-  Object createMemberSet(List mList);
+  Object createMemberSet(List<Object> mList);
 
 
   /**
@@ -231,11 +231,11 @@ public interface QuaxUti {
    */
   Object[] getLevelMembers(Level level);
 
-  void addMemberUncles(List list, Member m, int[] maxLevel);
-  void addMemberSiblings(List list, Member m, int[] maxLevel);
-  void addMemberChildren(List list, Member m, int[] maxLevel);
-  void addMemberDescendants(List list, Member m, Level lev, int[] maxLevel);
-  void addLevelMembers(List list, Level lev, int[] maxLevel);
+  void addMemberUncles(List<Object> list, Member m, int[] maxLevel);
+  void addMemberSiblings(List<Object> list, Member m, int[] maxLevel);
+  void addMemberChildren(List<Object> list, Member m, int[] maxLevel);
+  void addMemberDescendants(List<Object> list, Member m, Level lev, int[] maxLevel);
+  void addLevelMembers(List<Object> list, Level lev, int[] maxLevel);
   Level LevelForObj(Object oLevel);
   Level getParentLevel(Level lev);
 

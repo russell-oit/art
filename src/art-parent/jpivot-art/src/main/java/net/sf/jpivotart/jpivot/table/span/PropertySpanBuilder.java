@@ -196,6 +196,7 @@ public class PropertySpanBuilder implements PropertyConfig, ModelChangeListener,
    * Computes the visible MemberPropertyMetas for
    * every column.
    */
+  @SuppressWarnings("unchecked")
   void initializePropertyColumns() {
     propertyColumns = new List[HCOUNT];
     for (int i = 0; i < HCOUNT; i++)

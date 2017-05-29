@@ -347,7 +347,7 @@ public class MondrianQuaxUti implements QuaxUti {
     } else if (isCallTo(f, "Members")) {
       net.sf.mondrianart.mondrian.olap.Level levExp = getLevelArg(f, 0);
       List members = scr.getLevelMembers(levExp, false);
-      List<net.sf.mondrianart.mondrian.olap.Member> remainder = new ArrayList<>();
+      List<Object> remainder = new ArrayList<>();
       for (int i = 0; i < members.size(); i++) {
         net.sf.mondrianart.mondrian.olap.Member currMember = (net.sf.mondrianart.mondrian.olap.Member)members.get(i);
         if (!currMember.isChildOrEqualTo(m))
@@ -355,7 +355,7 @@ public class MondrianQuaxUti implements QuaxUti {
       }
       return createMemberSet(remainder);
     } else if (isCallTo(f, "{}")) {
-      List<net.sf.mondrianart.mondrian.olap.Member> remainder = new ArrayList<>();
+      List<Object> remainder = new ArrayList<>();
       for (int i = 0; i < f.getArgs().length; i++) {
         net.sf.mondrianart.mondrian.olap.Member mExp = getMemberArg(f, i);
         if (mExp.isCalculatedInQuery())
@@ -396,7 +396,7 @@ public class MondrianQuaxUti implements QuaxUti {
    * @return null for empty list, single member or set function otherwise
    * @see net.sf.jpivotart.jpivot.olap.query.QuaxUti#createMemberSet(java.util.List)
    */
-  public Object createMemberSet(List mList) {
+  public Object createMemberSet(List<Object> mList) {
     if (mList.size() == 0)
       return null;
     else if (mList.size() == 1)
@@ -526,7 +526,7 @@ public class MondrianQuaxUti implements QuaxUti {
   /**
    * check level and add a members descendatns to list
    */
-  public void addMemberDescendants(List list, Member member, Level level, int[] maxLevel) {
+  public void addMemberDescendants(List<Object> list, Member member, Level level, int[] maxLevel) {
     net.sf.mondrianart.mondrian.olap.Member m = ((MondrianMember) member).getMonMember();
     net.sf.mondrianart.mondrian.olap.Level lev = ((MondrianLevel) level).getMonLevel();
     int parentLevel = lev.getDepth() + 1;
@@ -666,7 +666,7 @@ public class MondrianQuaxUti implements QuaxUti {
   /**
    * check level and add a levels members to list
    */
-  public void addLevelMembers(List list, Level level, int[] maxLevel) {
+  public void addLevelMembers(List<Object> list, Level level, int[] maxLevel) {
     net.sf.mondrianart.mondrian.olap.Level lev = ((MondrianLevel) level).getMonLevel();
     int iLevel = lev.getDepth();
     if (iLevel < maxLevel[0])
@@ -838,7 +838,7 @@ public class MondrianQuaxUti implements QuaxUti {
   /**
    * check level and add a member's parents children to list
    */
-  public void addMemberSiblings(List list, Member member, int[] maxLevel) {
+  public void addMemberSiblings(List<Object> list, Member member, int[] maxLevel) {
     net.sf.mondrianart.mondrian.olap.Member m = ((MondrianMember) member).getMonMember();
     int level = m.getLevel().getDepth();
     if (level < maxLevel[0])
@@ -873,7 +873,7 @@ public class MondrianQuaxUti implements QuaxUti {
   /**
    * check level and add a member to list
    */
-  public void addMemberChildren(List list, Member member, int[] maxLevel) {
+  public void addMemberChildren(List<Object> list, Member member, int[] maxLevel) {
     net.sf.mondrianart.mondrian.olap.Member m = ((MondrianMember) member).getMonMember();
     int childLevel = m.getLevel().getDepth() + 1;
     if (childLevel < maxLevel[0])
@@ -907,7 +907,7 @@ public class MondrianQuaxUti implements QuaxUti {
   /**
    * check level and add a member's uncles to list
    */
-  public void addMemberUncles(List list, Member member, int[] maxLevel) {
+  public void addMemberUncles(List<Object> list, Member member, int[] maxLevel) {
     net.sf.mondrianart.mondrian.olap.Member m = ((MondrianMember) member).getMonMember();
     int parentLevel = m.getLevel().getDepth() - 1;
     if (parentLevel < maxLevel[0])
