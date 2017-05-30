@@ -28,6 +28,7 @@ import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.saiku.SaikuReport;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.ArtUtils;
@@ -954,6 +955,33 @@ public class ReportService {
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
+	}
+
+	/**
+	 * Returns saiku reports that a given user can access
+	 *
+	 * @param userId the id of the user
+	 * @return saiku reports that a given user can access
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<SaikuReport> getAvailableSaikuReports(int userId) throws SQLException {
+		logger.debug("Entering getAvailableSaikuReports: userId={}", userId);
+
+		List<SaikuReport> saikuReports = new ArrayList<>();
+		List<Report> availableReports = getAvailableReports(userId);
+		for (Report report : availableReports) {
+			if (report.getReportType() == ReportType.SaikuMondrian) {
+				SaikuReport saikuReport = new SaikuReport();
+				saikuReport.setReportId(report.getReportId());
+				saikuReport.setName(report.getName());
+				saikuReport.setShortDescription(report.getShortDescription());
+				saikuReport.setDescription(report.getDescription());
+				saikuReports.add(saikuReport);
+			}
+		}
+
+		return saikuReports;
 	}
 
 	/**

@@ -749,20 +749,4 @@ public class Report implements Serializable {
 		return reportIds;
 	}
 	
-	public String getPath(){
-		return "/" + name;
-	}
-	
-	public String getId(){
-		return "#" + getPath();
-	}
-	
-	public String getType(){
-		return "FILE";
-	}
-	
-	public String getFileType(){
-		return "saiku";
-	}
-
 }

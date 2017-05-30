@@ -62,7 +62,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 	private MessageSource messageSource;
 
 	private LocaleResolver localeResolver;
-	
+
 	private ApplicationContext applicationContext;
 
 	public void setApplicationContext(ApplicationContext applicationContext) {
@@ -152,7 +152,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				}
 			}
 		}
-		
+
 		//autowiring in this class has problems.. 
 		messageSource = (MessageSource) applicationContext.getBean("messageSource");
 		localeResolver = (LocaleResolver) applicationContext.getBean("localeResolver");
@@ -196,8 +196,12 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		if (StringUtils.startsWith(pathMinusContext, "/saiku2")
 				|| canAccessPage(page, user, session, pathMinusContext)) {
 			if (!Config.isArtDatabaseConfigured()) {
-				//if art database not configured, only allow access to artDatabase
-				if (!StringUtils.equals(page, "artDatabase")) {
+				//if art database not configured, only allow access to artDatabase and language
+				if (StringUtils.equals(page, "artDatabase")
+						|| StringUtils.equals(page, "language")
+						|| StringUtils.equals(page, "success")) {
+					return true;
+				} else {
 					message = "page.message.artDatabaseNotConfigured";
 					if (StringUtils.startsWith(pathMinusContext, "/saiku2")) {
 						response.setStatus(401); //HttpServletResponse.SC_UNAUTHORIZED

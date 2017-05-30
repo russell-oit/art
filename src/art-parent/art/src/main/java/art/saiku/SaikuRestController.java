@@ -27,7 +27,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.saiku.olap.dto.SaikuCatalog;
 import org.saiku.olap.dto.SaikuConnection;
@@ -96,7 +98,7 @@ public class SaikuRestController {
 				File[] subfiles = subdir.listFiles();
 
 				/**
-				 * TODO use a metadata.js file for alternative details.
+				 * use a metadata.js file for alternative details.
 				 */
 				if (subfiles != null) {
 					for (File s : subfiles) {
@@ -110,13 +112,17 @@ public class SaikuRestController {
 		}
 		return l;
 	}
-	
+
 	@GetMapping("/info/ui-settings")
-	public Map<String, Object> getUiSettings(){
+	public Map<String, Object> getUiSettings(Locale locale, HttpServletRequest request) {
 		//optionally override properties of the Settings object in /saiku/js/saiku/Settings.js
-		Map<String, Object> uiSettings=new HashMap<>();
+		Map<String, Object> uiSettings = new HashMap<>();
 		uiSettings.put("VERSION", "saiku-art");
+		//locale can only be changed either manually in Settings.js or adding lang parameter to saiku index.html call
+		//uiSettings.put("I18N_LOCALE", locale.toString());
+		String restUrlRoot = request.getContextPath() + "/saiku2";
+		uiSettings.put("TOMCAT_WEBAPP", restUrlRoot);
 		return uiSettings;
 	}
-	
+
 }

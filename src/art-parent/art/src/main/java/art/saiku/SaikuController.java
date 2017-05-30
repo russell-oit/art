@@ -27,13 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 
  * @author Timothy Anyona
  */
-@RestController
-@RequestMapping("/saiku2")
 public class SaikuController {
 	
-	@PostMapping
-	public void login(){
-		
-	}
 	
 }

@@ -37,6 +37,13 @@ Header that appears at the top of all pages, except the login and logs pages
 							</a>
 						</li>
 						<li>
+							<%-- https://stackoverflow.com/questions/7368863/how-to-get-visitors-locale-in-jsp-using-spring-3s-sessionlocaleresolver --%>
+							<a href="${pageContext.request.contextPath}/saiku/?lang=${pageContext.response.locale}">
+								<i class="fa fa-cubes"></i>
+								<spring:message code="header.link.analytics"/>
+							</a>
+						</li>
+						<li>
 							<a href="${pageContext.request.contextPath}/jobs">
 								<i class="fa fa-clock-o"></i> 
 								<spring:message code="header.link.jobs"/>

@@ -91,19 +91,6 @@ public class ReportController {
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
 		logger.debug("Entering showReports");
 
-		if (!Config.isArtDatabaseConfigured()) {
-			User user = new User();
-
-			user.setUserId(-1);
-			user.setUsername("initial setup");
-			user.setAccessLevel(AccessLevel.RepositoryUser);
-
-			session.setAttribute("sessionUser", user);
-			session.setAttribute("initialSetup", "true");
-
-			return "redirect:/artDatabase";
-		}
-
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			model.addAttribute("reports", reportService.getAvailableReports(sessionUser.getUserId()));

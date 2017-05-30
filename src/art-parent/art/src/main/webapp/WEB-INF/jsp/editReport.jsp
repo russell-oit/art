@@ -260,6 +260,18 @@ Edit report page
 					options.val(jsonEditor.getSession().getValue());
 				});
 
+				var saikuEditor = ace.edit("saikuEditor");
+				saikuEditor.getSession().setMode("ace/mode/json");
+				saikuEditor.setHighlightActiveLine(false);
+				saikuEditor.setShowPrintMargin(false);
+				saikuEditor.setOption("showLineNumbers", false);
+				document.getElementById('saikuEditor').style.fontSize = '14px';
+
+				saikuEditor.getSession().setValue(reportSource.val());
+				saikuEditor.getSession().on('change', function () {
+					options.val(saikuEditor.getSession().getValue());
+				});
+
 			});
 		</script>
 
@@ -323,10 +335,17 @@ Edit report page
 							//dashboard
 							$("#sqlEditor").hide();
 							$("#xmlEditor").show();
+							$("#saikuEditor").hide();
+							break;
+						case 149: //saiku mondrian
+							$("#sqlEditor").hide();
+							$("#xmlEditor").hide();
+							$("#saikuEditor").show();
 							break;
 						default:
 							$("#sqlEditor").show();
 							$("#xmlEditor").hide();
+							$("#saikuEditor").hide();
 					}
 				}
 
@@ -365,6 +384,9 @@ Edit report page
 						//jpivot
 						reportSourceType = "(MDX)";
 						break;
+					case 149: //saiku mondrian
+						reportSourceType = "(JSON)";
+						break;
 					default:
 						reportSourceType = "(SQL)";
 				}
@@ -380,9 +402,8 @@ Edit report page
 					case 117: //jxls template
 					case 120: //static lov
 					case 121: //dynamic job recipients
-					case 112: //mondrian
-					case 113: //mondrian xmla
-					case 114: //microsoft xmla
+					case 113: //jpivot mondrian xmla
+					case 114: //jpivot microsoft xmla
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
 					case 136: //dygraphs csv local
@@ -390,6 +411,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 145: //datamaps file
+					case 149: //saiku mondrian
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -421,7 +443,7 @@ Edit report page
 					case 116: //jasper art
 					case 117: //jxls template
 					case 118: //jxls art
-					case 112: //mondrian
+					case 112: //jpivot mondrian
 					case 122: //freemarker
 					case 131: //thymeleaf
 					case 123: //xdocreport freemarker docx
@@ -446,6 +468,7 @@ Edit report page
 					case 145: //datamaps file
 					case 146: //leaflet
 					case 147: //openlayers
+					case 149: //saiku mondrian
 						$("#templateDiv").show();
 						break;
 					default:
@@ -454,11 +477,11 @@ Edit report page
 
 				//show/hide xmla fields
 				switch (reportTypeId) {
-					case 113: //mondrian xmla
+					case 113: //jpivot mondrian xmla
 						$("#xmlaFields").show();
 						$("#xmlaDatasourceDiv").show();
 						break;
-					case 114: //sql server xmla
+					case 114: //jpivot sql server xmla
 						$("#xmlaFields").show();
 						//datasource name only configurable for mondrian xmla.
 						//for sql server xmla, it's hardcoded as provider=msolap
@@ -473,9 +496,9 @@ Edit report page
 					case 110: //dashboard
 					case 129: //gridstack dashboard
 					case 111: //text
-					case 112: //mondrian
-					case 113: //mondrian xmla
-					case 114: //sql server xmla
+					case 112: //jpivot mondrian
+					case 113: //jpivot mondrian xmla
+					case 114: //jpivot sql server xmla
 					case 115: //jasper template
 					case 117: //jxls template
 					case 120: //static lov
@@ -486,6 +509,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 145: //datamaps file
+					case 149: //saiku mondrian
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -530,9 +554,9 @@ Edit report page
 				switch (reportTypeId) {
 					case 110: //dashboard
 					case 129: //gridstack dashboard
-					case 112: //mondrian
-					case 113: //mondrian xmla
-					case 114: //sql server xmla
+					case 112: //jpivot mondrian
+					case 113: //jpivot mondrian xmla
+					case 114: //jpivot sql server xmla
 					case 100: //update
 					case 111: //text
 					case 103: //tabular html
@@ -558,6 +582,7 @@ Edit report page
 					case 145: //datamaps file
 					case 146: //leaflet
 					case 147: //openlayers
+					case 149: //saiku mondrian
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -599,9 +624,9 @@ Edit report page
 					case 110: //dashboard
 					case 129: //gridstack dashboard
 					case 111: //text
-					case 112: //mondrian
-					case 113: //mondrian xmla
-					case 114: //sql server xmla
+					case 112: //jpivot mondrian
+					case 113: //jpivot mondrian xmla
+					case 114: //jpivot sql server xmla
 					case 115: //jasper template
 					case 117: //jxls template
 					case 120: //static lov
@@ -612,6 +637,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 145: //datamaps file
+					case 149: //saiku mondrian
 						$("#fetchSizeDiv").hide();
 						break;
 					default:
@@ -620,6 +646,7 @@ Edit report page
 
 				//show/hide page orientation
 				if (reportTypeId <= 1 || reportTypeId === 101) {
+					//charts, tabular, group, crosstab
 					$("#pageOrientationDiv").show();
 				} else {
 					$("#pageOrientationDiv").hide();
@@ -1254,6 +1281,7 @@ Edit report page
 						<form:hidden path="reportSource"/>
 						<div id="sqlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 						<div id="xmlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
+						<div id="saikuEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 				<div id="reportSourceHtmlDiv" class="form-group">

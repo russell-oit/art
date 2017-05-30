@@ -74,6 +74,8 @@ public class LoginController {
 		logger.debug("Entering showLogin");
 
 		if (!Config.isArtDatabaseConfigured()) {
+			//we have most likely been redirected here from AuthorizationInterceptor
+			//or user explicitly tried using /login before art database configured
 			User user = new User();
 
 			user.setUserId(-1);

@@ -107,6 +107,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		viewResolver.setViewClass(JstlView.class);
 		viewResolver.setPrefix("/WEB-INF/jsp/");
 		viewResolver.setSuffix(".jsp");
+		//http://forum.spring.io/forum/spring-projects/web/58269-how-to-access-the-current-locale-in-jstl-view
+		//http://forum.spring.io/forum/spring-projects/web/web-flow/73404-gettign-user-locale-in-jsp-page
+		viewResolver.setRequestContextAttribute("rc");
 		return viewResolver;
 	}
 
@@ -143,7 +146,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		//https://opensourceforgeeks.blogspot.co.ke/2016/01/difference-between-and-in-spring-mvc.html
 		registry.addInterceptor(authorizationInterceptor)
 				.addPathPatterns("/**")
-				.excludePathPatterns("/login", "/logout", "/accessDenied",
+				.excludePathPatterns("/login", "/logout", "/accessDenied", 
 						"/error", "/error-404", "/error-405", "/error-400", "/error-500");
 	}
 

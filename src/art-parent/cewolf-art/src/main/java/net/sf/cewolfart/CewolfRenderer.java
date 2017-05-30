@@ -103,7 +103,7 @@ public class CewolfRenderer
 			MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 			ObjectName name = new ObjectName("Cewolf:name=Renderer,path="+path);
 			server.registerMBean(this, name);
-			log("registered MBean: "+name);
+//			log("registered MBean: "+name);
 		} catch (Exception ex) {
 			log("Bad JMX object name: "+ex.getMessage());
 		}
@@ -112,7 +112,7 @@ public class CewolfRenderer
 	@Override
     public void destroy() {
 		try {
-			log("unregistering MBean");
+//			log("unregistering MBean");
 			MBeanServer server = ManagementFactory.getPlatformMBeanServer();
             server.unregisterMBean(new ObjectName("Cewolf:name=Renderer,path="+path));
         } catch (Exception ex) {

@@ -81,8 +81,7 @@ public class JPivotController {
 	private RuleValueService ruleValueService;
 
 	@RequestMapping(value = "/showJPivot", method = {RequestMethod.GET, RequestMethod.POST})
-	public String showJPivot(HttpServletRequest request, Model model, HttpSession session,
-			Locale locale) {
+	public String showJPivot(HttpServletRequest request, Model model, HttpSession session) {
 
 		logger.debug("Entering showJPivot");
 
@@ -152,8 +151,6 @@ public class JPivotController {
 					return errorPage;
 				}
 			}
-
-			model.addAttribute("localeString", locale.toString());
 
 			prepareVariables(request, session, report, model, sessionUser);
 

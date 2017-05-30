@@ -261,12 +261,15 @@ var OpenQuery = Backbone.View.extend({
         var $properties = $('<ul id="query_info" />').appendTo($results);
 
         // Iterate through properties and show a key=>value set in the information pane
-        for (var property in query) {
-            if (query.hasOwnProperty(property) && property != "name") {
-                $properties.append($('<li />').html("<strong>" +
-                        property + "</strong> : " + query[property]));
-            }
-        }
+//        for (var property in query) {
+//            if (query.hasOwnProperty(property) && property != "name") {
+//                $properties.append($('<li />').html("<strong>" +
+//                        property + "</strong> : " + query[property]));
+//            }
+//        }
+		
+		 $properties.append($('<li />').html("<strong><span class='i18n'>ID<span></strong>: "
+                         + query.reportId));
 
         this.selected_query = new SavedQuery({ file: path, name: name, type: query.type });
 

@@ -18,8 +18,13 @@
 package art.saiku;
 
 import art.report.Report;
+import art.report.ReportService;
+import art.user.User;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,17 +37,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/saiku2/rest/saiku/api/repository")
 public class RepositoryController {
-	
+
+	@Autowired
+	private ReportService reportService;
+
 	@GetMapping()
-	public List<Report> getRepository(){
-		List<Report> reports= new ArrayList<>();
-		
-		Report report=new Report();
-		report.setName("test");
-		
-		reports.add(report);
-		
+	public List<SaikuReport> getRepository(HttpSession session) throws SQLException {
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		List<SaikuReport> reports = reportService.getAvailableSaikuReports(sessionUser.getUserId());
 		return reports;
 	}
-	
+
 }

@@ -748,6 +748,7 @@ public class ReportRunner {
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
 			case DatamapsFile:
+			case SaikuMondrian:
 				return;
 			default:
 			//do nothing
