@@ -323,6 +323,7 @@ Edit report page
 						case 139: //datatables csv local
 						case 140: //datatables csv server
 						case 145: //datamaps file
+						case 150: //saiku connection
 							$("#reportSourceDiv").hide();
 							break;
 						default:
@@ -360,6 +361,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 145: //datamaps file
+					case 150: //saiku connection
 						$("#reportSourceLabel").hide();
 						break;
 					default:
@@ -469,6 +471,7 @@ Edit report page
 					case 146: //leaflet
 					case 147: //openlayers
 					case 149: //saiku mondrian
+					case 150: //saiku connection
 						$("#templateDiv").show();
 						break;
 					default:
@@ -510,6 +513,7 @@ Edit report page
 					case 140: //datatables csv server
 					case 145: //datamaps file
 					case 149: //saiku mondrian
+					case 150: //saiku connection
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -583,6 +587,7 @@ Edit report page
 					case 146: //leaflet
 					case 147: //openlayers
 					case 149: //saiku mondrian
+					case 150: //saiku connection
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -638,6 +643,7 @@ Edit report page
 					case 140: //datatables csv server
 					case 145: //datamaps file
 					case 149: //saiku mondrian
+					case 150: //saiku connection
 						$("#fetchSizeDiv").hide();
 						break;
 					default:

@@ -348,6 +348,27 @@ public class ReportService {
 		Report report = dbService.query(sql, h, id);
 
 		setReportSource(report);
+
+		return report;
+	}
+
+	/**
+	 * Returns a report
+	 *
+	 * @param reportName the report name
+	 * @return report if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("reports")
+	public Report getReport(String reportName) throws SQLException {
+		logger.debug("Entering getReport: reportName={}", reportName);
+
+		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
+		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
+		Report report = dbService.query(sql, h, reportName);
+
+		setReportSource(report);
+
 		return report;
 	}
 
@@ -982,6 +1003,30 @@ public class ReportService {
 		}
 
 		return saikuReports;
+	}
+
+	/**
+	 * Returns saiku connection reports that a given user can access
+	 *
+	 * @param userId the id of the user
+	 * @return saiku connection reports that a given user can access
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAvailableSaikuConnectionReports(int userId) throws SQLException {
+		logger.debug("Entering getAvailableSaikuConnectionReports: userId={}", userId);
+
+		List<Report> saikuConnectionReports = new ArrayList<>();
+
+		List<Report> availableReports = getAvailableReports(userId);
+
+		for (Report report : availableReports) {
+			if (report.getReportType() == ReportType.SaikuConnection) {
+				saikuConnectionReports.add(report);
+			}
+		}
+
+		return saikuConnectionReports;
 	}
 
 	/**

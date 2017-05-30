@@ -28,6 +28,7 @@ import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.jobrunners.CleanJob;
 import art.saiku.SaikuConnectionManager;
+import art.saiku.SaikuConnectionProvider;
 import art.settings.CustomSettings;
 import art.settings.Settings;
 import art.utils.ArtUtils;
@@ -49,12 +50,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -69,8 +71,8 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
-import org.saiku.olap.discover.OlapMetaExplorer;
 import org.saiku.olap.util.exception.SaikuOlapException;
+import org.saiku.service.olap.OlapDiscoverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
@@ -106,8 +108,7 @@ public class Config extends HttpServlet {
 	private static final Map<String, String> languages = new TreeMap<>();
 	private static Configuration freemarkerConfig;
 	private static TemplateEngine thymeleafReportTemplateEngine;
-	private static SaikuConnectionManager saikuConnectionManager;
-	private static OlapMetaExplorer metaExplorer;
+	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -126,18 +127,12 @@ public class Config extends HttpServlet {
 
 		//shutdown quartz scheduler
 		SchedulerUtils.shutdownScheduler();
-		
-		if(saikuConnectionManager!=null){
-			try {
-				saikuConnectionManager.destroy();
-			} catch (SaikuOlapException ex) {
-				logger.error("Error", ex);
-			}
-		}
+
+		closeSaikuConnections();
 
 		//close database connections
 		DbConnections.closeAllConnections();
-		
+
 		//deregister jdbc drivers
 		deregisterJdbcDrivers();
 
@@ -411,14 +406,7 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(artVersion, upgradeFilePath, templatesPath);
-
-			if (saikuConnectionManager == null) {
-				saikuConnectionManager = new SaikuConnectionManager();
-			}
-			saikuConnectionManager.init();
-			metaExplorer = null;
-			metaExplorer = new OlapMetaExplorer(saikuConnectionManager);
-		} catch (SQLException | SaikuOlapException ex) {
+		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
 	}
@@ -873,7 +861,7 @@ public class Config extends HttpServlet {
 	public static String getTemplatesPath() {
 		return workDirectoryPath + "templates" + File.separator;
 	}
-	
+
 	/**
 	 * Returns the full path to the default templates directory
 	 *
@@ -1040,27 +1028,37 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Returns the saiku olap meta explorer
+	 * Returns the saiku connections
 	 *
-	 * @return the saiku olap meta explorer
+	 * @return the saiku connections
 	 */
-	public static OlapMetaExplorer getSaikuMetaExplorer() {
-		return metaExplorer;
+	public static Map<Integer, SaikuConnectionProvider> getSaikuConnections() {
+		return saikuConnections;
 	}
 
 	/**
-	 * Creates saiku connections given the current datasource configuration. If
-	 * they were already existing, they are destroyed, cleared and recreated
-	 *
-	 * @throws SaikuOlapException
-	 * @throws SQLException
+	 * Closes all saiku connections
 	 */
-	public static void createSaikuConnections() throws SaikuOlapException, SQLException {
-		if (saikuConnectionManager == null) {
-			saikuConnectionManager = new SaikuConnectionManager();
+	private static void closeSaikuConnections() {
+		for (Entry<Integer, SaikuConnectionProvider> entry : saikuConnections.entrySet()) {
+			try {
+				SaikuConnectionProvider connectionProvider = entry.getValue();
+				SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
+				connectionManager.destroy();
+			} catch (SaikuOlapException ex) {
+				logger.error("Error", ex);
+			}
 		}
-		saikuConnectionManager.init();
-		metaExplorer = null;
-		metaExplorer = new OlapMetaExplorer(saikuConnectionManager);
+	}
+
+	/**
+	 * Returns the olap discover service for a given user
+	 * 
+	 * @param userId the id of the given user
+	 * @return the olap discover service for a given user
+	 */
+	public static OlapDiscoverService getOlapDiscoverService(int userId) {
+		SaikuConnectionProvider connectionProvider = saikuConnections.get(userId);
+		return connectionProvider.getDiscoverService();
 	}
 }

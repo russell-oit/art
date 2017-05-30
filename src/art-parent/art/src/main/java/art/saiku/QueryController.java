@@ -22,20 +22,28 @@ import art.report.ReportService;
 import art.saiku.web.rest.objects.resultset.QueryResult;
 import art.saiku.web.rest.util.RestUtil;
 import art.servlets.Config;
+import art.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import org.apache.commons.lang3.StringUtils;
 import org.saiku.olap.discover.OlapMetaExplorer;
 import org.saiku.olap.query2.ThinQuery;
 import org.saiku.service.olap.OlapDiscoverService;
 import org.saiku.service.olap.ThinQueryService;
+import org.saiku.service.util.exception.SaikuServiceException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -46,25 +54,41 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/saiku2/rest/saiku/api/query")
 public class QueryController {
 
-	@PostMapping("/{queryName}")
-	public ThinQuery createQuery(HttpServletRequest request) throws SQLException, IOException {
-		ThinQuery query = new ThinQuery();
-		query.setType(ThinQuery.Type.MDX);
-		query.setMdx("select from Sales");
+	@Autowired
+	private ReportService reportService;
 
-		ReportService reportService = new ReportService();
-		Report report = reportService.getReport(366);
-		String source = report.getReportSource();
+	@PostMapping("/{newQueryName}")
+	public ThinQuery createQuery(@PathVariable("newQueryName") String newQueryName,
+			HttpServletRequest request,
+			@RequestParam(value = "file", required = false) String reportName,
+			@RequestParam(value = "json", required = false) String json)
+			throws SQLException, IOException {
+
+		//http://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/spring-path-variable/
+		String source;
+		if (reportName != null) {
+			String finalReportName = StringUtils.substringAfter(reportName, "/");
+			Report report = reportService.getReport(finalReportName);
+			source = report.getReportSource();
+		} else if (json != null) {
+			source = json;
+		} else {
+			throw new SaikuServiceException("Cannot create new query. Empty content");
+		}
+
 		ObjectMapper mapper = new ObjectMapper();
-		ThinQuery query2 = mapper.readValue(source, ThinQuery.class);
-		return query2;
+		ThinQuery query = mapper.readValue(source, ThinQuery.class);
+
+		query.setName(newQueryName);
+
+		return query;
 	}
 
 	@PostMapping("/execute")
-	public QueryResult execute(@RequestBody ThinQuery tq) throws Exception {
-		OlapDiscoverService olapDiscoverService = new OlapDiscoverService();
-		OlapMetaExplorer metaExplorer = Config.getSaikuMetaExplorer();
-		olapDiscoverService.setMetaExplorer(metaExplorer);
+	public QueryResult execute(@RequestBody ThinQuery tq, HttpSession session) throws Exception {
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		int userId = sessionUser.getUserId();
+		OlapDiscoverService olapDiscoverService = Config.getOlapDiscoverService(userId);
 
 		ThinQueryService thinQueryService = new ThinQueryService();
 		thinQueryService.setOlapDiscoverService(olapDiscoverService);
@@ -82,6 +106,7 @@ public class QueryController {
 		QueryResult qr = RestUtil.convert(thinQueryService.execute(tq));
 		ThinQuery tqAfter = thinQueryService.getContext(tq.getName()).getOlapQuery();
 		qr.setQuery(tqAfter);
+
 		return qr;
 	}
 

@@ -28,6 +28,7 @@ ART 3.0
 * Added Tabular Heatmap report type
 * Added ability to create csv output jobs
 * Added ability to create fixed width output jobs
+* Added ability to do OLAP analysis using saiku
 * Allow multi-value parameters with Oracle databases to have more than 1000 items
 * Added ability to output and schedule dashboard reports as pdf
 * Allow for specifying specific colours to be used for given chart series

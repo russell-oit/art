@@ -355,8 +355,6 @@ public class DatasourceController {
 
 			ArtDatabase artDbConfig = Config.getArtDbConfig();
 			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
-
-			Config.createSaikuConnections();
 		}
 	}
 

@@ -17,6 +17,7 @@
  */
 package art.jpivot;
 
+import art.utils.MondrianHelper;
 import art.datasource.Datasource;
 import art.enums.ReportType;
 import art.report.Report;
@@ -73,12 +74,6 @@ public class JPivotController {
 
 	@Autowired
 	private ReportService reportService;
-
-	@Autowired
-	private ReportRuleService reportRuleService;
-
-	@Autowired
-	private RuleValueService ruleValueService;
 
 	@RequestMapping(value = "/showJPivot", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showJPivot(HttpServletRequest request, Model model, HttpSession session) {
@@ -213,7 +208,8 @@ public class JPivotController {
 				model.addAttribute("databasePassword", databasePassword);
 				model.addAttribute("databaseDriver", databaseDriver);
 
-				String roles = getRolesString(reportId, sessionUser);
+				MondrianHelper mondrianHelper = new MondrianHelper();
+				String roles = mondrianHelper.getRolesString(reportId, sessionUser);
 				model.addAttribute("roles", roles);
 			} else {
 				//construct xmla url to incoporate username and password if present
@@ -408,43 +404,6 @@ public class JPivotController {
 		if (_mdxEdit != null && _mdxEdit.isVisible()) {
 			model.addAttribute("mdxEditIsVisible", true);
 		}
-	}
-
-	/**
-	 * Returns the roles string to use for jpivot mondrian roles configuration
-	 *
-	 * @param reportId the id of the current report
-	 * @param sessionUser the current session user
-	 * @return the roles string to use for jpivot mondrian roles configuration
-	 * @throws SQLException
-	 */
-	private String getRolesString(int reportId, User sessionUser) throws SQLException {
-		//get roles to be applied. use rule values are roles
-		List<String> roles = new ArrayList<>();
-		List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
-
-		for (ReportRule reportRule : reportRules) {
-			int userId = sessionUser.getUserId();
-			int ruleId = reportRule.getRule().getRuleId();
-			List<String> userRuleValues = ruleValueService.getUserRuleValues(userId, ruleId);
-			roles.addAll(userRuleValues);
-
-			for (UserGroup userGroup : sessionUser.getUserGroups()) {
-				List<String> userGroupRuleValues = ruleValueService.getUserGroupRuleValues(userGroup.getUserGroupId(), ruleId);
-				roles.addAll(userGroupRuleValues);
-			}
-		}
-
-		//https://stackoverflow.com/questions/3317691/replace-elements-in-a-list-with-another
-		Collections.replaceAll(roles, ",", ",,");
-
-		//remove duplicates
-		//https://stackoverflow.com/questions/203984/how-do-i-remove-repeated-elements-from-arraylist
-		Set<String> distinctRoles = new LinkedHashSet<>(roles);
-
-		String rolesString = StringUtils.join(distinctRoles, ",");
-
-		return rolesString;
 	}
 
 	@RequestMapping(value = "/jpivotError", method = {RequestMethod.GET, RequestMethod.POST})

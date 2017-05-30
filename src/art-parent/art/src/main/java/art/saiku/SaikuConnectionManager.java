@@ -1,57 +1,91 @@
 package art.saiku;
 
 import art.datasource.Datasource;
-import art.datasource.DatasourceService;
+import art.report.Report;
+import art.report.ReportService;
+import art.user.User;
+import art.utils.MondrianHelper;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.olap4j.OlapConnection;
 import org.saiku.datasources.connection.IConnectionManager;
+import org.saiku.datasources.connection.ISaikuConnection;
 import org.saiku.datasources.connection.SaikuOlapConnection;
 import org.saiku.olap.util.exception.SaikuOlapException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 public class SaikuConnectionManager implements IConnectionManager {
 
 	private static final Logger log = LoggerFactory.getLogger(SaikuConnectionManager.class);
-	private Map<String, SaikuOlapConnection> connections = new HashMap<>();
-	private Map<String, Datasource> ds;
+	private Map<String, ISaikuConnection> connections = new HashMap<>();
+	private Map<String, Properties> connectProperties;
+	private User user;
+	private String templatesPath;
+
+	/**
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
+	}
+
+	/**
+	 * @param user the user to set
+	 */
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	/**
+	 * @return the templatesPath
+	 */
+	public String getTemplatesPath() {
+		return templatesPath;
+	}
+
+	/**
+	 * @param templatesPath the templatesPath to set
+	 */
+	public void setTemplatesPath(String templatesPath) {
+		this.templatesPath = templatesPath;
+	}
 
 	public void init() throws SaikuOlapException {
-		if (ds == null) {
-			ds = new HashMap<>();
+		if (connectProperties == null) {
+			connectProperties = new HashMap<>();
 		} else {
 			destroy();
-			ds.clear();
+			connectProperties.clear();
 		}
 
 		try {
-			DatasourceService datasourceService = new DatasourceService();
-			List<Datasource> olapDatasources = datasourceService.getOlap4jDatasources();
-			for (Datasource datasource : olapDatasources) {
-				if (StringUtils.isNotBlank(datasource.getDriver())) {
-					ds.put(datasource.getName(), datasource);
-				}
+			ReportService reportService = new ReportService();
+			List<Report> reports = reportService.getAvailableSaikuConnectionReports(user.getUserId());
+			MondrianHelper mondrianHelper = new MondrianHelper();
+			for (Report report : reports) {
+				String roles = mondrianHelper.getRolesString(report.getReportId(), user);
+				Properties properties = getSaikuConnectProperties(report, roles, templatesPath);
+				connectProperties.put(report.getName(), properties);
 			}
 		} catch (SQLException ex) {
 			throw new SaikuOlapException(ex);
 		}
-		
+
 		this.connections = getAllConnections();
 	}
 
-	protected SaikuOlapConnection getInternalConnection(String name, Datasource datasource)
+	protected ISaikuConnection getInternalConnection(String name, Properties properties)
 			throws SaikuOlapException {
 
-		SaikuOlapConnection con;
+		ISaikuConnection con;
 
 		if (!connections.containsKey(name)) {
-			con = connect(name, datasource);
+			con = connect(name, properties);
 			if (con != null) {
 				connections.put(name, con);
 			}
@@ -62,37 +96,35 @@ public class SaikuConnectionManager implements IConnectionManager {
 		return con;
 	}
 
-	protected SaikuOlapConnection refreshInternalConnection(String name, Datasource datasource) {
+	protected ISaikuConnection refreshInternalConnection(String name, Properties properties) {
 		try {
-			SaikuOlapConnection con = connections.remove(name);
+			ISaikuConnection con = connections.remove(name);
 			if (con != null) {
 				con.clearCache();
 			}
-			return getInternalConnection(name, datasource);
+			return getInternalConnection(name, properties);
 		} catch (Exception e) {
 			log.error("Could not get internal connection", e);
 		}
 		return null;
 	}
 
-	private SaikuOlapConnection connect(String name, Datasource datasource) throws SaikuOlapException {
-		if (datasource != null) {
-
-			try {
-				SaikuOlapConnection con = new SaikuOlapConnection(name, datasource.getSaikuProperties());
-				if (con.connect()) {
-				}
-				if (con.initialized()) {
-					return con;
-				}
-			} catch (Exception e) {
-				log.error("Could not get connection", e);
-			}
-
-			return null;
+	private ISaikuConnection connect(String name, Properties properties) throws SaikuOlapException {
+		if (properties == null) {
+			throw new SaikuOlapException("properties must not be null");
 		}
 
-		throw new SaikuOlapException("Cannot find connection: (" + name + ")");
+		try {
+			ISaikuConnection con = new SaikuOlapConnection(name, properties);
+			con.connect();
+			if (con.initialized()) {
+				return con;
+			}
+		} catch (Exception e) {
+			log.error("Could not get connection", e);
+		}
+
+		return null;
 	}
 
 	public void destroy() throws SaikuOlapException {
@@ -113,37 +145,38 @@ public class SaikuConnectionManager implements IConnectionManager {
 		}
 	}
 
-	public SaikuOlapConnection getConnection(String name) throws SaikuOlapException {
-		Datasource datasource = ds.get(name);
-		SaikuOlapConnection con = getInternalConnection(name, datasource);
+	public ISaikuConnection getConnection(String name) throws SaikuOlapException {
+		Properties properties = connectProperties.get(name);
+		ISaikuConnection con = getInternalConnection(name, properties);
 		return con;
 	}
 
 	public void refreshAllConnections() {
-		for (String name : ds.keySet()) {
+		for (String name : connectProperties.keySet()) {
 			refreshConnection(name);
 		}
 	}
 
 	public void refreshConnection(String name) {
-		Datasource datasource = ds.get(name);
-		refreshInternalConnection(name, datasource);
+		Properties properties = connectProperties.get(name);
+		refreshInternalConnection(name, properties);
 	}
 
-	public Map<String, SaikuOlapConnection> getAllConnections() throws SaikuOlapException {
-		Map<String, SaikuOlapConnection> resultDs = new HashMap<>();
+	public Map<String, ISaikuConnection> getAllConnections() throws SaikuOlapException {
+		Map<String, ISaikuConnection> resultDs = new HashMap<>();
 
-		for (String name : ds.keySet()) {
-			SaikuOlapConnection con = getConnection(name);
+		for (String name : connectProperties.keySet()) {
+			ISaikuConnection con = getConnection(name);
 			if (con != null) {
 				resultDs.put(name, con);
 			}
 		}
+
 		return resultDs;
 	}
 
 	public OlapConnection getOlapConnection(String name) throws SaikuOlapException {
-		SaikuOlapConnection con = getConnection(name);
+		ISaikuConnection con = getConnection(name);
 		if (con != null) {
 			Object o = con.getConnection();
 			if (o != null && o instanceof OlapConnection) {
@@ -156,9 +189,9 @@ public class SaikuConnectionManager implements IConnectionManager {
 	}
 
 	public Map<String, OlapConnection> getAllOlapConnections() throws SaikuOlapException {
-		Map<String, SaikuOlapConnection> saikuConnections = getAllConnections();
+		Map<String, ISaikuConnection> saikuConnections = getAllConnections();
 		Map<String, OlapConnection> olapConnections = new HashMap<>();
-		for (SaikuOlapConnection con : saikuConnections.values()) {
+		for (ISaikuConnection con : saikuConnections.values()) {
 			Object o = con.getConnection();
 			if (o != null && o instanceof OlapConnection) {
 				olapConnections.put(con.getName(), (OlapConnection) o);
@@ -166,5 +199,48 @@ public class SaikuConnectionManager implements IConnectionManager {
 		}
 
 		return olapConnections;
+	}
+
+	/**
+	 * Returns details that are to be used to make a saiku olap connection
+	 *
+	 * @param report the saiku connection report
+	 * @param roles the roles string to use
+	 * @param templatesPath the templates path for the schema xml file
+	 * @return details that are to be used to make a saiku olap connection
+	 */
+	private Properties getSaikuConnectProperties(Report report, String roles,
+			String templatesPath) {
+
+		Properties properties = new Properties();
+
+		Datasource datasource = report.getDatasource();
+
+		properties.put(ISaikuConnection.USERNAME_KEY, datasource.getUsername());
+		properties.put(ISaikuConnection.PASSWORD_KEY, datasource.getPassword());
+		properties.put(ISaikuConnection.DRIVER_KEY, datasource.getDriver());
+
+		String url = datasource.getUrl();
+
+		String templateFileName = report.getTemplate();
+		if (!StringUtils.containsIgnoreCase(url, ";Catalog")
+				&& StringUtils.isNotBlank(templateFileName)) {
+			if (!StringUtils.endsWith(url, ";")) {
+				url += ";";
+			}
+			String catalogPath = templatesPath + templateFileName;
+			url += "Catalog=" + catalogPath + ";";
+		}
+
+		if (StringUtils.isNotBlank(roles)) {
+			if (!StringUtils.endsWith(url, ";")) {
+				url += ";";
+			}
+			url += "Role='" + roles + "';";
+		}
+
+		properties.put(ISaikuConnection.URL_KEY, url);
+
+		return properties;
 	}
 }

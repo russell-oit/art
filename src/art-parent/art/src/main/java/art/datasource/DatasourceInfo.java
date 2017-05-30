@@ -243,12 +243,4 @@ public abstract class DatasourceInfo {
 		this.driver = driver;
 	}
 
-	public Properties getSaikuProperties() {
-		Properties properties = new Properties();
-		properties.put("username", username);
-		properties.put("password", password);
-		properties.put("driver", driver);
-		properties.put("location", url);
-		return properties;
-	}
 }

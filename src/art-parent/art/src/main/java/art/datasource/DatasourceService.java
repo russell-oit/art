@@ -301,7 +301,7 @@ public class DatasourceService {
 	}
 
 	/**
-	 * Returns reports that use a given datasource
+	 * Returns names of reports that use a given datasource
 	 *
 	 * @param datasourceId the datasource id
 	 * @return linked report names

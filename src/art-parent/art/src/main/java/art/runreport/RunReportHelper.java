@@ -196,6 +196,7 @@ public class RunReportHelper {
 			case Leaflet:
 			case OpenLayers:
 			case SaikuMondrian:
+			case SaikuConnection:
 				enableReportFormats = false;
 				break;
 			default:
@@ -238,6 +239,7 @@ public class RunReportHelper {
 			case DataTablesCsvServer:
 			case DatamapsFile:
 			case SaikuMondrian:
+			case SaikuConnection:
 				enableShowSql = false;
 				enableShowSelectedParameters = false;
 				break;
@@ -269,6 +271,7 @@ public class RunReportHelper {
 			case JPivotMondrianXmla:
 			case JPivotSqlServerXmla:
 			case SaikuMondrian:
+			case SaikuConnection:
 				enableRunInline = false;
 				break;
 			default:
@@ -296,6 +299,7 @@ public class RunReportHelper {
 			case PivotTableJsCsvLocal:
 			case PivotTableJsCsvServer:
 			case SaikuMondrian:
+			case SaikuConnection:
 				enablePrint = false;
 				break;
 			default:
@@ -361,6 +365,7 @@ public class RunReportHelper {
 			case OpenLayers:
 			case TabularHeatmap:
 			case SaikuMondrian:
+			case SaikuConnection:
 				enableEmail = false;
 				break;
 			default:

@@ -35,6 +35,6 @@ public interface IConnectionManager {
 	
 	ISaikuConnection getConnection(String name) throws SaikuOlapException;
 	
-	Map<String, SaikuOlapConnection> getAllConnections() throws SaikuOlapException, SQLException;
+	Map<String, ISaikuConnection> getAllConnections() throws SaikuOlapException, SQLException;
 
 }

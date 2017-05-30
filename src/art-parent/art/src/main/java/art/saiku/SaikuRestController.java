@@ -31,10 +31,13 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.saiku.olap.discover.OlapMetaExplorer;
 import org.saiku.olap.dto.SaikuCatalog;
 import org.saiku.olap.dto.SaikuConnection;
 import org.saiku.olap.dto.SaikuCube;
 import org.saiku.olap.dto.SaikuSchema;
+import org.saiku.olap.util.exception.SaikuOlapException;
+import org.saiku.service.olap.OlapDiscoverService;
 import org.saiku.service.util.dto.Plugin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,7 +62,7 @@ public class SaikuRestController {
 
 	private Map<String, Object> createSessionDetails(HttpSession session, Locale locale)
 			throws IllegalStateException {
-		
+
 		Map<String, Object> sessionDetails = new HashMap<>();
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		sessionDetails.put("username", sessionUser.getUsername());
@@ -68,18 +71,53 @@ public class SaikuRestController {
 		List<String> roles = new ArrayList<>();
 		sessionDetails.put("roles", roles);
 		sessionDetails.put("language", locale.toString());
-		
+
 		return sessionDetails;
 	}
 
+	private void createConnections(HttpSession session) throws SaikuOlapException {
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		int userId = sessionUser.getUserId();
+		Map<Integer, SaikuConnectionProvider> connections = Config.getSaikuConnections();
+		SaikuConnectionProvider connectionProvider = connections.get(userId);
+		if (connectionProvider != null) {
+			SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
+			connectionManager.destroy();
+			connectionProvider.setConnectionManager(null);
+			connectionProvider.setMetaExplorer(null);
+			connectionProvider.setDiscoverService(null);
+			connectionProvider = null;
+		}
+
+		SaikuConnectionManager connectionManager = new SaikuConnectionManager();
+		String templatesPath = Config.getTemplatesPath();
+		connectionManager.setTemplatesPath(templatesPath);
+		connectionManager.setUser(sessionUser);
+		connectionManager.init();
+
+		OlapMetaExplorer metaExplorer = new OlapMetaExplorer(connectionManager);
+
+		OlapDiscoverService discoverService = new OlapDiscoverService();
+		discoverService.setMetaExplorer(metaExplorer);
+
+		connectionProvider = new SaikuConnectionProvider();
+		connectionProvider.setConnectionManager(connectionManager);
+		connectionProvider.setMetaExplorer(metaExplorer);
+		connectionProvider.setDiscoverService(discoverService);
+
+		connections.put(userId, connectionProvider);
+	}
+
 	@GetMapping("/session")
-	public Map<String, Object> getSessionDetails(HttpSession session, Locale locale) {
+	public Map<String, Object> getSessionDetails(HttpSession session, Locale locale) throws SaikuOlapException {
 //		@SuppressWarnings("unchecked")
 //		Map<String, Object> saikuSessionDetails = (Map<String, Object>) session.getAttribute("saikuSessionDetails");
 //		if (saikuSessionDetails == null) {
 //			saikuSessionDetails = createSessionDetails(session, locale);
 //			session.setAttribute("saikuSessionDetails", saikuSessionDetails);
 //		}
+
+		createConnections(session);
 		Map<String, Object> saikuSessionDetails = createSessionDetails(session, locale);
 		return saikuSessionDetails;
 	}
