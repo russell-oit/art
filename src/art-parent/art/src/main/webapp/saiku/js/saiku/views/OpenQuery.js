@@ -229,17 +229,20 @@ var OpenQuery = Backbone.View.extend({
         $( this.el ).find( '.add_folder' ).parent().addClass( 'hide' );
 		
 		$( this.el ).find( '.for_queries .run' ).parent().removeClass( 'hide' );
-		
-        if (typeof query.acl != "undefined" && _.indexOf(query.acl, "READ") > -1) {
-		 $( this.el ).find( '.for_queries .run' ).parent().removeClass( 'hide' );
-        }
-        if (typeof query.acl != "undefined" && _.indexOf(query.acl, "WRITE") > -1) {
-            $( this.el ).find( '.for_queries .delete' ).parent().removeClass( 'hide' );
+		 $( this.el ).find( '.for_queries .delete' ).parent().removeClass( 'hide' );
             $( this.el ).find( '.for_queries .edit' ).parent().removeClass( 'hide' );
-        }
-        if (typeof query.acl != "undefined" && _.indexOf(query.acl, "GRANT") > -1) {
-            $( this.el ).find( '.for_queries .edit_permissions' ).parent().removeClass( 'hide' );
-        }
+		$( this.el ).find( '.for_queries .edit_permissions' ).parent().removeClass( 'hide' );
+		
+//        if (typeof query.acl != "undefined" && _.indexOf(query.acl, "READ") > -1) {
+//		 $( this.el ).find( '.for_queries .run' ).parent().removeClass( 'hide' );
+//        }
+//        if (typeof query.acl != "undefined" && _.indexOf(query.acl, "WRITE") > -1) {
+//            $( this.el ).find( '.for_queries .delete' ).parent().removeClass( 'hide' );
+//            $( this.el ).find( '.for_queries .edit' ).parent().removeClass( 'hide' );
+//        }
+//        if (typeof query.acl != "undefined" && _.indexOf(query.acl, "GRANT") > -1) {
+//            $( this.el ).find( '.for_queries .edit_permissions' ).parent().removeClass( 'hide' );
+//        }
         try {
             var query_path = path.split("/");
             if (query_path.length > 1) {
@@ -268,8 +271,10 @@ var OpenQuery = Backbone.View.extend({
 //            }
 //        }
 		
-		 $properties.append($('<li />').html("<strong><span class='i18n'>ID<span></strong>: "
+		 $properties.append($('<li />').html("<strong>ID</strong>: "
                          + query.reportId));
+				  $properties.append($('<li />').html("<strong>Description</strong>: "
+                         + query.description));
 
         this.selected_query = new SavedQuery({ file: path, name: name, type: query.type });
 
