@@ -52,30 +52,35 @@ import org.springframework.web.context.request.RequestContextHolder;
 public class SaikuRestController {
 
 	@PostMapping("/session")
-	public void login(HttpSession session) {
-		Map<String, Object> saikuSessionDetails = createSessionDetails(session);
-		session.setAttribute("saikuSessionDetails", saikuSessionDetails);
+	public void login(HttpSession session, Locale locale) {
+//		Map<String, Object> saikuSessionDetails = createSessionDetails(session, locale);
+//		session.setAttribute("saikuSessionDetails", saikuSessionDetails);
 	}
 
-	private Map<String, Object> createSessionDetails(HttpSession session) throws IllegalStateException {
-		Map<String, Object> saikuSessionDetails = new HashMap<>();
+	private Map<String, Object> createSessionDetails(HttpSession session, Locale locale)
+			throws IllegalStateException {
+		
+		Map<String, Object> sessionDetails = new HashMap<>();
 		User sessionUser = (User) session.getAttribute("sessionUser");
-		saikuSessionDetails.put("username", sessionUser.getUsername());
-		saikuSessionDetails.put("sessionid", ArtUtils.getUniqueId());
-		saikuSessionDetails.put("authid", RequestContextHolder.currentRequestAttributes().getSessionId());
+		sessionDetails.put("username", sessionUser.getUsername());
+		sessionDetails.put("sessionid", ArtUtils.getUniqueId());
+		sessionDetails.put("authid", RequestContextHolder.currentRequestAttributes().getSessionId());
 		List<String> roles = new ArrayList<>();
-		saikuSessionDetails.put("roles", roles);
-		return saikuSessionDetails;
+		sessionDetails.put("roles", roles);
+		sessionDetails.put("language", locale.toString());
+		
+		return sessionDetails;
 	}
 
 	@GetMapping("/session")
-	public Map<String, Object> getSessionDetails(HttpSession session) {
-		@SuppressWarnings("unchecked")
-		Map<String, Object> saikuSessionDetails = (Map<String, Object>) session.getAttribute("saikuSessionDetails");
-		if (saikuSessionDetails == null) {
-			saikuSessionDetails = createSessionDetails(session);
-			session.setAttribute("saikuSessionDetails", saikuSessionDetails);
-		}
+	public Map<String, Object> getSessionDetails(HttpSession session, Locale locale) {
+//		@SuppressWarnings("unchecked")
+//		Map<String, Object> saikuSessionDetails = (Map<String, Object>) session.getAttribute("saikuSessionDetails");
+//		if (saikuSessionDetails == null) {
+//			saikuSessionDetails = createSessionDetails(session, locale);
+//			session.setAttribute("saikuSessionDetails", saikuSessionDetails);
+//		}
+		Map<String, Object> saikuSessionDetails = createSessionDetails(session, locale);
 		return saikuSessionDetails;
 	}
 
@@ -118,7 +123,9 @@ public class SaikuRestController {
 		//optionally override properties of the Settings object in /saiku/js/saiku/Settings.js
 		Map<String, Object> uiSettings = new HashMap<>();
 		uiSettings.put("VERSION", "saiku-art");
-		//locale can only be changed either manually in Settings.js or adding lang parameter to saiku index.html call
+		//locale can only be changed either manually in Settings.js
+		//or adding lang parameter to saiku index.html call
+		//or passing "language" attribute when beginning the session
 		//uiSettings.put("I18N_LOCALE", locale.toString());
 		String restUrlRoot = request.getContextPath() + "/saiku2";
 		uiSettings.put("TOMCAT_WEBAPP", restUrlRoot);

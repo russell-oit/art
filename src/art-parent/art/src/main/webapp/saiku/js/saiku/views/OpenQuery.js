@@ -271,10 +271,12 @@ var OpenQuery = Backbone.View.extend({
 //            }
 //        }
 		
-		 $properties.append($('<li />').html("<strong>ID</strong>: "
+		 $properties.append($('<li />').html("<strong class='i18n'>ID</strong>: "
                          + query.reportId));
-				  $properties.append($('<li />').html("<strong>Description</strong>: "
+				  $properties.append($('<li />').html("<strong class='i18n'>Description</strong>: "
                          + query.description));
+				 
+				 Saiku.i18n.translate();
 
         this.selected_query = new SavedQuery({ file: path, name: name, type: query.type });
 

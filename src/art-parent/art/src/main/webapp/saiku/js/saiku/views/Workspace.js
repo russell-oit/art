@@ -813,7 +813,7 @@ var Workspace = Backbone.View.extend({
         var self = this;
 
         dimlist.workspace.sync_query();
-        return false;
+        //return false;
 
         if (this.other_dimension) {
         // Populate selections - trust me, this is prettier than it was :-/
