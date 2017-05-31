@@ -143,24 +143,24 @@ public class QueryController {
 	}
 
 	@GetMapping("/{queryname}/export/xls")
-	public ResponseEntity getQueryExcelExport(HttpSession session, HttpServletResponse response,
+	public ResponseEntity getQueryExcelExport(HttpSession session,
 			@PathVariable("queryname") String queryName) throws IOException {
 
 		String format = "flattened";
 		String name = null;
-		return generateExcelFile(session, response, queryName, format, name);
+		return generateExcelFile(session, queryName, format, name);
 	}
 
 	@GetMapping("/{queryname}/export/xls/{format}")
-	public ResponseEntity getQueryExcelExportFormat(HttpSession session, HttpServletResponse response,
+	public ResponseEntity getQueryExcelExportFormat(HttpSession session,
 			@PathVariable("queryname") String queryName,
 			@PathVariable("format") String format,
 			@RequestParam(value = "exportname", defaultValue = "") String name) throws IOException {
 
-		return generateExcelFile(session, response, queryName, format, name);
+		return generateExcelFile(session, queryName, format, name);
 	}
 
-	private ResponseEntity generateExcelFile(HttpSession session, HttpServletResponse response,
+	private ResponseEntity generateExcelFile(HttpSession session,
 			String queryName, String format, String name) throws IOException {
 
 		//http://www.n-k.de/2016/05/optional-path-variables-with-spring-boot-rest-mvc.html
@@ -194,7 +194,44 @@ public class QueryController {
 				.contentLength(doc.length)
 				.contentType(MediaType.parseMediaType(contentType))
 				.body(doc);
+	}
 
+	@GetMapping("/{queryname}/export/csv")
+	public ResponseEntity getQueryCsvExport(HttpSession session,
+			@PathVariable("queryname") String queryName) throws IOException {
+
+		String format = "flattened";
+		String name = null;
+		return generateCsvFile(session, queryName, format, name);
+	}
+	
+	@GetMapping("/{queryname}/export/csv/{format}")
+	public ResponseEntity getQueryCsvExportFormat(HttpSession session,
+			@PathVariable("queryname") String queryName,
+			@PathVariable("format") String format,
+			@RequestParam(value = "exportname", defaultValue = "") String name) throws IOException {
+
+		return generateCsvFile(session, queryName, format, name);
+	}
+
+	private ResponseEntity generateCsvFile(HttpSession session,
+			String queryName, String format, String name) {
+
+		ThinQueryService thinQueryService = discoverHelper.getThinQueryService(session);
+
+		byte[] doc = thinQueryService.getExport(queryName, "csv", format);
+		if (name == null || name.equals("")) {
+			name = SaikuProperties.webExportCsvName;
+		}
+		
+		String cleanName = ArtUtils.cleanBaseFilename(name);
+		String finalName = cleanName + ".csv";
+		
+		return ResponseEntity.ok()
+				.header("Content-Disposition", "attachment; filename=\"" + finalName + "\"")
+				.contentLength(doc.length)
+				.contentType(MediaType.APPLICATION_OCTET_STREAM)
+				.body(doc);
 	}
 
 }
