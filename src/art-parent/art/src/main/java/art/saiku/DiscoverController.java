@@ -54,31 +54,44 @@ import org.springframework.web.bind.annotation.RestController;
 public class DiscoverController {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiscoverController.class);
+	
+	private void createConnections(HttpSession session) throws SaikuOlapException {
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		int userId = sessionUser.getUserId();
+		Map<Integer, SaikuConnectionProvider> connections = Config.getSaikuConnections();
+		SaikuConnectionProvider connectionProvider = connections.get(userId);
+		if (connectionProvider != null) {
+			SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
+			connectionManager.destroy();
+			connectionProvider.setConnectionManager(null);
+			connectionProvider.setMetaExplorer(null);
+			connectionProvider.setDiscoverService(null);
+			connectionProvider = null;
+		}
+
+		SaikuConnectionManager connectionManager = new SaikuConnectionManager();
+		String templatesPath = Config.getTemplatesPath();
+		connectionManager.setTemplatesPath(templatesPath);
+		connectionManager.setUser(sessionUser);
+		connectionManager.init();
+
+		OlapMetaExplorer metaExplorer = new OlapMetaExplorer(connectionManager);
+
+		OlapDiscoverService discoverService = new OlapDiscoverService();
+		discoverService.setMetaExplorer(metaExplorer);
+
+		connectionProvider = new SaikuConnectionProvider();
+		connectionProvider.setConnectionManager(connectionManager);
+		connectionProvider.setMetaExplorer(metaExplorer);
+		connectionProvider.setDiscoverService(discoverService);
+
+		connections.put(userId, connectionProvider);
+	}
 
 	@GetMapping
 	public List<SaikuConnection> discover(HttpSession session) throws SaikuOlapException {
-		List<SaikuConnection> connections = new ArrayList<>();
-
-		List<SaikuCatalog> catalogs = new ArrayList<>();
-
-		List<SaikuSchema> schemas = new ArrayList<>();
-
-		List<SaikuCube> cubes = new ArrayList<>();
-
-		SaikuCube cube = new SaikuCube("conn one", "unique cube name", "cube name", "cube caption", "catalog one", "schema one");
-		cubes.add(cube);
-
-		SaikuSchema schema = new SaikuSchema("schema one", cubes);
-		schemas.add(schema);
-
-		SaikuCatalog catalog = new SaikuCatalog("catalog one", schemas);
-		catalogs.add(catalog);
-
-		SaikuConnection conn = new SaikuConnection("conn one", catalogs);
-		connections.add(conn);
-
-		//return connections;
-		//return Collections.emptyList();
+		createConnections(session);
+		
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		int userId = sessionUser.getUserId();
 		OlapDiscoverService olapDiscoverService = Config.getOlapDiscoverService(userId);
@@ -118,5 +131,16 @@ public class DiscoverController {
 		List<SaikuMember> measures = olapDiscoverService.getMeasures(cube);
 		Map<String, Object> properties = olapDiscoverService.getProperties(cube);
 		return new SaikuCubeMetadata(dimensions, measures, properties);
+	}
+	
+	@GetMapping("/refresh")
+	public List<SaikuConnection> refreshConnections(HttpSession session){
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		int userId = sessionUser.getUserId();
+		OlapDiscoverService olapDiscoverService = Config.getOlapDiscoverService(userId);
+		SaikuConnectionManager connectionManager = Config.getSaikuConnectionManager(userId);
+		
+		connectionManager.refreshAllConnections();
+		return olapDiscoverService.getAllConnections();
 	}
 }

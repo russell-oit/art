@@ -60,20 +60,19 @@ public class QueryController {
 	@PostMapping("/{newQueryName}")
 	public ThinQuery createQuery(@PathVariable("newQueryName") String newQueryName,
 			HttpServletRequest request,
-			@RequestParam(value = "file", required = false) String reportName,
+			@RequestParam(value = "file", required = false) Integer reportId,
 			@RequestParam(value = "json", required = false) String json)
 			throws SQLException, IOException {
 
 		//http://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/spring-path-variable/
 		String source;
-		if (reportName != null) {
-			String finalReportName = StringUtils.substringAfter(reportName, "/");
-			Report report = reportService.getReport(finalReportName);
+		if (reportId != null) {
+			Report report = reportService.getReport(reportId);
 			source = report.getReportSource();
 		} else if (json != null) {
 			source = json;
 		} else {
-			throw new SaikuServiceException("Cannot create new query. Empty content");
+			throw new SaikuServiceException("Cannot create new query. json and file parameters both null.");
 		}
 
 		ObjectMapper mapper = new ObjectMapper();

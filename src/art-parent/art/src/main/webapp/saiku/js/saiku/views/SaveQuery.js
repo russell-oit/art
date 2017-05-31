@@ -76,7 +76,7 @@ var SaveQuery = Modal.extend({
             "<label for='name' class='i18n'>File:</label>&nbsp;" +
             "<input type='text' name='name' class='form-control' value='<%= name %>' /></div>" +
             "<br />"+
-            "</form>")({ name: full_path });
+            "</form>")({ name: this.query.name });
 
         _.extend(this.options, {
             title: "Save query"
@@ -242,10 +242,12 @@ var SaveQuery = Modal.extend({
         this.unselect_current_selected_folder( );
         //$currentTarget.parent( ).parent( ).has( '.folder' ).children('.folder_row').addClass( 'selected' );
         $currentTarget.addClass('selected');
-        var name = $currentTarget.find( 'a' ).attr('href').replace('#','');
+//        var name = $currentTarget.find( 'a' ).attr('href').replace('#','');
+		var name = $currentTarget.find( 'a' ).html();
         this.set_name(null, name);
-        var path = $currentTarget.parent( ).parent( ).has( '.folder' ).children('.folder_row').find( 'a' ).attr('href');
-        path = path.replace('#' , '');
+//        var path = $currentTarget.parent( ).parent( ).has( '.folder' ).children('.folder_row').find( 'a' ).attr('href');
+//        path = path.replace('#' , '');
+		var path = name;
         this.set_last_location(path);
         $(this.el).find('input[name="name"]').focus();
 
@@ -295,11 +297,11 @@ var SaveQuery = Modal.extend({
 
 
             } else {
-                alert("You need to enter a name!");
+                bootbox.alert("You need to enter a name");
             }
         }
         else {
-            alert("You need select a folder!");
+            bootbox.alert("You need to select a folder");
         }
 
 return false;
@@ -321,7 +323,7 @@ return false;
 				paths.push.apply(paths, self.get_files(entry.repoObjects));
 			}
 			else{
-				paths.push(entry.path);
+				paths.push(entry.name);
 
 			}
 		});

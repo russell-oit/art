@@ -75,39 +75,6 @@ public class SaikuRestController {
 		return sessionDetails;
 	}
 
-	private void createConnections(HttpSession session) throws SaikuOlapException {
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		int userId = sessionUser.getUserId();
-		Map<Integer, SaikuConnectionProvider> connections = Config.getSaikuConnections();
-		SaikuConnectionProvider connectionProvider = connections.get(userId);
-		if (connectionProvider != null) {
-			SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
-			connectionManager.destroy();
-			connectionProvider.setConnectionManager(null);
-			connectionProvider.setMetaExplorer(null);
-			connectionProvider.setDiscoverService(null);
-			connectionProvider = null;
-		}
-
-		SaikuConnectionManager connectionManager = new SaikuConnectionManager();
-		String templatesPath = Config.getTemplatesPath();
-		connectionManager.setTemplatesPath(templatesPath);
-		connectionManager.setUser(sessionUser);
-		connectionManager.init();
-
-		OlapMetaExplorer metaExplorer = new OlapMetaExplorer(connectionManager);
-
-		OlapDiscoverService discoverService = new OlapDiscoverService();
-		discoverService.setMetaExplorer(metaExplorer);
-
-		connectionProvider = new SaikuConnectionProvider();
-		connectionProvider.setConnectionManager(connectionManager);
-		connectionProvider.setMetaExplorer(metaExplorer);
-		connectionProvider.setDiscoverService(discoverService);
-
-		connections.put(userId, connectionProvider);
-	}
-
 	@GetMapping("/session")
 	public Map<String, Object> getSessionDetails(HttpSession session, Locale locale) throws SaikuOlapException {
 //		@SuppressWarnings("unchecked")
@@ -117,7 +84,6 @@ public class SaikuRestController {
 //			session.setAttribute("saikuSessionDetails", saikuSessionDetails);
 //		}
 
-		createConnections(session);
 		Map<String, Object> saikuSessionDetails = createSessionDetails(session, locale);
 		return saikuSessionDetails;
 	}

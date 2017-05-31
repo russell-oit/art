@@ -89,11 +89,11 @@ var Workspace = Backbone.View.extend({
                         Saiku.i18n.translate();
                         message = $('.error_loading_query').text();
                     }
-                    alert(message);
+                    bootbox.alert(message);
 
                 } else {
                     var m = $('.error_loading_query').text();
-                    alert(m);
+                    bootbox.alert(m);
                 }
             }});
         }

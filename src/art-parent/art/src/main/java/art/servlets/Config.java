@@ -1061,4 +1061,15 @@ public class Config extends HttpServlet {
 		SaikuConnectionProvider connectionProvider = saikuConnections.get(userId);
 		return connectionProvider.getDiscoverService();
 	}
+	
+	/**
+	 * Returns the saiku connection manager for a given user
+	 * 
+	 * @param userId the id of the given user
+	 * @return the saiku connection manager for a given user
+	 */
+	public static SaikuConnectionManager getSaikuConnectionManager(int userId){
+		SaikuConnectionProvider connectionProvider = saikuConnections.get(userId);
+		return connectionProvider.getConnectionManager();
+	}
 }

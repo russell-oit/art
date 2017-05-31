@@ -119,7 +119,7 @@ public class SaikuReport implements Serializable {
 	}
 	
 	public String getPath(){
-		return "/" + name;
+		return String.valueOf(reportId);
 	}
 	
 	public String getId(){
