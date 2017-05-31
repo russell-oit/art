@@ -19,6 +19,7 @@ package art.saiku;
 
 import org.saiku.olap.discover.OlapMetaExplorer;
 import org.saiku.service.olap.OlapDiscoverService;
+import org.saiku.service.olap.ThinQueryService;
 
 /**
  * Wrapper for classes required to provide a saiku connection and
@@ -31,6 +32,7 @@ public class SaikuConnectionProvider {
 	private SaikuConnectionManager connectionManager;
 	private OlapMetaExplorer metaExplorer;
 	private OlapDiscoverService discoverService;
+	private ThinQueryService thinQueryService;
 
 	/**
 	 * @return the connectionManager
@@ -72,5 +74,19 @@ public class SaikuConnectionProvider {
 	 */
 	public void setDiscoverService(OlapDiscoverService discoverService) {
 		this.discoverService = discoverService;
+	}
+
+	/**
+	 * @return the thinQueryService
+	 */
+	public ThinQueryService getThinQueryService() {
+		return thinQueryService;
+	}
+
+	/**
+	 * @param thinQueryService the thinQueryService to set
+	 */
+	public void setThinQueryService(ThinQueryService thinQueryService) {
+		this.thinQueryService = thinQueryService;
 	}
 }

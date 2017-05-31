@@ -32,6 +32,7 @@ import java.util.TreeMap;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
@@ -113,17 +114,34 @@ public class ArtUtils {
 
 	/**
 	 * Removes characters from the base file name part of a file name that may
-	 * result in a dangerous file name on the system
+	 * be invalid or result in a dangerous file name on the system
 	 *
 	 * @param baseFilename the initial base file name
-	 * @return final base file name with invalid characters replaced with underscores
+	 * @return final base file name with unwanted characters replaced with
+	 * underscores
 	 */
 	public static String cleanBaseFilename(String baseFilename) {
 		//only allow english alphabets, numbers, underscore, dash, space
 		String sane = baseFilename.replaceAll("[^a-zA-Z0-9_\\-\\s]+", "_");
 		return sane;
 	}
-	
+
+	/**
+	 * Removes characters from file name that may be invalid or result in a
+	 * dangerous file name on the system
+	 *
+	 * @param filename the initial file name, including the extension
+	 * @return final file name with unwanted characters replaced with
+	 * underscores
+	 */
+	public static String cleanFilename(String filename) {
+		String base = FilenameUtils.getBaseName(filename);
+		String extension = FilenameUtils.getExtension(filename);
+		String cleanBase = cleanBaseFilename(base);
+		String finalFilename = cleanBase + "." + extension;
+		return finalFilename;
+	}
+
 	/**
 	 * Get random string to be appended to output filenames
 	 *
@@ -322,5 +340,5 @@ public class ArtUtils {
 		cal.set(Calendar.MILLISECOND, 0);
 		return cal.getTime();
 	}
-	
+
 }

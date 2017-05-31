@@ -24,34 +24,11 @@ public class SaikuConnectionManager implements IConnectionManager {
 	private static final Logger log = LoggerFactory.getLogger(SaikuConnectionManager.class);
 	private Map<String, ISaikuConnection> connections = new HashMap<>();
 	private Map<String, Properties> connectProperties;
-	private User user;
-	private String templatesPath;
+	private final User user;
+	private final String templatesPath;
 
-	/**
-	 * @return the user
-	 */
-	public User getUser() {
-		return user;
-	}
-
-	/**
-	 * @param user the user to set
-	 */
-	public void setUser(User user) {
+	public SaikuConnectionManager(User user, String templatesPath) {
 		this.user = user;
-	}
-
-	/**
-	 * @return the templatesPath
-	 */
-	public String getTemplatesPath() {
-		return templatesPath;
-	}
-
-	/**
-	 * @param templatesPath the templatesPath to set
-	 */
-	public void setTemplatesPath(String templatesPath) {
 		this.templatesPath = templatesPath;
 	}
 

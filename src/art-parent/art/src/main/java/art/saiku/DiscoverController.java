@@ -34,6 +34,7 @@ import org.saiku.olap.dto.SaikuMember;
 import org.saiku.olap.dto.SimpleCubeElement;
 import org.saiku.olap.util.exception.SaikuOlapException;
 import org.saiku.service.olap.OlapDiscoverService;
+import org.saiku.service.olap.ThinQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,36 +54,27 @@ public class DiscoverController {
 	private static final Logger logger = LoggerFactory.getLogger(DiscoverController.class);
 
 	@Autowired
-	private DiscoverServiceHelper discoverServiceHelper;
+	private DiscoverHelper discoverHelper;
 
 	private void createConnections(HttpSession session) throws SaikuOlapException {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		int userId = sessionUser.getUserId();
 		Map<Integer, SaikuConnectionProvider> connections = Config.getSaikuConnections();
-		SaikuConnectionProvider connectionProvider = connections.get(userId);
-		if (connectionProvider != null) {
-			SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
-			connectionManager.destroy();
-			connectionProvider.setConnectionManager(null);
-			connectionProvider.setMetaExplorer(null);
-			connectionProvider.setDiscoverService(null);
-			connectionProvider = null;
-		}
+		Config.closeSaikuConnections(userId);
 
-		SaikuConnectionManager connectionManager = new SaikuConnectionManager();
 		String templatesPath = Config.getTemplatesPath();
-		connectionManager.setTemplatesPath(templatesPath);
-		connectionManager.setUser(sessionUser);
+		SaikuConnectionManager connectionManager = new SaikuConnectionManager(sessionUser, templatesPath);
 		connectionManager.init();
 
 		OlapMetaExplorer metaExplorer = new OlapMetaExplorer(connectionManager);
-
 		OlapDiscoverService discoverService = new OlapDiscoverService(metaExplorer, connectionManager);
+		ThinQueryService thinQueryService = new ThinQueryService(discoverService);
 
-		connectionProvider = new SaikuConnectionProvider();
+		SaikuConnectionProvider connectionProvider = new SaikuConnectionProvider();
 		connectionProvider.setConnectionManager(connectionManager);
 		connectionProvider.setMetaExplorer(metaExplorer);
 		connectionProvider.setDiscoverService(discoverService);
+		connectionProvider.setThinQueryService(thinQueryService);
 
 		connections.put(userId, connectionProvider);
 	}
@@ -90,7 +82,7 @@ public class DiscoverController {
 	@GetMapping
 	public List<SaikuConnection> discover(HttpSession session) throws SaikuOlapException {
 		createConnections(session);
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuConnection> connections = olapDiscoverService.getAllConnections();
 		return connections;
 	}
@@ -100,14 +92,14 @@ public class DiscoverController {
 			@PathVariable("connection") String connectionName)
 			throws SaikuOlapException, SQLException {
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuConnection> connectionList = olapDiscoverService.getConnection(connectionName);
 		return connectionList;
 	}
 
 	@GetMapping("/refresh")
 	public List<SaikuConnection> refreshConnections(HttpSession session) {
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		olapDiscoverService.refreshAllConnections();
 		List<SaikuConnection> connections = olapDiscoverService.getAllConnections();
 		return connections;
@@ -117,7 +109,7 @@ public class DiscoverController {
 	public List<SaikuConnection> refreshConnection(HttpSession session,
 			@PathVariable("connection") String connectionName) {
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		olapDiscoverService.refreshConnection(connectionName);
 		List<SaikuConnection> connectionList = olapDiscoverService.getConnection(connectionName);
 		return connectionList;
@@ -135,7 +127,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuDimension> dimensions = olapDiscoverService.getAllDimensions(cube);
 		List<SaikuMember> measures = olapDiscoverService.getMeasures(cube);
 		Map<String, Object> properties = olapDiscoverService.getProperties(cube);
@@ -154,7 +146,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuDimension> dimensions = olapDiscoverService.getAllDimensions(cube);
 		return dimensions;
 	}
@@ -172,7 +164,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		SaikuDimension dimension = olapDiscoverService.getDimension(cube, dimensionName);
 		return dimension;
 	}
@@ -190,7 +182,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuHierarchy> hierarchies = olapDiscoverService.getAllDimensionHierarchies(cube, dimensionName);
 		return hierarchies;
 	}
@@ -209,7 +201,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuLevel> levels = olapDiscoverService.getAllHierarchyLevels(cube, dimensionName, hierarchyName);
 		return levels;
 	}
@@ -229,7 +221,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SimpleCubeElement> levelMembers = olapDiscoverService.getLevelMembers(cube, hierarchyName, levelName);
 		return levelMembers;
 	}
@@ -247,7 +239,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuMember> rootMembers = olapDiscoverService.getHierarchyRootMembers(cube, hierarchyName);
 		return rootMembers;
 	}
@@ -264,7 +256,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuHierarchy> hierarchies = olapDiscoverService.getAllHierarchies(cube);
 		return hierarchies;
 	}
@@ -281,7 +273,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuMember> measures = olapDiscoverService.getMeasures(cube);
 		return measures;
 	}
@@ -299,7 +291,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		SaikuMember member = olapDiscoverService.getMember(cube, memberName);
 		return member;
 	}
@@ -317,7 +309,7 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuMember> children = olapDiscoverService.getMemberChildren(cube, memberName);
 		return children;
 	}

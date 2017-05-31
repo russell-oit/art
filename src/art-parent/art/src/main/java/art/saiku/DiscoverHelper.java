@@ -21,20 +21,28 @@ import art.servlets.Config;
 import art.user.User;
 import javax.servlet.http.HttpSession;
 import org.saiku.service.olap.OlapDiscoverService;
+import org.saiku.service.olap.ThinQueryService;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides method to get the appropriate discover service for the current user
+ * Provides methods to get the appropriate discover service and thin query
+ * service for the current user
  *
  * @author Timothy Anyona
  */
 @Component
-public class DiscoverServiceHelper {
+public class DiscoverHelper {
 
 	public OlapDiscoverService getDiscoverService(HttpSession session) {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		int userId = sessionUser.getUserId();
 		return Config.getOlapDiscoverService(userId);
+	}
+
+	public ThinQueryService getThinQueryService(HttpSession session) {
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		int userId = sessionUser.getUserId();
+		return Config.getThinQueryService(userId);
 	}
 
 }

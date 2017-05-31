@@ -57,6 +57,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -73,6 +74,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
 import org.saiku.olap.util.exception.SaikuOlapException;
 import org.saiku.service.olap.OlapDiscoverService;
+import org.saiku.service.olap.ThinQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
@@ -128,7 +130,7 @@ public class Config extends HttpServlet {
 		//shutdown quartz scheduler
 		SchedulerUtils.shutdownScheduler();
 
-		closeSaikuConnections();
+		Config.closeSaikuConnections();
 
 		//close database connections
 		DbConnections.closeAllConnections();
@@ -1050,6 +1052,31 @@ public class Config extends HttpServlet {
 			}
 		}
 	}
+	
+	/**
+	 * Close saiku connections for a given user
+	 * 
+	 * @param userId the id of the user
+	 */
+	public static void closeSaikuConnections(int userId){
+		SaikuConnectionProvider connectionProvider = saikuConnections.get(userId);
+		if (connectionProvider != null) {
+			try {
+				SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
+				connectionManager.destroy();
+				connectionProvider.setConnectionManager(null);
+				connectionProvider.setMetaExplorer(null);
+				connectionProvider.setDiscoverService(null);
+				ThinQueryService thinQueryService = connectionProvider.getThinQueryService();
+				thinQueryService.destroy();
+				thinQueryService = null;
+				connectionProvider = null;
+				saikuConnections.remove(userId);
+			} catch (SaikuOlapException ex) {
+				logger.error("Error", ex);
+			}
+		}
+	}
 
 	/**
 	 * Returns the olap discover service for a given user
@@ -1071,5 +1098,16 @@ public class Config extends HttpServlet {
 	public static SaikuConnectionManager getSaikuConnectionManager(int userId){
 		SaikuConnectionProvider connectionProvider = saikuConnections.get(userId);
 		return connectionProvider.getConnectionManager();
+	}
+	
+	/**
+	 * Returns the thin query service for a given user
+	 * 
+	 * @param userId the id of the given user
+	 * @return the thin query service for a given user
+	 */
+	public static ThinQueryService getThinQueryService(int userId){
+		SaikuConnectionProvider connectionProvider = saikuConnections.get(userId);
+		return connectionProvider.getThinQueryService();
 	}
 }

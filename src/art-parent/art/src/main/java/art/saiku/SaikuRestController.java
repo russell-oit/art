@@ -17,27 +17,19 @@
  */
 package art.saiku;
 
-import art.report.Report;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.saiku.olap.discover.OlapMetaExplorer;
-import org.saiku.olap.dto.SaikuCatalog;
-import org.saiku.olap.dto.SaikuConnection;
-import org.saiku.olap.dto.SaikuCube;
-import org.saiku.olap.dto.SaikuSchema;
 import org.saiku.olap.util.exception.SaikuOlapException;
-import org.saiku.service.olap.OlapDiscoverService;
 import org.saiku.service.util.dto.Plugin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
