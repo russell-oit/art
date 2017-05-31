@@ -304,7 +304,7 @@ public class ExcelWorksheetBuilder {
         boolean autoSize = (rowsetBody != null && rowsetBody.length > 0 && rowsetBody.length < 10000
                 && rowsetHeader != null && rowsetHeader.length > 0 && rowsetHeader[0].length < 200);
 
-        if (autoSize) {
+        if (!autoSize) {
             log.warn("Skipping auto-sizing columns, more than 10000 rows and/or 200 columns");
         }
 
@@ -403,10 +403,10 @@ public class ExcelWorksheetBuilder {
 
         row++;
 
-        sheetRow = summarySheet.createRow((int) row);
-        cell = sheetRow.createCell(0);
-        cell.setCellValue(SaikuProperties.webExportExcelPoweredBy);
-        summarySheet.addMergedRegion(new CellRangeAddress(row, row, 0, 10));
+//        sheetRow = summarySheet.createRow((int) row);
+//        cell = sheetRow.createCell(0);
+//        cell.setCellValue(SaikuProperties.webExportExcelPoweredBy);
+//        summarySheet.addMergedRegion(new CellRangeAddress(row, row, 0, 10));
 
         // Autosize columns for summary sheet
         for (int i = 0; i < 5; i++) {

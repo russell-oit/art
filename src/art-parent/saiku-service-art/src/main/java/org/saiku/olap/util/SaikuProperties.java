@@ -30,6 +30,7 @@ import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Properties;
+import org.apache.commons.lang.StringUtils;
 
 public class SaikuProperties extends Properties {
 
@@ -254,7 +255,7 @@ public class SaikuProperties extends Properties {
     String locale = null;
     try {
       locale = getPropString( "saiku.format.default.locale", null );
-      if ( locale != null ) {
+      if ( StringUtils.isNotBlank(locale) ) {
         return LocaleUtils.toLocale( locale );
       }
     } catch ( Exception e ) {
