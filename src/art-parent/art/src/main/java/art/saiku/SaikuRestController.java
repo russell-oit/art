@@ -56,8 +56,7 @@ public class SaikuRestController {
 
 	@PostMapping("/session")
 	public void login(HttpSession session, Locale locale) {
-//		Map<String, Object> saikuSessionDetails = createSessionDetails(session, locale);
-//		session.setAttribute("saikuSessionDetails", saikuSessionDetails);
+		//do nothing. user already authenticated by art
 	}
 
 	private Map<String, Object> createSessionDetails(HttpSession session, Locale locale)
@@ -71,19 +70,11 @@ public class SaikuRestController {
 		List<String> roles = new ArrayList<>();
 		sessionDetails.put("roles", roles);
 		sessionDetails.put("language", locale.toString());
-
 		return sessionDetails;
 	}
 
 	@GetMapping("/session")
 	public Map<String, Object> getSessionDetails(HttpSession session, Locale locale) throws SaikuOlapException {
-//		@SuppressWarnings("unchecked")
-//		Map<String, Object> saikuSessionDetails = (Map<String, Object>) session.getAttribute("saikuSessionDetails");
-//		if (saikuSessionDetails == null) {
-//			saikuSessionDetails = createSessionDetails(session, locale);
-//			session.setAttribute("saikuSessionDetails", saikuSessionDetails);
-//		}
-
 		Map<String, Object> saikuSessionDetails = createSessionDetails(session, locale);
 		return saikuSessionDetails;
 	}

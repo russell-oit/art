@@ -20,21 +20,18 @@ package art.saiku;
 import art.servlets.Config;
 import art.user.User;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
 import org.saiku.olap.discover.OlapMetaExplorer;
-import org.saiku.olap.dto.SaikuCatalog;
 import org.saiku.olap.dto.SaikuConnection;
 import org.saiku.olap.dto.SaikuCube;
 import org.saiku.olap.dto.SaikuCubeMetadata;
 import org.saiku.olap.dto.SaikuDimension;
+import org.saiku.olap.dto.SaikuHierarchy;
+import org.saiku.olap.dto.SaikuLevel;
 import org.saiku.olap.dto.SaikuMember;
-import org.saiku.olap.dto.SaikuSchema;
+import org.saiku.olap.dto.SimpleCubeElement;
 import org.saiku.olap.util.exception.SaikuOlapException;
 import org.saiku.service.olap.OlapDiscoverService;
 import org.slf4j.Logger;
@@ -54,7 +51,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class DiscoverController {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiscoverController.class);
-	
+
+	@Autowired
+	private DiscoverServiceHelper discoverServiceHelper;
+
 	private void createConnections(HttpSession session) throws SaikuOlapException {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		int userId = sessionUser.getUserId();
@@ -77,8 +77,7 @@ public class DiscoverController {
 
 		OlapMetaExplorer metaExplorer = new OlapMetaExplorer(connectionManager);
 
-		OlapDiscoverService discoverService = new OlapDiscoverService();
-		discoverService.setMetaExplorer(metaExplorer);
+		OlapDiscoverService discoverService = new OlapDiscoverService(metaExplorer, connectionManager);
 
 		connectionProvider = new SaikuConnectionProvider();
 		connectionProvider.setConnectionManager(connectionManager);
@@ -91,12 +90,9 @@ public class DiscoverController {
 	@GetMapping
 	public List<SaikuConnection> discover(HttpSession session) throws SaikuOlapException {
 		createConnections(session);
-		
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		int userId = sessionUser.getUserId();
-		OlapDiscoverService olapDiscoverService = Config.getOlapDiscoverService(userId);
-		
-		return olapDiscoverService.getAllConnections();
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SaikuConnection> connections = olapDiscoverService.getAllConnections();
+		return connections;
 	}
 
 	@GetMapping("/{connection}")
@@ -104,11 +100,27 @@ public class DiscoverController {
 			@PathVariable("connection") String connectionName)
 			throws SaikuOlapException, SQLException {
 
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		int userId = sessionUser.getUserId();
-		OlapDiscoverService olapDiscoverService = Config.getOlapDiscoverService(userId);
-		
-		return olapDiscoverService.getConnection(connectionName);
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SaikuConnection> connectionList = olapDiscoverService.getConnection(connectionName);
+		return connectionList;
+	}
+
+	@GetMapping("/refresh")
+	public List<SaikuConnection> refreshConnections(HttpSession session) {
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		olapDiscoverService.refreshAllConnections();
+		List<SaikuConnection> connections = olapDiscoverService.getAllConnections();
+		return connections;
+	}
+
+	@GetMapping("/{connection}/refresh")
+	public List<SaikuConnection> refreshConnection(HttpSession session,
+			@PathVariable("connection") String connectionName) {
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		olapDiscoverService.refreshConnection(connectionName);
+		List<SaikuConnection> connectionList = olapDiscoverService.getConnection(connectionName);
+		return connectionList;
 	}
 
 	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/metadata")
@@ -123,24 +135,191 @@ public class DiscoverController {
 		}
 		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
 
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		int userId = sessionUser.getUserId();
-		OlapDiscoverService olapDiscoverService = Config.getOlapDiscoverService(userId);
-
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
 		List<SaikuDimension> dimensions = olapDiscoverService.getAllDimensions(cube);
 		List<SaikuMember> measures = olapDiscoverService.getMeasures(cube);
 		Map<String, Object> properties = olapDiscoverService.getProperties(cube);
 		return new SaikuCubeMetadata(dimensions, measures, properties);
 	}
-	
-	@GetMapping("/refresh")
-	public List<SaikuConnection> refreshConnections(HttpSession session){
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		int userId = sessionUser.getUserId();
-		OlapDiscoverService olapDiscoverService = Config.getOlapDiscoverService(userId);
-		SaikuConnectionManager connectionManager = Config.getSaikuConnectionManager(userId);
-		
-		connectionManager.refreshAllConnections();
-		return olapDiscoverService.getAllConnections();
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/dimensions")
+	public List<SaikuDimension> getDimensions(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SaikuDimension> dimensions = olapDiscoverService.getAllDimensions(cube);
+		return dimensions;
 	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/dimensions/{dimension}")
+	public SaikuDimension getDimension(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName,
+			@PathVariable("dimension") String dimensionName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		SaikuDimension dimension = olapDiscoverService.getDimension(cube, dimensionName);
+		return dimension;
+	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/dimensions/{dimension}/hierarchies")
+	public List<SaikuHierarchy> getDimensionHierarchies(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName,
+			@PathVariable("dimension") String dimensionName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SaikuHierarchy> hierarchies = olapDiscoverService.getAllDimensionHierarchies(cube, dimensionName);
+		return hierarchies;
+	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/dimensions/{dimension}/hierarchies/{hierarchy}/levels")
+	public List<SaikuLevel> getHierarchy(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName,
+			@PathVariable("dimension") String dimensionName,
+			@PathVariable("hierarchy") String hierarchyName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SaikuLevel> levels = olapDiscoverService.getAllHierarchyLevels(cube, dimensionName, hierarchyName);
+		return levels;
+	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/dimensions/{dimension}/hierarchies/{hierarchy}/levels/{level}")
+	public List<SimpleCubeElement> getLevelMembers(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName,
+			@PathVariable("dimension") String dimensionName,
+			@PathVariable("hierarchy") String hierarchyName,
+			@PathVariable("level") String levelName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SimpleCubeElement> levelMembers = olapDiscoverService.getLevelMembers(cube, hierarchyName, levelName);
+		return levelMembers;
+	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/hierarchies/{hierarchy}/rootmembers")
+	public List<SaikuMember> getRootMembers(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName,
+			@PathVariable("hierarchy") String hierarchyName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SaikuMember> rootMembers = olapDiscoverService.getHierarchyRootMembers(cube, hierarchyName);
+		return rootMembers;
+	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/hierarchies/")
+	public List<SaikuHierarchy> getCubeHierarchies(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SaikuHierarchy> hierarchies = olapDiscoverService.getAllHierarchies(cube);
+		return hierarchies;
+	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/measures/")
+	public List<SaikuMember> getCubeMeasures(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SaikuMember> measures = olapDiscoverService.getMeasures(cube);
+		return measures;
+	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/member/{member}")
+	public SaikuMember getMember(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName,
+			@PathVariable("member") String memberName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		SaikuMember member = olapDiscoverService.getMember(cube, memberName);
+		return member;
+	}
+
+	@GetMapping("/{connection}/{catalog}/{schema}/{cube}/member/{member}/children")
+	public List<SaikuMember> getMemberChildren(HttpSession session,
+			@PathVariable("connection") String connectionName,
+			@PathVariable("catalog") String catalogName,
+			@PathVariable("schema") String schemaName,
+			@PathVariable("cube") String cubeName,
+			@PathVariable("member") String memberName) {
+
+		if ("null".equals(schemaName)) {
+			schemaName = "";
+		}
+		SaikuCube cube = new SaikuCube(connectionName, cubeName, cubeName, cubeName, catalogName, schemaName);
+
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
+		List<SaikuMember> children = olapDiscoverService.getMemberChildren(cube, memberName);
+		return children;
+	}
+
 }

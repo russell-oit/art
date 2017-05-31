@@ -32,18 +32,16 @@ import java.util.List;
 import java.util.Map;
 
 import mondrian.rolap.RolapConnection;
+import org.saiku.datasources.connection.IConnectionManager;
 
-public class OlapDiscoverService implements Serializable {
+public class OlapDiscoverService {
 
-	/**
-	 * SerialVersionUID
-	 */
-	private static final long serialVersionUID = 884682532600907574L;
+	private final OlapMetaExplorer metaExplorer;
+	private final IConnectionManager connectionManager;
 
-	private transient OlapMetaExplorer metaExplorer;
-
-	public void setMetaExplorer(OlapMetaExplorer metaExplorer) {
+	public OlapDiscoverService(OlapMetaExplorer metaExplorer, IConnectionManager connectionManager) {
 		this.metaExplorer = metaExplorer;
+		this.connectionManager = connectionManager;
 	}
 
 	public List<SaikuCube> getAllCubes() throws SaikuOlapException {
@@ -203,6 +201,14 @@ public class OlapDiscoverService implements Serializable {
 			throw new SaikuServiceException(e);
 		}
 		return properties;
+	}
+
+	public void refreshAllConnections() {
+		connectionManager.refreshAllConnections();
+	}
+
+	public void refreshConnection(String name) {
+		connectionManager.refreshConnection(name);
 	}
 
 }

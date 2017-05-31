@@ -30,15 +30,11 @@ import java.sql.SQLException;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.lang3.StringUtils;
-import org.saiku.olap.discover.OlapMetaExplorer;
 import org.saiku.olap.query2.ThinQuery;
 import org.saiku.service.olap.OlapDiscoverService;
 import org.saiku.service.olap.ThinQueryService;
 import org.saiku.service.util.exception.SaikuServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,6 +52,9 @@ public class QueryController {
 
 	@Autowired
 	private ReportService reportService;
+	
+	@Autowired
+	private DiscoverServiceHelper discoverServiceHelper;
 
 	@PostMapping("/{newQueryName}")
 	public ThinQuery createQuery(@PathVariable("newQueryName") String newQueryName,
@@ -85,10 +84,7 @@ public class QueryController {
 
 	@PostMapping("/execute")
 	public QueryResult execute(@RequestBody ThinQuery tq, HttpSession session) throws Exception {
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		int userId = sessionUser.getUserId();
-		OlapDiscoverService olapDiscoverService = Config.getOlapDiscoverService(userId);
-
+		OlapDiscoverService olapDiscoverService = discoverServiceHelper.getDiscoverService(session);
 		ThinQueryService thinQueryService = new ThinQueryService();
 		thinQueryService.setOlapDiscoverService(olapDiscoverService);
 
