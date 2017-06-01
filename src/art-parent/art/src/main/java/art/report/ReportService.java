@@ -258,26 +258,21 @@ public class ReportService {
 	}
 
 	/**
-	 * Returns the reports that a user can access from the reports page.
-	 * Excludes disabled reports and some report types e.g. lovs
+	 * Returns the reports that a user can access. Excludes disabled reports.
 	 *
 	 * @param userId the user id
-	 * @return available reports
+	 * @return accesible reports
 	 * @throws SQLException
 	 */
 	@Cacheable("reports")
-	public List<Report> getAvailableReports(int userId) throws SQLException {
-		logger.debug("Entering getAvailableReports: userId={}", userId);
+	public List<Report> getAccessibleReports(int userId) throws SQLException {
+		logger.debug("Entering getAccessibleReports: userId={}", userId);
 
 		String sql = SQL_SELECT_ALL
 				//only show active reports
 				+ " WHERE AQ.ACTIVE=1"
 				//don't show hidden reports
 				+ " AND AQ.HIDDEN<>1"
-				//don't show lov reports
-				+ " AND AQ.QUERY_TYPE NOT IN(?,?)"
-				//don't show job recipient reports
-				+ " AND AQ.QUERY_TYPE<>?"
 				+ " AND("
 				//user can run report if he has direct access to it
 				+ " EXISTS (SELECT *"
@@ -305,9 +300,6 @@ public class ReportService {
 				+ ")";
 
 		Object[] values = {
-			ReportType.LovDynamic.getValue(), //omitted report types
-			ReportType.LovStatic.getValue(),
-			ReportType.JobRecipients.getValue(),
 			userId, //user access to report
 			userId, //user group access to report
 			userId, //user access to report group
@@ -316,6 +308,38 @@ public class ReportService {
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, values);
+	}
+
+	/**
+	 * Returns the reports that a user can access from the reports page.
+	 * Excludes disabled reports and some report types e.g. lovs
+	 *
+	 * @param userId the user id
+	 * @return available reports
+	 * @throws SQLException
+	 */
+	@Cacheable("reports")
+	public List<Report> getDisplayReports(int userId) throws SQLException {
+		logger.debug("Entering getDisplayReports: userId={}", userId);
+
+		List<Report> accessibleReports = getAccessibleReports(userId);
+		List<Report> displayReports = new ArrayList<>();
+		
+		for (Report report : accessibleReports) {
+			ReportType reportType = report.getReportType();
+			switch (reportType) {
+				case LovDynamic:
+				case LovStatic:
+				case JobRecipients:
+				case SaikuConnection:
+					//do nothing. don't add to new list
+					break;
+				default:
+					displayReports.add(report);
+			}
+		}
+
+		return displayReports;
 	}
 
 	/**
@@ -990,7 +1014,8 @@ public class ReportService {
 		logger.debug("Entering getAvailableSaikuReports: userId={}", userId);
 
 		List<SaikuReport> saikuReports = new ArrayList<>();
-		List<Report> availableReports = getAvailableReports(userId);
+		List<Report> availableReports = getAccessibleReports(userId);
+		
 		for (Report report : availableReports) {
 			if (report.getReportType() == ReportType.SaikuMondrian) {
 				SaikuReport saikuReport = new SaikuReport();
@@ -1017,9 +1042,9 @@ public class ReportService {
 		logger.debug("Entering getAvailableSaikuConnectionReports: userId={}", userId);
 
 		List<Report> saikuConnectionReports = new ArrayList<>();
+		List<Report> availableReports = getAccessibleReports(userId);
 
-		List<Report> availableReports = getAvailableReports(userId);
-
+		//http://zetcode.com/articles/javafilterlist/
 		for (Report report : availableReports) {
 			if (report.getReportType() == ReportType.SaikuConnection) {
 				saikuConnectionReports.add(report);

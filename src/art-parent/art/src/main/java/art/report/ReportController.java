@@ -93,7 +93,7 @@ public class ReportController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			model.addAttribute("reports", reportService.getAvailableReports(sessionUser.getUserId()));
+			model.addAttribute("reports", reportService.getDisplayReports(sessionUser.getUserId()));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -139,7 +139,7 @@ public class ReportController {
 		List<Report> reports = null;
 
 		try {
-			reports = reportService.getAvailableReports(sessionUser.getUserId());
+			reports = reportService.getDisplayReports(sessionUser.getUserId());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 		}
