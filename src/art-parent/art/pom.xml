@@ -680,6 +680,7 @@
 			<artifactId>fop</artifactId>
 			<version>2.1</version>
 		</dependency>
+		<!-- saiku chart png, jpeg, pdf export -->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-transcoder</artifactId>
@@ -690,5 +691,12 @@
 			<artifactId>batik-codec</artifactId>
 			<version>1.8</version>
 		</dependency>
+		<!-- https://stackoverflow.com/questions/37899651/convert-a-svg-image-to-a-jpeg-image-using-apache-batik -->
+		<dependency>
+			<groupId>fr.avianey.apache-xmlgraphics</groupId>
+			<artifactId>batik</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<!-- saiku chart png, jpeg, pdf export -->
 	</dependencies>
 </project>
