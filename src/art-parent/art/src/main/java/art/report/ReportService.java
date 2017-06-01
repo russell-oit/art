@@ -1045,6 +1045,7 @@ public class ReportService {
 		List<Report> availableReports = getAccessibleReports(userId);
 
 		//http://zetcode.com/articles/javafilterlist/
+		//http://guidogarcia.net/blog/2011/10/29/java-different-ways-filter-collection/
 		for (Report report : availableReports) {
 			if (report.getReportType() == ReportType.SaikuConnection) {
 				saikuConnectionReports.add(report);
