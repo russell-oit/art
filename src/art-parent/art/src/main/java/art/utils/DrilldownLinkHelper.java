@@ -105,8 +105,9 @@ public class DrilldownLinkHelper implements Serializable {
 		}
 
 		try {
+			String encodedParamName = URLEncoder.encode(paramName, "UTF-8");
 			String encodedParamValue = URLEncoder.encode(paramValue, "UTF-8");
-			sb.append("&p-").append(paramName).append("=").append(encodedParamValue);
+			sb.append("&").append(ArtUtils.PARAM_PREFIX).append(encodedParamName).append("=").append(encodedParamValue);
 		} catch (UnsupportedEncodingException ex) {
 			throw new RuntimeException(ex);
 		}

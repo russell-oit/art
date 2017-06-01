@@ -19,6 +19,7 @@
  */
 var Settings = {
     VERSION: "Saiku-${version}",
+	RESOURCES_PATH: "",
     LICENSE: {},
     BIPLUGIN: false,
     BIPLUGIN5: false,

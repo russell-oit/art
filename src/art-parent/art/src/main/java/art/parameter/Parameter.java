@@ -393,7 +393,7 @@ public class Parameter implements Serializable {
 	 * @return the html element name that should be used for this parameter
 	 */
 	public String getHtmlElementName() {
-		return "p-" + name;
+		return ArtUtils.PARAM_PREFIX + name;
 	}
 
 	/**

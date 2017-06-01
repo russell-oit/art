@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 
 /**
- * Controller for saiku rest endpoints
+ * Controller for basic saiku rest endpoints
  *
  * @author Timothy Anyona
  */
@@ -72,7 +72,7 @@ public class SaikuRestController {
 	}
 
 	@GetMapping("/info")
-	public List<Plugin> info() {
+	public List<Plugin> info(HttpServletRequest request) {
 		ArrayList<Plugin> l = new ArrayList<>();
 		String filePath = Config.getAppPath() + File.separator + "saiku" + File.separator + "js"
 				+ File.separator + "saiku" + File.separator + "plugins" + File.separator;
@@ -83,6 +83,8 @@ public class SaikuRestController {
 				return new File(current, name).isDirectory();
 			}
 		});
+		
+		String contextPath= request.getContextPath();
 
 		if (directories != null && directories.length > 0) {
 			for (String d : directories) {
@@ -95,7 +97,8 @@ public class SaikuRestController {
 				if (subfiles != null) {
 					for (File s : subfiles) {
 						if (s.getName().equals("plugin.js")) {
-							Plugin p = new Plugin(s.getParentFile().getName(), "", "js/saiku/plugins/" + s.getParentFile().getName() + "/plugin.js");
+							String path = contextPath + "/saiku/js/saiku/plugins/" + s.getParentFile().getName() + "/plugin.js";
+							Plugin p = new Plugin(s.getParentFile().getName(), "", path);
 							l.add(p);
 						}
 					}
@@ -112,10 +115,12 @@ public class SaikuRestController {
 		uiSettings.put("VERSION", "saiku-art");
 		//locale can only be changed either manually in Settings.js
 		//or adding lang parameter to saiku index.html call
-		//or passing "language" attribute when beginning the session
-		//uiSettings.put("I18N_LOCALE", locale.toString());
+		//or passing "language" attribute when beginning the session?
+		uiSettings.put("I18N_LOCALE", locale.toString());
 		String restUrlRoot = request.getContextPath() + "/saiku2";
 		uiSettings.put("TOMCAT_WEBAPP", restUrlRoot);
+		String resourcesPath= request.getContextPath() + "/saiku/";
+		uiSettings.put("RESOURCES_PATH", resourcesPath);
 		return uiSettings;
 	}
 

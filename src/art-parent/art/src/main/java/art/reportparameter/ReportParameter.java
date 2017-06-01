@@ -355,7 +355,7 @@ public class ReportParameter implements Serializable {
 	 * @return the html element name to be used for this parameter
 	 */
 	public String getHtmlElementName() {
-		return "p-" + parameter.getName();
+		return ArtUtils.PARAM_PREFIX + parameter.getName();
 	}
 
 	/**
@@ -427,7 +427,7 @@ public class ReportParameter implements Serializable {
 		String[] idsArray = StringUtils.split(ids, ",");
 		List<String> idsList = new ArrayList<>();
 		for (String id : idsArray) {
-			String finalId = "#p-" + id;
+			String finalId = "#" + ArtUtils.PARAM_PREFIX + id;
 			idsList.add(finalId);
 		}
 

@@ -414,7 +414,7 @@ public class JobController {
 			String htmlParamName = entry.getKey();
 			logger.debug("htmlParamName='{}'", htmlParamName);
 
-			if (htmlParamName.startsWith("p-")) {
+			if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)) {
 				String[] paramValues = entry.getValue();
 				passedValues.put(htmlParamName, paramValues);
 			}

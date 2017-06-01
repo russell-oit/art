@@ -1715,7 +1715,7 @@ public class ReportJob implements org.quartz.Job {
 					break;
 				case "I":
 				case "M":
-					finalName = "p-" + name;
+					finalName = ArtUtils.PARAM_PREFIX + name;
 					break;
 				case "X":
 					finalName = name;

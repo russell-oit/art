@@ -28,17 +28,21 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
+import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -168,7 +172,7 @@ public class RunReportController {
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "analysis", reportParamsList);
+				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "jpivot", reportParamsList);
 
 				//can't use addFlashAttribute() as flash attributes aren't included as part of request parameters
 				redirectAttributes.addAllAttributes(request.getParameterMap());
@@ -176,6 +180,39 @@ public class RunReportController {
 				//doing this results in errors as a result of the runReport page being handled by jpivotError
 				//so use redirect
 				return "redirect:/showJPivot";
+			} else if (reportType == ReportType.SaikuMondrian) {
+				final int NOT_APPLICABLE = -1;
+				int totalTime = NOT_APPLICABLE;
+				int fetchTime = NOT_APPLICABLE;
+
+				ParameterProcessor paramProcessor = new ParameterProcessor();
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "saiku", reportParamsList);
+
+				List<String> parametersList = new ArrayList<>();
+				Map<String, String[]> requestParameters = request.getParameterMap();
+				for (Entry<String, String[]> entry : requestParameters.entrySet()) {
+					String paramName = entry.getKey();
+					String[] paramValues = entry.getValue();
+					if (StringUtils.startsWithIgnoreCase(paramName, ArtUtils.PARAM_PREFIX)) {
+						String encodedParamName = URLEncoder.encode(paramName, "UTF-8");
+						for (String paramValue : paramValues) {
+							String encodedParamValue = URLEncoder.encode(paramValue, "UTF-8");
+							String saikuParam = "param"
+									+ StringUtils.substring(encodedParamName, ArtUtils.PARAM_PREFIX.length())
+									+ "=" + encodedParamValue;
+							parametersList.add(saikuParam);
+						}
+					}
+				}
+
+				String parametersString = "";
+				if (!parametersList.isEmpty()) {
+					parametersString = "?" + StringUtils.join(parametersList, "&");
+				}
+
+				return "redirect:/saiku3/" + parametersString + "#query/open/" + reportId;
 			}
 
 			long totalTimeSeconds = 0;
@@ -403,7 +440,7 @@ public class RunReportController {
 
 					if (reportType == ReportType.TabularHeatmap) {
 						TabularHeatmapOptions options;
-						
+
 						String optionsString = report.getOptions();
 						if (StringUtils.isBlank(optionsString)) {
 							options = new TabularHeatmapOptions();
@@ -411,7 +448,7 @@ public class RunReportController {
 							ObjectMapper mapper = new ObjectMapper();
 							options = mapper.readValue(optionsString, TabularHeatmapOptions.class);
 						}
-						
+
 						request.setAttribute("options", options);
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/activateTabularHeatmap.jsp").include(request, response);
 					}

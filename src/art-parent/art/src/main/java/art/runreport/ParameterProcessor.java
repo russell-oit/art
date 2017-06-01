@@ -250,7 +250,7 @@ public class ParameterProcessor {
 			String htmlParamName = entry.getKey();
 			logger.debug("htmlParamName='{}'", htmlParamName);
 
-			if (htmlParamName.startsWith("p-")) { //use startswith instead of substring(0,2) because chrome passes a parameter "-" which causes StringIndexOutOfBoundsException. reported by yidong123
+			if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)) { //use startswith instead of substring(0,2) because chrome passes a parameter "-" which causes StringIndexOutOfBoundsException. reported by yidong123
 				//this is a report parameter. set it's value
 				String[] paramValues = entry.getValue();
 

@@ -28,6 +28,7 @@ import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
+import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import java.io.IOException;
 import java.io.StringReader;
@@ -491,11 +492,12 @@ public class DashboardController {
 			Map<String, String[]> requestParameters = request.getParameterMap();
 			for (Entry<String, String[]> entry : requestParameters.entrySet()) {
 				String htmlParamName = entry.getKey();
-				if (htmlParamName.startsWith("p-")) {
+				if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)) {
 					String[] paramValues = entry.getValue();
+					String encodedParamName = URLEncoder.encode(htmlParamName, "UTF-8");
 					for (String value : paramValues) {
 						String encodedParamValue = URLEncoder.encode(value, "UTF-8");
-						paramsSb.append("&").append(htmlParamName).append("=").append(encodedParamValue);
+						paramsSb.append("&").append(encodedParamName).append("=").append(encodedParamValue);
 					}
 				}
 			}
