@@ -12,6 +12,7 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <spring:message code="page.text.loading" var="loadingText"/>
+<spring:message code="page.title.analytics" var="pageTitle"/>
 
 <!DOCTYPE html>
 <html>
@@ -24,7 +25,7 @@
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>Saiku - Next Generation Open Source Analytics</title>
+    <title>ART - ${pageTitle}</title>
 
     <!--[if lt IE 9]><script type="text/javascript" src="${pageContext.request.contextPath}/saiku/js/svgweb/svg.js" data-path="js/svgweb/"></script><![endif]-->
     <meta name="svg.render.forceflash" content="true">
@@ -49,7 +50,8 @@
 
     <!-- CHOSEN CSS PLACEHOLDER-->
 
-    <link rel="shortcut icon" href="${pageContext.request.contextPath}/saiku/favicon.ico">
+    <!--<link rel="shortcut icon" href="${pageContext.request.contextPath}/saiku/favicon.ico">-->
+	<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 	
 	<!-- https://stackoverflow.com/questions/23509122/bootstrap-modal-overflowing-my-table-row -->
 	<style>
@@ -1015,13 +1017,6 @@ title="Drill across on cell"></a></li>
 </li>
 </ul>
 </script>
-<!-- https://sauce-dallas.blogspot.co.ke/2014/05/saiku-analytics-ui-customization-and.html -->
-<!--<script type="text/javascript" src="js/ga.js"></script>-->
-<!--<script>document.write('<script src="//'
-    + (location.host || 'localhost').split(':')[0]
-    + ':35729/livereload.js"></'
-    + 'script>')</script>-->
-
 
 </body>
 </html>
