@@ -380,6 +380,10 @@ Backbone.emulateHTTP = false;
  */
 if (!Settings.BIPLUGIN) {
     $(document).ready(function() {
+		//https://stackoverflow.com/questions/23510106/what-is-the-difference-between-url-vs-urlroot
+		var mainSettingsOverride = new MainSettingsOverride();
+		mainSettingsOverride.fetch();
+		
         var plugins = new PluginCollection();
 
         plugins.fetch({
@@ -393,8 +397,8 @@ if (!Settings.BIPLUGIN) {
 
                         plugins.each(function(log) {
                             j = j + 1;
-
-                            if (log.attributes.path !== 'js/saiku/plugins/I18n/plugin.js') {
+							
+                            if (log.attributes.path !== Settings.RESOURCES_PATH + 'js/saiku/plugins/I18n/plugin.js') {
                                 jQuery.ajax({
                                     async: false,
                                     type: 'GET',
@@ -470,7 +474,7 @@ if (!Settings.BIPLUGIN) {
                         plugins.each(function(log) {
                             j = j + 1;
 
-                            if (log.attributes.path !== 'js/saiku/plugins/I18n/plugin.js') {
+                            if (log.attributes.path !== Settings.RESOURCES_PATH + 'js/saiku/plugins/I18n/plugin.js') {
                                 jQuery.ajax({
                                     async: false,
                                     type: 'GET',

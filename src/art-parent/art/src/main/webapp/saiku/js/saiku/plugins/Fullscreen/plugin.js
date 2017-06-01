@@ -19,7 +19,7 @@ var Fullscreen = Backbone.Model.extend({
             return;
         var button =
             $('<a href="#fullscreen" id="fullscreen_icon" class="fullscreen button disabled_toolbar i18n" title="Fullscreen"></a>')
-            .css({  'background-image': "url('js/saiku/plugins/Fullscreen/fullscreen.png')",
+            .css({  'background-image': "url('" + Settings.RESOURCES_PATH + "js/saiku/plugins/Fullscreen/fullscreen.png')",
                     'background-repeat':'no-repeat',
                     'background-position':'50% 50%',
                     'background-size': '16px'

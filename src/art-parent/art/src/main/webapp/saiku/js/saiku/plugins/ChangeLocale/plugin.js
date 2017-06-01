@@ -62,7 +62,7 @@ var ChangeLocale = Backbone.View.extend({
     add_button: function () {
         var $chart_button =
             $('<a id="changeLocaleBtn" href="#changeLocale" class="i18n change_locale button disabled_toolbar sprite" title="Change locale"></a>')
-                .css({  'background-image': "url('js/saiku/plugins/ChangeLocale/images/change_locale.png')",
+                .css({  'background-image': "url('" + Settings.RESOURCES_PATH + "js/saiku/plugins/ChangeLocale/images/change_locale.png')",
                     'background-repeat': 'no-repeat',
                     'background-position': '7px 7px'
                 });

@@ -7,6 +7,12 @@
 <%-- https://stackoverflow.com/questions/5771742/underscore-js-templates-within-jsp --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
+
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+
+<spring:message code="page.text.loading" var="loadingText"/>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -62,7 +68,7 @@
         <span class="saiku_logo">&nbsp;</span>
         <div class="processing_content">
             <span class="processing_image">&nbsp;</span>
-            <span class="processing_message i18n">Loading...</span>
+            <span class="processing_message">${loadingText}...</span>
         </div>
     </div>
 </div>
@@ -285,7 +291,7 @@
 
 <script type="text/x-jquery-tmpl" id="template-upgrade">
             <div class="upgradeheader">
-                You are using Saiku Community Edition, please consider <a target="_blank" href="${pageContext.request.contextPath}/saiku/http://saiku.meteorite.bi/support">purchasing support, or entering a sponsorship agreement with us</a> to support development. <a href="${pageContext.request.contextPath}/saiku/mailto:info@meteorite.bi?subject=Supporting Saiku">info@meteorite.bi</a><span class="close_tab sprite"></span>
+                You are using Saiku Community Edition, please consider <a target="_blank" href="http://saiku.meteorite.bi/support">purchasing support, or entering a sponsorship agreement with us</a> to support development. <a href="mailto:info@meteorite.bi?subject=Supporting Saiku">info@meteorite.bi</a><span class="close_tab sprite"></span>
             </div>
         </script>
 <script type="text/x-jquery-tmpl" id="template-logincount">
@@ -322,14 +328,14 @@
         <\% if (dimension.name != 'Measures' && (typeof dimension["visible"] == "undefined" || dimension["visible"])) { %>
             <li class='parent_dimension'>
                 <span class="root collapsed sprite"></span>
-                <a class="folder_collapsed sprite" href="${pageContext.request.contextPath}/saiku/#" title="<\%= dimension.description ? dimension.description : dimension.caption %>"><\%= dimension.caption %></a>
+                <a class="folder_collapsed sprite" href="#" title="<\%= dimension.description ? dimension.description : dimension.caption %>"><\%= dimension.caption %></a>
                 <ul>
                 <\% _.each(dimension.hierarchies, function(hierarchy) { %>
                     <\% if (typeof hierarchy["visible"] == "undefined" || hierarchy["visible"]) { %>
                         <\% if ((Settings.DIMENSION_HIDE_HIERARCHY === 'NONE' && dimension.hierarchies.length > 1)
                         		|| (Settings.DIMENSION_HIDE_HIERARCHY === 'SINGLE_LEVEL' && ((Settings.DIMENSION_SHOW_ALL && hierarchy["levels"].length > 3) || (!Settings.DIMENSION_SHOW_ALL && hierarchy["levels"].length > 2)))) { %>
                             <li class="hierarchy hide">
-                                <a class="dimension" title="<\%= hierarchy.description ? hierarchy.description : hierarchy.caption %>" href="${pageContext.request.contextPath}/saiku/#"  hierarchy="<\%= hierarchy.name %>"><\%= hierarchy.caption %></a>
+                                <a class="dimension" title="<\%= hierarchy.description ? hierarchy.description : hierarchy.caption %>" href="#"  hierarchy="<\%= hierarchy.name %>"><\%= hierarchy.caption %></a>
                             </li>
                         <\% } %>
                         <ul class="d_hierarchy" hierarchy="<\%= hierarchy.uniqueName %>" hierarchycaption="<\%= hierarchy.caption %>">
@@ -338,7 +344,7 @@
                             <\% if ((Settings.DIMENSION_SHOW_ALL || level.name != "(All)") && (typeof level["visible"] == "undefined" || level["visible"])) { %>
                                 <li class="hide d_level">
                                 <a title="<\%= (Settings.DIMENSION_HIDE_HIERARCHY === 'SINGLE_LEVEL' || Settings.DIMENSION_HIDE_HIERARCHY === 'ALL') && dimension.hierarchies.length > 1? hierarchy.caption + ' - ' : '' %><\%= level.description ? level.description : level.caption %>" level="<\%= level.name %>" hierarchy="<\%= hierarchy.uniqueName %>"
-                                    class="level" href="${pageContext.request.contextPath}/saiku/#<\%= encodeURIComponent(hierarchy.uniqueName) %>/<\%= encodeURIComponent(level.name) %>"><\%= level.caption %></a>
+                                    class="level" href="#<\%= encodeURIComponent(hierarchy.uniqueName) %>/<\%= encodeURIComponent(level.name) %>"><\%= level.caption %></a>
                                 </li>
                             <\% } %>
                         <\% }); %>
@@ -358,13 +364,13 @@
                     <\% if(key != "null") { %>
                     <li class='parent_dimension'>
                     <span class="root <\%= Settings.MEASURE_GROUPS_COLLAPSED ? 'collapsed' : 'expand' %> sprite"></span>
-                      <a class="folder_expand sprite" href="${pageContext.request.contextPath}/saiku/#" title="<\%= key %>"><\%= key %></a>
+                      <a class="folder_expand sprite" href="#" title="<\%= key %>"><\%= key %></a>
                         <ul>
                         <\% _.each(group, function(measure) { %>
                         <\% if (typeof measure["visible"] == "undefined" || measure["visible"]) { %>
                         <li class="d_measure <\%= Settings.MEASURE_GROUPS_COLLAPSED ? 'hide' : '' %>"><a title="<\%= measure.description ? measure.description : measure.uniqueName %>"
                                 measure="<\%= measure.name %>" type="EXACT"
-                            class="measure" href="${pageContext.request.contextPath}/saiku/#Measures/member/<\%= encodeURIComponent(measure.uniqueName) %>"><\%= measure.caption %></a>
+                            class="measure" href="#Measures/member/<\%= encodeURIComponent(measure.uniqueName) %>"><\%= measure.caption %></a>
                         </li>
 
                         <\% } %>
@@ -374,13 +380,13 @@
                     <\% } else {%>
                     <li class='parent_dimension'>
                     <span class="root <\%= Settings.MEASURE_GROUPS_COLLAPSED ? 'collapsed' : 'expand' %> sprite"></span>
-                      <a class="folder_expand sprite" href="${pageContext.request.contextPath}/saiku/#" title=" "> </a>
+                      <a class="folder_expand sprite" href="#" title=" "> </a>
                         <ul>
                     <\% _.each(group, function(measure) { %>
 
                         <li class="d_measure <\%= Settings.MEASURE_GROUPS_COLLAPSED ? 'hide' : '' %>"><a title="<\%= measure.description ? measure.description : measure.uniqueName %>"
                                 measure="<\%= measure.name %>" type="EXACT"
-                            class="measure" href="${pageContext.request.contextPath}/saiku/#Measures/member/<\%= encodeURIComponent(measure.uniqueName) %>"><\%= measure.caption %></a>
+                            class="measure" href="#Measures/member/<\%= encodeURIComponent(measure.uniqueName) %>"><\%= measure.caption %></a>
                         </li>
 
                         <\% }); %>
@@ -394,14 +400,14 @@
         <ul>
             <li>
                 <span class="root expand sprite"></span>
-                   <a href="${pageContext.request.contextPath}/saiku/#" title="Calculated Measures" class="folder_expand sprite i18n">Calculated Measures</a>
+                   <a href="#" title="Calculated Measures" class="folder_expand sprite i18n">Calculated Measures</a>
                 <\% if (measures) { %>
                 <ul>
                 <\% _.each(measures, function(measure) { %>
 
                         <li class="d_measure"><a title="<\%= measure.name %>"
                                 measure="<\%= measure.name %>" type="CALCULATED"
-                            class="measure" href="${pageContext.request.contextPath}/saiku/#Measures/member/<\%= encodeURIComponent(measure.uniqueName) %>"><\%= measure.name %></a>
+                            class="measure" href="#Measures/member/<\%= encodeURIComponent(measure.uniqueName) %>"><\%= measure.name %></a>
                         </li>
 
                 <\% }); %>
@@ -413,7 +419,7 @@
 <script type="text/x-jquery-tmpl" id="template-calculated-member">
     <\% if (member) { %>
         <li class="hide d_level dimension-level-calcmember">
-            <a title="<\%= member.name %>" level="<\%= member.name %>" hierarchy="<\%= member.hierarchyName %>" uniquename="<\%= member.uniqueName %>" class="level level-calcmember" href="${pageContext.request.contextPath}/saiku/#<\%= encodeURIComponent(member.hierarchyName) %>/<\%= encodeURIComponent(member.name) %>" style="color: #1e7145;"><\%= member.name %></a>
+            <a title="<\%= member.name %>" level="<\%= member.name %>" hierarchy="<\%= member.hierarchyName %>" uniquename="<\%= member.uniqueName %>" class="level level-calcmember" href="#<\%= encodeURIComponent(member.hierarchyName) %>/<\%= encodeURIComponent(member.name) %>" style="color: #1e7145;"><\%= member.name %></a>
         </li>
     <\% } %>
 </script>
@@ -430,7 +436,7 @@
                     <span class="editor_info hide"></span>
 
                 </div>
-                <div id="query_processing" class="query_processing" style="display:none;"><span class="processing_image">&nbsp;&nbsp;</span> <span class="i18n">Running query...</span>  [&nbsp;<a class="cancel i18n" href="${pageContext.request.contextPath}/saiku/#cancel">Cancel</a>&nbsp;]</div>
+                <div id="query_processing" class="query_processing" style="display:none;"><span class="processing_image">&nbsp;&nbsp;</span> <span class="i18n">Running query...</span>  [&nbsp;<a class="cancel i18n" href="#cancel">Cancel</a>&nbsp;]</div>
 
                 <div class="workspace_results_info" align="right" />
                 <div class="workspace_results_titles" align="center"/>
@@ -443,7 +449,7 @@
             <div>
                 <h3 class="top i18n">Cubes</h3>
                 <div class="refresh_cubes_nav">
-                    <a id="refresh_icon" href="${pageContext.request.contextPath}/saiku/#refresh_cubes"
+                    <a id="refresh_icon" href="#refresh_cubes"
                         class="i18n button refresh_cubes"
                         title="Refresh Cubes (Clear Cache)"></a>
                 </div>
@@ -528,81 +534,81 @@
 
 <script type="text/x-jquery-tmpl" id="template-workspace-toolbar">
         <ul>
-            <li><a href="${pageContext.request.contextPath}/saiku/#open_query"
+            <li><a href="#open_query"
                 class="i18n open button sprite"
                 title="Open query" id="new_icon"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#save_query" id="save_icon"
+            <li><a href="#save_query" id="save_icon"
                 class="i18n save button disabled_toolbar sprite"
                 title="Save query"></a></li>
-            <li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#new_query"
+            <li class="seperator"><a href="#new_query"
                 class="i18n new disabled_toolbar button sprite"
                 title="Reset query"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#edit_query"
+            <li><a href="#edit_query"
                 class="i18n edit button on disabled_toolbar sprite"
                 title="Edit query" id="edit_icon"></a></li>
-            <li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#run_query" id="run_icon"
+            <li class="seperator"><a href="#run_query" id="run_icon"
                 class="i18n run button disabled_toolbar sprite"
                 title="Run query"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#automatic_execution" id="automatic_icon"
+            <li><a href="#automatic_execution" id="automatic_icon"
                 class="i18n auto button disabled_toolbar sprite"
                 title="Automatic execution"></a></li>
 <!--
-            <li><a href="${pageContext.request.contextPath}/saiku/#toggle_fields"
+            <li><a href="#toggle_fields"
                 class="i18n toggle_fields button sprite"
                 title="Toggle fields"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#toggle_sidebar"
+            <li><a href="#toggle_sidebar"
                 class="i18n toggle_sidebar button sprite"
                 title="Toggle sidebar"></a></li>
 -->
-            <li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#group_parents" id="group_icon"
+            <li class="seperator"><a href="#group_parents" id="group_icon"
                 class="i18n group_parents button disabled_toolbar sprite"
                 title="Hide Parents"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#non_empty" id="non_empty_icon"
+            <li><a href="#non_empty" id="non_empty_icon"
                 class="i18n non_empty button disabled_toolbar sprite"
                 title="Non-empty"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#swap_axis" id="swap_axis_icon"
+            <li><a href="#swap_axis" id="swap_axis_icon"
                 class="i18n swap_axis button disabled_toolbar sprite"
                 title="Swap axis"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#show_mdx" id="show_mdx_icon"
+            <li><a href="#show_mdx" id="show_mdx_icon"
                 class="i18n mdx button disabled_toolbar sprite"
                 title="Show MDX"></a></li>
-            <!-- <li><a href="${pageContext.request.contextPath}/saiku/#explain_query"
+            <!-- <li><a href="#explain_query"
                 class="i18n explain_query button disabled_toolbar sprite"
                 title="Show Explain Plan"></a></li> -->
-            <li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#zoom_mode" id="zoom_mode_icon"
+            <li class="seperator"><a href="#zoom_mode" id="zoom_mode_icon"
                 class="i18n table_mode zoom_mode button disabled_toolbar"
                 title="Zoom into table"></a></li>
-            <li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#query_scenario"
+            <li class="seperator"><a href="#query_scenario"
                 class="i18n table_mode query_scenario button disabled_toolbar sprite"
                 title="Query Scenario"></a></li>
             <\% if (Settings.USER_TITLES == true) { %>
-            <li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#workspace_titles"
+            <li class="seperator"><a href="#workspace_titles"
                 class="i18n workspace_titles button disabled_toolbar sprite"
                 title="Titles"></a></li>
                 <\% } %>
-	<li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#drillacross" id="drillacross_icon"
+	<li class="seperator"><a href="#drillacross" id="drillacross_icon"
 class="i18n table_mode drillacross button disabled_toolbar sprite"
 title="Drill across on cell"></a></li>
-            <li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#drillthrough" id="drillthrough_icon"
+            <li class="seperator"><a href="#drillthrough" id="drillthrough_icon"
                 class="i18n table_mode drillthrough button disabled_toolbar sprite"
                 title="Drill through on cell"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#export_drillthrough" id="export_drillthrough_icon"
+            <li><a href="#export_drillthrough" id="export_drillthrough_icon"
                 class="i18n table_mode drillthrough_export button disabled_toolbar sprite"
                 title="Export Drill-Through on cell to CSV"></a></li>
-            <li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#export_xls" id="export_xls_icon"
+            <li class="seperator"><a href="#export_xls" id="export_xls_icon"
                 class="i18n export_xls button disabled_toolbar sprite"
                 title="Export XLS"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#export_csv" id="export_csv_icon"
+            <li><a href="#export_csv" id="export_csv_icon"
                 class="i18n export_csv button disabled_toolbar sprite"
                 title="Export CSV"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#export_pdf" id="export_pdf_icon"
+            <li><a href="#export_pdf" id="export_pdf_icon"
                 class="i18n export_pdf button disabled_toolbar sprite"
                 title="EXPERIMENTAL: Export PDF"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#switch_to_mdx" id="switch_to_mdx_icon"
+            <li><a href="#switch_to_mdx" id="switch_to_mdx_icon"
                 class="i18n switch_to_mdx button disabled_toolbar"
                 title="Switch to MDX Mode"></a></li>
             <\% if (Settings.BIPLUGIN5 == true) { %>
-            <li class="seperator"><a href="${pageContext.request.contextPath}/saiku/#about"
+            <li class="seperator"><a href="#about"
                 class="i18n about button sprite"
                 title="About"></a></li>
              <\% } %>
@@ -613,23 +619,23 @@ title="Drill across on cell"></a></li>
 <script type="text/x-jquery-tmpl" id="template-query-toolbar">
         <div class="query_toolbar_vertical">
         <ul class="renderer">
-            <li><a href="${pageContext.request.contextPath}/saiku/#switch_render_button" id="table_icon"
+            <li><a href="#switch_render_button" id="table_icon"
                 class="i18n render_table button disabled_toolbar on"
                 title="Table Mode"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#switch_render_button" id="chart_icon"
+            <li><a href="#switch_render_button" id="chart_icon"
                 class="i18n render_chart button disabled_toolbar"
                 title="Chart Mode"></a></li>
         </ul>
         <ul class='options table hide'>
                         <!--<li class="seperator_vertical label"><a class="i18n label disabled_toolbar">Options:</a></li> -->
 
-            <li class="seperator_vertical"><a href="${pageContext.request.contextPath}/saiku/#spark_bar" id="spark_bar_icon"
+            <li class="seperator_vertical"><a href="#spark_bar" id="spark_bar_icon"
                 class="i18n spark_bar tablebutton button disabled_toolbar"
                 title="Spark Bar"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#spark_line" id="spark_line_icon"
+            <li><a href="#spark_line" id="spark_line_icon"
                 class="i18n spark_line button disabled_toolbar"
                 title="Spark Line"></a></li>
-           <!-- <li><a href="${pageContext.request.contextPath}/saiku/#asdf"
+           <!-- <li><a href="#asdf"
                 class="i18n button disabled_toolbar"
                 title="Spark Lines">Show Totals</a></li> -->
 
@@ -637,49 +643,49 @@ title="Drill across on cell"></a></li>
         <ul class='options chart hide'>
             <li class="seperator_vertical"><a href ="#export_button"
                 class="disabled_toolbar export_button menu button"><span class="i18n">Export</span><span class="dropdown"></span></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#bar"
+            <li><a href="#bar"
                 class="i18n bar chartoption button disabled_toolbar"
                 title="Bar"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#stackedBar"
+            <li><a href="#stackedBar"
                 class="i18n stackedBar chartoption on button disabled_toolbar"
                 title="Stacked Bar"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#stackedBar100"
+            <li><a href="#stackedBar100"
                 class="i18n stackedBar100 chartoption button disabled_toolbar"
                 title="Bar 100%"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#multiplebar"
+            <li><a href="#multiplebar"
                 class="i18n multiple chartoption button disabled_toolbar"
                 title="Multiple Bar Chart"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#line"
+            <li><a href="#line"
                 class="i18n line chartoption button disabled_toolbar"
                 title="Line"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#area"
+            <li><a href="#area"
                 class="i18n area chartoption button disabled_toolbar"
                 title="Area"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#heatgrid"
+            <li><a href="#heatgrid"
                 class="i18n heatgrid chartoption button disabled_toolbar"
                 title="Heat Grid"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#treemap"
+            <li><a href="#treemap"
                 class="i18n treemap chartoption button disabled_toolbar"
                 title="Tree Map"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#sunburst"
+            <li><a href="#sunburst"
                 class="i18n sunburst chartoption button disabled_toolbar"
                 title="Sunburst"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#multiplesunburst"
+            <li><a href="#multiplesunburst"
                 class="i18n multiplesunburst chartoption button disabled_toolbar"
                 title="Multi Sunburst"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#dot"
+            <li><a href="#dot"
                 class="i18n dot chartoption button disabled_toolbar"
                 title="Dot"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#waterfall"
+            <li><a href="#waterfall"
                 class="i18n waterfall chartoption button disabled_toolbar"
                 title="Waterfall"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#pie"
+            <li><a href="#pie"
                 class="i18n pie chartoption button disabled_toolbar"
                 title="Pie"></a></li>
-            <li><a href="${pageContext.request.contextPath}/saiku/#radar"
+            <li><a href="#radar"
                 class="i18n radar chartoption button disabled_toolbar"
                 title="Radar"></a></li>
-           <!-- <li><a href="${pageContext.request.contextPath}/saiku/#chart_editor"
+           <!-- <li><a href="#chart_editor"
                 class="i18n custom_chart button disabled_toolbar"
                 title="Custom">Custom</a></li> -->
         </ul>
@@ -691,15 +697,15 @@ title="Drill across on cell"></a></li>
                 <div class="workspace_inner" style="margin-left: 305px">
                     <div class="workspace_toolbar hide">
                     <ul>
-                        <li class='for_queries hide'><a href="${pageContext.request.contextPath}/saiku/#open_query" class="run button sprite"></a></li>
-                        <li class='for_queries hide'><a href="${pageContext.request.contextPath}/saiku/#edit_query" class="edit button sprite"></a></li>
-                        <li class='for_queries hide'><a href="${pageContext.request.contextPath}/saiku/#delete_query" class="delete button sprite"></a></li>
-                        <li class='for_queries hide'><a href="${pageContext.request.contextPath}/saiku/#edit_permissions" class="edit_permissions button sprite"></a></li>
+                        <li class='for_queries hide'><a href="#open_query" class="run button sprite"></a></li>
+                        <li class='for_queries hide'><a href="#edit_query" class="edit button sprite"></a></li>
+                        <li class='for_queries hide'><a href="#delete_query" class="delete button sprite"></a></li>
+                        <li class='for_queries hide'><a href="#edit_permissions" class="edit_permissions button sprite"></a></li>
                         <!--
-                        <li class='for_folder hide'><a href="${pageContext.request.contextPath}/saiku/#edit_folder" class="edit_folder button"></a></li>
+                        <li class='for_folder hide'><a href="#edit_folder" class="edit_folder button"></a></li>
                         -->
-                        <li class='for_folder hide'><a href="${pageContext.request.contextPath}/saiku/#delete_folder" class="delete button sprite"></a></li>
-                        <li class='for_folder hide'><a href="${pageContext.request.contextPath}/saiku/#edit_permissions" class="edit_permissions button sprite"></a></li>
+                        <li class='for_folder hide'><a href="#delete_folder" class="delete button sprite"></a></li>
+                        <li class='for_folder hide'><a href="#edit_permissions" class="edit_permissions button sprite"></a></li>
                     </ul>
                     </div>
                     <div class="workspace_results">
@@ -741,7 +747,7 @@ title="Drill across on cell"></a></li>
                 <li class='folder'>
                     <div class='folder_row'>
                         <span class='sprite folder collapsed'></span>
-                        <a href="${pageContext.request.contextPath}/saiku/#<\%= entry.path %>"><\%= entry.name %></a>
+                        <a href="#<\%= entry.path %>"><\%= entry.name %></a>
                     </div>
 
                     <ul class='hide folder_content'>
@@ -753,7 +759,7 @@ title="Drill across on cell"></a></li>
                 <li class='folder'>
                     <div class='folder_row'>
                         <span class='sprite folder collapsed'></span>
-                        <a href="${pageContext.request.contextPath}/saiku/#<\%= entry.path %>"><\%= entry.name %></a>
+                        <a href="#<\%= entry.path %>"><\%= entry.name %></a>
                     </div>
                 </li>
             <\% } %>
@@ -772,7 +778,7 @@ title="Drill across on cell"></a></li>
             <\% } else { %>
                 <span class='icon'></span>
             <\% } %>
-                <a href="${pageContext.request.contextPath}/saiku/#<\%= entry.path %>"><\%= entry.name %></a>
+                <a href="#<\%= entry.path %>"><\%= entry.name %></a>
             </li>
         </script>
 
@@ -786,11 +792,11 @@ title="Drill across on cell"></a></li>
                     <div class="selection_options" ><ul></ul></div>
             </div>
             <div class="selection_buttons">
-                <a class="form_button btn btn-default" href="${pageContext.request.contextPath}/saiku/#move_selection" id="add_members">&nbsp;&gt;&nbsp;
+                <a class="form_button btn btn-default" href="#move_selection" id="add_members">&nbsp;&gt;&nbsp;
                 </a><br><br>
-                <a class="form_button btn btn-default" href="${pageContext.request.contextPath}/saiku/#move_selection" id="add_all_members">&gt;&gt;</a><br><br>
-                <a class="form_button btn btn-default" href="${pageContext.request.contextPath}/saiku/#move_selection" id="remove_all_members">&lt;&lt;</a><br><br>
-                <a class="form_button btn btn-default" href="${pageContext.request.contextPath}/saiku/#move_selection" id="remove_members">&nbsp;&lt;&nbsp;</a>
+                <a class="form_button btn btn-default" href="#move_selection" id="add_all_members">&gt;&gt;</a><br><br>
+                <a class="form_button btn btn-default" href="#move_selection" id="remove_all_members">&lt;&lt;</a><br><br>
+                <a class="form_button btn btn-default" href="#move_selection" id="remove_members">&nbsp;&lt;&nbsp;</a>
             </div>
             <div class="used_selections form-inline caption">
                 <span class="i18n">Used members:</span>
@@ -803,8 +809,8 @@ title="Drill across on cell"></a></li>
                     <div class="selection_options" ><ul></ul></div>
             </div>
             <div class="updown_buttons">
-                <a class="form_button" href="${pageContext.request.contextPath}/saiku/#up" id="up_members">&nbsp;&uarr;&nbsp;</a><br><br>
-                <a class="form_button" href="${pageContext.request.contextPath}/saiku/#down" id="down_members">&nbsp;&darr;&nbsp;</a><br><br>
+                <a class="form_button" href="#up" id="up_members">&nbsp;&uarr;&nbsp;</a><br><br>
+                <a class="form_button" href="#down" id="down_members">&nbsp;&darr;&nbsp;</a><br><br>
             </div>
 
             <div class="options form-inline">
@@ -964,13 +970,13 @@ title="Drill across on cell"></a></li>
 <li class='parent_dimension'>
 <span class="root collapsed sprite"></span>
 <input type="checkbox" class="check_dimension" />
-<a class="folder_collapsed sprite" href="${pageContext.request.contextPath}/saiku/#" title="<\%= dimension.description ? dimension.description : dimension.caption %>"><\%= dimension.caption %></a>
+<a class="folder_collapsed sprite" href="#" title="<\%= dimension.description ? dimension.description : dimension.caption %>"><\%= dimension.caption %></a>
 <ul>
 <\% _.each(dimension.hierarchies, function(hierarchy) { %>
 <\% if (typeof hierarchy["visible"] == "undefined" || hierarchy["visible"]) { %>
 <\% if (dimension.hierarchies.length > 1) { %>
 <li class="hierarchy hide">
-<a class="dimension" title="<\%= hierarchy.description ? hierarchy.description : hierarchy.caption %>" href="${pageContext.request.contextPath}/saiku/#" key="<\%= dimension.name %>###<\%= hierarchy.name %>"><\%= hierarchy.caption %></a>
+<a class="dimension" title="<\%= hierarchy.description ? hierarchy.description : hierarchy.caption %>" href="#" key="<\%= dimension.name %>###<\%= hierarchy.name %>"><\%= hierarchy.caption %></a>
 </li>
 <\% } %>
 <\% } %>
@@ -994,7 +1000,7 @@ title="Drill across on cell"></a></li>
 <ul>
 <li>
 <span class="root expand sprite"></span>
-<a href="${pageContext.request.contextPath}/saiku/#" title="Measures" class="folder_expand i18n sprite">Measures</a>
+<a href="#" title="Measures" class="folder_expand i18n sprite">Measures</a>
 <ul>
 <\% _.each(measures, function(measure) { %>
 <\% if (typeof measure["visible"] == "undefined" || measure["visible"]) { %>
@@ -1010,8 +1016,8 @@ title="Drill across on cell"></a></li>
 </ul>
 </script>
 <!-- https://sauce-dallas.blogspot.co.ke/2014/05/saiku-analytics-ui-customization-and.html -->
-<!--<script type="text/javascript" src="${pageContext.request.contextPath}/saiku/js/ga.js"></script>-->
-<!--<script>document.write('<script src="${pageContext.request.contextPath}/saiku///'
+<!--<script type="text/javascript" src="js/ga.js"></script>-->
+<!--<script>document.write('<script src="//'
     + (location.host || 'localhost').split(':')[0]
     + ':35729/livereload.js"></'
     + 'script>')</script>-->

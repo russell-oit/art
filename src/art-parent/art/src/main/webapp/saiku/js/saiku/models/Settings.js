@@ -22,3 +22,11 @@ var SettingsOverrideCollection = Backbone.Collection.extend({
     model: SettingsOverride,
     url: 'info/ui-settings'
 });
+
+var MainSettingsOverride = Backbone.Model.extend({
+   urlRoot: 'info/main-settings',
+	parse: function (response) {
+		$.extend(Settings,response);
+	}
+   
+});

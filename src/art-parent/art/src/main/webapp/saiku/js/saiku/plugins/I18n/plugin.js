@@ -49,7 +49,7 @@ Saiku.i18n = {
 
         if (Saiku.i18n.locale != "en") {
             $.ajax({
-                url: "js/saiku/plugins/I18n/po/" + Saiku.i18n.locale + ".json",
+                url: Settings.RESOURCES_PATH + "js/saiku/plugins/I18n/po/" + Saiku.i18n.locale + ".json",
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {

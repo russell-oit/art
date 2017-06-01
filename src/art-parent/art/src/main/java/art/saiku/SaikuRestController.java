@@ -23,6 +23,7 @@ import art.utils.ArtUtils;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -109,19 +110,26 @@ public class SaikuRestController {
 	}
 
 	@GetMapping("/info/ui-settings")
-	public Map<String, Object> getUiSettings(Locale locale, HttpServletRequest request) {
-		//optionally override properties of the Settings object in /saiku/js/saiku/Settings.js
-		Map<String, Object> uiSettings = new HashMap<>();
-		uiSettings.put("VERSION", "saiku-art");
-		//locale can only be changed either manually in Settings.js
-		//or adding lang parameter to saiku index.html call
-		//or passing "language" attribute when beginning the session?
-		uiSettings.put("I18N_LOCALE", locale.toString());
+	public Map<String, Object> overrideUiSettings() {
+		//not sure how this works with respect to overriding properties of the Settings object in /saiku/js/saiku/Settings.js, or other properties?
+		//created new end point - /info/main-settings to specifically do override of Settings before anything else is done
+		return Collections.emptyMap();
+	}
+	
+	@GetMapping("/info/main-settings")
+	public Map<String, Object> overrideMainSettings(Locale locale, HttpServletRequest request) {
+		Map<String, Object> settings = new HashMap<>();
+		settings.put("VERSION", "saiku-art");
+		//locale can be changed either manually in Settings.js
+		//or adding lang parameter when calling index.html
+		//or passing "language" attribute when beginning the session
+		//or through this newly added main-settings end point, updating the Settings object
+		settings.put("I18N_LOCALE", locale.toString());
 		String restUrlRoot = request.getContextPath() + "/saiku2";
-		uiSettings.put("TOMCAT_WEBAPP", restUrlRoot);
+		settings.put("TOMCAT_WEBAPP", restUrlRoot);
 		String resourcesPath= request.getContextPath() + "/saiku/";
-		uiSettings.put("RESOURCES_PATH", resourcesPath);
-		return uiSettings;
+		settings.put("RESOURCES_PATH", resourcesPath);
+		return settings;
 	}
 
 }

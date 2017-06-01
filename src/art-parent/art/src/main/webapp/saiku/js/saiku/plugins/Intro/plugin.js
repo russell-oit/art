@@ -88,7 +88,7 @@ Saiku.intro = {
     }
 
     $.ajax({
-      url: 'js/saiku/plugins/Intro/steps/' + self.fileName + '.json',
+      url: Settings.RESOURCES_PATH + 'js/saiku/plugins/Intro/steps/' + self.fileName + '.json',
       type: 'GET',
       dataType: 'json',
       success: function(data) {
