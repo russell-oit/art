@@ -813,7 +813,7 @@ var Workspace = Backbone.View.extend({
         var self = this;
 
         dimlist.workspace.sync_query();
-        //return false;
+        //return false; //Timothy Anyona. commented out. was meant to be there? what of all the code after? check in future versions.
 
         if (this.other_dimension) {
         // Populate selections - trust me, this is prettier than it was :-/
