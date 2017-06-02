@@ -10,6 +10,8 @@
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="page.text.loading" var="loadingText"/>
 <spring:message code="page.title.analytics" var="pageTitle"/>
@@ -47,11 +49,15 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/saiku/css/saiku/src/styles.css" type="text/css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/saiku/css/saiku/src/saiku.table.css" type="text/css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/saiku/css/saiku/src/saiku.dropzone.css" type="text/css">
-
+	
     <!-- CHOSEN CSS PLACEHOLDER-->
 
     <!--<link rel="shortcut icon" href="${pageContext.request.contextPath}/saiku/favicon.ico">-->
 	<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
+	
+	<!--<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">-->
+<!--	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>-->
 	
 	<!-- https://stackoverflow.com/questions/23509122/bootstrap-modal-overflowing-my-table-row -->
 	<style>
@@ -270,6 +276,7 @@
 
 <!-- Templates -->
 <script type="text/x-jquery-tmpl" id="template-toolbar">
+
             <ul>
                     <li><a id='new_query' href='#new_query' title='New query' class='new_tab i18n sprite'></a></li>
                     <li class='separator'>&nbsp;</li>
@@ -426,6 +433,8 @@
     <\% } %>
 </script>
 <script type="text/x-jquery-tmpl" id="template-workspace">
+
+				
         <div class="workspace">
             <div class="workspace_inner">
                 <div class="query_toolbar"></div>
@@ -468,6 +477,8 @@
 
         <div class="sidebar_separator"></div>
         <div class="clear"></div>
+		
+
         </script>
 
 <script type="text/x-jquery-tmpl" id="template-attributes">
