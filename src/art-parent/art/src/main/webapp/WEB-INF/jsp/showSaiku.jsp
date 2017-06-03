@@ -276,7 +276,7 @@
 
 <!-- Templates -->
 <script type="text/x-jquery-tmpl" id="template-toolbar">
-
+		<div id="toolbar">
             <ul>
                     <li><a id='new_query' href='#new_query' title='New query' class='new_tab i18n sprite'></a></li>
                     <li class='separator'>&nbsp;</li>
@@ -296,6 +296,7 @@
             </ul>
 
             <\%= data.logo %>
+			</div>
         </script>
 
 <script type="text/x-jquery-tmpl" id="template-upgrade">
@@ -732,7 +733,6 @@ title="Drill across on cell"></a></li>
                     <label class="i18n">Search:</label> &nbsp;
                         <input type="text" class="search_file2 form-control" style="padding-right:0px"></input>
                         <span class="cancel_search"></span>
-                    <span class="add_folder_button"><a href='#' class='add_folder'></a></span>
                     </div>
                 </h3>
                 <div class="sidebar_inner">
