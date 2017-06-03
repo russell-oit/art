@@ -94,7 +94,7 @@ div[class="tooltip-inner"] {
 }*/
 
 /* add padding to navbar so that main body content isn't hidden under it */
-#header{
+#pageHeader{
 	padding-bottom: 60px;
 }
 
