@@ -33,7 +33,7 @@ var OpenQuery = Backbone.View.extend({
         'click .workspace_toolbar [href=#delete_query]': 'delete_repoObject',
         'click .workspace_toolbar [href=#edit_permissions]': 'edit_permissions',
         'click .queries' : 'click_canvas',
-        'keyup .search_file' : 'search_file',
+        'keyup .search_file2' : 'search_file',
         'click .cancel_search' : 'cancel_search'
     },
 
@@ -178,12 +178,12 @@ var OpenQuery = Backbone.View.extend({
     },
 
     search_file: function(event) {
-        var filter = $(this.el).find('.search_file').val().toLowerCase();
+        var filter = $(this.el).find('.search_file2').val().toLowerCase();
         var isEmpty = (typeof filter == "undefined" || filter === "" || filter === null);
         if (isEmpty || event.which == 27 || event.which == 9) {
             this.cancel_search();
         } else {
-            if ($(this.el).find('.search_file').val()) {
+            if ($(this.el).find('.search_file2').val()) {
                 $(this.el).find('.cancel_search').show();
             } else {
                 $(this.el).find('.cancel_search').hide();
@@ -205,7 +205,7 @@ var OpenQuery = Backbone.View.extend({
         return false;
     },
     cancel_search: function(event) {
-        $(this.el).find('input.search_file').val('');
+        $(this.el).find('input.search_file2').val('');
         $(this.el).find('.cancel_search').hide();
         $(this.el).find('li.query, li.folder').removeClass('hide');
         $(this.el).find( '.folder_row' ).find('.sprite').addClass( 'collapsed' );
