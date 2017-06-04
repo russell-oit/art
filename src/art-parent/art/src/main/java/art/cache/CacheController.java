@@ -79,8 +79,11 @@ public class CacheController {
 			message = "Unknown cache: " + id;
 		} else {
 			switch (cacheType) {
-				case Mondrian:
-					cacheHelper.clearMondrian();
+				case JPivot:
+					cacheHelper.clearJPivot();
+					break;
+				case Saiku:
+					cacheHelper.clearSaiku();
 					break;
 				case Reports:
 					cacheHelper.clearReports();

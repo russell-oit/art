@@ -41,10 +41,10 @@ public class CacheHelper {
 	private static final Logger logger = LoggerFactory.getLogger(CacheHelper.class);
 
 	/**
-	 * Clears all mondrian caches
+	 * Clears mondrian caches used by jpivot
 	 */
-	public void clearMondrian() {
-		logger.debug("Entering clearMondrian");
+	public void clearJPivot() {
+		logger.debug("Entering clearJPivot");
 
 		List<RolapSchema> schemas = RolapSchema.getRolapSchemas();
 		for (RolapSchema schema : schemas) {
@@ -72,6 +72,14 @@ public class CacheHelper {
 				logger.error("Error while closing writer", ex);
 			}
 		}
+	}
+	
+	/**
+	 * Clears mondrian caches used in saiku connections
+	 */
+	public void clearSaiku(){
+		logger.debug("Entering clearSaiku");
+		Config.refreshSaikuConnections();
 	}
 
 	/**
@@ -170,7 +178,8 @@ public class CacheHelper {
 	public void clearAll() {
 		logger.debug("Entering clearAll");
 		
-		clearMondrian();
+		clearJPivot();
+		clearSaiku();
 	}
 
 }

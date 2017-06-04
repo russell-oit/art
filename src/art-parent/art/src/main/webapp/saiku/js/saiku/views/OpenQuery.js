@@ -231,7 +231,6 @@ var OpenQuery = Backbone.View.extend({
 		$( this.el ).find( '.for_queries .run' ).parent().removeClass( 'hide' );
 		 $( this.el ).find( '.for_queries .delete' ).parent().removeClass( 'hide' );
             $( this.el ).find( '.for_queries .edit' ).parent().removeClass( 'hide' );
-		$( this.el ).find( '.for_queries .edit_permissions' ).parent().removeClass( 'hide' );
 		
 //        if (typeof query.acl != "undefined" && _.indexOf(query.acl, "READ") > -1) {
 //		 $( this.el ).find( '.for_queries .run' ).parent().removeClass( 'hide' );

@@ -18,8 +18,6 @@
 package art.saiku;
 
 import art.servlets.Config;
-import art.user.User;
-import art.utils.ArtUtils;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
@@ -29,50 +27,20 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import org.saiku.olap.util.exception.SaikuOlapException;
 import org.saiku.service.util.dto.Plugin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
 
 /**
- * Controller for basic saiku rest endpoints
  *
  * @author Timothy Anyona
  */
 @RestController
-@RequestMapping("/saiku2/rest/saiku")
-public class SaikuRestController {
-
-	@PostMapping("/session")
-	public void login(HttpSession session, Locale locale) {
-		//do nothing. user already authenticated by art
-	}
-
-	private Map<String, Object> createSessionDetails(HttpSession session, Locale locale)
-			throws IllegalStateException {
-
-		Map<String, Object> sessionDetails = new HashMap<>();
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		sessionDetails.put("username", sessionUser.getUsername());
-		sessionDetails.put("sessionid", ArtUtils.getUniqueId());
-		sessionDetails.put("authid", RequestContextHolder.currentRequestAttributes().getSessionId());
-		List<String> roles = new ArrayList<>();
-		sessionDetails.put("roles", roles);
-		sessionDetails.put("language", locale.toString());
-		return sessionDetails;
-	}
-
-	@GetMapping("/session")
-	public Map<String, Object> getSessionDetails(HttpSession session, Locale locale) throws SaikuOlapException {
-		Map<String, Object> saikuSessionDetails = createSessionDetails(session, locale);
-		return saikuSessionDetails;
-	}
-
-	@GetMapping("/info")
+@RequestMapping("/saiku2/rest/saiku/info")
+public class InfoController {
+	
+	@GetMapping()
 	public List<Plugin> info(HttpServletRequest request) {
 		ArrayList<Plugin> l = new ArrayList<>();
 		String filePath = Config.getAppPath() + File.separator + "saiku" + File.separator + "js"
@@ -109,14 +77,14 @@ public class SaikuRestController {
 		return l;
 	}
 
-	@GetMapping("/info/ui-settings")
+	@GetMapping("/ui-settings")
 	public Map<String, Object> overrideUiSettings() {
 		//not sure how this works with respect to overriding properties of the Settings object in /saiku/js/saiku/Settings.js, or other properties?
 		//created new end point - /info/main-settings to specifically do override of Settings before anything else is done
 		return Collections.emptyMap();
 	}
 	
-	@GetMapping("/info/main-settings")
+	@GetMapping("/main-settings")
 	public Map<String, Object> overrideMainSettings(Locale locale, HttpServletRequest request) {
 		Map<String, Object> settings = new HashMap<>();
 		settings.put("VERSION", "saiku-art");
@@ -129,7 +97,8 @@ public class SaikuRestController {
 		settings.put("TOMCAT_WEBAPP", restUrlRoot);
 		String resourcesPath= request.getContextPath() + "/saiku/";
 		settings.put("RESOURCES_PATH", resourcesPath);
+		settings.put("SHOW_REFRESH_NONADMIN", true);
 		return settings;
 	}
-
+	
 }

@@ -78,6 +78,7 @@ public class SaikuConnectionManager implements IConnectionManager {
 			ISaikuConnection con = connections.remove(name);
 			if (con != null) {
 				con.clearCache();
+				con.close();
 			}
 			return getInternalConnection(name, properties);
 		} catch (Exception e) {

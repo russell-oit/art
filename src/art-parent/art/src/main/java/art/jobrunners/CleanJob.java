@@ -118,7 +118,8 @@ public class CleanJob implements org.quartz.Job {
 				logger.debug("Actually clearing mondrian cache");
 
 				CacheHelper cacheHelper = new CacheHelper();
-				cacheHelper.clearMondrian();
+				cacheHelper.clearJPivot();
+				cacheHelper.clearSaiku();
 
 				try {
 					//create/update file that indicates when the cache was last cleared

@@ -28,7 +28,7 @@ import java.util.List;
  */
 public enum CacheType {
 
-	Mondrian("Mondrian"), Reports("Reports"), ReportGroups("ReportGroups"),
+	JPivot("JPivot"), Saiku("Saiku"), Reports("Reports"), ReportGroups("ReportGroups"),
 	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources"),
 	Schedules("Schedules"), Jobs("Jobs"), Rules("Rules"), Parameters("Parameters"),
 	FtpServers("FtpServers");

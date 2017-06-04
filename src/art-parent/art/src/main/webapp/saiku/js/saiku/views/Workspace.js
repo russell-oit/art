@@ -263,7 +263,7 @@ var Workspace = Backbone.View.extend({
         if (!Saiku.session.isAdmin && Settings.SHOW_REFRESH_NONADMIN === false) {
             $(this.el).find('.refresh_cubes_nav').hide();
         }
-
+		
         var paramsURI = Saiku.URLParams.paramsURI();
 
         if (!Saiku.introDone && Saiku.URLParams.contains({ show_help: paramsURI.show_help })) {

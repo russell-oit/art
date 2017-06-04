@@ -16,6 +16,7 @@
 package org.saiku.datasources.connection;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -83,5 +84,7 @@ public interface ISaikuConnection {
   String getName();
 
   Properties getProperties();
+  
+  void close() throws SQLException;
 
 }
