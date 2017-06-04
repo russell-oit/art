@@ -17,8 +17,10 @@
  */
 package art.saiku;
 
+import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
 import org.saiku.olap.util.exception.SaikuOlapException;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +42,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 @RestController
 @RequestMapping("/saiku2/rest/saiku/session")
 public class SessionController {
-	
+
 	@PostMapping()
 	public void login(HttpSession session, Locale locale) {
 		//do nothing. user already authenticated by art
@@ -50,7 +53,7 @@ public class SessionController {
 		Map<String, Object> saikuSessionDetails = createSessionDetails(session, locale);
 		return saikuSessionDetails;
 	}
-	
+
 	private Map<String, Object> createSessionDetails(HttpSession session, Locale locale)
 			throws IllegalStateException {
 
@@ -64,5 +67,16 @@ public class SessionController {
 		sessionDetails.put("language", locale.toString());
 		return sessionDetails;
 	}
-	
+
+	@DeleteMapping()
+	public void logout(HttpSession session) throws IOException {
+		
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		int userId = sessionUser.getUserId();
+		Config.closeSaikuConnections(userId);
+		
+		//https://stackoverflow.com/questions/29085295/spring-mvc-restcontroller-and-redirect
+		//http://forum.spring.io/forum/spring-projects/web/747839-how-to-redirect-properly-in-restful-spring-mvc-controller
+	}
+
 }

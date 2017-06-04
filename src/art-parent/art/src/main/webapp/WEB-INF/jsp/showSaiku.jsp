@@ -34,6 +34,7 @@
 	
 	
     <link rel="stylesheet" href="${pageContext.request.contextPath}/saiku/css/saiku/src/bootstrap.css"/>
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/saiku/css/saiku/src/bootstrap2.css"/>
 	
     <!-- Blueprint CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/saiku/js/tourist/tourist.css" type="text/css">
@@ -283,16 +284,9 @@
                     <li><a id='open_query' href='#open_query' title='Open query' class='open_query i18n sprite'></a></li>
                     <\% if (!data.buttons) { %>
                     <li class='separator'>&nbsp;</li>
-                    <li><a id='logout' href='#logout' title='Logout' class='logout i18n sprite'></a></li>
-
-                    <li class='separator'>&nbsp;</li>
-                    <li><a id='about' href='#about' title='About' class='about i18n sprite'></a></li>
-                    <li class='separator'>&nbsp;</li>
-                    <li><a id='help_icon' href='#help' target='_blank' title='Help' class='help i18n sprite'></a></li>
-
-                    <li class='separator'>&nbsp;</li>
+                    <li><a id='logout' href='#home' title='Home' class='logout i18n sprite'></a></li>
+					<li class='separator'>&nbsp;</li>
                     <\% } %>
-<!--                    <li><a id='issue_tracker' href='#issue_tracker' title='Issue Tracker' class='bug i18n sprite'></a></li>-->
             </ul>
 
             <\%= data.logo %>

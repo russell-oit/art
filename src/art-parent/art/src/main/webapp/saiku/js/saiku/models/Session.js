@@ -166,6 +166,27 @@ var Session = Backbone.Model.extend({
         delete this.id;
 
     },
+	art_home: function() {
+        // FIXME - This is a hack (inherited from old UI)
+        Saiku.ui.unblock();
+
+        if (typeof localStorage !== "undefined" && localStorage) {
+            localStorage.clear();
+        }
+
+        this.set('id', _.uniqueId('queryaction_'));
+        this.destroy({async: false });
+
+        this.clear();
+        this.sessionid = null;
+        this.username = null;
+        this.password = null;
+		this.roles = null;
+        this.isAdmin = false;
+        this.destroy({async: false });
+        delete this.id;
+		window.location = Settings.CONTEXT_PATH;
+    },
 
     url: function() {
 

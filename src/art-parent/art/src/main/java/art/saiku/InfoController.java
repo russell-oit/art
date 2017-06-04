@@ -98,6 +98,7 @@ public class InfoController {
 		String resourcesPath= request.getContextPath() + "/saiku/";
 		settings.put("RESOURCES_PATH", resourcesPath);
 		settings.put("SHOW_REFRESH_NONADMIN", true);
+		settings.put("CONTEXT_PATH", request.getContextPath());
 		return settings;
 	}
 	

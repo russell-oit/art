@@ -18,7 +18,6 @@
 package art.report;
 
 import art.datasource.DatasourceService;
-import art.enums.AccessLevel;
 import art.enums.PageOrientation;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
@@ -86,7 +85,7 @@ public class ReportController {
 
 	@Autowired
 	private MessageSource messageSource;
-
+	
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
 		logger.debug("Entering showReports");
@@ -101,7 +100,7 @@ public class ReportController {
 
 		return "reports";
 	}
-
+	
 	@RequestMapping(value = "/selectReportParameters", method = RequestMethod.GET)
 	public String selectReportParameters(HttpSession session,
 			@RequestParam("reportId") Integer reportId,

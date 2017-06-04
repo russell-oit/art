@@ -112,6 +112,14 @@ var Toolbar = Backbone.View.extend({
 					Saiku.session.logout();
 
     },
+	
+	 /**
+     * Clear the current session and go to the art home page
+     */
+	home: function() {
+					Saiku.session.art_home();
+
+    },
 
     /**
      * Show the credits dialog
