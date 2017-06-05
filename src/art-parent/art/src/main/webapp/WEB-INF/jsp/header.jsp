@@ -23,7 +23,7 @@ Header that appears at the top of all pages, except the login and logs pages
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="${pageContext.request.contextPath}/reports">
+				<a class="navbar-brand" href="${pageContext.request.contextPath}">
 					ART
 				</a>
 			</div>

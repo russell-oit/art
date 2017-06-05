@@ -32,7 +32,7 @@ Saiku.i18n = {
         // Load language file if it isn't English
 
         var paramsURI = Saiku.URLParams.paramsURI();
-
+		
         // compatible 'zh-CN' -> 'zh';
         if (Saiku.i18n.locale == 'zh') {
             Saiku.i18n.locale = 'cn';
@@ -278,7 +278,7 @@ var TranslationTab = Backbone.View.extend({
 /**
  * Automatically internationalize the UI based on the user's locale
  */
-Saiku.i18n.automatic_i18n();
+//Saiku.i18n.automatic_i18n();
 
 
 /**
