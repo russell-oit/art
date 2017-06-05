@@ -216,6 +216,9 @@ Edit report page
 				//https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts
 				//https://templth.wordpress.com/2014/12/29/using-ace-editor-into-angular-applications/
 				var sqlEditor = ace.edit("sqlEditor");
+				//https://stackoverflow.com/questions/28936479/where-to-set-ace-editor-blockscrolling
+				//https://github.com/angular-ui/ui-ace/issues/104
+				sqlEditor.$blockScrolling = Infinity;
 				sqlEditor.getSession().setMode("ace/mode/sql");
 				sqlEditor.setHighlightActiveLine(false);
 				//https://stackoverflow.com/questions/14907184/is-there-a-way-to-hide-the-vertical-ruler-in-ace-editor
@@ -232,6 +235,7 @@ Edit report page
 				});
 
 				var xmlEditor = ace.edit("xmlEditor");
+				xmlEditor.$blockScrolling = Infinity;
 				xmlEditor.getSession().setMode("ace/mode/xml");
 				xmlEditor.setHighlightActiveLine(false);
 				xmlEditor.setShowPrintMargin(false);
@@ -248,6 +252,7 @@ Edit report page
 				});
 
 				var jsonEditor = ace.edit("jsonEditor");
+				jsonEditor.$blockScrolling = Infinity;
 				jsonEditor.getSession().setMode("ace/mode/json");
 				jsonEditor.setHighlightActiveLine(false);
 				jsonEditor.setShowPrintMargin(false);
@@ -261,6 +266,7 @@ Edit report page
 				});
 
 				var saikuEditor = ace.edit("saikuEditor");
+				saikuEditor.$blockScrolling = Infinity;
 				saikuEditor.getSession().setMode("ace/mode/json");
 				saikuEditor.setHighlightActiveLine(false);
 				saikuEditor.setShowPrintMargin(false);

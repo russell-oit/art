@@ -21,6 +21,9 @@ import art.enums.ReportType;
 import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -53,23 +56,31 @@ public class RepositoryController {
 	@PostMapping("/resource")
 	public ResponseEntity saveResource(HttpSession session,
 			@RequestParam("name") String name,
-			@RequestParam("content") String content) throws SQLException {
+			@RequestParam("content") String content) throws SQLException, IOException {
 
+		//https://stackoverflow.com/questions/14515994/convert-json-string-to-pretty-print-json-output-using-jackson
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		Object json = mapper.readValue(content, Object.class);
+		String prettyContent = mapper.writeValueAsString(json);
+		
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		Report report = reportService.getReport(name);
 		if (report == null) {
 			report = new Report();
 			report.setName(name);
-			report.setReportSource(content);
+			report.setReportSource(prettyContent);
 			report.setReportType(ReportType.SaikuMondrian);
 			reportService.addReport(report, sessionUser);
+
+			//give this user direct access to the report
+			reportService.grantAccess(report, sessionUser);
 		} else {
-			report.setReportSource(content);
+			report.setReportSource(prettyContent);
 			reportService.updateReport(report, sessionUser);
 		}
 
-		//return a response entity instead of void to avoid firefox console error: 
-		//XML Parsing Error: no root element found Location
+		//return a response entity instead of void to avoid firefox console error - XML Parsing Error: no root element found Location
 		return ResponseEntity.ok("");
 	}
 

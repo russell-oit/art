@@ -64,7 +64,7 @@ public class Report implements Serializable {
 	private String updatedBy;
 	private ReportType reportType;
 	private int groupColumn;
-	private boolean active;
+	private boolean active = true;
 	private boolean hidden;
 	private String defaultReportFormat;
 	private String secondaryCharts;
@@ -728,7 +728,7 @@ public class Report implements Serializable {
 
 	/**
 	 * Returns the report ids for reports defined within a dashboard report
-	 * 
+	 *
 	 * @return the report ids for reports defined within a dashboard report
 	 */
 	public List<Integer> getDashboardReportIds() {
@@ -745,8 +745,8 @@ public class Report implements Serializable {
 		for (String id : reportIdStrings) {
 			reportIds.add(Integer.valueOf(id));
 		}
-		
+
 		return reportIds;
 	}
-	
+
 }

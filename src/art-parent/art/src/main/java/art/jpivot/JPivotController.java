@@ -496,7 +496,6 @@ public class JPivotController {
 				Report newReport = new Report();
 
 				newReport.setReportType(report.getReportType());
-				newReport.setShortDescription("");
 				newReport.setContactPerson(sessionUser.getUsername());
 				newReport.setUsesRules(report.isUsesRules());
 				newReport.setTemplate(report.getTemplate());
@@ -510,7 +509,7 @@ public class JPivotController {
 				newReport.setDescription(queryDescription);
 
 				String queryName = request.getParameter("newPivotName");
-				if (queryName == null || queryName.trim().length() == 0) {
+				if (StringUtils.isBlank(queryName)) {
 					//no name provided for the new query. create a default name
 					queryName = report.getName() + "-2";
 				}
