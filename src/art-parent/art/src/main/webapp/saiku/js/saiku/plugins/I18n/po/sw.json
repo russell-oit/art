@@ -38,6 +38,7 @@
 	"Mode:": "Modi",
 	"Multiple Bar Chart": "Chati pau kadhaa",
 	"New query": "Ripoti mpya",
+	"New Query": "Ripoti mpya",
 	"New": "Mpya",
 	"Non-empty": "Zisizo tupu",
 	"Open query": "Fungua ripoti",
@@ -232,6 +233,8 @@
 	"Table Mode": "Modi jedwali",
 	"Chart Mode": "Modi chati",
 	"You are about to clear your existing query": "Uko karibu kutandua ripoti iliyoko",
+	"OK": "Sawa",
+	"Okay": "Sawa",
 	"ID": "Kitambulishi",
 	"Description": "Wasifu"
 }
