@@ -180,9 +180,9 @@ var OpenDialog = Modal.extend({
         var $currentTarget = $( event.currentTarget );
         this.unselect_current_selected_folder( );
         //$currentTarget.parent( ).parent( ).has( '.folder' ).children('.folder_row').addClass( 'selected' );
-        var path = $currentTarget.parent( ).parent( ).has( '.folder' ).children('.folder_row').find( 'a' ).attr('href');
-        path = path.replace('#' , '');
-        this.set_last_location(path);
+//        var path = $currentTarget.parent( ).parent( ).has( '.folder' ).children('.folder_row').find( 'a' ).attr('href');
+//        path = path.replace('#' , '');
+//        this.set_last_location(path);
         $currentTarget.addClass('selected');
         var name = $currentTarget.find( 'a' ).attr('href');
         name = name.replace('#','');
