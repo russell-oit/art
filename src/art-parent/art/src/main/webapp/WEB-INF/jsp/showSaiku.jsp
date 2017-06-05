@@ -286,7 +286,7 @@
                     <li class='separator'>&nbsp;</li>
                     <li><a id='logout' href='#art_home' title='ART Home' class='logout i18n sprite'></a></li>
 					<li class='separator'>&nbsp;</li>
-					<li><a id='saiku_home' href='#saiku_home' title='Analytics Home' class='i18n'><i class="fa fa-home"></i></a></li>
+					<li><a id='saiku_home' href='#saiku_home' title='Analytics Home' class='i18n'><i class="fa fa-home" data-href="#saiku_home"></i></a></li>
 					<li class='separator'>&nbsp;</li>
                     <\% } %>
             </ul>

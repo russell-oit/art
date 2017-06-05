@@ -324,7 +324,7 @@ public class ReportService {
 
 		List<Report> accessibleReports = getAccessibleReports(userId);
 		List<Report> displayReports = new ArrayList<>();
-		
+
 		for (Report report : accessibleReports) {
 			ReportType reportType = report.getReportType();
 			switch (reportType) {
@@ -599,7 +599,6 @@ public class ReportService {
 		//set values for possibly null property objects
 		Integer reportGroupId; //database column doesn't allow null
 		if (report.getReportGroup() == null) {
-			logger.warn("Report group not defined. Defaulting to 0");
 			reportGroupId = 0;
 		} else {
 			reportGroupId = report.getReportGroup().getReportGroupId();
@@ -607,7 +606,6 @@ public class ReportService {
 
 		Integer datasourceId; //database column doesn't allow null
 		if (report.getDatasource() == null) {
-			logger.warn("Datasource not defined. Defaulting to 0");
 			datasourceId = 0;
 		} else {
 			datasourceId = report.getDatasource().getDatasourceId();
@@ -619,6 +617,20 @@ public class ReportService {
 			reportTypeId = 0;
 		} else {
 			reportTypeId = report.getReportType().getValue();
+		}
+
+		String shortDescription; //database column doesn't allow null
+		if (report.getShortDescription() == null) {
+			shortDescription = "";
+		} else {
+			shortDescription = report.getShortDescription();
+		}
+
+		String description; //database column doesn't allow null
+		if (report.getDescription() == null) {
+			description = "";
+		} else {
+			description = report.getDescription();
 		}
 
 		int affectedRows;
@@ -639,8 +651,8 @@ public class ReportService {
 			Object[] values = {
 				report.getReportId(),
 				report.getName(),
-				report.getShortDescription(),
-				report.getDescription(),
+				shortDescription,
+				description,
 				reportTypeId,
 				reportGroupId,
 				datasourceId,
@@ -690,8 +702,8 @@ public class ReportService {
 
 			Object[] values = {
 				report.getName(),
-				report.getShortDescription(),
-				report.getDescription(),
+				shortDescription,
+				description,
 				report.getReportTypeId(),
 				reportGroupId,
 				datasourceId,
@@ -1015,7 +1027,7 @@ public class ReportService {
 
 		List<SaikuReport> saikuReports = new ArrayList<>();
 		List<Report> availableReports = getAccessibleReports(userId);
-		
+
 		for (Report report : availableReports) {
 			if (report.getReportType() == ReportType.SaikuMondrian) {
 				SaikuReport saikuReport = new SaikuReport();

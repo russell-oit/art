@@ -433,6 +433,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 145: //datamaps file
+					case 149: //saiku mondrian
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -470,7 +471,6 @@ Edit report page
 					case 145: //datamaps file
 					case 146: //leaflet
 					case 147: //openlayers
-					case 149: //saiku mondrian
 					case 150: //saiku connection
 						$("#templateDiv").show();
 						break;

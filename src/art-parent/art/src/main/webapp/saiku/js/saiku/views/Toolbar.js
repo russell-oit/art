@@ -69,7 +69,11 @@ var Toolbar = Backbone.View.extend({
 
     call: function(e) {
         var target = $(e.target);
-        var callback = target.attr('href').replace('#', '');
+		var href = target.attr('href');
+		if(typeof href === 'undefined'){
+			href = target.data('href');
+		}
+        var callback = href.replace('#', '');
         if(this[callback]) {
             this[callback](e);
         }

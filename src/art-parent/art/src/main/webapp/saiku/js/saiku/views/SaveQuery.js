@@ -302,7 +302,7 @@ return false;
 		parent.query.set({ name: name, folder: foldername });
 		parent.query.trigger('query:save');
 		parent.copy_to_repository();
-		event.preventDefault();
+		//event.preventDefault();
 		return false;
 	},
 
