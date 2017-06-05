@@ -503,7 +503,7 @@ var CalculatedMemberModal = Modal.extend({
         }
 
         if (alertMsg !== '') {
-            alert(alertMsg);
+            bootbox.alert(alertMsg);
         }
     },
 
@@ -797,13 +797,13 @@ var CalculatedMemberModal = Modal.extend({
             alertMsg += 'You have to enter a name for the member! ';
         }
         if (typeof formula === 'undefined' || formula === '' || !formula) {
-            alertMsg += 'You have to enter a MDX formula for the calculated member! ';
+            alertMsg += 'You have to enter an MDX formula for the calculated member! ';
         }
         if (typeof dimension.val === 'undefined' || dimension.val === '' || !dimension.val) {
             alertMsg += 'You have to choose a dimension for the calculated member! ';
         }
         if (alertMsg !== '') {
-            alert(alertMsg);
+            bootbox.alert(alertMsg);
         }
         else {
             if (dimension.dataType === 'calcmeasure') {

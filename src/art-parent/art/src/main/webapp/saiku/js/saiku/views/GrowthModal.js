@@ -126,10 +126,10 @@ var GrowthModal = Modal.extend({
 			alert_msg += "You have to enter a name for the measure! ";
 		}
 		if (typeof measure_formula == "undefined" || !measure_formula || measure_formula === "") {
-			alert_msg += "You have to enter a MDX formula for the calculated measure! ";
+			alert_msg += "You have to enter an MDX formula for the calculated measure! ";
 		}
 		if (alert_msg !== "") {
-			alert(alert_msg);
+			bootbox.alert(alert_msg);
 		} else {
 			if(!this.asPercentAlternative) {
 				var m = {

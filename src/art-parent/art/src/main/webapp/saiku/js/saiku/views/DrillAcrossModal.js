@@ -51,7 +51,7 @@ var DrillAcrossModal = DrillthroughModal.extend({
 			if (b && b.hasOwnProperty("responseText")) {
 				text = b.responseText;
 			}
-			alert("Error drilling across. Check logs! " + text);
+			bootbox.alert("Error drilling across. Check logs! " + text);
 		}});
 		this.close();
 

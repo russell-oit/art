@@ -45,7 +45,7 @@ var FilterModal = Modal.extend({
         c += "<tr><td class='col1'>" + this.expressionType + " MDX Expression:</td></tr>" +
              "<tr><td class='col1' style='width:380px'><div class='filter-editor' style='width:380px' id='"+this.id+"'></div></td></tr>" +
              "</table>" +
-            "<a href='#' class='form_button btn btn-default insert-member'>Insert Member</a></div>";
+            "<a href='#' class='form_button btn btn-default insert-member i18n'>Insert Member</a></div>";
         return c;
     },
 
@@ -93,8 +93,8 @@ var FilterModal = Modal.extend({
 
         var alert_msg = "";
         if (typeof this.expression == "undefined" || !this.expression || this.expression === "") {
-            alert_msg += "You have to enter a MDX expression for the " + this.expressionType + " function! ";
-            alert(alert_msg);
+            alert_msg += "You have to enter an MDX expression for the " + this.expressionType + " function! ";
+            bootbox.alert(alert_msg);
         } else {
             if (self.expressionType == "Order") {
                 var sortOrder = $('#fun').val();

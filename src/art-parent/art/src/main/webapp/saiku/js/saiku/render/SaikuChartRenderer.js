@@ -221,7 +221,7 @@ SaikuChartRenderer.prototype.switch_chart = function (key, override) {
             this.render();
         }
     } else {
-        alert("Do not support chart type: '" + key + "'");
+        bootbox.alert("Do not support chart type: '" + key + "'");
     }
 
 };

@@ -272,37 +272,28 @@ var SaveQuery = Modal.extend({
 		var self = this;
 
         var name = $(this.el).find('input[name="name"]').val();
-        if (this.folder_name !== null && this.folder_name !== undefined && this.folder_name.length > 0) {
-            if (name !== null && name.length > 0) {
-    			this.repository.fetch({success: function(collection, response){
+		if (name !== null && name.length > 0) {
+			this.repository.fetch({success: function(collection, response){
 
 
-    				var paths=[];
-    				paths.push.apply(paths, self.get_files(response));
-    				if(paths.indexOf(name)> -1 && self.query.get("name")!=name){
-    					new OverwriteModal({name: name, foldername: foldername, parent: self}).render().open();
-    				}
-    				else{
-    					 self.query.set({ name: name, folder: foldername });
-    					 self.query.trigger('query:save');
-    					 self.copy_to_repository();
-    					 event.stopPropagation();
-    					 event.preventDefault();
-    					 return false;
-    				}
+				var paths=[];
+				paths.push.apply(paths, self.get_files(response));
+				if(paths.indexOf(name)> -1 && self.query.get("name")!=name){
+					new OverwriteModal({name: name, foldername: foldername, parent: self}).render().open();
+				}
+				else{
+					 self.query.set({ name: name, folder: foldername });
+					 self.query.trigger('query:save');
+					 self.copy_to_repository();
+					 event.stopPropagation();
+					 event.preventDefault();
+					 return false;
+				}
 
-    				}});
-
-
-
-
-            } else {
-                bootbox.alert("You need to enter a name");
-            }
-        }
-        else {
-            bootbox.alert("You need to select a folder");
-        }
+				}});
+		} else {
+			bootbox.alert("You need to enter a name");
+		}
 
 return false;
     },
@@ -324,7 +315,6 @@ return false;
 			}
 			else{
 				paths.push(entry.name);
-
 			}
 		});
 			return paths;
@@ -337,7 +327,7 @@ return false;
         file = folder + file;
         var error = function(data, textStatus, jqXHR) {
                 if (textStatus && textStatus.status == 403 && textStatus.responseText) {
-                    alert(textStatus.responseText);
+                    bootbox.alert(textStatus.responseText);
                 } else {
                     self.close();
                 }

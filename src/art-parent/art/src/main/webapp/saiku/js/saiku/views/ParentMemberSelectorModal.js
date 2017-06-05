@@ -262,7 +262,7 @@ var ParentMemberSelectorModal = Modal.extend({
                 .data('uniqueName', data[i].uniqueName)
                 .data('levelUniqueName', data[i].levelUniqueName ? data[i].levelUniqueName : false)
                 .data('currentLevelUnique', data[i].levelUniqueName)
-                .html(data[i].name+"<span class='drill_member' style='float:right;'>Next Level</span>");
+                .html(data[i].name+"<span class='drill_member i18n' style='float:right;'>Next Level</span>");
 
             self.$el.find('.members-list').append($members);
 
@@ -582,7 +582,7 @@ var ParentMemberSelectorModal = Modal.extend({
             alertMsg += 'You have to choose a member for the calculated member!';
         }
         if (alertMsg !== '') {
-            alert(alertMsg);
+            bootbox.alert(alertMsg);
         }
         else {
             if(this.select_type === "parent-member-selector") {

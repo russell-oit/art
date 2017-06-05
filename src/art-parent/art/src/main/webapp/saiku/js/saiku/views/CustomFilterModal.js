@@ -152,7 +152,7 @@ var CustomFilterModal = Modal.extend({
             alert_msg += "You have to enter a MDX expression for the sort literal! ";
         }
         if (alert_msg !== "") {
-            alert(alert_msg);
+            bootbox.alert(alert_msg);
         } else {
             self.success(this.func, this.n, this.sortliteral);
             this.close();
