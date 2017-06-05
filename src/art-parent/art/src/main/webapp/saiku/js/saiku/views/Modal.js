@@ -42,7 +42,7 @@ var Modal = Backbone.View.extend({
 
     template: function() {
         return _.template("<div class='dialog_icon'></div>" +
-                "<div class='dialog_body'><%= message %></div>" +
+                "<div class='dialog_body i18n'><%= message %></div>" +
         		"<div class='dialog_footer'>" +
             "<% _.each(buttons, function(button) { %>" +
                 "<a class='form_button btn btn-default i18n' href='#<%= button.method %>'><%= button.text %></a>" +

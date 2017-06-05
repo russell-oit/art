@@ -56,7 +56,7 @@
     <!--<link rel="shortcut icon" href="${pageContext.request.contextPath}/saiku/favicon.ico">-->
 	<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 	
-	<!--<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">-->
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
 <!--	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>-->
 	
@@ -284,7 +284,9 @@
                     <li><a id='open_query' href='#open_query' title='Open query' class='open_query i18n sprite'></a></li>
                     <\% if (!data.buttons) { %>
                     <li class='separator'>&nbsp;</li>
-                    <li><a id='logout' href='#home' title='Home' class='logout i18n sprite'></a></li>
+                    <li><a id='logout' href='#art_home' title='ART Home' class='logout i18n sprite'></a></li>
+					<li class='separator'>&nbsp;</li>
+					<li><a id='saiku_home' href='#saiku_home' title='Analytics Home' class='i18n'><i class="fa fa-home"></i></a></li>
 					<li class='separator'>&nbsp;</li>
                     <\% } %>
             </ul>

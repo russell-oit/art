@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/saiku2/rest/saiku/info")
 public class InfoController {
-	
+
 	@GetMapping()
 	public List<Plugin> info(HttpServletRequest request) {
 		ArrayList<Plugin> l = new ArrayList<>();
@@ -52,8 +52,8 @@ public class InfoController {
 				return new File(current, name).isDirectory();
 			}
 		});
-		
-		String contextPath= request.getContextPath();
+
+		String contextPath = request.getContextPath();
 
 		if (directories != null && directories.length > 0) {
 			for (String d : directories) {
@@ -83,7 +83,7 @@ public class InfoController {
 		//created new end point - /info/main-settings to specifically do override of Settings before anything else is done
 		return Collections.emptyMap();
 	}
-	
+
 	@GetMapping("/main-settings")
 	public Map<String, Object> overrideMainSettings(Locale locale, HttpServletRequest request) {
 		Map<String, Object> settings = new HashMap<>();
@@ -95,11 +95,13 @@ public class InfoController {
 		settings.put("I18N_LOCALE", locale.toString());
 		String restUrlRoot = request.getContextPath() + "/saiku2";
 		settings.put("TOMCAT_WEBAPP", restUrlRoot);
-		String resourcesPath= request.getContextPath() + "/saiku/";
+		String resourcesPath = request.getContextPath() + "/saiku/";
 		settings.put("RESOURCES_PATH", resourcesPath);
 		settings.put("SHOW_REFRESH_NONADMIN", true);
 		settings.put("CONTEXT_PATH", request.getContextPath());
+		String saikuHome = request.getContextPath() + "/saiku3";
+		settings.put("SAIKU_HOME", saikuHome);
 		return settings;
 	}
-	
+
 }

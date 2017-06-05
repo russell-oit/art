@@ -116,8 +116,16 @@ var Toolbar = Backbone.View.extend({
 	 /**
      * Clear the current session and go to the art home page
      */
-	home: function() {
+	art_home: function() {
 					Saiku.session.art_home();
+
+    },
+	
+	 /**
+     * Go to the saiku home page
+     */
+	saiku_home: function() {
+					window.location = Settings.SAIKU_HOME;
 
     },
 
