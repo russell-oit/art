@@ -21,6 +21,7 @@ import art.enums.ReportType;
 import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
+import art.utils.ActionResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
@@ -28,11 +29,13 @@ import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -54,7 +57,8 @@ public class RepositoryController {
 	}
 
 	@PostMapping("/resource")
-	public ResponseEntity saveResource(HttpSession session,
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void saveResource(HttpSession session,
 			@RequestParam("name") String name,
 			@RequestParam("content") String content) throws SQLException, IOException {
 
@@ -63,7 +67,7 @@ public class RepositoryController {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		Object json = mapper.readValue(content, Object.class);
 		String prettyContent = mapper.writeValueAsString(json);
-		
+
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		Report report = reportService.getReport(name);
 		if (report == null) {
@@ -81,7 +85,32 @@ public class RepositoryController {
 		}
 
 		//return a response entity instead of void to avoid firefox console error - XML Parsing Error: no root element found Location
-		return ResponseEntity.ok("");
+		//returning void (with or without produces) doesn't set the Content-Type header in the response. Firefox assumes xhtml (xml) if no content-type given hence the error.
+		//produces doesn't set response content type - https://stackoverflow.com/questions/30548822/spring-mvc-4-application-json-content-type-is-not-being-set-correctly
+		//https://stackoverflow.com/questions/39788503/spring-restcontroller-produces-charset-utf-8
+		//http://www.baeldung.com/spring-httpmessageconverter-rest
+		//alternative is to have a response status of no_content on the method
+		//https://stackoverflow.com/questions/26550124/spring-returning-empty-http-responses-with-responseentityvoid-doesnt-work
+//		return ResponseEntity.ok("");
+	}
+
+	@DeleteMapping("/resource")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteResource(HttpSession session,
+			@RequestParam("file") Integer reportId) throws SQLException {
+
+		User sessionUser = (User) session.getAttribute("sessionUser");
+
+		//check if this is the only user who has access. if so, he can delete the report
+		boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, reportId);
+		if (exclusiveAccess) {
+			ActionResult result = reportService.deleteReport(reportId);
+			if (!result.isSuccess()) {
+				throw new RuntimeException("Report not deleted. Linked jobs exist.");
+			} 
+		} else {
+			throw new RuntimeException("Report not deleted. You do not have exclusive access to the report.");
+		}
 	}
 
 }

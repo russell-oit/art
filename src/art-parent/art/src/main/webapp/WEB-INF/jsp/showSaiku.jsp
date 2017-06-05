@@ -707,9 +707,9 @@ title="Drill across on cell"></a></li>
                 <div class="workspace_inner" style="margin-left: 305px">
                     <div class="workspace_toolbar hide">
                     <ul>
-                        <li class='for_queries hide'><a href="#open_query" class="run button sprite"></a></li>
-                        <li class='for_queries hide'><a href="#edit_query" class="edit button sprite"></a></li>
-                        <li class='for_queries hide'><a href="#delete_query" class="delete button sprite"></a></li>
+                        <li class='for_queries hide'><a href="#open_query" class="run button sprite i18n" title="Run"></a></li>
+                        <li class='for_queries hide'><a href="#edit_query" class="edit button sprite i18n" title="Edit"></a></li>
+                        <li class='for_queries hide'><a href="#delete_query" class="delete button sprite i18n" title="Delete"></a></li>
                         <li class='for_queries hide'><a href="#edit_permissions" class="edit_permissions button sprite"></a></li>
                         <!--
                         <li class='for_folder hide'><a href="#edit_folder" class="edit_folder button"></a></li>

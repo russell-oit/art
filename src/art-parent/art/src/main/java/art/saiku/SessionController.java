@@ -28,11 +28,12 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
 import org.saiku.olap.util.exception.SaikuOlapException;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -45,11 +46,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 public class SessionController {
 
 	@PostMapping()
-	public ResponseEntity login(HttpSession session, Locale locale) {
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void login(HttpSession session, Locale locale) {
 		//do nothing. user already authenticated by art
-		
-		//return a response entity instead of void to avoid firefox console error - XML Parsing Error: no root element found Location
-		return ResponseEntity.ok("");
 	}
 
 	@GetMapping()
@@ -73,16 +72,14 @@ public class SessionController {
 	}
 
 	@DeleteMapping()
-	public ResponseEntity logout(HttpSession session) throws IOException {
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void logout(HttpSession session) throws IOException {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		int userId = sessionUser.getUserId();
 		Config.closeSaikuConnections(userId);
 		
 		//https://stackoverflow.com/questions/29085295/spring-mvc-restcontroller-and-redirect
 		//http://forum.spring.io/forum/spring-projects/web/747839-how-to-redirect-properly-in-restful-spring-mvc-controller
-		
-		//return a response entity instead of void to avoid firefox console error - XML Parsing Error: no root element found Location
-		return ResponseEntity.ok("");
 	}
 
 }

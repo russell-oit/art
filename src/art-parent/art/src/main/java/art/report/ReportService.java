@@ -1211,12 +1211,12 @@ public class ReportService {
 	 * single user
 	 *
 	 * @param user the user
-	 * @param report the report
+	 * @param reportId the id of the report
 	 * @return <code>true</code> if user has exclusive access to the report
 	 * @throws java.sql.SQLException
 	 */
-	public boolean hasExclusiveAccess(User user, Report report) throws SQLException {
-		logger.debug("Entering hasExclusiveAccess: user={}, report={}", user, report);
+	public boolean hasExclusiveAccess(User user, int reportId) throws SQLException {
+		logger.debug("Entering hasExclusiveAccess: user={}, reportId={}", user, reportId);
 
 		boolean exclusive = false;
 
@@ -1227,8 +1227,6 @@ public class ReportService {
 
 		sql = "SELECT USER_GROUP_ID FROM ART_USER_GROUP_QUERIES "
 				+ " WHERE QUERY_ID = ?";
-
-		int reportId = report.getReportId();
 
 		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
 		List<Map<String, Object>> userGroupsList = dbService.query(sql, h, reportId);

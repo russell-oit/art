@@ -30,7 +30,7 @@ var DeleteRepositoryObject = Modal.extend({
         this.options.title = "Confirm deletion";
         this.query = args.query;
         this.success = args.success;
-        this.message = '<span class="i18n">Are you sure you want to delete </span>'+'<span>' + this.query.get('name') + '?</span>';
+        this.message = '<span class="i18n">Are you sure you want to delete</span> <span><b>' + this.query.get('name') + '</b>?</span>';
     },
     
     del: function() {
