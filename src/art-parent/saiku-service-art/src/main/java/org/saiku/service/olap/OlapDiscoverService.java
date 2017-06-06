@@ -23,9 +23,6 @@ import org.saiku.service.util.exception.SaikuServiceException;
 import org.olap4j.OlapConnection;
 import org.olap4j.metadata.Cube;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

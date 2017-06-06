@@ -21,7 +21,6 @@ import org.olap4j.CellSetAxis;
 import org.olap4j.Position;
 import org.olap4j.impl.CoordinateIterator;
 import org.olap4j.impl.Olap4jUtil;
-import org.olap4j.metadata.Dimension;
 import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Member;
@@ -30,16 +29,12 @@ import org.saiku.olap.dto.resultset.DataCell;
 import org.saiku.olap.dto.resultset.Matrix;
 import org.saiku.olap.dto.resultset.MemberCell;
 import org.saiku.olap.util.SaikuProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
 
 public class HierarchicalCellSetFormatter implements ICellSetFormatter {
-
-    private static final Logger log = LoggerFactory.getLogger(HierarchicalCellSetFormatter.class);
 
     /**
    * Description of an axis.
@@ -301,14 +296,14 @@ public class HierarchicalCellSetFormatter implements ICellSetFormatter {
           cellValue = ""; //$NON-NLS-1$
         else {
           try {
-            // TODO this needs to become query / execution specific
+            // this needs to become query / execution specific
             DecimalFormat myFormatter = new DecimalFormat(SaikuProperties.formatDefautNumberFormat); //$NON-NLS-1$
             DecimalFormatSymbols dfs = new DecimalFormatSymbols(SaikuProperties.locale);
             myFormatter.setDecimalFormatSymbols(dfs);
             cellValue = myFormatter.format(cell.getValue());
           }
           catch (Exception e) {
-            // TODO: handle exception
+            // handle exception
           }
         }
         // the raw value

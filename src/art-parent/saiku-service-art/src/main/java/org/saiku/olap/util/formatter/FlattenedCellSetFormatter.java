@@ -31,7 +31,6 @@ import org.olap4j.CellSetAxis;
 import org.olap4j.Position;
 import org.olap4j.impl.CoordinateIterator;
 import org.olap4j.impl.Olap4jUtil;
-import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Member;
 import org.olap4j.metadata.Property;
@@ -314,7 +313,7 @@ public class FlattenedCellSetFormatter implements ICellSetFormatter {
     populateAxis(matrix, columnsAxis, columnsAxisInfo, true, xOffsset);
     populateAxis(matrix, rowsAxis, rowsAxisInfo, false, yOffset);
 
-    // TODO - why did we do this in the first place??? HERE BE DRAGONS
+    // why did we do this in the first place??? HERE BE DRAGONS
     //		int headerwidth = matrix.getMatrixWidth();
     //		if (headerwidth > 2) {
     //			for(int yy=matrix.getMatrixHeight(); yy > matrix.getOffset() ; yy--) {
@@ -394,14 +393,14 @@ public class FlattenedCellSetFormatter implements ICellSetFormatter {
           cellValue = ""; //$NON-NLS-1$
         else {
           try {
-            // TODO this needs to become query / execution specific
+            // this needs to become query / execution specific
             DecimalFormat myFormatter = new DecimalFormat(SaikuProperties.formatDefautNumberFormat); //$NON-NLS-1$
             DecimalFormatSymbols dfs = new DecimalFormatSymbols(SaikuProperties.locale);
             myFormatter.setDecimalFormatSymbols(dfs);
             cellValue = myFormatter.format(cell.getValue());
           }
           catch (Exception e) {
-            // TODO: handle exception
+            // handle exception
           }
         }
         // the raw value

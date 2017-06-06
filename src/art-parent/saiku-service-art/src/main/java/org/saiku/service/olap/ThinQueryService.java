@@ -90,15 +90,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -345,7 +342,7 @@ public class ThinQueryService implements Serializable {
 		old.getProperties().putAll(cubeProperties);
 
 		/**
-		 * TODO NASTY HACK REMOVE IN NEXT RELEASE
+		 * NASTY HACK REMOVE IN NEXT RELEASE
 		 */
 		old = removeDupSelections(old);
 		return old;
@@ -749,7 +746,7 @@ public class ThinQueryService implements Serializable {
 				rowsIndex = (rowsIndex + 1) & 1;
 			}
 
-			// TODO - refactor this using axis ordinals etc.
+			// refactor this using axis ordinals etc.
 			final AxisInfo[] axisInfos = new AxisInfo[]{new AxisInfo(cellSet.getAxes().get(rowsIndex)), new AxisInfo(cellSet.getAxes().get((rowsIndex + 1) & 1))};
 			@SuppressWarnings("unchecked")
 			List<TotalNode>[][] totals = new List[2][];

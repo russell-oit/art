@@ -1,6 +1,8 @@
 package org.saiku.service.util.exception;
 
 public class SaikuDataSourceNotFoundException extends SaikuDataSourceException {
+	
+	private static final long serialVersionUID = 1L;
 
     /**
      * @see java.lang.Exception#Exception()

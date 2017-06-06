@@ -300,14 +300,14 @@ public class CellSetFormatter implements ICellSetFormatter {
           cellValue = ""; //$NON-NLS-1$
         else {
           try {
-            // TODO this needs to become query / execution specific
+            // this needs to become query / execution specific
             DecimalFormat myFormatter = new DecimalFormat(SaikuProperties.formatDefautNumberFormat); //$NON-NLS-1$
             DecimalFormatSymbols dfs = new DecimalFormatSymbols(SaikuProperties.locale);
             myFormatter.setDecimalFormatSymbols(dfs);
             cellValue = myFormatter.format(cell.getValue());
           }
           catch (Exception e) {
-            // TODO: handle exception
+            // handle exception
           }
         }
         // the raw value

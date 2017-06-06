@@ -53,7 +53,6 @@
 	
     <!-- CHOSEN CSS PLACEHOLDER-->
 
-    <!--<link rel="shortcut icon" href="${pageContext.request.contextPath}/saiku/favicon.ico">-->
 	<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 	
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
@@ -256,7 +255,9 @@
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/saiku/js/saiku/plugins/CCC_Chart/jquery.tipsy.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/saiku/js/saiku/plugins/CCC_Chart/tipsy.js"></script>
-<link type="text/css" href="${pageContext.request.contextPath}/saiku/js/saiku/plugins/CCC_Chart/tipsy.css" rel="stylesheet"/>
+<%-- https://stackoverflow.com/questions/1842308/having-link-in-body --%>
+	<%-- https://stackoverflow.com/questions/6236097/is-link-not-rel-stylesheet-allowed-to-be-used-in-body --%>
+	<link type="text/css" href="${pageContext.request.contextPath}/saiku/js/saiku/plugins/CCC_Chart/tipsy.css" rel="stylesheet"/>
 
 <!--<script type="text/javascript" src="${pageContext.request.contextPath}/saiku/../js/saiku/render/SaikuRenderer.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/saiku/../js/saiku/render/SaikuTableRenderer.js"></script>

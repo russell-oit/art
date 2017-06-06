@@ -95,11 +95,6 @@ public abstract class AbstractBaseCell implements Serializable {
     this.rawValue = rawValue;
   }
 
-  /**
-   * TODO JAVADOC
-   *
-   * @param set
-   */
   public void setRight( final boolean set ) {
     this.right = set;
   }
@@ -123,9 +118,6 @@ public abstract class AbstractBaseCell implements Serializable {
     return formattedValue;
   }
 
-  /**
-   * TODO JAVADOC
-   */
   public void setParentDimension( final String pdim ) {
     parentDimension = pdim;
   }

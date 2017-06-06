@@ -44,6 +44,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import mondrian.olap4j.SaikuMondrianHelper;
@@ -73,7 +74,7 @@ public class Fat {
   private static void convertCalculatedMembers(Query q, List<ThinCalculatedMember> thinCms) {
 	  if (thinCms != null && thinCms.size() > 0) {
 		  for (ThinCalculatedMember qcm : thinCms) {
-			  // TODO improve this
+			  // improve this
 			  String name = qcm.getHierarchyName();
 			  boolean mondrian3=false;
 			  if(SaikuMondrianHelper.getMondrianServer(q.getConnection()).getVersion().getMajorVersion()==3) {
@@ -308,12 +309,10 @@ public class Fat {
 		  extendSortableQuerySet(qh.getQuery(), qh, th);
 		}
 
-		for (Object o : th.getCmembers().entrySet()) {
-			Map.Entry pair = (Map.Entry) o;
-
+		for (Entry<String, String> entry : th.getCmembers().entrySet()) {
 			ThinCalculatedMember cres = null;
 			for (ThinCalculatedMember c : tq.getQueryModel().getCalculatedMembers()) {
-				if (c.getUniqueName().equals(pair.getValue())) {
+				if (c.getUniqueName().equals(entry.getValue())) {
 					cres = c;
 					break;
 				}
@@ -325,7 +324,7 @@ public class Fat {
 					String cname = c.getUniqueName();
 					int ord = StringUtils.ordinalIndexOf(cname, "[", 2);
 					cname = cname.substring(ord, cname.length());
-					if (cname.equals(pair.getValue())) {
+					if (cname.equals(entry.getValue())) {
 						cres = c;
 						break;
 					}
@@ -336,8 +335,8 @@ public class Fat {
 			if(cres == null){
 				for (ThinCalculatedMember c : tq.getQueryModel().getCalculatedMembers()) {
 					String cname = c.getUniqueName();
-					int ord = StringUtils.ordinalIndexOf((String) pair.getValue(), "[", 2);
-					String v = ((String)pair.getValue()).substring(ord, ((String)pair.getValue()).length());
+					int ord = StringUtils.ordinalIndexOf(entry.getValue(), "[", 2);
+					String v = (entry.getValue()).substring(ord, (entry.getValue()).length());
 					if (cname.equals(v)) {
 						cres = c;
 						break;
@@ -476,7 +475,7 @@ public class Fat {
 					}
 					break;
 				case Measure:
-					// TODO Implement this
+					// Implement this
 					break;
 				case N:
 					List<String> nexp = f.getExpressions();

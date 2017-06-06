@@ -18,11 +18,9 @@
 package art.login;
 
 import art.enums.ArtAuthenticationMethod;
-import art.saiku.SaikuConnectionProvider;
 import art.servlets.Config;
 import art.user.User;
 import java.sql.SQLException;
-import java.util.Map;
 import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

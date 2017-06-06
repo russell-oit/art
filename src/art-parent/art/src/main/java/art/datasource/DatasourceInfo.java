@@ -19,7 +19,6 @@ package art.datasource;
 
 import art.enums.DatasourceType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.Properties;
 
 /**
  * Represents details common to report datasources and art database

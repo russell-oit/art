@@ -17,12 +17,8 @@
  */
 package art.saiku;
 
-import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller to process requests from saiku ui

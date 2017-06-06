@@ -67,7 +67,7 @@ public abstract class TotalAggregator {
 
   public void addData( Cell cell ) {
     try {
-      // FIXME - maybe we should try to do fetch the format here, but seems to cause some issues? infinite loop? make
+      // maybe we should try to do fetch the format here, but seems to cause some issues? infinite loop? make
       // sure we try this only once to override existing format?
       //		if (format == null) {
       //			String formatString = (String) cell.getPropertyValue(Property.StandardCellProperty.FORMAT_STRING);

@@ -35,7 +35,6 @@ public class SaikuOlapConnection implements ISaikuConnection {
 	private OlapConnection olapConnection;
 	private String username;
 	private String password;
-	private String passwordenc;
 
 	private static final Logger log = LoggerFactory.getLogger(SaikuOlapConnection.class);
 
@@ -68,13 +67,9 @@ public class SaikuOlapConnection implements ISaikuConnection {
 				this.username = props.getProperty(ISaikuConnection.USERNAME_KEY);
 				this.password = props.getProperty(ISaikuConnection.PASSWORD_KEY);
 				String driver = props.getProperty(ISaikuConnection.DRIVER_KEY);
-				this.passwordenc = props.getProperty(ISaikuConnection.PASSWORD_ENCRYPT_KEY);
 				this.properties = props;
 				String url = props.getProperty(ISaikuConnection.URL_KEY);
 
-//                if (this.passwordenc != null && this.passwordenc.equals("true")) {
-//                    this.password = decryptPassword(password);
-//                }
 				if (url.contains("Mondrian=4")) {
 					url = url.replace("Mondrian=4; ", "");
 					url = url.replace("jdbc:mondrian", "jdbc:mondrian4");

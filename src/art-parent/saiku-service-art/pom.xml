@@ -18,6 +18,23 @@
 		<poi.version>3.14</poi.version>
 	</properties>
 	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	
 	<repositories>
 		<!-- repository for custom mondrian 4 that saiku uses and saiku-olap-util -->
 		<repository>
@@ -30,7 +47,7 @@
 		<repository>
 			<id>project-local</id>
 			<name>project-local</name>
-			<url>file://${project.basedir}${file.separator}repo</url>
+			<url>file:${project.basedir}${file.separator}repo</url>
 		</repository>
 	</repositories>
 	

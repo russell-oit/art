@@ -17,8 +17,6 @@ import art.saiku.web.rest.objects.resultset.QueryResult;
 import art.servlets.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.avalon.framework.configuration.Configuration;
-import org.apache.avalon.framework.configuration.DefaultConfigurationBuilder;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,7 +26,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
@@ -36,7 +33,6 @@ import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.apache.fop.apps.FopFactoryBuilder;
 
 /**
  * This PdfReport reads in a QueryResult and converts it to HTML, DOM, FO and eventually to a byte array containing the PDF data

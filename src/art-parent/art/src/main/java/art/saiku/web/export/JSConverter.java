@@ -11,7 +11,6 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 import java.io.*;
-import java.util.Properties;
 
 public class JSConverter {
     public static String convertToHtml(QueryResult queryResult, boolean wrapcontent) throws IOException {
@@ -72,11 +71,6 @@ public class JSConverter {
     }
 
     private static String appendSaikuCommercialIfNecessary(String content) {
-        if (getVersion() != null && !getVersion().contains("EE")) {
-            content =
-                content + "<div style='margin-top:10px;'><h5>Export Provided By Saiku Analytics Community Edition(http://meteorite.bi)"
-                    + "</h5></div>";
-        }
         content = content.replaceAll("&nbsp;", " ");
         content = content.replaceAll("&nbsp", " ");
         return content;
@@ -86,25 +80,4 @@ public class JSConverter {
         return convertToHtml(qr, false);
     }
 
-    private static String getVersion() {
-        Properties prop = new Properties();
-        InputStream input = null;
-        String version = "";
-        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        InputStream is = classloader.getResourceAsStream("org/saiku/web/rest/resources/version.properties");
-        try {
-
-            //input = new FileInputStream("version.properties");
-
-            // load a properties file
-            prop.load(is);
-
-            // get the property value and print it out
-            System.out.println(prop.getProperty("VERSION"));
-            version = prop.getProperty("VERSION");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return version;
-    }
 }

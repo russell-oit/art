@@ -122,7 +122,6 @@ public class ThinQueryModel {
 				}
 			}
 		}
-		// TODO Auto-generated method stub
 		return false;
 	}
 

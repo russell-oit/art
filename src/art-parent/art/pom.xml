@@ -111,10 +111,11 @@
 		</repository>
 		<!-- in-project repository for artifacts that are not in a public maven 
 		repository e.g. spnego, itext-asian-2.1.7 -->
+		<!-- https://devcenter.heroku.com/articles/local-maven-dependencies -->
 		<repository>
 			<id>art-local</id>
 			<name>art-local</name>
-			<url>file://${project.basedir}${file.separator}repo</url>
+			<url>file:${project.basedir}${file.separator}repo</url>
 		</repository>
 		<!-- repository for mondrian, olap4j-xmla -->
 		<repository>

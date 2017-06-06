@@ -4,8 +4,6 @@ import org.olap4j.CellSetAxis;
 import org.olap4j.Position;
 import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Member;
-import org.olap4j.metadata.NamedList;
-import org.olap4j.metadata.Property;
 
 import java.util.ArrayList;
 import java.util.HashSet;

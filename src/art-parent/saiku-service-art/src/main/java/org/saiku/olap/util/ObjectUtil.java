@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
@@ -383,7 +382,6 @@ public class ObjectUtil {
 		} finally {
 			if (rs != null) {
 				Statement statement = null;
-				Connection con = null;
 				try {
 					statement = rs.getStatement();
 
