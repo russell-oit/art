@@ -50,6 +50,7 @@ import org.saiku.service.util.exception.SaikuServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,6 +60,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -128,6 +130,7 @@ public class QueryController {
 	}
 
 	@DeleteMapping("/{queryname}/cancel")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cancel(HttpSession session,
 			@PathVariable("queryname") String queryName) throws SQLException {
 
@@ -157,7 +160,7 @@ public class QueryController {
 	}
 
 	@GetMapping("/{queryname}/export/xls")
-	public ResponseEntity getQueryExcelExport(HttpSession session,
+	public ResponseEntity<byte[]> getQueryExcelExport(HttpSession session,
 			@PathVariable("queryname") String queryName) throws IOException {
 
 		String format = "flattened";
@@ -166,7 +169,7 @@ public class QueryController {
 	}
 
 	@GetMapping("/{queryname}/export/xls/{format}")
-	public ResponseEntity getQueryExcelExportFormat(HttpSession session,
+	public ResponseEntity<byte[]> getQueryExcelExportFormat(HttpSession session,
 			@PathVariable("queryname") String queryName,
 			@PathVariable("format") String format,
 			@RequestParam(value = "exportname", defaultValue = "") String name) throws IOException {
@@ -174,7 +177,7 @@ public class QueryController {
 		return generateExcelFile(session, queryName, format, name);
 	}
 
-	private ResponseEntity generateExcelFile(HttpSession session,
+	private ResponseEntity<byte[]> generateExcelFile(HttpSession session,
 			String queryName, String format, String name) throws IOException {
 
 		//http://www.n-k.de/2016/05/optional-path-variables-with-spring-boot-rest-mvc.html
@@ -202,7 +205,7 @@ public class QueryController {
 	}
 
 	@GetMapping("/{queryname}/export/csv")
-	public ResponseEntity getQueryCsvExport(HttpSession session,
+	public ResponseEntity<byte[]> getQueryCsvExport(HttpSession session,
 			@PathVariable("queryname") String queryName) throws IOException {
 
 		String format = "flattened";
@@ -211,7 +214,7 @@ public class QueryController {
 	}
 
 	@GetMapping("/{queryname}/export/csv/{format}")
-	public ResponseEntity getQueryCsvExportFormat(HttpSession session,
+	public ResponseEntity<byte[]> getQueryCsvExportFormat(HttpSession session,
 			@PathVariable("queryname") String queryName,
 			@PathVariable("format") String format,
 			@RequestParam(value = "exportname", defaultValue = "") String name) throws IOException {
@@ -219,7 +222,7 @@ public class QueryController {
 		return generateCsvFile(session, queryName, format, name);
 	}
 
-	private ResponseEntity generateCsvFile(HttpSession session,
+	private ResponseEntity<byte[]> generateCsvFile(HttpSession session,
 			String queryName, String format, String name) {
 
 		ThinQueryService thinQueryService = discoverHelper.getThinQueryService(session);
@@ -323,7 +326,7 @@ public class QueryController {
 	}
 
 	@GetMapping("/{queryname}/drillthrough/export/csv")
-	public ResponseEntity getDrillthroughExport(HttpSession session,
+	public ResponseEntity<byte[]> getDrillthroughExport(HttpSession session,
 			@PathVariable("queryname") String queryName,
 			@RequestParam(value = "maxrows", defaultValue = "100") Integer maxrows,
 			@RequestParam("position") String position,
@@ -373,7 +376,7 @@ public class QueryController {
 	}
 
 	@PostMapping("/{queryname}/export/pdf")
-	public ResponseEntity exportPdfWithChart(HttpSession session,
+	public ResponseEntity<byte[]> exportPdfWithChart(HttpSession session,
 			@PathVariable("queryname") String queryName) throws Exception {
 
 		String format = null;
@@ -383,7 +386,7 @@ public class QueryController {
 	}
 
 	@GetMapping("/{queryname}/export/pdf")
-	public ResponseEntity exportPdf(HttpSession session,
+	public ResponseEntity<byte[]> exportPdf(HttpSession session,
 			@PathVariable("queryname") String queryName) throws Exception {
 
 		String format = null;
@@ -393,7 +396,7 @@ public class QueryController {
 	}
 
 	@GetMapping("/{queryname}/export/pdf/{format}")
-	public ResponseEntity exportPdfWithFormat(HttpSession session,
+	public ResponseEntity<byte[]> exportPdfWithFormat(HttpSession session,
 			@PathVariable("queryname") String queryName,
 			@PathVariable("format") String format,
 			@RequestParam("exportname") String name) throws Exception {
@@ -403,7 +406,7 @@ public class QueryController {
 	}
 
 	@PostMapping("/{queryname}/export/pdf/{format}")
-	public ResponseEntity exportPdfWithChartAndFormat(HttpSession session,
+	public ResponseEntity<byte[]> exportPdfWithChartAndFormat(HttpSession session,
 			@PathVariable("queryname") String queryName,
 			@PathVariable("format") String format,
 			@RequestParam(value = "svg", defaultValue = "") String svg,
@@ -412,7 +415,7 @@ public class QueryController {
 		return generatePdfFile(session, queryName, format, svg, name);
 	}
 
-	private ResponseEntity generatePdfFile(HttpSession session,
+	private ResponseEntity<byte[]> generatePdfFile(HttpSession session,
 			String queryName, String format, String svg, String name) throws Exception {
 
 		ThinQueryService thinQueryService = discoverHelper.getThinQueryService(session);
@@ -436,7 +439,7 @@ public class QueryController {
 	}
 
 	@GetMapping("/{queryname}/export/html")
-	public ResponseEntity exporQuerytHtml(HttpSession session,
+	public ResponseEntity<String> exporQuerytHtml(HttpSession session,
 			@PathVariable("queryname") String queryname,
 			@PathVariable("format") String format,
 			@RequestParam(value = "css", defaultValue = "false") Boolean css,
@@ -446,11 +449,12 @@ public class QueryController {
 		ThinQueryService thinQueryService = discoverHelper.getThinQueryService(session);
 
 		ThinQuery tq = thinQueryService.getContext(queryname).getOlapQuery();
+		
 		return generateHtml(session, tq, format, css, tableonly, wrapcontent);
 	}
 
 	@PostMapping("/export/html")
-	public ResponseEntity exportHtml(HttpSession session,
+	public ResponseEntity<String> exportHtml(HttpSession session,
 			@RequestBody ThinQuery tq,
 			@PathVariable("format") String format,
 			@RequestParam(value = "css", defaultValue = "false") Boolean css,
@@ -460,7 +464,7 @@ public class QueryController {
 		return generateHtml(session, tq, format, css, tableonly, wrapcontent);
 	}
 
-	private ResponseEntity generateHtml(HttpSession session,
+	private ResponseEntity<String> generateHtml(HttpSession session,
 			ThinQuery tq, String format, Boolean css, Boolean tableonly, Boolean wrapcontent) throws IOException {
 
 		ThinQueryService thinQueryService = discoverHelper.getThinQueryService(session);

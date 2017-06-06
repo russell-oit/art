@@ -39,8 +39,6 @@ import java.util.Date;
  */
 public class PdfReport {
 
-    private static final Logger log = LoggerFactory.getLogger(PdfReport.class);
-
     private static final float marginLeft = 15;
     private static final float marginRight = 15;
     private static final float marginTop = 10;

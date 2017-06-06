@@ -45,7 +45,7 @@ public class ApiExportController {
 	//can't have two controllers with the same name. there is already another ExportController for serving art/export/report and art/export/job
 
 	@PostMapping("/saiku/chart")
-	public ResponseEntity exportChart(HttpSession session,
+	public ResponseEntity<byte[]> exportChart(HttpSession session,
 			@RequestParam(value = "type", defaultValue = "png") String type,
 			@RequestParam("svg") String svg,
 			@RequestParam(value = "size", required = false) Integer size,
@@ -72,6 +72,7 @@ public class ApiExportController {
 		String cleanName = ArtUtils.cleanBaseFilename(name);
 		String finalName = cleanName + "." + converter.getExtension();
 
+		//https://stackoverflow.com/questions/5690228/spring-mvc-how-to-return-image-in-responsebody
 		return ResponseEntity.ok()
 				.header("Content-Disposition", "attachment; filename=\"" + finalName + "\"")
 				.contentLength(b.length)
