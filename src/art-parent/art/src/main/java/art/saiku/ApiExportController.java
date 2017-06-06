@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Timothy Anyona
  */
 @RestController
-@RequestMapping("/saiku2/rest/saiku/api/export")
+@RequestMapping("/saiku2/api/export")
 public class ApiExportController {
 	//can't have two controllers with the same name. there is already another ExportController for serving art/export/report and art/export/job
 

@@ -42,7 +42,7 @@ import org.springframework.web.context.request.RequestContextHolder;
  * @author Timothy Anyona
  */
 @RestController
-@RequestMapping("/saiku2/rest/saiku/session")
+@RequestMapping("/saiku2/session")
 public class SessionController {
 
 	@PostMapping()

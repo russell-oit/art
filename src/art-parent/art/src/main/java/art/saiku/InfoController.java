@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Timothy Anyona
  */
 @RestController
-@RequestMapping("/saiku2/rest/saiku/info")
+@RequestMapping("/saiku2/info")
 public class InfoController {
 
 	@GetMapping()

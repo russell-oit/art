@@ -48,7 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Timothy Anyona
  */
 @RestController
-@RequestMapping("/saiku2/rest/saiku/{username}/discover")
+@RequestMapping("/saiku2/{username}/discover")
 public class DiscoverController {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiscoverController.class);

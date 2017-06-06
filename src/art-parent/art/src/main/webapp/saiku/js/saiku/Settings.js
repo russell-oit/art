@@ -24,9 +24,8 @@ var Settings = {
     BIPLUGIN: false,
     BIPLUGIN5: false,
 	BASE_URL: window.location.origin,
-    //TOMCAT_WEBAPP: "http://localhost:8080/saiku",
 	TOMCAT_WEBAPP: "/art/saiku2",
-    REST_MOUNT_POINT: "/rest/saiku/",
+    REST_MOUNT_POINT: "/",
     DIMENSION_PREFETCH: true,
     DIMENSION_SHOW_ALL: true,
     /*

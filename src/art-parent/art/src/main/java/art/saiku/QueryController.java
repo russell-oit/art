@@ -67,7 +67,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Timothy Anyona
  */
 @RestController
-@RequestMapping("/saiku2/rest/saiku/api/query")
+@RequestMapping("/saiku2/api/query")
 public class QueryController {
 
 	private static final Logger logger = LoggerFactory.getLogger(QueryController.class);
