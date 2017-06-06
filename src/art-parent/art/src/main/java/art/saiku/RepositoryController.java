@@ -98,6 +98,11 @@ public class RepositoryController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteResource(HttpSession session,
 			@RequestParam("file") Integer reportId) throws SQLException {
+		
+		//https://stackoverflow.com/questions/32396884/return-http-204-on-null-with-spring-restcontroller
+		//http://www.jcombat.com/spring/exception-handling-in-spring-restful-web-service
+		//https://stackoverflow.com/questions/26550124/spring-returning-empty-http-responses-with-responseentityvoid-doesnt-work
+		//https://blog.jayway.com/2012/09/16/improve-your-spring-rest-api-part-i/
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
