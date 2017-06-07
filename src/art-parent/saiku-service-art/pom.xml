@@ -36,7 +36,7 @@
 	</build>
 	
 	<repositories>
-		<!-- repository for custom mondrian 4 that saiku uses and saiku-olap-util -->
+		<!-- repository for custom mondrian 4 that saiku uses -->
 		<repository>
 			<id>Analytical Labs Repo</id>
 			<name>Analytical Labs Repo-releases</name>
@@ -60,11 +60,6 @@
 		<dependency>
 			<groupId>org.olap4j</groupId>
 			<artifactId>olap4j</artifactId>
-			<version>1.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.olap4j</groupId>
-			<artifactId>olap4j-xmlaserver</artifactId>
 			<version>1.2.0</version>
 		</dependency>
 		<dependency>
