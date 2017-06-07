@@ -326,7 +326,7 @@ public class ObjectUtil {
 			if (StringUtils.isNotBlank(axis.getFilterCondition())) {
 				sax.setFilterCondition(axis.getFilterCondition());
 			}
-		} catch (Error e) {
+		} catch (Exception e) {
 			LOG.error("Could not convert query axis", e);
 		}
 

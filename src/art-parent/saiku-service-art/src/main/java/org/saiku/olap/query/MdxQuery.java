@@ -16,6 +16,7 @@
 
 package org.saiku.olap.query;
 
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -112,7 +113,8 @@ public class MdxQuery implements IQuery {
     props.put("org.saiku.connection.scenario", Boolean.toString(false));
     try {
       props.put("org.saiku.query.explain", Boolean.toString(connection.isWrapperFor(RolapConnection.class)));
-    } catch (Exception e) {
+    } catch (SQLException e) {
+		log.error("Error", e);
       props.put("org.saiku.query.explain", Boolean.toString(false));
     }
     return props;
@@ -129,7 +131,7 @@ public class MdxQuery implements IQuery {
       return (cube != null && cube.isDrillThroughEnabled());
     } catch (Exception e) {
         if(cube == null) {
-            log.error("Cube is null");
+            log.error("Cube is null", e);
         }
         else{
             log.error("Could not detect drillthrough", e.getCause());
@@ -197,8 +199,8 @@ public class MdxQuery implements IQuery {
         CubeType cubeType = (CubeType) select.getFrom().getType();
         return cubeType.getCube();
       }
-    } catch (Exception e) {
-      log.debug("Parsing MDX to get the Cube failed. Using fallback scenario.", e);
+    } catch (OlapException e) {
+      log.error("Parsing MDX to get the Cube failed. Using fallback scenario.", e);
     }
       try {
       // ok seems like we failed to get the cube, lets try it differently
@@ -217,7 +219,7 @@ public class MdxQuery implements IQuery {
         }
       }
     } catch (OlapException e) {
-      e.printStackTrace();
+      log.error("Error", e);
     }
 
 

@@ -15,6 +15,7 @@
  */
 package org.saiku.olap.query;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ public class QuerySerializer {
 
       return st.getBuffer().toString();
 
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new QueryParseException(e.getMessage(),e);
     }
 

@@ -14,6 +14,7 @@ import org.apache.fop.apps.MimeConstants;
 import org.saiku.service.util.exception.SaikuServiceException;
 import org.saiku.service.util.export.PdfPerformanceLogger;
 import art.saiku.web.rest.objects.resultset.QueryResult;
+import java.awt.Graphics2D;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,19 +24,31 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
-import java.awt.*;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 /**
  * This PdfReport reads in a QueryResult and converts it to HTML, DOM, FO and
  * eventually to a byte array containing the PDF data
  */
 public class PdfReport {
+
+	private static final Logger logger = LoggerFactory.getLogger(PdfReport.class);
 
 	private static final float marginLeft = 15;
 	private static final float marginRight = 15;
@@ -175,12 +188,10 @@ public class PdfReport {
 	private void tryWritingContentToPdfStream(OutputStream pdf, byte[] formattedPdfContent) {
 		try {
 			pdf.write(formattedPdfContent);
-		} catch (java.io.FileNotFoundException e) {
-			e.printStackTrace();
-			System.out.println("Error creating PDF: ");
+		} catch (FileNotFoundException e) {
+			logger.error("Error creating PDF", e);
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Error writing PDF: ");
+			logger.error("Error writing PDF", e);
 		}
 	}
 
@@ -223,6 +234,7 @@ public class PdfReport {
 			return out.toByteArray();
 
 		} catch (Exception ex) {
+			logger.error("Error", ex);
 			return null;
 		}
 	}
@@ -240,17 +252,8 @@ public class PdfReport {
 			DOMSource xslDomSource = new DOMSource(xslDoc);
 
 			return tFactory.newTransformer(xslDomSource);
-		} catch (javax.xml.transform.TransformerException e) {
-			e.printStackTrace();
-			return null;
-		} catch (java.io.IOException e) {
-			e.printStackTrace();
-			return null;
-		} catch (javax.xml.parsers.ParserConfigurationException e) {
-			e.printStackTrace();
-			return null;
-		} catch (org.xml.sax.SAXException e) {
-			e.printStackTrace();
+		} catch (TransformerException | IOException | ParserConfigurationException | SAXException e) {
+			logger.error("Error", e);
 			return null;
 		}
 	}

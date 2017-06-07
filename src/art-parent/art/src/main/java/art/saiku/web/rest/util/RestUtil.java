@@ -77,7 +77,7 @@ public class RestUtil {
 			    height++;
 			}
 		} catch (SQLException e) {
-			log.error("SQL Exception", e);
+			log.error("Error", e);
 		}
 		
 		return new QueryResult(rows,0,width,height);
@@ -107,8 +107,6 @@ public class RestUtil {
 		}
 		AbstractBaseCell[][] body = cellSet.getCellSetBody();
 		AbstractBaseCell[][] headers = cellSet.getCellSetHeaders();
-		
-		
 		
 		for (AbstractBaseCell header[] : headers) {
 			rows.add(convert(header, Cell.Type.COLUMN_HEADER));
@@ -156,7 +154,7 @@ public class RestUtil {
 				
 				metaprops.putAll(dcell.getProperties());
 				
-				// TODO no properties  (NULL) for now - 
+				// no properties  (NULL) for now - 
 				return new Cell(dcell.getFormattedValue(), metaprops, Cell.Type.DATA_CELL);
 			}
 			if (acell instanceof MemberCell) {
@@ -182,7 +180,7 @@ public class RestUtil {
 				}
 //				props.putAll(mcell.getProperties());
 
-				// TODO no properties  (NULL) for now - 
+				// no properties  (NULL) for now - 
 				if ("row_header_header".equals(mcell.getProperty("__headertype"))) {
 					headertype = Cell.Type.ROW_HEADER_HEADER;
 				}
@@ -229,7 +227,7 @@ public class RestUtil {
 			    height++;
 			}
 		} catch (SQLException e) {
-			log.error("SQL Exception", e);
+			log.error("Error", e);
 		}
 		
 		return new QueryResult(rows,0,width,height);

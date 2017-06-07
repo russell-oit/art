@@ -30,8 +30,12 @@ import java.util.Map;
 
 import mondrian.rolap.RolapConnection;
 import org.saiku.datasources.connection.IConnectionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OlapDiscoverService {
+	
+	private static final Logger log = LoggerFactory.getLogger(OlapDiscoverService.class);
 
 	private final OlapMetaExplorer metaExplorer;
 	private final IConnectionManager connectionManager;
@@ -192,6 +196,7 @@ public class OlapDiscoverService {
 				Boolean isScenario = (c.getDimensions().get("Scenario") != null);
 				properties.put("org.saiku.connection.scenario", isScenario);
 			} catch (Exception e) {
+				log.error("Error", e);
 				properties.put("org.saiku.connection.scenario", false);
 			}
 		} catch (Exception e) {

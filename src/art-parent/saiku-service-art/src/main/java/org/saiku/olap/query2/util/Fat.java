@@ -48,8 +48,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import mondrian.olap4j.SaikuMondrianHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Fat {
+	
+	private static final Logger log = LoggerFactory.getLogger(Fat.class);
 	
 	public static Query convert(ThinQuery tq, Cube cube) throws SQLException {
 		
@@ -100,7 +104,7 @@ public class Fat {
 					  parent =
                               q.getCube().lookupMember(IdentifierParser.parseIdentifier(qcm.getParentMember()));
 				  } catch (OlapException e) {
-					  e.printStackTrace();
+					  log.error("Error", e);
 				  }
 
 			  }
@@ -386,7 +390,7 @@ public class Fat {
 
 			for (ThinLevel tl : th.getLevels().values()) {
 				if(tl.getName().equals(level) && (tl.getSelection()== null
-												  || tl.getSelection().getMembers().size()==0)){
+												  || tl.getSelection().getMembers().isEmpty())){
 					qh.includeCalculatedMember(cm, false);
 				}
 				else if(!tl.getName().equals(level)){

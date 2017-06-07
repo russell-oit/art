@@ -680,6 +680,7 @@ public class ExcelWorksheetBuilder {
                     ((XSSFCellStyle) numberCSClone).setFillBackgroundColor(
                             new XSSFColor(new java.awt.Color(redCode, greenCode, blueCode)));
                 } catch (Exception e) {
+					log.error("Error", e);
                     // we tried to set the color, no luck, lets continue
                     // without
                 }
@@ -727,6 +728,7 @@ public class ExcelWorksheetBuilder {
                         }
                         nextAvailableColorCode++;
                     } catch (Exception e) {
+						log.error("Error", e);
                         // we tried to set the color, no luck, lets continue
                         // without
                         return -1;

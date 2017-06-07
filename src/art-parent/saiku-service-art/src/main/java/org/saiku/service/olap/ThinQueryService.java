@@ -160,7 +160,7 @@ public class ThinQueryService implements Serializable {
 			return Thin.convert(query, cube);
 
 		} catch (Exception e) {
-			log.error("Cannot create new query for cube :" + cube, e);
+			log.error("Cannot create new query for cube : " + cube, e);
 		}
 		return null;
 
@@ -487,7 +487,8 @@ public class ThinQueryService implements Serializable {
 				if (stmt != null) {
 					stmt.close();
 				}
-			} catch (Exception e) {
+			} catch (SQLException e) {
+				log.error("Error", e);
 			}
 		}
 	}
@@ -520,7 +521,8 @@ public class ThinQueryService implements Serializable {
 				if (stmt != null) {
 					stmt.close();
 				}
-			} catch (Exception e) {
+			} catch (SQLException e) {
+				log.error("Error", e);
 			}
 		}
 
@@ -554,11 +556,12 @@ public class ThinQueryService implements Serializable {
 					final DimensionResultInfo dri = (DimensionResultInfo) ri;
 					List<SaikuHierarchy> hierarchies = olapDiscoverService
 							.getDimension(saikuCube, dri.getDimension()).getHierarchies();
-					SaikuHierarchy hierarchy = null;
+					SaikuHierarchy hierarchy;
 					try {
 						hierarchy = DrillthroughUtils
 								.findHierarchy(hierarchies, dri.getHierarchy());
 					} catch (Exception e) {
+						log.error("Error", e);
 						hierarchy = DrillthroughUtils
 								.findHierarchy(hierarchies, dri.getDimension() + "." + dri.getHierarchy());
 					}
@@ -629,7 +632,8 @@ public class ThinQueryService implements Serializable {
 				if (stmt != null) {
 					stmt.close();
 				}
-			} catch (Exception e) {
+			} catch (SQLException e) {
+				log.error("Error", e);
 			}
 		}
 	}
@@ -657,7 +661,8 @@ public class ThinQueryService implements Serializable {
 				if (stmt != null) {
 					stmt.close();
 				}
-			} catch (Exception e) {
+			} catch (SQLException e) {
+				log.error("Error", e);
 			}
 		}
 
@@ -719,7 +724,7 @@ public class ThinQueryService implements Serializable {
 				log.debug("Found members in the result: " + members.size());
 
 			}
-			if (cs == null || !preferResult || members.size() == 0 || levels.size() == 1) {
+			if (cs == null || !preferResult || members.isEmpty() || levels.size() == 1) {
 				members = olapDiscoverService.getLevelMembers(context.get(queryName).getOlapQuery().getCube(), hierarchyName, levelName, searchString, searchLimit);
 			}
 			return members;
@@ -787,7 +792,7 @@ public class ThinQueryService implements Serializable {
 				if (cs == null) {
 					throw new SaikuServiceException("Cannot zoom in if last cellset is null");
 				}
-				if (realPositions == null || realPositions.size() == 0) {
+				if (realPositions == null || realPositions.isEmpty()) {
 					throw new SaikuServiceException("Cannot zoom in if zoom in position is empty");
 				}
 
@@ -904,7 +909,7 @@ public class ThinQueryService implements Serializable {
 					}
 				}
 			}
-			if (query.getDetails().getMeasures().size() == 0) {
+			if (query.getDetails().getMeasures().isEmpty()) {
 				QueryHierarchy qh = query.getHierarchy("Measures");
 				Member defaultMeasure = qh.getHierarchy().getDefaultMember();
 				query.getDetails().add(query.getMeasure(defaultMeasure.getName()));

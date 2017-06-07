@@ -38,9 +38,13 @@ import org.saiku.olap.dto.resultset.DataCell;
 import org.saiku.olap.dto.resultset.Matrix;
 import org.saiku.olap.dto.resultset.MemberCell;
 import org.saiku.olap.util.SaikuProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class FlattenedCellSetFormatter implements ICellSetFormatter {
+	
+	private static final Logger log = LoggerFactory.getLogger(FlattenedCellSetFormatter.class);
 
   /**
    * Description of an axis.
@@ -379,6 +383,7 @@ public class FlattenedCellSetFormatter implements ICellSetFormatter {
         try {
           cellInfo.setRawNumber(cell.getDoubleValue());
         } catch (Exception e1) {
+			log.error("Error", e1);
         }
       }
       String cellValue = cell.getFormattedValue(); // First try to get a
@@ -401,6 +406,7 @@ public class FlattenedCellSetFormatter implements ICellSetFormatter {
           }
           catch (Exception e) {
             // handle exception
+			log.error("Error", e);
           }
         }
         // the raw value
@@ -418,6 +424,7 @@ public class FlattenedCellSetFormatter implements ICellSetFormatter {
         }
       } catch (Exception e) {
         // we tried
+		log.error("Error", e);
       }
 
       Map<String, String> cellProperties = new HashMap<>();

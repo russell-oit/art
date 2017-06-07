@@ -294,7 +294,7 @@ public class QueryDeserializer {
             qAxis.filter( filterCondition );
           }
         } catch ( Error e ) {
-            log.error("ERROR", e);
+            log.error("Error", e);
         }
 
 
@@ -442,7 +442,7 @@ public class QueryDeserializer {
       try {
           return new Query( queryName, cube );
       } catch ( SQLException e ) {
-        throw new OlapException( "Error creating query :" + queryName, e );
+        throw new OlapException( "Error creating query : " + queryName, e );
       }
     } else {
       throw new OlapException( "No Cube with name: " + cubeName + " found" );

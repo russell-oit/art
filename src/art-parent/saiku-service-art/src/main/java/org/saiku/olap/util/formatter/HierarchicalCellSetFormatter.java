@@ -33,8 +33,12 @@ import org.saiku.olap.util.SaikuProperties;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HierarchicalCellSetFormatter implements ICellSetFormatter {
+	
+	private static final Logger log = LoggerFactory.getLogger(HierarchicalCellSetFormatter.class);
 
     /**
    * Description of an axis.
@@ -282,6 +286,7 @@ public class HierarchicalCellSetFormatter implements ICellSetFormatter {
         try {
           cellInfo.setRawNumber(cell.getDoubleValue());
         } catch (Exception e1) {
+			log.error("Error", e1);
         }
       }
       String cellValue = cell.getFormattedValue(); // First try to get a
@@ -303,6 +308,7 @@ public class HierarchicalCellSetFormatter implements ICellSetFormatter {
             cellValue = myFormatter.format(cell.getValue());
           }
           catch (Exception e) {
+			  log.error("Error", e);
             // handle exception
           }
         }
@@ -321,6 +327,7 @@ public class HierarchicalCellSetFormatter implements ICellSetFormatter {
           cellInfo.setFormatString(formatString.substring(0, formatString.indexOf("|")));
         }
       } catch (Exception e) {
+		  log.error("Error", e);
         // we tried
       }
 

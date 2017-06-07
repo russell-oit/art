@@ -44,6 +44,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -139,7 +140,9 @@ public class OlapQuery implements IQuery {
                 rows.filter(colFilter);
             }
 
-        } catch (NoSuchMethodError e) {}
+        } catch (NoSuchMethodError e) {
+		log.error("Error", e);
+		}
 
     }
 
@@ -235,7 +238,7 @@ public class OlapQuery implements IQuery {
                 SelectNode s = QueryConverter.convert(query);
                 s.unparse(new ParseTreeWriter(new PrintWriter(writer)));
             } catch (SaikuIncompatibleException se) {
-                log.debug("Cannot convert to new query model mdx, falling back to old version", se);
+                log.error("Cannot convert to new query model mdx, falling back to old version", se);
                 this.query.getSelect().unparse(new ParseTreeWriter(new PrintWriter(writer)));
             } catch (Exception e) {
                 throw new SaikuServiceException("Cannot convert to new query model", e);
@@ -370,7 +373,8 @@ public class OlapQuery implements IQuery {
                 this.properties.put("org.saiku.connection.scenario", Boolean.toString(false));
             }
             this.properties.put("org.saiku.query.explain", Boolean.toString(connection.isWrapperFor(RolapConnection.class)));
-        } catch (Exception e) {
+        } catch (SQLException e) {
+			log.error("Error", e);
             this.properties.put("org.saiku.connection.scenario", Boolean.toString(false));
             this.properties.put("org.saiku.query.explain", Boolean.toString(false));
         }

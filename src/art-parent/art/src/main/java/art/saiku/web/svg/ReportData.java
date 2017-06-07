@@ -4,6 +4,7 @@ import org.saiku.olap.dto.resultset.AbstractBaseCell;
 import org.saiku.olap.dto.resultset.MemberCell;
 
 import java.util.ArrayList;
+import org.apache.commons.lang3.StringUtils;
 
 public class ReportData {
 	private AbstractBaseCell[][] rowHeader;
@@ -105,7 +106,7 @@ public class ReportData {
 				int row=i - start;
 				if(dataMatrix[0][dim-1].getClass().equals(MemberCell.class) 
 						&& dataMatrix[0][dim-1].getFormattedValue()==null &&
-						dataMatrix[0][0].getParentDimension()==(dataMatrix[1][dim-1].getParentDimension())){
+						StringUtils.equals(dataMatrix[0][0].getParentDimension(),dataMatrix[1][dim-1].getParentDimension())){
 					row=row-1;
 				}
 				AbstractBaseCell[][] abc = new AbstractBaseCell[row][dataMatrix[start].length];
@@ -167,7 +168,7 @@ public class ReportData {
 		else {
 			for (int i = 1; i < headMatrix[0].length; i++) {
 				if(headMatrix[rowIndex][i]!=null)
-					if (headMatrix[rowIndex][i].getFormattedValue() != "MeasuresLevel"
+					if (!StringUtils.equals(headMatrix[rowIndex][i].getFormattedValue(), "MeasuresLevel")
 					&& headMatrix[rowIndex][i].getFormattedValue() != null ) {
 						section = new Section();
 						section.setDes(headMatrix[rowIndex][i].getFormattedValue());

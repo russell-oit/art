@@ -18,8 +18,12 @@ package org.saiku.olap.query;
 import org.olap4j.Axis;
 
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QueryProperties {
+	
+	private static final Logger log = LoggerFactory.getLogger(QueryProperties.class);
 
   private static final String KEY_NONEMPTY = "saiku.olap.query.nonempty"; //$NON-NLS-1$
   private static final String KEY_NONEMPTY_ROWS = "saiku.olap.query.nonempty.rows"; //$NON-NLS-1$
@@ -178,15 +182,16 @@ public class QueryProperties {
     @Override
     public Properties getProperties() {
       Properties props = new Properties();
-      String key = this.key;
-      String value = Boolean.FALSE.toString();
+      String propKey = this.key;
+      String propValue = Boolean.FALSE.toString();
       try {
         query.getAxis( Axis.COLUMNS ).getLimitFunction();
-        value = Boolean.TRUE.toString();
-      } catch ( Error e ) {
+        propValue = Boolean.TRUE.toString();
+      } catch ( Exception e ) {
+		  log.error("Error", e);
 
       }
-      props.put( key, value );
+      props.put( propKey, propValue );
       return props;
     }
 
@@ -205,15 +210,15 @@ public class QueryProperties {
     @Override
     public Properties getProperties() {
       Properties props = new Properties();
-      String key = this.key;
-      String value = Boolean.FALSE.toString();
+      String propKey = this.key;
+      String propValue = Boolean.FALSE.toString();
       try {
         query.getAxis( Axis.COLUMNS ).getFilterCondition();
-        value = Boolean.TRUE.toString();
-      } catch ( Error e ) {
-
+        propValue = Boolean.TRUE.toString();
+      } catch ( Exception e ) {
+		  log.error("Error", e);
       }
-      props.put( key, value );
+      props.put( propKey, propValue );
       return props;
     }
 

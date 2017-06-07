@@ -7,15 +7,18 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class FoConverter {
+	
+	private static final Logger logger = LoggerFactory.getLogger(FoConverter.class);
 
     public static Document getFo(Document xmlDoc) {
         try {
             return xml2Fo(xmlDoc);
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error", e);
         }
         return null;
     }
@@ -33,7 +36,6 @@ class FoConverter {
         Transformer transformer = factory.newTransformer();
 
         if (transformer == null) {
-            System.out.println("Error creating transformer");
             throw new TransformerConfigurationException("Transformer is null");
         }
         return transformer;

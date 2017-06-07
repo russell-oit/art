@@ -68,7 +68,7 @@ public class OlapMetaExplorer {
 							Collections.sort(cubes, new SaikuCubeCaptionComparator());
 							schemas.add(new SaikuSchema(schem.getName(),cubes));
 						}
-						if (schemas.size() == 0) {
+						if (schemas.isEmpty()) {
 							OlapDatabaseMetaData olapDbMeta = olapcon.getMetaData();
                             ResultSet cubesResult = olapDbMeta.getCubes(cat.getName(), null, null);
 
@@ -389,7 +389,7 @@ public class OlapMetaExplorer {
 				}
 			}
 		} catch (OlapException e) {
-			throw new SaikuOlapException("Cannot get child members of member:" + uniqueMemberName,e);
+			throw new SaikuOlapException("Cannot get child members of member: " + uniqueMemberName,e);
 		}
 
 		return members;
@@ -404,12 +404,12 @@ public class OlapMetaExplorer {
 					measures.add(ObjectUtil.convertMeasure(measure));
 				}
 			}
-			if (measures.size() == 0) {
+			if (measures.isEmpty()) {
 				Hierarchy hierarchy = nativeCube.getDimensions().get("Measures").getDefaultHierarchy();
 				measures = (ObjectUtil.convertMembers(hierarchy.getRootMembers()));
 			}
 		} catch (OlapException e) {
-			throw new SaikuOlapException("Cannot get measures for cube:"+cube.getName(),e);
+			throw new SaikuOlapException("Cannot get measures for cube: "+cube.getName(),e);
 		}
 		
 //		Collections.sort(measures, new SaikuMemberCaptionComparator());
@@ -425,7 +425,7 @@ public class OlapMetaExplorer {
 			}
 			return null;
 		} catch (Exception e) {
-			throw new SaikuOlapException("Cannot find member: " + uniqueMemberName + " in cube:"+cube.getName(),e);
+			throw new SaikuOlapException("Cannot find member: " + uniqueMemberName + " in cube: "+cube.getName(),e);
 		}
 	}
 	

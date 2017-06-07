@@ -53,12 +53,7 @@ public class SaikuOlapConnection implements ISaikuConnection {
 	}
 
 	public boolean connect(Properties props) throws Exception {
-		String safemode = null;
-		try {
-			safemode = System.getProperty("saiku.safemode");
-		} catch (Exception e) {
-			//Safemode doesn't exist, not a problem.
-		}
+		String safemode = System.getProperty("saiku.safemode");
 		if (safemode != null && safemode.equals("true")) {
 			log.debug("Not starting connection " + name + ", Saiku in safe mode");
 			return false;
@@ -97,7 +92,7 @@ public class SaikuOlapConnection implements ISaikuConnection {
 						throw new Exception("Connection is null");
 					}
 
-					log.info("Catalogs:" + tmpolapConnection.getOlapCatalogs().size());
+					log.info("Catalogs: " + tmpolapConnection.getOlapCatalogs().size());
 					olapConnection = tmpolapConnection;
 					initialized = true;
 					return true;
@@ -115,7 +110,6 @@ public class SaikuOlapConnection implements ISaikuConnection {
 			log.info("Clearing cache");
 			RolapConnection rcon = olapConnection.unwrap(RolapConnection.class);
 			rcon.getCacheControl(null).flushSchemaCache();
-
 		}
 		return true;
 	}
