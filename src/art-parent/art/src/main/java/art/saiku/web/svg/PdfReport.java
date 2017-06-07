@@ -51,7 +51,7 @@ public class PdfReport {
 		try {
 			PdfWriter writer = PdfWriter.getInstance(document, baos);
 			document.open();			
-			DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			Date date = new Date();
 			document.setHeader(new HeaderFooter(new Phrase("Saiku Export - " + dateFormat.format(date) + " Page: "), null));
 			

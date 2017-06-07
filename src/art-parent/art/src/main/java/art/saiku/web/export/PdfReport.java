@@ -14,9 +14,6 @@ import org.apache.fop.apps.MimeConstants;
 import org.saiku.service.util.exception.SaikuServiceException;
 import org.saiku.service.util.export.PdfPerformanceLogger;
 import art.saiku.web.rest.objects.resultset.QueryResult;
-import art.servlets.Config;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,213 +32,231 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * This PdfReport reads in a QueryResult and converts it to HTML, DOM, FO and eventually to a byte array containing the PDF data
+ * This PdfReport reads in a QueryResult and converts it to HTML, DOM, FO and
+ * eventually to a byte array containing the PDF data
  */
 public class PdfReport {
 
-    private static final float marginLeft = 15;
-    private static final float marginRight = 15;
-    private static final float marginTop = 10;
-    private static final float marginBottom = 10;
+	private static final float marginLeft = 15;
+	private static final float marginRight = 15;
+	private static final float marginTop = 10;
+	private static final float marginBottom = 10;
 
-    private final PdfPerformanceLogger pdfPerformanceLogger;
+	private String name = "Saiku export";
 
-    public PdfReport() {
-        pdfPerformanceLogger = new PdfPerformanceLogger();
-    }
+	private final PdfPerformanceLogger pdfPerformanceLogger;
 
-    public byte[] createPdf(QueryResult queryResult, String svg) throws Exception {
-        Rectangle queryResultSize = getQueryResultSize(queryResult);
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
 
-        Document document = createDocumentWithSizeToContainQueryResult(queryResultSize);
-        document.open();
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
-        ByteArrayOutputStream pdf = new ByteArrayOutputStream();
-        populatePdf(queryResult, pdf, queryResultSize);
+	public PdfReport() {
+		pdfPerformanceLogger = new PdfPerformanceLogger();
+	}
 
-        // do we want to add a svg image?
-        if (StringUtils.isNotBlank(svg)) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PdfWriter writer = PdfWriter.getInstance(document, baos);
-            addSvgImage(svg, document, writer);
-        }
+	public byte[] createPdf(QueryResult queryResult, String svg) throws Exception {
+		Rectangle queryResultSize = getQueryResultSize(queryResult);
 
-        //  document.close();
-        return pdf.toByteArray();
-    }
+		Document document = createDocumentWithSizeToContainQueryResult(queryResultSize);
+		document.open();
 
-    private Document createDocumentWithSizeToContainQueryResult(Rectangle size) {
-        return createDocumentWithMargins(size);
-    }
+		ByteArrayOutputStream pdf = new ByteArrayOutputStream();
+		populatePdf(queryResult, pdf, queryResultSize);
 
-    private Document createDocumentWithMargins(Rectangle size) {
-        return new Document(size, marginLeft, marginRight, marginTop, marginBottom);
-    }
+		// do we want to add a svg image?
+		if (StringUtils.isNotBlank(svg)) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			PdfWriter writer = PdfWriter.getInstance(document, baos);
+			addSvgImage(svg, document, writer);
+		}
 
-    private int calculateResultWidth(QueryResult queryResult) {
-        int length = 0;
-        if (queryResult != null && queryResult.getCellset() != null && queryResult.getCellset().size() > 0) {
-            length = queryResult.getCellset().get(0).length;
-        }
-        if (length == 0) {
-            throw new SaikuServiceException("Cannot convert empty result to PDF");
-        }
+		//  document.close();
+		return pdf.toByteArray();
+	}
 
-        return length;
+	private Document createDocumentWithSizeToContainQueryResult(Rectangle size) {
+		return createDocumentWithMargins(size);
+	}
 
-    }
+	private Document createDocumentWithMargins(Rectangle size) {
+		return new Document(size, marginLeft, marginRight, marginTop, marginBottom);
+	}
 
-    private void addSvgImage(String svg, Document document, PdfWriter pdfWriter) {
-        document.newPage();
-        StringBuilder stringBuffer = new StringBuilder(svg);
-        if (!svg.startsWith("<svg xmlns=\"http://www.w3.org/2000/svg\" ")) {
-            stringBuffer.insert(stringBuffer.indexOf("<svg") + 4, " xmlns='http://www.w3.org/2000/svg'");
-        }
+	private int calculateResultWidth(QueryResult queryResult) {
+		int length = 0;
+		if (queryResult != null && queryResult.getCellset() != null && queryResult.getCellset().size() > 0) {
+			length = queryResult.getCellset().get(0).length;
+		}
+		if (length == 0) {
+			throw new SaikuServiceException("Cannot convert empty result to PDF");
+		}
 
-        String t = "<?xml version='1.0' encoding='ISO-8859-1'"
-                + " standalone='no'?>" + stringBuffer.toString();
-        PdfContentByte cb = pdfWriter.getDirectContent();
-        cb.saveState();
-        cb.concatCTM(1.0f, 0, 0, 1.0f, 36, 0);
-        float width = document.getPageSize().getWidth() - 20;
-        float height = document.getPageSize().getHeight() - 20;
-        Graphics2D graphics = cb.createGraphics(width, height);
-        //graphics.rotate(Math.toRadians(-90), 100, 100);
-        PrintTranscoder prm = new PrintTranscoder();
-        TranscoderInput ti = new TranscoderInput(new StringReader(t));
-        prm.transcode(ti, null);
-        PageFormat pg = new PageFormat();
-        Paper paper = new Paper();
-        paper.setSize(width, height);
-        paper.setImageableArea(5, 5, width, height);
-        pg.setPaper(paper);
-        prm.print(graphics, pg, 0);
-        graphics.dispose();
-        cb.restoreState();
-    }
+		return length;
 
-    private Rectangle calculateDocumentSize(int resultWidth) {
-        Rectangle size = PageSize.A3.rotate();
-        if (resultWidth > 8) {
-            size = PageSize.A2.rotate();
-        }
-        if (resultWidth > 16) {
-            size = PageSize.A1.rotate();
-        }
-        if (resultWidth > 24) {
-            size = PageSize.A0.rotate();
-        }
-        if (resultWidth > 32) {
-            size = PageSize.B0.rotate();
-        }
+	}
 
-        return size;
-    }
+	private void addSvgImage(String svg, Document document, PdfWriter pdfWriter) {
+		document.newPage();
+		StringBuilder stringBuffer = new StringBuilder(svg);
+		if (!svg.startsWith("<svg xmlns=\"http://www.w3.org/2000/svg\" ")) {
+			stringBuffer.insert(stringBuffer.indexOf("<svg") + 4, " xmlns='http://www.w3.org/2000/svg'");
+		}
 
-    /**
-     * Query to HTML, HTML to DOM, DOM to FO and FO is written as PDF Byte array
-     *
-     * @param queryResult
-     * @param pdf
-     * @param queryResultSize
-     * @throws Exception
-     */
-    private void populatePdf(QueryResult queryResult, OutputStream pdf, Rectangle queryResultSize) throws Exception {
-        String htmlContent = generateContentAsHtmlString(queryResult);
-        org.w3c.dom.Document htmlDom = DomConverter.getDom(htmlContent);
-        org.w3c.dom.Document foDoc = FoConverter.getFo(htmlDom);
+		String t = "<?xml version='1.0' encoding='ISO-8859-1'"
+				+ " standalone='no'?>" + stringBuffer.toString();
+		PdfContentByte cb = pdfWriter.getDirectContent();
+		cb.saveState();
+		cb.concatCTM(1.0f, 0, 0, 1.0f, 36, 0);
+		float width = document.getPageSize().getWidth() - 20;
+		float height = document.getPageSize().getHeight() - 20;
+		Graphics2D graphics = cb.createGraphics(width, height);
+		//graphics.rotate(Math.toRadians(-90), 100, 100);
+		PrintTranscoder prm = new PrintTranscoder();
+		TranscoderInput ti = new TranscoderInput(new StringReader(t));
+		prm.transcode(ti, null);
+		PageFormat pg = new PageFormat();
+		Paper paper = new Paper();
+		paper.setSize(width, height);
+		paper.setImageableArea(5, 5, width, height);
+		pg.setPaper(paper);
+		prm.print(graphics, pg, 0);
+		graphics.dispose();
+		cb.restoreState();
+	}
 
-        byte[] formattedPdfContent = fo2Pdf(foDoc, null, queryResultSize);
-        tryWritingContentToPdfStream(pdf, formattedPdfContent);
+	private Rectangle calculateDocumentSize(int resultWidth) {
+		Rectangle size = PageSize.A3.rotate();
+		if (resultWidth > 8) {
+			size = PageSize.A2.rotate();
+		}
+		if (resultWidth > 16) {
+			size = PageSize.A1.rotate();
+		}
+		if (resultWidth > 24) {
+			size = PageSize.A0.rotate();
+		}
+		if (resultWidth > 32) {
+			size = PageSize.B0.rotate();
+		}
 
-        pdfPerformanceLogger.renderStop();
-        pdfPerformanceLogger.logResults();
-    }
+		return size;
+	}
 
-    private void tryWritingContentToPdfStream(OutputStream pdf, byte[] formattedPdfContent) {
-        try {
-            pdf.write(formattedPdfContent);
-        } catch (java.io.FileNotFoundException e) {
-            e.printStackTrace();
-            System.out.println("Error creating PDF: ");
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Error writing PDF: ");
-        }
-    }
+	/**
+	 * Query to HTML, HTML to DOM, DOM to FO and FO is written as PDF Byte array
+	 *
+	 * @param queryResult
+	 * @param pdf
+	 * @param queryResultSize
+	 * @throws Exception
+	 */
+	private void populatePdf(QueryResult queryResult, OutputStream pdf, Rectangle queryResultSize) throws Exception {
+		String htmlContent = generateContentAsHtmlString(queryResult);
+		org.w3c.dom.Document htmlDom = DomConverter.getDom(htmlContent);
+		org.w3c.dom.Document foDoc = FoConverter.getFo(htmlDom);
 
-    private String generateContentAsHtmlString(QueryResult queryResult) throws IOException {
-        pdfPerformanceLogger.queryToHtmlStart();
-        String contentBeforeQueryResult = createExportedByMessage();
-        String queryResultContent = JSConverter.convertToHtml(queryResult);
-        pdfPerformanceLogger.setQueryToHtmlStop();
-        pdfPerformanceLogger.renderStart();
-        return contentBeforeQueryResult + queryResultContent;
-    }
+		byte[] formattedPdfContent = fo2Pdf(foDoc, null, queryResultSize);
+		tryWritingContentToPdfStream(pdf, formattedPdfContent);
 
-    private String createExportedByMessage() {
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Date date = new Date();
-        return "<p>" + "Saiku Export - " + dateFormat.format(date) + "</p>";
-    }
+		pdfPerformanceLogger.renderStop();
+		pdfPerformanceLogger.logResults();
+	}
 
-    private byte[] fo2Pdf(org.w3c.dom.Document foDocument, String styleSheet, Rectangle size) {
-        try {
-            // Specify an external configuration file, to ease user changes, like adding custom fonts
+	private void tryWritingContentToPdfStream(OutputStream pdf, byte[] formattedPdfContent) {
+		try {
+			pdf.write(formattedPdfContent);
+		} catch (java.io.FileNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("Error creating PDF: ");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("Error writing PDF: ");
+		}
+	}
+
+	private String generateContentAsHtmlString(QueryResult queryResult) throws IOException {
+		pdfPerformanceLogger.queryToHtmlStart();
+		String contentBeforeQueryResult = createExportedByMessage();
+		String queryResultContent = JSConverter.convertToHtml(queryResult);
+		pdfPerformanceLogger.setQueryToHtmlStop();
+		pdfPerformanceLogger.renderStart();
+		return contentBeforeQueryResult + queryResultContent;
+	}
+
+	private String createExportedByMessage() {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date date = new Date();
+		return "<p>" + name + " - " + dateFormat.format(date) + "</p>";
+	}
+
+	private byte[] fo2Pdf(org.w3c.dom.Document foDocument, String styleSheet, Rectangle size) {
+		try {
+			// Specify an external configuration file, to ease user changes, like adding custom fonts
 			//https://stackoverflow.com/questions/4359876/how-to-load-reference-a-file-as-a-file-instance-from-the-classpath
-			String fopConfigPath=Config.getClassesPath() + "saiku-fop-config.xml";
-			FopFactory fopFactory = FopFactory.newInstance(new File(fopConfigPath));
+			//https://stackoverflow.com/questions/14089146/file-loading-by-getclass-getresource
+			//https://stackoverflow.com/questions/14739550/difference-between-getclass-getclassloader-getresource-and-getclass-getres
+			FopFactory fopFactory = FopFactory.newInstance(new File(getClass().getResource("saiku-fop-config.xml").toURI()));
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, out);
-            Transformer transformer = getTransformer(styleSheet);
-            Source src = new DOMSource(foDocument);
-            Result res = new SAXResult(fop.getDefaultHandler());
+			Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, out);
+			Transformer transformer = getTransformer(styleSheet);
+			Source src = new DOMSource(foDocument);
+			Result res = new SAXResult(fop.getDefaultHandler());
 
-            if (transformer != null) {
-                transformer.setParameter("page_height", (size.getHeight() / 72) + "in");
-                transformer.setParameter("page_width", (size.getWidth() / 72) + "in");
-                transformer.transform(src, res);
-            }
+			if (transformer != null) {
+				transformer.setParameter("page_height", (size.getHeight() / 72) + "in");
+				transformer.setParameter("page_width", (size.getWidth() / 72) + "in");
+				transformer.transform(src, res);
+			}
 
-            return out.toByteArray();
+			return out.toByteArray();
 
-        } catch (Exception ex) {
-            return null;
-        }
-    }
+		} catch (Exception ex) {
+			return null;
+		}
+	}
 
-    private Transformer getTransformer(String styleSheet) {
-        try {
-            TransformerFactory tFactory = TransformerFactory.newInstance();
+	private Transformer getTransformer(String styleSheet) {
+		try {
+			TransformerFactory tFactory = TransformerFactory.newInstance();
 
-            DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();
-            dFactory.setNamespaceAware(true);
+			DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();
+			dFactory.setNamespaceAware(true);
 
-            InputStream is = this.getClass().getResourceAsStream("xhtml2fo.xsl");
-            DocumentBuilder dBuilder = dFactory.newDocumentBuilder();
-            org.w3c.dom.Document xslDoc = dBuilder.parse(is);
-            DOMSource xslDomSource = new DOMSource(xslDoc);
+			InputStream is = this.getClass().getResourceAsStream("xhtml2fo.xsl");
+			DocumentBuilder dBuilder = dFactory.newDocumentBuilder();
+			org.w3c.dom.Document xslDoc = dBuilder.parse(is);
+			DOMSource xslDomSource = new DOMSource(xslDoc);
 
-            return tFactory.newTransformer(xslDomSource);
-        } catch (javax.xml.transform.TransformerException e) {
-            e.printStackTrace();
-            return null;
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-            return null;
-        } catch (javax.xml.parsers.ParserConfigurationException e) {
-            e.printStackTrace();
-            return null;
-        } catch (org.xml.sax.SAXException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-	
-	 private Rectangle getQueryResultSize(QueryResult queryResult) {
-        int resultWidth = calculateResultWidth(queryResult);
-        return calculateDocumentSize(resultWidth);
-    }
+			return tFactory.newTransformer(xslDomSource);
+		} catch (javax.xml.transform.TransformerException e) {
+			e.printStackTrace();
+			return null;
+		} catch (java.io.IOException e) {
+			e.printStackTrace();
+			return null;
+		} catch (javax.xml.parsers.ParserConfigurationException e) {
+			e.printStackTrace();
+			return null;
+		} catch (org.xml.sax.SAXException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private Rectangle getQueryResultSize(QueryResult queryResult) {
+		int resultWidth = calculateResultWidth(queryResult);
+		return calculateDocumentSize(resultWidth);
+	}
 }

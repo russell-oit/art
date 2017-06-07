@@ -423,10 +423,11 @@ public class QueryController {
 		CellDataSet cellData = thinQueryService.getFormattedResult(queryName, format);
 		QueryResult queryResult = RestUtil.convert(cellData);
 		PdfReport pdf = new PdfReport();
-		byte[] doc = pdf.createPdf(queryResult, svg);
 		if (name == null || name.equals("")) {
 			name = "export";
 		}
+		pdf.setName(name);
+		byte[] doc = pdf.createPdf(queryResult, svg);
 
 		String cleanName = ArtUtils.cleanBaseFilename(name);
 		String finalName = cleanName + ".pdf";
