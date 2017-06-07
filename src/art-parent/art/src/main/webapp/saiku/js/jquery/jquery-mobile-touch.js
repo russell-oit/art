@@ -13,101 +13,101 @@
  *
  */
 (function( $ ) {
- Â  Â $.support.touch = typeof Touch === 'object';
- Â  Â if (!$.support.touch) {
- Â  Â  Â  Â return;
- Â  Â }
+    $.support.touch = typeof Touch === 'object';
+    if (!$.support.touch) {
+        return;
+    }
 
- Â  Â var proto = Â $.ui.mouse.prototype,
- Â  Â _mouseInit = proto._mouseInit;
+    var proto =  $.ui.mouse.prototype,
+    _mouseInit = proto._mouseInit;
 
  	var startX;
  	var dx = 0;
 
 
- Â  Â $.extend( proto, {
- Â  Â  Â  Â _mouseInit: function() {
+    $.extend( proto, {
+        _mouseInit: function() {
  			if ($(this.element).hasClass("ui-dialog") || (!$(this.element).hasClass('ui-draggable') && !$(this.element).hasClass('ui-sortable'))) {
  				return false;
  			}
 
- Â  Â  Â  Â  Â  Â this.element
- Â  Â  Â  Â  Â  Â .bind( "touchstart." + this.widgetName, $.proxy( this, "_touchStart" ) );
- Â  Â  Â  Â  Â  Â _mouseInit.apply( this, arguments );
- Â  Â  Â  Â },
+            this.element
+            .bind( "touchstart." + this.widgetName, $.proxy( this, "_touchStart" ) );
+            _mouseInit.apply( this, arguments );
+        },
 
- Â  Â  Â  Â _touchStart: function( event ) {
- Â  Â  Â  Â  Â  Â if ( event.originalEvent.targetTouches.length != 1 ) {
- Â  Â  Â  Â  Â  Â  Â  Â return false;
- Â  Â  Â  Â  Â  Â }
+        _touchStart: function( event ) {
+            if ( event.originalEvent.targetTouches.length != 1 ) {
+                return false;
+            }
  			
  			
  			startX = event.originalEvent.pageX;
- Â  Â  Â  Â  Â  Â // reset touchMoved to provide a clean state after touch start
- Â  Â  Â  Â  Â  Â this._touchMoved = false;
+            // reset touchMoved to provide a clean state after touch start
+            this._touchMoved = false;
  			dx = 0;
 
- Â  Â  Â  Â  Â  Â this.element
- Â  Â  Â  Â  Â  Â .bind( "touchmove." + this.widgetName, $.proxy( this, "_touchMove" ) )
- Â  Â  Â  Â  Â  Â .bind( "touchend." + this.widgetName, $.proxy( this, "_touchEnd" ) );
+            this.element
+            .bind( "touchmove." + this.widgetName, $.proxy( this, "_touchMove" ) )
+            .bind( "touchend." + this.widgetName, $.proxy( this, "_touchEnd" ) );
 
- Â  Â  Â  Â  Â  Â this._modifyEvent( event );
+            this._modifyEvent( event );
 
- Â  Â  Â  Â  Â  Â //$( document ).trigger($.Event("mouseup")); //reset mouseHandled flag in ui.mouse
- Â  Â  Â  Â  Â  Â this._mouseDown( event );
+            //$( document ).trigger($.Event("mouseup")); //reset mouseHandled flag in ui.mouse
+            this._mouseDown( event );
  			if (this._mouseOn) {
  				this._mouseOn( event );
  			}
- Â  Â  Â  Â  Â  Â return false;
- Â  Â  Â  Â },
+            return false;
+        },
 
- Â  Â  Â  Â _touchMove: function( event ) {
+        _touchMove: function( event ) {
  			if ($(event.target).hasClass('ui-draggable') || $(event.target).parent().hasClass('ui-draggable') || !$(event.target).parents("ui-dialog").length > 0) {
-	 Â  Â  Â  Â  Â  Â this._touchMoved = true;
-	 Â  Â  Â  Â  Â  Â this._modifyEvent( event );
-	 Â  Â  Â  Â  Â  Â this._mouseMove( event );
+	            this._touchMoved = true;
+	            this._modifyEvent( event );
+	            this._mouseMove( event );
 			} else {
 				$(event.target).click();
 				$( document ).trigger($.Event("mouseup")); //reset mouseHandled flag in ui.mouse
 			}
 
- Â  Â  Â  Â },
+        },
 
- Â  Â  Â  Â _touchEnd: function( event ) {
- Â  Â  Â  Â  Â  Â this.element
- Â  Â  Â  Â  Â  Â .unbind( "touchmove." + this.widgetName )
- Â  Â  Â  Â  Â  Â .unbind( "touchend." + this.widgetName );
+        _touchEnd: function( event ) {
+            this.element
+            .unbind( "touchmove." + this.widgetName )
+            .unbind( "touchend." + this.widgetName );
  			//console.log("Distance: " + dx);
  			
  			
- Â  Â  Â  Â  Â  Â if (Math.abs(dx) < 10 || !this._touchMoved) {
+            if (Math.abs(dx) < 10 || !this._touchMoved) {
  				//console.log("CLICK!");
- Â  Â  Â  Â  Â  Â  Â  Â this._touchMoved = false;
- Â  Â  Â  Â  Â  Â  Â  Â // since $(event.target).click() does not work properly on ios we need to call the click event in this way
- Â  Â  Â  Â  Â  Â  Â  Â // see http://stackoverflow.com/questions/3543733/jquery-trigger-click-mobile-safari-ipad
- //Â  Â  Â  Â  Â  Â  Â  Â var clickEvent = document.createEvent("MouseEvents");
+                this._touchMoved = false;
+                // since $(event.target).click() does not work properly on ios we need to call the click event in this way
+                // see http://stackoverflow.com/questions/3543733/jquery-trigger-click-mobile-safari-ipad
+ //               var clickEvent = document.createEvent("MouseEvents");
 //				clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 				$(event.target).click();
 				//console.log(clickEvent);
- //Â  Â  Â  Â  Â  Â  Â  Â $(event.currentTarget)[0].dispatchEvent(clickEvent);
- Â  Â  Â  Â  Â  Â } else {
+ //               $(event.currentTarget)[0].dispatchEvent(clickEvent);
+            } else {
  				event.preventDefault() ;
  			}
   			startX = null;
  			dx = 0;
- Â  Â  Â  Â  Â  Â this._mouseUp( event );
+            this._mouseUp( event );
  			$( document ).trigger($.Event("mouseup")); //reset mouseHandled flag in ui.mouse
 
- Â  Â  Â  Â },
+        },
 
- Â  Â  Â  Â _modifyEvent: function( event ) {
- Â  Â  Â  Â  Â  Â event.which = 1;
- Â  Â  Â  Â  Â  Â var target = event.originalEvent.targetTouches[0];
- Â  Â  Â  Â  Â  Â event.pageX = target.clientX;
- Â  Â  Â  Â  Â  Â event.pageY = target.clientY;
+        _modifyEvent: function( event ) {
+            event.which = 1;
+            var target = event.originalEvent.targetTouches[0];
+            event.pageX = target.clientX;
+            event.pageY = target.clientY;
  			dx = target.clientX - startX;
- Â  Â  Â  Â }
+        }
 
- Â  Â });
+    });
 
 })( jQuery );
