@@ -344,7 +344,7 @@ Edit report page
 							$("#xmlEditor").show();
 							$("#saikuEditor").hide();
 							break;
-						case 149: //saiku mondrian
+						case 149: //saiku report
 							$("#sqlEditor").hide();
 							$("#xmlEditor").hide();
 							$("#saikuEditor").show();
@@ -392,7 +392,7 @@ Edit report page
 						//jpivot
 						reportSourceType = "(MDX)";
 						break;
-					case 149: //saiku mondrian
+					case 149: //saiku report
 						reportSourceType = "(JSON)";
 						break;
 					default:
@@ -419,7 +419,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 145: //datamaps file
-					case 149: //saiku mondrian
+					case 149: //saiku report
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -439,7 +439,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 145: //datamaps file
-					case 149: //saiku mondrian
+					case 149: //saiku report
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -518,7 +518,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 145: //datamaps file
-					case 149: //saiku mondrian
+					case 149: //saiku report
 					case 150: //saiku connection
 						$("#displayResultsetDiv").hide();
 						break;
@@ -592,7 +592,7 @@ Edit report page
 					case 145: //datamaps file
 					case 146: //leaflet
 					case 147: //openlayers
-					case 149: //saiku mondrian
+					case 149: //saiku report
 					case 150: //saiku connection
 						$("#defaultReportFormatDiv").hide();
 						break;
@@ -648,7 +648,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 145: //datamaps file
-					case 149: //saiku mondrian
+					case 149: //saiku report
 					case 150: //saiku connection
 						$("#fetchSizeDiv").hide();
 						break;

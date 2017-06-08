@@ -1045,7 +1045,7 @@ public class ReportService {
 		List<Report> availableReports = getAccessibleReports(userId);
 
 		for (Report report : availableReports) {
-			if (report.getReportType() == ReportType.SaikuMondrian) {
+			if (report.getReportType() == ReportType.SaikuReport) {
 				SaikuReport saikuReport = new SaikuReport();
 				saikuReport.setReportId(report.getReportId());
 				saikuReport.setName(report.getName());

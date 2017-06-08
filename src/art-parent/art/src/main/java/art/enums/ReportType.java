@@ -33,7 +33,7 @@ public enum ReportType {
 	TabularHeatmap(148), Group(1), Update(100),
 	Dashboard(110), GridstackDashboard(129), Text(111), JPivotMondrian(112),
 	JPivotMondrianXmla(113), JPivotSqlServerXmla(114),
-	SaikuConnection(150), SaikuMondrian(149),
+	SaikuConnection(150), SaikuReport(149),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122), Thymeleaf(131),
 	ReactPivot(130), PivotTableJs(132), PivotTableJsCsvLocal(133), PivotTableJsCsvServer(134),
@@ -85,7 +85,7 @@ public enum ReportType {
 			case Leaflet:
 			case OpenLayers:
 			case TabularHeatmap:
-			case SaikuMondrian:
+			case SaikuReport:
 			case SaikuConnection:
 				return false;
 			default:
@@ -654,8 +654,8 @@ public enum ReportType {
 				return "OpenLayers";
 			case TabularHeatmap:
 				return "Tabular: Heatmap";
-			case SaikuMondrian:
-				return "Saiku: Mondrian";
+			case SaikuReport:
+				return "Saiku: Report";
 			case SaikuConnection:
 				return "Saiku: Connection";
 			default:

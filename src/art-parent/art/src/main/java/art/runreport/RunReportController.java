@@ -180,7 +180,7 @@ public class RunReportController {
 				//doing this results in errors as a result of the runReport page being handled by jpivotError
 				//so use redirect
 				return "redirect:/showJPivot";
-			} else if (reportType == ReportType.SaikuMondrian) {
+			} else if (reportType == ReportType.SaikuReport) {
 				final int NOT_APPLICABLE = -1;
 				int totalTime = NOT_APPLICABLE;
 				int fetchTime = NOT_APPLICABLE;

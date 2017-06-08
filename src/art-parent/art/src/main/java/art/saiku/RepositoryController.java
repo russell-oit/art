@@ -74,7 +74,7 @@ public class RepositoryController {
 			report = new Report();
 			report.setName(name);
 			report.setReportSource(prettyContent);
-			report.setReportType(ReportType.SaikuMondrian);
+			report.setReportType(ReportType.SaikuReport);
 			reportService.addReport(report, sessionUser);
 
 			//give this user direct access to the report
