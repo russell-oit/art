@@ -57,6 +57,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -110,6 +111,7 @@ public class Config extends HttpServlet {
 	private static Configuration freemarkerConfig;
 	private static TemplateEngine thymeleafReportTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
+	private static SaikuConnectionManager globalSaikuConnectionManager;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -131,6 +133,8 @@ public class Config extends HttpServlet {
 
 		Config.closeSaikuConnections();
 
+		closeGlobalSaikuConnections();
+
 		//close database connections
 		DbConnections.closeAllConnections();
 
@@ -143,6 +147,41 @@ public class Config extends HttpServlet {
 		//http://logback.qos.ch/manual/configuration.html#stopContext
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();
+	}
+
+	/**
+	 * Closes global saiku connections
+	 */
+	public static void closeGlobalSaikuConnections() {
+		if (globalSaikuConnectionManager == null) {
+			return;
+		}
+
+		globalSaikuConnectionManager.destroy();
+
+		globalSaikuConnectionManager = null;
+	}
+
+	/**
+	 * Initializes the global saiku connections
+	 */
+	private static void initializeGlobalSaikuConnections() {
+		closeGlobalSaikuConnections();
+		globalSaikuConnectionManager = new SaikuConnectionManager(null, getTemplatesPath());
+		try {
+			globalSaikuConnectionManager.init();
+		} catch (SaikuOlapException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Returns the global saiku connection manager
+	 *
+	 * @return the global saiku connection manager
+	 */
+	public static SaikuConnectionManager getGlobalSaikuConnectionManager() {
+		return globalSaikuConnectionManager;
 	}
 
 	/**
@@ -407,6 +446,8 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(artVersion, upgradeFilePath, templatesPath);
+
+			initializeGlobalSaikuConnections();
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
@@ -1042,13 +1083,9 @@ public class Config extends HttpServlet {
 	 */
 	private static void closeSaikuConnections() {
 		for (Entry<Integer, SaikuConnectionProvider> entry : saikuConnections.entrySet()) {
-			try {
-				SaikuConnectionProvider connectionProvider = entry.getValue();
-				SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
-				connectionManager.destroy();
-			} catch (SaikuOlapException ex) {
-				logger.error("Error", ex);
-			}
+			SaikuConnectionProvider connectionProvider = entry.getValue();
+			SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
+			connectionManager.destroy();
 		}
 	}
 
@@ -1060,20 +1097,16 @@ public class Config extends HttpServlet {
 	public static void closeSaikuConnections(int userId) {
 		SaikuConnectionProvider connectionProvider = saikuConnections.get(userId);
 		if (connectionProvider != null) {
-			try {
-				SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
-				connectionManager.destroy();
-				connectionProvider.setConnectionManager(null);
-				connectionProvider.setMetaExplorer(null);
-				connectionProvider.setDiscoverService(null);
-				ThinQueryService thinQueryService = connectionProvider.getThinQueryService();
-				thinQueryService.destroy();
-				thinQueryService = null;
-				connectionProvider = null;
-				saikuConnections.remove(userId);
-			} catch (SaikuOlapException ex) {
-				logger.error("Error", ex);
-			}
+			SaikuConnectionManager connectionManager = connectionProvider.getConnectionManager();
+			connectionManager.destroy();
+			connectionProvider.setConnectionManager(null);
+			connectionProvider.setMetaExplorer(null);
+			connectionProvider.setDiscoverService(null);
+			ThinQueryService thinQueryService = connectionProvider.getThinQueryService();
+			thinQueryService.destroy();
+			thinQueryService = null;
+			connectionProvider = null;
+			saikuConnections.remove(userId);
 		}
 	}
 

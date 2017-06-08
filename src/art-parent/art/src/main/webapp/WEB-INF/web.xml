@@ -33,8 +33,7 @@
         <error-code>500</error-code>
         <location>/error-500</location>
     </error-page>
-	
-	<filter>
+    <filter>
         <!-- ensure all parameter values are retrieved using utf-8 encoding
 	   This filter simply calls request.setCharacterEncoding()
 	   Must be the first filter. This applies to POST requests.
@@ -52,14 +51,11 @@
             <param-value>true</param-value>
         </init-param>
     </filter>
-	
-	<filter-mapping>
+    <filter-mapping>
         <filter-name>CharacterEncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
-
-	<!-- Start CAS configuration 
+    <!-- Start CAS configuration 
 
 	<filter>
 	   <filter-name>CAS Single Sign Out Filter</filter-name>
@@ -131,12 +127,9 @@
 	</listener>
 
 	End CAS configuration -->
-
-	
 	<!-- order of filter mapping is important. filters executed in the order of filter-mapping elements -->
 	<!-- https://stackoverflow.com/questions/7938050/what-will-the-the-order-in-which-filters-will-be-called -->
 	<!-- https://stackoverflow.com/questions/6560969/how-to-define-servlet-filter-order-of-execution-using-annotations-in-war -->
-	
 	<filter>
 		<filter-name>JPivotController</filter-name>
 		<filter-class>net.sf.wcfart.wcf.controller.RequestFilter</filter-class>
@@ -153,20 +146,17 @@
 			<param-value>/jpivotBusy</param-value>
 		</init-param>
 	</filter>
-	
 	<filter-mapping>
 		<filter-name>JPivotController</filter-name>
 		<url-pattern>/showJPivot</url-pattern>
 	</filter-mapping>
-	
-	
 	<servlet>
 		<servlet-name>CewolfServlet</servlet-name>
 		<servlet-class>net.sf.cewolfart.CewolfRenderer</servlet-class>
 		<init-param>
 			<param-name>overliburl</param-name>
 			<!-- leave blank to use custom tooltips instead of overlib -->
-			<param-value></param-value>
+			<param-value/>
 		</init-param>
 		<init-param>
 			<param-name>debug</param-name>
@@ -221,14 +211,6 @@
 		<servlet-name>MDXQueryServlet</servlet-name>
 		<servlet-class>net.sf.mondrianart.mondrian.web.servlet.MdxQueryServlet</servlet-class>
 	</servlet>
-	<servlet>
-		<servlet-name>MondrianXmlaServlet</servlet-name>
-		<servlet-class>art.servlets.MondrianXmla</servlet-class>
-		<init-param>
-			<param-name>CharacterEncoding</param-name>
-			<param-value>UTF-8</param-value>
-		</init-param>
-	</servlet>
 	<!-- jfreechart provided servlet -->
 	<servlet>
 		<servlet-name>DisplayChart</servlet-name>
@@ -258,9 +240,41 @@
 		<servlet-name>GetChart</servlet-name>
 		<url-pattern>/GetChart</url-pattern>
 	</servlet-mapping>
+	<!-- End JPivot -->
+	<servlet>
+		<servlet-name>Mondrian3XmlaServlet</servlet-name>
+		<servlet-class>art.servlets.Mondrian3XmlaServlet</servlet-class>
+		<init-param>
+			<param-name>CharacterEncoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</servlet>
 	<servlet-mapping>
-		<servlet-name>MondrianXmlaServlet</servlet-name>
+		<servlet-name>Mondrian3XmlaServlet</servlet-name>
+		<url-pattern>/xmla2</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Mondrian4XmlaServlet</servlet-name>
+		<servlet-class>art.servlets.Mondrian4XmlaServlet</servlet-class>
+		<init-param>
+			<param-name>CharacterEncoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Mondrian4XmlaServlet</servlet-name>
 		<url-pattern>/xmla</url-pattern>
 	</servlet-mapping>
-	<!-- End JPivot -->
+	<servlet>
+		<servlet-name>SaikuXmlaServlet</servlet-name>
+		<servlet-class>art.servlets.SaikuXmlaServlet</servlet-class>
+		<init-param>
+			<param-name>CharacterEncoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SaikuXmlaServlet</servlet-name>
+		<url-pattern>/xmla3</url-pattern>
+	</servlet-mapping>
 </web-app>

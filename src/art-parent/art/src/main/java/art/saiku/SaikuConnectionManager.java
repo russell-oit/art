@@ -29,6 +29,7 @@ public class SaikuConnectionManager implements IConnectionManager {
 
 	public SaikuConnectionManager(User user, String templatesPath) {
 		this.user = user;
+		//pass template instead of calling Config.getTemplatesPath() to avoid circular reference. Config references this class
 		this.templatesPath = templatesPath;
 	}
 
@@ -37,12 +38,16 @@ public class SaikuConnectionManager implements IConnectionManager {
 			connectProperties = new HashMap<>();
 		} else {
 			destroy();
-			connectProperties.clear();
 		}
 
 		try {
 			ReportService reportService = new ReportService();
-			List<Report> reports = reportService.getAvailableSaikuConnectionReports(user.getUserId());
+			List<Report> reports;
+			if (user == null) {
+				reports = reportService.getAllActiveSaikuConnectionReports();
+			} else {
+				reports = reportService.getAvailableSaikuConnectionReports(user.getUserId());
+			}
 			MondrianHelper mondrianHelper = new MondrianHelper();
 			for (Report report : reports) {
 				String roles = mondrianHelper.getRolesString(report.getReportId(), user);
@@ -105,10 +110,10 @@ public class SaikuConnectionManager implements IConnectionManager {
 		return null;
 	}
 
-	public void destroy() throws SaikuOlapException {
-		Map<String, OlapConnection> saikuConnections = getAllOlapConnections();
-		if (saikuConnections != null && !saikuConnections.isEmpty()) {
-			for (OlapConnection con : saikuConnections.values()) {
+	public void destroy() {
+		Map<String, OlapConnection> olapConnections = getCurrentOlapConnections();
+		if (olapConnections != null && !olapConnections.isEmpty()) {
+			for (OlapConnection con : olapConnections.values()) {
 				try {
 					if (!con.isClosed()) {
 						con.close();
@@ -118,8 +123,15 @@ public class SaikuConnectionManager implements IConnectionManager {
 				}
 			}
 		}
-		if (saikuConnections != null) {
-			saikuConnections.clear();
+
+		connections.clear();
+
+		if (olapConnections != null) {
+			olapConnections.clear();
+		}
+
+		if (connectProperties != null) {
+			connectProperties.clear();
 		}
 	}
 
@@ -160,9 +172,18 @@ public class SaikuConnectionManager implements IConnectionManager {
 			if (o != null && o instanceof OlapConnection) {
 				return (OlapConnection) o;
 			}
-		} else {
-
-		}
+		} 
+		return null;
+	}
+	
+	public OlapConnection getExistingOlapConnection(String name) throws SaikuOlapException {
+		ISaikuConnection con = connections.get(name);
+		if (con != null) {
+			Object o = con.getConnection();
+			if (o != null && o instanceof OlapConnection) {
+				return (OlapConnection) o;
+			}
+		} 
 		return null;
 	}
 
@@ -170,6 +191,18 @@ public class SaikuConnectionManager implements IConnectionManager {
 		Map<String, ISaikuConnection> saikuConnections = getAllConnections();
 		Map<String, OlapConnection> olapConnections = new HashMap<>();
 		for (ISaikuConnection con : saikuConnections.values()) {
+			Object o = con.getConnection();
+			if (o != null && o instanceof OlapConnection) {
+				olapConnections.put(con.getName(), (OlapConnection) o);
+			}
+		}
+
+		return olapConnections;
+	}
+	
+	public Map<String, OlapConnection> getCurrentOlapConnections(){
+		Map<String, OlapConnection> olapConnections = new HashMap<>();
+		for (ISaikuConnection con : connections.values()) {
 			Object o = con.getConnection();
 			if (o != null && o instanceof OlapConnection) {
 				olapConnections.put(con.getName(), (OlapConnection) o);

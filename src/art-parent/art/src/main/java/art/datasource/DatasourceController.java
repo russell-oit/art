@@ -382,13 +382,17 @@ public class DatasourceController {
 			} else {
 				if (StringUtils.isNotBlank(driver)) {
 					Class.forName(driver);
-					if (driver.equals("mondrian.olap4j.MondrianOlap4jDriver")) {
-						if (StringUtils.isNotBlank(username) && 
-								!StringUtils.contains(url, "JdbcUser")) {
+					//use ends with instead of equals to cater for net.sf.mondrianart.mondrian.olap4j.MondrianOlap4jDriver
+					if (StringUtils.endsWith(driver, "mondrian.olap4j.MondrianOlap4jDriver")) {
+						if (!StringUtils.endsWith(url, ";")) {
+							url += ";";
+						}
+						if (StringUtils.isNotBlank(username)
+								&& !StringUtils.contains(url, "JdbcUser")) {
 							url += "JdbcUser=" + username + ";";
 						}
-						if (StringUtils.isNotBlank(password) && 
-								!StringUtils.contains(url, "JdbcPassword")) {
+						if (StringUtils.isNotBlank(password)
+								&& !StringUtils.contains(url, "JdbcPassword")) {
 							url += "JdbcPassword=" + password + ";";
 						}
 					}

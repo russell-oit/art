@@ -355,6 +355,22 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
+	
+	/**
+	 * Returns all active saiku connection reports
+	 *
+	 * @return all active saiku connection reports
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAllActiveSaikuConnectionReports() throws SQLException {
+		logger.debug("Entering getAllActiveSaikuConnectionReports");
+		
+		String sql= SQL_SELECT_ALL + " WHERE QUERY_TYPE=150 AND ACTIVE=1";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h);
+	}
 
 	/**
 	 * Returns a report

@@ -26,6 +26,9 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import mondrian.rolap.RolapConnection;
+import org.apache.commons.lang.StringUtils;
+import org.olap4j.metadata.Catalog;
+import org.olap4j.metadata.NamedList;
 
 public class SaikuOlapConnection implements ISaikuConnection {
 
@@ -65,14 +68,15 @@ public class SaikuOlapConnection implements ISaikuConnection {
 				this.properties = props;
 				String url = props.getProperty(ISaikuConnection.URL_KEY);
 
-				if (url.contains("Mondrian=4")) {
-					url = url.replace("Mondrian=4; ", "");
-					url = url.replace("jdbc:mondrian", "jdbc:mondrian4");
-				}
+//				if (url.contains("Mondrian=4")) {
+//					url = url.replace("Mondrian=4; ", "");
+//					url = url.replace("jdbc:mondrian", "jdbc:mondrian4");
+//				}
 				if (url.length() > 0 && url.charAt(url.length() - 1) != ';') {
 					url += ";";
 				}
-				if (driver.equals("mondrian.olap4j.MondrianOlap4jDriver")) {
+				//use ends with instead of equals to cater for net.sf.mondrianart.mondrian.olap4j.MondrianOlap4jDriver
+				if (StringUtils.endsWith(driver, "mondrian.olap4j.MondrianOlap4jDriver")) {
 					if (username != null && username.length() > 0) {
 						url += "JdbcUser=" + username + ";";
 					}
@@ -92,7 +96,8 @@ public class SaikuOlapConnection implements ISaikuConnection {
 						throw new Exception("Connection is null");
 					}
 
-					log.info("Catalogs: " + tmpolapConnection.getOlapCatalogs().size());
+//					NamedList<Catalog> catalogs = tmpolapConnection.getOlapCatalogs();
+//					log.info("Catalogs: " + catalogs.size());
 					olapConnection = tmpolapConnection;
 					initialized = true;
 					return true;

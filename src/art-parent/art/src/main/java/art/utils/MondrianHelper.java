@@ -47,6 +47,10 @@ public class MondrianHelper {
 	 * @throws SQLException
 	 */
 	public String getRolesString(int reportId, User user) throws SQLException {
+		if (user == null) {
+			return null;
+		}
+
 		//get roles to be applied. use rule values are roles
 		List<String> roles = new ArrayList<>();
 

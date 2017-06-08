@@ -23,7 +23,7 @@ import java.util.Map;
 
 public interface IConnectionManager {
 
-	void init() throws SaikuOlapException, SQLException;
+	void init() throws SaikuOlapException;
 	
 	void refreshConnection(String name);
 
@@ -31,10 +31,10 @@ public interface IConnectionManager {
 	
 	OlapConnection getOlapConnection(String name) throws SaikuOlapException;
 	
-	Map<String, OlapConnection> getAllOlapConnections() throws SaikuOlapException, SQLException;
+	Map<String, OlapConnection> getAllOlapConnections() throws SaikuOlapException;
 	
 	ISaikuConnection getConnection(String name) throws SaikuOlapException;
 	
-	Map<String, ISaikuConnection> getAllConnections() throws SaikuOlapException, SQLException;
+	Map<String, ISaikuConnection> getAllConnections() throws SaikuOlapException;
 
 }

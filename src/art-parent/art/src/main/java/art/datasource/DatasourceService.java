@@ -216,7 +216,7 @@ public class DatasourceService {
 	 * @param actionUser the user who is performing the update
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "datasources", allEntries = true)
+	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
 	public void updateDatasource(Datasource datasource, User actionUser) throws SQLException {
 		logger.debug("Entering updateDatasource: datasource={}, actionUser={}", datasource, actionUser);
 
@@ -355,7 +355,7 @@ public class DatasourceService {
 	 * @param actionUser the user who is performing the edit
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "datasources", allEntries = true)
+	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
 	public void updateDatasources(MultipleDatasourceEdit multipleDatasourceEdit, User actionUser)
 			throws SQLException {
 
