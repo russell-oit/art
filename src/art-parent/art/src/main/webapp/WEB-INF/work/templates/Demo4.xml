@@ -1,0 +1,216 @@
+<Schema name="Demo" missingLink="ignore" metamodelVersion="4.0">
+	<PhysicalSchema>
+		<Table name="FACTORDERS" alias="FACTORDERS">
+			<ColumnDefs>
+			</ColumnDefs>
+		</Table>
+		<Table name="DIMUSERS" alias="DIMUSERS">
+			<ColumnDefs>
+			</ColumnDefs>
+			<Key name="key$0">
+				<Column table="DIMUSERS" name="USER_ID">
+				</Column>
+			</Key>
+		</Table>
+		<Table name="DIMLOCATION" alias="DIMLOCATION">
+			<ColumnDefs>
+			</ColumnDefs>
+			<Key name="key$0">
+				<Column table="DIMLOCATION" name="LOCATION_ID">
+				</Column>
+			</Key>
+		</Table>
+		<Table name="DIMTIME" alias="DIMTIME">
+			<ColumnDefs>
+			</ColumnDefs>
+			<Key name="key$0">
+				<Column table="DIMTIME" name="TIME_ID">
+				</Column>
+			</Key>
+		</Table>
+		<Table name="DIMITEMS" alias="DIMITEMS">
+			<ColumnDefs>
+			</ColumnDefs>
+			<Key name="key$0">
+				<Column table="DIMITEMS" name="ITEM_ID">
+				</Column>
+			</Key>
+		</Table>
+		<Link source="DIMTIME" target="FACTORDERS" key="key$0">
+			<ForeignKey>
+				<Column table="FACTORDERS" name="TIME_ID">
+				</Column>
+			</ForeignKey>
+		</Link>
+		<Link source="DIMITEMS" target="FACTORDERS" key="key$0">
+			<ForeignKey>
+				<Column table="FACTORDERS" name="ITEM_ID">
+				</Column>
+			</ForeignKey>
+		</Link>
+		<Link source="DIMUSERS" target="FACTORDERS" key="key$0">
+			<ForeignKey>
+				<Column table="FACTORDERS" name="USER_ID">
+				</Column>
+			</ForeignKey>
+		</Link>
+		<Link source="DIMLOCATION" target="FACTORDERS" key="key$0">
+			<ForeignKey>
+				<Column table="FACTORDERS" name="LOCATION_ID">
+				</Column>
+			</ForeignKey>
+		</Link>
+	</PhysicalSchema>
+	<Cube name="Orders" visible="true" cache="true" enabled="true" enableScenarios="false">
+		<Dimensions>
+			<Dimension name="Users" visible="true" key="$Id" hanger="false">
+				<Hierarchies>
+					<Hierarchy name="Users" visible="true" hasAll="true" allMemberName="All users">
+						<Level name="Name" visible="true" attribute="Name" hideMemberIf="Never">
+						</Level>
+					</Hierarchy>
+				</Hierarchies>
+				<Attributes>
+					<Attribute name="Name" levelType="Regular" table="DIMUSERS" datatype="String" hasHierarchy="false">
+						<Key>
+							<Column table="DIMUSERS" name="FIRST_NAME">
+							</Column>
+						</Key>
+					</Attribute>
+					<Attribute name="$Id" levelType="Regular" table="DIMUSERS" keyColumn="USER_ID" hasHierarchy="false">
+					</Attribute>
+				</Attributes>
+			</Dimension>
+			<Dimension name="Location" visible="true" key="$Id" hanger="false">
+				<Hierarchies>
+					<Hierarchy name="Location" visible="true" hasAll="true">
+						<Level name="Region" visible="true" attribute="Region" hideMemberIf="Never">
+						</Level>
+						<Level name="City" visible="true" attribute="City" hideMemberIf="Never">
+						</Level>
+					</Hierarchy>
+				</Hierarchies>
+				<Attributes>
+					<Attribute name="Region" levelType="Regular" table="DIMLOCATION" datatype="String" hasHierarchy="false">
+						<Key>
+							<Column table="DIMLOCATION" name="REGION">
+							</Column>
+						</Key>
+					</Attribute>
+					<Attribute name="City" levelType="Regular" table="DIMLOCATION" datatype="String" hasHierarchy="false">
+						<Key>
+							<Column table="DIMLOCATION" name="REGION">
+							</Column>
+							<Column table="DIMLOCATION" name="CITY">
+							</Column>
+						</Key>
+						<Name>
+							<Column table="DIMLOCATION" name="CITY">
+							</Column>
+						</Name>
+					</Attribute>
+					<Attribute name="$Id" levelType="Regular" table="DIMLOCATION" keyColumn="LOCATION_ID" hasHierarchy="false">
+					</Attribute>
+				</Attributes>
+			</Dimension>
+			<Dimension name="Time" visible="true" type="TIME" key="$Id" hanger="false">
+				<Hierarchies>
+					<Hierarchy name="Year" visible="true" hasAll="true">
+						<Level name="Year" visible="true" attribute="Year" hideMemberIf="Never">
+						</Level>
+					</Hierarchy>
+					<Hierarchy name="Quarter" visible="true" hasAll="true">
+						<Level name="Year" visible="true" attribute="Year0" hideMemberIf="Never">
+						</Level>
+						<Level name="Quarter" visible="true" attribute="Quarter" hideMemberIf="Never">
+						</Level>
+					</Hierarchy>
+				</Hierarchies>
+				<Attributes>
+					<Attribute name="Year" levelType="TimeYears" table="DIMTIME" datatype="Integer" hasHierarchy="false">
+						<Key>
+							<Column table="DIMTIME" name="YEAR">
+							</Column>
+						</Key>
+					</Attribute>
+					<Attribute name="$Id" levelType="Regular" table="DIMTIME" keyColumn="TIME_ID" hasHierarchy="false">
+					</Attribute>
+					<Attribute name="Year0" levelType="TimeYears" table="DIMTIME" datatype="Integer" hasHierarchy="false">
+						<Key>
+							<Column table="DIMTIME" name="YEAR">
+							</Column>
+						</Key>
+					</Attribute>
+					<Attribute name="Quarter" levelType="TimeQuarters" table="DIMTIME" datatype="String" hasHierarchy="false">
+						<Key>
+							<Column table="DIMTIME" name="YEAR">
+							</Column>
+							<Column table="DIMTIME" name="QUARTER">
+							</Column>
+						</Key>
+						<Name>
+							<Column table="DIMTIME" name="QUARTER">
+							</Column>
+						</Name>
+					</Attribute>
+				</Attributes>
+			</Dimension>
+			<Dimension name="Items" visible="true" key="$Id" hanger="false">
+				<Hierarchies>
+					<Hierarchy name="Items" visible="true" hasAll="true" allMemberName="All Items">
+						<Level name="Name" visible="true" attribute="Name" hideMemberIf="Never">
+						</Level>
+					</Hierarchy>
+				</Hierarchies>
+				<Attributes>
+					<Attribute name="Name" levelType="Regular" table="DIMITEMS" datatype="String" hasHierarchy="false">
+						<Key>
+							<Column table="DIMITEMS" name="NAME">
+							</Column>
+						</Key>
+					</Attribute>
+					<Attribute name="$Id" levelType="Regular" table="DIMITEMS" keyColumn="ITEM_ID" hasHierarchy="false">
+					</Attribute>
+				</Attributes>
+			</Dimension>
+		</Dimensions>
+		<MeasureGroups>
+			<MeasureGroup name="Orders" type="fact" table="FACTORDERS">
+				<Measures>
+					<Measure name="Volume" aggregator="sum" visible="true">
+						<Arguments>
+							<Column table="FACTORDERS" name="VOLUME">
+							</Column>
+						</Arguments>
+					</Measure>
+				</Measures>
+				<DimensionLinks>
+					<ForeignKeyLink dimension="Users">
+						<ForeignKey>
+							<Column table="FACTORDERS" name="USER_ID">
+							</Column>
+						</ForeignKey>
+					</ForeignKeyLink>
+					<ForeignKeyLink dimension="Location">
+						<ForeignKey>
+							<Column table="FACTORDERS" name="LOCATION_ID">
+							</Column>
+						</ForeignKey>
+					</ForeignKeyLink>
+					<ForeignKeyLink dimension="Time">
+						<ForeignKey>
+							<Column table="FACTORDERS" name="TIME_ID">
+							</Column>
+						</ForeignKey>
+					</ForeignKeyLink>
+					<ForeignKeyLink dimension="Items">
+						<ForeignKey>
+							<Column table="FACTORDERS" name="ITEM_ID">
+							</Column>
+						</ForeignKey>
+					</ForeignKeyLink>
+				</DimensionLinks>
+			</MeasureGroup>
+		</MeasureGroups>
+	</Cube>
+</Schema>
