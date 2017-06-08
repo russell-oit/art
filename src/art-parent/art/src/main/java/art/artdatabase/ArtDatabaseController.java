@@ -188,7 +188,8 @@ public class ArtDatabaseController {
 				ps.setInt(2, 2);
 				ps.addBatch();
 
-				String mondrianUrl = String.format(hsqldbUrl, "SampleDB2");
+				String mondrianJdbcUrl = String.format(hsqldbUrl, "SampleDB2");
+				String mondrianUrl = "jdbc:mondrian:Jdbc=" + mondrianJdbcUrl + ";JdbcDrivers=org.hsqldb.jdbcDriver";
 				ps.setString(1, mondrianUrl);
 				ps.setInt(2, 3);
 				ps.addBatch();
