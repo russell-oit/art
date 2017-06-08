@@ -142,8 +142,8 @@ public class ArtDatabaseController {
 		PreparedStatement ps = null;
 
 		try {
-			String demoDbUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
-			String sampleDbUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "SampleDB;shutdown=true;create=false;hsqldb.write_delay=false";
+			String hsqldbUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "%s;shutdown=true;create=false;hsqldb.write_delay=false";
+			String demoDbUrl = String.format(hsqldbUrl, "ArtRepositoryDB");
 
 			boolean usingDemoDatabase = false;
 			if (StringUtils.equalsIgnoreCase(artDatabase.getUrl(), "demo")) {
@@ -179,6 +179,7 @@ public class ArtDatabaseController {
 				sql = "UPDATE ART_DATABASES SET URL=? WHERE DATABASE_ID=?";
 				ps = conn.prepareStatement(sql);
 
+				String sampleDbUrl = String.format(hsqldbUrl, "SampleDB");
 				ps.setString(1, sampleDbUrl);
 				ps.setInt(2, 1);
 				ps.addBatch();
@@ -187,7 +188,7 @@ public class ArtDatabaseController {
 				ps.setInt(2, 2);
 				ps.addBatch();
 
-				String mondrianUrl = "jdbc:mondrian:Jdbc=" + sampleDbUrl + ";JdbcDrivers=org.hsqldb.jdbcDriver";
+				String mondrianUrl = String.format(hsqldbUrl, "SampleDB2");
 				ps.setString(1, mondrianUrl);
 				ps.setInt(2, 3);
 				ps.addBatch();
