@@ -71,6 +71,7 @@ public class RepositoryController {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		Report report = reportService.getReport(name);
 		if (report == null) {
+			//creating new report
 			report = new Report();
 			report.setName(name);
 			report.setReportSource(prettyContent);
@@ -80,8 +81,24 @@ public class RepositoryController {
 			//give this user direct access to the report
 			reportService.grantAccess(report, sessionUser);
 		} else {
-			report.setReportSource(prettyContent);
-			reportService.updateReport(report, sessionUser);
+			//editing/overwriting existing report
+			//check if this is the only user who has access. if so, he can overwrite the report
+			int reportId = report.getReportId();
+			boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, reportId);
+			boolean canOverwrite;
+
+			if (exclusiveAccess || sessionUser.isAdminUser()) {
+				canOverwrite = true;
+			} else {
+				canOverwrite = false;
+			}
+
+			if (canOverwrite) {
+				report.setReportSource(prettyContent);
+				reportService.updateReport(report, sessionUser);
+			} else {
+				throw new RuntimeException("Report not saved. You do not have access to overwrite the report.");
+			}
 		}
 
 		//return a response entity instead of void to avoid firefox console error - XML Parsing Error: no root element found Location
@@ -98,23 +115,30 @@ public class RepositoryController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteResource(HttpSession session,
 			@RequestParam("file") Integer reportId) throws SQLException {
-		
+
 		//https://stackoverflow.com/questions/32396884/return-http-204-on-null-with-spring-restcontroller
 		//http://www.jcombat.com/spring/exception-handling-in-spring-restful-web-service
 		//https://stackoverflow.com/questions/26550124/spring-returning-empty-http-responses-with-responseentityvoid-doesnt-work
 		//https://blog.jayway.com/2012/09/16/improve-your-spring-rest-api-part-i/
-
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		//check if this is the only user who has access. if so, he can delete the report
 		boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, reportId);
-		if (exclusiveAccess) {
+		boolean canDelete;
+
+		if (exclusiveAccess || sessionUser.isAdminUser()) {
+			canDelete = true;
+		} else {
+			canDelete = false;
+		}
+
+		if (canDelete) {
 			ActionResult result = reportService.deleteReport(reportId);
 			if (!result.isSuccess()) {
 				throw new RuntimeException("Report not deleted. Linked jobs exist.");
-			} 
+			}
 		} else {
-			throw new RuntimeException("Report not deleted. You do not have exclusive access to the report.");
+			throw new RuntimeException("Report not deleted. You do not have access to delete the report.");
 		}
 	}
 
