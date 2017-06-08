@@ -42,12 +42,8 @@ public class SaikuConnectionManager implements IConnectionManager {
 
 		try {
 			ReportService reportService = new ReportService();
-			List<Report> reports;
-			if (user == null) {
-				reports = reportService.getAllActiveSaikuConnectionReports();
-			} else {
-				reports = reportService.getAvailableSaikuConnectionReports(user.getUserId());
-			}
+			int userId = user.getUserId();
+			List<Report> reports = reportService.getAvailableSaikuConnectionReports(userId);
 			MondrianHelper mondrianHelper = new MondrianHelper();
 			for (Report report : reports) {
 				String roles = mondrianHelper.getRolesString(report.getReportId(), user);
@@ -172,10 +168,10 @@ public class SaikuConnectionManager implements IConnectionManager {
 			if (o != null && o instanceof OlapConnection) {
 				return (OlapConnection) o;
 			}
-		} 
+		}
 		return null;
 	}
-	
+
 	public OlapConnection getExistingOlapConnection(String name) throws SaikuOlapException {
 		ISaikuConnection con = connections.get(name);
 		if (con != null) {
@@ -183,7 +179,7 @@ public class SaikuConnectionManager implements IConnectionManager {
 			if (o != null && o instanceof OlapConnection) {
 				return (OlapConnection) o;
 			}
-		} 
+		}
 		return null;
 	}
 
@@ -199,8 +195,8 @@ public class SaikuConnectionManager implements IConnectionManager {
 
 		return olapConnections;
 	}
-	
-	public Map<String, OlapConnection> getCurrentOlapConnections(){
+
+	public Map<String, OlapConnection> getCurrentOlapConnections() {
 		Map<String, OlapConnection> olapConnections = new HashMap<>();
 		for (ISaikuConnection con : connections.values()) {
 			Object o = con.getConnection();
