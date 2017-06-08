@@ -27,8 +27,6 @@ import java.util.Properties;
 
 import mondrian.rolap.RolapConnection;
 import org.apache.commons.lang.StringUtils;
-import org.olap4j.metadata.Catalog;
-import org.olap4j.metadata.NamedList;
 
 public class SaikuOlapConnection implements ISaikuConnection {
 
@@ -96,8 +94,7 @@ public class SaikuOlapConnection implements ISaikuConnection {
 						throw new Exception("Connection is null");
 					}
 
-//					NamedList<Catalog> catalogs = tmpolapConnection.getOlapCatalogs();
-//					log.info("Catalogs: " + catalogs.size());
+					log.info("Catalogs: " + tmpolapConnection.getOlapCatalogs().size());
 					olapConnection = tmpolapConnection;
 					initialized = true;
 					return true;

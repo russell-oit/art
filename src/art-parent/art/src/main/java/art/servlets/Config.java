@@ -57,7 +57,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -72,7 +71,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
-import org.saiku.olap.util.exception.SaikuOlapException;
 import org.saiku.service.olap.OlapDiscoverService;
 import org.saiku.service.olap.ThinQueryService;
 import org.slf4j.Logger;
@@ -111,7 +109,6 @@ public class Config extends HttpServlet {
 	private static Configuration freemarkerConfig;
 	private static TemplateEngine thymeleafReportTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
-	private static SaikuConnectionManager globalSaikuConnectionManager;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -133,8 +130,6 @@ public class Config extends HttpServlet {
 
 		Config.closeSaikuConnections();
 
-		closeGlobalSaikuConnections();
-
 		//close database connections
 		DbConnections.closeAllConnections();
 
@@ -147,41 +142,6 @@ public class Config extends HttpServlet {
 		//http://logback.qos.ch/manual/configuration.html#stopContext
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();
-	}
-
-	/**
-	 * Closes global saiku connections
-	 */
-	public static void closeGlobalSaikuConnections() {
-		if (globalSaikuConnectionManager == null) {
-			return;
-		}
-
-		globalSaikuConnectionManager.destroy();
-
-		globalSaikuConnectionManager = null;
-	}
-
-	/**
-	 * Initializes the global saiku connections
-	 */
-	private static void initializeGlobalSaikuConnections() {
-		closeGlobalSaikuConnections();
-		globalSaikuConnectionManager = new SaikuConnectionManager(null, getTemplatesPath());
-		try {
-			globalSaikuConnectionManager.init();
-		} catch (SaikuOlapException ex) {
-			logger.error("Error", ex);
-		}
-	}
-
-	/**
-	 * Returns the global saiku connection manager
-	 *
-	 * @return the global saiku connection manager
-	 */
-	public static SaikuConnectionManager getGlobalSaikuConnectionManager() {
-		return globalSaikuConnectionManager;
 	}
 
 	/**
@@ -446,8 +406,6 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(artVersion, upgradeFilePath, templatesPath);
-
-			initializeGlobalSaikuConnections();
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}

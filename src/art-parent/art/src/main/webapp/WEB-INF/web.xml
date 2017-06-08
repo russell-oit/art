@@ -242,18 +242,6 @@
 	</servlet-mapping>
 	<!-- End JPivot -->
 	<servlet>
-		<servlet-name>Mondrian3XmlaServlet</servlet-name>
-		<servlet-class>art.servlets.Mondrian3XmlaServlet</servlet-class>
-		<init-param>
-			<param-name>CharacterEncoding</param-name>
-			<param-value>UTF-8</param-value>
-		</init-param>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>Mondrian3XmlaServlet</servlet-name>
-		<url-pattern>/xmla2</url-pattern>
-	</servlet-mapping>
-	<servlet>
 		<servlet-name>Mondrian4XmlaServlet</servlet-name>
 		<servlet-class>art.servlets.Mondrian4XmlaServlet</servlet-class>
 		<init-param>
@@ -266,15 +254,15 @@
 		<url-pattern>/xmla</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<servlet-name>SaikuXmlaServlet</servlet-name>
-		<servlet-class>art.servlets.SaikuXmlaServlet</servlet-class>
+		<servlet-name>Mondrian3XmlaServlet</servlet-name>
+		<servlet-class>art.servlets.Mondrian3XmlaServlet</servlet-class>
 		<init-param>
 			<param-name>CharacterEncoding</param-name>
 			<param-value>UTF-8</param-value>
 		</init-param>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>SaikuXmlaServlet</servlet-name>
-		<url-pattern>/xmla3</url-pattern>
+		<servlet-name>Mondrian3XmlaServlet</servlet-name>
+		<url-pattern>/xmla2</url-pattern>
 	</servlet-mapping>
 </web-app>
