@@ -107,28 +107,17 @@ public class SaikuConnectionManager implements IConnectionManager {
 	}
 
 	public void destroy() {
-		Map<String, OlapConnection> olapConnections = getCurrentOlapConnections();
-		if (olapConnections != null && !olapConnections.isEmpty()) {
-			for (OlapConnection con : olapConnections.values()) {
-				try {
-					if (!con.isClosed()) {
-						con.close();
-					}
-				} catch (Exception e) {
-					log.error("Could not close connection", e);
-				}
+		for (ISaikuConnection con : connections.values()) {
+			try {
+				con.close();
+			} catch (Exception e) {
+				log.error("Could not close connection", e);
 			}
 		}
 
 		connections.clear();
 
-		if (olapConnections != null) {
-			olapConnections.clear();
-		}
-
-		if (connectProperties != null) {
-			connectProperties.clear();
-		}
+		connectProperties.clear();
 	}
 
 	public ISaikuConnection getConnection(String name) throws SaikuOlapException {

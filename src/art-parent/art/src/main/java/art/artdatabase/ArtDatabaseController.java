@@ -188,7 +188,9 @@ public class ArtDatabaseController {
 				ps.setInt(2, 2);
 				ps.addBatch();
 
-				String mondrianJdbcUrl = String.format(hsqldbUrl, "SampleDB2");
+				//don't use hsqldbUrl which contains ; within it. ; is used as a separator in the mondrian url
+				//this means we can't effect the shutdown=true property and lock files will remain after the connections are closed
+				String mondrianJdbcUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "SampleDB";
 				String mondrianUrl = "jdbc:mondrian:Jdbc=" + mondrianJdbcUrl + ";JdbcDrivers=org.hsqldb.jdbcDriver";
 				ps.setString(1, mondrianUrl);
 				ps.setInt(2, 3);
