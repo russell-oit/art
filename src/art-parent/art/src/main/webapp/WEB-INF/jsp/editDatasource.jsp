@@ -20,6 +20,10 @@ Edit datasource page
 		<spring:message code="page.title.addDatasource" var="pageTitle"/>
 		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
+	<c:when test="${action == 'copy'}">
+		<spring:message code="page.title.copyDatasource" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
+	</c:when>
 	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editDatasource" var="panelTitle"/>
 		<c:set var="pageTitle">
@@ -58,7 +62,7 @@ Edit datasource page
 				$('#testConnection').on('click', function () {
 					var action = '${action}';
 					var id = 0;
-					if (action === 'edit') {
+					if (action === 'edit' || action === 'copy') {
 						id = $("#datasourceId").val();
 					}
 					var jndi = $("#jndi").is(":checked");
@@ -191,9 +195,14 @@ Edit datasource page
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action == 'edit'}">
-							<form:input path="datasourceId" readonly="true" class="form-control"/>
-						</c:if>
+						<c:choose>
+							<c:when test="${action == 'edit'}">
+								<form:input path="datasourceId" readonly="true" class="form-control"/>
+							</c:when>
+							<c:when test="${action == 'copy'}">
+								<form:hidden path="datasourceId"/>
+							</c:when>
+						</c:choose>
 					</div>
 				</div>
 				<div class="form-group">

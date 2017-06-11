@@ -209,6 +209,11 @@ Display datasources
 									<i class="fa fa-trash-o"></i>
 									<spring:message code="page.action.delete"/>
 								</button>
+								<a class="btn btn-default" 
+								   href="${pageContext.request.contextPath}/copyDatasource?id=${datasource.datasourceId}">
+									<i class="fa fa-copy"></i>
+									<spring:message code="page.action.copy"/>
+								</a>
 							</div>
 						</td>
 					</tr>

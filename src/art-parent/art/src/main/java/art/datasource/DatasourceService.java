@@ -77,7 +77,7 @@ public class DatasourceService {
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
+
 	/**
 	 * Returns olap4j datasources
 	 *
@@ -87,8 +87,8 @@ public class DatasourceService {
 	@Cacheable("datasources")
 	public List<Datasource> getOlap4jDatasources() throws SQLException {
 		logger.debug("Entering getOlap4jDatasources");
-		
-		String sql= SQL_SELECT_ALL + " WHERE DRIVER IN('mondrian.olap4j.MondrianOlap4jDriver',"
+
+		String sql = SQL_SELECT_ALL + " WHERE DRIVER IN('mondrian.olap4j.MondrianOlap4jDriver',"
 				+ "'org.olap4j.driver.xmla.XmlaOlap4jDriver')";
 
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
@@ -201,10 +201,10 @@ public class DatasourceService {
 		}
 		logger.debug("newId={}", newId);
 
-		datasource.setDatasourceId(newId);
-
-		boolean newRecord = true;
-		saveDatasource(datasource, newRecord, actionUser);
+		//only set new id after successful save. in case copy is attempted and there is an error
+		//new id will be set in save, if no exception is thrown
+//		datasource.setDatasourceId(newId);
+		saveDatasource(datasource, newId, actionUser);
 
 		return newId;
 	}
@@ -220,23 +220,32 @@ public class DatasourceService {
 	public void updateDatasource(Datasource datasource, User actionUser) throws SQLException {
 		logger.debug("Entering updateDatasource: datasource={}, actionUser={}", datasource, actionUser);
 
-		boolean newRecord = false;
-		saveDatasource(datasource, newRecord, actionUser);
+		Integer newRecordId = null;
+		saveDatasource(datasource, newRecordId, actionUser);
 	}
 
 	/**
 	 * Saves a datasource
 	 *
 	 * @param datasource the datasource to save
-	 * @param newRecord whether this is a new datasource
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * datasource
 	 * @param actionUser the user who is performing the save
 	 * @throws SQLException
 	 */
-	private void saveDatasource(Datasource datasource, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveDatasource: datasource={}, newRecord={}, actionUser={}",
-				datasource, newRecord, actionUser);
+	private void saveDatasource(Datasource datasource, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		logger.debug("Entering saveDatasource: datasource={}, "
+				+ " actionUser={}, newRecordId={}",
+				datasource, actionUser, newRecordId);
 
 		int affectedRows;
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_DATABASES"
 					+ " (DATABASE_ID, NAME, DESCRIPTION, DATASOURCE_TYPE, JNDI, DRIVER,"
@@ -245,7 +254,7 @@ public class DatasourceService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
 
 			Object[] values = {
-				datasource.getDatasourceId(),
+				newRecordId,
 				datasource.getName(),
 				datasource.getDescription(),
 				datasource.getDatasourceType().getValue(),
@@ -292,6 +301,11 @@ public class DatasourceService {
 		}
 
 		logger.debug("affectedRows={}", affectedRows);
+
+		//if no exception, update datasource id in case of new or copy
+		if (newRecordId != null) {
+			datasource.setDatasourceId(newRecordId);
+		}
 
 		if (affectedRows != 1) {
 			logger.warn("Problem with save. affectedRows={}, newRecord={}, datasource={}",

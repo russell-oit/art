@@ -158,6 +158,20 @@ public class DatasourceController {
 		return showEditDatasource("edit", model);
 	}
 
+	@RequestMapping(value = "/copyDatasource", method = RequestMethod.GET)
+	public String copyDatasource(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering copyDatasource: id={}", id);
+
+		try {
+			model.addAttribute("datasource", datasourceService.getDatasource(id));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditDatasource("copy", model);
+	}
+
 	@RequestMapping(value = "/editDatasources", method = RequestMethod.GET)
 	public String editDatasources(@RequestParam("ids") String ids, Model model,
 			HttpSession session) {
@@ -197,7 +211,7 @@ public class DatasourceController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			if (StringUtils.equals(action, "add")) {
+			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				datasourceService.addDatasource(datasource, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
@@ -310,7 +324,8 @@ public class DatasourceController {
 				}
 			}
 
-			if (StringUtils.equalsIgnoreCase(action, "edit") && useCurrentPassword) {
+			if ((StringUtils.equalsIgnoreCase(action, "edit") || StringUtils.equalsIgnoreCase(action, "copy"))
+					&& useCurrentPassword) {
 				//password field blank. use current password
 				Datasource currentDatasource = datasourceService.getDatasource(id);
 				logger.debug("currentDatasource={}", currentDatasource);
@@ -353,8 +368,10 @@ public class DatasourceController {
 		if (datasource.isActive()) {
 			testConnection(jndi, driver, url, username, clearTextPassword);
 
-			ArtDatabase artDbConfig = Config.getArtDbConfig();
-			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			if (datasource.getDatasourceType() == DatasourceType.JDBC) {
+				ArtDatabase artDbConfig = Config.getArtDbConfig();
+				DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			}
 		}
 	}
 
@@ -422,7 +439,8 @@ public class DatasourceController {
 		if (datasource.isUseBlankPassword()) {
 			newPassword = "";
 		} else {
-			if (StringUtils.isEmpty(newPassword) && StringUtils.equals(action, "edit")) {
+			if (StringUtils.isEmpty(newPassword)
+					&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
 				//password field blank. use current password
 				useCurrentPassword = true;
 			}

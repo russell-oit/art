@@ -104,10 +104,6 @@ public class DbConnections {
 		//remove any existing connection pool for this datasource
 		removeConnectionPool(datasourceInfo.getDatasourceId());
 		
-		if (datasourceInfo.getDatasourceType() == DatasourceType.OLAP) {
-			return;
-		}
-
 		logger.debug("datasourceInfo.isJndi()={}", datasourceInfo.isJndi());
 
 		ConnectionPool pool;
