@@ -197,6 +197,7 @@
 								${encode:forHtmlContent(reportParameter.parameter.name)} (${reportParameter.parameter.parameterId})
 							</a>
 							<c:if test="${reportParameter.parameter.shared}">
+								&nbsp;
 								<span class="label label-success">
 									<spring:message code="parameters.label.shared"/>
 								</span>

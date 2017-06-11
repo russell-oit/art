@@ -170,7 +170,14 @@ Display parameters
 							<t:displayNewLabel creationDate="${parameter.creationDate}"
 											   updateDate="${parameter.updateDate}"/>
 						</td>
-						<td>${encode:forHtmlContent(parameter.description)}</td>
+						<td>${encode:forHtmlContent(parameter.description)}
+							<c:if test="${parameter.shared}">
+								&nbsp;
+								<span class="label label-success">
+									<spring:message code="parameters.label.shared"/>
+								</span>
+							</c:if>
+						</td>
 						<td>${encode:forHtmlContent(parameter.createdBy)}</td>
 						<td data-sort="${parameter.creationDate.time}">
 							<fmt:formatDate value="${parameter.creationDate}" pattern="${dateDisplayPattern}"/>
