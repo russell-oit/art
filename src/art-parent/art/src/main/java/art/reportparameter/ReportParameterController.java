@@ -17,10 +17,13 @@
  */
 package art.reportparameter;
 
+import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.ReportService;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -79,7 +82,16 @@ public class ReportParameterController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
+			ReportParameter reportParameter = reportParameterService.getReportParameter(id);
+			Parameter parameter = reportParameter.getParameter();
+			
 			reportParameterService.deleteReportParameter(id);
+			
+			//also delete parameter if not shared
+			if (!parameter.isShared()) {
+				parameterService.deleteParameter(parameter.getParameterId());
+			}
+			
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -97,7 +109,20 @@ public class ReportParameterController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
+			List<Parameter> parameters = new ArrayList<>();
+			for (Integer id : ids) {
+				ReportParameter reportParameter = reportParameterService.getReportParameter(id);
+				parameters.add(reportParameter.getParameter());
+			}
+			
 			reportParameterService.deleteReportParameters(ids);
+			
+			for (Parameter parameter : parameters) {
+				if (!parameter.isShared()) {
+					parameterService.deleteParameter(parameter.getParameterId());
+				}
+			}
+			
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
