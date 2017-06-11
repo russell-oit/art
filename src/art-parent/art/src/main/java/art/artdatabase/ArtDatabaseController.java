@@ -76,6 +76,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("csv-csvjdbc");
 		databaseTypes.remove("olap4j-mondrian");
 		databaseTypes.remove("olap4j-xmla");
+		databaseTypes.remove("couchbase");
 
 		return databaseTypes;
 	}

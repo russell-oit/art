@@ -180,6 +180,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.olap4j.driver.xmla.XmlaOlap4jDriver";
 		urlElement.value = "jdbc:xmla:Server=<xmla_url>";
 		testSqlElement.value = "";
+	} else if (dbType === "couchbase") {
+		driverElement.value = "";
+		urlElement.value = "jdbc:couchbase://<server_name>";
+		testSqlElement.value = "";
 	}
 }
 
