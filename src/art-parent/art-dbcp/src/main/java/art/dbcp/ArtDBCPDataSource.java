@@ -86,13 +86,13 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	private String url;
 	private String username;
 	private String password;
-	private static final long DEFAULT_TIMEOUT_SECONDS = TimeUnit.MINUTES.toSeconds(30); //30 minutes
+	private static final long DEFAULT_TIMEOUT_SECONDS = TimeUnit.MINUTES.toSeconds(30);
 	private long timeoutMillis; //timeout after which idle connections are closed
-	private static final long DEFAULT_MAX_QUERY_RUNNING_TIME_SECONDS = TimeUnit.MINUTES.toSeconds(20); // 20 minutes
+	private static final long DEFAULT_MAX_QUERY_RUNNING_TIME_SECONDS = TimeUnit.MINUTES.toSeconds(20);
 	private long maxQueryRunningTimeMillis; // max running time for a query, before its connection is forcibly removed from the pool
 	private long totalConnectionRequests;
 	private int highestReachedPoolSize;
-	private int maxPoolSize = 10; //max number of underlying connections that can be created
+	private int maxPoolSize = 10; //default max number of underlying connections that can be created
 	private String testSql;
 	LocalTimer t;
 	private final List<PooledConnection> pool = new ArrayList<>(maxPoolSize); //stores active connections
@@ -178,7 +178,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 		try {
 			//set maximum time to wait for a connection to be made.
 			//some drivers may not honour this, using a url parameter instead e.g. mysql connector/j
-			//see https://stackoverflow.com/questions/1683949/connection-timeout-for-drivermanager-getconnection
+			//https://stackoverflow.com/questions/1683949/connection-timeout-for-drivermanager-getconnection
 			final int TIMEOUT_SECONDS = 10;
 			DriverManager.setLoginTimeout(TIMEOUT_SECONDS);
 		} catch (Exception ex) {
@@ -433,7 +433,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 			}
 		} catch (SQLException ex) {
 			logger.error("Error. Connection pool='{}'", poolName, ex);
-			throw new SQLException("getConnectionFromPool exception: " + ex.getMessage());
+			throw new SQLException("getConnectionFromPool exception: ", ex.getMessage());
 		}
 	}
 

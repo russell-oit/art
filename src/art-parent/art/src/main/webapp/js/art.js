@@ -181,8 +181,8 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		urlElement.value = "jdbc:xmla:Server=<xmla_url>";
 		testSqlElement.value = "";
 	} else if (dbType === "couchbase") {
-		driverElement.value = "";
-		urlElement.value = "jdbc:couchbase://<server_name>";
+		driverElement.value = "com.couchbase.jdbc.CBDriver";
+		urlElement.value = "jdbc:couchbase://<server_name>:8093";
 		testSqlElement.value = "";
 	}
 }
