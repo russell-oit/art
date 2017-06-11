@@ -298,18 +298,17 @@ public class ParameterService {
 		logger.debug("maxId={}", maxId);
 
 		int newId;
+		
 		if (maxId == null || maxId < 0) {
 			//no records in the table, or only hardcoded records
 			newId = 1;
 		} else {
 			newId = maxId + 1;
 		}
+		
 		logger.debug("newId={}", newId);
 
-		parameter.setParameterId(newId);
-
-		boolean newRecord = true;
-		saveParameter(parameter, newRecord, actionUser);
+		saveParameter(parameter, newId, actionUser);
 
 		return newId;
 	}
@@ -325,21 +324,22 @@ public class ParameterService {
 	public void updateParameter(Parameter parameter, User actionUser) throws SQLException {
 		logger.debug("Entering updateParameter: parameter={}, actionUser={}", parameter, actionUser);
 
-		boolean newRecord = false;
-		saveParameter(parameter, newRecord, actionUser);
+		Integer newRecordId = null;
+		saveParameter(parameter, newRecordId, actionUser);
 	}
 
 	/**
 	 * Saves a parameter
 	 *
 	 * @param parameter the parameter to save
-	 * @param newRecord whether this is a new record
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @param actionUser the user performing the action
 	 * @throws SQLException
 	 */
-	private void saveParameter(Parameter parameter, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveParameter: parameter={}, newRecord={}, actionUser={}",
-				parameter, newRecord, actionUser);
+	private void saveParameter(Parameter parameter, Integer newRecordId, User actionUser) throws SQLException {
+		logger.debug("Entering saveParameter: parameter={}, newRecordId={}, actionUser={}",
+				parameter, newRecordId, actionUser);
 
 		//set values for possibly null property objects
 		String parameterType;
@@ -366,6 +366,11 @@ public class ParameterService {
 		}
 
 		int affectedRows;
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+		
 		if (newRecord) {
 			String sql = "INSERT INTO ART_PARAMETERS"
 					+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
@@ -376,7 +381,7 @@ public class ParameterService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 19) + ")";
 
 			Object[] values = {
-				parameter.getParameterId(),
+				newRecordId,
 				parameter.getName(),
 				parameter.getDescription(),
 				parameterType,
@@ -430,6 +435,10 @@ public class ParameterService {
 			};
 
 			affectedRows = dbService.update(sql, values);
+		}
+		
+		if (newRecordId != null) {
+			parameter.setParameterId(newRecordId);
 		}
 
 		logger.debug("affectedRows={}", affectedRows);

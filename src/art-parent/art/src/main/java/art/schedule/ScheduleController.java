@@ -140,6 +140,20 @@ public class ScheduleController {
 
 		return showEditSchedule("edit", model);
 	}
+	
+	@RequestMapping(value = "/copySchedule", method = RequestMethod.GET)
+	public String copySchedule(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering copySchedule: id={}", id);
+
+		try {
+			model.addAttribute("schedule", scheduleService.getSchedule(id));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditSchedule("copy", model);
+	}
 
 	@RequestMapping(value = "/saveSchedule", method = RequestMethod.POST)
 	public String saveSchedule(@ModelAttribute("schedule") @Valid Schedule schedule,
@@ -164,7 +178,7 @@ public class ScheduleController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (StringUtils.equals(action, "add")) {
+			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				scheduleService.addSchedule(schedule, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {

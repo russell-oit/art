@@ -229,7 +229,7 @@ public class DatasourceService {
 	 *
 	 * @param datasource the datasource to save
 	 * @param newRecordId id of the new record or null if editing an existing
-	 * datasource
+	 * record
 	 * @param actionUser the user who is performing the save
 	 * @throws SQLException
 	 */

@@ -147,7 +147,7 @@ public class ScheduleService {
 
 		sql = "DELETE FROM ART_JOB_SCHEDULES"
 				+ " WHERE SCHEDULE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
-		
+
 		dbService.update(sql, (Object[]) ids);
 	}
 
@@ -178,10 +178,7 @@ public class ScheduleService {
 		}
 		logger.debug("newId={}", newId);
 
-		schedule.setScheduleId(newId);
-
-		boolean newRecord = true;
-		saveSchedule(schedule, newRecord, actionUser);
+		saveSchedule(schedule, newId, actionUser);
 
 		return newId;
 	}
@@ -197,23 +194,29 @@ public class ScheduleService {
 	public void updateSchedule(Schedule schedule, User actionUser) throws SQLException {
 		logger.debug("Entering updateSchedule: schedule={}, actionUser={}", schedule, actionUser);
 
-		boolean newRecord = false;
-		saveSchedule(schedule, newRecord, actionUser);
+		Integer newRecordId = null;
+		saveSchedule(schedule, newRecordId, actionUser);
 	}
 
 	/**
 	 * Saves a schedule
 	 *
 	 * @param schedule the schedule to save
-	 * @param newRecord whether this is a new record
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	private void saveSchedule(Schedule schedule, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveSchedule: schedule={}, newRecord={}, actionUser={}",
-				schedule, newRecord, actionUser);
+	private void saveSchedule(Schedule schedule, Integer newRecordId, User actionUser) throws SQLException {
+		logger.debug("Entering saveSchedule: schedule={}, newRecordId={}, actionUser={}",
+				schedule, newRecordId, actionUser);
 
 		int affectedRows;
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_JOB_SCHEDULES"
 					+ " (SCHEDULE_ID, SCHEDULE_NAME, DESCRIPTION, JOB_MINUTE,"
@@ -221,7 +224,7 @@ public class ScheduleService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 10) + ")";
 
 			Object[] values = {
-				schedule.getScheduleId(),
+				newRecordId,
 				schedule.getName(),
 				schedule.getDescription(),
 				schedule.getMinute(),
@@ -254,6 +257,10 @@ public class ScheduleService {
 			};
 
 			affectedRows = dbService.update(sql, values);
+		}
+
+		if (newRecordId != null) {
+			schedule.setScheduleId(newRecordId);
 		}
 
 		logger.debug("affectedRows={}", affectedRows);
