@@ -20,6 +20,7 @@ package art.login;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.user.User;
+import art.utils.ArtUtils;
 import java.sql.SQLException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,10 +60,13 @@ public class LoginService {
 		logger.debug("Entering addLoggedInUser: user={}, ipAddress='{}'", user, ipAddress);
 
 		String sql = "INSERT INTO ART_LOGGED_IN_USERS"
-				+ " (USER_ID, USERNAME, LOGIN_DATE, IP_ADDRESS)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
+				+ " (LOGGED_IN_USERS_ID, USER_ID, USERNAME, LOGIN_DATE, IP_ADDRESS)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
+
+		String id = ArtUtils.getUniqueId() + "-" + user.getUserId();
 
 		Object[] values = {
+			id,
 			user.getUserId(),
 			user.getUsername(),
 			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
