@@ -133,7 +133,7 @@ Edit datasource page
 					$("#jndiDiv").show();
 					$("#testSqlDiv").show();
 					$("#connectionPoolTimeoutDiv").show();
-				} else if (datasourceType === 'OLAP') {
+				} else {
 					$("#jndiDiv").hide();
 					$("#testSqlDiv").hide();
 					$("#connectionPoolTimeoutDiv").hide();
@@ -238,12 +238,13 @@ Edit datasource page
 						<spring:message code="datasources.label.datasourceType"/>
 					</label>
 					<div class="col-md-8">
-						<c:forEach var="datasourceType" items="${datasourceTypes}">
-							<label class="radio-inline">
-								<form:radiobutton path="datasourceType"
-												  value="${datasourceType}"/> ${datasourceType.description}
-							</label>
-						</c:forEach>
+						<form:select path="datasourceType" class="form-control selectpicker">
+							<c:forEach var="datasourceType" items="${datasourceTypes}">
+								<form:option value="${datasourceType}">
+									${datasourceType.description} 
+								</form:option>
+							</c:forEach>
+						</form:select>
 						<form:errors path="datasourceType" cssClass="error"/>
 					</div>
 				</div>

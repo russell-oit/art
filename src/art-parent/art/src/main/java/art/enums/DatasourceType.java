@@ -28,7 +28,7 @@ import java.util.List;
  */
 public enum DatasourceType {
 
-	JDBC("JDBC"), OLAP("OLAP");
+	JDBC("JDBC"), OLAP("OLAP"), MongoDB("MongoDB");
 
 	private final String value;
 
