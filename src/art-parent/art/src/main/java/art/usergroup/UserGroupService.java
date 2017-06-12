@@ -186,7 +186,7 @@ public class UserGroupService {
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
 	public void deleteUserGroups(Integer[] ids) throws SQLException {
-		logger.debug("Entering deleteUserGroups: ids={}", (Object)ids);
+		logger.debug("Entering deleteUserGroups: ids={}", (Object) ids);
 
 		for (Integer id : ids) {
 			deleteUserGroup(id);
@@ -220,10 +220,7 @@ public class UserGroupService {
 		}
 		logger.debug("newId={}", newId);
 
-		group.setUserGroupId(newId);
-
-		boolean newRecord = true;
-		saveUserGroup(group, newRecord, actionUser);
+		saveUserGroup(group, newId, actionUser);
 
 		return newId;
 	}
@@ -239,23 +236,30 @@ public class UserGroupService {
 	public void updateUserGroup(UserGroup group, User actionUser) throws SQLException {
 		logger.debug("Entering updateUserGroup: group={}, actionUser={}", group, actionUser);
 
-		boolean newRecord = false;
-		saveUserGroup(group, newRecord, actionUser);
+		Integer newRecordId = null;
+		saveUserGroup(group, newRecordId, actionUser);
 	}
 
 	/**
 	 * Saves a user group
 	 *
 	 * @param group the user group
-	 * @param newRecord whether this is a new record
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	private void saveUserGroup(UserGroup group, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveUserGroup: group={}, newRecord={}, actionUser={}",
-				group, newRecord, actionUser);
+	private void saveUserGroup(UserGroup group, Integer newRecordId, User actionUser) throws SQLException {
+		logger.debug("Entering saveUserGroup: group={}, newRecordId={}, actionUser={}",
+				group, newRecordId, actionUser);
 
 		int affectedRows;
+		
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+		
 		if (newRecord) {
 			String sql = "INSERT INTO ART_USER_GROUPS"
 					+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
@@ -263,7 +267,7 @@ public class UserGroupService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 7) + ")";
 
 			Object[] values = {
-				group.getUserGroupId(),
+				newRecordId,
 				group.getName(),
 				group.getDescription(),
 				group.getDefaultReportGroup(),
@@ -289,6 +293,10 @@ public class UserGroupService {
 			};
 
 			affectedRows = dbService.update(sql, values);
+		}
+		
+		if (newRecordId != null) {
+			group.setUserGroupId(newRecordId);
 		}
 
 		logger.debug("affectedRows={}", affectedRows);

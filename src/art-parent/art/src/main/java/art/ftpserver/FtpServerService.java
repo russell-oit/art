@@ -197,10 +197,7 @@ public class FtpServerService {
 		}
 		logger.debug("newId={}", newId);
 
-		ftpServer.setFtpServerId(newId);
-
-		boolean newRecord = true;
-		saveFtpServer(ftpServer, newRecord, actionUser);
+		saveFtpServer(ftpServer, newId, actionUser);
 
 		return newId;
 	}
@@ -216,23 +213,30 @@ public class FtpServerService {
 	public void updateFtpServer(FtpServer ftpServer, User actionUser) throws SQLException {
 		logger.debug("Entering updateFtpServer: ftpServer={}, actionUser={}", ftpServer, actionUser);
 
-		boolean newRecord = false;
-		saveFtpServer(ftpServer, newRecord, actionUser);
+		Integer newRecordId = null;
+		saveFtpServer(ftpServer, newRecordId, actionUser);
 	}
 
 	/**
 	 * Saves an ftp server
 	 *
 	 * @param ftpServer the ftp server
-	 * @param newRecord whether this is a new record
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	private void saveFtpServer(FtpServer ftpServer, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveFtpServer: ftpServer={}, newRecord={}, actionUser={}",
-				ftpServer, newRecord, actionUser);
+	private void saveFtpServer(FtpServer ftpServer, Integer newRecordId, User actionUser) throws SQLException {
+		logger.debug("Entering saveFtpServer: ftpServer={}, newRecordId={}, actionUser={}",
+				ftpServer, newRecordId, actionUser);
 
 		int affectedRows;
+
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_FTP_SERVERS"
 					+ " (FTP_SERVER_ID, NAME, DESCRIPTION, ACTIVE, SERVER, PORT,"
@@ -241,7 +245,7 @@ public class FtpServerService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 11) + ")";
 
 			Object[] values = {
-				ftpServer.getFtpServerId(),
+				newRecordId,
 				ftpServer.getName(),
 				ftpServer.getDescription(),
 				BooleanUtils.toInteger(ftpServer.isActive()),
@@ -277,6 +281,10 @@ public class FtpServerService {
 			};
 
 			affectedRows = dbService.update(sql, values);
+		}
+
+		if (newRecordId != null) {
+			ftpServer.setFtpServerId(newRecordId);
 		}
 
 		logger.debug("affectedRows={}", affectedRows);

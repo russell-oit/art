@@ -259,7 +259,7 @@ public class UserService {
 		dbService.update(sql, id);
 
 		result.setSuccess(true);
-		
+
 		return result;
 	}
 
@@ -290,7 +290,7 @@ public class UserService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
-		
+
 		return result;
 	}
 
@@ -351,11 +351,8 @@ public class UserService {
 			newId = maxId + 1;
 		}
 		logger.debug("newId={}", newId);
-
-		user.setUserId(newId);
-
-		boolean newRecord = true;
-		saveUser(user, newRecord, actionUser);
+		
+		saveUser(user, newId, actionUser);
 
 		return newId;
 	}
@@ -371,8 +368,8 @@ public class UserService {
 	public void updateUser(User user, User actionUser) throws SQLException {
 		logger.debug("Entering updateUser: user={}, actionUser={}", user, actionUser);
 
-		boolean newRecord = false;
-		saveUser(user, newRecord, actionUser);
+		Integer newRecordId = null;
+		saveUser(user, newRecordId, actionUser);
 	}
 
 	/**
@@ -409,13 +406,14 @@ public class UserService {
 	 * Saves a user
 	 *
 	 * @param user the user to save
-	 * @param newRecord whether this is a new record
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	private void saveUser(User user, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveUser: user={}, newRecord={}, actionUser={}",
-				user, newRecord, actionUser);
+	private void saveUser(User user, Integer newRecordId, User actionUser) throws SQLException {
+		logger.debug("Entering saveUser: user={}, newRecordId={}, actionUser={}",
+				user, newRecordId, actionUser);
 
 		//set values for possibly null property objects
 		int accessLevel;
@@ -427,6 +425,12 @@ public class UserService {
 		}
 
 		int affectedRows;
+
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_USERS"
 					+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
@@ -435,7 +439,7 @@ public class UserService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
 
 			Object[] values = {
-				user.getUserId(),
+				newRecordId,
 				user.getUsername(),
 				user.getPassword(),
 				user.getPasswordAlgorithm(),
@@ -475,6 +479,10 @@ public class UserService {
 			};
 
 			affectedRows = dbService.update(sql, values);
+		}
+
+		if (newRecordId != null) {
+			user.setUserId(newRecordId);
 		}
 
 		logger.debug("affectedRows={}", affectedRows);

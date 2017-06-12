@@ -243,15 +243,15 @@ public class JobService {
 
 		//delete records in quartz tables
 		Scheduler scheduler = SchedulerUtils.getScheduler();
-		
+
 		if (scheduler == null) {
 			logger.warn("Cannot delete job: {}. Scheduler not available.", id);
 			return;
 		}
-		
+
 		String jobName = "job" + id;
 		String triggerName = "trigger" + id;
-		
+
 		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
 		scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP));
 
@@ -338,10 +338,7 @@ public class JobService {
 		}
 		logger.debug("newId={}", newId);
 
-		job.setJobId(newId);
-		
-		boolean newRecord = true;
-		saveJob(job, newRecord, actionUser);
+		saveJob(job, newId, actionUser);
 
 		return newId;
 	}
@@ -357,8 +354,175 @@ public class JobService {
 	public void updateJob(Job job, User actionUser) throws SQLException {
 		logger.debug("Entering updateJob: job={}, actionUser={}", job, actionUser);
 
+		Integer newRecordId = null;
+		saveJob(job, newRecordId, actionUser);
+	}
+
+	/**
+	 * Saves a job
+	 *
+	 * @param job the job to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the action
+	 * @throws SQLException
+	 */
+	private void saveJob(Job job, Integer newRecordId, User actionUser) throws SQLException {
+		logger.debug("Entering saveJob: job={}, newRecordId={}, actionUser={}", job, newRecordId, actionUser);
+
+		Integer reportId; //database column doesn't allow null
+		if (job.getReport() == null) {
+			logger.warn("Report not defined. Defaulting to 0");
+			reportId = 0;
+		} else {
+			reportId = job.getReport().getReportId();
+		}
+
+		Integer userId; //database column doesn't allow null
+		String username;
+		if (job.getUser() == null) {
+			logger.warn("User not defined. Defaulting to 0");
+			userId = 0;
+			username = "";
+		} else {
+			userId = job.getUser().getUserId();
+			username = job.getUser().getUsername();
+		}
+
+		Integer ftpServerId;
+		if (job.getFtpServer() == null) {
+			logger.warn("Ftp server not defined. Defaulting to 0");
+			ftpServerId = 0;
+		} else {
+			ftpServerId = job.getFtpServer().getFtpServerId();
+		}
+
+		String migratedToQuartz = "X";
+
+		int affectedRows;
+
 		boolean newRecord = false;
-		saveJob(job, newRecord, actionUser);
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+
+		if (newRecord) {
+			String sql = "INSERT INTO ART_JOBS"
+					+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME,"
+					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
+					+ " JOB_WEEKDAY, JOB_MONTH, MAIL_TOS, MAIL_FROM, MAIL_CC,"
+					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_DATASOURCE_ID, CACHED_TABLE_NAME,"
+					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
+					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
+					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
+					+ " FIXED_FILE_NAME, BATCH_FILE, FTP_SERVER_ID,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 35) + ")";
+
+			Object[] values = {
+				newRecordId,
+				job.getName(),
+				reportId,
+				userId,
+				username,
+				job.getOutputFormat(),
+				job.getJobType().getValue(),
+				job.getScheduleMinute(),
+				job.getScheduleHour(),
+				job.getScheduleDay(),
+				job.getScheduleWeekday(),
+				job.getScheduleMonth(),
+				job.getMailTo(),
+				job.getMailFrom(),
+				job.getMailCc(),
+				job.getMailBcc(),
+				job.getMailSubject(),
+				job.getMailMessage(),
+				job.getCachedDatasourceId(),
+				job.getCachedTableName(),
+				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
+				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
+				DatabaseUtils.toSqlTimestamp(job.getNextRunDate()),
+				BooleanUtils.toInteger(job.isActive()),
+				BooleanUtils.toInteger(job.isEnableAudit()),
+				BooleanUtils.toInteger(job.isAllowSharing()),
+				BooleanUtils.toInteger(job.isAllowSplitting()),
+				job.getRecipientsReportId(),
+				job.getRunsToArchive(),
+				migratedToQuartz,
+				job.getFixedFileName(),
+				job.getBatchFile(),
+				ftpServerId,
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_JOBS SET JOB_NAME=?, QUERY_ID=?,"
+					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
+					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?,"
+					+ " JOB_MONTH=?, MAIL_TOS=?, MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
+					+ " SUBJECT=?, MESSAGE=?, CACHED_DATASOURCE_ID=?, CACHED_TABLE_NAME=?,"
+					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
+					+ " ACTIVE=?, ENABLE_AUDIT=?,"
+					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
+					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?,"
+					+ " FIXED_FILE_NAME=?, BATCH_FILE=?, FTP_SERVER_ID=?,"
+					+ " UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE JOB_ID=?";
+
+			Object[] values = {
+				job.getName(),
+				reportId,
+				userId,
+				username,
+				job.getOutputFormat(),
+				job.getJobType().getValue(),
+				job.getScheduleMinute(),
+				job.getScheduleHour(),
+				job.getScheduleDay(),
+				job.getScheduleWeekday(),
+				job.getScheduleMonth(),
+				job.getMailTo(),
+				job.getMailFrom(),
+				job.getMailCc(),
+				job.getMailBcc(),
+				job.getMailSubject(),
+				job.getMailMessage(),
+				job.getCachedDatasourceId(),
+				job.getCachedTableName(),
+				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
+				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
+				DatabaseUtils.toSqlTimestamp(job.getNextRunDate()),
+				BooleanUtils.toInteger(job.isActive()),
+				BooleanUtils.toInteger(job.isEnableAudit()),
+				BooleanUtils.toInteger(job.isAllowSharing()),
+				BooleanUtils.toInteger(job.isAllowSplitting()),
+				job.getRecipientsReportId(),
+				job.getRunsToArchive(),
+				migratedToQuartz,
+				job.getFixedFileName(),
+				job.getBatchFile(),
+				ftpServerId,
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+				actionUser.getUsername(),
+				job.getJobId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		if (newRecordId != null) {
+			job.setJobId(newRecordId);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, job={}",
+					affectedRows, newRecord, job);
+		}
 	}
 
 	/**
@@ -472,159 +636,4 @@ public class JobService {
 		return dbService.query(sql, h);
 	}
 
-	/**
-	 * Saves a job
-	 *
-	 * @param job the job to save
-	 * @param newRecord whether this is a new job
-	 * @param actionUser the user who is performing the action
-	 * @throws SQLException
-	 */
-	private void saveJob(Job job, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveJob: job={}, newRecord={}, actionUser={}", job, newRecord, actionUser);
-
-		Integer reportId; //database column doesn't allow null
-		if (job.getReport() == null) {
-			logger.warn("Report not defined. Defaulting to 0");
-			reportId = 0;
-		} else {
-			reportId = job.getReport().getReportId();
-		}
-
-		Integer userId; //database column doesn't allow null
-		String username;
-		if (job.getUser() == null) {
-			logger.warn("User not defined. Defaulting to 0");
-			userId = 0;
-			username = "";
-		} else {
-			userId = job.getUser().getUserId();
-			username = job.getUser().getUsername();
-		}
-
-		Integer ftpServerId;
-		if (job.getFtpServer() == null) {
-			logger.warn("Ftp server not defined. Defaulting to 0");
-			ftpServerId = 0;
-		} else {
-			ftpServerId = job.getFtpServer().getFtpServerId();
-		}
-
-		String migratedToQuartz = "X";
-
-		int affectedRows;
-		if (newRecord) {
-			String sql = "INSERT INTO ART_JOBS"
-					+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME,"
-					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
-					+ " JOB_WEEKDAY, JOB_MONTH, MAIL_TOS, MAIL_FROM, MAIL_CC,"
-					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_DATASOURCE_ID, CACHED_TABLE_NAME,"
-					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
-					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
-					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
-					+ " FIXED_FILE_NAME, BATCH_FILE, FTP_SERVER_ID,"
-					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 35) + ")";
-
-			Object[] values = {
-				job.getJobId(),
-				job.getName(),
-				reportId,
-				userId,
-				username,
-				job.getOutputFormat(),
-				job.getJobType().getValue(),
-				job.getScheduleMinute(),
-				job.getScheduleHour(),
-				job.getScheduleDay(),
-				job.getScheduleWeekday(),
-				job.getScheduleMonth(),
-				job.getMailTo(),
-				job.getMailFrom(),
-				job.getMailCc(),
-				job.getMailBcc(),
-				job.getMailSubject(),
-				job.getMailMessage(),
-				job.getCachedDatasourceId(),
-				job.getCachedTableName(),
-				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
-				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
-				DatabaseUtils.toSqlTimestamp(job.getNextRunDate()),
-				BooleanUtils.toInteger(job.isActive()),
-				BooleanUtils.toInteger(job.isEnableAudit()),
-				BooleanUtils.toInteger(job.isAllowSharing()),
-				BooleanUtils.toInteger(job.isAllowSplitting()),
-				job.getRecipientsReportId(),
-				job.getRunsToArchive(),
-				migratedToQuartz,
-				job.getFixedFileName(),
-				job.getBatchFile(),
-				ftpServerId,
-				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
-				actionUser.getUsername()
-			};
-
-			affectedRows = dbService.update(sql, values);
-		} else {
-			String sql = "UPDATE ART_JOBS SET JOB_NAME=?, QUERY_ID=?,"
-					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
-					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?,"
-					+ " JOB_MONTH=?, MAIL_TOS=?, MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
-					+ " SUBJECT=?, MESSAGE=?, CACHED_DATASOURCE_ID=?, CACHED_TABLE_NAME=?,"
-					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
-					+ " ACTIVE=?, ENABLE_AUDIT=?,"
-					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
-					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?,"
-					+ " FIXED_FILE_NAME=?, BATCH_FILE=?, FTP_SERVER_ID=?,"
-					+ " UPDATE_DATE=?, UPDATED_BY=?"
-					+ " WHERE JOB_ID=?";
-
-			Object[] values = {
-				job.getName(),
-				reportId,
-				userId,
-				username,
-				job.getOutputFormat(),
-				job.getJobType().getValue(),
-				job.getScheduleMinute(),
-				job.getScheduleHour(),
-				job.getScheduleDay(),
-				job.getScheduleWeekday(),
-				job.getScheduleMonth(),
-				job.getMailTo(),
-				job.getMailFrom(),
-				job.getMailCc(),
-				job.getMailBcc(),
-				job.getMailSubject(),
-				job.getMailMessage(),
-				job.getCachedDatasourceId(),
-				job.getCachedTableName(),
-				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
-				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
-				DatabaseUtils.toSqlTimestamp(job.getNextRunDate()),
-				BooleanUtils.toInteger(job.isActive()),
-				BooleanUtils.toInteger(job.isEnableAudit()),
-				BooleanUtils.toInteger(job.isAllowSharing()),
-				BooleanUtils.toInteger(job.isAllowSplitting()),
-				job.getRecipientsReportId(),
-				job.getRunsToArchive(),
-				migratedToQuartz,
-				job.getFixedFileName(),
-				job.getBatchFile(),
-				ftpServerId,
-				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
-				actionUser.getUsername(),
-				job.getJobId()
-			};
-
-			affectedRows = dbService.update(sql, values);
-		}
-
-		logger.debug("affectedRows={}", affectedRows);
-
-		if (affectedRows != 1) {
-			logger.warn("Problem with save. affectedRows={}, newRecord={}, job={}",
-					affectedRows, newRecord, job);
-		}
-	}
 }

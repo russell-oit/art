@@ -237,7 +237,7 @@ public class ReportGroupService {
 		dbService.update(sql, id);
 
 		result.setSuccess(true);
-		
+
 		return result;
 	}
 
@@ -268,7 +268,7 @@ public class ReportGroupService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
-		
+
 		return result;
 	}
 
@@ -299,10 +299,7 @@ public class ReportGroupService {
 		}
 		logger.debug("newId={}", newId);
 
-		group.setReportGroupId(newId);
-
-		boolean newRecord = true;
-		saveReportGroup(group, newRecord, actionUser);
+		saveReportGroup(group, newId, actionUser);
 
 		return newId;
 	}
@@ -318,30 +315,37 @@ public class ReportGroupService {
 	public void updateReportGroup(ReportGroup group, User actionUser) throws SQLException {
 		logger.debug("Entering updateReportGroup: group={}, actionUser={}", group, actionUser);
 
-		boolean newRecord = false;
-		saveReportGroup(group, newRecord, actionUser);
+		Integer newRecordId = null;
+		saveReportGroup(group, newRecordId, actionUser);
 	}
 
 	/**
 	 * Saves a report group
 	 *
 	 * @param group the report group
-	 * @param newRecord whether this is a new record
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	private void saveReportGroup(ReportGroup group, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveReportGroup: group={}, newRecord={}, actionUser={}",
-				group, newRecord, actionUser);
+	private void saveReportGroup(ReportGroup group, Integer newRecordId, User actionUser) throws SQLException {
+		logger.debug("Entering saveReportGroup: group={}, newRecordId={}, actionUser={}",
+				group, newRecordId, actionUser);
 
 		int affectedRows;
+		
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+		
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERY_GROUPS"
 					+ " (QUERY_GROUP_ID, NAME, DESCRIPTION, CREATION_DATE, CREATED_BY)"
 					+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
 
 			Object[] values = {
-				group.getReportGroupId(),
+				newRecordId,
 				group.getName(),
 				group.getDescription(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
@@ -363,6 +367,10 @@ public class ReportGroupService {
 			};
 
 			affectedRows = dbService.update(sql, values);
+		}
+		
+		if (newRecordId != null) {
+			group.setReportGroupId(newRecordId);
 		}
 
 		logger.debug("affectedRows={}", affectedRows);

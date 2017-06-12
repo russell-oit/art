@@ -547,10 +547,7 @@ public class ReportService {
 		}
 		logger.debug("newId={}", newId);
 
-		report.setReportId(newId);
-
-		boolean newRecord = true;
-		saveReport(report, newRecord, actionUser);
+		saveReport(report, newId, actionUser);
 
 		return newId;
 	}
@@ -566,51 +563,22 @@ public class ReportService {
 	public void updateReport(Report report, User actionUser) throws SQLException {
 		logger.debug("Entering updateReport: report={}, actionUser={}", report, actionUser);
 
-		boolean newRecord = false;
-		saveReport(report, newRecord, actionUser);
-	}
-
-	/**
-	 * Updates multiple reports
-	 *
-	 * @param multipleReportEdit the multiple report edit details
-	 * @param actionUser the user who is performing the action
-	 * @throws SQLException
-	 */
-	@CacheEvict(value = "reports", allEntries = true)
-	public void updateReports(MultipleReportEdit multipleReportEdit, User actionUser) throws SQLException {
-		logger.debug("Entering updateReports: multipleReportEdit={}, actionUser={}", multipleReportEdit, actionUser);
-
-		String sql;
-
-		String[] ids = StringUtils.split(multipleReportEdit.getIds(), ",");
-		if (!multipleReportEdit.isActiveUnchanged()) {
-			sql = "UPDATE ART_QUERIES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
-
-			List<Object> valuesList = new ArrayList<>();
-			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isActive()));
-			valuesList.add(actionUser.getUsername());
-			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
-
-			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
-
-			dbService.update(sql, valuesArray);
-		}
+		Integer newRecordId = null;
+		saveReport(report, newRecordId, actionUser);
 	}
 
 	/**
 	 * Saves a report
 	 *
 	 * @param report the report to save
-	 * @param newRecord whether this is a new report
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	private void saveReport(Report report, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveReport: report={}, newRecord={}, actionUser={}",
-				report, newRecord, actionUser);
+	private void saveReport(Report report, Integer newRecordId, User actionUser) throws SQLException {
+		logger.debug("Entering saveReport: report={}, newRecordId={}, actionUser={}",
+				report, newRecordId, actionUser);
 
 		//set values for possibly null property objects
 		Integer reportGroupId; //database column doesn't allow null
@@ -650,6 +618,12 @@ public class ReportService {
 		}
 
 		int affectedRows;
+		
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+		
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
@@ -665,7 +639,7 @@ public class ReportService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 34) + ")";
 
 			Object[] values = {
-				report.getReportId(),
+				newRecordId,
 				report.getName(),
 				shortDescription,
 				description,
@@ -755,6 +729,10 @@ public class ReportService {
 
 			affectedRows = dbService.update(sql, values);
 		}
+		
+		if (newRecordId != null) {
+			report.setReportId(newRecordId);
+		}
 
 		updateReportSource(report.getReportId(), report.getReportSource());
 
@@ -763,6 +741,36 @@ public class ReportService {
 		if (affectedRows != 1) {
 			logger.warn("Problem with save. affectedRows={}, newRecord={}, report={}",
 					affectedRows, newRecord, report);
+		}
+	}
+	
+	/**
+	 * Updates multiple reports
+	 *
+	 * @param multipleReportEdit the multiple report edit details
+	 * @param actionUser the user who is performing the action
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public void updateReports(MultipleReportEdit multipleReportEdit, User actionUser) throws SQLException {
+		logger.debug("Entering updateReports: multipleReportEdit={}, actionUser={}", multipleReportEdit, actionUser);
+
+		String sql;
+
+		String[] ids = StringUtils.split(multipleReportEdit.getIds(), ",");
+		if (!multipleReportEdit.isActiveUnchanged()) {
+			sql = "UPDATE ART_QUERIES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isActive()));
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, valuesArray);
 		}
 	}
 

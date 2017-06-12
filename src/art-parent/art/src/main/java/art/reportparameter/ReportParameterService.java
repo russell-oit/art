@@ -281,16 +281,14 @@ public class ReportParameterService {
 		}
 		logger.debug("newPosition={}", newPosition);
 
-		reportParam.setReportParameterId(newId);
 		reportParam.setPosition(newPosition);
-		
+
 		Report report = new Report();
 		report.setReportId(reportId);
-		
+
 		reportParam.setReport(report);
-		
-		boolean newRecord = true;
-		saveReportParameter(reportParam, newRecord);
+
+		saveReportParameter(reportParam, newId);
 
 		return newId;
 	}
@@ -305,22 +303,29 @@ public class ReportParameterService {
 	public void updateReportParameter(ReportParameter param) throws SQLException {
 		logger.debug("Entering updateReportParameter: param={}", param);
 
-		boolean newRecord = false;
-		saveReportParameter(param, newRecord);
+		Integer newRecordId = null;
+		saveReportParameter(param, newRecordId);
 	}
 
 	/**
 	 * Saves a report parameter
 	 *
 	 * @param reportParam the report parameter
-	 * @param newRecord whether this is a new record
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @throws SQLException
 	 */
-	private void saveReportParameter(ReportParameter reportParam, boolean newRecord) throws SQLException {
-		logger.debug("Entering saveReportParameter: reportParam={}, newRecord={}",
-				reportParam, newRecord);
+	private void saveReportParameter(ReportParameter reportParam, Integer newRecordId) throws SQLException {
+		logger.debug("Entering saveReportParameter: reportParam={}, newRecordId={}",
+				reportParam, newRecordId);
 
 		int affectedRows;
+
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_REPORT_PARAMETERS"
 					+ " (REPORT_PARAMETER_ID, REPORT_ID, PARAMETER_ID,"
@@ -328,7 +333,7 @@ public class ReportParameterService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
 			Object[] values = {
-				reportParam.getReportParameterId(),
+				newRecordId,
 				reportParam.getReport().getReportId(),
 				reportParam.getParameter().getParameterId(),
 				reportParam.getPosition(),
@@ -351,6 +356,10 @@ public class ReportParameterService {
 			};
 
 			affectedRows = dbService.update(sql, values);
+		}
+
+		if (newRecordId != null) {
+			reportParam.setReportParameterId(newRecordId);
 		}
 
 		logger.debug("affectedRows={}", affectedRows);

@@ -51,14 +51,14 @@ public class RuleService {
 	private static final Logger logger = LoggerFactory.getLogger(RuleService.class);
 
 	private final DbService dbService;
-	
+
 	@Autowired
-	public RuleService(DbService dbService){
-		this.dbService=dbService;
+	public RuleService(DbService dbService) {
+		this.dbService = dbService;
 	}
-	
-	public RuleService(){
-		dbService=new DbService();
+
+	public RuleService() {
+		dbService = new DbService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_RULES";
@@ -107,7 +107,7 @@ public class RuleService {
 		ResultSetHandler<List<Rule>> h = new BeanListHandler<>(Rule.class, new RuleMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
+
 	/**
 	 * Returns a rule
 	 *
@@ -178,7 +178,7 @@ public class RuleService {
 		dbService.update(sql, id);
 
 		result.setSuccess(true);
-		
+
 		return result;
 	}
 
@@ -209,7 +209,7 @@ public class RuleService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
-		
+
 		return result;
 	}
 
@@ -240,10 +240,7 @@ public class RuleService {
 		}
 		logger.debug("newId={}", newId);
 
-		rule.setRuleId(newId);
-
-		boolean newRecord = true;
-		saveRule(rule, newRecord, actionUser);
+		saveRule(rule, newId, actionUser);
 
 		return newId;
 	}
@@ -259,21 +256,22 @@ public class RuleService {
 	public void updateRule(Rule rule, User actionUser) throws SQLException {
 		logger.debug("Entering updateRule: rule={}, actionUser={}", rule, actionUser);
 
-		boolean newRecord = false;
-		saveRule(rule, newRecord, actionUser);
+		Integer newRecordId = null;
+		saveRule(rule, newRecordId, actionUser);
 	}
 
 	/**
 	 * Saves a rule
 	 *
 	 * @param rule the rule to save
-	 * @param newRecord whether this is a new record
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	private void saveRule(Rule rule, boolean newRecord, User actionUser) throws SQLException {
-		logger.debug("Entering saveRule: rule={}, newRecord={},actionUser={}",
-				rule, newRecord, actionUser);
+	private void saveRule(Rule rule, Integer newRecordId, User actionUser) throws SQLException {
+		logger.debug("Entering saveRule: rule={}, newRecordId={},actionUser={}",
+				rule, newRecordId, actionUser);
 
 		//set values for possibly null property objects
 		String dataType;
@@ -285,6 +283,12 @@ public class RuleService {
 		}
 
 		int affectedRows;
+		
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+		
 		if (newRecord) {
 			String sql = "INSERT INTO ART_RULES"
 					+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, DATA_TYPE,"
@@ -292,7 +296,7 @@ public class RuleService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
 			Object[] values = {
-				rule.getRuleId(),
+				newRecordId,
 				rule.getName(),
 				rule.getDescription(),
 				dataType,
@@ -316,6 +320,10 @@ public class RuleService {
 			};
 
 			affectedRows = dbService.update(sql, values);
+		}
+		
+		if (newRecordId != null) {
+			rule.setRuleId(newRecordId);
 		}
 
 		logger.debug("affectedRows={}", affectedRows);
