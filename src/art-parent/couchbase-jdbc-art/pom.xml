@@ -78,19 +78,18 @@
 	</dependencies>
 
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<configuration>
-						<compilerArgs>
-							<!--<arg>-Xlint</arg>-->
-							<arg></arg>
-						</compilerArgs>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<!-- inherits config from parent: can override if required -->
+				<configuration>
+					<compilerArgs combine.self="override">
+						<!--<arg>-Xlint</arg>-->
+						<arg></arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 </project>
