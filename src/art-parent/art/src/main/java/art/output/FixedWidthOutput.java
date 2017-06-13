@@ -32,11 +32,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Generates fixed width output
@@ -175,7 +175,7 @@ public class FixedWidthOutput {
 		}
 
 		List<Map<String, List<String>>> fieldAlignmentByName = options.getFieldAlignmentByName();
-		if (!CollectionUtils.isEmpty(fieldAlignmentByName)) {
+		if (CollectionUtils.isNotEmpty(fieldAlignmentByName)) {
 			for (Map<String, List<String>> alignmentDefinition : fieldAlignmentByName) {
 				// Get the first entry that the iterator returns
 				Entry<String, List<String>> entry = alignmentDefinition.entrySet().iterator().next();
@@ -195,7 +195,7 @@ public class FixedWidthOutput {
 		}
 
 		List<Map<String, List<Integer>>> fieldAlignmentByPosition = options.getFieldAlignmentByPosition();
-		if (!CollectionUtils.isEmpty(fieldAlignmentByPosition)) {
+		if (CollectionUtils.isNotEmpty(fieldAlignmentByPosition)) {
 			for (Map<String, List<Integer>> alignmentDefinition : fieldAlignmentByPosition) {
 				// Get the first entry that the iterator returns
 				Entry<String, List<Integer>> entry = alignmentDefinition.entrySet().iterator().next();
@@ -215,7 +215,7 @@ public class FixedWidthOutput {
 		}
 
 		List<Map<Character, List<String>>> fieldPaddingByName = options.getFieldPaddingByName();
-		if (!CollectionUtils.isEmpty(fieldPaddingByName)) {
+		if (CollectionUtils.isNotEmpty(fieldPaddingByName)) {
 			for (Map<Character, List<String>> paddingDefinition : fieldPaddingByName) {
 				// Get the first entry that the iterator returns
 				Entry<Character, List<String>> entry = paddingDefinition.entrySet().iterator().next();
@@ -227,7 +227,7 @@ public class FixedWidthOutput {
 		}
 
 		List<Map<Character, List<Integer>>> fieldPaddingByPosition = options.getFieldPaddingByPosition();
-		if (!CollectionUtils.isEmpty(fieldPaddingByPosition)) {
+		if (CollectionUtils.isNotEmpty(fieldPaddingByPosition)) {
 			for (Map<Character, List<Integer>> paddingDefinition : fieldPaddingByPosition) {
 				// Get the first entry that the iterator returns
 				Entry<Character, List<Integer>> entry = paddingDefinition.entrySet().iterator().next();

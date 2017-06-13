@@ -88,12 +88,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -102,16 +105,18 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Generates report output
@@ -245,7 +250,7 @@ public class ReportOutputGenerator {
 			PrintWriter writer, String fullOutputFilename, User user, MessageSource messageSource)
 			throws IOException, SQLException, JRException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
-			PostProcessingException, ServletException, TemplateException, XDocReportException {
+			PostProcessingException, ServletException, TemplateException, XDocReportException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 
 		logger.debug("Entering generateOutput");
 
@@ -1015,7 +1020,7 @@ public class ReportOutputGenerator {
 				}
 
 				List<String> jsFileNames = options.getJsFiles();
-				if (!CollectionUtils.isEmpty(jsFileNames)) {
+				if (CollectionUtils.isNotEmpty(jsFileNames)) {
 					for (String jsFileName : jsFileNames) {
 						if (StringUtils.isNotBlank(jsFileName)) {
 							String fullJsFileName = jsTemplatesPath + jsFileName;
@@ -1028,7 +1033,7 @@ public class ReportOutputGenerator {
 				}
 
 				List<String> cssFileNames = options.getCssFiles();
-				if (!CollectionUtils.isEmpty(cssFileNames)) {
+				if (CollectionUtils.isNotEmpty(cssFileNames)) {
 					for (String listCssFileName : cssFileNames) {
 						if (StringUtils.isNotBlank(listCssFileName)) {
 							String fullListCssFileName = jsTemplatesPath + listCssFileName;
@@ -1069,13 +1074,103 @@ public class ReportOutputGenerator {
 				if (result != null) {
 					if (result instanceof String) {
 						String resultString = (String) result;
-						resultString="<pre>" + resultString + "</pre>";
+						resultString = "<pre>" + resultString + "</pre>";
 						writer.print(resultString);
 					} else if (result instanceof List) {
-						List resultList = (List) result;
-						String resultString = ArtUtils.objectToPrettyJson(resultList);
-						resultString="<pre>" + resultString + "</pre>";
-						writer.print(resultString);
+						List<Object> resultList = (List<Object>) result;
+						List<ResultSetColumn> columns = new ArrayList<>();
+						String resultString = null;
+						if (!resultList.isEmpty()) {
+							Object sample = resultList.get(0);
+							if (sample instanceof Document) {
+								Document doc = (Document) sample;
+								//http://api.mongodb.com/java/current/org/bson/Document.html
+								for (Entry<String, Object> entry : doc.entrySet()) {
+									String name = entry.getKey();
+									Object value = entry.getValue();
+									String type = "string";
+									if (value instanceof Number) {
+										type = "numeric";
+									}
+									ResultSetColumn column = new ResultSetColumn();
+									column.setName(name);
+									column.setType(type);
+									columns.add(column);
+								}
+								List<Object> finalResultList = new ArrayList<>();
+								for (Object object : resultList) {
+									Document document = (Document) object;
+									Map<String, Object> row = new LinkedHashMap<>();
+									for (Entry<String, Object> entry : document.entrySet()) {
+										String name = entry.getKey();
+										Object value = entry.getValue();
+										Object finalValue;
+										if (value instanceof ObjectId) {
+											ObjectId objectId = (ObjectId) value;
+											finalValue = objectId.toString();
+										} else {
+											finalValue = value;
+										}
+										row.put(name, finalValue);
+									}
+									finalResultList.add(row);
+								}
+								resultString = ArtUtils.objectToJson(finalResultList);
+
+//								StringBuilder sb = new StringBuilder();
+//								List<String> jsonStrings = new ArrayList<>();
+//								for (Object object : resultList) {
+//									Document document = (Document) object;
+//									ObjectId objectId = document.getObjectId("_id");
+//									String objectIdString = objectId.toString();
+//									String jsonString = document.toJson();
+//									jsonString = StringUtils.replace(jsonString, "{ \"$oid\" : \"" + objectIdString + "\" }", "\"" + objectIdString + "\"");
+//									jsonStrings.add(jsonString);
+//								}
+//								resultString = StringUtils.join(jsonStrings, ",");
+//								resultString = StringUtils.replace(resultString, "\\\"", "\"");
+//								resultString = "[" + resultString + "]";
+								logger.info(resultString);
+							} else {
+								Map<String, Object> properties = PropertyUtils.describe(sample);
+								for (Entry<String, Object> entry : properties.entrySet()) {
+									String name = entry.getKey();
+									Object value = entry.getValue();
+									String type = "string";
+									if (value instanceof Number) {
+										type = "numeric";
+									}
+									ResultSetColumn column = new ResultSetColumn();
+									column.setName(name);
+									column.setType(type);
+									columns.add(column);
+								}
+
+								resultString = ArtUtils.objectToPrettyJson(resultList);
+							}
+						}
+
+						request.setAttribute("data", resultString);
+						request.setAttribute("columns", columns);
+						request.setAttribute("reportType", reportType);
+
+						String optionsString = report.getOptions();
+						boolean showColumnFilters = true;
+						if (StringUtils.isNotBlank(optionsString)) {
+							ObjectMapper mapper = new ObjectMapper();
+							DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
+							showColumnFilters = options.isShowColumnFilters();
+						}
+						request.setAttribute("showColumnFilters", showColumnFilters);
+
+						String languageTag = locale.toLanguageTag();
+						request.setAttribute("languageTag", languageTag);
+						String localeString = locale.toString();
+						request.setAttribute("locale", localeString);
+						servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
+
+//						resultString = "<pre>" + resultString + "</pre>";
+//						writer.print(resultString);
 					} else {
 						writer.print(result);
 					}
