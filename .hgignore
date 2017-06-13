@@ -54,3 +54,5 @@ src/art-parent/cewolf-art/nb-configuration.xml
 src/art-parent/cewolf-art/nbactions.xml
 src/art-parent/cewolf-art/target/
 src/art-parent/saiku-service-art/nbactions.xml
+src/art-parent/couchbase-jdbc-art/nb-configuration.xml
+src/art-parent/couchbase-jdbc-art/target/

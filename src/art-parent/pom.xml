@@ -20,6 +20,7 @@
 		<module>wcf-art</module>
 		<module>mondrian-art</module>
 		<module>jpivot-art</module>
+		<module>couchbase-jdbc-art</module>
 		<module>art</module>
 	</modules>
 
@@ -55,9 +56,9 @@
 						<debug>true</debug>
 						<!--						<showWarnings>true</showWarnings>
 						<showDeprecation>true</showDeprecation>-->
-						<compilerArgs>
+<!--						<compilerArgs>
 							<arg>-Xlint</arg>
-						</compilerArgs>
+						</compilerArgs>-->
 					</configuration>
 				</plugin>
 				<plugin>

@@ -228,6 +228,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.art</groupId>
+			<artifactId>jdbc-n1ql-art</artifactId>
+			<version>3.0-beta12-SNAPSHOT</version>
+			<scope>runtime</scope>
+		</dependency>
 		<!-- add jstl 1.2.1 -->
 		<!-- https://stackoverflow.com/questions/24262223/standard-way-of-adding-jslt-1-2-1-in-a-maven-project -->
 		<dependency>
@@ -436,12 +442,6 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>1.4.195</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.couchbase.jdbc</groupId>
-			<artifactId>jdbc-n1ql</artifactId>
-			<version>1.0-BETA</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
