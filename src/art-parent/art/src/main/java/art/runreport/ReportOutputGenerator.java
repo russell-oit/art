@@ -106,6 +106,7 @@ import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.bson.Document;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1068,12 +1069,11 @@ public class ReportOutputGenerator {
 				if (result != null) {
 					if (result instanceof String) {
 						String resultString = (String) result;
-						resultString = "[" + resultString + "]";
+						resultString="<pre>" + resultString + "</pre>";
 						writer.print(resultString);
 					} else if (result instanceof List) {
-						List<org.bson.Document> resultList = (List<org.bson.Document>) result;
+						List resultList = (List) result;
 						String resultString = ArtUtils.objectToPrettyJson(resultList);
-						logger.info(resultString);
 						resultString="<pre>" + resultString + "</pre>";
 						writer.print(resultString);
 					} else {

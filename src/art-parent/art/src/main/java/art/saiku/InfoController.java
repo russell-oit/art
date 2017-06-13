@@ -95,7 +95,7 @@ public class InfoController {
 		settings.put("I18N_LOCALE", locale.toString());
 		String contextPath = request.getContextPath();
 		settings.put("TOMCAT_WEBAPP", contextPath);
-		settings.put("REST_MOUNT_POINT", "/saiku2");
+		settings.put("REST_MOUNT_POINT", "/saiku2/");
 		String resourcesPath = contextPath + "/saiku/";
 		settings.put("RESOURCES_PATH", resourcesPath);
 		settings.put("SHOW_REFRESH_NONADMIN", true);
