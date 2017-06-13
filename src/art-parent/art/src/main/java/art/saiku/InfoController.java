@@ -93,8 +93,8 @@ public class InfoController {
 		//or passing "language" attribute when beginning the session
 		//or through this newly added main-settings end point, updating the Settings object
 		settings.put("I18N_LOCALE", locale.toString());
-		String restUrlRoot = request.getContextPath() + "/saiku2";
-		settings.put("TOMCAT_WEBAPP", restUrlRoot);
+		settings.put("TOMCAT_WEBAPP", request.getContextPath());
+		settings.put("REST_MOUNT_POINT", "/saiku2");
 		String resourcesPath = request.getContextPath() + "/saiku/";
 		settings.put("RESOURCES_PATH", resourcesPath);
 		settings.put("SHOW_REFRESH_NONADMIN", true);
