@@ -17,7 +17,11 @@
  */
 package art.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.awt.Color;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -342,5 +346,47 @@ public class ArtUtils {
 		cal.set(Calendar.MILLISECOND, 0);
 		return cal.getTime();
 	}
-
+	
+	/**
+	 * Returns formatted json string from an unformatted json string
+	 * 
+	 * @param jsonString the unformatted json string
+	 * @return formatted json string
+	 * @throws IOException 
+	 */
+	public static String prettyPrintJsonString(String jsonString) throws IOException{
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		Object json = mapper.readValue(jsonString, Object.class);
+		String prettyString = mapper.writeValueAsString(json);
+		return prettyString;
+	}
+	
+	/**
+	 * Returns formatted json string representation of an object
+	 * 
+	 * @param object the object
+	 * @return formatted json string
+	 * @throws JsonProcessingException 
+	 */
+	public static String objectToPrettyJson(Object object) throws JsonProcessingException{
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String prettyString = mapper.writeValueAsString(object);
+		return prettyString;
+	}
+	
+	/**
+	 * Returns a json string representation of an object
+	 * 
+	 * @param object the object
+	 * @return json string representation of the object
+	 * @throws JsonProcessingException 
+	 */
+	public static String objectToJson(Object object) throws JsonProcessingException{
+		ObjectMapper mapper = new ObjectMapper();
+		String jsonString = mapper.writeValueAsString(object);
+		return jsonString;
+	}
+	
 }

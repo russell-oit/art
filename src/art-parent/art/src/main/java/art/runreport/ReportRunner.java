@@ -749,6 +749,7 @@ public class ReportRunner {
 			case DataTablesCsvServer:
 			case DatamapsFile:
 			case SaikuReport:
+			case MongoDBRaw:
 				return;
 			default:
 			//do nothing

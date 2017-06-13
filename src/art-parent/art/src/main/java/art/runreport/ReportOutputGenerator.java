@@ -76,12 +76,14 @@ import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
+import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
 import net.sf.cewolfart.PostProcessingException;
 import fr.opensagres.xdocreport.core.XDocReportException;
 import freemarker.template.TemplateException;
+import groovy.lang.GroovyShell;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -1051,6 +1053,34 @@ public class ReportOutputGenerator {
 					default:
 						throw new IllegalArgumentException("Unexpected report type: " + reportType);
 				}
+			} else if (reportType == ReportType.MongoDBRaw) {
+				//https://learnxinyminutes.com/docs/groovy/
+				//http://docs.groovy-lang.org/next/html/documentation/
+				//https://www.tutorialspoint.com/mongodb/mongodb_java.htm
+				//https://avaldes.com/java-connecting-to-mongodb-3-2-examples/
+				//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
+				//https://mongodb.github.io/mongo-java-driver/3.4/driver/getting-started/quick-start/
+//				String processingCode = "def hello_world() { println 'Hello, world!' }; hello_world();";
+				GroovyShell shell = new GroovyShell();
+//				shell.evaluate(processingCode);
+				String reportSource = report.getReportSource();
+				Object result = shell.evaluate(reportSource);
+				if (result != null) {
+					if (result instanceof String) {
+						String resultString = (String) result;
+						resultString = "[" + resultString + "]";
+						writer.print(resultString);
+					} else if (result instanceof List) {
+						List<org.bson.Document> resultList = (List<org.bson.Document>) result;
+						String resultString = ArtUtils.objectToPrettyJson(resultList);
+						logger.info(resultString);
+						resultString="<pre>" + resultString + "</pre>";
+						writer.print(resultString);
+					} else {
+						writer.print(result);
+					}
+				}
+
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

@@ -197,6 +197,7 @@ public class RunReportHelper {
 			case OpenLayers:
 			case SaikuReport:
 			case SaikuConnection:
+			case MongoDBRaw:
 				enableReportFormats = false;
 				break;
 			default:
