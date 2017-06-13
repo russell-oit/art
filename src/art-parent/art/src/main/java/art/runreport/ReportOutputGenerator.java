@@ -103,6 +103,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JRException;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -1066,6 +1067,7 @@ public class ReportOutputGenerator {
 				//https://avaldes.com/java-connecting-to-mongodb-3-2-examples/
 				//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
 				//https://mongodb.github.io/mongo-java-driver/3.4/driver/getting-started/quick-start/
+				//https://github.com/ihr/jongo-by-example/blob/master/src/test/java/org/ingini/mongodb/jongo/example/aggregation/TestAggregationFramework.java
 //				String processingCode = "def hello_world() { println 'Hello, world!' }; hello_world();";
 				GroovyShell shell = new GroovyShell();
 //				shell.evaluate(processingCode);
@@ -1074,7 +1076,6 @@ public class ReportOutputGenerator {
 				if (result != null) {
 					if (result instanceof String) {
 						String resultString = (String) result;
-						resultString = "<pre>" + resultString + "</pre>";
 						writer.print(resultString);
 					} else if (result instanceof List) {
 						List<Object> resultList = (List<Object>) result;
@@ -1082,72 +1083,47 @@ public class ReportOutputGenerator {
 						String resultString = null;
 						if (!resultList.isEmpty()) {
 							Object sample = resultList.get(0);
-							if (sample instanceof Document) {
-								Document doc = (Document) sample;
-								//http://api.mongodb.com/java/current/org/bson/Document.html
-								for (Entry<String, Object> entry : doc.entrySet()) {
-									String name = entry.getKey();
-									Object value = entry.getValue();
-									String type = "string";
-									if (value instanceof Number) {
-										type = "numeric";
-									}
-									ResultSetColumn column = new ResultSetColumn();
-									column.setName(name);
-									column.setType(type);
-									columns.add(column);
+							//https://stackoverflow.com/questions/6133660/recursive-beanutils-describe
+							//https://www.leveluplunch.com/java/examples/convert-object-bean-properties-map-key-value/
+							//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
+							//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
+							//Map<String, String> properties = BeanUtils.describe(sample);
+							ObjectMapper mapper = new ObjectMapper();
+							Map<String, Object> map = mapper.convertValue(sample, Map.class);
+							for (Entry<String, Object> entry : map.entrySet()) {
+								String name = entry.getKey();
+								Object value = entry.getValue();
+								String type = "string";
+								if (value instanceof Number) {
+									type = "numeric";
 								}
-								List<Object> finalResultList = new ArrayList<>();
-								for (Object object : resultList) {
-									Document document = (Document) object;
-									Map<String, Object> row = new LinkedHashMap<>();
-									for (Entry<String, Object> entry : document.entrySet()) {
-										String name = entry.getKey();
-										Object value = entry.getValue();
-										Object finalValue;
-										if (value instanceof ObjectId) {
-											ObjectId objectId = (ObjectId) value;
-											finalValue = objectId.toString();
-										} else {
-											finalValue = value;
-										}
-										row.put(name, finalValue);
-									}
-									finalResultList.add(row);
-								}
-								resultString = ArtUtils.objectToJson(finalResultList);
-
-//								StringBuilder sb = new StringBuilder();
-//								List<String> jsonStrings = new ArrayList<>();
-//								for (Object object : resultList) {
-//									Document document = (Document) object;
-//									ObjectId objectId = document.getObjectId("_id");
-//									String objectIdString = objectId.toString();
-//									String jsonString = document.toJson();
-//									jsonString = StringUtils.replace(jsonString, "{ \"$oid\" : \"" + objectIdString + "\" }", "\"" + objectIdString + "\"");
-//									jsonStrings.add(jsonString);
-//								}
-//								resultString = StringUtils.join(jsonStrings, ",");
-//								resultString = StringUtils.replace(resultString, "\\\"", "\"");
-//								resultString = "[" + resultString + "]";
-								logger.info(resultString);
-							} else {
-								Map<String, Object> properties = PropertyUtils.describe(sample);
-								for (Entry<String, Object> entry : properties.entrySet()) {
-									String name = entry.getKey();
-									Object value = entry.getValue();
-									String type = "string";
-									if (value instanceof Number) {
-										type = "numeric";
-									}
-									ResultSetColumn column = new ResultSetColumn();
-									column.setName(name);
-									column.setType(type);
-									columns.add(column);
-								}
-
-								resultString = ArtUtils.objectToPrettyJson(resultList);
+								ResultSetColumn column = new ResultSetColumn();
+								column.setName(name);
+								column.setType(type);
+								columns.add(column);
 							}
+
+							//_id is a complex object so we have to iterate and replace it with the toString() representation
+							//otherwise we would just call resultString = ArtUtils.objectToJson(resultList); directly and not have to create a new list
+							List<Map<String, Object>> finalResultList = new ArrayList<>();
+							for (Object object : resultList) {
+								Map<String, Object> map2 = mapper.convertValue(object, Map.class);
+								Map<String, Object> row = new LinkedHashMap<>();
+								for (Entry<String, Object> entry : map2.entrySet()) {
+									String name = entry.getKey();
+									Object value = entry.getValue();
+									Object finalValue;
+									if (value instanceof ObjectId) {
+										ObjectId objectId = (ObjectId) value;
+										finalValue = objectId.toString();
+									} else {
+										finalValue = value;
+									}
+									row.put(name, finalValue);
+								}
+								finalResultList.add(row);
+							}
+							resultString = ArtUtils.objectToJson(finalResultList);
 						}
 
 						request.setAttribute("data", resultString);
@@ -1168,14 +1144,10 @@ public class ReportOutputGenerator {
 						String localeString = locale.toString();
 						request.setAttribute("locale", localeString);
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
-
-//						resultString = "<pre>" + resultString + "</pre>";
-//						writer.print(resultString);
 					} else {
 						writer.print(result);
 					}
 				}
-
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
