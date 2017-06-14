@@ -39,7 +39,7 @@ public enum ReportType {
 	ReactPivot(130), PivotTableJs(132), PivotTableJsCsvLocal(133), PivotTableJsCsvServer(134),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
 	XDocReportFreeMarkerOdt(125), XDocReportVelocityOdt(126),
-	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128), MongoDBRaw(151),
+	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128), MongoDB(151),
 	XYChart(-1), Pie3DChart(-2), HorizontalBar3DChart(-3), VerticalBar3DChart(-4),
 	LineChart(-5), TimeSeriesChart(-6), DateSeriesChart(-7), StackedVerticalBar3DChart(-8),
 	StackedHorizontalBar3DChart(-9), SpeedometerChart(-10), BubbleChart(-11),
@@ -87,6 +87,7 @@ public enum ReportType {
 			case TabularHeatmap:
 			case SaikuReport:
 			case SaikuConnection:
+			case MongoDB:
 				return false;
 			default:
 				return true;
@@ -658,6 +659,8 @@ public enum ReportType {
 				return "Saiku: Report";
 			case SaikuConnection:
 				return "Saiku: Connection";
+			case MongoDB:
+				return "MongoDB";
 			default:
 				return this.name();
 		}

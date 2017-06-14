@@ -1060,7 +1060,7 @@ public class ReportOutputGenerator {
 					default:
 						throw new IllegalArgumentException("Unexpected report type: " + reportType);
 				}
-			} else if (reportType == ReportType.MongoDBRaw) {
+			} else if (reportType == ReportType.MongoDB) {
 				//https://learnxinyminutes.com/docs/groovy/
 				//http://docs.groovy-lang.org/next/html/documentation/
 				//https://www.tutorialspoint.com/mongodb/mongodb_java.htm
@@ -1074,10 +1074,7 @@ public class ReportOutputGenerator {
 				String reportSource = report.getReportSource();
 				Object result = shell.evaluate(reportSource);
 				if (result != null) {
-					if (result instanceof String) {
-						String resultString = (String) result;
-						writer.print(resultString);
-					} else if (result instanceof List) {
+					if (result instanceof List) {
 						List<Object> resultList = (List<Object>) result;
 						List<ResultSetColumn> columns = new ArrayList<>();
 						String resultString = null;
@@ -1087,7 +1084,6 @@ public class ReportOutputGenerator {
 							//https://www.leveluplunch.com/java/examples/convert-object-bean-properties-map-key-value/
 							//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
 							//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
-							//Map<String, String> properties = BeanUtils.describe(sample);
 							ObjectMapper mapper = new ObjectMapper();
 							Map<String, Object> map = mapper.convertValue(sample, Map.class);
 							for (Entry<String, Object> entry : map.entrySet()) {

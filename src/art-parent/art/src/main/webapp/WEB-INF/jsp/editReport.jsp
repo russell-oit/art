@@ -278,6 +278,19 @@ Edit report page
 					options.val(saikuEditor.getSession().getValue());
 				});
 
+				var mongoEditor = ace.edit("mongoEditor");
+				mongoEditor.$blockScrolling = Infinity;
+				mongoEditor.getSession().setMode("ace/mode/groovy");
+				mongoEditor.setHighlightActiveLine(false);
+				mongoEditor.setShowPrintMargin(false);
+				mongoEditor.setOption("showLineNumbers", false);
+				document.getElementById('mongoEditor').style.fontSize = '14px';
+
+				mongoEditor.getSession().setValue(reportSource.val());
+				mongoEditor.getSession().on('change', function () {
+					options.val(mongoEditor.getSession().getValue());
+				});
+
 			});
 		</script>
 
@@ -301,6 +314,7 @@ Edit report page
 					case 146: //leaflet
 					case 147: //openlayers
 					case 148: //tabular heatmap
+					case 151: //mongodb
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -343,16 +357,25 @@ Edit report page
 							$("#sqlEditor").hide();
 							$("#xmlEditor").show();
 							$("#saikuEditor").hide();
+							$("#mongoEditor").hide();
 							break;
 						case 149: //saiku report
 							$("#sqlEditor").hide();
 							$("#xmlEditor").hide();
 							$("#saikuEditor").show();
+							$("#mongoEditor").hide();
+							break;
+						case 151: //mongodb
+							$("#sqlEditor").hide();
+							$("#xmlEditor").hide();
+							$("#saikuEditor").hide();
+							$("#mongoEditor").show();
 							break;
 						default:
 							$("#sqlEditor").show();
 							$("#xmlEditor").hide();
 							$("#saikuEditor").hide();
+							$("#mongoEditor").hide();
 					}
 				}
 
@@ -394,6 +417,9 @@ Edit report page
 						break;
 					case 149: //saiku report
 						reportSourceType = "(JSON)";
+						break;
+					case 151: //mongodb
+						reportSourceType = "(Groovy)";
 						break;
 					default:
 						reportSourceType = "(SQL)";
@@ -520,6 +546,7 @@ Edit report page
 					case 145: //datamaps file
 					case 149: //saiku report
 					case 150: //saiku connection
+					case 151: //mongodb
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -594,6 +621,7 @@ Edit report page
 					case 147: //openlayers
 					case 149: //saiku report
 					case 150: //saiku connection
+					case 151: //mongodb
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -650,6 +678,7 @@ Edit report page
 					case 145: //datamaps file
 					case 149: //saiku report
 					case 150: //saiku connection
+					case 151: //mongodb
 						$("#fetchSizeDiv").hide();
 						break;
 					default:
@@ -1294,6 +1323,7 @@ Edit report page
 						<div id="sqlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 						<div id="xmlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 						<div id="saikuEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
+						<div id="mongoEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 				<div id="reportSourceHtmlDiv" class="form-group">

@@ -255,7 +255,7 @@
 </c:if>
 
 <c:choose>
-	<c:when test="${reportType == 'DataTables' || reportType == 'MongoDBRaw'}">
+	<c:when test="${reportType == 'DataTables' || reportType == 'MongoDB'}">
 		<script type="text/javascript">
 	//https://datatables.net/reference/option/
 	//https://stackoverflow.com/questions/1290131/javascript-how-to-create-an-array-of-object-literals-in-a-loop
