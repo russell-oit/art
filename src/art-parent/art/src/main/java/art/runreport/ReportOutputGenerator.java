@@ -1064,6 +1064,7 @@ public class ReportOutputGenerator {
 				}
 			} else if (reportType == ReportType.MongoDB) {
 				//https://learnxinyminutes.com/docs/groovy/
+				//http://groovy-lang.org/index.html
 				//http://docs.groovy-lang.org/next/html/documentation/
 				//https://www.tutorialspoint.com/mongodb/mongodb_java.htm
 				//https://avaldes.com/java-connecting-to-mongodb-3-2-examples/

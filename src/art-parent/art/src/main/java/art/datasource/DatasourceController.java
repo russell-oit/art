@@ -418,6 +418,8 @@ public class DatasourceController {
 					conn = DriverManager.getConnection(url, username, password);
 				} else {
 					if (StringUtils.startsWith(url, "mongodb://")) {
+						//https://docs.mongodb.com/manual/reference/connection-string/
+						//https://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html
 						MongoClient mongoClient = null;
 						try {
 							MongoClientURI uri = new MongoClientURI(url);

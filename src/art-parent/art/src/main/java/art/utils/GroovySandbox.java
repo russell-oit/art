@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public class GroovySandbox extends GroovyValueFilter {
 	//https://github.com/kohsuke/groovy-sandbox/blob/master/src/test/groovy/org/kohsuke/groovy/sandbox/robot/RobotSandbox.groovy
 	//https://github.com/kohsuke/groovy-sandbox/tree/master/src/test/groovy/org/kohsuke/groovy/sandbox/robot
+	//https://github.com/kohsuke/groovy-sandbox/blob/master/src/test/groovy/org/kohsuke/groovy/sandbox/TheTest.groovy
 
 	private static final Logger logger = LoggerFactory.getLogger(GroovySandbox.class);
 
@@ -78,6 +79,7 @@ public class GroovySandbox extends GroovyValueFilter {
 	private Set<Class> getDefaultTypes() {
 		Set<Class> defaultTypes = new HashSet<>();
 
+		//https://stackoverflow.com/questions/2041778/how-to-initialize-hashset-values-by-construction
 		//http://tutorials.jenkov.com/java/data-types.html
 		Collections.addAll(defaultTypes,
 				Boolean.class,
@@ -108,6 +110,7 @@ public class GroovySandbox extends GroovyValueFilter {
 
 		Class cl;
 		Object value = null;
+		//https://stackoverflow.com/questions/9068150/best-way-to-negate-an-instanceof
 		if (o instanceof Class) {
 			cl = (Class) o;
 		} else {
