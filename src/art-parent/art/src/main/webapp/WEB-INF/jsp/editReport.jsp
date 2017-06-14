@@ -275,7 +275,7 @@ Edit report page
 
 				saikuEditor.getSession().setValue(reportSource.val());
 				saikuEditor.getSession().on('change', function () {
-					options.val(saikuEditor.getSession().getValue());
+					reportSource.val(saikuEditor.getSession().getValue());
 				});
 
 				var mongoEditor = ace.edit("mongoEditor");
@@ -283,12 +283,12 @@ Edit report page
 				mongoEditor.getSession().setMode("ace/mode/groovy");
 				mongoEditor.setHighlightActiveLine(false);
 				mongoEditor.setShowPrintMargin(false);
-				mongoEditor.setOption("showLineNumbers", false);
+				mongoEditor.setOption("showLineNumbers", true);
 				document.getElementById('mongoEditor').style.fontSize = '14px';
 
 				mongoEditor.getSession().setValue(reportSource.val());
 				mongoEditor.getSession().on('change', function () {
-					options.val(mongoEditor.getSession().getValue());
+					reportSource.val(mongoEditor.getSession().getValue());
 				});
 
 			});

@@ -1,0 +1,26 @@
+#classes used with the mongo java driver
+com.mongodb.MongoClientURI
+com.mongodb.MongoClient
+com.mongodb.DB
+com.mongodb.DBCollection
+com.mongodb.BasicDBObject
+com.mongodb.DBObject
+com.mongodb.DBCursor
+com.mongodb.client.MongoCollection
+com.mongodb.client.MongoCursor
+com.mongodb.client.MongoDatabase
+com.mongodb.MongoDatabaseImpl
+com.mongodb.MongoCollectionImpl
+com.mongodb.FindIterableImpl
+com.mongodb.MongoBatchCursorAdapter
+org.bson.Document
+
+#classes used with the jongo library
+org.jongo.Jongo
+org.jongo.MongoCollection
+org.jongo.MongoCursor
+org.jongo.Find
+
+#other classes
+java.util.ArrayList
+java.util.LinkedHashMap

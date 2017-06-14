@@ -27,6 +27,8 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -414,6 +416,18 @@ public class DatasourceController {
 						}
 					}
 					conn = DriverManager.getConnection(url, username, password);
+				} else {
+					if (StringUtils.startsWith(url, "mongodb://")) {
+						MongoClient mongoClient = null;
+						try {
+							MongoClientURI uri = new MongoClientURI(url);
+							mongoClient = new MongoClient(uri);
+						} finally {
+							if(mongoClient!=null){
+								mongoClient.close();
+							}
+						}
+					}
 				}
 			}
 		} finally {

@@ -25,6 +25,7 @@ import art.chart.SpeedometerChart;
 import art.chart.TimeSeriesBasedChart;
 import art.chart.XYChart;
 import art.chart.XYZBasedChart;
+import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
@@ -77,12 +78,14 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
+import art.utils.GroovySandbox;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
 import net.sf.cewolfart.PostProcessingException;
 import fr.opensagres.xdocreport.core.XDocReportException;
 import freemarker.template.TemplateException;
+import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.io.File;
 import java.io.IOException;
@@ -103,17 +106,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JRException;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1068,13 +1070,35 @@ public class ReportOutputGenerator {
 				//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
 				//https://mongodb.github.io/mongo-java-driver/3.4/driver/getting-started/quick-start/
 				//https://github.com/ihr/jongo-by-example/blob/master/src/test/java/org/ingini/mongodb/jongo/example/aggregation/TestAggregationFramework.java
-//				String processingCode = "def hello_world() { println 'Hello, world!' }; hello_world();";
-				GroovyShell shell = new GroovyShell();
-//				shell.evaluate(processingCode);
+				//https://stackoverflow.com/questions/24370456/groovy-script-sandboxing-use-groovy-timecategory-syntax-from-java-as-string/24374237
+				CompilerConfiguration cc = new CompilerConfiguration();
+				cc.addCompilationCustomizers(new SandboxTransformer());
+				Binding binding = new Binding();
+				String url = null;
+				String username = null;
+				String password = null;
+				Datasource datasource = report.getDatasource();
+				if (datasource != null) {
+					url = datasource.getUrl();
+					username = datasource.getUsername();
+					password = datasource.getPassword();
+				}
+				binding.setProperty("url", url);
+				binding.setProperty("username", username);
+				binding.setProperty("password", password);
+				GroovyShell shell = new GroovyShell(binding, cc);
+				GroovySandbox sandbox = new GroovySandbox();
+				sandbox.register();
 				String reportSource = report.getReportSource();
-				Object result = shell.evaluate(reportSource);
+				Object result;
+				try {
+					result = shell.evaluate(reportSource);
+				} finally {
+					sandbox.unregister();
+				}
 				if (result != null) {
 					if (result instanceof List) {
+						@SuppressWarnings("unchecked")
 						List<Object> resultList = (List<Object>) result;
 						List<ResultSetColumn> columns = new ArrayList<>();
 						String resultString = null;
@@ -1085,6 +1109,7 @@ public class ReportOutputGenerator {
 							//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
 							//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
 							ObjectMapper mapper = new ObjectMapper();
+							@SuppressWarnings("unchecked")
 							Map<String, Object> map = mapper.convertValue(sample, Map.class);
 							for (Entry<String, Object> entry : map.entrySet()) {
 								String name = entry.getKey();
@@ -1103,6 +1128,7 @@ public class ReportOutputGenerator {
 							//otherwise we would just call resultString = ArtUtils.objectToJson(resultList); directly and not have to create a new list
 							List<Map<String, Object>> finalResultList = new ArrayList<>();
 							for (Object object : resultList) {
+								@SuppressWarnings("unchecked")
 								Map<String, Object> map2 = mapper.convertValue(object, Map.class);
 								Map<String, Object> row = new LinkedHashMap<>();
 								for (Entry<String, Object> entry : map2.entrySet()) {
@@ -1119,6 +1145,9 @@ public class ReportOutputGenerator {
 								}
 								finalResultList.add(row);
 							}
+
+							//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
+							//https://github.com/wnameless/json-flattener
 							resultString = ArtUtils.objectToJson(finalResultList);
 						}
 

@@ -184,6 +184,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.couchbase.jdbc.CBDriver";
 		urlElement.value = "jdbc:couchbase://<server_name>:8093";
 		testSqlElement.value = "";
+	} else if (dbType === "mongodb") {
+		driverElement.value = "";
+		urlElement.value = "mongodb://<server_name>";
+		testSqlElement.value = "";
 	}
 }
 

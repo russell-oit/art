@@ -258,6 +258,7 @@ public class ArtUtils {
 		databaseTypes.put("olap4j-mondrian", "Olap4j Mondrian");
 		databaseTypes.put("olap4j-xmla", "Olap4j XMLA");
 		databaseTypes.put("couchbase", "Couchbase");
+		databaseTypes.put("mongodb", "MongoDB");
 
 		return databaseTypes;
 	}
