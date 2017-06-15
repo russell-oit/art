@@ -25,6 +25,7 @@ import art.chart.SpeedometerChart;
 import art.chart.TimeSeriesBasedChart;
 import art.chart.XYChart;
 import art.chart.XYZBasedChart;
+import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.drilldown.Drilldown;
@@ -81,6 +82,7 @@ import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
 import art.utils.MongoHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.MongoClient;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.io.File;
@@ -1065,32 +1067,36 @@ public class ReportOutputGenerator {
 				//https://stackoverflow.com/questions/4912400/what-packages-does-1-java-and-2-groovy-automatically-import
 				CompilerConfiguration cc = new CompilerConfiguration();
 				cc.addCompilationCustomizers(new SandboxTransformer());
-				
-				Map<String, Object> variables=new HashMap<>();
+
+				Map<String, Object> variables = new HashMap<>();
 				variables.putAll(reportParamsMap);
+
+				MongoClient mongoClient = null;
 				String url = null; //url with credentials in it
 				String basicUrl = null; //url without credentils in it
 				String username = null;
 				String password = null;
 				Datasource datasource = report.getDatasource();
 				if (datasource != null) {
+					mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
 					basicUrl = datasource.getUrl();
 					username = datasource.getUsername();
 					password = datasource.getPassword();
 					MongoHelper mongoHelper = new MongoHelper();
 					url = mongoHelper.getUrlWithCredentials(basicUrl, username, password);
 				}
+				variables.put("mongoClient", mongoClient);
 				variables.put("url", url);
 				variables.put("username", username);
 				variables.put("password", password);
 				variables.put("basicUrl", basicUrl);
-				
+
 				Binding binding = new Binding(variables);
-				
+
 				GroovyShell shell = new GroovyShell(binding, cc);
 				GroovySandbox sandbox = new GroovySandbox();
 				sandbox.register();
-				
+
 				//get report source with direct parameters, rules etc applied
 				String reportSource = reportRunner.getQuerySql();
 				Object result;

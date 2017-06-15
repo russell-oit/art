@@ -128,7 +128,7 @@ public class Config extends HttpServlet {
 		//shutdown quartz scheduler
 		SchedulerUtils.shutdownScheduler();
 
-		Config.closeSaikuConnections();
+		closeSaikuConnections();
 
 		//close database connections
 		DbConnections.closeAllConnections();

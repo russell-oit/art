@@ -371,9 +371,18 @@ public class DatasourceController {
 		if (datasource.isActive()) {
 			testConnection(jndi, driver, url, username, clearTextPassword);
 
-			if (datasource.getDatasourceType() == DatasourceType.JDBC) {
-				ArtDatabase artDbConfig = Config.getArtDbConfig();
-				DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			DatasourceType datasourceType = datasource.getDatasourceType();
+			logger.debug("datasourceType={}", datasourceType);
+			switch (datasourceType) {
+				case JDBC:
+					ArtDatabase artDbConfig = Config.getArtDbConfig();
+					DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+					break;
+				case MongoDB:
+					DbConnections.createMongodbConnectionPool(datasource);
+					break;
+				default:
+				//do nothing
 			}
 		}
 	}

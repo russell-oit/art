@@ -23,6 +23,9 @@ import art.datasource.DatasourceInfo;
 import art.datasource.DatasourceMapper;
 import art.enums.ConnectionPoolLibrary;
 import art.enums.DatasourceType;
+import art.utils.MongoHelper;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -49,6 +52,7 @@ public class DbConnections {
 	private static final Logger logger = LoggerFactory.getLogger(DbConnections.class);
 
 	private static Map<Integer, ConnectionPool> connectionPoolMap;
+	private static Map<Integer, MongoClient> mongodbConnections;
 
 	/**
 	 * Creates connections to all report databases. Connections are pooled.
@@ -64,6 +68,7 @@ public class DbConnections {
 		//reset pools map
 		closeAllConnections();
 		connectionPoolMap = new HashMap<>();
+		mongodbConnections = new HashMap<>();
 
 		ConnectionPoolLibrary connectionPoolLibrary = artDbConfig.getConnectionPoolLibrary();
 		int maxPoolSize = artDbConfig.getMaxPoolConnections(); //will apply to all connection pools
@@ -73,16 +78,32 @@ public class DbConnections {
 
 		//create connection pool for the art database
 		createConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
+		//create connection pools for report databases
+		createJdbcDatasourceConnectionPools(maxPoolSize, connectionPoolLibrary);
+		createMongodbDatasourceConnectionPools();
+	}
+
+	/**
+	 * Create connection pools for jdbc datasources
+	 *
+	 * @param maxPoolSize max connection pool size
+	 * @param connectionPoolLibrary connection pool library to use
+	 * @throws SQLException
+	 */
+	private static void createJdbcDatasourceConnectionPools(int maxPoolSize,
+			ConnectionPoolLibrary connectionPoolLibrary) throws SQLException {
+
+		logger.debug("Entering createJdbcDatasourceConnectionPools");
 
 		//create connection pools for report datasources
 		//use QueryRunner directly instead of DbService or DatasourceService to avoid circular references
 		String sql = "SELECT *"
 				+ " FROM ART_DATABASES"
-				+ " WHERE ACTIVE=1 AND DATASOURCE_TYPE='" + DatasourceType.JDBC.getValue() + "'";
+				+ " WHERE ACTIVE=1 AND DATASOURCE_TYPE=?";
 
 		QueryRunner run = new QueryRunner(getArtDbDataSource());
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
-		List<Datasource> datasources = run.query(sql, h);
+		List<Datasource> datasources = run.query(sql, h, DatasourceType.JDBC.getValue());
 
 		for (Datasource datasource : datasources) {
 			createConnectionPool(datasource, maxPoolSize, connectionPoolLibrary);
@@ -90,7 +111,30 @@ public class DbConnections {
 	}
 
 	/**
-	 * Creates a connection pool for the given datasource
+	 * Creates connection pools for mongodb datasources
+	 *
+	 * @throws SQLException
+	 */
+	private static void createMongodbDatasourceConnectionPools() throws SQLException {
+		logger.debug("Entering createMongodbDatasourceConnectionPools");
+
+		//create connection pools for report datasources
+		//use QueryRunner directly instead of DbService or DatasourceService to avoid circular references
+		String sql = "SELECT *"
+				+ " FROM ART_DATABASES"
+				+ " WHERE ACTIVE=1 AND DATASOURCE_TYPE=?";
+
+		QueryRunner run = new QueryRunner(getArtDbDataSource());
+		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
+		List<Datasource> datasources = run.query(sql, h, DatasourceType.MongoDB.getValue());
+
+		for (Datasource datasource : datasources) {
+			createMongodbConnectionPool(datasource);
+		}
+	}
+
+	/**
+	 * Creates a connection pool for the given jdbc datasource
 	 *
 	 * @param datasourceInfo the datasource details
 	 * @param maxPoolSize the maximum pool size
@@ -103,7 +147,7 @@ public class DbConnections {
 
 		//remove any existing connection pool for this datasource
 		removeConnectionPool(datasourceInfo.getDatasourceId());
-		
+
 		logger.debug("datasourceInfo.isJndi()={}", datasourceInfo.isJndi());
 
 		ConnectionPool pool;
@@ -120,6 +164,24 @@ public class DbConnections {
 
 		pool.create(datasourceInfo, maxPoolSize);
 		connectionPoolMap.put(pool.getPoolId(), pool);
+	}
+
+	/**
+	 * Creates a connection pool for a mongodb datasource
+	 *
+	 * @param datasource the mongodb datasource
+	 */
+	public static void createMongodbConnectionPool(Datasource datasource) {
+		logger.debug("Entering createMongodbConnectionPool");
+
+		removeConnectionPool(datasource.getDatasourceId());
+
+		MongoHelper mongoHelper = new MongoHelper();
+		String mongoUrl = mongoHelper.getUrlWithCredentials(datasource);
+		MongoClientURI uri = new MongoClientURI(mongoUrl);
+		MongoClient mongoClient = new MongoClient(uri);
+
+		mongodbConnections.put(datasource.getDatasourceId(), mongoClient);
 	}
 
 	/**
@@ -213,6 +275,17 @@ public class DbConnections {
 
 		return conn;
 	}
+	
+	/**
+	 * Returns a mongodb connection for a datasource with the given id
+	 * 
+	 * @param datasourceId the datasource id
+	 * @return a mongodb connection for a datasource with the given id
+	 */
+	public static MongoClient getMongodbConnection(int datasourceId){
+		logger.debug("Entering getMongodbConnection: datasourceId={}", datasourceId);
+		return mongodbConnections.get(datasourceId);
+	}
 
 	/**
 	 * Closes all connection pools (really closes all connections in all the
@@ -221,16 +294,22 @@ public class DbConnections {
 	public static void closeAllConnections() {
 		logger.debug("Entering closeAllConnections");
 
-		if (connectionPoolMap == null) {
-			return;
+		if (connectionPoolMap != null) {
+			for (ConnectionPool pool : connectionPoolMap.values()) {
+				pool.close();
+			}
+			connectionPoolMap.clear();
+			connectionPoolMap = null;
 		}
 
-		for (ConnectionPool pool : connectionPoolMap.values()) {
-			pool.close();
+		if (mongodbConnections != null) {
+			for (MongoClient mongoClient : mongodbConnections.values()) {
+				mongoClient.close();
+			}
+			mongodbConnections.clear();
+			mongodbConnections = null;
 		}
 
-		connectionPoolMap.clear();
-		connectionPoolMap = null;
 	}
 
 	/**
@@ -285,6 +364,14 @@ public class DbConnections {
 		if (pool != null) {
 			pool.closePool();
 			connectionPoolMap.remove(datasourceId);
+			return;
+		}
+
+		//datasource not among jdbc connection pool. try mongodb connection pool
+		MongoClient mongoClient = mongodbConnections.get(datasourceId);
+		if (mongoClient != null) {
+			mongoClient.close();
+			mongodbConnections.remove(datasourceId);
 		}
 	}
 }
