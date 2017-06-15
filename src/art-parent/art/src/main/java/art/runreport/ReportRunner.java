@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -81,12 +82,10 @@ public class ReportRunner {
 	private String recipientColumn;
 	private String recipientId;
 	private String recipientIdType = "VARCHAR";
-	private int displayResultset;
 	private int updateCount; //update count of display resultset
 	private Report report;
 	private Map<String, ReportParameter> reportParamsMap;
 	private final List<Object> jdbcParams = new ArrayList<>();
-	private ReportType reportType;
 	private User user;
 	private boolean postgreSqlFetchSizeApplied;
 	private final String QUESTION_PLACEHOLDER = "[ART_QUESTION_MARK_PLACEHOLDER]";
@@ -209,12 +208,44 @@ public class ReportRunner {
 	/**
 	 * Processes the report source and applies tags, dynamic sql, parameters and
 	 * rules
+	 *
+	 * @param report the report for which to process the source
+	 * @param user the user who is running the report. may be null if the report
+	 * doesn't use rules, or if the source doesn't contain the :username: tag
+	 * which needs to be replaced
+	 * @param reportParamsMap the report parameters. may be null if the report
+	 * doesn't contain direct report parameters which need to be replaced, or if
+	 * it doesn't contain dynamic sql tags that use parameters
+	 * @return processed report source
+	 * @throws java.sql.SQLException
 	 */
-	private void processReportSource() throws SQLException {
+	public String processReportSource(Report report, User user,
+			Map<String, ReportParameter> reportParamsMap) throws SQLException {
+
+		Objects.requireNonNull(report, "report must not be null");
+
+		this.report = report;
+		this.user = user;
+		this.reportParamsMap = reportParamsMap;
+
+		useRules = report.isUsesRules();
+
+		return processReportSource();
+	}
+
+	/**
+	 * Processes the report source and applies tags, dynamic sql, parameters and
+	 * rules
+	 *
+	 * @return processed report source
+	 * @throws java.sql.SQLException
+	 */
+	private String processReportSource() throws SQLException {
 		logger.debug("Entering processReportSource");
 
 		//update querySb with report sql
-		querySb.replace(0, querySb.length(), report.getReportSource());
+		String reportSource = report.getReportSource();
+		querySb.replace(0, querySb.length(), reportSource);
 
 		applyTags(querySb);
 		applyDynamicSql(querySb);
@@ -241,6 +272,10 @@ public class ReportRunner {
 		querySb.replace(0, querySb.length(), querySql);
 
 		logger.debug("Sql query now is:\n{}", querySb.toString());
+
+		String processedSource = querySb.toString();
+
+		return processedSource;
 	}
 
 	/**
@@ -273,15 +308,21 @@ public class ReportRunner {
 		int count = 0;
 		StringBuilder labelledValues = new StringBuilder(1024);
 
+		if (CollectionUtils.isNotEmpty(reportRules) && user == null) {
+			throw new IllegalStateException("Report has rules but no user supplied");
+		}
+
 		// for each rule build and add the AND column IN (list) string to the query
 		// Note: if we don't have rules for this query, the sb is left untouched
 		for (ReportRule reportRule : reportRules) {
 			count++;
 			Rule rule = reportRule.getRule();
-			List<String> userRuleValues = ruleValueService.getUserRuleValues(user.getUserId(), rule.getRuleId());
+			int userId = user.getUserId();
+			int ruleId = rule.getRuleId();
+			List<String> userRuleValues = ruleValueService.getUserRuleValues(userId, ruleId);
 			List<String> userGroupRuleValues = new ArrayList<>();
 			for (UserGroup userGroup : user.getUserGroups()) {
-				userGroupRuleValues.addAll(ruleValueService.getUserGroupRuleValues(userGroup.getUserGroupId(), rule.getRuleId()));
+				userGroupRuleValues.addAll(ruleValueService.getUserGroupRuleValues(userGroup.getUserGroupId(), ruleId));
 			}
 
 			if (userRuleValues.contains("ALL_ITEMS") || userGroupRuleValues.contains("ALL_ITEMS")) {
@@ -438,6 +479,7 @@ public class ReportRunner {
 		String querySql = sb.toString();
 
 		//get and store param identifier order for use with jdbc preparedstatement
+		ReportType reportType = report.getReportType();
 		if (!reportType.isJPivot()) {
 			Map<Integer, ReportParameter> jdbcParamOrder = new TreeMap<>(); //use treemap so that jdbc params are set in correct order
 			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
@@ -721,8 +763,6 @@ public class ReportRunner {
 			throw new IllegalStateException("report is null");
 		}
 
-		reportType = report.getReportType();
-		displayResultset = report.getDisplayResultset();
 		useRules = report.isUsesRules();
 
 		//override use rules setting if required, especially for lovs
@@ -734,6 +774,7 @@ public class ReportRunner {
 		processReportSource();
 
 		//don't execute sql source for report types that don't have runnable sql
+		ReportType reportType = report.getReportType();
 		switch (reportType) {
 			case JasperReportsTemplate:
 			case JxlsTemplate:
@@ -811,6 +852,7 @@ public class ReportRunner {
 		ResultSet rs = psQuery.getResultSet();
 		updateCount = psQuery.getUpdateCount();
 
+		int displayResultset = report.getDisplayResultset();
 		if (displayResultset == -1) {
 			//use the select statement. will use first select statement. having several selects isn't useful
 			if (rs == null) {
@@ -1005,6 +1047,7 @@ public class ReportRunner {
 
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 
+		ReportType reportType = report.getReportType();
 		if (reportType == ReportType.LovStatic) {
 			//static lov. values coming from static values defined in sql source
 			String items = querySb.toString();

@@ -891,7 +891,10 @@ public class ReportJob implements org.quartz.Job {
 	 * @throws SQLException
 	 */
 	private void runJob(boolean splitJob, User user, String userEmail) throws SQLException {
-		runJob(splitJob, user, userEmail, null, false);
+		Map<String, Map<String, String>> recipientDetails = null;
+		boolean recipientFilterPresent = false;
+		
+		runJob(splitJob, user, userEmail, recipientDetails, recipientFilterPresent);
 	}
 
 	/**
@@ -907,7 +910,9 @@ public class ReportJob implements org.quartz.Job {
 	private void runJob(boolean splitJob, User user, String userEmail,
 			Map<String, Map<String, String>> recipientDetails) throws SQLException {
 
-		runJob(splitJob, user, userEmail, recipientDetails, false);
+		boolean recipientFilterPresent = false;
+		
+		runJob(splitJob, user, userEmail, recipientDetails, recipientFilterPresent);
 	}
 
 	/**
