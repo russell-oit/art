@@ -81,18 +81,12 @@ import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
 import art.utils.MongoHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sf.cewolfart.ChartValidationException;
-import net.sf.cewolfart.DatasetProduceException;
-import net.sf.cewolfart.PostProcessingException;
-import fr.opensagres.xdocreport.core.XDocReportException;
-import freemarker.template.TemplateException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -107,14 +101,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bson.types.ObjectId;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
@@ -238,24 +230,13 @@ public class ReportOutputGenerator {
 	 * generated
 	 * @param messageSource the messagesource to use
 	 * @return the output result
-	 * @throws IOException
-	 * @throws SQLException
-	 * @throws JRException
-	 * @throws InvalidFormatException
-	 * @throws DatasetProduceException
-	 * @throws ChartValidationException
-	 * @throws PostProcessingException
-	 * @throws ServletException
-	 * @throws freemarker.template.TemplateException
-	 * @throws fr.opensagres.xdocreport.core.XDocReportException
+	 * @throws Exception
 	 */
 	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
 			ReportFormat reportFormat, Locale locale,
 			ParameterProcessorResult paramProcessorResult,
 			PrintWriter writer, String fullOutputFilename, User user, MessageSource messageSource)
-			throws IOException, SQLException, JRException,
-			InvalidFormatException, DatasetProduceException, ChartValidationException,
-			PostProcessingException, ServletException, TemplateException, XDocReportException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+			throws Exception {
 
 		logger.debug("Entering generateOutput");
 
