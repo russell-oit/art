@@ -27,6 +27,7 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
+import art.utils.MongoHelper;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import java.sql.Connection;
@@ -422,10 +423,12 @@ public class DatasourceController {
 						//https://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html
 						MongoClient mongoClient = null;
 						try {
-							MongoClientURI uri = new MongoClientURI(url);
+							MongoHelper mongoHelper = new MongoHelper();
+							String finalUrl = mongoHelper.getUrlWithCredentials(url, username, password);
+							MongoClientURI uri = new MongoClientURI(finalUrl);
 							mongoClient = new MongoClient(uri);
 						} finally {
-							if(mongoClient!=null){
+							if (mongoClient != null) {
 								mongoClient.close();
 							}
 						}

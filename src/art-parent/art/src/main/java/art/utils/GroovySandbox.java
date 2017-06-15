@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Restricts which classes can be used in a groovy script
  *
  * @author Timothy Anyona
  */
@@ -40,6 +41,7 @@ public class GroovySandbox extends GroovyValueFilter {
 	//https://github.com/kohsuke/groovy-sandbox/blob/master/src/test/groovy/org/kohsuke/groovy/sandbox/robot/RobotSandbox.groovy
 	//https://github.com/kohsuke/groovy-sandbox/tree/master/src/test/groovy/org/kohsuke/groovy/sandbox/robot
 	//https://github.com/kohsuke/groovy-sandbox/blob/master/src/test/groovy/org/kohsuke/groovy/sandbox/TheTest.groovy
+	//https://stackoverflow.com/questions/6210045/bullet-proof-groovy-script-embedding
 
 	private static final Logger logger = LoggerFactory.getLogger(GroovySandbox.class);
 
@@ -51,6 +53,9 @@ public class GroovySandbox extends GroovyValueFilter {
 		setAllowedTypes();
 	}
 
+	/**
+	 * Sets the allowed classes
+	 */
 	private void setAllowedTypes() {
 		//https://www.mkyong.com/java/java-read-a-text-file-line-by-line/
 		File whitelistFile = new File(whitelistFilePath);
@@ -76,6 +81,13 @@ public class GroovySandbox extends GroovyValueFilter {
 		allowedTypes.addAll(getDefaultTypes());
 	}
 
+	/**
+	 * Returns classes that are allowed without having to be specified in the
+	 * whitelist file
+	 *
+	 * @return classes that are allowed without having to be specified in the
+	 * whitelist file
+	 */
 	private Set<Class> getDefaultTypes() {
 		Set<Class> defaultTypes = new HashSet<>();
 
