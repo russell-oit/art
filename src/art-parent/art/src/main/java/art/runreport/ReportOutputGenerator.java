@@ -1110,7 +1110,8 @@ public class ReportOutputGenerator {
 				GroovySandbox sandbox = new GroovySandbox();
 				sandbox.register();
 				
-				String reportSource = report.getReportSource();
+				//get report source with direct parameters, rules etc applied
+				String reportSource = reportRunner.getQuerySql();
 				Object result;
 				try {
 					result = shell.evaluate(reportSource);
