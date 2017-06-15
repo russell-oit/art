@@ -1072,24 +1072,11 @@ public class ReportOutputGenerator {
 				variables.putAll(reportParamsMap);
 
 				MongoClient mongoClient = null;
-				String url = null; //url with credentials in it
-				String basicUrl = null; //url without credentils in it
-				String username = null;
-				String password = null;
 				Datasource datasource = report.getDatasource();
 				if (datasource != null) {
 					mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
-					basicUrl = datasource.getUrl();
-					username = datasource.getUsername();
-					password = datasource.getPassword();
-					MongoHelper mongoHelper = new MongoHelper();
-					url = mongoHelper.getUrlWithCredentials(basicUrl, username, password);
 				}
 				variables.put("mongoClient", mongoClient);
-				variables.put("url", url);
-				variables.put("username", username);
-				variables.put("password", password);
-				variables.put("basicUrl", basicUrl);
 
 				Binding binding = new Binding(variables);
 
