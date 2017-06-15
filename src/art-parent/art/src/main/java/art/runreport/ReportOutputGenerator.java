@@ -96,6 +96,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -1083,7 +1084,9 @@ public class ReportOutputGenerator {
 				//https://stackoverflow.com/questions/4912400/what-packages-does-1-java-and-2-groovy-automatically-import
 				CompilerConfiguration cc = new CompilerConfiguration();
 				cc.addCompilationCustomizers(new SandboxTransformer());
-				Binding binding = new Binding();
+				
+				Map<String, Object> variables=new HashMap<>();
+				variables.putAll(reportParamsMap);
 				String url = null; //url with credentials in it
 				String basicUrl = null; //url without credentils in it
 				String username = null;
@@ -1096,13 +1099,17 @@ public class ReportOutputGenerator {
 					MongoHelper mongoHelper = new MongoHelper();
 					url = mongoHelper.getUrlWithCredentials(basicUrl, username, password);
 				}
-				binding.setProperty("url", url);
-				binding.setProperty("username", username);
-				binding.setProperty("password", password);
-				binding.setProperty("basicUrl", basicUrl);
+				variables.put("url", url);
+				variables.put("username", username);
+				variables.put("password", password);
+				variables.put("basicUrl", basicUrl);
+				
+				Binding binding = new Binding(variables);
+				
 				GroovyShell shell = new GroovyShell(binding, cc);
 				GroovySandbox sandbox = new GroovySandbox();
 				sandbox.register();
+				
 				String reportSource = report.getReportSource();
 				Object result;
 				try {
