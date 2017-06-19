@@ -3,5 +3,6 @@
 	"enableDirectParameterSubstitution" : true,
 	"exportDirectory" : "",
 	"workDirectory" : "",
-	"checkExportFileAccess" : false
+	"checkExportFileAccess" : false,
+	"enableGroovySandbox": true
 }

@@ -80,11 +80,13 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
-import art.utils.MongoHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -1065,6 +1067,10 @@ public class ReportOutputGenerator {
 				//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
 				//https://stackoverflow.com/questions/7567378/access-a-java-class-from-within-groovy
 				//https://stackoverflow.com/questions/4912400/what-packages-does-1-java-and-2-groovy-automatically-import
+				//https://www.spigotmc.org/wiki/mongodb-with-morphia/
+				//http://www.foobaracademy.com/morphia-hello-world-example/
+				//http://www.carfey.com/blog/using-mongodb-with-morphia/
+				//http://www.obsidianscheduler.com/blog/evolving-document-structures-with-morphia-and-mongodb/
 				CompilerConfiguration cc = new CompilerConfiguration();
 				cc.addCompilationCustomizers(new SandboxTransformer());
 
@@ -1081,8 +1087,12 @@ public class ReportOutputGenerator {
 				Binding binding = new Binding(variables);
 
 				GroovyShell shell = new GroovyShell(binding, cc);
-				GroovySandbox sandbox = new GroovySandbox();
-				sandbox.register();
+				GroovySandbox sandbox = null;
+
+				if (Config.getCustomSettings().isEnableGroovySandbox()) {
+					sandbox = new GroovySandbox();
+					sandbox.register();
+				}
 
 				//get report source with direct parameters, rules etc applied
 				String reportSource = reportRunner.getQuerySql();
@@ -1090,7 +1100,9 @@ public class ReportOutputGenerator {
 				try {
 					result = shell.evaluate(reportSource);
 				} finally {
-					sandbox.unregister();
+					if (sandbox != null) {
+						sandbox.unregister();
+					}
 				}
 				if (result != null) {
 					if (result instanceof List) {
@@ -1125,20 +1137,42 @@ public class ReportOutputGenerator {
 							//otherwise we would just call resultString = ArtUtils.objectToJson(resultList); directly and not have to create a new list
 							List<Map<String, Object>> finalResultList = new ArrayList<>();
 							for (Object object : resultList) {
-								@SuppressWarnings("unchecked")
-								Map<String, Object> map2 = mapper.convertValue(object, Map.class);
 								Map<String, Object> row = new LinkedHashMap<>();
-								for (Entry<String, Object> entry : map2.entrySet()) {
-									String name = entry.getKey();
-									Object value = entry.getValue();
-									Object finalValue;
-									if (value instanceof ObjectId) {
-										ObjectId objectId = (ObjectId) value;
-										finalValue = objectId.toString();
-									} else {
-										finalValue = value;
+								if (object instanceof Map) {
+									@SuppressWarnings("unchecked")
+									Map<String, Object> map2 = mapper.convertValue(object, Map.class);
+									for (Entry<String, Object> entry : map2.entrySet()) {
+										String name = entry.getKey();
+										Object value = entry.getValue();
+										Object finalValue;
+										if (value instanceof ObjectId) {
+											ObjectId objectId = (ObjectId) value;
+											finalValue = objectId.toString();
+										} else {
+											finalValue = value;
+										}
+										row.put(name, finalValue);
 									}
-									row.put(name, finalValue);
+								} else {
+									//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
+									Class<?> c = object.getClass();
+									BeanInfo beanInfo = Introspector.getBeanInfo(c, Object.class);
+									for (PropertyDescriptor propertyDesc : beanInfo.getPropertyDescriptors()) {
+										String propertyName = propertyDesc.getName();
+										if (StringUtils.equals(propertyName, "metaClass")) {
+											//don't include
+										} else {
+											Object value = propertyDesc.getReadMethod().invoke(object);
+											Object finalValue;
+											if (value instanceof ObjectId) {
+												ObjectId objectId = (ObjectId) value;
+												finalValue = objectId.toString();
+											} else {
+												finalValue = value;
+											}
+											row.put(propertyName, finalValue);
+										}
+									}
 								}
 								finalResultList.add(row);
 							}

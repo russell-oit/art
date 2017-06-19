@@ -103,7 +103,15 @@ public class GroovySandbox extends GroovyValueFilter {
 				Float.class,
 				Double.class,
 				String.class,
-				Object.class
+				Object.class,
+				boolean.class,
+				byte.class,
+				short.class,
+				char.class,
+				int.class,
+				long.class,
+				float.class,
+				double.class
 		);
 
 		return defaultTypes;
@@ -129,6 +137,13 @@ public class GroovySandbox extends GroovyValueFilter {
 			cl = o.getClass();
 			value = o;
 		}
+		
+		//allow dynamic classes defined in groovy script
+		String className = cl.getName();
+		if(StringUtils.startsWith(className, "art.groovy.")){
+			return o;
+		}
+		
 		if (allowedTypes.contains(cl)) {
 			return o;
 		}
