@@ -74,6 +74,7 @@ import art.reportoptions.DataTablesOptions;
 import art.reportoptions.DatamapsOptions;
 import art.reportoptions.FixedWidthOptions;
 import art.reportoptions.JFreeChartOptions;
+import art.reportoptions.MongoDbOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -1106,31 +1107,73 @@ public class ReportOutputGenerator {
 				}
 				if (result != null) {
 					if (result instanceof List) {
+						String optionsString = report.getOptions();
+						boolean showColumnFilters = true;
+						List<String> columnNames = null;
+						List<Map<String, String>> columnDataTypes = null;
+						if (StringUtils.isNotBlank(optionsString)) {
+							ObjectMapper mapper = new ObjectMapper();
+							MongoDbOptions options = mapper.readValue(optionsString, MongoDbOptions.class);
+							showColumnFilters = options.isShowColumnFilters();
+							columnNames = options.getColumns();
+							columnDataTypes = options.getColumnDataTypes();
+						}
+
 						@SuppressWarnings("unchecked")
 						List<Object> resultList = (List<Object>) result;
 						List<ResultSetColumn> columns = new ArrayList<>();
 						String resultString = null;
 						if (!resultList.isEmpty()) {
-							Object sample = resultList.get(0);
-							//https://stackoverflow.com/questions/6133660/recursive-beanutils-describe
-							//https://www.leveluplunch.com/java/examples/convert-object-bean-properties-map-key-value/
-							//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
-							//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
-							//http://www.makeinjava.com/convert-list-objects-tofrom-json-java-jackson-objectmapper-example/
-							ObjectMapper mapper = new ObjectMapper();
-							@SuppressWarnings("unchecked")
-							Map<String, Object> map = mapper.convertValue(sample, Map.class);
-							for (Entry<String, Object> entry : map.entrySet()) {
-								String name = entry.getKey();
-								Object value = entry.getValue();
-								String type = "string";
-								if (value instanceof Number) {
-									type = "numeric";
+							if (CollectionUtils.isEmpty(columnNames)) {
+								Object sample = resultList.get(0);
+								//https://stackoverflow.com/questions/6133660/recursive-beanutils-describe
+								//https://www.leveluplunch.com/java/examples/convert-object-bean-properties-map-key-value/
+								//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
+								//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
+								//http://www.makeinjava.com/convert-list-objects-tofrom-json-java-jackson-objectmapper-example/
+								ObjectMapper mapper = new ObjectMapper();
+								@SuppressWarnings("unchecked")
+								Map<String, Object> map = mapper.convertValue(sample, Map.class);
+								for (Entry<String, Object> entry : map.entrySet()) {
+									String name = entry.getKey();
+									Object value = entry.getValue();
+									String type = "string";
+									if (value instanceof Number) {
+										type = "numeric";
+									}
+									ResultSetColumn column = new ResultSetColumn();
+									column.setName(name);
+									column.setType(type);
+									columns.add(column);
 								}
-								ResultSetColumn column = new ResultSetColumn();
-								column.setName(name);
-								column.setType(type);
-								columns.add(column);
+							} else {
+								for (String columnName : columnNames) {
+									ResultSetColumn column = new ResultSetColumn();
+									column.setName(columnName);
+									column.setType("string");
+									columns.add(column);
+								}
+							}
+
+							if (CollectionUtils.isNotEmpty(columnDataTypes)) {
+								for (ResultSetColumn column : columns) {
+									String dataColumnName = column.getName();
+									for (Map<String, String> columnDataTypeDefinition : columnDataTypes) {
+										Entry<String, String> entry = columnDataTypeDefinition.entrySet().iterator().next();
+										String columnName = entry.getKey();
+										String dataType = entry.getValue();
+										if (StringUtils.equalsIgnoreCase(columnName, dataColumnName)) {
+											column.setType(dataType);
+											break;
+										}
+									}
+								}
+							}
+
+							List<String> columnList = new ArrayList<>();
+							for (ResultSetColumn column : columns) {
+								String columnName = column.getName();
+								columnList.add(columnName);
 							}
 
 							//_id is a complex object so we have to iterate and replace it with the toString() representation
@@ -1139,19 +1182,22 @@ public class ReportOutputGenerator {
 							for (Object object : resultList) {
 								Map<String, Object> row = new LinkedHashMap<>();
 								if (object instanceof Map) {
+									ObjectMapper mapper = new ObjectMapper();
 									@SuppressWarnings("unchecked")
 									Map<String, Object> map2 = mapper.convertValue(object, Map.class);
 									for (Entry<String, Object> entry : map2.entrySet()) {
 										String name = entry.getKey();
-										Object value = entry.getValue();
-										Object finalValue;
-										if (value instanceof ObjectId) {
-											ObjectId objectId = (ObjectId) value;
-											finalValue = objectId.toString();
-										} else {
-											finalValue = value;
+										if (columnList.contains(name)) {
+											Object value = entry.getValue();
+											Object finalValue;
+											if (value instanceof ObjectId) {
+												ObjectId objectId = (ObjectId) value;
+												finalValue = objectId.toString();
+											} else {
+												finalValue = value;
+											}
+											row.put(name, finalValue);
 										}
-										row.put(name, finalValue);
 									}
 								} else {
 									//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
@@ -1162,15 +1208,17 @@ public class ReportOutputGenerator {
 										if (StringUtils.equals(propertyName, "metaClass")) {
 											//don't include
 										} else {
-											Object value = propertyDesc.getReadMethod().invoke(object);
-											Object finalValue;
-											if (value instanceof ObjectId) {
-												ObjectId objectId = (ObjectId) value;
-												finalValue = objectId.toString();
-											} else {
-												finalValue = value;
+											if (columnList.contains(propertyName)) {
+												Object value = propertyDesc.getReadMethod().invoke(object);
+												Object finalValue;
+												if (value instanceof ObjectId) {
+													ObjectId objectId = (ObjectId) value;
+													finalValue = objectId.toString();
+												} else {
+													finalValue = value;
+												}
+												row.put(propertyName, finalValue);
 											}
-											row.put(propertyName, finalValue);
 										}
 									}
 								}
@@ -1185,14 +1233,6 @@ public class ReportOutputGenerator {
 						request.setAttribute("data", resultString);
 						request.setAttribute("columns", columns);
 						request.setAttribute("reportType", reportType);
-
-						String optionsString = report.getOptions();
-						boolean showColumnFilters = true;
-						if (StringUtils.isNotBlank(optionsString)) {
-							ObjectMapper mapper = new ObjectMapper();
-							DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
-							showColumnFilters = options.isShowColumnFilters();
-						}
 						request.setAttribute("showColumnFilters", showColumnFilters);
 
 						String languageTag = locale.toLanguageTag();
