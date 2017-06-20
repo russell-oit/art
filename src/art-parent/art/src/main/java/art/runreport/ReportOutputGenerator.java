@@ -1187,7 +1187,7 @@ public class ReportOutputGenerator {
 									Map<String, Object> map2 = mapper.convertValue(object, Map.class);
 									for (Entry<String, Object> entry : map2.entrySet()) {
 										String name = entry.getKey();
-										if (columnList.contains(name)) {
+										if (ArtUtils.containsIgnoreCase(columnList, name)) {
 											Object value = entry.getValue();
 											Object finalValue;
 											if (value instanceof ObjectId) {
@@ -1208,7 +1208,7 @@ public class ReportOutputGenerator {
 										if (StringUtils.equals(propertyName, "metaClass")) {
 											//don't include
 										} else {
-											if (columnList.contains(propertyName)) {
+											if (ArtUtils.containsIgnoreCase(columnList, propertyName)) {
 												Object value = propertyDesc.getReadMethod().invoke(object);
 												Object finalValue;
 												if (value instanceof ObjectId) {

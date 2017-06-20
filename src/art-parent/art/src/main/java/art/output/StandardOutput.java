@@ -758,7 +758,7 @@ public abstract class StandardOutput {
 			for (int i = 1; i <= resultSetColumnCount; i++) {
 				String columnName = rsmd.getColumnLabel(i);
 				if (columnFormatIds.contains(String.valueOf(i))
-						|| (StringUtils.isNotBlank(columnName) && columnFormatIds.contains(columnName))) {
+						|| (StringUtils.isNotBlank(columnName) && ArtUtils.containsIgnoreCase(columnFormatIds, columnName))) {
 					String format = columnFormatDetails.get(String.valueOf(i));
 					if (format == null) {
 						format = columnFormatDetails.get(columnName);
@@ -1233,7 +1233,8 @@ public abstract class StandardOutput {
 
 		String columnName = rsmd.getColumnLabel(columnIndex);
 
-		if (hiddenColumns.contains(String.valueOf(columnIndex)) || hiddenColumns.contains(columnName)) {
+		if (hiddenColumns.contains(String.valueOf(columnIndex))
+				|| ArtUtils.containsIgnoreCase(hiddenColumns, columnName)) {
 			displayColumn = false;
 		} else {
 			displayColumn = true;
@@ -1264,7 +1265,8 @@ public abstract class StandardOutput {
 
 		String columnName = rsmd.getColumnLabel(columnIndex);
 
-		if (totalColumns.contains(String.valueOf(columnIndex)) || totalColumns.contains(columnName)) {
+		if (totalColumns.contains(String.valueOf(columnIndex))
+				|| ArtUtils.containsIgnoreCase(totalColumns, columnName)) {
 			totalColumn = true;
 		} else {
 			totalColumn = false;

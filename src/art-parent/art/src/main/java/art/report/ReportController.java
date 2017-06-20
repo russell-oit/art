@@ -29,6 +29,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
+import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
 import java.io.IOException;
@@ -573,9 +574,9 @@ public class ReportController {
 
 		String filename = file.getOriginalFilename();
 		logger.debug("filename='{}'", filename);
-		String extension = FilenameUtils.getExtension(filename).toLowerCase(Locale.ENGLISH);
+		String extension = FilenameUtils.getExtension(filename);
 
-		if (!validExtensions.contains(extension)) {
+		if (!ArtUtils.containsIgnoreCase(validExtensions, extension)) {
 			return "reports.message.fileTypeNotAllowed";
 		}
 

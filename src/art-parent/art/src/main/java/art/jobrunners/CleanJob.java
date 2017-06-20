@@ -19,6 +19,7 @@ package art.jobrunners;
 
 import art.cache.CacheHelper;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Deletes old report files and clears the mondrian cache
- * 
+ *
  * @author Timothy Anyona
  */
 public class CleanJob implements org.quartz.Job {
@@ -60,7 +61,7 @@ public class CleanJob implements org.quartz.Job {
 	 */
 	private void cleanDirectory(String directoryPath) {
 		logger.debug("Entering cleanDirectory: directoryPath='{}'", directoryPath);
-		
+
 		File directory = new File(directoryPath);
 		File[] files = directory.listFiles();
 		final long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
@@ -88,8 +89,8 @@ public class CleanJob implements org.quartz.Job {
 		for (File file : files) {
 			// Delete the file if it is older than DELETE_FILES_MINUTES
 			if (FileUtils.isFileOlder(file, limit)) {
-				String extension = FilenameUtils.getExtension(file.getName()).toLowerCase(Locale.ENGLISH);
-				if (file.isDirectory() || validExtensions.contains(extension)) {
+				String extension = FilenameUtils.getExtension(file.getName());
+				if (file.isDirectory() || ArtUtils.containsIgnoreCase(validExtensions, extension)) {
 					FileUtils.deleteQuietly(file);
 				}
 			}

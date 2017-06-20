@@ -664,13 +664,11 @@ public class ReportJob implements org.quartz.Job {
 				ArrayList<String> columnList = new ArrayList<>();
 				for (int i = 1; i < columnCount + 1; i++) {
 					String columnName = rsmd.getColumnLabel(i); //use alias if available
-
-					//store column names in lowercase to ensure special columns are found by list.contains()
-					//some RDBMSs make all column names uppercase					
-					columnList.add(columnName.toLowerCase(Locale.ENGLISH));
+					columnList.add(columnName);
 				}
 
-				if (columnList.contains(ArtUtils.RECIPIENT_COLUMN) && columnList.contains(ArtUtils.RECIPIENT_ID)) {
+				if (ArtUtils.containsIgnoreCase(columnList, ArtUtils.RECIPIENT_COLUMN)
+						&& ArtUtils.containsIgnoreCase(columnList, ArtUtils.RECIPIENT_ID)) {
 					//separate emails, different email message, different report data
 					while (rs.next()) {
 						String email = rs.getString(1); //first column has email addresses

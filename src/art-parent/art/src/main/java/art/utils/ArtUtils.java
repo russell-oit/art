@@ -347,47 +347,66 @@ public class ArtUtils {
 		cal.set(Calendar.MILLISECOND, 0);
 		return cal.getTime();
 	}
-	
+
 	/**
 	 * Returns formatted json string from an unformatted json string
-	 * 
+	 *
 	 * @param jsonString the unformatted json string
 	 * @return formatted json string
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public static String prettyPrintJsonString(String jsonString) throws IOException{
+	public static String prettyPrintJsonString(String jsonString) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		Object json = mapper.readValue(jsonString, Object.class);
 		String prettyString = mapper.writeValueAsString(json);
 		return prettyString;
 	}
-	
+
 	/**
 	 * Returns formatted json string representation of an object
-	 * 
+	 *
 	 * @param object the object
 	 * @return formatted json string
-	 * @throws JsonProcessingException 
+	 * @throws JsonProcessingException
 	 */
-	public static String objectToPrettyJson(Object object) throws JsonProcessingException{
+	public static String objectToPrettyJson(Object object) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		String prettyString = mapper.writeValueAsString(object);
 		return prettyString;
 	}
-	
+
 	/**
 	 * Returns a json string representation of an object
-	 * 
+	 *
 	 * @param object the object
 	 * @return json string representation of the object
-	 * @throws JsonProcessingException 
+	 * @throws JsonProcessingException
 	 */
-	public static String objectToJson(Object object) throws JsonProcessingException{
+	public static String objectToJson(Object object) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonString = mapper.writeValueAsString(object);
 		return jsonString;
 	}
-	
+
+	/**
+	 * Returns <code>true</code> if a list of strings contains a given string,
+	 * performing a case insensitive search
+	 *
+	 * @param list the list of strings to search
+	 * @param searchString the string to search for
+	 * @return <code>true</code> if a list of strings contains a given string
+	 */
+	public static boolean containsIgnoreCase(List<String> list, String searchString) {
+		//https://stackoverflow.com/questions/8751455/arraylist-contains-case-sensitivity
+		//https://stackoverflow.com/questions/15824733/option-to-ignore-case-with-contains-method/24829584#24829584
+		for (String listItem : list) {
+			if (StringUtils.equalsIgnoreCase(listItem, searchString)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
