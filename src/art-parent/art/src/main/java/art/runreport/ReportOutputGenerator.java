@@ -1185,19 +1185,18 @@ public class ReportOutputGenerator {
 									ObjectMapper mapper = new ObjectMapper();
 									@SuppressWarnings("unchecked")
 									Map<String, Object> map2 = mapper.convertValue(object, Map.class);
-									for (Entry<String, Object> entry : map2.entrySet()) {
-										String name = entry.getKey();
-										if (ArtUtils.containsIgnoreCase(columnList, name)) {
-											Object value = entry.getValue();
-											Object finalValue;
-											if (value instanceof ObjectId) {
-												ObjectId objectId = (ObjectId) value;
-												finalValue = objectId.toString();
-											} else {
-												finalValue = value;
-											}
-											row.put(name, finalValue);
+									for (String columnName : columnList) {
+										Object value = map2.get(columnName);
+										Object finalValue;
+										if (value == null) {
+											finalValue = "";
+										} else if (value instanceof ObjectId) {
+											ObjectId objectId = (ObjectId) value;
+											finalValue = objectId.toString();
+										} else {
+											finalValue = value;
 										}
+										row.put(columnName, finalValue);
 									}
 								} else {
 									//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
