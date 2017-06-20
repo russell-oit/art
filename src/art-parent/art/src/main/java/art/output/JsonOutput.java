@@ -112,7 +112,7 @@ public class JsonOutput {
 					columnType = "time";
 					break;
 				case Types.TIMESTAMP:
-					columnType = "timestamp";
+					columnType = "datetime";
 					break;
 				default:
 					columnType = "unhandled";

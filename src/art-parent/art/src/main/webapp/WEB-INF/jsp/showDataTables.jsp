@@ -55,13 +55,13 @@
 
 	//https://stackoverflow.com/questions/35450227/how-to-parse-given-date-string-using-moment-js
 	//http://momentjs.com/docs/
-	var inputDateFormat = 'YYYY-MM-DD'; //moment format
-	var outputDateFormat = ''; //moment format e.g. DD-MMM-YYYY
+	var inputDateFormat = '${options.inputDateFormat}'; //moment format e.g. YYYY-MM-DD
+	var outputDateFormat = '${options.outputDateFormat}'; //moment format e.g. DD-MMM-YYYY
 
-	var inputDateTimeFormat = 'YYYY-MM-DD HH:mm:ss.SSS'; //moment format
-	var outputDateTimeFormat = ''; //moment format e.g. DD-MMM-YYYY HH:mm:ss
+	var inputDateTimeFormat = '${options.inputDateTimeFormat}'; //moment format e.g. YYYY-MM-DD HH:mm:ss.SSS
+	var outputDateTimeFormat = '${options.outputDateTimeFormat}'; //moment format e.g. DD-MMM-YYYY HH:mm:ss
 
-	var showColumnFilters = ${showColumnFilters};
+	var showColumnFilters = ${options.showColumnFilters};
 
 	moment.locale('${locale}');
 
@@ -80,7 +80,7 @@
 		}
 	}
 
-	function timestampFormatter(data, type, full, meta) {
+	function datetimeFormatter(data, type, full, meta) {
 		//https://stackoverflow.com/questions/25319193/jquery-datatables-column-rendering-and-sorting
 		if (type === "display") {
 			var formattedDate;
@@ -289,9 +289,9 @@
 		if (inputDateFormat && outputDateFormat) {
 			columnDef["render"] = dateFormatter;
 		}
-	} else if (columnType === 'timestamp') {
+	} else if (columnType === 'datetime') {
 		if (inputDateTimeFormat && outputDateTimeFormat) {
-			columnDef["render"] = timestampFormatter;
+			columnDef["render"] = datetimeFormatter;
 		}
 	}
 	columns.push(columnDef);

@@ -25,6 +25,10 @@ package art.reportoptions;
 public class DataTablesOptions extends CsvServerOptions {
 
 	private boolean showColumnFilters = true;
+	private String inputDateFormat = "YYYY-MM-DD"; //moment format
+	private String outputDateFormat = ""; //moment format e.g. DD-MMM-YYYY. if blank, no formatting/changes will be done
+	private String inputDateTimeFormat = "YYYY-MM-DD HH:mm:ss.SSS"; //moment format
+	private String outputDateTimeFormat = ""; //moment format e.g. DD-MMM-YYYY HH:mm:ss. if blank, no formatting/changes will be done
 
 	/**
 	 * @return the showColumnFilters
@@ -38,6 +42,62 @@ public class DataTablesOptions extends CsvServerOptions {
 	 */
 	public void setShowColumnFilters(boolean showColumnFilters) {
 		this.showColumnFilters = showColumnFilters;
+	}
+
+	/**
+	 * @return the inputDateFormat
+	 */
+	public String getInputDateFormat() {
+		return inputDateFormat;
+	}
+
+	/**
+	 * @param inputDateFormat the inputDateFormat to set
+	 */
+	public void setInputDateFormat(String inputDateFormat) {
+		this.inputDateFormat = inputDateFormat;
+	}
+
+	/**
+	 * @return the outputDateFormat
+	 */
+	public String getOutputDateFormat() {
+		return outputDateFormat;
+	}
+
+	/**
+	 * @param outputDateFormat the outputDateFormat to set
+	 */
+	public void setOutputDateFormat(String outputDateFormat) {
+		this.outputDateFormat = outputDateFormat;
+	}
+
+	/**
+	 * @return the inputDateTimeFormat
+	 */
+	public String getInputDateTimeFormat() {
+		return inputDateTimeFormat;
+	}
+
+	/**
+	 * @param inputDateTimeFormat the inputDateTimeFormat to set
+	 */
+	public void setInputDateTimeFormat(String inputDateTimeFormat) {
+		this.inputDateTimeFormat = inputDateTimeFormat;
+	}
+
+	/**
+	 * @return the outputDateTimeFormat
+	 */
+	public String getOutputDateTimeFormat() {
+		return outputDateTimeFormat;
+	}
+
+	/**
+	 * @param outputDateTimeFormat the outputDateTimeFormat to set
+	 */
+	public void setOutputDateTimeFormat(String outputDateTimeFormat) {
+		this.outputDateTimeFormat = outputDateTimeFormat;
 	}
 
 }

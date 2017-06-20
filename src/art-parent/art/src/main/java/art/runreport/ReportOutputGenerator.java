@@ -722,13 +722,14 @@ public class ReportOutputGenerator {
 				}
 
 				String optionsString = report.getOptions();
-				boolean showColumnFilters = true;
-				if (StringUtils.isNotBlank(optionsString)) {
+				DataTablesOptions options;
+				if (StringUtils.isBlank(optionsString)) {
+					options = new DataTablesOptions();
+				} else {
 					ObjectMapper mapper = new ObjectMapper();
-					DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
-					showColumnFilters = options.isShowColumnFilters();
+					options = mapper.readValue(optionsString, DataTablesOptions.class);
 				}
-				request.setAttribute("showColumnFilters", showColumnFilters);
+				request.setAttribute("options", options);
 
 				if (reportType == ReportType.DataTablesCsvServer) {
 					if (StringUtils.isBlank(optionsString)) {
@@ -736,8 +737,8 @@ public class ReportOutputGenerator {
 					}
 
 					ObjectMapper mapper = new ObjectMapper();
-					DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
-					String dataFileName = options.getDataFile();
+					DataTablesOptions options2 = mapper.readValue(optionsString, DataTablesOptions.class);
+					String dataFileName = options2.getDataFile();
 
 					logger.debug("dataFileName='{}'", dataFileName);
 
@@ -1108,13 +1109,14 @@ public class ReportOutputGenerator {
 				if (result != null) {
 					if (result instanceof List) {
 						String optionsString = report.getOptions();
-						boolean showColumnFilters = true;
 						List<String> columnNames = null;
 						List<Map<String, String>> columnDataTypes = null;
-						if (StringUtils.isNotBlank(optionsString)) {
+						MongoDbOptions options;
+						if (StringUtils.isBlank(optionsString)) {
+							options = new MongoDbOptions();
+						} else {
 							ObjectMapper mapper = new ObjectMapper();
-							MongoDbOptions options = mapper.readValue(optionsString, MongoDbOptions.class);
-							showColumnFilters = options.isShowColumnFilters();
+							options = mapper.readValue(optionsString, MongoDbOptions.class);
 							columnNames = options.getColumns();
 							columnDataTypes = options.getColumnDataTypes();
 						}
@@ -1232,7 +1234,7 @@ public class ReportOutputGenerator {
 						request.setAttribute("data", resultString);
 						request.setAttribute("columns", columns);
 						request.setAttribute("reportType", reportType);
-						request.setAttribute("showColumnFilters", showColumnFilters);
+						request.setAttribute("options", options);
 
 						String languageTag = locale.toLanguageTag();
 						request.setAttribute("languageTag", languageTag);
