@@ -36,7 +36,7 @@ public class MongoHelper {
 		String username = datasource.getUsername();
 		String password = datasource.getPassword();
 
-		return MongoHelper.this.getUrlWithCredentials(url, username, password);
+		return getUrlWithCredentials(url, username, password);
 	}
 
 	public String getUrlWithCredentials(String url, String username, String password) {
@@ -44,6 +44,8 @@ public class MongoHelper {
 			return url;
 		}
 
+		//https://docs.mongodb.com/manual/reference/connection-string/
+		//https://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html
 		String beginning = "mongodb://";
 		String end = StringUtils.substringAfter(url, beginning);
 		String finalUrl=beginning + username + ":" + password + "@" + end;

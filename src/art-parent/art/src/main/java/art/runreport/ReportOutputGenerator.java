@@ -1057,8 +1057,14 @@ public class ReportOutputGenerator {
 				//http://docs.groovy-lang.org/next/html/documentation/
 				//https://www.tutorialspoint.com/mongodb/mongodb_java.htm
 				//https://avaldes.com/java-connecting-to-mongodb-3-2-examples/
+				//https://avaldes.com/mongodb-java-crud-operations-example-tutorial/
+				//http://www.mkyong.com/mongodb/java-mongodb-query-document/
+				//http://o7planning.org/en/10289/java-and-mongodb-tutorial
 				//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
+				//http://zetcode.com/db/mongodbjava/
+				//http://www.mastertheintegration.com/nosql-databases/mongodb/mongodb-java-driver-3-0-quick-reference.html
 				//https://mongodb.github.io/mongo-java-driver/3.4/driver/getting-started/quick-start/
+				//https://github.com/mongolab/mongodb-driver-examples/blob/master/java/JavaSimpleExample.java
 				//https://github.com/ihr/jongo-by-example/blob/master/src/test/java/org/ingini/mongodb/jongo/example/aggregation/TestAggregationFramework.java
 				//https://stackoverflow.com/questions/24370456/groovy-script-sandboxing-use-groovy-timecategory-syntax-from-java-as-string/24374237
 				//http://groovy-lang.org/integrating.html
@@ -1073,6 +1079,18 @@ public class ReportOutputGenerator {
 				//http://www.foobaracademy.com/morphia-hello-world-example/
 				//http://www.carfey.com/blog/using-mongodb-with-morphia/
 				//http://www.obsidianscheduler.com/blog/evolving-document-structures-with-morphia-and-mongodb/
+				//https://www.javacodegeeks.com/2011/11/using-mongodb-with-morphia.html
+				//http://javabeat.net/using-morphia-java-library-for-mongodb/
+				//http://www.scalabiliti.com/blog/mongodb_and_morphia_performance
+				//https://city81.blogspot.co.ke/2012/07/using-morphia-to-map-java-objects-in.html
+				//http://www.thejavageek.com/2015/08/24/save-entity-using-morphia/
+				//https://sleeplessinslc.blogspot.co.ke/2010/10/mongodb-with-morphia-example.html
+				//http://jameswilliams.be/blog/2010/05/05/Using-MongoDB-with-Morphia-and-Groovy.html
+				//https://mongodb.github.io/morphia/1.3/getting-started/quick-tour/
+				//https://github.com/mongodb/morphia/blob/1.3.x/morphia/src/examples/java/org/mongodb/morphia/example/QuickTour.java
+				//https://www.javacodegeeks.com/2015/09/mongodb-and-java-tutorial.html
+				//https://mdahlman.wordpress.com/2011/09/02/cool-reporting-on-mongodb/
+				//https://mdahlman.wordpress.com/2011/09/02/simple-reporting-on-mongodb/
 				CompilerConfiguration cc = new CompilerConfiguration();
 				cc.addCompilationCustomizers(new SandboxTransformer());
 
