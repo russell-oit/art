@@ -259,6 +259,7 @@ public class ArtUtils {
 		databaseTypes.put("olap4j-xmla", "Olap4j XMLA");
 		databaseTypes.put("couchbase", "Couchbase");
 		databaseTypes.put("mongodb", "MongoDB");
+		databaseTypes.put("drill", "Drill - driver not included");
 
 		return databaseTypes;
 	}

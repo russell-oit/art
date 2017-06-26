@@ -55,6 +55,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -547,13 +548,13 @@ public abstract class StandardOutput {
 
 	/**
 	 * Returns the value to be used for tabular heatmaps
-	 * 
+	 *
 	 * @param value the original value
 	 * @return the value to be used for tabular heatmaps
 	 */
 	protected double getHeatmapValue(Double value) {
 		double heatmapValue;
-		
+
 		if (value == null) {
 			heatmapValue = Double.MIN_VALUE;
 		} else {
@@ -702,7 +703,7 @@ public abstract class StandardOutput {
 
 		result.setSuccess(true);
 		result.setRowCount(rowCount);
-		
+
 		return result;
 	}
 
@@ -1192,7 +1193,8 @@ public abstract class StandardOutput {
 	private Map<Integer, ColumnType> getColumnTypes(ResultSetMetaData rsmd) throws SQLException {
 		Map<Integer, ColumnType> columnTypes = new LinkedHashMap<>();
 
-		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+		int colCount = rsmd.getColumnCount();
+		for (int i = 1; i <= colCount; i++) {
 			int sqlType = rsmd.getColumnType(i);
 
 			if (isNumeric(sqlType)) {
@@ -1203,6 +1205,8 @@ public abstract class StandardOutput {
 				columnTypes.put(i, ColumnType.Clob);
 			} else if (sqlType == Types.OTHER) {
 				columnTypes.put(i, ColumnType.Other);
+			} else if (isBinary(sqlType)) {
+				columnTypes.put(i, ColumnType.Binary);
 			} else {
 				columnTypes.put(i, ColumnType.String);
 			}
@@ -1403,10 +1407,21 @@ public abstract class StandardOutput {
 					}
 					addString(value, nullStringDisplay);
 					break;
-				case Other: //ms-access (ucanaccess driver) data type
+				case Other:
+					//ms-access (ucanaccess driver) data type
 					value = rs.getObject(columnIndex);
 					if (value != null) {
 						value = value.toString();
+					}
+					addString(value, nullStringDisplay);
+					break;
+				case Binary:
+					//e.g. _id column of mongodb collections querying with drill gives a varbinary sql type
+					//https://stackoverflow.com/questions/14013534/jdbctemplate-accessing-mysql-varbinary-field-as-string
+					//https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
+					byte[] bytes = rs.getBytes(columnIndex);
+					if (bytes != null) {
+						value = Hex.encodeHexString(bytes);
 					}
 					addString(value, nullStringDisplay);
 					break;
@@ -1534,6 +1549,28 @@ public abstract class StandardOutput {
 		}
 
 		return clob;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given sql type is a binary one
+	 *
+	 * @param sqlType the sql/jdbc type
+	 * @return <code>true</code> if the given sql type is a binary one
+	 */
+	private boolean isBinary(int sqlType) {
+		boolean binary;
+
+		switch (sqlType) {
+			case Types.BINARY:
+			case Types.VARBINARY:
+			case Types.LONGVARBINARY:
+				binary = true;
+				break;
+			default:
+				binary = false;
+		}
+
+		return binary;
 	}
 
 	/**

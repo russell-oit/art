@@ -188,6 +188,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "";
 		urlElement.value = "mongodb://<server_name>";
 		testSqlElement.value = "";
+	} else if (dbType === "drill") {
+		driverElement.value = "org.apache.drill.jdbc.Driver";
+		urlElement.value = "jdbc:drill:drillbit=<server_name>";
+		testSqlElement.value = "select 1 from sys.version";
 	}
 }
 
