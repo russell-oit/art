@@ -11,6 +11,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class JSConverter {
     public static String convertToHtml(QueryResult queryResult, boolean wrapcontent) throws IOException {
@@ -66,7 +67,7 @@ public class JSConverter {
         javascriptContext.evaluateReader(globalScope, underscoreReader, "underscore.js", 1, null);
         Reader saikuRendererReader = new InputStreamReader(JSConverter.class.getResourceAsStream("SaikuRenderer.js"));
         javascriptContext.evaluateReader(globalScope, saikuRendererReader, "SaikuRenderer.js", 1, null);
-        String result = IOUtils.toString(JSConverter.class.getResourceAsStream("SaikuTableRenderer.js"));
+        String result = IOUtils.toString(JSConverter.class.getResourceAsStream("SaikuTableRenderer.js"), StandardCharsets.UTF_8);
         javascriptContext.evaluateString(globalScope, result, "SaikuTableRenderer.js", 1, null);
     }
 

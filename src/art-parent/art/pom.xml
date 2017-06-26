@@ -25,8 +25,8 @@
 	<properties>
 		<poi.version>3.14</poi.version>
 		<owasp.encoder.version>1.2.1</owasp.encoder.version>
-		<thymeleaf.version>3.0.3.RELEASE</thymeleaf.version>
-		<xdocreport.version>2.0.0</xdocreport.version>
+		<thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
+		<xdocreport.version>2.0.1</xdocreport.version>
 	</properties>
 
 	<build>
@@ -288,12 +288,12 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.8.3</version>
+			<version>1.10.3</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-dbutils</groupId>
 			<artifactId>commons-dbutils</artifactId>
-			<version>1.5</version>
+			<version>1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>joda-time</groupId>
@@ -321,12 +321,12 @@
 		<dependency>
 			<groupId>com.unboundid</groupId>
 			<artifactId>unboundid-ldapsdk</artifactId>
-			<version>3.1.1</version>
+			<version>3.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.2</version>
+			<version>1.9.3</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -353,7 +353,7 @@
 		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
-			<version>1.2.2</version>
+			<version>1.3.3</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -406,19 +406,19 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.4.1212.jre7</version>
+			<version>42.1.1.jre7</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ucanaccess</groupId>
 			<artifactId>ucanaccess</artifactId>
-			<version>4.0.0</version>
+			<version>4.0.2</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.16.1</version>
+			<version>3.19.3</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -442,7 +442,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.195</version>
+			<version>1.4.196</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -581,7 +581,7 @@
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
 			<!-- http://freemarker.org/freemarkerdownload.html -->
-			<version>2.3.25-incubating</version>
+			<version>2.3.26-incubating</version>
 		</dependency>
 		<dependency>
 			<groupId>fr.opensagres.xdocreport</groupId>
@@ -640,7 +640,7 @@
 		<dependency>
 			<groupId>commons-net</groupId>
 			<artifactId>commons-net</artifactId>
-			<version>3.5</version>
+			<version>3.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jasig.cas.client</groupId>

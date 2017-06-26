@@ -248,7 +248,7 @@ public class Config extends HttpServlet {
 	 * Creates the freemarker configuration object
 	 */
 	private static void createFreemarkerConfiguration() {
-		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_25);
+		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_26);
 
 		try {
 			freemarkerConfig.setDirectoryForTemplateLoading(new File(getTemplatesPath()));

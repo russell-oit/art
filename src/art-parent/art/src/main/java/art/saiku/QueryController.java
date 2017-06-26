@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -484,7 +485,7 @@ public class QueryController {
 			if (css) {
 				html += "<style>\n";
 				InputStream is = JSConverter.class.getResourceAsStream("saiku.table.full.css");
-				String cssContent = IOUtils.toString(is);
+				String cssContent = IOUtils.toString(is, StandardCharsets.UTF_8);
 				html += cssContent;
 				html += "</style>\n";
 			}

@@ -189,6 +189,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		urlElement.value = "mongodb://<server_name>";
 		testSqlElement.value = "";
 	} else if (dbType === "drill") {
+		//https://stackoverflow.com/questions/31654658/apache-drill-connection-to-drill-in-embedded-mode-java/33442630
 		driverElement.value = "org.apache.drill.jdbc.Driver";
 		urlElement.value = "jdbc:drill:drillbit=<server_name>";
 		testSqlElement.value = "select 1 from sys.version";
