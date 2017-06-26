@@ -406,7 +406,8 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(artVersion, upgradeFilePath, templatesPath);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
+			//include runtime exception in case of PoolInitializationException when using hikaricp
 			logger.error("Error", ex);
 		}
 	}
@@ -427,6 +428,9 @@ public class Config extends HttpServlet {
 				String encryptedPassword = artDatabase.getPassword();
 				String decryptedPassword = AesEncryptor.decrypt(encryptedPassword);
 				artDatabase.setPassword(decryptedPassword);
+				
+				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
+				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
 			} else {
 				logger.info("ART Database configuration file not found");
 			}

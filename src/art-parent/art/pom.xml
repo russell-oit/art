@@ -149,7 +149,7 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
-				<version>4.3.5.RELEASE</version>
+				<version>4.3.9.RELEASE</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -387,19 +387,20 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.40</version>
+			<version>5.1.42</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
-			<version>1.5.7</version>
+			<!-- 2.x is for java 8 -->
+			<version>1.6.1</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>cubrid</groupId>
 			<artifactId>cubrid-jdbc</artifactId>
-			<version>9.3.7.0008</version>
+			<version>9.3.8.0003</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -556,8 +557,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-			<version>2.4.5</version>
+			<artifactId>HikariCP-java7</artifactId>
+			<version>2.4.12</version>
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
