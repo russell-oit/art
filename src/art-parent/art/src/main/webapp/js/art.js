@@ -202,7 +202,12 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.firebirdsql.jdbc.FBDriver";
 		urlElement.value = "jdbc:firebirdsql://<server_name>/<file_path or database_alias>?encoding=UTF8";
 		testSqlElement.value = "select 1 from RDB$DATABASE";
-	} 
+	}  else if (dbType === "monetdb") {
+		//https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Select_queries/Select_without_tables
+		driverElement.value = "nl.cwi.monetdb.jdbc.MonetDriver";
+		urlElement.value = "jdbc:monetdb://<server_name>/<database_name>";
+		testSqlElement.value = "select 1";
+	}
 }
 
 //BEGIN code for escaping html content

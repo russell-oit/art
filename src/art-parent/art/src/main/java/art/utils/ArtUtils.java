@@ -261,6 +261,7 @@ public class ArtUtils {
 		databaseTypes.put("mongodb", "MongoDB");
 		databaseTypes.put("drill", "Drill - driver not included");
 		databaseTypes.put("firebird", "Firebird");
+		databaseTypes.put("monetdb", "MonetDB");
 
 		return databaseTypes;
 	}

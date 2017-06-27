@@ -79,6 +79,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("couchbase");
 		databaseTypes.remove("mongodb");
 		databaseTypes.remove("drill");
+		databaseTypes.remove("monetdb");
 
 		return databaseTypes;
 	}
