@@ -163,7 +163,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "h2-server") {
 		driverElement.value = "org.h2.Driver";
-		urlElement.value = "jdbc:h2://<server>/<db-name>";
+		urlElement.value = "jdbc:h2://<server_name>/<database_name>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "h2-embedded") {
 		driverElement.value = "org.h2.Driver";
@@ -193,6 +193,12 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.apache.drill.jdbc.Driver";
 		urlElement.value = "jdbc:drill:drillbit=<server_name>";
 		testSqlElement.value = "select 1 from sys.version";
+	} else if (dbType === "firebird") {
+		//https://gist.github.com/mariuz/1043473
+		//https://stackoverflow.com/questions/3424206/firebird-connection-with-java
+		driverElement.value = "org.firebirdsql.jdbc.FBDriver";
+		urlElement.value = "jdbc:firebirdsql://<server_name>/<file_path>?encoding=UTF8";
+		testSqlElement.value = "select 1";
 	}
 }
 

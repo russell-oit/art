@@ -260,6 +260,7 @@ public class ArtUtils {
 		databaseTypes.put("couchbase", "Couchbase");
 		databaseTypes.put("mongodb", "MongoDB");
 		databaseTypes.put("drill", "Drill - driver not included");
+		databaseTypes.put("firebird", "Firebird");
 
 		return databaseTypes;
 	}
