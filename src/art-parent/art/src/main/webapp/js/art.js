@@ -196,10 +196,13 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 	} else if (dbType === "firebird") {
 		//https://gist.github.com/mariuz/1043473
 		//https://stackoverflow.com/questions/3424206/firebird-connection-with-java
+		//https://stackoverflow.com/questions/37492890/incompatible-wire-encryption-levels-requested-on-client-and-server-with-firebird
+		//https://www.firebirdsql.org/file/documentation/drivers_documentation/java/faq.html#how-can-i-solve-the-error-connection-rejected-no-connection-character-set-specified
+		//http://www.firebirdfaq.org/faq30/
 		driverElement.value = "org.firebirdsql.jdbc.FBDriver";
-		urlElement.value = "jdbc:firebirdsql://<server_name>/<file_path>?encoding=UTF8";
-		testSqlElement.value = "select 1";
-	}
+		urlElement.value = "jdbc:firebirdsql://<server_name>/<file_path or database_alias>?encoding=UTF8";
+		testSqlElement.value = "select 1 from RDB$DATABASE";
+	} 
 }
 
 //BEGIN code for escaping html content

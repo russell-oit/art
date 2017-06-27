@@ -44,8 +44,9 @@ public class SchedulerUtils {
 	private static Scheduler scheduler;
 
 	/**
-	 * Creates and starts a new quartz scheduler instance, shutting down the existing
-	 * one if any. The scheduler is stored as a static variable in this class.
+	 * Creates and starts a new quartz scheduler instance, shutting down the
+	 * existing one if any. The scheduler is stored as a static variable in this
+	 * class.
 	 *
 	 * @param artDbConfig the art database configuration
 	 * @param propertiesFilePath the quartz scheduler properties file path
@@ -73,7 +74,7 @@ public class SchedulerUtils {
 
 	/**
 	 * Returns the quartz scheduler
-	 * 
+	 *
 	 * @return the quartz scheduler
 	 */
 	public static Scheduler getScheduler() {
@@ -248,6 +249,13 @@ public class SchedulerUtils {
 				}
 				if (properties.getProperty(VALIDATION_QUERY) == null) {
 					properties.setProperty(VALIDATION_QUERY, "select 1 from systables where tabid = 1");
+				}
+			} else if (StringUtils.startsWith(url, "jdbc:firebirdsql")) {
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1 from RDB$DATABASE");
 				}
 			} else {
 				//MySQL and any other databases that use the standard
