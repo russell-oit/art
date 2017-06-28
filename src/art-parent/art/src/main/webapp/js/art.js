@@ -207,6 +207,11 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "nl.cwi.monetdb.jdbc.MonetDriver";
 		urlElement.value = "jdbc:monetdb://<server_name>/<database_name>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "vertica") {
+		//https://my.vertica.com/docs/7.1.x/HTML/Content/Authoring/ConnectingToHPVertica/ClientJDBC/CreatingAndConfiguringAConnection.htm
+		driverElement.value = "com.vertica.jdbc.Driver";
+		urlElement.value = "jdbc:vertica://<server_name>/<database_name>";
+		testSqlElement.value = "select 1 from dual";
 	}
 }
 

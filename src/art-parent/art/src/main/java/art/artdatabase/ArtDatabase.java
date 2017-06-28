@@ -19,7 +19,6 @@ package art.artdatabase;
 
 import art.datasource.DatasourceInfo;
 import art.enums.ConnectionPoolLibrary;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 

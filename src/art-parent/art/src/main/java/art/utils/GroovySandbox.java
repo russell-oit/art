@@ -45,7 +45,7 @@ public class GroovySandbox extends GroovyValueFilter {
 
 	private static final Logger logger = LoggerFactory.getLogger(GroovySandbox.class);
 
-	private Set<Class> allowedTypes = new HashSet<>();
+	private Set<Class<?>> allowedTypes = new HashSet<>();
 	private String whitelistFilePath;
 
 	public GroovySandbox() {
@@ -88,8 +88,8 @@ public class GroovySandbox extends GroovyValueFilter {
 	 * @return classes that are allowed without having to be specified in the
 	 * whitelist file
 	 */
-	private Set<Class> getDefaultTypes() {
-		Set<Class> defaultTypes = new HashSet<>();
+	private Set<Class<?>> getDefaultTypes() {
+		Set<Class<?>> defaultTypes = new HashSet<>();
 
 		//https://stackoverflow.com/questions/2041778/how-to-initialize-hashset-values-by-construction
 		//http://tutorials.jenkov.com/java/data-types.html
@@ -128,11 +128,11 @@ public class GroovySandbox extends GroovyValueFilter {
 			return o; // access to properties of compiled groovy script
 		}
 
-		Class cl;
+		Class<?> cl;
 		Object value = null;
 		//https://stackoverflow.com/questions/9068150/best-way-to-negate-an-instanceof
 		if (o instanceof Class) {
-			cl = (Class) o;
+			cl = (Class<?>) o;
 		} else {
 			cl = o.getClass();
 			value = o;

@@ -80,6 +80,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("mongodb");
 		databaseTypes.remove("drill");
 		databaseTypes.remove("monetdb");
+		databaseTypes.remove("vertica");
 
 		return databaseTypes;
 	}
