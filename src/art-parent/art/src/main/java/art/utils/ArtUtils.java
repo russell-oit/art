@@ -237,7 +237,7 @@ public class ArtUtils {
 
 		databaseTypes.put("demo", "Demo");
 		databaseTypes.put("cubrid", "CUBRID");
-		databaseTypes.put("oracle", "Oracle - driver not included");
+		databaseTypes.put("oracle", "Oracle - driver not included"); //license doesn't allow redistribution?
 		databaseTypes.put("mysql", "MySQL");
 		databaseTypes.put("mariadb", "MariaDB");
 		databaseTypes.put("postgresql", "PostgreSQL");
@@ -245,11 +245,11 @@ public class ArtUtils {
 		databaseTypes.put("sqlserver-jtds", "SQL Server (jTDS driver)");
 		databaseTypes.put("hsqldb-standalone", "HSQLDB Standalone");
 		databaseTypes.put("hsqldb-server", "HSQLDB Server");
-		databaseTypes.put("db2", "DB2 - driver not included");
+		databaseTypes.put("db2", "DB2 - driver not included"); //license restrictions? must register to download.
 //		databaseTypes.put("generic-odbc", "Generic ODBC"); //generic jdbc-odbc will be removed in Java 8
 		databaseTypes.put("sql-logging", "SQL Logging");
 		databaseTypes.put("other", "Other");
-		databaseTypes.put("hbase-phoenix", "HBase (Phoenix driver) - driver not included");
+		databaseTypes.put("hbase-phoenix", "HBase (Phoenix driver) - driver not included"); //adds 50MB
 		databaseTypes.put("msaccess-ucanaccess", "MS Access (UCanAccess driver)");
 		databaseTypes.put("sqlite-xerial", "SQLite (Xerial driver)");
 		databaseTypes.put("csv-csvjdbc", "CSV (CsvJdbc driver)");
@@ -259,10 +259,11 @@ public class ArtUtils {
 		databaseTypes.put("olap4j-xmla", "Olap4j XMLA");
 		databaseTypes.put("couchbase", "Couchbase");
 		databaseTypes.put("mongodb", "MongoDB");
-		databaseTypes.put("drill", "Drill - driver not included");
+		databaseTypes.put("drill", "Drill - driver not included"); //adds 20MB
 		databaseTypes.put("firebird", "Firebird");
 		databaseTypes.put("monetdb", "MonetDB");
-		databaseTypes.put("vertica", "Vertica - driver not included");
+		databaseTypes.put("vertica", "Vertica - driver not included"); //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
+		databaseTypes.put("informix", "Informix - driver not included (conflict with mongo driver)");//contains org.bson classes for bson 2.x. not compatible with mongo java driver which also contains org.bson classes, but for bson 3.x
 
 		return databaseTypes;
 	}

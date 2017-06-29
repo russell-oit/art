@@ -212,6 +212,11 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.vertica.jdbc.Driver";
 		urlElement.value = "jdbc:vertica://<server_name>/<database_name>";
 		testSqlElement.value = "select 1 from dual";
+	} else if (dbType === "informix") {
+		//https://gist.github.com/ikenna/5706366
+		driverElement.value = "com.informix.jdbc.IfxDriver";
+		urlElement.value = "jdbc:informix-sqli://<server_name>:<port_number>/<database_name>";
+		testSqlElement.value = "select 1 from systables where tabid=1";
 	}
 }
 
