@@ -463,6 +463,20 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.ibm.informix</groupId>
+			<artifactId>jdbc</artifactId>
+			<!-- version 4.10.8 includes org.bson package which conflicts with mongo java driver 3 -->
+			<version>4.10.7.20160517</version>
+			<scope>runtime</scope>
+			<!-- informix includes bson 2.x which conflicts with mongo java driver which uses bson 3.x -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.mongodb</groupId>
+					<artifactId>bson</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
 			<version>3.4.2</version>

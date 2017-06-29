@@ -263,7 +263,7 @@ public class ArtUtils {
 		databaseTypes.put("firebird", "Firebird");
 		databaseTypes.put("monetdb", "MonetDB");
 		databaseTypes.put("vertica", "Vertica - driver not included"); //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
-		databaseTypes.put("informix", "Informix - driver not included (conflict with mongo driver)");//contains org.bson classes for bson 2.x. not compatible with mongo java driver which also contains org.bson classes, but for bson 3.x
+		databaseTypes.put("informix", "Informix");
 
 		return databaseTypes;
 	}
