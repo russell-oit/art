@@ -215,8 +215,13 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 	} else if (dbType === "informix") {
 		//https://gist.github.com/ikenna/5706366
 		driverElement.value = "com.informix.jdbc.IfxDriver";
-		urlElement.value = "jdbc:informix-sqli://<server_name>:<port_number>/<database_name>";
+		urlElement.value = "jdbc:informix-sqli://<server_name>:<port>/<database_name>";
 		testSqlElement.value = "select 1 from systables where tabid=1";
+	} else if (dbType === "cassandra-adejanovski") {
+		//https://datastax-oss.atlassian.net/browse/JAVA-975
+		driverElement.value = "com.github.adejanovski.cassandra.jdbc.CassandraDriver";
+		urlElement.value = "jdbc:cassandra://<server_name>/<keyspace>";
+		testSqlElement.value = "select release_version from system.local";
 	}
 }
 

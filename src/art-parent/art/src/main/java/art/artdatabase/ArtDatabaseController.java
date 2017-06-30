@@ -81,6 +81,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("drill");
 		databaseTypes.remove("monetdb");
 		databaseTypes.remove("vertica");
+		databaseTypes.remove("cassandra-adejanovski");
 
 		return databaseTypes;
 	}

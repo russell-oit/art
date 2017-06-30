@@ -264,6 +264,7 @@ public class ArtUtils {
 		databaseTypes.put("monetdb", "MonetDB");
 		databaseTypes.put("vertica", "Vertica - driver not included"); //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
 		databaseTypes.put("informix", "Informix");
+		databaseTypes.put("cassandra-adejanovski", "Cassandra (adejanovski driver)");
 
 		return databaseTypes;
 	}

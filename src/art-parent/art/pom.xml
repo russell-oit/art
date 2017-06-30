@@ -168,6 +168,12 @@
 				<artifactId>poi-ooxml</artifactId>
 				<version>${poi.version}</version>
 			</dependency>
+			<!-- datastax cassandra driver requires guava 16.0.1 and above -->
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>16.0.1</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -463,9 +469,15 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.github.adejanovski</groupId>
+			<artifactId>cassandra-jdbc-wrapper</artifactId>
+			<version>3.1.0</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.ibm.informix</groupId>
 			<artifactId>jdbc</artifactId>
-			<!-- version 4.10.8 includes org.bson package which conflicts with mongo java driver 3 -->
+			<!-- version 4.10.8.1 includes org.bson package which conflicts with mongo java driver 3 -->
 			<version>4.10.7.20160517</version>
 			<scope>runtime</scope>
 			<!-- informix includes bson 2.x which conflicts with mongo java driver which uses bson 3.x -->

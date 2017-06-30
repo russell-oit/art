@@ -650,7 +650,7 @@ public abstract class StandardOutput {
 		beginRows();
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
-		Map<Integer, ColumnType> columnTypes = getColumnTypes(rsmd);
+		Map<Integer, ColumnTypeDefinition> columnTypes = getColumnTypes(rsmd);
 
 		List<String> totalColumns = getTotalColumnsList(report);
 		if (!totalColumns.isEmpty()) {
@@ -718,7 +718,7 @@ public abstract class StandardOutput {
 	 * @throws SQLException
 	 */
 	private void initializeColumnFormatters(Report report, ResultSetMetaData rsmd,
-			Map<Integer, ColumnType> columnTypes) throws IllegalStateException, SQLException {
+			Map<Integer, ColumnTypeDefinition> columnTypes) throws IllegalStateException, SQLException {
 
 		Locale columnFormatLocale;
 		String reportLocale = report.getLocale();
@@ -764,7 +764,8 @@ public abstract class StandardOutput {
 					if (format == null) {
 						format = columnFormatDetails.get(columnName);
 					}
-					ColumnType columnType = columnTypes.get(i);
+					ColumnTypeDefinition columnTypeDefinition = columnTypes.get(i);
+					ColumnType columnType = columnTypeDefinition.getColumnType();
 					switch (columnType) {
 						case Date:
 							SimpleDateFormat dateFormatter = new SimpleDateFormat(format, columnFormatLocale);
@@ -951,7 +952,7 @@ public abstract class StandardOutput {
 		totalColumnCount = totalColumnCount - hiddenColumnCount;
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
-		Map<Integer, ColumnType> columnTypes = getColumnTypes(rsmd);
+		Map<Integer, ColumnTypeDefinition> columnTypes = getColumnTypes(rsmd);
 
 		List<String> totalColumns = getTotalColumnsList(report);
 
@@ -1187,29 +1188,35 @@ public abstract class StandardOutput {
 	 *
 	 * @param rsmd the resultset metadata
 	 * @return the column types corresponding to the given resultset metadata
-	 * [column index, column type]
+	 * [column index, column type definition]
 	 * @throws SQLException
 	 */
-	private Map<Integer, ColumnType> getColumnTypes(ResultSetMetaData rsmd) throws SQLException {
-		Map<Integer, ColumnType> columnTypes = new LinkedHashMap<>();
+	private Map<Integer, ColumnTypeDefinition> getColumnTypes(ResultSetMetaData rsmd) throws SQLException {
+		Map<Integer, ColumnTypeDefinition> columnTypes = new LinkedHashMap<>();
 
 		int colCount = rsmd.getColumnCount();
 		for (int i = 1; i <= colCount; i++) {
 			int sqlType = rsmd.getColumnType(i);
 
+			ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
+			columnTypeDefinition.setSqlType(sqlType);
+
 			if (isNumeric(sqlType)) {
-				columnTypes.put(i, ColumnType.Numeric);
+				columnTypeDefinition.setColumnType(ColumnType.Numeric);
 			} else if (isDate(sqlType)) {
-				columnTypes.put(i, ColumnType.Date);
+				columnTypeDefinition.setColumnType(ColumnType.Date);
 			} else if (isClob(sqlType)) {
-				columnTypes.put(i, ColumnType.Clob);
+				columnTypeDefinition.setColumnType(ColumnType.Clob);
 			} else if (sqlType == Types.OTHER) {
-				columnTypes.put(i, ColumnType.Other);
+				columnTypeDefinition.setColumnType(ColumnType.Other);
 			} else if (isBinary(sqlType)) {
-				columnTypes.put(i, ColumnType.Binary);
+				columnTypeDefinition.setColumnType(ColumnType.Binary);
 			} else {
-				columnTypes.put(i, ColumnType.String);
+				columnTypeDefinition.setColumnType(ColumnType.String);
 			}
+
+			columnTypes.put(i, columnTypeDefinition);
+
 		}
 
 		return columnTypes;
@@ -1291,7 +1298,7 @@ public abstract class StandardOutput {
 	 * @return data for the output row
 	 * @throws SQLException
 	 */
-	private List<Object> outputResultSetColumns(Map<Integer, ColumnType> columnTypes,
+	private List<Object> outputResultSetColumns(Map<Integer, ColumnTypeDefinition> columnTypes,
 			ResultSet rs, List<String> hiddenColumns, String nullNumberDisplay,
 			String nullStringDisplay) throws SQLException {
 		//save column values for use in drill down columns.
@@ -1302,9 +1309,11 @@ public abstract class StandardOutput {
 		ResultSetMetaData rsmd = rs.getMetaData();
 
 		currentColumnIndex = 0;
-		for (Entry<Integer, ColumnType> entry : columnTypes.entrySet()) {
+		for (Entry<Integer, ColumnTypeDefinition> entry : columnTypes.entrySet()) {
 			int columnIndex = entry.getKey();
-			ColumnType columnType = entry.getValue();
+			ColumnTypeDefinition columnTypeDefinition = entry.getValue();
+			ColumnType columnType = columnTypeDefinition.getColumnType();
+			int sqlType = columnTypeDefinition.getSqlType();
 
 			if (!shouldOutputColumn(columnIndex, hiddenColumns, rsmd)) {
 				continue;
@@ -1316,11 +1325,33 @@ public abstract class StandardOutput {
 
 			switch (columnType) {
 				case Numeric:
-					value = rs.getDouble(columnIndex);
+					//https://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html
+					//http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cql_data_types_c.html
+					//cassandra has issues using getDouble() when a column is defined as int
+					switch (sqlType) {
+						case Types.TINYINT:
+						case Types.SMALLINT:
+							value = rs.getShort(columnIndex);
+							break;
+						case Types.INTEGER:
+							value = rs.getInt(columnIndex);
+							break;
+						case Types.BIGINT:
+							value = rs.getLong(columnIndex);
+							break;
+						default:
+							value = rs.getDouble(columnIndex);
+					}
+
+					Double numericValue;
 					if (rs.wasNull()) {
 						value = null;
+						numericValue = null;
+					} else {
+						//https://stackoverflow.com/questions/7503877/java-correct-way-convert-cast-object-to-double
+						//https://stackoverflow.com/questions/2465096/casting-a-primitive-int-to-a-number
+						numericValue = ((Number) value).doubleValue();
 					}
-					Double numericValue = (Double) value;
 
 					if (numericValue == null) {
 						String sortValue = "null";
@@ -1356,7 +1387,7 @@ public abstract class StandardOutput {
 						if (value == null) {
 							currentValue = 0D;
 						} else {
-							currentValue = (Double) value;
+							currentValue = numericValue;
 						}
 
 						Double newTotal;
