@@ -83,7 +83,9 @@ public class SaikuOlapConnection implements ISaikuConnection {
 					}
 				}
 
-				Class.forName(driver);
+				if (StringUtils.isNotBlank(driver)) {
+					Class.forName(driver).newInstance();
+				}
 				Connection connection = DriverManager.getConnection(url, username, password);
 
 				if (connection != null) {

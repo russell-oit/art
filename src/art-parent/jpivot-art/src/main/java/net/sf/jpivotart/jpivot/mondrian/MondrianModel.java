@@ -78,6 +78,7 @@ import net.sf.jpivotart.jpivot.olap.query.Memento;
 import net.sf.jpivotart.jpivot.olap.query.PositionNodeBean;
 import net.sf.jpivotart.jpivot.olap.query.QueryAdapter;
 import net.sf.wcfart.wcf.bookmarks.Bookmarkable;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The Model represents all (meta-)data for an MDX query.
@@ -446,9 +447,9 @@ public class MondrianModel extends MdxOlapModel implements OlapModel,
     boolean logInfo = logger.isInfoEnabled();
 
     // load the jdbc Driver
-    if (jdbcDriver != null) {
+    if (StringUtils.isNotBlank(jdbcDriver)) {
       try {
-        Class.forName(jdbcDriver);
+        Class.forName(jdbcDriver).newInstance();
       } catch (Exception ex) {
         String err = "Could not load Jdbc Driver " + jdbcDriver;
         logger.error(err);

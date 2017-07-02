@@ -82,6 +82,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("monetdb");
 		databaseTypes.remove("vertica");
 		databaseTypes.remove("cassandra-adejanovski");
+		databaseTypes.remove("neo4j");
 
 		return databaseTypes;
 	}
@@ -169,7 +170,11 @@ public class ArtDatabaseController {
 			if (artDatabase.isJndi()) {
 				conn = ArtUtils.getJndiConnection(url);
 			} else {
-				Class.forName(driver).newInstance();
+				//for jdbc 4 drivers, you don't have to specify driver or use class.forName()
+				//https://stackoverflow.com/questions/5484227/jdbc-class-forname-vs-drivermanager-registerdriver
+				if (StringUtils.isNotBlank(driver)) {
+					Class.forName(driver).newInstance();
+				}
 				conn = DriverManager.getConnection(url, username, password);
 			}
 

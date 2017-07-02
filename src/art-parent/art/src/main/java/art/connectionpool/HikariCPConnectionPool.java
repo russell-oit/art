@@ -51,7 +51,11 @@ public class HikariCPConnectionPool extends ConnectionPool {
 		config.setMinimumIdle(1);
 		config.setMaximumPoolSize(maxPoolSize);
 		config.setJdbcUrl(datasourceInfo.getUrl());
-		config.setDriverClassName(datasourceInfo.getDriver()); //registers/loads the driver
+		
+		String driver = datasourceInfo.getDriver();
+		if (StringUtils.isNotBlank(driver)) {
+			config.setDriverClassName(driver); //registers/loads the driver
+		}
 
 		if (StringUtils.isBlank(datasourceInfo.getTestSql())
 				|| StringUtils.equals(datasourceInfo.getTestSql(), "isValid")) {
@@ -67,7 +71,7 @@ public class HikariCPConnectionPool extends ConnectionPool {
 		config.setDataSourceProperties(getAppNameProperty(datasourceInfo.getUrl(), datasourceInfo.getName()));
 
 		hikariDataSource = new HikariDataSource(config);
-		
+
 		return hikariDataSource;
 	}
 

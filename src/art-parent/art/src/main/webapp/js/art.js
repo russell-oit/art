@@ -219,9 +219,15 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "select 1 from systables where tabid=1";
 	} else if (dbType === "cassandra-adejanovski") {
 		//https://datastax-oss.atlassian.net/browse/JAVA-975
+		//http://docs.datastax.com/en/cql/3.1/cql/cql_using/use_query_system_c.html
+		//https://stackoverflow.com/questions/34055752/select-contant-value-is-cassandra
 		driverElement.value = "com.github.adejanovski.cassandra.jdbc.CassandraDriver";
 		urlElement.value = "jdbc:cassandra://<server_name>/<keyspace>";
 		testSqlElement.value = "select release_version from system.local";
+	} else if (dbType === "neo4j") {
+		driverElement.value = "org.neo4j.jdbc.Driver";
+		urlElement.value = "jdbc:neo4j:bolt://<server_name>";
+		testSqlElement.value = "";
 	}
 }
 

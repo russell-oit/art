@@ -433,7 +433,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 			}
 		} catch (SQLException ex) {
 			logger.error("Error. Connection pool='{}'", poolName, ex);
-			throw new SQLException("getConnectionFromPool exception: ", ex.getMessage());
+			throw new SQLException(ex);
 		}
 	}
 

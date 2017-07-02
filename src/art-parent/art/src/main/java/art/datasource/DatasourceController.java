@@ -31,10 +31,12 @@ import art.utils.MongoHelper;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -409,8 +411,27 @@ public class DatasourceController {
 			if (jndi) {
 				conn = ArtUtils.getJndiConnection(url);
 			} else {
-				if (StringUtils.isNotBlank(driver)) {
-					Class.forName(driver);
+				if (StringUtils.startsWith(url, "mongodb://")) {
+					//https://docs.mongodb.com/manual/reference/connection-string/
+					//https://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html
+					MongoClient mongoClient = null;
+					try {
+						MongoHelper mongoHelper = new MongoHelper();
+						String finalUrl = mongoHelper.getUrlWithCredentials(url, username, password);
+						MongoClientURI uri = new MongoClientURI(finalUrl);
+						mongoClient = new MongoClient(uri);
+					} finally {
+						if (mongoClient != null) {
+							mongoClient.close();
+						}
+					}
+				} else {
+					if (StringUtils.isNotBlank(driver)) {
+						//use newInstance because of neo4j driver
+						//https://github.com/neo4j-contrib/neo4j-jdbc/issues/104
+						//Class.forName(driver);
+						Class.forName(driver).newInstance();
+					}
 					//use ends with instead of equals to cater for net.sf.mondrianart.mondrian.olap4j.MondrianOlap4jDriver
 					if (StringUtils.endsWith(driver, "mondrian.olap4j.MondrianOlap4jDriver")) {
 						if (!StringUtils.endsWith(url, ";")) {
@@ -425,23 +446,15 @@ public class DatasourceController {
 							url += "JdbcPassword=" + password + ";";
 						}
 					}
-					conn = DriverManager.getConnection(url, username, password);
-				} else {
-					if (StringUtils.startsWith(url, "mongodb://")) {
-						//https://docs.mongodb.com/manual/reference/connection-string/
-						//https://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html
-						MongoClient mongoClient = null;
-						try {
-							MongoHelper mongoHelper = new MongoHelper();
-							String finalUrl = mongoHelper.getUrlWithCredentials(url, username, password);
-							MongoClientURI uri = new MongoClientURI(finalUrl);
-							mongoClient = new MongoClient(uri);
-						} finally {
-							if (mongoClient != null) {
-								mongoClient.close();
-							}
-						}
-					}
+					//conn = DriverManager.getConnection(url, username, password);
+					//use getDriver() in order for correct reporting of No suitable driver error.
+					//with some urls/drivers, the jvm tries to use the wrong driver
+					//e.g. with neo4j driver if driver is not included in application lib/classpath or in jre\lib\ext
+					Properties dbProperties = new Properties();
+					dbProperties.put("user", username);
+					dbProperties.put("password", password);
+					Driver driverObject = DriverManager.getDriver(url); // get the right driver for the given url
+					conn = driverObject.connect(url, dbProperties); // get the connection
 				}
 			}
 		} finally {
