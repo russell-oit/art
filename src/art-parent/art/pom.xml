@@ -230,6 +230,11 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
+			<artifactId>wcf-art</artifactId>
+			<version>3.0-beta12-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
 			<version>3.0-beta12-SNAPSHOT</version>
 			<exclusions>
@@ -754,7 +759,7 @@
 			<artifactId>fop</artifactId>
 			<version>2.1</version>
 		</dependency>
-		<!-- saiku chart png, jpeg, pdf export -->
+		<!-- start saiku chart png, jpeg, pdf export -->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-transcoder</artifactId>
@@ -771,7 +776,7 @@
 			<artifactId>batik</artifactId>
 			<version>1.8</version>
 		</dependency>
-		<!-- saiku chart png, jpeg, pdf export -->
+		<!-- end saiku chart png, jpeg, pdf export -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
@@ -789,6 +794,11 @@
 					<artifactId>groovy</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.0.19</version>
 		</dependency>
 	</dependencies>
 </project>

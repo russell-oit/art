@@ -472,7 +472,7 @@ public class QueryController {
 		ThinQueryService thinQueryService = discoverHelper.getThinQueryService(session);
 
 		CellDataSet cs;
-		if (org.apache.commons.lang.StringUtils.isNotBlank(format)) {
+		if (StringUtils.isNotBlank(format)) {
 			cs = thinQueryService.execute(tq, format);
 		} else {
 			cs = thinQueryService.execute(tq);
