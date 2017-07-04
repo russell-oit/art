@@ -92,7 +92,7 @@ public class ReportRuleController {
 	
 	@RequestMapping(value = "/deleteReportRules", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteReportRules(@RequestParam("ids") Integer[] ids) {
+	AjaxResponse deleteReportRules(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteReportRules: ids={}",(Object) ids);
 
 		AjaxResponse response = new AjaxResponse();

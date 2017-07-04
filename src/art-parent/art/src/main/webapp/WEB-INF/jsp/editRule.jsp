@@ -95,6 +95,9 @@ Edit a rule
 				</c:if>
 
 				<input type="hidden" name="action" value="${action}">
+				<input type="hidden" name="reportId" value="${reportId}">
+				<input type="hidden" name="returnReportId" value="${returnReportId}">
+				
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>

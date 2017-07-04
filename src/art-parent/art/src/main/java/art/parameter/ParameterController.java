@@ -139,7 +139,8 @@ public class ParameterController {
 
 		model.addAttribute("parameter", param);
 
-		return showEditParameter("add", model, reportId, null);
+		Integer returnReportId = null;
+		return showEditParameter("add", model, reportId, returnReportId);
 	}
 
 	@RequestMapping(value = "/editParameter", method = RequestMethod.GET)
@@ -155,7 +156,8 @@ public class ParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditParameter("edit", model, null, returnReportId);
+		Integer reportId = null;
+		return showEditParameter("edit", model, reportId, returnReportId);
 	}
 	
 	@RequestMapping(value = "/copyParameter", method = RequestMethod.GET)
@@ -216,10 +218,10 @@ public class ParameterController {
 				reportParameterConfigReportId = returnReportId;
 			}
 
-			if (reportParameterConfigReportId != null) {
-				return "redirect:/reportParameterConfig?reportId=" + reportParameterConfigReportId;
-			} else {
+			if (reportParameterConfigReportId == null) {
 				return "redirect:/parameters";
+			} else {
+				return "redirect:/reportParameterConfig?reportId=" + reportParameterConfigReportId;
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

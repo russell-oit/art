@@ -18,6 +18,8 @@
 package art.rule;
 
 import art.enums.ParameterDataType;
+import art.reportrule.ReportRule;
+import art.reportrule.ReportRuleService;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
@@ -51,6 +53,9 @@ public class RuleController {
 	@Autowired
 	private RuleService ruleService;
 
+	@Autowired
+	private ReportRuleService reportRuleService;
+
 	@RequestMapping(value = "/rules", method = RequestMethod.GET)
 	public String showRules(Model model) {
 		logger.debug("Entering showRules");
@@ -74,7 +79,7 @@ public class RuleController {
 
 		try {
 			ActionResult deleteResult = ruleService.deleteRule(id);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -89,17 +94,17 @@ public class RuleController {
 
 		return response;
 	}
-	
+
 	@RequestMapping(value = "/deleteRules", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteRules(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteRules: id={}", (Object)ids);
+		logger.debug("Entering deleteRules: id={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
 			ActionResult deleteResult = ruleService.deleteRules(ids);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -115,17 +120,22 @@ public class RuleController {
 	}
 
 	@RequestMapping(value = "/addRule", method = RequestMethod.GET)
-	public String addRule(Model model) {
-		logger.debug("Entering addRule");
+	public String addRule(Model model,
+			@RequestParam(value = "reportId", required = false) Integer reportId) {
+
+		logger.debug("Entering addRule: reportId={}", reportId);
 
 		model.addAttribute("rule", new Rule());
-		
-		return showEditRule("add", model);
+
+		Integer returnReportId = null;
+		return showEditRule("add", model, reportId, returnReportId);
 	}
 
 	@RequestMapping(value = "/editRule", method = RequestMethod.GET)
-	public String editRule(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editRule: id={}", id);
+	public String editRule(@RequestParam("id") Integer id, Model model,
+			@RequestParam(value = "returnReportId", required = false) Integer returnReportId) {
+
+		logger.debug("Entering editRule: id={}, returnReportId={}", id, returnReportId);
 
 		try {
 			model.addAttribute("rule", ruleService.getRule(id));
@@ -134,42 +144,64 @@ public class RuleController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditRule("edit", model);
+		Integer reportId = null;
+		return showEditRule("edit", model, reportId, returnReportId);
 	}
 
 	@RequestMapping(value = "/saveRule", method = RequestMethod.POST)
 	public String saveRule(@ModelAttribute("rule") @Valid Rule rule,
-			@RequestParam("action") String action,
+			@RequestParam("action") String action, @RequestParam("reportId") Integer reportId,
+			@RequestParam("returnReportId") Integer returnReportId,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
-		logger.debug("Entering saveRule: rule={}, action='{}'", rule, action);
+		logger.debug("Entering saveRule: rule={}, action='{}',"
+				+ " reportId={}, returnReportId={}", rule, action, reportId, returnReportId);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditRule(action, model);
+			return showEditRule(action, model, reportId, returnReportId);
 		}
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add")) {
 				ruleService.addRule(rule, sessionUser);
+				if (reportId != null) {
+					ReportRule reportRule = new ReportRule();
+					reportRule.setRule(rule);
+					reportRule.setReportId(reportId);
+					reportRule.setReportColumn("");
+					reportRuleService.addReportRule(reportRule, reportId);
+				}
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
 				ruleService.updateRule(rule, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			
+
 			String recordName = rule.getName() + " (" + rule.getRuleId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
-			return "redirect:/rules";
+
+			Integer reportRulesReportId = null;
+			if (reportId != null) {
+				reportRulesReportId = reportId;
+			} else if (returnReportId != null) {
+				reportRulesReportId = returnReportId;
+			}
+
+			if (reportRulesReportId == null) {
+				return "redirect:/rules";
+			} else {
+				return "redirect:/reportRules?reportId=" + reportRulesReportId;
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditRule(action, model);
+		return showEditRule(action, model, reportId, returnReportId);
 	}
 
 	/**
@@ -177,14 +209,23 @@ public class RuleController {
 	 *
 	 * @param action the action to take
 	 * @param model the model to use
+	 * @param reportId the report id of the report to add this rule to, null if
+	 * not applicable
+	 * @param returnReportId the report id to display in the reportRules page
+	 * after saving the report, null if not applicable
 	 * @return the jsp file to display
 	 */
-	private String showEditRule(String action, Model model) {
-		logger.debug("Entering showEditRule: action='{}'", action);
+	private String showEditRule(String action, Model model, Integer reportId,
+			Integer returnReportId) {
+
+		logger.debug("Entering showEditRule: action='{}', reportId={},"
+				+ " returnReportId={}", action, reportId, returnReportId);
 
 		model.addAttribute("dataTypes", ParameterDataType.list());
 		model.addAttribute("action", action);
-		
+		model.addAttribute("reportId", reportId);
+		model.addAttribute("returnReportId", returnReportId);
+
 		return "editRule";
 	}
 }

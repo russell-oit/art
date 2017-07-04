@@ -159,13 +159,13 @@
 			<b><spring:message code="page.text.report"/>:</b> ${reportName}
 		</div>
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/addReportParameter?reportId=${reportId}">
-				<i class="fa fa-plus"></i>
-				<spring:message code="parameters.button.addExisting"/>
-			</a>
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/addParameter?reportId=${reportId}">
 				<i class="fa fa-plus"></i>
-				<spring:message code="parameters.button.addNew"/>
+				<spring:message code="page.button.addNew"/>
+			</a>
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addReportParameter?reportId=${reportId}">
+				<i class="fa fa-plus"></i>
+				<spring:message code="page.button.addExisting"/>
 			</a>
 			<button type="button" id="deleteRecords" class="btn btn-default">
 				<i class="fa fa-trash-o"></i>

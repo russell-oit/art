@@ -29,17 +29,17 @@ Display report filters
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="reportsConfig"]').parent().addClass('active');
-				
+
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
 				var tbl = $('#reportRules');
-				
+
 				var oTable = tbl.dataTable({
 					columnDefs: [
 						{orderable: true, targets: 1},
@@ -69,7 +69,7 @@ Display report filters
 					},
 					initComplete: datatablesInitComplete
 				});
-				
+
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
 					var recordName = escapeHtmlContent(row.data("name"));
@@ -106,7 +106,7 @@ Display report filters
 						} //end callback
 					}); //end bootbox confirm
 				});
-				
+
 				var table = oTable.api();
 
 				$('#deleteRecords').click(function () {
@@ -114,8 +114,12 @@ Display report filters
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[2];
+							return item[1];
 						});
+//						var ids = [];
+//						for (var i = 0; i < table.rows('.selected').data().length; i++) {
+//							ids.push(table.rows('.selected').nodes()[i].attributes["data-name"].value);
+//						}
 						bootbox.confirm({
 							message: "${deleteRecordText}: <b>" + ids + "</b>",
 							buttons: {
@@ -180,9 +184,13 @@ Display report filters
 			<b><spring:message code="page.text.report"/>:</b> ${reportName}
 		</div>
 		<div style="margin-bottom: 10px;">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addRule?reportId=${reportId}">
+				<i class="fa fa-plus"></i>
+				<spring:message code="page.button.addNew"/>
+			</a>
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/addReportRule?reportId=${reportId}">
 				<i class="fa fa-plus"></i>
-				<spring:message code="page.action.add"/>
+				<spring:message code="page.button.addExisting"/>
 			</a>
 			<button type="button" id="deleteRecords" class="btn btn-default">
 				<i class="fa fa-trash-o"></i>
@@ -207,7 +215,11 @@ Display report filters
 
 						<td></td>
 						<td>${reportRule.reportRuleId}</td>
-						<td>${encode:forHtmlContent(reportRule.rule.name)}</td>							
+						<td>
+							<a href="${pageContext.request.contextPath}/editRule?id=${reportRule.rule.ruleId}&returnReportId=${reportRule.reportId}">
+								${encode:forHtmlContent(reportRule.rule.name)}
+							</a>
+						</td>							
 						<td>${encode:forHtmlContent(reportRule.reportColumn)}</td>
 						<td>
 							<div class="btn-group">
