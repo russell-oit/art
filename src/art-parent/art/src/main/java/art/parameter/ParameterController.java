@@ -159,13 +159,13 @@ public class ParameterController {
 		Integer reportId = null;
 		return showEditParameter("edit", model, reportId, returnReportId);
 	}
-	
+
 	@RequestMapping(value = "/copyParameter", method = RequestMethod.GET)
 	public String copyParameter(@RequestParam("id") Integer id, Model model,
 			@RequestParam(value = "reportId", required = false) Integer reportId,
 			HttpSession session) {
 
-		logger.debug("Entering copyParameter: id={}", id);
+		logger.debug("Entering copyParameter: id={}, reportId={}", id, reportId);
 
 		try {
 			model.addAttribute("parameter", parameterService.getParameter(id));
@@ -174,7 +174,8 @@ public class ParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditParameter("copy", model, reportId, null);
+		Integer returnReportId = null;
+		return showEditParameter("copy", model, reportId, returnReportId);
 	}
 
 	@RequestMapping(value = "/saveParameter", method = RequestMethod.POST)

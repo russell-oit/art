@@ -147,6 +147,24 @@ public class RuleController {
 		Integer reportId = null;
 		return showEditRule("edit", model, reportId, returnReportId);
 	}
+	
+	@RequestMapping(value = "/copyRule", method = RequestMethod.GET)
+	public String copyRule(@RequestParam("id") Integer id, Model model,
+			@RequestParam(value = "reportId", required = false) Integer reportId,
+			HttpSession session) {
+
+		logger.debug("Entering copyRule: id={}, reportId={}", id, reportId);
+
+		try {
+			model.addAttribute("rule", ruleService.getRule(id));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		Integer returnReportId = null;
+		return showEditRule("copy", model, reportId, returnReportId);
+	}
 
 	@RequestMapping(value = "/saveRule", method = RequestMethod.POST)
 	public String saveRule(@ModelAttribute("rule") @Valid Rule rule,
@@ -166,13 +184,13 @@ public class RuleController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (StringUtils.equals(action, "add")) {
+			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				ruleService.addRule(rule, sessionUser);
 				if (reportId != null) {
 					ReportRule reportRule = new ReportRule();
 					reportRule.setRule(rule);
 					reportRule.setReportId(reportId);
-					reportRule.setReportColumn("");
+					reportRule.setReportColumn(""); //null not allowed
 					reportRuleService.addReportRule(reportRule, reportId);
 				}
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");

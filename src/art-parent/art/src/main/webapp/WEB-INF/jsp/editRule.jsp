@@ -20,6 +20,10 @@ Edit a rule
 		<spring:message code="page.title.addRule" var="pageTitle"/>
 		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
+	<c:when test="${action == 'copy'}">
+		<spring:message code="page.title.copyRule" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
+	</c:when>
 	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editRule" var="panelTitle"/>
 		<c:set var="pageTitle">
@@ -103,9 +107,14 @@ Edit a rule
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action == 'edit'}">
-							<form:input path="ruleId" readonly="true" class="form-control"/>
-						</c:if>
+						<c:choose>
+							<c:when test="${action == 'edit'}">
+								<form:input path="ruleId" readonly="true" class="form-control"/>
+							</c:when>
+							<c:when test="${action == 'copy'}">
+								<form:hidden path="ruleId"/>
+							</c:when>
+						</c:choose>
 					</div>
 				</div>
 				<div class="form-group">
