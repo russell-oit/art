@@ -218,7 +218,7 @@ public class JobService {
 	public Job getJob(int id) throws SQLException {
 		logger.debug("Entering getJob: id={}", id);
 
-		String sql = SQL_SELECT_ALL + " WHERE JOB_ID = ?";
+		String sql = SQL_SELECT_ALL + " WHERE JOB_ID=?";
 		ResultSetHandler<Job> h = new BeanHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h, id);
 	}

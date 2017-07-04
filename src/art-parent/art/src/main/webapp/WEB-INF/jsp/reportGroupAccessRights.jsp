@@ -112,7 +112,7 @@
 		</div>
 		
 		<div class="text-center">
-			<b><spring:message code="page.text.reportGroup"/>:</b> ${reportGroup.name}
+			<b><spring:message code="page.text.reportGroup"/>:</b> ${encode:forHtmlContent(reportGroup.name)}
 		</div>
 
 		<table id="rights" class="table table-striped table-bordered">
@@ -155,7 +155,6 @@
 						</td>
 					</tr>
 				</c:forEach>
-
 			</tbody>
 		</table>
 	</jsp:body>

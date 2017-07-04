@@ -199,5 +199,21 @@ public class AccessRightController {
 		
 		return "reportGroupAccessRights";
 	}
+	
+	@GetMapping("/jobAccessRights")
+	public String jobAccessRights(Model model, @RequestParam("jobId") Integer jobId){
+		logger.debug("Entering jobAccessRights: jobId={}", jobId);
+
+		try {
+			model.addAttribute("job", jobService.getJob(jobId));
+			model.addAttribute("userJobRights", accessRightService.getUserJobRights(jobId));
+			model.addAttribute("userGroupJobRights", accessRightService.getUserGroupJobRights(jobId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+		
+		return "jobAccessRights";
+	}
 
 }

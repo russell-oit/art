@@ -374,6 +374,21 @@ public class AccessRightService {
 	}
 
 	/**
+	 * Returns user-job rights for a given job
+	 *
+	 * @param jobId the id of the job
+	 * @return user-job rights for a given job
+	 * @throws SQLException
+	 */
+	public List<UserJobRight> getUserJobRights(int jobId) throws SQLException {
+		logger.debug("Entering getUserJobRights: jobId={}", jobId);
+
+		String sql = SQL_SELECT_ALL_USER_JOB_RIGHTS + " WHERE AJ.JOB_ID=?";
+		ResultSetHandler<List<UserJobRight>> h = new BeanListHandler<>(UserJobRight.class, new UserJobRightMapper());
+		return dbService.query(sql, h, jobId);
+	}
+
+	/**
 	 * Returns all user group-report rights
 	 *
 	 * @return all user group-report rights
@@ -413,7 +428,7 @@ public class AccessRightService {
 		ResultSetHandler<List<UserGroupReportGroupRight>> h = new BeanListHandler<>(UserGroupReportGroupRight.class, new UserGroupReportGroupRightMapper());
 		return dbService.query(SQL_SELECT_ALL_USER_GROUP_REPORT_GROUP_RIGHTS, h);
 	}
-	
+
 	/**
 	 * Returns user group-report group rights for a given report group
 	 *
@@ -440,6 +455,21 @@ public class AccessRightService {
 
 		ResultSetHandler<List<UserGroupJobRight>> h = new BeanListHandler<>(UserGroupJobRight.class, new UserGroupJobRightMapper());
 		return dbService.query(SQL_SELECT_ALL_USER_GROUP_JOB_RIGHTS, h);
+	}
+
+	/**
+	 * Returns user group-job rights for a given job
+	 *
+	 * @param jobId the id of the job
+	 * @return user group-job rights for a given job
+	 * @throws SQLException
+	 */
+	public List<UserGroupJobRight> getUserGroupJobRights(int jobId) throws SQLException {
+		logger.debug("Entering getUserGroupJobRights: jobId={}", jobId);
+
+		String sql = SQL_SELECT_ALL_USER_GROUP_JOB_RIGHTS + " WHERE AJ.JOB_ID=?";
+		ResultSetHandler<List<UserGroupJobRight>> h = new BeanListHandler<>(UserGroupJobRight.class, new UserGroupJobRightMapper());
+		return dbService.query(sql, h, jobId);
 	}
 
 	/**

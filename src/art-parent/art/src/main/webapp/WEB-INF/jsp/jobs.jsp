@@ -260,7 +260,7 @@ Display user jobs and jobs configuration
 						error: ajaxErrorHandler
 					});
 				});
-				
+
 				$('#runLaterSingle').click(function () {
 					var item = $(this);
 					var recordName = escapeHtmlContent(item.data("name"));
@@ -414,6 +414,24 @@ Display user jobs and jobs configuration
 										<i class="fa fa-refresh"></i>
 										<spring:message code="page.action.refresh"/>
 									</button>
+								</div>
+							</c:if>
+							<c:if test="${action == 'config'}">
+								<div class="btn-group">
+									<button type="button" class="btn btn-default dropdown-toggle"
+											data-toggle="dropdown" data-hover="dropdown"
+											data-delay="100">
+										<spring:message code="reports.action.more"/>
+										<span class="caret"></span>
+									</button>
+									<ul class="dropdown-menu">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/jobAccessRights?jobId=${job.jobId}">
+												<spring:message code="page.action.accessRights"/>
+											</a>
+										</li>
+									</ul>
 								</div>
 							</c:if>
 						</td>

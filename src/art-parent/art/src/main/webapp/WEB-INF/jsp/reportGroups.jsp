@@ -32,9 +32,9 @@ Report groups configuration page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="reportGroups"]').parent().addClass('active');
 
@@ -59,7 +59,7 @@ Report groups configuration page
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
 						"${linkedReportsExistText}" //linkedRecordsExistText
 						);
-				
+
 				var table = oTable.api();
 
 				$('#deleteRecords').click(function () {
@@ -189,7 +189,7 @@ Report groups configuration page
 									<spring:message code="page.action.delete"/>
 								</button>
 							</div>
-								<div class="btn-group">
+							<div class="btn-group">
 								<button type="button" class="btn btn-default dropdown-toggle"
 										data-toggle="dropdown" data-hover="dropdown"
 										data-delay="100">
