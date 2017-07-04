@@ -286,6 +286,12 @@ Reports configuration page
 											<spring:message code="reports.action.drilldowns"/>
 										</a>
 									</li>
+									<li>
+										<a 
+											href="${pageContext.request.contextPath}/reportAccessRights?reportId=${report.reportId}">
+											<spring:message code="page.action.accessRights"/>
+										</a>
+									</li>
 									<li class="divider"></li>
 										<c:if test="${report.reportType.canSchedule()}">
 										<li>

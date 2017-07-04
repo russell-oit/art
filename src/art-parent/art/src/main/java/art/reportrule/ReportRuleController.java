@@ -57,7 +57,6 @@ public class ReportRuleController {
 
 	@RequestMapping(value = "/reportRules", method = RequestMethod.GET)
 	public String showReportRules(Model model, @RequestParam("reportId") Integer reportId) {
-
 		logger.debug("Entering showReportRules");
 
 		try {

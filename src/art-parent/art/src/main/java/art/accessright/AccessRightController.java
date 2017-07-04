@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -163,6 +164,22 @@ public class AccessRightController {
 		}
 
 		return response;
+	}
+	
+	@GetMapping("/reportAccessRights")
+	public String showReportAccessRights(Model model, @RequestParam("reportId") Integer reportId){
+		logger.debug("Entering showReportAccessRights");
+
+		try {
+			model.addAttribute("reportName", reportService.getReportName(reportId));
+			model.addAttribute("userReportRights", accessRightService.getUserReportRights(reportId));
+			model.addAttribute("userGroupReportRights", accessRightService.getUserGroupReportRights(reportId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+		
+		return "reportAccessRights";
 	}
 
 }
