@@ -168,7 +168,7 @@ public class AccessRightController {
 	
 	@GetMapping("/reportAccessRights")
 	public String showReportAccessRights(Model model, @RequestParam("reportId") Integer reportId){
-		logger.debug("Entering showReportAccessRights");
+		logger.debug("Entering showReportAccessRights: reportId={}", reportId);
 
 		try {
 			model.addAttribute("reportName", reportService.getReportName(reportId));
@@ -180,6 +180,24 @@ public class AccessRightController {
 		}
 		
 		return "reportAccessRights";
+	}
+	
+	@GetMapping("/reportGroupAccessRights")
+	public String showReportGroupAccessRights(Model model,
+			@RequestParam("reportGroupId") Integer reportGroupId){
+		
+		logger.debug("Entering showReportGroupAccessRights: reportGroupId={}", reportGroupId);
+
+		try {
+			model.addAttribute("reportGroup", reportGroupService.getReportGroup(reportGroupId));
+			model.addAttribute("userReportGroupRights", accessRightService.getUserReportGroupRights(reportGroupId));
+			model.addAttribute("userGroupReportGroupRights", accessRightService.getUserGroupReportGroupRights(reportGroupId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+		
+		return "reportGroupAccessRights";
 	}
 
 }

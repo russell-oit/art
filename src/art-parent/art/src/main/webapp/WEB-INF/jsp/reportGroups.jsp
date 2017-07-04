@@ -189,6 +189,22 @@ Report groups configuration page
 									<spring:message code="page.action.delete"/>
 								</button>
 							</div>
+								<div class="btn-group">
+								<button type="button" class="btn btn-default dropdown-toggle"
+										data-toggle="dropdown" data-hover="dropdown"
+										data-delay="100">
+									<spring:message code="reports.action.more"/>
+									<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu">
+									<li>
+										<a 
+											href="${pageContext.request.contextPath}/reportGroupAccessRights?reportGroupId=${group.reportGroupId}">
+											<spring:message code="page.action.accessRights"/>
+										</a>
+									</li>
+								</ul>
+							</div>
 						</td>
 					</tr>
 				</c:forEach>
