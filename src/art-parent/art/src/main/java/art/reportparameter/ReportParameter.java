@@ -24,7 +24,6 @@ import art.report.Report;
 import art.utils.ArtUtils;
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;

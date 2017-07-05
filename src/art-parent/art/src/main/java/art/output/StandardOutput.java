@@ -93,7 +93,6 @@ public abstract class StandardOutput {
 	private DecimalFormat globalNumericFormatter;
 	protected MessageSource messageSource;
 	private String requestBaseUrl;
-	protected int currentColumnIndex;
 	protected boolean isJob;
 	protected Report report;
 	protected boolean pdfPageNumbers = true;
@@ -623,10 +622,8 @@ public abstract class StandardOutput {
 		beginHeader();
 
 		//output header columns for the result set columns
-		currentColumnIndex = 0;
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
-				currentColumnIndex++;
 				addHeaderCell(rsmd.getColumnLabel(i));
 			}
 		}
@@ -682,9 +679,7 @@ public abstract class StandardOutput {
 
 			if (rowCount > maxRows) {
 				//row limit exceeded
-				currentColumnIndex = 0;
 				for (int i = 0; i < totalColumnCount; i++) {
-					currentColumnIndex++;
 					addCellString("...");
 				}
 
@@ -825,10 +820,8 @@ public abstract class StandardOutput {
 
 		beginTotalRow();
 
-		currentColumnIndex = 0;
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
-				currentColumnIndex++;
 				Double columnTotal = columnTotals.get(i);
 				if (columnTotal == null) {
 					addCellString("");
@@ -864,9 +857,7 @@ public abstract class StandardOutput {
 		}
 
 		//output total columns for drilldowns
-		currentColumnIndex = 0;
 		for (int i = 0; i < drilldownCount; i++) {
-			currentColumnIndex++;
 			addCellString("");
 		}
 
@@ -1068,9 +1059,7 @@ public abstract class StandardOutput {
 
 				if (rowCount > maxRows) {
 					//row limit exceeded
-					currentColumnIndex = 0;
 					for (int i = 0; i < totalColumnCount; i++) {
-						currentColumnIndex++;
 						addCellString("...");
 					}
 
@@ -1168,10 +1157,8 @@ public abstract class StandardOutput {
 		beginHeader();
 
 		//output header columns for the result set columns
-		currentColumnIndex = 0;
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
-				currentColumnIndex++;
 				addHeaderCell(rsmd.getColumnLabel(i));
 			}
 		}
@@ -1308,7 +1295,6 @@ public abstract class StandardOutput {
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 
-		currentColumnIndex = 0;
 		for (Entry<Integer, ColumnTypeDefinition> entry : columnTypes.entrySet()) {
 			int columnIndex = entry.getKey();
 			ColumnTypeDefinition columnTypeDefinition = entry.getValue();
@@ -1318,8 +1304,6 @@ public abstract class StandardOutput {
 			if (!shouldOutputColumn(columnIndex, hiddenColumns, rsmd)) {
 				continue;
 			}
-
-			currentColumnIndex++;
 
 			Object value = null;
 
@@ -1498,7 +1482,6 @@ public abstract class StandardOutput {
 				}
 				drilldownTag = "<a href='" + drilldownUrl + "' " + targetAttribute + ">" + drilldownText + "</a>";
 
-				currentColumnIndex++;
 				//clean to be a custom setting? cleanHtmlReportOutput?
 				addCellString(drilldownTag);
 //				if (requestBaseUrl != null) {

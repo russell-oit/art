@@ -37,6 +37,7 @@ public class CsvOutputArt extends StandardOutput {
 	private StringBuilder sb;
 	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
 	private final CsvOutputArtOptions options;
+	private int currentColumnIndex = 1;
 
 	public CsvOutputArt(CsvOutputArtOptions options) {
 		Objects.requireNonNull(options, "options must not be null");
@@ -52,6 +53,7 @@ public class CsvOutputArt extends StandardOutput {
 	private void resetVariables() {
 		fout = null;
 		sb = null;
+		currentColumnIndex = 1;
 	}
 
 	@Override
@@ -107,6 +109,8 @@ public class CsvOutputArt extends StandardOutput {
 	@Override
 	public void newRow() {
 		sb.append("\n");
+
+		currentColumnIndex = 1;// reset column index
 
 		if ((rowCount * totalColumnCount) > FLUSH_SIZE) {
 			try {
@@ -185,6 +189,8 @@ public class CsvOutputArt extends StandardOutput {
 			sb.append(options.getDelimiter());
 		}
 		sb.append(quotedValue);
+
+		currentColumnIndex++;
 	}
 
 }
