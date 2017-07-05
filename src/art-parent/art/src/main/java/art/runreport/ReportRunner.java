@@ -1312,13 +1312,13 @@ public class ReportRunner {
 		//replace :DATE: with current date
 		Date now = new Date();
 
-		String dateFormat = "yyyy-MM-dd";
+		String dateFormat = ArtUtils.ISO_DATE_FORMAT;
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 		String date = dateFormatter.format(now);
 		querySql = querySql.replaceAll("(?iu):date:", "'" + date + "'"); //postgresql has casting syntax like ::date
 
 		//replace :TIME: with current date and time
-		String timeFormat = "yyyy-MM-dd HH:mm:ss";
+		String timeFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		String time = timeFormatter.format(now);
 		querySql = querySql.replaceAll("(?iu):time:", "'" + time + "'");
@@ -1369,9 +1369,9 @@ public class ReportRunner {
 			if (parameter instanceof String) {
 				return "'" + ((String) parameter).replace("'", "''") + "'";
 			} else if (parameter instanceof Timestamp) {
-				return "'" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(parameter) + "'";
+				return "'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(parameter) + "'";
 			} else if (parameter instanceof java.sql.Date) {
-				return "'" + new SimpleDateFormat("yyyy-MM-dd").format(parameter) + "'";
+				return "'" + ArtUtils.isoDateFormatter.format(parameter) + "'";
 			} else if (parameter instanceof Boolean) {
 				return ((Boolean) parameter) ? "1" : "0";
 			} else {

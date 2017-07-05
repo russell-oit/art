@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.utils.ArtUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -140,7 +141,7 @@ public class JsonOutput {
 		ObjectMapper mapper = new ObjectMapper();
 		//https://egkatzioura.wordpress.com/2013/01/22/spring-jackson-and-date-serialization/
 		//http://wiki.fasterxml.com/JacksonFAQDateHandling
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		SimpleDateFormat df = new SimpleDateFormat(ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT);
 		mapper.setDateFormat(df);
 		String jsonString;
 		if (prettyPrint) {

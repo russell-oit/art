@@ -17,6 +17,8 @@
  */
 package art.reportoptions;
 
+import art.utils.ArtUtils;
+
 /**
  * Represents report options for datatables reports
  *
@@ -25,10 +27,10 @@ package art.reportoptions;
 public class DataTablesOptions extends CsvServerOptions {
 
 	private boolean showColumnFilters = true;
-	private String inputDateFormat = "YYYY-MM-DD"; //moment format
-	private String outputDateFormat = ""; //moment format e.g. DD-MMM-YYYY. if blank, no formatting/changes will be done
-	private String inputDateTimeFormat = "YYYY-MM-DD HH:mm:ss.SSS"; //moment format
-	private String outputDateTimeFormat = ""; //moment format e.g. DD-MMM-YYYY HH:mm:ss. if blank, no formatting/changes will be done
+	private String inputDateFormat = ArtUtils.ISO_DATE_FORMAT;
+	private String outputDateFormat = ""; //if blank, no formatting will be done
+	private String inputDateTimeFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
+	private String outputDateTimeFormat = ""; //if blank, no formatting will be done
 
 	/**
 	 * @return the showColumnFilters

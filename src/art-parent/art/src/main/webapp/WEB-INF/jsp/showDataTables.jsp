@@ -40,6 +40,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.js"></script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.1.4/papaparse.min.js"></script>
 
@@ -55,11 +56,29 @@
 
 	//https://stackoverflow.com/questions/35450227/how-to-parse-given-date-string-using-moment-js
 	//http://momentjs.com/docs/
-	var inputDateFormat = '${options.inputDateFormat}'; //moment format e.g. YYYY-MM-DD
-	var outputDateFormat = '${options.outputDateFormat}'; //moment format e.g. DD-MMM-YYYY
+	var inputDateFormat = 'YYYY-MM-DD'; //moment format e.g. YYYY-MM-DD
+	var javaInputDateFormat = '${options.inputDateFormat}';
+	if (javaInputDateFormat) {
+		inputDateFormat = moment().toMomentFormatString(javaInputDateFormat);
+	}
+	
+	var outputDateFormat = ''; //moment format e.g. DD-MMM-YYYY
+	var javaOutputDateFormat = '${options.outputDateFormat}';
+	if (javaOutputDateFormat) {
+		outputDateFormat = moment().toMomentFormatString(javaOutputDateFormat);
+	}
 
-	var inputDateTimeFormat = '${options.inputDateTimeFormat}'; //moment format e.g. YYYY-MM-DD HH:mm:ss.SSS
-	var outputDateTimeFormat = '${options.outputDateTimeFormat}'; //moment format e.g. DD-MMM-YYYY HH:mm:ss
+	var inputDateTimeFormat = 'YYYY-MM-DD HH:mm:ss.SSS'; //moment format e.g. YYYY-MM-DD HH:mm:ss.SSS
+	var javaInputDateTimeFormat = '${options.inputDateTimeFormat}';
+	if (javaInputDateTimeFormat) {
+		inputDateTimeFormat = moment().toMomentFormatString(javaInputDateTimeFormat);
+	}
+	
+	var outputDateTimeFormat = ''; //moment format e.g. DD-MMM-YYYY HH:mm:ss
+	var javaOutputDateTimeFormat = '${options.outputDateTimeFormat}';
+	if (javaOutputDateTimeFormat) {
+		outputDateTimeFormat = moment().toMomentFormatString(javaOutputDateTimeFormat);
+	}
 
 	var showColumnFilters = ${options.showColumnFilters};
 
@@ -234,7 +253,7 @@
 			//https://stackoverflow.com/questions/24452270/how-to-reinitialize-datatable-in-ajax
 			//https://datatables.net/manual/tech-notes/3
 			var tbl = $('#tableData');
-			
+
 			if ($.fn.DataTable.isDataTable("#tableData")) {
 				$('#tableData').DataTable().destroy();
 				tbl.empty();
