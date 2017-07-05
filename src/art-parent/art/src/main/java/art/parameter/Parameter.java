@@ -61,6 +61,21 @@ public class Parameter implements Serializable {
 	private Report defaultValueReport;
 	private boolean shared;
 	private String options;
+	private String dateFormat;
+
+	/**
+	 * @return the dateFormat
+	 */
+	public String getDateFormat() {
+		return dateFormat;
+	}
+
+	/**
+	 * @param dateFormat the dateFormat to set
+	 */
+	public void setDateFormat(String dateFormat) {
+		this.dateFormat = dateFormat;
+	}
 
 	/**
 	 * @return the options

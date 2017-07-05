@@ -217,12 +217,12 @@ public class ParameterProcessor {
 					defaultValueLovReportRunner.setUser(user);
 					defaultValueLovReportRunner.setReport(defaultValueReport);
 					defaultValueLovReportRunner.setReportParamsMap(reportParamsMap);
-					
+
 					Map<Object, String> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
 					if (reportParam.getPassedParameterValues() == null) {
 						reportParam.getActualParameterValues().addAll(lovValues.keySet());
 					}
-					
+
 					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
 					reportParam.setDefaultValueLovValues(lovValuesAsString);
 				} finally {
@@ -420,7 +420,7 @@ public class ParameterProcessor {
 		if (paramDataType.isNumeric()) {
 			return convertParameterStringValueToNumber(value, param);
 		} else if (paramDataType.isDate()) {
-			return convertParameterStringValueToDate(value);
+			return convertParameterStringValueToDate(value, param);
 		} else {
 			//parameter data types that are treated as strings
 			return value;
@@ -479,11 +479,37 @@ public class ParameterProcessor {
 	 * Converts a string parameter value to a date object
 	 *
 	 * @param value the string parameter value
+	 * @param param the parameter object for the value
+	 * @return a date object
+	 * @throws ParseException
+	 */
+	public Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
+		return convertParameterStringValueToDate(value, param.getDateFormat());
+	}
+
+	/**
+	 * Converts a string parameter value to a date object
+	 *
+	 * @param value the string parameter value
 	 * @return a date object
 	 * @throws ParseException
 	 */
 	public Date convertParameterStringValueToDate(String value) throws ParseException {
-		logger.debug("Entering convertParameterStringValueToDate: value='{}'", value);
+		String dateFormat = null;
+		return convertParameterStringValueToDate(value, dateFormat);
+	}
+
+	/**
+	 * Converts a string parameter value to a date object
+	 *
+	 * @param value the string parameter value
+	 * @param dateFormat the date format that the value is in
+	 * @return a date object
+	 * @throws ParseException
+	 */
+	public Date convertParameterStringValueToDate(String value, String dateFormat) throws ParseException {
+		logger.debug("Entering convertParameterStringValueToDate: value='{}',"
+				+ " dateFormat='{}'", value, dateFormat);
 
 		Date dateValue;
 		Date now = new Date();
@@ -524,18 +550,18 @@ public class ParameterProcessor {
 			}
 		} else {
 			//convert date string as it is to a date
-			String dateFormat;
-
-			if (value.length() == ArtUtils.ISO_DATE_FORMAT.length()) {
-				dateFormat = ArtUtils.ISO_DATE_FORMAT;
-			} else if (value.length() == ArtUtils.ISO_DATE_TIME_FORMAT.length()) {
-				dateFormat = ArtUtils.ISO_DATE_TIME_FORMAT;
-			} else if (value.length() == ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT.length()) {
-				dateFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
-			} else if (value.length() == ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT.length()) {
-				dateFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
-			} else {
-				throw new IllegalArgumentException("Invalid date format: " + value);
+			if (StringUtils.isBlank(dateFormat)) {
+				if (value.length() == ArtUtils.ISO_DATE_FORMAT.length()) {
+					dateFormat = ArtUtils.ISO_DATE_FORMAT;
+				} else if (value.length() == ArtUtils.ISO_DATE_TIME_FORMAT.length()) {
+					dateFormat = ArtUtils.ISO_DATE_TIME_FORMAT;
+				} else if (value.length() == ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT.length()) {
+					dateFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
+				} else if (value.length() == ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT.length()) {
+					dateFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
+				} else {
+					throw new IllegalArgumentException("Unexpected date format: " + value);
+				}
 			}
 
 			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);

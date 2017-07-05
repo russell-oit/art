@@ -980,7 +980,7 @@ Edit report page
 					</div>
 					<div class="form-group">
 						<label class="control-label col-md-4" for="dateFormat">
-							<spring:message code="reports.label.dateFormat"/>
+							<spring:message code="page.label.dateFormat"/>
 						</label>
 						<div class="col-md-8">
 							<form:input path="dateFormat" maxlength="100" class="form-control"/>

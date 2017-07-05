@@ -104,6 +104,7 @@ public class ParameterService {
 			parameter.setDrilldownColumnIndex(rs.getInt("DRILLDOWN_COLUMN_INDEX"));
 			parameter.setUseDirectSubstitution(rs.getBoolean("USE_DIRECT_SUBSTITUTION"));
 			parameter.setOptions(rs.getString("PARAMETER_OPTIONS"));
+			parameter.setDateFormat(rs.getString("PARAMETER_DATE_FORMAT"));
 			parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			parameter.setCreatedBy(rs.getString("CREATED_BY"));
@@ -377,8 +378,9 @@ public class ParameterService {
 					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, DEFAULT_VALUE_REPORT_ID,"
 					+ " HIDDEN, SHARED, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
 					+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION, PARAMETER_OPTIONS,"
+					+ " PARAMETER_DATE_FORMAT,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 19) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 20) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -398,6 +400,7 @@ public class ParameterService {
 				parameter.getDrilldownColumnIndex(),
 				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),
 				parameter.getOptions(),
+				parameter.getDateFormat(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -408,7 +411,7 @@ public class ParameterService {
 					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
 					+ " DEFAULT_VALUE_REPORT_ID=?, HIDDEN=?, SHARED=?, USE_LOV=?, LOV_REPORT_ID=?,"
 					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
-					+ " PARAMETER_OPTIONS=?,"
+					+ " PARAMETER_OPTIONS=?, PARAMETER_DATE_FORMAT=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
 
@@ -429,6 +432,7 @@ public class ParameterService {
 				parameter.getDrilldownColumnIndex(),
 				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),
 				parameter.getOptions(),
+				parameter.getDateFormat(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()

@@ -74,7 +74,7 @@ Edit parameter definition
 					onText: '${yesText}',
 					offText: '${noText}'
 				});
-				
+
 				var jsonEditor = ace.edit("jsonEditor");
 				jsonEditor.getSession().setMode("ace/mode/json");
 				jsonEditor.setHighlightActiveLine(false);
@@ -88,9 +88,30 @@ Edit parameter definition
 					options.val(jsonEditor.getSession().getValue());
 				});
 
+				$("#dataType").change(function () {
+					toggleDateFormatVisible();
+				});
+
+				toggleDateFormatVisible(); //show/hide on page load
+
 				$('#name').focus();
 
 			});
+		</script>
+
+		<script type="text/javascript">
+			function toggleDateFormatVisible() {
+				var dataType = $('#dataType option:selected').val();
+
+				switch (dataType) {
+					case "Date":
+					case "DateTime":
+						$("#dateFormatDiv").show();
+						break;
+					default:
+						$("#dateFormatDiv").hide();
+				}
+			}
 		</script>
 	</jsp:attribute>
 
@@ -227,6 +248,15 @@ Edit parameter definition
 							<form:options items="${dataTypes}" itemLabel="description" itemValue="value"/>
 						</form:select>
 						<form:errors path="dataType" cssClass="error"/>
+					</div>
+				</div>
+				<div id="dateFormatDiv" class="form-group">
+					<label class="col-md-4 control-label " for="dateFormat">
+						<spring:message code="page.label.dateFormat"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="dateFormat" maxlength="100" class="form-control"/>
+						<form:errors path="dateFormat" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

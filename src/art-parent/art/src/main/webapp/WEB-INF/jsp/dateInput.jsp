@@ -12,7 +12,7 @@ Display input for date and datetime parameters
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div class='input-group date datepicker'>
-	<input type='text' class="form-control"
+	<input type='text' class="form-control" data-date-format="YYYY-MM-DD"
 		   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   value="${encode:forHtmlAttribute(reportParam.htmlValue)}">
@@ -20,4 +20,12 @@ Display input for date and datetime parameters
 		<span class="glyphicon glyphicon-calendar"></span>
 	</span>
 </div>
+
+<script>
+	var javaDateFormat = '${reportParam.parameter.dateFormat}';
+	if (javaDateFormat) {
+		var momentDateFormat = moment().toMomentFormatString(javaDateFormat);
+		$('#${reportParam.htmlElementName}').data('date-format', momentDateFormat);
+	}
+</script>
 
