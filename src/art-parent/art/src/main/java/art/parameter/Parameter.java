@@ -24,11 +24,13 @@ import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -436,12 +438,37 @@ public class Parameter implements Serializable {
 	public String getHtmlValue(Object value) {
 		switch (dataType) {
 			case Date:
-				//convert date to string that will be recognised by parameter processor class
-				return ArtUtils.isoDateFormatter.format(value);
 			case DateTime:
-				return ArtUtils.isoDateTimeFormatter.format(value);
+				//convert date to string that will be recognised by parameter processor class
+				return getDateString(value);
 			default:
 				return String.valueOf(value);
+		}
+	}
+
+	/**
+	 * Returns a date string for a given date object, formatted according to the
+	 * parameter's date format setting
+	 *
+	 * @param value the date value
+	 * @return the formatted date string
+	 */
+	public String getDateString(Object value) {
+		switch (dataType) {
+			case Date:
+			case DateTime:
+				if (StringUtils.isBlank(dateFormat)) {
+					if (dataType == ParameterDataType.Date) {
+						return ArtUtils.isoDateFormatter.format(value);
+					} else {
+						return ArtUtils.isoDateTimeFormatter.format(value);
+					}
+				} else {
+					SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+					return dateFormatter.format(value);
+				}
+			default:
+				throw new IllegalArgumentException("Unexpected parameter data type: " + dataType);
 		}
 	}
 

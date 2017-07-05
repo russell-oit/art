@@ -24,6 +24,7 @@ import art.report.Report;
 import art.utils.ArtUtils;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -299,7 +300,7 @@ public class ReportParameter implements Serializable {
 
 		return StringUtils.join(paramDisplayStrings, ", ");
 	}
-	
+
 	/**
 	 * Returns the parameter name and actual parameter values in a formatted
 	 * manner
@@ -373,9 +374,8 @@ public class ReportParameter implements Serializable {
 		ParameterDataType parameterDataType = parameter.getDataType();
 		switch (parameterDataType) {
 			case Date:
-				return ArtUtils.isoDateFormatter.format(value);
 			case DateTime:
-				return ArtUtils.isoDateTimeFormatter.format(value);
+				return parameter.getDateString(value);
 			default:
 				if (value instanceof List) {
 					List<String> values = new ArrayList<>();

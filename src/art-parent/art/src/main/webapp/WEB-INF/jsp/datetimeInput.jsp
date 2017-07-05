@@ -10,7 +10,7 @@
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div class='input-group date datetimepicker'>
-	<input type='text' class="form-control" data-date-format="YYYY-MM-DD HH:mm:ss"
+	<input type='text' class="form-control" data-date-format="YYYY-MM-DD HH:mm"
 		   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   value="${encode:forHtmlAttribute(reportParam.htmlValue)}">
