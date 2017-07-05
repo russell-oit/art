@@ -35,10 +35,12 @@ import net.sf.jpivotart.jpivot.table.TableComponent;
 import net.sf.jpivotart.jpivot.tags.OlapModelProxy;
 import net.sf.wcfart.wcf.form.FormComponent;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -66,7 +68,8 @@ public class JPivotController {
 	private ReportService reportService;
 
 	@RequestMapping(value = "/showJPivot", method = {RequestMethod.GET, RequestMethod.POST})
-	public String showJPivot(HttpServletRequest request, Model model, HttpSession session) {
+	public String showJPivot(HttpServletRequest request, Model model, HttpSession session,
+			Locale locale) {
 
 		logger.debug("Entering showJPivot");
 
@@ -137,9 +140,9 @@ public class JPivotController {
 				}
 			}
 
-			prepareVariables(request, session, report, model, sessionUser);
+			prepareVariables(request, session, report, model, sessionUser, locale);
 
-		} catch (SQLException | RuntimeException | ParseException | MalformedURLException ex) {
+		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -156,14 +159,17 @@ public class JPivotController {
 	 * @param report
 	 * @param model
 	 * @param sessionUser
+	 * @param locale
 	 * @throws NumberFormatException
 	 * @throws SQLException
 	 * @throws ParseException
 	 * @throws MalformedURLException
+	 * @throws IOException
 	 */
 	private void prepareVariables(HttpServletRequest request, HttpSession session,
-			Report report, Model model, User sessionUser)
-			throws NumberFormatException, SQLException, ParseException, MalformedURLException {
+			Report report, Model model, User sessionUser, Locale locale)
+			throws NumberFormatException, SQLException, ParseException,
+			MalformedURLException, IOException {
 
 		int reportId = report.getReportId();
 		model.addAttribute("reportId", reportId);
@@ -248,6 +254,7 @@ public class JPivotController {
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
+				paramProcessor.setLocale(locale);
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();

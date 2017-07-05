@@ -569,7 +569,7 @@ public class ReportParameter implements Serializable {
 	 * the parameter dropdown list
 	 *
 	 * @param lovValue the lov value
-	 * @return code>true</code> if the given lov value should be selected in the
+	 * @return <code>true</code> if the given lov value should be selected in the
 	 * parameter dropdown list
 	 */
 	public boolean selectLovValue(String lovValue) {

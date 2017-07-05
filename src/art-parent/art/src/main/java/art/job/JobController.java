@@ -36,6 +36,7 @@ import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -307,7 +308,7 @@ public class JobController {
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
 			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request);
 			addParameters(model, paramProcessorResult);
-		} catch (SQLException | RuntimeException | ParseException ex) {
+		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

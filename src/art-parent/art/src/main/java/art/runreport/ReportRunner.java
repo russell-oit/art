@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -1359,23 +1360,25 @@ public class ReportRunner {
 	/**
 	 * Formats a parameter value for use in the final sql string
 	 *
-	 * @param parameter the parameter value
+	 * @param value the parameter value
 	 * @return the formatted value
 	 */
-	private String formatParameter(Object parameter) {
-		if (parameter == null) {
+	private String formatParameter(Object value) {
+		if (value == null) {
 			return "NULL";
 		} else {
-			if (parameter instanceof String) {
-				return "'" + ((String) parameter).replace("'", "''") + "'";
-			} else if (parameter instanceof Timestamp) {
-				return "'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(parameter) + "'";
-			} else if (parameter instanceof java.sql.Date) {
-				return "'" + ArtUtils.isoDateFormatter.format(parameter) + "'";
-			} else if (parameter instanceof Boolean) {
-				return ((Boolean) parameter) ? "1" : "0";
+			if (value instanceof String) {
+				return "'" + ((String) value).replace("'", "''") + "'";
+			} else if (value instanceof Timestamp) {
+				return "'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(value) + "'";
+			} else if (value instanceof java.sql.Date) {
+				return "'" + ArtUtils.isoDateFormatter.format(value) + "'";
+			} else if (value instanceof Boolean) {
+				Boolean boolValue = (Boolean) value;
+				Integer integerValue = BooleanUtils.toIntegerObject(boolValue);
+				return String.valueOf(integerValue);
 			} else {
-				return parameter.toString();
+				return String.valueOf(value);
 			}
 		}
 	}

@@ -28,6 +28,7 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -126,10 +128,12 @@ public class RunReportHelper {
 	 * @param reportService the report service to use
 	 * @throws ParseException
 	 * @throws SQLException
+	 * @throws java.io.IOException
 	 */
 	public void setSelectReportParameterAttributes(Report report,
-			HttpServletRequest request, HttpSession session, ReportService reportService)
-			throws ParseException, SQLException {
+			HttpServletRequest request, HttpSession session,
+			ReportService reportService, Locale locale)
+			throws ParseException, SQLException, IOException {
 
 		logger.debug("Entering setSelectReportParameterAttributes: report={}", report);
 
@@ -142,6 +146,7 @@ public class RunReportHelper {
 
 		//prepare report parameters
 		ParameterProcessor paramProcessor = new ParameterProcessor();
+		paramProcessor.setLocale(locale);
 		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 

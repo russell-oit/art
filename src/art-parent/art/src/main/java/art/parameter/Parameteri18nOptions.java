@@ -29,6 +29,7 @@ public class Parameteri18nOptions {
 	
 	private List<Map<String, String>> label;
 	private List<Map<String, String>> helpText;
+	private List<Map<String, String>> defaultValue;
 
 	/**
 	 * @return the label
@@ -56,5 +57,19 @@ public class Parameteri18nOptions {
 	 */
 	public void setHelpText(List<Map<String, String>> helpText) {
 		this.helpText = helpText;
+	}
+
+	/**
+	 * @return the defaultValue
+	 */
+	public List<Map<String, String>> getDefaultValue() {
+		return defaultValue;
+	}
+
+	/**
+	 * @param defaultValue the defaultValue to set
+	 */
+	public void setDefaultValue(List<Map<String, String>> defaultValue) {
+		this.defaultValue = defaultValue;
 	}
 }

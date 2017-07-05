@@ -170,6 +170,7 @@ public class RunReportController {
 				int fetchTime = NOT_APPLICABLE;
 
 				ParameterProcessor paramProcessor = new ParameterProcessor();
+				paramProcessor.setLocale(locale);
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "jpivot", reportParamsList);
@@ -186,6 +187,7 @@ public class RunReportController {
 				int fetchTime = NOT_APPLICABLE;
 
 				ParameterProcessor paramProcessor = new ParameterProcessor();
+				paramProcessor.setLocale(locale);
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "saiku", reportParamsList);
@@ -290,7 +292,7 @@ public class RunReportController {
 				boolean allowSelectParameters = Boolean.parseBoolean(request.getParameter("allowSelectParameters"));
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
-					runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
+					runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService, locale);
 				}
 
 				request.setAttribute("reportType", reportType);
@@ -328,6 +330,7 @@ public class RunReportController {
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
+				paramProcessor.setLocale(locale);
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();

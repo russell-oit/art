@@ -141,6 +141,7 @@ public class DashboardController {
 			model.addAttribute("reportType", reportType);
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
+			paramProcessor.setLocale(locale);
 			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportParamsList = paramProcessorResult.getReportParamsList();

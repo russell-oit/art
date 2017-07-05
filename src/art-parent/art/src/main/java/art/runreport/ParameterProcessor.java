@@ -27,6 +27,7 @@ import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.user.User;
 import art.utils.ArtUtils;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -37,6 +38,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
@@ -57,6 +59,22 @@ import org.slf4j.LoggerFactory;
 public class ParameterProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(ParameterProcessor.class);
+	
+	private Locale locale;
+
+	/**
+	 * @return the locale
+	 */
+	public Locale getLocale() {
+		return locale;
+	}
+
+	/**
+	 * @param locale the locale to set
+	 */
+	public void setLocale(Locale locale) {
+		this.locale = locale;
+	}
 
 	/**
 	 * Processes a http request for running a report and fills objects with
@@ -68,7 +86,7 @@ public class ParameterProcessor {
 	 * @throws java.text.ParseException
 	 */
 	public ParameterProcessorResult processHttpParameters(
-			HttpServletRequest request) throws SQLException, ParseException {
+			HttpServletRequest request) throws SQLException, ParseException, IOException {
 
 		int reportId = Integer.parseInt(request.getParameter("reportId"));
 
@@ -95,9 +113,10 @@ public class ParameterProcessor {
 	 * @return final report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.text.ParseException
+	 * @throws java.io.IOException
 	 */
 	public ParameterProcessorResult process(Map<String, String[]> passedValuesMap,
-			int reportId, User user) throws SQLException, ParseException {
+			int reportId, User user) throws SQLException, ParseException, IOException {
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
@@ -346,7 +365,7 @@ public class ParameterProcessor {
 	 * @throws ParseException
 	 */
 	private void setActualParameterValues(List<ReportParameter> reportParamsList)
-			throws NumberFormatException, ParseException {
+			throws NumberFormatException, ParseException, IOException {
 
 		logger.debug("Entering setActualParameterValues");
 
@@ -362,7 +381,7 @@ public class ParameterProcessor {
 				String actualValueString;
 				if (passedValues == null) {
 					//parameter value not specified. use default value
-					actualValueString = param.getDefaultValue();
+					actualValueString = param.getLocalizedDefaultValue(locale);
 				} else {
 					actualValueString = passedValues[0];
 				}
@@ -375,7 +394,7 @@ public class ParameterProcessor {
 				List<String> actualValueStrings = new ArrayList<>();
 				if (passedValues == null) {
 					//parameter value not specified. use default value
-					String defaultValue = param.getDefaultValue();
+					String defaultValue = param.getLocalizedDefaultValue(locale);
 					if (StringUtils.isNotEmpty(defaultValue)) {
 						String defaultValues[] = defaultValue.split("\\r?\\n");
 						actualValueStrings.addAll(Arrays.asList(defaultValues));

@@ -1753,7 +1753,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			ParameterProcessor paramProcessor = new ParameterProcessor();
 			paramProcessorResult = paramProcessor.process(finalValues, reportId, user);
-		} catch (ParseException ex) {
+		} catch (ParseException | IOException ex) {
 			logger.error("Error", ex);
 		}
 

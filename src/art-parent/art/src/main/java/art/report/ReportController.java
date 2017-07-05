@@ -105,7 +105,7 @@ public class ReportController {
 	@RequestMapping(value = "/selectReportParameters", method = RequestMethod.GET)
 	public String selectReportParameters(HttpSession session,
 			@RequestParam("reportId") Integer reportId,
-			HttpServletRequest request, Model model) {
+			HttpServletRequest request, Model model, Locale locale) {
 
 		logger.debug("Entering selectReportParameters: reportId={}", reportId);
 
@@ -116,9 +116,9 @@ public class ReportController {
 				return "reportError";
 			} else {
 				RunReportHelper runReportHelper = new RunReportHelper();
-				runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
+				runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService, locale);
 			}
-		} catch (SQLException | RuntimeException | ParseException ex) {
+		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

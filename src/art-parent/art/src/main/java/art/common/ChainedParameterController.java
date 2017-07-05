@@ -24,11 +24,13 @@ import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportRunner;
 import art.user.User;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
@@ -58,7 +60,7 @@ public class ChainedParameterController {
 	@RequestMapping(value = "/getLovValues", method = RequestMethod.GET)
 	public @ResponseBody
 	List<Map<String, String>> getLovValues(@RequestParam("reportId") Integer reportId,
-			HttpSession session, HttpServletRequest request) {
+			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering getLovValues: reportId={}", reportId);
 
@@ -79,12 +81,13 @@ public class ChainedParameterController {
 			reportRunner.setUser(sessionUser);
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
+			paramProcessor.setLocale(locale);
 			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportRunner.setReportParamsMap(reportParamsMap);
 
 			values = reportRunner.getLovValues();
-		} catch (SQLException | RuntimeException | ParseException ex) {
+		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {

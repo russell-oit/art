@@ -477,7 +477,7 @@ public class Parameter implements Serializable {
 	 * taking into consideration the i18n options defined for the parameter
 	 *
 	 * @param locale the locale object for the relevant locale
-	 * @return the label to use for this parameter
+	 * @return the localized label
 	 * @throws java.io.IOException
 	 */
 	public String getLocalizedLabel(Locale locale) throws IOException {
@@ -494,11 +494,11 @@ public class Parameter implements Serializable {
 	 * taking into consideration the i18n options defined for the parameter
 	 *
 	 * @param localeString the string that represents the locale to use
-	 * @return the label to use for this parameter
+	 * @return the localized label
 	 * @throws java.io.IOException
 	 */
 	public String getLocalizedLabel(String localeString) throws IOException {
-		String localizedLabel = label;
+		String localizedLabel = null;
 
 		if (StringUtils.isNotBlank(options) && StringUtils.isNotBlank(localeString)) {
 			ObjectMapper mapper = new ObjectMapper();
@@ -506,31 +506,12 @@ public class Parameter implements Serializable {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nLabelOptions = i18nOptions.getLabel();
-				if (CollectionUtils.isNotEmpty(i18nLabelOptions)) {
-					//https://stackoverflow.com/questions/886955/breaking-out-of-nested-loops-in-java
-					//https://stackoverflow.com/questions/5097513/in-java-how-does-break-interact-with-nested-loops
-					boolean labelFound = false;
-					for (Map<String, String> i18nLabelOption : i18nLabelOptions) {
-						//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
-						// Get the first entry that the iterator returns
-						Entry<String, String> entry = i18nLabelOption.entrySet().iterator().next();
-						String localeSetting = entry.getKey();
-						String localeLabel = entry.getValue();
-						String[] locales = StringUtils.split(localeSetting, ",");
-						for (String locale : locales) {
-							if (StringUtils.equalsIgnoreCase(locale.trim(), localeString)) {
-								localizedLabel = localeLabel;
-								labelFound = true;
-								break;
-							}
-						}
-
-						if (labelFound) {
-							break;
-						}
-					}
-				}
+				localizedLabel = getLocalizedValue(localeString, i18nLabelOptions);
 			}
+		}
+
+		if (localizedLabel == null) {
+			localizedLabel = label;
 		}
 
 		return localizedLabel;
@@ -542,7 +523,7 @@ public class Parameter implements Serializable {
 	 * parameter
 	 *
 	 * @param locale the locale object for the relevant locale
-	 * @return the help text to use for this parameter
+	 * @return the localized help text
 	 * @throws java.io.IOException
 	 */
 	public String getLocalizedHelpText(Locale locale) throws IOException {
@@ -559,11 +540,11 @@ public class Parameter implements Serializable {
 	 * parameter
 	 *
 	 * @param localeString the string that represents the locale to use
-	 * @return the help text to use for this parameter
+	 * @return the localized help text
 	 * @throws java.io.IOException
 	 */
 	public String getLocalizedHelpText(String localeString) throws IOException {
-		String localizedHelpText = helpText;
+		String localizedHelpText = null;
 
 		if (StringUtils.isNotBlank(options) && StringUtils.isNotBlank(localeString)) {
 			ObjectMapper mapper = new ObjectMapper();
@@ -571,31 +552,101 @@ public class Parameter implements Serializable {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nHelpTextOptions = i18nOptions.getHelpText();
-				if (CollectionUtils.isNotEmpty(i18nHelpTextOptions)) {
-					boolean helpTextFound = false;
-					for (Map<String, String> i18nHelpTextOption : i18nHelpTextOptions) {
-						//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
-						// Get the first entry that the iterator returns
-						Entry<String, String> entry = i18nHelpTextOption.entrySet().iterator().next();
-						String localeSetting = entry.getKey();
-						String localeHelpText = entry.getValue();
-						String[] locales = StringUtils.split(localeSetting, ",");
-						for (String locale : locales) {
-							if (StringUtils.equalsIgnoreCase(locale.trim(), localeString)) {
-								localizedHelpText = localeHelpText;
-								helpTextFound = true;
-								break;
-							}
-						}
+				localizedHelpText = getLocalizedValue(localeString, i18nHelpTextOptions);
+			}
+		}
 
-						if (helpTextFound) {
-							break;
-						}
+		if (localizedHelpText == null) {
+			localizedHelpText = helpText;
+		}
+
+		return localizedHelpText;
+	}
+	
+	/**
+	 * Returns the default value to use for this parameter, given a particular
+	 * locale, taking into consideration the i18n options defined for the
+	 * parameter
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the localized default value
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedDefaultValue(Locale locale) throws IOException {
+		if (locale == null) {
+			return defaultValue;
+		} else {
+			return getLocalizedDefaultValue(locale.toString());
+		}
+	}
+	
+	/**
+	 * Returns the default value to use for this parameter, given a particular
+	 * locale, taking into consideration the i18n options defined for the
+	 * parameter
+	 *
+	 * @param localeString the string that represents the locale to use
+	 * @return the localized default value
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedDefaultValue(String localeString) throws IOException {
+		String localizedDefaultValue = null;
+
+		if (StringUtils.isNotBlank(options) && StringUtils.isNotBlank(localeString)) {
+			ObjectMapper mapper = new ObjectMapper();
+			ParameterOptions parameterOptions = mapper.readValue(options, ParameterOptions.class);
+			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nDefaultValueOptions = i18nOptions.getDefaultValue();
+				localizedDefaultValue = getLocalizedValue(localeString, i18nDefaultValueOptions);
+			}
+		}
+
+		if (localizedDefaultValue == null) {
+			localizedDefaultValue = defaultValue;
+		}
+
+		return localizedDefaultValue;
+	}
+
+	/**
+	 * Returns an i18n value to use for this parameter, given a particular
+	 * locale, taking into consideration the i18n options defined for the
+	 * parameter
+	 *
+	 * @param localeString the string that represents the locale to use
+	 * @param i18nValueOptions the i18n definition of locales and values
+	 * @return the localized value to use, or null if a localization is not
+	 * found
+	 */
+	private String getLocalizedValue(String localeString,
+			List<Map<String, String>> i18nValueOptions) {
+
+		String localizedValue = null;
+
+		if (CollectionUtils.isNotEmpty(i18nValueOptions)) {
+			boolean valueFound = false;
+			for (Map<String, String> i18nValueOption : i18nValueOptions) {
+				//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
+				// Get the first entry that the iterator returns
+				Entry<String, String> entry = i18nValueOption.entrySet().iterator().next();
+				String localeSetting = entry.getKey();
+				String localeValue = entry.getValue();
+				String[] locales = StringUtils.split(localeSetting, ",");
+				for (String locale : locales) {
+					if (StringUtils.equalsIgnoreCase(locale.trim(), localeString)) {
+						localizedValue = localeValue;
+						valueFound = true;
+						break;
 					}
+				}
+
+				if (valueFound) {
+					break;
 				}
 			}
 		}
 
-		return localizedHelpText;
+		return localizedValue;
 	}
 }
