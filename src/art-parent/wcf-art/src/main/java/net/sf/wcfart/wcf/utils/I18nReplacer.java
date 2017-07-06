@@ -15,7 +15,6 @@ package net.sf.wcfart.wcf.utils;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import net.sf.wcfart.tbutils.res.Resources;
-import org.apache.commons.lang3.StringUtils;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
@@ -90,15 +89,7 @@ public abstract class I18nReplacer {
       String data = text.getData();
       if (data.startsWith(PREFIX)) {
 		  data = data.substring(4);
-		  boolean endsWithSpace=false;
-		  if(StringUtils.endsWith(data, " ")){
-			  endsWithSpace=true;
-			  data = StringUtils.substringBefore(data, " ");
-		  }
         data = internalReplace(data);
-		if(endsWithSpace){
-			data=data + " ";
-		}
         text.setData(data);
       }
     }

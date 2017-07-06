@@ -55,12 +55,14 @@
  <tr>
   <td>fmt:printform.tableWidth</td>
   <td>
-   <checkBox modelReference="setTableWidth"/>(off = auto)
+   <checkBox modelReference="setTableWidth"/> (off = auto)
    <textField type="double" modelReference="tableWidth" size="4" title="fmt:printform.tableWidthTooltip"/>cm
   </td>
  </tr>
   <tr >
-   <td colspan="2" align="left">fmt:printform.chartSeparatePage <checkBox modelReference="chartPageBreak"/>
+	  <td colspan="2" align="left">
+		  <span>fmt:printform.chartSeparatePage</span>  
+		  <checkBox modelReference="chartPageBreak"/>
    </td>
   </tr>
   
