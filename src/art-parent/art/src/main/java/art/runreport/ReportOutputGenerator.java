@@ -1127,7 +1127,7 @@ public class ReportOutputGenerator {
 				if (result != null) {
 					if (result instanceof List) {
 						String optionsString = report.getOptions();
-						List<String> columnNames = null;
+						List<String> optionsColumnNames = null;
 						List<Map<String, String>> columnDataTypes = null;
 						MongoDbOptions options;
 						if (StringUtils.isBlank(optionsString)) {
@@ -1135,7 +1135,7 @@ public class ReportOutputGenerator {
 						} else {
 							ObjectMapper mapper = new ObjectMapper();
 							options = mapper.readValue(optionsString, MongoDbOptions.class);
-							columnNames = options.getColumns();
+							optionsColumnNames = options.getColumns();
 							columnDataTypes = options.getColumnDataTypes();
 						}
 
@@ -1144,7 +1144,7 @@ public class ReportOutputGenerator {
 						List<ResultSetColumn> columns = new ArrayList<>();
 						String resultString = null;
 						if (!resultList.isEmpty()) {
-							if (CollectionUtils.isEmpty(columnNames)) {
+							if (CollectionUtils.isEmpty(optionsColumnNames)) {
 								Object sample = resultList.get(0);
 								//https://stackoverflow.com/questions/6133660/recursive-beanutils-describe
 								//https://www.leveluplunch.com/java/examples/convert-object-bean-properties-map-key-value/
@@ -1167,7 +1167,7 @@ public class ReportOutputGenerator {
 									columns.add(column);
 								}
 							} else {
-								for (String columnName : columnNames) {
+								for (String columnName : optionsColumnNames) {
 									ResultSetColumn column = new ResultSetColumn();
 									column.setName(columnName);
 									column.setType("string");
@@ -1190,10 +1190,10 @@ public class ReportOutputGenerator {
 								}
 							}
 
-							List<String> columnList = new ArrayList<>();
+							List<String> finalColumnNames = new ArrayList<>();
 							for (ResultSetColumn column : columns) {
 								String columnName = column.getName();
-								columnList.add(columnName);
+								finalColumnNames.add(columnName);
 							}
 
 							//_id is a complex object so we have to iterate and replace it with the toString() representation
@@ -1205,7 +1205,7 @@ public class ReportOutputGenerator {
 									ObjectMapper mapper = new ObjectMapper();
 									@SuppressWarnings("unchecked")
 									Map<String, Object> map2 = mapper.convertValue(object, Map.class);
-									for (String columnName : columnList) {
+									for (String columnName : finalColumnNames) {
 										Object value = map2.get(columnName);
 										Object finalValue;
 										if (value == null) {
@@ -1227,7 +1227,7 @@ public class ReportOutputGenerator {
 										if (StringUtils.equals(propertyName, "metaClass")) {
 											//don't include
 										} else {
-											if (ArtUtils.containsIgnoreCase(columnList, propertyName)) {
+											if (ArtUtils.containsIgnoreCase(finalColumnNames, propertyName)) {
 												Object value = propertyDesc.getReadMethod().invoke(object);
 												Object finalValue;
 												if (value instanceof ObjectId) {

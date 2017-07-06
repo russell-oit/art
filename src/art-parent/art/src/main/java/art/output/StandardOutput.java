@@ -1026,7 +1026,7 @@ public abstract class StandardOutput {
 						}
 					} else {
 						FilenameHelper filenameHelper = new FilenameHelper();
-						baseFileName = filenameHelper.getBaseFilename(job, fileNameBurstId);
+						baseFileName = filenameHelper.getBaseFilename(job, fileNameBurstId); //getBaseFilename() does cleaning
 						extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 						fileName = baseFileName + "." + extension;
 
@@ -1125,7 +1125,7 @@ public abstract class StandardOutput {
 		plainNumberFormatter.applyPattern("#.#");
 
 		//specifically use english locale for sorting e.g.
-		//in case user locale uses dot as thousands separator e.g. italian, german locale
+		//in case user locale uses dot as thousands separator e.g. italian, german
 		sortNumberFormatter = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
 		sortNumberFormatter.applyPattern("#.#");
 		//set minimum digits to ensure all numbers are pre-padded with zeros,
@@ -1762,7 +1762,6 @@ public abstract class StandardOutput {
 					}
 				}
 			}
-
 		} else {
 			TreeSet<Object> x = new TreeSet<>(); // allows a sorted toArray (or Iterator())
 			TreeSet<Object> y = new TreeSet<>();

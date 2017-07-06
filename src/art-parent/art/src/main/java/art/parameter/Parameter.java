@@ -715,4 +715,18 @@ public class Parameter implements Serializable {
 
 		return localizedValue;
 	}
+	
+	/**
+	 * Returns the html type attribute to use for text input
+	 * 
+	 * @return 
+	 */
+	public String getHtmlTextInputType(){
+		switch(dataType){
+			case Integer:
+				return "number";
+			default:
+				return "text";
+		}
+	}
 }
