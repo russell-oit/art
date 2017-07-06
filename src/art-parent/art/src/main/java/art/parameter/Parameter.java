@@ -63,6 +63,21 @@ public class Parameter implements Serializable {
 	private String options;
 	private String dateFormat;
 	private ParameterOptions parameterOptions;
+	private String placeholderText;
+
+	/**
+	 * @return the placeholderText
+	 */
+	public String getPlaceholderText() {
+		return placeholderText;
+	}
+
+	/**
+	 * @param placeholderText the placeholderText to set
+	 */
+	public void setPlaceholderText(String placeholderText) {
+		this.placeholderText = placeholderText;
+	}
 
 	/**
 	 * @return the parameterOptions
@@ -614,6 +629,50 @@ public class Parameter implements Serializable {
 		}
 
 		return localizedDefaultValue;
+	}
+	
+	/**
+	 * Returns the placeholder text to use for this parameter, given a particular
+	 * locale, taking into consideration the i18n options defined for the
+	 * parameter
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the localized placeholder text
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedPlaceholderText(Locale locale) throws IOException {
+		if (locale == null) {
+			return placeholderText;
+		} else {
+			return getLocalizedPlaceholderText(locale.toString());
+		}
+	}
+
+	/**
+	 * Returns the placeholder text to use for this parameter, given a particular
+	 * locale, taking into consideration the i18n options defined for the
+	 * parameter
+	 *
+	 * @param localeString the string that represents the locale to use
+	 * @return the localized placeholder text
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedPlaceholderText(String localeString) throws IOException {
+		String localizedPlaceholderText = null;
+
+		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
+			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nPlaceholderTextOptions = i18nOptions.getPlaceholderText();
+				localizedPlaceholderText = getLocalizedValue(localeString, i18nPlaceholderTextOptions);
+			}
+		}
+
+		if (localizedPlaceholderText == null) {
+			localizedPlaceholderText = placeholderText;
+		}
+
+		return localizedPlaceholderText;
 	}
 
 	/**

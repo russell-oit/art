@@ -240,6 +240,15 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="col-md-4 control-label " for="placeholderText">
+						<spring:message code="parameters.label.placeholderText"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="placeholderText" maxlength="100" class="form-control"/>
+						<form:errors path="placeholderText" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="col-md-4 control-label " for="dataType">
 						<spring:message code="page.label.dataType"/>
 					</label>

@@ -88,7 +88,7 @@ public abstract class I18nReplacer {
       Text text = (Text) root;
       String data = text.getData();
       if (data.startsWith(PREFIX)) {
-		  data = data.substring(4);
+		  data = data.substring(PREFIX.length());
         data = internalReplace(data);
         text.setData(data);
       }

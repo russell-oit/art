@@ -126,6 +126,7 @@ public class RunReportHelper {
 	 * @param request the http request
 	 * @param session the http session
 	 * @param reportService the report service to use
+	 * @param locale the current locale
 	 * @throws ParseException
 	 * @throws SQLException
 	 * @throws java.io.IOException
@@ -141,6 +142,7 @@ public class RunReportHelper {
 		request.setAttribute("startSelectParametersHidden", startSelectParametersHidden);
 
 		request.setAttribute("report", report);
+		request.setAttribute("localeString", locale.toString());
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
