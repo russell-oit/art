@@ -25,6 +25,8 @@ import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
 import art.utils.ActionResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -112,6 +114,17 @@ public class ParameterService {
 
 			Report defaultValueReport = reportService.getReport(rs.getInt("DEFAULT_VALUE_REPORT_ID"));
 			parameter.setDefaultValueReport(defaultValueReport);
+
+			String options = parameter.getOptions();
+			if (StringUtils.isNotBlank(options)) {
+				ObjectMapper mapper = new ObjectMapper();
+				try {
+					ParameterOptions parameterOptions = mapper.readValue(options, ParameterOptions.class);
+					parameter.setParameterOptions(parameterOptions);
+				} catch (IOException ex) {
+					throw new SQLException(ex);
+				}
+			}
 
 			return type.cast(parameter);
 		}
@@ -299,14 +312,14 @@ public class ParameterService {
 		logger.debug("maxId={}", maxId);
 
 		int newId;
-		
+
 		if (maxId == null || maxId < 0) {
 			//no records in the table, or only hardcoded records
 			newId = 1;
 		} else {
 			newId = maxId + 1;
 		}
-		
+
 		logger.debug("newId={}", newId);
 
 		saveParameter(parameter, newId, actionUser);
@@ -371,7 +384,7 @@ public class ParameterService {
 		if (newRecordId != null) {
 			newRecord = true;
 		}
-		
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_PARAMETERS"
 					+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
@@ -440,7 +453,7 @@ public class ParameterService {
 
 			affectedRows = dbService.update(sql, values);
 		}
-		
+
 		if (newRecordId != null) {
 			parameter.setParameterId(newRecordId);
 		}

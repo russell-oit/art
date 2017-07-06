@@ -21,7 +21,6 @@ import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.report.Report;
 import art.utils.ArtUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -64,6 +62,21 @@ public class Parameter implements Serializable {
 	private boolean shared;
 	private String options;
 	private String dateFormat;
+	private ParameterOptions parameterOptions;
+
+	/**
+	 * @return the parameterOptions
+	 */
+	public ParameterOptions getParameterOptions() {
+		return parameterOptions;
+	}
+
+	/**
+	 * @param parameterOptions the parameterOptions to set
+	 */
+	public void setParameterOptions(ParameterOptions parameterOptions) {
+		this.parameterOptions = parameterOptions;
+	}
 
 	/**
 	 * @return the dateFormat
@@ -500,9 +513,7 @@ public class Parameter implements Serializable {
 	public String getLocalizedLabel(String localeString) throws IOException {
 		String localizedLabel = null;
 
-		if (StringUtils.isNotBlank(options) && StringUtils.isNotBlank(localeString)) {
-			ObjectMapper mapper = new ObjectMapper();
-			ParameterOptions parameterOptions = mapper.readValue(options, ParameterOptions.class);
+		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nLabelOptions = i18nOptions.getLabel();
@@ -546,9 +557,7 @@ public class Parameter implements Serializable {
 	public String getLocalizedHelpText(String localeString) throws IOException {
 		String localizedHelpText = null;
 
-		if (StringUtils.isNotBlank(options) && StringUtils.isNotBlank(localeString)) {
-			ObjectMapper mapper = new ObjectMapper();
-			ParameterOptions parameterOptions = mapper.readValue(options, ParameterOptions.class);
+		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nHelpTextOptions = i18nOptions.getHelpText();
@@ -562,7 +571,7 @@ public class Parameter implements Serializable {
 
 		return localizedHelpText;
 	}
-	
+
 	/**
 	 * Returns the default value to use for this parameter, given a particular
 	 * locale, taking into consideration the i18n options defined for the
@@ -579,7 +588,7 @@ public class Parameter implements Serializable {
 			return getLocalizedDefaultValue(locale.toString());
 		}
 	}
-	
+
 	/**
 	 * Returns the default value to use for this parameter, given a particular
 	 * locale, taking into consideration the i18n options defined for the
@@ -592,9 +601,7 @@ public class Parameter implements Serializable {
 	public String getLocalizedDefaultValue(String localeString) throws IOException {
 		String localizedDefaultValue = null;
 
-		if (StringUtils.isNotBlank(options) && StringUtils.isNotBlank(localeString)) {
-			ObjectMapper mapper = new ObjectMapper();
-			ParameterOptions parameterOptions = mapper.readValue(options, ParameterOptions.class);
+		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nDefaultValueOptions = i18nOptions.getDefaultValue();
