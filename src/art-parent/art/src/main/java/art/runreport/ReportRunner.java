@@ -57,7 +57,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -1374,9 +1373,8 @@ public class ReportRunner {
 			} else if (value instanceof java.sql.Date) {
 				return "'" + ArtUtils.isoDateFormatter.format(value) + "'";
 			} else if (value instanceof Boolean) {
-				Boolean boolValue = (Boolean) value;
-				Integer integerValue = BooleanUtils.toIntegerObject(boolValue);
-				return String.valueOf(integerValue);
+				Boolean booleanValue = (Boolean) value;
+				return booleanValue ? "1" : "0";
 			} else {
 				return String.valueOf(value);
 			}
