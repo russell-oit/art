@@ -39,7 +39,10 @@ import java.util.Objects;
  */
 public class PdfHelper {
 
-	public final String PDF_AUTHOR_ART = "ART - http://art.sourceforge.net";
+	public static final String PDF_AUTHOR_ART = "ART - http://art.sourceforge.net";
+	public static final float HEADER_GRAY = 0.9f;
+	public static final float CELL_PADDING_LEFT = 5f;
+	public static final float CELL_PADDING_RIGHT = 5f;
 
 	/**
 	 * Adds page numbers to a pdf document

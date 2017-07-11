@@ -37,7 +37,6 @@ public class PdfOutput extends StandardOutput {
 	private Document document;
 	private PdfPTable table;
 	private PdfPCell cell;
-	private final float headergray = 0.9f;
 	private FontSelector fsBody; //fonts to use for document body
 	private FontSelector fsHeading; //fonts to use for document title and column headings
 
@@ -73,7 +72,7 @@ public class PdfOutput extends StandardOutput {
 
 			PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));
 			document.addTitle(reportName);
-			document.addAuthor(pdfHelper.PDF_AUTHOR_ART);
+			document.addAuthor(PdfHelper.PDF_AUTHOR_ART);
 
 			if (pdfPageNumbers) {
 				pdfHelper.addPageNumbers(document);
@@ -179,9 +178,9 @@ public class PdfOutput extends StandardOutput {
 		cell = new PdfPCell(new Paragraph(fsHeading.process(finalValue)));
 
 		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-		cell.setPaddingLeft(5f);
-		cell.setPaddingRight(5f);
-		cell.setGrayFill(headergray);
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
+		cell.setGrayFill(PdfHelper.HEADER_GRAY);
 
 		table.addCell(cell);
 	}
@@ -198,8 +197,8 @@ public class PdfOutput extends StandardOutput {
 
 		cell = new PdfPCell(new Paragraph(fsBody.process(finalValue)));
 
-		cell.setPaddingLeft(5f);
-		cell.setPaddingRight(5f);
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
 
 		table.addCell(cell);
 	}
@@ -211,8 +210,8 @@ public class PdfOutput extends StandardOutput {
 		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
 
 		cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-		cell.setPaddingLeft(5f);
-		cell.setPaddingRight(5f);
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
 //		cell.setGrayFill((oddline ? evengray : oddgray));
 		table.addCell(cell);
 	}
@@ -222,8 +221,8 @@ public class PdfOutput extends StandardOutput {
 		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
 
 		cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-		cell.setPaddingLeft(5f);
-		cell.setPaddingRight(5f);
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
 //		cell.setGrayFill((oddline ? evengray : oddgray));
 		table.addCell(cell);
 	}
@@ -233,8 +232,8 @@ public class PdfOutput extends StandardOutput {
 		String formattedValue = formatDateValue(value);
 
 		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
-		cell.setPaddingLeft(5f);
-		cell.setPaddingRight(5f);
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
 //		cell.setGrayFill((oddline ? evengray : oddgray));
 		table.addCell(cell);
 	}
@@ -242,8 +241,8 @@ public class PdfOutput extends StandardOutput {
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
-		cell.setPaddingLeft(5f);
-		cell.setPaddingRight(5f);
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
 //		cell.setGrayFill((oddline ? evengray : oddgray));
 		table.addCell(cell);
 	}
@@ -271,8 +270,8 @@ public class PdfOutput extends StandardOutput {
 		cell = new PdfPCell(new Paragraph(fsHeading.process(formattedValue)));
 
 		cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-		cell.setPaddingLeft(5f);
-		cell.setPaddingRight(5f);
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
 
 		table.addCell(cell);
 	}
@@ -282,8 +281,8 @@ public class PdfOutput extends StandardOutput {
 		cell = new PdfPCell(new Paragraph(fsHeading.process(formattedValue)));
 
 		cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-		cell.setPaddingLeft(5f);
-		cell.setPaddingRight(5f);
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
 
 		table.addCell(cell);
 	}

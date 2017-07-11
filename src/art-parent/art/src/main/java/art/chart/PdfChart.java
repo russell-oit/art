@@ -87,7 +87,7 @@ public class PdfChart {
 				title = ""; //null title will cause an exception
 			}
 			document.addTitle(title);
-			document.addAuthor(pdfHelper.PDF_AUTHOR_ART);
+			document.addAuthor(PdfHelper.PDF_AUTHOR_ART);
 
 			if (pdfPageNumbers) {
 				pdfHelper.addPageNumbers(document);
@@ -162,7 +162,6 @@ public class PdfChart {
 
 				PdfPTable table = null;
 				PdfPCell cell;
-				float headergray = 0.5f;
 
 				for (int i = 0; i < rows.size(); i++) {
 					DynaBean row = rows.get(i);
@@ -177,9 +176,9 @@ public class PdfChart {
 							columnName = dynaProperties[j].getName();
 							cell = new PdfPCell(new Paragraph(fsHeading.process(columnName + "")));
 							cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-							cell.setPaddingLeft(5f);
-							cell.setPaddingRight(5f);
-							cell.setGrayFill(headergray);
+							cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+							cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
+							cell.setGrayFill(PdfHelper.HEADER_GRAY);
 							table.addCell(cell);
 						}
 					}
@@ -189,8 +188,8 @@ public class PdfChart {
 						columnName = dynaProperties[k].getName();
 						columnValue = String.valueOf(row.get(columnName));
 						cell = new PdfPCell(new Paragraph(fsBody.process(columnValue + ""))); //add empty string to prevent NPE if value is null
-						cell.setPaddingLeft(5f);
-						cell.setPaddingRight(5f);
+						cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+						cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
 						table.addCell(cell);
 					}
 				}
