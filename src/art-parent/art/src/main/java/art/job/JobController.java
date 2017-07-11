@@ -284,7 +284,9 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/addJob", method = {RequestMethod.GET, RequestMethod.POST})
-	public String addJob(Model model, HttpServletRequest request, HttpSession session) {
+	public String addJob(Model model, HttpServletRequest request, HttpSession session,
+			Locale locale) {
+		
 		logger.debug("Entering addJob");
 
 		Job job = new Job();
@@ -313,21 +315,21 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJob("add", model, job);
+		return showEditJob("add", model, job, locale);
 	}
 
 	@RequestMapping(value = "/saveJob", method = RequestMethod.POST)
 	public String saveJob(@ModelAttribute("job") @Valid Job job,
 			@RequestParam("action") String action, @RequestParam("nextPage") String nextPage,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			HttpSession session, HttpServletRequest request) {
+			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveJob: job={}, action='{}', nextPage='{}'", job, action, nextPage);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditJob(action, model, job);
+			return showEditJob(action, model, job, locale);
 		}
 
 		try {
@@ -355,7 +357,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJob(action, model, job);
+		return showEditJob(action, model, job, locale);
 	}
 
 	@RequestMapping(value = "/saveJobs", method = RequestMethod.POST)
@@ -451,7 +453,7 @@ public class JobController {
 
 	@RequestMapping(value = "/editJob", method = RequestMethod.GET)
 	public String editJob(@RequestParam("id") Integer id, Model model,
-			HttpSession session) {
+			HttpSession session, Locale locale) {
 
 		logger.debug("Entering editJob: id={}", id);
 
@@ -472,7 +474,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJob("edit", model, job);
+		return showEditJob("edit", model, job, locale);
 	}
 
 	/**
@@ -518,12 +520,14 @@ public class JobController {
 	 * @param action "add" or "edit"
 	 * @param model the spring model
 	 * @param job the job that is being scheduled
+	 * @param locale the locale for this request
 	 * @return the jsp file to display
 	 */
-	private String showEditJob(String action, Model model, Job job) {
+	private String showEditJob(String action, Model model, Job job, Locale locale) {
 		logger.debug("Entering showEditJob: action='{}'", action);
 
 		model.addAttribute("action", action);
+		model.addAttribute("localeString", locale.toString());
 
 		List<JobType> jobTypes = new ArrayList<>();
 
