@@ -144,6 +144,11 @@ public class GroovySandbox extends GroovyValueFilter {
 			return o;
 		}
 		
+		//allow all art classes
+		if(StringUtils.startsWith(className, "art.")){
+			return o;
+		}
+		
 		if (allowedTypes.contains(cl)) {
 			return o;
 		}

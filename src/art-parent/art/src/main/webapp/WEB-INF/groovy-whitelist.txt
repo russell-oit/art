@@ -31,3 +31,5 @@ org.mongodb.morphia.query.QueryImpl
 #other classes
 java.util.ArrayList
 java.util.LinkedHashMap
+java.util.Date
+java.util.HashMap
