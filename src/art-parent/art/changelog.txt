@@ -35,7 +35,7 @@ ART 3.0
 * Allow for localization of parameter labels and help text
 * Enable use of barcode4j barcodes in jasperreports
 * Allow to report from MongoDB databases
-* Allow use of groovy in sql source
+* Enable use of groovy in sql source
 * Fix for context is readonly error on application startup
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7

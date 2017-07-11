@@ -583,8 +583,6 @@ public abstract class StandardOutput {
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(report, "report must not be null");
 
-		this.report = report;
-
 		StandardOutputResult result = new StandardOutputResult();
 
 		//initialize number formatters

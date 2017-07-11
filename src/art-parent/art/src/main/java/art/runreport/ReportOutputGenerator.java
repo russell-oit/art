@@ -450,6 +450,7 @@ public class ReportOutputGenerator {
 				standardOutput.setMessageSource(messageSource);
 				standardOutput.setIsJob(isJob);
 				standardOutput.setPdfPageNumbers(pdfPageNumbers);
+				standardOutput.setReport(report);
 
 				if (request != null) {
 					String contextPath = request.getContextPath();
