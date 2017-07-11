@@ -776,10 +776,16 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 				//get row count before performing output. univocity will close rs after writing
 				rowsRetrieved = getResultSetRowCount(rs);
+				if (!isJob) {
+					writer.println("<pre>");
+				}
 				//wrap the writer in an uncloseable printwriter to prevent the writer from being closed by univocity
 				//https://stackoverflow.com/questions/8941298/system-out-closed-can-i-reopen-it
 				UncloseablePrintWriter uncloseableWriter = new UncloseablePrintWriter(writer);
 				fixedWidthOutput.generateOutput(rs, uncloseableWriter, options);
+				if (!isJob) {
+					writer.println("</pre>");
+				}
 			} else if (reportType == ReportType.C3) {
 				if (isJob) {
 					throw new IllegalStateException("C3.js report type not supported for jobs");
