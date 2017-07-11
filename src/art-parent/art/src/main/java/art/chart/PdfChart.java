@@ -150,10 +150,6 @@ public class PdfChart {
 
 			//display chart data below chart if so required
 			if (data != null) {
-				Paragraph p = new Paragraph(fsBody.process("Data\n"));
-				p.setAlignment(Element.ALIGN_CENTER);
-				document.add(p);
-
 				java.util.List<DynaBean> rows = data.getRows();
 				DynaProperty[] dynaProperties = null;
 				String columnName;
