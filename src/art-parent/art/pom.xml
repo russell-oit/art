@@ -230,11 +230,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
-			<artifactId>wcf-art</artifactId>
-			<version>3.0-beta12-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
 			<version>3.0-beta12-SNAPSHOT</version>
 			<exclusions>

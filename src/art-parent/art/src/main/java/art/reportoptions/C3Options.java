@@ -22,7 +22,7 @@ package art.reportoptions;
  *
  * @author Timothy Anyona
  */
-public class C3Options {
+public class C3Options extends GeneralReportOptions {
 
 	private String cssFile;
 

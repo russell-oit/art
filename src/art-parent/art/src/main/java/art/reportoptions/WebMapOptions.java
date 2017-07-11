@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author Timothy Anyona
  */
-public class WebMapOptions {
+public class WebMapOptions extends GeneralReportOptions {
 
 	private String height = "400px";
 	private String cssFile;

@@ -22,7 +22,7 @@ package art.reportoptions;
  *
  * @author Timothy Anyona
  */
-public class DatamapsOptions {
+public class DatamapsOptions extends GeneralReportOptions {
 
 	private String width = "500px";
 	private String height = "300px";

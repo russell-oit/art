@@ -362,8 +362,21 @@ public class ReportParameter implements Serializable {
 	 * Returns the html element value to be used for this parameter
 	 *
 	 * @return the html element value to be used for this parameter
+	 * @throws java.io.IOException
 	 */
-	public String getHtmlValue() {
+	public String getHtmlValue() throws IOException {
+		String localeString = null;
+		return getHtmlValue(localeString);
+	}
+
+	/**
+	 * Returns the html element value to be used for this parameter
+	 *
+	 * @param localeString the locale being used
+	 * @return the html element value to be used for this parameter
+	 * @throws java.io.IOException
+	 */
+	public String getHtmlValue(String localeString) throws IOException {
 		Object value = getEffectiveActualParameterValue();
 
 		if (value == null) {
@@ -371,26 +384,30 @@ public class ReportParameter implements Serializable {
 		}
 
 		ParameterDataType parameterDataType = parameter.getDataType();
-		switch (parameterDataType) {
-			case Date:
-			case DateTime:
-				return parameter.getDateString(value);
-			default:
-				if (value instanceof List) {
-					List<String> values = new ArrayList<>();
-					@SuppressWarnings("unchecked")
-					List<Object> valueList = (List<Object>) value;
-					for (int i = 0; i < valueList.size(); i++) {
-						String htmlValue = String.valueOf(valueList.get(i));
-						values.add(htmlValue);
-					}
-					//https://stackoverflow.com/questions/8627902/new-line-in-text-area
-					//https://stackoverflow.com/questions/7693994/how-to-convert-ascii-code-0-255-to-a-string-of-the-associated-character
-					int NEWLINE_CHAR_ASCII = 10;
-					return StringUtils.join(values, String.valueOf(Character.toChars(NEWLINE_CHAR_ASCII)));
-				} else {
-					return String.valueOf(value);
+		if (parameterDataType.isDate()) {
+			return parameter.getDateString(value);
+		}
+
+		String defaultValue = parameter.getLocalizedDefaultValue(localeString);
+		Report defaultValueReport = parameter.getDefaultValueReport();
+		if (StringUtils.isBlank(defaultValue) && defaultValueReport == null) {
+			return ""; //return blank instead of "0" for integers or "0.0" for doubles
+		} else {
+			if (value instanceof List) {
+				List<String> values = new ArrayList<>();
+				@SuppressWarnings("unchecked")
+				List<Object> valueList = (List<Object>) value;
+				for (int i = 0; i < valueList.size(); i++) {
+					String htmlValue = String.valueOf(valueList.get(i));
+					values.add(htmlValue);
 				}
+				//https://stackoverflow.com/questions/8627902/new-line-in-text-area
+				//https://stackoverflow.com/questions/7693994/how-to-convert-ascii-code-0-255-to-a-string-of-the-associated-character
+				int NEWLINE_CHAR_ASCII = 10;
+				return StringUtils.join(values, String.valueOf(Character.toChars(NEWLINE_CHAR_ASCII)));
+			} else {
+				return String.valueOf(value);
+			}
 		}
 	}
 
@@ -568,10 +585,11 @@ public class ReportParameter implements Serializable {
 	 * the parameter dropdown list
 	 *
 	 * @param lovValue the lov value
-	 * @return <code>true</code> if the given lov value should be selected in the
-	 * parameter dropdown list
+	 * @return <code>true</code> if the given lov value should be selected in
+	 * the parameter dropdown list
+	 * @throws java.io.IOException
 	 */
-	public boolean selectLovValue(String lovValue) {
+	public boolean selectLovValue(String lovValue) throws IOException {
 		ParameterType parameterType = parameter.getParameterType();
 
 		switch (parameterType) {

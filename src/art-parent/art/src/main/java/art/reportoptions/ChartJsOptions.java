@@ -22,7 +22,7 @@ package art.reportoptions;
  *
  * @author Timothy Anyona
  */
-public class ChartJsOptions {
+public class ChartJsOptions extends GeneralReportOptions {
 
 	private int width = 300;
 	private int height = 100;

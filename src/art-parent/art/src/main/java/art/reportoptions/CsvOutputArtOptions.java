@@ -21,7 +21,7 @@ package art.reportoptions;
  *
  * @author Timothy Anyona
  */
-public class CsvOutputArtOptions {
+public class CsvOutputArtOptions extends GeneralReportOptions {
 
 	private String delimiter = ",";
 	private String quoteChar = "\"";

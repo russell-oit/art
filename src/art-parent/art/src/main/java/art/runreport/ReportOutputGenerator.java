@@ -736,9 +736,7 @@ public class ReportOutputGenerator {
 						throw new IllegalArgumentException("Options not specified");
 					}
 
-					ObjectMapper mapper = new ObjectMapper();
-					DataTablesOptions options2 = mapper.readValue(optionsString, DataTablesOptions.class);
-					String dataFileName = options2.getDataFile();
+					String dataFileName = options.getDataFile();
 
 					logger.debug("dataFileName='{}'", dataFileName);
 

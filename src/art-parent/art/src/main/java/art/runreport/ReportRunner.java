@@ -23,6 +23,7 @@ import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.report.Report;
+import art.reportoptions.GeneralReportOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
 import art.reportrule.ReportRuleService;
@@ -32,8 +33,13 @@ import art.servlets.Config;
 import art.user.User;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
+import art.utils.GroovySandbox;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,6 +49,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,6 +66,8 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -247,13 +256,15 @@ public class ReportRunner {
 		String reportSource = report.getReportSource();
 		querySb.replace(0, querySb.length(), reportSource);
 
-		applyTags(querySb);
-		applyDynamicSql(querySb);
-		applyParameterPlaceholders(querySb); //question placeholder put here
-		applyDynamicRecipient(querySb);
+		applyTags();
+		applyDynamicSql();
+		applyDirectSubstitution();
+		applyGroovy();
+		applyParameterPlaceholders(); //question placeholder put here
+		applyDynamicRecipient();
 
 		if (!report.getReportType().isJPivot()) {
-			applyRulesToQuery(querySb);
+			applyRulesToQuery();
 		}
 
 		//generate final sql and revert question placeholder
@@ -279,23 +290,80 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Applies rules to the report source
+	 * Applies groovy to the report source if the report is configured to use
+	 * groovy
 	 *
-	 * @param sb the report source
 	 * @throws SQLException
 	 */
-	private void applyRulesToQuery(StringBuilder sb) throws SQLException {
+	private void applyGroovy() throws SQLException {
+		logger.debug("Entering applyGroovy");
+		
+		String optionsString = report.getOptions();
+		GeneralReportOptions options;
+		if (StringUtils.isBlank(optionsString)) {
+			options = new GeneralReportOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				options = mapper.readValue(optionsString, GeneralReportOptions.class);
+			} catch (IOException ex) {
+				throw new SQLException(ex);
+			}
+		}
+
+		if (options.isUsesGroovy()) {
+			CompilerConfiguration cc = new CompilerConfiguration();
+			cc.addCompilationCustomizers(new SandboxTransformer());
+
+			Map<String, Object> variables = new HashMap<>();
+			if (reportParamsMap != null) {
+				variables.putAll(reportParamsMap);
+			}
+
+			Binding binding = new Binding(variables);
+
+			GroovyShell shell = new GroovyShell(binding, cc);
+			GroovySandbox sandbox = null;
+
+			if (Config.getCustomSettings().isEnableGroovySandbox()) {
+				sandbox = new GroovySandbox();
+				sandbox.register();
+			}
+
+			String querySql = querySb.toString();
+			Object result;
+			try {
+				result = shell.evaluate(querySql);
+			} finally {
+				if (sandbox != null) {
+					sandbox.unregister();
+				}
+			}
+
+			if (result != null) {
+				querySql = String.valueOf(result);
+			}
+
+			//update sb with new sql
+			querySb.replace(0, querySb.length(), querySql);
+		}
+	}
+
+	/**
+	 * Applies rules to the report source
+	 *
+	 * @throws SQLException
+	 */
+	private void applyRulesToQuery() throws SQLException {
 		logger.debug("Entering applyRulesToQuery");
 
-		String querySql = sb.toString();
+		String querySql = querySb.toString();
 
 		if (!useRules) {
 			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
 			querySql = querySql.replaceAll("(?iu)#rules#", "1=1");
-
 			//update sb with new sql
-			sb.replace(0, sb.length(), querySql);
-
+			querySb.replace(0, querySb.length(), querySql);
 			return;
 		}
 
@@ -396,8 +464,9 @@ public class ReportRunner {
 		//replace all occurrences of labelled rule with rule values
 		String replaceString = Matcher.quoteReplacement(labelledValues.toString()); //quote in case it contains special regex characters
 		querySql = querySql.replaceAll("(?iu)#rules#", replaceString);
+		
 		//update sb with new sql
-		sb.replace(0, sb.length(), querySql);
+		querySb.replace(0, querySb.length(), querySql);
 	}
 
 	/**
@@ -463,20 +532,45 @@ public class ReportRunner {
 
 		return finalLovValues;
 	}
+	
+	/**
+	 * Applies direct substitution parameters in the report source
+	 */
+	private void applyDirectSubstitution(){
+		logger.debug("Entering applyDirectSubstitution");
+
+		if (MapUtils.isEmpty(reportParamsMap)) {
+			return;
+		}
+		
+		String querySql = querySb.toString();
+
+		//get and store param identifier order for use with jdbc preparedstatement
+		ReportType reportType = report.getReportType();
+		
+		//replace direct substitution parameters
+		if (Config.getCustomSettings().isEnableDirectParameterSubstitution()
+				|| reportType.isJPivot()) {
+			RunReportHelper runReportHelper = new RunReportHelper();
+			String placeholderPrefix = "!";
+			querySql = runReportHelper.performDirectParameterSubstitution(querySql, placeholderPrefix, reportParamsMap);
+		}
+		
+		//update querySb with new sql
+		querySb.replace(0, querySb.length(), querySql);
+	}
 
 	/**
 	 * Applies parameter placeholders to the report source
-	 *
-	 * @param sb the report source
 	 */
-	private void applyParameterPlaceholders(StringBuilder sb) {
+	private void applyParameterPlaceholders() {
 		logger.debug("Entering applyParameterPlaceholders");
 
 		if (MapUtils.isEmpty(reportParamsMap)) {
 			return;
 		}
 
-		String querySql = sb.toString();
+		String querySql = querySb.toString();
 
 		//get and store param identifier order for use with jdbc preparedstatement
 		ReportType reportType = report.getReportType();
@@ -503,14 +597,6 @@ public class ReportRunner {
 					addJdbcParam(paramValue, reportParam.getParameter().getDataType());
 				}
 			}
-		}
-
-		//replace direct substitution parameters
-		if (Config.getCustomSettings().isEnableDirectParameterSubstitution()
-				|| reportType.isJPivot()) {
-			RunReportHelper runReportHelper = new RunReportHelper();
-			String placeholderPrefix = "!";
-			querySql = runReportHelper.performDirectParameterSubstitution(querySql, placeholderPrefix, reportParamsMap);
 		}
 
 		//replace literal ? in query with a placeholder, before substituting query parameters with ?
@@ -601,7 +687,7 @@ public class ReportRunner {
 		}
 
 		//update querySb with new sql
-		sb.replace(0, sb.length(), querySql);
+		querySb.replace(0, querySb.length(), querySql);
 	}
 
 	/**
@@ -683,13 +769,11 @@ public class ReportRunner {
 
 	/**
 	 * Applies dynamic recipients to the report source
-	 *
-	 * @param sb the report source
 	 */
-	private void applyDynamicRecipient(StringBuilder sb) {
+	private void applyDynamicRecipient() {
 		logger.debug("Entering applyDynamicRecipient");
 
-		String querySql = sb.toString();
+		String querySql = querySb.toString();
 
 		if (recipientFilterPresent) {
 			//replace #recipient# label with recipient values
@@ -715,7 +799,7 @@ public class ReportRunner {
 		querySql = querySql.replaceAll("(?iu)" + searchString, "1=1");
 
 		//update querySb with new sql
-		sb.replace(0, sb.length(), querySql);
+		querySb.replace(0, querySb.length(), querySql);
 	}
 
 	/**
@@ -1125,17 +1209,17 @@ public class ReportRunner {
 
 	/**
 	 * Applies dynamic sql to the report source
-	 *
-	 * @param sb the report source
 	 */
-	private void applyDynamicSql(StringBuilder sb) {
+	private void applyDynamicSql() {
 		logger.debug("Entering applyDynamicSql");
 
 		String element = "IF";
+		
+		String querySql = querySb.toString();
 
 		// XmlInfo stores the text between a tag as well as
 		// the start and end position of the tag
-		XmlInfo xinfo = XmlParser.getXmlElementInfo(sb.toString(), element, 0);
+		XmlInfo xinfo = XmlParser.getXmlElementInfo(querySql, element, 0);
 
 		while (xinfo != null) {
 			String xmlText = xinfo.getText(); // stores xml code between the IF element
@@ -1162,10 +1246,10 @@ public class ReportRunner {
 
 			// replace the code in the SQL with the text
 			// +3 is to handle </ and > chars around the closing tag
-			sb.replace(xinfo.getStart(), xinfo.getEnd() + element.length() + 3, finalElementValue);
+			querySb.replace(xinfo.getStart(), xinfo.getEnd() + element.length() + 3, finalElementValue);
 
 			// check next element
-			xinfo = XmlParser.getXmlElementInfo(sb.toString(), element, xinfo.getStart() + finalElementValue.length());
+			xinfo = XmlParser.getXmlElementInfo(querySb.toString(), element, xinfo.getStart() + finalElementValue.length());
 		}
 	}
 
@@ -1295,12 +1379,11 @@ public class ReportRunner {
 	/**
 	 * Applies :TAGS in the report source. This includes :USERNAME, :TIME, :DATE
 	 *
-	 * @param sb the report source
 	 */
-	private void applyTags(StringBuilder sb) {
+	private void applyTags() {
 		logger.debug("Entering applyTags");
 
-		String querySql = sb.toString();
+		String querySql = querySb.toString();
 
 		//replace :USERNAME: with currently logged in user's username
 		if (user != null) {
@@ -1324,9 +1407,9 @@ public class ReportRunner {
 		querySql = querySql.replaceAll("(?iu):time:", "'" + time + "'");
 
 		//update querySb with new sql
-		sb.replace(0, sb.length(), querySql);
+		querySb.replace(0, querySb.length(), querySql);
 
-		logger.debug("Sql query now is:\n{}", sb);
+		logger.debug("Sql query now is:\n{}", querySb);
 	}
 
 	/**

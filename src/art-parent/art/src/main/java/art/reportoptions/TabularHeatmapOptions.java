@@ -24,7 +24,7 @@ import java.util.List;
  * 
  * @author Timothy Anyona
  */
-public class TabularHeatmapOptions {
+public class TabularHeatmapOptions extends GeneralReportOptions {
 	
 	private List<Integer> columns;
 	private List<String> colors;

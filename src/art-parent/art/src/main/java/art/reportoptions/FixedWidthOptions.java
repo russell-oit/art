@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author Timothy Anyona
  */
-public class FixedWidthOptions {
+public class FixedWidthOptions extends GeneralReportOptions {
 
 	private String dateFormat;
 	private String dateTimeFormat;

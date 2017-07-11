@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author Timothy Anyona
  */
-public class JFreeChartOptions implements Serializable {
+public class JFreeChartOptions extends GeneralReportOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
