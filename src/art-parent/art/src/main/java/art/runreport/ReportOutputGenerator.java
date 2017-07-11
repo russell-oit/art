@@ -81,6 +81,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
+import art.utils.UncloseablePrintWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
 import groovy.lang.Binding;
@@ -625,6 +626,8 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.Dygraphs) {
 					rs = reportRunner.getResultSet();
+					//get row count before performing output. univocity will close rs after writing
+					rowsRetrieved = getResultSetRowCount(rs);
 					CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
 					//use appropriate date formats to ensure correct interpretation by browsers
 					//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
@@ -638,7 +641,6 @@ public class ReportOutputGenerator {
 						csvOutputUnivocity.generateOutput(rs, stringWriter);
 						csvString = stringWriter.toString();
 					}
-					rowsRetrieved = getResultSetRowCount(rs);
 					//need to escape string for javascript, otherwise you get Unterminated string literal error
 					//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
 					String escapedCsvString = Encode.forJavaScript(csvString);
@@ -772,8 +774,12 @@ public class ReportOutputGenerator {
 				FixedWidthOptions options = mapper.readValue(optionsString, FixedWidthOptions.class);
 				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
 				rs = reportRunner.getResultSet();
-				fixedWidthOutput.generateOutput(rs, writer, options);
+				//get row count before performing output. univocity will close rs after writing
 				rowsRetrieved = getResultSetRowCount(rs);
+				//wrap the writer in an uncloseable printwriter to prevent the writer from being closed by univocity
+				//https://stackoverflow.com/questions/8941298/system-out-closed-can-i-reopen-it
+				UncloseablePrintWriter uncloseableWriter = new UncloseablePrintWriter(writer);
+				fixedWidthOutput.generateOutput(rs, uncloseableWriter, options);
 			} else if (reportType == ReportType.C3) {
 				if (isJob) {
 					throw new IllegalStateException("C3.js report type not supported for jobs");
@@ -1515,7 +1521,7 @@ public class ReportOutputGenerator {
 		Integer rowCount = null;
 
 		try {
-			if (rs != null) {
+			if (rs != null && !rs.isClosed()) {
 				int rsType = rs.getType();
 				if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
 					//resultset is scrollable

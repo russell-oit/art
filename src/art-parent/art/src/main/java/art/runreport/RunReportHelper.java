@@ -553,9 +553,10 @@ public class RunReportHelper {
 				|| reportType == ReportType.FreeMarker || reportType.isXDocReport()
 				|| reportType == ReportType.Group || reportType.isChart()
 				|| reportType == ReportType.Thymeleaf
-				|| reportType == ReportType.Dygraphs) {
+				|| reportType == ReportType.Dygraphs
+				|| reportType == ReportType.FixedWidth) {
 			//need scrollable resultset for jasper art report, jxls art report,
-			//freemarker, xdocreport, thymeleaf, dygraphs in order to display record count
+			//freemarker, xdocreport, thymeleaf, dygraphs, fixedwidth in order to display record count
 			//need scrollable resultset in order to generate group report
 			//need scrollable resultset for charts for show data option
 			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
