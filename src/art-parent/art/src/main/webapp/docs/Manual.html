@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
  <head> 
-  <meta charset="UTF-8" /> 
-  <meta name="pdfTitle" content="ART Administration Manual" /> 
-  <meta name="version" content="3.0-beta11" /> 
+  <meta charset="UTF-8"> 
+  <meta name="pdfTitle" content="ART Administration Manual"> 
+  <meta name="version" content="3.0-rc1"> 
   <title>ART - Administration Manual</title> 
-  <link rel="shortcut icon" href="../images/favicon.ico" /> 
+  <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
 			table
 			{
@@ -56,16 +56,76 @@
      <li><a href="#reports">Reports</a> 
       <ol> 
        <li><a href="#creating-a-new-report">Creating a new report</a></li> 
-       <li><a href="#report-types">Report Types</a></li> 
+       <li><a href="#report-types">Report Types</a> 
+        <ol> 
+         <li><a href="#tabular">Tabular</a></li> 
+         <li><a href="#tabular-html-only">Tabular (html only)</a></li> 
+         <li><a href="#crosstab">Crosstab</a></li> 
+         <li><a href="#crosstab-html-only">Crosstab (html only)</a></li> 
+         <li><a href="#tabular-heatmap">Tabular: Heatmap</a></li> 
+         <li><a href="#charts">Charts</a></li> 
+         <li><a href="#xy">XY</a></li> 
+         <li><a href="#pie">Pie</a></li> 
+         <li><a href="#barsstacked-barsline">Bars/Stacked Bars/Line</a></li> 
+         <li><a href="#timedate-series">Time/Date Series</a></li> 
+         <li><a href="#speedometer">Speedometer</a></li> 
+         <li><a href="#bubble">Bubble</a></li> 
+         <li><a href="#heat-map">Heat Map</a></li> 
+         <li><a href="#chart-options">Chart Options</a></li> 
+         <li><a href="#group">Group</a></li> 
+         <li><a href="#update-statement">Update Statement</a></li> 
+         <li><a href="#text">Text</a></li> 
+         <li><a href="#dashboard">Dashboard</a></li> 
+         <li><a href="#dashboard-gridstack">Dashboard: Gridstack</a></li> 
+         <li><a href="#jasperreports-template-query">JasperReports: Template Query</a></li> 
+         <li><a href="#jasperreports-art-query">JasperReports: ART Query</a></li> 
+         <li><a href="#jpivot-mondrian">JPivot: Mondrian</a></li> 
+         <li><a href="#jpivot-mondrian-xmla">JPivot: Mondrian XMLA</a></li> 
+         <li><a href="#jpivot-microsoft-xmla">JPivot: Microsoft XMLA</a></li> 
+         <li><a href="#jxls-template-query">jXLS: Template Query</a></li> 
+         <li><a href="#jxls-art-query">jXLS: ART Query</a></li> 
+         <li><a href="#freemarker">FreeMarker</a></li> 
+         <li><a href="#thymeleaf">Thymeleaf</a></li> 
+         <li><a href="#reactpivot">ReactPivot</a></li> 
+         <li><a href="#pivottablejs">PivotTable.js</a></li> 
+         <li><a href="#pivottablejs-csv-local">PivotTable.js: CSV Local</a></li> 
+         <li><a href="#pivottablejs-csv-server">PivotTable.js: CSV Server</a></li> 
+         <li><a href="#xdocreport-freemarker-engine-docx">XDocReport: FreeMarker engine - Docx</a></li> 
+         <li><a href="#xdocreport-velocity-engine-docx">XDocReport: Velocity engine - Docx</a></li> 
+         <li><a href="#xdocreport-freemarker-engine-odt">XDocReport: FreeMarker engine - ODT</a></li> 
+         <li><a href="#xdocreport-velocity-engine-odt">XDocReport: Velocity engine - ODT</a></li> 
+         <li><a href="#xdocreport-freemarker-engine-pptx">XDocReport: FreeMarker engine - PPTX</a></li> 
+         <li><a href="#xdocreport-velocity-engine-pptx">XDocReport: Velocity engine - PPTX</a></li> 
+         <li><a href="#lov-dynamic">LOV: Dynamic</a></li> 
+         <li><a href="#lov-static">LOV: Static</a></li> 
+         <li><a href="#dynamic-job-recipients">Dynamic Job Recipients</a></li> 
+         <li><a href="#dygraphs">Dygraphs</a></li> 
+         <li><a href="#dygraphs-csv-local">Dygraphs: CSV Local</a></li> 
+         <li><a href="#dygraphs-csv-server">Dygraphs: CSV Server</a></li> 
+         <li><a href="#datatables">DataTables</a></li> 
+         <li><a href="#datatables-csv-local">DataTables: CSV Local</a></li> 
+         <li><a href="#datatables-csv-server">DataTables: CSV Server</a></li> 
+         <li><a href="#fixed-width">Fixed Width</a></li> 
+         <li><a href="#c3js">C3.js</a></li> 
+         <li><a href="#chartjs">Chart.js</a></li> 
+         <li><a href="#datamaps">Datamaps</a></li> 
+         <li><a href="#datamaps-file">Datamaps: File</a></li> 
+         <li><a href="#leaflet">Leaflet</a></li> 
+         <li><a href="#openlayers">OpenLayers</a></li> 
+         <li><a href="#saiku-connection">Saiku: Connection</a></li> 
+         <li><a href="#saiku-report">Saiku: Report</a></li> 
+         <li><a href="#mongodb">MongoDB</a></li> 
+        </ol></li> 
        <li><a href="#parameters">Parameters</a> 
         <ol> 
          <li><a href="#single-value-parameters">Single-Value Parameters</a></li> 
          <li><a href="#multi-value-parameters">Multi-Value Parameters</a></li> 
+         <li><a href="#parameter-options">Parameter Options</a></li> 
         </ol></li> 
        <li><a href="#running-a-report-via-url">Running a report via URL</a> 
         <ol> 
          <li><a href="#report-options">Report Options</a></li> 
-         <li><a href="#chart-options">Chart Options</a></li> 
+         <li><a href="#chart-options_1">Chart Options</a></li> 
          <li><a href="#examples">Examples</a></li> 
         </ol></li> 
        <li><a href="#report-formats">Report Formats</a></li> 
@@ -75,10 +135,17 @@
       <ol> 
        <li><a href="#example">Example</a></li> 
       </ol></li> 
-     <li><a href="#dynamic-queries">Dynamic Queries</a> 
+     <li><a href="#dynamic-sql">Dynamic SQL</a> 
       <ol> 
-       <li><a href="#operators">Operators</a></li> 
-       <li><a href="#dynamic-query-examples">Dynamic Query Examples</a></li> 
+       <li><a href="#using-groovy">Using Groovy</a> 
+        <ol> 
+         <li><a href="#example">Example</a></li> 
+        </ol></li> 
+       <li><a href="#using-xml-tags">Using XML tags</a> 
+        <ol> 
+         <li><a href="#operators">Operators</a></li> 
+         <li><a href="#examples">Examples</a></li> 
+        </ol></li> 
       </ol></li> 
      <li><a href="#drill-down-reports">Drill Down Reports</a> 
       <ol> 
@@ -108,14 +175,15 @@
          <li><a href="#tag-descriptions">Tag Descriptions</a></li> 
         </ol></li> 
       </ol></li> 
-     <li><a href="#jxls-spreadsheets">jXLS Spreadsheets</a></li> 
-     <li><a href="#pivot-tables-olap">Pivot Tables (OLAP)</a> 
+     <li><a href="#jxls-reports">jXLS Reports</a></li> 
+     <li><a href="#jpivot-reports">JPivot Reports</a> 
       <ol> 
        <li><a href="#mondrian">Mondrian</a> 
         <ol> 
          <li><a href="#create-the-schema-xml-file">Create the schema xml file</a></li> 
          <li><a href="#create-a-datasource">Create a datasource</a></li> 
          <li><a href="#create-the-report">Create the report</a></li> 
+         <li><a href="#roles">Roles</a></li> 
         </ol></li> 
        <li><a href="#mondrian-xmla">Mondrian XMLA</a> 
         <ol> 
@@ -228,10 +296,10 @@
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="introduction">Introduction</h1> 
-     <p>ART is a Java EE web application that enables quick deployment of SQL query results.</p> 
+     <p>ART is a Java web application that enables quick deployment of SQL query results.</p> 
      <ul> 
-      <li><strong>ART Administrators</strong> define datasources, reports, users, etc.</li> 
-      <li><strong>ART Users</strong> run reports and view the results in a browser or in a variety of file formats.<br /> </li> 
+      <li><strong>ART Administrators</strong> define datasources, reports, etc.</li> 
+      <li><strong>ART Users</strong> run reports and view the results in a browser or in a variety of file formats.<br> </li> 
      </ul> 
      <p>ART is open source software distributed under the <a class="" href="https://www.gnu.org/licenses/gpl-3.0.en.html" rel="nofollow">GPLv3 license</a>. You can install and use it without any charge.</p> 
      <h2 id="administration-overview">Administration Overview</h2> 
@@ -252,15 +320,16 @@
       <li><strong>Rule Values</strong> to be used with specific users or user groups</li> 
       <li><strong>Jobs</strong> to run reports at scheduled times</li> 
       <li><strong>Schedules</strong> to manage schedules that can be used when creating jobs</li> 
+      <li><strong>FTP Servers</strong> to enable ftping of job output</li> 
       <li><strong>Caches</strong> to enable clearing of ART object caches</li> 
       <li><strong>Connections</strong> to view datasource connection pools</li> 
       <li><strong>Loggers</strong> to manage which application debug information is logged by ART</li> 
      </ul> 
-     <p>The typical flow when defining a new report is</p> 
+     <p>The typical process when defining a report is</p> 
      <ul> 
-      <li>Obtain the plain SQL statement</li> 
-      <li>Define the report</li> 
-      <li>Update access rights to allow users to run the report</li> 
+      <li>Obtain the SQL statement for the report</li> 
+      <li>Create the report</li> 
+      <li>Grant access rights to allow users to run the report</li> 
      </ul> 
     </div> 
    </div> 
@@ -303,7 +372,7 @@
        </tr> 
        <tr> 
         <td><strong>Test SQL</strong></td> 
-        <td>Short SQL query used to determine if a connection is alive e.g. &quot;Select 1&quot;</td> 
+        <td>Short SQL query used to determine if a connection is alive e.g. "Select 1"</td> 
        </tr> 
        <tr> 
         <td><strong>Connection Pool Timeout</strong></td> 
@@ -427,10 +496,6 @@
         <td>The maximum number of rows to output for specific report formats, defined as a comma separated list of settings with each setting in the format <code>viewmode:value</code> e.g. <code>htmlGrid:5000,xls:10000</code>. Report formats are case sensitive.</td> 
        </tr> 
        <tr> 
-        <td><strong>PDF Page Size</strong></td> 
-        <td>Size and layout of documents generated by pdf output</td> 
-       </tr> 
-       <tr> 
         <td><strong>PDF Font Name</strong></td> 
         <td>Name of a custom font that should be used in generation of pdf output, and charts. For jasper reports, custom fonts need to be defined in the jrxml file. See the <a class="" href="http://sourceforge.net/p/art/wiki/Tips/">Tips</a> documentation for details on how to use custom fonts with jasper reports.</td> 
        </tr> 
@@ -468,7 +533,7 @@
        </tr> 
        <tr> 
         <td><strong>Display Null</strong></td> 
-        <td>Defines whether the string &quot;null&quot; is displayed where a column in a report is null</td> 
+        <td>Defines whether the string "null" is displayed where a column in a report is null</td> 
        </tr> 
        <tr> 
         <td><strong>Max Running Reports</strong></td> 
@@ -507,7 +572,7 @@
      <!--NewPage--> 
      <h1 id="datasources">Datasources</h1> 
      <p>A datasource is a database against which you want to run reports. Use the <strong>Configure | Datasources</strong> menu to manage datasources.</p> 
-     <p><img alt="datasources" src="datasources.png" /></p> 
+     <p><img alt="datasources" src="datasources.png"></p> 
      <ul> 
       <li>Use the <strong>Add</strong> button to create a new datasource</li> 
       <li>Use the <strong>Edit</strong> and <strong>Delete</strong> buttons at the top to edit or delete multiple datasources and the buttons on the side to edit or delete individual datasources</li> 
@@ -566,7 +631,7 @@
        </tr> 
        <tr> 
         <td><strong>Test SQL</strong></td> 
-        <td>Short SQL query used to determine if a connection is valid e.g. &quot;Select 1&quot;</td> 
+        <td>Short SQL query used to determine if a connection is valid e.g. "Select 1"</td> 
        </tr> 
        <tr> 
         <td><strong>Connection Pool Timeout</strong></td> 
@@ -583,55 +648,51 @@
      <p>Database: <strong>CUBRID</strong></p> 
      <p>Driver Name: cubrid.jdbc.driver.CUBRIDDriver</p> 
      <p>JDBC URL: <code>jdbc:cubrid:&lt;server_name&gt;:&lt;port&gt;:&lt;database_name&gt;[:?&lt;property1&gt;=&lt;value1&gt;[&amp;&lt;property2&gt;=&lt;value2&gt;][&amp;...]</code> (default port is 33000)</p> 
-     <p>Driver Available from: <a href="http://www.cubrid.org" rel="nofollow">http://www.cubrid.org</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://www.cubrid.org" rel="nofollow">http://www.cubrid.org</a><br> <br><br></p> 
      <p>Database: <strong>Oracle</strong></p> 
      <p>Driver Name: oracle.jdbc.OracleDriver</p> 
      <p>JDBC URL: <code>jdbc:oracle:thin:@&lt;server_name&gt;:&lt;port&gt;:&lt;sid&gt;</code> (default port is 1521)</p> 
-     <p>Driver Available from: <a href="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html" rel="nofollow">http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html" rel="nofollow">http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html</a><br> <br><br></p> 
      <p>Database: <strong>MySQL</strong></p> 
      <p>Driver Name: com.mysql.jdbc.Driver</p> 
      <p>JDBC URL: <code>jdbc:mysql://&lt;server_name&gt;[:port]/&lt;database_name&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 3306)</p> 
-     <p>Driver Available from: <a href="http://dev.mysql.com/downloads/connector/j/" rel="nofollow">http://dev.mysql.com/downloads/connector/j/</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://dev.mysql.com/downloads/connector/j/" rel="nofollow">http://dev.mysql.com/downloads/connector/j/</a><br> <br><br></p> 
      <p>Database: <strong>MariaDB</strong></p> 
      <p>Driver Name: org.mariadb.jdbc.Driver</p> 
      <p>JDBC URL: <code>jdbc:mariadb://&lt;server_name&gt;[:port]/&lt;database_name&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 3306)</p> 
      <p>Driver Available from: Driver Available from: <a href="https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j/" rel="nofollow">https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j/</a></p> 
-     <p><br /><br /></p> 
+     <p><br><br></p> 
      <p>Database: <strong>PostgreSQL</strong></p> 
      <p>Driver Name: org.postgresql.Driver</p> 
      <p>JDBC URL: <code>jdbc:postgresql://&lt;server_name&gt;[:port]/&lt;database_name&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 5432)</p> 
-     <p>Driver Available from: <a href="http://jdbc.postgresql.org/" rel="nofollow">http://jdbc.postgresql.org/</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://jdbc.postgresql.org/" rel="nofollow">http://jdbc.postgresql.org/</a><br> <br><br></p> 
      <p>Database: <strong>SQL Server (Microsoft driver)</strong></p> 
      <p>Driver Name: com.microsoft.sqlserver.jdbc.SQLServerDriver</p> 
      <p>JDBC URL: <code>jdbc:sqlserver://&lt;server_name&gt;[:port];databaseName=&lt;database_name&gt;[;instanceName=&lt;instance_name&gt;][;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 1433)</p> 
-     <p>Driver Available from: <a href="http://msdn.microsoft.com/en-us/data/aa937724.aspx" rel="nofollow">http://msdn.microsoft.com/en-us/data/aa937724.aspx</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://msdn.microsoft.com/en-us/data/aa937724.aspx" rel="nofollow">http://msdn.microsoft.com/en-us/data/aa937724.aspx</a><br> <br><br></p> 
      <p>Database: <strong>SQL Server (jTDS driver)</strong></p> 
      <p>Driver Name: net.sourceforge.jtds.jdbc.Driver</p> 
      <p>JDBC URL: <code>jdbc:jtds:sqlserver://&lt;server_name&gt;[:port]/&lt;database_name&gt;[;instance=&lt;instance_name&gt;][;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 1433)</p> 
-     <p>Driver Available from: <a href="http://jtds.sourceforge.net">http://jtds.sourceforge.net</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://jtds.sourceforge.net">http://jtds.sourceforge.net</a><br> <br><br></p> 
      <p>Database: <strong>HSQLDB (Standalone mode)</strong></p> 
      <p>Driver Name: org.hsqldb.jdbcDriver</p> 
      <p>JDBC URL: <code>jdbc:hsqldb:file:&lt;file_path&gt;[;shutdown=true;hsqldb.write_delay=false;create=false][;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
-     <p>Driver Available from: <a href="http://hsqldb.org/" rel="nofollow">http://hsqldb.org/</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://hsqldb.org/" rel="nofollow">http://hsqldb.org/</a><br> <br><br></p> 
      <p>Database: <strong>HSQLDB (Server mode)</strong></p> 
      <p>Driver Name: org.hsqldb.jdbcDriver</p> 
      <p>JDBC URL: <code>jdbc:hsqldb:hsql://&lt;server_name&gt;[:port]/&lt;database_alias&gt;[;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 9001)</p> 
-     <p>Driver Available from: <a href="http://hsqldb.org/" rel="nofollow">http://hsqldb.org/</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://hsqldb.org/" rel="nofollow">http://hsqldb.org/</a><br> <br><br></p> 
      <p>Database: <strong>DB2 (IBM Data Server Driver for JDBC and SQLJ)</strong></p> 
      <p>Driver Name: com.ibm.db2.jcc.DB2Driver</p> 
      <p>JDBC URL: <code>jdbc:db2://&lt;server_name&gt;[:port]/&lt;database_name&gt;[:&lt;property&gt;=&lt;value&gt;[;...]</code> (default port for IBM DB2 is many times one of the following: 446, 6789, or 50000)</p> 
-     <p>Driver Available from: <a href="http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217" rel="nofollow">http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217</a> (registration required).<br /> This driver can connect to a DB2 database on any platform i.e. iSeries, zSeries, or Intel-based machines with Linux or Windows. <br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217" rel="nofollow">http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217</a> (registration required).<br> This driver can connect to a DB2 database on any platform i.e. iSeries, zSeries, or Intel-based machines with Linux or Windows. <br> <br><br></p> 
      <p>Database: <strong>DB2 for iSeries (Toolbox driver)</strong></p> 
      <p>Driver Name: com.ibm.as400.access.AS400JDBCDriver</p> 
      <p>JDBC URL: <code>jdbc:as400://&lt;server_name&gt;;prompt=false;translate binary=true[;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
-     <p>Driver Available from: <a href="http://jt400.sourceforge.net/">http://jt400.sourceforge.net/</a><br /> <br /><br /></p> 
-     <p>Database: <strong>Generic ODBC Datasource</strong></p> 
-     <p>Driver Name: sun.jdbc.odbc.JdbcOdbcDriver</p> 
-     <p>JDBC URL: <code>jdbc:odbc:&lt;dsn_name&gt;</code><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://jt400.sourceforge.net/">http://jt400.sourceforge.net/</a><br> <br><br></p> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li>The sun JDBC-ODBC bridge driver is available by default. You need to set up the DSN on the server. For optimal performance you should use the specific DBMS JDBC driver.</li> 
-      <li>ART comes with drivers for CUBRID, PostgreSQL, MySQL, MariaDB, HSQLDB, jTDS so you don?t need to download these drivers</li> 
+      <li>ART comes with drivers for CUBRID, PostgreSQL, MySQL, MariaDB, HSQLDB, SQL Server (jTDS driver), SQL Server (Microsoft driver) so you don?t need to download these drivers</li> 
      </ul> 
     </div> 
    </div> 
@@ -640,7 +701,7 @@
      <!--NewPage--> 
      <h1 id="users">Users</h1> 
      <p>Use the <strong>Configure | Users</strong> menu to manage users.</p> 
-     <p><img alt="users" src="users.png" /></p> 
+     <p><img alt="users" src="users.png"></p> 
      <ul> 
       <li>Use the <strong>Add</strong> button to create a new user</li> 
       <li>Use the <strong>Edit</strong> and <strong>Delete</strong> buttons at the top to edit or delete multiple users and the buttons on the side to edit or delete individual users</li> 
@@ -752,8 +813,8 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <div class="codehilite"> 
       <pre>    if ( &lt;CONDITION&gt; ) {
     // Authentication Successful!
-    session.setAttribute(&quot;username&quot;, username);
-    response.sendRedirect(&quot;/art/reports&quot;);
+    session.setAttribute("username", username);
+    response.sendRedirect("/art/reports");
     }
 </pre> 
      </div> 
@@ -799,14 +860,14 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <table border="1"> 
       <thead> 
        <tr> 
-        <th>Attribute</th> 
+        <th>Field</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><strong>ID</strong></td> 
-        <td>Auto-generated ID used to uniquely identify the report</td> 
+        <td>Auto-generated ID used to identify the report</td> 
        </tr> 
        <tr> 
         <td><strong>Name</strong></td> 
@@ -870,7 +931,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Date Format</strong></td> 
-        <td>For tabular reports, the format that should be used for date columns. Leave blank to use the default.</td> 
+        <td>For tabular reports, the format that should be used for date columns. Leave blank to use the default. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>Number Format</strong></td> 
@@ -895,6 +956,10 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        <tr> 
         <td><strong>Fetch Size</strong></td> 
         <td>The number of rows retrieved by the database driver per trip to the database. Leave as 0 to use the driver's default. This value reprents a trade-off between memory and query execution time and may be useful to set for reports that return large amounts of data in order to avoid out-of-memory errors. Not all databases honour this setting.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Page Orientation</strong></td> 
+        <td>The orientation to be used in generated documents e.g. with pdf output</td> 
        </tr> 
        <tr> 
         <td><strong>x-axis Label</strong></td> 
@@ -967,28 +1032,29 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
 :TIME: - replaced by the current time (format YYYY-MM-DD HH:MI:SS)
 </pre> 
        </div> </li> 
-      <li> <p>You can use a stored procedure to return query results. When defining the query, in the SQL source section, use the syntax for calling a stored procedure in the RDBMS you are using e.g. For MySQL you can use something like &quot;call my_sp&quot;. Another RDBMS may use syntax like &quot;exec my_sp&quot;.</p> </li> 
+      <li> <p>You can use a stored procedure to return query results. When defining the query, in the SQL source section, use the syntax for calling a stored procedure in the RDBMS you are using e.g. For MySQL you can use something like "call my_sp". Another RDBMS may use syntax like "exec my_sp".</p> </li> 
      </ul> 
      <h2 id="report-types">Report Types</h2> 
-     <ul> 
-      <li><strong>Tabular</strong><br /> A tabular result exportable to spreadsheet, pdf etc.</li> 
-      <li> <p><strong>Tabular (html only)</strong><br /> A tabular result that can only be displayed in HTML format. This may be used to embed HTML code in the SQL query in order to modify display colours of certain columns etc. To do this, concatenate the SQL with the required HTML tags. e.g. For MySQL, to display positive values in green and negative values in red, you can use something like</p> 
-       <div class="codehilite"> 
-        <pre>SELECT col1,
-CASE WHEN int_col2&gt;0 THEN
-concat('<span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;background-color: green&quot;</span><span class="nt">&gt;</span>',cast(int_col2 as char),'<span class="nt">&lt;/div&gt;</span>') 
-ELSE
-concat('<span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;background-color: red&quot;</span><span class="nt">&gt;</span>',cast(int_col2 as char),'<span class="nt">&lt;/div&gt;</span>') 
-END as &quot;My Formatted Column&quot;,
-col3
-from my_table
+     <h3 id="tabular">Tabular</h3> 
+     <p>A tabular result exportable to spreadsheet, pdf etc.</p> 
+     <h3 id="tabular-html-only">Tabular (html only)</h3> 
+     <p>A tabular result that can only be displayed in HTML format. This may be used to embed HTML code in the SQL query in order to modify display colours of certain columns etc. To do this, concatenate the SQL with the required HTML tags. e.g. For MySQL, to display positive values in green and negative values in red, you can use something like</p> 
+     <div class="codehilite"> 
+      <pre>    SELECT col1,
+    CASE WHEN int_col2&gt;0 THEN
+    concat('<span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background-color: green"</span><span class="nt">&gt;</span>',cast(int_col2 as char),'<span class="nt">&lt;/div&gt;</span>') 
+    ELSE
+    concat('<span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background-color: red"</span><span class="nt">&gt;</span>',cast(int_col2 as char),'<span class="nt">&lt;/div&gt;</span>') 
+    END as "My Formatted Column",
+    col3
+    from my_table
 </pre> 
-       </div> </li> 
-      <li> <p><strong>Crosstab</strong><br /> Rearranges the query output into crosstab format, exportable to spreadsheet, pdf etc. If you want values to be summed, include the summing in the SQL query e.g. select year,quarter,sum(amount) from orders group by year,quarter</p> </li> 
-     </ul> 
+     </div> 
+     <h3 id="crosstab">Crosstab</h3> 
+     <p>Rearranges the query output into crosstab format, exportable to spreadsheet, pdf etc. If you want values to be summed, include the summing in the SQL query e.g. select year,quarter,sum(amount) from orders group by year,quarter</p> 
      <p>The SQL result set is expected to have either 3 or 5 columns:</p> 
      <div class="codehilite"> 
-      <pre>    SELECT xAxisCol &quot;xAxisLabel&quot;, yAxisCol &quot;yAxisLabel&quot;, Value FROM ...
+      <pre>    SELECT xAxisCol "xAxisLabel", yAxisCol "yAxisLabel", Value FROM ...
     (data type: string, string, any)
 </pre> 
      </div> 
@@ -1020,103 +1086,156 @@ from my_table
     //                   ^--- Jan comes after Feb!
 </pre> 
      </div> 
-     <p>Without the AltSort columns, as in the first output, Feb appears before Jan. This is because the string &quot;Feb&quot; is alphabetically before &quot;Jan&quot;. However, Jan should appear before Feb because that is how they appear in the order of months. You can therefore use the month number in the sort column to ensure that Jan is displayed before Feb. Another example would be if you are displaying dates in a format like &quot;Apr-2011&quot; (MMM-YYYY). Apr-2011 is alphabetically before Jan-2011, so the alternative sort column could be set to YYYY-MM format (e.g. 2011-04) to order the period names in the right way.</p> 
-     <ul> 
-      <li><strong>Crosstab (html only)</strong><br /> Same as crosstab but limited to HTML output only</li> 
-      <li><strong>Charts</strong><br /> Display the results as a chart, exportable to pdf or png.</li> 
-     </ul> 
+     <p>Without the AltSort columns, as in the first output, Feb appears before Jan. This is because the string "Feb" is alphabetically before "Jan". However, Jan should appear before Feb because that is how they appear in the order of months. You can therefore use the month number in the sort column to ensure that Jan is displayed before Feb. Another example would be if you are displaying dates in a format like "Apr-2011" (MMM-YYYY). Apr-2011 is alphabetically before Jan-2011, so the alternative sort column could be set to YYYY-MM format (e.g. 2011-04) to order the period names in the right way.</p> 
+     <h3 id="crosstab-html-only">Crosstab (html only)</h3> 
+     <p>Same as crosstab but limited to HTML output only</p> 
+     <h3 id="tabular-heatmap">Tabular: Heatmap</h3> 
+     <p>Displays numeric information using shades of colour depending on the values. A number of options can be specified in the <strong>Options</strong> field to configure the output.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>columns</strong></td> 
+        <td>optional - array of integers</td> 
+        <td>The columns that should be coloured. If not specified, all columns are included in the colouring. If any cell in the applicable columns contains a non-numeric value, no colouring will be done. An error will be displayed in the javascript console for the web browser indicating that <strong>hex is undefined</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>colors</strong></td> 
+        <td>optional - array of strings</td> 
+        <td>Colours that should be applied, beginning with colours for the lower values going up. The colour strings are specified in hex format e.g. <code>#ffffff</code>. For example for a two colour scheme in a red range, one can specify the setting as <code>"colors": ["#ffffff", "#ff4a53"]</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>perColumn</strong></td> 
+        <td>optional - boolean (default = false)</td> 
+        <td>If true, each applicable column is graded and coloured separately. If false, the whole table is considered when grading the colours.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="charts">Charts</h3> 
+     <p>Display the results as a chart, exportable to pdf or png.</p> 
      <p>The layout of the SQL must follow a specific syntax for each different type of chart</p> 
-     <ul> 
-      <li> <p><strong>XY</strong></p> 
-       <div class="codehilite"> 
-        <pre>SELECT Value1, Value2 &quot;SeriesName&quot; FROM ...
-(data type: number, number )
-</pre> 
-       </div> <p>Dynamic Series</p> 
-       <div class="codehilite"> 
-        <pre>SELECT Value1, Value2, SeriesName FROM ...
-(data type: number, number, string)
-</pre> 
-       </div> </li> 
-      <li> <p><strong>Pie</strong></p> 
-       <div class="codehilite"> 
-        <pre>SELECT Category, Value FROM ...
-(data type: string, number )
-</pre> 
-       </div> </li> 
-      <li> <p><strong>Bars/Stacked Bars/Line</strong><br /> Static Series</p> 
-       <div class="codehilite"> 
-        <pre>SELECT Item, Value1 &quot;SeriesName1&quot; [, Value2, ...] FROM ...
-(data type: string, number [, number, ...] )
-</pre> 
-       </div> <p>Dynamic Series</p> 
-       <div class="codehilite"> 
-        <pre>SELECT Item, SeriesName, Value FROM ...
-(data type: string, string, number)
+     <h3 id="xy">XY</h3> 
+     <div class="codehilite"> 
+      <pre>    SELECT Value1, Value2 "SeriesName" FROM ...
+    (data type: number, number )
 
-Example:
-SELECT Product, Region, SUM(VOLUME) FROM sales group by product,region
-</pre> 
-       </div> </li> 
-      <li> <p><strong>Time/Date Series</strong><br /> Static Series</p> 
-       <div class="codehilite"> 
-        <pre>SELECT Timestamp|Date, Value1 &quot;SeriesName1&quot; [, Value2, ...] FROM ...
-(data type: timestamp|date, number, [, number, ...] ). Timestamp/Dates must be unique.
-</pre> 
-       </div> <p>Dynamic Series</p> 
-       <div class="codehilite"> 
-        <pre>SELECT Timestamp|Date, SeriesName, Value FROM ...
-(data type: timestamp|date, string, number). Timestamp/Dates must be unique.
+Dynamic Series
 
-Example:
-SELECT ORDER_DATE, PRODUCT, SUM(VOLUME) FROM orders group by order_date,product
+    SELECT Value1, Value2, SeriesName FROM ...
+    (data type: number, number, string)
 </pre> 
-       </div> </li> 
-      <li> <p><strong>Speedometer</strong></p> 
-       <div class="codehilite"> 
-        <pre>SELECT DataValue, MinValue, MaxValue, UnitsDescription [, Range1, Range2, ...] FROM ...
-(data type: number, number, number, string)
-Ranges represent optional columns and each range has 3 values separated by :  i.e.
-RangeUpperValue:RangeColour:RangeDescription (data type: number, string, string).
-RangeUpperValue can be a percentage.
+     </div> 
+     <h3 id="pie">Pie</h3> 
+     <div class="codehilite"> 
+      <pre>    SELECT Category, Value FROM ...
+    (data type: string, number )
+</pre> 
+     </div> 
+     <h3 id="barsstacked-barsline">Bars/Stacked Bars/Line</h3> 
+     <p>Static Series</p> 
+     <div class="codehilite"> 
+      <pre>    SELECT Item, Value1 "SeriesName1" [, Value2, ...] FROM ...
+    (data type: string, number [, number, ...] )
+</pre> 
+     </div> 
+     <p>Dynamic Series</p> 
+     <div class="codehilite"> 
+      <pre>    SELECT Item, SeriesName, Value FROM ...
+    (data type: string, string, number)
 
-Example:
-SELECT reading, 0, 100, &quot;degrees&quot;,
-&quot;50:#00FF00:Normal&quot;,
-&quot;80%:#FFFF00:Warning&quot;,
-&quot;100:#FF0000:Critical&quot;
-FROM temperature_reading
+    Example:
+    SELECT Product, Region, SUM(VOLUME) FROM sales group by product,region
 </pre> 
-       </div> </li> 
-      <li> <p><strong>Bubble</strong></p> 
-       <div class="codehilite"> 
-        <pre>SELECT Value1, Value2 &quot;SeriesName&quot;, Value3 [, normalisedValue3] FROM ...
-(data type: number, number, number [, number] )
+     </div> 
+     <h3 id="timedate-series">Time/Date Series</h3> 
+     <p>Static Series</p> 
+     <div class="codehilite"> 
+      <pre>    SELECT Timestamp|Date, Value1 "SeriesName1" [, Value2, ...] FROM ...
+    (data type: timestamp|date, number, [, number, ...] ). Timestamp/Dates must be unique.
 </pre> 
-       </div> </li> 
-      <li> <p><strong>Heat Map</strong></p> 
-       <div class="codehilite"> 
-        <pre>SELECT Value1, Value2, Value3 [, Option1, Option2, ...] FROM ...
-(data type: number, number, number [, string, string, ...] )
+     </div> 
+     <p>Dynamic Series</p> 
+     <div class="codehilite"> 
+      <pre>    SELECT Timestamp|Date, SeriesName, Value FROM ...
+    (data type: timestamp|date, string, number). Timestamp/Dates must be unique.
 
-Example:
-SELECT x, y, z, &quot;upperBound=100&quot;        
-FROM myvalues
+    Example:
+    SELECT ORDER_DATE, PRODUCT, SUM(VOLUME) FROM orders group by order_date,product
 </pre> 
-       </div> </li> 
-     </ul> 
+     </div> 
+     <h3 id="speedometer">Speedometer</h3> 
+     <div class="codehilite"> 
+      <pre>    SELECT DataValue, MinValue, MaxValue, UnitsDescription [, Range1, Range2, ...] FROM ...
+    (data type: number, number, number, string)
+    Ranges represent optional columns and each range has 3 values separated by :  i.e.
+    RangeUpperValue:RangeColour:RangeDescription (data type: number, string, string).
+    RangeUpperValue can be a percentage.
+
+    Example:
+    SELECT reading, 0, 100, "degrees",
+    "50:#00FF00:Normal",
+    "80%:#FFFF00:Warning",
+    "100:#FF0000:Critical"
+    FROM temperature_reading
+</pre> 
+     </div> 
+     <h3 id="bubble">Bubble</h3> 
+     <div class="codehilite"> 
+      <pre>    SELECT Value1, Value2 "SeriesName", Value3 [, normalisedValue3] FROM ...
+    (data type: number, number, number [, number] )
+</pre> 
+     </div> 
+     <h3 id="heat-map">Heat Map</h3> 
+     <div class="codehilite"> 
+      <pre>    SELECT Value1, Value2, Value3 [, Option1, Option2, ...] FROM ...
+    (data type: number, number, number [, string, string, ...] )
+
+    Example:
+    SELECT x, y, z, "upperBound=100"        
+    FROM myvalues
+</pre> 
+     </div> 
+     <h3 id="chart-options">Chart Options</h3> 
+     <p>Certain options can be specified in the <strong>Options</strong> field to configure the chart output.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>seriesColors</strong></td> 
+        <td>optional - object</td> 
+        <td>Defines specific colours to be used for given chart series. Each property of the object consists of the series ID as the property name and the hex colour code as the property value. Multiple properties can be specified e.g. <code>"seriesColors": {"0" : "#ff4a53", "2" : "#4a538a"}</code>. The first series has an ID of 0.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dateFormat</strong></td> 
+        <td>optional - string</td> 
+        <td>For date series and time series charts, defines the date format to be used on the x-axis, overriding the one automatically assigned by the chart.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li>ART uses the cewolf and jfreechart libraries to generate charts. These libraries in turn use standard java AWT to plot charts. In order to work correctly, AWT needs a graphic display. If you are using a &quot;headless&quot; workstation (i.e. a Unix box without X) you need to start the JVM with the option <strong>-Djava.awt.headless=true</strong></li> 
+      <li>ART uses the cewolf and jfreechart libraries to generate charts. These libraries in turn use standard java AWT to plot charts. In order to work correctly, AWT needs a graphic display. If you are using a "headless" workstation (i.e. a Unix box without X) you need to start the JVM with the option <strong>-Djava.awt.headless=true</strong></li> 
       <li> <p>You can specify specific colours to be used for the series displayed in a chart by adding columns to the query resultset in the format <code>seriesColor:&lt;series index&gt;:&lt;hex color code&gt;</code> e.g. for a pie chart,</p> 
        <div class="codehilite"> 
-        <pre>SELECT description, volume, &quot;seriesColor:0:#ff8000&quot;
+        <pre>SELECT description, volume, "seriesColor:0:#ff8000"
 FROM orders
 </pre> 
        </div> </li> 
       <li> <p>For <strong>bubble charts</strong>, the size of the bubbles is determined by <code>Value3</code>. The actual size of the bubbles as they appear in the chart is also relative to the values on the y axis (<code>Value2</code>). If your values for <code>Value3</code> are much larger than those for <code>Value2</code> for example, you may find the whole chart filled in one colour, with no bubbles. In this case, you can increase the range of the y axis by setting the <strong>y-axis Min</strong> and <strong>y-axis Max</strong> fields for the query. Alternatively, you can include an extra column in the result set that contains a normalised value that will be used to scale the size of the bubbles e.g.</p> 
        <div class="codehilite"> 
-        <pre>SELECT Value1, Value2 &quot;MySeries&quot;, Value3,
+        <pre>SELECT Value1, Value2 "MySeries", Value3,
 Value3 * (SELECT max(Value2) FROM mytable)/(SELECT max(Value3) FROM mytable)
 FROM mytable
 </pre> 
@@ -1147,7 +1266,7 @@ FROM mytable
        </tr> 
        <tr> 
         <td><strong>scalePos</strong></td> 
-        <td>top <br /> left <br /> bottom <br /> right</td> 
+        <td>top <br> left <br> bottom <br> right</td> 
         <td>bottom</td> 
         <td>Default position of the colour scale relative to the chart</td> 
        </tr> 
@@ -1159,7 +1278,7 @@ FROM mytable
        </tr> 
        <tr> 
         <td><strong>scaleTextPos</strong></td> 
-        <td>topleft <br /> topright <br /> bottomleft <br /> bottomright</td> 
+        <td>topleft <br> topright <br> bottomleft <br> bottomright</td> 
         <td>topleft</td> 
         <td>Position of the scale title relative to the colour scale</td> 
        </tr> 
@@ -1185,7 +1304,7 @@ FROM mytable
         <td><strong><code>color#&lt;n&gt;</code></strong> e.g. <code>color#1</code>, <code>color#2</code></td> 
         <td><code>&lt;number&gt;:&lt;hex colour code&gt;</code> e.g. <code>0.0:#FF0000</code></td> 
         <td>None</td> 
-        <td>The colour to use for a given range of values. The colour is determined by <code>Value3</code> of the result set. The number is the lower bound of the range. The option value has the lower bound and colour separated by <code>:</code> e.g. to display 0-10 in red and 11-50 in green, you'll define two columns in the result set, <code>&quot;color#1=0:#FF0000&quot;, &quot;color#2=11:#00FF00&quot;</code></td> 
+        <td>The colour to use for a given range of values. The colour is determined by <code>Value3</code> of the result set. The number is the lower bound of the range. The option value has the lower bound and colour separated by <code>:</code> e.g. to display 0-10 in red and 11-50 in green, you'll define two columns in the result set, <code>"color#1=0:#FF0000", "color#2=11:#00FF00"</code></td> 
        </tr> 
        <tr> 
         <td><strong>lowerColor</strong></td> 
@@ -1201,10 +1320,8 @@ FROM mytable
        </tr> 
       </tbody> 
      </table> 
-     <p><br /></p> 
-     <ul> 
-      <li><strong>Group</strong><br /> Groups the report data.</li> 
-     </ul> 
+     <h3 id="group">Group</h3> 
+     <p>Groups the report data.</p> 
      <p>For example, if a query's tabular output looks like:</p> 
      <div class="codehilite"> 
       <pre>    AA | AA | B | C | D
@@ -1213,7 +1330,7 @@ FROM mytable
     AA | BB | X | Y | Z
 </pre> 
      </div> 
-     <p>using &quot;Group on 2 columns&quot;, the data would be grouped by the first 2 columns, and the output would look like:</p> 
+     <p>using "Group on 2 columns", the data would be grouped by the first 2 columns, and the output would look like:</p> 
      <div class="codehilite"> 
       <pre>    AA | AA
     B | C | D
@@ -1223,14 +1340,17 @@ FROM mytable
     X | Y | Z
 </pre> 
      </div> 
-     <p>For a &quot;Group on n columns&quot; report, the query must be ordered by the the first n-1 columns.</p> 
-     <ul> 
-      <li><strong>Update Statement</strong><br /> Used to execute statements that do not return any rows e.g. INSERT/UPDATE/DELETE statements</li> 
-      <li><strong>Text</strong><br /> Used to define a piece of text that can be displayed</li> 
-      <li><strong>Dashboard</strong><br /> Used to display reports in a single portal-like page.</li> 
-      <li><strong>Dashboard: Gridstack</strong><br /> Used to display reports in a single portal-like page, allowing for specifying exact positioning of report items within the dashboard, specifying the height and width that the report items should occupy, allowing for resizing the items dynamically using the mouse, and moving the items around using drag-and-drop.</li> 
-      <li><strong>JasperReports: Template Query</strong><br /> To generate formatted reports e.g. statements given to customers, you can use Jasper Reports. To create a jasper report, use the <a class="" href="http://jasperforge.org/projects/ireport" rel="nofollow">iReport</a> or <a class="" href="http://community.jaspersoft.com/project/jaspersoft-studio" rel="nofollow">JasperSoft Studio</a> report designer.</li> 
-     </ul> 
+     <p>For a "Group on n columns" report, the query must be ordered by the the first n-1 columns.</p> 
+     <h3 id="update-statement">Update Statement</h3> 
+     <p>Used to execute statements that do not return any rows e.g. INSERT/UPDATE/DELETE statements</p> 
+     <h3 id="text">Text</h3> 
+     <p>Used to define a piece of text that can be displayed</p> 
+     <h3 id="dashboard">Dashboard</h3> 
+     <p>Used to display reports in a single portal-like page</p> 
+     <h3 id="dashboard-gridstack">Dashboard: Gridstack</h3> 
+     <p>Used to display reports in a single portal-like page, allowing for specifying exact positioning of report items within the dashboard, specifying the height and width that the report items should occupy, allowing for resizing the items dynamically using the mouse, and moving the items around using drag-and-drop.</p> 
+     <h3 id="jasperreports-template-query">JasperReports: Template Query</h3> 
+     <p>To generate formatted reports e.g. documents given to customers, you can use JasperReports. To create a jasper report, use the <a class="" href="http://community.jaspersoft.com/project/jaspersoft-studio" rel="nofollow">JasperSoft Studio</a> report designer.</p> 
      <p>Displays a jasper report based on the selected jrxml template. The query within the jasper report template will be used to generate the results. The query will be run against the selected datasource. You can define parameters that will be passed to the jasper report. Jasper report parameters are defined with a specific type. The following mapping of ART and jasperreport parameter types should be used.</p> 
      <table border="1"> 
       <thead> 
@@ -1253,7 +1373,7 @@ FROM mytable
         <td>java.lang.Integer</td> 
        </tr> 
        <tr> 
-        <td><strong>Number</strong></td> 
+        <td><strong>Double</strong></td> 
         <td>java.lang.Double</td> 
        </tr> 
        <tr> 
@@ -1262,93 +1382,128 @@ FROM mytable
        </tr> 
       </tbody> 
      </table> 
-     <p>If the report needs a barcode element, use one of the <strong>Barbecue</strong> barcode elements. The Barcode4J elements will cause an error when the report is run within ART.</p> 
-     <p>If the report contains a subreport, set the <strong>Subreport Expression</strong> property of the subreport object to the file name of the subreport with a .jasper extension e.g. <strong>&quot;subreport1.jasper&quot;</strong> (include the quotes). When creating the report in ART, upload the main report's .jrxml file using the main template field and upload the subreport's .jrxml file using the resources field. If there are multiple subreports, you can select multiple files and upload all of them at once using the <strong>Start upload</strong> button. You can also select files by dragging from the file explorer and dropping to the browser page.</p> 
-     <ul> 
-      <li><strong>JasperReports: ART Query</strong><br /> Displays a jasper report based on the selected jrxml template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</li> 
-      <li><strong>Pivot Table: Mondrian</strong><br /> Used to provide OLAP (slice and dice) analysis using the mondrian engine. The MDX for the query should be put in the source section and the xml file that defines the mondrian cube should be selected in the template field.</li> 
-      <li><strong>Pivot Table: Mondrian XMLA</strong><br /> Used to provide OLAP analysis by accessing a mondrian server via the xmla protocol. </li> 
-      <li><strong>Pivot Table: Microsoft XMLA</strong><br /> Used to provide OLAP analysis by accessing an SQL Server Analysis Services server via the xmla protocol. </li> 
-      <li><strong>jXLS Spreadsheet: Template Query</strong><br /> Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query within the jXLS template will be used to generate the results. The query will be run against the selected datasource.</li> 
-      <li><strong>jXLS Spreadsheet: ART Query</strong><br /> Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</li> 
-      <li><strong>FreeMarker</strong><br /> Displays a report in the browser based on a freemarker template - <a href="http://freemarker.org/." rel="nofollow">http://freemarker.org/.</a> The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. An example report is included in the demo database.</li> 
-      <li><strong>Thymeleaf</strong><br /> Displays a report in the browser based on a thymeleaf template - <a href="http://www.thymeleaf.org/." rel="nofollow">http://www.thymeleaf.org/.</a> The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. An example report is included in the demo database.</li> 
-      <li><strong>ReactPivot</strong><br /> Generates a pivot-table-like report based on tabular data using the ReactPivot library - <a href="https://davidguttman.github.io/react-pivot/." rel="nofollow">https://davidguttman.github.io/react-pivot/.</a> You will need to create a javascript file that contains the react pivot configuration for the report. You need to define <strong>dimensions</strong>, <strong>reduce</strong> and <strong>calculations</strong> options. Other options can also be defined to override the defaults. The demo database also comes with some samples of this report type. This report type is useful when you want summary and analysis of numeric data by category.</li> 
-      <li><strong>PivotTable.js</strong><br /> Generates a pivot table based on data from a database - making use of the PivotTable.js library - <a href="https://github.com/nicolaskruchten/pivottable." rel="nofollow">https://github.com/nicolaskruchten/pivottable.</a> A javascript file containing custom configuration can be uploaded using the <strong>Template</strong> field. The demo database contains a sample report of this type. Performace should be acceptable up to 100,000 rows, depending on the user's computer.</li> 
-      <li><strong>PivotTable.js: CSV Local</strong><br /> Enables generation of a pivot table using data from a user supplied csv file. Additionally, a javascript file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</li> 
-      <li> <p><strong>PivotTable.js: CSV Server</strong><br /> Generates a pivot table based on data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
-       <div class="codehilite"> 
-        <pre>{
-     &quot;dataFile&quot;: &quot;file_name.csv&quot;
-}
+     <p>If the report contains a subreport, set the <strong>Subreport Expression</strong> property of the subreport object to the file name of the subreport with a .jasper extension e.g. <strong>"subreport1.jasper"</strong> (include the quotes). When creating the report in ART, upload the main report's .jrxml file using the main template field and upload the subreport's .jrxml file using the resources field. If there are multiple subreports, you can select multiple files and upload all of them at once using the <strong>Start upload</strong> button. You can also select files by dragging from the file explorer and dropping to the browser page.</p> 
+     <h3 id="jasperreports-art-query">JasperReports: ART Query</h3> 
+     <p>Displays a jasper report based on the selected jrxml template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</p> 
+     <h3 id="jpivot-mondrian">JPivot: Mondrian</h3> 
+     <p>Used to provide OLAP (slice and dice) analysis using the mondrian engine. The MDX for the query should be put in the source section and the xml file that defines the mondrian cube should be selected in the template field. More details about JPivot reports can be found in the JPivot Reports section of the manual.</p> 
+     <h3 id="jpivot-mondrian-xmla">JPivot: Mondrian XMLA</h3> 
+     <p>Used to provide OLAP analysis by accessing a mondrian server via the xmla protocol. </p> 
+     <h3 id="jpivot-microsoft-xmla">JPivot: Microsoft XMLA</h3> 
+     <p>Used to provide OLAP analysis by accessing an SQL Server Analysis Services server via the xmla protocol. </p> 
+     <h3 id="jxls-template-query">jXLS: Template Query</h3> 
+     <p>Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query within the jXLS template will be used to generate the results. The query will be run against the selected datasource. More details about jXLS reports can be found in the jXLS Reports section of the manual.</p> 
+     <h3 id="jxls-art-query">jXLS: ART Query</h3> 
+     <p>Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</p> 
+     <h3 id="freemarker">FreeMarker</h3> 
+     <p>Displays a report in the browser based on a freemarker template - <a href="http://freemarker.org/." rel="nofollow">http://freemarker.org/.</a> The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. An example report is included in the demo database.</p> 
+     <h3 id="thymeleaf">Thymeleaf</h3> 
+     <p>Displays a report in the browser based on a thymeleaf template - <a href="http://www.thymeleaf.org/." rel="nofollow">http://www.thymeleaf.org/.</a> The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. An example report is included in the demo database.</p> 
+     <h3 id="reactpivot">ReactPivot</h3> 
+     <p>Generates a pivot-table-like report based on tabular data using the ReactPivot library - <a href="https://davidguttman.github.io/react-pivot/." rel="nofollow">https://davidguttman.github.io/react-pivot/.</a> You will need to create a javascript file that contains the react pivot configuration for the report. You need to define <strong>dimensions</strong>, <strong>reduce</strong> and <strong>calculations</strong> options. Other options can also be defined to override the defaults. The demo database also comes with some samples of this report type. This report type is useful when you want summary and analysis of numeric data by category.</p> 
+     <h3 id="pivottablejs">PivotTable.js</h3> 
+     <p>Generates a pivot table based on data from a database - making use of the PivotTable.js library - <a href="https://github.com/nicolaskruchten/pivottable." rel="nofollow">https://github.com/nicolaskruchten/pivottable.</a> A javascript file containing custom configuration can be uploaded using the <strong>Template</strong> field. The demo database contains a sample report of this type. Performace should be acceptable up to 100,000 rows, depending on the user's computer.</p> 
+     <h3 id="pivottablejs-csv-local">PivotTable.js: CSV Local</h3> 
+     <p>Enables generation of a pivot table using data from a user supplied csv file. Additionally, a javascript file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> 
+     <h3 id="pivottablejs-csv-server">PivotTable.js: CSV Server</h3> 
+     <p>Generates a pivot table based on data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
+     <div class="codehilite"> 
+      <pre>    {
+         "dataFile": "file_name.csv"
+    }
 </pre> 
-       </div> </li> 
-     </ul> 
+     </div> 
      <p>Additionally, a javascript template file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> 
-     <ul> 
-      <li><strong>XDocReport: FreeMarker engine - Docx</strong><br /> You can use MS Word (docx), LibreOffice Writer (odt) or MS PowerPoint (pptx) docments as a template for reports. You simply create the document as you would like it to appear and then insert fields that will be replaced with data at runtime. This uses the <a class="" href="https://github.com/opensagres/xdocreport" rel="nofollow">XDocReport</a> library. You can have a look at the XDocReport wiki, <a href="https://github.com/opensagres/xdocreport/wiki" rel="nofollow">https://github.com/opensagres/xdocreport/wiki</a>, for examples on how to create templates for different needs. The query results will be contained in a variable named <strong>results</strong> which can be used in the FreeMarker or Velocity expressions.</li> 
-     </ul> 
+     <h3 id="xdocreport-freemarker-engine-docx">XDocReport: FreeMarker engine - Docx</h3> 
+     <p>You can use MS Word (docx), LibreOffice Writer (odt) or MS PowerPoint (pptx) docments as a template for reports. You simply create the document as you would like it to appear and then insert fields that will be replaced with data at runtime. This uses the <a class="" href="https://github.com/opensagres/xdocreport" rel="nofollow">XDocReport</a> library. You can have a look at the XDocReport wiki, <a href="https://github.com/opensagres/xdocreport/wiki" rel="nofollow">https://github.com/opensagres/xdocreport/wiki</a>, for examples on how to create templates for different needs. The query results will be contained in a variable named <strong>results</strong> which can be used in the FreeMarker or Velocity expressions.</p> 
      <p>Displays a report based on the selected docx template, which uses freemarker syntax - <a href="http://freemarker.org/docs/index.html" rel="nofollow">http://freemarker.org/docs/index.html</a> for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
-     <ul> 
-      <li><strong>XDocReport: Velocity engine - Docx</strong><br /> Displays a report based on the selected docx template, which uses velocity syntax - <a href="https://velocity.apache.org/engine/devel/user-guide.html" rel="nofollow">https://velocity.apache.org/engine/devel/user-guide.html</a> for expressions within the document. The query as defined in the SQL source will be used to generate the results.</li> 
-      <li><strong>XDocReport: FreeMarker engine - ODT</strong><br /> Displays a report based on the selected odt template, which uses freemarker syntax. The query as defined in the SQL source will be used to generate the results.</li> 
-      <li><strong>XDocReport: Velocity engine - ODT</strong><br /> Displays a report based on the selected odt template, which uses velocity syntax. The query as defined in the SQL source will be used to generate the results.</li> 
-      <li><strong>XDocReport: FreeMarker engine - PPTX</strong><br /> Displays a report based on the selected pptx template, which uses freemarker syntax. The query as defined in the SQL source will be used to generate the results.</li> 
-      <li><strong>XDocReport: Velocity engine - PPTX</strong><br /> Displays a report based on the selected pptx template, which uses velocity syntax. The query as defined in the SQL source will be used to generate the results.</li> 
-      <li> <p><strong>LOV: Dynamic</strong><br /> Creates an LOV query whose values are based on an sql query. The query can have either one column, or two columns if the parameter value and the text displayed to the user needs to be different</p> 
-       <div class="codehilite"> 
-        <pre>SELECT city_id, city_name
-FROM cities
+     <h3 id="xdocreport-velocity-engine-docx">XDocReport: Velocity engine - Docx</h3> 
+     <p>Displays a report based on the selected docx template, which uses velocity syntax - <a href="https://velocity.apache.org/engine/devel/user-guide.html" rel="nofollow">https://velocity.apache.org/engine/devel/user-guide.html</a> for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
+     <h3 id="xdocreport-freemarker-engine-odt">XDocReport: FreeMarker engine - ODT</h3> 
+     <p>Displays a report based on the selected odt template, which uses freemarker syntax. The query as defined in the SQL source will be used to generate the results.</p> 
+     <h3 id="xdocreport-velocity-engine-odt">XDocReport: Velocity engine - ODT</h3> 
+     <p>Displays a report based on the selected odt template, which uses velocity syntax. The query as defined in the SQL source will be used to generate the results.</p> 
+     <h3 id="xdocreport-freemarker-engine-pptx">XDocReport: FreeMarker engine - PPTX</h3> 
+     <p>Displays a report based on the selected pptx template, which uses freemarker syntax. The query as defined in the SQL source will be used to generate the results.</p> 
+     <h3 id="xdocreport-velocity-engine-pptx">XDocReport: Velocity engine - PPTX</h3> 
+     <p>Displays a report based on the selected pptx template, which uses velocity syntax. The query as defined in the SQL source will be used to generate the results.</p> 
+     <h3 id="lov-dynamic">LOV: Dynamic</h3> 
+     <p>Creates an LOV query whose values are based on an sql query. The query can have either one column, or two columns if the parameter value and the text displayed to the user needs to be different</p> 
+     <div class="codehilite"> 
+      <pre>    SELECT city_id, city_name
+    FROM cities
 </pre> 
-       </div> </li> 
-     </ul> 
+     </div> 
      <p>OR</p> 
      <div class="codehilite"> 
       <pre>    SELECT city_id
     FROM cities
 </pre> 
      </div> 
-     <ul> 
-      <li> <p><strong>LOV: Static</strong><br /> Creates an LOV query whose values are set in the sql source section. Values are separated by new lines. If the value and display text need to be different, separate the two with a |</p> 
-       <div class="codehilite"> 
-        <pre>Toaster
-pr-01|Laptops
-pr-02|Desktops
+     <h3 id="lov-static">LOV: Static</h3> 
+     <p>Creates an LOV query whose values are set in the sql source section. Values are separated by new lines. If the value and display text need to be different, separate the two with a |</p> 
+     <div class="codehilite"> 
+      <pre>    Toaster
+    pr-01|Laptops
+    pr-02|Desktops
 </pre> 
-       </div> </li> 
-      <li> <p><strong>Dynamic Job Recipients</strong><br /> Defines a query that can be used to specify dynamic recipients when scheduling a job. It can have either one column, or multiple columns. In either case, the first column must contain email addresses for the recipients.</p> </li> 
-      <li><strong>Dygraphs</strong><br /> Generates a time series chart using data from a database - making use of the dygraphs library - <a href="http://dygraphs.com/." rel="nofollow">http://dygraphs.com/.</a> A javascript file containing custom configuration can be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. The query must have a minimum of two columns. The first can be a date or number field, and will be the data on the x-axis. The second column must be a number and will represent the first series data. Additional columns of number type can be included, which will be data for additional series. There should be no record with a null date in the query result. If you zoom into the data by clicking and dragging, you double-click on the chart to zoom out.</li> 
-      <li><strong>Dygraphs: CSV Local</strong><br /> Enables generation of a dygraphs chart using data from a user supplied csv file. Additionally, a javascript file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv. The first column of the data, if a date, should have dates formatted as <code>yyyy/MM/dd</code> e.g. 2017/02/17, and datetime data formatted as <code>yyyy/MM/dd HH:mm</code> e.g. 2017/02/17 16:02 or <code>yyyy/MM/dd HH:mm:ss</code> e.g. 2017/02/17 16:02:59. The csv data should not contain any quotes.</li> 
-      <li> <p><strong>Dygraphs: CSV Server</strong><br /> Generates a dygraphs chart based on data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
-       <div class="codehilite"> 
-        <pre>{
-     &quot;dataFile&quot;: &quot;file_name.csv&quot;
-}
+     </div> 
+     <h3 id="dynamic-job-recipients">Dynamic Job Recipients</h3> 
+     <p>Defines a query that can be used to specify dynamic recipients when scheduling a job. It can have either one column, or multiple columns. In either case, the first column must contain email addresses for the recipients.</p> 
+     <h3 id="dygraphs">Dygraphs</h3> 
+     <p>Generates a time series chart using data from a database - making use of the dygraphs library - <a href="http://dygraphs.com/." rel="nofollow">http://dygraphs.com/.</a> A javascript file containing custom configuration can be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. The query must have a minimum of two columns. The first can be a date or number field, and will be the data on the x-axis. The second column must be a number and will represent the first series data. Additional columns of number type can be included, which will be data for additional series. There should be no record with a null date in the query result. If you zoom into the data by clicking and dragging, you double-click on the chart to zoom out.</p> 
+     <h3 id="dygraphs-csv-local">Dygraphs: CSV Local</h3> 
+     <p>Enables generation of a dygraphs chart using data from a user supplied csv file. Additionally, a javascript file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv. The first column of the data, if a date, should have dates formatted as <code>yyyy/MM/dd</code> e.g. 2017/02/17, and datetime data formatted as <code>yyyy/MM/dd HH:mm</code> e.g. 2017/02/17 16:02 or <code>yyyy/MM/dd HH:mm:ss</code> e.g. 2017/02/17 16:02:59. The csv data should not contain any quotes.</p> 
+     <h3 id="dygraphs-csv-server">Dygraphs: CSV Server</h3> 
+     <p>Generates a dygraphs chart based on data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
+     <div class="codehilite"> 
+      <pre>    {
+         "dataFile": "file_name.csv"
+    }
 </pre> 
-       </div> </li> 
-     </ul> 
+     </div> 
      <p>Additionally, a javascript template file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> 
-     <ul> 
-      <li> <p><strong>DataTables</strong><br /> Enables display of data from a database in a table using the DataTables library - <a href="https://datatables.net/." rel="nofollow">https://datatables.net/.</a> A javascript file containing custom configuration can be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. By default, column filters are added to all columns. If you would like to turn off column filters, provide a json object in the <strong>Options</strong> field, setting the <strong>showColumnFilters</strong> property to <strong>false</strong> e.g.</p> 
-       <div class="codehilite"> 
-        <pre>{
-     &quot;showColumnFilters&quot;: false
-}
+     <h3 id="datatables">DataTables</h3> 
+     <p>Enables display of data from a database in a table using the DataTables library - <a href="https://datatables.net/." rel="nofollow">https://datatables.net/.</a> A javascript file containing custom configuration can be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>outputDateFormat</strong></td> 
+        <td>optional - string (defalut = blank)</td> 
+        <td>The format of output data for date columns. If blank, the data will be output as is. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>outputDateTimeFormat</strong></td> 
+        <td>optional - string (defalut = blank)</td> 
+        <td>The format of output data for datetime columns. If blank, the data will be output as is. The format is as per<a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showColumnFilters</strong></td> 
+        <td>optional - boolean (default = true)</td> 
+        <td>Determines if column filters will be displayed</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="datatables-csv-local">DataTables: CSV Local</h3> 
+     <p>Enables display of data from a user supplied csv file in a DataTables table. Additionally, a javascript file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> 
+     <h3 id="datatables-csv-server">DataTables: CSV Server</h3> 
+     <p>Enables display of data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
+     <div class="codehilite"> 
+      <pre>    {
+         "dataFile": "file_name.csv"
+    }
 </pre> 
-       </div> </li> 
-      <li> <p><strong>DataTables: CSV Local</strong><br /> Enables display of data from a user supplied csv file in a DataTables table. Additionally, a javascript file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> </li> 
-      <li> <p><strong>DataTables: CSV Server</strong><br /> Enables display of data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
-       <div class="codehilite"> 
-        <pre>{
-     &quot;dataFile&quot;: &quot;file_name.csv&quot;
-}
-</pre> 
-       </div> </li> 
-     </ul> 
+     </div> 
      <p>Additionally, a javascript template file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> 
-     <ul> 
-      <li><strong>Fixed Width</strong><br /> Generates fixed width output, primarily for jobs that require output in fixed width format. The sql query determines which data will be in the output. The <strong>Options</strong> field determines the formatting of this output and has the following possible properties.</li> 
-     </ul> 
+     <h3 id="fixed-width">Fixed Width</h3> 
+     <p>Generates fixed width output, primarily for jobs that require output in fixed width format. The sql query determines which data will be in the output. The <strong>Options</strong> field determines the formatting of this output and has the following possible properties.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -1366,7 +1521,7 @@ pr-02|Desktops
        <tr> 
         <td><strong>fieldLengthsByName</strong></td> 
         <td>array of objects</td> 
-        <td>Each object specifies the field name and the field length e.g. <code>[{&quot;order_id&quot;: 8}, {&quot;order_date&quot;: 14}]</code> means the <code>order_id</code> field will have a length of 8 and the <code>order_date</code> field will have a length of 14. You must specify either the <strong>fieldLengths</strong> or the <strong>fieldLengthsByName</strong> property.</td> 
+        <td>Each object specifies the field name and the field length e.g. <code>[{"order_id": 8}, {"order_date": 14}]</code> means the <code>order_id</code> field will have a length of 8 and the <code>order_date</code> field will have a length of 14. You must specify either the <strong>fieldLengths</strong> or the <strong>fieldLengthsByName</strong> property.</td> 
        </tr> 
        <tr> 
         <td><strong>includeHeaders</strong></td> 
@@ -1406,47 +1561,48 @@ pr-02|Desktops
        <tr> 
         <td><strong>fieldDateFormats</strong></td> 
         <td>optional - array of objects</td> 
-        <td>Each object specifies the date format and an array of fields that should use that format e.g. <code>[{&quot;dd/MM/yyyy&quot;: [&quot;order_date&quot;, &quot;due_date&quot;]}, {&quot;dd-MMM-yyyy&quot;: [&quot;payment_date&quot;]}]</code></td> 
+        <td>Each object specifies the date format and an array of fields that should use that format e.g. <code>[{"dd/MM/yyyy": ["order_date", "due_date"]}, {"dd-MMM-yyyy": ["payment_date"]}]</code></td> 
        </tr> 
        <tr> 
         <td><strong>fieldNumberFormats</strong></td> 
         <td>optional - array of objects</td> 
-        <td>Each object specifies the number format and an array of fields that should use that format e.g. <code>[{&quot;0.00&quot;: [&quot;amount&quot;]}, {&quot;#,##0.#&quot;: [&quot;volume&quot;]}]</code></td> 
+        <td>Each object specifies the number format and an array of fields that should use that format e.g. <code>[{"0.00": ["amount"]}, {"#,##0.#": ["volume"]}]</code></td> 
        </tr> 
        <tr> 
         <td><strong>fieldAlignmentByName</strong></td> 
         <td>optional - array of objects</td> 
-        <td>Each object specifies the alignment to be used and an array of field names that should use that alignment e.g. <code>[{&quot;right&quot;: [&quot;amount&quot;, &quot;volume&quot;]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>.</td> 
+        <td>Each object specifies the alignment to be used and an array of field names that should use that alignment e.g. <code>[{"right": ["amount", "volume"]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldAlignmentByPosition</strong></td> 
         <td>optional - array of objects</td> 
-        <td>Each object specifies the alignment to be used and an array of field positions that should use that alignment e.g. <code>[{&quot;right&quot;: [2, 5]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>. The first field in the output is marked as position 0.</td> 
+        <td>Each object specifies the alignment to be used and an array of field positions that should use that alignment e.g. <code>[{"right": [2, 5]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>. The first field in the output is marked as position 0.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldPaddingByName</strong></td> 
         <td>optional - array of objects</td> 
-        <td>Each object specifies the padding to be used and an array of field names that should use that padding e.g. <code>[{&quot;_&quot;: [&quot;amount&quot;, &quot;volume&quot;]}]</code>. The padding should be a single character.</td> 
+        <td>Each object specifies the padding to be used and an array of field names that should use that padding e.g. <code>[{"_": ["amount", "volume"]}]</code>. The padding should be a single character.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldPaddingByPosition</strong></td> 
         <td>optional - array of objects</td> 
-        <td>Each object specifies the padding to be used and an array of field positions that should use that padding e.g. <code>[{&quot;_&quot;: [2, 5]}]</code>. The padding should be a single character. The first field in the output is marked as position 0.</td> 
+        <td>Each object specifies the padding to be used and an array of field positions that should use that padding e.g. <code>[{"_": [2, 5]}]</code>. The padding should be a single character. The first field in the output is marked as position 0.</td> 
        </tr> 
       </tbody> 
      </table> 
      <p>The demo database has a few sample fixed width reports and jobs.</p> 
-     <ul> 
-      <li> <p><strong>C3.js</strong><br /> Generates charts using the c3.js library - <a href="http://c3js.org/." rel="nofollow">http://c3js.org/.</a> A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. If you would like to use custom css, provide a json object in the <strong>Options</strong> field, setting the <strong>cssFile</strong> property to the file name of the css file to use. This file can be uploaded using the <strong>Add files</strong> option.</p> 
-       <div class="codehilite"> 
-        <pre>{
-     &quot;cssFile&quot;: &quot;file_name.css&quot;
-}
+     <h3 id="c3js">C3.js</h3> 
+     <p>Generates charts using the c3.js library - <a href="http://c3js.org/." rel="nofollow">http://c3js.org/.</a> A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. If you would like to use custom css, provide a json object in the <strong>Options</strong> field, setting the <strong>cssFile</strong> property to the file name of the css file to use. This file can be uploaded using the <strong>Add files</strong> option.</p> 
+     <div class="codehilite"> 
+      <pre>    {
+         "cssFile": "file_name.css"
+    }
 </pre> 
-       </div> </li> 
-      <li> <p><strong>Chart.js</strong><br /> Generates charts using the chart.js library - <a href="http://www.chartjs.org/." rel="nofollow">http://www.chartjs.org/.</a> A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. In the <strong>Options</strong> field, you can specify the <strong>width</strong> (integer - default = 300) or <strong>height</strong> (integer - default = 100) properties to define a custom width or height for the chart.</p> </li> 
-      <li> <p><strong>Datamaps</strong><br /> Enables display of data on a map, using the Datamaps library - <a href="https://datamaps.github.io/" rel="nofollow">https://datamaps.github.io/</a>, using data from a database. A javascript file containing the datamaps configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> </li> 
-     </ul> 
+     </div> 
+     <h3 id="chartjs">Chart.js</h3> 
+     <p>Generates charts using the chart.js library - <a href="http://www.chartjs.org/." rel="nofollow">http://www.chartjs.org/.</a> A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. In the <strong>Options</strong> field, you can specify the <strong>width</strong> (integer - default = 300) or <strong>height</strong> (integer - default = 100) properties to define a custom width or height for the chart.</p> 
+     <h3 id="datamaps">Datamaps</h3> 
+     <p>Enables display of data on a map, using the Datamaps library - <a href="https://datamaps.github.io/" rel="nofollow">https://datamaps.github.io/</a>, using data from a database. A javascript file containing the datamaps configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -1494,10 +1650,10 @@ pr-02|Desktops
       </tbody> 
      </table> 
      <p>If using a custom map and you have a shapefile, you can <strong>Import</strong> the zip file with shapefile specification files to <a href="http://mapshaper.org/" rel="nofollow">http://mapshaper.org/</a> and then use the <strong>Export</strong> option to convert the shapefile to <strong>TopoJSON</strong>. You will then use the TopoJSON file for the report.</p> 
-     <ul> 
-      <li> <p><strong>Datamaps: File</strong><br /> Enables display of data on a map, using the Datamaps library, using data from a csv or json file. You can also use this report type if the data is hardcoded within the template file. Requirements and options are similar to those of the <strong>Datamaps</strong> report type. The demo database contains some sample reports of this type.</p> </li> 
-      <li> <p><strong>Leaflet</strong><br /> Enables display of data on a web map or tiled map using the Leaflet library - <a href="http://leafletjs.com/." rel="nofollow">http://leafletjs.com/.</a> A javascript file containing the leaflet configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> </li> 
-     </ul> 
+     <h3 id="datamaps-file">Datamaps: File</h3> 
+     <p>Enables display of data on a map, using the Datamaps library, using data from a csv or json file. You can also use this report type if the data is hardcoded within the template file. Requirements and options are similar to those of the <strong>Datamaps</strong> report type. The demo database contains some sample reports of this type.</p> 
+     <h3 id="leaflet">Leaflet</h3> 
+     <p>Enables display of data on a web map or tiled map using the Leaflet library - <a href="http://leafletjs.com/." rel="nofollow">http://leafletjs.com/.</a> A javascript file containing the leaflet configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -1534,15 +1690,235 @@ pr-02|Desktops
        </tr> 
       </tbody> 
      </table> 
-     <ul> 
-      <li><strong>OpenLayers</strong><br /> Enables display of data on a web map using the OpenLayers library - <a href="http://openlayers.org/." rel="nofollow">http://openlayers.org/.</a> A javascript file containing the openlayers configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified. These attributes are the same as those for Leaflet reports.</li> 
-     </ul> 
+     <h3 id="openlayers">OpenLayers</h3> 
+     <p>Enables display of data on a web map using the OpenLayers library - <a href="http://openlayers.org/." rel="nofollow">http://openlayers.org/.</a> A javascript file containing the openlayers configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified. These attributes are the same as those for Leaflet reports.</p> 
+     <h3 id="saiku-connection">Saiku: Connection</h3> 
+     <p>Provides a connection that will be used to generate cubes in the Analytics view. ART uses the <a class="" href="http://meteorite.bi/products/saiku" rel="nofollow">Saiku</a> library to provide the Analytics functionality.</p> 
+     <p>You would first create a <strong>Datasource</strong> from the <strong>Configure | Datasources</strong> menu. The datasource will need to be of either the Olap4J Mondrian or Olap4j XMLA type. You would then fill the other datasource details as appropriate and then specify this datasource in the <code>Datasource</code> field when creating the saiku connection report. After doing this, if you click on the <strong>Analytics</strong> menu and then the <strong>Add query</strong> icon, you will see in the <strong>Cubes</strong> drop down, your connection and the cubes it has.</p> 
+     <p>If you use an Olap4j Mondrian datasource, you can specify different roles that different users will have when using the connection. To do this, create a rule for the saiku connection report. Use a dummy column name. Next, specify rule values for that rule for different users. If you need to specify multiple roles, add multiple rule values.</p> 
+     <p>Also for Olap4j Mondrian datasources, you can omit the <strong>Catalog</strong> part from the JDBC URL and instead upload the catalog (schema xml file) to use in the <strong>Template</strong> field. Note that when you test or save an olap4j mondrian datasource without specifying the Catalog, you will get an error. You can ignore this error if you will be specifying the Catalog in the saiku connection.</p> 
+     <p>It is also worth noting that saiku uses mondrian 4, and as such if using olap4j mondrian, or mondrian xmla datasources, it is best if the schema xml files are in mondrian 4 structure.</p> 
+     <h3 id="saiku-report">Saiku: Report</h3> 
+     <p>When you perform some analysis from the Analytics view, you can save that analysis. When you do this, this is saved as a <code>Saiku: Report</code> type. The report source for this report type is a JSON representation of a saiku QueryModel. You can have a look at it to see what is generated. It isn't recommended to build this by hand.</p> 
+     <p>Once you have created a saiku report, you can give users access to it like with other report types. The users will also need to be given access to the saiku connection that is the basis for the saiku report. Users will see a list of saiku reports they have access to by clicking on the <strong>Open query</strong> icon at the top of the Analytics view. Users can then run the reports, edit and save new reports, and delete reports they have created. Users cannot overwrite or delete reports for which they don't have exclusive access i.e. they are the only ones who have access to the report. Only junior admins and above can overwrite or delete any saiku report.</p> 
+     <h3 id="mongodb">MongoDB</h3> 
+     <p>Allows you to query a MongoDB database. To use it, first create a datasource of type <strong>MongoDB</strong>. Set the URL as appropriate. Next, create the report, setting the report <strong>Type</strong> as <strong>MongoDB</strong> and selecting the mongodb datasource in the <strong>Datasource</strong> field. In the report source field, enter the groovy script that will be used to retrieve data from the mongodb database. The syntax of querying can either be that of the <a class="" href="https://mongodb.github.io/mongo-java-driver/" rel="nofollow">MongoDB Java Driver</a>, the <a class="" href="http://jongo.org/" rel="nofollow">Jongo</a> library or the <a class="" href="https://mongodb.github.io/morphia/" rel="nofollow">Morphia</a> library. ART passes a MongoClient connection object to the groovy script with the variable name <strong>mongoClient</strong>. This is the variable that is to be used as the connection to the mongodb server. ART also passes any report parameters specified using the parameter name as the variable name.</p> 
+     <p>If it is required to display the returned results in a table, the groovy script must return a <code>List</code> of objects that are to be displayed. Also, the groovy script is run through a sandbox and only classes contained in the <strong>WEB-INF\groovy-whitelist.txt</strong> file will be allowed to be used within the script. If you use a class that is not contained in the whitelist, a <strong>SecurityException</strong> error will occur when you run the report. If you get such an error, add the class mentioned to the whitelist and run the report again.</p> 
+     <p><strong>Example using MongoDB Java Driver syntax</strong></p> 
+     <div class="codehilite"> 
+      <pre><span class="kn">import</span> <span class="nn">org.bson.Document</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.mongodb.client.MongoCollection</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.mongodb.client.MongoCursor</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.mongodb.client.MongoDatabase</span><span class="p">;</span>
+
+<span class="n">MongoDatabase</span> <span class="n">db</span> <span class="o">=</span> <span class="n">mongoClient</span><span class="o">.</span><span class="n">getDatabase</span><span class="p">(</span><span class="s">"test"</span><span class="p">);</span>
+<span class="n">MongoCollection</span><span class="o">&lt;</span><span class="n">Document</span><span class="o">&gt;</span> <span class="n">collection</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">getCollection</span><span class="p">(</span><span class="s">"mycol"</span><span class="p">);</span>
+<span class="n">MongoCursor</span><span class="o">&lt;</span><span class="n">Document</span><span class="o">&gt;</span> <span class="n">cursor</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">find</span><span class="p">()</span><span class="o">.</span><span class="n">iterator</span><span class="p">();</span>
+
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Document</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="k">try</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">cursor</span><span class="o">.</span><span class="n">hasNext</span><span class="p">())</span> <span class="p">{</span>
+        <span class="n">records</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cursor</span><span class="o">.</span><span class="n">next</span><span class="p">());</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">return</span> <span class="n">records</span><span class="p">;</span>
+</pre> 
+     </div> 
+     <p><strong>Example using Jongo syntax</strong></p> 
+     <div class="codehilite"> 
+      <pre><span class="kn">import</span> <span class="nn">com.mongodb.DB</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.bson.Document</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">org.jongo.Jongo</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.jongo.MongoCollection</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.jongo.MongoCursor</span><span class="p">;</span>
+
+<span class="n">DB</span> <span class="n">db</span> <span class="o">=</span> <span class="n">mongoClient</span><span class="o">.</span><span class="n">getDB</span><span class="p">(</span><span class="s">"test"</span><span class="p">);</span>
+
+<span class="n">Jongo</span> <span class="n">jongo</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Jongo</span><span class="p">(</span><span class="n">db</span><span class="p">);</span>
+<span class="n">MongoCollection</span> <span class="n">friends</span> <span class="o">=</span> <span class="n">jongo</span><span class="o">.</span><span class="n">getCollection</span><span class="p">(</span><span class="s">"mycol"</span><span class="p">);</span>
+<span class="n">MongoCursor</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">cursor</span> <span class="o">=</span> <span class="n">friends</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">"{title: 'MongoDB'}"</span><span class="p">)</span><span class="o">.</span><span class="k">as</span><span class="p">(</span><span class="n">Object</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
+
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="k">try</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">cursor</span><span class="o">.</span><span class="n">hasNext</span><span class="p">())</span> <span class="p">{</span>
+        <span class="n">records</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cursor</span><span class="o">.</span><span class="n">next</span><span class="p">());</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">return</span> <span class="n">records</span><span class="p">;</span>
+</pre> 
+     </div> 
+     <p><strong>Example using Morphia syntax</strong></p> 
+     <div class="codehilite"> 
+      <pre><span class="n">package</span> <span class="n">art</span><span class="o">.</span><span class="n">groovy</span>
+
+<span class="kn">import</span> <span class="nn">org.mongodb.morphia.annotations.Entity</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.mongodb.morphia.annotations.Id</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.mongodb.morphia.Datastore</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.mongodb.morphia.Morphia</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.mongodb.morphia.query.Query</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.bson.types.ObjectId</span><span class="p">;</span>
+
+<span class="nd">@Entity</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"employeesCol"</span><span class="p">,</span> <span class="n">noClassnameStored</span> <span class="o">=</span> <span class="n">true</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Employee</span><span class="p">{</span>
+    <span class="nd">@Id</span>
+    <span class="n">ObjectId</span> <span class="nb">id</span>
+    <span class="n">String</span> <span class="n">name</span>
+    <span class="n">String</span> <span class="n">department</span>
+<span class="p">}</span>
+
+<span class="n">Morphia</span> <span class="n">morphia</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Morphia</span><span class="p">();</span>
+
+<span class="n">morphia</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">Employee</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
+
+<span class="n">Datastore</span> <span class="n">datastore</span> <span class="o">=</span> <span class="n">morphia</span><span class="o">.</span><span class="n">createDatastore</span><span class="p">(</span><span class="n">mongoClient</span><span class="p">,</span> <span class="s">"employeesDb"</span><span class="p">);</span>
+
+<span class="n">Query</span><span class="o">&lt;</span><span class="n">Employee</span><span class="o">&gt;</span> <span class="n">query</span> <span class="o">=</span> <span class="n">datastore</span><span class="o">.</span><span class="n">createQuery</span><span class="p">(</span><span class="n">Employee</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Employee</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">asList</span><span class="p">();</span>
+
+<span class="k">return</span> <span class="n">records</span><span class="p">;</span>
+</pre> 
+     </div> 
+     <p>For <strong>Morphia</strong> queries, you need to specify a package name for the groovy script. This package needs to be <strong>art.groovy</strong> in order not to get a security exception. The other alternative to not specifying this package name is to turn off the groovy sandbox within the <strong>WEB-INF\art-custom-settings.json</strong> file. Changes to this file require the application to be restarted in order to take effect.</p> 
+     <p>In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>columns</strong></td> 
+        <td>optional - array of strings</td> 
+        <td>Names of columns that should be included in the tabular output. This may be useful when querying documents that may have different attributes. If not specified, ART will use the first document retrieved to determine the columns that will be included in the output.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>columnDataTypes</strong></td> 
+        <td>optional - array of objects</td> 
+        <td>Each object specifies a column name and the data type that is to be used for that column e.g. <code>[{"col1": "numeric"}]</code>. The possible data types are <strong>string</strong>, <strong>numeric</strong>, <strong>date</strong> and <strong>datetime</strong>. The default is <code>string</code> so if a column is to be treated as a general string, it doesn't need to be specified.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>inputDateFormat</strong></td> 
+        <td>optional - string (defalut = yyyy-MM-dd)</td> 
+        <td>The format of input data for columns with a <strong>date</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>outputDateFormat</strong></td> 
+        <td>optional - string (defalut = blank)</td> 
+        <td>The format of output/displayed data for columns with a <strong>date</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>inputDateTimeFormat</strong></td> 
+        <td>optional - string (defalut = yyyy-MM-dd HH:mm:ss.SSS)</td> 
+        <td>The format of input data for columns with a <strong>datetime</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>outputDateTimeFormat</strong></td> 
+        <td>optional - string (defalut = blank)</td> 
+        <td>The format of output/displayed data for columns with a <strong>datetime</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showColumnFilters</strong></td> 
+        <td>optional - boolean (default = true)</td> 
+        <td>Determines if column filters will be displayed in the tabular output.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <p>Another alternative for querying MongoDB is to install and use <a class="" href="https://drill.apache.org/" rel="nofollow">Apache Drill</a>. Drill allows you to use normal SQL to query a MongoDB database. When using drill, you wouldn't use the MongoDB datasource type or the MongoDB report type. You would use the JDBC datasource type with the drill driver, and then use any of the other report types e.g. Tabular etc. The drill jdbc driver can be obtained from the drill installation and copied to the ART_HOME\WEB-INF\lib directory.</p> 
+     <p><br></p> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li>If the output for a report creates a file e.g. pdf, this file is stored in the <strong>ART_HOME\work\export</strong> directory</li> 
+      <li>If the output for a report creates a file e.g. pdf, this file is stored in the <strong>WEB-INF\work\export</strong> directory</li> 
      </ul> 
      <h2 id="parameters">Parameters</h2> 
      <p>Parameters enable different output to be generated depending on values selected or input by a user.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Field</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>Auto-generated ID used to identify the parameter</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Name</strong></td> 
+        <td>Name of the parameter as it appears in reports SQL source</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Description</strong></td> 
+        <td>Description for the parameter</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Parameter Type</strong></td> 
+        <td>Whether the parameter will have a single value (<strong>Single-Value</strong>) or whether it can have multiple values (<strong>Multi-Value</strong>)</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Label</strong></td> 
+        <td>The label for the parameter in the select parameters page</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Help Text</strong></td> 
+        <td>Help text displayed as a tooltip in the select parameters page</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Placeholder Text</strong></td> 
+        <td>Placeholder text displayed in the field in the select parameters page</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Data Type</strong></td> 
+        <td>The type of data that the parameter can hold</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Date Format</strong></td> 
+        <td>For <strong>Date</strong> and <strong>DateTime</strong> data types, the date format to use. Leave blank to use the default. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Default Value</strong></td> 
+        <td>The value for the parameter to use when the parameter is first displayed in the select parameters page, or the value to use if the report is run by direct url and the parameter is not specified within the url. For <strong>Multi-Value</strong> parameters, multiple values can be specified, with each value on a new line.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Default Value Report</strong></td> 
+        <td>A report that provides the default values. This needs to be an LOV report.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Shared</strong></td> 
+        <td>Whether the parameter is available for selecting when defining report parameters, through the <strong>Add Existing</strong> option.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Hidden</strong></td> 
+        <td>Whether the parameter is displayed in the select parameters page</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Use LOV</strong></td> 
+        <td>Whether the parameter uses a dropdown to provide a list of values to choose from in the select parameters page</td> 
+       </tr> 
+       <tr> 
+        <td><strong>LOV Report</strong></td> 
+        <td>If <strong>Use LOV</strong> is specified, the report that generates the available values. This needs to be an LOV report.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Drilldown Column Index</strong></td> 
+        <td>The index of the column that will be set with the parameter's value when used with drilldown reports. The first column has an index of 1.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Options</strong></td> 
+        <td>Options used to further configure the parameter. The options are specified in JSON format.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <h3 id="single-value-parameters">Single-Value Parameters</h3> 
      <p>Single-value parameters are used to pass single values to the SQL query. The parameter's name surrounded by the <code>#</code> character is used to identify the parameter within the SQL source. For example, the following query has two parameters.</p> 
      <div class="codehilite"> 
@@ -1555,17 +1931,16 @@ pr-02|Desktops
      <p>Take the following steps to use a single-value parameter</p> 
      <ul> 
       <li>Create the report, putting the parameter placeholder in the appropriate place within the SQL</li> 
-      <li>Use the <strong>Configure | Parameters</strong> menu to open the Parameters page</li> 
-      <li>Click on the <strong>Add</strong> button to create a new parameter</li> 
+      <li>After saving the report, click on the <strong>Parameters</strong> button for the just saved report</li> 
+      <li>Click on the <strong>Add New</strong> button</li> 
       <li>Fill in the appropriate fields for the parameter</li> 
-      <li>In the <strong>Parameter Name</strong> field, specify the parameter name as used in the SQL source e.g. &quot;date&quot; for the example above</li> 
+      <li>In the <strong>Parameter Name</strong> field, specify the parameter name as used in the SQL source e.g. <code>date</code> for the example above. Avoid having spaces in parameter names.</li> 
       <li><strong>Save</strong> the parameter</li> 
-      <li>Use the <strong>Configure | Reports</strong> menu to open the Reports Configuration page</li> 
-      <li>From the Reports Configuration page, identify the report and use the <strong>More | Parameters</strong> button of the report to open the Report Parameters page</li> 
-      <li>Click on the <strong>Add</strong> button to add the new report parameter</li> 
+      <li>You can also use the <strong>Add Existing</strong> button to use a parameter that was created previously and marked as <strong>Shared</strong>.</li> 
      </ul> 
      <p><strong>Note:</strong></p> 
      <ul> 
+      <li>When editing report parameters from the <strong>Report Parameters</strong> page, clicking on the link with the parameter name enables you to edit core parameter definition attributes, while clicking on the Edit button allows you to edit extra attributes specifically related to that report parameter.</li> 
       <li>The same parameter (<code>#parameter_name#</code>) can be used several times in the same query. All occurrences will be substituted with the same value.</li> 
       <li>Avoid using the special labels <strong>#rules#</strong> or <strong>#recipient#</strong>. These labels are used for the rules and dynamic job recipients functionality respectively, and using them for your parameters may result in your query not working as expected.</li> 
       <li>There is a slight difference between <code>Varchar</code> and <code>Text</code> parameters. <code>Varchar</code> parameters provide a text box for input of a few characters while <code>Text</code> parameters provide a text area for input of much longer strings.</li> 
@@ -1588,15 +1963,15 @@ pr-02|Desktops
         <td>The date when the report is run, with the time being 00:00</td> 
        </tr> 
        <tr> 
-        <td><strong>add</strong> <code>days,weeks,months,years</code> increment</td> 
+        <td><strong>add</strong> <code>days, weeks, months, years, hours, minutes, seconds, milliseconds</code> increment</td> 
         <td>The date when the report is run plus the given increment e.g. <code>add days 1</code> for the run date plus one day, <code>add months -1</code> for the run date minus one month.</td> 
        </tr> 
       </tbody> 
      </table> 
      <ul> 
-      <li><strong>Workaround for boolean parameters</strong><br /> </li> 
+      <li><strong>Workaround for boolean parameters</strong><br> </li> 
      </ul> 
-     <p>There is no boolean data type for single-value parameters because different RDBMSs implement the boolean data type differently. As a workaround, you can create a static LOV query to return the boolean states true and false, as used in your database, and use that LOV query to provide the boolean parameter values.</p> 
+     <p>There is no boolean data type for single-value parameters because different RDBMSs implement the boolean data type differently. As a workaround, you can create a static LOV report to return the boolean states true and false, as used in your database, and use that LOV report to provide the boolean parameter values.</p> 
      <p>Example main query</p> 
      <div class="codehilite"> 
       <pre>    SELECT * FROM mytable WHERE my_boolean_column=#boolean_param#
@@ -1608,14 +1983,14 @@ pr-02|Desktops
     false|False
 </pre> 
      </div> 
-     <p>Lastly, create a single-value parameter named &quot;boolean_param&quot;, with data type as <code>Varchar</code>, set <strong>Use LOV</strong> to <strong>Yes</strong> and set the LOV Report to the report created for this purpose above.</p> 
-     <p>If the boolean states are &quot;1&quot; and &quot;0&quot; instead of &quot;true&quot; and &quot;false&quot;, you can create a static LOV query like the one below and set the parameter data type to <code>Integer</code> instead of varchar.</p> 
+     <p>Lastly, create a <strong>Single-Value</strong> parameter named <code>boolean_param</code>, with data type as <strong>Varchar</strong>, set <strong>Use LOV</strong> to <strong>Yes</strong> and set the <strong>LOV Report</strong> to the report created for this purpose above.</p> 
+     <p>If the boolean states are "1" and "0" instead of "true" and "false", you can create a static LOV query like the one below and set the parameter data type to <strong>Integer</strong> instead of Varchar.</p> 
      <div class="codehilite"> 
       <pre>    1|True
     0|False
 </pre> 
      </div> 
-     <p><br /></p> 
+     <p><br></p> 
      <h3 id="multi-value-parameters">Multi-Value Parameters</h3> 
      <p>Multi-value parameters are used to pass multiple values to the SQL query. To define a multi-value parameter, put the WHERE...IN clause in the desired location in your query and include the parameter placeholder to indicate where the values will go e.g.</p> 
      <div class="codehilite"> 
@@ -1624,11 +1999,11 @@ pr-02|Desktops
     WHERE product_name IN(#product_list#)
 </pre> 
      </div> 
-     <p>Take the following steps to use a multi-value parameter<br /> </p> 
+     <p>Take the following steps to use a multi-value parameter<br> </p> 
      <ul> 
       <li>Create the report, putting the WHERE...IN clause and parameter placeholder in the appropriate place within the SQL</li> 
       <li>Create the parameter definition using the same process as with single-value parameters</li> 
-      <li>Now when a user runs the query, they will be presented with a parameters section where they can select one or more values for the parameter. Multiple values are selected using <strong>control+click</strong> or <strong>shift+click</strong>. An &quot;All&quot; option will be displayed to select all possible values.</li> 
+      <li>Now when a user runs the query, they will be presented with a parameters section where they can select one or more values for the parameter. An "All" option will be displayed to specify all values.</li> 
      </ul> 
      <p><strong>X-Parameter Definitions</strong></p> 
      <p>There exists an alternative syntax for specifying multi-value parameters. This provides for defining <code>IN</code> and <code>NOT IN</code> clauses where IN clauses take the format <code>$x{in,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> and NOT IN clauses take the format <code>$x{notin,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> e.g.</p> 
@@ -1643,7 +2018,26 @@ pr-02|Desktops
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>If the values for a multi-value parameter are not derived from an LOV, the end user will enter the multiple values required in the text box provided, with each value put on a new line.</li> 
+      <li>When setting the <strong>Default Value</strong> for a multi-value parameter, several values can be set as defaults by entering each value on a separate line in the field provided. Default values can also come from an LOV report that can be specified in the <strong>Default Value Report</strong> field.</li> 
      </ul> 
+     <h3 id="parameter-options">Parameter Options</h3> 
+     <p>When defining a parameter, a number of options can be specified in the <strong>Options</strong> field. These are defined in JSON format with the following possibilities.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>i18n</strong></td> 
+        <td>optional - object</td> 
+        <td>Allows for localization of parameter configurations. It can have the properties <strong>label</strong>, <strong>helpText</strong>, <strong>defaultValue</strong>, <strong>placeholderText</strong>, with each property being an array of objects providing the locale and the appropriate localized string. e.g. <code>"i18n": { "label": [{"en, sw": "Test Label"}, {"pt": "Another Label"}], "helpText": [{"lt": "Sample help text"}] }</code></td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <h2 id="running-a-report-via-url">Running a report via URL</h2> 
      <p>It is possible to run a report directly via URL. The report format and parameters are included in the URL. The basic URL for running a report is something like <code>http://server_name:port/art/runReport?reportId=x&amp;other_parameters</code></p> 
      <p>If direct URL access is needed without requiring the user to log in to ART beforehand, the special user <strong>public_user</strong> must be granted access to the query and <strong>&amp;public=true</strong> must be included in the URL.</p> 
@@ -1705,7 +2099,7 @@ pr-02|Desktops
        </tr> 
       </tbody> 
      </table> 
-     <h3 id="chart-options">Chart Options</h3> 
+     <h3 id="chart-options_1">Chart Options</h3> 
      <p>For chart reports, additional options specific to charts can be specified in the URL.</p> 
      <table border="1"> 
       <thead> 
@@ -1774,7 +2168,7 @@ pr-02|Desktops
        <tr> 
         <td><strong>labelFormat</strong></td> 
         <td>String</td> 
-        <td>Indicates the format of data labels e.g. <code>labelFormat={0} = {1} ({2})</code> or <code>labelFormat=off</code>. If set to &quot;off&quot;, this indicates that labels should not be shown. For pie charts, <code>{0}</code> will display the pie section key, <code>{1}</code> will display the absolute section value and <code>{2}</code> will display the percent amount of the pie section. Setting it to <code>{0} = {1} ({2})</code> would display a string like &quot;Laptops = 17 (42%)&quot; for a section of the pie chart showing laptops numbering 17 and having a percentage value of 42%. For bar charts, use <code>{2}</code> to display the data value.</td> 
+        <td>Indicates the format of data labels e.g. <code>labelFormat={0} = {1} ({2})</code> or <code>labelFormat=off</code>. If set to "off", this indicates that labels should not be shown. For pie charts, <code>{0}</code> will display the pie section key, <code>{1}</code> will display the absolute section value and <code>{2}</code> will display the percent amount of the pie section. Setting it to <code>{0} = {1} ({2})</code> would display a string like "Laptops = 17 (42%)" for a section of the pie chart showing laptops numbering 17 and having a percentage value of 42%. For bar charts, use <code>{2}</code> to display the data value.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -1786,7 +2180,7 @@ pr-02|Desktops
 
     runs report 120 in html format.
     The #startdate# parameter (p-startdate) is set to 2006-04-04 
-    and the #description# parameter (p-description) is set to &quot;Desktop&quot;
+    and the #description# parameter (p-description) is set to "Desktop"
 </pre> 
      </div> 
      <p><strong>Example 2:</strong> (chart)</p> 
@@ -1801,7 +2195,7 @@ pr-02|Desktops
     reportId=122&amp;splitColumn=2&amp;p-param=abc
 
     runs report 122 in group on 2 columns mode (splitColumn parameter). 
-    The parameter named param is set to &quot;abc&quot;.
+    The parameter named param is set to "abc".
 </pre> 
      </div> 
      <p><strong>Example 4:</strong> (pdf, public)</p> 
@@ -1849,7 +2243,7 @@ pr-02|Desktops
      <ul> 
       <li> <p>If the report url contains some non-ASCII characters in the parameter values and they don't seem to be interpreted correctly, you may need to configure your application server to explicitly handle urls using UTF-8 encoding e.g. for Tomcat, edit the TOMCAT_HOME\conf\<strong>server.xml</strong> file and add the <strong>URIEncoding</strong> attribute to the appropriate <strong>Connector</strong> element e.g.</p> 
        <div class="codehilite"> 
-        <pre>&lt;Connector port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot; URIEncoding=&quot;UTF-8&quot;
+        <pre>&lt;Connector port="8080" protocol="HTTP/1.1" URIEncoding="UTF-8"
     ...
 </pre> 
        </div> </li> 
@@ -2073,7 +2467,7 @@ pr-02|Desktops
       <pre>    SELECT location_id, location_name FROM LOCATIONS
 </pre> 
      </div> 
-     <p>Users see values from the <code>location_name</code> column while the actual parameter match is performed using values from the <code>location_id</code> column.<br /> If the parameter options don't come from a database, you can use a static lov with something like the following in the sql source. If the parameter value and the display value are different, separate them with a |</p> 
+     <p>Users see values from the <code>location_name</code> column while the actual parameter match is performed using values from the <code>location_id</code> column.<br> If the parameter options don't come from a database, you can use a static lov with something like the following in the sql source. If the parameter value and the display value are different, separate them with a |</p> 
      <div class="codehilite"> 
       <pre>    local|Local
     international|Worldwide
@@ -2086,9 +2480,9 @@ pr-02|Desktops
       <li>Set up a datasource that points to the ART database</li> 
       <li>Define a user and a report group</li> 
      </ul> 
-     <p><br /></p> 
+     <p><br></p> 
      <ul> 
-      <li> <p><strong>LOV Report</strong><br /> This report is the one used to retrieve the list of values (i.e. the list of available reports that will be shown as a parameter). Use the <strong>Configure | Reports</strong> menu and then the <strong>Add</strong> button to create a new report. Set the name to &quot;ART Report Names&quot;, the type to <strong>LOV: Dynamic</strong> and the following as the SQL source:</p> 
+      <li> <p><strong>LOV Report</strong><br> This report is the one used to retrieve the list of values (i.e. the list of available reports that will be shown as a parameter). Use the <strong>Configure | Reports</strong> menu and then the <strong>Add</strong> button to create a new report. Set the name to "ART Report Names", the type to <strong>LOV: Dynamic</strong> and the following as the SQL source:</p> 
        <div class="codehilite"> 
         <pre>SELECT NAME FROM ART_QUERIES ORDER BY NAME
 </pre> 
@@ -2096,7 +2490,7 @@ pr-02|Desktops
      </ul> 
      <p>Select the ART database as the Datasource and <strong>Save</strong>.</p> 
      <ul> 
-      <li> <p><strong>Main Report</strong><br /> This report retrieves the details of the reports that are defined in ART. It has one parameter whose values are retrieved from the &quot;ART Report Names&quot; report created above. Following the same process used for the previous report, name the report &quot;ART Reports&quot; and for the SQL source use:</p> 
+      <li> <p><strong>Main Report</strong><br> This report retrieves the details of the reports that are defined in ART. It has one parameter whose values are retrieved from the "ART Report Names" report created above. Following the same process used for the previous report, name the report "ART Reports" and for the SQL source use:</p> 
        <div class="codehilite"> 
         <pre>SELECT NAME
 , SHORT_DESCRIPTION
@@ -2107,7 +2501,7 @@ FROM ART_QUERIES WHERE NAME = #report_name#
        </div> </li> 
      </ul> 
      <p>Select the ART database as the Datasource and Save.</p> 
-     <p>Use the <strong>Configure | Parameters</strong> menu and then the <strong>Add</strong> button to create a new single-value paramter named <code>report_name</code>. Select the <strong>Use LOV</strong> option and select &quot;ART Report Names&quot; in the <strong>LOV Report</strong> field. Click on the <strong>Save</strong> button to save the parameter details.</p> 
+     <p>Use the <strong>Configure | Parameters</strong> menu and then the <strong>Add</strong> button to create a new single-value paramter named <code>report_name</code>. Select the <strong>Use LOV</strong> option and select "ART Report Names" in the <strong>LOV Report</strong> field. Click on the <strong>Save</strong> button to save the parameter details.</p> 
      <p>Use the <strong>Configure | Reports</strong> menu to go back to the Reports Configuration page. Find the main report, ART Reports, click on the <strong>More | Parameters</strong> button and <strong>Add</strong> a new parameter, setting the parameter to the <code>report_name</code> parameter that has just been created.</p> 
      <p>Use the <strong>Configure | Access Rights</strong> menu to define users who can run the main report. Now you can log in as the user and run the report.</p> 
      <p><strong>Note:</strong></p> 
@@ -2126,9 +2520,33 @@ where #rules#
    <div> 
     <div class="markdown_content"> 
      <!--NewPage--> 
-     <h1 id="dynamic-queries">Dynamic Queries</h1> 
-     <p>It is possible to create Dynamic SQL queries using xml-like tags in the SQL source section. This feature allows you to modify the structure of the query based on user parameters, possibly running completely different queries depending on the user input.</p> 
-     <p>The syntax is as follows. Tag names are case sensitive.</p> 
+     <h1 id="dynamic-sql">Dynamic SQL</h1> 
+     <p>It is possible to create Dynamic SQL queries, allowing you to modify the structure of the query based on user parameters, possibly running different queries depending on the user input.</p> 
+     <h2 id="using-groovy">Using Groovy</h2> 
+     <p>You can use <a class="" href="http://groovy-lang.org/" rel="nofollow">groovy</a> in the SQL source section to achieve dynamic sql. The groovy script needs to return a string that has the sql to be executed. You need to define an option in the <strong>Options</strong> field of the report to specify that you are using groovy in the sql source. This option is named <strong>usesGroovy</strong> and needs to have the value <strong>true</strong> e.g.</p> 
+     <div class="codehilite"> 
+      <pre>{
+    "usesGroovy": true
+}
+</pre> 
+     </div> 
+     <p>The groovy code is run through a sandbox and depending on the code in the script, you may need to specify additional classes in the <strong>WEB-INF\groovy-whitelist.txt</strong> file. If you get a security exception when running the report, add the indicated class to the groovy whitelist file and run the report again. You can also disable the sandbox completely by modifying the <strong>WEB-INF\art-custom-settings.json</strong> file and setting the <strong>enableGroovySandbox</strong> property to <strong>false</strong>. This modification will require an application restart to take effect.</p> 
+     <h3 id="example">Example</h3> 
+     <p>A trivial example is given below.</p> 
+     <div class="codehilite"> 
+      <pre>def sql
+
+//assumes the report has an integer parameter named id
+if(id.value == 0) {
+    sql = 'select id from users'
+} else {
+    sql = 'select name from users'
+}
+</pre> 
+     </div> 
+     <p>The demo database contains some sample reports that use groovy in the sql source to execute different queries based on parameter input.</p> 
+     <h2 id="using-xml-tags">Using XML tags</h2> 
+     <p>You can use xml tags in the SQL source section to achieve dynamic sql. The syntax is as follows. Tag names are case sensitive.</p> 
      <div class="codehilite"> 
       <pre>    <span class="nt">&lt;IF&gt;</span>
     <span class="nt">&lt;EXP1&gt;</span>value1<span class="nt">&lt;/EXP1&gt;</span> <span class="nt">&lt;OP&gt;</span>operator<span class="nt">&lt;/OP&gt;</span> <span class="nt">&lt;EXP2&gt;</span>value2<span class="nt">&lt;/EXP2&gt;</span>
@@ -2151,7 +2569,7 @@ where #rules#
     <span class="nt">&lt;/IF&gt;</span>
 </pre> 
      </div> 
-     <p>if the <code>#level#</code> parameter is set to &quot;summary&quot; and the <code>#date#</code> parameter is not null, ART rewrites the query as:</p> 
+     <p>if the <code>#level#</code> parameter is set to "summary" and the <code>#date#</code> parameter is not null, ART rewrites the query as:</p> 
      <div class="codehilite"> 
       <pre>    SELECT *
     FROM orders_summary
@@ -2159,14 +2577,14 @@ where #rules#
     AND order_date &gt; #date#
 </pre> 
      </div> 
-     <p>if the <code>#level#</code> parameter is not set to &quot;summary&quot; and the <code>#date#</code> is null, ART rewrites the query as:</p> 
+     <p>if the <code>#level#</code> parameter is not set to "summary" and the <code>#date#</code> is null, ART rewrites the query as:</p> 
      <div class="codehilite"> 
       <pre>    SELECT *
     FROM orders_details
     WHERE VENDOR like #vendor#
 </pre> 
      </div> 
-     <h2 id="operators">Operators</h2> 
+     <h3 id="operators">Operators</h3> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -2249,7 +2667,7 @@ where #rules#
        </tr> 
       </tbody> 
      </table> 
-     <h2 id="dynamic-query-examples">Dynamic Query Examples</h2> 
+     <h3 id="examples">Examples</h3> 
      <p><strong>Dynamic OR/AND selection</strong>:</p> 
      <div class="codehilite"> 
       <pre>    SELECT *
@@ -2300,11 +2718,11 @@ where #rules#
      <div class="codehilite"> 
       <pre>    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#value#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>ln<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>10000<span class="nt">&lt;/EXP2&gt;</span>
     <span class="nt">&lt;TEXT&gt;</span> SELECT ... <span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;ELSETEXT&gt;</span> SELECT 'Value too High' &quot;Warning&quot; <span class="nt">&lt;/ELSETEXT&gt;</span>
+    <span class="nt">&lt;ELSETEXT&gt;</span> SELECT 'Value too High' "Warning" <span class="nt">&lt;/ELSETEXT&gt;</span>
     <span class="nt">&lt;/IF&gt;</span>
 
     the select statement to use to show the warning depends on the DBMS (for example in
-    Oracle you should use SELECT 'Value too High' &quot;Warning&quot; FROM DUAL)
+    Oracle you should use SELECT 'Value too High' "Warning" FROM DUAL)
 </pre> 
      </div> 
      <p><strong>Dynamic WHERE condition</strong>: E.g. to drill down on null values</p> 
@@ -2333,7 +2751,7 @@ where #rules#
      <ul> 
       <li> <p><strong>Sales Summary</strong> (Main report)</p> 
        <div class="codehilite"> 
-        <pre>select REGION &quot;Region&quot;, SUM(VOLUME) &quot;Volume&quot;
+        <pre>select REGION "Region", SUM(VOLUME) "Volume"
 from ORDERS
 where ...
 </pre> 
@@ -2346,7 +2764,7 @@ WHERE REGION = #region#
 </pre> 
        </div> </li> 
      </ul> 
-     <p>On the Drill Down report, when defining the <code>#region#</code> parameter, set the option <strong>Drilldown Column Index</strong> to 1. This means this parameter will match with the first column value on the Main Report i.e. &quot;Region&quot;</p> 
+     <p>On the Drill Down report, when defining the <code>#region#</code> parameter, set the option <strong>Drilldown Column Index</strong> to 1. This means this parameter will match with the first column value on the Main Report i.e. "Region"</p> 
      <p>From now on this report will appear as an available Drill Down report.</p> 
      <p>On the Main report, select the <strong>More | Drilldowns</strong> option</p> 
      <p>Select <strong>Add</strong> and:</p> 
@@ -2361,7 +2779,7 @@ WHERE REGION = #region#
      <h2 id="using-the-main-reports-parameters">Using the main report's parameters</h2> 
      <p>In addition to using the main report's column values, a drill down report can also use the main report's parameter values. If in our example above the Main Report allowed the user to select a city, e.g.</p> 
      <div class="codehilite"> 
-      <pre>    select REGION &quot;Region&quot;, SUM(VOLUME) &quot;Volume&quot;
+      <pre>    select REGION "Region", SUM(VOLUME) "Volume"
     from ORDERS
     WHERE CITY=#city# AND ...
 </pre> 
@@ -2448,17 +2866,17 @@ WHERE REGION = #region#
        </tr> 
       </tbody> 
      </table> 
-     <p>Please refer to the RSS specification for more details.<br /> </p> 
+     <p>Please refer to the RSS specification for more details.<br> </p> 
      <p>For example the following query:</p> 
      <div class="codehilite"> 
-      <pre>    select col1 &quot;title&quot;, col2 &quot;description&quot; , col3 &quot;pubDate&quot;, col4 &quot;guid&quot; 
+      <pre>    select col1 "title", col2 "description" , col3 "pubDate", col4 "guid" 
     from myTable
 </pre> 
      </div> 
      <p>Will produce the following RSS 2.0 XML content:</p> 
      <div class="codehilite"> 
-      <pre>    <span class="o">&lt;?</span><span class="n">xml</span> <span class="n">version</span><span class="o">=</span><span class="s">&quot;1.0&quot;</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="o">?&gt;</span>
-    <span class="o">&lt;</span><span class="n">rss</span> <span class="n">version</span><span class="o">=</span><span class="s">&quot;2.0&quot;</span><span class="o">&gt;</span>
+      <pre>    <span class="o">&lt;?</span><span class="n">xml</span> <span class="n">version</span><span class="o">=</span><span class="s">"1.0"</span> <span class="n">encoding</span><span class="o">=</span><span class="s">"UTF-8"</span><span class="o">?&gt;</span>
+    <span class="o">&lt;</span><span class="n">rss</span> <span class="n">version</span><span class="o">=</span><span class="s">"2.0"</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">channel</span><span class="o">&gt;</span>
      <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="p">[</span><span class="n">Report</span> <span class="n">Name</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">title</span><span class="o">&gt;</span>
      <span class="o">&lt;</span><span class="n">link</span><span class="o">&gt;</span><span class="p">[</span><span class="n">As</span> <span class="n">configured</span> <span class="k">in</span> <span class="n">ART</span> <span class="n">settings</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">link</span><span class="o">&gt;</span>
@@ -2466,10 +2884,10 @@ WHERE REGION = #region#
      <span class="o">&lt;</span><span class="n">pubDate</span><span class="o">&gt;</span><span class="p">[</span><span class="n">Current</span> <span class="n">date</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">pubDate</span><span class="o">&gt;</span> 
      <span class="o">&lt;</span><span class="n">generator</span><span class="o">&gt;</span><span class="nl">http</span><span class="p">:</span><span class="c1">//art.sourceforge.net&lt;/generator&gt; </span>
      <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
-      <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="p">[</span><span class="n">resultset</span> <span class="s">&quot;title&quot;</span> <span class="n">column</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">title</span><span class="o">&gt;</span>
-      <span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">[</span><span class="n">resultset</span> <span class="s">&quot;description&quot;</span> <span class="n">column</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">description</span><span class="o">&gt;</span>
-      <span class="o">&lt;</span><span class="n">guid</span><span class="o">&gt;</span><span class="p">[</span><span class="n">resultset</span> <span class="s">&quot;guid&quot;</span> <span class="n">column</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">guid</span><span class="o">&gt;</span>
-      <span class="o">&lt;</span><span class="n">pubDate</span><span class="o">&gt;</span><span class="p">[</span><span class="n">resultset</span> <span class="s">&quot;pubDate&quot;</span> <span class="n">column</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">pubDate</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="p">[</span><span class="n">resultset</span> <span class="s">"title"</span> <span class="n">column</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">title</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">[</span><span class="n">resultset</span> <span class="s">"description"</span> <span class="n">column</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">description</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">guid</span><span class="o">&gt;</span><span class="p">[</span><span class="n">resultset</span> <span class="s">"guid"</span> <span class="n">column</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">guid</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">pubDate</span><span class="o">&gt;</span><span class="p">[</span><span class="n">resultset</span> <span class="s">"pubDate"</span> <span class="n">column</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">pubDate</span><span class="o">&gt;</span>
      <span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
      <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span> 
       <span class="p">...</span>
@@ -2492,7 +2910,7 @@ WHERE REGION = #region#
      <h1 id="dashboards">Dashboards</h1> 
      <p>Dashboards are used to display reports on a single portal-like page.</p> 
      <p>Any ART report can be considered a portlet i.e. a small embeddable frame within a web page. Each portlet uses AJAX components to dynamically load itself within the page. Users can refresh or minimize each portlet independently by clicking on the buttons at the top of the portlet frame. When a user runs a dashboard, he can choose to modify the default parameters used by the reports in the dashboard. All the embedded reports are parsed and their parameters, if any, are displayed. If several reports use the same parameter, it is displayed only once.</p> 
-     <p><img alt="dashboard-example" src="dashboard-example.png" /></p> 
+     <p><img alt="dashboard-example" src="dashboard-example.png"></p> 
      <h2 id="regular-dashboards">Regular Dashboards</h2> 
      <h3 id="features">Features</h3> 
      <ul> 
@@ -2546,13 +2964,14 @@ WHERE REGION = #region#
     <span class="nt">&lt;/DASHBOARD&gt;</span>
 </pre> 
      </div> 
-     <p><br /></p> 
+     <p><br></p> 
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>Using the <code>&lt;REPORTID&gt;</code> tag, tabular reports are displayed using the htmlFancy format. To override this, use the <code>&lt;URL&gt;</code> tag and type the direct access URL for the report</li> 
       <li>Tag names are case sensitive (use uppercase)</li> 
       <li>Minimum refresh period allowed is 5 seconds. Be careful with this so as not to overload the server and databases.</li> 
       <li>If you need to use xml special characters within tag content, ensure to replace them with the relevant xml character entities e.g. if the <code>&lt;URL&gt;</code> tag should contain a url like <code>http://localhost:8080/art/runReport?reportId=1&amp;p-param1=test</code>, you'll need to replace the <code>&amp;</code> character with <code>&amp;amp;</code>, to have the url as <code>http://localhost:8080/art/runReport?reportId=1&amp;amp;p-param1=test</code>. For a list of the 5 special xml characters and their respective replacement strings or character entities, see <a href="http://support.esri.com/technical-article/000005870" rel="nofollow">http://support.esri.com/technical-article/000005870</a></li> 
+      <li>For pdf output of dashboards, only tabular and standard chart reports will be included in the pdf output.</li> 
      </ul> 
      <h2 id="gridstack-dashboards">Gridstack Dashboards</h2> 
      <p>Gridstack dashboards allow for specifying exact positioning of report items within the dashboard, specifying the height and width that the report items should occupy, allowing for resizing the items dynamically using the mouse, and moving the items around using drag-and-drop.</p> 
@@ -2588,7 +3007,7 @@ WHERE REGION = #region#
        </tr> 
        <tr> 
         <td><code>&lt;CELLHEIGHT&gt;</code></td> 
-        <td>(optional - string) default = 60px. Defines the dimensions of one unit of the grid co-ordinates on the vertical or y axis. Can also be defined in terms of <strong>em</strong> and <strong>rem</strong> units instead of pixels e.g. 10em or 10rem. Can also be defined as &quot;<strong>auto</strong>&quot; in which case the height will be calculated from the cell width.</td> 
+        <td>(optional - string) default = 60px. Defines the dimensions of one unit of the grid co-ordinates on the vertical or y axis. Can also be defined in terms of <strong>em</strong> and <strong>rem</strong> units instead of pixels e.g. 10em or 10rem. Can also be defined as "<strong>auto</strong>" in which case the height will be calculated from the cell width.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;VERTICALMARGIN&gt;</code></td> 
@@ -2761,53 +3180,56 @@ WHERE REGION = #region#
    <div> 
     <div class="markdown_content"> 
      <!--NewPage--> 
-     <h1 id="jxls-spreadsheets">jXLS Spreadsheets</h1> 
-     <p>ART uses the <a class="" href="http://jxls.sourceforge.net/">jXLS</a> library to provide support for reports based on pre-formatted MS Excel spreadsheets. For details on the syntax of these jXLS templates, see the documentation available on the jXLS website. Generally, you'll follow the following steps to create a jXLS spreadsheet report.</p> 
+     <h1 id="jxls-reports">jXLS Reports</h1> 
+     <p>ART uses the <a class="" href="http://jxls.sourceforge.net/">jXLS</a> library to provide support for reports based on pre-formatted MS Excel spreadsheets. For details on the syntax of these jXLS templates, see the documentation available on the jXLS website. Generally, you'll follow the following steps to create a jXLS report.</p> 
      <ul> 
       <li>Create an Excel file (either xls or xlsx) with any text and formatting that will be required in the final report</li> 
       <li>Insert jXLS syntax as appropriate to define where the raw data should go</li> 
       <li>Create a new report in ART and select the jXLS template to use</li> 
       <li> <p>If the report is of type <strong>jXLS: ART Query</strong>, the sql used to retrieve the data will be the one defined in the SQL source section. You can use parameters, rules and any other features of ART reports. In the template, use the identifier <strong>results</strong> to output report values. e.g.</p> 
        <div class="codehilite"> 
-        <pre><span class="n">jx</span><span class="o">:</span><span class="k">each</span><span class="o">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;results&quot;</span> <span class="n">var</span><span class="o">=</span><span class="s2">&quot;row&quot;</span> <span class="n">lastCell</span><span class="o">=</span><span class="s2">&quot;E10&quot;</span><span class="o">)</span>
+        <pre><span class="n">jx</span><span class="o">:</span><span class="k">each</span><span class="o">(</span><span class="n">items</span><span class="o">=</span><span class="s2">"results"</span> <span class="n">var</span><span class="o">=</span><span class="s2">"row"</span> <span class="n">lastCell</span><span class="o">=</span><span class="s2">"E10"</span><span class="o">)</span>
 
 <span class="n">$</span><span class="o">{</span><span class="n">row</span><span class="o">.</span><span class="na">description</span><span class="o">}</span>
 </pre> 
        </div> </li> 
       <li> <p>If the report is of type <strong>jXLS: Template Query</strong>, the sql used to retrieve the data will be the one defined in the template.The database used for the report will be the one selected in the datasource field of the report.</p> </li> 
+      <li>If the report uses parameters, avoid using the following names for the parameters as these are used for special purpose variables i.e. <code>results, jdbc, conn, params, locale</code>.</li> 
      </ul> 
     </div> 
    </div> 
    <div> 
     <div class="markdown_content"> 
      <!--NewPage--> 
-     <h1 id="pivot-tables-olap">Pivot Tables (OLAP)</h1> 
-     <p>ART uses the <a class="" href="http://mondrian.pentaho.com/" rel="nofollow">Mondrian</a> OLAP server to provide OLAP functionality. There are 3 report types that can be created to provide OLAP analysis.</p> 
+     <h1 id="jpivot-reports">JPivot Reports</h1> 
+     <p>There are 3 report types that use the <a class="" href="http://jpivot.sourceforge.net/">JPivot</a> library to provide OLAP functionality.</p> 
      <h2 id="mondrian">Mondrian</h2> 
-     <p>This report type uses ART's internal mondrian engine to run OLAP queries. To use it, do the following.</p> 
+     <p>This report type uses ART's internal <a class="" href="http://mondrian.pentaho.com/" rel="nofollow">mondrian</a> engine to run OLAP queries. To use it, do the following.</p> 
      <h3 id="create-the-schema-xml-file">Create the schema xml file</h3> 
      <ul> 
-      <li>Create a mondrian cube schema file that defines your cube</li> 
+      <li>Create a mondrian (version 3) cube schema file that defines your cube</li> 
      </ul> 
      <h3 id="create-a-datasource">Create a datasource</h3> 
      <ul> 
       <li>Create a new datasource in ART using the <strong>Configure | Datasources</strong> menu and then clicking on the <strong>Add</strong> button</li> 
-      <li>In the <strong>Datasource Type</strong> section, select <strong>JDBC</strong></li> 
+      <li>In the <strong>Datasource Type</strong> section, select <strong>OLAP</strong></li> 
       <li>Provide the url, username and password to use to access the database that has the star schema tables referenced in the schema xml file</li> 
       <li>Save the datasource</li> 
      </ul> 
      <h3 id="create-the-report">Create the report</h3> 
      <ul> 
-      <li>Create a new report in ART of the type <strong>Pivot Table: Mondrian</strong></li> 
+      <li>Create a new report in ART of the type <strong>JPivot: Mondrian</strong></li> 
       <li>In the <strong>Datasource</strong> field, select the datasource you have just created</li> 
       <li>For the <strong>Template</strong> field, select the schema file for the cube</li> 
       <li>In the MDX source field, enter the MDX for your report</li> 
      </ul> 
+     <h3 id="roles">Roles</h3> 
+     <p>If you need to define roles that users should have when accessing the cube, create a rule for the report and assign users rule values for this rule according to the required roles. The name of the rule doesn't matter. You can also use a dummy report column name when defining the report rule. Roles are case-sensitive as per their appearance in the schema xml file so rule values should be exactly as they appear in the schema file. If you specify a rule value that doesn't exist in the schema file, the report will have an error and won't run. If you need to specify multiple roles, specify multiple rule values.</p> 
      <h2 id="mondrian-xmla">Mondrian XMLA</h2> 
      <p>This report type is used to access cubes defined in an external mondrian server. To use it, do the following.</p> 
      <h3 id="create-the-schema-xml-file_1">Create the schema xml file</h3> 
      <ul> 
-      <li>Create a mondrian cube schema file that defines your cube</li> 
+      <li>Create a mondrian (version 3) cube schema file that defines your cube</li> 
      </ul> 
      <h3 id="create-the-datasourcesxml-file">Create the datasources.xml file</h3> 
      <ul> 
@@ -2823,7 +3245,7 @@ WHERE REGION = #region#
      </ul> 
      <h3 id="create-the-report_1">Create the report</h3> 
      <ul> 
-      <li>Create a new report in ART of the type <strong>Pivot Table: Mondrian XMLA</strong></li> 
+      <li>Create a new report in ART of the type <strong>JPivot: Mondrian XMLA</strong></li> 
       <li>In the <strong>Datasource</strong> field, select the datasource you have just created</li> 
       <li>Enter the required <strong>XMLA Datasource</strong> name. This should match exactly with the contents of the <strong>DataSourceName</strong> in the <strong>datasources.xml</strong> file defined on the external server. These names can be any string and don't have to match any name in the schema xml file.</li> 
       <li>Enter the required <strong>XMLA Catalog</strong> name. This should match exactly with the contents of the <strong>Catalog</strong> name in the <strong>datasources.xml</strong> file defined on the external server. These names can be any string and don't have to match any name in the schema xml file.</li> 
@@ -2901,7 +3323,7 @@ WHERE REGION = #region#
      <h3 id="create-the-report_2">Create the report</h3> 
      <ul> 
       <li>Create a new report in ART using the <strong>Configure | Report</strong> menu and then clicking on the <strong>Add</strong> button</li> 
-      <li>In the <strong>Type</strong> field, select <strong>Pivot Table: SQL Server XMLA</strong></li> 
+      <li>In the <strong>Type</strong> field, select <strong>JPivot: SQL Server XMLA</strong></li> 
       <li>In the <strong>Datasource</strong> field, select the datasource you have just created</li> 
       <li>In the <strong>XMLA Catalog</strong> field, enter the database name for your database on the SSAS server</li> 
       <li>In the MDX source field, enter the MDX for your report</li> 
@@ -2918,9 +3340,9 @@ WHERE REGION = #region#
 <span class="n">WHERE</span> <span class="p">(</span> <span class="p">[</span><span class="n">Sales</span> <span class="n">Territory</span><span class="p">].[</span><span class="err">#</span><span class="o">!</span><span class="n">Territory</span><span class="err">#</span><span class="p">]</span> <span class="p">)</span>
 </pre> 
        </div> </li> 
-      <li> <p>You can also use multi-value parameters. In this case, construct the LOV query such that it returns strings as they would appear in the MDX. e.g.<br /> Example LOV</p> 
+      <li> <p>You can also use multi-value parameters. In this case, construct the LOV query such that it returns strings as they would appear in the MDX. e.g.<br> Example LOV</p> 
        <div class="codehilite"> 
-        <pre>SELECT CONCAT(&quot;[Order.Order Sale Type].[&quot;,sale_type_code,&quot;]&quot;) as typecodes, sale_type_code     
+        <pre>SELECT CONCAT("[Order.Order Sale Type].[",sale_type_code,"]") as typecodes, sale_type_code     
 FROM dim_orders
 </pre> 
        </div> <p>Use multi-value parameter in MDX as desired...</p> 
@@ -2929,8 +3351,7 @@ FROM dim_orders
 WHERE {#!saleTypes#}
 </pre> 
        </div> </li> 
-      <li> <p>Pivot Tables use cached data where possible. To manually clear the cache, use the <strong>Configure | Caches</strong> menu and Clear the <strong>Mondrian</strong> cache. If you'd like the cache to be automatically cleared periodically, use the <strong>Mondrian Cache Expiry Period</strong> setting on the <strong>Settings</strong> page.</p> </li> 
-      <li>For the SQL Sever XMLA</li> 
+      <li> <p>JPivot reports use cached data where possible. To manually clear the cache, use the <strong>Configure | Caches</strong> menu and Clear the <strong>JPivot</strong> cache. If you'd like the cache to be automatically cleared periodically, use the <strong>Mondrian Cache Expiry Period</strong> setting on the <strong>Settings</strong> page.</p> </li> 
      </ul> 
     </div> 
    </div> 
@@ -2941,8 +3362,8 @@ WHERE {#!saleTypes#}
      <p>Rules are used to filter report results. They allow the same report to be filtered depending on the user that is running it.</p> 
      <p>The following steps need to be performed in order to use rules:</p> 
      <ul> 
-      <li> <p><strong>Create the rule</strong> <br /> Use the <strong>Configure | Rules</strong> menu and then the <strong>Add</strong> button to specify the rule name</p> </li> 
-      <li> <p><strong>Link the rule to a report</strong><br /> On the report definition page, select the <strong>Uses Rules</strong> option<br /> In the SQL source section, use the special, hard coded placeholder <strong>#rules#</strong> where you want the rule values to go e.g</p> 
+      <li> <p><strong>Create the rule</strong> <br> Use the <strong>Configure | Rules</strong> menu and then the <strong>Add</strong> button to specify the rule name</p> </li> 
+      <li> <p><strong>Link the rule to a report</strong><br> On the report definition page, select the <strong>Uses Rules</strong> option<br> In the SQL source section, use the special, hard coded placeholder <strong>#rules#</strong> where you want the rule values to go e.g</p> 
        <div class="codehilite"> 
         <pre>SELECT * from transactions
 where #rules#
@@ -2951,16 +3372,16 @@ where #rules#
      </ul> 
      <p>On the reports configuration page, find the report and use the <strong>More | Rules</strong> menu to specify which column the rule values will apply to</p> 
      <ul> 
-      <li><strong>Assign rule values to users or user groups</strong><br /> Use the <strong>Configure | Rule Values</strong> menu to assign rule values to users or user groups. Select the user or user group and rule name, and specify the rule values that will apply to that user or user group. If you want the user or user group to have multiple rule values, add each value separately. i.e enter the first value, then click on Add, then enter the next value etc.</li> 
+      <li><strong>Assign rule values to users or user groups</strong><br> Use the <strong>Configure | Rule Values</strong> menu to assign rule values to users or user groups. Select the user or user group and rule name, and specify the rule values that will apply to that user or user group. If you want the user or user group to have multiple rule values, add each value separately. i.e enter the first value, then click on Add, then enter the next value etc.</li> 
      </ul> 
      <p><strong>Example</strong>:</p> 
      <ul> 
-      <li>You have a table named &quot;employees&quot; with the a column named &quot;region&quot;</li> 
-      <li>Create a rule named &quot;GeoArea&quot;</li> 
-      <li>Set up a report that selects rows from the employees table and link it to the rule named &quot;GeoArea&quot; on the column &quot;employees.region&quot;</li> 
-      <li>Link the user to the rule &quot;GeoArea&quot; for values NORTH and EAST</li> 
+      <li>You have a table named "employees" with the a column named "region"</li> 
+      <li>Create a rule named "GeoArea"</li> 
+      <li>Set up a report that selects rows from the employees table and link it to the rule named "GeoArea" on the column "employees.region"</li> 
+      <li>Link the user to the rule "GeoArea" for values NORTH and EAST</li> 
      </ul> 
-     <p>When the user runs the report, he will extract only the rows where the &quot;region&quot; column has the values NORTH or EAST (i.e. the SQL query will be modified on the fly before execution by adding <code>AND employees.region IN ('NORTH','EAST')</code> to the WHERE clause).</p> 
+     <p>When the user runs the report, he will extract only the rows where the "region" column has the values NORTH or EAST (i.e. the SQL query will be modified on the fly before execution by adding <code>AND employees.region IN ('NORTH','EAST')</code> to the WHERE clause).</p> 
      <p><strong>Note</strong>:</p> 
      <ul> 
       <li>If a report is linked to a rule but the user who runs the report has not been set up for that rule, the report execution will not be performed and an error message will be displayed.</li> 
@@ -2974,7 +3395,7 @@ where #rules#
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="chained-parameters">Chained Parameters</h1> 
-     <p>A chained parameter is one whose values depend on the value selected in another parameter. The parameter that triggers the change is called the &quot;parent&quot;. A chained parameter can be used as a parent for another parameter, which in turn can have another child parameter and so on.</p> 
+     <p>A chained parameter is one whose values depend on the value selected in another parameter. The parameter that triggers the change is called the "parent". A chained parameter can be used as a parent for another parameter, which in turn can have another child parameter and so on.</p> 
      <h2 id="example">Example</h2> 
      <p>Suppose we want to view customers who reside in a particular city. We want the user to select a country and then have cities in that country displayed. He'll then pick one of these cities and run the report. We have a <code>CUSTOMERS</code> table, and one of the columns it has is <code>CITY_ID</code>. We also have a <code>COUNTRIES</code> table which has <code>COUNTRY_ID</code> and <code>COUNTRY_NAME</code> columns. Finally, we have a <code>CITIES</code> table with <code>CITY_ID</code>, <code>CITY_NAME</code> and <code>COUNTRY_ID</code> columns.</p> 
      <p>We could take the following steps to set up the report.</p> 
@@ -2986,7 +3407,7 @@ FROM COUNTRIES
 ORDER BY 2
 </pre> 
        </div> </li> 
-      <li> <p>Create a Parameter named <strong>countryId</strong> with a Data Type of <strong>Integer</strong>, set it to <strong>Use LOV</strong> and select &quot;countries&quot; as the <strong>LOV Report</strong>.</p> </li> 
+      <li> <p>Create a Parameter named <strong>countryId</strong> with a Data Type of <strong>Integer</strong>, set it to <strong>Use LOV</strong> and select "countries" as the <strong>LOV Report</strong>.</p> </li> 
       <li> <p>Create a Dynamic LOV report named <strong>cities</strong> that will display city names. The query needs to have a parameter label for the country parameter. This will be replaced at runtime with the country selected.</p> 
        <div class="codehilite"> 
         <pre>SELECT CITY_ID, CITY_NAME
@@ -3007,7 +3428,7 @@ WHERE CITY_ID = #cityId#
        </div> </li> 
       <li> <p>Once you have saved the main report, select the <strong>More | Parameters</strong> option for this report in order to allocate the report parameters.</p> </li> 
       <li>Add a Report Parameter and set the <strong>Parameter</strong> field to the <strong>countryId</strong> parameter created earlier.</li> 
-      <li>Add another Report Parameter, set the <strong>Parameter</strong> field to <strong>cityId</strong> and the <strong>Chained Parents</strong> field to &quot;countryId&quot; i.e. the name of the parent parameter for this chained parameter.</li> 
+      <li>Add another Report Parameter, set the <strong>Parameter</strong> field to <strong>cityId</strong> and the <strong>Chained Parents</strong> field to "countryId" i.e. the name of the parent parameter for this chained parameter.</li> 
      </ul> 
      <p>Now when you run the main report, you are presented with two drop down boxes. Depending on what country you select, a different set of cities is displayed, from which you can choose one and run the report to see the final results.</p> 
     </div> 
@@ -3026,7 +3447,7 @@ WHERE CITY_ID = #cityId#
      </ul> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li>Dashboards and pivot tables cannot be scheduled</li> 
+      <li>Not all report types can be scheduled</li> 
       <li>The <strong>Runs To Archive</strong> field indicates, for Publish and Conditional Publish jobs, how many runs should be kept for viewing from the Archives page e.g. setting it to 5 will retain output from the last 5 runs in the Archives page. This allows users to access past job output as per their requirements.</li> 
       <li>The <strong>Fixed File Name</strong> field indicates that the output file generated should use the file name indicated in this field e.g. <code>test.html</code></li> 
       <li> <p>The <strong>Batch File</strong> field indicates the name of a batch file or script that should be run after the job completes. The batch file must exist in the <strong>ART_HOME\WEB-INF\work\batch</strong> directory. You only set the file name in this field e.g. <code>test.bat</code> or <code>test.sh</code>. ART passes the file name of the generated output as the first parameter to the batch file so you can use this e.g. to copy the file to another location e.g. the <code>test.bat</code> file may have the following contents.</p> 
@@ -3037,10 +3458,10 @@ WHERE CITY_ID = #cityId#
      </ul> 
      <h2 id="job-types">Job Types</h2> 
      <ul> 
-      <li><strong>E-Mail Output (Attachment)</strong><br /> The output is emailed as an attachment to the specified recipients (in the &quot;To&quot; section). The attachment type can be selected in the Output Format field.</li> 
-      <li><strong>E-Mail Output (Inline)</strong><br /> The output is emailed to the specified recipients, in the email body.</li> 
-      <li><strong>Publish</strong><br /> The output is saved to a file. The file is reachable from the Jobs page. Once the file is generated, a notification email is sent to the specified recipients (in the &quot;To&quot; section). Leave the &quot;To&quot; area empty if you don't want a notification email to be sent. </li> 
-      <li><strong>Alert</strong><br /> Send an email to the specified recipients if the first column of the first row in the query result has a value greater than zero. You can construct a simple SQL query to return a non zero value in case of a certain business condition.</li> 
+      <li><strong>E-Mail Output (Attachment)</strong><br> The output is emailed as an attachment to the specified recipients (in the "To" section). The attachment type can be selected in the Output Format field.</li> 
+      <li><strong>E-Mail Output (Inline)</strong><br> The output is emailed to the specified recipients, in the email body.</li> 
+      <li><strong>Publish</strong><br> The output is saved to a file. The file is reachable from the Jobs page. Once the file is generated, a notification email is sent to the specified recipients (in the "To" section). Leave the "To" area empty if you don't want a notification email to be sent. </li> 
+      <li><strong>Alert</strong><br> Send an email to the specified recipients if the first column of the first row in the query result has a value greater than zero. You can construct a simple SQL query to return a non zero value in case of a certain business condition.</li> 
      </ul> 
      <p>Example query to be used for an alert. Send an email if a big order is made</p> 
      <div class="codehilite"> 
@@ -3050,14 +3471,14 @@ WHERE CITY_ID = #cityId#
 </pre> 
      </div> 
      <ul> 
-      <li><strong>Just Run It</strong><br /> Simply run the report. Uuseful to launch stored procedures or perform periodic data updates.</li> 
-      <li><strong>Conditional E-Mail Output (Attachment)</strong><br /> If the result set has records, an email with the output attached is sent to the specified recipients. If it has no records, no email is sent. </li> 
-      <li><strong>Conditional E-Mail Output (Inline)</strong><br /> If the result set has records, an email is sent to the specified recipients with the output contained in the email body. If it has no records, no email is sent. </li> 
-      <li><strong>Conditional Publish</strong><br /> If the result set has records, the output will available from the Jobs page. A notification email is sent to the specified recipients if this is configured. If the result set has no records, no output is generated and no email is sent.</li> 
-      <li><strong>Cache ResultSet (Append)</strong><br /> Cache the result set in a database table (Append)</li> 
-      <li><strong>Cache ResultSet (Delete&amp;Insert)</strong><br /> Cache the result set in a database table (Delete&amp;Insert)</li> 
-      <li><strong>Print</strong><br /> Prints the report output to the default printer</li> 
-      <li><strong>Burst</strong><br /> Generates report files for each distinct value in a resultset. This requires that the query for the report be ordered by the first column, which will be the burst-id column. When the value of this column changes, a new file is generated. Burst jobs are only possible with <strong>Tabular</strong> reports. The files generated will have the burst-id in their file names so different files can be identified and copied or ftped to different locations for example.</li> 
+      <li><strong>Just Run It</strong><br> Simply run the report. Uuseful to launch stored procedures or perform periodic data updates.</li> 
+      <li><strong>Conditional E-Mail Output (Attachment)</strong><br> If the result set has records, an email with the output attached is sent to the specified recipients. If it has no records, no email is sent. </li> 
+      <li><strong>Conditional E-Mail Output (Inline)</strong><br> If the result set has records, an email is sent to the specified recipients with the output contained in the email body. If it has no records, no email is sent. </li> 
+      <li><strong>Conditional Publish</strong><br> If the result set has records, the output will available from the Jobs page. A notification email is sent to the specified recipients if this is configured. If the result set has no records, no output is generated and no email is sent.</li> 
+      <li><strong>Cache ResultSet (Append)</strong><br> Cache the result set in a database table (Append)</li> 
+      <li><strong>Cache ResultSet (Delete&amp;Insert)</strong><br> Cache the result set in a database table (Delete&amp;Insert)</li> 
+      <li><strong>Print</strong><br> Prints the report output to the default printer</li> 
+      <li><strong>Burst</strong><br> Generates report files for each distinct value in a resultset. This requires that the query for the report be ordered by the first column, which will be the burst-id column. When the value of this column changes, a new file is generated. Burst jobs are only possible with <strong>Tabular</strong> reports. The files generated will have the burst-id in their file names so different files can be identified and copied or ftped to different locations for example.</li> 
      </ul> 
      <p><strong>Note:</strong></p> 
      <ul> 
@@ -3083,7 +3504,7 @@ WHERE CITY_ID = #cityId#
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="cached-results">Cached Results</h1> 
-     <p>ART can be used to reverse query results from a datasource to the same or a different datasource. <br /> This allows administrators to:</p> 
+     <p>ART can be used to reverse query results from a datasource to the same or a different datasource. <br> This allows administrators to:</p> 
      <ul> 
       <li>Group data to summary tables, creating a data mart from which to develop other reports</li> 
       <li>Create Data-Transformation-Load procedures (DTL) to feed other systems</li> 
@@ -3108,7 +3529,7 @@ WHERE CITY_ID = #cityId#
       <li>Run the query</li> 
       <li>Connect to the datasource where to reverse the results 
        <ul> 
-        <li>The Cached Table is created in the selected datasource (if the table doesn't exist). The column names will match with the query column names. Blanks or other special charaters in the names are replaced with &quot;_&quot;.</li> 
+        <li>The Cached Table is created in the selected datasource (if the table doesn't exist). The column names will match with the query column names. Blanks or other special charaters in the names are replaced with "_".</li> 
         <li>The table content is deleted if the option <strong>Cache ResultSet (Delete &amp; Insert)</strong> was selected</li> 
        </ul> </li> 
       <li>Reverse all the query results in the new table</li> 
@@ -3158,7 +3579,7 @@ WHERE CITY_ID = #cityId#
      <p>Each person in the dynamic recipients report list will get a personalized email with the column labels substituted with his values.</p> 
      <h2 id="dynamic-recipients-filtering">Dynamic Recipients + Filtering</h2> 
      <p>If you want the recipients to get different data, you will define a dynamic recipients report where the first column contains the recipient email addresses, any additional columns with personalization information if you want, and 2 other special, hard coded columns named <strong>recipient_column</strong> and <strong>recipient_id</strong>. These will be used to filter the data query. i.e. WHERE <code>&lt;recipient_column&gt;</code> = <code>&lt;recipient_id&gt;</code>. The main, data query will also need to have a special, hard coded label, <strong>#recipient#</strong>, in the where clause.</p> 
-     <p>Example:<br /> If we want to email users only transactions that they created, our data query can be something like</p> 
+     <p>Example:<br> If we want to email users only transactions that they created, our data query can be something like</p> 
      <div class="codehilite"> 
       <pre>    SELECT *
     FROM transactions
@@ -3168,14 +3589,14 @@ WHERE CITY_ID = #cityId#
      </div> 
      <p>We can then define a dynamic recipients report like</p> 
      <div class="codehilite"> 
-      <pre>    SELECT email, &quot;transaction_user&quot; recipient_column, employee_id recipient_id
+      <pre>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id
     FROM employee
 </pre> 
      </div> 
      <p>This will cause the <code>#recipient#</code> placeholder in the data query to be replaced with the condition <code>transaction_user = &lt;employee_id&gt;</code>, where <code>&lt;employee_id&gt;</code> will be different for each recipient, as per the dynamic recipients query. We can then schedule a job for the main report and set the dynamic recipients field, and all the recipients will get a separate email with their specific data only.</p> 
      <p>If we also want to include personalization fields in the email message body, we can add these to the dynamic recipients query e.g</p> 
      <div class="codehilite"> 
-      <pre>    SELECT email, &quot;transaction_user&quot; recipient_column, employee_id recipient_id, first_name
+      <pre>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id, first_name
     FROM employee
 </pre> 
      </div> 
@@ -3235,7 +3656,7 @@ WHERE CITY_ID = #cityId#
        </tr> 
        <tr> 
         <td><strong>Remote Directory</strong></td> 
-        <td>If the files are to be ftped to the user's home directory, then this field should be left blank. If the files are to be ftped to another directory, then the path should be given here, always beginning with &quot;/&quot; e.g. /sub-folder-a or /sub-folder-a/sub-sub-folder-b.</td> 
+        <td>If the files are to be ftped to the user's home directory, then this field should be left blank. If the files are to be ftped to another directory, then the path should be given here, always beginning with "/" e.g. /sub-folder-a or /sub-folder-a/sub-sub-folder-b.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -3380,7 +3801,7 @@ spnego-server {
      </ul> 
      <h3 id="omitting-the-credentials-box">Omitting the credentials box</h3> 
      <ul> 
-      <li> <p><strong>Firefox</strong><br /> By default, firefox will still display a credentials box requiring a user to enter their domain username and password. To avoid this, do the following</p> 
+      <li> <p><strong>Firefox</strong><br> By default, firefox will still display a credentials box requiring a user to enter their domain username and password. To avoid this, do the following</p> 
        <ul> 
         <li>In the address bar, type <strong>about:config</strong></li> 
         <li>In the filter box, type <strong>network.negotiate</strong></li> 
@@ -3388,9 +3809,9 @@ spnego-server {
        </ul> <p>If the credentials box is still displayed, set the following options in a similar way</p> 
        <ul> 
         <li><strong>network.negotiate-auth.delegation-uris</strong></li> 
-        <li><strong>network.automatic-ntlm-auth.trusted-uris</strong><br /> <br /></li> 
+        <li><strong>network.automatic-ntlm-auth.trusted-uris</strong><br> <br></li> 
        </ul> </li> 
-      <li> <p><strong>IE</strong><br /> For IE, the credentials box may be displayed if you access the web application using an ip address. To avoid this, do the following</p> 
+      <li> <p><strong>IE</strong><br> For IE, the credentials box may be displayed if you access the web application using an ip address. To avoid this, do the following</p> 
        <ul> 
         <li>Under internet options, security, local intranet, sites, click on advanced and add the url to the application server e.g. <code>http://192.168.56.101:8080</code></li> 
        </ul> </li> 
@@ -3423,7 +3844,7 @@ spnego-server {
     com.sun.security.auth.module.Krb5LoginModule required
     storeKey=true
     useKeyTab=true
-    keyTab=&quot;file:///c:/tomcat/webapps/art/WEB-INF/art.keytab&quot;
+    keyTab="file:///c:/tomcat/webapps/art/WEB-INF/art.keytab"
     principal=spnego;
 };
 </pre> 
@@ -3465,24 +3886,23 @@ spnego-server {
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="application-logs">Application Logs</h1> 
-     <p>ART uses the <a class="" href="http://logback.qos.ch/index.html" rel="nofollow">Logback</a> library for application logging. By default, application logging is done to standard output and includes logging on errors, warnings and information messages. The location of the logs or the amount of logging generated can be modified by making appropriate configuration changes to the ART_HOME\WEB-INF\classes\<strong>logback.xml</strong> file. Changes made to the logging configuration e.g. changing certain logging levels from &quot;info&quot; to &quot;debug&quot; automatically take effect after the configured <strong>scanPeriod</strong> (values can be specified as milliseconds, seconds, minutes or hours. See <a href="http://logback.qos.ch/manual/configuration.html" rel="nofollow">http://logback.qos.ch/manual/configuration.html</a> for more details).</p> 
+     <p>ART uses the <a class="" href="http://logback.qos.ch/index.html" rel="nofollow">Logback</a> library for application logging. By default, application logging is done to standard output and includes logging on errors, warnings and information messages. The location of the logs or the amount of logging generated can be modified by making appropriate configuration changes to the ART_HOME\WEB-INF\classes\<strong>logback.xml</strong> file. Changes made to the logging configuration e.g. changing certain logging levels from "info" to "debug" automatically take effect after the configured <strong>scanPeriod</strong> (values can be specified as milliseconds, seconds, minutes or hours. See <a href="http://logback.qos.ch/manual/configuration.html" rel="nofollow">http://logback.qos.ch/manual/configuration.html</a> for more details).</p> 
      <p>In addition to being available on the application server's standard output log files, e.g stdout.log or catalina.log on Tomcat, application logs can also be viewed from within ART. This means that you don't need to have access to the application server machine in order to view application logs. </p> 
      <p>Application logs can be viewed from the <strong>Logs</strong> menu. New logs are added to the bottom and you'll need to refresh the page to view them. Also note that this page doesn't display all the logs ever generated by the application, only the most recent ones.</p> 
      <h2 id="sql-logging">SQL Logging</h2> 
-     <p>You can set up logging for the sql that is generated when queries are run, e.g. to see the final sql generated, or to see how long queries take to execute. ART comes with the <a class="" href="http://code.google.com/p/log4jdbc/" rel="nofollow">log4jdbc</a> library that enables such logging. Take the following steps to configure sql logging.</p> 
+     <p>You can set up logging for the sql that is generated when queries are run, e.g. to see the final sql generated, or to see how long queries take to execute. ART uses the <a class="" href="http://log4jdbc.brunorozendo.com/" rel="nofollow">log4jdbc-log4j2</a> library to enable such logging. Take the following steps to configure sql logging.</p> 
      <ul> 
       <li>Select the <strong>Configure | Datasources</strong> menu and <strong>Edit</strong> the datasource you're interested in</li> 
-      <li>Set the <strong>JDBC Driver</strong> to <code>net.sf.log4jdbc.DriverSpy</code></li> 
-      <li>Modify the <strong>JDBC URL</strong> by prepending <strong>jdbc:log4</strong> to the existing url, e.g. resulting in a url like <code>jdbc:log4jdbc:mysql://localhost/mydb</code></li> 
+      <li>Select <strong>SQL Logging</strong> in the <code>Database Type</code> field. This will set the JDBC Driver and JDBC fields appropriately for sql logging. Alternatively, you can set the values manually as follows. Set the <code>JDBC Driver</code> field to <code>net.sf.log4jdbc.sql.jdbcapi.DriverSpy</code> and modify the <code>JDBC URL</code> field by prepending <strong>jdbc:log4</strong> to the existing url, e.g. resulting in a url like <code>jdbc:log4jdbc:mysql://localhost/mydb</code></li> 
       <li><strong>Save</strong> the datasource details</li> 
       <li> <p>Modify the ART_HOME\WEB-INF\classes\<strong>logback.xml</strong> file and add loggers for the items you are interested in e.g.</p> 
        <div class="codehilite"> 
-        <pre><span class="nt">&lt;logger</span> <span class="na">name=</span><span class="s">&quot;jdbc.sqltiming&quot;</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;level</span> <span class="na">value=</span><span class="s">&quot;info&quot;</span> <span class="nt">/&gt;</span>
+        <pre><span class="nt">&lt;logger</span> <span class="na">name=</span><span class="s">"jdbc.sqltiming"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;level</span> <span class="na">value=</span><span class="s">"info"</span> <span class="nt">/&gt;</span>
 <span class="nt">&lt;/logger&gt;</span>
 </pre> 
        </div> </li> 
-      <li> <p>The available loggers and what events they log can be found on the log4jdbc project home page, <a href="http://code.google.com/p/log4jdbc/" rel="nofollow">http://code.google.com/p/log4jdbc/</a></p> </li> 
+      <li> <p>The available loggers and what events they log can be found on the log4jdbc-log4j2 project home page, <a href="http://log4jdbc.brunorozendo.com/." rel="nofollow">http://log4jdbc.brunorozendo.com/.</a> ART uses the SLF4J configuration.</p> </li> 
       <li>That's all. The logging information will now be included in the application logs when reports are run against that datasource.</li> 
      </ul> 
     </div> 
@@ -3502,7 +3922,7 @@ spnego-server {
      </ul> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li>The &quot;service user account&quot; configured to start and stop the Tomcat service needs to have appropriate permissions, otherwise you may get errors when accessing ART. In particular, ART requires write access to the <code>ART_HOME\WEB-INF\work</code> and <code>ART_HOME\js-templates</code> directories.</li> 
+      <li>The "service user account" configured to start and stop the Tomcat service needs to have appropriate permissions, otherwise you may get errors when accessing ART. In particular, ART requires write access to the <code>ART_HOME\WEB-INF\work</code> and <code>ART_HOME\js-templates</code> directories.</li> 
      </ul> 
      <p>If Tomcat is run from a batch file</p> 
      <ul> 
@@ -3515,10 +3935,10 @@ spnego-server {
      <h3 id="linux">Linux</h3> 
      <p>Create a file named <strong>setenv.sh</strong> in the TOMCAT_HOME/bin directory (or edit it if it exists) and set the configuration options in the JAVA_OPTS environment variable e.g.</p> 
      <div class="codehilite"> 
-      <pre>    export JAVA_OPTS=&quot;-server -Xmx512m&quot;
+      <pre>    export JAVA_OPTS="-server -Xmx512m"
 </pre> 
      </div> 
-     <p><br /></p> 
+     <p><br></p> 
      <h2 id="accessing-tomcat-via-apache">Accessing Tomcat via Apache</h2> 
      <p>You can use the Apache HTTP Server as a front end to your application that resides on Tomcat. This can be done for a number of reasons, including clustering or enabling access to the application from a more familiar url. </p> 
      <p>There are a number of ways to run Tomcat behind Apache.</p> 
@@ -3550,7 +3970,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
        </div> </li> 
       <li> <p>Ensure you have an AJP connector defined in the <strong>TOMCAT_HOME\conf\server.xml</strong> file e.g.</p> 
        <div class="codehilite"> 
-        <pre>&lt;Connector port=&quot;8009&quot; protocol=&quot;AJP/1.3&quot; redirectPort=&quot;8443&quot; /&gt;
+        <pre>&lt;Connector port="8009" protocol="AJP/1.3" redirectPort="8443" /&gt;
 </pre> 
        </div> </li> 
       <li> <p>Add an item at the end of the <strong>httpd.conf</strong> file to indicate how ART will be accessed by users and how Apache will communicate with Tomcat e.g</p> 
@@ -3683,9 +4103,9 @@ a2enmod proxy_http
       <li>Ensure you have an internet connection</li> 
       <li>Select the <strong>Help | Eclipse Marketplace</strong> menu</li> 
       <li>On the Search tab, in the Find field, type maven and hit enter</li> 
-      <li>Find the &quot;Maven Integration for Eclipse&quot; plugin (m2e by eclipse.org) and click on the Install button</li> 
+      <li>Find the "Maven Integration for Eclipse" plugin (m2e by eclipse.org) and click on the Install button</li> 
       <li>Once the plugin installs, go back to the Eclipse Marketplace and again type maven in the Find field and hit enter</li> 
-      <li>Find the &quot;Maven Integration for Eclipse WTP&quot; plugin (m2e-wtp by eclipse.org) and click on the Install button.</li> 
+      <li>Find the "Maven Integration for Eclipse WTP" plugin (m2e-wtp by eclipse.org) and click on the Install button.</li> 
       <li>Create a directory to hold eclipse workspace files e.g. <code>C:\MyEclipseWorkspaces\art</code></li> 
       <li>In Eclipse, select the <strong>File | Switch Workspace | Other</strong> menu</li> 
       <li>Select the workspace folder you created e.g. <code>C:\MyEclipseWorkspaces\art</code> and click on OK. Wait for Eclipse to restart</li> 

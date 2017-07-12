@@ -2,6 +2,7 @@
 <html>
  <head> 
   <meta charset="UTF-8"> 
+  <meta name="pdfTitle" content="Upgrading ART"> 
   <title>ART - Upgrading</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -17,7 +18,19 @@
 		</style> 
  </head> 
  <body class="wiki-Tips" id="forge"> 
+  <div> 
+   <p><strong>Upgrading ART</strong></p> 
+  </div> 
   <div class="markdown_content">
+   <div class="toc"> 
+    <ol> 
+     <li><a href="#upgrading-art">Upgrading ART</a></li> 
+     <li><a href="#notes">Notes</a> 
+      <ol> 
+       <li><a href="#30">3.0</a></li> 
+      </ol></li> 
+    </ol> 
+   </div> 
    <h1 id="upgrading-art">Upgrading ART</h1> 
    <p>Take the following steps to upgrade an existing ART installation to a more current version.</p> 
    <ul> 
@@ -38,15 +51,16 @@
     <li>Copy the contents of the backup <strong>art\WEB-INF\work</strong> directory to the new version's work directory</li> 
     <li>Copy the contents of the backup <strong>art\js-templates</strong> directory to the new version's js-templates directory</li> 
     <li>If you had modified the <strong>art\WEB-INF\art-custom-settings.json</strong> file, copy the file from the backup directory to the new version directory</li> 
+    <li>If you had modified the <strong>art\WEB-INF\groovy-whitelist.txt</strong> file, copy the file from the backup directory to the new version directory</li> 
     <li>If you were using the demo HSQLDB database, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="" href="https://sourceforge.net/p/art/wiki/Tips/">Tips</a> documentation to see how you can upgrade an HSQLDB database.</li> 
     <li>If you had put any <strong>JDBC drivers</strong> in the <strong>art\WEB-INF\lib</strong> directory, copy these drivers from the backup lib directory to the new version's lib directory.</li> 
     <li>Restart Tomcat</li> 
     <li>Clear your browser's cache e.g. for Firefox, use the History | Clear Recent History menu</li> 
    </ul> 
    <p>The upgrade is complete. All users, reports, scheduled jobs etc should continue to work as before.</p> 
-   <h2 id="notes">Notes</h2> 
+   <h1 id="notes">Notes</h1> 
    <p>Some upgrades may require special attention or additional effort due to feature changes and incompatibilities with previous versions.</p> 
-   <h3 id="30">3.0</h3> 
+   <h2 id="30">3.0</h2> 
    <p>ART 3.0 is a major upgrade and may require extensive testing to verify that it continues to fulfill the needs of an existing installation.</p> 
    <table border="1"> 
     <thead> 
@@ -82,7 +96,7 @@
      </tr> 
      <tr> 
       <td><strong>Renamed concepts</strong></td> 
-      <td>Some concepts have been renamed e.g. "Queries" are now "Reports", "Graphs" are now "Charts", "View Modes" are now "Report Formats", "Report on Column" report types are now "Group" reports.</td> 
+      <td>Some concepts have been renamed e.g. "Queries" are now "Reports", "Graphs" are now "Charts", "View Modes" are now "Report Formats", "Report on Column" report types are now "Group" reports, "Pivot Table" report types are now "JPivot" reports.</td> 
      </tr> 
      <tr> 
       <td><strong>jXLS templates</strong></td> 
@@ -129,7 +143,7 @@
       <td>Parameters that were defined with a data type of <code>java.lang.Long</code> in JasperReports need to be modified to <code>java.lang.Integer</code></td> 
      </tr> 
     </tbody> 
-   </table>
+   </table> 
   </div>  
  </body>
 </html>

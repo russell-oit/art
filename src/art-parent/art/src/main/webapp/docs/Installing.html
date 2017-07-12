@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
  <head> 
-  <meta charset="UTF-8" /> 
-  <meta name="pdfTitle" content="Installing ART" /> 
+  <meta charset="UTF-8"> 
+  <meta name="pdfTitle" content="Installing ART"> 
   <title>ART - Installing</title> 
-  <link rel="shortcut icon" href="../images/favicon.ico" /> 
+  <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
 			table
 			{
@@ -88,8 +88,8 @@ sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
    <ul> 
     <li>Download and install the Windows Service Installer package</li> 
     <li>Change the default install location from C:\Program Files, e.g. install to C:\tomcat.</li> 
-    <li>To start Tomcat, start the service e.g. type &quot;net start tomcat7&quot; in a command prompt window. You may need to open the command prompt window using the &quot;Run as administrator&quot; option.</li> 
-    <li>To stop Tomcat, stop the service e.g. type &quot;net stop tomcat7&quot; in a command prompt window</li> 
+    <li>To start Tomcat, start the service e.g. type "net start tomcat7" in a command prompt window. You may need to open the command prompt window using the "Run as administrator" option.</li> 
+    <li>To stop Tomcat, stop the service e.g. type "net stop tomcat7" in a command prompt window</li> 
    </ul> 
    <p>Once Tomcat is installed and started, open a browser and navigate to localhost:8080. You should see the Tomcat welcome page. This indicates that the Tomcat installation was successful.</p> 
    <h2 id="deployment-on-tomcat">Deployment on Tomcat</h2> 
@@ -112,8 +112,8 @@ sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
    <ul> 
     <li>From the <strong>Admin Console</strong>, click on the <strong>Settings</strong> button</li> 
     <li>Set the ART database username/password to ART/ART (both username and password are case sensitive)</li> 
-    <li>Set the jdbc driver field to &quot;default&quot;</li> 
-    <li>Set the jdbc url field to &quot;default&quot;</li> 
+    <li>Set the jdbc driver field to "default"</li> 
+    <li>Set the jdbc url field to "default"</li> 
     <li>Make any other application settings as you like and click on the <strong>Submit</strong> button</li> 
    </ul> 
    <p><strong>Note:</strong></p> 
@@ -149,7 +149,7 @@ sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
    <h3 id="using-mysql-on-windows">Using MySQL on Windows</h3> 
    <ul> 
     <li>Ensure the path to mysql.exe is included in the PATH environment variable</li> 
-    <li> <p>Open a command prompt window <br /> </p> 
+    <li> <p>Open a command prompt window <br> </p> 
      <div class="codehilite"> 
       <pre>c:\&gt; mysql -h localhost -u root -p
 </pre> 
@@ -157,10 +157,10 @@ sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
     <li> <p>Enter the password</p> 
      <div class="codehilite"> 
       <pre>mysql&gt; create database art;
-mysql&gt; grant all on art.* to artuser@localhost identified by &quot;artpassword&quot;;
+mysql&gt; grant all on art.* to artuser@localhost identified by "artpassword";
 mysql&gt; use art;
-mysql&gt; \. &quot;PACKAGE_PATH\database\art_tables.sql&quot;
-mysql&gt; \. &quot;PACKAGE_PATH\database\quartz\tables_mysql.sql&quot;
+mysql&gt; \. "PACKAGE_PATH\database\art_tables.sql"
+mysql&gt; \. "PACKAGE_PATH\database\quartz\tables_mysql.sql"
 mysql&gt; quit;
 </pre> 
      </div> </li> 
@@ -174,7 +174,7 @@ mysql&gt; quit;
       <pre>c:\&gt; psql -U postgres
 </pre> 
      </div> </li> 
-    <li> <p>When prompted for a password, enter the password for the postgres database user created when installing PostgreSQL. If the username of the account is not &quot;postgres&quot;, use the appropriate name in place of postgres in the -U switch of the command.</p> 
+    <li> <p>When prompted for a password, enter the password for the postgres database user created when installing PostgreSQL. If the username of the account is not "postgres", use the appropriate name in place of postgres in the -U switch of the command.</p> 
      <div class="codehilite"> 
       <pre>postgres=# create user artuser password 'artpassword';
 postgres=# create database art owner artuser;
@@ -188,11 +188,11 @@ art=# \q
    </ul> 
    <p>For the path to the sql scripts, use forward slashes instead of back slashes, and enclose the path in single quotes in case it contains spaces.</p> 
    <h3 id="using-cubrid-on-windows">Using CUBRID on Windows</h3> 
-   <p>CUBRID is a comprehensive open source relational database management system highly optimized for Web Applications.<br /> Using the CUBRID Manager application,</p> 
+   <p>CUBRID is a comprehensive open source relational database management system highly optimized for Web Applications.<br> Using the CUBRID Manager application,</p> 
    <ul> 
     <li>Connect to your host</li> 
     <li>Right click on <strong>Databases</strong> and select <strong>Create Database...</strong>. Provide the required details for database creation.</li> 
-    <li>Right click on the created database and select <strong>Login Database</strong>. Login with the username <strong>public</strong> and blank password. This will ensure that tables will be created with owner as &quot;public&quot;, making access to them more straight forward.</li> 
+    <li>Right click on the created database and select <strong>Login Database</strong>. Login with the username <strong>public</strong> and blank password. This will ensure that tables will be created with owner as "public", making access to them more straight forward.</li> 
     <li>Right click on the database and select <strong>Run SQL File</strong>. Select the PACKAGE_PATH\database\art_tables.sql file and click on OK. Do the same for the PACKAGE_PATH\database\quartz\tables_cubrid.sql file.</li> 
    </ul> 
    <h2 id="configure-art">Configure ART</h2> 
@@ -206,7 +206,7 @@ art=# \q
     <li>Create and publish queries as required</li> 
    </ul> 
    <h1 id="patches">Patches</h1> 
-   <p>ART patches replace specific files in an ART installation in order to resolve specific issues.<br /> If patches are available for your ART version, take the following steps.</p> 
+   <p>ART patches replace specific files in an ART installation in order to resolve specific issues.<br> If patches are available for your ART version, take the following steps.</p> 
    <ul> 
     <li>Download the latest patch for your version</li> 
     <li>Stop the application server</li> 
