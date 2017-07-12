@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
 public class ParameterProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(ParameterProcessor.class);
-	
+
 	private Locale locale;
 
 	/**
@@ -192,9 +192,8 @@ public class ParameterProcessor {
 				//don't run chained parameters. their values will be
 				//loaded dynamically depending on parent and depends paremeter values
 				if (!reportParam.isChained()) {
-					ReportRunner lovReportRunner = null;
+					ReportRunner lovReportRunner = new ReportRunner();
 					try {
-						lovReportRunner = new ReportRunner();
 						int lovReportId = param.getLovReportId();
 						Report lovReport = reportService.getReport(lovReportId);
 						lovReportRunner.setUser(user);
@@ -205,9 +204,7 @@ public class ParameterProcessor {
 						Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
 						reportParam.setLovValuesAsString(lovValuesAsString);
 					} finally {
-						if (lovReportRunner != null) {
-							lovReportRunner.close();
-						}
+						lovReportRunner.close();
 					}
 				}
 			}
@@ -230,9 +227,8 @@ public class ParameterProcessor {
 			Report defaultValueReport = param.getDefaultValueReport();
 
 			if (defaultValueReport != null) {
-				ReportRunner defaultValueLovReportRunner = null;
+				ReportRunner defaultValueLovReportRunner = new ReportRunner();
 				try {
-					defaultValueLovReportRunner = new ReportRunner();
 					defaultValueLovReportRunner.setUser(user);
 					defaultValueLovReportRunner.setReport(defaultValueReport);
 					defaultValueLovReportRunner.setReportParamsMap(reportParamsMap);
@@ -245,9 +241,7 @@ public class ParameterProcessor {
 					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
 					reportParam.setDefaultValueLovValues(lovValuesAsString);
 				} finally {
-					if (defaultValueLovReportRunner != null) {
-						defaultValueLovReportRunner.close();
-					}
+					defaultValueLovReportRunner.close();
 				}
 			}
 		}
@@ -328,11 +322,10 @@ public class ParameterProcessor {
 
 				if (CollectionUtils.isEmpty(actualValuesList)) {
 					//get all lov values that apply for the user
-					ReportRunner lovReportRunner = null;
-					try {
-						List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
-						if (param.isUseLov()) {
-							lovReportRunner = new ReportRunner();
+					List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
+					if (param.isUseLov()) {
+						ReportRunner lovReportRunner = new ReportRunner();
+						try {
 							int lovReportId = param.getLovReportId();
 							ReportService reportService = new ReportService();
 							Report lovReport = reportService.getReport(lovReportId);
@@ -345,13 +338,11 @@ public class ParameterProcessor {
 								Object actualValue = entry2.getKey();
 								actualValues.add(actualValue);
 							}
-						}
-						reportParam.setActualParameterValues(actualValues);
-					} finally {
-						if (lovReportRunner != null) {
+						} finally {
 							lovReportRunner.close();
 						}
 					}
+					reportParam.setActualParameterValues(actualValues);
 				}
 			}
 		}

@@ -67,13 +67,9 @@ public class ChainedParameterController {
 		//encapsulate values in a list (will be a json array) to ensure values
 		//are displayed in the order given
 		List<Map<String, String>> list = new ArrayList<>();
-
 		Map<String, String> values = new HashMap<>();
-
-		ReportRunner reportRunner = null;
-
+		ReportRunner reportRunner = new ReportRunner();
 		try {
-			reportRunner = new ReportRunner();
 			Report report = reportService.getReport(reportId);
 			reportRunner.setReport(report);
 
@@ -90,9 +86,7 @@ public class ChainedParameterController {
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 		} finally {
-			if (reportRunner != null) {
-				reportRunner.close();
-			}
+			reportRunner.close();
 		}
 
 		for (Entry<String, String> entry : values.entrySet()) {

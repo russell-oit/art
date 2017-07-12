@@ -246,9 +246,8 @@ public class JPivotController {
 				model.addAttribute("xmlaCatalog", xmlaCatalog);
 			}
 
-			ReportRunner reportRunner = null;
+			ReportRunner reportRunner = new ReportRunner();
 			try {
-				reportRunner = new ReportRunner();
 				reportRunner.setUser(sessionUser);
 				reportRunner.setReport(report);
 
@@ -266,9 +265,7 @@ public class JPivotController {
 				String query = reportRunner.getQuerySql();
 				model.addAttribute("query", query);
 			} finally {
-				if (reportRunner != null) {
-					reportRunner.close();
-				}
+				reportRunner.close();
 			}
 
 			//check if this is the only user who has access. if so, he can overwrite the pivot table view with a different view
