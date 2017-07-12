@@ -237,7 +237,6 @@ public class RunReportHelper {
 			case JPivotMondrianXmla:
 			case JPivotSqlServerXmla:
 			case JasperReportsTemplate:
-			case JxlsTemplate:
 			case Text:
 			case PivotTableJsCsvLocal:
 			case PivotTableJsCsvServer:
@@ -259,7 +258,7 @@ public class RunReportHelper {
 					enableShowSql = false;
 				}
 
-				if (reportType.isDashboard()) {
+				if (reportType.isDashboard() || reportType == ReportType.JxlsTemplate) {
 					enableShowSql = false;
 				}
 
@@ -307,6 +306,11 @@ public class RunReportHelper {
 			case PivotTableJsCsvLocal:
 			case PivotTableJsCsvServer:
 			case SaikuReport:
+			case ReactPivot:
+			case GridstackDashboard:
+			case ChartJs:
+			case C3:
+			case TabularHeatmap:
 				enablePrint = false;
 				break;
 			default:
@@ -320,7 +324,6 @@ public class RunReportHelper {
 			case CrosstabHtml:
 			case FreeMarker:
 			case Thymeleaf:
-			case ReactPivot:
 			case Dygraphs:
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
@@ -328,13 +331,10 @@ public class RunReportHelper {
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
 			case FixedWidth:
-			case C3:
-			case ChartJs:
 			case Datamaps:
 			case DatamapsFile:
 			case Leaflet:
 			case OpenLayers:
-			case TabularHeatmap:
 			case MongoDB:
 				enablePrintAlways = true;
 				break;
