@@ -24,6 +24,7 @@ import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportOptions;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
@@ -145,6 +147,14 @@ public class DashboardController {
 			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportParamsList = paramProcessorResult.getReportParamsList();
+
+			//facilitate display of selected parameters in browser
+			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
+			if (reportOptions.isShowSelectedParameters()) {
+				request.setAttribute("reportParamEntries", reportParamsMap);
+				String localeString = locale.toString();
+				request.setAttribute("localeString", localeString);
+			}
 
 			if (reportFormat == ReportFormat.pdf) {
 				FilenameHelper filenameHelper = new FilenameHelper();

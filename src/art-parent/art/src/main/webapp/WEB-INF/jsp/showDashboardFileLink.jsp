@@ -21,7 +21,9 @@
 		</h4>
 	</div>
 </div>
-			
+
+<jsp:include page="/WEB-INF/jsp/showSelectedParameters.jsp"/>
+
 <jsp:include page="/WEB-INF/jsp/showFileLink.jsp"/>
 
 <div class="reportBanner">

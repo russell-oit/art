@@ -47,7 +47,7 @@
 							$('#spinner').hide();
 						});
 					</script>
-
+					
 					<c:choose>
 						<c:when test="${reportFormat == 'pdf'}">
 							<jsp:include page="/WEB-INF/jsp/showDashboardFileLink.jsp"/>

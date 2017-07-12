@@ -145,37 +145,41 @@ public class PdfDashboard {
 
 			if (reportType.isStandardOutput() || reportType.isChart()) {
 				ReportRunner reportRunner = new ReportRunner();
-				reportRunner.setUser(user);
-				reportRunner.setReport(report);
-				reportRunner.setReportParamsMap(reportParamsMap);
+				try {
+					reportRunner.setUser(user);
+					reportRunner.setReport(report);
+					reportRunner.setReportParamsMap(reportParamsMap);
 
-				RunReportHelper runReportHelper = new RunReportHelper();
-				int resultSetType = runReportHelper.getResultSetType(reportType);
+					RunReportHelper runReportHelper = new RunReportHelper();
+					int resultSetType = runReportHelper.getResultSetType(reportType);
 
-				reportRunner.execute(resultSetType);
+					reportRunner.execute(resultSetType);
 
-				FilenameHelper filenameHelper = new FilenameHelper();
-				String baseFileName = filenameHelper.getBaseFilename(report);
-				String exportPath = Config.getReportsExportPath();
-				String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
-				String fileName = baseFileName + "." + extension;
-				String reportFileName = exportPath + fileName;
+					FilenameHelper filenameHelper = new FilenameHelper();
+					String baseFileName = filenameHelper.getBaseFilename(report);
+					String exportPath = Config.getReportsExportPath();
+					String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
+					String fileName = baseFileName + "." + extension;
+					String reportFileName = exportPath + fileName;
 
-				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+					ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
-				reportOutputGenerator.setIsJob(true);
-				reportOutputGenerator.setPdfPageNumbers(false);
+					reportOutputGenerator.setIsJob(true);
+					reportOutputGenerator.setPdfPageNumbers(false);
 
-				FileOutputStream fos = new FileOutputStream(reportFileName);
-				try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"))) {
-					reportOutputGenerator.generateOutput(report, reportRunner,
-							reportFormat, locale, paramProcessorResult, writer,
-							reportFileName, user, messageSource);
+					FileOutputStream fos = new FileOutputStream(reportFileName);
+					try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"))) {
+						reportOutputGenerator.generateOutput(report, reportRunner,
+								reportFormat, locale, paramProcessorResult, writer,
+								reportFileName, user, messageSource);
+					} finally {
+						fos.close();
+					}
+
+					reportFileNames.add(reportFileName);
 				} finally {
-					fos.close();
+					reportRunner.close();
 				}
-
-				reportFileNames.add(reportFileName);
 			}
 		}
 
