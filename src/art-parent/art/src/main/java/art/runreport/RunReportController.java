@@ -307,7 +307,10 @@ public class RunReportController {
 				//http://jsoup.org/apidocs/org/jsoup/safety/Whitelist.html
 				//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
 				String reportSource = report.getReportSource();
-				String cleanSource = Jsoup.clean(reportSource, Whitelist.relaxed());
+				//https://github.com/jhy/jsoup/issues/511#issuecomment-94978302
+				Whitelist whitelist = Whitelist.relaxed();
+				whitelist.addProtocols("img", "src", "data"); //for base64 encoded images
+				String cleanSource = Jsoup.clean(reportSource, whitelist);
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showTextReport.jsp").include(request, response);
 			} else {
