@@ -82,7 +82,24 @@ Edit report page
 				],
 				toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
 				toolbar2: "print preview | forecolor backcolor | link image | code",
-				image_advtab: true
+				image_advtab: true,
+				//https://codepen.io/nirajmchauhan/pen/EjQLpV
+				paste_data_images: true,
+				file_picker_callback: function (callback, value, meta) {
+					if (meta.filetype == 'image') {
+						$('#upload').trigger('click');
+						$('#upload').on('change', function () {
+							var file = this.files[0];
+							var reader = new FileReader();
+							reader.onload = function (e) {
+								callback(e.target.result, {
+									alt: ''
+								});
+							};
+							reader.readAsDataURL(file);
+						});
+					}
+				}
 			});
 		</script>
 
@@ -1329,6 +1346,7 @@ Edit report page
 				<div id="reportSourceHtmlDiv" class="form-group">
 					<div class="col-md-12">
 						<form:textarea path="reportSourceHtml" rows="20" cols="70" wrap="off" class="form-control editor"/>
+						 <input name="image" type="file" id="upload" style="display:none;" onchange="">
 						<form:errors path="reportSourceHtml" cssClass="error"/>
 					</div>
 				</div>
