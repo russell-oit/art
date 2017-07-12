@@ -132,7 +132,11 @@ class StorageCleaner implements Runnable {
 	      runner.setDaemon(true);
 	      runner.setName("Cewolf-SessionCleanup");
 	      runner.setPriority(Thread.MIN_PRIORITY);
+		  //https://stackoverflow.com/questions/7315941/java-lang-illegalthreadstateexception
+		  Thread.State state=runner.getState();
+		  if(state==Thread.State.NEW) {
 	      runner.start();
+		}
 	    }
 	  }
 	  

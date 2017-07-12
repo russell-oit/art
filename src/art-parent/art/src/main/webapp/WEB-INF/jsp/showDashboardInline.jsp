@@ -15,6 +15,8 @@
 <div id="reportOutput" class="container-fluid">
 	<%-- https://stackoverflow.com/questions/26192952/single-full-width-column-in-row-with-twitter-bootstrap-grid --%>
 	<%-- https://stackoverflow.com/questions/18854586/best-practice-for-single-column-within-row-in-bootstrap-v3-grid-system --%>
+	<%-- http://www.helloerik.com/the-subtle-magic-behind-why-the-bootstrap-3-grid-works --%>
+	<%-- https://medium.com/wdstack/how-the-bootstrap-grid-really-works-471d7a089cfc --%>
 	<div class="row">
 		<h2>${encode:forHtmlContent(dashboard.title)}  
 			<small>  ${encode:forHtmlContent(dashboard.description)}</small>
