@@ -248,7 +248,10 @@ public class ReportJob implements org.quartz.Job {
 			String fullLocalFileName = jobsExportPath + fileName;
 			String remoteDirectory = ftpServer.getRemoteDirectory();
 			remoteDirectory = StringUtils.trimToEmpty(remoteDirectory);
-			String remoteFileName = remoteDirectory + "/" + fileName;
+			if (!StringUtils.endsWith(remoteDirectory, "/")) {
+				remoteDirectory += "/";
+			}
+			String remoteFileName = remoteDirectory + fileName;
 			File localFile = new File(fullLocalFileName);
 
 			boolean done;
@@ -891,7 +894,7 @@ public class ReportJob implements org.quartz.Job {
 	private void runJob(boolean splitJob, User user, String userEmail) throws SQLException {
 		Map<String, Map<String, String>> recipientDetails = null;
 		boolean recipientFilterPresent = false;
-		
+
 		runJob(splitJob, user, userEmail, recipientDetails, recipientFilterPresent);
 	}
 
@@ -909,7 +912,7 @@ public class ReportJob implements org.quartz.Job {
 			Map<String, Map<String, String>> recipientDetails) throws SQLException {
 
 		boolean recipientFilterPresent = false;
-		
+
 		runJob(splitJob, user, userEmail, recipientDetails, recipientFilterPresent);
 	}
 
