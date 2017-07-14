@@ -216,6 +216,10 @@ public class ReportJob implements org.quartz.Job {
 
 		//http://www.codejava.net/java-se/networking/ftp/java-ftp-file-upload-tutorial-and-example
 		//https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
+		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
+		//https://stackoverflow.com/questions/36302985/how-to-connect-to-ftp-over-tls-ssl-ftps-server-in-java
+		//https://stackoverflow.com/questions/36349361/apache-java-ftp-client-does-not-switch-to-binary-transfer-mode-on-some-servers
+		//https://stackoverflow.com/questions/6651158/apache-commons-ftp-problems
 		String server = ftpServer.getServer();
 		int port = ftpServer.getPort();
 		String user = ftpServer.getUser();
