@@ -241,7 +241,8 @@ Edit report page
 				//https://stackoverflow.com/questions/14907184/is-there-a-way-to-hide-the-vertical-ruler-in-ace-editor
 				sqlEditor.setShowPrintMargin(false);
 				//https://stackoverflow.com/questions/28283344/is-there-a-way-to-hide-the-line-numbers-in-ace-editor
-				sqlEditor.renderer.setShowGutter(false);
+				//sqlEditor.renderer.setShowGutter(false);
+				sqlEditor.setOption("showLineNumbers", true);
 
 				document.getElementById('sqlEditor').style.fontSize = '14px'; //default seems to be 12px
 
