@@ -102,10 +102,12 @@ public class RunReportController {
 
 		//check if output is being displayed within the show report page (inline) or in a new page
 		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
+		//check if the html code should be rendered as an html fragment (without <html> and </html> tags) e.g. in a dashboard section
+		boolean isFragment = Boolean.parseBoolean(request.getParameter("isFragment"));
 
 		//set appropriate error page to use
 		String errorPage;
-		if (showInline) {
+		if (showInline || isFragment) {
 			errorPage = "reportErrorInline";
 		} else {
 			errorPage = "reportError";
@@ -143,9 +145,6 @@ public class RunReportController {
 
 			String reportName = report.getName();
 			ReportType reportType = report.getReportType();
-
-			//check if the html code should be rendered as an html fragment (without <html> and </html> tags) e.g. in a dashboard section
-			boolean isFragment = Boolean.parseBoolean(request.getParameter("isFragment"));
 
 			//make sure the browser does not cache the result using Ajax (this happens in IE)
 //			if (isFragment) {
