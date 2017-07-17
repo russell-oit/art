@@ -56,9 +56,11 @@ public class LogoutController {
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 		}
-		
-		int userId = sessionUser.getUserId();
-		Config.closeSaikuConnections(userId);
+
+		if (sessionUser != null) { //can be null if this controller called twice
+			int userId = sessionUser.getUserId();
+			Config.closeSaikuConnections(userId);
+		}
 
 		String casLogoutUrl = (String) session.getAttribute("casLogoutUrl");
 
@@ -67,16 +69,18 @@ public class LogoutController {
 		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
 		if (null == loginMethod) {
 			return "redirect:/login";
-		} else switch (loginMethod) {
-			case Auto:
-				return "autoLogout";
-			case CAS:
-				if (casLogoutUrl != null) {
-					model.addAttribute("casLogoutUrl", casLogoutUrl);
-				}
-				return "casLogout";
-			default:
-				return "redirect:/login";
+		} else {
+			switch (loginMethod) {
+				case Auto:
+					return "autoLogout";
+				case CAS:
+					if (casLogoutUrl != null) {
+						model.addAttribute("casLogoutUrl", casLogoutUrl);
+					}
+					return "casLogout";
+				default:
+					return "redirect:/login";
+			}
 		}
 	}
 }
