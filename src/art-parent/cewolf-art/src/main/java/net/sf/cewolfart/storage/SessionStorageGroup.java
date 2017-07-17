@@ -114,7 +114,9 @@ class StorageCleaner implements Runnable {
 	   * Register a storage group to be automatically cleaned up.
 	   * @param group The group
 	   */
-	  public void addStorageGroup(SessionStorageGroup group) {
+	  public synchronized void addStorageGroup(SessionStorageGroup group) {
+		  //make method synchronized to prevent errors when starting
+		  //https://stackoverflow.com/questions/7315941/java-lang-illegalthreadstateexception
 		  this.storageGroups.put(group, null);
 		  // start the thread if needed
 		  start();
@@ -132,11 +134,7 @@ class StorageCleaner implements Runnable {
 	      runner.setDaemon(true);
 	      runner.setName("Cewolf-SessionCleanup");
 	      runner.setPriority(Thread.MIN_PRIORITY);
-		  //https://stackoverflow.com/questions/7315941/java-lang-illegalthreadstateexception
-		  Thread.State state=runner.getState();
-		  if(state==Thread.State.NEW) {
 	      runner.start();
-		}
 	    }
 	  }
 	  
