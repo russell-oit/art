@@ -463,7 +463,7 @@ public class ReportOutputGenerator {
 
 				StandardOutputResult standardOutputResult;
 				if (reportType.isCrosstab()) {
-					standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat);
+					standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
 				} else {
 					if (reportFormat.isHtml() && !isJob) {
 						//only drill down for html output. drill down query launched from hyperlink                                            

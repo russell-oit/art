@@ -585,7 +585,6 @@ public abstract class StandardOutput {
 
 		StandardOutputResult result = new StandardOutputResult();
 
-		//initialize number formatters
 		initializeNumberFormatters();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
@@ -647,11 +646,6 @@ public abstract class StandardOutput {
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
 		Map<Integer, ColumnTypeDefinition> columnTypes = getColumnTypes(rsmd);
 
-		List<String> totalColumns = getTotalColumnsList(report);
-		if (!totalColumns.isEmpty()) {
-			columnTotals = new HashMap<>();
-		}
-
 		initializeColumnFormatters(report, rsmd, columnTypes);
 
 		String nullNumberDisplay = report.getNullNumberDisplay();
@@ -662,6 +656,11 @@ public abstract class StandardOutput {
 		String nullStringDisplay = report.getNullStringDisplay();
 		if (nullStringDisplay == null) {
 			nullStringDisplay = "";
+		}
+		
+		List<String> totalColumns = getTotalColumnsList(report);
+		if (!totalColumns.isEmpty()) {
+			columnTotals = new HashMap<>();
 		}
 
 		while (rs.next()) {
@@ -943,8 +942,6 @@ public abstract class StandardOutput {
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
 		Map<Integer, ColumnTypeDefinition> columnTypes = getColumnTypes(rsmd);
 
-		List<String> totalColumns = getTotalColumnsList(report);
-
 		initializeColumnFormatters(report, rsmd, columnTypes);
 
 		String nullNumberDisplay = report.getNullNumberDisplay();
@@ -956,6 +953,8 @@ public abstract class StandardOutput {
 		if (nullStringDisplay == null) {
 			nullStringDisplay = "";
 		}
+		
+		List<String> totalColumns = getTotalColumnsList(report);
 
 		String previousBurstId = null;
 		FileOutputStream fos = null;
@@ -1181,30 +1180,59 @@ public abstract class StandardOutput {
 
 		int colCount = rsmd.getColumnCount();
 		for (int i = 1; i <= colCount; i++) {
-			int sqlType = rsmd.getColumnType(i);
-
-			ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
-			columnTypeDefinition.setSqlType(sqlType);
-
-			if (isNumeric(sqlType)) {
-				columnTypeDefinition.setColumnType(ColumnType.Numeric);
-			} else if (isDate(sqlType)) {
-				columnTypeDefinition.setColumnType(ColumnType.Date);
-			} else if (isClob(sqlType)) {
-				columnTypeDefinition.setColumnType(ColumnType.Clob);
-			} else if (sqlType == Types.OTHER) {
-				columnTypeDefinition.setColumnType(ColumnType.Other);
-			} else if (isBinary(sqlType)) {
-				columnTypeDefinition.setColumnType(ColumnType.Binary);
-			} else {
-				columnTypeDefinition.setColumnType(ColumnType.String);
-			}
-
+			ColumnTypeDefinition columnTypeDefinition = getColumnTypeDefinition(rsmd, i);
 			columnTypes.put(i, columnTypeDefinition);
-
 		}
 
 		return columnTypes;
+	}
+
+	/**
+	 * Returns the column type definition for a given column
+	 *
+	 * @param rsmd the resultset metadata
+	 * @param columnIndex the column index
+	 * @return the column type definition
+	 * @throws SQLException
+	 */
+	private ColumnTypeDefinition getColumnTypeDefinition(ResultSetMetaData rsmd,
+			int columnIndex) throws SQLException {
+
+		int sqlType = rsmd.getColumnType(columnIndex);
+
+		ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
+		columnTypeDefinition.setSqlType(sqlType);
+
+		ColumnType columnType = getColumnType(sqlType);
+		columnTypeDefinition.setColumnType(columnType);
+
+		return columnTypeDefinition;
+	}
+
+	/**
+	 * Returns the art column type given a particular sql type
+	 *
+	 * @param sqlType the sql type
+	 * @return the art column type
+	 */
+	private ColumnType getColumnType(int sqlType) {
+		ColumnType columnType;
+
+		if (isNumeric(sqlType)) {
+			columnType = ColumnType.Numeric;
+		} else if (isDate(sqlType)) {
+			columnType = ColumnType.Date;
+		} else if (isClob(sqlType)) {
+			columnType = ColumnType.Clob;
+		} else if (sqlType == Types.OTHER) {
+			columnType = ColumnType.Other;
+		} else if (isBinary(sqlType)) {
+			columnType = ColumnType.Binary;
+		} else {
+			columnType = ColumnType.String;
+		}
+
+		return columnType;
 	}
 
 	/**
@@ -1295,44 +1323,23 @@ public abstract class StandardOutput {
 
 		for (Entry<Integer, ColumnTypeDefinition> entry : columnTypes.entrySet()) {
 			int columnIndex = entry.getKey();
-			ColumnTypeDefinition columnTypeDefinition = entry.getValue();
-			ColumnType columnType = columnTypeDefinition.getColumnType();
-			int sqlType = columnTypeDefinition.getSqlType();
-
 			if (!shouldOutputColumn(columnIndex, hiddenColumns, rsmd)) {
 				continue;
 			}
+
+			ColumnTypeDefinition columnTypeDefinition = entry.getValue();
+			ColumnType columnType = columnTypeDefinition.getColumnType();
 
 			Object value = null;
 
 			switch (columnType) {
 				case Numeric:
-					//https://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html
-					//http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cql_data_types_c.html
-					//cassandra has issues using getDouble() when a column is defined as int
-					switch (sqlType) {
-						case Types.TINYINT:
-						case Types.SMALLINT:
-							value = rs.getShort(columnIndex);
-							break;
-						case Types.INTEGER:
-							value = rs.getInt(columnIndex);
-							break;
-						case Types.BIGINT:
-							value = rs.getLong(columnIndex);
-							break;
-						default:
-							value = rs.getDouble(columnIndex);
-					}
-
+					value = getColumnValue(rs, columnIndex, columnTypeDefinition);
 					Double numericValue;
-					if (rs.wasNull()) {
-						value = null;
+					if (value == null) {
 						numericValue = null;
 					} else {
-						//https://stackoverflow.com/questions/7503877/java-correct-way-convert-cast-object-to-double
-						//https://stackoverflow.com/questions/2465096/casting-a-primitive-int-to-a-number
-						numericValue = ((Number) value).doubleValue();
+						numericValue = (Double) value;
 					}
 
 					if (numericValue == null) {
@@ -1414,10 +1421,7 @@ public abstract class StandardOutput {
 					}
 					break;
 				case Clob:
-					Clob clob = rs.getClob(columnIndex);
-					if (clob != null) {
-						value = clob.getSubString(1, (int) clob.length());
-					}
+					value = getColumnValue(rs, columnIndex, columnTypeDefinition);
 					addString(value, nullStringDisplay);
 					break;
 				case Other:
@@ -1631,11 +1635,12 @@ public abstract class StandardOutput {
 	 *
 	 * @param rs the resultset to use
 	 * @param reportFormat the report format to use
+	 * @param report the report that is being run
 	 * @return output result
 	 * @throws SQLException
 	 */
 	public StandardOutputResult generateCrosstabOutput(ResultSet rs,
-			ReportFormat reportFormat) throws SQLException {
+			ReportFormat reportFormat, Report report) throws SQLException {
 
 		/*
 		 * input
@@ -1665,6 +1670,8 @@ public abstract class StandardOutput {
 		//                   ^--- Jan comes after Feb!			     	 
 
 		StandardOutputResult result = new StandardOutputResult();
+		
+		initializeNumberFormatters();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 		resultSetColumnCount = rsmd.getColumnCount();
@@ -1673,8 +1680,25 @@ public abstract class StandardOutput {
 			result.setMessage("reports.message.invalidCrosstab");
 			return result;
 		}
-
+		
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
+		
+		Map<Integer, ColumnTypeDefinition> columnTypes = getColumnTypes(rsmd);
+
+		initializeColumnFormatters(report, rsmd, columnTypes);
+
+		// Check the data type of the value (last column)
+		ColumnTypeDefinition valueColumnTypeDefinition = getColumnTypeDefinition(rsmd, resultSetColumnCount);
+		
+		String nullNumberDisplay = report.getNullNumberDisplay();
+		if (nullNumberDisplay == null) {
+			nullNumberDisplay = "";
+		}
+
+		String nullStringDisplay = report.getNullStringDisplay();
+		if (nullStringDisplay == null) {
+			nullStringDisplay = "";
+		}
 
 		boolean alternateSort;
 
@@ -1700,7 +1724,7 @@ public abstract class StandardOutput {
 				Object Dx = rs.getObject(4);
 				x.put(Dx, DxVal);
 				y.put(Dy, DyVal);
-				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, 5, ColumnType.String);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, 5, valueColumnTypeDefinition);
 			}
 
 			xa = x.keySet().toArray();
@@ -1756,7 +1780,7 @@ public abstract class StandardOutput {
 					addHeaderCellAlignLeft(y.get(Dy).toString()); //column 1 data displayed as a header
 					for (i = 0; i < xa.length; i++) {
 						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
-						addString(value);
+						outputCrosstabValue(value, valueColumnTypeDefinition, nullNumberDisplay, nullStringDisplay);
 					}
 				}
 			}
@@ -1771,7 +1795,7 @@ public abstract class StandardOutput {
 				Object Dx = rs.getObject(2);
 				x.add(Dx);
 				y.add(Dy);
-				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, 3, ColumnType.String);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, 3, valueColumnTypeDefinition);
 			}
 
 			xa = x.toArray();
@@ -1828,7 +1852,7 @@ public abstract class StandardOutput {
 					addHeaderCellAlignLeft(Dy.toString()); //column 1 data displayed as a header
 					for (i = 0; i < xa.length; i++) {
 						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
-						addString(value);
+						outputCrosstabValue(value, valueColumnTypeDefinition, nullNumberDisplay, nullStringDisplay);
 					}
 				}
 			}
@@ -1844,17 +1868,65 @@ public abstract class StandardOutput {
 	/**
 	 * Stores the right object type in the Hashmap used by
 	 * generateCrosstabOutput to cache sorted values
+	 *
+	 * @param key
+	 * @param values
+	 * @param rs
+	 * @param columnIndex
+	 * @param columnTypeDefinition
+	 * @throws SQLException
 	 */
-	private static void addValue(String key, Map<String, Object> values,
-			ResultSet rs, int columnIndex, ColumnType columnType) throws SQLException {
+	private void addValue(String key, Map<String, Object> values,
+			ResultSet rs, int columnIndex, ColumnTypeDefinition columnTypeDefinition)
+			throws SQLException {
+
+		Object value = getColumnValue(rs, columnIndex, columnTypeDefinition);
+		values.put(key, value);
+	}
+
+	/**
+	 * Returns the value for a given resultset column
+	 *
+	 * @param rs the resultset
+	 * @param columnIndex the column index
+	 * @param columnTypeDefinition the column type definition
+	 * @return the value for a given resultset column
+	 * @throws SQLException
+	 */
+	private Object getColumnValue(ResultSet rs, int columnIndex,
+			ColumnTypeDefinition columnTypeDefinition) throws SQLException {
+
+		ColumnType columnType = columnTypeDefinition.getColumnType();
+		int sqlType = columnTypeDefinition.getSqlType();
 
 		Object value = null;
 
 		switch (columnType) {
 			case Numeric:
-				value = rs.getDouble(columnIndex);
+				//https://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html
+				//http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cql_data_types_c.html
+				//cassandra has issues using getDouble() when a column is defined as int
+				switch (sqlType) {
+					case Types.TINYINT:
+					case Types.SMALLINT:
+						value = rs.getShort(columnIndex);
+						break;
+					case Types.INTEGER:
+						value = rs.getInt(columnIndex);
+						break;
+					case Types.BIGINT:
+						value = rs.getLong(columnIndex);
+						break;
+					default:
+						value = rs.getDouble(columnIndex);
+				}
+
 				if (rs.wasNull()) {
 					value = null;
+				} else {
+					//https://stackoverflow.com/questions/7503877/java-correct-way-convert-cast-object-to-double
+					//https://stackoverflow.com/questions/2465096/casting-a-primitive-int-to-a-number
+					value = ((Number) value).doubleValue();
 				}
 				break;
 			case Date:
@@ -1866,10 +1938,109 @@ public abstract class StandardOutput {
 					value = clob.getSubString(1, (int) clob.length());
 				}
 				break;
+			case Other:
+				//ms-access (ucanaccess driver) data type
+				value = rs.getObject(columnIndex);
+				if (value != null) {
+					value = value.toString();
+				}
+				break;
+			case Binary:
+				//e.g. _id column of mongodb collections querying with drill gives a varbinary sql type
+				//https://stackoverflow.com/questions/14013534/jdbctemplate-accessing-mysql-varbinary-field-as-string
+				//https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
+				byte[] bytes = rs.getBytes(columnIndex);
+				if (bytes != null) {
+					value = Hex.encodeHexString(bytes);
+				}
+				break;
 			default:
 				value = rs.getString(columnIndex);
 		}
 
-		values.put(key, value);
+		return value;
+	}
+
+	/**
+	 * Outputs a value for a crosstab report
+	 *
+	 * @param value the value to output
+	 * @param columnTypeDefinition the column type definition that determines
+	 * what type of value it is and how it is to be output
+	 * @param nullNumberDisplay the string to display for null numbers
+	 * @param nullStringDisplay the string to display for null strings
+	 */
+	private void outputCrosstabValue(Object value, ColumnTypeDefinition columnTypeDefinition,
+			String nullNumberDisplay, String nullStringDisplay) {
+		ColumnType columnType = columnTypeDefinition.getColumnType();
+
+		switch (columnType) {
+			case Numeric:
+				Double numericValue;
+				if (value == null) {
+					numericValue = null;
+				} else {
+					numericValue = (Double) value;
+				}
+
+				if (numericValue == null) {
+					String sortValue = "null";
+					addCellNumeric(numericValue, nullNumberDisplay, sortValue);
+				} else {
+					String sortValue = getNumericSortValue(numericValue);
+					String columnFormattedValue = null;
+
+					if (columnFormattedValue != null) {
+						addCellNumeric(numericValue, columnFormattedValue, sortValue);
+					} else {
+						String formattedValue;
+						if (globalNumericFormatter != null) {
+							formattedValue = globalNumericFormatter.format(numericValue);
+						} else {
+							formattedValue = formatNumericValue(numericValue);
+						}
+
+						addCellNumeric(numericValue, formattedValue, sortValue);
+					}
+				}
+				break;
+			case Date:
+				Date dateValue = (Date) value;
+				if (dateValue == null) {
+					addCellDate(dateValue);
+				} else {
+					long sortValue = getDateSortValue(dateValue);
+					String columnFormattedValue = null;
+
+					if (columnFormattedValue != null) {
+						addCellDate(dateValue, columnFormattedValue, sortValue);
+					} else {
+						String formattedValue;
+						if (globalDateFormatter != null) {
+							formattedValue = globalDateFormatter.format(dateValue);
+						} else {
+							formattedValue = Config.getDateDisplayString(dateValue);
+						}
+
+						addCellDate(dateValue, formattedValue, sortValue);
+					}
+				}
+				break;
+			case Clob:
+				addString(value, nullStringDisplay);
+				break;
+			case Other:
+				//ms-access (ucanaccess driver) data type
+				addString(value, nullStringDisplay);
+				break;
+			case Binary:
+				//e.g. _id column of mongodb collections querying with drill gives a varbinary sql type
+				//https://stackoverflow.com/questions/14013534/jdbctemplate-accessing-mysql-varbinary-field-as-string
+				//https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
+				addString(value, nullStringDisplay);
+				break;
+			default:
+				addString(value, nullStringDisplay);
+		}
 	}
 }
