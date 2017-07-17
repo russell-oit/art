@@ -128,11 +128,11 @@ public class OdsOutput extends StandardOutput {
 		if (CollectionUtils.isEmpty(reportParamsList)) {
 			return;
 		}
-
+		
 		for (ReportParameter reportParam : reportParamsList) {
 			try {
 				newRow();
-				String paramLabel = reportParam.getParameter().getLocalizedLabel(locale);
+				String paramLabel = reportParam.getParameter().getLocalizedLabelWithLocale(locale);
 				String paramDisplayValues = reportParam.getDisplayValues();
 				addHeaderCell(paramLabel);
 				addCellString(paramDisplayValues);

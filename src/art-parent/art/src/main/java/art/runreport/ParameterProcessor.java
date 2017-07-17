@@ -372,7 +372,7 @@ public class ParameterProcessor {
 				String actualValueString;
 				if (passedValues == null) {
 					//parameter value not specified. use default value
-					actualValueString = param.getLocalizedDefaultValue(locale);
+					actualValueString = param.getLocalizedDefaultValueWithLocale(locale);
 				} else {
 					actualValueString = passedValues[0];
 				}
@@ -385,7 +385,7 @@ public class ParameterProcessor {
 				List<String> actualValueStrings = new ArrayList<>();
 				if (passedValues == null) {
 					//parameter value not specified. use default value
-					String defaultValue = param.getLocalizedDefaultValue(locale);
+					String defaultValue = param.getLocalizedDefaultValueWithLocale(locale);
 					if (StringUtils.isNotEmpty(defaultValue)) {
 						String defaultValues[] = defaultValue.split("\\r?\\n");
 						actualValueStrings.addAll(Arrays.asList(defaultValues));

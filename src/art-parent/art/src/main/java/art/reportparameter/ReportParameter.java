@@ -332,7 +332,7 @@ public class ReportParameter implements Serializable {
 	 * @throws java.io.IOException
 	 */
 	public String getLocalizedLabelAndDisplayValues(Locale locale) throws IOException {
-		return parameter.getLocalizedLabel(locale) + ": " + getDisplayValues();
+		return parameter.getLocalizedLabelWithLocale(locale) + ": " + getDisplayValues();
 	}
 
 	/**

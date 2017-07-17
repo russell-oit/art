@@ -508,13 +508,14 @@ public class Parameter implements Serializable {
 	 * @return the localized label
 	 * @throws java.io.IOException
 	 */
-	public String getLocalizedLabel(Locale locale) throws IOException {
+	public String getLocalizedLabelWithLocale(Locale locale) throws IOException {
+		//can't use method overloading as this functionality is used from jsp with el, and el can't reliably call overloaded methods
+		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
 		if (locale == null) {
 			return label;
 		} else {
 			return getLocalizedLabel(locale.toString());
 		}
-
 	}
 
 	/**
@@ -542,7 +543,7 @@ public class Parameter implements Serializable {
 
 		return localizedLabel;
 	}
-
+	
 	/**
 	 * Returns the help text to use for this parameter, given a particular
 	 * locale, taking into consideration the i18n options defined for the
@@ -552,7 +553,9 @@ public class Parameter implements Serializable {
 	 * @return the localized help text
 	 * @throws java.io.IOException
 	 */
-	public String getLocalizedHelpText(Locale locale) throws IOException {
+	public String getLocalizedHelpTextWithLocale(Locale locale) throws IOException {
+		//can't use method overloading as this functionality is used from jsp with el, and el can't reliably call overloaded methods
+		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
 		if (locale == null) {
 			return helpText;
 		} else {
@@ -586,7 +589,7 @@ public class Parameter implements Serializable {
 
 		return localizedHelpText;
 	}
-
+	
 	/**
 	 * Returns the default value to use for this parameter, given a particular
 	 * locale, taking into consideration the i18n options defined for the
@@ -596,7 +599,9 @@ public class Parameter implements Serializable {
 	 * @return the localized default value
 	 * @throws java.io.IOException
 	 */
-	public String getLocalizedDefaultValue(Locale locale) throws IOException {
+	public String getLocalizedDefaultValueWithLocale(Locale locale) throws IOException {
+		//can't use method overloading as this functionality is used from jsp with el, and el can't reliably call overloaded methods
+		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
 		if (locale == null) {
 			return defaultValue;
 		} else {
@@ -640,7 +645,9 @@ public class Parameter implements Serializable {
 	 * @return the localized placeholder text
 	 * @throws java.io.IOException
 	 */
-	public String getLocalizedPlaceholderText(Locale locale) throws IOException {
+	public String getLocalizedPlaceholderTextWithLocale(Locale locale) throws IOException {
+		//can't use method overloading as this functionality is used from jsp with el, and el can't reliably call overloaded methods
+		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
 		if (locale == null) {
 			return placeholderText;
 		} else {
