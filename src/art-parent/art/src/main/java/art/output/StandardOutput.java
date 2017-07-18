@@ -347,6 +347,16 @@ public abstract class StandardOutput {
 	protected void addHeaderCellAlignLeft(String value) {
 		addHeaderCell(value);
 	}
+	
+	/**
+	 * Outputs a value to the header whose text is left aligned
+	 *
+	 * @param value the value to output
+	 * @param sortValue the sort value to use
+	 */
+	protected void addHeaderCellAlignLeft(String value, String sortValue) {
+		addHeaderCellAlignLeft(value);
+	}
 
 	/**
 	 * Performs any cleanup after outputting of the header
@@ -1777,7 +1787,7 @@ public abstract class StandardOutput {
 					return result;
 				} else {
 					Object Dy = ya[j];
-					addHeaderCellAlignLeft(y.get(Dy).toString()); //column 1 data displayed as a header
+					addHeaderCellAlignLeft(y.get(Dy).toString(), String.valueOf(Dy)); //column 1 data displayed as a header
 					for (i = 0; i < xa.length; i++) {
 						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
 						outputCrosstabValue(value, valueColumnTypeDefinition, nullNumberDisplay, nullStringDisplay);

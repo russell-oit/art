@@ -135,6 +135,13 @@ public class HtmlDataTableOutput extends StandardOutput {
 	public void addHeaderCellAlignLeft(String value) {
 		out.println("<th style='text-align: left'>" + value + "</th>");
 	}
+	
+	@Override
+	public void addHeaderCellAlignLeft(String value, String sortValue) {
+		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
+		out.println("<th style='text-align: left' data-order='" + escapedSortValue + "'>"
+				+ value + "</th>");
+	}
 
 	@Override
 	public void endHeader() {
