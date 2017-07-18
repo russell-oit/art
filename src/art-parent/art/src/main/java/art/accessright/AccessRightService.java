@@ -479,6 +479,7 @@ public class AccessRightService {
 	 * @param reportId the report id for the right
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "reports", allEntries = true)
 	public void deleteUserReportRight(int userId, int reportId) throws SQLException {
 		logger.debug("Entering deleteUserReportRight: userId={}, reportId={}", userId, reportId);
 
@@ -495,6 +496,7 @@ public class AccessRightService {
 	 * @param reportGroupId the report group id for the right
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "reports", allEntries = true)
 	public void deleteUserReportGroupRight(int userId, int reportGroupId) throws SQLException {
 		logger.debug("Entering deleteUserReportGroupRight: userId={}, reportGroupId={}", userId, reportGroupId);
 
@@ -527,6 +529,7 @@ public class AccessRightService {
 	 * @param reportId the report id for the right
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "reports", allEntries = true)
 	public void deleteUserGroupReportRight(int userGroupId, int reportId) throws SQLException {
 		logger.debug("Entering deleteUserGroupReportRight: userGroupId={}, reportId={}", userGroupId, reportId);
 
@@ -543,6 +546,7 @@ public class AccessRightService {
 	 * @param reportGroupId the report group id for the right
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "reports", allEntries = true)
 	public void deleteUserGroupReportGroupRight(int userGroupId, int reportGroupId) throws SQLException {
 		logger.debug("Entering deleteUserGroupReportGroupRight: userGroupId={}, reportGroupId={}", userGroupId, reportGroupId);
 
