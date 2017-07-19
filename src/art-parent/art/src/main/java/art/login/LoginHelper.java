@@ -75,7 +75,7 @@ public class LoginHelper {
 
 	/**
 	 * Logs a successful login attempt
-	 * 
+	 *
 	 * @param loginMethod the login method used
 	 * @param username the username used
 	 * @param ip the ip address from which the login was done
@@ -88,7 +88,7 @@ public class LoginHelper {
 
 	/**
 	 * Logs a failed login attempt
-	 * 
+	 *
 	 * @param loginMethod the login method used
 	 * @param username the username used
 	 * @param ip the ip address from which the login was done
@@ -98,5 +98,48 @@ public class LoginHelper {
 			String username, String ip, String message) {
 
 		log(loginMethod, false, username, ip, message);
+	}
+
+	/**
+	 * Returns result of authentication using the given authentication method
+	 * and credentials. Only authenticates against the following authentication
+	 * methods: internal, database, ldap, windows domain.
+	 *
+	 * @param loginMethod the authentication method
+	 * @param username the username
+	 * @param password the password
+	 * @param windowsDomain the windows domain. Only relevant for windows domain
+	 * authentication
+	 * @return authentication result
+	 */
+	public LoginResult authenticate(ArtAuthenticationMethod loginMethod,
+			String username, String password, String windowsDomain) {
+
+		LoginResult result;
+
+		if (loginMethod == null) {
+			result = new LoginResult();
+		} else {
+			switch (loginMethod) {
+				case Internal:
+					result = InternalLogin.authenticate(username, password);
+					break;
+				case Database:
+					result = DbLogin.authenticate(username, password);
+					break;
+				case LDAP:
+					result = LdapLogin.authenticate(username, password);
+					break;
+				case WindowsDomain:
+					result = WindowsDomainLogin.authenticate(windowsDomain, username, password);
+					break;
+				default:
+					//enum has other possible values but they aren't relevant here
+					//create default object
+					result = new LoginResult();
+			}
+		}
+
+		return result;
 	}
 }

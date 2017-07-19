@@ -85,6 +85,12 @@ Login page
 										<p>${fn:escapeXml(result.error)}</p>
 									</div>
 								</c:if>
+								<c:if test="${message != null}">
+									<div class="alert alert-danger alert-dismissable">
+										<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+										<p><spring:message code="${message}"/></p>
+									</div>
+								</c:if>
 							</c:when>
 							<c:otherwise>
 								<c:if test="${invalidLogin != null}">

@@ -299,31 +299,7 @@ public class LoginController {
 			result.setMessage("login.message.artUserDisabled");
 			result.setDetails(ArtUtils.ART_USER_DISABLED);
 		} else {
-			if (null == loginMethod) {
-				//enum has other possible values but they aren't relevant here
-				//create default object
-				result = new LoginResult();
-			} else {
-				switch (loginMethod) {
-					case Internal:
-						result = InternalLogin.authenticate(username, password);
-						break;
-					case Database:
-						result = DbLogin.authenticate(username, password);
-						break;
-					case LDAP:
-						result = LdapLogin.authenticate(username, password);
-						break;
-					case WindowsDomain:
-						result = WindowsDomainLogin.authenticate(windowsDomain, username, password);
-						break;
-					default:
-						//enum has other possible values but they aren't relevant here
-						//create default object
-						result = new LoginResult();
-						break;
-				}
-			}
+			result = loginHelper.authenticate(loginMethod, username, password, windowsDomain);
 		}
 
 		//log result
@@ -370,7 +346,7 @@ public class LoginController {
 		} else {
 			//login failure. always display invalid account message rather than actual result details
 			//better for security if less details are displayed
-			model.addAttribute("invalidLogin", "");
+			model.addAttribute("invalidLogin", "true");
 			//add authentication failure details to the model in case it's desired to display result details in login.jsp
 			model.addAttribute("result", result);
 

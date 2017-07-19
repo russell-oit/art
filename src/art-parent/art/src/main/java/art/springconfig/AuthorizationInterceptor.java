@@ -20,6 +20,7 @@ package art.springconfig;
 import art.enums.AccessLevel;
 import art.enums.ArtAuthenticationMethod;
 import art.login.LoginHelper;
+import art.login.LoginResult;
 import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
@@ -97,27 +98,44 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 		User user = (User) session.getAttribute("sessionUser");
 		if (user == null) {
-			//custom authentication, public user session or session expired
+			//custom authentication, public user session, credentials in url or session expired
 			ArtAuthenticationMethod loginMethod = null;
 
 			//test custom authentication
 			String username = (String) session.getAttribute("username");
 
 			if (username == null) {
-				//not using custom authentication. check if this is a public session
+				//not using custom authentication
+				//check if this is a public session
 				if (Boolean.parseBoolean(request.getParameter("public"))) {
 					username = ArtUtils.PUBLIC_USER;
 					loginMethod = ArtAuthenticationMethod.Public;
+				} else {
+					//check if credentials passed in url
+					String urlUsername = request.getParameter("username");
+					String password = request.getParameter("password");
+					String windowsDomain = request.getParameter("windowsDomain");
+					String authenticationMethodString = request.getParameter("authenticationMethod");
+					if (urlUsername != null && password != null) {
+						LoginHelper loginHelper = new LoginHelper();
+						ArtAuthenticationMethod authenticationMethod = ArtAuthenticationMethod.toEnum(authenticationMethodString);
+						LoginResult result = loginHelper.authenticate(authenticationMethod, urlUsername, password, windowsDomain);
+						message = result.getMessage();
+						if (result.isAuthenticated()) {
+							username = urlUsername;
+							loginMethod = authenticationMethod;
+						}
+					}
 				}
 			} else {
 				loginMethod = ArtAuthenticationMethod.Custom;
 			}
 
 			if (loginMethod == null) {
-				//session expired or just unauthorized access attempt
-				message = "login.message.sessionExpired";
+				//session expired or unauthorized access attempt
+				//don't show any message
 			} else {
-				//either custom authentication or public user session
+				//either custom authentication or public user session or credentials in url
 				//ensure user exists
 				LoginHelper loginHelper = new LoginHelper();
 				String ip = request.getRemoteAddr();
@@ -131,14 +149,12 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 				if (user == null) {
 					//user doesn't exist
-					//always display invalidAccount message in login page. log actual cause
-					message = "login.message.invalidCredentials";
+					message = "login.message.artUserInvalid";
 					//log failure
 					loginHelper.logFailure(loginMethod, username, ip, ArtUtils.ART_USER_INVALID);
 				} else if (!user.isActive()) {
 					//user disabled
-					//always display invalidAccount message in login page. log actual cause
-					message = "login.message.invalidCredentials";
+					message = "login.message.artUserDisabled";
 					//log failure
 					loginHelper.logFailure(loginMethod, username, ip, ArtUtils.ART_USER_DISABLED);
 				} else {
@@ -162,9 +178,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		//https://stackoverflow.com/questions/24612568/localcontexthandler-usage
 		Locale locale = localeResolver.resolveLocale(request);
 
-		if (user == null) {
-			//no valid user available
-
+		if (user == null || !user.isActive()) {
 			//forward to login page. 
 			//use forward instead of redirect so that an indication of the
 			//page that was being accessed remains in the browser
