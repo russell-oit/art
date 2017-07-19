@@ -40,7 +40,6 @@
 	<target name="clean" description="Delete compiled code" >
 		<delete file="${dist}/art.war"/>
 		<delete>
-			<fileset dir="." includes="*.war"/>
 			<fileset dir="." includes="**/*.class"/>			
 		</delete>
 	</target>
