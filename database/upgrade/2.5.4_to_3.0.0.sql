@@ -497,6 +497,10 @@ ALTER TABLE ART_QUERIES ADD PAGE_ORIENTATION VARCHAR(20);
 -- rename "number" parameter data type to "double"
 UPDATE ART_QUERY_FIELDS SET PARAM_DATA_TYPE='Double' WHERE PARAM_DATA_TYPE='NUMBER';
 
+-- change html output type for tabular drilldowns to htmlFancy
+-- https://stackoverflow.com/questions/1293330/how-can-i-do-an-update-statement-with-join-in-sql
+UPDATE ART_DRILLDOWN_QUERIES SET OUTPUT_FORMAT = 'htmlFancy' WHERE EXISTS(SELECT * FROM ART_QUERIES WHERE ART_QUERIES.QUERY_ID=ART_DRILLDOWN_QUERIES.DRILLDOWN_QUERY_ID AND ART_QUERIES.QUERY_TYPE=0 AND ART_DRILLDOWN_QUERIES.OUTPUT_FORMAT='html');
+
 
 -- add reference table for report types
 CREATE TABLE ART_REPORT_TYPES
