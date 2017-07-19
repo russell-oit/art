@@ -137,11 +137,7 @@ public class UserController {
 		logger.debug("Entering addUser");
 
 		User user = new User();
-
-		//set default properties for new users
-		user.setActive(true);
-		user.setCanChangePassword(true);
-
+		
 		model.addAttribute("user", user);
 		
 		return showEditUser("add", model, session);

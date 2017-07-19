@@ -43,7 +43,7 @@
 			<url>http://repo.meteorite.bi/repository/alabs-release-local/</url>
 		</repository>
 		<!-- in-project repository for artifacts that are not in a public maven 
-		repository e.g. saiku-olap-util, saiku-query -->
+		repository e.g. saiku-olap-util, saiku-query-art -->
 		<repository>
 			<id>project-local</id>
 			<name>project-local</name>
@@ -85,13 +85,7 @@
 		<dependency>
 			<groupId>org.saiku</groupId>
 			<artifactId>saiku-query</artifactId>
-			<version>0.4-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>pentaho</groupId>
-					<artifactId>mondrian</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>0.4-art</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>

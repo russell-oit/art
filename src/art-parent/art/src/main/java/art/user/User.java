@@ -41,9 +41,9 @@ public class User implements Serializable {
 	private int defaultReportGroup;
 	private String passwordAlgorithm;
 	private String startReport;
-	private boolean active;
+	private boolean active = true;
 	private int userId;
-	private boolean canChangePassword;
+	private boolean canChangePassword = true;
 	private Date creationDate;
 	private Date updateDate;
 	private List<UserGroup> userGroups;
@@ -55,8 +55,8 @@ public class User implements Serializable {
 
 	/**
 	 * Determine if this is an admin user
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean isAdminUser() {
 		if (accessLevel == null || accessLevel.getValue() < AccessLevel.JuniorAdmin.getValue()) {
@@ -65,13 +65,13 @@ public class User implements Serializable {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Determine if this is the public user
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
-	public boolean isPublicUser(){
+	public boolean isPublicUser() {
 		if (StringUtils.equals(username, ArtUtils.PUBLIC_USER)) {
 			return true;
 		} else {

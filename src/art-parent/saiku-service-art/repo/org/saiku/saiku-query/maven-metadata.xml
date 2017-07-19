@@ -3,9 +3,11 @@
   <groupId>org.saiku</groupId>
   <artifactId>saiku-query</artifactId>
   <versioning>
+    <release>0.4-art</release>
     <versions>
       <version>0.4-SNAPSHOT</version>
+      <version>0.4-art</version>
     </versions>
-    <lastUpdated>20170518181153</lastUpdated>
+    <lastUpdated>20170719191847</lastUpdated>
   </versioning>
 </metadata>
