@@ -367,10 +367,12 @@ public class ReportJob implements org.quartz.Job {
 	private void sendEmail(Mailer mailer) throws MessagingException, IOException {
 		logger.debug("Entering sendEmail");
 
-		if (Config.isEmailServerConfigured()) {
-			mailer.send();
-		} else {
+		if (!Config.getCustomSettings().isEnableEmail()) {
+			logger.info("Email disabled. Job Id: {}", jobId);
+		} else if (!Config.isEmailServerConfigured()) {
 			logger.info("Email server not configured. Job Id: {}", jobId);
+		} else {
+			mailer.send();
 		}
 	}
 

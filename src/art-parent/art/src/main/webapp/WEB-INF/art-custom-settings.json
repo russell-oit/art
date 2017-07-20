@@ -4,5 +4,6 @@
 	"exportDirectory" : "",
 	"workDirectory" : "",
 	"checkExportFileAccess" : false,
-	"enableGroovySandbox": true
+	"enableGroovySandbox": true,
+	"enableEmail": true
 }
