@@ -361,19 +361,27 @@ public class ReportJob implements org.quartz.Job {
 	 * Sends an email
 	 *
 	 * @param mailer the mailer to use
+	 * @return <code>true</code> if email sent. false if email not configured
 	 * @throws MessagingException
 	 * @throws IOException
 	 */
-	private void sendEmail(Mailer mailer) throws MessagingException, IOException {
+	private boolean sendEmail(Mailer mailer) throws MessagingException, IOException {
 		logger.debug("Entering sendEmail");
+
+		boolean emailSent = false;
 
 		if (!Config.getCustomSettings().isEnableEmail()) {
 			logger.info("Email disabled. Job Id: {}", jobId);
+			runDetails = "Email disabled";
 		} else if (!Config.isEmailServerConfigured()) {
 			logger.info("Email server not configured. Job Id: {}", jobId);
+			runDetails = "Email server not configured";
 		} else {
 			mailer.send();
+			emailSent = true;
 		}
+
+		return emailSent;
 	}
 
 	/**
@@ -749,7 +757,8 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void runNormalJob() {
 		logger.debug("Entering runNormalJob");
-		runNormalJob(null);
+		String dynamicRecipientEmails = null;
+		runNormalJob(dynamicRecipientEmails);
 	}
 
 	/**
@@ -1139,8 +1148,10 @@ public class ReportJob implements org.quartz.Job {
 
 				//send email for this recipient
 				try {
-					sendEmail(mailer);
-					runMessage = "jobs.message.fileEmailed";
+					boolean emailSent = sendEmail(mailer);
+					if (emailSent) {
+						runMessage = "jobs.message.fileEmailed";
+					}
 				} catch (MessagingException ex) {
 					logger.debug("Error", ex);
 					fileName = "";
@@ -1180,8 +1191,10 @@ public class ReportJob implements org.quartz.Job {
 			mailer.setBcc(bccs);
 
 			try {
-				sendEmail(mailer);
-				runMessage = "jobs.message.fileEmailed";
+				boolean emailSent = sendEmail(mailer);
+				if (emailSent) {
+					runMessage = "jobs.message.fileEmailed";
+				}
 
 				if (jobType.isEmail()) {
 					// delete the file since it has
@@ -1564,8 +1577,10 @@ public class ReportJob implements org.quartz.Job {
 
 								//send email for this recipient
 								try {
-									sendEmail(mailer);
-									runMessage = "jobs.message.alertSent";
+									boolean emailSent = sendEmail(mailer);
+									if (emailSent) {
+										runMessage = "jobs.message.alertSent";
+									}
 								} catch (MessagingException ex) {
 									logger.debug("Error", ex);
 									fileName = "";
@@ -1596,8 +1611,10 @@ public class ReportJob implements org.quartz.Job {
 							mailer.setBcc(bccs);
 
 							try {
-								sendEmail(mailer);
-								runMessage = "jobs.message.alertSent";
+								boolean emailSent = sendEmail(mailer);
+								if (emailSent) {
+									runMessage = "jobs.message.alertSent";
+								}
 							} catch (MessagingException ex) {
 								logger.debug("Error", ex);
 								fileName = "";
