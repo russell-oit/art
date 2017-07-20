@@ -151,7 +151,7 @@ public class ArtDatabaseController {
 		try {
 			String hsqldbUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "%s;shutdown=true;create=false;hsqldb.write_delay=false";
 			String demoDbUrl = String.format(hsqldbUrl, "ArtRepositoryDB");
-
+			
 			String username = artDatabase.getUsername();
 			String password = artDatabase.getPassword();
 
@@ -173,6 +173,8 @@ public class ArtDatabaseController {
 
 			String driver = artDatabase.getDriver();
 			String url = artDatabase.getUrl();
+			username = artDatabase.getUsername();
+			password = artDatabase.getPassword();
 
 			if (artDatabase.isJndi()) {
 				conn = ArtUtils.getJndiConnection(url);
