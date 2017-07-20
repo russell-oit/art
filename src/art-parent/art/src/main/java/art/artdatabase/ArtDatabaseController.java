@@ -152,20 +152,27 @@ public class ArtDatabaseController {
 			String hsqldbUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "%s;shutdown=true;create=false;hsqldb.write_delay=false";
 			String demoDbUrl = String.format(hsqldbUrl, "ArtRepositoryDB");
 
+			String username = artDatabase.getUsername();
+			String password = artDatabase.getPassword();
+
 			boolean usingDemoDatabase = false;
 			if (StringUtils.equalsIgnoreCase(artDatabase.getUrl(), "demo")) {
 				usingDemoDatabase = true;
 
 				artDatabase.setDriver("org.hsqldb.jdbcDriver");
 				artDatabase.setUrl(demoDbUrl);
-				artDatabase.setUsername("ART");
-				artDatabase.setPassword("ART");
+				
+				if (StringUtils.isBlank(username)) {
+					artDatabase.setUsername("ART");
+					artDatabase.setPassword("ART");
+				} else {
+					artDatabase.setUsername(username);
+					artDatabase.setPassword(password);
+				}
 			}
 
 			String driver = artDatabase.getDriver();
 			String url = artDatabase.getUrl();
-			String username = artDatabase.getUsername();
-			String password = artDatabase.getPassword();
 
 			if (artDatabase.isJndi()) {
 				conn = ArtUtils.getJndiConnection(url);
