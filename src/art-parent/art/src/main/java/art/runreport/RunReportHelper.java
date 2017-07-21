@@ -424,13 +424,6 @@ public class RunReportHelper {
 			formats.add("png");
 		} else {
 			switch (reportType) {
-				case Tabular:
-				case Crosstab:
-				case LovDynamic:
-					String formatsString = Config.getSettings().getReportFormats();
-					String[] formatsArray = StringUtils.split(formatsString, ",");
-					formats = Arrays.asList(formatsArray);
-					break;
 				case JasperReportsArt:
 				case JasperReportsTemplate:
 					formats.add("pdf");
@@ -471,7 +464,10 @@ public class RunReportHelper {
 					formats.add("htmlPlain");
 					break;
 				default:
-					throw new IllegalArgumentException("Unexpected report type: " + reportType);
+					//tabular, crosstab, lov dynamic, etc
+					String formatsString = Config.getSettings().getReportFormats();
+					String[] formatsArray = StringUtils.split(formatsString, ",");
+					formats = Arrays.asList(formatsArray);
 			}
 		}
 

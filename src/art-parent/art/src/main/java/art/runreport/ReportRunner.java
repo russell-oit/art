@@ -779,7 +779,7 @@ public class ReportRunner {
 			//replace #recipient# label with recipient values
 			if (recipientColumn != null && recipientId != null) {
 				String recipientValue;
-				if (StringUtils.equalsIgnoreCase(recipientIdType, "NUMBER") && NumberUtils.isCreatable(recipientId)) {
+				if (StringUtils.equalsIgnoreCase(recipientIdType, "number") && NumberUtils.isCreatable(recipientId)) {
 					//don't quote recipient id
 					recipientValue = recipientId;
 				} else {

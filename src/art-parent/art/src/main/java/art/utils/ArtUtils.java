@@ -52,8 +52,8 @@ import org.slf4j.LoggerFactory;
 public class ArtUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtUtils.class);
-	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains recipient identifier column
-	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
+	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains the recipient identifier
+	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier column
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
 	public static final String EMAIL_CC = "email_cc"; //column name in data query that contains email cc column
 	public static final String EMAIL_BCC = "email_bcc"; //column name in data query that contains email bcc column
