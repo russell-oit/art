@@ -43,18 +43,19 @@ public class HtmlDataTableOutput extends StandardOutput {
 		//note that including script files will cause the browser to display the following warning e.g. on firefox's debug console (Ctrl + Shift + I) when report run inline (using ajax)
 		//Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience
 		//https://stackoverflow.com/questions/24639335/javascript-console-log-causes-error-synchronous-xmlhttprequest-on-the-main-thr
+		//https://github.com/jquery/jquery/issues/2060
 		//however we have to include the script files for report run by ajax to work
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/jquery.dataTables.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/JSZip-2.5.0/jszip.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/pdfmake-0.1.18/pdfmake.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/pdfmake-0.1.18/vfs_fonts.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.html5.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.print.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.colVis.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/jquery.dataTables.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/JSZip-2.5.0/jszip.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/pdfmake-0.1.18/pdfmake.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/pdfmake-0.1.18/vfs_fonts.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.html5.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.print.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.colVis.min.js'></script>");
 
 		//set language file to use for localization
 		//language files to be put in the /js/datatables/i18n directory and to be named dataTables_xx.json according to the locale
@@ -111,7 +112,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 				+ "}";
 
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
-		out.println("<script type='text/javascript'>");
+		out.println("<script>");
 		out.println("	$(document).ready(function() {");
 		out.println("		$('#" + tableId + "').dataTable(" + dataTableOptions + ");");
 		out.println("	});");
