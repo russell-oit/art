@@ -415,6 +415,28 @@
 				<fieldset>
 					<legend><spring:message code="jobs.text.job"/></legend>
 					<div class="form-group">
+						<label class="col-sm-4 control-label">
+							<spring:message code="jobs.label.owner"/>
+						</label>
+						<div class="col-sm-8">
+							<p class="form-control-static">${job.user.username}</p>
+						</div>
+					</div>
+					<form:hidden path="user.userId" />
+					<form:hidden path="user.username" />
+					<div class="form-group">
+						<label class="col-sm-4 control-label">
+							<spring:message code="page.text.report"/>
+						</label>
+						<div class="col-sm-8">
+							<p class="form-control-static">${job.report.name}</p>
+						</div>
+					</div>
+					<form:hidden path="report.reportId" />
+					<form:hidden path="report.reportTypeId" />
+					<form:hidden path="report.name" />
+					<hr>
+					<div class="form-group">
 						<label class="control-label col-md-4">
 							<spring:message code="page.label.id"/>
 						</label>
@@ -578,30 +600,6 @@
 							<form:errors path="batchFile" cssClass="error"/>
 						</div>
 					</div>
-
-					<hr>
-					<div class="form-group">
-						<label class="col-sm-4 control-label">
-							<spring:message code="jobs.label.owner"/>
-						</label>
-						<div class="col-sm-8">
-							<p class="form-control-static">${job.user.username}</p>
-						</div>
-					</div>
-					<form:hidden path="user.userId" />
-					<form:hidden path="user.username" />
-					<div class="form-group">
-						<label class="col-sm-4 control-label">
-							<spring:message code="page.text.report"/>
-						</label>
-						<div class="col-sm-8">
-							<p class="form-control-static">${job.report.name}</p>
-						</div>
-					</div>
-					<form:hidden path="report.reportId" />
-					<form:hidden path="report.reportTypeId" />
-					<form:hidden path="report.name" />
-
 				</fieldset>
 
 				<fieldset id="emailFields">
