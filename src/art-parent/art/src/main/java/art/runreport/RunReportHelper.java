@@ -34,7 +34,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -464,9 +463,7 @@ public class RunReportHelper {
 					break;
 				default:
 					//tabular, crosstab, lov dynamic, etc
-					String formatsString = Config.getSettings().getReportFormats();
-					String[] formatsArray = StringUtils.split(formatsString, ",");
-					formats = Arrays.asList(formatsArray);
+					formats = Config.getReportFormats();
 			}
 		}
 
