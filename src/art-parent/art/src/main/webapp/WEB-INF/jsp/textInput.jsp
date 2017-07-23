@@ -13,8 +13,8 @@ Display report parameter that uses text input
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <input type='text' class="form-control"
-	   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(localeString))}"
+	   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(requestContext.locale))}"
 	   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 	   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-	   value="${encode:forHtmlAttribute(reportParam.getHtmlValue(localeString))}">
+	   value="${encode:forHtmlAttribute(reportParam.getHtmlValue(requestContext.locale))}">
 

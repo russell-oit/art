@@ -508,26 +508,15 @@ public class Parameter implements Serializable {
 	 * @return the localized label
 	 * @throws java.io.IOException
 	 */
-	public String getLocalizedLabelWithLocale(Locale locale) throws IOException {
-		//can't use method overloading as this functionality is used from jsp with el, and el can't reliably call overloaded methods
+	public String getLocalizedLabel(Locale locale) throws IOException {
+		//note that el can't reliably call overloaded methods, so if a method is to be called from el, don't overload it
 		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
-		if (locale == null) {
-			return label;
-		} else {
-			return getLocalizedLabel(locale.toString());
-		}
-	}
-
-	/**
-	 * Returns the label to use for this parameter, given a particular locale,
-	 * taking into consideration the i18n options defined for the parameter
-	 *
-	 * @param localeString the string that represents the locale to use
-	 * @return the localized label
-	 * @throws java.io.IOException
-	 */
-	public String getLocalizedLabel(String localeString) throws IOException {
 		String localizedLabel = null;
+		
+		String localeString = null;
+		if (locale != null) {
+			localeString = locale.toString();
+		}
 
 		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
@@ -543,7 +532,7 @@ public class Parameter implements Serializable {
 
 		return localizedLabel;
 	}
-	
+
 	/**
 	 * Returns the help text to use for this parameter, given a particular
 	 * locale, taking into consideration the i18n options defined for the
@@ -553,27 +542,13 @@ public class Parameter implements Serializable {
 	 * @return the localized help text
 	 * @throws java.io.IOException
 	 */
-	public String getLocalizedHelpTextWithLocale(Locale locale) throws IOException {
-		//can't use method overloading as this functionality is used from jsp with el, and el can't reliably call overloaded methods
-		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
-		if (locale == null) {
-			return helpText;
-		} else {
-			return getLocalizedHelpText(locale.toString());
-		}
-	}
-
-	/**
-	 * Returns the help text to use for this parameter, given a particular
-	 * locale, taking into consideration the i18n options defined for the
-	 * parameter
-	 *
-	 * @param localeString the string that represents the locale to use
-	 * @return the localized help text
-	 * @throws java.io.IOException
-	 */
-	public String getLocalizedHelpText(String localeString) throws IOException {
+	public String getLocalizedHelpText(Locale locale) throws IOException {
 		String localizedHelpText = null;
+		
+		String localeString = null;
+		if (locale != null) {
+			localeString = locale.toString();
+		}
 
 		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
@@ -589,7 +564,7 @@ public class Parameter implements Serializable {
 
 		return localizedHelpText;
 	}
-	
+
 	/**
 	 * Returns the default value to use for this parameter, given a particular
 	 * locale, taking into consideration the i18n options defined for the
@@ -599,27 +574,13 @@ public class Parameter implements Serializable {
 	 * @return the localized default value
 	 * @throws java.io.IOException
 	 */
-	public String getLocalizedDefaultValueWithLocale(Locale locale) throws IOException {
-		//can't use method overloading as this functionality is used from jsp with el, and el can't reliably call overloaded methods
-		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
-		if (locale == null) {
-			return defaultValue;
-		} else {
-			return getLocalizedDefaultValue(locale.toString());
-		}
-	}
-
-	/**
-	 * Returns the default value to use for this parameter, given a particular
-	 * locale, taking into consideration the i18n options defined for the
-	 * parameter
-	 *
-	 * @param localeString the string that represents the locale to use
-	 * @return the localized default value
-	 * @throws java.io.IOException
-	 */
-	public String getLocalizedDefaultValue(String localeString) throws IOException {
+	public String getLocalizedDefaultValue(Locale locale) throws IOException {
 		String localizedDefaultValue = null;
+		
+		String localeString = null;
+		if (locale != null) {
+			localeString = locale.toString();
+		}
 
 		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
@@ -635,37 +596,23 @@ public class Parameter implements Serializable {
 
 		return localizedDefaultValue;
 	}
-	
+
 	/**
-	 * Returns the placeholder text to use for this parameter, given a particular
-	 * locale, taking into consideration the i18n options defined for the
-	 * parameter
+	 * Returns the placeholder text to use for this parameter, given a
+	 * particular locale, taking into consideration the i18n options defined for
+	 * the parameter
 	 *
 	 * @param locale the locale object for the relevant locale
 	 * @return the localized placeholder text
 	 * @throws java.io.IOException
 	 */
-	public String getLocalizedPlaceholderTextWithLocale(Locale locale) throws IOException {
-		//can't use method overloading as this functionality is used from jsp with el, and el can't reliably call overloaded methods
-		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
-		if (locale == null) {
-			return placeholderText;
-		} else {
-			return getLocalizedPlaceholderText(locale.toString());
-		}
-	}
-
-	/**
-	 * Returns the placeholder text to use for this parameter, given a particular
-	 * locale, taking into consideration the i18n options defined for the
-	 * parameter
-	 *
-	 * @param localeString the string that represents the locale to use
-	 * @return the localized placeholder text
-	 * @throws java.io.IOException
-	 */
-	public String getLocalizedPlaceholderText(String localeString) throws IOException {
+	public String getLocalizedPlaceholderText(Locale locale) throws IOException {
 		String localizedPlaceholderText = null;
+		
+		String localeString = null;
+		if (locale != null) {
+			localeString = locale.toString();
+		}
 
 		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
@@ -722,14 +669,14 @@ public class Parameter implements Serializable {
 
 		return localizedValue;
 	}
-	
+
 	/**
 	 * Returns the html type attribute to use for text input
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
-	public String getHtmlTextInputType(){
-		switch(dataType){
+	public String getHtmlTextInputType() {
+		switch (dataType) {
 			case Integer:
 				return "number";
 			default:

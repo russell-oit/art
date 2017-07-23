@@ -332,7 +332,7 @@ public class ReportParameter implements Serializable {
 	 * @throws java.io.IOException
 	 */
 	public String getLocalizedLabelAndDisplayValues(Locale locale) throws IOException {
-		return parameter.getLocalizedLabelWithLocale(locale) + ": " + getDisplayValues();
+		return parameter.getLocalizedLabel(locale) + ": " + getDisplayValues();
 	}
 
 	/**
@@ -365,18 +365,18 @@ public class ReportParameter implements Serializable {
 	 * @throws java.io.IOException
 	 */
 	public String getHtmlValue() throws IOException {
-		String localeString = null;
-		return getHtmlValue(localeString);
+		Locale locale=null;
+		return getHtmlValue(locale);
 	}
 
 	/**
 	 * Returns the html element value to be used for this parameter
 	 *
-	 * @param localeString the locale being used
+	 * @param locale the locale being used
 	 * @return the html element value to be used for this parameter
 	 * @throws java.io.IOException
 	 */
-	public String getHtmlValue(String localeString) throws IOException {
+	public String getHtmlValue(Locale locale) throws IOException {
 		Object value = getEffectiveActualParameterValue();
 
 		if (value == null) {
@@ -388,7 +388,7 @@ public class ReportParameter implements Serializable {
 			return parameter.getDateString(value);
 		}
 
-		String defaultValue = parameter.getLocalizedDefaultValue(localeString);
+		String defaultValue = parameter.getLocalizedDefaultValue(locale);
 		Report defaultValueReport = parameter.getDefaultValueReport();
 		if (StringUtils.isBlank(defaultValue) && defaultValueReport == null) {
 			return ""; //return blank instead of "0" for integers or "0.0" for doubles

@@ -22,6 +22,7 @@ import art.usergroup.StringToUserGroup;
 import art.utils.StringToDouble;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
+import org.apache.commons.lang3.LocaleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -109,7 +110,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		viewResolver.setSuffix(".jsp");
 		//http://forum.spring.io/forum/spring-projects/web/58269-how-to-access-the-current-locale-in-jstl-view
 		//http://forum.spring.io/forum/spring-projects/web/web-flow/73404-gettign-user-locale-in-jsp-page
-		viewResolver.setRequestContextAttribute("rc");
+		viewResolver.setRequestContextAttribute("requestContext");
 		return viewResolver;
 	}
 
@@ -153,7 +154,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	@Bean
 	public LocaleResolver localeResolver() {
 		CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver();
-		cookieLocaleResolver.setDefaultLocale(org.springframework.util.StringUtils.parseLocaleString("en"));
+		cookieLocaleResolver.setDefaultLocale(LocaleUtils.toLocale("en"));
 		return cookieLocaleResolver;
 	}
 

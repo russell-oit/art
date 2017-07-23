@@ -21,7 +21,7 @@
 				${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(pageContext.response.locale))}
 			</label>
 			<div class="${inputColClass}">
-				<c:set var="help" value="${reportParam.parameter.getLocalizedHelpText(localeString)}"/>
+				<c:set var="help" value="${reportParam.parameter.getLocalizedHelpText(requestContext.locale)}"/>
 				<c:if test="${not empty fn:trim(help)}">
 					<div class="input-group">
 					</c:if>

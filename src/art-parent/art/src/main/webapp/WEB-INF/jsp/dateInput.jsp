@@ -13,7 +13,7 @@ Display input for date and datetime parameters
 
 <div class='input-group date datepicker'>
 	<input type='text' class="form-control" data-date-format="YYYY-MM-DD"
-		   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(localeString))}"
+		   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(requestContext.locale))}"
 		   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   value="${encode:forHtmlAttribute(reportParam.htmlValue)}">

@@ -152,8 +152,6 @@ public class DashboardController {
 			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 			if (reportOptions.isShowSelectedParameters()) {
 				request.setAttribute("reportParamEntries", reportParamsMap);
-				String localeString = locale.toString();
-				request.setAttribute("localeString", localeString);
 			}
 
 			if (reportFormat == ReportFormat.pdf) {

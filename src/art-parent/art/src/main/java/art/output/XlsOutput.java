@@ -191,7 +191,7 @@ public class XlsOutput extends StandardOutput {
 		for (ReportParameter reportParam : reportParamsList) {
 			try {
 				newRow();
-				String paramLabel = reportParam.getParameter().getLocalizedLabelWithLocale(locale);
+				String paramLabel = reportParam.getParameter().getLocalizedLabel(locale);
 				String paramDisplayValues = reportParam.getDisplayValues();
 				addHeaderCell(paramLabel);
 				addCellString(paramDisplayValues);

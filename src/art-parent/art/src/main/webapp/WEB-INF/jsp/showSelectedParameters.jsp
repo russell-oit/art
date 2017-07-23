@@ -15,7 +15,7 @@
 		<c:forEach var="reportParamEntry" items="${reportParamEntries}">
 			<c:set var="reportParam" value="${reportParamEntry.value}"/>
 			<%-- if page included using servletContext.getRequestDispatcher().include(), pageContext.response.locale returns the OS locale and request.locale the browser locale? --%>
-			<b>${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(localeString))}</b>: ${encode:forHtmlContent(reportParam.displayValues)}
+			<b>${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(requestContext.locale))}</b>: ${encode:forHtmlContent(reportParam.displayValues)}
 			<br>
 		</c:forEach>
 	</div>

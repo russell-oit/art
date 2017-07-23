@@ -142,7 +142,6 @@ public class RunReportHelper {
 		request.setAttribute("startSelectParametersHidden", startSelectParametersHidden);
 
 		request.setAttribute("report", report);
-		request.setAttribute("localeString", locale.toString());
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 

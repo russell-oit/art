@@ -394,8 +394,6 @@ public class RunReportController {
 					//display parameters
 					if (showParams) {
 						request.setAttribute("reportParamEntries", reportParamEntries);
-						String localeString = locale.toString();
-						request.setAttribute("localeString", localeString);
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showSelectedParameters.jsp").include(request, response);
 					}
 
