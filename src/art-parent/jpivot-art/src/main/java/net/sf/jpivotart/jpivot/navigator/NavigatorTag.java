@@ -19,7 +19,6 @@ import net.sf.jpivotart.jpivot.olap.model.OlapModel;
 import net.sf.wcfart.wcf.component.Component;
 import net.sf.wcfart.wcf.component.ComponentTag;
 import net.sf.wcfart.wcf.controller.RequestContext;
-import org.apache.commons.lang3.LocaleUtils;
 
 /**
  * Created on 09.12.2002
@@ -29,14 +28,13 @@ import org.apache.commons.lang3.LocaleUtils;
 public class NavigatorTag extends ComponentTag {
 
   String query;
-  private String localeString;
+  private Locale locale;
 
   /**
    * creates the navigator component
    */
   public Component createComponent(RequestContext context) throws JspException {
-	  if(localeString!=null){
-		  Locale locale=LocaleUtils.toLocale(localeString);
+	  if(locale!=null){
 		  context.setLocale(locale);
 	  }
     OlapModel olapModel = (OlapModel) context.getModelReference(query);
@@ -62,17 +60,17 @@ public class NavigatorTag extends ComponentTag {
   }
 
 	/**
-	 * @return the localeString
+	 * @return the locale
 	 */
-	public String getLocaleString() {
-		return localeString;
+	public Locale getLocale() {
+		return locale;
 	}
 
 	/**
-	 * @param localeString the localeString to set
+	 * @param locale the locale to set
 	 */
-	public void setLocaleString(String localeString) {
-		this.localeString = localeString;
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 
 }

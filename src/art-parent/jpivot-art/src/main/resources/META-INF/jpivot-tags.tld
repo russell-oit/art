@@ -326,7 +326,7 @@
 			</description>
 		</attribute>
 		<attribute>
-			<name>localeString</name>
+			<name>locale</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>Locale for context</description>

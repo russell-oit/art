@@ -29,7 +29,6 @@ import net.sf.wcfart.wcf.utils.ResourceLocator;
 import net.sf.wcfart.wcf.utils.XmlUtils;
 import net.sf.wcfart.wcf.wizard.WizardComponent;
 import net.sf.wcfart.wcf.wizard.WizardComponentTag;
-import org.apache.commons.lang3.LocaleUtils;
 
 /**
  * creates a FormComponent
@@ -45,7 +44,7 @@ public class FormComponentTag extends ComponentTag {
   boolean bookmarkable = false;
   boolean finishButton = true;
   String bundle;
-  private String localeString;
+  private Locale locale;
 
   private static Logger logger = Logger.getLogger(FormComponentTag.class);
 
@@ -55,8 +54,7 @@ public class FormComponentTag extends ComponentTag {
   public Component createComponent(RequestContext context) throws JspException {
     try {
 		
-		if(localeString!=null){
-			Locale locale=LocaleUtils.toLocale(localeString);
+		if(locale!=null){
 			context.setLocale(locale);
 		}
 
@@ -148,17 +146,17 @@ public class FormComponentTag extends ComponentTag {
   }
 
 	/**
-	 * @return the localeString
+	 * @return the locale
 	 */
-	public String getLocaleString() {
-		return localeString;
+	public Locale getLocale() {
+		return locale;
 	}
 
 	/**
-	 * @param localeString the localeString to set
+	 * @param locale the locale to set
 	 */
-	public void setLocaleString(String localeString) {
-		this.localeString = localeString;
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 
 }

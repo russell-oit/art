@@ -83,20 +83,20 @@
 									<wcf:scroller />
 
 									<jp:table id="${tableId}" query="${modelQueryId}"/>
-									<jp:navigator id="${navigatorId}" query="${modelQueryId}" visible="false" localeString="${pageContext.response.locale}"/>
-									<wcf:form id="${mdxEditId}" xmlUri="/WEB-INF/jpivot/table/mdxedit.xml" model="${modelQueryId}" visible="false" localeString="${pageContext.response.locale}"/>
-									<wcf:form id="${sortFormId}" xmlUri="/WEB-INF/jpivot/table/sortform.xml" model="${modelTableId}" visible="false" localeString="${pageContext.response.locale}"/>
+									<jp:navigator id="${navigatorId}" query="${modelQueryId}" visible="false" locale="${pageContext.response.locale}"/>
+									<wcf:form id="${mdxEditId}" xmlUri="/WEB-INF/jpivot/table/mdxedit.xml" model="${modelQueryId}" visible="false" locale="${pageContext.response.locale}"/>
+									<wcf:form id="${sortFormId}" xmlUri="/WEB-INF/jpivot/table/sortform.xml" model="${modelTableId}" visible="false" locale="${pageContext.response.locale}"/>
 
 									<jp:print id="${printId}"/>
-									<wcf:form id="${printFormId}" xmlUri="/WEB-INF/jpivot/print/printpropertiesform.xml" model="${modelPrintId}" visible="false" localeString="${pageContext.response.locale}"/>
+									<wcf:form id="${printFormId}" xmlUri="/WEB-INF/jpivot/print/printpropertiesform.xml" model="${modelPrintId}" visible="false" locale="${pageContext.response.locale}"/>
 
 									<jp:chart id="${chartId}" query="${modelQueryId}" visible="false"/>
-									<wcf:form id="${chartFormId}" xmlUri="/WEB-INF/jpivot/chart/chartpropertiesform.xml" model="${modelChartId}" visible="false" localeString="${pageContext.response.locale}"/>
+									<wcf:form id="${chartFormId}" xmlUri="/WEB-INF/jpivot/chart/chartpropertiesform.xml" model="${modelChartId}" visible="false" locale="${pageContext.response.locale}"/>
 									<wcf:table id="${queryDrillThroughTable}" visible="false" selmode="none" editable="true"/>
 
 
 									<%-- define a toolbar --%>
-									<wcf:toolbar id="${toolbarId}" bundle="net.sf.jpivotart.jpivot.toolbar.resources" localeString="${pageContext.response.locale}">
+									<wcf:toolbar id="${toolbarId}" bundle="net.sf.jpivotart.jpivot.toolbar.resources" locale="${pageContext.response.locale}">
 										<wcf:scriptbutton id="cubeNaviButton" tooltip="toolb.cube" img="cube" model="${navigatorVisible}"/>
 										<wcf:scriptbutton id="mdxEditButton" tooltip="toolb.mdx.edit" img="mdx-edit" model="${mdxEditVisible}"/>
 										<wcf:scriptbutton id="sortConfigButton" tooltip="toolb.table.config" img="sort-asc" model="${sortFormVisible}"/>
@@ -150,7 +150,7 @@
 
 									<!-- render the table -->
 									<p> <br />
-									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true" localeString="${pageContext.response.locale}"/>
+									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true" locale="${pageContext.response.locale}"/>
 									</p>
 
 									<p>
@@ -160,7 +160,7 @@
 
 									<p>
 										<!-- drill through table -->
-									<wcf:render ref="${queryDrillThroughTable}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" localeString="${pageContext.response.locale}"/>
+									<wcf:render ref="${queryDrillThroughTable}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" locale="${pageContext.response.locale}"/>
 									</p>
 
 									<p>

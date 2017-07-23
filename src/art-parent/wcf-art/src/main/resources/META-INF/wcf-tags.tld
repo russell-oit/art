@@ -334,7 +334,7 @@
 			<description>ResourceBundle for i18n replacements. If a text- or attributenode in xml starts with 'fmt:' the remaining text will be interpreted as key into the resource bundle.</description>
 		</attribute>
 		<attribute>
-			<name>localeString</name>
+			<name>locale</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>Locale for context</description>
@@ -1051,7 +1051,7 @@
 				and false for development</description>
 		</attribute>
 		<attribute>
-			<name>localeString</name>
+			<name>locale</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>Locale for context</description>
@@ -1550,7 +1550,7 @@
 			<description>@DEPRECATED - do not use. Workaround for a bug in earlier versions that prevented multiple toolbars to have buttons with the same id</description>
 		</attribute>
 		<attribute>
-			<name>localeString</name>
+			<name>locale</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>Locale for context</description>

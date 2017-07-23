@@ -19,7 +19,6 @@ import net.sf.wcfart.tbutils.res.Resources;
 import net.sf.wcfart.wcf.component.Component;
 import net.sf.wcfart.wcf.component.ComponentTag;
 import net.sf.wcfart.wcf.controller.RequestContext;
-import org.apache.commons.lang3.LocaleUtils;
 
 /**
  * @author av
@@ -30,12 +29,12 @@ public class ToolBarTag extends ComponentTag {
 	
   String bundle;
   boolean globalButtonIds = false;
-  private String localeString;
+  private Locale locale;
 
   public void release() {
     globalButtonIds = false;
     bundle = null;
-	localeString = null;
+	locale = null;
     super.release();
   }  
   
@@ -46,8 +45,7 @@ public class ToolBarTag extends ComponentTag {
   public Component createComponent(RequestContext context) throws JspException {
     ToolBar tb = new ToolBar(getId(), null);
     tb.setGlobalButtonIds(globalButtonIds);
-	if(localeString!=null){
-			Locale locale=LocaleUtils.toLocale(localeString);
+	if(locale!=null){
 			context.setLocale(locale);
 		}
     if (bundle != null) {
@@ -77,16 +75,16 @@ public class ToolBarTag extends ComponentTag {
   }
 
 	/**
-	 * @return the localeString
+	 * @return the locale
 	 */
-	public String getLocaleString() {
-		return localeString;
+	public Locale getLocale() {
+		return locale;
 	}
 
 	/**
-	 * @param localeString the localeString to set
+	 * @param locale the locale to set
 	 */
-	public void setLocaleString(String localeString) {
-		this.localeString = localeString;
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 }

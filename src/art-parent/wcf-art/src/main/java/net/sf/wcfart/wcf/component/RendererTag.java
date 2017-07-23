@@ -38,7 +38,6 @@ import net.sf.wcfart.wcf.expr.ExprUtils;
 import net.sf.wcfart.wcf.token.RequestToken;
 import net.sf.wcfart.wcf.utils.DomUtils;
 import net.sf.wcfart.wcf.utils.XmlUtils;
-import org.apache.commons.lang3.LocaleUtils;
 
 /**
  * renders a Component via xsl stylesheet. The following
@@ -86,7 +85,7 @@ public class RendererTag extends TagSupport {
   boolean xslCache = true;
   String ref;
   Map<String, Object> parameters = new HashMap<>();
-  private String localeString;
+  private Locale locale;
 
   private static Logger logger = Logger.getLogger(RendererTag.class);
 
@@ -118,8 +117,7 @@ public class RendererTag extends TagSupport {
 
     try {
       RequestContext context = RequestContext.instance();
-	  if(localeString!=null){
-		  Locale locale=LocaleUtils.toLocale(localeString);
+	  if(locale!=null){
 		  context.setLocale(locale);
 	  }
       Object x = context.getModelReference(getRef());
@@ -337,17 +335,17 @@ public class RendererTag extends TagSupport {
   }
 
 	/**
-	 * @return the localeString
+	 * @return the locale
 	 */
-	public String getLocaleString() {
-		return localeString;
+	public Locale getLocale() {
+		return locale;
 	}
 
 	/**
-	 * @param localeString the localeString to set
+	 * @param locale the locale to set
 	 */
-	public void setLocaleString(String localeString) {
-		this.localeString = localeString;
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 
 }
