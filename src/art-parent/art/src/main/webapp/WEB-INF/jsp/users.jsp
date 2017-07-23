@@ -188,7 +188,10 @@ Display user configuration page
 
 						<td></td>
 						<td>${user.userId}</td>
-						<td>${encode:forHtmlContent(user.username)}</td>
+						<td>${encode:forHtmlContent(user.username)} &nbsp;
+							<t:displayNewLabel creationDate="${user.creationDate}"
+											   updateDate="${user.updateDate}"/>
+						</td>
 						<td>${encode:forHtmlContent(user.fullName)}</td>
 						<td><t:displayActiveStatus active="${user.active}"
 											   activeText="${activeText}"

@@ -358,7 +358,10 @@ Display user jobs and jobs configuration
 
 						<td></td>
 						<td>${job.jobId}</td>
-						<td>${encode:forHtmlContent(job.name)}</td>
+						<td>${encode:forHtmlContent(job.name)} &nbsp;
+							<t:displayNewLabel creationDate="${job.creationDate}"
+											   updateDate="${job.updateDate}"/>
+						</td>
 						<td data-sort="${job.lastEndDate.time}">
 							<fmt:formatDate value="${job.lastEndDate}" pattern="${dateDisplayPattern}"/>
 						</td>
