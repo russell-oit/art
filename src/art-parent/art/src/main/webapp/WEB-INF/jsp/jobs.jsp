@@ -289,6 +289,7 @@ Display user jobs and jobs configuration
 			{
 				var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
 				$("#clock").val(currentTimeString);
+				$("#clock2").val(currentTimeString);
 			}
 		</script>
 
@@ -318,6 +319,14 @@ Display user jobs and jobs configuration
 		</c:if>
 
 		<div id="ajaxResponse">
+		</div>
+
+		<div class="row">
+			<div class="col-md-2 col-md-offset-10">
+				<form>
+					<input type="text" id="clock2" readonly class="form-control"/>
+				</form>
+			</div>
 		</div>
 
 		<c:choose>
