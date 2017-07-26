@@ -555,6 +555,7 @@ public class ReportController {
 		validExtensions.add("jrxml");
 		validExtensions.add("xls");
 		validExtensions.add("xlsx");
+		validExtensions.add("xlsm");
 		validExtensions.add("png");
 		validExtensions.add("jpg");
 		validExtensions.add("jpeg");
