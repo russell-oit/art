@@ -20,9 +20,11 @@ package art.output;
 import art.dbutils.DatabaseUtils;
 import art.enums.ReportType;
 import art.report.Report;
+import art.reportoptions.JxlsOptions;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,9 +40,14 @@ import java.util.Objects;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.jxls.area.Area;
+import org.jxls.builder.AreaBuilder;
+import org.jxls.builder.xml.XmlAreaBuilder;
 import org.jxls.common.Context;
 import org.jxls.jdbc.JdbcHelper;
+import org.jxls.transform.Transformer;
 import org.jxls.util.JxlsHelper;
+import org.jxls.util.TransformerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +59,7 @@ import org.slf4j.LoggerFactory;
 public class JxlsOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(JxlsOutput.class);
-	
+
 	private ResultSet resultSet;
 	private Locale locale;
 
@@ -125,9 +132,31 @@ public class JxlsOutput {
 				String paramName = reportParam.getParameter().getName();
 				context.putVar(paramName, reportParam);
 			}
-			
+
 			context.putVar("params", reportParams);
 			context.putVar("locale", locale);
+
+			String optionsString = report.getOptions();
+
+			JxlsOptions options;
+			if (StringUtils.isBlank(optionsString)) {
+				options = new JxlsOptions();
+			} else {
+				ObjectMapper mapper = new ObjectMapper();
+				options = mapper.readValue(optionsString, JxlsOptions.class);
+			}
+
+			String areaConfigFilename = options.getAreaConfigFile();
+
+			if (StringUtils.isNotBlank(areaConfigFilename)) {
+				String fullAreaConfigFilename = templatesPath + areaConfigFilename;
+				File areaConfigFile = new File(fullAreaConfigFilename);
+				if (!areaConfigFile.exists()) {
+					throw new IllegalStateException("Area config file not found: " + areaConfigFilename);
+				}
+			}
+
+			String fullAreaConfigFilename = templatesPath + areaConfigFilename;
 
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
@@ -138,7 +167,11 @@ public class JxlsOutput {
 					try (OutputStream os = new FileOutputStream(outputFileName)) {
 						context.putVar("conn", conn);
 						context.putVar("jdbc", jdbcHelper);
-						JxlsHelper.getInstance().processTemplate(is, os, context);
+						if (StringUtils.isBlank(areaConfigFilename)) {
+							JxlsHelper.getInstance().processTemplate(is, os, context);
+						} else {
+							processUsingXmlConfig(fullAreaConfigFilename, is, os, context);
+						}
 					}
 				}
 			} else {
@@ -149,12 +182,41 @@ public class JxlsOutput {
 				context.putVar("results", rsdc.getRows());
 				try (InputStream is = new FileInputStream(fullTemplateFileName)) {
 					try (OutputStream os = new FileOutputStream(outputFileName)) {
-						JxlsHelper.getInstance().processTemplate(is, os, context);
+						if (StringUtils.isBlank(areaConfigFilename)) {
+							JxlsHelper.getInstance().processTemplate(is, os, context);
+						} else {
+							processUsingXmlConfig(fullAreaConfigFilename, is, os, context);
+						}
 					}
 				}
 			}
 		} finally {
 			DatabaseUtils.close(conn);
+		}
+	}
+
+	/**
+	 * Processes template using xml config to define areas
+	 *
+	 * @param fullAreaConfigFilename full file name of config file, including
+	 * path
+	 * @param is source template input stream
+	 * @param os target file output stream
+	 * @param context context
+	 * @throws IOException
+	 */
+	private void processUsingXmlConfig(String fullAreaConfigFilename,
+			final InputStream is, final OutputStream os, Context context) throws IOException {
+
+		//http://jxls.sourceforge.net/samples/object_collection_xmlbuilder.html
+		Transformer transformer = TransformerFactory.createTransformer(is, os);
+		try (InputStream configInputStream = new FileInputStream(fullAreaConfigFilename)) {
+			AreaBuilder areaBuilder = new XmlAreaBuilder(configInputStream, transformer);
+			List<Area> xlsAreaList = areaBuilder.build();
+			for (Area xlsArea : xlsAreaList) {
+				xlsArea.applyAt(xlsArea.getStartCellRef(), context);
+			}
+			transformer.write();
 		}
 	}
 }

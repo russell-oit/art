@@ -151,7 +151,7 @@ Edit report page
 				$('#fileupload').fileupload({
 					url: '${pageContext.request.contextPath}/uploadResources',
 					fileInput: $('#fileuploadInput'),
-					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g|csv|txt|css|js|json)$/i,
+					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g|csv|txt|css|js|json|xml)$/i,
 					maxFileSize: maxFileSizeBytes,
 					messages: {
 						acceptFileTypes: '${fileTypeNotAllowedText}',
@@ -333,6 +333,8 @@ Edit report page
 					case 147: //openlayers
 					case 148: //tabular heatmap
 					case 151: //mongodb
+					case 117: //jxls template
+					case 118: //jxls art
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -669,6 +671,8 @@ Edit report page
 					case 145: //datamaps file
 					case 146: //leaflet
 					case 147: //openlayers
+					case 117: //jxls template
+					case 118: //jxls art
 						$("#resourcesDiv").show();
 						break;
 					default:
@@ -1347,7 +1351,7 @@ Edit report page
 				<div id="reportSourceHtmlDiv" class="form-group">
 					<div class="col-md-12">
 						<form:textarea path="reportSourceHtml" rows="20" cols="70" wrap="off" class="form-control editor"/>
-						 <input name="image" type="file" id="upload" style="display:none;" onchange="">
+						<input name="image" type="file" id="upload" style="display:none;" onchange="">
 						<form:errors path="reportSourceHtml" cssClass="error"/>
 					</div>
 				</div>

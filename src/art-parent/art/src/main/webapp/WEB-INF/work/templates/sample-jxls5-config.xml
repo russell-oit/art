@@ -1,0 +1,7 @@
+<xls>
+    <area ref="Sheet1!A1:E12">
+        <each items="jdbc.query('select o.order_id, c.name city_name, i.name item_name, o.order_date, o.volume from orders o, cities c, items i where o.city_id=c.city_id and o.item_id=i.item_id and order_date>=? and o.city_id=? and o.item_id in(' + item.sqlValue + ') order by o.order_date', order_date.value, cityId.value)" var="item" ref="Sheet1!A10:E10">
+            <area ref="Sheet1!A10:E10"/>
+        </each>
+    </area>
+</xls>

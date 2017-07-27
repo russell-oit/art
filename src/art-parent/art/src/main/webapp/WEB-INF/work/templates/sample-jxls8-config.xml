@@ -1,0 +1,13 @@
+<xls>
+    <area ref="Cities!A1:C6">
+        <each items="jdbc.query('select * from cities')" var="city" ref="Cities!A6:C6">
+            <area ref="Cities!A6:C6"/>
+        </each>
+    </area>
+	
+	<area ref="Regions!A1:B7">
+        <each items="jdbc.query('select * from regions')" var="region" ref="Regions!A7:B7">
+            <area ref="Regions!A7:B7"/>
+        </each>
+    </area>
+</xls>
