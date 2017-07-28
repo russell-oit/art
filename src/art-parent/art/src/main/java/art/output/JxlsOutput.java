@@ -44,7 +44,6 @@ import org.jxls.area.Area;
 import org.jxls.builder.AreaBuilder;
 import org.jxls.builder.xml.XmlAreaBuilder;
 import org.jxls.common.Context;
-import org.jxls.jdbc.JdbcHelper;
 import org.jxls.transform.Transformer;
 import org.jxls.util.JxlsHelper;
 import org.jxls.util.TransformerFactory;
@@ -162,36 +161,45 @@ public class JxlsOutput {
 			if (reportType == ReportType.JxlsTemplate) {
 				RunReportHelper runReportHelper = new RunReportHelper();
 				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
-				JdbcHelper jdbcHelper = new JdbcHelper(conn);
-				try (InputStream is = new FileInputStream(fullTemplateFileName)) {
-					try (OutputStream os = new FileOutputStream(outputFileName)) {
-						context.putVar("conn", conn);
-						context.putVar("jdbc", jdbcHelper);
-						if (StringUtils.isBlank(areaConfigFilename)) {
-							JxlsHelper.getInstance().processTemplate(is, os, context);
-						} else {
-							processUsingXmlConfig(fullAreaConfigFilename, is, os, context);
-						}
-					}
-				}
+				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn);
+				context.putVar("jdbc", jdbcHelper);
 			} else {
 				//use recordset based on art query
 				boolean useLowerCaseProperties = false;
 				boolean useColumnLabels = true;
 				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
 				context.putVar("results", rsdc.getRows());
-				try (InputStream is = new FileInputStream(fullTemplateFileName)) {
-					try (OutputStream os = new FileOutputStream(outputFileName)) {
-						if (StringUtils.isBlank(areaConfigFilename)) {
-							JxlsHelper.getInstance().processTemplate(is, os, context);
-						} else {
-							processUsingXmlConfig(fullAreaConfigFilename, is, os, context);
-						}
-					}
-				}
 			}
+			
+			process(fullTemplateFileName, outputFileName, areaConfigFilename, context, fullAreaConfigFilename);
 		} finally {
 			DatabaseUtils.close(conn);
+		}
+	}
+
+	/**
+	 * Processes the jxls template
+	 *
+	 * @param fullTemplateFileName the path of the template file
+	 * @param outputFileName the path of the output file
+	 * @param areaConfigFilename the xml area config file name. null if not
+	 * using xml config
+	 * @param context the context
+	 * @param fullAreaConfigFilename the full path of the area config file
+	 * @throws IOException
+	 */
+	private void process(String fullTemplateFileName, String outputFileName,
+			String areaConfigFilename, Context context, String fullAreaConfigFilename)
+			throws IOException {
+
+		try (InputStream is = new FileInputStream(fullTemplateFileName)) {
+			try (OutputStream os = new FileOutputStream(outputFileName)) {
+				if (StringUtils.isBlank(areaConfigFilename)) {
+					JxlsHelper.getInstance().processTemplate(is, os, context);
+				} else {
+					processUsingXmlConfig(fullAreaConfigFilename, is, os, context);
+				}
+			}
 		}
 	}
 
