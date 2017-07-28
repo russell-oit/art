@@ -31,8 +31,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -123,14 +125,14 @@ public class XlsOutput extends StandardOutput {
 			}
 
 			HSSFFont headerFont = wb.createFont();
-			headerFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-			headerFont.setColor(HSSFColor.BLUE.index);
+			headerFont.setBold(true);
+			headerFont.setColor(IndexedColors.BLUE.getIndex());
 			short headerFontSize = 12;
 			headerFont.setFontHeightInPoints(headerFontSize);
 
 			headerStyle = wb.createCellStyle();
 			headerStyle.setFont(headerFont);
-			headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+			headerStyle.setBorderBottom(BorderStyle.THIN);
 
 			HSSFFont bodyFont = wb.createFont();
 			bodyFont.setColor(HSSFFont.COLOR_NORMAL);
@@ -158,7 +160,7 @@ public class XlsOutput extends StandardOutput {
 			}
 
 			HSSFFont totalFont = wb.createFont();
-			totalFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+			totalFont.setBold(true);
 			totalFont.setColor(HSSFFont.COLOR_NORMAL);
 			totalFont.setFontHeightInPoints(bodyFontSize);
 
@@ -212,7 +214,7 @@ public class XlsOutput extends StandardOutput {
 	@Override
 	public void addHeaderCell(String value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		cell.setCellType(CellType.STRING);
 		cell.setCellValue(new HSSFRichTextString(value));
 		cell.setCellStyle(headerStyle);
 	}
@@ -225,7 +227,7 @@ public class XlsOutput extends StandardOutput {
 	@Override
 	public void addCellString(String value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		cell.setCellType(CellType.STRING);
 		cell.setCellValue(new HSSFRichTextString(value));
 		cell.setCellStyle(bodyStyle);
 	}
@@ -235,7 +237,7 @@ public class XlsOutput extends StandardOutput {
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			cell.setCellType(CellType.NUMERIC);
 			cell.setCellValue(value);
 			if (numberStyle == null) {
 				cell.setCellStyle(bodyStyle);
@@ -266,7 +268,7 @@ public class XlsOutput extends StandardOutput {
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			cell.setCellType(CellType.NUMERIC);
 			cell.setCellValue(value);
 			cell.setCellStyle(totalStyle);
 		}

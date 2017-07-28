@@ -31,7 +31,6 @@ import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -129,14 +128,14 @@ public class XlsxOutput extends StandardOutput {
 			styles = new HashMap<>();
 
 			Font headerFont = wb.createFont();
-			headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+			headerFont.setBold(true);
 			headerFont.setColor(IndexedColors.BLUE.getIndex());
 			short headerFontSize = 12;
 			headerFont.setFontHeightInPoints(headerFontSize);
 
 			headerStyle = wb.createCellStyle();
 			headerStyle.setFont(headerFont);
-			headerStyle.setBorderBottom(CellStyle.BORDER_THIN);
+			headerStyle.setBorderBottom(BorderStyle.THIN);
 			styles.put("header", headerStyle);
 
 			Font bodyFont = wb.createFont();
@@ -168,7 +167,7 @@ public class XlsxOutput extends StandardOutput {
 			}
 
 			Font totalFont = wb.createFont();
-			totalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+			totalFont.setBold(true);
 			totalFont.setColor(Font.COLOR_NORMAL);
 			totalFont.setFontHeightInPoints(bodyFontSize);
 
@@ -223,7 +222,7 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void addHeaderCell(String value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+		cell.setCellType(CellType.STRING);
 		cell.setCellValue(new XSSFRichTextString(value));
 		cell.setCellStyle(headerStyle);
 	}
@@ -236,7 +235,7 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void addCellString(String value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+		cell.setCellType(CellType.STRING);
 		cell.setCellValue(new XSSFRichTextString(value));
 		cell.setCellStyle(bodyStyle);
 	}
@@ -246,7 +245,7 @@ public class XlsxOutput extends StandardOutput {
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
-			cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+			cell.setCellType(CellType.NUMERIC);
 			cell.setCellValue(value);
 			if (numberStyle == null) {
 				cell.setCellStyle(bodyStyle);
@@ -278,7 +277,7 @@ public class XlsxOutput extends StandardOutput {
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
-			cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+			cell.setCellType(CellType.NUMERIC);
 			cell.setCellValue(value);
 			cell.setCellStyle(totalStyle);
 		}

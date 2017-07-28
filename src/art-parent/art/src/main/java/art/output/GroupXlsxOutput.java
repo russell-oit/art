@@ -26,10 +26,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
-import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -71,13 +71,14 @@ public class GroupXlsxOutput extends GroupOutput {
 			sheet = wb.createSheet(sheetName);
 
 			XSSFFont headerFont = wb.createFont();
-			headerFont.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
-			headerFont.setColor(HSSFColor.BLUE.index);
-			headerFont.setFontHeightInPoints((short) 12);
+			headerFont.setBold(true);
+			headerFont.setColor(IndexedColors.BLUE.getIndex());
+			short headerFontSize = 12;
+			headerFont.setFontHeightInPoints(headerFontSize);
 
 			headerStyle = wb.createCellStyle();
 			headerStyle.setFont(headerFont);
-			headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+			headerStyle.setBorderBottom(BorderStyle.THIN);
 
 			XSSFFont bodyFont = wb.createFont();
 			bodyFont.setColor(XSSFFont.COLOR_NORMAL);
@@ -109,7 +110,7 @@ public class GroupXlsxOutput extends GroupOutput {
 	 */
 	private void addCell(String value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+		cell.setCellType(CellType.STRING);
 		cell.setCellValue(new XSSFRichTextString(value));
 		cell.setCellStyle(bodyStyle);
 	}
@@ -121,7 +122,7 @@ public class GroupXlsxOutput extends GroupOutput {
 	 */
 	private void addSummaryCell(String value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+		cell.setCellType(CellType.STRING);
 		cell.setCellValue(new XSSFRichTextString(value));
 		cell.setCellStyle(summaryStyle);
 	}
@@ -133,7 +134,7 @@ public class GroupXlsxOutput extends GroupOutput {
 	 */
 	public void addSummaryCellNumeric(double value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+		cell.setCellType(CellType.NUMERIC);
 		cell.setCellValue(value);
 		cell.setCellStyle(summaryStyle);
 	}
@@ -176,7 +177,7 @@ public class GroupXlsxOutput extends GroupOutput {
 	 */
 	private void addHeaderCell(String value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		cell.setCellType(CellType.STRING);
 		cell.setCellValue(new XSSFRichTextString(value));
 		cell.setCellStyle(headerStyle);
 	}
