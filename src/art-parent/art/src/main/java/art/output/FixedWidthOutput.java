@@ -50,8 +50,7 @@ public class FixedWidthOutput {
 	private static final Logger logger = LoggerFactory.getLogger(FixedWidthOutput.class);
 
 	/**
-	 * Generates fixed width output for data in the given resultset. The
-	 * resultset and writer get closed by the method.
+	 * Generates fixed width output for data in the given resultset
 	 *
 	 * @param rs the resultset that contains the data to output
 	 * @param outputWriter the writer to output to
@@ -259,6 +258,7 @@ public class FixedWidthOutput {
 		}
 
 		FixedWidthRoutines routines = new FixedWidthRoutines(writerSettings);
+		routines.setKeepResourcesOpen(true);
 		routines.write(rs, outputWriter);
 	}
 

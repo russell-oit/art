@@ -626,8 +626,6 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.Dygraphs) {
 					rs = reportRunner.getResultSet();
-					//get row count before performing output. univocity will close rs after writing
-					rowsRetrieved = getResultSetRowCount(rs);
 					CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
 					//use appropriate date formats to ensure correct interpretation by browsers
 					//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
@@ -641,6 +639,7 @@ public class ReportOutputGenerator {
 						csvOutputUnivocity.generateOutput(rs, stringWriter);
 						csvString = stringWriter.toString();
 					}
+					rowsRetrieved = getResultSetRowCount(rs);
 					//need to escape string for javascript, otherwise you get Unterminated string literal error
 					//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
 					String escapedCsvString = Encode.forJavaScript(csvString);
@@ -774,15 +773,11 @@ public class ReportOutputGenerator {
 				FixedWidthOptions options = mapper.readValue(optionsString, FixedWidthOptions.class);
 				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
 				rs = reportRunner.getResultSet();
-				//get row count before performing output. univocity will close rs after writing
-				rowsRetrieved = getResultSetRowCount(rs);
 				if (!isJob) {
 					writer.println("<pre>");
 				}
-				//wrap the writer in an uncloseable printwriter to prevent the writer from being closed by univocity
-				//https://stackoverflow.com/questions/8941298/system-out-closed-can-i-reopen-it
-				UncloseablePrintWriter uncloseableWriter = new UncloseablePrintWriter(writer);
-				fixedWidthOutput.generateOutput(rs, uncloseableWriter, options);
+				fixedWidthOutput.generateOutput(rs, writer, options);
+				rowsRetrieved = getResultSetRowCount(rs);
 				if (!isJob) {
 					writer.println("</pre>");
 				}

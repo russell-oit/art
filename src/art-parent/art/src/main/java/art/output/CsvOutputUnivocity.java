@@ -134,8 +134,7 @@ public class CsvOutputUnivocity {
 	}
 
 	/**
-	 * Generates csv output for data in the given resultset. The resultset and
-	 * writer get closed by the method.
+	 * Generates csv output for data in the given resultset
 	 *
 	 * @param rs the resultset that contains the data to output
 	 * @param outputWriter the writer to output to
@@ -173,6 +172,7 @@ public class CsvOutputUnivocity {
 		csvFormat.setQuote(quote);
 
 		CsvRoutines csvRoutines = new CsvRoutines(csvWriterSettings);
+		csvRoutines.setKeepResourcesOpen(true);
 		csvRoutines.write(rs, outputWriter);
 	}
 
