@@ -147,16 +147,14 @@ public class JxlsOutput {
 			}
 
 			String areaConfigFilename = options.getAreaConfigFile();
+			String fullAreaConfigFilename = templatesPath + areaConfigFilename;
 
 			if (StringUtils.isNotBlank(areaConfigFilename)) {
-				String fullAreaConfigFilename = templatesPath + areaConfigFilename;
 				File areaConfigFile = new File(fullAreaConfigFilename);
 				if (!areaConfigFile.exists()) {
 					throw new IllegalStateException("Area config file not found: " + areaConfigFilename);
 				}
 			}
-
-			String fullAreaConfigFilename = templatesPath + areaConfigFilename;
 
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
@@ -171,8 +169,8 @@ public class JxlsOutput {
 				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
 				context.putVar("results", rsdc.getRows());
 			}
-			
-			process(fullTemplateFileName, outputFileName, areaConfigFilename, context, fullAreaConfigFilename);
+
+			process(fullTemplateFileName, outputFileName, areaConfigFilename, context, fullAreaConfigFilename, options);
 		} finally {
 			DatabaseUtils.close(conn);
 		}
@@ -187,18 +185,19 @@ public class JxlsOutput {
 	 * using xml config
 	 * @param context the context
 	 * @param fullAreaConfigFilename the full path of the area config file
+	 * @param options jxls options
 	 * @throws IOException
 	 */
 	private void process(String fullTemplateFileName, String outputFileName,
-			String areaConfigFilename, Context context, String fullAreaConfigFilename)
-			throws IOException {
+			String areaConfigFilename, Context context, String fullAreaConfigFilename,
+			JxlsOptions options) throws IOException {
 
 		try (InputStream is = new FileInputStream(fullTemplateFileName)) {
 			try (OutputStream os = new FileOutputStream(outputFileName)) {
 				if (StringUtils.isBlank(areaConfigFilename)) {
 					JxlsHelper.getInstance().processTemplate(is, os, context);
 				} else {
-					processUsingXmlConfig(fullAreaConfigFilename, is, os, context);
+					processUsingXmlConfig(fullAreaConfigFilename, is, os, context, options);
 				}
 			}
 		}
@@ -212,10 +211,12 @@ public class JxlsOutput {
 	 * @param is source template input stream
 	 * @param os target file output stream
 	 * @param context context
+	 * @param options jxls options
 	 * @throws IOException
 	 */
 	private void processUsingXmlConfig(String fullAreaConfigFilename,
-			final InputStream is, final OutputStream os, Context context) throws IOException {
+			final InputStream is, final OutputStream os, Context context,
+			JxlsOptions options) throws IOException {
 
 		//http://jxls.sourceforge.net/samples/object_collection_xmlbuilder.html
 		Transformer transformer = TransformerFactory.createTransformer(is, os);
@@ -225,7 +226,9 @@ public class JxlsOutput {
 			for (Area xlsArea : xlsAreaList) {
 				xlsArea.applyAt(xlsArea.getStartCellRef(), context);
 				//http://jxls.sourceforge.net/reference/formulas.html
-				xlsArea.setFormulaProcessor(new StandardFormulaProcessor()); 
+				if (options.isUseStandardFormulaProcessor()) {
+					xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
+				}
 				xlsArea.processFormulas();
 			}
 			transformer.write();

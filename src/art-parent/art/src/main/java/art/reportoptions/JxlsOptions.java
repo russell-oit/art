@@ -25,6 +25,7 @@ package art.reportoptions;
 public class JxlsOptions extends GeneralReportOptions {
 	
 	private String areaConfigFile;
+	private boolean useStandardFormulaProcessor;
 
 	/**
 	 * @return the areaConfigFile
@@ -38,5 +39,19 @@ public class JxlsOptions extends GeneralReportOptions {
 	 */
 	public void setAreaConfigFile(String areaConfigFile) {
 		this.areaConfigFile = areaConfigFile;
+	}
+
+	/**
+	 * @return the useStandardFormulaProcessor
+	 */
+	public boolean isUseStandardFormulaProcessor() {
+		return useStandardFormulaProcessor;
+	}
+
+	/**
+	 * @param useStandardFormulaProcessor the useStandardFormulaProcessor to set
+	 */
+	public void setUseStandardFormulaProcessor(boolean useStandardFormulaProcessor) {
+		this.useStandardFormulaProcessor = useStandardFormulaProcessor;
 	}
 }
