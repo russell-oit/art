@@ -62,6 +62,25 @@ public class RunReportHelper {
 	 * Returns the connection to use for running the given report
 	 *
 	 * @param report the report
+	 * @param reportParamsMap the report parameters
+	 * @return the connection to use for running the report
+	 * @throws SQLException
+	 */
+	public Connection getEffectiveReportDatasource(Report report,
+			Map<String, ReportParameter> reportParamsMap) throws SQLException {
+
+		Collection<ReportParameter> reportParams = null;
+		if (reportParamsMap != null) {
+			reportParams = reportParamsMap.values();
+		}
+
+		return getEffectiveReportDatasource(report, reportParams);
+	}
+
+	/**
+	 * Returns the connection to use for running the given report
+	 *
+	 * @param report the report
 	 * @param reportParams the report parameters
 	 * @return the connection to use for running the report
 	 * @throws SQLException
@@ -71,7 +90,7 @@ public class RunReportHelper {
 
 		logger.debug("Entering getEffectiveReportDatasource: report={}", report);
 
-		Connection conn;
+		Connection conn = null;
 
 		Integer dynamicDatasourceId = null;
 		if (reportParams != null) {
@@ -89,32 +108,15 @@ public class RunReportHelper {
 		if (dynamicDatasourceId == null) {
 			//use datasource defined on the report
 			Datasource reportDatasource = report.getDatasource();
-			conn = DbConnections.getConnection(reportDatasource.getDatasourceId());
+			if (reportDatasource != null) {
+				conn = DbConnections.getConnection(reportDatasource.getDatasourceId());
+			}
 		} else {
 			//use datasource indicated in parameter
 			conn = DbConnections.getConnection(dynamicDatasourceId);
 		}
 
 		return conn;
-	}
-
-	/**
-	 * Returns the connection to use for running the given report
-	 *
-	 * @param report the report
-	 * @param reportParamsMap the report parameters
-	 * @return the connection to use for running the report
-	 * @throws SQLException
-	 */
-	public Connection getEffectiveReportDatasource(Report report,
-			Map<String, ReportParameter> reportParamsMap) throws SQLException {
-
-		Collection<ReportParameter> reportParams = null;
-		if (reportParamsMap != null) {
-			reportParams = reportParamsMap.values();
-		}
-
-		return getEffectiveReportDatasource(report, reportParams);
 	}
 
 	/**

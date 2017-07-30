@@ -44,6 +44,7 @@ import org.jxls.area.Area;
 import org.jxls.builder.AreaBuilder;
 import org.jxls.builder.xml.XmlAreaBuilder;
 import org.jxls.common.Context;
+import org.jxls.formula.StandardFormulaProcessor;
 import org.jxls.transform.Transformer;
 import org.jxls.util.JxlsHelper;
 import org.jxls.util.TransformerFactory;
@@ -223,6 +224,9 @@ public class JxlsOutput {
 			List<Area> xlsAreaList = areaBuilder.build();
 			for (Area xlsArea : xlsAreaList) {
 				xlsArea.applyAt(xlsArea.getStartCellRef(), context);
+				//http://jxls.sourceforge.net/reference/formulas.html
+				xlsArea.setFormulaProcessor(new StandardFormulaProcessor()); 
+				xlsArea.processFormulas();
 			}
 			transformer.write();
 		}
