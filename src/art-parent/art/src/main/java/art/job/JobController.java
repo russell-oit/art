@@ -116,6 +116,7 @@ public class JobController {
 			List<Job> jobs = jobService.getJobs(sessionUser.getUserId());
 			model.addAttribute("jobs", jobs);
 			model.addAttribute("nextPage", "jobs");
+			model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -569,6 +570,8 @@ public class JobController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
+		
+		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
 
 		return "editJob";
 	}

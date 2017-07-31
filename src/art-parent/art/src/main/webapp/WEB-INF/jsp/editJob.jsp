@@ -63,12 +63,31 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects-1.0.1/jquery.chained.remote.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
+
+		<script>
+			//put obtaining of server offset in head to reduce difference between server and client time
+			//https://stackoverflow.com/questions/19629561/moment-js-set-the-base-time-from-the-server
+			var serverDate = '${serverDateString}';
+			var serverOffset = moment(serverDate, 'YYYY-MM-DD HH:mm:ss.SSS').diff(new Date());
+
+			function currentServerDate()
+			{
+				return moment().add('milliseconds', serverOffset);
+			}
+
+			function updateClock()
+			{
+				var currentTimeString = currentServerDate().format("YYYY-MM-DD HH:mm:ss");
+				$("#clock").val(currentTimeString);
+			}
+		</script>
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		
 		<script type="text/javascript">
 			tinymce.init({
 				selector: "textarea.editor",
@@ -86,6 +105,9 @@
 
 		<script type="text/javascript">
 			$(document).ready(function () {
+				//display current time. updates every 1000 milliseconds
+				setInterval('updateClock()', 1000);
+
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="jobsConfig"]').parent().addClass('active');
 
@@ -144,10 +166,6 @@
 				populateOutputFormatField();
 
 				$('#name').focus();
-
-				//display current time. updates every 1000 milliseconds
-				setInterval('updateClock()', 1000);
-
 			});
 		</script>
 
@@ -348,12 +366,6 @@
 					default:
 						$("#runsToArchiveDiv").hide();
 				}
-			}
-
-			function updateClock()
-			{
-				var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
-				$("#clock").val(currentTimeString);
 			}
 		</script>
 	</jsp:attribute>

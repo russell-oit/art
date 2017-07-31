@@ -43,13 +43,38 @@ Display user jobs and jobs configuration
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 	</jsp:attribute>
 
+	<jsp:attribute name="headContent">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+
+		<script>
+			//put obtaining of server offset in head to reduce difference between server and client time
+			//https://stackoverflow.com/questions/19629561/moment-js-set-the-base-time-from-the-server
+			var serverDate = '${serverDateString}';
+			var serverOffset = moment(serverDate, 'YYYY-MM-DD HH:mm:ss.SSS').diff(new Date());
+
+			function currentServerDate()
+			{
+				return moment().add('milliseconds', serverOffset);
+			}
+
+			function updateClock()
+			{
+				var currentTimeString = currentServerDate().format("YYYY-MM-DD HH:mm:ss");
+				$("#clock").val(currentTimeString);
+				$("#clock2").val(currentTimeString);
+			}
+		</script>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
+				//display current time. updates every 1000 milliseconds
+				setInterval('updateClock()', 1000);
+
 				var actionValue = '${action}';
 				if (actionValue === 'config') {
 					$('a[id="configure"]').parent().addClass('active');
@@ -278,21 +303,8 @@ Display user jobs and jobs configuration
 					locale: '${pageContext.response.locale}'
 				});
 
-				//display current time. updates every 1000 milliseconds
-				setInterval('updateClock()', 1000);
-
 			}); //end document ready
 		</script>
-
-		<script type="text/javascript">
-			function updateClock()
-			{
-				var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
-				$("#clock").val(currentTimeString);
-				$("#clock2").val(currentTimeString);
-			}
-		</script>
-
 	</jsp:attribute>
 
 	<jsp:body>
