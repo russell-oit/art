@@ -50,7 +50,7 @@ Edit datasource page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -114,7 +114,7 @@ Edit datasource page
 					offText: '${noText}'
 				});
 
-				$("input[name='datasourceType']:radio").change(function () {
+				$("#datasourceType").change(function () {
 					toggleVisibleFields();
 				});
 
@@ -127,8 +127,8 @@ Edit datasource page
 
 		<script type="text/javascript">
 			function toggleVisibleFields() {
-				var datasourceType=$('input[name="datasourceType"]:checked').val();
-				
+				var datasourceType = $('#datasourceType option:selected').val();
+
 				if (datasourceType === 'JDBC') {
 					$("#jndiDiv").show();
 					$("#testSqlDiv").show();
