@@ -195,7 +195,12 @@ public class JxlsOutput {
 		try (InputStream is = new FileInputStream(fullTemplateFileName)) {
 			try (OutputStream os = new FileOutputStream(outputFileName)) {
 				if (StringUtils.isBlank(areaConfigFilename)) {
-					JxlsHelper.getInstance().processTemplate(is, os, context);
+					//http://jxls.sourceforge.net/samples/multi_sheet_markup_demo.html
+					JxlsHelper jxlsHelper = JxlsHelper.getInstance();
+					if (options.isUseStandardFormulaProcessor()) {
+						jxlsHelper.setUseFastFormulaProcessor(false);
+					}
+					jxlsHelper.processTemplate(is, os, context);
 				} else {
 					processUsingXmlConfig(fullAreaConfigFilename, is, os, context, options);
 				}
