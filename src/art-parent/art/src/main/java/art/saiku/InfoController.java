@@ -94,7 +94,6 @@ public class InfoController {
 		//or through this newly added main-settings end point, updating the Settings object
 		settings.put("I18N_LOCALE", locale.toString());
 		String contextPath = request.getContextPath();
-		settings.put("TOMCAT_WEBAPP", contextPath);
 		settings.put("REST_MOUNT_POINT", "/saiku2/");
 		String resourcesPath = contextPath + "/saiku/";
 		settings.put("RESOURCES_PATH", resourcesPath);

@@ -81,6 +81,10 @@
         </div>
     </div>
 </div>
+		
+<script>
+	contextPath='${pageContext.request.contextPath}';
+</script>
 
 <!--
 <script type="text/javascript" src="${pageContext.request.contextPath}/saiku///www.google.com/jsapi" defer></script>

@@ -24,7 +24,7 @@ var Settings = {
     BIPLUGIN: false,
     BIPLUGIN5: false,
 	BASE_URL: window.location.origin,
-	TOMCAT_WEBAPP: "/art",
+	TOMCAT_WEBAPP: contextPath,
     REST_MOUNT_POINT: "/saiku2/",
     DIMENSION_PREFETCH: true,
     DIMENSION_SHOW_ALL: true,
