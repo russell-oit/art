@@ -1,2 +1,0 @@
-This is a dummy file used to trigger running of additional upgrade steps.
-This file is deleted once the upgrade is completed.

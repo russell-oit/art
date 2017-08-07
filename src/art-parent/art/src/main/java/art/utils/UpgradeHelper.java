@@ -73,12 +73,11 @@ public class UpgradeHelper {
 	 * Runs upgrade steps
 	 *
 	 * @param artVersion the art version
-	 * @param upgradeFilePath the path to the upgrade file
 	 * @param templatesPath the path to the templates directory
 	 */
-	public void upgrade(String artVersion, String upgradeFilePath, String templatesPath) {
+	public void upgrade(String artVersion, String templatesPath) {
 		migrateJobsToQuartz();
-		upgradeDatabase(artVersion, upgradeFilePath, templatesPath);
+		upgradeDatabase(artVersion, templatesPath);
 	}
 
 	/**
@@ -233,13 +232,22 @@ public class UpgradeHelper {
 	 * Runs upgrade steps
 	 *
 	 * @param artVersion the art version
-	 * @param upgradeFilePath the path to the upgrade file
 	 * @param templatesPath the path to the templates directory
 	 */
-	private void upgradeDatabase(String artVersion, String upgradeFilePath, String templatesPath) {
-		File upgradeFile = new File(upgradeFilePath);
-		if (upgradeFile.exists()) {
-			try {
+	private void upgradeDatabase(String artVersion, String templatesPath) {
+		try {
+			String sql = "SELECT UPGRADED FROM ART_DATABASE_VERSION";
+			ResultSetHandler<Integer> h = new ScalarHandler<>();
+			Integer upgradedInteger = dbService.query(sql, h);
+			int upgradedInt;
+			if (upgradedInteger == null) {
+				upgradedInt = 0;
+			} else {
+				upgradedInt = upgradedInteger;
+			}
+			boolean upgraded = BooleanUtils.toBoolean(upgradedInt);
+
+			if (!upgraded) {
 				//don't consider alpha, beta, rc etc
 				//also, pre-releases, i.e. alpha, beta, etc are considered less than final releases
 				String version = StringUtils.substringBefore(artVersion, "-");
@@ -252,14 +260,12 @@ public class UpgradeHelper {
 					deleteDotJasperFiles(templatesPath);
 					logger.info("Done performing 3.0 upgrade steps");
 				}
-
-				boolean deleted = upgradeFile.delete();
-				if (!deleted) {
-					logger.warn("Upgrade file not deleted: {}", upgradeFile);
-				}
-			} catch (SQLException ex) {
-				logger.error("Error", ex);
+				
+				sql = "UPDATE ART_DATABASE_VERSION SET UPGRADED=1";
+				dbService.update(sql);
 			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
 		}
 	}
 
@@ -563,13 +569,13 @@ public class UpgradeHelper {
 				ParameterDataType dataType = ParameterDataType.toEnum(dataTypeString);
 
 				String useLovString = (String) parameter.get("USE_LOV");
-				boolean useLov=BooleanUtils.toBoolean(useLovString);
-				
+				boolean useLov = BooleanUtils.toBoolean(useLovString);
+
 				String useRulesInLovString = (String) parameter.get("APPLY_RULES_TO_LOV");
 				boolean useRulesInLov = BooleanUtils.toBoolean(useRulesInLovString);
-				
+
 				String useDirectSubstitutionString = (String) parameter.get("DIRECT_SUBSTITUTION");
-				boolean useDirectSubstitution=BooleanUtils.toBoolean(useDirectSubstitutionString);
+				boolean useDirectSubstitution = BooleanUtils.toBoolean(useDirectSubstitutionString);
 
 				boolean hidden = false;
 				boolean shared = false;

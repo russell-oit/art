@@ -402,10 +402,9 @@ public class Config extends HttpServlet {
 			createQuartzScheduler();
 
 			//upgrade art database
-			String upgradeFilePath = getArtTempPath() + "upgrade.txt";
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
-			upgradeHelper.upgrade(artVersion, upgradeFilePath, templatesPath);
+			upgradeHelper.upgrade(artVersion, templatesPath);
 		} catch (SQLException | RuntimeException ex) {
 			//include runtime exception in case of PoolInitializationException when using hikaricp
 			logger.error("Error", ex);

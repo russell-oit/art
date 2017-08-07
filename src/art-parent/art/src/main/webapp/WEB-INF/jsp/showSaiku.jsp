@@ -83,6 +83,7 @@
 </div>
 		
 <script>
+	//global variable for use in Settings.js
 	contextPath='${pageContext.request.contextPath}';
 </script>
 
