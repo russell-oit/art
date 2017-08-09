@@ -1203,7 +1203,9 @@ public class ReportJob implements org.quartz.Job {
 					file.delete();
 					fileName = "";
 				} else if (jobType.isPublish()) {
-					runMessage = "jobs.message.reminderSent";
+					if (emailSent) {
+						runMessage = "jobs.message.reminderSent";
+					}
 				}
 			} catch (MessagingException ex) {
 				logger.debug("Error", ex);
