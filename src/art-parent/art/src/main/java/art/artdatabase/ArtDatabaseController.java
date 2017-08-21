@@ -26,11 +26,13 @@ import art.user.UserService;
 import art.utils.ArtUtils;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -151,7 +153,7 @@ public class ArtDatabaseController {
 		try {
 			String hsqldbUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "%s;shutdown=true;create=false;hsqldb.write_delay=false";
 			String demoDbUrl = String.format(hsqldbUrl, "ArtRepositoryDB");
-			
+
 			String username = artDatabase.getUsername();
 			String password = artDatabase.getPassword();
 
@@ -161,7 +163,7 @@ public class ArtDatabaseController {
 
 				artDatabase.setDriver("org.hsqldb.jdbcDriver");
 				artDatabase.setUrl(demoDbUrl);
-				
+
 				if (StringUtils.isBlank(username)) {
 					artDatabase.setUsername("ART");
 					artDatabase.setPassword("ART");
@@ -184,7 +186,15 @@ public class ArtDatabaseController {
 				if (StringUtils.isNotBlank(driver)) {
 					Class.forName(driver).newInstance();
 				}
-				conn = DriverManager.getConnection(url, username, password);
+				//conn = DriverManager.getConnection(url, username, password);
+				//use getDriver() in order for correct reporting of No suitable driver error.
+				//with some urls/drivers, the jvm tries to use the wrong driver
+				//e.g. with neo4j driver if driver is not included in application lib/classpath or in jre\lib\ext
+				Properties dbProperties = new Properties();
+				dbProperties.put("user", username);
+				dbProperties.put("password", password);
+				Driver driverObject = DriverManager.getDriver(url); // get the right driver for the given url
+				conn = driverObject.connect(url, dbProperties); // get the connection
 			}
 
 			/* if we are here, Connection to art database is successful.
