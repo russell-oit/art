@@ -85,6 +85,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("vertica");
 		databaseTypes.remove("cassandra-adejanovski");
 		databaseTypes.remove("neo4j");
+		databaseTypes.remove("sql-logging");
 
 		return databaseTypes;
 	}
@@ -189,7 +190,6 @@ public class ArtDatabaseController {
 				//conn = DriverManager.getConnection(url, username, password);
 				//use getDriver() in order for correct reporting of No suitable driver error.
 				//with some urls/drivers, the jvm tries to use the wrong driver
-				//e.g. with neo4j driver if driver is not included in application lib/classpath or in jre\lib\ext
 				Properties dbProperties = new Properties();
 				dbProperties.put("user", username);
 				dbProperties.put("password", password);
