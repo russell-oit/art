@@ -20,8 +20,10 @@ package art.login;
 import art.servlets.Config;
 import art.dbutils.DatabaseUtils;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ public class DbLogin {
 
 	/**
 	 * Authenticates a user using database connection credentials
-	 * 
+	 *
 	 * @param username the username to use
 	 * @param password the password to use
 	 * @return the result of the authentication process
@@ -59,9 +61,14 @@ public class DbLogin {
 			result.setDetails("database authentication not configured");
 			return result;
 		}
-		
+
 		try {
-			Connection conn = DriverManager.getConnection(url, username, password);
+			//Connection conn = DriverManager.getConnection(url, username, password);
+			Properties dbProperties = new Properties();
+			dbProperties.put("user", username);
+			dbProperties.put("password", password);
+			Driver driverObject = DriverManager.getDriver(url); //get the right driver for the given url
+			Connection conn = driverObject.connect(url, dbProperties);
 
 			//if we are here, authentication is successful
 			result.setAuthenticated(true);
