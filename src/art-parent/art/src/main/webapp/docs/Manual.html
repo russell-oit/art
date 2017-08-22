@@ -2,8 +2,9 @@
 <html>
  <head> 
   <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Administration Manual"> 
-  <meta name="version" content="3.0-rc1"> 
+  <meta name="version" content="3.0-rc4"> 
   <title>ART - Administration Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -48,7 +49,7 @@
        <li><a href="#ldap-authentication">LDAP Authentication</a></li> 
        <li><a href="#database-authentication">Database Authentication</a></li> 
        <li><a href="#cas-authentication">CAS Authentication</a></li> 
-       <li><a href="#custom-authentication-sources">Custom Authentication Sources</a></li> 
+       <li><a href="#custom-authentication">Custom Authentication</a></li> 
       </ol></li> 
      <li><a href="#user-groups">User Groups</a></li> 
      <li><a href="#user-group-membership">User Group Membership</a></li> 
@@ -176,6 +177,7 @@
         </ol></li> 
       </ol></li> 
      <li><a href="#jxls-reports">jXLS Reports</a></li> 
+     <li><a href="#options">Options</a></li> 
      <li><a href="#jpivot-reports">JPivot Reports</a> 
       <ol> 
        <li><a href="#mondrian">Mondrian</a> 
@@ -210,16 +212,29 @@
      <li><a href="#scheduling">Scheduling</a> 
       <ol> 
        <li><a href="#scheduling-a-new-job">Scheduling a new job</a></li> 
-       <li><a href="#job-types">Job Types</a></li> 
+       <li><a href="#job-types">Job Types</a> 
+        <ol> 
+         <li><a href="#e-mail-output-attachment">E-Mail Output (Attachment)</a></li> 
+         <li><a href="#e-mail-output-inline">E-Mail Output (Inline)</a></li> 
+         <li><a href="#publish">Publish</a></li> 
+         <li><a href="#alert">Alert</a></li> 
+         <li><a href="#just-run-it">Just Run It</a></li> 
+         <li><a href="#conditional-e-mail-output-attachment">Conditional E-Mail Output (Attachment)</a></li> 
+         <li><a href="#conditional-e-mail-output-inline">Conditional E-Mail Output (Inline)</a></li> 
+         <li><a href="#conditional-publish">Conditional Publish</a></li> 
+         <li><a href="#cache-resultset-append">Cache ResultSet (Append)</a></li> 
+         <li><a href="#cache-resultset-deleteinsert">Cache ResultSet (Delete&amp;Insert)</a></li> 
+         <li><a href="#print">Print</a></li> 
+         <li><a href="#burst">Burst</a></li> 
+        </ol></li> 
        <li><a href="#archives">Archives</a></li> 
-       <li><a href="#job-auditing">Job Auditing</a></li> 
        <li><a href="#saved-schedules">Saved Schedules</a></li> 
-       <li><a href="#job-duration">Job Duration</a></li> 
        <li><a href="#shared-jobs">Shared Jobs</a> 
         <ol> 
          <li><a href="#split-jobs">Split Jobs</a></li> 
         </ol></li> 
        <li><a href="#random-start-times">Random Start Times</a></li> 
+       <li><a href="#quartz-properties">Quartz Properties</a></li> 
       </ol></li> 
      <li><a href="#cached-results">Cached Results</a> 
       <ol> 
@@ -298,7 +313,7 @@
      <h1 id="introduction">Introduction</h1> 
      <p>ART is a Java web application that enables quick deployment of SQL query results.</p> 
      <ul> 
-      <li><strong>ART Administrators</strong> define datasources, reports, etc.</li> 
+      <li><strong>ART Administrators</strong> define reports, users, etc.</li> 
       <li><strong>ART Users</strong> run reports and view the results in a browser or in a variety of file formats.<br> </li> 
      </ul> 
      <p>ART is open source software distributed under the <a class="" href="https://www.gnu.org/licenses/gpl-3.0.en.html" rel="nofollow">GPLv3 license</a>. You can install and use it without any charge.</p> 
@@ -690,10 +705,6 @@
      <p>Driver Name: com.ibm.as400.access.AS400JDBCDriver</p> 
      <p>JDBC URL: <code>jdbc:as400://&lt;server_name&gt;;prompt=false;translate binary=true[;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
      <p>Driver Available from: <a href="http://jt400.sourceforge.net/">http://jt400.sourceforge.net/</a><br> <br><br></p> 
-     <p><strong>Note:</strong></p> 
-     <ul> 
-      <li>ART comes with drivers for CUBRID, PostgreSQL, MySQL, MariaDB, HSQLDB, SQL Server (jTDS driver), SQL Server (Microsoft driver) so you don?t need to download these drivers</li> 
-     </ul> 
     </div> 
    </div> 
    <div> 
@@ -807,18 +818,8 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       <li>You should be redirected to the CAS login page where you will provide appropriate credentials, after which you will be redirected back to ART</li> 
      </ul> 
      <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their CAS login username. Grant them appropriate access to reports. </p> 
-     <h2 id="custom-authentication-sources">Custom Authentication Sources</h2> 
-     <p>Additional, custom authentication sources can be used by creating a jsp page to check the user credentials - for example by executing a query on a remote database - and then redirecting to the reports page.</p> 
-     <p>This is the code fragment to redirect an authenticated user to ART.</p> 
-     <div class="codehilite"> 
-      <pre>    if ( &lt;CONDITION&gt; ) {
-    // Authentication Successful!
-    session.setAttribute("username", username);
-    response.sendRedirect("/art/reports");
-    }
-</pre> 
-     </div> 
-     <p>The user needs to be defined in ART. ART will check if the username exists, and if this is the case, will let the user proceed.</p> 
+     <h2 id="custom-authentication">Custom Authentication</h2> 
+     <p>Custom authentication code can be written e.g. executing a query on a remote database. To do this, stop the application, modify the file <strong>CustomAuthenticationController.java</strong> in the <strong>art.login</strong> package as appropriate, recompile the application by running <strong>ant compile</strong> from the ART home directory (ant needs to be configured), restart the application and then use a url like <code>http://localhost:8080/art/customAuthentication</code> as per your custom code.</p> 
     </div> 
    </div> 
    <div> 
@@ -1102,17 +1103,17 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       <tbody> 
        <tr> 
         <td><strong>columns</strong></td> 
-        <td>optional - array of integers</td> 
+        <td>Array of integers</td> 
         <td>The columns that should be coloured. If not specified, all columns are included in the colouring. If any cell in the applicable columns contains a non-numeric value, no colouring will be done. An error will be displayed in the javascript console for the web browser indicating that <strong>hex is undefined</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>colors</strong></td> 
-        <td>optional - array of strings</td> 
+        <td>Array of strings</td> 
         <td>Colours that should be applied, beginning with colours for the lower values going up. The colour strings are specified in hex format e.g. <code>#ffffff</code>. For example for a two colour scheme in a red range, one can specify the setting as <code>"colors": ["#ffffff", "#ff4a53"]</code></td> 
        </tr> 
        <tr> 
         <td><strong>perColumn</strong></td> 
-        <td>optional - boolean (default = false)</td> 
+        <td>Boolean (default = false)</td> 
         <td>If true, each applicable column is graded and coloured separately. If false, the whole table is considered when grading the colours.</td> 
        </tr> 
       </tbody> 
@@ -1214,12 +1215,12 @@ Dynamic Series
       <tbody> 
        <tr> 
         <td><strong>seriesColors</strong></td> 
-        <td>optional - object</td> 
+        <td>Object</td> 
         <td>Defines specific colours to be used for given chart series. Each property of the object consists of the series ID as the property name and the hex colour code as the property value. Multiple properties can be specified e.g. <code>"seriesColors": {"0" : "#ff4a53", "2" : "#4a538a"}</code>. The first series has an ID of 0.</td> 
        </tr> 
        <tr> 
         <td><strong>dateFormat</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>For date series and time series charts, defines the date format to be used on the x-axis, overriding the one automatically assigned by the chart.</td> 
        </tr> 
       </tbody> 
@@ -1476,17 +1477,17 @@ FROM mytable
       <tbody> 
        <tr> 
         <td><strong>outputDateFormat</strong></td> 
-        <td>optional - string (defalut = blank)</td> 
+        <td>String (default = blank)</td> 
         <td>The format of output data for date columns. If blank, the data will be output as is. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateTimeFormat</strong></td> 
-        <td>optional - string (defalut = blank)</td> 
+        <td>String (default = blank)</td> 
         <td>The format of output data for datetime columns. If blank, the data will be output as is. The format is as per<a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>showColumnFilters</strong></td> 
-        <td>optional - boolean (default = true)</td> 
+        <td>Boolean (default = false)</td> 
         <td>Determines if column filters will be displayed</td> 
        </tr> 
       </tbody> 
@@ -1515,77 +1516,77 @@ FROM mytable
       <tbody> 
        <tr> 
         <td><strong>fieldLengths</strong></td> 
-        <td>array of integers</td> 
+        <td>Array of integers. <strong>required</strong></td> 
         <td>Used to define the field lengths of the output e.g. <code>[5,6]</code> means that the first field will have a length of 5 and the second field will have a length of 6</td> 
        </tr> 
        <tr> 
         <td><strong>fieldLengthsByName</strong></td> 
-        <td>array of objects</td> 
+        <td>Array of objects. <strong>required</strong></td> 
         <td>Each object specifies the field name and the field length e.g. <code>[{"order_id": 8}, {"order_date": 14}]</code> means the <code>order_id</code> field will have a length of 8 and the <code>order_date</code> field will have a length of 14. You must specify either the <strong>fieldLengths</strong> or the <strong>fieldLengthsByName</strong> property.</td> 
        </tr> 
        <tr> 
         <td><strong>includeHeaders</strong></td> 
-        <td>optional - boolean (default = true)</td> 
+        <td>Boolean (default = true)</td> 
         <td>Determines whether the column names will be included in the output as the first row</td> 
        </tr> 
        <tr> 
         <td><strong>defaultAlignmentForHeaders</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>Either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>. If present, overrides any field alignment set and uses the given alignment for the header columns</td> 
        </tr> 
        <tr> 
         <td><strong>padding</strong></td> 
-        <td>optional - string (default = space)</td> 
+        <td>String (default = space)</td> 
         <td>A single character defining the default padding to use for fields. Must not be the empty string.</td> 
        </tr> 
        <tr> 
         <td><strong>useDefaultPaddingForHeaders</strong></td> 
-        <td>optional - boolean (default = true)</td> 
+        <td>Boolean (default = true)</td> 
         <td>Determines if the headers should use the global <strong>padding</strong> setting or use the padding set for individual fields</td> 
        </tr> 
        <tr> 
         <td><strong>dateFormat</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>Determines the format that should be used for DATE columns</td> 
        </tr> 
        <tr> 
         <td><strong>dateTimeFormat</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>Determines the format that should be used for DATETIME columns</td> 
        </tr> 
        <tr> 
         <td><strong>numberFormat</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>Determines the format that should be used for numeric columns</td> 
        </tr> 
        <tr> 
         <td><strong>fieldDateFormats</strong></td> 
-        <td>optional - array of objects</td> 
+        <td>Array of objects</td> 
         <td>Each object specifies the date format and an array of fields that should use that format e.g. <code>[{"dd/MM/yyyy": ["order_date", "due_date"]}, {"dd-MMM-yyyy": ["payment_date"]}]</code></td> 
        </tr> 
        <tr> 
         <td><strong>fieldNumberFormats</strong></td> 
-        <td>optional - array of objects</td> 
+        <td>Array of objects</td> 
         <td>Each object specifies the number format and an array of fields that should use that format e.g. <code>[{"0.00": ["amount"]}, {"#,##0.#": ["volume"]}]</code></td> 
        </tr> 
        <tr> 
         <td><strong>fieldAlignmentByName</strong></td> 
-        <td>optional - array of objects</td> 
+        <td>Array of objects</td> 
         <td>Each object specifies the alignment to be used and an array of field names that should use that alignment e.g. <code>[{"right": ["amount", "volume"]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldAlignmentByPosition</strong></td> 
-        <td>optional - array of objects</td> 
+        <td>Array of objects</td> 
         <td>Each object specifies the alignment to be used and an array of field positions that should use that alignment e.g. <code>[{"right": [2, 5]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>. The first field in the output is marked as position 0.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldPaddingByName</strong></td> 
-        <td>optional - array of objects</td> 
+        <td>Array of objects</td> 
         <td>Each object specifies the padding to be used and an array of field names that should use that padding e.g. <code>[{"_": ["amount", "volume"]}]</code>. The padding should be a single character.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldPaddingByPosition</strong></td> 
-        <td>optional - array of objects</td> 
+        <td>Array of objects</td> 
         <td>Each object specifies the padding to be used and an array of field positions that should use that padding e.g. <code>[{"_": [2, 5]}]</code>. The padding should be a single character. The first field in the output is marked as position 0.</td> 
        </tr> 
       </tbody> 
@@ -1614,37 +1615,37 @@ FROM mytable
       <tbody> 
        <tr> 
         <td><strong>datamapsJsFile</strong></td> 
-        <td>string</td> 
+        <td>String. <strong>required</strong></td> 
         <td>The file name of the datamaps javascript file. Appropriate files can be downloaded from <a href="https://github.com/markmarkoh/datamaps/tree/master/dist." rel="nofollow">https://github.com/markmarkoh/datamaps/tree/master/dist.</a></td> 
        </tr> 
        <tr> 
         <td><strong>width</strong></td> 
-        <td>optional - string (default = 500px)</td> 
+        <td>String (default = 500px)</td> 
         <td>CSS width for the div that contains the map</td> 
        </tr> 
        <tr> 
         <td><strong>height</strong></td> 
-        <td>optional - string (default = 300px)</td> 
+        <td>String (default = 300px)</td> 
         <td>CSS height for the div that contains the map</td> 
        </tr> 
        <tr> 
         <td><strong>dataFile</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>The file name of the json or csv file that contains data elements for the map. This file can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
        <tr> 
         <td><strong>dataType</strong></td> 
-        <td>optional - string (default = json)</td> 
+        <td>String (default = json)</td> 
         <td>Either <strong>csv</strong> if the dataFile specified is in csv format or <strong>json</strong> if it's in json format.</td> 
        </tr> 
        <tr> 
         <td><strong>mapFile</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>The file name of a file that contains the custom map in TopoJSON format. When using this option, use the <strong>datamaps.none.min.js</strong> datamaps js file. This file can be uploaded using the <strong>Add files</strong> option. It is important to note that if using the Add files option to upload files, files with multiple dots in the name are not allowed, so such files need to be renamed e.g. datamaps-none-min.js</td> 
        </tr> 
        <tr> 
         <td><strong>cssFile</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>The file name of a css file that contains custom css to be used with the display. This file can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
       </tbody> 
@@ -1665,27 +1666,27 @@ FROM mytable
       <tbody> 
        <tr> 
         <td><strong>height</strong></td> 
-        <td>optional - string (default = 400px)</td> 
+        <td>String (default = 400px)</td> 
         <td>CSS height for the div that contains the map</td> 
        </tr> 
        <tr> 
         <td><strong>cssFile</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>The file name of a css file that contains custom css to be used with the display. This file can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
        <tr> 
         <td><strong>dataFile</strong></td> 
-        <td>optional - string</td> 
+        <td>String</td> 
         <td>The file name of a file that contains extra data to be used with the map e.g. a GeoJSON file. This file can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
        <tr> 
         <td><strong>jsFiles</strong></td> 
-        <td>optional - array of strings</td> 
+        <td>Array of strings</td> 
         <td>File names of javascript files that need to be incorporated for the map display e.g. leaflet plugins. The files can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
        <tr> 
         <td><strong>cssFiles</strong></td> 
-        <td>optional - array of strings</td> 
+        <td>Array of strings</td> 
         <td>File names of additional css files to be used with the display. The files can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
       </tbody> 
@@ -1798,37 +1799,37 @@ FROM mytable
       <tbody> 
        <tr> 
         <td><strong>columns</strong></td> 
-        <td>optional - array of strings</td> 
+        <td>Array of strings</td> 
         <td>Names of columns that should be included in the tabular output. This may be useful when querying documents that may have different attributes. If not specified, ART will use the first document retrieved to determine the columns that will be included in the output.</td> 
        </tr> 
        <tr> 
         <td><strong>columnDataTypes</strong></td> 
-        <td>optional - array of objects</td> 
+        <td>Array of objects</td> 
         <td>Each object specifies a column name and the data type that is to be used for that column e.g. <code>[{"col1": "numeric"}]</code>. The possible data types are <strong>string</strong>, <strong>numeric</strong>, <strong>date</strong> and <strong>datetime</strong>. The default is <code>string</code> so if a column is to be treated as a general string, it doesn't need to be specified.</td> 
        </tr> 
        <tr> 
         <td><strong>inputDateFormat</strong></td> 
-        <td>optional - string (defalut = yyyy-MM-dd)</td> 
+        <td>String (defalut = yyyy-MM-dd)</td> 
         <td>The format of input data for columns with a <strong>date</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateFormat</strong></td> 
-        <td>optional - string (defalut = blank)</td> 
+        <td>String (default = blank)</td> 
         <td>The format of output/displayed data for columns with a <strong>date</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>inputDateTimeFormat</strong></td> 
-        <td>optional - string (defalut = yyyy-MM-dd HH:mm:ss.SSS)</td> 
+        <td>String (default = yyyy-MM-dd HH:mm:ss.SSS)</td> 
         <td>The format of input data for columns with a <strong>datetime</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateTimeFormat</strong></td> 
-        <td>optional - string (defalut = blank)</td> 
+        <td>String (default = blank)</td> 
         <td>The format of output/displayed data for columns with a <strong>datetime</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>showColumnFilters</strong></td> 
-        <td>optional - boolean (default = true)</td> 
+        <td>Boolean (default = true)</td> 
         <td>Determines if column filters will be displayed in the tabular output.</td> 
        </tr> 
       </tbody> 
@@ -2033,7 +2034,7 @@ FROM mytable
       <tbody> 
        <tr> 
         <td><strong>i18n</strong></td> 
-        <td>optional - object</td> 
+        <td>Object</td> 
         <td>Allows for localization of parameter configurations. It can have the properties <strong>label</strong>, <strong>helpText</strong>, <strong>defaultValue</strong>, <strong>placeholderText</strong>, with each property being an array of objects providing the locale and the appropriate localized string. e.g. <code>"i18n": { "label": [{"en, sw": "Test Label"}, {"pt": "Another Label"}], "helpText": [{"lt": "Sample help text"}] }</code></td> 
        </tr> 
       </tbody> 
@@ -3183,19 +3184,43 @@ WHERE REGION = #region#
      <h1 id="jxls-reports">jXLS Reports</h1> 
      <p>ART uses the <a class="" href="http://jxls.sourceforge.net/">jXLS</a> library to provide support for reports based on pre-formatted MS Excel spreadsheets. For details on the syntax of these jXLS templates, see the documentation available on the jXLS website. Generally, you'll follow the following steps to create a jXLS report.</p> 
      <ul> 
-      <li>Create an Excel file (either xls or xlsx) with any text and formatting that will be required in the final report</li> 
+      <li>Create an Excel file (either xls or xlsx) with any text, formulas and formatting that will be required in the final report</li> 
       <li>Insert jXLS syntax as appropriate to define where the raw data should go</li> 
       <li>Create a new report in ART and select the jXLS template to use</li> 
-      <li> <p>If the report is of type <strong>jXLS: ART Query</strong>, the sql used to retrieve the data will be the one defined in the SQL source section. You can use parameters, rules and any other features of ART reports. In the template, use the identifier <strong>results</strong> to output report values. e.g.</p> 
+      <li> <p>If the report is of type <strong>jXLS: ART Query</strong>, the sql used to retrieve the data will be the one defined in the SQL source section. You can use parameters, rules or any other features of ART reports. In the template, use the identifier <strong>results</strong> to output report values. e.g.</p> 
        <div class="codehilite"> 
         <pre><span class="n">jx</span><span class="o">:</span><span class="k">each</span><span class="o">(</span><span class="n">items</span><span class="o">=</span><span class="s2">"results"</span> <span class="n">var</span><span class="o">=</span><span class="s2">"row"</span> <span class="n">lastCell</span><span class="o">=</span><span class="s2">"E10"</span><span class="o">)</span>
 
 <span class="n">$</span><span class="o">{</span><span class="n">row</span><span class="o">.</span><span class="na">description</span><span class="o">}</span>
 </pre> 
        </div> </li> 
-      <li> <p>If the report is of type <strong>jXLS: Template Query</strong>, the sql used to retrieve the data will be the one defined in the template.The database used for the report will be the one selected in the datasource field of the report.</p> </li> 
-      <li>If the report uses parameters, avoid using the following names for the parameters as these are used for special purpose variables i.e. <code>results, jdbc, conn, params, locale</code>.</li> 
+      <li> <p>If the report is of type <strong>jXLS: Template Query</strong>, the sql used to retrieve the data will be the one defined in the template. The database used for the query will be the one selected in the datasource field of the report. You can alternatively pass the datasource id of the datasource to use e.g. <code>jdbc.query(1, 'select * from cities')</code>.</p> </li> 
+      <li>If the report uses parameters, avoid using the following names for the parameters as these are used for special purpose variables i.e. <code>results, jdbc, params, locale</code>.</li> 
      </ul> 
+     <!--NewPage--> 
+     <h1 id="options">Options</h1> 
+     <p>You can define a number of options in the <strong>Options</strong> field of the report.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>areaConfigFile</strong></td> 
+        <td>String</td> 
+        <td>The name of the file that has configuration details of areas within the template e.g. <code>jxls2config.xml</code>. This is an xml file that can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>useStandardFormulaProcessor</strong></td> 
+        <td>Boolean (default = false)</td> 
+        <td>Whether the standard formula processor should be used. This can be set to true in case the template seems to be producing invalid formula results. This setting is only considered if using an area config file.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
     </div> 
    </div> 
    <div> 
@@ -3445,24 +3470,86 @@ WHERE CITY_ID = #cityId#
       <li>Specify the job details and Save</li> 
       <li>The job will now run as per the schedule defined</li> 
      </ul> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Field</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>Auto-generated ID used to identify the job</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Name</strong></td> 
+        <td>Name of the job</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Job Type</strong></td> 
+        <td>The job type</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Output Format</strong></td> 
+        <td>The output format for the job</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Active</strong></td> 
+        <td>Whether the job can run or not</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Enable Auditing</strong></td> 
+        <td>Whether job auditing is enabled. If disabled, only the last start and end time is recorded (in the <code>ART_JOBS</code> table). If enabled, an additional record is created in the <code>ART_JOBS_AUDIT</code> table indicating the start time, end time and status of each job run.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Number of Runs to Archive</strong></td> 
+        <td>For publish jobs, indicates how many runs should be retained for viewing from the Archives page e.g. setting it to 5 will retain output from the last 5 runs in the Archives page. This allows users to access past job output as per their requirements.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Allow Sharing</strong></td> 
+        <td>For publish jobs, whether the job output can be accessed by other users, apart from the job owner</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Allow Splitting</strong></td> 
+        <td>Whether rule values for shared users should be applied so that each user gets different output</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Fixed File Name</strong></td> 
+        <td>The file name to be used for generated output. File names can only contain english alphabet letters, numbers, hyphen and space. Any other characters will be replaced with underscores. Leave this field blank to use a default generated file name.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>FTP Server</strong></td> 
+        <td>An ftp server to which the generated output will be sent</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Batch File</strong></td> 
+        <td>The name of a batch file or script that should be run after the job completes. The batch file must exist in the <strong>ART_HOME\WEB-INF\work\batch</strong> directory. You only set the file name in this field e.g. <code>test.bat</code> or <code>test.sh</code>. ART passes the file name of the generated output as the first parameter to the batch file so you can use this e.g. to copy the file to another location, a batch file may contain the following command - <code>copy ..\export\jobs\%1 C:\temp</code>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Start Date</strong></td> 
+        <td>The date when the job should start running. If blank, the job will start running on the current date, as per it's schedule.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>End Date</strong></td> 
+        <td>The date when the job should stop running. If blank, the job will continue to run indefinitely.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>Not all report types can be scheduled</li> 
-      <li>The <strong>Runs To Archive</strong> field indicates, for Publish and Conditional Publish jobs, how many runs should be kept for viewing from the Archives page e.g. setting it to 5 will retain output from the last 5 runs in the Archives page. This allows users to access past job output as per their requirements.</li> 
-      <li>The <strong>Fixed File Name</strong> field indicates that the output file generated should use the file name indicated in this field e.g. <code>test.html</code></li> 
-      <li> <p>The <strong>Batch File</strong> field indicates the name of a batch file or script that should be run after the job completes. The batch file must exist in the <strong>ART_HOME\WEB-INF\work\batch</strong> directory. You only set the file name in this field e.g. <code>test.bat</code> or <code>test.sh</code>. ART passes the file name of the generated output as the first parameter to the batch file so you can use this e.g. to copy the file to another location e.g. the <code>test.bat</code> file may have the following contents.</p> 
-       <div class="codehilite"> 
-        <pre>copy ..\export\jobs\%1 C:\temp
-</pre> 
-       </div> </li> 
+      <li>If the output for a job creates a file e.g. publish to pdf, this file is stored in the <strong>ART_HOME\WEB-INF\work\export\jobs</strong> directory</li> 
      </ul> 
      <h2 id="job-types">Job Types</h2> 
-     <ul> 
-      <li><strong>E-Mail Output (Attachment)</strong><br> The output is emailed as an attachment to the specified recipients (in the "To" section). The attachment type can be selected in the Output Format field.</li> 
-      <li><strong>E-Mail Output (Inline)</strong><br> The output is emailed to the specified recipients, in the email body.</li> 
-      <li><strong>Publish</strong><br> The output is saved to a file. The file is reachable from the Jobs page. Once the file is generated, a notification email is sent to the specified recipients (in the "To" section). Leave the "To" area empty if you don't want a notification email to be sent. </li> 
-      <li><strong>Alert</strong><br> Send an email to the specified recipients if the first column of the first row in the query result has a value greater than zero. You can construct a simple SQL query to return a non zero value in case of a certain business condition.</li> 
-     </ul> 
+     <h3 id="e-mail-output-attachment">E-Mail Output (Attachment)</h3> 
+     <p>The output is emailed as an attachment to the specified recipients (in the "To" section). The attachment type can be selected in the <strong>Output Format</strong> field.</p> 
+     <h3 id="e-mail-output-inline">E-Mail Output (Inline)</h3> 
+     <p>The output is emailed to the specified recipients, in the email body.</p> 
+     <h3 id="publish">Publish</h3> 
+     <p>The output is saved to a file. The file is reachable from the Jobs page. Once the file is generated, a notification email is sent to the specified recipients (in the "To" section). Leave the "To" area empty if you don't want a notification email to be sent.</p> 
+     <h3 id="alert">Alert</h3> 
+     <p>Send an email to the specified recipients if the first column of the first row in the query result has a value greater than zero. You can construct a simple SQL query to return a non zero value in case of a certain business condition.</p> 
      <p>Example query to be used for an alert. Send an email if a big order is made</p> 
      <div class="codehilite"> 
       <pre>    SELECT count(*)
@@ -3470,34 +3557,77 @@ WHERE CITY_ID = #cityId#
     WHERE quantity&gt;100
 </pre> 
      </div> 
-     <ul> 
-      <li><strong>Just Run It</strong><br> Simply run the report. Uuseful to launch stored procedures or perform periodic data updates.</li> 
-      <li><strong>Conditional E-Mail Output (Attachment)</strong><br> If the result set has records, an email with the output attached is sent to the specified recipients. If it has no records, no email is sent. </li> 
-      <li><strong>Conditional E-Mail Output (Inline)</strong><br> If the result set has records, an email is sent to the specified recipients with the output contained in the email body. If it has no records, no email is sent. </li> 
-      <li><strong>Conditional Publish</strong><br> If the result set has records, the output will available from the Jobs page. A notification email is sent to the specified recipients if this is configured. If the result set has no records, no output is generated and no email is sent.</li> 
-      <li><strong>Cache ResultSet (Append)</strong><br> Cache the result set in a database table (Append)</li> 
-      <li><strong>Cache ResultSet (Delete&amp;Insert)</strong><br> Cache the result set in a database table (Delete&amp;Insert)</li> 
-      <li><strong>Print</strong><br> Prints the report output to the default printer</li> 
-      <li><strong>Burst</strong><br> Generates report files for each distinct value in a resultset. This requires that the query for the report be ordered by the first column, which will be the burst-id column. When the value of this column changes, a new file is generated. Burst jobs are only possible with <strong>Tabular</strong> reports. The files generated will have the burst-id in their file names so different files can be identified and copied or ftped to different locations for example.</li> 
-     </ul> 
-     <p><strong>Note:</strong></p> 
-     <ul> 
-      <li>If the output for a job creates a file e.g. publish to pdf, this file is stored in the <strong>ART_HOME\WEB-INF\work\export\jobs</strong> directory</li> 
-     </ul> 
+     <h3 id="just-run-it">Just Run It</h3> 
+     <p>Simply run the report. May be used to run stored procedures or perform data updates.</p> 
+     <h3 id="conditional-e-mail-output-attachment">Conditional E-Mail Output (Attachment)</h3> 
+     <p>If the result set has records, an email with the output attached is sent to the specified recipients. If it has no records, no email is sent.</p> 
+     <h3 id="conditional-e-mail-output-inline">Conditional E-Mail Output (Inline)</h3> 
+     <p>If the result set has records, an email is sent to the specified recipients with the output contained in the email body. If it has no records, no email is sent.</p> 
+     <h3 id="conditional-publish">Conditional Publish</h3> 
+     <p>If the result set has records, the output will available from the Jobs page. A notification email is sent to the specified recipients if this is configured. If the result set has no records, no output is generated and no email is sent.</p> 
+     <h3 id="cache-resultset-append">Cache ResultSet (Append)</h3> 
+     <p>Cache the result set in a database table (Append)</p> 
+     <h3 id="cache-resultset-deleteinsert">Cache ResultSet (Delete&amp;Insert)</h3> 
+     <p>Cache the result set in a database table (Delete&amp;Insert)</p> 
+     <h3 id="print">Print</h3> 
+     <p>Prints the report output to the default printer</p> 
+     <h3 id="burst">Burst</h3> 
+     <p>Generates report files for each distinct value in a resultset. This requires that the query for the report be ordered by the first column, which will be the burst-id column. When the value of this column changes, a new file is generated. Burst jobs are only possible with <strong>Tabular</strong> reports. The files generated will have the burst-id in their file names so different files can be identified and copied or ftped to different locations for example.</p> 
      <h2 id="archives">Archives</h2> 
      <p>For publish and conditional publish jobs, you can specify that a certain number of job runs should be archived i.e. files generated from past runs should be available for viewing. This is done by setting the <strong>Number of Runs to Archive</strong> field when defining the job, and archived files are available from the <strong>Archives</strong> menu.</p> 
-     <h2 id="job-auditing">Job Auditing</h2> 
-     <p>Use the <strong>Enable Auditing</strong> option to enable/disable logging of additional information for a job run. If unchecked, only the last start and end time is recorded (in the <code>ART_JOBS</code> table). If checked, an additional record will be created in the <code>ART_JOBS_AUDIT</code> table indicating the start time, end time and status of each job run.</p> 
      <h2 id="saved-schedules">Saved Schedules</h2> 
      <p>If a schedule is used frequently, it can be saved such that you don't need to enter all the details each time you create a job. To reuse a schedule, select it from the <strong>Schedules</strong> option and click on the <strong>Get</strong> button. The schedule details will be retrieved and filled in the appropriate job schedule fields. Administrators can create, modify or delete schedules using the <strong>Configure | Schedules</strong> menu.</p> 
-     <h2 id="job-duration">Job Duration</h2> 
-     <p>When defining the job schedule, you can specify the date when the job should start running and the date when it should stop in the <strong>Start Date</strong> and <strong>End Date</strong> fields respectively. If the start date is left blank, the job will start running on the current date, as per it's schedule. If the end date is left blank, the job will continue to run indefinitely.</p> 
      <h2 id="shared-jobs">Shared Jobs</h2> 
-     <p>By default, only the owner of a job has access to its output, particularly for published jobs. Shared jobs allow the output of a job to be shared with other users. To share a job's output, check the <strong>Allow Sharing</strong> field and select the users or user groups with whom the output will be shared using the <strong>Configure | Access Rights</strong> menu. These users will be able to access the job's output from the Jobs menu.</p> 
+     <p>By default, only the owner of a job has access to its output, particularly for published jobs. Shared jobs allow the output of a job to be shared with other users. To share a job's output, enable the <strong>Allow Sharing</strong> field and select the users or user groups with whom the output will be shared using the <strong>Configure | Access Rights</strong> menu. These users will be able to access the job's output from the Jobs menu.</p> 
      <h3 id="split-jobs">Split Jobs</h3> 
-     <p>If the report for a shared job uses rules, you can specify that the rule values for the shared users be applied so that each individual user may get different, individualized output. To do this, check the <strong>Allow Splitting</strong> field. If this field is unchecked and the report uses rules, the rule values of the job owner will be applied and all shared users will get the same output. If the report doesn't use rules, the value of this field will have no effect. A single, identical output will be availed to all users.</p> 
+     <p>If the report for a shared job uses rules, you can specify that the rule values for the shared users be applied so that each user may get different output. To do this, enable the <strong>Allow Splitting</strong> field. If this field is disabled and the report uses rules, the rule values of the job owner will be applied and all shared users will get the same output. If the report doesn't use rules, the value of this field will have no effect. A single, identical output will be generated for all users.</p> 
      <h2 id="random-start-times">Random Start Times</h2> 
      <p>You may not care when exactly a job runs, as long as it runs in a certain window of time. If you leave the Hour and Minute fields blank when creating the job, the job will be assigned a random hour between 3-6 and a random minute between 0-59 in which it will run. This may be useful for jobs that your require to run at night. Additionally, you can specify an explicit time range in which the job should run. To do this, in the <strong>Hour</strong> field, define the required start time and end time separated by | e.g. 4|7, 4:30|6, 12:45|13:15. The job will then be assigned a random execution time in this range.</p> 
+     <h2 id="quartz-properties">Quartz Properties</h2> 
+     <p>You can modify some aspects of the scheduler e.g. thread count by modifying the <strong>WEB-INF\classes\quartz.properties</strong> file. Documentation of configuration options can be found <a class="" href="http://www.quartz-scheduler.org/documentation/quartz-2.x/configuration/" rel="nofollow">here</a>. In particular, if you use JNDI for the ART Database, you may need to adjust the <strong>quartz.properties</strong> file to use the correct Quartz values. The following are the minimum changes required.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Database Type</th> 
+        <th>Required Quartz Configuration</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>Oracle</strong></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.OracleDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from dual</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>DB2</strong></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.StdJDBCDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from sysibm.sysdummy1</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>HSQLDB</strong></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.HSQLDBDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = values 1</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>PostgreSQL</strong></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.PostgreSQLDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>CUBRID</strong></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.CUBRIDDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>SQL Server</strong></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.MSSQLDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>Informix</strong></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.StdJDBCDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from systables where tabid = 1</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>Firebird</strong></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.StdJDBCDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from RDB$DATABASE</code></td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <p>For other database types, you can supply an appropriate validation query as per your database. You don't have to specify the driver delegate class - <code>StdJDBCDelegate</code> will be used.</p> 
     </div> 
    </div> 
    <div> 
@@ -3579,6 +3709,7 @@ WHERE CITY_ID = #cityId#
      <p>Each person in the dynamic recipients report list will get a personalized email with the column labels substituted with his values.</p> 
      <h2 id="dynamic-recipients-filtering">Dynamic Recipients + Filtering</h2> 
      <p>If you want the recipients to get different data, you will define a dynamic recipients report where the first column contains the recipient email addresses, any additional columns with personalization information if you want, and 2 other special, hard coded columns named <strong>recipient_column</strong> and <strong>recipient_id</strong>. These will be used to filter the data query. i.e. WHERE <code>&lt;recipient_column&gt;</code> = <code>&lt;recipient_id&gt;</code>. The main, data query will also need to have a special, hard coded label, <strong>#recipient#</strong>, in the where clause.</p> 
+     <p>In addition, if the values in the <strong>recipient_id</strong> column are numbers, include an additional hard coded column named <strong>recipient_id_type</strong>, with the value of this column being the string "<strong>number</strong>".</p> 
      <p>Example:<br> If we want to email users only transactions that they created, our data query can be something like</p> 
      <div class="codehilite"> 
       <pre>    SELECT *
@@ -3587,24 +3718,24 @@ WHERE CITY_ID = #cityId#
     AND #recipient#
 </pre> 
      </div> 
-     <p>We can then define a dynamic recipients report like</p> 
+     <p>We can then define a dynamic recipients query like</p> 
      <div class="codehilite"> 
-      <pre>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id
+      <pre>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id, "number" recipient_id_type
     FROM employee
 </pre> 
      </div> 
-     <p>This will cause the <code>#recipient#</code> placeholder in the data query to be replaced with the condition <code>transaction_user = &lt;employee_id&gt;</code>, where <code>&lt;employee_id&gt;</code> will be different for each recipient, as per the dynamic recipients query. We can then schedule a job for the main report and set the dynamic recipients field, and all the recipients will get a separate email with their specific data only.</p> 
+     <p>This will cause the <code>#recipient#</code> placeholder in the data query to be replaced with the condition <code>transaction_user = &lt;employee_id&gt;</code>, where <code>&lt;employee_id&gt;</code> will be different for each recipient, as per the dynamic recipients query. We can then schedule a job for the main report and set the <strong>Dynamic Recipients</strong> field to the dynamic recipients report, and all the recipients will get a separate email with their specific data only.</p> 
      <p>If we also want to include personalization fields in the email message body, we can add these to the dynamic recipients query e.g</p> 
      <div class="codehilite"> 
-      <pre>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id, first_name
+      <pre>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id, "number" recipient_id_type, first_name
     FROM employee
 </pre> 
      </div> 
-     <p>and we can then include the personalization placeholders in the email message field as desired.</p> 
+     <p>and then we can include the personalization placeholders in the email message field as desired.</p> 
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>With the personalization and filtering options, you can include columns with the name <strong>email_cc</strong> or <strong>email_bcc</strong> to specify email addresses that should be included in the cc or bcc fields of the email sent.</li> 
-      <li>Email address columns can have multiple emails separated by <code>;</code></li> 
+      <li>Email address columns can have multiple email addresses separated by <code>;</code></li> 
      </ul> 
     </div> 
    </div> 
@@ -4014,7 +4145,7 @@ a2enmod proxy_http
      <h3 id="customizing-java-files">Customizing java files</h3> 
      <p>Java source files are contained in sub directories under the <strong>ART_HOME\WEB-INF\classes\art</strong> directory. To make customizations to these files, take the following steps.</p> 
      <ul> 
-      <li>Configure Apache Ant as described above</li> 
+      <li>Configure Ant as described above</li> 
       <li>Make changes to the desired .java files</li> 
       <li>Open a command prompt window and navigate to the <strong>TOMCAT_HOME\webapps\art</strong> directory</li> 
       <li>Type the command <code>ant compile</code></li> 
@@ -4031,10 +4162,10 @@ a2enmod proxy_http
       <li>ART_HOME\WEB-INF\classes\<strong>logback.xml</strong> - Change logging level for quartz or ART classes</li> 
      </ul> 
      <h3 id="updating-jasperreports">Updating jasperreports</h3> 
-     <p>If you are using a version of iReport that is different from the jasperreports version contained in ART, you may want to update the jasperreports version contained in ART to match your iReport version. This may not be necessary, but would be useful if you encounter problems while running reports. Take the following steps to update the jasperreports library and template files.</p> 
+     <p>If you are using a version of iReport/Jaspersoft Studio that is different from the jasperreports version contained in ART, you may want to update the jasperreports version contained in ART to match your iReport/Jaspersoft Studio version. This may not be necessary, but would be useful if you encounter problems while running reports. Take the following steps to update the jasperreports library and template files.</p> 
      <ul> 
       <li>Download the required jasperreports .jar from the jasperreports sourceforge page, <a href="http://sourceforge.net/projects/jasperreports/files/jasperreports/">http://sourceforge.net/projects/jasperreports/files/jasperreports/</a> e.g download the file jasperreports-5.0.1.jar from the JasperReports 5.0.1 folder.</li> 
-      <li>Ensure Apache Ant is set up as described above</li> 
+      <li>Ensure Ant is set up as described above</li> 
       <li>Stop Tomcat</li> 
       <li>Backup the contents of the <strong>ART_HOME\WEB-INF\work\templates</strong> directory, where the jasperreport template files reside</li> 
       <li>Delete the jasperreports .jar file contained in the <strong>ART_HOME\WEB-INF\lib</strong> directory</li> 
@@ -4049,11 +4180,11 @@ a2enmod proxy_http
      <p>If you don't wish to modify the live files, e.g. you want to test the changes on a test server first, you can modify the files in another location and create an application .war file to deploy on your test environment.</p> 
      <h3 id="using-ant-without-an-ide">Using Ant without an IDE</h3> 
      <ul> 
-      <li>Ensure Apache Ant is set up as described above</li> 
+      <li>Ensure Ant is set up as described above</li> 
       <li>Unzip the <code>PACKAGE_PATH\art.war</code> e.g. unzip to a new directory <code>PACKAGE_PATH\art</code></li> 
       <li>Using a text editor, make modifications to the required files</li> 
       <li>Open a command prompt window and navigate to the <code>PACKAGE_PATH\art</code> directory</li> 
-      <li>Type the command <code>ant war</code></li> 
+      <li>Type the command <code>ant clean compile war</code></li> 
       <li>A new file named art.war will be created in the <code>PACKAGE_PATH\art</code> directory. Deploy this file to your desired application server.</li> 
      </ul> 
      <h3 id="using-ant-with-netbeans">Using Ant with NetBeans</h3> 

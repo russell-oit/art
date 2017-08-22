@@ -2,6 +2,7 @@
 <html>
  <head> 
   <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="Upgrading ART"> 
   <title>ART - Upgrading</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
@@ -136,11 +137,15 @@
      </tr> 
      <tr> 
       <td><strong>Dynamic datasources</strong></td> 
-      <td>Dynamic datasources must now use the Datasource ID as the value to pass to the parameter. If using an LOV report to provide the dynamic datasource list, the first column must be the datasource ID. If using a static lov this may look something like `3</td> 
+      <td>Dynamic datasources must now use the Datasource ID as the value to pass to the parameter. If using an LOV report to provide the dynamic datasource list, the first column must be the datasource ID. If using a static lov this may look something like <code>3|Some Datasource</code>.</td> 
      </tr> 
      <tr> 
       <td><strong>Long parameters in JasperReports</strong></td> 
       <td>Parameters that were defined with a data type of <code>java.lang.Long</code> in JasperReports need to be modified to <code>java.lang.Integer</code></td> 
+     </tr> 
+     <tr> 
+      <td><strong>defaultAutoCommit</strong></td> 
+      <td>If using JNDI for the ART Database, make sure the <strong>defaultAutoCommit</strong> setting is set to <strong>true</strong> if you were previously using false. This setting is for Tomcat but a similar change would be needed for different application servers.</td> 
      </tr> 
     </tbody> 
    </table> 

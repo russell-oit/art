@@ -2,6 +2,7 @@
 <html>
  <head> 
   <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Tips"> 
   <title>ART - Tips</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
@@ -62,8 +63,9 @@
     <li>From the <strong>Tools | Wizards | Create database connection</strong> menu, create connections for your source and destination database</li> 
     <li>Select the <strong>Tools | Wizards | Copy tables</strong> menu</li> 
     <li>Select the source and destination databases</li> 
-    <li>In the available items list, select all the tables that begin with art_ i.e. don't select the qrtz_xx tables. This is so that you don't run into foreign key constraint issues when you run the job.</li> 
+    <li>In the available items list, select all the tables that begin with <code>art_</code> i.e. don't select the qrtz_xx tables. This is so that you don't run into foreign key constraint issues when you run the job.</li> 
     <li>Provide a name and directory where the job should be saved. The job must be saved before it runs.</li> 
+    <li>Edit the job by deleting the create table steps and re-creating the connections from one step to the next for the remaining copy data steps, then save the job.</li> 
     <li>Run the job. You can use the <strong>Run this job</strong> icon to do this.</li> 
     <li> <p>Run the following statement on your destination database e.g. using <a class="" href="http://www.heidisql.com/" rel="nofollow">HeidiSQL</a></p> 
      <div class="codehilite"> 
@@ -77,14 +79,15 @@
    <ul> 
     <li>Navigate to the PDI_HOME\data-integration\<strong>libext\JDBC</strong> directory</li> 
     <li>Delete the <strong>hsqldb.jar</strong> file and replace it with a version that corresponds to the version of the HSQLDB database e.g. for the default ART database, you can use the hsqldb jar found in the ART_HOME\WEB-INF\lib directory</li> 
-    <li>Start the default database in server mode. Navigate to the ART_HOME\<strong>WEB-INF\hsqldb\server-mode</strong> directory and run the <strong>start-databases.bat</strong> file.</li> 
+    <li>Start the default database in server mode. </li> 
     <li>Run the <strong>spoon.bat</strong> file in the PDI_HOME\data-integration directory</li> 
     <li>From the <strong>Tools | Wizards | Create database connection</strong> menu, create connections for your source and destination database</li> 
     <li>When creating the database connection to the HSQLDB database, use <strong>HyperSonic</strong> as the Type of database to connect to. In the next screen, for the name of the database, use <strong>artrepository</strong>.</li> 
     <li>Select the <strong>Tools | Wizards | Copy tables</strong> menu</li> 
     <li>Select the source and destination databases</li> 
-    <li>In the available items list, select all the tables that begin with art_ i.e. don't select the qrtz_xx tables. This is so that you don't run into foreign key constraint issues when you run the job.</li> 
+    <li>In the available items list, select all the tables that begin with <code>art_</code> i.e. don't select the qrtz_xx tables. This is so that you don't run into foreign key constraint issues when you run the job.</li> 
     <li>Provide a name and directory where the job should be saved. The job must be saved before it runs.</li> 
+    <li>Edit the job by deleting the create table steps and re-creating the connections from one step to the next for the remaining copy data steps, then save the job.</li> 
     <li>Run the job. You can use the <strong>Run this job</strong> icon to do this.</li> 
     <li> <p>Run the following statement on your destination database</p> 
      <div class="codehilite"> 
