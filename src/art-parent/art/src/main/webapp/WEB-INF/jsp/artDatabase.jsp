@@ -22,7 +22,7 @@ Display art database configuration page
 <spring:message code="switch.text.no" var="noText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
-	
+
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
@@ -31,7 +31,7 @@ Display art database configuration page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -51,7 +51,7 @@ Display art database configuration page
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
-				
+
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
@@ -84,6 +84,16 @@ Display art database configuration page
 		<div class="col-md-6 col-md-offset-3">
 			<div class="alert alert-info">
 				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>
+				<ul>
+					<li>
+						If using <b>JNDI</b>, the <b>quartz.properties</b> file will
+						need to have been modified beforehand to set appropriate quartz
+						values depending on the database type you are using for the ART Database.
+						See <a href="${pageContext.request.contextPath}/docs/Manual.html#quartz-properties">
+							${pageContext.request.contextPath}/docs/Manual.html#quartz-properties
+						</a>
+					</li>
+				</ul>
 			</div>
 		</div>
 	</jsp:attribute>
