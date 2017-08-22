@@ -21,7 +21,7 @@ copy /Y build-hg\build\readme.txt art-nightly
 rem copy ART license
 copy /Y build-hg\src\art-parent\art\LICENSE.txt art-nightly
 
-rem copy Apache license related files for third-party libraries
+rem copy license related files for third-party libraries
 robocopy build-hg\build\third-party art-nightly\third-party /mir
 
 rem copy database scripts
@@ -29,6 +29,7 @@ robocopy build-hg\database art-nightly\database /mir
 
 rem copy docs
 robocopy ..\Manuals\automated\ art-nightly\docs *.pdf
+robocopy ..\Manuals\automated\ build-hg\src\art-parent\art\src\main\webapp\docs *.pdf
 
 rem copy source files (excluding any target directories)
 robocopy build-hg\src\art-parent art-nightly\src\art-parent /mir /xd target
