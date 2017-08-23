@@ -170,5 +170,28 @@ public class ArtJxlsJdbcHelper {
 
 		return result;
 	}
+	
+	public List<Map<String, Object>> query(String datasourceName, String sql, Object... params) {
+		List<Map<String, Object>> result;
+
+		//save existing connection so that it can be restored after exec is finished
+		Connection connOriginal = conn;
+		Connection connQuery = null;
+
+		try {
+			//get connection and use it to execute the given sql
+			connQuery = DbConnections.getConnection(datasourceName);
+			conn = connQuery;
+			result = query(sql, params);
+		} catch (SQLException ex) {
+			throw new JxlsException(ex);
+		} finally {
+			//restore original connnection. may be used by other calls to query that don't specify the datasource
+			conn = connOriginal;
+			DatabaseUtils.close(connQuery);
+		}
+
+		return result;
+	}
 
 }
