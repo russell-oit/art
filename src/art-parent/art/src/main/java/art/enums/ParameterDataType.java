@@ -46,7 +46,6 @@ public enum ParameterDataType {
 		switch(this){
 			case Integer:
 			case Double:
-			case Datasource:
 				return true;
 			default:
 				return false;

@@ -459,7 +459,6 @@ public class ParameterProcessor {
 
 		switch (paramDataType) {
 			case Integer:
-			case Datasource:
 				//use Double.valueOf() for cases where something like 15.0 is passed (e.g. with drilldown from chart)
 				//Integer.valueOf() would throw an exception in such a case
 				//intValue() merely returns the integer part; it does not do any rounding

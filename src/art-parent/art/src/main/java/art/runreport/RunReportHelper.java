@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,20 +93,20 @@ public class RunReportHelper {
 
 		Connection conn = null;
 
-		Integer dynamicDatasourceId = null;
+		String dynamicDatasourceIdString = null;
 		if (reportParams != null) {
 			for (ReportParameter reportParam : reportParams) {
 				if (reportParam.getParameter().getDataType() == ParameterDataType.Datasource) {
 					String[] passedValues = reportParam.getPassedParameterValues();
 					if (passedValues != null && StringUtils.isNotBlank(passedValues[0])) {
-						dynamicDatasourceId = (Integer) reportParam.getEffectiveActualParameterValue();
+						dynamicDatasourceIdString = (String) reportParam.getEffectiveActualParameterValue();
 						break;
 					}
 				}
 			}
 		}
 
-		if (dynamicDatasourceId == null) {
+		if (dynamicDatasourceIdString == null) {
 			//use datasource defined on the report
 			Datasource reportDatasource = report.getDatasource();
 			if (reportDatasource != null) {
@@ -113,7 +114,12 @@ public class RunReportHelper {
 			}
 		} else {
 			//use datasource indicated in parameter
-			conn = DbConnections.getConnection(dynamicDatasourceId);
+			if (NumberUtils.isCreatable(dynamicDatasourceIdString)) {
+				int dynamicDatasourceIdInt = Integer.parseInt(dynamicDatasourceIdString);
+				conn = DbConnections.getConnection(dynamicDatasourceIdInt);
+			} else {
+				conn = DbConnections.getConnection(dynamicDatasourceIdString);
+			}
 		}
 
 		return conn;
