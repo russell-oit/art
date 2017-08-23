@@ -86,7 +86,7 @@ Display art database configuration page
 				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>
 				<ul>
 					<li>
-						If using <b>JNDI</b>, the <b>quartz.properties</b> file will
+						If using <b>JNDI</b>, the <b>WEB-INF\classes\quartz.properties</b> file will
 						need to have been modified beforehand to set appropriate quartz
 						values depending on the database type you are using for the ART Database.
 						See <a href="${pageContext.request.contextPath}/docs/Manual.html#quartz-properties">
