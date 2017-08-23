@@ -3194,7 +3194,7 @@ WHERE REGION = #region#
 <span class="n">$</span><span class="o">{</span><span class="n">row</span><span class="o">.</span><span class="na">description</span><span class="o">}</span>
 </pre> 
        </div> </li> 
-      <li> <p>If the report is of type <strong>jXLS: Template Query</strong>, the sql used to retrieve the data will be the one defined in the template. The database used for the query will be the one selected in the datasource field of the report. You can alternatively pass the datasource id of the datasource to use e.g. <code>jdbc.query(1, 'select * from cities')</code>.</p> </li> 
+      <li> <p>If the report is of type <strong>jXLS: Template Query</strong>, the sql used to retrieve the data will be the one defined in the template. The datasource used for the query will be the one selected in the datasource field of the report. Use the <strong>jdbc.query</strong> method to call the sql e.g. <code>jdbc.query('select * from cities')</code>. You can alternatively pass the datasource id of the datasource to use. In this case use the <strong>jdbc.query2</strong> method to call the sql e.g. <code>jdbc.query2(1, 'select * from cities')</code>. You can also use the datasource name e.g. <code>jdbc.query2('mydb', 'select * from cities')</code>.</p> </li> 
       <li>If the report uses parameters, avoid using the following names for the parameters as these are used for special purpose variables i.e. <code>results, jdbc, params, locale</code>.</li> 
      </ul> 
      <!--NewPage--> 
@@ -3584,7 +3584,7 @@ WHERE CITY_ID = #cityId#
      <h2 id="random-start-times">Random Start Times</h2> 
      <p>You may not care when exactly a job runs, as long as it runs in a certain window of time. If you leave the Hour and Minute fields blank when creating the job, the job will be assigned a random hour between 3-6 and a random minute between 0-59 in which it will run. This may be useful for jobs that your require to run at night. Additionally, you can specify an explicit time range in which the job should run. To do this, in the <strong>Hour</strong> field, define the required start time and end time separated by | e.g. 4|7, 4:30|6, 12:45|13:15. The job will then be assigned a random execution time in this range.</p> 
      <h2 id="quartz-properties">Quartz Properties</h2> 
-     <p>You can modify some aspects of the scheduler e.g. thread count by modifying the <strong>WEB-INF\classes\quartz.properties</strong> file. Documentation of configuration options can be found <a class="" href="http://www.quartz-scheduler.org/documentation/quartz-2.x/configuration/" rel="nofollow">here</a>. In particular, if you use JNDI for the ART Database, you may need to adjust the <strong>quartz.properties</strong> file to use the correct Quartz values. The following are the minimum changes required.</p> 
+     <p>You can modify some aspects of the scheduler e.g. thread count by modifying the <strong>WEB-INF\classes\quartz.properties</strong> file. Documentation of configuration options can be found <a class="" href="http://www.quartz-scheduler.org/documentation/quartz-2.x/configuration/" rel="nofollow">here</a>. In particular, if you use JNDI for the ART Database, you may need to adjust the <strong>quartz.properties</strong> file to use the correct Quartz values for your database. The following are the minimum changes required.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -3599,35 +3599,35 @@ WHERE CITY_ID = #cityId#
        </tr> 
        <tr> 
         <td><strong>DB2</strong></td> 
-        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.StdJDBCDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from sysibm.sysdummy1</code></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from sysibm.sysdummy1</code></td> 
        </tr> 
        <tr> 
         <td><strong>HSQLDB</strong></td> 
-        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.HSQLDBDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = values 1</code></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.HSQLDBDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = values 1</code></td> 
        </tr> 
        <tr> 
         <td><strong>PostgreSQL</strong></td> 
-        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.PostgreSQLDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1</code></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.PostgreSQLDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1</code></td> 
        </tr> 
        <tr> 
         <td><strong>CUBRID</strong></td> 
-        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.CUBRIDDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1</code></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.CUBRIDDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1</code></td> 
        </tr> 
        <tr> 
         <td><strong>SQL Server</strong></td> 
-        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.MSSQLDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1</code></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.MSSQLDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1</code></td> 
        </tr> 
        <tr> 
         <td><strong>Informix</strong></td> 
-        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.StdJDBCDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from systables where tabid = 1</code></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from systables where tabid = 1</code></td> 
        </tr> 
        <tr> 
         <td><strong>Firebird</strong></td> 
-        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.StdJDBCDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from RDB$DATABASE</code></td> 
+        <td><code>org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate</code> <br><br> <code>org.quartz.dataSource.ArtDs.validationQuery = select 1 from RDB$DATABASE</code></td> 
        </tr> 
       </tbody> 
      </table> 
-     <p>For other database types, you can supply an appropriate validation query as per your database. You don't have to specify the driver delegate class - <code>StdJDBCDelegate</code> will be used.</p> 
+     <p>For other database types, you can supply an appropriate validation query as per your database. You don't have to specify the driver delegate class. <code>StdJDBCDelegate</code> will be used.</p> 
     </div> 
    </div> 
    <div> 
