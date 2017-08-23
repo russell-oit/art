@@ -148,7 +148,7 @@ public class ArtJxlsJdbcHelper {
 		return result;
 	}
 
-	public List<Map<String, Object>> query(int datasourceId, String sql, Object... params) {
+	public List<Map<String, Object>> query2(int datasourceId, String sql, Object... params) {
 		List<Map<String, Object>> result;
 
 		//save existing connection so that it can be restored after exec is finished
@@ -171,7 +171,8 @@ public class ArtJxlsJdbcHelper {
 		return result;
 	}
 	
-	public List<Map<String, Object>> query(String datasourceName, String sql, Object... params) {
+	public List<Map<String, Object>> query2(String datasourceName, String sql, Object... params) {
+		//use different method name to avoid errors with wrong method being called with query(String, Object...)
 		List<Map<String, Object>> result;
 
 		//save existing connection so that it can be restored after exec is finished
