@@ -64,7 +64,10 @@ public class SchedulerUtils {
 			Properties schedulerProperties = getSchedulerProperties(artDbConfig, propertiesFilePath);
 			SchedulerFactory schedulerFactory = new StdSchedulerFactory(schedulerProperties);
 			scheduler = schedulerFactory.getScheduler();
-			scheduler.start();
+			//use startDelayed() instead of start()
+			//https://sourceforge.net/p/art/discussion/352129/thread/c3c7f2b2/
+			int SCHEDULER_START_DELAY_SECONDS = 60;
+			scheduler.startDelayed(SCHEDULER_START_DELAY_SECONDS);
 		} catch (SchedulerException ex) {
 			logger.error("Error", ex);
 		}
@@ -99,7 +102,7 @@ public class SchedulerUtils {
 	 * Returns quartz scheduler properties
 	 *
 	 * @param artDbConfig the art database configuration, not null
-	 * @param propertiesFilePath the quartz scheduler propertis file
+	 * @param propertiesFilePath the quartz scheduler properties file
 	 * @return quartz scheduler properties
 	 */
 	private static Properties getSchedulerProperties(ArtDatabase artDbConfig, String propertiesFilePath) {
