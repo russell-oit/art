@@ -86,6 +86,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("cassandra-adejanovski");
 		databaseTypes.remove("neo4j");
 		databaseTypes.remove("sql-logging");
+		databaseTypes.remove("exasol");
 
 		return databaseTypes;
 	}

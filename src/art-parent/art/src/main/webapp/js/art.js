@@ -228,6 +228,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.neo4j.jdbc.Driver";
 		urlElement.value = "jdbc:neo4j:bolt://<server_name>";
 		testSqlElement.value = "";
+	} else if (dbType === "exasol") {
+		driverElement.value = "com.exasol.jdbc.EXADriver";
+		urlElement.value = "jdbc:exa://<server_name>;schema=<database_name>";
+		testSqlElement.value = "";
 	}
 }
 

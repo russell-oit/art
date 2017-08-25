@@ -266,6 +266,7 @@ public class ArtUtils {
 		databaseTypes.put("informix", "Informix");
 		databaseTypes.put("cassandra-adejanovski", "Cassandra (adejanovski driver)");
 		databaseTypes.put("neo4j", "Neo4j");
+		databaseTypes.put("exasol", "EXASOL - driver not included"); //license doesn't allow distribution without consent from exasol
 
 		return databaseTypes;
 	}
