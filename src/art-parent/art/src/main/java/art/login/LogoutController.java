@@ -51,13 +51,13 @@ public class LogoutController {
 		logger.debug("authenticationMethod='{}'", authenticationMethod);
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
-		try {
-			loginService.removeLoggedInUser(sessionUser);
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-		}
-
 		if (sessionUser != null) { //can be null if this controller called twice
+			try {
+				loginService.removeLoggedInUser(sessionUser);
+			} catch (SQLException | RuntimeException ex) {
+				logger.error("Error", ex);
+			}
+
 			int userId = sessionUser.getUserId();
 			Config.closeSaikuConnections(userId);
 		}
