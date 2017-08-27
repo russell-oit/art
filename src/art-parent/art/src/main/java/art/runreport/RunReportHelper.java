@@ -277,8 +277,6 @@ public class RunReportHelper {
 		request.setAttribute("enableShowSql", enableShowSql);
 		request.setAttribute("enableShowSelectedParameters", enableShowSelectedParameters);
 
-		request.setAttribute("isChart", reportType.isChart());
-
 		boolean enableRunInline;
 		switch (reportType) {
 			case JPivotMondrian:

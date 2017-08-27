@@ -254,7 +254,7 @@ Display section to allow selecting of report parameters and initiate running of 
 							<c:set var="inputColClass" value="col-md-7" scope="request"/>
 							<jsp:include page="reportParameters.jsp"/>
 
-							<c:if test="${isChart}">
+							<c:if test="${report.reportType.isChart()}">
 								<div id="chartOptions">
 									<div class="form-group">
 										<label class="control-label col-md-5">
