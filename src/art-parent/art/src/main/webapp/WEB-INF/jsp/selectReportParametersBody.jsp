@@ -255,71 +255,7 @@ Display section to allow selecting of report parameters and initiate running of 
 							<jsp:include page="reportParameters.jsp"/>
 
 							<c:if test="${report.reportType.isChart()}">
-								<div id="chartOptions">
-									<div class="form-group">
-										<label class="control-label col-md-5">
-											<spring:message code="reports.label.show"/>
-										</label>
-										<div class="col-md-7">
-											<label class="checkbox-inline">
-												<input type="checkbox" name="showLegend" value=""
-													   ${report.chartOptions.showLegend ? "checked" : ""}>
-												<spring:message code="reports.label.showLegend"/>
-											</label>
-											<label class="checkbox-inline">
-												<input type="checkbox" name="showLabels" value=""
-													   ${report.chartOptions.showLabels ? "checked" : ""}>
-												<spring:message code="reports.label.showLabels"/>
-											</label>
-											<label class="checkbox-inline">
-												<input type="checkbox" name="showPoints" value=""
-													   ${report.chartOptions.showPoints ? "checked" : ""}>
-												<spring:message code="reports.label.showPoints"/>
-											</label>
-											<label class="checkbox-inline">
-												<input type="checkbox" name="showData" value=""
-													   ${report.chartOptions.showData ? "checked" : ""}>
-												<spring:message code="reports.label.showData"/>
-											</label>
-										</div>
-									</div>
-									<div class="form-group">
-										<label class="control-label col-md-5" for="chartWidth">
-											<spring:message code="reports.label.width"/>
-										</label>
-										<div class="col-md-7">
-											<input type="text" name="chartWidth" 
-												   maxlength="4" class="form-control"
-												   value="${report.chartOptions.width}">
-										</div>
-									</div>
-									<div class="form-group">
-										<label class="control-label col-md-5" for="chartHeight">
-											<spring:message code="reports.label.height"/>
-										</label>
-										<div class="col-md-7">
-											<input type="text" name="chartHeight" 
-												   maxlength="4" class="form-control"
-												   value="${report.chartOptions.height}">
-										</div>
-									</div>
-									<c:if test="${enableSwapAxes}">
-										<div class="form-group">
-											<label class="control-label col-md-5" for="swapAxes">
-												<spring:message code="reports.label.swapAxes"/>
-											</label>
-											<div class="col-md-7">
-												<label>
-													<input type="checkbox" name="swapAxes" id="swapAxes" value="">
-												</label>
-											</div>
-										</div>
-									</c:if>
-									<input type="hidden" name="yAxisMin" value="${report.chartOptions.yAxisMin}"> 
-									<input type="hidden" name="yAxisMax" value="${report.chartOptions.yAxisMax}"> 
-									<input type="hidden" name="backgroundColor" value="${report.chartOptions.backgroundColor}"> 
-									<input type="hidden" name="labelFormat" value="${report.chartOptions.labelFormat}"> 
-								</div>
+								<jsp:include page="chartOptions.jsp"/>
 							</c:if>
 
 							<div id="reportOptions">
@@ -436,7 +372,7 @@ Display section to allow selecting of report parameters and initiate running of 
 						</label>
 						<div class="col-md-8">
 							<input type="text" id="mailFrom" name="mailFrom"
-								   readonly class="form-control" value="${sessionUser.email}"/>
+								   readonly class="form-control" value="${encode:forHtmlAttribute(sessionUser.email)}"/>
 						</div>
 					</div>
 					<div class="form-group">

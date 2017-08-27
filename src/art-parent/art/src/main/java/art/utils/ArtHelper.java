@@ -19,6 +19,7 @@ package art.utils;
 
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
+import art.enums.ReportType;
 import art.reportparameter.ReportParameter;
 import art.user.User;
 import java.sql.Connection;
@@ -159,5 +160,33 @@ public class ArtHelper {
 
 		String username = sessionUser.getUsername();
 		log(username, "report", ip, reportId, totalTime, fetchTime, reportFormat + parameters);
+	}
+
+	/**
+	 * Returns the default show legend option depending on the report type
+	 * 
+	 * @param reportType the report type
+	 * @return the default show legend option
+	 */
+	public boolean getDefaultShowLegendOption(ReportType reportType) {
+		if (reportType == ReportType.HeatmapChart) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * Returns the default show labels option depending on the report type
+	 * 
+	 * @param reportType the report type
+	 * @return the default show labels option
+	 */
+	public boolean getDefaultShowLabelsOption(ReportType reportType) {
+		if (reportType == ReportType.Pie2DChart || reportType == ReportType.Pie3DChart) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

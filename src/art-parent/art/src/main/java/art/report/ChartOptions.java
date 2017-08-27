@@ -27,16 +27,16 @@ import java.io.Serializable;
 public class ChartOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private boolean showLegend;
-	private boolean showLabels;
-	private boolean showPoints;
-	private boolean showData;
-	private int rotateAt;
-	private int removeAt;
+	private Boolean showLegend; //use object wrapper instead of primitive to differentiate 0 and "not set"
+	private Boolean showLabels;
+	private Boolean showPoints;
+	private Boolean showData;
+	private Integer rotateAt;
+	private Integer removeAt;
 	private Integer width;
 	private Integer height;
-	private double yAxisMin;
-	private double yAxisMax;
+	private Double yAxisMin;
+	private Double yAxisMax;
 	private String backgroundColor;
 	private String labelFormat;
 
@@ -57,84 +57,86 @@ public class ChartOptions implements Serializable {
 	/**
 	 * @return the showLegend
 	 */
-	public boolean isShowLegend() {
+	public Boolean getShowLegend() {
+		//must use get in method name instead of is if using Boolean object and not boolean primitive
+		//otherwise you'll have errors in jsp pages
 		return showLegend;
 	}
 
 	/**
 	 * @param showLegend the showLegend to set
 	 */
-	public void setShowLegend(boolean showLegend) {
+	public void setShowLegend(Boolean showLegend) {
 		this.showLegend = showLegend;
 	}
 
 	/**
 	 * @return the showLabels
 	 */
-	public boolean isShowLabels() {
+	public Boolean getShowLabels() {
 		return showLabels;
 	}
 
 	/**
 	 * @param showLabels the showLabels to set
 	 */
-	public void setShowLabels(boolean showLabels) {
+	public void setShowLabels(Boolean showLabels) {
 		this.showLabels = showLabels;
 	}
 
 	/**
 	 * @return the showPoints
 	 */
-	public boolean isShowPoints() {
+	public Boolean getShowPoints() {
 		return showPoints;
 	}
 
 	/**
 	 * @param showPoints the showPoints to set
 	 */
-	public void setShowPoints(boolean showPoints) {
+	public void setShowPoints(Boolean showPoints) {
 		this.showPoints = showPoints;
 	}
 
 	/**
 	 * @return the showData
 	 */
-	public boolean isShowData() {
+	public Boolean getShowData() {
 		return showData;
 	}
 
 	/**
 	 * @param showData the showData to set
 	 */
-	public void setShowData(boolean showData) {
+	public void setShowData(Boolean showData) {
 		this.showData = showData;
 	}
 
 	/**
 	 * @return the rotateAt
 	 */
-	public int getRotateAt() {
+	public Integer getRotateAt() {
 		return rotateAt;
 	}
 
 	/**
 	 * @param rotateAt the rotateAt to set
 	 */
-	public void setRotateAt(int rotateAt) {
+	public void setRotateAt(Integer rotateAt) {
 		this.rotateAt = rotateAt;
 	}
 
 	/**
 	 * @return the removeAt
 	 */
-	public int getRemoveAt() {
+	public Integer getRemoveAt() {
 		return removeAt;
 	}
 
 	/**
 	 * @param removeAt the removeAt to set
 	 */
-	public void setRemoveAt(int removeAt) {
+	public void setRemoveAt(Integer removeAt) {
 		this.removeAt = removeAt;
 	}
 
@@ -169,28 +171,28 @@ public class ChartOptions implements Serializable {
 	/**
 	 * @return the yAxisMin
 	 */
-	public double getyAxisMin() {
+	public Double getyAxisMin() {
 		return yAxisMin;
 	}
 
 	/**
 	 * @param yAxisMin the yAxisMin to set
 	 */
-	public void setyAxisMin(double yAxisMin) {
+	public void setyAxisMin(Double yAxisMin) {
 		this.yAxisMin = yAxisMin;
 	}
 
 	/**
 	 * @return the yAxisMax
 	 */
-	public double getyAxisMax() {
+	public Double getyAxisMax() {
 		return yAxisMax;
 	}
 
 	/**
 	 * @param yAxisMax the yAxisMax to set
 	 */
-	public void setyAxisMax(double yAxisMax) {
+	public void setyAxisMax(Double yAxisMax) {
 		this.yAxisMax = yAxisMax;
 	}
 

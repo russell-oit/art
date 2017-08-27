@@ -673,20 +673,20 @@ public class ReportController {
 		String showPoints = "";
 		String showData = "";
 
-		logger.debug("report.getChartOptions().isShowLegend() = {}", report.getChartOptions().isShowLegend());
-		if (report.getChartOptions().isShowLegend()) {
+		logger.debug("report.getChartOptions().isShowLegend() = {}", report.getChartOptions().getShowLegend());
+		if (report.getChartOptions().getShowLegend()) {
 			showLegend = "showLegend";
 		}
-		logger.debug("report.getChartOptions().isShowLabels() = {}", report.getChartOptions().isShowLabels());
-		if (report.getChartOptions().isShowLabels()) {
+		logger.debug("report.getChartOptions().isShowLabels() = {}", report.getChartOptions().getShowLabels());
+		if (report.getChartOptions().getShowLabels()) {
 			showLabels = "showLabels";
 		}
-		logger.debug("report.getChartOptions().isShowPoints() = {}", report.getChartOptions().isShowPoints());
-		if (report.getChartOptions().isShowPoints()) {
+		logger.debug("report.getChartOptions().isShowPoints() = {}", report.getChartOptions().getShowPoints());
+		if (report.getChartOptions().getShowPoints()) {
 			showPoints = "showPoints";
 		}
-		logger.debug("report.getChartOptions().isShowData() = {}", report.getChartOptions().isShowData());
-		if (report.getChartOptions().isShowData()) {
+		logger.debug("report.getChartOptions().isShowData() = {}", report.getChartOptions().getShowData());
+		if (report.getChartOptions().getShowData()) {
 			showData = "showData";
 		}
 

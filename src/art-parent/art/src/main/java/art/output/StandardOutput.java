@@ -347,7 +347,7 @@ public abstract class StandardOutput {
 	protected void addHeaderCellAlignLeft(String value) {
 		addHeaderCell(value);
 	}
-	
+
 	/**
 	 * Outputs a value to the header whose text is left aligned
 	 *
@@ -667,7 +667,7 @@ public abstract class StandardOutput {
 		if (nullStringDisplay == null) {
 			nullStringDisplay = "";
 		}
-		
+
 		List<String> totalColumns = getTotalColumnsList(report);
 		if (!totalColumns.isEmpty()) {
 			columnTotals = new HashMap<>();
@@ -963,7 +963,7 @@ public abstract class StandardOutput {
 		if (nullStringDisplay == null) {
 			nullStringDisplay = "";
 		}
-		
+
 		List<String> totalColumns = getTotalColumnsList(report);
 
 		String previousBurstId = null;
@@ -1603,19 +1603,6 @@ public abstract class StandardOutput {
 	 * Outputs a string value
 	 *
 	 * @param value the value to output
-	 */
-	private void addString(Object value) {
-		if (value == null) {
-			addCellString(""); //display nulls as empty string
-		} else {
-			addCellString((String) value);
-		}
-	}
-
-	/**
-	 * Outputs a string value
-	 *
-	 * @param value the value to output
 	 * @param nullStringDisplay the string to output if the value is null
 	 */
 	private void addString(Object value, String nullStringDisplay) {
@@ -1680,7 +1667,7 @@ public abstract class StandardOutput {
 		//                   ^--- Jan comes after Feb!			     	 
 
 		StandardOutputResult result = new StandardOutputResult();
-		
+
 		initializeNumberFormatters();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
@@ -1690,16 +1677,16 @@ public abstract class StandardOutput {
 			result.setMessage("reports.message.invalidCrosstab");
 			return result;
 		}
-		
+
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
-		
+
 		Map<Integer, ColumnTypeDefinition> columnTypes = getColumnTypes(rsmd);
 
 		initializeColumnFormatters(report, rsmd, columnTypes);
 
 		// Check the data type of the value (last column)
 		ColumnTypeDefinition valueColumnTypeDefinition = getColumnTypeDefinition(rsmd, resultSetColumnCount);
-		
+
 		String nullNumberDisplay = report.getNullNumberDisplay();
 		if (nullNumberDisplay == null) {
 			nullNumberDisplay = "";
@@ -1998,20 +1985,14 @@ public abstract class StandardOutput {
 					addCellNumeric(numericValue, nullNumberDisplay, sortValue);
 				} else {
 					String sortValue = getNumericSortValue(numericValue);
-					String columnFormattedValue = null;
-
-					if (columnFormattedValue != null) {
-						addCellNumeric(numericValue, columnFormattedValue, sortValue);
+					String formattedValue;
+					if (globalNumericFormatter != null) {
+						formattedValue = globalNumericFormatter.format(numericValue);
 					} else {
-						String formattedValue;
-						if (globalNumericFormatter != null) {
-							formattedValue = globalNumericFormatter.format(numericValue);
-						} else {
-							formattedValue = formatNumericValue(numericValue);
-						}
-
-						addCellNumeric(numericValue, formattedValue, sortValue);
+						formattedValue = formatNumericValue(numericValue);
 					}
+
+					addCellNumeric(numericValue, formattedValue, sortValue);
 				}
 				break;
 			case Date:
@@ -2020,20 +2001,14 @@ public abstract class StandardOutput {
 					addCellDate(dateValue);
 				} else {
 					long sortValue = getDateSortValue(dateValue);
-					String columnFormattedValue = null;
-
-					if (columnFormattedValue != null) {
-						addCellDate(dateValue, columnFormattedValue, sortValue);
+					String formattedValue;
+					if (globalDateFormatter != null) {
+						formattedValue = globalDateFormatter.format(dateValue);
 					} else {
-						String formattedValue;
-						if (globalDateFormatter != null) {
-							formattedValue = globalDateFormatter.format(dateValue);
-						} else {
-							formattedValue = Config.getDateDisplayString(dateValue);
-						}
-
-						addCellDate(dateValue, formattedValue, sortValue);
+						formattedValue = Config.getDateDisplayString(dateValue);
 					}
+
+					addCellDate(dateValue, formattedValue, sortValue);
 				}
 				break;
 			case Clob:

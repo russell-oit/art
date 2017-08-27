@@ -18,6 +18,7 @@
 package art.chart;
 
 import art.enums.ReportType;
+import art.utils.ArtUtils;
 import java.awt.Color;
 import net.sf.cewolfart.cpp.HeatmapEnhancer;
 import net.sf.cewolfart.links.XYItemLinkGenerator;
@@ -132,7 +133,7 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 
 				// allow specifying only the upper colour, for 2 colour schemes. set lower colour to white
 				if (heatmapOptions.containsKey("upperColor") && !heatmapOptions.containsKey("lowerColor")) {
-					heatmapOptions.put("lowerColor", WHITE_HEX_COLOR_CODE);
+					heatmapOptions.put("lowerColor", ArtUtils.WHITE_HEX_COLOR_CODE);
 				}
 			}
 

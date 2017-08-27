@@ -87,7 +87,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+
 		<script type="text/javascript">
 			tinymce.init({
 				selector: "textarea.editor",
@@ -402,11 +402,16 @@
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="nextPage" value="${param.nextPage}">
 
+				<c:set var="labelColClass" value="col-md-4" scope="request"/>
+				<c:set var="inputColClass" value="col-md-8" scope="request"/>
+
+				<c:if test="${job.report.reportType.isChart()}">
+					<jsp:include page="chartOptions.jsp"/>
+				</c:if>
+
 				<c:if test="${not empty reportParams}">
 					<fieldset>
 						<legend><spring:message code="jobs.text.parameters"/></legend>
-						<c:set var="labelColClass" value="col-md-4" scope="request"/>
-						<c:set var="inputColClass" value="col-md-8" scope="request"/>
 						<jsp:include page="reportParameters.jsp"/>
 						<div class="form-group">
 							<label class="control-label col-md-4" for="showSelectedParameters">

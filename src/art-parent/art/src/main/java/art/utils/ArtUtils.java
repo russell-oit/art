@@ -74,6 +74,7 @@ public class ArtUtils {
 	public static final String FILE_NAME_DATE_FORMAT = "yyyy_MM_dd-HH_mm_ss_SSS";
 	public static final SimpleDateFormat fileNameDateFormatter = new SimpleDateFormat(FILE_NAME_DATE_FORMAT);
 	public static final String PARAM_PREFIX = "p-"; //prefix for report parameters in html element names or from url
+	public static final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<>();

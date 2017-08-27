@@ -1740,6 +1740,18 @@ public class ReportJob implements org.quartz.Job {
 						case "_showParams":
 							finalName = "showSelectedParameters";
 							break;
+						case "_showGraphData":
+							finalName = "showData";
+							break;
+						case "_showGraphLegend":
+							finalName = "showLegend";
+							break;
+						case "_showGraphLabels":
+							finalName = "showLabels";
+							break;
+						case "_showGraphDataPoints":
+							finalName = "showPoints";
+							break;
 						default:
 							finalName = name;
 					}

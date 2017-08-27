@@ -22,6 +22,7 @@ import art.datasource.Datasource;
 import art.enums.AccessLevel;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
+import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -157,6 +158,14 @@ public class RunReportHelper {
 		paramProcessor.setLocale(locale);
 		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
+
+		request.setAttribute("reportOptions", reportOptions);
+
+		ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
+		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+		ChartOptions effectiveChartOptions = reportOutputGenerator.getEffectiveChartOptions(report, parameterChartOptions);
+		request.setAttribute("chartOptions", effectiveChartOptions);
 
 		ReportType reportType = report.getReportType();
 
@@ -391,6 +400,17 @@ public class RunReportHelper {
 //		enableEmail = false; //disable email for now. feature may be abused by users to send spam?
 		request.setAttribute("enableEmail", enableEmail);
 
+		setEnableSwapAxes(reportType, request);
+	}
+
+	/**
+	 * Set the enableSwapAxes request attribute according to the given report
+	 * type
+	 *
+	 * @param reportType the report type
+	 * @param request the http request object
+	 */
+	public void setEnableSwapAxes(ReportType reportType, HttpServletRequest request) {
 		boolean enableSwapAxes;
 		switch (reportType) {
 			case XYChart:
@@ -566,4 +586,5 @@ public class RunReportHelper {
 
 		return resultSetType;
 	}
+
 }

@@ -79,9 +79,9 @@ import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
+import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
-import art.utils.UncloseablePrintWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
 import groovy.lang.Binding;
@@ -345,20 +345,14 @@ public class ReportOutputGenerator {
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
 
-				boolean swapAxes = false;
-				if (request != null) {
-					if (request.getParameter("swapAxes") != null) {
-						swapAxes = true;
-					}
-				}
-
 				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
+				boolean swapAxes = reportOptions.isSwapAxes();
 				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes);
 
 				//store data for potential use in html and pdf output
 				RowSetDynaClass data = null;
-				if (parameterChartOptions.isShowData()
+				if (parameterChartOptions.getShowData()
 						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
 					int rsType = rs.getType();
 					if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
@@ -1539,6 +1533,19 @@ public class ReportOutputGenerator {
 	}
 
 	/**
+	 * Returns the final chart options to use based on the given chart options
+	 * and the report options
+	 *
+	 * @param report the report
+	 * @param parameterChartOptions the passed chart options
+	 * @return the final chart options
+	 */
+	public ChartOptions getEffectiveChartOptions(Report report, ChartOptions parameterChartOptions) {
+		ReportFormat reportFormat = null;
+		return getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
+	}
+
+	/**
 	 * Returns the final chart options to use based on the given chart options,
 	 * report and report format
 	 *
@@ -1553,39 +1560,140 @@ public class ReportOutputGenerator {
 		ChartOptions reportChartOptions = report.getChartOptions();
 		ChartOptions effectiveChartOptions = parameterChartOptions;
 
-		Integer width = effectiveChartOptions.getWidth();
+		Integer width = parameterChartOptions.getWidth();
 		if (width == null || width <= 0) {
-			effectiveChartOptions.setWidth(reportChartOptions.getWidth());
+			width = reportChartOptions.getWidth();
 		}
-		width = effectiveChartOptions.getWidth();
 		if (width == null || width <= 0) {
-			final int DEFAULT_WIDTH = 500;
+			final Integer DEFAULT_WIDTH = 500;
 			effectiveChartOptions.setWidth(DEFAULT_WIDTH);
+		} else {
+			effectiveChartOptions.setWidth(width);
 		}
 
-		Integer height = effectiveChartOptions.getHeight();
+		Integer height = parameterChartOptions.getHeight();
 		if (height == null || height <= 0) {
-			effectiveChartOptions.setHeight(reportChartOptions.getHeight());
+			height = reportChartOptions.getHeight();
 		}
-		height = effectiveChartOptions.getHeight();
 		if (height == null || height <= 0) {
-			final int DEFAULT_HEIGHT = 300;
+			final Integer DEFAULT_HEIGHT = 300;
 			effectiveChartOptions.setHeight(DEFAULT_HEIGHT);
+		} else {
+			effectiveChartOptions.setHeight(height);
+		}
+
+		Double yAxisMin = parameterChartOptions.getyAxisMin();
+		if (yAxisMin == null) {
+			yAxisMin = reportChartOptions.getyAxisMin();
+		}
+		if (yAxisMin == null) {
+			final Double DEFAULT_Y_AXIS_MIN = 0D;
+			effectiveChartOptions.setyAxisMin(DEFAULT_Y_AXIS_MIN);
+		} else {
+			effectiveChartOptions.setyAxisMin(yAxisMin);
+		}
+
+		Double yAxisMax = parameterChartOptions.getyAxisMax();
+		if (yAxisMax == null) {
+			yAxisMax = reportChartOptions.getyAxisMax();
+		}
+		if (yAxisMax == null) {
+			final Double DEFAULT_Y_AXIS_MAX = 0D;
+			effectiveChartOptions.setyAxisMax(DEFAULT_Y_AXIS_MAX);
+		} else {
+			effectiveChartOptions.setyAxisMax(yAxisMax);
+		}
+
+		Integer rotateAt = parameterChartOptions.getRotateAt();
+		if (rotateAt == null) {
+			rotateAt = reportChartOptions.getRotateAt();
+		}
+		if (rotateAt == null) {
+			final Integer DEFAULT_ROTATE_AT = 0;
+			effectiveChartOptions.setRotateAt(DEFAULT_ROTATE_AT);
+		} else {
+			effectiveChartOptions.setRotateAt(rotateAt);
+		}
+
+		Integer removeAt = parameterChartOptions.getRemoveAt();
+		if (removeAt == null) {
+			removeAt = reportChartOptions.getRemoveAt();
+		}
+		if (removeAt == null) {
+			final Integer DEFAULT_REMOVE_AT = 0;
+			effectiveChartOptions.setRemoveAt(DEFAULT_REMOVE_AT);
+		} else {
+			effectiveChartOptions.setRemoveAt(removeAt);
+		}
+
+		String backgroundColor = parameterChartOptions.getBackgroundColor();
+		if (StringUtils.isBlank(backgroundColor)) {
+			backgroundColor = reportChartOptions.getBackgroundColor();
+		}
+		if (StringUtils.isBlank(backgroundColor)) {
+			final String DEFAULT_BACKGROUND_COLOR = ArtUtils.WHITE_HEX_COLOR_CODE;
+			effectiveChartOptions.setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
+		} else {
+			effectiveChartOptions.setBackgroundColor(backgroundColor);
+		}
+
+		ArtHelper artHelper = new ArtHelper();
+		ReportType reportType = report.getReportType();
+
+		Boolean showLegend = parameterChartOptions.getShowLegend();
+		if (showLegend == null) {
+			showLegend = reportChartOptions.getShowLegend();
+		}
+		if (showLegend == null) {
+			boolean defaultShowLegendOption = artHelper.getDefaultShowLegendOption(reportType);
+			effectiveChartOptions.setShowLegend(defaultShowLegendOption);
+		} else {
+			effectiveChartOptions.setShowLegend(showLegend);
+		}
+		
+		Boolean showLabels = parameterChartOptions.getShowLabels();
+		if (showLabels == null) {
+			showLabels = reportChartOptions.getShowLabels();
+		}
+		if (showLabels == null) {
+			boolean defaultShowLabelsOption = artHelper.getDefaultShowLabelsOption(reportType);
+			effectiveChartOptions.setShowLabels(defaultShowLabelsOption);
+		} else {
+			effectiveChartOptions.setShowLabels(showLabels);
+		}
+		
+		Boolean showPoints = parameterChartOptions.getShowPoints();
+		if (showPoints == null) {
+			showPoints = reportChartOptions.getShowPoints();
+		}
+		if (showPoints == null) {
+			effectiveChartOptions.setShowPoints(false);
+		} else {
+			effectiveChartOptions.setShowPoints(showPoints);
+		}
+		
+		Boolean showData = parameterChartOptions.getShowData();
+		if (showData == null) {
+			showData = reportChartOptions.getShowData();
+		}
+		if (showData == null) {
+			effectiveChartOptions.setShowData(false);
+		} else {
+			effectiveChartOptions.setShowData(showData);
 		}
 
 		//set default label format.
 		//{2} for category based charts
 		//{0} ({2}) for pie chart html output
 		//{0} = {1} ({2}) for pie chart png and pdf output
-		ReportType reportType = report.getReportType();
-		String labelFormat = effectiveChartOptions.getLabelFormat();
+		String labelFormat = parameterChartOptions.getLabelFormat();
 		if (StringUtils.isBlank(labelFormat)) {
 			effectiveChartOptions.setLabelFormat(reportChartOptions.getLabelFormat());
 		}
 		labelFormat = effectiveChartOptions.getLabelFormat();
 		if (StringUtils.isBlank(labelFormat)) {
 			if (reportType == ReportType.Pie2DChart || reportType == ReportType.Pie3DChart) {
-				if (reportFormat == ReportFormat.html) {
+				if (reportFormat == null || reportFormat == ReportFormat.html) {
 					labelFormat = "{0} ({2})";
 				} else {
 					labelFormat = "{0} = {1} ({2})";

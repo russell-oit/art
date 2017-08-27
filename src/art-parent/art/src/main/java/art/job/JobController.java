@@ -24,12 +24,15 @@ import art.ftpserver.FtpServerService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
 import art.jobrunners.ReportJob;
+import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportOptions;
+import art.runreport.ReportOutputGenerator;
+import art.runreport.RunReportHelper;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.user.User;
@@ -286,7 +289,7 @@ public class JobController {
 
 	@RequestMapping(value = "/addJob", method = {RequestMethod.GET, RequestMethod.POST})
 	public String addJob(Model model, HttpServletRequest request, HttpSession session) {
-		
+
 		logger.debug("Entering addJob");
 
 		Job job = new Job();
@@ -309,7 +312,8 @@ public class JobController {
 
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
 			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request);
-			addParameters(model, paramProcessorResult);
+			Report report = job.getReport();
+			addParameters(model, paramProcessorResult, report, request);
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -412,12 +416,17 @@ public class JobController {
 
 		Map<String, String[]> passedValues = new HashMap<>();
 
+		List<String> nonBooleanParams = new ArrayList<>();
+		nonBooleanParams.add("chartWidth");
+		nonBooleanParams.add("chartHeight");
+
 		Map<String, String[]> requestParameters = request.getParameterMap();
 		for (Entry<String, String[]> entry : requestParameters.entrySet()) {
 			String htmlParamName = entry.getKey();
 			logger.debug("htmlParamName='{}'", htmlParamName);
 
-			if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)) {
+			if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)
+					|| ArtUtils.containsIgnoreCase(nonBooleanParams, htmlParamName)) {
 				String[] paramValues = entry.getValue();
 				passedValues.put(htmlParamName, paramValues);
 			}
@@ -449,11 +458,58 @@ public class JobController {
 			jobParam.setParamTypeString("X");
 			jobParameterService.addJobParameter(jobParam);
 		}
+		String swapAxesValue = request.getParameter("swapAxes");
+		if (swapAxesValue != null) {
+			JobParameter jobParam = new JobParameter();
+			jobParam.setJobId(jobId);
+			jobParam.setName("swapAxes");
+			jobParam.setValue("true");
+			jobParam.setParamTypeString("X");
+			jobParameterService.addJobParameter(jobParam);
+		}
+
+		//add boolean chart options
+		String showLegendValue = request.getParameter("showLegend");
+		if (showLegendValue != null) {
+			JobParameter jobParam = new JobParameter();
+			jobParam.setJobId(jobId);
+			jobParam.setName("showLegend");
+			jobParam.setValue("true");
+			jobParam.setParamTypeString("X");
+			jobParameterService.addJobParameter(jobParam);
+		}
+		String showLabelsValue = request.getParameter("showLabels");
+		if (showLabelsValue != null) {
+			JobParameter jobParam = new JobParameter();
+			jobParam.setJobId(jobId);
+			jobParam.setName("showLabels");
+			jobParam.setValue("true");
+			jobParam.setParamTypeString("X");
+			jobParameterService.addJobParameter(jobParam);
+		}
+		String showDataValue = request.getParameter("showData");
+		if (showDataValue != null) {
+			JobParameter jobParam = new JobParameter();
+			jobParam.setJobId(jobId);
+			jobParam.setName("showData");
+			jobParam.setValue("true");
+			jobParam.setParamTypeString("X");
+			jobParameterService.addJobParameter(jobParam);
+		}
+		String showPointsValue = request.getParameter("showPoints");
+		if (showPointsValue != null) {
+			JobParameter jobParam = new JobParameter();
+			jobParam.setJobId(jobId);
+			jobParam.setName("showPoints");
+			jobParam.setValue("true");
+			jobParam.setParamTypeString("X");
+			jobParameterService.addJobParameter(jobParam);
+		}
 	}
 
 	@RequestMapping(value = "/editJob", method = RequestMethod.GET)
 	public String editJob(@RequestParam("id") Integer id, Model model,
-			HttpSession session) {
+			HttpSession session, HttpServletRequest request) {
 
 		logger.debug("Entering editJob: id={}", id);
 
@@ -468,7 +524,7 @@ public class JobController {
 			int reportId = report.getReportId();
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id, sessionUser);
-			addParameters(model, paramProcessorResult);
+			addParameters(model, paramProcessorResult, report, request);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -482,9 +538,13 @@ public class JobController {
 	 *
 	 * @param model the model
 	 * @param paramProcessorResult the parameter processor result that contains
-	 * report parameters, report options and chart options
+	 * the job's report report parameters, report options and chart options
+	 * @report the job's report
+	 * @param the http request
 	 */
-	private void addParameters(Model model, ParameterProcessorResult paramProcessorResult) {
+	private void addParameters(Model model, ParameterProcessorResult paramProcessorResult,
+			Report report, HttpServletRequest request) {
+
 		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 
 		//create map in order to display parameters by position
@@ -495,9 +555,17 @@ public class JobController {
 
 		model.addAttribute("reportParams", reportParams);
 
-		//add report options for the showSelectedParameters option
+		//add report options for the showSelectedParameters and swapAxes options
 		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 		model.addAttribute("reportOptions", reportOptions);
+
+		ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
+		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+		ChartOptions effectiveChartOptions = reportOutputGenerator.getEffectiveChartOptions(report, parameterChartOptions);
+		model.addAttribute("chartOptions", effectiveChartOptions);
+		
+		RunReportHelper runReportHelper = new RunReportHelper();
+		runReportHelper.setEnableSwapAxes(report.getReportType(), request);
 	}
 
 	@RequestMapping(value = "/editJobs", method = RequestMethod.GET)
@@ -570,7 +638,7 @@ public class JobController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-		
+
 		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
 
 		return "editJob";

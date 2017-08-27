@@ -31,6 +31,7 @@ import art.reportgroup.ReportGroupService;
 import art.saiku.SaikuReport;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -51,7 +51,6 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,19 +183,16 @@ public class ReportService {
 			index = optionsString.lastIndexOf("@");
 
 			if (usingShortDescription || index > -1) {
+				ArtHelper artHelper = new ArtHelper();
+
 				//set default for showlegend. false for heat maps. true for all other graphs
 				ReportType reportType = report.getReportType();
-				if (reportType == ReportType.HeatmapChart) {
-					chartOptions.setShowLegend(false);
-				} else {
-					chartOptions.setShowLegend(true);
-				}
+				boolean defaultShowLegendOption = artHelper.getDefaultShowLegendOption(reportType);
+				chartOptions.setShowLegend(defaultShowLegendOption);
+
 				//set default for showlabels. true for pie charts. false for all other graphs
-				if (reportType == ReportType.Pie2DChart || reportType == ReportType.Pie3DChart) {
-					chartOptions.setShowLabels(true);
-				} else {
-					chartOptions.setShowLabels(false);
-				}
+				boolean defaultShowLabelsOption = artHelper.getDefaultShowLabelsOption(reportType);
+				chartOptions.setShowLabels(defaultShowLabelsOption);
 			}
 
 			String options;
@@ -212,46 +208,8 @@ public class ReportService {
 				}
 			}
 
-			StringTokenizer st = new StringTokenizer(options.trim(), " ");
-
-			String token;
-			while (st.hasMoreTokens()) {
-				token = st.nextToken();
-
-				if (token.startsWith("rotate_at") || token.startsWith("rotateAt")) {
-					String tmp = StringUtils.substringAfter(token, ":");
-					chartOptions.setRotateAt(NumberUtils.toInt(tmp));
-				} else if (token.startsWith("remove_at") || token.startsWith("removeAt")) {
-					String tmp = StringUtils.substringAfter(token, ":");
-					chartOptions.setRemoveAt(NumberUtils.toInt(tmp));
-				} else if (token.startsWith("noleg")) {
-					chartOptions.setShowLegend(false);
-				} else if (StringUtils.startsWithIgnoreCase(token, "showLegend")) {
-					chartOptions.setShowLegend(true);
-				} else if (token.startsWith("nolab")) {
-					chartOptions.setShowLabels(false);
-				} else if (StringUtils.startsWithIgnoreCase(token, "showLabels")) {
-					chartOptions.setShowLabels(true);
-				} else if (StringUtils.startsWithIgnoreCase(token, "showPoints")) {
-					chartOptions.setShowPoints(true);
-				} else if (StringUtils.startsWithIgnoreCase(token, "showData")) {
-					chartOptions.setShowData(true);
-				} else if (token.contains("x")) { //must come after named options e.g. rotate_at
-					int idx = token.indexOf("x");
-					String width = token.substring(0, idx);
-					String height = token.substring(idx + 1);
-					chartOptions.setWidth(NumberUtils.toInt(width));
-					chartOptions.setHeight(NumberUtils.toInt(height));
-				} else if (token.contains(":")) { //must come after named options e.g. rotate_at
-					int idx = token.indexOf(":");
-					String yMin = token.substring(0, idx);
-					String yMax = token.substring(idx + 1);
-					chartOptions.setyAxisMin(NumberUtils.toDouble(yMin));
-					chartOptions.setyAxisMax(NumberUtils.toDouble(yMax));
-				} else if (token.startsWith("#")) {
-					chartOptions.setBackgroundColor(token);
-				}
-			}
+			ReportHelper reportHelper = new ReportHelper();
+			reportHelper.setChartOptionsFromString(options, chartOptions);
 
 			report.setChartOptions(chartOptions);
 		}
@@ -355,7 +313,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
+
 	/**
 	 * Returns all active saiku connection reports
 	 *
@@ -365,8 +323,8 @@ public class ReportService {
 	@Cacheable(value = "reports")
 	public List<Report> getAllActiveSaikuConnectionReports() throws SQLException {
 		logger.debug("Entering getAllActiveSaikuConnectionReports");
-		
-		String sql= SQL_SELECT_ALL + " WHERE QUERY_TYPE=150 AND ACTIVE=1";
+
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_TYPE=150 AND ACTIVE=1";
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
@@ -618,12 +576,12 @@ public class ReportService {
 		}
 
 		int affectedRows;
-		
+
 		boolean newRecord = false;
 		if (newRecordId != null) {
 			newRecord = true;
 		}
-		
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
@@ -729,7 +687,7 @@ public class ReportService {
 
 			affectedRows = dbService.update(sql, values);
 		}
-		
+
 		if (newRecordId != null) {
 			report.setReportId(newRecordId);
 		}
@@ -743,7 +701,7 @@ public class ReportService {
 					affectedRows, newRecord, report);
 		}
 	}
-	
+
 	/**
 	 * Updates multiple reports
 	 *

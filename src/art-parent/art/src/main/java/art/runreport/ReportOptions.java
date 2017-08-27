@@ -31,6 +31,7 @@ public class ReportOptions implements Serializable {
 	private int splitColumn;
 	private boolean showSql;
 	private boolean prettyPrint;
+	private boolean swapAxes;
 
 	/**
 	 * @return the prettyPrint
@@ -86,5 +87,19 @@ public class ReportOptions implements Serializable {
 	 */
 	public void setShowSelectedParameters(boolean showSelectedParameters) {
 		this.showSelectedParameters = showSelectedParameters;
+	}
+
+	/**
+	 * @return the swapAxes
+	 */
+	public boolean isSwapAxes() {
+		return swapAxes;
+	}
+
+	/**
+	 * @param swapAxes the swapAxes to set
+	 */
+	public void setSwapAxes(boolean swapAxes) {
+		this.swapAxes = swapAxes;
 	}
 }

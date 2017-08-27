@@ -24,6 +24,7 @@ import art.report.ChartOptions;
 import art.report.Report;
 import art.reportoptions.JFreeChartOptions;
 import art.reportparameter.ReportParameter;
+import art.utils.ArtUtils;
 import art.utils.DrilldownLinkHelper;
 import net.sf.cewolfart.ChartPostProcessor;
 import net.sf.cewolfart.ChartValidationException;
@@ -84,8 +85,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 	private static final Logger logger = LoggerFactory.getLogger(Chart.class);
 	private static final long serialVersionUID = 1L;
-	protected final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
-	private String backgroundColor = WHITE_HEX_COLOR_CODE;
+	private String backgroundColor = ArtUtils.WHITE_HEX_COLOR_CODE;
 	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
 	private Dataset dataset;
 	private ChartOptions chartOptions;
@@ -503,7 +503,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		Plot plot = chart.getPlot();
 
 		String labelFormat = chartOptions.getLabelFormat(); //either "off" or a format string e.g. {2}
-		if (chartOptions.isShowLabels() && labelFormat != null) {
+		if (chartOptions.getShowLabels() && labelFormat != null) {
 			if (plot instanceof PiePlot) {
 				PiePlot piePlot = (PiePlot) plot;
 
@@ -544,7 +544,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	@Override
 	protected JFreeChart produceChart() throws DatasetProduceException, ChartValidationException {
-		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, chartOptions.isShowLegend());
+		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, chartOptions.getShowLegend());
 	}
 
 	/**
@@ -605,7 +605,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		//with additional processing like antialising and running external post processors
 		//in order to achieve similar look as with interactive/browser display using <cewolf> tags
 		//alternative is to duplicate the code
-		showLegend = chartOptions.isShowLegend();
+		showLegend = chartOptions.getShowLegend();
 		JFreeChart chart = getChart();
 
 		//run internal post processor
@@ -635,7 +635,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 		LineRendererProcessor pointsProcessor = new LineRendererProcessor();
 		Map<String, String> lineOptions = new HashMap<>();
-		lineOptions.put("shapes", String.valueOf(chartOptions.isShowPoints()));
+		lineOptions.put("shapes", String.valueOf(chartOptions.getShowPoints()));
 		pointsProcessor.processChart(chart, lineOptions);
 	}
 
@@ -698,7 +698,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		}
 
 		boolean showPoints;
-		if (chartOptions != null && chartOptions.isShowPoints()) {
+		if (chartOptions != null && chartOptions.getShowPoints()) {
 			showPoints = true;
 		} else {
 			showPoints = false;
