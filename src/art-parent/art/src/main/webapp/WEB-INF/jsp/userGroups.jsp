@@ -147,9 +147,7 @@ Display user groups
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
 					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -167,13 +165,7 @@ Display user groups
 						</td>
 						<td>${encode:forHtmlContent(group.description)}</td>
 						<td>${encode:forHtmlContent(group.createdBy)}</td>
-						<td data-sort="${group.creationDate.time}">
-							<fmt:formatDate value="${group.creationDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>${encode:forHtmlContent(group.updatedBy)}</td>
-						<td data-sort="${group.updateDate.time}">
-							<fmt:formatDate value="${group.updateDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

@@ -171,9 +171,7 @@ Display datasources
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
 					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
 					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -191,13 +189,7 @@ Display datasources
 						<td>${encode:forHtmlContent(datasource.description)}</td>
 						<td><t:displayActiveStatus active="${datasource.active}"/></td>
 						<td>${encode:forHtmlContent(datasource.createdBy)}</td>
-						<td data-sort="${datasource.creationDate.time}">
-							<fmt:formatDate value="${datasource.creationDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>${encode:forHtmlContent(datasource.updatedBy)}</td>
-						<td data-sort="${datasource.updateDate.time}">
-							<fmt:formatDate value="${datasource.updateDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

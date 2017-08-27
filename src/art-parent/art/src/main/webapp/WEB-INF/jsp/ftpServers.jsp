@@ -165,9 +165,7 @@
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
 					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
 					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -185,13 +183,7 @@
 						<td>${encode:forHtmlContent(ftpServer.description)}</td>
 						<td><t:displayActiveStatus active="${ftpServer.active}"/></td>
 						<td>${encode:forHtmlContent(ftpServer.createdBy)}</td>
-						<td data-sort="${ftpServer.creationDate.time}">
-							<fmt:formatDate value="${ftpServer.creationDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>${encode:forHtmlContent(ftpServer.updatedBy)}</td>
-						<td data-sort="${ftpServer.updateDate.time}">
-							<fmt:formatDate value="${ftpServer.updateDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" href="${pageContext.request.contextPath}/editFtpServer?id=${ftpServer.ftpServerId}">

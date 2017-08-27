@@ -147,9 +147,7 @@ Display schedules
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
 					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -166,13 +164,7 @@ Display schedules
 						</td>
 						<td>${encode:forHtmlContent(schedule.description)}</td>
 						<td>${encode:forHtmlContent(schedule.createdBy)}</td>
-						<td data-sort="${schedule.creationDate.time}">
-							<fmt:formatDate value="${schedule.creationDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>${encode:forHtmlContent(schedule.updatedBy)}</td>
-						<td data-sort="${schedule.updateDate.time}">
-							<fmt:formatDate value="${schedule.updateDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

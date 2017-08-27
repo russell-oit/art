@@ -175,9 +175,7 @@ Display user configuration page
 					<th><spring:message code="users.text.fullName"/></th>
 					<th><spring:message code="page.text.active"/></th>
 					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
 					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -198,13 +196,7 @@ Display user configuration page
 											   disabledText="${disabledText}"/>
 						</td>
 						<td>${encode:forHtmlContent(user.createdBy)}</td>
-						<td data-sort="${user.creationDate.time}">
-							<fmt:formatDate value="${user.creationDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>${encode:forHtmlContent(user.updatedBy)}</td>
-						<td data-sort="${user.updateDate.time}">
-							<fmt:formatDate value="${user.updateDate}" pattern="${dateDisplayPattern}"/>
-						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" href="${pageContext.request.contextPath}/editUser?id=${user.userId}">
