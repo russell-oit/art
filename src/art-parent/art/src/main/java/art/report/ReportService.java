@@ -208,8 +208,7 @@ public class ReportService {
 				}
 			}
 
-			ReportHelper reportHelper = new ReportHelper();
-			reportHelper.setChartOptionsFromString(options, chartOptions);
+			chartOptions.setChartOptionsFromString(optionsString);
 
 			report.setChartOptions(chartOptions);
 		}

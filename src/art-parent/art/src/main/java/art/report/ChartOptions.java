@@ -18,6 +18,9 @@
 package art.report;
 
 import java.io.Serializable;
+import java.util.StringTokenizer;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  * Represents chart options
@@ -208,5 +211,58 @@ public class ChartOptions implements Serializable {
 	 */
 	public void setBackgroundColor(String backgroundColor) {
 		this.backgroundColor = backgroundColor;
+	}
+	
+	/**
+	 * Sets some chart option properties from a string representation of the options
+	 * 
+	 * @param optionsString the options string
+	 * @param chartOptions the chart options object to set
+	 */
+	public void setChartOptionsFromString(String optionsString) {
+		if(StringUtils.isBlank(optionsString)){
+			return;
+		}
+		
+		StringTokenizer st = new StringTokenizer(optionsString.trim(), " ");
+
+		String token;
+		while (st.hasMoreTokens()) {
+			token = st.nextToken();
+
+			if (token.startsWith("rotate_at") || token.startsWith("rotateAt")) {
+				String tmp = StringUtils.substringAfter(token, ":");
+				setRotateAt(NumberUtils.toInt(tmp));
+			} else if (token.startsWith("remove_at") || token.startsWith("removeAt")) {
+				String tmp = StringUtils.substringAfter(token, ":");
+				setRemoveAt(NumberUtils.toInt(tmp));
+			} else if (token.startsWith("noleg")) {
+				setShowLegend(false);
+			} else if (StringUtils.startsWithIgnoreCase(token, "showLegend")) {
+				setShowLegend(true);
+			} else if (token.startsWith("nolab")) {
+				setShowLabels(false);
+			} else if (StringUtils.startsWithIgnoreCase(token, "showLabels")) {
+				setShowLabels(true);
+			} else if (StringUtils.startsWithIgnoreCase(token, "showPoints")) {
+				setShowPoints(true);
+			} else if (StringUtils.startsWithIgnoreCase(token, "showData")) {
+				setShowData(true);
+			} else if (token.contains("x")) { //check must come after named options e.g. rotate_at
+				int idx = token.indexOf("x");
+				String tempWidth = token.substring(0, idx);
+				String tempHeight = token.substring(idx + 1);
+				setWidth(NumberUtils.toInt(tempWidth));
+				setHeight(NumberUtils.toInt(tempHeight));
+			} else if (token.contains(":")) { //check must come after named options e.g. rotate_at
+				int idx = token.indexOf(":");
+				String yMin = token.substring(0, idx);
+				String yMax = token.substring(idx + 1);
+				setyAxisMin(NumberUtils.toDouble(yMin));
+				setyAxisMax(NumberUtils.toDouble(yMax));
+			} else if (token.startsWith("#")) {
+				setBackgroundColor(token);
+			}
+		}
 	}
 }

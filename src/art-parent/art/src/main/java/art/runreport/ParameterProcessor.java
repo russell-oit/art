@@ -22,7 +22,6 @@ import art.enums.ParameterType;
 import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.report.Report;
-import art.report.ReportHelper;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
@@ -631,8 +630,6 @@ public class ParameterProcessor {
 
 		ChartOptions chartOptions = new ChartOptions();
 		
-		ReportHelper reportHelper = new ReportHelper();
-
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
 			String htmlParamName = entry.getKey();
 			String[] paramValues = entry.getValue();
@@ -679,7 +676,7 @@ public class ParameterProcessor {
 					chartOptions.setBackgroundColor(paramValue);
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "_graphOptions")) {
 					//handle legacy parameter name in art_jobs_parameters table
-					reportHelper.setChartOptionsFromString(paramValue, chartOptions);
+					chartOptions.setChartOptionsFromString(paramValue);
 				}
 			}
 		}

@@ -457,7 +457,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		Plot plot = chart.getPlot();
 
 		//set y axis range if required
-		if (chartOptions.getyAxisMin() != 0 && chartOptions.getyAxisMax() != 0) {
+		if (chartOptions.getyAxisMin() != 0 || chartOptions.getyAxisMax() != 0) {
 			if (plot instanceof XYPlot) {
 				XYPlot xyPlot = (XYPlot) plot;
 				NumberAxis rangeAxis = (NumberAxis) xyPlot.getRangeAxis();
