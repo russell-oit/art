@@ -626,49 +626,49 @@ public class Config extends HttpServlet {
 	/**
 	 * Sets defaults for application settings that have invalid values
 	 */
-	private static void setSettingsDefaults(Settings pSettings) {
-		if (pSettings == null) {
+	private static void setSettingsDefaults(Settings parSettings) {
+		if (parSettings == null) {
 			return;
 		}
 
-		if (pSettings.getSmtpPort() <= 0) {
-			pSettings.setSmtpPort(25);
+		if (parSettings.getSmtpPort() <= 0) {
+			parSettings.setSmtpPort(25);
 		}
-		if (pSettings.getMaxRowsDefault() <= 0) {
-			pSettings.setMaxRowsDefault(10000);
+		if (parSettings.getMaxRowsDefault() <= 0) {
+			parSettings.setMaxRowsDefault(10000);
 		}
-		if (pSettings.getLdapPort() <= 0) {
-			pSettings.setLdapPort(389);
+		if (parSettings.getLdapPort() <= 0) {
+			parSettings.setLdapPort(389);
 		}
-		if (StringUtils.isBlank(pSettings.getLdapUserIdAttribute())) {
-			pSettings.setLdapUserIdAttribute("uid");
+		if (StringUtils.isBlank(parSettings.getLdapUserIdAttribute())) {
+			parSettings.setLdapUserIdAttribute("uid");
 		}
-		if (StringUtils.isBlank(pSettings.getDateFormat())) {
-			pSettings.setDateFormat("dd-MMM-yyyy");
+		if (StringUtils.isBlank(parSettings.getDateFormat())) {
+			parSettings.setDateFormat("dd-MMM-yyyy");
 		}
-		if (StringUtils.isBlank(pSettings.getTimeFormat())) {
-			pSettings.setTimeFormat("HH:mm:ss");
+		if (StringUtils.isBlank(parSettings.getTimeFormat())) {
+			parSettings.setTimeFormat("HH:mm:ss");
 		}
-		if (StringUtils.isBlank(pSettings.getReportFormats())) {
-			pSettings.setReportFormats("htmlDataTable,htmlGrid,xlsx,pdf,docx,htmlPlain");
+		if (StringUtils.isBlank(parSettings.getReportFormats())) {
+			parSettings.setReportFormats("htmlDataTable,htmlGrid,xlsx,pdf,docx,htmlPlain");
 		}
-		if (pSettings.getMaxRunningReports() <= 0) {
-			pSettings.setMaxRunningReports(1000);
+		if (parSettings.getMaxRunningReports() <= 0) {
+			parSettings.setMaxRunningReports(1000);
 		}
-		if (pSettings.getArtAuthenticationMethod() == null) {
-			pSettings.setArtAuthenticationMethod(ArtAuthenticationMethod.Internal);
+		if (parSettings.getArtAuthenticationMethod() == null) {
+			parSettings.setArtAuthenticationMethod(ArtAuthenticationMethod.Internal);
 		}
-		if (pSettings.getLdapConnectionEncryptionMethod() == null) {
-			pSettings.setLdapConnectionEncryptionMethod(LdapConnectionEncryptionMethod.None);
+		if (parSettings.getLdapConnectionEncryptionMethod() == null) {
+			parSettings.setLdapConnectionEncryptionMethod(LdapConnectionEncryptionMethod.None);
 		}
-		if (pSettings.getLdapAuthenticationMethod() == null) {
-			pSettings.setLdapAuthenticationMethod(LdapAuthenticationMethod.Simple);
+		if (parSettings.getLdapAuthenticationMethod() == null) {
+			parSettings.setLdapAuthenticationMethod(LdapAuthenticationMethod.Simple);
 		}
-		if (pSettings.getPdfPageSize() == null) {
-			pSettings.setPdfPageSize(PdfPageSize.A4Landscape);
+		if (parSettings.getPdfPageSize() == null) {
+			parSettings.setPdfPageSize(PdfPageSize.A4Landscape);
 		}
-		if (pSettings.getDisplayNull() == null) {
-			pSettings.setDisplayNull(DisplayNull.NoNumbersAsZero);
+		if (parSettings.getDisplayNull() == null) {
+			parSettings.setDisplayNull(DisplayNull.NoNumbersAsZero);
 		}
 	}
 
