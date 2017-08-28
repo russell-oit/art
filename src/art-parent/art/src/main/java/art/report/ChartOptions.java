@@ -63,6 +63,7 @@ public class ChartOptions implements Serializable {
 	public Boolean getShowLegend() {
 		//must use get in method name instead of is if using Boolean object and not boolean primitive
 		//otherwise you'll have errors in jsp pages
+		//https://stackoverflow.com/questions/13952630/javax-el-propertynotfoundexception-property-foo-not-readable-on-type-java-lan
 		return showLegend;
 	}
 
