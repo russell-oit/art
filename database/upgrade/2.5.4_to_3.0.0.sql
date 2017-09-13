@@ -45,11 +45,19 @@
 DROP TABLE ART_SETTINGS;
 CREATE TABLE ART_DATABASE_VERSION
 (
+	DATABASE_VERSION VARCHAR(50)
+);
+-- insert database version
+INSERT INTO ART_DATABASE_VERSION VALUES('3.0-rc5');
+
+-- create custom upgrades table
+CREATE TABLE ART_CUSTOM_UPGRADES
+(
 	DATABASE_VERSION VARCHAR(50),
 	UPGRADED INTEGER
 );
--- insert database version
-INSERT INTO ART_DATABASE_VERSION VALUES('3.0-rc5', 0);
+-- insert custom upgrade setting for 3.0
+INSERT INTO ART_CUSTOM_UPGRADES VALUES('3.0', 0);
 
 -- reset x_axis_label column for non-graph queries
 UPDATE ART_QUERIES SET X_AXIS_LABEL='' WHERE QUERY_TYPE>=0;

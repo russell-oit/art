@@ -404,7 +404,7 @@ public class Config extends HttpServlet {
 			//upgrade art database
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
-			upgradeHelper.upgrade(artVersion, templatesPath);
+			upgradeHelper.upgrade(templatesPath);
 		} catch (SQLException | RuntimeException ex) {
 			//include runtime exception in case of PoolInitializationException when using hikaricp
 			logger.error("Error", ex);

@@ -22,11 +22,20 @@
 
 CREATE TABLE ART_DATABASE_VERSION
 (
+	DATABASE_VERSION VARCHAR(50)
+);
+-- insert database version
+INSERT INTO ART_DATABASE_VERSION VALUES('3.0-rc5');
+
+
+-- ART_CUSTOM_UPGRADES
+-- stores indications of custom upgrades that have been performed
+
+CREATE TABLE ART_CUSTOM_UPGRADES
+(
 	DATABASE_VERSION VARCHAR(50),
 	UPGRADED INTEGER
 );
--- insert database version
-INSERT INTO ART_DATABASE_VERSION VALUES('3.0-rc5', 1);
 
 
 -- ART_USERS 

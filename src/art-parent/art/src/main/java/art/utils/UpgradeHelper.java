@@ -72,12 +72,11 @@ public class UpgradeHelper {
 	/**
 	 * Runs upgrade steps
 	 *
-	 * @param artVersion the art version
 	 * @param templatesPath the path to the templates directory
 	 */
-	public void upgrade(String artVersion, String templatesPath) {
+	public void upgrade(String templatesPath) {
 		migrateJobsToQuartz();
-		upgradeDatabase(artVersion, templatesPath);
+		upgradeDatabase(templatesPath);
 	}
 
 	/**
@@ -204,8 +203,7 @@ public class UpgradeHelper {
 
 						psUpdate.addBatch();
 						//run executebatch periodically to prevent out of memory errors
-						if (migratedRecordCount % batchSize
-								== 0) {
+						if (migratedRecordCount % batchSize == 0) {
 							psUpdate.executeBatch();
 							psUpdate.clearBatch(); //not sure if this is necessary
 						}
@@ -231,60 +229,49 @@ public class UpgradeHelper {
 	/**
 	 * Runs upgrade steps
 	 *
-	 * @param artVersion the art version
 	 * @param templatesPath the path to the templates directory
 	 */
-	private void upgradeDatabase(String artVersion, String templatesPath) {
-		try {
-			String sql = "SELECT UPGRADED FROM ART_DATABASE_VERSION";
-			ResultSetHandler<Integer> h = new ScalarHandler<>();
-			Integer upgradedInteger = dbService.query(sql, h);
-			int upgradedInt;
-			if (upgradedInteger == null) {
-				upgradedInt = 0;
-			} else {
-				upgradedInt = upgradedInteger;
-			}
-			boolean upgraded = BooleanUtils.toBoolean(upgradedInt);
-
-			if (!upgraded) {
-				//don't consider alpha, beta, rc etc
-				//also, pre-releases, i.e. alpha, beta, etc are considered less than final releases
-				String version = StringUtils.substringBefore(artVersion, "-");
-				logger.debug("version='{}'", version);
-
-				//changes introduced in 3.0
-				if (StringUtils.equals(version, "3.0")) {
-					logger.info("Performing 3.0 upgrade steps");
-					upgradeDatabaseTo30();
-					deleteDotJasperFiles(templatesPath);
-					logger.info("Done performing 3.0 upgrade steps");
-				}
-				
-				sql = "UPDATE ART_DATABASE_VERSION SET UPGRADED=1";
-				dbService.update(sql);
-			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-		}
+	private void upgradeDatabase(String templatesPath) {
+		upgradeDatabaseTo30(templatesPath);
 	}
 
 	/**
 	 * Upgrades the database to 3.0
 	 *
-	 * @throws SQLException
+	 * @param templatesPath the path to the templates directory
 	 */
-	private void upgradeDatabaseTo30() throws SQLException {
-		addUserIds();
-		addScheduleIds();
-		addDrilldownIds();
-		addRuleIds();
-		addQueryRuleIds();
-		addParameters();
-		addUserRuleValueKeys();
-		addUserGroupRuleValueKeys();
-		addCachedDatasourceIds();
-		updateDatasourcePasswords();
+	private void upgradeDatabaseTo30(String templatesPath) {
+		try {
+			String databaseVersionString = "3.0";
+			String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
+			ResultSetHandler<Integer> h = new ScalarHandler<>();
+			Integer upgradedValue = dbService.query(sql, h, databaseVersionString);
+			if (upgradedValue == null || upgradedValue == 1) {
+				return;
+			}
+
+			logger.info("Performing 3.0 upgrade steps");
+
+			addUserIds();
+			addScheduleIds();
+			addDrilldownIds();
+			addRuleIds();
+			addQueryRuleIds();
+			addParameters();
+			addUserRuleValueKeys();
+			addUserGroupRuleValueKeys();
+			addCachedDatasourceIds();
+			updateDatasourcePasswords();
+
+			sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
+			dbService.update(sql, databaseVersionString);
+
+			logger.info("Done performing 3.0 upgrade steps");
+
+			deleteDotJasperFiles(templatesPath);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 	}
 
 	/**
