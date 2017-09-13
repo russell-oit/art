@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Administration Manual"> 
-  <meta name="version" content="3.0-rc4"> 
+  <meta name="version" content="3.0-rc5"> 
   <title>ART - Administration Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -2822,7 +2822,7 @@ WHERE REGION = #region#
       <li>Create the report that will retrieve the data you want. What you select in the Datasource field is not important as the report will use a dynamically specified datasource. It is advisable though to set this to a valid, default datasource for your sql.</li> 
       <li>Define a single-value parameter for your report, setting the Data Type to Datasource. If you would like the available datasources to be selected from a list, create and specify the LOV report that will display the desired datasources.</li> 
      </ul> 
-     <p>When you run the report, it will use the value of the datasource parameter to determine which datasource to run the report on. The value of this parameter should be an existing datasource id.</p> 
+     <p>When you run the report, it will use the value of the datasource parameter to determine which datasource to run the report on. The value of this parameter should be a datasource id or datasource name. If it passes the "isNumeric" test, it will be assumed that it is referring to a datasource id, otherwise a check against datasource names will be done.</p> 
     </div> 
    </div> 
    <div> 
