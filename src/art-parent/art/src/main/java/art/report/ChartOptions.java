@@ -218,7 +218,6 @@ public class ChartOptions implements Serializable {
 	 * Sets some chart option properties from a string representation of the options
 	 * 
 	 * @param optionsString the options string
-	 * @param chartOptions the chart options object to set
 	 */
 	public void setChartOptionsFromString(String optionsString) {
 		if(StringUtils.isBlank(optionsString)){

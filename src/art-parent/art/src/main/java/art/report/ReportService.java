@@ -208,7 +208,7 @@ public class ReportService {
 				}
 			}
 
-			chartOptions.setChartOptionsFromString(optionsString);
+			chartOptions.setChartOptionsFromString(options);
 
 			report.setChartOptions(chartOptions);
 		}
