@@ -88,11 +88,11 @@
 	</build>
 	
 	<repositories>
-		<!-- repository for eigenbase files -->
+		<!-- repository for eigenbase files, javacup -->
 		<repository>
 			<id>pentaho</id>
 			<name>Pentaho</name>
-			<url>http://repository.pentaho.org/artifactory/repo</url>
+			<url>http://nexus.pentaho.org/content/groups/omni</url>
 		</repository>
 	</repositories>
 	

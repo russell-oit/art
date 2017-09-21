@@ -94,6 +94,15 @@
 		</plugins>
 	</build>
 	
+	<repositories>
+		<!-- repository for javacup -->
+		<repository>
+			<id>pentaho</id>
+			<name>Pentaho</name>
+			<url>http://nexus.pentaho.org/content/groups/omni</url>
+		</repository>
+	</repositories>
+	
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.art</groupId>
