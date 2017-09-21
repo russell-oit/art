@@ -32,6 +32,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -96,19 +97,35 @@ public class ExportController {
 
 	/**
 	 * Serves a file to the http response
-	 * 
+	 *
 	 * @param fullFilename the full path to the file to serve
 	 * @param request the http request
 	 * @param response the http response
 	 */
 	private void serveFile(String fullFilename, HttpServletRequest request,
 			HttpServletResponse response) {
-		
+
 		logger.debug("Entering serveFile: fullFilename='{}'", fullFilename);
 
 		File file = new File(fullFilename);
 
 		if (file.exists()) {
+			// Determine the file's content type
+			//https://stackoverflow.com/questions/19711956/alternative-to-files-probecontenttype
+			//https://odoepner.wordpress.com/2013/07/29/transparently-improve-java-7-mime-type-recognition-with-apache-tika/
+			//https://dzone.com/articles/determining-file-types-java
+			//http://www.rgagnon.com/javadetails/java-0487.html
+			//https://howtodoinjava.com/spring/spring-mvc/spring-mvc-download-file-controller-example/
+			String mimeType = "application/octet-stream";
+			Tika tika = new Tika();
+			try {
+				mimeType = tika.detect(file);
+			} catch (IOException ex) {
+				logger.error("Error", ex);
+			}
+
+			response.setContentType(mimeType);
+
 			FileInputStream fs = null;
 			OutputStream os = null;
 
