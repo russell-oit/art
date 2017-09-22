@@ -72,7 +72,7 @@
 
 			function currentServerDate()
 			{
-				return moment().add('milliseconds', serverOffset);
+				return moment().add(serverOffset, 'milliseconds');
 			}
 
 			function updateClock()

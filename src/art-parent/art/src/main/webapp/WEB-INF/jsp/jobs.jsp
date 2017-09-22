@@ -54,7 +54,7 @@ Display user jobs and jobs configuration
 
 			function currentServerDate()
 			{
-				return moment().add('milliseconds', serverOffset);
+				return moment().add(serverOffset, 'milliseconds');
 			}
 
 			function updateClock()
