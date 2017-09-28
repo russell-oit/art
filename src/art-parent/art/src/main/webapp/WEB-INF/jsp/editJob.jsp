@@ -26,6 +26,8 @@
 	</c:when>
 </c:choose>
 
+<spring:message code="switch.text.yes" var="yesText"/>
+<spring:message code="switch.text.no" var="noText"/>
 <spring:message code="reports.format.htmlPlain" var="htmlPlainText"/>
 <spring:message code="reports.format.xlsZip" var="xlsZipText"/>
 <spring:message code="reports.format.pdf" var="pdfText"/>
@@ -34,13 +36,13 @@
 <spring:message code="reports.format.tsvZip" var="tsvZipText"/>
 <spring:message code="reports.format.png" var="pngText"/>
 <spring:message code="reports.format.html" var="htmlText"/>
-<spring:message code="switch.text.yes" var="yesText"/>
-<spring:message code="switch.text.no" var="noText"/>
 <spring:message code="reports.format.docx" var="docxText"/>
 <spring:message code="reports.format.odt" var="odtText"/>
 <spring:message code="reports.format.pptx" var="pptxText"/>
 <spring:message code="reports.format.ods" var="odsText"/>
 <spring:message code="reports.format.csv" var="csvText"/>
+<spring:message code="reports.format.slk" var="slkText"/>
+<spring:message code="reports.format.tsv" var="tsvText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -261,13 +263,9 @@
 						case 'CondEmailAttachment':
 						case 'CondPublish':
 						case 'Burst':
-							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
-							list.append(new Option('${xlsxText}', 'xlsx'));
-							list.append(new Option('${odsText}', 'ods'));
-							list.append(new Option('${pdfText}', 'pdf'));
-							list.append(new Option('${docxText}', 'docx'));
-							list.append(new Option('${odtText}', 'odt'));
-							list.append(new Option('${csvText}', 'csv'));
+			<c:forEach var="reportFormat" items="${fileReportFormats}">
+							list.append(new Option('${reportFormat.value}', '${reportFormat.key}'));
+			</c:forEach>
 							break;
 						case 'Print':
 							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
@@ -277,6 +275,9 @@
 							list.append(new Option('${docxText}', 'docx'));
 							list.append(new Option('${odtText}', 'odt'));
 							list.append(new Option('${csvText}', 'csv'));
+							list.append(new Option('${xlsText}', 'xls'));
+							list.append(new Option('${slkText}', 'slk'));
+							list.append(new Option('${tsvText}', 'tsv'));
 							break;
 						default:
 							list.append(new Option('--', '--'));

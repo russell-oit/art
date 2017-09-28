@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -288,7 +289,8 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/addJob", method = {RequestMethod.GET, RequestMethod.POST})
-	public String addJob(Model model, HttpServletRequest request, HttpSession session) {
+	public String addJob(Model model, HttpServletRequest request, HttpSession session,
+			Locale locale) {
 
 		logger.debug("Entering addJob");
 
@@ -319,21 +321,21 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJob("add", model, job);
+		return showEditJob("add", model, job, locale);
 	}
 
 	@RequestMapping(value = "/saveJob", method = RequestMethod.POST)
 	public String saveJob(@ModelAttribute("job") @Valid Job job,
 			@RequestParam("action") String action, @RequestParam("nextPage") String nextPage,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			HttpSession session, HttpServletRequest request) {
+			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveJob: job={}, action='{}', nextPage='{}'", job, action, nextPage);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditJob(action, model, job);
+			return showEditJob(action, model, job, locale);
 		}
 
 		try {
@@ -361,7 +363,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJob(action, model, job);
+		return showEditJob(action, model, job, locale);
 	}
 
 	@RequestMapping(value = "/saveJobs", method = RequestMethod.POST)
@@ -509,7 +511,7 @@ public class JobController {
 
 	@RequestMapping(value = "/editJob", method = RequestMethod.GET)
 	public String editJob(@RequestParam("id") Integer id, Model model,
-			HttpSession session, HttpServletRequest request) {
+			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering editJob: id={}", id);
 
@@ -530,7 +532,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJob("edit", model, job);
+		return showEditJob("edit", model, job, locale);
 	}
 
 	/**
@@ -563,7 +565,7 @@ public class JobController {
 		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 		ChartOptions effectiveChartOptions = reportOutputGenerator.getEffectiveChartOptions(report, parameterChartOptions);
 		model.addAttribute("chartOptions", effectiveChartOptions);
-		
+
 		RunReportHelper runReportHelper = new RunReportHelper();
 		runReportHelper.setEnableSwapAxes(report.getReportType(), request);
 	}
@@ -588,9 +590,10 @@ public class JobController {
 	 * @param action "add" or "edit"
 	 * @param model the spring model
 	 * @param job the job that is being scheduled
+	 * @param locale the current locale
 	 * @return the jsp file to display
 	 */
-	private String showEditJob(String action, Model model, Job job) {
+	private String showEditJob(String action, Model model, Job job, Locale locale) {
 		logger.debug("Entering showEditJob: action='{}'", action);
 
 		model.addAttribute("action", action);
@@ -628,6 +631,23 @@ public class JobController {
 		}
 
 		model.addAttribute("jobTypes", jobTypes);
+
+		Map<String, String> fileReportFormats = new LinkedHashMap<>();
+		List<String> jobReportFormats = new ArrayList<>(Config.getReportFormats());
+		jobReportFormats.remove("html");
+		jobReportFormats.remove("htmlFancy");
+		jobReportFormats.remove("htmlGrid");
+		jobReportFormats.remove("htmlDataTable");
+		if (!ArtUtils.containsIgnoreCase(jobReportFormats, "csv")) {
+			jobReportFormats.add("csv");
+		}
+
+		final String REPORT_FORMAT_PREFIX = "reports.format.";
+		for (String reportFormat : jobReportFormats) {
+			String reportFormatDescription = messageSource.getMessage(REPORT_FORMAT_PREFIX + reportFormat, null, locale);
+			fileReportFormats.put(reportFormat, reportFormatDescription);
+		}
+		model.addAttribute("fileReportFormats", fileReportFormats);
 
 		try {
 			model.addAttribute("dynamicRecipientReports", reportService.getDynamicRecipientReports());
