@@ -302,10 +302,7 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		//restrict file name that can be used for batch file
-		String filenameRegex = "[a-zA-Z0-9]{1,200}\\\\.[a-zA-Z0-9]{1,10}";
-		Pattern pattern = Pattern.compile(filenameRegex);
-		Matcher matcher = pattern.matcher(batchFileName);
-		if (!matcher.matches()) {
+		if (!FinalFilenameValidator.isValid(batchFileName)) {
 			logger.warn("Invalid batch file name '{}'. Job id {}", batchFileName, jobId);
 			return;
 		}
