@@ -1025,7 +1025,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <ul> 
       <li> <p>Three special tags can be used within the SQL statement and are substituted at runtime with their respective values:</p> 
        <div class="codehilite"> 
-        <pre>:USERNAME: - replaced by the username of the user who is executing the query
+        <pre><span></span>:USERNAME: - replaced by the username of the user who is executing the query
 :DATE: - replaced by the current date (format YYYY-MM-DD)
 :TIME: - replaced by the current time (format YYYY-MM-DD HH:MI:SS)
 </pre> 
@@ -1038,7 +1038,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <h3 id="tabular-html-only">Tabular (html only)</h3> 
      <p>A tabular result that can only be displayed in HTML format. This may be used to embed HTML code in the SQL query in order to modify display colours of certain columns etc. To do this, concatenate the SQL with the required HTML tags. e.g. For MySQL, to display positive values in green and negative values in red, you can use something like</p> 
      <div class="codehilite"> 
-      <pre>    SELECT col1,
+      <pre><span></span>    SELECT col1,
     CASE WHEN int_col2&gt;0 THEN
     concat('<span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background-color: green"</span><span class="nt">&gt;</span>',cast(int_col2 as char),'<span class="nt">&lt;/div&gt;</span>') 
     ELSE
@@ -1052,19 +1052,19 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <p>Rearranges the query output into crosstab format, exportable to spreadsheet, pdf etc. If you want values to be summed, include the summing in the SQL query e.g. select year,quarter,sum(amount) from orders group by year,quarter</p> 
      <p>The SQL result set is expected to have either 3 or 5 columns:</p> 
      <div class="codehilite"> 
-      <pre>    SELECT xAxisCol "xAxisLabel", yAxisCol "yAxisLabel", Value FROM ...
+      <pre><span></span>    SELECT xAxisCol "xAxisLabel", yAxisCol "yAxisLabel", Value FROM ...
     (data type: string, string, any)
 </pre> 
      </div> 
      <p>OR</p> 
      <div class="codehilite"> 
-      <pre>    SELECT xAxisCol, xAxisAltSort, yAxisCol, yAxisAltSort, Value FROM ...
+      <pre><span></span>    SELECT xAxisCol, xAxisAltSort, yAxisCol, yAxisAltSort, Value FROM ...
     (data type: string, string, string, string, any)
 </pre> 
      </div> 
      <p>The AltSort columns are used to sort the x-axis (rows) and y-axis (columns). The following helps to illustrate this.</p> 
      <div class="codehilite"> 
-      <pre>    /* input */                  /* input */
+      <pre><span></span>    /* input */                  /* input */
     // A Jan 14                   A 1 Jan 1 14
     // A Feb 24                   A 1 Feb 2 24
     // A Mar 34                   A 1 Mar 3 34
@@ -1120,7 +1120,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <p>The layout of the SQL must follow a specific syntax for each different type of chart</p> 
      <h3 id="xy">XY</h3> 
      <div class="codehilite"> 
-      <pre>    SELECT Value1, Value2 "SeriesName" FROM ...
+      <pre><span></span>    SELECT Value1, Value2 "SeriesName" FROM ...
     (data type: number, number )
 
 Dynamic Series
@@ -1131,20 +1131,20 @@ Dynamic Series
      </div> 
      <h3 id="pie">Pie</h3> 
      <div class="codehilite"> 
-      <pre>    SELECT Category, Value FROM ...
+      <pre><span></span>    SELECT Category, Value FROM ...
     (data type: string, number )
 </pre> 
      </div> 
      <h3 id="barsstacked-barsline">Bars/Stacked Bars/Line</h3> 
      <p>Static Series</p> 
      <div class="codehilite"> 
-      <pre>    SELECT Item, Value1 "SeriesName1" [, Value2, ...] FROM ...
+      <pre><span></span>    SELECT Item, Value1 "SeriesName1" [, Value2, ...] FROM ...
     (data type: string, number [, number, ...] )
 </pre> 
      </div> 
      <p>Dynamic Series</p> 
      <div class="codehilite"> 
-      <pre>    SELECT Item, SeriesName, Value FROM ...
+      <pre><span></span>    SELECT Item, SeriesName, Value FROM ...
     (data type: string, string, number)
 
     Example:
@@ -1154,13 +1154,13 @@ Dynamic Series
      <h3 id="timedate-series">Time/Date Series</h3> 
      <p>Static Series</p> 
      <div class="codehilite"> 
-      <pre>    SELECT Timestamp|Date, Value1 "SeriesName1" [, Value2, ...] FROM ...
+      <pre><span></span>    SELECT Timestamp|Date, Value1 "SeriesName1" [, Value2, ...] FROM ...
     (data type: timestamp|date, number, [, number, ...] ). Timestamp/Dates must be unique.
 </pre> 
      </div> 
      <p>Dynamic Series</p> 
      <div class="codehilite"> 
-      <pre>    SELECT Timestamp|Date, SeriesName, Value FROM ...
+      <pre><span></span>    SELECT Timestamp|Date, SeriesName, Value FROM ...
     (data type: timestamp|date, string, number). Timestamp/Dates must be unique.
 
     Example:
@@ -1169,7 +1169,7 @@ Dynamic Series
      </div> 
      <h3 id="speedometer">Speedometer</h3> 
      <div class="codehilite"> 
-      <pre>    SELECT DataValue, MinValue, MaxValue, UnitsDescription [, Range1, Range2, ...] FROM ...
+      <pre><span></span>    SELECT DataValue, MinValue, MaxValue, UnitsDescription [, Range1, Range2, ...] FROM ...
     (data type: number, number, number, string)
     Ranges represent optional columns and each range has 3 values separated by :  i.e.
     RangeUpperValue:RangeColour:RangeDescription (data type: number, string, string).
@@ -1185,13 +1185,13 @@ Dynamic Series
      </div> 
      <h3 id="bubble">Bubble</h3> 
      <div class="codehilite"> 
-      <pre>    SELECT Value1, Value2 "SeriesName", Value3 [, normalisedValue3] FROM ...
+      <pre><span></span>    SELECT Value1, Value2 "SeriesName", Value3 [, normalisedValue3] FROM ...
     (data type: number, number, number [, number] )
 </pre> 
      </div> 
      <h3 id="heat-map">Heat Map</h3> 
      <div class="codehilite"> 
-      <pre>    SELECT Value1, Value2, Value3 [, Option1, Option2, ...] FROM ...
+      <pre><span></span>    SELECT Value1, Value2, Value3 [, Option1, Option2, ...] FROM ...
     (data type: number, number, number [, string, string, ...] )
 
     Example:
@@ -1227,13 +1227,13 @@ Dynamic Series
       <li>ART uses the cewolf and jfreechart libraries to generate charts. These libraries in turn use standard java AWT to plot charts. In order to work correctly, AWT needs a graphic display. If you are using a "headless" workstation (i.e. a Unix box without X) you need to start the JVM with the option <strong>-Djava.awt.headless=true</strong></li> 
       <li> <p>You can specify specific colours to be used for the series displayed in a chart by adding columns to the query resultset in the format <code>seriesColor:&lt;series index&gt;:&lt;hex color code&gt;</code> e.g. for a pie chart,</p> 
        <div class="codehilite"> 
-        <pre>SELECT description, volume, "seriesColor:0:#ff8000"
+        <pre><span></span>SELECT description, volume, "seriesColor:0:#ff8000"
 FROM orders
 </pre> 
        </div> </li> 
       <li> <p>For <strong>bubble charts</strong>, the size of the bubbles is determined by <code>Value3</code>. The actual size of the bubbles as they appear in the chart is also relative to the values on the y axis (<code>Value2</code>). If your values for <code>Value3</code> are much larger than those for <code>Value2</code> for example, you may find the whole chart filled in one colour, with no bubbles. In this case, you can increase the range of the y axis by setting the <strong>y-axis Min</strong> and <strong>y-axis Max</strong> fields for the query. Alternatively, you can include an extra column in the result set that contains a normalised value that will be used to scale the size of the bubbles e.g.</p> 
        <div class="codehilite"> 
-        <pre>SELECT Value1, Value2 "MySeries", Value3,
+        <pre><span></span>SELECT Value1, Value2 "MySeries", Value3,
 Value3 * (SELECT max(Value2) FROM mytable)/(SELECT max(Value3) FROM mytable)
 FROM mytable
 </pre> 
@@ -1322,7 +1322,7 @@ FROM mytable
      <p>Groups the report data.</p> 
      <p>For example, if a query's tabular output looks like:</p> 
      <div class="codehilite"> 
-      <pre>    AA | AA | B | C | D
+      <pre><span></span>    AA | AA | B | C | D
     AA | AA | E | F | G
     AA | BB | H | J | K
     AA | BB | X | Y | Z
@@ -1330,7 +1330,7 @@ FROM mytable
      </div> 
      <p>using "Group on 2 columns", the data would be grouped by the first 2 columns, and the output would look like:</p> 
      <div class="codehilite"> 
-      <pre>    AA | AA
+      <pre><span></span>    AA | AA
     B | C | D
     E | F | G
     AA | BB
@@ -1406,7 +1406,7 @@ FROM mytable
      <h3 id="pivottablejs-csv-server">PivotTable.js: CSV Server</h3> 
      <p>Generates a pivot table based on data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
      <div class="codehilite"> 
-      <pre>    {
+      <pre><span></span>    {
          "dataFile": "file_name.csv"
     }
 </pre> 
@@ -1428,20 +1428,20 @@ FROM mytable
      <h3 id="lov-dynamic">LOV: Dynamic</h3> 
      <p>Creates an LOV query whose values are based on an sql query. The query can have either one column, or two columns if the parameter value and the text displayed to the user needs to be different</p> 
      <div class="codehilite"> 
-      <pre>    SELECT city_id, city_name
+      <pre><span></span>    SELECT city_id, city_name
     FROM cities
 </pre> 
      </div> 
      <p>OR</p> 
      <div class="codehilite"> 
-      <pre>    SELECT city_id
+      <pre><span></span>    SELECT city_id
     FROM cities
 </pre> 
      </div> 
      <h3 id="lov-static">LOV: Static</h3> 
      <p>Creates an LOV query whose values are set in the sql source section. Values are separated by new lines. If the value and display text need to be different, separate the two with a |</p> 
      <div class="codehilite"> 
-      <pre>    Toaster
+      <pre><span></span>    Toaster
     pr-01|Laptops
     pr-02|Desktops
 </pre> 
@@ -1455,7 +1455,7 @@ FROM mytable
      <h3 id="dygraphs-csv-server">Dygraphs: CSV Server</h3> 
      <p>Generates a dygraphs chart based on data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
      <div class="codehilite"> 
-      <pre>    {
+      <pre><span></span>    {
          "dataFile": "file_name.csv"
     }
 </pre> 
@@ -1494,7 +1494,7 @@ FROM mytable
      <h3 id="datatables-csv-server">DataTables: CSV Server</h3> 
      <p>Enables display of data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
      <div class="codehilite"> 
-      <pre>    {
+      <pre><span></span>    {
          "dataFile": "file_name.csv"
     }
 </pre> 
@@ -1592,7 +1592,7 @@ FROM mytable
      <h3 id="c3js">C3.js</h3> 
      <p>Generates charts using the c3.js library - <a href="http://c3js.org/." rel="nofollow">http://c3js.org/.</a> A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. If you would like to use custom css, provide a json object in the <strong>Options</strong> field, setting the <strong>cssFile</strong> property to the file name of the css file to use. This file can be uploaded using the <strong>Add files</strong> option.</p> 
      <div class="codehilite"> 
-      <pre>    {
+      <pre><span></span>    {
          "cssFile": "file_name.css"
     }
 </pre> 
@@ -1692,25 +1692,25 @@ FROM mytable
      <p>Enables display of data on a web map using the OpenLayers library - <a href="http://openlayers.org/." rel="nofollow">http://openlayers.org/.</a> A javascript file containing the openlayers configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified. These attributes are the same as those for Leaflet reports.</p> 
      <h3 id="saiku-connection">Saiku: Connection</h3> 
      <p>Provides a connection that will be used to generate cubes in the Analytics view. ART uses the <a class="" href="http://meteorite.bi/products/saiku" rel="nofollow">Saiku</a> library to provide the Analytics functionality.</p> 
-     <p>You would first create a <strong>Datasource</strong> from the <strong>Configure | Datasources</strong> menu. The datasource will need to be of either the Olap4J Mondrian or Olap4j XMLA type. You would then fill the other datasource details as appropriate and then specify this datasource in the <code>Datasource</code> field when creating the saiku connection report. After doing this, if you click on the <strong>Analytics</strong> menu and then the <strong>Add query</strong> icon, you will see in the <strong>Cubes</strong> drop down, your connection and the cubes it has.</p> 
+     <p>You would first create a <strong>Datasource</strong> from the <strong>Configure | Datasources</strong> menu. The <strong>Datasource Type</strong> should be <strong>OLAP</strong> and the <strong>Database Type</strong> will need to be of either the Olap4J Mondrian or Olap4j XMLA type. You would then fill the other datasource details as appropriate and then specify this datasource in the <strong>Datasource</strong> field when creating the saiku connection report. After doing this, if you click on the <strong>Analytics</strong> menu and then the <strong>Add query</strong> icon, you will see in the <strong>Cubes</strong> drop down, your connection and the cubes it has.</p> 
      <p>If you use an Olap4j Mondrian datasource, you can specify different roles that different users will have when using the connection. To do this, create a rule for the saiku connection report. Use a dummy column name. Next, specify rule values for that rule for different users. If you need to specify multiple roles, add multiple rule values.</p> 
      <p>Also for Olap4j Mondrian datasources, you can omit the <strong>Catalog</strong> part from the JDBC URL and instead upload the catalog (schema xml file) to use in the <strong>Template</strong> field. Note that when you test or save an olap4j mondrian datasource without specifying the Catalog, you will get an error. You can ignore this error if you will be specifying the Catalog in the saiku connection.</p> 
      <p>It is also worth noting that saiku uses mondrian 4, and as such if using olap4j mondrian, or mondrian xmla datasources, it is best if the schema xml files are in mondrian 4 structure.</p> 
      <h3 id="saiku-report">Saiku: Report</h3> 
-     <p>When you perform some analysis from the Analytics view, you can save that analysis. When you do this, this is saved as a <code>Saiku: Report</code> type. The report source for this report type is a JSON representation of a saiku QueryModel. You can have a look at it to see what is generated. It isn't recommended to build this by hand.</p> 
+     <p>When you perform some analysis from the Analytics view, you can save that analysis. When you do this, this is saved as a <strong>Saiku: Report</strong> type. The report source for this report type is a JSON representation of a saiku QueryModel. You can have a look at it to see what is generated. It isn't recommended to build this by hand.</p> 
      <p>Once you have created a saiku report, you can give users access to it like with other report types. The users will also need to be given access to the saiku connection that is the basis for the saiku report. Users will see a list of saiku reports they have access to by clicking on the <strong>Open query</strong> icon at the top of the Analytics view. Users can then run the reports, edit and save new reports, and delete reports they have created. Users cannot overwrite or delete reports for which they don't have exclusive access i.e. they are the only ones who have access to the report. Only junior admins and above can overwrite or delete any saiku report.</p> 
      <h3 id="mongodb">MongoDB</h3> 
      <p>Allows you to query a MongoDB database. To use it, first create a datasource of type <strong>MongoDB</strong>. Set the URL as appropriate. Next, create the report, setting the report <strong>Type</strong> as <strong>MongoDB</strong> and selecting the mongodb datasource in the <strong>Datasource</strong> field. In the report source field, enter the groovy script that will be used to retrieve data from the mongodb database. The syntax of querying can either be that of the <a class="" href="https://mongodb.github.io/mongo-java-driver/" rel="nofollow">MongoDB Java Driver</a>, the <a class="" href="http://jongo.org/" rel="nofollow">Jongo</a> library or the <a class="" href="https://mongodb.github.io/morphia/" rel="nofollow">Morphia</a> library. ART passes a MongoClient connection object to the groovy script with the variable name <strong>mongoClient</strong>. This is the variable that is to be used as the connection to the mongodb server. ART also passes any report parameters specified using the parameter name as the variable name.</p> 
      <p>If it is required to display the returned results in a table, the groovy script must return a <code>List</code> of objects that are to be displayed. Also, the groovy script is run through a sandbox and only classes contained in the <strong>WEB-INF\groovy-whitelist.txt</strong> file will be allowed to be used within the script. If you use a class that is not contained in the whitelist, a <strong>SecurityException</strong> error will occur when you run the report. If you get such an error, add the class mentioned to the whitelist and run the report again.</p> 
      <p><strong>Example using MongoDB Java Driver syntax</strong></p> 
      <div class="codehilite"> 
-      <pre><span class="kn">import</span> <span class="nn">org.bson.Document</span><span class="p">;</span>
+      <pre><span></span><span class="kn">import</span> <span class="nn">org.bson.Document</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">com.mongodb.client.MongoCollection</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">com.mongodb.client.MongoCursor</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">com.mongodb.client.MongoDatabase</span><span class="p">;</span>
 
-<span class="n">MongoDatabase</span> <span class="n">db</span> <span class="o">=</span> <span class="n">mongoClient</span><span class="o">.</span><span class="n">getDatabase</span><span class="p">(</span><span class="s">"test"</span><span class="p">);</span>
-<span class="n">MongoCollection</span><span class="o">&lt;</span><span class="n">Document</span><span class="o">&gt;</span> <span class="n">collection</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">getCollection</span><span class="p">(</span><span class="s">"mycol"</span><span class="p">);</span>
+<span class="n">MongoDatabase</span> <span class="n">db</span> <span class="o">=</span> <span class="n">mongoClient</span><span class="o">.</span><span class="n">getDatabase</span><span class="p">(</span><span class="s2">"test"</span><span class="p">);</span>
+<span class="n">MongoCollection</span><span class="o">&lt;</span><span class="n">Document</span><span class="o">&gt;</span> <span class="n">collection</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">getCollection</span><span class="p">(</span><span class="s2">"mycol"</span><span class="p">);</span>
 <span class="n">MongoCursor</span><span class="o">&lt;</span><span class="n">Document</span><span class="o">&gt;</span> <span class="n">cursor</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">find</span><span class="p">()</span><span class="o">.</span><span class="n">iterator</span><span class="p">();</span>
 
 <span class="n">List</span><span class="o">&lt;</span><span class="n">Document</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
@@ -1727,18 +1727,18 @@ FROM mytable
      </div> 
      <p><strong>Example using Jongo syntax</strong></p> 
      <div class="codehilite"> 
-      <pre><span class="kn">import</span> <span class="nn">com.mongodb.DB</span><span class="p">;</span>
+      <pre><span></span><span class="kn">import</span> <span class="nn">com.mongodb.DB</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.bson.Document</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">org.jongo.Jongo</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.jongo.MongoCollection</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.jongo.MongoCursor</span><span class="p">;</span>
 
-<span class="n">DB</span> <span class="n">db</span> <span class="o">=</span> <span class="n">mongoClient</span><span class="o">.</span><span class="n">getDB</span><span class="p">(</span><span class="s">"test"</span><span class="p">);</span>
+<span class="n">DB</span> <span class="n">db</span> <span class="o">=</span> <span class="n">mongoClient</span><span class="o">.</span><span class="n">getDB</span><span class="p">(</span><span class="s2">"test"</span><span class="p">);</span>
 
 <span class="n">Jongo</span> <span class="n">jongo</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Jongo</span><span class="p">(</span><span class="n">db</span><span class="p">);</span>
-<span class="n">MongoCollection</span> <span class="n">friends</span> <span class="o">=</span> <span class="n">jongo</span><span class="o">.</span><span class="n">getCollection</span><span class="p">(</span><span class="s">"mycol"</span><span class="p">);</span>
-<span class="n">MongoCursor</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">cursor</span> <span class="o">=</span> <span class="n">friends</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">"{title: 'MongoDB'}"</span><span class="p">)</span><span class="o">.</span><span class="k">as</span><span class="p">(</span><span class="n">Object</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
+<span class="n">MongoCollection</span> <span class="n">friends</span> <span class="o">=</span> <span class="n">jongo</span><span class="o">.</span><span class="n">getCollection</span><span class="p">(</span><span class="s2">"mycol"</span><span class="p">);</span>
+<span class="n">MongoCursor</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">cursor</span> <span class="o">=</span> <span class="n">friends</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"{title: 'MongoDB'}"</span><span class="p">)</span><span class="o">.</span><span class="k">as</span><span class="p">(</span><span class="n">Object</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
 
 <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
 <span class="k">try</span> <span class="p">{</span>
@@ -1754,7 +1754,7 @@ FROM mytable
      </div> 
      <p><strong>Example using Morphia syntax</strong></p> 
      <div class="codehilite"> 
-      <pre><span class="n">package</span> <span class="n">art</span><span class="o">.</span><span class="n">groovy</span>
+      <pre><span></span><span class="n">package</span> <span class="n">art</span><span class="o">.</span><span class="n">groovy</span>
 
 <span class="kn">import</span> <span class="nn">org.mongodb.morphia.annotations.Entity</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.mongodb.morphia.annotations.Id</span><span class="p">;</span>
@@ -1763,7 +1763,7 @@ FROM mytable
 <span class="kn">import</span> <span class="nn">org.mongodb.morphia.query.Query</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.bson.types.ObjectId</span><span class="p">;</span>
 
-<span class="nd">@Entity</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"employeesCol"</span><span class="p">,</span> <span class="n">noClassnameStored</span> <span class="o">=</span> <span class="n">true</span><span class="p">)</span>
+<span class="nd">@Entity</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s2">"employeesCol"</span><span class="p">,</span> <span class="n">noClassnameStored</span> <span class="o">=</span> <span class="n">true</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Employee</span><span class="p">{</span>
     <span class="nd">@Id</span>
     <span class="n">ObjectId</span> <span class="nb">id</span>
@@ -1775,7 +1775,7 @@ FROM mytable
 
 <span class="n">morphia</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">Employee</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
 
-<span class="n">Datastore</span> <span class="n">datastore</span> <span class="o">=</span> <span class="n">morphia</span><span class="o">.</span><span class="n">createDatastore</span><span class="p">(</span><span class="n">mongoClient</span><span class="p">,</span> <span class="s">"employeesDb"</span><span class="p">);</span>
+<span class="n">Datastore</span> <span class="n">datastore</span> <span class="o">=</span> <span class="n">morphia</span><span class="o">.</span><span class="n">createDatastore</span><span class="p">(</span><span class="n">mongoClient</span><span class="p">,</span> <span class="s2">"employeesDb"</span><span class="p">);</span>
 
 <span class="n">Query</span><span class="o">&lt;</span><span class="n">Employee</span><span class="o">&gt;</span> <span class="n">query</span> <span class="o">=</span> <span class="n">datastore</span><span class="o">.</span><span class="n">createQuery</span><span class="p">(</span><span class="n">Employee</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
 <span class="n">List</span><span class="o">&lt;</span><span class="n">Employee</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">asList</span><span class="p">();</span>
@@ -1920,7 +1920,7 @@ FROM mytable
      <h3 id="single-value-parameters">Single-Value Parameters</h3> 
      <p>Single-value parameters are used to pass single values to the SQL query. The parameter's name surrounded by the <code>#</code> character is used to identify the parameter within the SQL source. For example, the following query has two parameters.</p> 
      <div class="codehilite"> 
-      <pre>    SELECT *
+      <pre><span></span>    SELECT *
     FROM orders
     WHERE order_date &gt; #date#
     AND vendor_name like #vendor# -- you do not need to put the ' character around the name
@@ -1972,19 +1972,19 @@ FROM mytable
      <p>There is no boolean data type for single-value parameters because different RDBMSs implement the boolean data type differently. As a workaround, you can create a static LOV report to return the boolean states true and false, as used in your database, and use that LOV report to provide the boolean parameter values.</p> 
      <p>Example main query</p> 
      <div class="codehilite"> 
-      <pre>    SELECT * FROM mytable WHERE my_boolean_column=#boolean_param#
+      <pre><span></span>    SELECT * FROM mytable WHERE my_boolean_column=#boolean_param#
 </pre> 
      </div> 
      <p>Example static LOV query for boolean values</p> 
      <div class="codehilite"> 
-      <pre>    true|True
+      <pre><span></span>    true|True
     false|False
 </pre> 
      </div> 
      <p>Lastly, create a <strong>Single-Value</strong> parameter named <code>boolean_param</code>, with data type as <strong>Varchar</strong>, set <strong>Use LOV</strong> to <strong>Yes</strong> and set the <strong>LOV Report</strong> to the report created for this purpose above.</p> 
      <p>If the boolean states are "1" and "0" instead of "true" and "false", you can create a static LOV query like the one below and set the parameter data type to <strong>Integer</strong> instead of Varchar.</p> 
      <div class="codehilite"> 
-      <pre>    1|True
+      <pre><span></span>    1|True
     0|False
 </pre> 
      </div> 
@@ -1992,7 +1992,7 @@ FROM mytable
      <h3 id="multi-value-parameters">Multi-Value Parameters</h3> 
      <p>Multi-value parameters are used to pass multiple values to the SQL query. To define a multi-value parameter, put the WHERE...IN clause in the desired location in your query and include the parameter placeholder to indicate where the values will go e.g.</p> 
      <div class="codehilite"> 
-      <pre>    SELECT *
+      <pre><span></span>    SELECT *
     FROM orders
     WHERE product_name IN(#product_list#)
 </pre> 
@@ -2006,9 +2006,9 @@ FROM mytable
      <p><strong>X-Parameter Definitions</strong></p> 
      <p>There exists an alternative syntax for specifying multi-value parameters. This provides for defining <code>IN</code> and <code>NOT IN</code> clauses where IN clauses take the format <code>$x{in,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> and NOT IN clauses take the format <code>$x{notin,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> e.g.</p> 
      <div class="codehilite"> 
-      <pre><span class="x">    SELECT *</span>
-<span class="x">    FROM orders</span>
-<span class="x">    WHERE </span><span class="p">$</span><span class="nv">x</span><span class="err">{</span><span class="x">in,product_name,product_list}</span>
+      <pre><span></span>    SELECT *
+    FROM orders
+    WHERE $x{in,product_name,product_list}
 </pre> 
      </div> 
      <p>It should be noted that with x-parameter definitions, the parameter name is case sensitive and must be specified exactly the way it is defined in the parameter configuration. Also, a different separator other than a comma can be used to separate the different components of the x-parameter definition e.g. ; or | etc.</p> 
@@ -2173,7 +2173,7 @@ FROM mytable
      <h3 id="examples">Examples</h3> 
      <p><strong>Example 1:</strong> (single-value parameters)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server_name:port/art/runReport?
     reportId=120&amp;reportFormat=html&amp;p-startdate=2006-04-04&amp;p-description=Desktop
 
     runs report 120 in html format.
@@ -2183,13 +2183,13 @@ FROM mytable
      </div> 
      <p><strong>Example 2:</strong> (chart)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server_name:port/art/runReport?
     reportId=121&amp;p-date=2006-04-04
 </pre> 
      </div> 
      <p><strong>Example 3:</strong> (group)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server_name:port/art/runReport?
     reportId=122&amp;splitColumn=2&amp;p-param=abc
 
     runs report 122 in group on 2 columns mode (splitColumn parameter). 
@@ -2198,7 +2198,7 @@ FROM mytable
      </div> 
      <p><strong>Example 4:</strong> (pdf, public)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server_name:port/art/runReport?
     reportId=123&amp;reportFormat=pdf&amp;public=true
 
     generates report as a pdf file without requiring the user to log in to ART
@@ -2206,7 +2206,7 @@ FROM mytable
      </div> 
      <p><strong>Example 5:</strong> (dashboard)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server_name:port/art/runReport?
     reportId=124&amp;p-param1=value1&amp;p-param2=value2
 
     runs report 124, setting values for parameters param1 and param2
@@ -2214,7 +2214,7 @@ FROM mytable
      </div> 
      <p><strong>Example 6:</strong> (show selected parameters)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server_name:port/art/runReport?
     reportId=125&amp;reportFormat=xls&amp;p-startdate=2006-04-04&amp;showSelectedParameters=true
 
     generates report and includes the parameter value used in the report output
@@ -2222,7 +2222,7 @@ FROM mytable
      </div> 
      <p><strong>Example 7:</strong> (multi-value parameters)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server_name:port/art/runReport?
     reportId=126&amp;reportFormat=xls&amp;p-category=Laptops&amp;p-category=Desktops&amp;p-category=Tablets
 
     the #category# multi-value parameter (p-category) has 3 values defined: 
@@ -2231,7 +2231,7 @@ FROM mytable
      </div> 
      <p><strong>Example 8:</strong> (default parameter values)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server_name:port/art/runReport?
     reportId=127
 
     generates report using default parameter values
@@ -2241,7 +2241,7 @@ FROM mytable
      <ul> 
       <li> <p>If the report url contains some non-ASCII characters in the parameter values and they don't seem to be interpreted correctly, you may need to configure your application server to explicitly handle urls using UTF-8 encoding e.g. for Tomcat, edit the TOMCAT_HOME\conf\<strong>server.xml</strong> file and add the <strong>URIEncoding</strong> attribute to the appropriate <strong>Connector</strong> element e.g.</p> 
        <div class="codehilite"> 
-        <pre>&lt;Connector port="8080" protocol="HTTP/1.1" URIEncoding="UTF-8"
+        <pre><span></span>&lt;Connector port="8080" protocol="HTTP/1.1" URIEncoding="UTF-8"
     ...
 </pre> 
        </div> </li> 
