@@ -43,7 +43,7 @@
 			<url>http://repo.meteorite.bi/repository/alabs-release-local/</url>
 		</repository>
 		<!-- in-project repository for artifacts that are not in a public maven 
-		repository e.g. saiku-olap-util, saiku-query-art -->
+		repository e.g. saiku-olap-util, saiku-query -->
 		<repository>
 			<id>project-local</id>
 			<name>project-local</name>

@@ -408,7 +408,10 @@ public class DatasourceController {
 		Connection conn = null;
 
 		try {
-			if (jndi) {
+			if (StringUtils.startsWith(url, "http")) {
+				//do nothing
+				//don't try to make a jdbc connection to http url. Probably xmla connection
+			} else if (jndi) {
 				conn = ArtUtils.getJndiConnection(url);
 			} else {
 				if (StringUtils.startsWith(url, "mongodb://")) {
