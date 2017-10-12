@@ -114,9 +114,6 @@ public class XlsxOutput extends StandardOutput {
 
 			sheet = wb.getSheetAt(0);
 			sheet.setRandomAccessWindowSize(100);// keep 100 rows in memory, exceeding rows will be flushed to disk
-			//https://poi.apache.org/spreadsheet/quick-guide.html#Autofit
-			//https://poi.apache.org/apidocs/org/apache/poi/xssf/streaming/SXSSFSheet.html#autoSizeColumn(int)
-			sheet.trackAllColumnsForAutoSizing();
 
 			sheet.getPrintSetup().setPaperSize(PrintSetup.A4_PAPERSIZE);
 
@@ -290,11 +287,6 @@ public class XlsxOutput extends StandardOutput {
 
 	@Override
 	public void endOutput() {
-		//https://poi.apache.org/spreadsheet/quick-guide.html#Autofit
-		for (int i = 0; i < totalColumnCount; i++) {
-			sheet.autoSizeColumn(i);
-		}
-
 		try {
 
 			if (wb != null) {

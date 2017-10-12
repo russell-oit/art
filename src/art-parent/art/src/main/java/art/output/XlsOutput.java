@@ -281,10 +281,6 @@ public class XlsOutput extends StandardOutput {
 
 	@Override
 	public void endOutput() {
-		for (int i = 0; i < totalColumnCount; i++) {
-			sheet.autoSizeColumn(i);
-		}
-
 		try {
 			if (zout == null) {
 				if (wb != null && fout != null) {
