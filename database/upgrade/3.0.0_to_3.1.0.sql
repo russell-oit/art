@@ -7,4 +7,4 @@
 
 
 -- update database version
-INSERT INTO ART_DATABASE_VERSION VALUES('3.1');
+INSERT INTO ART_DATABASE_VERSION VALUES('3.1-snapshot');
