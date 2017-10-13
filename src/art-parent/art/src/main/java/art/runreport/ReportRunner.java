@@ -17,6 +17,7 @@
  */
 package art.runreport;
 
+import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
@@ -297,7 +298,7 @@ public class ReportRunner {
 	 */
 	private void applyGroovy() throws SQLException {
 		logger.debug("Entering applyGroovy");
-		
+
 		String optionsString = report.getOptions();
 		GeneralReportOptions options;
 		if (StringUtils.isBlank(optionsString)) {
@@ -464,7 +465,7 @@ public class ReportRunner {
 		//replace all occurrences of labelled rule with rule values
 		String replaceString = Matcher.quoteReplacement(labelledValues.toString()); //quote in case it contains special regex characters
 		querySql = querySql.replaceAll("(?iu)#rules#", replaceString);
-		
+
 		//update sb with new sql
 		querySb.replace(0, querySb.length(), querySql);
 	}
@@ -532,22 +533,22 @@ public class ReportRunner {
 
 		return finalLovValues;
 	}
-	
+
 	/**
 	 * Applies direct substitution parameters in the report source
 	 */
-	private void applyDirectSubstitution(){
+	private void applyDirectSubstitution() {
 		logger.debug("Entering applyDirectSubstitution");
 
 		if (MapUtils.isEmpty(reportParamsMap)) {
 			return;
 		}
-		
+
 		String querySql = querySb.toString();
 
 		//get and store param identifier order for use with jdbc preparedstatement
 		ReportType reportType = report.getReportType();
-		
+
 		//replace direct substitution parameters
 		if (Config.getCustomSettings().isEnableDirectParameterSubstitution()
 				|| reportType.isJPivot()) {
@@ -555,7 +556,7 @@ public class ReportRunner {
 			String placeholderPrefix = "!";
 			querySql = runReportHelper.performDirectParameterSubstitution(querySql, placeholderPrefix, reportParamsMap);
 		}
-		
+
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
 	}
@@ -881,8 +882,13 @@ public class ReportRunner {
 		}
 
 		//use dynamic datasource if so configured
-		RunReportHelper runReportHelper = new RunReportHelper();
-		connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
+		if (reportType == ReportType.LovDynamic) {
+			Datasource reportDatasource = report.getDatasource();
+			connQuery = DbConnections.getConnection(reportDatasource.getDatasourceId());
+		} else {
+			RunReportHelper runReportHelper = new RunReportHelper();
+			connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
+		}
 
 		int fetchSize = report.getFetchSize();
 		boolean applyFetchSize = false;
@@ -1214,7 +1220,7 @@ public class ReportRunner {
 		logger.debug("Entering applyDynamicSql");
 
 		String element = "IF";
-		
+
 		String querySql = querySb.toString();
 
 		// XmlInfo stores the text between a tag as well as
