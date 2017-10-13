@@ -1,3 +1,6 @@
+ART 3.0.1
+* Removed column autosizing for xls and xlsx output. Was causing greatly increased execution times for xlsx output.
+
 ART 3.0
 * Reorganised the code for easier maintenance and enhanced user experience
  - now using maven, spring mvc, bootstrap, among other libraries
