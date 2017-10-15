@@ -1,4 +1,4 @@
--- Upgrade script from ART 3.0 to ART 3.1
+-- Upgrade script from ART 3.0 to ART 3.0.1
 
 -- CHANGES:
 -- update database version
