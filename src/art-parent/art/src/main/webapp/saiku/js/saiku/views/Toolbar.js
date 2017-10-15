@@ -48,9 +48,9 @@ var Toolbar = Backbone.View.extend({
             self.render();
         }
         else{
-            self.logo = "<h1 id='logo'>"+
-                "<a href='http://www.meteorite.bi/' title='Saiku - Next Generation Open Source Analytics' target='_blank' class='sprite'>Saiku</a>"+
-                "</h1>";
+//            self.logo = "<h1 id='logo'>"+
+//                "<a href='http://www.meteorite.bi/' title='Saiku - Next Generation Open Source Analytics' target='_blank' class='sprite'>Saiku</a>"+
+//                "</h1>";
             self.render();
         }
     },
