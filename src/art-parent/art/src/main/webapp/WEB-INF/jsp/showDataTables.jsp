@@ -159,6 +159,7 @@
 
 	var options = {
 		orderClasses: false,
+		order: [],
 		pagingType: "full_numbers",
 		lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "${showAllRowsText}"]],
 		pageLength: 50,
