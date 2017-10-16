@@ -527,6 +527,14 @@ public class JobController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id, sessionUser);
 			addParameters(model, paramProcessorResult, report, request);
+
+			//update job from email if owner email has changed
+			User jobUser = job.getUser();
+			if (jobUser != null && (sessionUser.getUserId() == jobUser.getUserId())) {
+				if (!StringUtils.equals(jobUser.getEmail(), job.getMailFrom())) {
+					job.setMailFrom(jobUser.getEmail());
+				}
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
