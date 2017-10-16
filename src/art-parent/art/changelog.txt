@@ -4,6 +4,8 @@ ART 3.0.1
 * For cached result job, don't stop if create table process has an error
 * Don't sort DataTable report format on initialization
 * Use select column filter for report group in reports page
+* When editing a job, update from email if owner email has changed
+* Don't use email input type for user email field
 
 ART 3.0
 * Reorganised the code for easier maintenance and enhanced user experience
