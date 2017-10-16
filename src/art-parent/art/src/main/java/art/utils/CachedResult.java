@@ -86,13 +86,12 @@ public class CachedResult {
 	 * Set the name of the database table where data is cached in the target
 	 * connection If the table does not exists it is recreated otherwise it will
 	 * attempt to insert the values in the existing table. To avoid problems
-	 * with special chars or case sensitive platforms the name is parsed and set
-	 * to uppercase.
+	 * with special chars the name is parsed and set to uppercase.
 	 *
 	 * @param s
 	 */
 	public void setCachedTableName(String s) {
-		tableName = parseString(s).toUpperCase();
+		tableName = parseString(s);
 	}
 
 	/**
@@ -105,8 +104,8 @@ public class CachedResult {
 	}
 
 	/**
-	 * Sets  the job type
-	 * 
+	 * Sets the job type
+	 *
 	 * @param jobType the job type
 	 */
 	public void setJobType(JobType jobType) {
