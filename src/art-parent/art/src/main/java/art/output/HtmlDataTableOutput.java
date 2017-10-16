@@ -97,6 +97,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 		String dataTableOptions
 				= "{"
 				+ "orderClasses: false"
+				+ ", order: []"
 				+ ", pagingType: 'full_numbers'"
 				+ ", lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, '" + allText + "']]"
 				+ ", pageLength: 50"
