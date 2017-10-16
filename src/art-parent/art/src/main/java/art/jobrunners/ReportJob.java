@@ -1485,14 +1485,7 @@ public class ReportJob implements org.quartz.Job {
 				cachedTableName = reportName + "_J" + jobId;
 			}
 			cr.setCachedTableName(cachedTableName);
-
-			if (jobType == JobType.CacheAppend) {
-				// 1 = append 2 = drop/insert (3 = update (not implemented))
-				cr.setCacheMode(1);
-			} else if (jobType == JobType.CacheInsert) {
-				cr.setCacheMode(2);
-			}
-
+			cr.setJobType(jobType);
 			cr.cacheIt();
 
 			runDetails = "Table Name (rows inserted):  <code>"
