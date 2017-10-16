@@ -531,8 +531,8 @@ public class JobController {
 			//update job from email if owner email has changed
 			User jobUser = job.getUser();
 			if (jobUser != null && (sessionUser.getUserId() == jobUser.getUserId())) {
-				if (!StringUtils.equals(jobUser.getEmail(), job.getMailFrom())) {
-					job.setMailFrom(jobUser.getEmail());
+				if (!StringUtils.equals(sessionUser.getEmail(), job.getMailFrom())) {
+					job.setMailFrom(sessionUser.getEmail());
 				}
 			}
 		} catch (SQLException | RuntimeException ex) {
