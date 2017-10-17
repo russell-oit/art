@@ -22,6 +22,7 @@ import art.connectionpool.DbConnections;
 import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
+import art.enums.FtpConnectionType;
 import art.enums.JobType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
@@ -214,6 +215,25 @@ public class ReportJob implements org.quartz.Job {
 			return;
 		}
 
+		FtpConnectionType connectionType = ftpServer.getConnectionType();
+		logger.debug("connectionType={}", connectionType);
+
+		switch (connectionType) {
+			case FTP:
+				doFtp(ftpServer);
+				break;
+			default:
+				logger.warn("Unexpected ftp connection type: " + connectionType);
+		}
+
+	}
+
+	/**
+	 * Ftp a generated file using the ftp protocol
+	 *
+	 * @param ftpServer the ftp server object
+	 */
+	private void doFtp(FtpServer ftpServer) {
 		//http://www.codejava.net/java-se/networking/ftp/java-ftp-file-upload-tutorial-and-example
 		//https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
 		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
@@ -222,8 +242,19 @@ public class ReportJob implements org.quartz.Job {
 		//https://stackoverflow.com/questions/6651158/apache-commons-ftp-problems
 		String server = ftpServer.getServer();
 		int port = ftpServer.getPort();
+
+		logger.debug("server='{}'", server);
+		logger.debug("port={}", port);
+		
+		if (port <= 0) {
+			final int DEFAULT_FTP_PORT = 21;
+			port = DEFAULT_FTP_PORT;
+		}
+		
 		String user = ftpServer.getUser();
 		String pass = ftpServer.getPassword();
+		
+		logger.debug("user='{}'", user);
 
 		FTPClient ftpClient = new FTPClient();
 		try {
@@ -251,6 +282,7 @@ public class ReportJob implements org.quartz.Job {
 			String jobsExportPath = Config.getJobsExportPath();
 			String fullLocalFileName = jobsExportPath + fileName;
 			String remoteDirectory = ftpServer.getRemoteDirectory();
+			logger.debug("remoteDirectory='{}'", remoteDirectory);
 			remoteDirectory = StringUtils.trimToEmpty(remoteDirectory);
 			if (!StringUtils.endsWith(remoteDirectory, "/")) {
 				remoteDirectory += "/";

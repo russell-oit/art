@@ -18,6 +18,7 @@
 package art.ftpserver;
 
 import art.encryption.AesEncryptor;
+import art.enums.FtpConnectionType;
 import art.user.User;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
@@ -220,6 +221,7 @@ public class FtpServerController {
 	private String showEditFtpServer(String action, Model model) {
 		logger.debug("Entering showFtpServer: action='{}'", action);
 
+		model.addAttribute("connectionTypes", FtpConnectionType.list());
 		model.addAttribute("action", action);
 
 		return "editFtpServer";

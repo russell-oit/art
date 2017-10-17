@@ -17,6 +17,7 @@
  */
 package art.ftpserver;
 
+import art.enums.FtpConnectionType;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -32,7 +33,7 @@ public class FtpServer implements Serializable {
 	private String name;
 	private String description;
 	private String server;
-	private int port = 21;
+	private int port;
 	private boolean active;
 	private String user;
 	private String password;
@@ -42,6 +43,21 @@ public class FtpServer implements Serializable {
 	private String createdBy;
 	private Date updateDate;
 	private String updatedBy;
+	private FtpConnectionType connectionType = FtpConnectionType.FTP;
+
+	/**
+	 * @return the connectionType
+	 */
+	public FtpConnectionType getConnectionType() {
+		return connectionType;
+	}
+
+	/**
+	 * @param connectionType the connectionType to set
+	 */
+	public void setConnectionType(FtpConnectionType connectionType) {
+		this.connectionType = connectionType;
+	}
 
 	/**
 	 * @return the useBlankPassword
@@ -56,7 +72,6 @@ public class FtpServer implements Serializable {
 	public void setUseBlankPassword(boolean useBlankPassword) {
 		this.useBlankPassword = useBlankPassword;
 	}
-
 
 	/**
 	 * @return the description
@@ -239,7 +254,7 @@ public class FtpServer implements Serializable {
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "FtpServer{" + "name=" + name + '}';
