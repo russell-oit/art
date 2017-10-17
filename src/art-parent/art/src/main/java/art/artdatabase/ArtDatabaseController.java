@@ -88,6 +88,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("sql-logging");
 		databaseTypes.remove("exasol");
 		databaseTypes.remove("redshift");
+		databaseTypes.remove("teradata");
 
 		return databaseTypes;
 	}

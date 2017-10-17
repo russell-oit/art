@@ -236,6 +236,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.amazon.redshift.jdbc.Driver";
 		urlElement.value = "jdbc:redshift://<server_name>/<database_name>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "teradata") {
+		driverElement.value = "com.teradata.jdbc.TeraDriver";
+		urlElement.value = "jdbc:teradata://<server_name>/DATABASE=<database_name>";
+		testSqlElement.value = "";
 	}
 }
 
