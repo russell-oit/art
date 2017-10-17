@@ -558,9 +558,9 @@ public enum ReportType {
 			case JasperReportsArt:
 				return "JasperReports: ART Query";
 			case JxlsTemplate:
-				return "jXLS: Template Query";
+				return "Jxls: Template Query";
 			case JxlsArt:
-				return "jXLS: ART Query";
+				return "Jxls: ART Query";
 			case LovDynamic:
 				return "LOV: Dynamic";
 			case LovStatic:

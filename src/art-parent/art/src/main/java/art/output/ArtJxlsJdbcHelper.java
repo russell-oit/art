@@ -33,7 +33,7 @@ import org.jxls.common.JxlsException;
 import org.jxls.jdbc.CaseInsensitiveHashMap;
 
 /**
- * jXLS jdbc helper that allows specifying of a datasource id for a query
+ * Jxls jdbc helper that allows specifying of a datasource for a query
  *
  * @author Timothy Anyona
  */
