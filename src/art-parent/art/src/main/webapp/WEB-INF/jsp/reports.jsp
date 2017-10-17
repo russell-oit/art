@@ -16,9 +16,10 @@ Reports page. Also main/home page
 
 <spring:message code="page.title.reports" var="pageTitle"/>
 
+<spring:message code="page.text.reports" var="mainPanelTitle"/>
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.text.description" var="descriptionText"/>
-<spring:message code="page.text.reports" var="mainPanelTitle"/>
+<spring:message code="reports.text.selectValue" var="selectValueText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
@@ -34,8 +35,6 @@ Reports page. Also main/home page
 				$('a[href*="reports"]').parent().addClass('active');
 
 				var tbl = $('#reports');
-
-//				var columnFilterRow = createColumnFilters(tbl);
 
 				var oTable = tbl.dataTable({
 					columnDefs: [
@@ -66,9 +65,6 @@ Reports page. Also main/home page
 					}
 				});
 
-				//move column filter row after heading row
-//				columnFilterRow.insertAfter(columnFilterRow.next());
-
 				//get datatables api object
 				var table = oTable.api();
 
@@ -84,7 +80,8 @@ Reports page. Also main/home page
 				yadcf.init(table,
 						[
 							{
-								column_number: 1
+								column_number: 1,
+								filter_default_label: '${selectValueText}'
 							},
 							{
 								column_number: 3,
@@ -94,9 +91,6 @@ Reports page. Also main/home page
 						],
 						{filters_tr_index: 1}
 				);
-
-				// Apply the column filter
-//				applyColumnFilters(tbl, table);
 
 				//show/hide details
 				//http://datatables.net/examples/server_side/row_details.html
