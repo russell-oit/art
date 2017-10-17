@@ -232,6 +232,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.exasol.jdbc.EXADriver";
 		urlElement.value = "jdbc:exa://<server_name>;schema=<database_name>";
 		testSqlElement.value = "";
+	} else if (dbType === "redshift") {
+		driverElement.value = "com.amazon.redshift.jdbc.Driver";
+		urlElement.value = "jdbc:redshift://<server_name>/<database_name>";
+		testSqlElement.value = "select 1";
 	}
 }
 

@@ -268,6 +268,7 @@ public class ArtUtils {
 		databaseTypes.put("cassandra-adejanovski", "Cassandra (adejanovski driver)");
 		databaseTypes.put("neo4j", "Neo4j");
 		databaseTypes.put("exasol", "EXASOL - driver not included"); //license doesn't allow distribution without consent from exasol
+		databaseTypes.put("redshift", "Redshift - driver not included"); //license issues
 
 		return databaseTypes;
 	}

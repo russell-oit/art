@@ -87,6 +87,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("neo4j");
 		databaseTypes.remove("sql-logging");
 		databaseTypes.remove("exasol");
+		databaseTypes.remove("redshift");
 
 		return databaseTypes;
 	}
