@@ -19,6 +19,8 @@ package art.usergroup;
 
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
+import art.reportgroup.ReportGroup;
+import art.reportgroup.ReportGroupService;
 import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,14 +50,17 @@ public class UserGroupService {
 	private static final Logger logger = LoggerFactory.getLogger(UserGroupService.class);
 
 	private final DbService dbService;
+	private final ReportGroupService reportGroupService;
 
 	@Autowired
-	public UserGroupService(DbService dbService) {
+	public UserGroupService(DbService dbService, ReportGroupService reportGroupService) {
 		this.dbService = dbService;
+		this.reportGroupService = reportGroupService;
 	}
 
 	public UserGroupService() {
 		dbService = new DbService();
+		reportGroupService = new ReportGroupService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUPS AUG";
@@ -81,12 +86,14 @@ public class UserGroupService {
 			group.setUserGroupId(rs.getInt("USER_GROUP_ID"));
 			group.setName(rs.getString("NAME"));
 			group.setDescription(rs.getString("DESCRIPTION"));
-			group.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 			group.setStartReport(rs.getString("START_QUERY"));
 			group.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			group.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			group.setCreatedBy(rs.getString("CREATED_BY"));
 			group.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+			ReportGroup defaultReportGroup = reportGroupService.getReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
+			group.setDefaultReportGroup(defaultReportGroup);
 
 			return type.cast(group);
 		}
@@ -253,13 +260,21 @@ public class UserGroupService {
 		logger.debug("Entering saveUserGroup: group={}, newRecordId={}, actionUser={}",
 				group, newRecordId, actionUser);
 
+		//set values for possibly null property objects
+		int defaultReportGroupId;
+		if (group.getDefaultReportGroup() == null) {
+			defaultReportGroupId = 0;
+		} else {
+			defaultReportGroupId = group.getDefaultReportGroup().getReportGroupId();
+		}
+
 		int affectedRows;
-		
+
 		boolean newRecord = false;
 		if (newRecordId != null) {
 			newRecord = true;
 		}
-		
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_USER_GROUPS"
 					+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
@@ -270,7 +285,7 @@ public class UserGroupService {
 				newRecordId,
 				group.getName(),
 				group.getDescription(),
-				group.getDefaultReportGroup(),
+				defaultReportGroupId,
 				group.getStartReport(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
@@ -285,7 +300,7 @@ public class UserGroupService {
 			Object[] values = {
 				group.getName(),
 				group.getDescription(),
-				group.getDefaultReportGroup(),
+				defaultReportGroupId,
 				group.getStartReport(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
@@ -294,7 +309,7 @@ public class UserGroupService {
 
 			affectedRows = dbService.update(sql, values);
 		}
-		
+
 		if (newRecordId != null) {
 			group.setUserGroupId(newRecordId);
 		}

@@ -47,7 +47,7 @@ Display edit user page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -216,7 +216,19 @@ Display edit user page
 						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>
-				<form:hidden path="defaultReportGroup" />
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="defaultReportGroup.reportGroupId">
+						<spring:message code="page.label.defaultReportGroup"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="defaultReportGroup.reportGroupId" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+								<option data-divider="true"></option>
+							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
+						</form:select>
+						<form:errors path="defaultReportGroup.reportGroupId" cssClass="error"/>
+					</div>
+				</div>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="startReport">
 						<spring:message code="page.label.startReport"/>

@@ -6,6 +6,7 @@ ART 3.0.1
 * Use select column filter for report group in reports page
 * When editing a job, update from email if owner email has changed
 * Don't use email input type for user email field
+* Enable use of default report group
 
 ART 3.0
 * Reorganised the code for easier maintenance and enhanced user experience

@@ -124,16 +124,16 @@ Edit user group page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="defaultReportGroup">
+					<label class="col-md-4 control-label " for="defaultReportGroup.reportGroupId">
 						<spring:message code="page.label.defaultReportGroup"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="defaultReportGroup" class="form-control selectpicker">
+						<form:select path="defaultReportGroup.reportGroupId" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
 							<option data-divider="true"></option>
 							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
 						</form:select>
-						<form:errors path="defaultReportGroup" cssClass="error"/>
+						<form:errors path="defaultReportGroup.reportGroupId" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

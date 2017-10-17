@@ -18,6 +18,7 @@
 package art.user;
 
 import art.enums.AccessLevel;
+import art.reportgroup.ReportGroup;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
 import java.io.Serializable;
@@ -38,9 +39,9 @@ public class User implements Serializable {
 	private String email;
 	private String fullName;
 	private String password;
-	private int defaultReportGroup;
+	private ReportGroup defaultReportGroup;
 	private String passwordAlgorithm;
-	private String startReport;
+	private String startReport; //can contain only report id or report id with parameters e.g. 1?p-param1=value
 	private boolean active = true;
 	private int userId;
 	private boolean canChangePassword = true;
@@ -48,7 +49,7 @@ public class User implements Serializable {
 	private Date updateDate;
 	private List<UserGroup> userGroups;
 	private String effectiveStartReport;
-	private int effectiveDefaultReportGroup;
+	private ReportGroup effectiveDefaultReportGroup;
 	private boolean useBlankPassword; //only used for user interface logic
 	private String createdBy;
 	private String updatedBy;
@@ -142,14 +143,14 @@ public class User implements Serializable {
 	/**
 	 * @return the effectiveDefaultReportGroup
 	 */
-	public int getEffectiveDefaultReportGroup() {
+	public ReportGroup getEffectiveDefaultReportGroup() {
 		return effectiveDefaultReportGroup;
 	}
 
 	/**
 	 * @param effectiveDefaultReportGroup the effectiveDefaultReportGroup to set
 	 */
-	public void setEffectiveDefaultReportGroup(int effectiveDefaultReportGroup) {
+	public void setEffectiveDefaultReportGroup(ReportGroup effectiveDefaultReportGroup) {
 		this.effectiveDefaultReportGroup = effectiveDefaultReportGroup;
 	}
 
@@ -307,7 +308,7 @@ public class User implements Serializable {
 	 *
 	 * @return the value of defaultReportGroup
 	 */
-	public int getDefaultReportGroup() {
+	public ReportGroup getDefaultReportGroup() {
 		return defaultReportGroup;
 	}
 
@@ -316,7 +317,7 @@ public class User implements Serializable {
 	 *
 	 * @param defaultReportGroup new value of defaultReportGroup
 	 */
-	public void setDefaultReportGroup(int defaultReportGroup) {
+	public void setDefaultReportGroup(ReportGroup defaultReportGroup) {
 		this.defaultReportGroup = defaultReportGroup;
 	}
 

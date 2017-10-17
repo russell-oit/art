@@ -391,7 +391,6 @@ public class JobService {
 
 		Integer ftpServerId;
 		if (job.getFtpServer() == null) {
-			logger.warn("Ftp server not defined. Defaulting to 0");
 			ftpServerId = 0;
 		} else {
 			ftpServerId = job.getFtpServer().getFtpServerId();

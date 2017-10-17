@@ -69,7 +69,7 @@ Reports page. Also main/home page
 				var table = oTable.api();
 
 				var headingRow = tbl.find('thead tr:first');
-				var colCount=3; //visible columns
+				var colCount = 3; //visible columns
 				var cols = '';
 				for (var i = 1; i <= colCount; i++) {
 					cols += '<th></th>';
@@ -91,6 +91,10 @@ Reports page. Also main/home page
 						],
 						{filters_tr_index: 1}
 				);
+
+			<c:if test="${not empty sessionUser.effectiveDefaultReportGroup}">
+				yadcf.exFilterColumn(oTable, [[1, '${sessionUser.effectiveDefaultReportGroup.name}']]);
+			</c:if>
 
 				//show/hide details
 				//http://datatables.net/examples/server_side/row_details.html
