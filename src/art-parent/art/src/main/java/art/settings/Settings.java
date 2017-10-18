@@ -82,6 +82,21 @@ public class Settings implements Serializable {
 	private int maxFileUploadSizeMB = 5;
 	private String artBaseUrl;
 	private String casLogoutUrl;
+	private String smtpFrom;
+
+	/**
+	 * @return the smtpFrom
+	 */
+	public String getSmtpFrom() {
+		return smtpFrom;
+	}
+
+	/**
+	 * @param smtpFrom the smtpFrom to set
+	 */
+	public void setSmtpFrom(String smtpFrom) {
+		this.smtpFrom = smtpFrom;
+	}
 
 	/**
 	 * @return the casLogoutUrl

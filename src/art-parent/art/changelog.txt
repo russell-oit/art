@@ -10,6 +10,7 @@ ART 3.0.1
 * Added SFTP option
 * Fix for ftp not closing properly
 * Fix for fixed file name being deleted
+* Allow use of a single from email address for all jobs
 
 ART 3.0
 * Reorganised the code for easier maintenance and enhanced user experience

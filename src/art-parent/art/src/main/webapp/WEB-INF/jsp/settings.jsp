@@ -28,7 +28,7 @@ Settings configuration page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -52,7 +52,7 @@ Settings configuration page
 				$('#useLdapAnonymousBind').on('switchChange.bootstrapSwitch', function (event, state) {
 					toggleLdapBindDnEnabled();
 				});
-				
+
 				// enable/disable on page load
 				toggleSmtpUsernameEnabled();
 				toggleLdapBindDnEnabled();
@@ -194,6 +194,15 @@ Settings configuration page
 							</div>
 						</div>
 					</fieldset>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="smtpFrom">
+							<spring:message code="settings.label.smtpFrom"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="smtpFrom" maxlength="100" class="form-control"/>
+							<form:errors path="smtpFrom" cssClass="error"/>
+						</div>
+					</div>
 				</fieldset>
 
 				<fieldset>

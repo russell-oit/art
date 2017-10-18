@@ -508,7 +508,7 @@ public class ReportJob implements org.quartz.Job {
 	private void prepareAlertMailer(Mailer mailer, String msg, int value) {
 		logger.debug("Entering prepareAlertMailer");
 
-		String from = job.getMailFrom();
+		String from = getMailFrom();
 
 		String subject = job.getMailSubject();
 		// compatibility with Art pre 1.8 where subject was not editable
@@ -565,7 +565,7 @@ public class ReportJob implements org.quartz.Job {
 
 		logger.debug("Entering prepareFreeMarkerAlertMailer");
 
-		String from = job.getMailFrom();
+		String from = getMailFrom();
 
 		String subject = job.getMailSubject();
 		// compatibility with Art pre 1.8 where subject was not editable
@@ -631,7 +631,7 @@ public class ReportJob implements org.quartz.Job {
 
 		logger.debug("Entering prepareEmailMailer: outputFileName='{}'", outputFileName);
 
-		String from = job.getMailFrom();
+		String from = getMailFrom();
 
 		String subject = job.getMailSubject();
 		// compatibility with Art pre 1.8 where subject was not editable
@@ -694,6 +694,27 @@ public class ReportJob implements org.quartz.Job {
 			String finalMessage = emailTemplateEngine.process("basicEmail", ctx);
 			mailer.setMessage(finalMessage);
 		}
+	}
+
+	/**
+	 * Returns the email address to use in the from field
+	 * 
+	 * @return the email address to use in the from field
+	 */
+	private String getMailFrom() {
+		logger.debug("Entering getMailFrom");
+		
+		String from;
+		String settingsFrom = Config.getSettings().getSmtpFrom();
+		logger.debug("settingsFrom='{}'", settingsFrom);
+
+		if (StringUtils.isBlank(settingsFrom)) {
+			from = job.getMailFrom();
+		} else {
+			from = settingsFrom;
+		}
+
+		return from;
 	}
 
 	/**
