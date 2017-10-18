@@ -69,9 +69,9 @@ Reports page. Also main/home page
 				var table = oTable.api();
 
 				var headingRow = tbl.find('thead tr:first');
-				var colCount = 3; //visible columns
+				var visibleColCount = 3;
 				var cols = '';
-				for (var i = 1; i <= colCount; i++) {
+				for (var i = 1; i <= visibleColCount; i++) {
 					cols += '<th></th>';
 				}
 

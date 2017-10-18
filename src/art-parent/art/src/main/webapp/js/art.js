@@ -202,7 +202,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.firebirdsql.jdbc.FBDriver";
 		urlElement.value = "jdbc:firebirdsql://<server_name>/<file_path or database_alias>?encoding=UTF8";
 		testSqlElement.value = "select 1 from RDB$DATABASE";
-	}  else if (dbType === "monetdb") {
+	} else if (dbType === "monetdb") {
 		//https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Select_queries/Select_without_tables
 		driverElement.value = "nl.cwi.monetdb.jdbc.MonetDriver";
 		urlElement.value = "jdbc:monetdb://<server_name>/<database_name>";
@@ -310,6 +310,17 @@ function applyColumnFilters(tbl, table) {
 				.search(this.value)
 				.draw();
 	});
+}
+
+/**
+ * Determines if the current browser is a touch/mobile browser
+ * 
+ * @returns {boolean} true if this is a mobile browser
+ */
+function isMobile() {
+	//https://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
+	var isMobile = ('ontouchstart' in document.documentElement || navigator.userAgent.match(/Mobi/));
+	return isMobile;
 }
 
 /**
@@ -720,3 +731,4 @@ function artRemoveWork() {
 
 //	console.log("artRemoveWork " + workCount);
 }
+

@@ -56,6 +56,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.html5.min.js'></script>");
 		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.print.min.js'></script>");
 		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.colVis.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/art.js'></script>");
 
 		//set language file to use for localization
 		//language files to be put in the /js/datatables/i18n directory and to be named dataTables_xx.json according to the locale
@@ -109,7 +110,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 				+ "{extend: 'print', exportOptions: {columns: ':visible'}}"
 				+ "]"
 				+ languageSetting
-				+ ", initComplete: function() {$('div.dataTables_filter input').focus();}"
+				+ ", initComplete: function() {if(!isMobile()){$('div.dataTables_filter input').focus();}}"
 				+ "}";
 
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
