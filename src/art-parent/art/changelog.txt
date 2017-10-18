@@ -8,6 +8,8 @@ ART 3.0.1
 * Don't use email input type for user email field
 * Enable use of default report group
 * Added SFTP option
+* Fix for ftp not closing properly
+* Fix for fixed file name being deleted
 
 ART 3.0
 * Reorganised the code for easier maintenance and enhanced user experience

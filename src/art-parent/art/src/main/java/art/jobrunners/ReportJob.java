@@ -46,6 +46,12 @@ import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -74,6 +80,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
@@ -199,7 +206,7 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Ftps a generated file
+	 * Ftps the generated file
 	 */
 	private void ftpFile() {
 		logger.debug("Entering ftpFile");
@@ -218,9 +225,23 @@ public class ReportJob implements org.quartz.Job {
 		FtpConnectionType connectionType = ftpServer.getConnectionType();
 		logger.debug("connectionType={}", connectionType);
 
+		String jobsExportPath = Config.getJobsExportPath();
+		String fullLocalFileName = jobsExportPath + fileName;
+
+		String remoteDirectory = ftpServer.getRemoteDirectory();
+		logger.debug("remoteDirectory='{}'", remoteDirectory);
+		remoteDirectory = StringUtils.trimToEmpty(remoteDirectory);
+		if (!StringUtils.endsWith(remoteDirectory, "/")) {
+			remoteDirectory += "/";
+		}
+		String remoteFileName = remoteDirectory + fileName;
+
 		switch (connectionType) {
 			case FTP:
-				doFtp(ftpServer);
+				doFtp(ftpServer, fullLocalFileName, remoteFileName);
+				break;
+			case SFTP:
+				doSftp(ftpServer, fullLocalFileName, remoteFileName);
 				break;
 			default:
 				logger.warn("Unexpected ftp connection type: " + connectionType);
@@ -229,31 +250,38 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Ftp a generated file using the ftp protocol
+	 * Ftp the generated file using the ftp protocol
 	 *
 	 * @param ftpServer the ftp server object
+	 * @param fullLocalFileName full path to the local job file to ftp
+	 * @param remoteFileName the file name or full path of the ftp destination
 	 */
-	private void doFtp(FtpServer ftpServer) {
+	private void doFtp(FtpServer ftpServer, String fullLocalFileName, String remoteFileName) {
+		logger.debug("Entering doFtp: ftpServer={}, fullLocalFileName='{}',"
+				+ " remoteFileName='{}'", ftpServer, fullLocalFileName, remoteFileName);
+
 		//http://www.codejava.net/java-se/networking/ftp/java-ftp-file-upload-tutorial-and-example
 		//https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
 		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
 		//https://stackoverflow.com/questions/36302985/how-to-connect-to-ftp-over-tls-ssl-ftps-server-in-java
 		//https://stackoverflow.com/questions/36349361/apache-java-ftp-client-does-not-switch-to-binary-transfer-mode-on-some-servers
 		//https://stackoverflow.com/questions/6651158/apache-commons-ftp-problems
+		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html#completePendingCommand()
+		//https://stackoverflow.com/questions/19209826/android-ftpclient-cannot-upload-file-ftp-response-421-received-server-closed
 		String server = ftpServer.getServer();
 		int port = ftpServer.getPort();
 
 		logger.debug("server='{}'", server);
 		logger.debug("port={}", port);
-		
+
 		if (port <= 0) {
 			final int DEFAULT_FTP_PORT = 21;
 			port = DEFAULT_FTP_PORT;
 		}
-		
+
 		String user = ftpServer.getUser();
-		String pass = ftpServer.getPassword();
-		
+		String password = ftpServer.getPassword();
+
 		logger.debug("user='{}'", user);
 
 		FTPClient ftpClient = new FTPClient();
@@ -270,7 +298,7 @@ public class ReportJob implements org.quartz.Job {
 				return;
 			}
 
-			if (!ftpClient.login(user, pass)) {
+			if (!ftpClient.login(user, password)) {
 				logger.info("FTP login failed. Job Id: {}", jobId);
 				return;
 			}
@@ -279,15 +307,6 @@ public class ReportJob implements org.quartz.Job {
 
 			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 
-			String jobsExportPath = Config.getJobsExportPath();
-			String fullLocalFileName = jobsExportPath + fileName;
-			String remoteDirectory = ftpServer.getRemoteDirectory();
-			logger.debug("remoteDirectory='{}'", remoteDirectory);
-			remoteDirectory = StringUtils.trimToEmpty(remoteDirectory);
-			if (!StringUtils.endsWith(remoteDirectory, "/")) {
-				remoteDirectory += "/";
-			}
-			String remoteFileName = remoteDirectory + fileName;
 			File localFile = new File(fullLocalFileName);
 
 			boolean done;
@@ -300,13 +319,6 @@ public class ReportJob implements org.quartz.Job {
 				logger.info("Ftp file upload failed. Job Id: {}", jobId);
 			}
 
-			boolean completed = ftpClient.completePendingCommand();
-			if (completed) {
-				logger.debug("Ftp file upload completed. Job Id: {}", jobId);
-			} else {
-				logger.info("Ftp file upload not completed. Job Id: {}", jobId);
-			}
-
 			ftpClient.logout();
 		} catch (IOException ex) {
 			logger.error("Error", ex);
@@ -317,6 +329,79 @@ public class ReportJob implements org.quartz.Job {
 				}
 			} catch (IOException ex) {
 				logger.error("Error", ex);
+			}
+		}
+	}
+
+	/**
+	 * Ftp the generated file using the sftp protocol
+	 *
+	 * @param ftpServer the ftp server object
+	 * @param fullLocalFileName full path to the local job file to ftp
+	 * @param remoteFileName the file name or full path of the ftp destination
+	 */
+	private void doSftp(FtpServer ftpServer, String fullLocalFileName, String remoteFileName) {
+		logger.debug("Entering doSftp: ftpServer={}, fullLocalFileName='{}',"
+				+ " remoteFileName='{}'", ftpServer, fullLocalFileName, remoteFileName);
+
+		//https://stackoverflow.com/questions/14830146/how-to-transfer-a-file-through-sftp-in-java
+		//https://github.com/jpbriend/sftp-example/blob/master/src/main/java/com/infinit/sftp/SftpClient.java
+		//https://stackoverflow.com/questions/17473398/java-sftp-upload-using-jsch-but-how-to-overwrite-the-current-file
+		//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/ChannelSftp.html
+		String server = ftpServer.getServer();
+		int port = ftpServer.getPort();
+
+		logger.debug("server='{}'", server);
+		logger.debug("port={}", port);
+
+		if (port <= 0) {
+			final int DEFAULT_SFTP_PORT = 22;
+			port = DEFAULT_SFTP_PORT;
+		}
+
+		String user = ftpServer.getUser();
+		String password = ftpServer.getPassword();
+
+		logger.debug("user='{}'", user);
+
+		Session session = null;
+		Channel channel = null;
+		ChannelSftp channelSftp = null;
+
+		try {
+			JSch jsch = new JSch();
+			session = jsch.getSession(user, server, port);
+			session.setPassword(password);
+
+			Properties config = new Properties();
+			config.put("StrictHostKeyChecking", "no");
+			session.setConfig(config);
+			session.connect();
+			logger.debug("Host connected");
+
+			channel = session.openChannel("sftp");
+			channel.connect();
+			logger.debug("Channel connected");
+
+			File localFile = new File(fullLocalFileName);
+
+			channelSftp = (ChannelSftp) channel;
+			try (InputStream inputStream = new FileInputStream(localFile)) {
+				channelSftp.put(inputStream, remoteFileName, ChannelSftp.OVERWRITE);
+			}
+		} catch (JSchException | SftpException | IOException ex) {
+			logger.error("Error", ex);
+		} finally {
+			if (channelSftp != null) {
+				channelSftp.disconnect();
+			}
+
+			if (channel != null) {
+				channel.disconnect();
+			}
+
+			if (session != null) {
+				session.disconnect();
 			}
 		}
 	}
@@ -1911,7 +1996,7 @@ public class ReportJob implements org.quartz.Job {
 				updateArchives(splitJob, user);
 			} else {
 				//if not archiving, delete previous file
-				if (StringUtils.isNotBlank(archiveFileName) && !archiveFileName.startsWith("-")) {
+				if (StringUtils.isBlank(job.getFixedFileName()) && !StringUtils.startsWith(archiveFileName, "-")) {
 					String filePath = Config.getJobsExportPath() + archiveFileName;
 					File previousFile = new File(filePath);
 					if (previousFile.exists()) {
