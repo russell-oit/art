@@ -486,10 +486,10 @@ public class ReportJob implements org.quartz.Job {
 
 		if (!Config.getCustomSettings().isEnableEmail()) {
 			logger.info("Email disabled. Job Id: {}", jobId);
-			runDetails = "Email disabled";
+			runMessage = "jobs.message.emailDisabled";
 		} else if (!Config.isEmailServerConfigured()) {
 			logger.info("Email server not configured. Job Id: {}", jobId);
-			runDetails = "Email server not configured";
+			runMessage = "jobs.message.emailServerNotConfigured";
 		} else {
 			mailer.send();
 			emailSent = true;
