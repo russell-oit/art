@@ -47,6 +47,7 @@ public class OdsOutput extends StandardOutput {
 	private Table table;
 	private Row row;
 	private Cell cell;
+	private int currentRow;
 	private int cellNumber;
 	Font headerFont;
 	Font bodyFont;
@@ -62,6 +63,7 @@ public class OdsOutput extends StandardOutput {
 		table = null;
 		row = null;
 		cell = null;
+		currentRow = 0;
 		cellNumber = 0;
 		headerFont = null;
 		bodyFont = null;
@@ -122,9 +124,10 @@ public class OdsOutput extends StandardOutput {
 			return;
 		}
 
-		row = table.getRowByIndex(0);
+		newRow();
 		addCellString(reportName);
 		addCellString(ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
+		newRow();
 	}
 
 	@Override
@@ -197,7 +200,8 @@ public class OdsOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		row = table.appendRow();
+		//don't use table.appendRow(). a new table/sheet seems to have 2 rows already in it
+		row = table.getRowByIndex(currentRow++);
 		cellNumber = 0;
 	}
 
