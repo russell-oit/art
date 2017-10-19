@@ -28,11 +28,17 @@ Reports configuration page
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
+<spring:message code="reports.text.selectValue" var="selectValueText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+	
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.css"/>
+	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -62,6 +68,26 @@ Reports configuration page
 						);
 
 				var table = oTable.api();
+				
+				//add thead row with yadcf filters
+				var headingRow = tbl.find('thead tr:first');
+				var visibleColCount = 7;
+				var cols = '';
+				for (var i = 1; i <= visibleColCount; i++) {
+					cols += '<th></th>';
+				}
+				var filterRow = '<tr>' + cols + '</tr>';
+				headingRow.after(filterRow);
+				
+				yadcf.init(table,
+						[
+							{
+								column_number: 3,
+								filter_default_label: '${selectValueText}'
+							}
+						],
+						{filters_tr_index: 1}
+				);
 
 				$('#deleteRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
@@ -210,6 +236,7 @@ Reports configuration page
 					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
+					<th><spring:message code="reports.text.groupName"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
 					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
@@ -227,6 +254,11 @@ Reports configuration page
 						<td>${encode:forHtmlContent(report.name)} &nbsp;
 							<t:displayNewLabel creationDate="${report.creationDate}"
 											   updateDate="${report.updateDate}"/>
+						</td>
+						<td>
+							<c:if test="${not empty report.reportGroup}">
+								${encode:forHtmlContent(report.reportGroup.name)}
+							</c:if>
 						</td>
 						<td>${encode:forHtmlContent(report.description)}</td>
 						<td><t:displayActiveStatus active="${report.active}"

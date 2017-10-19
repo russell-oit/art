@@ -35,6 +35,8 @@ Reports page. Also main/home page
 				$('a[href*="reports"]').parent().addClass('active');
 
 				var tbl = $('#reports');
+				
+//				var columnFilterRow = createColumnFilters(tbl);
 
 				var oTable = tbl.dataTable({
 					columnDefs: [
@@ -64,19 +66,26 @@ Reports page. Also main/home page
 						$('div.dataTables_filter input').focus();
 					}
 				});
+				
+//				//move column filter row after heading row
+//				columnFilterRow.insertAfter(columnFilterRow.next());
 
 				//get datatables api object
 				var table = oTable.api();
+				
+//				// Apply the column filter
+//				applyColumnFilters(tbl, table);
 
+				//add thead row with yadcf filters
 				var headingRow = tbl.find('thead tr:first');
 				var visibleColCount = 3;
 				var cols = '';
 				for (var i = 1; i <= visibleColCount; i++) {
 					cols += '<th></th>';
 				}
-
 				var filterRow = '<tr>' + cols + '</tr>';
 				headingRow.after(filterRow);
+				
 				yadcf.init(table,
 						[
 							{
