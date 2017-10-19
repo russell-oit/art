@@ -128,7 +128,7 @@ public class OdsOutput extends StandardOutput {
 		if (CollectionUtils.isEmpty(reportParamsList)) {
 			return;
 		}
-		
+
 		for (ReportParameter reportParam : reportParamsList) {
 			try {
 				newRow();
@@ -172,19 +172,23 @@ public class OdsOutput extends StandardOutput {
 	@Override
 	public void addCellNumeric(Double value) {
 		cell = row.getCellByIndex(cellNumber++);
-		cell.setDoubleValue(value);
-		cell.setFont(bodyFont);
+
+		if (value != null) {
+			cell.setDoubleValue(value);
+			cell.setFont(bodyFont);
+		}
 	}
 
 	@Override
 	public void addCellDate(Date value) {
 		cell = row.getCellByIndex(cellNumber++);
+
 		if (value != null) {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(value);
 			cell.setDateValue(calendar);
+			cell.setFont(bodyFont);
 		}
-		cell.setFont(bodyFont);
 	}
 
 	@Override
@@ -196,8 +200,11 @@ public class OdsOutput extends StandardOutput {
 	@Override
 	public void addCellTotal(Double value) {
 		cell = row.getCellByIndex(cellNumber++);
-		cell.setDoubleValue(value);
-		cell.setFont(totalFont);
+
+		if (value != null) {
+			cell.setDoubleValue(value);
+			cell.setFont(totalFont);
+		}
 	}
 
 	@Override
