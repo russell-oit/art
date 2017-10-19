@@ -11,6 +11,8 @@ ART 3.0.1
 * Fix for ftp not closing properly
 * Fix for fixed file name being deleted
 * Allow use of a single from email address for all jobs
+* Fix for error with ods output with null number values
+* Added option to omit title row for xls, xlsx, ods, htmlPlain and slk output
 
 ART 3.0
 * Reorganised the code for easier maintenance and enhanced user experience

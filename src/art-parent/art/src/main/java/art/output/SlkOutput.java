@@ -110,6 +110,10 @@ public class SlkOutput extends StandardOutput {
 
 	@Override
 	public void addTitle() {
+		if (report.isOmitTitleRow()) {
+			return;
+		}
+		
 		newRow();
 
 		exportFileStrBuf.append("C;Y").append(localRowCount++).append(";X1;K\"")

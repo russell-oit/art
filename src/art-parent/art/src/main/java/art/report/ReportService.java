@@ -127,6 +127,7 @@ public class ReportService {
 			report.setXmlaDatasource(rs.getString("XMLA_DATASOURCE"));
 			report.setXmlaCatalog(rs.getString("XMLA_CATALOG"));
 			report.setDefaultReportFormat(rs.getString("DEFAULT_REPORT_FORMAT"));
+			report.setOmitTitleRow(rs.getBoolean("OMIT_TITLE_ROW"));
 			report.setHiddenColumns(rs.getString("HIDDEN_COLUMNS"));
 			report.setTotalColumns(rs.getString("TOTAL_COLUMNS"));
 			report.setDateFormat(rs.getString("DATE_COLUMN_FORMAT"));
@@ -588,12 +589,12 @@ public class ReportService {
 					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
 					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
-					+ " HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
+					+ " OMIT_TITLE_ROW, HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
 					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 34) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 35) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -617,6 +618,7 @@ public class ReportService {
 				report.getXmlaDatasource(),
 				report.getXmlaCatalog(),
 				report.getDefaultReportFormat(),
+				BooleanUtils.toInteger(report.isOmitTitleRow()),
 				report.getHiddenColumns(),
 				report.getTotalColumns(),
 				report.getDateFormat(),
@@ -640,7 +642,7 @@ public class ReportService {
 					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
-					+ " HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
+					+ " OMIT_TITLE_ROW=?, HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
 					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?, LOCALE=?,"
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
 					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?,"
@@ -668,6 +670,7 @@ public class ReportService {
 				report.getXmlaDatasource(),
 				report.getXmlaCatalog(),
 				report.getDefaultReportFormat(),
+				BooleanUtils.toInteger(report.isOmitTitleRow()),
 				report.getHiddenColumns(),
 				report.getTotalColumns(),
 				report.getDateFormat(),

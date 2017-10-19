@@ -66,6 +66,10 @@ public class HtmlPlainOutput extends StandardOutput {
 		if (!fileOutput) {
 			return;
 		}
+		
+		if (report.isOmitTitleRow()) {
+			return;
+		}
 
 		out.println("<div align='center'>");
 		out.println("<table border='0' width='100%' cellspacing='1'"

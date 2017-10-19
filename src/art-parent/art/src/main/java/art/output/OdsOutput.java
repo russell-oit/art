@@ -118,6 +118,10 @@ public class OdsOutput extends StandardOutput {
 
 	@Override
 	public void addTitle() {
+		if (report.isOmitTitleRow()) {
+			return;
+		}
+
 		row = table.getRowByIndex(0);
 		addCellString(reportName);
 		addCellString(ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));

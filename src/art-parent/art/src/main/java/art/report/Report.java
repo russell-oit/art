@@ -79,6 +79,21 @@ public class Report implements Serializable {
 	private int fetchSize;
 	private String options;
 	private PageOrientation pageOrientation = PageOrientation.Portrait;
+	private boolean omitTitleRow;
+
+	/**
+	 * @return the omitTitleRow
+	 */
+	public boolean isOmitTitleRow() {
+		return omitTitleRow;
+	}
+
+	/**
+	 * @param omitTitleRow the omitTitleRow to set
+	 */
+	public void setOmitTitleRow(boolean omitTitleRow) {
+		this.omitTitleRow = omitTitleRow;
+	}
 
 	/**
 	 * @return the pageOrientation
