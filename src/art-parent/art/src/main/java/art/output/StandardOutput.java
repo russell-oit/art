@@ -96,6 +96,21 @@ public abstract class StandardOutput {
 	protected boolean isJob;
 	protected Report report;
 	protected boolean pdfPageNumbers = true;
+	protected boolean ajax;
+
+	/**
+	 * @return the ajax
+	 */
+	public boolean isAjax() {
+		return ajax;
+	}
+
+	/**
+	 * @param ajax the ajax to set
+	 */
+	public void setAjax(boolean ajax) {
+		this.ajax = ajax;
+	}
 
 	/**
 	 * @return the pdfPageNumbers
