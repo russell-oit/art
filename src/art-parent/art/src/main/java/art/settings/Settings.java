@@ -83,6 +83,21 @@ public class Settings implements Serializable {
 	private String artBaseUrl;
 	private String casLogoutUrl;
 	private String smtpFrom;
+	private String systemLocale;
+
+	/**
+	 * @return the systemLocale
+	 */
+	public String getSystemLocale() {
+		return systemLocale;
+	}
+
+	/**
+	 * @param systemLocale the systemLocale to set
+	 */
+	public void setSystemLocale(String systemLocale) {
+		this.systemLocale = systemLocale;
+	}
 
 	/**
 	 * @return the smtpFrom

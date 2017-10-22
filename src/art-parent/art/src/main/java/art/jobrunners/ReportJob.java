@@ -122,6 +122,7 @@ public class ReportJob implements org.quartz.Job {
 	private int jobId;
 	private String runDetails;
 	private String runMessage;
+	private Locale locale;
 
 	@Autowired
 	private TemplateEngine emailTemplateEngine;
@@ -163,6 +164,11 @@ public class ReportJob implements org.quartz.Job {
 		fileName = "";
 		runDetails = "";
 		runMessage = "";
+		
+		String systemLocale = Config.getSettings().getSystemLocale();
+		logger.debug("systemLocale='{}'", systemLocale);
+		
+		locale = ArtUtils.getLocaleFromString(systemLocale);
 
 		dbService = new DbService();
 
@@ -531,7 +537,7 @@ public class ReportJob implements org.quartz.Job {
 			mainMessage = mainMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 		}
 
-		Context ctx = new Context(Locale.getDefault());
+		Context ctx = new Context(locale);
 		ctx.setVariable("mainMessage", mainMessage);
 		ctx.setVariable("job", job);
 
@@ -686,7 +692,7 @@ public class ReportJob implements org.quartz.Job {
 				mainMessage = msg;
 			}
 
-			Context ctx = new Context(Locale.getDefault());
+			Context ctx = new Context(locale);
 			ctx.setVariable("mainMessage", mainMessage);
 			ctx.setVariable("job", job);
 			ctx.setVariable("data", messageData);
@@ -698,12 +704,12 @@ public class ReportJob implements org.quartz.Job {
 
 	/**
 	 * Returns the email address to use in the from field
-	 * 
+	 *
 	 * @return the email address to use in the from field
 	 */
 	private String getMailFrom() {
 		logger.debug("Entering getMailFrom");
-		
+
 		String from;
 		String settingsFrom = Config.getSettings().getSmtpFrom();
 		logger.debug("settingsFrom='{}'", settingsFrom);
@@ -1426,8 +1432,6 @@ public class ReportJob implements org.quartz.Job {
 
 		String outputFileName = exportPath + fileName;
 
-		Locale locale = Locale.getDefault();
-
 		if (reportType.isDashboard()) {
 			PdfDashboard.generatePdf(paramProcessorResult, report, user, locale, outputFileName, messageSource);
 		} else {
@@ -1496,8 +1500,7 @@ public class ReportJob implements org.quartz.Job {
 		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
 		reportOutputGenerator.setIsJob(true);
-		Locale locale = Locale.getDefault();
-
+		
 		ResultSet rs = null;
 		try {
 			boolean isJob = true;
@@ -2243,4 +2246,5 @@ public class ReportJob implements org.quartz.Job {
 			logger.error("Error", ex);
 		}
 	}
+
 }

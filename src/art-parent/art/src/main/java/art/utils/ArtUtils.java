@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -37,6 +38,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
@@ -418,6 +420,23 @@ public class ArtUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns a locale object based on a string. If the string is null or
+	 * blank, the system/jvm default locale is returned
+	 *
+	 * @param localeString the string representation of the locale
+	 * @return the locale object
+	 */
+	public static Locale getLocaleFromString(String localeString) {
+		if (StringUtils.isBlank(localeString)) {
+			return Locale.getDefault();
+		} else if (StringUtils.contains(localeString, "-")) {
+			return Locale.forLanguageTag(localeString);
+		} else {
+			return LocaleUtils.toLocale(localeString);
+		}
 	}
 
 }

@@ -58,7 +58,6 @@ import java.util.TreeSet;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -727,10 +726,8 @@ public abstract class StandardOutput {
 		String reportLocale = report.getLocale();
 		if (StringUtils.isBlank(reportLocale)) {
 			columnFormatLocale = locale;
-		} else if (StringUtils.contains(reportLocale, "-")) {
-			columnFormatLocale = Locale.forLanguageTag(reportLocale);
 		} else {
-			columnFormatLocale = LocaleUtils.toLocale(reportLocale);
+			columnFormatLocale = ArtUtils.getLocaleFromString(reportLocale);
 		}
 
 		String globalDateFormat = report.getDateFormat();

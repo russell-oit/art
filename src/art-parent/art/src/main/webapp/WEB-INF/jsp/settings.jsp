@@ -608,7 +608,7 @@ Settings configuration page
 				</fieldset>
 
 				<fieldset>
-					<legend><spring:message code="settings.text.general" /></legend>
+					<legend><spring:message code="settings.text.general"/></legend>
 					<div class="form-group">
 						<label class="control-label col-md-5" for="administratorEmail">
 							<spring:message code="settings.label.administratorEmail"/>
@@ -679,30 +679,6 @@ Settings configuration page
 								</span>
 							</div>
 							<form:errors path="reportFormats" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-md-5">
-							<spring:message code="settings.label.displayNull"/>
-						</label>
-						<div class="col-md-7">
-							<div class="input-group">
-								<c:forEach var="displayNullOption" items="${displayNullOptions}">
-									<label class="radio-inline">
-										<form:radiobutton path="displayNull"
-														  value="${displayNullOption}"/>
-										<spring:message code="${displayNullOption.localizedDescription}"/>
-									</label>
-								</c:forEach>
-								<spring:message code="settings.help.displayNull" var="help" />
-								<span class="input-group-btn" >
-									<button class="btn btn-default" type="button"
-											data-toggle="tooltip" title="${help}">
-										<i class="fa fa-info"></i>
-									</button>
-								</span>
-							</div>
-							<form:errors path="displayNull" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
@@ -813,6 +789,15 @@ Settings configuration page
 								</span>
 							</div>
 							<form:errors path="artBaseUrl" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="systemLocale">
+							<spring:message code="settings.label.systemLocale"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="systemLocale" class="form-control"/>
+							<form:errors path="systemLocale" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>
