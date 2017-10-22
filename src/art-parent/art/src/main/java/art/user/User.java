@@ -53,31 +53,20 @@ public class User implements Serializable {
 	private boolean useBlankPassword; //only used for user interface logic
 	private String createdBy;
 	private String updatedBy;
+	private boolean generateAndSend; //only used for user interface logic
 
 	/**
-	 * Determine if this is an admin user
-	 *
-	 * @return
+	 * @return the generateAndSend
 	 */
-	public boolean isAdminUser() {
-		if (accessLevel == null || accessLevel.getValue() < AccessLevel.JuniorAdmin.getValue()) {
-			return false;
-		} else {
-			return true;
-		}
+	public boolean isGenerateAndSend() {
+		return generateAndSend;
 	}
 
 	/**
-	 * Determine if this is the public user
-	 *
-	 * @return
+	 * @param generateAndSend the generateAndSend to set
 	 */
-	public boolean isPublicUser() {
-		if (StringUtils.equals(username, ArtUtils.PUBLIC_USER)) {
-			return true;
-		} else {
-			return false;
-		}
+	public void setGenerateAndSend(boolean generateAndSend) {
+		this.generateAndSend = generateAndSend;
 	}
 
 	/**
@@ -441,6 +430,32 @@ public class User implements Serializable {
 	@Override
 	public String toString() {
 		return "User{" + "username=" + username + '}';
+	}
+	
+	/**
+	 * Determine if this is an admin user
+	 *
+	 * @return
+	 */
+	public boolean isAdminUser() {
+		if (accessLevel == null || accessLevel.getValue() < AccessLevel.JuniorAdmin.getValue()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * Determine if this is the public user
+	 *
+	 * @return
+	 */
+	public boolean isPublicUser() {
+		if (StringUtils.equals(username, ArtUtils.PUBLIC_USER)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

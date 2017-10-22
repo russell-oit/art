@@ -159,6 +159,12 @@ Display edit user page
 								<spring:message code="page.checkbox.useBlankPassword"/>
 							</label>
 						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="generateAndSend"/>
+								<spring:message code="users.checkbox.generateAndSend"/>
+							</label>
+						</div>
 						<form:errors path="password" cssClass="error"/>
 					</div>
 				</div>

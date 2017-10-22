@@ -20,7 +20,9 @@ package art.utils;
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.enums.ReportType;
+import art.mail.Mailer;
 import art.reportparameter.ReportParameter;
+import art.servlets.Config;
 import art.user.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -188,5 +190,31 @@ public class ArtHelper {
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * Returns a mailer object that can be used to send emails
+	 *
+	 * @return a mailer object that can be used to send emails
+	 */
+	public Mailer getMailer() {
+		logger.debug("Entering getMailer");
+
+		String smtpServer = Config.getSettings().getSmtpServer();
+		String smtpUsername = Config.getSettings().getSmtpUsername();
+		String smtpPassword = Config.getSettings().getSmtpPassword();
+
+		Mailer mailer = new Mailer();
+		mailer.setHost(smtpServer);
+		if (StringUtils.length(smtpUsername) > 3 && smtpPassword != null) {
+			mailer.setUsername(smtpUsername);
+			mailer.setPassword(smtpPassword);
+		}
+
+		mailer.setPort(Config.getSettings().getSmtpPort());
+		mailer.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
+		mailer.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
+
+		return mailer;
 	}
 }

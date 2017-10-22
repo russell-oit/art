@@ -42,6 +42,7 @@ import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.user.User;
+import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.FilenameHelper;
@@ -164,10 +165,10 @@ public class ReportJob implements org.quartz.Job {
 		fileName = "";
 		runDetails = "";
 		runMessage = "";
-		
+
 		String systemLocale = Config.getSettings().getSystemLocale();
 		logger.debug("systemLocale='{}'", systemLocale);
-		
+
 		locale = ArtUtils.getLocaleFromString(systemLocale);
 
 		dbService = new DbService();
@@ -715,6 +716,7 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("settingsFrom='{}'", settingsFrom);
 
 		if (StringUtils.isBlank(settingsFrom)) {
+			logger.debug("job.getMailFrom()='{}'", job.getMailFrom());
 			from = job.getMailFrom();
 		} else {
 			from = settingsFrom;
@@ -1500,7 +1502,7 @@ public class ReportJob implements org.quartz.Job {
 		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
 		reportOutputGenerator.setIsJob(true);
-		
+
 		ResultSet rs = null;
 		try {
 			boolean isJob = true;
@@ -1980,23 +1982,11 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @return a mailer object that can be used to send emails
 	 */
-	public Mailer getMailer() {
+	private Mailer getMailer() {
 		logger.debug("Entering getMailer");
 
-		String smtpServer = Config.getSettings().getSmtpServer();
-		String smtpUsername = Config.getSettings().getSmtpUsername();
-		String smtpPassword = Config.getSettings().getSmtpPassword();
-
-		Mailer mailer = new Mailer();
-		mailer.setHost(smtpServer);
-		if (StringUtils.length(smtpUsername) > 3 && smtpPassword != null) {
-			mailer.setUsername(smtpUsername);
-			mailer.setPassword(smtpPassword);
-		}
-
-		mailer.setPort(Config.getSettings().getSmtpPort());
-		mailer.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
-		mailer.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
+		ArtHelper artHelper = new ArtHelper();
+		Mailer mailer = artHelper.getMailer();
 
 		return mailer;
 	}
