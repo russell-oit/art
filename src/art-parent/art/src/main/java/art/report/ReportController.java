@@ -21,7 +21,6 @@ import art.datasource.DatasourceService;
 import art.enums.PageOrientation;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
-import art.jobrunners.ReportJob;
 import art.mail.Mailer;
 import art.reportgroup.ReportGroupService;
 import art.runreport.RunReportHelper;

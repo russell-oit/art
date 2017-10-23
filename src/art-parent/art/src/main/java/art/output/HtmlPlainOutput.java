@@ -18,7 +18,6 @@
 package art.output;
 
 import art.reportparameter.ReportParameter;
-import art.utils.ArtUtils;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
