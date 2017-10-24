@@ -97,6 +97,18 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		String message = null;
 
 		User user = (User) session.getAttribute("sessionUser");
+
+		//reset session user if different username passed in url
+		if (!StringUtils.startsWith(page, "save") && user != null) {
+			String urlUsername = request.getParameter("username");
+			String password = request.getParameter("password");
+			if (urlUsername != null && password != null
+					&& !StringUtils.equalsIgnoreCase(user.getUsername(), urlUsername)) {
+				session.removeAttribute("sessionUser");
+				user = null;
+			}
+		}
+
 		if (user == null) {
 			//custom authentication, public user session, credentials in url or session expired
 			ArtAuthenticationMethod loginMethod = null;
@@ -116,7 +128,9 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 					String password = request.getParameter("password");
 					String windowsDomain = request.getParameter("windowsDomain");
 					String authenticationMethodString = request.getParameter("authenticationMethod");
-					if (urlUsername != null && password != null) {
+					//some pages e.g. saveUser, saveDatasource send the fields "username" and "password"
+					if (!StringUtils.startsWith(page, "save")
+							&& urlUsername != null && password != null) {
 						LoginHelper loginHelper = new LoginHelper();
 						ArtAuthenticationMethod authenticationMethod = ArtAuthenticationMethod.toEnum(authenticationMethodString);
 						LoginResult result = loginHelper.authenticate(authenticationMethod, urlUsername, password, windowsDomain);
@@ -137,15 +151,15 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			} else {
 				//either custom authentication or public user session or credentials in url
 				//ensure user exists
-				LoginHelper loginHelper = new LoginHelper();
-				String ip = request.getRemoteAddr();
-
 				UserService userService = new UserService();
 				try {
 					user = userService.getUser(username);
 				} catch (SQLException ex) {
 					logger.error("Error", ex);
 				}
+
+				LoginHelper loginHelper = new LoginHelper();
+				String ip = request.getRemoteAddr();
 
 				if (user == null) {
 					//user doesn't exist
