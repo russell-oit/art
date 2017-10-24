@@ -151,8 +151,17 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "msaccess-ucanaccess") {
 		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
-		urlElement.value = "jdbc:ucanaccess://c:/file_path.mdb";
+		urlElement.value = "jdbc:ucanaccess://<file_path>";
 		testSqlElement.value = "";
+	} else if (dbType === "msaccess-ucanaccess-password") {
+		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
+		urlElement.value = "jdbc:ucanaccess://<file_path>;jackcessOpener=art.utils.CryptCodecOpener";
+		testSqlElement.value = "";
+		
+		var usernameElement = document.getElementById("username");
+		if (usernameElement !== null) {
+			usernameElement.value = "";
+		}
 	} else if (dbType === "sqlite-xerial") {
 		driverElement.value = "org.sqlite.JDBC";
 		urlElement.value = "jdbc:sqlite:<file_path>";

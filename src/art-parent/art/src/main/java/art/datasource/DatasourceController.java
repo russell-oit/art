@@ -214,6 +214,11 @@ public class DatasourceController {
 				return showEditDatasource(action, model);
 			}
 
+			//ucanaccess will cause error if username is not empty
+			if (StringUtils.startsWith(datasource.getUrl(), "jdbc:ucanaccess")) {
+				datasource.setUsername("");
+			}
+
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
@@ -449,6 +454,12 @@ public class DatasourceController {
 							url += "JdbcPassword=" + password + ";";
 						}
 					}
+
+					//ucanaccess will cause error if username is not empty
+					if (StringUtils.startsWith(url, "jdbc:ucanaccess")) {
+						username = "";
+					}
+
 					//conn = DriverManager.getConnection(url, username, password);
 					//use getDriver() in order for correct reporting of No suitable driver error.
 					//with some urls/drivers, the jvm tries to use the wrong driver
