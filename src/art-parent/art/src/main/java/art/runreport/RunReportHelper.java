@@ -106,6 +106,8 @@ public class RunReportHelper {
 				}
 			}
 		}
+		
+		logger.debug("dynamicDatasourceIdString='{}'", dynamicDatasourceIdString);
 
 		if (dynamicDatasourceIdString == null) {
 			//use datasource defined on the report
@@ -116,9 +118,11 @@ public class RunReportHelper {
 		} else {
 			//use datasource indicated in parameter
 			if (NumberUtils.isCreatable(dynamicDatasourceIdString)) {
+				//search with datasource id
 				int dynamicDatasourceIdInt = Integer.parseInt(dynamicDatasourceIdString);
 				conn = DbConnections.getConnection(dynamicDatasourceIdInt);
 			} else {
+				//search with datasource name
 				conn = DbConnections.getConnection(dynamicDatasourceIdString);
 			}
 		}

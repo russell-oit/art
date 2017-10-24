@@ -20,6 +20,7 @@ package art.ftpserver;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.encryption.AesEncryptor;
+import art.enums.FtpConnectionType;
 import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -86,6 +87,7 @@ public class FtpServerService {
 			ftpServer.setName(rs.getString("NAME"));
 			ftpServer.setDescription(rs.getString("DESCRIPTION"));
 			ftpServer.setActive(rs.getBoolean("ACTIVE"));
+			ftpServer.setConnectionType(FtpConnectionType.toEnum(rs.getString("CONNECTION_TYPE")));
 			ftpServer.setServer(rs.getString("SERVER"));
 			ftpServer.setPort(rs.getInt("PORT"));
 			ftpServer.setUser(rs.getString("FTP_USER"));
@@ -147,7 +149,6 @@ public class FtpServerService {
 
 		String sql;
 
-		//finally delete ftp server
 		sql = "DELETE FROM ART_FTP_SERVERS WHERE FTP_SERVER_ID=?";
 		dbService.update(sql, id);
 	}
@@ -239,16 +240,17 @@ public class FtpServerService {
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_FTP_SERVERS"
-					+ " (FTP_SERVER_ID, NAME, DESCRIPTION, ACTIVE, SERVER, PORT,"
-					+ " FTP_USER, PASSWORD, REMOTE_DIRECTORY,"
+					+ " (FTP_SERVER_ID, NAME, DESCRIPTION, ACTIVE, CONNECTION_TYPE,"
+					+ " SERVER, PORT, FTP_USER, PASSWORD, REMOTE_DIRECTORY,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 11) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
 
 			Object[] values = {
 				newRecordId,
 				ftpServer.getName(),
 				ftpServer.getDescription(),
 				BooleanUtils.toInteger(ftpServer.isActive()),
+				ftpServer.getConnectionType().getValue(),
 				ftpServer.getServer(),
 				ftpServer.getPort(),
 				ftpServer.getUser(),
@@ -261,8 +263,8 @@ public class FtpServerService {
 			affectedRows = dbService.update(sql, values);
 		} else {
 			String sql = "UPDATE ART_FTP_SERVERS SET NAME=?, DESCRIPTION=?,"
-					+ " ACTIVE=?, SERVER=?, PORT=?, FTP_USER=?, PASSWORD=?,"
-					+ " REMOTE_DIRECTORY=?,"
+					+ " ACTIVE=?, CONNECTION_TYPE=?, SERVER=?, PORT=?, FTP_USER=?,"
+					+ " PASSWORD=?, REMOTE_DIRECTORY=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE FTP_SERVER_ID=?";
 
@@ -270,6 +272,7 @@ public class FtpServerService {
 				ftpServer.getName(),
 				ftpServer.getDescription(),
 				BooleanUtils.toInteger(ftpServer.isActive()),
+				ftpServer.getConnectionType().getValue(),
 				ftpServer.getServer(),
 				ftpServer.getPort(),
 				ftpServer.getUser(),

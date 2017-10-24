@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 	<head>
-		<title></title>
+		<title>Title</title>
 		<meta charset="UTF-8"/>
 	</head>
 	<body>
 		<div th:utext="${mainMessage}">Main message</div>
 		<div th:if='${data != null}'>
-			<hr/>
 			<p th:utext="${data}">Data</p>
 		</div>
 		<hr/>

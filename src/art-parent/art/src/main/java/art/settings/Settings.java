@@ -82,6 +82,36 @@ public class Settings implements Serializable {
 	private int maxFileUploadSizeMB = 5;
 	private String artBaseUrl;
 	private String casLogoutUrl;
+	private String smtpFrom;
+	private String systemLocale;
+
+	/**
+	 * @return the systemLocale
+	 */
+	public String getSystemLocale() {
+		return systemLocale;
+	}
+
+	/**
+	 * @param systemLocale the systemLocale to set
+	 */
+	public void setSystemLocale(String systemLocale) {
+		this.systemLocale = systemLocale;
+	}
+
+	/**
+	 * @return the smtpFrom
+	 */
+	public String getSmtpFrom() {
+		return smtpFrom;
+	}
+
+	/**
+	 * @param smtpFrom the smtpFrom to set
+	 */
+	public void setSmtpFrom(String smtpFrom) {
+		this.smtpFrom = smtpFrom;
+	}
 
 	/**
 	 * @return the casLogoutUrl

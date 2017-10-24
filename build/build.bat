@@ -10,7 +10,7 @@ rd /S /Q art-nightly
 md art-nightly
 
 rem create archive from hg repo
-hg archive --repository ..\hg -t files -- build-hg
+hg archive --rev stable --repository ..\hg -t files -- build-hg
 
 rem copy changelog
 copy /Y build-hg\src\art-parent\art\changelog.txt art-nightly

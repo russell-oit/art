@@ -35,6 +35,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void init() {
+		//include required css and javascript files
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlDataTableOutput.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/DataTables-1.10.13/css/dataTables.bootstrap.min.css'>");
@@ -45,7 +46,10 @@ public class HtmlDataTableOutput extends StandardOutput {
 		//https://stackoverflow.com/questions/24639335/javascript-console-log-causes-error-synchronous-xmlhttprequest-on-the-main-thr
 		//https://github.com/jquery/jquery/issues/2060
 		//however we have to include the script files for report run by ajax to work
-		out.println("<script src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
+		if (!ajax) {
+			//including jquery.js while using $.load() or $.post() results in spinner not appearing on second run
+			out.println("<script src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
+		}
 		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/jquery.dataTables.min.js'></script>");
 		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js'></script>");
 		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js'></script>");
@@ -56,6 +60,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.html5.min.js'></script>");
 		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.print.min.js'></script>");
 		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.colVis.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/art.js'></script>");
 
 		//set language file to use for localization
 		//language files to be put in the /js/datatables/i18n directory and to be named dataTables_xx.json according to the locale
@@ -97,6 +102,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 		String dataTableOptions
 				= "{"
 				+ "orderClasses: false"
+				+ ", order: []"
 				+ ", pagingType: 'full_numbers'"
 				+ ", lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, '" + allText + "']]"
 				+ ", pageLength: 50"
@@ -108,7 +114,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 				+ "{extend: 'print', exportOptions: {columns: ':visible'}}"
 				+ "]"
 				+ languageSetting
-				+ ", initComplete: function() {$('div.dataTables_filter input').focus();}"
+				+ ", initComplete: function() {if(!isMobile()){$('div.dataTables_filter input').focus();}}"
 				+ "}";
 
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
@@ -136,7 +142,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 	public void addHeaderCellAlignLeft(String value) {
 		out.println("<th style='text-align: left'>" + value + "</th>");
 	}
-	
+
 	@Override
 	public void addHeaderCellAlignLeft(String value, String sortValue) {
 		String escapedSortValue = Encode.forHtmlAttribute(sortValue);

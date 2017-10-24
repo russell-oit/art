@@ -47,7 +47,7 @@ Display edit user page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -159,6 +159,12 @@ Display edit user page
 								<spring:message code="page.checkbox.useBlankPassword"/>
 							</label>
 						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="generateAndSend"/>
+								<spring:message code="users.checkbox.generateAndSend"/>
+							</label>
+						</div>
 						<form:errors path="password" cssClass="error"/>
 					</div>
 				</div>
@@ -176,7 +182,7 @@ Display edit user page
 						<spring:message code="users.label.email"/>
 					</label>
 					<div class="col-md-8">
-						<form:input type="email" path="email" maxlength="100" class="form-control"/>
+						<form:input path="email" maxlength="100" class="form-control"/>
 						<form:errors path="email" cssClass="error"/>
 					</div>
 				</div>
@@ -216,7 +222,19 @@ Display edit user page
 						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>
-				<form:hidden path="defaultReportGroup" />
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="defaultReportGroup.reportGroupId">
+						<spring:message code="page.label.defaultReportGroup"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="defaultReportGroup.reportGroupId" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+								<option data-divider="true"></option>
+							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
+						</form:select>
+						<form:errors path="defaultReportGroup.reportGroupId" cssClass="error"/>
+					</div>
+				</div>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="startReport">
 						<spring:message code="page.label.startReport"/>

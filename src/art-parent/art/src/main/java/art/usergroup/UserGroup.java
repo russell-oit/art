@@ -17,6 +17,7 @@
  */
 package art.usergroup;
 
+import art.reportgroup.ReportGroup;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -34,7 +35,7 @@ public class UserGroup implements Serializable {
 	private int userGroupId;
 	private String name;
 	private String description;
-	private int defaultReportGroup;
+	private ReportGroup defaultReportGroup;
 	private String startReport;
 	private Date creationDate;
 	private Date updateDate;
@@ -143,14 +144,14 @@ public class UserGroup implements Serializable {
 	/**
 	 * @return the defaultReportGroup
 	 */
-	public int getDefaultReportGroup() {
+	public ReportGroup getDefaultReportGroup() {
 		return defaultReportGroup;
 	}
 
 	/**
 	 * @param defaultReportGroup the defaultReportGroup to set
 	 */
-	public void setDefaultReportGroup(int defaultReportGroup) {
+	public void setDefaultReportGroup(ReportGroup defaultReportGroup) {
 		this.defaultReportGroup = defaultReportGroup;
 	}
 

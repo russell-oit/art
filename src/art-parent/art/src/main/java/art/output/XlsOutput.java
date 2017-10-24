@@ -178,6 +178,10 @@ public class XlsOutput extends StandardOutput {
 
 	@Override
 	public void addTitle() {
+		if (report.isOmitTitleRow()) {
+			return;
+		}
+
 		newRow();
 		addCellString(reportName);
 		addCellString(ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
@@ -281,10 +285,6 @@ public class XlsOutput extends StandardOutput {
 
 	@Override
 	public void endOutput() {
-		for (int i = 0; i < totalColumnCount; i++) {
-			sheet.autoSizeColumn(i);
-		}
-
 		try {
 			if (zout == null) {
 				if (wb != null && fout != null) {

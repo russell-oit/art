@@ -22,6 +22,7 @@ import art.connectionpool.DbConnections;
 import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
+import art.enums.FtpConnectionType;
 import art.enums.JobType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
@@ -41,10 +42,17 @@ import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.user.User;
+import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -73,6 +81,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
@@ -114,6 +123,7 @@ public class ReportJob implements org.quartz.Job {
 	private int jobId;
 	private String runDetails;
 	private String runMessage;
+	private Locale locale;
 
 	@Autowired
 	private TemplateEngine emailTemplateEngine;
@@ -155,6 +165,11 @@ public class ReportJob implements org.quartz.Job {
 		fileName = "";
 		runDetails = "";
 		runMessage = "";
+
+		String systemLocale = Config.getSettings().getSystemLocale();
+		logger.debug("systemLocale='{}'", systemLocale);
+
+		locale = ArtUtils.getLocaleFromString(systemLocale);
 
 		dbService = new DbService();
 
@@ -198,7 +213,7 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Ftps a generated file
+	 * Ftps the generated file
 	 */
 	private void ftpFile() {
 		logger.debug("Entering ftpFile");
@@ -214,16 +229,67 @@ public class ReportJob implements org.quartz.Job {
 			return;
 		}
 
+		FtpConnectionType connectionType = ftpServer.getConnectionType();
+		logger.debug("connectionType={}", connectionType);
+
+		String jobsExportPath = Config.getJobsExportPath();
+		String fullLocalFileName = jobsExportPath + fileName;
+
+		String remoteDirectory = ftpServer.getRemoteDirectory();
+		logger.debug("remoteDirectory='{}'", remoteDirectory);
+		remoteDirectory = StringUtils.trimToEmpty(remoteDirectory);
+		if (!StringUtils.endsWith(remoteDirectory, "/")) {
+			remoteDirectory += "/";
+		}
+		String remoteFileName = remoteDirectory + fileName;
+
+		switch (connectionType) {
+			case FTP:
+				doFtp(ftpServer, fullLocalFileName, remoteFileName);
+				break;
+			case SFTP:
+				doSftp(ftpServer, fullLocalFileName, remoteFileName);
+				break;
+			default:
+				logger.warn("Unexpected ftp connection type: " + connectionType);
+		}
+
+	}
+
+	/**
+	 * Ftp the generated file using the ftp protocol
+	 *
+	 * @param ftpServer the ftp server object
+	 * @param fullLocalFileName full path to the local job file to ftp
+	 * @param remoteFileName the file name or full path of the ftp destination
+	 */
+	private void doFtp(FtpServer ftpServer, String fullLocalFileName, String remoteFileName) {
+		logger.debug("Entering doFtp: ftpServer={}, fullLocalFileName='{}',"
+				+ " remoteFileName='{}'", ftpServer, fullLocalFileName, remoteFileName);
+
 		//http://www.codejava.net/java-se/networking/ftp/java-ftp-file-upload-tutorial-and-example
 		//https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
 		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
 		//https://stackoverflow.com/questions/36302985/how-to-connect-to-ftp-over-tls-ssl-ftps-server-in-java
 		//https://stackoverflow.com/questions/36349361/apache-java-ftp-client-does-not-switch-to-binary-transfer-mode-on-some-servers
 		//https://stackoverflow.com/questions/6651158/apache-commons-ftp-problems
+		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html#completePendingCommand()
+		//https://stackoverflow.com/questions/19209826/android-ftpclient-cannot-upload-file-ftp-response-421-received-server-closed
 		String server = ftpServer.getServer();
 		int port = ftpServer.getPort();
+
+		logger.debug("server='{}'", server);
+		logger.debug("port={}", port);
+
+		if (port <= 0) {
+			final int DEFAULT_FTP_PORT = 21;
+			port = DEFAULT_FTP_PORT;
+		}
+
 		String user = ftpServer.getUser();
-		String pass = ftpServer.getPassword();
+		String password = ftpServer.getPassword();
+
+		logger.debug("user='{}'", user);
 
 		FTPClient ftpClient = new FTPClient();
 		try {
@@ -239,7 +305,7 @@ public class ReportJob implements org.quartz.Job {
 				return;
 			}
 
-			if (!ftpClient.login(user, pass)) {
+			if (!ftpClient.login(user, password)) {
 				logger.info("FTP login failed. Job Id: {}", jobId);
 				return;
 			}
@@ -248,14 +314,6 @@ public class ReportJob implements org.quartz.Job {
 
 			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 
-			String jobsExportPath = Config.getJobsExportPath();
-			String fullLocalFileName = jobsExportPath + fileName;
-			String remoteDirectory = ftpServer.getRemoteDirectory();
-			remoteDirectory = StringUtils.trimToEmpty(remoteDirectory);
-			if (!StringUtils.endsWith(remoteDirectory, "/")) {
-				remoteDirectory += "/";
-			}
-			String remoteFileName = remoteDirectory + fileName;
 			File localFile = new File(fullLocalFileName);
 
 			boolean done;
@@ -268,13 +326,6 @@ public class ReportJob implements org.quartz.Job {
 				logger.info("Ftp file upload failed. Job Id: {}", jobId);
 			}
 
-			boolean completed = ftpClient.completePendingCommand();
-			if (completed) {
-				logger.debug("Ftp file upload completed. Job Id: {}", jobId);
-			} else {
-				logger.info("Ftp file upload not completed. Job Id: {}", jobId);
-			}
-
 			ftpClient.logout();
 		} catch (IOException ex) {
 			logger.error("Error", ex);
@@ -285,6 +336,79 @@ public class ReportJob implements org.quartz.Job {
 				}
 			} catch (IOException ex) {
 				logger.error("Error", ex);
+			}
+		}
+	}
+
+	/**
+	 * Ftp the generated file using the sftp protocol
+	 *
+	 * @param ftpServer the ftp server object
+	 * @param fullLocalFileName full path to the local job file to ftp
+	 * @param remoteFileName the file name or full path of the ftp destination
+	 */
+	private void doSftp(FtpServer ftpServer, String fullLocalFileName, String remoteFileName) {
+		logger.debug("Entering doSftp: ftpServer={}, fullLocalFileName='{}',"
+				+ " remoteFileName='{}'", ftpServer, fullLocalFileName, remoteFileName);
+
+		//https://stackoverflow.com/questions/14830146/how-to-transfer-a-file-through-sftp-in-java
+		//https://github.com/jpbriend/sftp-example/blob/master/src/main/java/com/infinit/sftp/SftpClient.java
+		//https://stackoverflow.com/questions/17473398/java-sftp-upload-using-jsch-but-how-to-overwrite-the-current-file
+		//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/ChannelSftp.html
+		String server = ftpServer.getServer();
+		int port = ftpServer.getPort();
+
+		logger.debug("server='{}'", server);
+		logger.debug("port={}", port);
+
+		if (port <= 0) {
+			final int DEFAULT_SFTP_PORT = 22;
+			port = DEFAULT_SFTP_PORT;
+		}
+
+		String user = ftpServer.getUser();
+		String password = ftpServer.getPassword();
+
+		logger.debug("user='{}'", user);
+
+		Session session = null;
+		Channel channel = null;
+		ChannelSftp channelSftp = null;
+
+		try {
+			JSch jsch = new JSch();
+			session = jsch.getSession(user, server, port);
+			session.setPassword(password);
+
+			Properties config = new Properties();
+			config.put("StrictHostKeyChecking", "no");
+			session.setConfig(config);
+			session.connect();
+			logger.debug("Host connected");
+
+			channel = session.openChannel("sftp");
+			channel.connect();
+			logger.debug("Channel connected");
+
+			File localFile = new File(fullLocalFileName);
+
+			channelSftp = (ChannelSftp) channel;
+			try (InputStream inputStream = new FileInputStream(localFile)) {
+				channelSftp.put(inputStream, remoteFileName, ChannelSftp.OVERWRITE);
+			}
+		} catch (JSchException | SftpException | IOException ex) {
+			logger.error("Error", ex);
+		} finally {
+			if (channelSftp != null) {
+				channelSftp.disconnect();
+			}
+
+			if (channel != null) {
+				channel.disconnect();
+			}
+
+			if (session != null) {
+				session.disconnect();
 			}
 		}
 	}
@@ -369,10 +493,10 @@ public class ReportJob implements org.quartz.Job {
 
 		if (!Config.getCustomSettings().isEnableEmail()) {
 			logger.info("Email disabled. Job Id: {}", jobId);
-			runDetails = "Email disabled";
+			runMessage = "jobs.message.emailDisabled";
 		} else if (!Config.isEmailServerConfigured()) {
 			logger.info("Email server not configured. Job Id: {}", jobId);
-			runDetails = "Email server not configured";
+			runMessage = "jobs.message.emailServerNotConfigured";
 		} else {
 			mailer.send();
 			emailSent = true;
@@ -391,7 +515,7 @@ public class ReportJob implements org.quartz.Job {
 	private void prepareAlertMailer(Mailer mailer, String msg, int value) {
 		logger.debug("Entering prepareAlertMailer");
 
-		String from = job.getMailFrom();
+		String from = getMailFrom();
 
 		String subject = job.getMailSubject();
 		// compatibility with Art pre 1.8 where subject was not editable
@@ -414,7 +538,7 @@ public class ReportJob implements org.quartz.Job {
 			mainMessage = mainMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 		}
 
-		Context ctx = new Context(Locale.getDefault());
+		Context ctx = new Context(locale);
 		ctx.setVariable("mainMessage", mainMessage);
 		ctx.setVariable("job", job);
 
@@ -448,7 +572,7 @@ public class ReportJob implements org.quartz.Job {
 
 		logger.debug("Entering prepareFreeMarkerAlertMailer");
 
-		String from = job.getMailFrom();
+		String from = getMailFrom();
 
 		String subject = job.getMailSubject();
 		// compatibility with Art pre 1.8 where subject was not editable
@@ -514,7 +638,7 @@ public class ReportJob implements org.quartz.Job {
 
 		logger.debug("Entering prepareEmailMailer: outputFileName='{}'", outputFileName);
 
-		String from = job.getMailFrom();
+		String from = getMailFrom();
 
 		String subject = job.getMailSubject();
 		// compatibility with Art pre 1.8 where subject was not editable
@@ -569,7 +693,7 @@ public class ReportJob implements org.quartz.Job {
 				mainMessage = msg;
 			}
 
-			Context ctx = new Context(Locale.getDefault());
+			Context ctx = new Context(locale);
 			ctx.setVariable("mainMessage", mainMessage);
 			ctx.setVariable("job", job);
 			ctx.setVariable("data", messageData);
@@ -577,6 +701,28 @@ public class ReportJob implements org.quartz.Job {
 			String finalMessage = emailTemplateEngine.process("basicEmail", ctx);
 			mailer.setMessage(finalMessage);
 		}
+	}
+
+	/**
+	 * Returns the email address to use in the from field
+	 *
+	 * @return the email address to use in the from field
+	 */
+	private String getMailFrom() {
+		logger.debug("Entering getMailFrom");
+
+		String from;
+		String settingsFrom = Config.getSettings().getSmtpFrom();
+		logger.debug("settingsFrom='{}'", settingsFrom);
+
+		if (StringUtils.isBlank(settingsFrom)) {
+			logger.debug("job.getMailFrom()='{}'", job.getMailFrom());
+			from = job.getMailFrom();
+		} else {
+			from = settingsFrom;
+		}
+
+		return from;
 	}
 
 	/**
@@ -1288,8 +1434,6 @@ public class ReportJob implements org.quartz.Job {
 
 		String outputFileName = exportPath + fileName;
 
-		Locale locale = Locale.getDefault();
-
 		if (reportType.isDashboard()) {
 			PdfDashboard.generatePdf(paramProcessorResult, report, user, locale, outputFileName, messageSource);
 		} else {
@@ -1358,7 +1502,6 @@ public class ReportJob implements org.quartz.Job {
 		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
 		reportOutputGenerator.setIsJob(true);
-		Locale locale = Locale.getDefault();
 
 		ResultSet rs = null;
 		try {
@@ -1485,14 +1628,7 @@ public class ReportJob implements org.quartz.Job {
 				cachedTableName = reportName + "_J" + jobId;
 			}
 			cr.setCachedTableName(cachedTableName);
-
-			if (jobType == JobType.CacheAppend) {
-				// 1 = append 2 = drop/insert (3 = update (not implemented))
-				cr.setCacheMode(1);
-			} else if (jobType == JobType.CacheInsert) {
-				cr.setCacheMode(2);
-			}
-
+			cr.setJobType(jobType);
 			cr.cacheIt();
 
 			runDetails = "Table Name (rows inserted):  <code>"
@@ -1846,23 +1982,11 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @return a mailer object that can be used to send emails
 	 */
-	public Mailer getMailer() {
+	private Mailer getMailer() {
 		logger.debug("Entering getMailer");
 
-		String smtpServer = Config.getSettings().getSmtpServer();
-		String smtpUsername = Config.getSettings().getSmtpUsername();
-		String smtpPassword = Config.getSettings().getSmtpPassword();
-
-		Mailer mailer = new Mailer();
-		mailer.setHost(smtpServer);
-		if (StringUtils.length(smtpUsername) > 3 && smtpPassword != null) {
-			mailer.setUsername(smtpUsername);
-			mailer.setPassword(smtpPassword);
-		}
-
-		mailer.setPort(Config.getSettings().getSmtpPort());
-		mailer.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
-		mailer.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
+		ArtHelper artHelper = new ArtHelper();
+		Mailer mailer = artHelper.getMailer();
 
 		return mailer;
 	}
@@ -1886,7 +2010,7 @@ public class ReportJob implements org.quartz.Job {
 				updateArchives(splitJob, user);
 			} else {
 				//if not archiving, delete previous file
-				if (StringUtils.isNotBlank(archiveFileName) && !archiveFileName.startsWith("-")) {
+				if (StringUtils.isBlank(job.getFixedFileName()) && !StringUtils.startsWith(archiveFileName, "-")) {
 					String filePath = Config.getJobsExportPath() + archiveFileName;
 					File previousFile = new File(filePath);
 					if (previousFile.exists()) {
@@ -2112,4 +2236,5 @@ public class ReportJob implements org.quartz.Job {
 			logger.error("Error", ex);
 		}
 	}
+
 }

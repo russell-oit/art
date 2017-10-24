@@ -16,20 +16,27 @@ Reports page. Also main/home page
 
 <spring:message code="page.title.reports" var="pageTitle"/>
 
+<spring:message code="page.text.reports" var="mainPanelTitle"/>
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.text.description" var="descriptionText"/>
-<spring:message code="page.text.reports" var="mainPanelTitle"/>
+<spring:message code="reports.text.selectValue" var="selectValueText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.css"/>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.js"></script>
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[href*="reports"]').parent().addClass('active');
 
 				var tbl = $('#reports');
 				
-				var columnFilterRow = createColumnFilters(tbl);
+//				var columnFilterRow = createColumnFilters(tbl);
 
 				var oTable = tbl.dataTable({
 					columnDefs: [
@@ -55,19 +62,48 @@ Reports page. Also main/home page
 					language: {
 						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
-					initComplete: function() {
+					initComplete: function () {
 						$('div.dataTables_filter input').focus();
 					}
 				});
 				
-				//move column filter row after heading row
-				columnFilterRow.insertAfter(columnFilterRow.next());
+//				//move column filter row after heading row
+//				columnFilterRow.insertAfter(columnFilterRow.next());
 
 				//get datatables api object
 				var table = oTable.api();
 				
-				// Apply the column filter
-				applyColumnFilters(tbl, table);
+//				// Apply the column filter
+//				applyColumnFilters(tbl, table);
+
+				//add thead row with yadcf filters
+				var headingRow = tbl.find('thead tr:first');
+				var visibleColCount = 3;
+				var cols = '';
+				for (var i = 1; i <= visibleColCount; i++) {
+					cols += '<th></th>';
+				}
+				var filterRow = '<tr>' + cols + '</tr>';
+				headingRow.after(filterRow);
+				
+				yadcf.init(table,
+						[
+							{
+								column_number: 1,
+								filter_default_label: '${selectValueText}'
+							},
+							{
+								column_number: 3,
+								filter_type: 'text',
+								filter_default_label: ""
+							}
+						],
+						{filters_tr_index: 1}
+				);
+
+			<c:if test="${not empty sessionUser.effectiveDefaultReportGroup}">
+				yadcf.exFilterColumn(oTable, [[1, '${sessionUser.effectiveDefaultReportGroup.name}']]);
+			</c:if>
 
 				//show/hide details
 				//http://datatables.net/examples/server_side/row_details.html
@@ -75,7 +111,7 @@ Reports page. Also main/home page
 				// Array to track the ids of the details displayed rows
 				var detailRows = [];
 
-				tbl.find('tbody').on('click', 'tr td:first-child', function() {
+				tbl.find('tbody').on('click', 'tr td:first-child', function () {
 					var tr = $(this).closest('tr');
 					var row = table.row(tr);
 					var idx = $.inArray(tr, detailRows);
@@ -86,8 +122,7 @@ Reports page. Also main/home page
 
 						// Remove from the 'open' array
 						detailRows.splice(idx, 1);
-					}
-					else {
+					} else {
 						tr.addClass('details');
 						row.child(formatDetails(row.data()), 'details').show(); //add details class to child row td
 

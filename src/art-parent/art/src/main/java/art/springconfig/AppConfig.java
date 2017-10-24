@@ -20,6 +20,7 @@ package art.springconfig;
 import art.report.StringToReport;
 import art.usergroup.StringToUserGroup;
 import art.utils.StringToDouble;
+import art.utils.StringToInteger;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.LocaleUtils;
@@ -68,6 +69,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToDouble stringToDouble;
+	
+	@Autowired
+	private StringToInteger stringToInteger;
 
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
@@ -172,6 +176,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	public void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(stringToUserGroup);
 		registry.addConverter(stringToDouble);
+		registry.addConverter(stringToInteger);
 		registry.addConverter(stringToReport);
 	}
 

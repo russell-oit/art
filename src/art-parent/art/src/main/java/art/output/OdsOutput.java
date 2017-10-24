@@ -47,6 +47,7 @@ public class OdsOutput extends StandardOutput {
 	private Table table;
 	private Row row;
 	private Cell cell;
+	private int currentRow;
 	private int cellNumber;
 	Font headerFont;
 	Font bodyFont;
@@ -62,6 +63,7 @@ public class OdsOutput extends StandardOutput {
 		table = null;
 		row = null;
 		cell = null;
+		currentRow = 0;
 		cellNumber = 0;
 		headerFont = null;
 		bodyFont = null;
@@ -118,9 +120,14 @@ public class OdsOutput extends StandardOutput {
 
 	@Override
 	public void addTitle() {
-		row = table.getRowByIndex(0);
+		if (report.isOmitTitleRow()) {
+			return;
+		}
+
+		newRow();
 		addCellString(reportName);
 		addCellString(ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
+		newRow();
 	}
 
 	@Override
@@ -128,7 +135,7 @@ public class OdsOutput extends StandardOutput {
 		if (CollectionUtils.isEmpty(reportParamsList)) {
 			return;
 		}
-		
+
 		for (ReportParameter reportParam : reportParamsList) {
 			try {
 				newRow();
@@ -172,32 +179,40 @@ public class OdsOutput extends StandardOutput {
 	@Override
 	public void addCellNumeric(Double value) {
 		cell = row.getCellByIndex(cellNumber++);
-		cell.setDoubleValue(value);
-		cell.setFont(bodyFont);
+
+		if (value != null) {
+			cell.setDoubleValue(value);
+			cell.setFont(bodyFont);
+		}
 	}
 
 	@Override
 	public void addCellDate(Date value) {
 		cell = row.getCellByIndex(cellNumber++);
+
 		if (value != null) {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(value);
 			cell.setDateValue(calendar);
+			cell.setFont(bodyFont);
 		}
-		cell.setFont(bodyFont);
 	}
 
 	@Override
 	public void newRow() {
-		row = table.appendRow();
+		//don't use table.appendRow(). a new table/sheet seems to have 2 rows already in it
+		row = table.getRowByIndex(currentRow++);
 		cellNumber = 0;
 	}
 
 	@Override
 	public void addCellTotal(Double value) {
 		cell = row.getCellByIndex(cellNumber++);
-		cell.setDoubleValue(value);
-		cell.setFont(totalFont);
+
+		if (value != null) {
+			cell.setDoubleValue(value);
+			cell.setFont(totalFont);
+		}
 	}
 
 	@Override

@@ -39,7 +39,25 @@ public enum ReportFormat {
 	private ReportFormat(String value) {
 		this.value = value;
 	}
-	
+
+	/**
+	 * Returns <code>true</code> if for a tabular report, this format can use
+	 * column formatting options
+	 *
+	 * @return <code>true</code> if for a tabular report, this format can use
+	 * column formatting options
+	 */
+	public boolean isUseColumnFormatting() {
+		switch (this) {
+			case xls:
+			case xlsx:
+			case ods:
+				return false;
+			default:
+				return true;
+		}
+	}
+
 	/**
 	 * Returns <code>true</code> if this is a json or jsonBrowser report format
 	 *
@@ -156,7 +174,7 @@ public enum ReportFormat {
 		}
 		throw new IllegalArgumentException("Invalid report format: " + value);
 	}
-	
+
 	/**
 	 * Converts a value to an enum. If the conversion fails, the specified
 	 * default is returned

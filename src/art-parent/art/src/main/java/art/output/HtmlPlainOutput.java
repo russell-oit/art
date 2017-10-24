@@ -18,7 +18,6 @@
 package art.output;
 
 import art.reportparameter.ReportParameter;
-import art.utils.ArtUtils;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -63,22 +62,26 @@ public class HtmlPlainOutput extends StandardOutput {
 
 	@Override
 	public void addTitle() {
-		if (!fileOutput) {
-			return;
-		}
-
-		out.println("<div align='center'>");
-		out.println("<table border='0' width='100%' cellspacing='1'"
-				+ " cellpadding='1'>");
-		out.println("<tr><td>");
-
-		String escapedReportName = Encode.forHtmlContent(reportName);
-		String formattedRunDate = ArtUtils.isoDateTimeSecondsFormatter.format(new Date());
-		String escapedFormattedRunDate = Encode.forHtmlContent(formattedRunDate);
-
-		out.println("<b>" + escapedReportName + "</b> :: " + escapedFormattedRunDate);
-
-		out.println("</td></tr></table></div>");
+//		if (!fileOutput) {
+//			return;
+//		}
+//		
+//		if (report.isOmitTitleRow()) {
+//			return;
+//		}
+//
+//		out.println("<div align='center'>");
+//		out.println("<table border='0' width='100%' cellspacing='1'"
+//				+ " cellpadding='1'>");
+//		out.println("<tr><td>");
+//
+//		String escapedReportName = Encode.forHtmlContent(reportName);
+//		String formattedRunDate = ArtUtils.isoDateTimeSecondsFormatter.format(new Date());
+//		String escapedFormattedRunDate = Encode.forHtmlContent(formattedRunDate);
+//
+//		out.println("<b>" + escapedReportName + "</b> :: " + escapedFormattedRunDate);
+//
+//		out.println("</td></tr></table></div>");
 	}
 
 	@Override

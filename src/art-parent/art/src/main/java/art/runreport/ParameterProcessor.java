@@ -84,6 +84,7 @@ public class ParameterProcessor {
 	 * @return final report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.text.ParseException
+	 * @throws java.io.IOException
 	 */
 	public ParameterProcessorResult processHttpParameters(
 			HttpServletRequest request) throws SQLException, ParseException, IOException {

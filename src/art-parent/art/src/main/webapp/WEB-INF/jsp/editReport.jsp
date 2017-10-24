@@ -965,6 +965,17 @@ Edit report page
 
 				<fieldset id="tabularFields">
 					<div class="form-group">
+						<label class="control-label col-md-4" for="omitTitleRow">
+							<spring:message code="reports.label.omitTitleRow"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="omitTitleRow" id="omitTitleRow" class="switch-yes-no"/>
+							</div>
+							<form:errors path="omitTitleRow" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
 						<label class="col-md-4 control-label " for="hiddenColumns">
 							<spring:message code="reports.label.hiddenColumns"/>
 						</label>

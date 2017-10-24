@@ -267,7 +267,7 @@ public class ReportOutputGenerator {
 			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
 
-			//for pdf dashboards, more parameters may be passed than a relevant for a report
+			//for pdf dashboards, more parameters may be passed than are relevant for a report
 			List<ReportParameter> applicableReportParamsList = new ArrayList<>();
 			for (ReportParameter reportParam : reportParamsList) {
 				if (report.getReportId() == reportParam.getReport().getReportId()) {
@@ -450,6 +450,10 @@ public class ReportOutputGenerator {
 				if (request != null) {
 					String contextPath = request.getContextPath();
 					standardOutput.setContextPath(contextPath);
+
+					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+						standardOutput.setAjax(true);
+					}
 				}
 
 				//generate output
@@ -1650,7 +1654,7 @@ public class ReportOutputGenerator {
 		} else {
 			effectiveChartOptions.setShowLegend(showLegend);
 		}
-		
+
 		Boolean showLabels = parameterChartOptions.getShowLabels();
 		if (showLabels == null) {
 			showLabels = reportChartOptions.getShowLabels();
@@ -1661,7 +1665,7 @@ public class ReportOutputGenerator {
 		} else {
 			effectiveChartOptions.setShowLabels(showLabels);
 		}
-		
+
 		Boolean showPoints = parameterChartOptions.getShowPoints();
 		if (showPoints == null) {
 			showPoints = reportChartOptions.getShowPoints();
@@ -1671,7 +1675,7 @@ public class ReportOutputGenerator {
 		} else {
 			effectiveChartOptions.setShowPoints(showPoints);
 		}
-		
+
 		Boolean showData = parameterChartOptions.getShowData();
 		if (showData == null) {
 			showData = reportChartOptions.getShowData();

@@ -13,17 +13,6 @@ Display a chart report
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
-
-<script type="text/javascript">
-	$(document).ready(function () {
-		$('.tooltip-chart').tooltipster({
-			delay: 0,
-			animationDuration: 0
-		});
-	});
-</script>
 
 <div align="center" style="width: 90%;">
 	<cewolf:chart 
@@ -61,3 +50,13 @@ Display a chart report
 		</c:choose>
 	</cewolf:img>
 </div>
+
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
+
+<script type="text/javascript">
+	$('.tooltip-chart').tooltipster({
+		delay: 0,
+		animationDuration: 0
+	});
+</script>

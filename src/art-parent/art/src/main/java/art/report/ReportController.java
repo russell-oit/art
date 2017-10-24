@@ -21,7 +21,6 @@ import art.datasource.DatasourceService;
 import art.enums.PageOrientation;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
-import art.jobrunners.ReportJob;
 import art.mail.Mailer;
 import art.reportgroup.ReportGroupService;
 import art.runreport.RunReportHelper;
@@ -29,6 +28,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
+import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
@@ -410,19 +410,21 @@ public class ReportController {
 			bccs = StringUtils.split(mailBcc, ";");
 		}
 
-		ReportJob reportJob = new ReportJob();
-		Mailer mailer = reportJob.getMailer();
+		ArtHelper artHelper = new ArtHelper();
+		Mailer mailer = artHelper.getMailer();
+		
 		mailer.setFrom(from);
 		mailer.setSubject(subject);
 		mailer.setMessage(mailMessage);
-		List<File> attachments = new ArrayList<>();
-		attachments.add(reportFile);
-		mailer.setAttachments(attachments);
 		mailer.setTo(tos);
 		mailer.setCc(ccs);
 		mailer.setBcc(bccs);
+		
+		List<File> attachments = new ArrayList<>();
+		attachments.add(reportFile);
+		mailer.setAttachments(attachments);
 
-		//disable email for now. feature may be abused by users to send spam?
+		//disable email for now? feature may be abused by users to send spam?
 		try {
 			mailer.send();
 		} catch (MessagingException | RuntimeException | IOException ex) {

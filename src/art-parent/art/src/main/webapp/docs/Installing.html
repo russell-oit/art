@@ -72,7 +72,7 @@
     <li>Download the latest binary distribution</li> 
     <li> <p>Unpack the archive somewhere e.g.</p> 
      <div class="codehilite"> 
-      <pre>tar xvzf apache-tomcat-7.0.23.tar.gz
+      <pre><span></span>tar xvzf apache-tomcat-7.0.23.tar.gz
 sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
 </pre> 
      </div> </li> 
@@ -147,14 +147,14 @@ sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
    <h3 id="using-mysql-on-windows">Using MySQL on Windows</h3> 
    <ul> 
     <li>Ensure the path to mysql.exe is included in the PATH environment variable</li> 
-    <li> <p>Open a command prompt window <br> </p> 
+    <li> <p>Open a command prompt window </p> 
      <div class="codehilite"> 
-      <pre>c:\&gt; mysql -h localhost -u root -p
+      <pre><span></span>c:\&gt; mysql -h localhost -u root -p
 </pre> 
      </div> </li> 
     <li> <p>Enter the password</p> 
      <div class="codehilite"> 
-      <pre>mysql&gt; create database art;
+      <pre><span></span>mysql&gt; create database art;
 mysql&gt; grant all on art.* to artuser@localhost identified by "artpassword";
 mysql&gt; use art;
 mysql&gt; \. "PACKAGE_PATH\database\art_tables.sql"
@@ -169,12 +169,12 @@ mysql&gt; quit;
     <li>Ensure the path to the PostgreSQL bin folder is included in the PATH environment variable</li> 
     <li> <p>Open a command prompt window</p> 
      <div class="codehilite"> 
-      <pre>c:\&gt; psql -U postgres
+      <pre><span></span>c:\&gt; psql -U postgres
 </pre> 
      </div> </li> 
     <li> <p>When prompted for a password, enter the password for the postgres database user created when installing PostgreSQL. If the username of the account is not "postgres", use the appropriate name in place of postgres in the -U switch of the command.</p> 
      <div class="codehilite"> 
-      <pre>postgres=# create user artuser password 'artpassword';
+      <pre><span></span>postgres=# create user artuser password 'artpassword';
 postgres=# create database art owner artuser;
 postgres=# \c art
 

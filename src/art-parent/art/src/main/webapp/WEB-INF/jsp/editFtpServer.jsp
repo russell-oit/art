@@ -38,7 +38,7 @@
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -130,6 +130,20 @@
 						<div class="checkbox">
 							<form:checkbox path="active" id="active" class="switch-yes-no"/>
 						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="ftpServers.label.connectionType"/>
+					</label>
+					<div class="col-md-8">
+						<c:forEach var="connectionType" items="${connectionTypes}">
+							<label class="radio-inline">
+								<form:radiobutton path="connectionType"
+												  value="${connectionType}"/> ${connectionType.description}
+							</label>
+						</c:forEach>
+						<form:errors path="connectionType" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

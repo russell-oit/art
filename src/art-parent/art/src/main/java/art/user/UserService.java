@@ -20,6 +20,8 @@ package art.user;
 import art.dbutils.DbService;
 import art.enums.AccessLevel;
 import art.dbutils.DatabaseUtils;
+import art.reportgroup.ReportGroup;
+import art.reportgroup.ReportGroupService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ActionResult;
@@ -58,16 +60,21 @@ public class UserService {
 
 	private final DbService dbService;
 	private final UserGroupService userGroupService;
+	private final ReportGroupService reportGroupService;
 
 	@Autowired
-	public UserService(DbService dbService, UserGroupService userGroupService) {
+	public UserService(DbService dbService, UserGroupService userGroupService,
+			ReportGroupService reportGroupService) {
+
 		this.dbService = dbService;
 		this.userGroupService = userGroupService;
+		this.reportGroupService = reportGroupService;
 	}
 
 	public UserService() {
 		dbService = new DbService();
 		userGroupService = new UserGroupService();
+		reportGroupService = new ReportGroupService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
@@ -96,7 +103,6 @@ public class UserService {
 			user.setFullName(rs.getString("FULL_NAME"));
 			user.setActive(rs.getBoolean("ACTIVE"));
 			user.setPassword(rs.getString("PASSWORD"));
-			user.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 			user.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
 			user.setStartReport(rs.getString("START_QUERY"));
 			user.setUserId(rs.getInt("USER_ID"));
@@ -105,6 +111,9 @@ public class UserService {
 			user.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			user.setCreatedBy(rs.getString("CREATED_BY"));
 			user.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+			ReportGroup defaultReportGroup = reportGroupService.getReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
+			user.setDefaultReportGroup(defaultReportGroup);
 
 			return type.cast(user);
 		}
@@ -186,13 +195,13 @@ public class UserService {
 			return;
 		}
 
-		int effectiveDefaultReportGroup = user.getDefaultReportGroup();
+		ReportGroup effectiveDefaultReportGroup = user.getDefaultReportGroup();
 		String effectiveStartReport = user.getStartReport();
 
 		List<UserGroup> groups = userGroupService.getUserGroupsForUser(user.getUserId());
 
 		for (UserGroup group : groups) {
-			if (effectiveDefaultReportGroup <= 0) {
+			if (effectiveDefaultReportGroup == null) {
 				effectiveDefaultReportGroup = group.getDefaultReportGroup();
 			}
 			if (StringUtils.isBlank(effectiveStartReport)) {
@@ -351,7 +360,7 @@ public class UserService {
 			newId = maxId + 1;
 		}
 		logger.debug("newId={}", newId);
-		
+
 		saveUser(user, newId, actionUser);
 
 		return newId;
@@ -424,6 +433,13 @@ public class UserService {
 			accessLevel = user.getAccessLevel().getValue();
 		}
 
+		int defaultReportGroupId;
+		if (user.getDefaultReportGroup() == null) {
+			defaultReportGroupId = 0;
+		} else {
+			defaultReportGroupId = user.getDefaultReportGroup().getReportGroupId();
+		}
+
 		int affectedRows;
 
 		boolean newRecord = false;
@@ -446,7 +462,7 @@ public class UserService {
 				user.getFullName(),
 				user.getEmail(),
 				accessLevel,
-				user.getDefaultReportGroup(),
+				defaultReportGroupId,
 				user.getStartReport(),
 				BooleanUtils.toInteger(user.isCanChangePassword()),
 				BooleanUtils.toInteger(user.isActive()),
@@ -469,7 +485,7 @@ public class UserService {
 				user.getFullName(),
 				user.getEmail(),
 				accessLevel,
-				user.getDefaultReportGroup(),
+				defaultReportGroupId,
 				user.getStartReport(),
 				BooleanUtils.toInteger(user.isCanChangePassword()),
 				BooleanUtils.toInteger(user.isActive()),

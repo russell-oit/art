@@ -33,7 +33,10 @@ public class HtmlFancyOutput extends StandardOutput {
 		//include required css and javascript files
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/DataTables-1.10.13/css/dataTables.bootstrap.min.css'>");
-		out.println("<script src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
+		if (!ajax) {
+			//including jquery.js while using $.load() or $.post() results in spinner not appearing on second run
+			out.println("<script src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
+		}
 		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/jquery.dataTables.min.js'></script>");
 		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js'></script>");
 	}
@@ -59,7 +62,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	public void endHeader() {
 		out.println("</tr></thead>");
 	}
-	
+
 	@Override
 	public void beginRows() {
 		out.println("<tbody>");
@@ -76,11 +79,11 @@ public class HtmlFancyOutput extends StandardOutput {
 
 		out.println("<td class='" + cssClass + "'>" + value + "</td>");
 	}
-	
+
 	@Override
 	public void addCellStringUnsafe(String value) {
 		String escapedValue = Encode.forHtmlContent(value);
-		
+
 		String cssClass;
 		if (evenRow) {
 			cssClass = "text-left";
@@ -94,34 +97,34 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void addCellNumeric(Double value) {
 		String formattedValue = formatNumericValue(value);
-		
+
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-		
+
 		String cssClass;
 		if (evenRow) {
 			cssClass = "text-right";
 		} else {
 			cssClass = "text-right";
 		}
-		
+
 		double heatmapValue = getHeatmapValue(value);
 
 		out.println("<td class='" + cssClass
 				+ "' data-value='" + heatmapValue + "'>"
 				+ escapedFormattedValue + "</td>");
 	}
-	
+
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-		
+
 		String cssClass;
 		if (evenRow) {
 			cssClass = "text-right";
 		} else {
 			cssClass = "text-right";
 		}
-		
+
 		double heatmapValue = getHeatmapValue(numericValue);
 
 		out.println("<td class='" + cssClass
@@ -132,7 +135,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
-		
+
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
 		String cssClass;
@@ -144,13 +147,13 @@ public class HtmlFancyOutput extends StandardOutput {
 
 		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
 	}
-	
+
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-		
+
 		String cssClass;
-		
+
 		if (evenRow) {
 			cssClass = "text-left";
 		} else {
@@ -170,24 +173,24 @@ public class HtmlFancyOutput extends StandardOutput {
 		//open new row
 		out.println("<tr>");
 	}
-	
+
 	@Override
-	public void endRow(){
+	public void endRow() {
 		out.println("</tr>");
 	}
-	
+
 	@Override
 	public void endRows() {
 		out.println("</tbody>");
 	}
-	
+
 	@Override
-	public void beginTotalRow(){
+	public void beginTotalRow() {
 		out.println("<tfoot><tr>");
 	}
-	
+
 	@Override
-	public void endTotalRow(){
+	public void endTotalRow() {
 		out.println("</tr><tfoot>");
 	}
 

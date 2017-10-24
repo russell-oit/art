@@ -194,8 +194,9 @@ Display section to allow selecting of report parameters and initiate running of 
 
 </script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
-<script type="text/javascript">
+<c:if test="${enableEmail}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
+	<script type="text/javascript">
 	tinymce.init({
 		selector: "textarea.editor",
 		plugins: [
@@ -208,7 +209,8 @@ Display section to allow selecting of report parameters and initiate running of 
 		toolbar2: "print preview | forecolor backcolor | link image | code",
 		image_advtab: true
 	});
-</script>
+	</script>
+</c:if>
 
 <c:if test="${error != null}">
 	<div class="alert alert-danger alert-dismissable">
@@ -417,7 +419,6 @@ Display section to allow selecting of report parameters and initiate running of 
 							</div>
 						</div>
 					</div>
-
 				</div>
 
 				<!-- Modal Footer -->

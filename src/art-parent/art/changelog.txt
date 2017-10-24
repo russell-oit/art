@@ -1,3 +1,19 @@
+ART 3.0.1
+* Removed column autosizing for xls and xlsx output. Was causing greatly increased execution times for xlsx output.
+* Always use report datasource for dynamic lovs
+* For cached result job, don't stop if create table process has an error
+* Don't sort DataTable report format on initialization
+* Use select column filter for report group in reports page
+* When editing a job, update from email if owner email has changed
+* Don't use email input type for user email field
+* Enable use of default report group
+* Added SFTP option
+* Fix for ftp not closing properly
+* Fix for fixed file name being deleted
+* Allow use of a single from email address for all jobs
+* Fix for error with ods output with null number values
+* Added option to omit title row for xls, xlsx, ods, slk output
+
 ART 3.0
 * Reorganised the code for easier maintenance and enhanced user experience
  - now using maven, spring mvc, bootstrap, among other libraries

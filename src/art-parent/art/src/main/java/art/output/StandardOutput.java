@@ -56,8 +56,8 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +96,21 @@ public abstract class StandardOutput {
 	protected boolean isJob;
 	protected Report report;
 	protected boolean pdfPageNumbers = true;
+	protected boolean ajax;
+
+	/**
+	 * @return the ajax
+	 */
+	public boolean isAjax() {
+		return ajax;
+	}
+
+	/**
+	 * @param ajax the ajax to set
+	 */
+	public void setAjax(boolean ajax) {
+		this.ajax = ajax;
+	}
 
 	/**
 	 * @return the pdfPageNumbers
@@ -637,7 +652,7 @@ public abstract class StandardOutput {
 
 		//output header columns for drill down reports
 		//only output drilldown columns for html reports
-		if (reportFormat.isHtml() && drilldowns != null) {
+		if (reportFormat.isHtml() && CollectionUtils.isNotEmpty(drilldowns)) {
 			for (Drilldown drilldown : drilldowns) {
 				String drilldownTitle = drilldown.getHeaderText();
 				if (drilldownTitle == null || drilldownTitle.trim().length() == 0) {
@@ -696,7 +711,7 @@ public abstract class StandardOutput {
 				result.setTooManyRows(true);
 				return result;
 			} else {
-				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay);
+				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay, reportFormat);
 				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
 			}
 		}
@@ -726,10 +741,8 @@ public abstract class StandardOutput {
 		String reportLocale = report.getLocale();
 		if (StringUtils.isBlank(reportLocale)) {
 			columnFormatLocale = locale;
-		} else if (StringUtils.contains(reportLocale, "-")) {
-			columnFormatLocale = Locale.forLanguageTag(reportLocale);
 		} else {
-			columnFormatLocale = LocaleUtils.toLocale(reportLocale);
+			columnFormatLocale = ArtUtils.getLocaleFromString(reportLocale);
 		}
 
 		String globalDateFormat = report.getDateFormat();
@@ -1073,7 +1086,7 @@ public abstract class StandardOutput {
 					fos = endBurstOutput(fos, hiddenColumns, rsmd, totalColumns);
 					previousBurstId = null;
 				} else {
-					outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay);
+					outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay, reportFormat);
 				}
 			}
 
@@ -1318,12 +1331,13 @@ public abstract class StandardOutput {
 	 * should not be included in the output
 	 * @param nullNumberDisplay the string to display for null numeric values
 	 * @param nullStringDisplay the string to display for null string values
+	 * @param reportFormat the report format being used
 	 * @return data for the output row
 	 * @throws SQLException
 	 */
 	private List<Object> outputResultSetColumns(Map<Integer, ColumnTypeDefinition> columnTypes,
 			ResultSet rs, List<String> hiddenColumns, String nullNumberDisplay,
-			String nullStringDisplay) throws SQLException {
+			String nullStringDisplay, ReportFormat reportFormat) throws SQLException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
@@ -1352,32 +1366,36 @@ public abstract class StandardOutput {
 						numericValue = (Double) value;
 					}
 
-					if (numericValue == null) {
-						String sortValue = "null";
-						addCellNumeric(numericValue, nullNumberDisplay, sortValue);
-					} else {
-						String sortValue = getNumericSortValue(numericValue);
-						String columnFormattedValue = null;
-
-						if (columnFormatters != null) {
-							DecimalFormat columnFormatter = (DecimalFormat) columnFormatters.get(columnIndex);
-							if (columnFormatter != null) {
-								columnFormattedValue = columnFormatter.format(numericValue);
-							}
-						}
-
-						if (columnFormattedValue != null) {
-							addCellNumeric(numericValue, columnFormattedValue, sortValue);
+					if (reportFormat.isUseColumnFormatting()) {
+						if (numericValue == null) {
+							String sortValue = "null";
+							addCellNumeric(numericValue, nullNumberDisplay, sortValue);
 						} else {
-							String formattedValue;
-							if (globalNumericFormatter != null) {
-								formattedValue = globalNumericFormatter.format(numericValue);
-							} else {
-								formattedValue = formatNumericValue(numericValue);
+							String sortValue = getNumericSortValue(numericValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								DecimalFormat columnFormatter = (DecimalFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(numericValue);
+								}
 							}
 
-							addCellNumeric(numericValue, formattedValue, sortValue);
+							if (columnFormattedValue != null) {
+								addCellNumeric(numericValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalNumericFormatter != null) {
+									formattedValue = globalNumericFormatter.format(numericValue);
+								} else {
+									formattedValue = formatNumericValue(numericValue);
+								}
+
+								addCellNumeric(numericValue, formattedValue, sortValue);
+							}
 						}
+					} else {
+						addCellNumeric(numericValue);
 					}
 
 					if (columnTotals != null) {
@@ -1403,31 +1421,36 @@ public abstract class StandardOutput {
 				case Date:
 					value = rs.getTimestamp(columnIndex);
 					Date dateValue = (Date) value;
-					if (dateValue == null) {
-						addCellDate(dateValue);
-					} else {
-						long sortValue = getDateSortValue(dateValue);
-						String columnFormattedValue = null;
 
-						if (columnFormatters != null) {
-							SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
-							if (columnFormatter != null) {
-								columnFormattedValue = columnFormatter.format(dateValue);
-							}
-						}
-
-						if (columnFormattedValue != null) {
-							addCellDate(dateValue, columnFormattedValue, sortValue);
+					if (reportFormat.isUseColumnFormatting()) {
+						if (dateValue == null) {
+							addCellDate(dateValue);
 						} else {
-							String formattedValue;
-							if (globalDateFormatter != null) {
-								formattedValue = globalDateFormatter.format(dateValue);
-							} else {
-								formattedValue = Config.getDateDisplayString(dateValue);
+							long sortValue = getDateSortValue(dateValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(dateValue);
+								}
 							}
 
-							addCellDate(dateValue, formattedValue, sortValue);
+							if (columnFormattedValue != null) {
+								addCellDate(dateValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalDateFormatter != null) {
+									formattedValue = globalDateFormatter.format(dateValue);
+								} else {
+									formattedValue = Config.getDateDisplayString(dateValue);
+								}
+
+								addCellDate(dateValue, formattedValue, sortValue);
+							}
 						}
+					} else {
+						addCellDate(dateValue);
 					}
 					break;
 				case Clob:
@@ -1475,34 +1498,35 @@ public abstract class StandardOutput {
 			List<ReportParameter> reportParamsList, List<Object> columnValues)
 			throws SQLException {
 
-		//output columns for drill down reports
-		if (drilldowns != null) {
-			for (Drilldown drilldown : drilldowns) {
-				DrilldownLinkHelper drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList);
-				String drilldownUrl = drilldownLinkHelper.getDrilldownLink(columnValues.toArray());
+		if (CollectionUtils.isEmpty(drilldowns)) {
+			return;
+		}
 
-				String drilldownText = drilldown.getLinkText();
-				if (StringUtils.isBlank(drilldownText)) {
-					drilldownText = "Drill Down";
-				}
+		for (Drilldown drilldown : drilldowns) {
+			DrilldownLinkHelper drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList);
+			String drilldownUrl = drilldownLinkHelper.getDrilldownLink(columnValues.toArray());
 
-				String drilldownTag;
-				String targetAttribute = "";
-				if (drilldown.isOpenInNewWindow()) {
-					//open drill down in new window
-					targetAttribute = "target='_blank'";
-				}
-				drilldownTag = "<a href='" + drilldownUrl + "' " + targetAttribute + ">" + drilldownText + "</a>";
+			String drilldownText = drilldown.getLinkText();
+			if (StringUtils.isBlank(drilldownText)) {
+				drilldownText = "Drill Down";
+			}
 
-				//clean to be a custom setting? cleanHtmlReportOutput?
-				addCellString(drilldownTag);
+			String drilldownTag;
+			String targetAttribute = "";
+			if (drilldown.isOpenInNewWindow()) {
+				//open drill down in new window
+				targetAttribute = "target='_blank'";
+			}
+			drilldownTag = "<a href='" + drilldownUrl + "' " + targetAttribute + ">" + drilldownText + "</a>";
+
+			//clean to be a custom setting? cleanHtmlReportOutput?
+			addCellString(drilldownTag);
 //				if (requestBaseUrl != null) {
 //					String cleanedDrilldownTag = Jsoup.clean(drilldownTag, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
 //					addCellStringAsIs(cleanedDrilldownTag);
 //				} else {
 //					addCellString(drilldownTag);
 //				}
-			}
 		}
 	}
 
