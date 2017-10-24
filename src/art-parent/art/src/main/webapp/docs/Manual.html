@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.0"> 
+  <meta name="version" content="3.0.1"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -36,6 +36,7 @@
       </ol></li> 
      <li><a href="#users">Users</a> 
       <ol> 
+       <li><a href="#creating-a-new-user">Creating a new user</a></li> 
        <li><a href="#setting-up-the-public-user">Setting up the Public User</a></li> 
        <li><a href="#access-levels">Access Levels</a></li> 
       </ol></li> 
@@ -80,8 +81,8 @@
          <li><a href="#jpivot-mondrian">JPivot: Mondrian</a></li> 
          <li><a href="#jpivot-mondrian-xmla">JPivot: Mondrian XMLA</a></li> 
          <li><a href="#jpivot-microsoft-xmla">JPivot: Microsoft XMLA</a></li> 
-         <li><a href="#jxls-template-query">jXLS: Template Query</a></li> 
-         <li><a href="#jxls-art-query">jXLS: ART Query</a></li> 
+         <li><a href="#jxls-template-query">Jxls: Template Query</a></li> 
+         <li><a href="#jxls-art-query">Jxls: ART Query</a></li> 
          <li><a href="#freemarker">FreeMarker</a></li> 
          <li><a href="#thymeleaf">Thymeleaf</a></li> 
          <li><a href="#reactpivot">ReactPivot</a></li> 
@@ -173,7 +174,7 @@
          <li><a href="#tag-descriptions">Tag Descriptions</a></li> 
         </ol></li> 
       </ol></li> 
-     <li><a href="#jxls-reports">jXLS Reports</a></li> 
+     <li><a href="#jxls-reports">Jxls Reports</a></li> 
      <li><a href="#options">Options</a></li> 
      <li><a href="#jpivot-reports">JPivot Reports</a> 
       <ol> 
@@ -311,7 +312,7 @@
      <p>ART is a Java web application that enables quick deployment of SQL query results.</p> 
      <ul> 
       <li><strong>ART Administrators</strong> define reports, users, etc.</li> 
-      <li><strong>ART Users</strong> run reports and view the results in a browser or in a variety of file formats.<br> </li> 
+      <li><strong>ART Users</strong> run reports and view the results in a browser or in a variety of file formats. </li> 
      </ul> 
      <p>ART is open source software distributed under the <a class="" href="https://www.gnu.org/licenses/gpl-3.0.en.html" rel="nofollow">GPLv3 license</a>. You can install and use it without any charge.</p> 
      <h2 id="administration-overview">Administration Overview</h2> 
@@ -440,6 +441,10 @@
         <td>Password to be used when sending emails if the email server is configured to require SMTP authentication</td> 
        </tr> 
        <tr> 
+        <td><strong>SMTP From</strong></td> 
+        <td>An email address to be used as the "From" email address for all jobs. Leave blank to use separate email addresses as configured in each job.</td> 
+       </tr> 
+       <tr> 
         <td><strong>Default Authentication Method</strong></td> 
         <td>The authentication method that will be used by ART</td> 
        </tr> 
@@ -544,10 +549,6 @@
         <td>The report formats that will be available to users when they run a report, defined as a comma separated list. Report format names are case sensitive and the order specified will be respected in the list shown to users.</td> 
        </tr> 
        <tr> 
-        <td><strong>Display Null</strong></td> 
-        <td>Defines whether the string "null" is displayed where a column in a report is null</td> 
-       </tr> 
-       <tr> 
         <td><strong>Max Running Reports</strong></td> 
         <td>The maximum number of reports that can be running at any one time</td> 
        </tr> 
@@ -569,11 +570,15 @@
        </tr> 
        <tr> 
         <td><strong>Max File Upload Size (MB)</strong></td> 
-        <td>Maximum file upload size for jasperreports, jXLS or mondrian files. Set to -1 for no limit.</td> 
+        <td>Maximum file upload size. Set to -1 for no limit.</td> 
        </tr> 
        <tr> 
         <td><strong>ART Base URL</strong></td> 
         <td>The base URL for ART e.g. <a href="http://art-server:8080/art." rel="nofollow">http://art-server:8080/art.</a> This is used to include a link to publish job output in publish job reminder emails.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>System Locale</strong></td> 
+        <td>The locale to use in non-interactive scenarios e.g. jobs. Leave blank to use the default.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -596,11 +601,15 @@
      <table border="1"> 
       <thead> 
        <tr> 
-        <th>Attribute</th> 
+        <th>Field</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>Auto-generated ID used to identify the datasource</td> 
+       </tr> 
        <tr> 
         <td><strong>Name</strong></td> 
         <td>A name to identify the datasource</td> 
@@ -618,19 +627,19 @@
         <td>Defines whether this is a JDBC based datasource or an OLAP datasource</td> 
        </tr> 
        <tr> 
-        <td><strong>JNDI</strong></td> 
-        <td>Defines whether the datasource is a JNDI datasource</td> 
-       </tr> 
-       <tr> 
         <td><strong>Database Type</strong></td> 
         <td>The database software that the database runs on</td> 
+       </tr> 
+       <tr> 
+        <td><strong>JNDI</strong></td> 
+        <td>Defines whether the datasource is a JNDI datasource</td> 
        </tr> 
        <tr> 
         <td><strong>JDBC Driver</strong></td> 
         <td>JDBC driver name</td> 
        </tr> 
        <tr> 
-        <td><strong>JDBC URL</strong></td> 
+        <td><strong>URL</strong></td> 
         <td>JDBC URL of the target database. If you are using a JNDI datasource, set this to the JNDI name of your datasource e.g. <code>jdbc/MyDatasource</code>, or the full JNDI url e.g. <code>java:comp/env/jdbc/MyDatasource</code></td> 
        </tr> 
        <tr> 
@@ -672,7 +681,7 @@
      <p>Database: <strong>MariaDB</strong></p> 
      <p>Driver Name: org.mariadb.jdbc.Driver</p> 
      <p>JDBC URL: <code>jdbc:mariadb://&lt;server_name&gt;[:port]/&lt;database_name&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 3306)</p> 
-     <p>Driver Available from: Driver Available from: <a href="https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j/" rel="nofollow">https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j/</a></p> 
+     <p>Driver Available from: <a href="https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j/" rel="nofollow">https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j/</a></p> 
      <p><br><br></p> 
      <p>Database: <strong>PostgreSQL</strong></p> 
      <p>Driver Name: org.postgresql.Driver</p> 
@@ -698,7 +707,7 @@
      <p>Driver Name: com.ibm.db2.jcc.DB2Driver</p> 
      <p>JDBC URL: <code>jdbc:db2://&lt;server_name&gt;[:port]/&lt;database_name&gt;[:&lt;property&gt;=&lt;value&gt;[;...]</code> (default port for IBM DB2 is many times one of the following: 446, 6789, or 50000)</p> 
      <p>Driver Available from: <a href="http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217" rel="nofollow">http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217</a> (registration required).<br> This driver can connect to a DB2 database on any platform i.e. iSeries, zSeries, or Intel-based machines with Linux or Windows. <br> <br><br></p> 
-     <p>Database: <strong>DB2 for iSeries (Toolbox driver)</strong></p> 
+     <p>Database: <strong>DB2 for iSeries (Toolbox or JTOpen driver)</strong></p> 
      <p>Driver Name: com.ibm.as400.access.AS400JDBCDriver</p> 
      <p>JDBC URL: <code>jdbc:as400://&lt;server_name&gt;;prompt=false;translate binary=true[;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
      <p>Driver Available from: <a href="http://jt400.sourceforge.net/">http://jt400.sourceforge.net/</a><br> <br><br></p> 
@@ -720,8 +729,64 @@
      <ul> 
       <li>It is always possible to log into ART by specifying the ART database username and password</li> 
      </ul> 
+     <h2 id="creating-a-new-user">Creating a new user</h2> 
+     <p>From the Users page, use the Add button and then specify the details for the user.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Field</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>Auto-generated ID used to identify the user</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Username</strong></td> 
+        <td>A username for the user, used to login to the application</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Password</strong></td> 
+        <td>The password for the user. You can use the <strong>Blank</strong> option to specify setting of a blank password. If you have configured an SMTP server in the Settings page, you can use the <strong>Generate and send</strong> option to generate a random password and send an email to the user informing him of his credentials.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Full Name</strong></td> 
+        <td>The user's full name for identification purposes</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Email</strong></td> 
+        <td>The user's email address</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Active</strong></td> 
+        <td>Whether the user account is active or disabled</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Can Change Password</strong></td> 
+        <td>Whether the user can change his password</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Access Level</strong></td> 
+        <td>The access level for the user</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Default Report Group</strong></td> 
+        <td>A report group that will be pre-selected in the reports page when the user logs in</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Start Report</strong></td> 
+        <td>A report ID for a report that should be run when the user logs in. Parameters can be specified after the report id e.g. <code>1?p-param1=value1&amp;p-param2=value2</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>User Groups</strong></td> 
+        <td>Any user groups that the user should belong to</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <h2 id="setting-up-the-public-user">Setting up the Public User</h2> 
-     <p>If you want a report to be run by anyone, without authentication, you can define a user with the special username <strong>public_user</strong> and grant this user access to the report. This is useful for availing reports without requiring users to log in to ART</p> 
+     <p>If you want a report to be run by anyone, without authentication, you'll need to create a user with the special username <strong>public_user</strong> and grant this user access to the report. This is useful for availing reports without requiring users to log in to ART.</p> 
      <h2 id="access-levels">Access Levels</h2> 
      <p>Users are assigned access levels depending on the permissions they require within the application. Each higher access level has the permissions of all access levels below it.</p> 
      <table border="1"> 
@@ -778,7 +843,7 @@
       <li>In the Settings page, set the <strong>Default Authentication Method</strong> to <strong>Windows Domain</strong></li> 
       <li> <p>Set the <strong>Windows Domain Controller</strong> field to the domain controller machine name (IP address should also work). You can do the following to get the domain controller machine name.</p> 
        <div class="codehilite"> 
-        <pre>ping &lt;domain name&gt; (This will get the ip address of the domain controller)
+        <pre><span></span>ping &lt;domain name&gt; (This will get the ip address of the domain controller)
 ping -a &lt;ip address of domain controller&gt; (This will get the hostname of the domain controller)
 </pre> 
        </div> </li> 
@@ -920,6 +985,10 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>The default report format that should be selected for this report. Please note that not all report formats are available for all report types.</td> 
        </tr> 
        <tr> 
+        <td><strong>Omit Title Row</strong></td> 
+        <td>For tabular reports, whether the title row should be omitted in xls, xlsx, ods, slk report formats</td> 
+       </tr> 
+       <tr> 
         <td><strong>Hidden Columns</strong></td> 
         <td>For tabular reports, a comma separated list of column indices or column names for columns that should not be included in the generated output</td> 
        </tr> 
@@ -1001,7 +1070,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Template</strong></td> 
-        <td>For jasper reports, select the .jrxml file to use. For pivot table (mondrian) reports, select the mondrian cube .xml file to use. For jXLS reports, select the .xls or .xlsx template file to use. For FreeMarker reports, select the .ftl template file to use. For XDocReport reports, select the .docx, .odt or .pptx template file to use. For ReactPivot reports, specify the .js file that contains the react pivot configuration for the report.</td> 
+        <td>The template file to use for the report</td> 
        </tr> 
        <tr> 
         <td><strong>XMLA Datasource</strong></td> 
@@ -1389,10 +1458,10 @@ FROM mytable
      <p>Used to provide OLAP analysis by accessing a mondrian server via the xmla protocol. </p> 
      <h3 id="jpivot-microsoft-xmla">JPivot: Microsoft XMLA</h3> 
      <p>Used to provide OLAP analysis by accessing an SQL Server Analysis Services server via the xmla protocol. </p> 
-     <h3 id="jxls-template-query">jXLS: Template Query</h3> 
-     <p>Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query within the jXLS template will be used to generate the results. The query will be run against the selected datasource. More details about jXLS reports can be found in the jXLS Reports section of the manual.</p> 
-     <h3 id="jxls-art-query">jXLS: ART Query</h3> 
-     <p>Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</p> 
+     <h3 id="jxls-template-query">Jxls: Template Query</h3> 
+     <p>Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted Jxls template. The query within the Jxls template will be used to generate the results. The query will be run against the selected datasource. More details about Jxls reports can be found in the Jxls Reports section of the manual.</p> 
+     <h3 id="jxls-art-query">Jxls: ART Query</h3> 
+     <p>Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted Jxls template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</p> 
      <h3 id="freemarker">FreeMarker</h3> 
      <p>Displays a report in the browser based on a freemarker template - <a href="http://freemarker.org/." rel="nofollow">http://freemarker.org/.</a> The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. An example report is included in the demo database.</p> 
      <h3 id="thymeleaf">Thymeleaf</h3> 
@@ -1967,7 +2036,7 @@ FROM mytable
       </tbody> 
      </table> 
      <ul> 
-      <li><strong>Workaround for boolean parameters</strong><br> </li> 
+      <li><strong>Workaround for boolean parameters</strong> </li> 
      </ul> 
      <p>There is no boolean data type for single-value parameters because different RDBMSs implement the boolean data type differently. As a workaround, you can create a static LOV report to return the boolean states true and false, as used in your database, and use that LOV report to provide the boolean parameter values.</p> 
      <p>Example main query</p> 
@@ -1997,7 +2066,7 @@ FROM mytable
     WHERE product_name IN(#product_list#)
 </pre> 
      </div> 
-     <p>Take the following steps to use a multi-value parameter<br> </p> 
+     <p>Take the following steps to use a multi-value parameter </p> 
      <ul> 
       <li>Create the report, putting the WHERE...IN clause and parameter placeholder in the appropriate place within the SQL</li> 
       <li>Create the parameter definition using the same process as with single-value parameters</li> 
@@ -2462,12 +2531,12 @@ FROM mytable
      <h1 id="lov-reports">LOV Reports</h1> 
      <p>LOV reports are used to generate parameter values for other reports. Dynamic LOV reports get their values from an sql query while static LOV reports use fixed values defined in the sql source section. An LOV report must have either one or two columns. The value of the first column is passed to the parameter. The value of the second column (if available) is displayed to the user. For example, for the following dynamic LOV query</p> 
      <div class="codehilite"> 
-      <pre>    SELECT location_id, location_name FROM LOCATIONS
+      <pre><span></span>    SELECT location_id, location_name FROM LOCATIONS
 </pre> 
      </div> 
      <p>Users see values from the <code>location_name</code> column while the actual parameter match is performed using values from the <code>location_id</code> column.<br> If the parameter options don't come from a database, you can use a static lov with something like the following in the sql source. If the parameter value and the display value are different, separate them with a |</p> 
      <div class="codehilite"> 
-      <pre>    local|Local
+      <pre><span></span>    local|Local
     international|Worldwide
 </pre> 
      </div> 
@@ -2482,7 +2551,7 @@ FROM mytable
      <ul> 
       <li> <p><strong>LOV Report</strong><br> This report is the one used to retrieve the list of values (i.e. the list of available reports that will be shown as a parameter). Use the <strong>Configure | Reports</strong> menu and then the <strong>Add</strong> button to create a new report. Set the name to "ART Report Names", the type to <strong>LOV: Dynamic</strong> and the following as the SQL source:</p> 
        <div class="codehilite"> 
-        <pre>SELECT NAME FROM ART_QUERIES ORDER BY NAME
+        <pre><span></span>SELECT NAME FROM ART_QUERIES ORDER BY NAME
 </pre> 
        </div> </li> 
      </ul> 
@@ -2490,7 +2559,7 @@ FROM mytable
      <ul> 
       <li> <p><strong>Main Report</strong><br> This report retrieves the details of the reports that are defined in ART. It has one parameter whose values are retrieved from the "ART Report Names" report created above. Following the same process used for the previous report, name the report "ART Reports" and for the SQL source use:</p> 
        <div class="codehilite"> 
-        <pre>SELECT NAME
+        <pre><span></span>SELECT NAME
 , SHORT_DESCRIPTION
 , DESCRIPTION        
 , UPDATE_DATE
@@ -2507,7 +2576,7 @@ FROM ART_QUERIES WHERE NAME = #report_name#
       <li>You don't have to assign access to the LOV report itself</li> 
       <li> <p>You can't use rules with static lovs. If you have a PostgreSQL database, you can create a dynamic lov that will return the static values, with syntax like the following</p> 
        <div class="codehilite"> 
-        <pre>select id from
+        <pre><span></span>select id from
 (select unnest(ARRAY[1, 5, 10]) as id) as id_list
 where #rules#
 </pre> 
@@ -2523,7 +2592,7 @@ where #rules#
      <h2 id="using-groovy">Using Groovy</h2> 
      <p>You can use <a class="" href="http://groovy-lang.org/" rel="nofollow">groovy</a> in the SQL source section to achieve dynamic sql. The groovy script needs to return a string that has the sql to be executed. You need to define an option in the <strong>Options</strong> field of the report to specify that you are using groovy in the sql source. This option is named <strong>usesGroovy</strong> and needs to have the value <strong>true</strong> e.g.</p> 
      <div class="codehilite"> 
-      <pre>{
+      <pre><span></span>{
     "usesGroovy": true
 }
 </pre> 
@@ -2532,7 +2601,7 @@ where #rules#
      <h3 id="example">Example</h3> 
      <p>A trivial example is given below.</p> 
      <div class="codehilite"> 
-      <pre>def sql
+      <pre><span></span>def sql
 
 //assumes the report has an integer parameter named id
 if(id.value == 0) {
@@ -2546,7 +2615,7 @@ if(id.value == 0) {
      <h2 id="using-xml-tags">Using XML tags</h2> 
      <p>You can use xml tags in the SQL source section to achieve dynamic sql. The syntax is as follows. Tag names are case sensitive.</p> 
      <div class="codehilite"> 
-      <pre>    <span class="nt">&lt;IF&gt;</span>
+      <pre><span></span>    <span class="nt">&lt;IF&gt;</span>
     <span class="nt">&lt;EXP1&gt;</span>value1<span class="nt">&lt;/EXP1&gt;</span> <span class="nt">&lt;OP&gt;</span>operator<span class="nt">&lt;/OP&gt;</span> <span class="nt">&lt;EXP2&gt;</span>value2<span class="nt">&lt;/EXP2&gt;</span>
     <span class="nt">&lt;TEXT&gt;</span> ... <span class="nt">&lt;/TEXT&gt;</span>
     <span class="nt">&lt;ELSETEXT&gt;</span> ... <span class="nt">&lt;/ELSETEXT&gt;</span>
@@ -2556,7 +2625,7 @@ if(id.value == 0) {
      <p>ART parses the query and leaves only the text in the <code>&lt;TEXT&gt;</code> tag if the condition (value1 operator value2) is true or the text in the <code>&lt;ELSETEXT&gt;</code> tag if the condition is false. The EXP1 or EXP2 contents can be static values, single-value parameters or :tags, while the OP content is an operator (see supported list below). </p> 
      <p>For example in the following query:</p> 
      <div class="codehilite"> 
-      <pre>    SELECT *
+      <pre><span></span>    SELECT *
     FROM <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#level#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>summary<span class="nt">&lt;/EXP2&gt;</span>
     <span class="nt">&lt;TEXT&gt;</span> orders_summary <span class="nt">&lt;/TEXT&gt;</span>
     <span class="nt">&lt;ELSETEXT&gt;</span> orders_details <span class="nt">&lt;/ELSETEXT&gt;</span>
@@ -2569,7 +2638,7 @@ if(id.value == 0) {
      </div> 
      <p>if the <code>#level#</code> parameter is set to "summary" and the <code>#date#</code> parameter is not null, ART rewrites the query as:</p> 
      <div class="codehilite"> 
-      <pre>    SELECT *
+      <pre><span></span>    SELECT *
     FROM orders_summary
     WHERE VENDOR like #vendor#
     AND order_date &gt; #date#
@@ -2577,7 +2646,7 @@ if(id.value == 0) {
      </div> 
      <p>if the <code>#level#</code> parameter is not set to "summary" and the <code>#date#</code> is null, ART rewrites the query as:</p> 
      <div class="codehilite"> 
-      <pre>    SELECT *
+      <pre><span></span>    SELECT *
     FROM orders_details
     WHERE VENDOR like #vendor#
 </pre> 
@@ -2668,7 +2737,7 @@ if(id.value == 0) {
      <h3 id="examples">Examples</h3> 
      <p><strong>Dynamic OR/AND selection</strong>:</p> 
      <div class="codehilite"> 
-      <pre>    SELECT *
+      <pre><span></span>    SELECT *
     FROM orders_summary
     WHERE VENDOR like #vendor#
     <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#logic#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>OR<span class="nt">&lt;/EXP2&gt;</span>
@@ -2679,7 +2748,7 @@ if(id.value == 0) {
      </div> 
      <p><strong>Dynamic ORDER BY</strong>: The order by part is driven by the user input</p> 
      <div class="codehilite"> 
-      <pre>    SELECT *
+      <pre><span></span>    SELECT *
     FROM orders_summary
     WHERE VENDOR like #vendor#
     <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#sortby#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>Vendor<span class="nt">&lt;/EXP2&gt;</span>
@@ -2690,7 +2759,7 @@ if(id.value == 0) {
      </div> 
      <p><strong>Dynamic query selection</strong>: A different query is executed depending on user input</p> 
      <div class="codehilite"> 
-      <pre>    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#showaddr#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>Y<span class="nt">&lt;/EXP2&gt;</span>
+      <pre><span></span>    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#showaddr#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>Y<span class="nt">&lt;/EXP2&gt;</span>
     <span class="nt">&lt;TEXT&gt;</span>
     SELECT name, code, address, phone FROM VENDOR
     WHERE VENDOR like #vendor#
@@ -2704,7 +2773,7 @@ if(id.value == 0) {
      </div> 
      <p><strong>Dynamic SQL with tags</strong>: The condition is verified only if the date supplied by the user (<code>#date#</code>) is earlier than the system date at report execution time (<code>:DATE</code> tag)</p> 
      <div class="codehilite"> 
-      <pre>    SELECT *
+      <pre><span></span>    SELECT *
     FROM orders_summary
     WHERE VENDOR like #vendor#
     <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#date#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>la<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>:DATE<span class="nt">&lt;/EXP2&gt;</span>
@@ -2714,7 +2783,7 @@ if(id.value == 0) {
      </div> 
      <p><strong>Check user input</strong>: Show a warning instead of executing the query</p> 
      <div class="codehilite"> 
-      <pre>    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#value#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>ln<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>10000<span class="nt">&lt;/EXP2&gt;</span>
+      <pre><span></span>    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#value#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>ln<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>10000<span class="nt">&lt;/EXP2&gt;</span>
     <span class="nt">&lt;TEXT&gt;</span> SELECT ... <span class="nt">&lt;/TEXT&gt;</span>
     <span class="nt">&lt;ELSETEXT&gt;</span> SELECT 'Value too High' "Warning" <span class="nt">&lt;/ELSETEXT&gt;</span>
     <span class="nt">&lt;/IF&gt;</span>
@@ -2725,7 +2794,7 @@ if(id.value == 0) {
      </div> 
      <p><strong>Dynamic WHERE condition</strong>: E.g. to drill down on null values</p> 
      <div class="codehilite"> 
-      <pre>    SELECT * FROM customers
+      <pre><span></span>    SELECT * FROM customers
     WHERE 
     <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#email#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>null<span class="nt">&lt;/EXP2&gt;</span>
     <span class="nt">&lt;TEXT&gt;</span>customer_email is null<span class="nt">&lt;/TEXT&gt;</span>
@@ -2749,14 +2818,14 @@ if(id.value == 0) {
      <ul> 
       <li> <p><strong>Sales Summary</strong> (Main report)</p> 
        <div class="codehilite"> 
-        <pre>select REGION "Region", SUM(VOLUME) "Volume"
+        <pre><span></span>select REGION "Region", SUM(VOLUME) "Volume"
 from ORDERS
 where ...
 </pre> 
        </div> </li> 
       <li> <p><strong>Sales Details</strong> (Drill Down report)</p> 
        <div class="codehilite"> 
-        <pre>select REGION, CITY, ITEM, VOLUME
+        <pre><span></span>select REGION, CITY, ITEM, VOLUME
 from ORDER_DETAILS
 WHERE REGION = #region#
 </pre> 
@@ -2777,7 +2846,7 @@ WHERE REGION = #region#
      <h2 id="using-the-main-reports-parameters">Using the main report's parameters</h2> 
      <p>In addition to using the main report's column values, a drill down report can also use the main report's parameter values. If in our example above the Main Report allowed the user to select a city, e.g.</p> 
      <div class="codehilite"> 
-      <pre>    select REGION "Region", SUM(VOLUME) "Volume"
+      <pre><span></span>    select REGION "Region", SUM(VOLUME) "Volume"
     from ORDERS
     WHERE CITY=#city# AND ...
 </pre> 
@@ -2789,7 +2858,7 @@ WHERE REGION = #region#
      </ul> 
      <p>So the Drill Down Report would look something like</p> 
      <div class="codehilite"> 
-      <pre>    select REGION, CITY, ITEM, VOLUME
+      <pre><span></span>    select REGION, CITY, ITEM, VOLUME
     from ORDER_DETAILS
     WHERE REGION = #region# and CITY=#city#
 </pre> 
@@ -2864,16 +2933,16 @@ WHERE REGION = #region#
        </tr> 
       </tbody> 
      </table> 
-     <p>Please refer to the RSS specification for more details.<br> </p> 
+     <p>Please refer to the RSS specification for more details. </p> 
      <p>For example the following query:</p> 
      <div class="codehilite"> 
-      <pre>    select col1 "title", col2 "description" , col3 "pubDate", col4 "guid" 
+      <pre><span></span>    select col1 "title", col2 "description" , col3 "pubDate", col4 "guid" 
     from myTable
 </pre> 
      </div> 
      <p>Will produce the following RSS 2.0 XML content:</p> 
      <div class="codehilite"> 
-      <pre>    <span class="o">&lt;?</span><span class="n">xml</span> <span class="n">version</span><span class="o">=</span><span class="s">"1.0"</span> <span class="n">encoding</span><span class="o">=</span><span class="s">"UTF-8"</span><span class="o">?&gt;</span>
+      <pre><span></span>    <span class="o">&lt;?</span><span class="n">xml</span> <span class="n">version</span><span class="o">=</span><span class="s">"1.0"</span> <span class="n">encoding</span><span class="o">=</span><span class="s">"UTF-8"</span><span class="o">?&gt;</span>
     <span class="o">&lt;</span><span class="n">rss</span> <span class="n">version</span><span class="o">=</span><span class="s">"2.0"</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">channel</span><span class="o">&gt;</span>
      <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="p">[</span><span class="n">Report</span> <span class="n">Name</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">title</span><span class="o">&gt;</span>
@@ -2924,7 +2993,7 @@ WHERE REGION = #region#
      <h3 id="example-syntax">Example Syntax</h3> 
      <p>XML-like syntax is used to define the dashboard structure</p> 
      <div class="codehilite"> 
-      <pre>    <span class="nt">&lt;DASHBOARD&gt;</span>
+      <pre><span></span>    <span class="nt">&lt;DASHBOARD&gt;</span>
 
         <span class="nt">&lt;COLUMN&gt;</span>
             <span class="c">&lt;!-- column size: auto|small|medium|large. default is auto--&gt;</span>
@@ -3084,7 +3153,7 @@ WHERE REGION = #region#
      <p>In addition to these properties that are unique to gridstack items, the following properties of regular dashboard portlets should also be used within gridstack items, with the same effect: <code>&lt;TITLE&gt;</code>, <code>&lt;REPORTID&gt;</code>, <code>&lt;URL&gt;</code>, <code>&lt;REFRESH&gt;</code>, <code>&lt;ONLOAD&gt;</code>.</p> 
      <h3 id="example-syntax_1">Example Syntax</h3> 
      <div class="codehilite"> 
-      <pre>    <span class="nt">&lt;DASHBOARD&gt;</span>
+      <pre><span></span>    <span class="nt">&lt;DASHBOARD&gt;</span>
 
         <span class="nt">&lt;ITEM&gt;</span>
             <span class="nt">&lt;TITLE&gt;</span>Report 1<span class="nt">&lt;/TITLE&gt;</span>
@@ -3111,7 +3180,7 @@ WHERE REGION = #region#
      <p>Both regular and gridstack dashboards can be modified to have their components displayed within tabs. This would be done by adding the optional <code>&lt;TABLIST&gt;</code> tag to the dashboard xml. Tabs will then be defined according to the desired number of tabs, and which portlets/items should appear in which tabs.</p> 
      <h3 id="example-syntax_2">Example Syntax</h3> 
      <div class="codehilite"> 
-      <pre>    <span class="nt">&lt;DASHBOARD&gt;</span>
+      <pre><span></span>    <span class="nt">&lt;DASHBOARD&gt;</span>
 
         <span class="nt">&lt;ITEM&gt;</span>
             <span class="nt">&lt;TITLE&gt;</span>Report 1<span class="nt">&lt;/TITLE&gt;</span>
@@ -3178,20 +3247,20 @@ WHERE REGION = #region#
    <div> 
     <div class="markdown_content"> 
      <!--NewPage--> 
-     <h1 id="jxls-reports">jXLS Reports</h1> 
-     <p>ART uses the <a class="" href="http://jxls.sourceforge.net/">jXLS</a> library to provide support for reports based on pre-formatted MS Excel spreadsheets. For details on the syntax of these jXLS templates, see the documentation available on the jXLS website. Generally, you'll follow the following steps to create a jXLS report.</p> 
+     <h1 id="jxls-reports">Jxls Reports</h1> 
+     <p>ART uses the <a class="" href="http://jxls.sourceforge.net/">Jxls</a> library to provide support for reports based on pre-formatted MS Excel spreadsheets. For details on the syntax of these Jxls templates, see the documentation available on the Jxls website. Generally, you'll follow the following steps to create a Jxls report.</p> 
      <ul> 
-      <li>Create an Excel file (either xls or xlsx) with any text, formulas and formatting that will be required in the final report</li> 
-      <li>Insert jXLS syntax as appropriate to define where the raw data should go</li> 
-      <li>Create a new report in ART and select the jXLS template to use</li> 
-      <li> <p>If the report is of type <strong>jXLS: ART Query</strong>, the sql used to retrieve the data will be the one defined in the SQL source section. You can use parameters, rules or any other features of ART reports. In the template, use the identifier <strong>results</strong> to output report values. e.g.</p> 
+      <li>Create an Excel file (either xls or xlsx) with any text, formulas and formatting that will be required in the final report. This is the Jxls template.</li> 
+      <li>Insert Jxls syntax to define where the raw data should go</li> 
+      <li>Create a new report in ART and select the Jxls template to use in the <strong>Template</strong> field</li> 
+      <li> <p>If the report is of type <strong>Jxls: ART Query</strong>, the sql used to retrieve the data will be the one defined in the SQL source section. You can use parameters, rules or any other features of ART reports. In the template, use the identifier <strong>results</strong> to output report values. e.g.</p> 
        <div class="codehilite"> 
-        <pre><span class="n">jx</span><span class="o">:</span><span class="k">each</span><span class="o">(</span><span class="n">items</span><span class="o">=</span><span class="s2">"results"</span> <span class="n">var</span><span class="o">=</span><span class="s2">"row"</span> <span class="n">lastCell</span><span class="o">=</span><span class="s2">"E10"</span><span class="o">)</span>
+        <pre><span></span><span class="n">jx</span><span class="o">:</span><span class="k">each</span><span class="o">(</span><span class="n">items</span><span class="o">=</span><span class="s2">"results"</span> <span class="n">var</span><span class="o">=</span><span class="s2">"row"</span> <span class="n">lastCell</span><span class="o">=</span><span class="s2">"E10"</span><span class="o">)</span>
 
 <span class="n">$</span><span class="o">{</span><span class="n">row</span><span class="o">.</span><span class="na">description</span><span class="o">}</span>
 </pre> 
        </div> </li> 
-      <li> <p>If the report is of type <strong>jXLS: Template Query</strong>, the sql used to retrieve the data will be the one defined in the template. The datasource used for the query will be the one selected in the datasource field of the report. Use the <strong>jdbc.query</strong> method to call the sql e.g. <code>jdbc.query('select * from cities')</code>. You can alternatively pass the datasource id of the datasource to use. In this case use the <strong>jdbc.query2</strong> method to call the sql e.g. <code>jdbc.query2(1, 'select * from cities')</code>. You can also use the datasource name e.g. <code>jdbc.query2('mydb', 'select * from cities')</code>.</p> </li> 
+      <li> <p>If the report is of type <strong>Jxls: Template Query</strong>, the sql used to retrieve the data will be the one defined in the template. The datasource used for the query will be the one selected in the datasource field of the report. Use the <strong>jdbc.query</strong> method to call the sql e.g. <code>jdbc.query('select * from cities')</code>. You can alternatively pass the datasource id of the datasource to use. In this case use the <strong>jdbc.query2</strong> method to call the sql e.g. <code>jdbc.query2(1, 'select * from cities')</code>. You can also use the datasource name e.g. <code>jdbc.query2('mydb', 'select * from cities')</code>.</p> </li> 
       <li>If the report uses parameters, avoid using the following names for the parameters as these are used for special purpose variables i.e. <code>results, jdbc, params, locale</code>.</li> 
      </ul> 
      <!--NewPage--> 
@@ -3355,7 +3424,7 @@ WHERE REGION = #region#
      <ul> 
       <li> <p>You can use single-value parameters in the mdx using the direct parameter substitution syntax <code>#!&lt;param name&gt;#</code> e.g.</p> 
        <div class="codehilite"> 
-        <pre><span class="n">SELECT</span> 
+        <pre><span></span><span class="n">SELECT</span> 
 <span class="p">{</span> <span class="p">[</span><span class="n">Measures</span><span class="p">].[</span><span class="n">Sales</span> <span class="n">Amount</span><span class="p">],</span> <span class="p">[</span><span class="n">Measures</span><span class="p">].[</span><span class="n">Tax</span> <span class="n">Amount</span><span class="p">]</span> <span class="p">}</span> <span class="n">ON</span> <span class="n">COLUMNS</span><span class="p">,</span> 
 <span class="p">{</span> <span class="p">[</span><span class="n">Date</span><span class="p">].[</span><span class="n">Fiscal</span><span class="p">].[</span><span class="n">Fiscal</span> <span class="n">Year</span><span class="p">].</span><span class="o">&amp;</span><span class="p">[</span><span class="err">#</span><span class="o">!</span><span class="n">FromYear</span><span class="err">#</span><span class="p">],</span> <span class="p">[</span><span class="n">Date</span><span class="p">].[</span><span class="n">Fiscal</span><span class="p">].[</span><span class="n">Fiscal</span> <span class="n">Year</span><span class="p">].</span><span class="o">&amp;</span><span class="p">[</span><span class="err">#</span><span class="o">!</span><span class="n">ToYear</span><span class="err">#</span><span class="p">]</span> <span class="p">}</span> <span class="n">ON</span> <span class="n">ROWS</span> 
 <span class="n">FROM</span> <span class="p">[</span><span class="n">Adventure</span> <span class="n">Works</span><span class="p">]</span> 
@@ -3364,12 +3433,12 @@ WHERE REGION = #region#
        </div> </li> 
       <li> <p>You can also use multi-value parameters. In this case, construct the LOV query such that it returns strings as they would appear in the MDX. e.g.<br> Example LOV</p> 
        <div class="codehilite"> 
-        <pre>SELECT CONCAT("[Order.Order Sale Type].[",sale_type_code,"]") as typecodes, sale_type_code     
+        <pre><span></span>SELECT CONCAT("[Order.Order Sale Type].[",sale_type_code,"]") as typecodes, sale_type_code     
 FROM dim_orders
 </pre> 
        </div> <p>Use multi-value parameter in MDX as desired...</p> 
        <div class="codehilite"> 
-        <pre>SELECT ... FROM ...
+        <pre><span></span>SELECT ... FROM ...
 WHERE {#!saleTypes#}
 </pre> 
        </div> </li> 
@@ -3387,7 +3456,7 @@ WHERE {#!saleTypes#}
       <li> <p><strong>Create the rule</strong> <br> Use the <strong>Configure | Rules</strong> menu and then the <strong>Add</strong> button to specify the rule name</p> </li> 
       <li> <p><strong>Link the rule to a report</strong><br> On the report definition page, select the <strong>Uses Rules</strong> option<br> In the SQL source section, use the special, hard coded placeholder <strong>#rules#</strong> where you want the rule values to go e.g</p> 
        <div class="codehilite"> 
-        <pre>SELECT * from transactions
+        <pre><span></span>SELECT * from transactions
 where #rules#
 </pre> 
        </div> </li> 
@@ -3424,7 +3493,7 @@ where #rules#
      <ul> 
       <li> <p>Create a Dynamic LOV report named <strong>countries</strong> that will display country names. The country will be the parent parameter. Depending on what country is selected, the available cities will change. The report would have the following SQL.</p> 
        <div class="codehilite"> 
-        <pre>SELECT COUNTRY_ID, COUNTRY_NAME
+        <pre><span></span>SELECT COUNTRY_ID, COUNTRY_NAME
 FROM COUNTRIES
 ORDER BY 2
 </pre> 
@@ -3432,7 +3501,7 @@ ORDER BY 2
       <li> <p>Create a Parameter named <strong>countryId</strong> with a Data Type of <strong>Integer</strong>, set it to <strong>Use LOV</strong> and select "countries" as the <strong>LOV Report</strong>.</p> </li> 
       <li> <p>Create a Dynamic LOV report named <strong>cities</strong> that will display city names. The query needs to have a parameter label for the country parameter. This will be replaced at runtime with the country selected.</p> 
        <div class="codehilite"> 
-        <pre>SELECT CITY_ID, CITY_NAME
+        <pre><span></span>SELECT CITY_ID, CITY_NAME
 FROM CITIES
 WHERE COUNTRY_ID = #countryId#
 ORDER BY 2
@@ -3443,7 +3512,7 @@ ORDER BY 2
       <li>Create a Parameter named <strong>cityId</strong> with a Data Type of <strong>Integer</strong>.</li> 
       <li> <p>Create the main report. The SQL for the report will need to have a placeholder for the cityId parameter. </p> 
        <div class="codehilite"> 
-        <pre>SELECT FIRST_NAME, LAST_NAME, EMAIL
+        <pre><span></span>SELECT FIRST_NAME, LAST_NAME, EMAIL
 FROM CUSTOMERS
 WHERE CITY_ID = #cityId#
 </pre> 
@@ -3549,7 +3618,7 @@ WHERE CITY_ID = #cityId#
      <p>Send an email to the specified recipients if the first column of the first row in the query result has a value greater than zero. You can construct a simple SQL query to return a non zero value in case of a certain business condition.</p> 
      <p>Example query to be used for an alert. Send an email if a big order is made</p> 
      <div class="codehilite"> 
-      <pre>    SELECT count(*)
+      <pre><span></span>    SELECT count(*)
     FROM todays_order_details
     WHERE quantity&gt;100
 </pre> 
@@ -3685,21 +3754,21 @@ WHERE CITY_ID = #cityId#
      <h2 id="dynamic-recipients-only">Dynamic Recipients only</h2> 
      <p>If you want all the recipients to get the same data and the same email message, then define a dynamic recipients report with only one column. This column should contain the email addresses of the recipients. The name of the column doesn't matter. Example:</p> 
      <div class="codehilite"> 
-      <pre>    SELECT email
+      <pre><span></span>    SELECT email
     FROM employee
 </pre> 
      </div> 
      <h2 id="dynamic-recipients-personalization">Dynamic Recipients + Personalization</h2> 
      <p>If you want all the recipients to get the same data, but you would like some personalization of the email message e.g. having a greeting like <code>Dear John</code> instead of <code>Dear Employee</code>, then define a dynamic recipients report where the first column contains the recipient email addresses, and any additional columns that you would like to use in the email message e.g.</p> 
      <div class="codehilite"> 
-      <pre>    SELECT email, first_name, other_name last_name, order_count
+      <pre><span></span>    SELECT email, first_name, other_name last_name, order_count
     FROM employee, orders
     WHERE employee.id=orders.employee_id
 </pre> 
      </div> 
      <p>When defining the job for your data query, in the email message section, you can then use column labels as placeholders where personalized details will be put. The labels consist of column names from the recipients report surrounded by # signs e.g. you can have a message like</p> 
      <div class="codehilite"> 
-      <pre>    Dear #first_name# #last_name#
+      <pre><span></span>    Dear #first_name# #last_name#
     You are now at #order_count# orders, which is below the target of 100.
 </pre> 
      </div> 
@@ -3709,7 +3778,7 @@ WHERE CITY_ID = #cityId#
      <p>In addition, if the values in the <strong>recipient_id</strong> column are numbers, include an additional hard coded column named <strong>recipient_id_type</strong>, with the value of this column being the string "<strong>number</strong>".</p> 
      <p>Example:<br> If we want to email users only transactions that they created, our data query can be something like</p> 
      <div class="codehilite"> 
-      <pre>    SELECT *
+      <pre><span></span>    SELECT *
     FROM transactions
     WHERE transaction_date = CURDATE()
     AND #recipient#
@@ -3717,14 +3786,14 @@ WHERE CITY_ID = #cityId#
      </div> 
      <p>We can then define a dynamic recipients query like</p> 
      <div class="codehilite"> 
-      <pre>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id, "number" recipient_id_type
+      <pre><span></span>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id, "number" recipient_id_type
     FROM employee
 </pre> 
      </div> 
      <p>This will cause the <code>#recipient#</code> placeholder in the data query to be replaced with the condition <code>transaction_user = &lt;employee_id&gt;</code>, where <code>&lt;employee_id&gt;</code> will be different for each recipient, as per the dynamic recipients query. We can then schedule a job for the main report and set the <strong>Dynamic Recipients</strong> field to the dynamic recipients report, and all the recipients will get a separate email with their specific data only.</p> 
      <p>If we also want to include personalization fields in the email message body, we can add these to the dynamic recipients query e.g</p> 
      <div class="codehilite"> 
-      <pre>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id, "number" recipient_id_type, first_name
+      <pre><span></span>    SELECT email, "transaction_user" recipient_column, employee_id recipient_id, "number" recipient_id_type, first_name
     FROM employee
 </pre> 
      </div> 
@@ -3767,12 +3836,16 @@ WHERE CITY_ID = #cityId#
         <td>Whether this configuration is active or not. If it is not active, no files will be ftped for jobs that use this ftp server configuration.</td> 
        </tr> 
        <tr> 
+        <td><strong>Connection Type</strong></td> 
+        <td>Whether to use FTP or SFTP</td> 
+       </tr> 
+       <tr> 
         <td><strong>Server</strong></td> 
         <td>The IP address or host name of the ftp server</td> 
        </tr> 
        <tr> 
         <td><strong>Port</strong></td> 
-        <td>The ftp port of the server</td> 
+        <td>The ftp port of the server. You can leave this as 0 to use the default port.</td> 
        </tr> 
        <tr> 
         <td><strong>User</strong></td> 
@@ -3807,14 +3880,14 @@ WHERE CITY_ID = #cityId#
       <li>Create a user in AD to be used for authentication purposes. This user doesn't need to have access to log in to computers. e.g. a user named spnego. Set the password to never expire</li> 
       <li> <p>Create spns that point to the application server/spnego user combination using the setspn command. Use syntax like below</p> 
        <div class="codehilite"> 
-        <pre>setspn -A HTTP/app-server spnego
+        <pre><span></span>setspn -A HTTP/app-server spnego
 setspn -A HTTP/app-server.domainname spnego
 </pre> 
        </div> </li> 
      </ul> 
      <p>Replace <strong>app-server</strong> with the appropriate machine name of the application server, <strong>my.domain.com</strong> with the domain name and <strong>spnego</strong> with the username of the domain account to be used for spnego access. If you'll also be accessing the web application on the application server via ip address e.g. <code>http://192.168.56.101:8080/art</code>, also create spns for the ip address. Examples</p> 
      <div class="codehilite"> 
-      <pre>    setspn -A HTTP/app-server spnego
+      <pre><span></span>    setspn -A HTTP/app-server spnego
     setspn -A HTTP/app-server.my.domain.com spnego
     setspn -A HTTP/192.168.56.101 spnego
     setspn -A HTTP/192.168.56.101.my.domain.com spnego
@@ -3824,7 +3897,7 @@ setspn -A HTTP/app-server.domainname spnego
      <ul> 
       <li> <p>Create a file in the ART_HOME\WEB-INF directory named <strong>login.conf</strong> with the following details</p> 
        <div class="codehilite"> 
-        <pre>spnego-client {
+        <pre><span></span>spnego-client {
     com.sun.security.auth.module.Krb5LoginModule required;
 };
 
@@ -3837,7 +3910,7 @@ spnego-server {
        </div> </li> 
       <li> <p>Create a file in the ART_HOME\WEB-INF directory named <strong>krb5.conf</strong> with the following details. Replace <strong>MY.DOMAIN.COM</strong> with your domain name. For the kdc parameter, use the fully qualified domain name of the AD server.</p> 
        <div class="codehilite"> 
-        <pre>[libdefaults]   
+        <pre><span></span>[libdefaults]   
     default_realm = MY.DOMAIN.COM
     default_tkt_enctypes = aes128-cts rc4-hmac des3-cbc-sha1 des-cbc-md5 des-cbc-crc
     default_tgs_enctypes = aes128-cts rc4-hmac des3-cbc-sha1 des-cbc-md5 des-cbc-crc
@@ -3855,7 +3928,7 @@ spnego-server {
        </div> </li> 
       <li> <p>Edit the ART_HOME\WEB-INF\<strong>web.xml</strong> file and add a filter as below. Replace the <strong>spnego.preauth.username</strong> and <strong>spnego.preauth.password</strong> parameter values with the details of the domain account created to enable spnego access. Replace the <strong>spnego.krb5.conf</strong> and <strong>spnego.login.conf</strong> parameter values with the full path of the respective files. Leave all the other parameters as they are. The spnego filter mapping must come before other filter mapping elements.</p> 
        <div class="codehilite"> 
-        <pre><span class="nt">&lt;filter&gt;</span>
+        <pre><span></span><span class="nt">&lt;filter&gt;</span>
     <span class="nt">&lt;filter-name&gt;</span>SpnegoHttpFilter<span class="nt">&lt;/filter-name&gt;</span>
     <span class="nt">&lt;filter-class&gt;</span>net.sourceforge.spnego.SpnegoHttpFilter<span class="nt">&lt;/filter-class&gt;</span>
 
@@ -3952,19 +4025,19 @@ spnego-server {
       <li>Rename the file to krb5.ini</li> 
       <li> <p>Open a command prompt window, cd to the ART_HOME\WEB-INF directory and type a command with syntax like the following</p> 
        <div class="codehilite"> 
-        <pre>ktab -a &lt;spnego user&gt; &lt;spnego password&gt; -k &lt;file name&gt;
+        <pre><span></span>ktab -a &lt;spnego user&gt; &lt;spnego password&gt; -k &lt;file name&gt;
 </pre> 
        </div> </li> 
      </ul> 
      <p>E.g.</p> 
      <div class="codehilite"> 
-      <pre>    ktab -a spnego spnego -k art.keytab
+      <pre><span></span>    ktab -a spnego spnego -k art.keytab
 </pre> 
      </div> 
      <ul> 
       <li> <p>Edit the ART_HOME\WEB-INF\<strong>login.conf</strong> file to have contents like the following. Set the full path to the keytab file and the spnego username (principal) as per your configuration</p> 
        <div class="codehilite"> 
-        <pre>spnego-client {
+        <pre><span></span>spnego-client {
     com.sun.security.auth.module.Krb5LoginModule required;
 };
 
@@ -3979,7 +4052,7 @@ spnego-server {
        </div> </li> 
       <li> <p>Edit the ART_HOME\WEB-INF\<strong>web.xml</strong> file. Make the <strong>spnego.preauth.username</strong> and <strong>spnego.preauth.password</strong> parameters blank. i.e.</p> 
        <div class="codehilite"> 
-        <pre><span class="nt">&lt;init-param&gt;</span>
+        <pre><span></span><span class="nt">&lt;init-param&gt;</span>
     <span class="nt">&lt;param-name&gt;</span>spnego.preauth.username<span class="nt">&lt;/param-name&gt;</span>
     <span class="nt">&lt;param-value&gt;&lt;/param-value&gt;</span>
 <span class="nt">&lt;/init-param&gt;</span>
@@ -3996,7 +4069,7 @@ spnego-server {
      <h2 id="changing-the-spnego-user">Changing the spnego user</h2> 
      <p>If you need to change the AD user used to enable spnego access, first delete the spns associated with the application server and then create new ones for the desired user. An spn for a given server can only refer to a single user. To delete the spns, you can use syntax similar to the following</p> 
      <div class="codehilite"> 
-      <pre>    setspn -D HTTP/app-server spnego
+      <pre><span></span>    setspn -D HTTP/app-server spnego
     setspn -D HTTP/app-server.my.domain.com spnego
 </pre> 
      </div> 
@@ -4025,7 +4098,7 @@ spnego-server {
       <li><strong>Save</strong> the datasource details</li> 
       <li> <p>Modify the ART_HOME\WEB-INF\classes\<strong>logback.xml</strong> file and add loggers for the items you are interested in e.g.</p> 
        <div class="codehilite"> 
-        <pre><span class="nt">&lt;logger</span> <span class="na">name=</span><span class="s">"jdbc.sqltiming"</span><span class="nt">&gt;</span>
+        <pre><span></span><span class="nt">&lt;logger</span> <span class="na">name=</span><span class="s">"jdbc.sqltiming"</span><span class="nt">&gt;</span>
     <span class="nt">&lt;level</span> <span class="na">value=</span><span class="s">"info"</span> <span class="nt">/&gt;</span>
 <span class="nt">&lt;/logger&gt;</span>
 </pre> 
@@ -4056,14 +4129,14 @@ spnego-server {
      <ul> 
       <li> <p>Create a file named <strong>setenv.bat</strong> in the TOMCAT_HOME\bin directory (or edit it if it exists) and set the configuration options in the JAVA_OPTS environment variable e.g.</p> 
        <div class="codehilite"> 
-        <pre>set JAVA_OPTS=-server -Xmx1024m
+        <pre><span></span>set JAVA_OPTS=-server -Xmx1024m
 </pre> 
        </div> </li> 
      </ul> 
      <h3 id="linux">Linux</h3> 
      <p>Create a file named <strong>setenv.sh</strong> in the TOMCAT_HOME/bin directory (or edit it if it exists) and set the configuration options in the JAVA_OPTS environment variable e.g.</p> 
      <div class="codehilite"> 
-      <pre>    export JAVA_OPTS="-server -Xmx512m"
+      <pre><span></span>    export JAVA_OPTS="-server -Xmx512m"
 </pre> 
      </div> 
      <p><br></p> 
@@ -4074,13 +4147,13 @@ spnego-server {
      <ul> 
       <li> <p>Ensure the following lines in your Apache <strong>httpd.conf</strong> file are uncommented</p> 
        <div class="codehilite"> 
-        <pre>LoadModule proxy_module modules/mod_proxy.so
+        <pre><span></span>LoadModule proxy_module modules/mod_proxy.so
 LoadModule proxy_http_module modules/mod_proxy_http.so
 </pre> 
        </div> </li> 
       <li> <p>Add an item at the end of the <strong>httpd.conf</strong> file to indicate how ART will be accessed by users and how Apache will communicate with Tomcat e.g</p> 
        <div class="codehilite"> 
-        <pre>ProxyPass /art http://localhost:8080/art
+        <pre><span></span>ProxyPass /art http://localhost:8080/art
 ProxyPassReverse /art http://localhost:8080/art
 </pre> 
        </div> </li> 
@@ -4091,19 +4164,19 @@ ProxyPassReverse /art http://localhost:8080/art
      <ul> 
       <li> <p>Ensure the following lines in your Apache <strong>httpd.conf</strong> file are uncommented</p> 
        <div class="codehilite"> 
-        <pre>LoadModule proxy_ajp_module modules/mod_proxy_ajp.so
+        <pre><span></span>LoadModule proxy_ajp_module modules/mod_proxy_ajp.so
 LoadModule proxy_module modules/mod_proxy.so
 LoadModule proxy_http_module modules/mod_proxy_http.so
 </pre> 
        </div> </li> 
       <li> <p>Ensure you have an AJP connector defined in the <strong>TOMCAT_HOME\conf\server.xml</strong> file e.g.</p> 
        <div class="codehilite"> 
-        <pre>&lt;Connector port="8009" protocol="AJP/1.3" redirectPort="8443" /&gt;
+        <pre><span></span>&lt;Connector port="8009" protocol="AJP/1.3" redirectPort="8443" /&gt;
 </pre> 
        </div> </li> 
       <li> <p>Add an item at the end of the <strong>httpd.conf</strong> file to indicate how ART will be accessed by users and how Apache will communicate with Tomcat e.g</p> 
        <div class="codehilite"> 
-        <pre>ProxyPass /art ajp://localhost:8009/art
+        <pre><span></span>ProxyPass /art ajp://localhost:8009/art
 ProxyPassReverse /art ajp://localhost:8009/art
 </pre> 
        </div> </li> 
@@ -4116,7 +4189,7 @@ ProxyPassReverse /art ajp://localhost:8009/art
      <ul> 
       <li> <p>For Ubuntu/Debian, instead of using LoadModule to enable the modules, use a2enmod from the command line, e.g.</p> 
        <div class="codehilite"> 
-        <pre>a2enmod proxy_ajp
+        <pre><span></span>a2enmod proxy_ajp
 a2enmod proxy
 a2enmod proxy_http
 </pre> 
@@ -4258,7 +4331,7 @@ a2enmod proxy_http
       <li>Change all the text in your new properties file after the = signs to your language </li> 
       <li> <p>If your language uses a non ISO-8859 character set (e.g. chinese, arabic, russian etc) name the file ArtMessages_xx-UTF8.properties and then decode it to an ISO-8859 character set with UTF-8 escapes using the <strong>native2ascii</strong> tool that is available with your Java installation. An example command is as below.</p> 
        <div class="codehilite"> 
-        <pre>native2ascii ArtMessages_xx-UTF8.properties ArtMessages_xx.properties
+        <pre><span></span>native2ascii ArtMessages_xx-UTF8.properties ArtMessages_xx.properties
 </pre> 
        </div> </li> 
       <li> <p>Once you have your translated properties file in the i18n folder, you can restart the application server to make the new translation available to the application, or wait for 1 hour after which the messages are refreshed.</p> </li> 
