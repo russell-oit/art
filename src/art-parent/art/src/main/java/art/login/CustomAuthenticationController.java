@@ -31,8 +31,9 @@ public class CustomAuthenticationController {
 	@RequestMapping("/customAuthentication")
 	public String performCustomAuthentication(){
 		//perform custom authentication
-		//if authentication successful, set session attribute "username" with the appropriate user's username
-		//if not, you can redirect to "/login"
+		//if authentication successful, set session attribute "username"
+		//with the appropriate user's username and return "redirect:/reports"
+		//if not, you can return "redirect:/login"
 		return "redirect:/reports";
 	}
 	

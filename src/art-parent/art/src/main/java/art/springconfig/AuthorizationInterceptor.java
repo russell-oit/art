@@ -98,15 +98,15 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 		User user = (User) session.getAttribute("sessionUser");
 
+		String urlUsername = request.getParameter("username");
+		String urlPassword = request.getParameter("password");
+
 		//reset session user if different username passed in url
-		if (!StringUtils.startsWith(page, "save") && user != null) {
-			String urlUsername = request.getParameter("username");
-			String password = request.getParameter("password");
-			if (urlUsername != null && password != null
-					&& !StringUtils.equalsIgnoreCase(user.getUsername(), urlUsername)) {
-				session.removeAttribute("sessionUser");
-				user = null;
-			}
+		if (processUrlCredentials(page, urlUsername, urlPassword)
+				&& user != null
+				&& !StringUtils.equalsIgnoreCase(user.getUsername(), urlUsername)) {
+			session.removeAttribute("sessionUser");
+			user = null;
 		}
 
 		if (user == null) {
@@ -124,16 +124,13 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 					loginMethod = ArtAuthenticationMethod.Public;
 				} else {
 					//check if credentials passed in url
-					String urlUsername = request.getParameter("username");
-					String password = request.getParameter("password");
 					String windowsDomain = request.getParameter("windowsDomain");
 					String authenticationMethodString = request.getParameter("authenticationMethod");
 					//some pages e.g. saveUser, saveDatasource send the fields "username" and "password"
-					if (!StringUtils.startsWith(page, "save")
-							&& urlUsername != null && password != null) {
+					if (processUrlCredentials(page, urlUsername, urlPassword)) {
 						LoginHelper loginHelper = new LoginHelper();
 						ArtAuthenticationMethod authenticationMethod = ArtAuthenticationMethod.toEnum(authenticationMethodString);
-						LoginResult result = loginHelper.authenticate(authenticationMethod, urlUsername, password, windowsDomain);
+						LoginResult result = loginHelper.authenticate(authenticationMethod, urlUsername, urlPassword, windowsDomain);
 						message = result.getMessage();
 						if (result.isAuthenticated()) {
 							username = urlUsername;
@@ -260,6 +257,34 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				request.getRequestDispatcher("/accessDenied").forward(request, response);
 				return false;
 			}
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if credentials in the url should be considered
+	 *
+	 * @param page the page being processed
+	 * @param urlUsername the "username" url parameter value
+	 * @param urlPassword the "password" url parameter value
+	 * @return <code>true</code> if credentials in the url should be considered
+	 */
+	private boolean processUrlCredentials(String page, String urlUsername, String urlPassword) {
+		//some pages e.g. saveUser, saveDatasource, testDatasource send the fields "username" and "password"
+		//and so should not be considered. mainly considering running reports via url, page = runReport
+		//login doesn't pass through authorizationInterceptor
+//		if (!StringUtils.startsWith(page, "save") && !StringUtils.equals(page, "testDatasource")
+//				&& !StringUtils.equals(page, "artDatabase")
+//				&& urlUsername != null && urlPassword != null) {
+//			return true;
+//		} else {
+//			return false;
+//		}
+
+		if (StringUtils.equals(page, "runReport")
+				&& urlUsername != null && urlPassword != null) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
