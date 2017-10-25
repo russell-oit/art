@@ -555,7 +555,7 @@
 							<spring:message code="jobs.label.runsToArchive"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="runsToArchive" maxlength="2" class="form-control"/>
+							<form:input path="runsToArchive" maxlength="3" class="form-control"/>
 							<form:errors path="runsToArchive" cssClass="error"/>
 						</div>
 					</div>
@@ -584,7 +584,7 @@
 							<spring:message code="jobs.label.fixedFileName"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="fixedFileName" maxlength="50" class="form-control"/>
+							<form:input path="fixedFileName" maxlength="1000" class="form-control"/>
 							<form:errors path="fixedFileName" cssClass="error"/>
 						</div>
 					</div>
@@ -636,7 +636,7 @@
 							<spring:message code="jobs.label.mailTo"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailTo" class="form-control"/>
+							<form:input path="mailTo" maxlength="254" class="form-control"/>
 							<form:errors path="mailTo" cssClass="error"/>
 						</div>
 					</div>
@@ -662,7 +662,7 @@
 							<spring:message code="jobs.label.mailCc"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailCc" class="form-control"/>
+							<form:input path="mailCc" maxlength="254" class="form-control"/>
 							<form:errors path="mailCc" cssClass="error"/>
 						</div>
 					</div>
@@ -671,7 +671,7 @@
 							<spring:message code="jobs.label.mailBcc"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailBcc" class="form-control"/>
+							<form:input path="mailBcc" maxlength="254" class="form-control"/>
 							<form:errors path="mailBcc" cssClass="error"/>
 						</div>
 					</div>
@@ -680,7 +680,7 @@
 							<spring:message code="jobs.label.mailSubject"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailSubject" class="form-control"/>
+							<form:input path="mailSubject" maxlength="1000" class="form-control"/>
 							<form:errors path="mailSubject" cssClass="error"/>
 						</div>
 					</div>

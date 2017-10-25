@@ -125,7 +125,7 @@ Edit report rule page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="reportColumn" maxlength="40" class="form-control"/>
+							<form:input path="reportColumn" maxlength="100" class="form-control"/>
 							<spring:message code="rules.help.reportColumn" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
