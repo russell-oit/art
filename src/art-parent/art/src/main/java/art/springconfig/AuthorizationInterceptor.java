@@ -102,8 +102,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		String urlPassword = request.getParameter("password");
 
 		//reset session user if different username passed in url
-		if (processUrlCredentials(page, urlUsername, urlPassword)
-				&& user != null
+		if (user != null && processUrlCredentials(page, urlUsername, urlPassword)
 				&& !StringUtils.equalsIgnoreCase(user.getUsername(), urlUsername)) {
 			session.removeAttribute("sessionUser");
 			user = null;
