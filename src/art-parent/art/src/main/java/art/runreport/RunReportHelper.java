@@ -46,6 +46,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -535,7 +536,7 @@ public class RunReportHelper {
 
 			List<Object> actualParameterValues = reportParam.getActualParameterValues();
 
-			if (actualParameterValues == null || actualParameterValues.isEmpty()) {
+			if (CollectionUtils.isEmpty(actualParameterValues)) {
 				continue;
 			}
 
