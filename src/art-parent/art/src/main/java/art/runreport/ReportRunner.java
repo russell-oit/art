@@ -882,7 +882,7 @@ public class ReportRunner {
 		}
 
 		//use dynamic datasource if so configured
-		if (reportType == ReportType.LovDynamic) {
+		if (reportType == ReportType.LovDynamic && !report.isLovUseDynamicDatasource()) {
 			Datasource reportDatasource = report.getDatasource();
 			connQuery = DbConnections.getConnection(reportDatasource.getDatasourceId());
 		} else {

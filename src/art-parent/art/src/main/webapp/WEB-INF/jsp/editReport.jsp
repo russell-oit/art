@@ -599,12 +599,11 @@ Edit report page
 				}
 
 				//show/hide group column
-				switch (reportTypeId) {
-					case 1: //group
-						$("#groupColumnDiv").show();
-						break;
-					default:
-						$("#groupColumnDiv").hide();
+				if (reportTypeId === 1) {
+					//group
+					$("#groupColumnDiv").show();
+				} else {
+					$("#groupColumnDiv").hide();
 				}
 
 				//show/hide default report format
@@ -713,6 +712,14 @@ Edit report page
 					$("#pageOrientationDiv").show();
 				} else {
 					$("#pageOrientationDiv").hide();
+				}
+				
+				//show/hide lov use dynamic datasource
+				if (reportTypeId === 119) {
+					//lov dynamic
+					$("#lovUseDynamicDatasourceDiv").show();
+				} else {
+					$("#lovUseDynamicDatasourceDiv").hide();
 				}
 			}
 		</script>
@@ -1090,6 +1097,18 @@ Edit report page
 							</label>
 						</c:forEach>
 						<form:errors path="pageOrientation" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="lovUseDynamicDatasourceDiv" class="form-group">
+					<label class="control-label col-md-4" for="lovUseDynamicDatasource">
+						<spring:message code="reports.label.lovUseDynamicDatasource"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="lovUseDynamicDatasource" id="lovUseDynamicDatasource" class="switch-yes-no"/>
+						</div>
+						<form:errors path="lovUseDynamicDatasource" cssClass="error"/>
 					</div>
 				</div>
 

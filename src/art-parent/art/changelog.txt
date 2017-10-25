@@ -1,5 +1,6 @@
 ART 3.1
 * Accomodate reporting from password protected MS Access files
+* Allow dynamic lov to use a dynamic datasource when the lov is a chained parameter
 * Updated sqlite driver to 3.20.1
 * Updated jxls to 2.4.2
 

@@ -139,6 +139,7 @@ public class ReportService {
 			report.setFetchSize(rs.getInt("FETCH_SIZE"));
 			report.setOptions(rs.getString("REPORT_OPTIONS"));
 			report.setPageOrientation(PageOrientation.toEnum(rs.getString("PAGE_ORIENTATION"), PageOrientation.Portrait));
+			report.setLovUseDynamicDatasource(rs.getBoolean("LOV_USE_DYNAMIC_DATASOURCE"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -592,9 +593,9 @@ public class ReportService {
 					+ " OMIT_TITLE_ROW, HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
 					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
-					+ " REPORT_OPTIONS, PAGE_ORIENTATION,"
+					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 35) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 36) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -630,6 +631,7 @@ public class ReportService {
 				report.getFetchSize(),
 				report.getOptions(),
 				report.getPageOrientation().getValue(),
+				BooleanUtils.toInteger(report.isLovUseDynamicDatasource()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -645,7 +647,7 @@ public class ReportService {
 					+ " OMIT_TITLE_ROW=?, HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
 					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?, LOCALE=?,"
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
-					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?,"
+					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -682,6 +684,7 @@ public class ReportService {
 				report.getFetchSize(),
 				report.getOptions(),
 				report.getPageOrientation().getValue(),
+				BooleanUtils.toInteger(report.isLovUseDynamicDatasource()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

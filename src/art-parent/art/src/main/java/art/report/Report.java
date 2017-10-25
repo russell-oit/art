@@ -80,6 +80,21 @@ public class Report implements Serializable {
 	private String options;
 	private PageOrientation pageOrientation = PageOrientation.Portrait;
 	private boolean omitTitleRow;
+	private boolean lovUseDynamicDatasource;
+
+	/**
+	 * @return the lovUseDynamicDatasource
+	 */
+	public boolean isLovUseDynamicDatasource() {
+		return lovUseDynamicDatasource;
+	}
+
+	/**
+	 * @param lovUseDynamicDatasource the lovUseDynamicDatasource to set
+	 */
+	public void setLovUseDynamicDatasource(boolean lovUseDynamicDatasource) {
+		this.lovUseDynamicDatasource = lovUseDynamicDatasource;
+	}
 
 	/**
 	 * @return the omitTitleRow
