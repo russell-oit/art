@@ -673,18 +673,25 @@ public class ReportJob implements org.quartz.Job {
 				// convert the file to a string and get only the html table
 				messageData = new String(fileBytes, "UTF-8");
 
-				if (reportType != ReportType.FreeMarker) {
+				if (reportType != ReportType.FreeMarker && reportType != ReportType.Thymeleaf) {
 					messageData = messageData.substring(messageData.indexOf("<body>") + 6, messageData.indexOf("</body>")); //html plain output now has head and body sections
 				}
 
 			}
 		}
 
-		if (reportType == ReportType.FreeMarker) {
-			if (messageData == null) {
-				messageData = "";
+		if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+			String finalMessage;
+			if (jobType.isEmailInline()) {
+				finalMessage = messageData;
+			} else {
+				finalMessage = msg;
 			}
-			mailer.setMessage(messageData);
+
+			if (finalMessage == null) {
+				finalMessage = "";
+			}
+			mailer.setMessage(finalMessage);
 		} else {
 			String mainMessage;
 			if (StringUtils.isBlank(msg)) {

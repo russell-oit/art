@@ -21,6 +21,7 @@ import art.datasource.Datasource;
 import art.enums.PageOrientation;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
+import art.reportoptions.GeneralReportOptions;
 import art.utils.XmlParser;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -81,6 +82,21 @@ public class Report implements Serializable {
 	private PageOrientation pageOrientation = PageOrientation.Portrait;
 	private boolean omitTitleRow;
 	private boolean lovUseDynamicDatasource;
+	private GeneralReportOptions generalOptions;
+
+	/**
+	 * @return the generalOptions
+	 */
+	public GeneralReportOptions getGeneralOptions() {
+		return generalOptions;
+	}
+
+	/**
+	 * @param generalOptions the generalOptions to set
+	 */
+	public void setGeneralOptions(GeneralReportOptions generalOptions) {
+		this.generalOptions = generalOptions;
+	}
 
 	/**
 	 * @return the lovUseDynamicDatasource

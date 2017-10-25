@@ -299,36 +299,68 @@ public class ReportRunner {
 	private void applyGroovy() throws SQLException {
 		logger.debug("Entering applyGroovy");
 
+		long lStartTime, lEndTime, output;
+
 		String optionsString = report.getOptions();
 		GeneralReportOptions options;
 		if (StringUtils.isBlank(optionsString)) {
 			options = new GeneralReportOptions();
 		} else {
+			lStartTime = System.currentTimeMillis();
 			ObjectMapper mapper = new ObjectMapper();
 			try {
 				options = mapper.readValue(optionsString, GeneralReportOptions.class);
 			} catch (IOException ex) {
 				throw new SQLException(ex);
 			}
+			lEndTime = System.currentTimeMillis();
+			output = lEndTime - lStartTime;
+			System.out.println("mapper readValue time: " + output);
 		}
 
 		if (options.isUsesGroovy()) {
+			lStartTime = System.currentTimeMillis();
 			CompilerConfiguration cc = new CompilerConfiguration();
+			lEndTime = System.currentTimeMillis();
+			output = lEndTime - lStartTime;
+			System.out.println("cc create time: " + output);
+
+			lStartTime = System.currentTimeMillis();
 			cc.addCompilationCustomizers(new SandboxTransformer());
+			lEndTime = System.currentTimeMillis();
+			output = lEndTime - lStartTime;
+			System.out.println("cc add customizer time: " + output);
 
 			Map<String, Object> variables = new HashMap<>();
 			if (reportParamsMap != null) {
 				variables.putAll(reportParamsMap);
 			}
 
+			lStartTime = System.currentTimeMillis();
 			Binding binding = new Binding(variables);
+			lEndTime = System.currentTimeMillis();
+			output = lEndTime - lStartTime;
+			System.out.println("binding create time: " + output);
 
+			lStartTime = System.currentTimeMillis();
 			GroovyShell shell = new GroovyShell(binding, cc);
+			lEndTime = System.currentTimeMillis();
+			output = lEndTime - lStartTime;
+			System.out.println("shell create time: " + output);
+			
 			GroovySandbox sandbox = null;
 
 			if (Config.getCustomSettings().isEnableGroovySandbox()) {
+				lStartTime = System.currentTimeMillis();
 				sandbox = new GroovySandbox();
+				lEndTime = System.currentTimeMillis();
+				output = lEndTime - lStartTime;
+				System.out.println("Sandbox create time: " + output);
+
+				lStartTime = System.currentTimeMillis();
 				sandbox.register();
+				output = lEndTime - lStartTime;
+				System.out.println("Sandbox register time: " + output);
 			}
 
 			String querySql = querySb.toString();

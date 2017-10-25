@@ -309,20 +309,23 @@
 
 			function toggleEmailFieldsVisibility(jobType, reportTypeId) {
 				//show/hide emailFields
-				if (reportTypeId === 122) {
-					//freemarker
-					$("#mailMessageDiv").hide();
-				} else {
-					switch (jobType) {
-						case 'CacheAppend':
-						case 'CacheInsert':
-						case 'JustRun':
-						case 'Print':
-							$("#emailFields").hide();
-							break;
-						default:
-							$("#emailFields").show();
-					}
+				switch (jobType) {
+					case 'CacheAppend':
+					case 'CacheInsert':
+					case 'JustRun':
+					case 'Print':
+						$("#emailFields").hide();
+						break;
+					case 'EmailInline':
+					case 'CondEmailInline':
+						if (reportTypeId === 122 || reportTypeId === 131) {
+							//freemarker, thymeleaf
+							$("#mailMessageDiv").hide();
+						}
+						break;
+					default:
+						$("#emailFields").show();
+						$("#mailMessageDiv").show();
 				}
 			}
 
@@ -340,8 +343,11 @@
 
 			function toggleOutputFormatVisibility(jobType, reportTypeId) {
 				//show/hide outputFormatDiv
-				if (reportTypeId === 122) {
-					//freemarker
+				if (reportTypeId === 122
+						|| reportTypeId === 131
+						|| reportTypeId === 117 || reportTypeId === 118
+						|| reportTypeId === 141) {
+					//freemarker, thymeleaf, jxls, fixed width
 					$("#outputFormatDiv").hide();
 				} else {
 					switch (jobType) {

@@ -28,11 +28,14 @@ import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.GeneralReportOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -152,6 +155,20 @@ public class ReportService {
 			report.setDatasource(datasource);
 
 			setChartOptions(report);
+
+			String options = report.getOptions();
+			GeneralReportOptions generalOptions;
+			if (StringUtils.isBlank(options)) {
+				generalOptions = new GeneralReportOptions();
+			} else {
+				ObjectMapper mapper = new ObjectMapper();
+				try {
+					generalOptions = mapper.readValue(options, GeneralReportOptions.class);
+				} catch (IOException ex) {
+					throw new SQLException(ex);
+				}
+			}
+			report.setGeneralOptions(generalOptions);
 
 			return type.cast(report);
 		}
