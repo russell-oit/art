@@ -87,6 +87,7 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -662,21 +663,11 @@ public class ReportJob implements org.quartz.Job {
 		} else if (jobType.isEmailInline()) {
 			// inline html within email
 			// read the file and include it in the HTML message
-			try (FileInputStream fis = new FileInputStream(outputFileName)) {
-				byte fileBytes[] = new byte[fis.available()];
-
-				int result = fis.read(fileBytes);
-				if (result == -1) {
-					logger.warn("EOF reached for inline email file: '{}'", outputFileName);
-				}
-
-				// convert the file to a string and get only the html table
-				messageData = new String(fileBytes, "UTF-8");
-
-				if (reportType != ReportType.FreeMarker && reportType != ReportType.Thymeleaf) {
-					messageData = messageData.substring(messageData.indexOf("<body>") + 6, messageData.indexOf("</body>")); //html plain output now has head and body sections
-				}
-
+			// convert the file to a string and get only the html table
+			File outputFile = new File(outputFileName);
+			messageData = FileUtils.readFileToString(outputFile, "UTF-8");
+			if (reportType != ReportType.FreeMarker && reportType != ReportType.Thymeleaf) {
+				messageData = StringUtils.substringBetween(messageData, "<body>", "</body>");
 			}
 		}
 
