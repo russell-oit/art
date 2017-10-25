@@ -279,7 +279,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 //			return false;
 //		}
 
-		if (StringUtils.equals(page, "runReport")
+		if ((StringUtils.equals(page, "runReport") || StringUtils.equals(page, "reports"))
 				&& urlUsername != null && urlPassword != null) {
 			return true;
 		} else {
