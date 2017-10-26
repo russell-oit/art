@@ -1182,7 +1182,7 @@ public class ReportJob implements org.quartz.Job {
 					//email attachment, email inline, conditional email attachment, conditional email inline
 					if (!generateEmail && recipientDetails == null) {
 						generateOutput = false;
-						runMessage = "jobs.message.noEmailsConfigured";
+						runMessage = "jobs.message.noEmailAddressesAvailable";
 					}
 				}
 
@@ -1765,8 +1765,8 @@ public class ReportJob implements org.quartz.Job {
 				DatabaseUtils.close(rs);
 			}
 		} else {
-			//no emails configured
-			runMessage = "jobs.message.noEmailsConfigured";
+			//no emails addresses to send to
+			runMessage = "jobs.message.noEmailAddressesAvailable";
 		}
 	}
 
