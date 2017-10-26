@@ -105,7 +105,8 @@ public enum ReportFormat {
 			case htmlPlain:
 				return "html";
 			case tsvGz:
-				return "gz";
+				//https://stackoverflow.com/questions/3984927/how-do-i-get-a-filename-of-a-file-inside-a-gzip-in-java
+				return "tsv.gz";
 			case xlsZip:
 			case slkZip:
 			case tsvZip:
