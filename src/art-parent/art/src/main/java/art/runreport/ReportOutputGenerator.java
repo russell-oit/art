@@ -419,11 +419,14 @@ public class ReportOutputGenerator {
 				}
 			} else if (reportType.isStandardOutput() && reportFormat.isJson()) {
 				rs = reportRunner.getResultSet();
+				
 				JsonOutput jsonOutput = new JsonOutput();
 				jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonString = jsonOutputResult.getJsonData();
+				
 				rowsRetrieved = jsonOutputResult.getRowCount();
+				
 				switch (reportFormat) {
 					case jsonBrowser:
 						//https://stackoverflow.com/questions/14533530/how-to-show-pretty-print-json-string-in-a-jsp-page
@@ -432,6 +435,7 @@ public class ReportOutputGenerator {
 					default:
 						writer.print(jsonString);
 				}
+				
 				writer.flush();
 			} else if (reportType.isStandardOutput()) {
 				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
@@ -491,20 +495,27 @@ public class ReportOutputGenerator {
 					outputResult.setMessage(standardOutputResult.getMessage());
 				}
 			} else if (reportType == ReportType.FreeMarker) {
-				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
 				rs = reportRunner.getResultSet();
+				
+				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
 				freemarkerOutput.generateReport(report, applicableReportParamsList, rs, writer);
+				
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType == ReportType.Thymeleaf) {
-				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
 				rs = reportRunner.getResultSet();
+				
+				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
 				thymeleafOutput.generateReport(report, applicableReportParamsList, rs, writer);
+				
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType.isXDocReport()) {
-				XDocReportOutput xdocReportOutput = new XDocReportOutput();
 				rs = reportRunner.getResultSet();
+				
+				XDocReportOutput xdocReportOutput = new XDocReportOutput();
 				xdocReportOutput.generateReport(report, applicableReportParamsList, rs, reportFormat, fullOutputFilename);
+				
 				rowsRetrieved = getResultSetRowCount(rs);
+				
 				if (!isJob) {
 					displayFileLink(fileName);
 				}
@@ -514,9 +525,11 @@ public class ReportOutputGenerator {
 				}
 
 				rs = reportRunner.getResultSet();
+				
 				JsonOutput jsonOutput = new JsonOutput();
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonData = jsonOutputResult.getJsonData();
+				
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -548,9 +561,11 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.PivotTableJs) {
 					rs = reportRunner.getResultSet();
+					
 					JsonOutput jsonOutput = new JsonOutput();
 					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 					String jsonData = jsonOutputResult.getJsonData();
+					
 					rowsRetrieved = jsonOutputResult.getRowCount();
 					request.setAttribute("input", jsonData);
 				}
@@ -624,6 +639,7 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.Dygraphs) {
 					rs = reportRunner.getResultSet();
+					
 					CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
 					//use appropriate date formats to ensure correct interpretation by browsers
 					//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
@@ -632,12 +648,15 @@ public class ReportOutputGenerator {
 					String dateTimeFormat = "yyyy/MM/dd HH:mm";
 					csvOutputUnivocity.setDateFormat(dateFormat);
 					csvOutputUnivocity.setDateTimeFormat(dateTimeFormat);
+					
 					String csvString;
 					try (StringWriter stringWriter = new StringWriter()) {
 						csvOutputUnivocity.generateOutput(rs, stringWriter);
 						csvString = stringWriter.toString();
 					}
+					
 					rowsRetrieved = getResultSetRowCount(rs);
+					
 					//need to escape string for javascript, otherwise you get Unterminated string literal error
 					//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
 					String escapedCsvString = Encode.forJavaScript(csvString);
@@ -698,9 +717,11 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.DataTables) {
 					rs = reportRunner.getResultSet();
+					
 					JsonOutput jsonOutput = new JsonOutput();
 					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 					String jsonData = jsonOutputResult.getJsonData();
+					
 					List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 					request.setAttribute("data", jsonData);
 					request.setAttribute("columns", columns);
@@ -763,8 +784,10 @@ public class ReportOutputGenerator {
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 			} else if (reportType == ReportType.FixedWidth) {
 				rs = reportRunner.getResultSet();
+				
 				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
 				fixedWidthOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename);
+				
 				rowsRetrieved = getResultSetRowCount(rs);
 				
 				if (!isJob && !reportFormat.isHtml()) {
@@ -776,9 +799,11 @@ public class ReportOutputGenerator {
 				}
 
 				rs = reportRunner.getResultSet();
+				
 				JsonOutput jsonOutput = new JsonOutput();
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonData = jsonOutputResult.getJsonData();
+				
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -829,9 +854,11 @@ public class ReportOutputGenerator {
 				}
 
 				rs = reportRunner.getResultSet();
+				
 				JsonOutput jsonOutput = new JsonOutput();
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonData = jsonOutputResult.getJsonData();
+				
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -873,9 +900,11 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.Datamaps) {
 					rs = reportRunner.getResultSet();
+					
 					JsonOutput jsonOutput = new JsonOutput();
 					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 					String jsonData = jsonOutputResult.getJsonData();
+					
 					rowsRetrieved = jsonOutputResult.getRowCount();
 					request.setAttribute("data", jsonData);
 				}
@@ -956,9 +985,11 @@ public class ReportOutputGenerator {
 				}
 
 				rs = reportRunner.getResultSet();
+				
 				JsonOutput jsonOutput = new JsonOutput();
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonData = jsonOutputResult.getJsonData();
+				
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
