@@ -31,12 +31,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
 import java.util.TreeMap;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -438,6 +440,46 @@ public class ArtUtils {
 		} else {
 			return LocaleUtils.toLocale(localeString);
 		}
+	}
+
+	/**
+	 * Returns an i18n value to use, given a particular locale, taking into
+	 * consideration the i18n options defined
+	 *
+	 * @param localeString the string that represents the locale to use
+	 * @param i18nValueOptions the i18n definition of locales and values
+	 * @return the localized value to use, or null if a localization is not
+	 * found
+	 */
+	public static String getLocalizedValue(String localeString,
+			List<Map<String, String>> i18nValueOptions) {
+
+		String localizedValue = null;
+
+		if (CollectionUtils.isNotEmpty(i18nValueOptions)) {
+			boolean valueFound = false;
+			for (Map<String, String> i18nValueOption : i18nValueOptions) {
+				//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
+				// Get the first entry that the iterator returns
+				Entry<String, String> entry = i18nValueOption.entrySet().iterator().next();
+				String localeSetting = entry.getKey();
+				String localeValue = entry.getValue();
+				String[] locales = StringUtils.split(localeSetting, ",");
+				for (String locale : locales) {
+					if (StringUtils.equalsIgnoreCase(locale.trim(), localeString)) {
+						localizedValue = localeValue;
+						valueFound = true;
+						break;
+					}
+				}
+
+				if (valueFound) {
+					break;
+				}
+			}
+		}
+
+		return localizedValue;
 	}
 
 }

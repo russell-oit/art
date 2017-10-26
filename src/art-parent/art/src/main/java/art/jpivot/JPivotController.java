@@ -431,7 +431,8 @@ public class JPivotController {
 
 	@RequestMapping(value = "/saveJPivot", method = RequestMethod.POST)
 	public String saveJPivot(HttpServletRequest request,
-			HttpSession session, RedirectAttributes redirectAttributes) {
+			HttpSession session, RedirectAttributes redirectAttributes,
+			Locale locale) {
 
 		logger.debug("Entering saveJPivot");
 
@@ -473,7 +474,7 @@ public class JPivotController {
 				//overwrite query source with current mdx
 				//query details loaded. update query
 				report.setReportSource(mdx);
-				if (StringUtils.length(queryDescription) > 0) {
+				if (StringUtils.isNotBlank(queryDescription)) {
 					//update description
 					report.setDescription(queryDescription);
 				}
@@ -496,9 +497,9 @@ public class JPivotController {
 				newReport.setActive(report.isActive());
 				newReport.setHidden(report.isHidden());
 
-				if (queryDescription == null || queryDescription.length() == 0) {
+				if (StringUtils.isBlank(queryDescription)) {
 					//no description provided. use original query description
-					queryDescription = report.getDescription();
+					queryDescription = report.getLocalizedDescription(locale);
 				}
 				newReport.setDescription(queryDescription);
 
@@ -524,7 +525,7 @@ public class JPivotController {
 				redirectAttributes.addFlashAttribute("message", "jpivot.message.reportAdded");
 				return "redirect:/success";
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			redirectAttributes.addFlashAttribute("error", ex);
 			return "redirect:/reportError";
 		}

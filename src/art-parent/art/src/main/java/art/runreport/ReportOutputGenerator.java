@@ -1111,8 +1111,8 @@ public class ReportOutputGenerator {
 				Binding binding = new Binding(variables);
 
 				GroovyShell shell = new GroovyShell(binding, cc);
+				
 				GroovySandbox sandbox = null;
-
 				if (Config.getCustomSettings().isEnableGroovySandbox()) {
 					sandbox = new GroovySandbox();
 					sandbox.register();
@@ -1305,7 +1305,7 @@ public class ReportOutputGenerator {
 
 		ChartOptions effectiveChartOptions = getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
 
-		String shortDescription = report.getShortDescription();
+		String shortDescription = report.getLocalizedShortDescription(locale);
 		RunReportHelper runReportHelper = new RunReportHelper();
 		shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 

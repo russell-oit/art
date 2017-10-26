@@ -173,7 +173,7 @@ Reports page. Also main/home page
 					<tr>
 						<td class="details-control"></td> <%-- details control column --%>
 						<td><encode:forHtmlContent value="${report.reportGroup.name}"/></td>
-						<td><encode:forHtmlContent value="${report.description}"/></td>
+						<td>${encode:forHtmlContent(report.getLocalizedDescription(pageContext.response.locale))}</td>
 						<td>
 							<a href="${pageContext.request.contextPath}/selectReportParameters?reportId=${report.reportId}">
 								<encode:forHtmlContent value="${report.name}"/>

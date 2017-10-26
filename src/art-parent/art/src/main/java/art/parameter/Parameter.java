@@ -522,7 +522,7 @@ public class Parameter implements Serializable {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nLabelOptions = i18nOptions.getLabel();
-				localizedLabel = getLocalizedValue(localeString, i18nLabelOptions);
+				localizedLabel = ArtUtils.getLocalizedValue(localeString, i18nLabelOptions);
 			}
 		}
 
@@ -554,7 +554,7 @@ public class Parameter implements Serializable {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nHelpTextOptions = i18nOptions.getHelpText();
-				localizedHelpText = getLocalizedValue(localeString, i18nHelpTextOptions);
+				localizedHelpText = ArtUtils.getLocalizedValue(localeString, i18nHelpTextOptions);
 			}
 		}
 
@@ -586,7 +586,7 @@ public class Parameter implements Serializable {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nDefaultValueOptions = i18nOptions.getDefaultValue();
-				localizedDefaultValue = getLocalizedValue(localeString, i18nDefaultValueOptions);
+				localizedDefaultValue = ArtUtils.getLocalizedValue(localeString, i18nDefaultValueOptions);
 			}
 		}
 
@@ -618,7 +618,7 @@ public class Parameter implements Serializable {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nPlaceholderTextOptions = i18nOptions.getPlaceholderText();
-				localizedPlaceholderText = getLocalizedValue(localeString, i18nPlaceholderTextOptions);
+				localizedPlaceholderText = ArtUtils.getLocalizedValue(localeString, i18nPlaceholderTextOptions);
 			}
 		}
 
@@ -627,47 +627,6 @@ public class Parameter implements Serializable {
 		}
 
 		return localizedPlaceholderText;
-	}
-
-	/**
-	 * Returns an i18n value to use for this parameter, given a particular
-	 * locale, taking into consideration the i18n options defined for the
-	 * parameter
-	 *
-	 * @param localeString the string that represents the locale to use
-	 * @param i18nValueOptions the i18n definition of locales and values
-	 * @return the localized value to use, or null if a localization is not
-	 * found
-	 */
-	private String getLocalizedValue(String localeString,
-			List<Map<String, String>> i18nValueOptions) {
-
-		String localizedValue = null;
-
-		if (CollectionUtils.isNotEmpty(i18nValueOptions)) {
-			boolean valueFound = false;
-			for (Map<String, String> i18nValueOption : i18nValueOptions) {
-				//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
-				// Get the first entry that the iterator returns
-				Entry<String, String> entry = i18nValueOption.entrySet().iterator().next();
-				String localeSetting = entry.getKey();
-				String localeValue = entry.getValue();
-				String[] locales = StringUtils.split(localeSetting, ",");
-				for (String locale : locales) {
-					if (StringUtils.equalsIgnoreCase(locale.trim(), localeString)) {
-						localizedValue = localeValue;
-						valueFound = true;
-						break;
-					}
-				}
-
-				if (valueFound) {
-					break;
-				}
-			}
-		}
-
-		return localizedValue;
 	}
 
 	/**

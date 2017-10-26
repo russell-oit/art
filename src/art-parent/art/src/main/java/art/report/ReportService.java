@@ -44,6 +44,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -157,18 +158,15 @@ public class ReportService {
 			setChartOptions(report);
 
 			String options = report.getOptions();
-			GeneralReportOptions generalOptions;
-			if (StringUtils.isBlank(options)) {
-				generalOptions = new GeneralReportOptions();
-			} else {
+			if (StringUtils.isNotBlank(options)) {
 				ObjectMapper mapper = new ObjectMapper();
 				try {
-					generalOptions = mapper.readValue(options, GeneralReportOptions.class);
+					GeneralReportOptions generalOptions = mapper.readValue(options, GeneralReportOptions.class);
+					report.setGeneralOptions(generalOptions);
 				} catch (IOException ex) {
 					throw new SQLException(ex);
 				}
 			}
-			report.setGeneralOptions(generalOptions);
 
 			return type.cast(report);
 		}
@@ -1022,11 +1020,15 @@ public class ReportService {
 	 * Returns saiku reports that a given user can access
 	 *
 	 * @param userId the id of the user
+	 * @param locale the locale to determine the report name, description, etc
 	 * @return saiku reports that a given user can access
 	 * @throws SQLException
+	 * @throws java.io.IOException
 	 */
 	@Cacheable(value = "reports")
-	public List<SaikuReport> getAvailableSaikuReports(int userId) throws SQLException {
+	public List<SaikuReport> getAvailableSaikuReports(int userId, Locale locale)
+			throws SQLException, IOException {
+		
 		logger.debug("Entering getAvailableSaikuReports: userId={}", userId);
 
 		List<SaikuReport> saikuReports = new ArrayList<>();
@@ -1037,8 +1039,8 @@ public class ReportService {
 				SaikuReport saikuReport = new SaikuReport();
 				saikuReport.setReportId(report.getReportId());
 				saikuReport.setName(report.getName());
-				saikuReport.setShortDescription(report.getShortDescription());
-				saikuReport.setDescription(report.getDescription());
+				saikuReport.setShortDescription(report.getLocalizedShortDescription(locale));
+				saikuReport.setDescription(report.getLocalizedDescription(locale));
 				saikuReports.add(saikuReport);
 			}
 		}

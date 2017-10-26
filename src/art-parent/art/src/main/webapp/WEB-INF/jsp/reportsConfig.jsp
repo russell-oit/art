@@ -260,7 +260,7 @@ Reports configuration page
 								${encode:forHtmlContent(report.reportGroup.name)}
 							</c:if>
 						</td>
-						<td>${encode:forHtmlContent(report.description)}</td>
+						<td>${encode:forHtmlContent(report.getLocalizedDescription(pageContext.response.locale))}</td>
 						<td><t:displayActiveStatus active="${report.active}"
 											   activeText="${activeText}"
 											   disabledText="${disabledText}"/>

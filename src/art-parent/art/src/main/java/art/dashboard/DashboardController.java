@@ -168,7 +168,7 @@ public class DashboardController {
 
 				RunReportHelper runReportHelper = new RunReportHelper();
 
-				String shortDescription = report.getShortDescription();
+				String shortDescription = report.getLocalizedShortDescription(locale);
 				shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
 				if (StringUtils.isNotBlank(shortDescription)) {
@@ -263,10 +263,10 @@ public class DashboardController {
 
 		Dashboard dashboard = new Dashboard();
 
-		String dashboardTitle = getDashboardTitle(report, reportParamsMap);
+		String dashboardTitle = getDashboardTitle(report, reportParamsMap, locale);
 
 		dashboard.setTitle(dashboardTitle);
-		dashboard.setDescription(report.getDescription());
+		dashboard.setDescription(report.getLocalizedDescription(locale));
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
@@ -619,10 +619,10 @@ public class DashboardController {
 
 		GridstackDashboard dashboard = new GridstackDashboard();
 
-		String dashboardTitle = getDashboardTitle(report, reportParamsMap);
+		String dashboardTitle = getDashboardTitle(report, reportParamsMap, locale);
 
 		dashboard.setTitle(dashboardTitle);
-		dashboard.setDescription(report.getDescription());
+		dashboard.setDescription(report.getLocalizedDescription(locale));
 
 		//https://stackoverflow.com/questions/773012/getting-xml-node-text-value-with-java-dom
 		//https://stackoverflow.com/questions/4076910/how-to-retrieve-element-value-of-xml-using-java
@@ -847,16 +847,18 @@ public class DashboardController {
 	 *
 	 * @param report the dashboard report
 	 * @param reportParamsMap the report parameters map
+	 * @param locale the locale being used
 	 * @return the string to be used as the dashboard title
 	 * @throws ParseException
 	 * @throws SQLException
 	 */
-	private String getDashboardTitle(Report report, Map<String, ReportParameter> reportParamsMap)
-			throws ParseException, SQLException {
+	private String getDashboardTitle(Report report, Map<String,
+			ReportParameter> reportParamsMap, Locale locale)
+			throws ParseException, SQLException, IOException {
 
 		logger.debug("Entering getDashboardTitle: Report={}", report);
 
-		String shortDescription = report.getShortDescription();
+		String shortDescription = report.getLocalizedShortDescription(locale);
 		logger.debug("shortDescription='{}'", shortDescription);
 
 		RunReportHelper runReportHelper = new RunReportHelper();

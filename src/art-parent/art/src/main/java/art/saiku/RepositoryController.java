@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,9 +51,11 @@ public class RepositoryController {
 	private ReportService reportService;
 
 	@GetMapping()
-	public List<SaikuReport> getRepository(HttpSession session) throws SQLException {
+	public List<SaikuReport> getRepository(HttpSession session, Locale locale)
+			throws SQLException, IOException {
+		
 		User sessionUser = (User) session.getAttribute("sessionUser");
-		List<SaikuReport> reports = reportService.getAvailableSaikuReports(sessionUser.getUserId());
+		List<SaikuReport> reports = reportService.getAvailableSaikuReports(sessionUser.getUserId(), locale);
 		return reports;
 	}
 

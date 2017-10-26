@@ -370,7 +370,7 @@ public class RunReportController {
 
 				// display status information, parameters and final sql
 				if (showReportHeaderAndFooter) {
-					String shortDescription = report.getShortDescription();
+					String shortDescription = report.getLocalizedShortDescription(locale);
 					shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
 					String description = "";

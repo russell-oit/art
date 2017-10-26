@@ -20,14 +20,20 @@ package art.report;
 import art.datasource.Datasource;
 import art.enums.PageOrientation;
 import art.enums.ReportType;
+import art.parameter.Parameteri18nOptions;
 import art.reportgroup.ReportGroup;
 import art.reportoptions.GeneralReportOptions;
+import art.reportoptions.Reporti18nOptions;
+import art.utils.ArtUtils;
 import art.utils.XmlParser;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -793,6 +799,99 @@ public class Report implements Serializable {
 		}
 
 		return reportIds;
+	}
+
+	/**
+	 * Returns the name to use for this report, given a particular locale,
+	 * taking into consideration the i18n options defined for the report
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the localized name
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedName(Locale locale) throws IOException {
+		String localizedName = null;
+
+		String localeString = null;
+		if (locale != null) {
+			localeString = locale.toString();
+		}
+
+		if (generalOptions != null && StringUtils.isNotBlank(localeString)) {
+			Reporti18nOptions i18nOptions = generalOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nNameOptions = i18nOptions.getName();
+				localizedName = ArtUtils.getLocalizedValue(localeString, i18nNameOptions);
+			}
+		}
+
+		if (localizedName == null) {
+			localizedName = name;
+		}
+
+		return localizedName;
+	}
+
+	/**
+	 * Returns the short description to use for this report, given a particular
+	 * locale, taking into consideration the i18n options defined for the report
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the localized short description
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedShortDescription(Locale locale) throws IOException {
+		String localizedShortDescription = null;
+
+		String localeString = null;
+		if (locale != null) {
+			localeString = locale.toString();
+		}
+
+		if (generalOptions != null && StringUtils.isNotBlank(localeString)) {
+			Reporti18nOptions i18nOptions = generalOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nShortDescriptionOptions = i18nOptions.getShortDescription();
+				localizedShortDescription = ArtUtils.getLocalizedValue(localeString, i18nShortDescriptionOptions);
+			}
+		}
+
+		if (localizedShortDescription == null) {
+			localizedShortDescription = shortDescription;
+		}
+
+		return localizedShortDescription;
+	}
+	
+	/**
+	 * Returns the description to use for this report, given a particular
+	 * locale, taking into consideration the i18n options defined for the report
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the localized description
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedDescription(Locale locale) throws IOException {
+		String localizedDescription = null;
+
+		String localeString = null;
+		if (locale != null) {
+			localeString = locale.toString();
+		}
+
+		if (generalOptions != null && StringUtils.isNotBlank(localeString)) {
+			Reporti18nOptions i18nOptions = generalOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nDescriptionOptions = i18nOptions.getDescription();
+				localizedDescription = ArtUtils.getLocalizedValue(localeString, i18nDescriptionOptions);
+			}
+		}
+
+		if (localizedDescription == null) {
+			localizedDescription = description;
+		}
+
+		return localizedDescription;
 	}
 
 }
