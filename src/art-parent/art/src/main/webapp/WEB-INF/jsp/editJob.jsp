@@ -43,6 +43,8 @@
 <spring:message code="reports.format.csv" var="csvText"/>
 <spring:message code="reports.format.slk" var="slkText"/>
 <spring:message code="reports.format.tsv" var="tsvText"/>
+<spring:message code="reports.format.txt" var="txtText"/>
+<spring:message code="reports.format.txtZip" var="txtZipText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -241,7 +243,9 @@
 					list.append(new Option('${pptxText}', 'pptx'));
 				} else if (reportTypeId === 141) {
 					//fixed width
-					list.append(new Option('--', '--'));
+					list.append(new Option('${txtText}', 'txt'));
+					list.append(new Option('${txtZipText}', 'txtZip'));
+					list.append(new Option('${htmlText}', 'html'));
 				} else if (reportTypeId === 110 || reportTypeId === 129) {
 					//dashboard
 					list.append(new Option('${pdfText}', 'pdf'));
@@ -249,6 +253,7 @@
 					//group
 					list.append(new Option('${xlsxText}', 'xlsx'));
 				} else {
+					//tabular
 					switch (jobType) {
 						case 'Alert':
 						case 'JustRun':
@@ -345,9 +350,8 @@
 				//show/hide outputFormatDiv
 				if (reportTypeId === 122
 						|| reportTypeId === 131
-						|| reportTypeId === 117 || reportTypeId === 118
-						|| reportTypeId === 141) {
-					//freemarker, thymeleaf, jxls, fixed width
+						|| reportTypeId === 117 || reportTypeId === 118) {
+					//freemarker, thymeleaf, jxls
 					$("#outputFormatDiv").hide();
 				} else {
 					switch (jobType) {

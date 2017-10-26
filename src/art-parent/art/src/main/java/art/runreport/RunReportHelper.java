@@ -215,7 +215,6 @@ public class RunReportHelper {
 			case DataTables:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
-			case FixedWidth:
 			case C3:
 			case ChartJs:
 			case Datamaps:
@@ -348,7 +347,6 @@ public class RunReportHelper {
 			case DataTables:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
-			case FixedWidth:
 			case Datamaps:
 			case DatamapsFile:
 			case Leaflet:
@@ -491,6 +489,11 @@ public class RunReportHelper {
 					formats.add("htmlDataTable");
 					formats.add("htmlFancy");
 					formats.add("htmlPlain");
+					break;
+				case FixedWidth:
+					formats.add("html");
+					formats.add("txt");
+					formats.add("txtZip");
 					break;
 				default:
 					//tabular, crosstab, lov dynamic, etc

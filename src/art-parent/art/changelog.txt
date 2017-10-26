@@ -3,6 +3,8 @@ ART 3.1
 * Allow dynamic lov to use a dynamic datasource when the lov is a chained parameter
 * Fix for error with thymleaf email inline job
 * Allow localization of report name, short description, description
+* Added csv zip report format
+* Allow outputting of fixed with report as txt or zip file
 * Updated sqlite driver to 3.20.1
 * Updated jxls to 2.4.2
 

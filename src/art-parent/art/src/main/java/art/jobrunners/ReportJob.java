@@ -115,6 +115,7 @@ import org.thymeleaf.context.Context;
 public class ReportJob implements org.quartz.Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportJob.class);
+
 	private DbService dbService;
 	private String fileName;
 	private String jobAuditKey;
@@ -666,7 +667,7 @@ public class ReportJob implements org.quartz.Job {
 			// convert the file to a string and get only the html table
 			File outputFile = new File(outputFileName);
 			messageData = FileUtils.readFileToString(outputFile, "UTF-8");
-			if (reportType != ReportType.FreeMarker && reportType != ReportType.Thymeleaf) {
+			if (reportType.isStandardOutput()) {
 				messageData = StringUtils.substringBetween(messageData, "<body>", "</body>");
 			}
 		}
@@ -1383,10 +1384,9 @@ public class ReportJob implements org.quartz.Job {
 		ReportType reportType = report.getReportType();
 		String outputFormat = job.getOutputFormat();
 		ReportFormat reportFormat;
-		if (reportType == ReportType.FixedWidth) {
-			//fixed width jobs don't have a report format
-			//they will have undefined/invalid output format - set in editJob.jsp
-			//just set some default report format
+		if (StringUtils.isBlank(outputFormat) || StringUtils.startsWith(outputFormat, "-")) {
+			//set some default report format. note that it may determine the file name extension
+			//fixed width reports didn't have a report format in 3.0. Was saved in database as "--"
 			reportFormat = ReportFormat.html;
 		} else {
 			reportFormat = ReportFormat.toEnum(outputFormat);
@@ -1442,8 +1442,7 @@ public class ReportJob implements org.quartz.Job {
 			PrintWriter writer = null;
 
 			if (reportFormat.isHtml() || reportFormat == ReportFormat.xml
-					|| reportFormat == ReportFormat.rss20
-					|| reportType == ReportType.FixedWidth) {
+					|| reportFormat == ReportFormat.rss20) {
 				fos = new FileOutputStream(outputFileName);
 				writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
 			}

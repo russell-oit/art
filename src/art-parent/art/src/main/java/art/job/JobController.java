@@ -624,12 +624,19 @@ public class JobController {
 					jobTypes.add(JobType.JustRun);
 				} else if (reportType.isChart() || reportType.isXDocReport()
 						|| reportType == ReportType.Group
-						|| reportType == ReportType.FixedWidth
 						|| reportType == ReportType.JasperReportsArt
 						|| reportType == ReportType.JxlsArt) {
 					jobTypes.add(JobType.EmailAttachment);
 					jobTypes.add(JobType.Publish);
 					jobTypes.add(JobType.CondEmailAttachment);
+					jobTypes.add(JobType.CondPublish);
+					jobTypes.add(JobType.Print);
+				} else if(reportType == ReportType.FixedWidth){
+					jobTypes.add(JobType.EmailAttachment);
+					jobTypes.add(JobType.EmailInline);
+					jobTypes.add(JobType.Publish);
+					jobTypes.add(JobType.CondEmailAttachment);
+					jobTypes.add(JobType.CondEmailInline);
 					jobTypes.add(JobType.CondPublish);
 					jobTypes.add(JobType.Print);
 				} else {
@@ -646,9 +653,6 @@ public class JobController {
 		jobReportFormats.remove("htmlFancy");
 		jobReportFormats.remove("htmlGrid");
 		jobReportFormats.remove("htmlDataTable");
-		if (!ArtUtils.containsIgnoreCase(jobReportFormats, "csv")) {
-			jobReportFormats.add("csv");
-		}
 
 		final String REPORT_FORMAT_PREFIX = "reports.format.";
 		for (String reportFormat : jobReportFormats) {

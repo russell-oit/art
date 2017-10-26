@@ -153,8 +153,6 @@ public class FilenameHelper {
 			extension = FilenameUtils.getExtension(jxlsFilename);
 		} else if (reportFormat == ReportFormat.csv) {
 			extension = getCsvExtension(report);
-		} else if (reportType == ReportType.FixedWidth) {
-			extension = "txt";
 		} else {
 			extension = reportFormat.getFilenameExtension();
 		}

@@ -762,22 +762,13 @@ public class ReportOutputGenerator {
 				request.setAttribute("locale", localeString);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 			} else if (reportType == ReportType.FixedWidth) {
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					throw new IllegalArgumentException("Options not specified");
-				}
-
-				ObjectMapper mapper = new ObjectMapper();
-				FixedWidthOptions options = mapper.readValue(optionsString, FixedWidthOptions.class);
-				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
 				rs = reportRunner.getResultSet();
-				if (!isJob) {
-					writer.println("<pre>");
-				}
-				fixedWidthOutput.generateOutput(rs, writer, options);
+				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
+				fixedWidthOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename);
 				rowsRetrieved = getResultSetRowCount(rs);
-				if (!isJob) {
-					writer.println("</pre>");
+				
+				if (!isJob && !reportFormat.isHtml()) {
+					displayFileLink(fileName);
 				}
 			} else if (reportType == ReportType.C3) {
 				if (isJob) {

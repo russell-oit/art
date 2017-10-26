@@ -29,10 +29,11 @@ import java.util.List;
 public enum ReportFormat {
 
 	html("html"), htmlPlain("htmlPlain"), htmlFancy("htmlFancy"), htmlGrid("htmlGrid"),
-	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"),
-	pdf("pdf"), docx("docx"), odt("odt"), ods("ods"), pptx("pptx"), slk("slk"), slkZip("slkZip"),
+	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"), pdf("pdf"),
+	docx("docx"), odt("odt"), ods("ods"), pptx("pptx"), slk("slk"), slkZip("slkZip"),
 	tsv("tsv"), tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png"),
-	json("json"), jsonBrowser("jsonBrowser"), csv("csv"), csvZip("csvZip");
+	json("json"), jsonBrowser("jsonBrowser"), csv("csv"), csvZip("csvZip"),
+	txt("txt"), txtZip("txtZip");
 
 	private final String value;
 
@@ -109,6 +110,7 @@ public enum ReportFormat {
 			case slkZip:
 			case tsvZip:
 			case csvZip:
+			case txtZip:
 				return "zip";
 			case rss20:
 				return "html";
