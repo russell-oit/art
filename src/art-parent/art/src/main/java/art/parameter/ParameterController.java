@@ -198,7 +198,7 @@ public class ParameterController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				parameterService.addParameter(parameter, sessionUser);
-				if (reportId != null) {
+				if (reportId != null && reportId != 0) {
 					ReportParameter reportParameter = new ReportParameter();
 					reportParameter.setParameter(parameter);
 					reportParameterService.addReportParameter(reportParameter, reportId);
@@ -213,9 +213,9 @@ public class ParameterController {
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			Integer reportParameterConfigReportId = null;
-			if (reportId != null) {
+			if (reportId != null && reportId != 0) {
 				reportParameterConfigReportId = reportId;
-			} else if (returnReportId != null) {
+			} else if (returnReportId != null && returnReportId != 0) {
 				reportParameterConfigReportId = returnReportId;
 			}
 

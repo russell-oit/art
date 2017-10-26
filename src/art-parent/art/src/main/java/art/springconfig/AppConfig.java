@@ -176,7 +176,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	public void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(stringToUserGroup);
 		registry.addConverter(stringToDouble);
-		registry.addConverter(stringToInteger);
+//		registry.addConverter(stringToInteger);
 		registry.addConverter(stringToReport);
 	}
 

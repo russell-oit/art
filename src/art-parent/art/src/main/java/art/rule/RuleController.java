@@ -147,7 +147,7 @@ public class RuleController {
 		Integer reportId = null;
 		return showEditRule("edit", model, reportId, returnReportId);
 	}
-	
+
 	@RequestMapping(value = "/copyRule", method = RequestMethod.GET)
 	public String copyRule(@RequestParam("id") Integer id, Model model,
 			@RequestParam(value = "reportId", required = false) Integer reportId,
@@ -186,7 +186,7 @@ public class RuleController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				ruleService.addRule(rule, sessionUser);
-				if (reportId != null) {
+				if (reportId != null && reportId != 0) {
 					ReportRule reportRule = new ReportRule();
 					reportRule.setRule(rule);
 					reportRule.setReportId(reportId);
@@ -203,9 +203,9 @@ public class RuleController {
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			Integer reportRulesReportId = null;
-			if (reportId != null) {
+			if (reportId != null && reportId != 0) {
 				reportRulesReportId = reportId;
-			} else if (returnReportId != null) {
+			} else if (returnReportId != null && returnReportId != 0) {
 				reportRulesReportId = returnReportId;
 			}
 
