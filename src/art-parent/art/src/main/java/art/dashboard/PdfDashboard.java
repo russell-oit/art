@@ -156,7 +156,7 @@ public class PdfDashboard {
 					reportRunner.execute(resultSetType);
 
 					FilenameHelper filenameHelper = new FilenameHelper();
-					String baseFileName = filenameHelper.getBaseFilename(report);
+					String baseFileName = filenameHelper.getBaseFilename(report, locale);
 					String exportPath = Config.getReportsExportPath();
 					String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 					String fileName = baseFileName + "." + extension;

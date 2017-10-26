@@ -453,7 +453,7 @@
 							<spring:message code="page.text.report"/>
 						</label>
 						<div class="col-sm-8">
-							<p class="form-control-static">${job.report.name}</p>
+							<p class="form-control-static">${job.report.getLocalizedName(pageContext.response.locale)}</p>
 						</div>
 					</div>
 					<form:hidden path="report.reportId" />
@@ -656,7 +656,7 @@
 									<option data-divider="true"></option>
 								<c:forEach var="dynamicRecipientReport" items="${dynamicRecipientReports}">
 									<form:option value="${dynamicRecipientReport.reportId}">
-										${dynamicRecipientReport.name} 
+										${dynamicRecipientReport.getLocalizedName(pageContext.response.locale)} 
 									</form:option>
 								</c:forEach>
 							</form:select>

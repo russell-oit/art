@@ -127,12 +127,12 @@ Display access rights
 			<tbody>
 				<c:forEach var="userReportRight" items="${userReportRights}">
 					<tr data-name="${encode:forHtmlAttribute(userReportRight.user.username)} -
-						${encode:forHtmlAttribute(userReportRight.report.name)}"
+						${encode:forHtmlAttribute(userReportRight.report.getLocalizedName(pageContext.response.locale))}"
 						data-id="userReportRight-${userReportRight.user.userId}-${userReportRight.report.reportId}">
 
 						<td><encode:forHtmlContent value="${userReportRight.user.username}"/></td>
 						<td></td>
-						<td><encode:forHtmlContent value="${userReportRight.report.name}"/></td>
+						<td><encode:forHtmlContent value="${userReportRight.report.getLocalizedName(pageContext.response.locale)}"/></td>
 						<td></td>
 						<td></td>
 						<td>
@@ -184,12 +184,12 @@ Display access rights
 
 				<c:forEach var="userGroupReportRight" items="${userGroupReportRights}">
 					<tr data-name="${encode:forHtmlAttribute(userGroupReportRight.userGroup.name)} -
-						${encode:forHtmlAttribute(userGroupReportRight.report.name)}"
+						${encode:forHtmlAttribute(userGroupReportRight.report.getLocalizedName(pageContext.response.locale))}"
 						data-id="userGroupReportRight-${userGroupReportRight.userGroup.userGroupId}-${userGroupReportRight.report.reportId}">
 
 						<td></td>
 						<td><encode:forHtmlContent value="${userGroupReportRight.userGroup.name}"/></td>
-						<td><encode:forHtmlContent value="${userGroupReportRight.report.name}"/></td>
+						<td><encode:forHtmlContent value="${userGroupReportRight.report.getLocalizedName(pageContext.response.locale)}"/></td>
 						<td></td>
 						<td></td>
 						<td>

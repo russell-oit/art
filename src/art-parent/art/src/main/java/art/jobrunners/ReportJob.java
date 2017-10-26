@@ -880,7 +880,7 @@ public class ReportJob implements org.quartz.Job {
 					runJob(splitJob, jobUser, tos, recipients);
 				}
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | IOException ex) {
 			logger.error("Error", ex);
 		} finally {
 			DatabaseUtils.close(rs);
@@ -992,7 +992,7 @@ public class ReportJob implements org.quartz.Job {
 				//job is shared with other users but the owner doesn't have a copy. save note in the jobs table
 				runMessage = "jobs.message.jobShared";
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | IOException ex) {
 			logger.error("Error", ex);
 		}
 	}
@@ -1047,7 +1047,8 @@ public class ReportJob implements org.quartz.Job {
 	 * email
 	 * @throws SQLException
 	 */
-	private void runJob(boolean splitJob, User user, String userEmail) throws SQLException {
+	private void runJob(boolean splitJob, User user, String userEmail)
+			throws SQLException, IOException {
 		Map<String, Map<String, String>> recipientDetails = null;
 		boolean recipientFilterPresent = false;
 
@@ -1065,7 +1066,8 @@ public class ReportJob implements org.quartz.Job {
 	 * @throws SQLException
 	 */
 	private void runJob(boolean splitJob, User user, String userEmail,
-			Map<String, Map<String, String>> recipientDetails) throws SQLException {
+			Map<String, Map<String, String>> recipientDetails)
+			throws SQLException, IOException {
 
 		boolean recipientFilterPresent = false;
 
@@ -1418,7 +1420,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} else {
 			FilenameHelper filenameHelper = new FilenameHelper();
-			String baseFilename = filenameHelper.getBaseFilename(job);
+			String baseFilename = filenameHelper.getBaseFilename(job, locale);
 			String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 
 			fileName = baseFilename + "." + extension;
@@ -1605,7 +1607,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @param reportRunner the report runner to use
 	 * @throws Exception
 	 */
-	private void runCacheJob(ReportRunner reportRunner) throws SQLException {
+	private void runCacheJob(ReportRunner reportRunner) throws SQLException, IOException {
 		logger.debug("Entering runCacheJob");
 
 		Connection cacheDatabaseConnection = null;
@@ -1622,7 +1624,7 @@ public class ReportJob implements org.quartz.Job {
 
 			String cachedTableName = job.getCachedTableName();
 			if (StringUtils.isBlank(cachedTableName)) {
-				String reportName = job.getReport().getName();
+				String reportName = job.getReport().getLocalizedName(locale);
 				cachedTableName = reportName + "_J" + jobId;
 			}
 			cr.setCachedTableName(cachedTableName);

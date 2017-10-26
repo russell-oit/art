@@ -126,7 +126,7 @@
 			<tbody>
 				<c:forEach var="userReportRight" items="${userReportRights}">
 					<tr data-name="${encode:forHtmlAttribute(userReportRight.user.username)} -
-						${encode:forHtmlAttribute(userReportRight.report.name)}"
+						${encode:forHtmlAttribute(userReportRight.report.getLocalizedName(pageContext.response.locale))}"
 						data-id="userReportRight-${userReportRight.user.userId}-${userReportRight.report.reportId}">
 
 						<td><encode:forHtmlContent value="${userReportRight.user.username}"/></td>
@@ -142,7 +142,7 @@
 
 				<c:forEach var="userGroupReportRight" items="${userGroupReportRights}">
 					<tr data-name="${encode:forHtmlAttribute(userGroupReportRight.userGroup.name)} -
-						${encode:forHtmlAttribute(userGroupReportRight.report.name)}"
+						${encode:forHtmlAttribute(userGroupReportRight.report.getLocalizedName(pageContext.response.locale))}"
 						data-id="userGroupReportRight-${userGroupReportRight.userGroup.userGroupId}-${userGroupReportRight.report.reportId}">
 
 						<td></td>

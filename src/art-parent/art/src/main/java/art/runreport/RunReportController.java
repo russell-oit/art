@@ -112,6 +112,8 @@ public class RunReportController {
 		} else {
 			errorPage = "reportError";
 		}
+		
+		String reportName=null;
 
 		try {
 			report = reportService.getReport(reportId);
@@ -120,6 +122,8 @@ public class RunReportController {
 				model.addAttribute("message", "reports.message.reportNotFound");
 				return errorPage;
 			}
+			
+			reportName = report.getLocalizedName(locale);
 
 			//check if user has permission to run report
 			//admins can run all reports, even disabled ones. only check for non admin users
@@ -143,14 +147,13 @@ public class RunReportController {
 				}
 			}
 
-			String reportName = report.getName();
-			ReportType reportType = report.getReportType();
-
 			//make sure the browser does not cache the result using Ajax (this happens in IE)
 //			if (isFragment) {
 //				response.setHeader("Cache-control", "no-cache");
 //			}
 			response.setHeader("Cache-control", "no-cache");
+			
+			ReportType reportType = report.getReportType();
 
 			if (reportType.isDashboard()) {
 				return "forward:/showDashboard";
@@ -418,7 +421,7 @@ public class RunReportController {
 					//generate output
 					//generate file name to use for report types and formats that generate files
 					FilenameHelper filenameHelper = new FilenameHelper();
-					String baseFileName = filenameHelper.getBaseFilename(report);
+					String baseFileName = filenameHelper.getBaseFilename(report, locale);
 					String exportPath = Config.getReportsExportPath();
 					String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 					String fileName = baseFileName + "." + extension;
@@ -497,8 +500,8 @@ public class RunReportController {
 			ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
 		} catch (Exception ex) {
 			logger.error("Error. {}, {}", report, sessionUser, ex);
-			if (report != null) {
-				model.addAttribute("reportName", report.getName());
+			if (reportName != null) {
+				model.addAttribute("reportName", reportName);
 			}
 			model.addAttribute("error", ex);
 			return errorPage;

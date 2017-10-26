@@ -19,7 +19,7 @@ Display report parameters and initiate running of report
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
-<t:mainPage title="${report.name}">
+<t:mainPage title="${report.getLocalizedName(pageContext.response.locale)}">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">

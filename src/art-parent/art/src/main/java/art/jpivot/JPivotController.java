@@ -100,7 +100,7 @@ public class JPivotController {
 				return errorPage;
 			}
 
-			String reportName = report.getName();
+			String reportName = report.getLocalizedName(locale);
 			model.addAttribute("reportName", reportName);
 
 			//check if user has permission to run report
@@ -189,7 +189,7 @@ public class JPivotController {
 			model.addAttribute("reportType", reportType);
 
 			//put title in session. may be lost if olap navigator option on jpivot toolbar is used
-			String title = report.getName();
+			String title = report.getLocalizedName(locale);
 			session.setAttribute("pivotTitle" + reportId, title);
 
 			Datasource datasource = report.getDatasource();
@@ -506,7 +506,7 @@ public class JPivotController {
 				String queryName = request.getParameter("newPivotName");
 				if (StringUtils.isBlank(queryName)) {
 					//no name provided for the new query. create a default name
-					queryName = report.getName() + "-2";
+					queryName = report.getLocalizedName(locale) + "-2";
 				}
 				newReport.setName(queryName);
 

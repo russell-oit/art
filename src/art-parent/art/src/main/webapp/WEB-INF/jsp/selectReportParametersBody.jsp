@@ -57,7 +57,9 @@ Display section to allow selecting of report parameters and initiate running of 
 
 		$("#runInNewPage").click(function () {
 			$("#showInline").val("false");
-			$("#parametersForm").submit();
+			//need to explicitly set. if click on schedule, then back then run in new page - goes to schedule again
+			var url = "${pageContext.request.contextPath}/runReport";
+			$('#parametersForm').attr('action', url).submit();
 		});
 
 		$("#runInline").click(function (e) {
@@ -138,8 +140,8 @@ Display section to allow selecting of report parameters and initiate running of 
 
 	function Popup(data)
 	{
-		var mywindow = window.open('', '${report.name}', 'height=400,width=600');
-		mywindow.document.write('<html><head><title>${report.name}</title>');
+		var mywindow = window.open('', '${report.getLocalizedName(pageContext.response.locale)}', 'height=400,width=600');
+		mywindow.document.write('<html><head><title>${report.getLocalizedName(pageContext.response.locale)}</title>');
 		/*optional stylesheet*/ //mywindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
 		mywindow.document.write('</head><body>');
 		mywindow.document.write(data);
@@ -224,7 +226,7 @@ Display section to allow selecting of report parameters and initiate running of 
 
 <div class="row  page-header">
     <div class="col-md-10">
-        <h3>${encode:forHtmlContent(report.name)}</h3>
+        <h3>${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}</h3>
     </div>
 	<div class="col-md-2">
 		<h3 class="text-right">

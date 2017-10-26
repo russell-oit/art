@@ -330,7 +330,7 @@ public class ReportOutputGenerator {
 						break;
 					case xlsx:
 						groupOutput = new GroupXlsxOutput();
-						groupOutput.setReportName(report.getName());
+						groupOutput.setReportName(report.getLocalizedName(locale));
 						groupOutput.setFullOutputFileName(fullOutputFilename);
 						break;
 					default:
@@ -441,7 +441,7 @@ public class ReportOutputGenerator {
 				standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
 				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
 				standardOutput.setLocale(locale);
-				standardOutput.setReportName(report.getName());
+				standardOutput.setReportName(report.getLocalizedName(locale));
 				standardOutput.setMessageSource(messageSource);
 				standardOutput.setIsJob(isJob);
 				standardOutput.setPdfPageNumbers(pdfPageNumbers);

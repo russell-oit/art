@@ -176,7 +176,7 @@ Reports page. Also main/home page
 						<td>${encode:forHtmlContent(report.getLocalizedDescription(pageContext.response.locale))}</td>
 						<td>
 							<a href="${pageContext.request.contextPath}/selectReportParameters?reportId=${report.reportId}">
-								<encode:forHtmlContent value="${report.name}"/>
+								${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}
 							</a> &nbsp;
 							<t:displayNewLabel creationDate="${report.creationDate}"
 											   updateDate="${report.updateDate}"/>

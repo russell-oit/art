@@ -115,7 +115,7 @@ Edit a drilldown
 					<div class="col-md-8">
 						<form:select path="drilldownReport.reportId" class="form-control selectpicker">
 							<c:forEach var="drilldownReport" items="${drilldownReports}">
-								<form:option value="${drilldownReport.reportId}">${drilldownReport.name}</form:option>
+								<form:option value="${drilldownReport.reportId}">${drilldownReport.getLocalizedName(pageContext.response.locale)}</form:option>
 							</c:forEach>
 						</form:select>
 						<form:errors path="drilldownReport.reportId" cssClass="error"/>

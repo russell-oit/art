@@ -157,15 +157,10 @@ public class ReportService {
 
 			setChartOptions(report);
 
-			String options = report.getOptions();
-			if (StringUtils.isNotBlank(options)) {
-				ObjectMapper mapper = new ObjectMapper();
-				try {
-					GeneralReportOptions generalOptions = mapper.readValue(options, GeneralReportOptions.class);
-					report.setGeneralOptions(generalOptions);
-				} catch (IOException ex) {
-					throw new SQLException(ex);
-				}
+			try {
+				report.loadGeneralOptions();
+			} catch (IOException ex) {
+				throw new SQLException(ex);
 			}
 
 			return type.cast(report);
@@ -1028,7 +1023,7 @@ public class ReportService {
 	@Cacheable(value = "reports")
 	public List<SaikuReport> getAvailableSaikuReports(int userId, Locale locale)
 			throws SQLException, IOException {
-		
+
 		logger.debug("Entering getAvailableSaikuReports: userId={}", userId);
 
 		List<SaikuReport> saikuReports = new ArrayList<>();
@@ -1038,7 +1033,7 @@ public class ReportService {
 			if (report.getReportType() == ReportType.SaikuReport) {
 				SaikuReport saikuReport = new SaikuReport();
 				saikuReport.setReportId(report.getReportId());
-				saikuReport.setName(report.getName());
+				saikuReport.setName(report.getLocalizedName(locale));
 				saikuReport.setShortDescription(report.getLocalizedShortDescription(locale));
 				saikuReport.setDescription(report.getLocalizedDescription(locale));
 				saikuReports.add(saikuReport);

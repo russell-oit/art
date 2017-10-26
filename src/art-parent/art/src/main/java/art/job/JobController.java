@@ -303,7 +303,7 @@ public class JobController {
 			if (reportIdString != null) {
 				Report report = reportService.getReport(Integer.parseInt(reportIdString));
 				job.setReport(report);
-				job.setName(report.getName());
+				job.setName(report.getLocalizedName(locale));
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");

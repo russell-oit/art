@@ -25,10 +25,13 @@ import art.reportoptions.CsvOutputArtOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides methods for generating file names for use with report output
@@ -37,15 +40,18 @@ import org.apache.commons.lang3.RandomStringUtils;
  */
 public class FilenameHelper {
 
+	private static final Logger logger = LoggerFactory.getLogger(FilenameHelper.class);
+
 	/**
 	 * Returns the base file name (file name before extension) to be used for
 	 * the given report
 	 *
 	 * @param report the report
+	 * @param locale the locale being used
 	 * @return the base file name to be used for the given report
 	 */
-	public String getBaseFilename(Report report) {
-		return getBaseFilename(report, null, null);
+	public String getBaseFilename(Report report, Locale locale) {
+		return getBaseFilename(report, null, null, locale);
 	}
 
 	/**
@@ -53,10 +59,11 @@ public class FilenameHelper {
 	 * the given job
 	 *
 	 * @param job the job
+	 * @param locale the locale being used
 	 * @return the base file name to be used for the given job
 	 */
-	public String getBaseFilename(Job job) {
-		return getBaseFilename(job.getReport(), job, null);
+	public String getBaseFilename(Job job, Locale locale) {
+		return getBaseFilename(job.getReport(), job, null, locale);
 	}
 
 	/**
@@ -65,10 +72,11 @@ public class FilenameHelper {
 	 *
 	 * @param job the job
 	 * @param burstId the burst id for the job
+	 * @param locale the locale being used
 	 * @return the base file name to be used for the given job
 	 */
-	public String getBaseFilename(Job job, String burstId) {
-		return getBaseFilename(job.getReport(), job, burstId);
+	public String getBaseFilename(Job job, String burstId, Locale locale) {
+		return getBaseFilename(job.getReport(), job, burstId, locale);
 	}
 
 	/**
@@ -78,22 +86,34 @@ public class FilenameHelper {
 	 * @param report the report, not null
 	 * @param job the job, may be null
 	 * @param burstId the burst id for the job, may be null
+	 * @param locale the locale being used
 	 * @return the base file name to be used for the given report or job
 	 */
-	private String getBaseFilename(Report report, Job job, String burstId) {
+	private String getBaseFilename(Report report, Job job, String burstId,
+			Locale locale) {
+
 		Objects.requireNonNull(report, "report must not be null");
 
 		int jobId;
 		String namePart;
 
+		String reportName = report.getName();
+		try {
+			reportName = report.getLocalizedName(locale);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+
 		if (job == null) {
 			jobId = 0;
-			namePart = report.getName();
+			namePart = reportName;
 		} else {
 			jobId = job.getJobId();
-			namePart = job.getName();
-			if (StringUtils.isBlank(namePart)) {
-				namePart = report.getName();
+			String jobName = job.getName();
+			if (StringUtils.isBlank(jobName)) {
+				namePart = reportName;
+			} else {
+				namePart = jobName;
 			}
 		}
 

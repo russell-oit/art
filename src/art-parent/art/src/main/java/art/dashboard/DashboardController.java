@@ -155,7 +155,7 @@ public class DashboardController {
 
 			if (reportFormat == ReportFormat.pdf) {
 				FilenameHelper filenameHelper = new FilenameHelper();
-				String baseFileName = filenameHelper.getBaseFilename(report);
+				String baseFileName = filenameHelper.getBaseFilename(report, locale);
 				String exportPath = Config.getReportsExportPath();
 				String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 				String fileName = baseFileName + "." + extension;
@@ -184,7 +184,8 @@ public class DashboardController {
 				}
 			}
 
-			model.addAttribute("reportName", report.getName());
+			String reportName = report.getLocalizedName(locale);
+			model.addAttribute("reportName", reportName);
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -852,8 +853,7 @@ public class DashboardController {
 	 * @throws ParseException
 	 * @throws SQLException
 	 */
-	private String getDashboardTitle(Report report, Map<String,
-			ReportParameter> reportParamsMap, Locale locale)
+	private String getDashboardTitle(Report report, Map<String, ReportParameter> reportParamsMap, Locale locale)
 			throws ParseException, SQLException, IOException {
 
 		logger.debug("Entering getDashboardTitle: Report={}", report);

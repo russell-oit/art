@@ -21,6 +21,7 @@ import art.servlets.Config;
 import art.user.User;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
 import org.saiku.olap.discover.OlapMetaExplorer;
@@ -52,14 +53,14 @@ public class DiscoverController {
 	@Autowired
 	private DiscoverHelper discoverHelper;
 
-	private void createConnections(HttpSession session) throws SaikuOlapException {
+	private void createConnections(HttpSession session, Locale locale) throws SaikuOlapException {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		int userId = sessionUser.getUserId();
 		Map<Integer, SaikuConnectionProvider> connections = Config.getSaikuConnections();
 		Config.closeSaikuConnections(userId);
 
 		String templatesPath = Config.getTemplatesPath();
-		SaikuConnectionManager connectionManager = new SaikuConnectionManager(sessionUser, templatesPath);
+		SaikuConnectionManager connectionManager = new SaikuConnectionManager(sessionUser, templatesPath, locale);
 		connectionManager.init();
 
 		OlapMetaExplorer metaExplorer = new OlapMetaExplorer(connectionManager);
@@ -76,8 +77,8 @@ public class DiscoverController {
 	}
 
 	@GetMapping
-	public List<SaikuConnection> discover(HttpSession session) throws SaikuOlapException {
-		createConnections(session);
+	public List<SaikuConnection> discover(HttpSession session, Locale locale) throws SaikuOlapException {
+		createConnections(session, locale);
 		OlapDiscoverService olapDiscoverService = discoverHelper.getDiscoverService(session);
 		List<SaikuConnection> connections = olapDiscoverService.getAllConnections();
 		return connections;

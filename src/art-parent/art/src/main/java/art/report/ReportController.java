@@ -260,7 +260,8 @@ public class ReportController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session, @RequestParam("action") String action,
 			@RequestParam(value = "templateFile", required = false) MultipartFile templateFile,
-			@RequestParam(value = "resourcesFile", required = false) MultipartFile resourcesFile) {
+			@RequestParam(value = "resourcesFile", required = false) MultipartFile resourcesFile,
+			Locale locale) {
 
 		logger.debug("Entering saveReport: report={}, action='{}'", report, action);
 
@@ -292,7 +293,8 @@ public class ReportController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
-			String recordName = report.getName() + " (" + report.getReportId() + ")";
+			report.loadGeneralOptions();
+			String recordName = report.getLocalizedName(locale) + " (" + report.getReportId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			redirectAttributes.addFlashAttribute("record", report);
 			return "redirect:/reportsConfig";

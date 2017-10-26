@@ -18,13 +18,16 @@
 package art.accessright;
 
 import art.job.JobService;
+import art.report.Report;
 import art.report.ReportService;
 import art.reportgroup.ReportGroupService;
 import art.user.User;
 import art.user.UserService;
 import art.usergroup.UserGroupService;
 import art.utils.AjaxResponse;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Locale;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -167,14 +170,21 @@ public class AccessRightController {
 	}
 	
 	@GetMapping("/reportAccessRights")
-	public String showReportAccessRights(Model model, @RequestParam("reportId") Integer reportId){
+	public String showReportAccessRights(Model model,
+			@RequestParam("reportId") Integer reportId, Locale locale){
+		
 		logger.debug("Entering showReportAccessRights: reportId={}", reportId);
 
 		try {
-			model.addAttribute("reportName", reportService.getReportName(reportId));
+			String reportName = "";
+			Report report = reportService.getReport(reportId);
+			if (report != null) {
+				reportName = report.getLocalizedName(locale);
+			}
+			model.addAttribute("reportName", reportName);
 			model.addAttribute("userReportRights", accessRightService.getUserReportRights(reportId));
 			model.addAttribute("userGroupReportRights", accessRightService.getUserGroupReportRights(reportId));
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

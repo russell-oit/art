@@ -598,9 +598,10 @@ public abstract class StandardOutput {
 	 * of rows in the resultset. if not, message contains the i18n message
 	 * indicating the problem
 	 * @throws SQLException
+	 * @throws java.io.IOException
 	 */
 	public StandardOutputResult generateTabularOutput(ResultSet rs, ReportFormat reportFormat,
-			Report report) throws SQLException {
+			Report report) throws SQLException, IOException {
 
 		logger.debug("Entering generateTabularOutput");
 
@@ -656,7 +657,7 @@ public abstract class StandardOutput {
 			for (Drilldown drilldown : drilldowns) {
 				String drilldownTitle = drilldown.getHeaderText();
 				if (drilldownTitle == null || drilldownTitle.trim().length() == 0) {
-					drilldownTitle = drilldown.getDrilldownReport().getName();
+					drilldownTitle = drilldown.getDrilldownReport().getLocalizedName(locale);
 				}
 				addHeaderCell(drilldownTitle);
 			}
@@ -1046,7 +1047,7 @@ public abstract class StandardOutput {
 						}
 					} else {
 						FilenameHelper filenameHelper = new FilenameHelper();
-						baseFileName = filenameHelper.getBaseFilename(job, fileNameBurstId); //getBaseFilename() does cleaning
+						baseFileName = filenameHelper.getBaseFilename(job, fileNameBurstId, locale); //getBaseFilename() does cleaning
 						extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 						fileName = baseFileName + "." + extension;
 
@@ -1064,7 +1065,7 @@ public abstract class StandardOutput {
 						out = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
 					}
 
-					reportName = report.getName() + " - " + currentBurstId;
+					reportName = report.getLocalizedName(locale) + " - " + currentBurstId;
 
 					initializeBurstOutput(rsmd, hiddenColumns);
 				}

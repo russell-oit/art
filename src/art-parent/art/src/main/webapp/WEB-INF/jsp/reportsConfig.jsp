@@ -246,12 +246,12 @@ Reports configuration page
 			</thead>
 			<tbody>
 				<c:forEach var="report" items="${reports}">
-					<tr data-name="${encode:forHtmlAttribute(report.name)}"
+					<tr data-name="${encode:forHtmlAttribute(report.getLocalizedName(pageContext.response.locale))}"
 						data-id="${report.reportId}">
 
 						<td></td>
 						<td>${report.reportId}</td>
-						<td>${encode:forHtmlContent(report.name)} &nbsp;
+						<td>${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))} &nbsp;
 							<t:displayNewLabel creationDate="${report.creationDate}"
 											   updateDate="${report.updateDate}"/>
 						</td>

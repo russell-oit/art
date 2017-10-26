@@ -20,12 +20,12 @@ package art.report;
 import art.datasource.Datasource;
 import art.enums.PageOrientation;
 import art.enums.ReportType;
-import art.parameter.Parameteri18nOptions;
 import art.reportgroup.ReportGroup;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.Reporti18nOptions;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -862,7 +862,7 @@ public class Report implements Serializable {
 
 		return localizedShortDescription;
 	}
-	
+
 	/**
 	 * Returns the description to use for this report, given a particular
 	 * locale, taking into consideration the i18n options defined for the report
@@ -892,6 +892,17 @@ public class Report implements Serializable {
 		}
 
 		return localizedDescription;
+	}
+
+	/**
+	 * Loads the general report options object from the options string
+	 * @throws java.io.IOException
+	 */
+	public void loadGeneralOptions() throws IOException {
+		if (StringUtils.isNotBlank(options)) {
+			ObjectMapper mapper = new ObjectMapper();
+			generalOptions = mapper.readValue(options, GeneralReportOptions.class);
+		}
 	}
 
 }
