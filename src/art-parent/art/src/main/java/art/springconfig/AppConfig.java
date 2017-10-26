@@ -116,6 +116,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	@Bean
 	public TemplateEngine emailTemplateEngine() {
 		SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+		templateEngine.setEnableSpringELCompiler(true);
 		templateEngine.setTemplateResolver(emailTemplateResolver());
 		return templateEngine;
 	}
