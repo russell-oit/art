@@ -1111,7 +1111,7 @@ public class ReportOutputGenerator {
 				Binding binding = new Binding(variables);
 
 				GroovyShell shell = new GroovyShell(binding, cc);
-				
+
 				GroovySandbox sandbox = null;
 				if (Config.getCustomSettings().isEnableGroovySandbox()) {
 					sandbox = new GroovySandbox();
@@ -1446,7 +1446,7 @@ public class ReportOutputGenerator {
 				standardOutput = new XlsOutput(xlsDateFormat, xlsNumberFormat);
 				break;
 			case xlsZip:
-				standardOutput = new XlsOutput(ZipType.Zip, xlsDateFormat, xlsNumberFormat);
+				standardOutput = new XlsOutput(xlsDateFormat, xlsNumberFormat, ZipType.Zip);
 				break;
 			case xlsx:
 				standardOutput = new XlsxOutput(xlsDateFormat, xlsNumberFormat);
@@ -1476,6 +1476,7 @@ public class ReportOutputGenerator {
 				standardOutput = new OdsOutput();
 				break;
 			case csv:
+			case csvZip:
 				CsvOutputArtOptions options;
 				String optionsString = report.getOptions();
 				if (StringUtils.isBlank(optionsString)) {
@@ -1484,7 +1485,13 @@ public class ReportOutputGenerator {
 					ObjectMapper mapper = new ObjectMapper();
 					options = mapper.readValue(optionsString, CsvOutputArtOptions.class);
 				}
-				standardOutput = new CsvOutputArt(options);
+				
+				ZipType zipType = ZipType.None;
+				if (reportFormat == ReportFormat.csvZip) {
+					zipType = ZipType.Zip;
+				}
+				
+				standardOutput = new CsvOutputArt(options, zipType);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);

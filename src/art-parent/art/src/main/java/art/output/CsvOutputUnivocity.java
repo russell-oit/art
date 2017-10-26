@@ -29,7 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generates csv output. Also supports any delimiter, other than comma.
+ * Generates csv output using the univocity-parsers library. Also supports
+ * generating the file with another delimiter, other than comma.
  *
  * @author Timothy Anyona
  */

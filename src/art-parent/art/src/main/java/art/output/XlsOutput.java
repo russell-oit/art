@@ -60,17 +60,15 @@ public class XlsOutput extends StandardOutput {
 	private HSSFCellStyle numberStyle;
 	private int currentRow;
 	private int cellNumber;
-	private final ZipType zipType;
+	private ZipType zipType = ZipType.None;
 	private final String javaDateFormat;
 	private final String numberFormat;
 
 	public XlsOutput(String javaDateFormat, String numberFormat) {
-		zipType = ZipType.None;
-		this.javaDateFormat = javaDateFormat;
-		this.numberFormat = numberFormat;
+		this(javaDateFormat, numberFormat, ZipType.None);
 	}
 
-	public XlsOutput(ZipType zipType, String javaDateFormat, String numberFormat) {
+	public XlsOutput(String javaDateFormat, String numberFormat, ZipType zipType) {
 		this.zipType = zipType;
 		this.javaDateFormat = javaDateFormat;
 		this.numberFormat = numberFormat;

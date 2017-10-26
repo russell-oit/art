@@ -18,7 +18,8 @@
 package art.reportoptions;
 
 /**
- *
+ * Represents report options for csv output
+ * 
  * @author Timothy Anyona
  */
 public class CsvOutputArtOptions extends GeneralReportOptions {

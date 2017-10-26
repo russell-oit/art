@@ -152,24 +152,43 @@ public class FilenameHelper {
 			String jxlsFilename = report.getTemplate();
 			extension = FilenameUtils.getExtension(jxlsFilename);
 		} else if (reportFormat == ReportFormat.csv) {
-			CsvOutputArtOptions options;
-			String optionsString = report.getOptions();
-			if (StringUtils.isBlank(optionsString)) {
-				options = new CsvOutputArtOptions(); //has default values set
-			} else {
-				ObjectMapper mapper = new ObjectMapper();
-				options = mapper.readValue(optionsString, CsvOutputArtOptions.class);
-			}
-			String delimiter = options.getDelimiter();
-			if (StringUtils.equals(delimiter, ",")) {
-				extension = "csv";
-			} else {
-				extension = "txt";
-			}
+			extension = getCsvExtension(report);
 		} else if (reportType == ReportType.FixedWidth) {
 			extension = "txt";
 		} else {
 			extension = reportFormat.getFilenameExtension();
+		}
+
+		return extension;
+	}
+
+	/**
+	 * Returns the file name extension to use for a csv file. "csv" if delimited
+	 * is comma, "txt" otherwise
+	 *
+	 * @param report
+	 * @return
+	 * @throws java.io.IOException
+	 */
+	public String getCsvExtension(Report report) throws IOException {
+		Objects.requireNonNull(report, "report must not be null");
+
+		String extension;
+
+		CsvOutputArtOptions csvOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			csvOptions = new CsvOutputArtOptions(); //has default values set
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			csvOptions = mapper.readValue(options, CsvOutputArtOptions.class);
+		}
+
+		String delimiter = csvOptions.getDelimiter();
+		if (StringUtils.equals(delimiter, ",")) {
+			extension = "csv";
+		} else {
+			extension = "txt";
 		}
 
 		return extension;
