@@ -113,7 +113,7 @@ public class FixedWidthOutput {
 		}
 
 		List<Map<String, List<String>>> fieldNumberFormats = fixedWidthOptions.getFieldNumberFormats();
-		if (!CollectionUtils.isEmpty(fieldNumberFormats)) {
+		if (CollectionUtils.isNotEmpty(fieldNumberFormats)) {
 			for (Map<String, List<String>> numberFormatDefinition : fieldNumberFormats) {
 				Entry<String, List<String>> entry = numberFormatDefinition.entrySet().iterator().next();
 				String fieldNumberFormat = entry.getKey();
@@ -123,7 +123,7 @@ public class FixedWidthOutput {
 		}
 
 		List<Map<String, List<String>>> fieldIntegerFormats = fixedWidthOptions.getFieldIntegerFormats();
-		if (!CollectionUtils.isEmpty(fieldIntegerFormats)) {
+		if (CollectionUtils.isNotEmpty(fieldIntegerFormats)) {
 			for (Map<String, List<String>> integerFormatDefinition : fieldIntegerFormats) {
 				Entry<String, List<String>> entry = integerFormatDefinition.entrySet().iterator().next();
 				String fieldIntegerFormat = entry.getKey();
@@ -133,7 +133,7 @@ public class FixedWidthOutput {
 		}
 
 		List<Map<String, List<String>>> fieldLongFormats = fixedWidthOptions.getFieldLongFormats();
-		if (!CollectionUtils.isEmpty(fieldLongFormats)) {
+		if (CollectionUtils.isNotEmpty(fieldLongFormats)) {
 			for (Map<String, List<String>> longFormatDefinition : fieldLongFormats) {
 				Entry<String, List<String>> entry = longFormatDefinition.entrySet().iterator().next();
 				String fieldLongFormat = entry.getKey();
@@ -143,7 +143,7 @@ public class FixedWidthOutput {
 		}
 
 		List<Map<String, List<String>>> fieldDoubleFormats = fixedWidthOptions.getFieldDoubleFormats();
-		if (!CollectionUtils.isEmpty(fieldDoubleFormats)) {
+		if (CollectionUtils.isNotEmpty(fieldDoubleFormats)) {
 			for (Map<String, List<String>> doubleFormatDefinition : fieldDoubleFormats) {
 				Entry<String, List<String>> entry = doubleFormatDefinition.entrySet().iterator().next();
 				String fieldDoubleFormat = entry.getKey();
@@ -153,7 +153,7 @@ public class FixedWidthOutput {
 		}
 
 		List<Map<String, List<String>>> fieldDateFormats = fixedWidthOptions.getFieldDateFormats();
-		if (!CollectionUtils.isEmpty(fieldDateFormats)) {
+		if (CollectionUtils.isNotEmpty(fieldDateFormats)) {
 			for (Map<String, List<String>> dateFormatDefinition : fieldDateFormats) {
 				Entry<String, List<String>> entry = dateFormatDefinition.entrySet().iterator().next();
 				String fieldDateFormat = entry.getKey();
@@ -169,7 +169,7 @@ public class FixedWidthOutput {
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 
-		if (!CollectionUtils.isEmpty(fieldLengths)) {
+		if (CollectionUtils.isNotEmpty(fieldLengths)) {
 			//https://stackoverflow.com/questions/718554/how-to-convert-an-arraylist-containing-integers-to-primitive-int-array
 			int[] fieldLengthsArray = ArrayUtils.toPrimitive(fixedWidthOptions.getFieldLengths().toArray(new Integer[0]));
 
@@ -181,7 +181,7 @@ public class FixedWidthOutput {
 			String[] headers = columnNames.toArray(new String[0]);
 
 			fields = new FixedWidthFields(headers, fieldLengthsArray);
-		} else if (!CollectionUtils.isEmpty(fieldLengthsByName)) {
+		} else if (CollectionUtils.isNotEmpty(fieldLengthsByName)) {
 			fields = new FixedWidthFields();
 			//addField() will just add fields in the order added, which may not be the order in the resultset
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {

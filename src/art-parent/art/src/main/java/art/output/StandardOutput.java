@@ -23,6 +23,8 @@ import art.enums.ColumnType;
 import art.enums.ReportType;
 import art.job.Job;
 import art.report.Report;
+import art.reportoptions.GeneralReportOptions;
+import art.reportoptions.Reporti18nOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtUtils;
@@ -57,6 +59,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -608,6 +611,8 @@ public abstract class StandardOutput {
 		Objects.requireNonNull(rs, "rs must not be null");
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(report, "report must not be null");
+		
+		this.report = report;
 
 		StandardOutputResult result = new StandardOutputResult();
 
@@ -644,10 +649,12 @@ public abstract class StandardOutput {
 		//begin header output
 		beginHeader();
 
+		List<String> localizedColumnNames = getLocalizedColumnNames(rsmd, report);
+
 		//output header columns for the result set columns
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
-				addHeaderCell(rsmd.getColumnLabel(i));
+				addHeaderCell(localizedColumnNames.get(i));
 			}
 		}
 
@@ -945,7 +952,10 @@ public abstract class StandardOutput {
 	public void generateBurstOutput(ResultSet rs, ReportFormat reportFormat, Job job,
 			Report report, ReportType reportType) throws SQLException, IOException {
 
-		logger.debug("Entering generateBurstOutput");
+		logger.debug("Entering generateBurstOutput: reportFormat={}, job={},"
+				+ " report={}, reportType={}", reportFormat, job, report, reportType);
+
+		this.report = report;
 
 		initializeNumberFormatters();
 
@@ -1067,7 +1077,7 @@ public abstract class StandardOutput {
 
 					reportName = report.getLocalizedName(locale) + " - " + currentBurstId;
 
-					initializeBurstOutput(rsmd, hiddenColumns);
+					initializeBurstOutput(rsmd, hiddenColumns, report);
 				}
 
 				newRow();
@@ -1162,8 +1172,8 @@ public abstract class StandardOutput {
 	 * should not be included in the output
 	 * @throws SQLException
 	 */
-	private void initializeBurstOutput(ResultSetMetaData rsmd, List<String> hiddenColumns)
-			throws SQLException {
+	private void initializeBurstOutput(ResultSetMetaData rsmd, List<String> hiddenColumns,
+			Report report) throws SQLException {
 
 		//perform any required output initialization
 		init();
@@ -1177,10 +1187,12 @@ public abstract class StandardOutput {
 		//begin header output
 		beginHeader();
 
+		List<String> localizedColumnNames = getLocalizedColumnNames(rsmd, report);
+
 		//output header columns for the result set columns
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
-				addHeaderCell(rsmd.getColumnLabel(i));
+				addHeaderCell(localizedColumnNames.get(i));
 			}
 		}
 
@@ -1664,6 +1676,9 @@ public abstract class StandardOutput {
 	public StandardOutputResult generateCrosstabOutput(ResultSet rs,
 			ReportFormat reportFormat, Report report) throws SQLException {
 
+		logger.debug("Entering generateCrosstabOutput: reportFormat={},"
+				+ " report={}", reportFormat, report);
+
 		/*
 		 * input
 		 */ /*
@@ -1690,6 +1705,8 @@ public abstract class StandardOutput {
 		//           B    24  14  -      	 	    B	14  24   -   
 		//           C    -   04  44      	 	    C	04   -  44   
 		//                   ^--- Jan comes after Feb!			     	 
+
+		this.report = report;
 
 		StandardOutputResult result = new StandardOutputResult();
 
@@ -1730,6 +1747,8 @@ public abstract class StandardOutput {
 			alternateSort = false;
 		}
 
+		List<String> localizedColumnNames = getLocalizedColumnNames(rsmd, report);
+
 		HashMap<String, Object> values = new HashMap<>();
 		Object[] xa;
 		Object[] ya;
@@ -1766,7 +1785,7 @@ public abstract class StandardOutput {
 			//begin header output
 			beginHeader();
 
-			addHeaderCell(rsmd.getColumnLabel(5) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(3) + ")");
+			addHeaderCell(localizedColumnNames.get(5) + " (" + localizedColumnNames.get(1) + " / " + localizedColumnNames.get(3) + ")");
 			int i, j;
 			for (i = 0; i < xa.length; i++) {
 				addHeaderCell(x.get(xa[i]).toString());
@@ -1836,7 +1855,7 @@ public abstract class StandardOutput {
 
 			//begin header output
 			beginHeader();
-			addHeaderCell(rsmd.getColumnLabel(3) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(2) + ")");
+			addHeaderCell(localizedColumnNames.get(3) + " (" + localizedColumnNames.get(1) + " / " + localizedColumnNames.get(2) + ")");
 			int i, j;
 			for (i = 0; i < xa.length; i++) {
 				addHeaderCell(xa[i].toString());
@@ -2052,5 +2071,70 @@ public abstract class StandardOutput {
 			default:
 				addString(value, nullStringDisplay);
 		}
+	}
+
+	/**
+	 * Returns the column names to use in report output, considering the current
+	 * locale and report i18n options
+	 *
+	 * @param rsmd the resultset metadata object for the data result set
+	 * @param report the report being run
+	 * @return the localized column names to use
+	 * @throws SQLException
+	 */
+	private List<String> getLocalizedColumnNames(ResultSetMetaData rsmd,
+			Report report) throws SQLException {
+
+		List<String> localizedColumnNames = new ArrayList<>();
+
+		//set defaults
+		//add dummy item in index 0. to allow retrieving of column names using 1-based index like with rsmd
+		//without it, the index based add() or set() fails with an empty list
+		localizedColumnNames.add("dummy");
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			localizedColumnNames.add(i, rsmd.getColumnLabel(i));
+		}
+
+		//set localized column names if configured
+		GeneralReportOptions generalReportOptions = report.getGeneralOptions();
+		if (generalReportOptions != null) {
+			Reporti18nOptions i18nOptions = generalReportOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, List<Map<String, String>>>> i18nColumnNamesSettings = i18nOptions.getColumnNames();
+
+				if (CollectionUtils.isNotEmpty(i18nColumnNamesSettings)) {
+					//use case insensitive map so that column names specified in i18n options are not case sensitive
+					Map<String, String> localizedColumnNamesMap = new CaseInsensitiveMap<>();
+
+					for (Map<String, List<Map<String, String>>> i18nColumnNameSetting : i18nColumnNamesSettings) {
+						//Get the first entry that the iterator returns
+						Entry<String, List<Map<String, String>>> entry = i18nColumnNameSetting.entrySet().iterator().next();
+						String i18nColumnName = entry.getKey();
+						List<Map<String, String>> i18nColumnNameOptions = entry.getValue();
+						String localizedColumnName = ArtUtils.getLocalizedValue(locale, i18nColumnNameOptions);
+						//https://stackoverflow.com/questions/15091148/hashmaps-and-null-values
+						localizedColumnNamesMap.put(i18nColumnName, localizedColumnName);
+					}
+
+					//set final column names
+					for (int i = 1; i < localizedColumnNames.size(); i++) {
+						String columnName = localizedColumnNames.get(i);
+						String columnIndexString = String.valueOf(i);
+						//try see if localized column index defined
+						String localizedColumnName = localizedColumnNamesMap.get(columnIndexString);
+						if (localizedColumnName == null) {
+							//try search using column name
+							localizedColumnName = localizedColumnNamesMap.get(columnName);
+						}
+
+						if (localizedColumnName != null) {
+							localizedColumnNames.set(i, localizedColumnName);
+						}
+					}
+				}
+			}
+		}
+
+		return localizedColumnNames;
 	}
 }

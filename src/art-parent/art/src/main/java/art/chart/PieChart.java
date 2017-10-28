@@ -96,7 +96,7 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 		double dataValue = data.getValue(pieIndex).doubleValue();
 
 		//format value
-		NumberFormat nf = NumberFormat.getInstance(getLocale());
+		NumberFormat nf = NumberFormat.getInstance(locale);
 		String formattedValue = nf.format(dataValue);
 
 		//in case one wishes to show category names

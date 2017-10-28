@@ -172,8 +172,7 @@ public class RunReportController {
 				int fetchTime = NOT_APPLICABLE;
 
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				paramProcessor.setLocale(locale);
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "jpivot", reportParamsList);
 
@@ -189,8 +188,7 @@ public class RunReportController {
 				int fetchTime = NOT_APPLICABLE;
 
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				paramProcessor.setLocale(locale);
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "saiku", reportParamsList);
 
@@ -335,8 +333,7 @@ public class RunReportController {
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				paramProcessor.setLocale(locale);
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				reportParamsList = paramProcessorResult.getReportParamsList();

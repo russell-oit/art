@@ -228,14 +228,14 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		//format y value
 		double yValue = data.getYValue(series, item);
 
-		NumberFormat nf = NumberFormat.getInstance(getLocale());
+		NumberFormat nf = NumberFormat.getInstance(locale);
 		String formattedYValue = nf.format(yValue);
 
 		//format x value (date)
 		long xValue = (long) data.getXValue(series, item);
 		Date date = new Date(xValue);
 
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("MMM-dd-yyyy");
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("MMM-dd-yyyy", locale);
 		String formattedDate = dateFormatter.format(date);
 
 		//return final tooltip text	   

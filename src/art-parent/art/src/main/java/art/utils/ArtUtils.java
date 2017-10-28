@@ -446,17 +446,17 @@ public class ArtUtils {
 	 * Returns an i18n value to use, given a particular locale, taking into
 	 * consideration the i18n options defined
 	 *
-	 * @param localeString the string that represents the locale to use
+	 * @param locale the locale to use
 	 * @param i18nValueOptions the i18n definition of locales and values
 	 * @return the localized value to use, or null if a localization is not
 	 * found
 	 */
-	public static String getLocalizedValue(String localeString,
+	public static String getLocalizedValue(Locale locale,
 			List<Map<String, String>> i18nValueOptions) {
 
 		String localizedValue = null;
 
-		if (CollectionUtils.isNotEmpty(i18nValueOptions)) {
+		if (CollectionUtils.isNotEmpty(i18nValueOptions) && locale != null) {
 			boolean valueFound = false;
 			for (Map<String, String> i18nValueOption : i18nValueOptions) {
 				//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
@@ -465,8 +465,8 @@ public class ArtUtils {
 				String localeSetting = entry.getKey();
 				String localeValue = entry.getValue();
 				String[] locales = StringUtils.split(localeSetting, ",");
-				for (String locale : locales) {
-					if (StringUtils.equalsIgnoreCase(locale.trim(), localeString)) {
+				for (String localeString : locales) {
+					if (StringUtils.equalsIgnoreCase(localeString.trim(), locale.toString())) {
 						localizedValue = localeValue;
 						valueFound = true;
 						break;

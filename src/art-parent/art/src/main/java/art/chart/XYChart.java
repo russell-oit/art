@@ -143,7 +143,7 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 	@Override
 	public String generateToolTip(XYDataset data, int series, int item) {
 		//display formatted values
-		NumberFormat nf = NumberFormat.getInstance(getLocale());
+		NumberFormat nf = NumberFormat.getInstance(locale);
 
 		//format y value
 		double yValue = data.getYValue(series, item);

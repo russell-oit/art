@@ -1924,7 +1924,7 @@ public class ReportJob implements org.quartz.Job {
 
 		try {
 			ParameterProcessor paramProcessor = new ParameterProcessor();
-			paramProcessorResult = paramProcessor.process(finalValues, reportId, user);
+			paramProcessorResult = paramProcessor.process(finalValues, reportId, user, locale);
 		} catch (ParseException | IOException ex) {
 			logger.error("Error", ex);
 		}

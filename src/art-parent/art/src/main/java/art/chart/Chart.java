@@ -84,12 +84,13 @@ import org.slf4j.LoggerFactory;
 public abstract class Chart extends AbstractChartDefinition implements DatasetProducer, ChartPostProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(Chart.class);
+
 	private static final long serialVersionUID = 1L;
 	private String backgroundColor = ArtUtils.WHITE_HEX_COLOR_CODE;
 	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
 	private Dataset dataset;
 	private ChartOptions chartOptions;
-	private Locale locale;
+	protected Locale locale;
 	private Map<String, String> hyperLinks;
 	private Map<String, String> drilldownLinks;
 	private boolean openLinksInNewWindow;
@@ -674,8 +675,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	private void applySeriesColors(JFreeChart chart) {
 		logger.debug("Entering applySeriesColors");
-		
-		if(extraOptions == null){
+
+		if (extraOptions == null) {
 			return;
 		}
 

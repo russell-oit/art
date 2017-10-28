@@ -253,8 +253,7 @@ public class JPivotController {
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				paramProcessor.setLocale(locale);
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 

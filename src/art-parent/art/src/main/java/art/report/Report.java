@@ -812,16 +812,11 @@ public class Report implements Serializable {
 	public String getLocalizedName(Locale locale) throws IOException {
 		String localizedName = null;
 
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
-
-		if (generalOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (generalOptions != null && locale != null) {
 			Reporti18nOptions i18nOptions = generalOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nNameOptions = i18nOptions.getName();
-				localizedName = ArtUtils.getLocalizedValue(localeString, i18nNameOptions);
+				localizedName = ArtUtils.getLocalizedValue(locale, i18nNameOptions);
 			}
 		}
 
@@ -843,16 +838,11 @@ public class Report implements Serializable {
 	public String getLocalizedShortDescription(Locale locale) throws IOException {
 		String localizedShortDescription = null;
 
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
-
-		if (generalOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (generalOptions != null && locale != null) {
 			Reporti18nOptions i18nOptions = generalOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nShortDescriptionOptions = i18nOptions.getShortDescription();
-				localizedShortDescription = ArtUtils.getLocalizedValue(localeString, i18nShortDescriptionOptions);
+				localizedShortDescription = ArtUtils.getLocalizedValue(locale, i18nShortDescriptionOptions);
 			}
 		}
 
@@ -874,16 +864,11 @@ public class Report implements Serializable {
 	public String getLocalizedDescription(Locale locale) throws IOException {
 		String localizedDescription = null;
 
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
-
-		if (generalOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (generalOptions != null && locale != null) {
 			Reporti18nOptions i18nOptions = generalOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nDescriptionOptions = i18nOptions.getDescription();
-				localizedDescription = ArtUtils.getLocalizedValue(localeString, i18nDescriptionOptions);
+				localizedDescription = ArtUtils.getLocalizedValue(locale, i18nDescriptionOptions);
 			}
 		}
 

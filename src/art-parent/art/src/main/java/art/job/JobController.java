@@ -313,7 +313,7 @@ public class JobController {
 			model.addAttribute("job", job);
 
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
-			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request);
+			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request, locale);
 			Report report = job.getReport();
 			addParameters(model, paramProcessorResult, report, request);
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {

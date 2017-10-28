@@ -160,8 +160,7 @@ public class RunReportHelper {
 
 		//prepare report parameters
 		ParameterProcessor paramProcessor = new ParameterProcessor();
-		paramProcessor.setLocale(locale);
-		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 

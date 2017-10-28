@@ -512,17 +512,12 @@ public class Parameter implements Serializable {
 		//note that el can't reliably call overloaded methods, so if a method is to be called from el, don't overload it
 		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
 		String localizedLabel = null;
-		
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
 
-		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (parameterOptions != null && locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nLabelOptions = i18nOptions.getLabel();
-				localizedLabel = ArtUtils.getLocalizedValue(localeString, i18nLabelOptions);
+				localizedLabel = ArtUtils.getLocalizedValue(locale, i18nLabelOptions);
 			}
 		}
 
@@ -544,17 +539,12 @@ public class Parameter implements Serializable {
 	 */
 	public String getLocalizedHelpText(Locale locale) throws IOException {
 		String localizedHelpText = null;
-		
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
 
-		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (parameterOptions != null && locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nHelpTextOptions = i18nOptions.getHelpText();
-				localizedHelpText = ArtUtils.getLocalizedValue(localeString, i18nHelpTextOptions);
+				localizedHelpText = ArtUtils.getLocalizedValue(locale, i18nHelpTextOptions);
 			}
 		}
 
@@ -576,17 +566,12 @@ public class Parameter implements Serializable {
 	 */
 	public String getLocalizedDefaultValue(Locale locale) throws IOException {
 		String localizedDefaultValue = null;
-		
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
 
-		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (parameterOptions != null && locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nDefaultValueOptions = i18nOptions.getDefaultValue();
-				localizedDefaultValue = ArtUtils.getLocalizedValue(localeString, i18nDefaultValueOptions);
+				localizedDefaultValue = ArtUtils.getLocalizedValue(locale, i18nDefaultValueOptions);
 			}
 		}
 
@@ -608,17 +593,12 @@ public class Parameter implements Serializable {
 	 */
 	public String getLocalizedPlaceholderText(Locale locale) throws IOException {
 		String localizedPlaceholderText = null;
-		
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
 
-		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (parameterOptions != null && locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nPlaceholderTextOptions = i18nOptions.getPlaceholderText();
-				localizedPlaceholderText = ArtUtils.getLocalizedValue(localeString, i18nPlaceholderTextOptions);
+				localizedPlaceholderText = ArtUtils.getLocalizedValue(locale, i18nPlaceholderTextOptions);
 			}
 		}
 

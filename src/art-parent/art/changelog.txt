@@ -1,8 +1,8 @@
 ART 3.1
-* Accomodate reporting from password protected MS Access files
 * Allow dynamic lov to use a dynamic datasource when the lov is a chained parameter
 * Fix for error with thymleaf email inline jobs
 * Allow localization of report name, short description, description
+* Allow localization of report output column names
 * Added csv zip report format
 * Allow outputting of fixed width reports as txt or zip file
 * Updated sqlite driver to 3.20.1

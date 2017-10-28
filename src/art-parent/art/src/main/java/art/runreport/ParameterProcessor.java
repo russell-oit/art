@@ -62,6 +62,10 @@ public class ParameterProcessor {
 
 	private Locale locale;
 
+	public ParameterProcessor() {
+		locale = Locale.getDefault();
+	}
+
 	/**
 	 * @return the locale
 	 */
@@ -81,15 +85,20 @@ public class ParameterProcessor {
 	 * parameter values to be used when running a report
 	 *
 	 * @param request the http request
+	 * @param locale the locale being used
 	 * @return final report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.text.ParseException
 	 * @throws java.io.IOException
 	 */
 	public ParameterProcessorResult processHttpParameters(
-			HttpServletRequest request) throws SQLException, ParseException, IOException {
+			HttpServletRequest request, Locale locale)
+			throws SQLException, ParseException, IOException {
 
-		int reportId = Integer.parseInt(request.getParameter("reportId"));
+		String reportIdString = request.getParameter("reportId");
+		logger.debug("reportIdString='{}'", reportIdString);
+
+		int reportId = Integer.parseInt(reportIdString);
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
@@ -100,7 +109,7 @@ public class ParameterProcessor {
 		HttpSession session = request.getSession();
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
-		return process(passedValues, reportId, sessionUser);
+		return process(passedValues, reportId, sessionUser, locale);
 	}
 
 	/**
@@ -111,15 +120,23 @@ public class ParameterProcessor {
 	 * e.g. p-due_date, value is string array with values
 	 * @param reportId the report id
 	 * @param user the user under whose permission the report is being run
+	 * @param locale the locale being used
 	 * @return final report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.text.ParseException
 	 * @throws java.io.IOException
 	 */
 	public ParameterProcessorResult process(Map<String, String[]> passedValuesMap,
-			int reportId, User user) throws SQLException, ParseException, IOException {
+			int reportId, User user, Locale locale) throws SQLException, ParseException, IOException {
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
+
+		this.locale = locale;
+
+		Locale[] locales = SimpleDateFormat.getAvailableLocales();
+		if (!Arrays.asList(locales).contains(locale)) {
+			logger.debug("Locale '{}' not available for date parameter parsing", locale);
+		}
 
 		Map<String, ReportParameter> reportParamsMap = new HashMap<>();
 
@@ -421,7 +438,7 @@ public class ParameterProcessor {
 	 * @return an object of the appropriate type
 	 * @throws ParseException
 	 */
-	public Object convertParameterStringValueToObject(String value, Parameter param)
+	private Object convertParameterStringValueToObject(String value, Parameter param)
 			throws ParseException {
 
 		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
@@ -493,7 +510,7 @@ public class ParameterProcessor {
 	 * @return a date object
 	 * @throws ParseException
 	 */
-	public Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
+	private Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
 		return convertParameterStringValueToDate(value, param.getDateFormat());
 	}
 
@@ -517,7 +534,7 @@ public class ParameterProcessor {
 	 * @return a date object
 	 * @throws ParseException
 	 */
-	public Date convertParameterStringValueToDate(String value, String dateFormat) throws ParseException {
+	private Date convertParameterStringValueToDate(String value, String dateFormat) throws ParseException {
 		logger.debug("Entering convertParameterStringValueToDate: value='{}',"
 				+ " dateFormat='{}'", value, dateFormat);
 
@@ -574,7 +591,7 @@ public class ParameterProcessor {
 				}
 			}
 
-			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat, locale);
 			dateFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates
 			dateValue = dateFormatter.parse(value);
 		}
@@ -630,7 +647,7 @@ public class ParameterProcessor {
 		logger.debug("Entering processChartOptions");
 
 		ChartOptions chartOptions = new ChartOptions();
-		
+
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
 			String htmlParamName = entry.getKey();
 			String[] paramValues = entry.getValue();

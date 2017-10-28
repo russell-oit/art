@@ -30,6 +30,21 @@ public class Reporti18nOptions {
 	private List<Map<String, String>> name;
 	private List<Map<String, String>> shortDescription;
 	private List<Map<String, String>> description;
+	private List<Map<String, List<Map<String, String>>>> columnNames;
+
+	/**
+	 * @return the columnNames
+	 */
+	public List<Map<String, List<Map<String, String>>>> getColumnNames() {
+		return columnNames;
+	}
+
+	/**
+	 * @param columnNames the columnNames to set
+	 */
+	public void setColumnNames(List<Map<String, List<Map<String, String>>>> columnNames) {
+		this.columnNames = columnNames;
+	}
 
 	/**
 	 * @return the name

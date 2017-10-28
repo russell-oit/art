@@ -38,24 +38,14 @@ import org.apache.commons.lang3.StringEscapeUtils;
  */
 public class Rss20Output extends StandardOutput {
 
-	int columnIndex = 0; // current column
-	String[] columnNames;
+	private int columnIndex = 0; // current column
+	private String[] columnNames;
 
 	/**
 	 * rfc822 (2822) standard date
 	 */
-	public final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
-
-	/**
-	 * Returns the given date in rfc 822 format
-	 *
-	 * @param date the date to format
-	 * @return rfc822 representation of the date
-	 */
-	public String getDateAsRFC822String(Date date) {
-		return Rfc822DateFormat.format(date);
-	}
-
+	private final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
+	
 	@Override
 	public String getContentType() {
 		return "application/xml"; // mime type (use "text/html" for html)
@@ -90,7 +80,7 @@ public class Rss20Output extends StandardOutput {
 		out.println("<title>" + reportName + "</title>");
 		out.println("<link>" + Config.getSettings().getRssLink() + "</link>");
 		out.println("<description>" + reportName + " ART Feed</description>");
-		out.println("<pubDate>" + getDateAsRFC822String(new Date()) + "</pubDate> ");
+		out.println("<pubDate>" + Rfc822DateFormat.format(new Date()) + "</pubDate> ");
 		out.println("<generator>http://art.sourceforge.net</generator> ");
 	}
 
@@ -149,7 +139,7 @@ public class Rss20Output extends StandardOutput {
 		if (value == null) {
 			formattedValue = "";
 		} else {
-			formattedValue = getDateAsRFC822String(value);
+			formattedValue = Rfc822DateFormat.format(value);
 		}
 
 		out.println("<" + columnNames[columnIndex] + ">"
