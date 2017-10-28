@@ -22,6 +22,7 @@ import art.servlets.Config;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -37,14 +38,15 @@ import org.apache.commons.lang3.StringEscapeUtils;
  * @author Timothy Anyona
  */
 public class Rss20Output extends StandardOutput {
+	//https://validator.w3.org/feed/
 
 	private int columnIndex = 0; // current column
 	private String[] columnNames;
 
-	/**
-	 * rfc822 (2822) standard date
-	 */
-	private final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
+	//rfc822 (2822) date
+	//dates should not be localized. should always be in english.
+	//https://validator.w3.org/feed/docs/error/InvalidRFC2822Date.html
+	private final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
 	
 	@Override
 	public String getContentType() {
@@ -114,11 +116,6 @@ public class Rss20Output extends StandardOutput {
 	}
 
 	@Override
-	public void beginRows() {
-		out.println("<item>");
-	}
-
-	@Override
 	public void addCellString(String value) {
 		out.println("<" + columnNames[columnIndex] + ">"
 				+ StringEscapeUtils.escapeXml10(value)
@@ -165,12 +162,6 @@ public class Rss20Output extends StandardOutput {
 		out.println("</item>");
 	}
 	
-	@Override
-	public void beginTotalRow(){
-		columnIndex = 0;
-		out.println("<item>");
-	}
-
 	@Override
 	public void endOutput() {
 		out.println("</channel>");
