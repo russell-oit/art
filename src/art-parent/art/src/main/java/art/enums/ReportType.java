@@ -47,7 +47,7 @@ public enum ReportType {
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17),
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
-	FixedWidth(141), C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
+	CSV(152), FixedWidth(141), C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
 	Leaflet(146), OpenLayers(147);
 
 	private final int value;
@@ -661,6 +661,8 @@ public enum ReportType {
 				return "Saiku: Connection";
 			case MongoDB:
 				return "MongoDB";
+			case CSV:
+				return "CSV";
 			default:
 				return this.name();
 		}

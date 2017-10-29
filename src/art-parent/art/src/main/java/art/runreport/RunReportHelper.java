@@ -107,7 +107,7 @@ public class RunReportHelper {
 				}
 			}
 		}
-		
+
 		logger.debug("dynamicDatasourceIdString='{}'", dynamicDatasourceIdString);
 
 		if (dynamicDatasourceIdString == null) {
@@ -379,7 +379,6 @@ public class RunReportHelper {
 			case DataTables:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
-			case FixedWidth:
 			case C3:
 			case ChartJs:
 			case Datamaps:
@@ -494,6 +493,11 @@ public class RunReportHelper {
 					formats.add("txt");
 					formats.add("txtZip");
 					break;
+				case CSV:
+					formats.add("html");
+					formats.add("csv");
+					formats.add("csvZip");
+					break;
 				default:
 					//tabular, crosstab, lov dynamic, etc
 					formats = Config.getReportFormats();
@@ -579,9 +583,9 @@ public class RunReportHelper {
 				|| reportType == ReportType.Group || reportType.isChart()
 				|| reportType == ReportType.Thymeleaf
 				|| reportType == ReportType.Dygraphs
+				|| reportType == ReportType.CSV
 				|| reportType == ReportType.FixedWidth) {
-			//need scrollable resultset for jasper art report, jxls art report,
-			//freemarker, xdocreport, thymeleaf, dygraphs, fixedwidth in order to display record count
+			//need scrollable resultset in order to display record count
 			//need scrollable resultset in order to generate group report
 			//need scrollable resultset for charts for show data option
 			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;

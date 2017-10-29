@@ -74,9 +74,8 @@ public class TsvOutput extends StandardOutput {
 		try {
 			fout = new FileOutputStream(fullOutputFileName);
 
-			String filename = FilenameUtils.getBaseName(fullOutputFileName);
-
 			if (zipType == ZipType.Zip) {
+				String filename = FilenameUtils.getBaseName(fullOutputFileName);
 				ZipEntry ze = new ZipEntry(filename + ".tsv");
 				zout = new ZipOutputStream(fout);
 				zout.putNextEntry(ze);

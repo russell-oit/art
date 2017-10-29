@@ -338,6 +338,7 @@ Edit report page
 					case 103: //tabular html
 					case 101: //crosstab
 					case 102: //crosstab html
+					case 152: //csv
 						$("#optionsDiv").show();
 						break;
 					default:

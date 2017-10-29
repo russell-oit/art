@@ -631,7 +631,8 @@ public class JobController {
 					jobTypes.add(JobType.CondEmailAttachment);
 					jobTypes.add(JobType.CondPublish);
 					jobTypes.add(JobType.Print);
-				} else if(reportType == ReportType.FixedWidth){
+				} else if(reportType == ReportType.FixedWidth
+						|| reportType == ReportType.CSV){
 					jobTypes.add(JobType.EmailAttachment);
 					jobTypes.add(JobType.EmailInline);
 					jobTypes.add(JobType.Publish);

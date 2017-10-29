@@ -72,9 +72,8 @@ public class CsvOutputArt extends StandardOutput {
 		try {
 			fout = new FileOutputStream(fullOutputFileName);
 
-			String filename = FilenameUtils.getBaseName(fullOutputFileName);
-
 			if (zipType == ZipType.Zip) {
+				String filename = FilenameUtils.getBaseName(fullOutputFileName);
 				FilenameHelper filenameHelper = new FilenameHelper();
 				String zipEntryFilenameExtension = filenameHelper.getCsvExtension(report);
 				String zipEntryFilename = filename + "." + zipEntryFilenameExtension;

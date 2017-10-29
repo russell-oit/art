@@ -20,25 +20,27 @@ package art.reportoptions;
 import com.univocity.parsers.common.processor.ObjectRowWriterProcessor;
 import com.univocity.parsers.conversions.Conversions;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * Common options for univocity output
- * 
+ *
  * @author Timothy Anyona
  */
 public class CommonUnivocityOptions extends GeneralReportOptions {
-	
+
 	private String dateFormat;
 	private String dateTimeFormat;
 	private String numberFormat;
-	private List<Map<String,List<String>>> fieldNumberFormats;
-	private List<Map<String,List<String>>> fieldIntegerFormats;
-	private List<Map<String,List<String>>> fieldLongFormats;
-	private List<Map<String,List<String>>> fieldDoubleFormats;
-	private List<Map<String,List<String>>> fieldDateFormats;
+	private List<Map<String, List<String>>> fieldNumberFormats;
+	private List<Map<String, List<String>>> fieldIntegerFormats;
+	private List<Map<String, List<String>>> fieldLongFormats;
+	private List<Map<String, List<String>>> fieldDoubleFormats;
+	private List<Map<String, List<String>>> fieldDateFormats;
 	private boolean includeHeaders = true;
 
 	/**
@@ -100,85 +102,89 @@ public class CommonUnivocityOptions extends GeneralReportOptions {
 	/**
 	 * @return the fieldNumberFormats
 	 */
-	public List<Map<String,List<String>>> getFieldNumberFormats() {
+	public List<Map<String, List<String>>> getFieldNumberFormats() {
 		return fieldNumberFormats;
 	}
 
 	/**
 	 * @param fieldNumberFormats the fieldNumberFormats to set
 	 */
-	public void setFieldNumberFormats(List<Map<String,List<String>>> fieldNumberFormats) {
+	public void setFieldNumberFormats(List<Map<String, List<String>>> fieldNumberFormats) {
 		this.fieldNumberFormats = fieldNumberFormats;
 	}
 
 	/**
 	 * @return the fieldIntegerFormats
 	 */
-	public List<Map<String,List<String>>> getFieldIntegerFormats() {
+	public List<Map<String, List<String>>> getFieldIntegerFormats() {
 		return fieldIntegerFormats;
 	}
 
 	/**
 	 * @param fieldIntegerFormats the fieldIntegerFormats to set
 	 */
-	public void setFieldIntegerFormats(List<Map<String,List<String>>> fieldIntegerFormats) {
+	public void setFieldIntegerFormats(List<Map<String, List<String>>> fieldIntegerFormats) {
 		this.fieldIntegerFormats = fieldIntegerFormats;
 	}
 
 	/**
 	 * @return the fieldLongFormats
 	 */
-	public List<Map<String,List<String>>> getFieldLongFormats() {
+	public List<Map<String, List<String>>> getFieldLongFormats() {
 		return fieldLongFormats;
 	}
 
 	/**
 	 * @param fieldLongFormats the fieldLongFormats to set
 	 */
-	public void setFieldLongFormats(List<Map<String,List<String>>> fieldLongFormats) {
+	public void setFieldLongFormats(List<Map<String, List<String>>> fieldLongFormats) {
 		this.fieldLongFormats = fieldLongFormats;
 	}
 
 	/**
 	 * @return the fieldDoubleFormats
 	 */
-	public List<Map<String,List<String>>> getFieldDoubleFormats() {
+	public List<Map<String, List<String>>> getFieldDoubleFormats() {
 		return fieldDoubleFormats;
 	}
 
 	/**
 	 * @param fieldDoubleFormats the fieldDoubleFormats to set
 	 */
-	public void setFieldDoubleFormats(List<Map<String,List<String>>> fieldDoubleFormats) {
+	public void setFieldDoubleFormats(List<Map<String, List<String>>> fieldDoubleFormats) {
 		this.fieldDoubleFormats = fieldDoubleFormats;
 	}
 
 	/**
 	 * @return the fieldDateFormats
 	 */
-	public List<Map<String,List<String>>> getFieldDateFormats() {
+	public List<Map<String, List<String>>> getFieldDateFormats() {
 		return fieldDateFormats;
 	}
 
 	/**
 	 * @param fieldDateFormats the fieldDateFormats to set
 	 */
-	public void setFieldDateFormats(List<Map<String,List<String>>> fieldDateFormats) {
+	public void setFieldDateFormats(List<Map<String, List<String>>> fieldDateFormats) {
 		this.fieldDateFormats = fieldDateFormats;
 	}
-	
+
 	/**
 	 * Sets field formats to use for different data types and fields
-	 * 
-	 * @param processor 
+	 *
+	 * @param processor the processor to set, not null
+	 * @param locale the locale that determines date format output, not null
 	 */
-	public void initializeProcessor(ObjectRowWriterProcessor processor){
+	public void initializeProcessor(ObjectRowWriterProcessor processor, Locale locale) {
+		Objects.requireNonNull(processor, "processor must not be null");
+		Objects.requireNonNull(locale, "locale must not be null");
+
 		if (StringUtils.isNotBlank(dateFormat)) {
-			processor.convertType(java.sql.Date.class, Conversions.toDate(dateFormat));
+			processor.convertType(java.sql.Date.class, Conversions.toDate(locale, dateFormat));
 		}
 
 		if (StringUtils.isNotBlank(dateTimeFormat)) {
-			processor.convertType(java.sql.Timestamp.class, Conversions.toDate(dateTimeFormat));
+			processor.convertType(java.sql.Timestamp.class, Conversions.toDate(locale, dateTimeFormat));
 		}
 
 		if (StringUtils.isNotBlank(numberFormat)) {
@@ -228,9 +234,9 @@ public class CommonUnivocityOptions extends GeneralReportOptions {
 				Map.Entry<String, List<String>> entry = dateFormatDefinition.entrySet().iterator().next();
 				String fieldDateFormat = entry.getKey();
 				List<String> fieldNames = entry.getValue();
-				processor.convertFields(Conversions.toDate(fieldDateFormat)).set(fieldNames);
+				processor.convertFields(Conversions.toDate(locale, fieldDateFormat)).set(fieldNames);
 			}
 		}
 	}
-	
+
 }

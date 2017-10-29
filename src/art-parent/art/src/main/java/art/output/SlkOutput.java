@@ -95,9 +95,8 @@ public class SlkOutput extends StandardOutput {
 		try {
 			fout = new FileOutputStream(fullOutputFileName);
 
-			String filename = FilenameUtils.getBaseName(fullOutputFileName);
-
 			if (zipType == ZipType.Zip) {
+				String filename = FilenameUtils.getBaseName(fullOutputFileName);
 				ZipEntry ze = new ZipEntry(filename + ".slk");
 				zout = new ZipOutputStream(fout);
 				zout.putNextEntry(ze);

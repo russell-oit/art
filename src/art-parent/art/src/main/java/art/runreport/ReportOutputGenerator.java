@@ -69,6 +69,7 @@ import art.report.ReportService;
 import art.reportoptions.C3Options;
 import art.reportoptions.ChartJsOptions;
 import art.reportoptions.CsvOutputArtOptions;
+import art.reportoptions.CsvOutputUnivocityOptions;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
 import art.reportoptions.DatamapsOptions;
@@ -272,6 +273,14 @@ public class ReportOutputGenerator {
 				if (report.getReportId() == reportParam.getReport().getReportId()) {
 					applicableReportParamsList.add(reportParam);
 				}
+			}
+
+			Locale reportOutputLocale;
+			String reportLocale = report.getLocale();
+			if (StringUtils.isBlank(reportLocale)) {
+				reportOutputLocale = locale;
+			} else {
+				reportOutputLocale = ArtUtils.getLocaleFromString(reportLocale);
 			}
 
 			int reportId = report.getReportId();
@@ -645,12 +654,13 @@ public class ReportOutputGenerator {
 					//http://dygraphs.com/date-formats.html
 					String dateFormat = "yyyy/MM/dd";
 					String dateTimeFormat = "yyyy/MM/dd HH:mm";
-					csvOutputUnivocity.setDateFormat(dateFormat);
-					csvOutputUnivocity.setDateTimeFormat(dateTimeFormat);
+					CsvOutputUnivocityOptions csvOptions = new CsvOutputUnivocityOptions();
+					csvOptions.setDateFormat(dateFormat);
+					csvOptions.setDateTimeFormat(dateTimeFormat);
 
 					String csvString;
 					try (StringWriter stringWriter = new StringWriter()) {
-						csvOutputUnivocity.generateOutput(rs, stringWriter);
+						csvOutputUnivocity.generateOutput(rs, stringWriter, csvOptions, Locale.ENGLISH);
 						csvString = stringWriter.toString();
 					}
 
@@ -785,7 +795,18 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
-				fixedWidthOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename);
+				fixedWidthOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+
+				rowsRetrieved = getResultSetRowCount(rs);
+
+				if (!isJob && !reportFormat.isHtml()) {
+					displayFileLink(fileName);
+				}
+			} else if (reportType == ReportType.CSV) {
+				rs = reportRunner.getResultSet();
+
+				CsvOutputUnivocity csvOutput = new CsvOutputUnivocity();
+				csvOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
 
 				rowsRetrieved = getResultSetRowCount(rs);
 

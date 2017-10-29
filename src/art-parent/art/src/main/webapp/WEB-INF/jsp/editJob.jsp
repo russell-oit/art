@@ -247,6 +247,11 @@
 					list.append(new Option('${txtText}', 'txt'));
 					list.append(new Option('${txtZipText}', 'txtZip'));
 					list.append(new Option('${htmlText}', 'html'));
+				} else if (reportTypeId === 152) {
+					//csv
+					list.append(new Option('${txtText}', 'csv'));
+					list.append(new Option('${txtZipText}', 'csvZip'));
+					list.append(new Option('${htmlText}', 'html'));
 				} else if (reportTypeId === 110 || reportTypeId === 129) {
 					//dashboard
 					list.append(new Option('${pdfText}', 'pdf'));

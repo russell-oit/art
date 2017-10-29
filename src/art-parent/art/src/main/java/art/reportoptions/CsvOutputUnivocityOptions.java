@@ -22,6 +22,52 @@ package art.reportoptions;
  * 
  * @author Timothy Anyona
  */
-public class CsvOutputUnivocityOptions {
+public class CsvOutputUnivocityOptions extends CommonUnivocityOptions {
+	
+	private char delimiter = ',';
+	private char quote = '"';
+	private boolean quoteAllFields;
+
+	/**
+	 * @return the delimiter
+	 */
+	public char getDelimiter() {
+		return delimiter;
+	}
+
+	/**
+	 * @param delimiter the delimiter to set
+	 */
+	public void setDelimiter(char delimiter) {
+		this.delimiter = delimiter;
+	}
+
+	/**
+	 * @return the quote
+	 */
+	public char getQuote() {
+		return quote;
+	}
+
+	/**
+	 * @param quote the quote to set
+	 */
+	public void setQuote(char quote) {
+		this.quote = quote;
+	}
+
+	/**
+	 * @return the quoteAllFields
+	 */
+	public boolean isQuoteAllFields() {
+		return quoteAllFields;
+	}
+
+	/**
+	 * @param quoteAllFields the quoteAllFields to set
+	 */
+	public void setQuoteAllFields(boolean quoteAllFields) {
+		this.quoteAllFields = quoteAllFields;
+	}
 	
 }

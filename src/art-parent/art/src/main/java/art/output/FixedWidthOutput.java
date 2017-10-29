@@ -35,6 +35,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -67,11 +68,13 @@ public class FixedWidthOutput {
 	 * @param report the report object for the report being run
 	 * @param reportFormat the report format to use
 	 * @param fullOutputFileName the output file name to use
+	 * @param locale the locale that determines date format output
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 */
 	public void generateOutput(ResultSet rs, PrintWriter writer, Report report,
-			ReportFormat reportFormat, String fullOutputFileName) throws SQLException, IOException {
+			ReportFormat reportFormat, String fullOutputFileName, Locale locale)
+			throws SQLException, IOException {
 
 		logger.debug("Entering generateOutput: report={}, reportFormat={},"
 				+ " fullOutputFileName='{}'", report, reportFormat, fullOutputFileName);
@@ -89,7 +92,7 @@ public class FixedWidthOutput {
 		FixedWidthOptions fixedWidthOptions = mapper.readValue(options, FixedWidthOptions.class);
 
 		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
-		fixedWidthOptions.initializeProcessor(processor);
+		fixedWidthOptions.initializeProcessor(processor, locale);
 
 		FixedWidthFields fields;
 
@@ -226,11 +229,10 @@ public class FixedWidthOutput {
 			writer.println("</pre>");
 		} else {
 			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
-				String filename = FilenameUtils.getBaseName(fullOutputFileName);
-
 				if (reportFormat == ReportFormat.txt) {
 					routines.write(rs, fout);
 				} else if (reportFormat == ReportFormat.txtZip) {
+					String filename = FilenameUtils.getBaseName(fullOutputFileName);
 					ZipEntry ze = new ZipEntry(filename + ".txt");
 					try (ZipOutputStream zout = new ZipOutputStream(fout)) {
 						zout.putNextEntry(ze);

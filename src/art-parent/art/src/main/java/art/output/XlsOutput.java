@@ -102,9 +102,8 @@ public class XlsOutput extends StandardOutput {
 
 			fout = new FileOutputStream(fullOutputFileName);
 
-			String filename = FilenameUtils.getBaseName(fullOutputFileName);
-
 			if (zipType == ZipType.Zip) {
+				String filename = FilenameUtils.getBaseName(fullOutputFileName);
 				ZipEntry ze = new ZipEntry(filename + ".xls");
 				zout = new ZipOutputStream(fout);
 				zout.putNextEntry(ze);

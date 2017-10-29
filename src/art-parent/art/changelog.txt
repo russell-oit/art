@@ -6,8 +6,8 @@ ART 3.1
 * Added csv zip report format
 * Allow outputting of fixed width reports as txt or zip file
 * Allow use of dynamic recipient details in email subject
-* Updated sqlite driver to 3.20.1
-* Updated jxls to 2.4.2
+* Added CSV report type
+* Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1
 * Removed column autosizing for xls and xlsx output. Was causing greatly increased execution times for xlsx output.
