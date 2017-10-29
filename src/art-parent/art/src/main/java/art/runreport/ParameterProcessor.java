@@ -133,11 +133,6 @@ public class ParameterProcessor {
 
 		this.locale = locale;
 
-		Locale[] locales = SimpleDateFormat.getAvailableLocales();
-		if (!Arrays.asList(locales).contains(locale)) {
-			logger.debug("Locale '{}' not available for date parameter parsing", locale);
-		}
-
 		Map<String, ReportParameter> reportParamsMap = new HashMap<>();
 
 		//get list of all defined report parameters
@@ -588,6 +583,15 @@ public class ParameterProcessor {
 					dateFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
 				} else {
 					throw new IllegalArgumentException("Unexpected date format: " + value);
+				}
+			}
+
+			//not all locales work or are available with simpledateformat
+			//with lenient set to false, parsing may throw an error if the locale is not available
+			if (logger.isDebugEnabled()) {
+				Locale[] locales = SimpleDateFormat.getAvailableLocales();
+				if (!Arrays.asList(locales).contains(locale)) {
+					logger.debug("Locale '{}' not available for date parameter parsing", locale);
 				}
 			}
 

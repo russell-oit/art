@@ -162,6 +162,18 @@ public class ReportJob implements org.quartz.Job {
 			return;
 		}
 
+		Report report = job.getReport();
+		if (report == null) {
+			logger.info("Job report not available: Job ID {}", tempJobId);
+			return;
+		}
+
+		User user = job.getUser();
+		if (user == null) {
+			logger.info("Job user not available: Job ID {}", tempJobId);
+			return;
+		}
+
 		jobType = job.getJobType();
 		jobId = job.getJobId();
 
@@ -903,6 +915,7 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 		} catch (SQLException | IOException ex) {
+			runDetails = "<b>Error:</b> " + ex.toString();
 			logger.error("Error", ex);
 		} finally {
 			DatabaseUtils.close(rs);
