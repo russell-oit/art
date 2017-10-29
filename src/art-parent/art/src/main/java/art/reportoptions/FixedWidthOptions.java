@@ -25,12 +25,9 @@ import java.util.Map;
  *
  * @author Timothy Anyona
  */
-public class FixedWidthOptions extends GeneralReportOptions {
+public class FixedWidthOptions extends CommonUnivocityOptions {
 
-	private String dateFormat;
-	private String dateTimeFormat;
 	private List<Integer> fieldLengths;
-	private boolean includeHeaders = true;
 	private char padding = ' ';
 	private boolean useDefaultPaddingForHeaders = true;
 	private String defaultAlignmentForHeaders;
@@ -39,12 +36,6 @@ public class FixedWidthOptions extends GeneralReportOptions {
 	private List<Map<String,List<Integer>>> fieldAlignmentByPosition;
 	private List<Map<Character,List<String>>> fieldPaddingByName;
 	private List<Map<Character,List<Integer>>> fieldPaddingByPosition;
-	private String numberFormat;
-	private List<Map<String,List<String>>> fieldNumberFormats;
-	private List<Map<String,List<String>>> fieldIntegerFormats;
-	private List<Map<String,List<String>>> fieldLongFormats;
-	private List<Map<String,List<String>>> fieldDoubleFormats;
-	private List<Map<String,List<String>>> fieldDateFormats;
 
 	/**
 	 * @return the padding
@@ -72,48 +63,6 @@ public class FixedWidthOptions extends GeneralReportOptions {
 	 */
 	public void setFieldLengths(List<Integer> fieldLengths) {
 		this.fieldLengths = fieldLengths;
-	}
-
-	/**
-	 * @return the dateFormat
-	 */
-	public String getDateFormat() {
-		return dateFormat;
-	}
-
-	/**
-	 * @param dateFormat the dateFormat to set
-	 */
-	public void setDateFormat(String dateFormat) {
-		this.dateFormat = dateFormat;
-	}
-
-	/**
-	 * @return the dateTimeFormat
-	 */
-	public String getDateTimeFormat() {
-		return dateTimeFormat;
-	}
-
-	/**
-	 * @param dateTimeFormat the dateTimeFormat to set
-	 */
-	public void setDateTimeFormat(String dateTimeFormat) {
-		this.dateTimeFormat = dateTimeFormat;
-	}
-
-	/**
-	 * @return the includeHeaders
-	 */
-	public boolean isIncludeHeaders() {
-		return includeHeaders;
-	}
-
-	/**
-	 * @param includeHeaders the includeHeaders to set
-	 */
-	public void setIncludeHeaders(boolean includeHeaders) {
-		this.includeHeaders = includeHeaders;
 	}
 
 	/**
@@ -214,87 +163,4 @@ public class FixedWidthOptions extends GeneralReportOptions {
 		this.fieldPaddingByPosition = fieldPaddingByPosition;
 	}
 
-	/**
-	 * @return the numberFormat
-	 */
-	public String getNumberFormat() {
-		return numberFormat;
-	}
-
-	/**
-	 * @param numberFormat the numberFormat to set
-	 */
-	public void setNumberFormat(String numberFormat) {
-		this.numberFormat = numberFormat;
-	}
-
-	/**
-	 * @return the fieldIntegerFormats
-	 */
-	public List<Map<String,List<String>>> getFieldIntegerFormats() {
-		return fieldIntegerFormats;
-	}
-
-	/**
-	 * @param fieldIntegerFormats the fieldIntegerFormats to set
-	 */
-	public void setFieldIntegerFormats(List<Map<String,List<String>>> fieldIntegerFormats) {
-		this.fieldIntegerFormats = fieldIntegerFormats;
-	}
-
-	/**
-	 * @return the fieldDateFormats
-	 */
-	public List<Map<String,List<String>>> getFieldDateFormats() {
-		return fieldDateFormats;
-	}
-
-	/**
-	 * @param fieldDateFormats the fieldDateFormats to set
-	 */
-	public void setFieldDateFormats(List<Map<String,List<String>>> fieldDateFormats) {
-		this.fieldDateFormats = fieldDateFormats;
-	}
-
-	/**
-	 * @return the fieldLongFormats
-	 */
-	public List<Map<String,List<String>>> getFieldLongFormats() {
-		return fieldLongFormats;
-	}
-
-	/**
-	 * @param fieldLongFormats the fieldLongFormats to set
-	 */
-	public void setFieldLongFormats(List<Map<String,List<String>>> fieldLongFormats) {
-		this.fieldLongFormats = fieldLongFormats;
-	}
-
-	/**
-	 * @return the fieldDoubleFormats
-	 */
-	public List<Map<String,List<String>>> getFieldDoubleFormats() {
-		return fieldDoubleFormats;
-	}
-
-	/**
-	 * @param fieldDoubleFormats the fieldDoubleFormats to set
-	 */
-	public void setFieldDoubleFormats(List<Map<String,List<String>>> fieldDoubleFormats) {
-		this.fieldDoubleFormats = fieldDoubleFormats;
-	}
-
-	/**
-	 * @return the fieldNumberFormats
-	 */
-	public List<Map<String,List<String>>> getFieldNumberFormats() {
-		return fieldNumberFormats;
-	}
-
-	/**
-	 * @param fieldNumberFormats the fieldNumberFormats to set
-	 */
-	public void setFieldNumberFormats(List<Map<String,List<String>>> fieldNumberFormats) {
-		this.fieldNumberFormats = fieldNumberFormats;
-	}
 }

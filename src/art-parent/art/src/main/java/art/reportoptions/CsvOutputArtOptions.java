@@ -18,7 +18,7 @@
 package art.reportoptions;
 
 /**
- * Represents report options for csv output
+ * Represents report options for csv output for tabular reports
  * 
  * @author Timothy Anyona
  */
