@@ -50,6 +50,7 @@ Display application logs
 						}
 					],
 					orderClasses: false,
+					order: [1, "asc"], //sort by log date. 0 is the details column
 					pagingType: "full_numbers",
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: -1,

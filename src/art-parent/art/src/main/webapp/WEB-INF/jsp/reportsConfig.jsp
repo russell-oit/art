@@ -30,14 +30,13 @@ Reports configuration page
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 <spring:message code="reports.text.selectValue" var="selectValueText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 	
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.css"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.js"></script>
 
 		<script type="text/javascript">
@@ -341,4 +340,4 @@ Reports configuration page
 			</tbody>
 		</table>
 	</jsp:body>
-</t:mainPageWithPanel>
+</t:mainConfigPage>

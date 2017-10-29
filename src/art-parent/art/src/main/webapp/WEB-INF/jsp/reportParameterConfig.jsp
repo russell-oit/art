@@ -26,11 +26,9 @@
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-
 		<script type="text/javascript">
 			//enable use of bootstrap tooltips. both jquery ui and bootstrap define the tooltip function
 			$.fn.bsTooltip = $.fn.tooltip.noConflict();
@@ -226,5 +224,5 @@
 			</tbody>
 		</table>
 	</jsp:body>
-</t:mainPageWithPanel>
+</t:mainConfigPage>
 

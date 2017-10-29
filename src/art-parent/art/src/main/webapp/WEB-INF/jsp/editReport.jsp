@@ -335,6 +335,9 @@ Edit report page
 					case 151: //mongodb
 					case 117: //jxls template
 					case 118: //jxls art
+					case 103: //tabular html
+					case 101: //crosstab
+					case 102: //crosstab html
 						$("#optionsDiv").show();
 						break;
 					default:

@@ -21,8 +21,6 @@ Display current loggers
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
