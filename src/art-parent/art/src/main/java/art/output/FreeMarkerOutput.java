@@ -47,24 +47,59 @@ public class FreeMarkerOutput {
 	private static final Logger logger = LoggerFactory.getLogger(FreeMarkerOutput.class);
 
 	/**
-	 * Generates report output
+	 * Generates processed output, updating the writer with the final output
 	 *
 	 * @param report the report to use, not null
-	 * @param reportParams the report parameters
-	 * @param resultSet the resultset containing report data, not null
 	 * @param writer the writer to output to, not null
+	 * @param rs the resultset containing report data, not null
+	 * @param reportParams the report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 * @throws freemarker.template.TemplateException
 	 */
-	public void generateReport(Report report, List<ReportParameter> reportParams,
-			ResultSet resultSet, Writer writer)
+	public void generateOutput(Report report, Writer writer, ResultSet rs,
+			List<ReportParameter> reportParams)
 			throws SQLException, IOException, TemplateException {
 
-		logger.debug("Entering generateReport");
+		Objects.requireNonNull(rs, "rs must not be null");
+
+		//set objects to be passed to freemarker
+		Map<String, Object> data = new HashMap<>();
+
+		//pass report parameters
+		if (reportParams != null) {
+			for (ReportParameter reportParam : reportParams) {
+				String paramName = reportParam.getParameter().getName();
+				data.put(paramName, reportParam);
+			}
+
+			data.put("params", reportParams);
+		}
+
+		//pass report data
+		boolean useLowerCaseProperties = false;
+		boolean useColumnLabels = true;
+		RowSetDynaClass rsdc = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
+		data.put("results", rsdc.getRows());
+
+		generateOutput(report, writer, data);
+	}
+
+	/**
+	 * Generates processed output, updating the writer with the final output
+	 *
+	 * @param report the report to use, not null
+	 * @param writer the writer to output to, not null
+	 * @param data the objects to be passed to the template
+	 * @throws java.io.IOException
+	 * @throws freemarker.template.TemplateException
+	 */
+	public void generateOutput(Report report, Writer writer, Map<String, Object> data)
+			throws IOException, TemplateException {
+
+		logger.debug("Entering generateOutput: report={}", report);
 
 		Objects.requireNonNull(report, "report must not be null");
-		Objects.requireNonNull(resultSet, "resultset must not be null");
 		Objects.requireNonNull(writer, "writer must not be null");
 
 		String templateFileName = report.getTemplate();
@@ -87,25 +122,6 @@ public class FreeMarkerOutput {
 
 		Configuration cfg = Config.getFreemarkerConfig();
 		Template template = cfg.getTemplate(templateFileName);
-
-		//set objects to be passed to freemarker
-		Map<String, Object> data = new HashMap<>();
-
-		//pass report parameters
-		if (reportParams != null) {
-			for (ReportParameter reportParam : reportParams) {
-				String paramName = reportParam.getParameter().getName();
-				data.put(paramName, reportParam);
-			}
-			
-			data.put("params", reportParams);
-		}
-
-		//pass report data
-		boolean useLowerCaseProperties = false;
-		boolean useColumnLabels = true;
-		RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
-		data.put("results", rsdc.getRows());
 
 		//create output
 		template.process(data, writer);

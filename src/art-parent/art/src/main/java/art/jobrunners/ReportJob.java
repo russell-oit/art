@@ -31,6 +31,7 @@ import art.job.JobService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
+import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.report.Report;
 import art.report.ReportService;
@@ -586,28 +587,6 @@ public class ReportJob implements org.quartz.Job {
 
 		setMailerFromSubject(mailer, recipientColumns);
 
-		Report report = job.getReport();
-		String templateFileName = report.getTemplate();
-		String templatesPath = Config.getTemplatesPath();
-		String fullTemplateFileName = templatesPath + templateFileName;
-
-		logger.debug("templateFileName='{}'", templateFileName);
-
-		//need to explicitly check if template file is empty string
-		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-		if (StringUtils.isBlank(templateFileName)) {
-			throw new IllegalArgumentException("Template file not specified");
-		}
-
-		//check if template file exists
-		File templateFile = new File(fullTemplateFileName);
-		if (!templateFile.exists()) {
-			throw new IllegalStateException("Template file not found: " + templateFileName);
-		}
-
-		Configuration cfg = Config.getFreemarkerConfig();
-		Template template = cfg.getTemplate(templateFileName);
-
 		//set objects to be passed to freemarker
 		Map<String, Object> data = new HashMap<>();
 
@@ -621,9 +600,12 @@ public class ReportJob implements org.quartz.Job {
 
 		data.put("value", value);
 
+		Report report = job.getReport();
+
 		//create output
 		Writer writer = new StringWriter();
-		template.process(data, writer);
+		FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+		freemarkerOutput.generateOutput(report, writer, data);
 
 		String finalMessage = writer.toString();
 		mailer.setMessage(finalMessage);

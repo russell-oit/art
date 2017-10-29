@@ -498,7 +498,7 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 				
 				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
-				freemarkerOutput.generateReport(report, applicableReportParamsList, rs, writer);
+				freemarkerOutput.generateOutput(report, writer, rs, applicableReportParamsList);
 				
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType == ReportType.Thymeleaf) {
