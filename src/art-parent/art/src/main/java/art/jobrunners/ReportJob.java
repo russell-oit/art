@@ -85,6 +85,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
@@ -511,28 +512,36 @@ public class ReportJob implements org.quartz.Job {
 	 * Prepares a mailer object for sending an alert job
 	 *
 	 * @param mailer the mailer to use
-	 * @param msg the message of the email
+	 * @param message the message of the email
 	 * @param value the alert value
 	 */
-	private void prepareAlertMailer(Mailer mailer, String msg, int value) {
-		logger.debug("Entering prepareAlertMailer");
+	private void prepareAlertMailer(Mailer mailer, String message, int value) {
+		Map<String, String> recipientDetails = null;
+		prepareAlertMailer(mailer, message, value, recipientDetails);
+	}
 
-		String from = getMailFrom();
+	/**
+	 * Prepares a mailer object for sending an alert job
+	 *
+	 * @param mailer the mailer to use
+	 * @param message the message of the email
+	 * @param value the alert value
+	 * @param the dynamic recipient details
+	 */
+	private void prepareAlertMailer(Mailer mailer, String message, int value,
+			Map<String, String> recipientDetails) {
 
-		String subject = job.getMailSubject();
-		// compatibility with Art pre 1.8 where subject was not editable
-		if (subject == null) {
-			subject = "ART Alert: (Job " + jobId + ")";
-		}
+		logger.debug("Entering prepareAlertMailer: value={}", value);
 
-		mailer.setSubject(subject);
-		mailer.setFrom(from);
+		setMailerFromSubject(mailer, recipientDetails);
+
+		String customMessage = applyDynamicRecipientColumns(message, recipientDetails);
 
 		String mainMessage;
-		if (StringUtils.isBlank(msg)) {
+		if (StringUtils.isBlank(customMessage)) {
 			mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
 		} else {
-			mainMessage = msg;
+			mainMessage = customMessage;
 
 			//replace value placeholder in the message if it exists
 			String searchString = Pattern.quote("#value#"); //quote in case it contains special regex characters
@@ -558,7 +567,8 @@ public class ReportJob implements org.quartz.Job {
 	private void prepareFreeMarkerAlertMailer(Mailer mailer, int value)
 			throws TemplateException, IOException {
 
-		prepareFreeMarkerAlertMailer(mailer, value, null);
+		Map<String, String> recipientColumns = null;
+		prepareFreeMarkerAlertMailer(mailer, value, recipientColumns);
 	}
 
 	/**
@@ -572,18 +582,9 @@ public class ReportJob implements org.quartz.Job {
 	private void prepareFreeMarkerAlertMailer(Mailer mailer, int value,
 			Map<String, String> recipientColumns) throws TemplateException, IOException {
 
-		logger.debug("Entering prepareFreeMarkerAlertMailer");
+		logger.debug("Entering prepareFreeMarkerAlertMailer: value={}", value);
 
-		String from = getMailFrom();
-
-		String subject = job.getMailSubject();
-		// compatibility with Art pre 1.8 where subject was not editable
-		if (subject == null) {
-			subject = "ART Alert: (Job " + jobId + ")";
-		}
-
-		mailer.setSubject(subject);
-		mailer.setFrom(from);
+		setMailerFromSubject(mailer, recipientColumns);
 
 		Report report = job.getReport();
 		String templateFileName = report.getTemplate();
@@ -632,24 +633,31 @@ public class ReportJob implements org.quartz.Job {
 	 * Prepares a mailer object for sending an email job
 	 *
 	 * @param mailer the mailer to use
-	 * @param msg the message of the email
+	 * @param message the message of the email
 	 * @param outputFileName the full path of a file to include with the email
 	 */
-	private void prepareMailer(Mailer mailer, String msg, String outputFileName)
+	private void prepareMailer(Mailer mailer, String message, String outputFileName)
+			throws FileNotFoundException, IOException {
+
+		Map<String, String> recipientDetails = null;
+		prepareMailer(mailer, message, outputFileName, recipientDetails);
+	}
+
+	/**
+	 * Prepares a mailer object for sending an email job
+	 *
+	 * @param mailer the mailer to use
+	 * @param message the message of the email
+	 * @param outputFileName the full path of a file to include with the email
+	 * @param recipientDetails the dynamic recipient details
+	 */
+	private void prepareMailer(Mailer mailer, String message, String outputFileName,
+			Map<String, String> recipientDetails)
 			throws FileNotFoundException, IOException {
 
 		logger.debug("Entering prepareEmailMailer: outputFileName='{}'", outputFileName);
 
-		String from = getMailFrom();
-
-		String subject = job.getMailSubject();
-		// compatibility with Art pre 1.8 where subject was not editable
-		if (subject == null) {
-			subject = "ART: (Job " + jobId + ")";
-		}
-
-		mailer.setSubject(subject);
-		mailer.setFrom(from);
+		setMailerFromSubject(mailer, recipientDetails);
 
 		Report report = job.getReport();
 		ReportType reportType = report.getReportType();
@@ -672,12 +680,14 @@ public class ReportJob implements org.quartz.Job {
 			}
 		}
 
+		String customMessage = applyDynamicRecipientColumns(message, recipientDetails);
+
 		if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
 			String finalMessage;
 			if (jobType.isEmailInline()) {
 				finalMessage = messageData;
 			} else {
-				finalMessage = msg;
+				finalMessage = customMessage;
 			}
 
 			if (finalMessage == null) {
@@ -686,10 +696,10 @@ public class ReportJob implements org.quartz.Job {
 			mailer.setMessage(finalMessage);
 		} else {
 			String mainMessage;
-			if (StringUtils.isBlank(msg)) {
+			if (StringUtils.isBlank(customMessage)) {
 				mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
 			} else {
-				mainMessage = msg;
+				mainMessage = customMessage;
 			}
 
 			Context ctx = new Context(locale);
@@ -700,6 +710,26 @@ public class ReportJob implements org.quartz.Job {
 			String finalMessage = emailTemplateEngine.process("basicEmail", ctx);
 			mailer.setMessage(finalMessage);
 		}
+	}
+
+	/**
+	 * Sets the from and subject properties of a mailer object
+	 *
+	 * @param mailer the mailer object
+	 * @param recipientDetails the dynamic recipient details
+	 */
+	private void setMailerFromSubject(Mailer mailer, Map<String, String> recipientDetails) {
+		String from = getMailFrom();
+
+		String subject = job.getMailSubject();
+		if (subject == null) {
+			subject = "ART: (Job " + jobId + ")";
+		}
+
+		subject = applyDynamicRecipientColumns(subject, recipientDetails);
+
+		mailer.setSubject(subject);
+		mailer.setFrom(from);
 	}
 
 	/**
@@ -1272,9 +1302,7 @@ public class ReportJob implements org.quartz.Job {
 				String[] emailsArray = StringUtils.split(emails, ";");
 				Map<String, String> recipientColumns = entry.getValue();
 
-				//customize message by replacing field labels with values for this recipient
-				String customMessage = prepareCustomMessage(finalMessage, recipientColumns); //message for a particular recipient. may include personalization e.g. Dear Jane
-				prepareMailer(mailer, customMessage, outputFileName);
+				prepareMailer(mailer, finalMessage, outputFileName, recipientColumns);
 
 				mailer.setTo(emailsArray);
 
@@ -1691,8 +1719,7 @@ public class ReportJob implements org.quartz.Job {
 								if (reportType == ReportType.FreeMarker) {
 									prepareFreeMarkerAlertMailer(mailer, value, recipientColumns);
 								} else {
-									String customMessage = prepareCustomMessage(message, recipientColumns);
-									prepareAlertMailer(mailer, customMessage, value);
+									prepareAlertMailer(mailer, message, value, recipientColumns);
 								}
 
 								mailer.setTo(emailsArray);
@@ -1772,28 +1799,27 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Customizes the email message for a dynamic recipient by replacing field
-	 * labels with values for this recipient
+	 * Replaces field labels with values for a particular recipient
 	 *
-	 * @param message the original email message
+	 * @param value the original string
 	 * @param recipientColumns the recipient details
-	 * @return the customized message with field labels replaced
+	 * @return the customized string with field labels replaced
 	 */
-	private String prepareCustomMessage(String message, Map<String, String> recipientColumns) {
-		String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
+	private String applyDynamicRecipientColumns(String value, Map<String, String> recipientColumns) {
+		String finalValue = value;
 
-		if (StringUtils.isNotBlank(customMessage)) {
+		if (StringUtils.isNotBlank(value) && MapUtils.isNotEmpty(recipientColumns)) {
 			for (Entry<String, String> entry : recipientColumns.entrySet()) {
 				String columnName = entry.getKey();
 				String columnValue = entry.getValue();
 
 				String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
 				String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
-				customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+				finalValue = finalValue.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 			}
 		}
 
-		return customMessage;
+		return finalValue;
 	}
 
 	/**

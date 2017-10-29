@@ -44,7 +44,7 @@ public class Rss20Output extends StandardOutput {
 	private String[] columnNames;
 
 	//rfc822 (2822) date
-	//dates should not be localized. should always be in english.
+	//dates should not be localized. must use english locale.
 	//https://validator.w3.org/feed/docs/error/InvalidRFC2822Date.html
 	private final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
 	
