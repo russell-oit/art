@@ -914,7 +914,7 @@ public class ReportJob implements org.quartz.Job {
 					runJob(splitJob, jobUser, tos, recipients);
 				}
 			}
-		} catch (SQLException | IOException ex) {
+		} catch (SQLException | IOException | RuntimeException ex) {
 			runDetails = "<b>Error:</b> " + ex.toString();
 			logger.error("Error", ex);
 		} finally {
@@ -1027,7 +1027,7 @@ public class ReportJob implements org.quartz.Job {
 				//job is shared with other users but the owner doesn't have a copy. save note in the jobs table
 				runMessage = "jobs.message.jobShared";
 			}
-		} catch (SQLException | IOException ex) {
+		} catch (SQLException | IOException | RuntimeException ex) {
 			logger.error("Error", ex);
 		}
 	}

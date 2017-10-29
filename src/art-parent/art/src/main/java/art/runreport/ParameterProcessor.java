@@ -586,7 +586,7 @@ public class ParameterProcessor {
 				}
 			}
 
-			//not all locales work or are available with simpledateformat
+			//not all locales work with simpledateformat
 			//with lenient set to false, parsing may throw an error if the locale is not available
 			if (logger.isDebugEnabled()) {
 				Locale[] locales = SimpleDateFormat.getAvailableLocales();
