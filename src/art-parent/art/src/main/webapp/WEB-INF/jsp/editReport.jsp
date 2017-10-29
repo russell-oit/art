@@ -656,6 +656,8 @@ Edit report page
 					case 0: //tabular
 					case 103: //tabular html
 					case 148: //tabular heatmap
+					case 101: //crosstab
+					case 102: //crosstab html
 						$("#tabularFields").show();
 						break;
 					default:
@@ -717,13 +719,28 @@ Edit report page
 				} else {
 					$("#pageOrientationDiv").hide();
 				}
-				
+
 				//show/hide lov use dynamic datasource
 				if (reportTypeId === 119) {
 					//lov dynamic
 					$("#lovUseDynamicDatasourceDiv").show();
 				} else {
 					$("#lovUseDynamicDatasourceDiv").hide();
+				}
+
+				//show/hide locale
+				switch (reportTypeId) {
+					case 0: //tabular
+					case 103: //tabular html
+					case 148: //tabular heatmap
+					case 101: //crosstab
+					case 102: //crosstab html
+					case 141: //fixed width
+					case 152: //csv
+						$("#localeDiv").show();
+						break;
+					default:
+						$("#localeDiv").hide();
 				}
 			}
 		</script>
@@ -1050,15 +1067,6 @@ Edit report page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-4" for="locale">
-							<spring:message code="reports.label.locale"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="locale" maxlength="50" class="form-control"/>
-							<form:errors path="locale" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
 						<label class="control-label col-md-4" for="nullNumberDisplay">
 							<spring:message code="reports.label.nullNumberDisplay"/>
 						</label>
@@ -1077,6 +1085,16 @@ Edit report page
 						</div>
 					</div>
 				</fieldset>
+
+				<div id="localeDiv" class="form-group">
+					<label class="control-label col-md-4" for="locale">
+						<spring:message code="reports.label.locale"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="locale" maxlength="50" class="form-control"/>
+						<form:errors path="locale" cssClass="error"/>
+					</div>
+				</div>
 
 				<div id="fetchSizeDiv" class="form-group">
 					<label class="control-label col-md-4" for="fetchSize">
