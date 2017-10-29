@@ -47,7 +47,7 @@ public class FreeMarkerOutput {
 	private static final Logger logger = LoggerFactory.getLogger(FreeMarkerOutput.class);
 
 	/**
-	 * Generates processed output, updating the writer with the final output
+	 * Generates output, updating the writer with the final output
 	 *
 	 * @param report the report to use, not null
 	 * @param writer the writer to output to, not null
@@ -86,7 +86,7 @@ public class FreeMarkerOutput {
 	}
 
 	/**
-	 * Generates processed output, updating the writer with the final output
+	 * Generates output, updating the writer with the final output
 	 *
 	 * @param report the report to use, not null
 	 * @param writer the writer to output to, not null

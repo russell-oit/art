@@ -33,6 +33,7 @@ import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
+import art.output.ThymeleafOutput;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -54,8 +55,6 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import java.awt.Desktop;
 import java.io.File;
@@ -560,34 +559,38 @@ public class ReportJob implements org.quartz.Job {
 
 	/**
 	 * Prepares a mailer object for sending an alert job based on a freemarker
-	 * report
+	 * or thymeleaf report
 	 *
+	 * @param reportType the report type
 	 * @param mailer the mailer to use
 	 * @param value the alert value
 	 */
-	private void prepareFreeMarkerAlertMailer(Mailer mailer, int value)
+	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer, int value)
 			throws TemplateException, IOException {
 
 		Map<String, String> recipientColumns = null;
-		prepareFreeMarkerAlertMailer(mailer, value, recipientColumns);
+		prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns);
 	}
 
 	/**
 	 * Prepares a mailer object for sending an alert job based on a freemarker
-	 * report
+	 * or thymeleaf report
 	 *
+	 * @param reportType the report type
 	 * @param mailer the mailer to use
 	 * @param value the alert value
 	 * @param recipientColumns the recipient column details
 	 */
-	private void prepareFreeMarkerAlertMailer(Mailer mailer, int value,
-			Map<String, String> recipientColumns) throws TemplateException, IOException {
+	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer,
+			int value, Map<String, String> recipientColumns)
+			throws TemplateException, IOException {
 
-		logger.debug("Entering prepareFreeMarkerAlertMailer: value={}", value);
+		logger.debug("Entering prepareTemplateAlertMailer: reportType={}, "
+				+ "value={}", reportType, value);
 
 		setMailerFromSubject(mailer, recipientColumns);
 
-		//set objects to be passed to freemarker
+		//set variables to be passed to template
 		Map<String, Object> data = new HashMap<>();
 
 		if (recipientColumns != null) {
@@ -604,8 +607,14 @@ public class ReportJob implements org.quartz.Job {
 
 		//create output
 		Writer writer = new StringWriter();
-		FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
-		freemarkerOutput.generateOutput(report, writer, data);
+
+		if (reportType == ReportType.FreeMarker) {
+			FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+			freemarkerOutput.generateOutput(report, writer, data);
+		} else if (reportType == ReportType.Thymeleaf) {
+			ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+			thymeleafOutput.generateOutput(report, writer, data);
+		}
 
 		String finalMessage = writer.toString();
 		mailer.setMessage(finalMessage);
@@ -1698,8 +1707,8 @@ public class ReportJob implements org.quartz.Job {
 								String[] emailsArray = StringUtils.split(emails, ";");
 								Map<String, String> recipientColumns = entry.getValue();
 
-								if (reportType == ReportType.FreeMarker) {
-									prepareFreeMarkerAlertMailer(mailer, value, recipientColumns);
+								if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+									prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns);
 								} else {
 									prepareAlertMailer(mailer, message, value, recipientColumns);
 								}
@@ -1742,8 +1751,8 @@ public class ReportJob implements org.quartz.Job {
 						if (generateEmail) {
 							Mailer mailer = getMailer();
 
-							if (reportType == ReportType.FreeMarker) {
-								prepareFreeMarkerAlertMailer(mailer, value);
+							if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+								prepareTemplateAlertMailer(reportType, mailer, value);
 							} else {
 								prepareAlertMailer(mailer, message, value);
 							}
