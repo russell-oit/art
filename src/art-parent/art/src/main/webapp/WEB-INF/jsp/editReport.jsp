@@ -742,6 +742,18 @@ Edit report page
 					default:
 						$("#localeDiv").hide();
 				}
+
+				//show/hide open and modify password
+				switch (reportTypeId) {
+					case 0: //tabular
+					case 101: //crosstab
+						$("#openPasswordDiv").show();
+						$("#modifyPasswordDiv").show();
+						break;
+					default:
+						$("#openPasswordDiv").hide();
+						$("#modifyPasswordDiv").hide();
+				}
 			}
 		</script>
 
@@ -1131,6 +1143,42 @@ Edit report page
 							<form:checkbox path="lovUseDynamicDatasource" id="lovUseDynamicDatasource" class="switch-yes-no"/>
 						</div>
 						<form:errors path="lovUseDynamicDatasource" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="openPasswordDiv" class="form-group">
+					<label class="control-label col-md-4" for="openPassword">
+						<spring:message code="reports.label.openPassword"/>
+					</label>
+					<div class="col-md-8">
+						<div>
+							<form:password path="openPassword" autocomplete="off" maxlength="50" class="form-control"/>
+						</div>
+						<div>
+							<label class="checkbox-inline">
+								<form:checkbox path="useNoneOpenPassword" id="useNoneOpenPassword"/>
+								<spring:message code="reports.checkbox.none"/>
+							</label>
+						</div>
+						<form:errors path="openPassword" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="modifyPasswordDiv" class="form-group">
+					<label class="control-label col-md-4" for="modifyPassword">
+						<spring:message code="reports.label.modifyPassword"/>
+					</label>
+					<div class="col-md-8">
+						<div>
+							<form:password path="modifyPassword" autocomplete="off" maxlength="50" class="form-control"/>
+						</div>
+						<div>
+							<label class="checkbox-inline">
+								<form:checkbox path="useNoneModifyPassword" id="useNoneModifyPassword"/>
+								<spring:message code="reports.checkbox.none"/>
+							</label>
+						</div>
+						<form:errors path="modifyPassword" cssClass="error"/>
 					</div>
 				</div>
 

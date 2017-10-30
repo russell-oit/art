@@ -22,6 +22,7 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.connectionpool.DbConnections;
 import art.datasource.DatasourceService;
+import art.encryption.AesEncryptor;
 import art.enums.AccessLevel;
 import art.enums.PageOrientation;
 import art.enums.ParameterType;
@@ -142,6 +143,8 @@ public class ReportService {
 			report.setOptions(rs.getString("REPORT_OPTIONS"));
 			report.setPageOrientation(PageOrientation.toEnum(rs.getString("PAGE_ORIENTATION"), PageOrientation.Portrait));
 			report.setLovUseDynamicDatasource(rs.getBoolean("LOV_USE_DYNAMIC_DATASOURCE"));
+			report.setOpenPassword(rs.getString("OPEN_PASSWORD"));
+			report.setModifyPassword(rs.getString("MODIFY_PASSWORD"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -152,6 +155,13 @@ public class ReportService {
 
 			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
 			report.setDatasource(datasource);
+
+			//decrypt open and modify passwords
+			String clearTextOpenPassword = AesEncryptor.decrypt(report.getOpenPassword());
+			report.setOpenPassword(clearTextOpenPassword);
+
+			String clearTextModifypassword = AesEncryptor.decrypt(report.getModifyPassword());
+			report.setModifyPassword(clearTextModifypassword);
 
 			setChartOptions(report);
 
@@ -602,8 +612,9 @@ public class ReportService {
 					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
+					+ " OPEN_PASSWORD, MODIFY_PASSWORD,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 36) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 38) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -640,6 +651,8 @@ public class ReportService {
 				report.getOptions(),
 				report.getPageOrientation().getValue(),
 				BooleanUtils.toInteger(report.isLovUseDynamicDatasource()),
+				report.getOpenPassword(),
+				report.getModifyPassword(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -656,6 +669,7 @@ public class ReportService {
 					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?, LOCALE=?,"
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
 					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
+					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -693,6 +707,8 @@ public class ReportService {
 				report.getOptions(),
 				report.getPageOrientation().getValue(),
 				BooleanUtils.toInteger(report.isLovUseDynamicDatasource()),
+				report.getOpenPassword(),
+				report.getModifyPassword(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

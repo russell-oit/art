@@ -480,7 +480,7 @@ public class DatasourceController {
 	 * Sets the password field of the datasource
 	 *
 	 * @param datasource the datasource object to set
-	 * @param action "add or "edit"
+	 * @param action "add", "edit" or "copy"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws SQLException

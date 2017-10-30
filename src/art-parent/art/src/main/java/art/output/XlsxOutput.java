@@ -21,11 +21,19 @@ import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
 import java.io.*;
+import java.security.GeneralSecurityException;
 import java.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackageAccess;
+import org.apache.poi.poifs.crypt.EncryptionInfo;
+import org.apache.poi.poifs.crypt.EncryptionMode;
+import org.apache.poi.poifs.crypt.Encryptor;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -293,6 +301,8 @@ public class XlsxOutput extends StandardOutput {
 	public void endOutput() {
 		try {
 
+			addModifyPassword();
+
 			if (wb != null) {
 				try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 					wb.write(fout);
@@ -305,8 +315,57 @@ public class XlsxOutput extends StandardOutput {
 			//delete template file
 			File templateFile = new File(templateFileName);
 			templateFile.delete();
-		} catch (IOException ex) {
+
+			addOpenPassword();
+		} catch (IOException | GeneralSecurityException | InvalidFormatException ex) {
 			throw new RuntimeException(ex);
+		}
+	}
+
+	/**
+	 * Adds a password to prevent modification of the worksheet
+	 */
+	private void addModifyPassword() {
+		//http://www.quicklyjava.com/create-password-protected-excel-using-apache-poi/
+		//http://www.quicklyjava.com/create-password-protected-excel-sheets-using-apache-poi/
+		//https://poi.apache.org/encryption.html
+		//https://blogs.msdn.microsoft.com/david_leblanc/2010/04/16/dont-use-office-rc4-encryption-really-just-dont-do-it/
+		//https://stackoverflow.com/questions/14701322/apache-poi-how-to-protect-sheet-with-options
+		//https://stackoverflow.com/questions/17675685/apache-poi-excel-sheet-protection-and-data-validation
+		//https://stackoverflow.com/questions/45097889/apache-poi-sheet-password-not-working
+		if (sheet != null && StringUtils.isNotEmpty(report.getModifyPassword())) {
+			sheet.protectSheet(report.getModifyPassword());
+		}
+	}
+
+	/**
+	 * Adds a password to prevent opening of the workbook
+	 *
+	 * @throws IOException
+	 * @throws GeneralSecurityException
+	 * @throws InvalidFormatException
+	 */
+	private void addOpenPassword() throws IOException, GeneralSecurityException, InvalidFormatException {
+		if (StringUtils.isEmpty(report.getOpenPassword())) {
+			return;
+		}
+
+		POIFSFileSystem fs = new POIFSFileSystem();
+		EncryptionInfo info = new EncryptionInfo(EncryptionMode.agile);
+		// EncryptionInfo info = new EncryptionInfo(EncryptionMode.agile, CipherAlgorithm.aes192, HashAlgorithm.sha384, -1, -1, null);
+
+		Encryptor enc = info.getEncryptor();
+		enc.confirmPassword(report.getOpenPassword());
+
+		// Read in an existing OOXML file
+		try (OPCPackage opc = OPCPackage.open(new File(fullOutputFileName), PackageAccess.READ_WRITE)) {
+			OutputStream os = enc.getDataStream(fs);
+			opc.save(os);
+		}
+
+		// Write out the encrypted version
+		try (FileOutputStream fos = new FileOutputStream(fullOutputFileName)) {
+			fs.writeFilesystem(fos);
 		}
 	}
 }

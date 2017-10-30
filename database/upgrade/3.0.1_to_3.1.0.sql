@@ -8,6 +8,7 @@
 -- increase size of query rules field name column
 -- increase size of parameter default value column
 -- increase size of job subject and fixed file name columns
+-- add open and modify password fields for reports
 
 -- NOTES:
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
@@ -43,3 +44,7 @@ ALTER TABLE ART_JOBS MODIFY FIXED_FILE_NAME VARCHAR(1000);
 
 -- add csv report type
 INSERT INTO ART_REPORT_TYPES VALUES (152,'CSV');
+
+-- add open and modify password fields for reports
+ALTER TABLE ART_QUERIES ADD OPEN_PASSWORD VARCHAR(100);
+ALTER TABLE ART_QUERIES ADD MODIFY_PASSWORD VARCHAR(100);

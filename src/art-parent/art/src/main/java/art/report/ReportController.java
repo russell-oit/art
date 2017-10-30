@@ -18,6 +18,7 @@
 package art.report;
 
 import art.datasource.DatasourceService;
+import art.encryption.AesEncryptor;
 import art.enums.PageOrientation;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
@@ -86,7 +87,7 @@ public class ReportController {
 
 	@Autowired
 	private MessageSource messageSource;
-	
+
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
 		logger.debug("Entering showReports");
@@ -101,7 +102,7 @@ public class ReportController {
 
 		return "reports";
 	}
-	
+
 	@RequestMapping(value = "/selectReportParameters", method = RequestMethod.GET)
 	public String selectReportParameters(HttpSession session,
 			@RequestParam("reportId") Integer reportId,
@@ -272,6 +273,14 @@ public class ReportController {
 		}
 
 		try {
+			//set passwords as appropriate
+			String setPasswordsMessage = setPasswords(report, action);
+			logger.debug("setPasswordsMessage='{}'", setPasswordsMessage);
+			if (setPasswordsMessage != null) {
+				model.addAttribute("message", setPasswordsMessage);
+				return showEditReport(action, model, session);
+			}
+
 			//finalise report properties
 			String prepareReportMessage = prepareReport(report, templateFile, resourcesFile, action);
 			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
@@ -414,14 +423,14 @@ public class ReportController {
 
 		ArtHelper artHelper = new ArtHelper();
 		Mailer mailer = artHelper.getMailer();
-		
+
 		mailer.setFrom(from);
 		mailer.setSubject(subject);
 		mailer.setMessage(mailMessage);
 		mailer.setTo(tos);
 		mailer.setCc(ccs);
 		mailer.setBcc(bccs);
-		
+
 		List<File> attachments = new ArrayList<>();
 		attachments.add(reportFile);
 		mailer.setAttachments(attachments);
@@ -812,6 +821,80 @@ public class ReportController {
 		response.put("files", fileList);
 
 		return response;
+	}
+
+	/**
+	 * Sets the password fields, encrypting them in preparation for saving
+	 *
+	 * @param report the report
+	 * @param action the action
+	 * @return i18n message to display in the user interface if there was a
+	 * problem, null otherwise
+	 * @throws SQLException
+	 */
+	private String setPasswords(Report report, String action) throws SQLException {
+		logger.debug("Entering setPasswords: report={}, action='{}'", report, action);
+
+		//set open password
+		boolean useCurrentOpenPassword = false;
+		String newOpenPassword = report.getOpenPassword();
+
+		if (report.isUseNoneOpenPassword()) {
+			newOpenPassword = null;
+		} else if (StringUtils.isEmpty(newOpenPassword)
+				&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
+			//password field blank. use current password
+			useCurrentOpenPassword = true;
+		}
+
+		if (useCurrentOpenPassword) {
+			//password field blank. use current password
+			Report currentReport = reportService.getReport(report.getReportId());
+			if (currentReport == null) {
+				return "page.message.cannotUseCurrentPassword";
+			} else {
+				newOpenPassword = currentReport.getOpenPassword();
+			}
+		}
+
+		//encrypt new password
+		if (StringUtils.equals(newOpenPassword, "")) {
+			//if password set as empty string, there is no way to specify empty string as password for xlsx workbooks
+			newOpenPassword = null;
+		}
+		String encryptedOpenPassword = AesEncryptor.encrypt(newOpenPassword);
+		report.setOpenPassword(encryptedOpenPassword);
+
+		//set modify password
+		boolean useCurrentModifyPassword = false;
+		String newModifyPassword = report.getModifyPassword();
+
+		if (report.isUseNoneModifyPassword()) {
+			newModifyPassword = null;
+		} else if (StringUtils.isEmpty(newModifyPassword)
+				&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
+			//password field blank. use current password
+			useCurrentModifyPassword = true;
+		}
+
+		if (useCurrentModifyPassword) {
+			//password field blank. use current password
+			Report currentReport = reportService.getReport(report.getReportId());
+			if (currentReport == null) {
+				return "page.message.cannotUseCurrentPassword";
+			} else {
+				newModifyPassword = currentReport.getModifyPassword();
+			}
+		}
+
+		//encrypt new password
+		if (StringUtils.equals(newModifyPassword, "")) {
+			newModifyPassword = null;
+		}
+		String encryptedModifyPassword = AesEncryptor.encrypt(newModifyPassword);
+		report.setModifyPassword(encryptedModifyPassword);
+
+		return null;
 	}
 
 }
