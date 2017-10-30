@@ -20,6 +20,7 @@ package art.output;
 import art.servlets.Config;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -63,7 +65,7 @@ public class GroupXlsxOutput extends GroupOutput {
 	 */
 	private void init() {
 		try {
-			fout = new FileOutputStream(fullOutputFilename);
+			fout = new FileOutputStream(fullOutputFileName);
 
 			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 
@@ -160,12 +162,23 @@ public class GroupXlsxOutput extends GroupOutput {
 	private void endOutput() {
 		try {
 			if (fout != null) {
+				//set modify password
+				if (sheet != null && StringUtils.isNotEmpty(report.getModifyPassword())) {
+					sheet.protectSheet(report.getModifyPassword());
+				}
+
 				if (wb != null) {
 					wb.write(fout);
 				}
 				fout.close();
+
+				//set open password
+				String openPassword = report.getOpenPassword();
+				if (StringUtils.isNotEmpty(openPassword)) {
+					PoiUtils.addOpenPassword(openPassword, fullOutputFileName);
+				}
 			}
-		} catch (IOException ex) {
+		} catch (IOException | GeneralSecurityException | InvalidFormatException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

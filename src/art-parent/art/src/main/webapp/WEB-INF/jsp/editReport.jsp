@@ -747,6 +747,7 @@ Edit report page
 				switch (reportTypeId) {
 					case 0: //tabular
 					case 101: //crosstab
+					case 1: //group
 						$("#openPasswordDiv").show();
 						$("#modifyPasswordDiv").show();
 						break;

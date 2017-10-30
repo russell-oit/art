@@ -340,6 +340,7 @@ public class ReportOutputGenerator {
 						groupOutput = new GroupXlsxOutput();
 						groupOutput.setReportName(report.getLocalizedName(locale));
 						groupOutput.setFullOutputFileName(fullOutputFilename);
+						groupOutput.setReport(report);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
@@ -347,7 +348,7 @@ public class ReportOutputGenerator {
 
 				rowsRetrieved = groupOutput.generateGroupReport(rs, splitColumn);
 
-				if (reportFormat == ReportFormat.xlsx) {
+				if (!isJob && reportFormat == ReportFormat.xlsx) {
 					displayFileLink(fileName);
 				}
 			} else if (reportType.isChart()) {
