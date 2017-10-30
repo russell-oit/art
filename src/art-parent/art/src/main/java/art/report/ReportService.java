@@ -604,7 +604,7 @@ public class ReportService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
-					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_RULES,"
+					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_RULES,"
 					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
 					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
@@ -614,7 +614,7 @@ public class ReportService {
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 38) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 39) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -622,6 +622,7 @@ public class ReportService {
 				shortDescription,
 				description,
 				reportTypeId,
+				report.getGroupColumn(),
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
@@ -660,7 +661,7 @@ public class ReportService {
 			affectedRows = dbService.update(sql, values);
 		} else {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
-					+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
+					+ " DESCRIPTION=?, QUERY_TYPE=?, GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
 					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
 					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
@@ -678,6 +679,7 @@ public class ReportService {
 				shortDescription,
 				description,
 				report.getReportTypeId(),
+				report.getGroupColumn(),
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),

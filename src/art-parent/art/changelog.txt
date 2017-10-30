@@ -8,6 +8,7 @@ ART 3.1
 * Allow use of dynamic recipient details in email subject
 * Added CSV report type
 * Allow setting of password for xlsx, docx output
+* Fix for group column not being saved
 * Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1
