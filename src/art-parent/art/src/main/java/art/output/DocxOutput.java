@@ -23,9 +23,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -258,7 +261,13 @@ public class DocxOutput extends StandardOutput {
 			try (OutputStream fout = new FileOutputStream(fullOutputFileName)) {
 				document.write(fout);
 			}
-		} catch (IOException ex) {
+
+			//set open password
+			String openPassword = report.getOpenPassword();
+			if (StringUtils.isNotEmpty(openPassword)) {
+				PoiUtils.addOpenPassword(openPassword, fullOutputFileName);
+			}
+		} catch (IOException | GeneralSecurityException | InvalidFormatException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

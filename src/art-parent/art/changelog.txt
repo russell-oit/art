@@ -7,7 +7,7 @@ ART 3.1
 * Allow outputting of fixed width reports as txt or zip file
 * Allow use of dynamic recipient details in email subject
 * Added CSV report type
-* Allow setting of password for xlsx output
+* Allow setting of password for xlsx, docx output
 * Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1
