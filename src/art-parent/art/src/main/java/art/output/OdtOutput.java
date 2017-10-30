@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.odftoolkit.odfdom.dom.element.style.StyleMasterPageElement;
 import org.odftoolkit.odfdom.dom.style.props.OdfPageLayoutProperties;
 import org.odftoolkit.odfdom.incubator.doc.style.OdfStylePageLayout;
@@ -213,6 +214,12 @@ public class OdtOutput extends StandardOutput {
 	public void endOutput() {
 		try {
 			if (document != null) {
+				//set open password
+				String openPassword = report.getOpenPassword();
+				if (StringUtils.isNotEmpty(openPassword)) {
+					document.setPassword(openPassword);
+				}
+
 				document.save(fullOutputFileName);
 				document.close();
 			}

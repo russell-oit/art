@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.odftoolkit.odfdom.dom.element.style.StyleMasterPageElement;
 import org.odftoolkit.odfdom.dom.style.props.OdfPageLayoutProperties;
 import org.odftoolkit.odfdom.incubator.doc.style.OdfStylePageLayout;
@@ -83,7 +84,7 @@ public class OdsOutput extends StandardOutput {
 			//so append sheet and remove the first one created by default
 			table = document.appendSheet(reportName);
 			document.removeSheet(0);
-
+			
 			PageOrientation pageOrientation = report.getPageOrientation();
 			if (pageOrientation == PageOrientation.Landscape) {
 				setLandscapeOrientation();
@@ -224,6 +225,15 @@ public class OdsOutput extends StandardOutput {
 	public void endOutput() {
 		try {
 			if (document != null) {
+				//set open password
+				String openPassword = report.getOpenPassword();
+				if (StringUtils.isNotEmpty(openPassword)) {
+					document.setPassword(openPassword);
+				}
+				
+				//no way to set modify password. can only protect the worksheet, which can be unprotected without a password
+				//table.setProtected(true);
+
 				document.save(fullOutputFileName);
 				document.close();
 			}
