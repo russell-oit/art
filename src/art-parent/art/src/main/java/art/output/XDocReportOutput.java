@@ -177,5 +177,10 @@ public class XDocReportOutput {
 				xdocReport.convert(context, options, out);
 			}
 		}
+
+		if (reportFormat == ReportFormat.pdf) {
+			PdfHelper pdfHelper = new PdfHelper();
+			pdfHelper.addProtections(report, outputFileName);
+		}
 	}
 }

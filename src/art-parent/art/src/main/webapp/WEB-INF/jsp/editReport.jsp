@@ -719,6 +719,10 @@ Edit report page
 					case 129: //gridstack dashboard
 					case 115: //jasper template
 					case 116: //jasper art
+					case 123: //xdocreport docx freemarker
+					case 124: //xdocreport docx velocity
+					case 125: //xdocreport odt freemarker
+					case 126: //xdocreport odt velocity
 						$("#openPasswordDiv").show();
 						$("#modifyPasswordDiv").show();
 						break;
