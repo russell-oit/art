@@ -717,6 +717,8 @@ Edit report page
 					case 1: //group
 					case 110: //dashboard
 					case 129: //gridstack dashboard
+					case 115: //jasper template
+					case 116: //jasper art
 						$("#openPasswordDiv").show();
 						$("#modifyPasswordDiv").show();
 						break;
