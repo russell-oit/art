@@ -141,8 +141,8 @@ Display section to allow selecting of report parameters and initiate running of 
 
 	function Popup(data)
 	{
-		var mywindow = window.open('', '${report.getLocalizedName(pageContext.response.locale)}', 'height=400,width=600');
-		mywindow.document.write('<html><head><title>${report.getLocalizedName(pageContext.response.locale)}</title>');
+		var mywindow = window.open('', '${encode:forJavaScript(report.getLocalizedName(pageContext.response.locale))}', 'height=400,width=600');
+		mywindow.document.write('<html><head><title>${encode:forJavaScript(report.getLocalizedName(pageContext.response.locale))}</title>');
 		/*optional stylesheet*/ //mywindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
 		mywindow.document.write('</head><body>');
 		mywindow.document.write(data);
