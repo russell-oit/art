@@ -187,7 +187,7 @@ public class PdfHelper {
 			StandardProtectionPolicy spp = new StandardProtectionPolicy(ownerPassword, userPassword, ap);
 			int keyLength = pdfOptions.getKeyLength();
 			spp.setEncryptionKeyLength(keyLength);
-			spp.setPreferAES(true);
+			spp.setPreferAES(pdfOptions.isPreferAes());
 			spp.setPermissions(ap);
 			doc.protect(spp);
 

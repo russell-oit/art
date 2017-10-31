@@ -31,6 +31,7 @@ public class PdfOptions {
 	private boolean pdfCanCopyContent = true;
 	private boolean pdfCanModify = true;
 	private int keyLength = 128; //40, 128 or 256. using 256 requires JCE unlimited strength jurisdiction policy files. https://pdfbox.apache.org/2.0/dependencies.html
+	private boolean preferAes = true;
 
 	/**
 	 * @return the pdfCanPrint
@@ -86,6 +87,20 @@ public class PdfOptions {
 	 */
 	public void setKeyLength(int keyLength) {
 		this.keyLength = keyLength;
+	}
+
+	/**
+	 * @return the preferAes
+	 */
+	public boolean isPreferAes() {
+		return preferAes;
+	}
+
+	/**
+	 * @param preferAes the preferAes to set
+	 */
+	public void setPreferAes(boolean preferAes) {
+		this.preferAes = preferAes;
 	}
 
 }
