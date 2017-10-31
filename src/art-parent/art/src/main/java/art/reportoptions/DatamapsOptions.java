@@ -17,12 +17,15 @@
  */
 package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Represents report options for datamaps reports
  *
  * @author Timothy Anyona
  */
-public class DatamapsOptions extends GeneralReportOptions {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DatamapsOptions {
 
 	private String width = "500px";
 	private String height = "300px";

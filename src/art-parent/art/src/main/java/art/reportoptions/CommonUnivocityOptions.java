@@ -17,6 +17,7 @@
  */
 package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.univocity.parsers.common.processor.ObjectRowWriterProcessor;
 import com.univocity.parsers.conversions.Conversions;
 import java.util.List;
@@ -31,7 +32,8 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Timothy Anyona
  */
-public class CommonUnivocityOptions extends GeneralReportOptions {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CommonUnivocityOptions {
 
 	private String dateFormat;
 	private String dateTimeFormat;

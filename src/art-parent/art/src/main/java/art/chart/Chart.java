@@ -20,6 +20,7 @@ package art.chart;
 import art.drilldown.Drilldown;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.output.PdfHelper;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.reportoptions.JFreeChartOptions;
@@ -582,6 +583,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				break;
 			case pdf:
 				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList, report, pdfPageNumbers);
+				PdfHelper pdfHelper = new PdfHelper();
+				pdfHelper.addProtections(report, outputFileName);
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported report format: " + reportFormat);

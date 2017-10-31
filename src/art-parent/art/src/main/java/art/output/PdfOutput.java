@@ -26,7 +26,7 @@ import java.util.Date;
 import org.apache.commons.collections4.CollectionUtils;
 
 /**
- * Generates pdf output. See
+ * Generates pdf output using the itext library. See
  * http://itextdocs.lowagie.com/examples/com/lowagie/examples/objects/tables/pdfptable/FragmentTable.java
  *
  * @author Marios Timotheou
@@ -299,8 +299,11 @@ public class PdfOutput extends StandardOutput {
 					document.add(table);
 				}
 				document.close();
+				
+				PdfHelper pdfHelper = new PdfHelper();
+				pdfHelper.addProtections(report, fullOutputFileName);
 			}
-		} catch (DocumentException ex) {
+		} catch (DocumentException | IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

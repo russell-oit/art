@@ -17,6 +17,7 @@
  */
 package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -25,7 +26,8 @@ import java.util.Map;
  *
  * @author Timothy Anyona
  */
-public class JFreeChartOptions extends GeneralReportOptions implements Serializable {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class JFreeChartOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

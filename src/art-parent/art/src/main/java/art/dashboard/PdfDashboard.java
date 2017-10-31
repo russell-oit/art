@@ -19,6 +19,7 @@ package art.dashboard;
 
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.output.PdfHelper;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -229,7 +230,9 @@ public class PdfDashboard {
 				File reportFile = new File(reportFileName);
 				FileUtils.deleteQuietly(reportFile);
 			}
-		}
 
+			PdfHelper pdfHelper = new PdfHelper();
+			pdfHelper.addProtections(dashboardReport, outputFileName);
+		}
 	}
 }

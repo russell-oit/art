@@ -17,12 +17,15 @@
  */
 package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Represents report options for chart.js reports
  *
  * @author Timothy Anyona
  */
-public class ChartJsOptions extends GeneralReportOptions {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ChartJsOptions {
 
 	private int width = 300;
 	private int height = 100;

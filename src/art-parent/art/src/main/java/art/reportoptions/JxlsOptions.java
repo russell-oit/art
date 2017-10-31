@@ -17,12 +17,15 @@
  */
 package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Report options for jxls reports
  * 
  * @author Timothy Anyona
  */
-public class JxlsOptions extends GeneralReportOptions {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class JxlsOptions {
 	
 	private String areaConfigFile;
 	private boolean useStandardFormulaProcessor;

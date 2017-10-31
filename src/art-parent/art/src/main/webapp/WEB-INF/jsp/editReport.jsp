@@ -316,39 +316,6 @@ Edit report page
 			function toggleVisibleFields() {
 				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
 
-				//show/hide report options
-				switch (reportTypeId) {
-					case 134: //pivottable.js csv server
-					case 137: //dygraphs csv server
-					case 138: //datatables
-					case 139: //datatables csv local
-					case 140: //datatables csv server
-					case 0: //tabular
-					case 141: //fixed width
-					case 142: //c3
-					case 143: //chart.js
-					case 144: //datamaps
-					case 145: //datamaps file
-					case 146: //leaflet
-					case 147: //openlayers
-					case 148: //tabular heatmap
-					case 151: //mongodb
-					case 117: //jxls template
-					case 118: //jxls art
-					case 103: //tabular html
-					case 101: //crosstab
-					case 102: //crosstab html
-					case 152: //csv
-						$("#optionsDiv").show();
-						break;
-					default:
-						if (reportTypeId < 0) {
-							$("#optionsDiv").show();
-						} else {
-							$("#optionsDiv").hide();
-						}
-				}
-
 				//show/hide report source
 				if (reportTypeId === 111) {
 					//text
@@ -748,12 +715,20 @@ Edit report page
 					case 0: //tabular
 					case 101: //crosstab
 					case 1: //group
+					case 110: //dashboard
+					case 129: //gridstack dashboard
 						$("#openPasswordDiv").show();
 						$("#modifyPasswordDiv").show();
 						break;
 					default:
-						$("#openPasswordDiv").hide();
-						$("#modifyPasswordDiv").hide();
+						if (reportTypeId < 0) {
+							//charts
+							$("#openPasswordDiv").show();
+							$("#modifyPasswordDiv").show();
+						} else {
+							$("#openPasswordDiv").hide();
+							$("#modifyPasswordDiv").hide();
+						}
 				}
 			}
 		</script>

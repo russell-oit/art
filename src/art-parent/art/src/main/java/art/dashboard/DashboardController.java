@@ -102,8 +102,17 @@ public class DashboardController {
 		logger.debug("Entering showDashboard: reportId={}", reportId);
 
 		long startTime = System.currentTimeMillis();
+		
+		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
 
-		String errorPage = "reportError";
+		//set appropriate error page to use
+		String errorPage;
+		if (showInline) {
+			errorPage = "reportErrorInline";
+		} else {
+			errorPage = "reportError";
+		}
+		
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		String reportFormatString = request.getParameter("reportFormat");
@@ -190,8 +199,6 @@ public class DashboardController {
 			model.addAttribute("error", ex);
 			return errorPage;
 		}
-
-		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
 
 		final long NOT_APPLICABLE = -1;
 		long totalTimeSeconds = NOT_APPLICABLE;

@@ -188,7 +188,7 @@ public class CsvOutputArt extends StandardOutput {
 
 		if (StringUtils.isNotBlank(delimiter)) {
 			if (StringUtils.contains(value, delimiter)) {
-				String quoteChar = options.getQuoteChar();
+				String quoteChar = options.getQuote();
 				quotedValue = quoteChar + value + quoteChar;
 			}
 		}
