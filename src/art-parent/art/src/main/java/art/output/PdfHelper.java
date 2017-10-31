@@ -128,6 +128,15 @@ public class PdfHelper {
 		header.addFont(FontFactory.getFont(BaseFont.HELVETICA, 10, Font.BOLD));
 	}
 
+	/**
+	 * Adds protections to a pdf file, including user and owner passwords, and
+	 * whether one can print or copy contents
+	 *
+	 * @param report the report object for the report associated with the file.
+	 * The repot object contains pdf options e.g. whether one can print
+	 * @param fullOutputFileName the full file path to the pdf file
+	 * @throws java.io.IOException
+	 */
 	public void addProtections(Report report, String fullOutputFileName) throws IOException {
 		//https://www.tutorialspoint.com/pdfbox/
 		//https://self-learning-java-tutorial.blogspot.co.ke/2016/03/pdfbox-encrypt-password-protect-pdf.html
@@ -140,24 +149,38 @@ public class PdfHelper {
 			return;
 		}
 
+		String userPassword = report.getOpenPassword();
+		if (userPassword == null) {
+			userPassword = "";
+		}
+
+		String ownerPassword = report.getModifyPassword();
+		if (ownerPassword == null) {
+			ownerPassword = "";
+		}
+
+		String options = report.getOptions();
+		PdfOptions pdfOptions;
+		if (StringUtils.isBlank(options)) {
+			pdfOptions = new PdfOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			pdfOptions = mapper.readValue(options, PdfOptions.class);
+		}
+
+		if (StringUtils.equals(userPassword, "") && StringUtils.equals(ownerPassword, "")
+				&& pdfOptions.isPdfCanPrint() && pdfOptions.isPdfCanCopyContent()
+				&& pdfOptions.isPdfCanModify()) {
+			//nothing to secure
+			return;
+		}
+
 		try (PDDocument doc = PDDocument.load(file)) {
 			AccessPermission ap = new AccessPermission();
-
-			String options = report.getOptions();
-			PdfOptions pdfOptions;
-			if (StringUtils.isBlank(options)) {
-				pdfOptions = new PdfOptions();
-			} else {
-				ObjectMapper mapper = new ObjectMapper();
-				pdfOptions = mapper.readValue(options, PdfOptions.class);
-			}
 
 			ap.setCanPrint(pdfOptions.isPdfCanPrint());
 			ap.setCanExtractContent(pdfOptions.isPdfCanCopyContent());
 			ap.setCanModify(pdfOptions.isPdfCanModify());
-
-			String userPassword = report.getOpenPassword();
-			String ownerPassword = report.getModifyPassword();
 
 			// Owner password (to open the file with all permissions)
 			// User password (to open the file but with restricted permissions)

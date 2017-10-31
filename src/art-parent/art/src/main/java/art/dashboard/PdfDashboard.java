@@ -30,17 +30,9 @@ import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.FilenameHelper;
-import com.lowagie.text.Chunk;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.ColumnText;
-import com.lowagie.text.pdf.PdfCopy;
-import com.lowagie.text.pdf.PdfCopy.PageStamp;
-import com.lowagie.text.pdf.PdfImportedPage;
-import com.lowagie.text.pdf.PdfReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -55,6 +47,15 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -168,6 +169,10 @@ public class PdfDashboard {
 					reportOutputGenerator.setIsJob(true);
 					reportOutputGenerator.setPdfPageNumbers(false);
 
+					//use blank passwords when generating individual files to make merge more straightforward
+					report.setOpenPassword("");
+					report.setModifyPassword("");
+
 					FileOutputStream fos = new FileOutputStream(reportFileName);
 					try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"))) {
 						reportOutputGenerator.generateOutput(report, reportRunner,
@@ -184,55 +189,78 @@ public class PdfDashboard {
 			}
 		}
 
-		//http://itext.2136553.n4.nabble.com/Merging-Problem-td3177394.html
-		//https://stackoverflow.com/questions/34818288/itext-2-1-7-pdfcopy-addpagepage-cant-find-page-reference
-		//http://tutorialspointexamples.com/itext-merge-pdf-files-in-java/
-		//https://stackoverflow.com/questions/23062345/function-that-can-use-itext-to-concatenate-merge-pdfs-together-causing-some
 		if (CollectionUtils.isNotEmpty(reportFileNames)) {
-			//pdfcopy with throw an error if no pages are added
-			File outputFile = new File(outputFileName);
-			com.lowagie.text.Document doc = new com.lowagie.text.Document();
-			FileOutputStream outputStream = new FileOutputStream(outputFile);
-			PdfCopy copy = new PdfCopy(doc, outputStream);
-			doc.open();
-
-			//https://dkbalachandar.wordpress.com/2016/06/09/itext-pdf-page-header-with-title-and-number/
-			Rectangle pageSize = PageSize.A4;
-			float x = pageSize.getRight(72);
-			float y = pageSize.getBottom(72);
-			int pageCount = 0;
-
-			for (String reportFileName : reportFileNames) {
-				PdfReader reader = new PdfReader(reportFileName);
-				int totalPages = reader.getNumberOfPages();
-				for (int i = 1; i <= totalPages; i++) {
-					PdfImportedPage page = copy.getImportedPage(reader, i);
-
-					//add page numbers
-					pageCount++;
-					PageStamp stamp = copy.createPageStamp(page);
-					Chunk chunk = new Chunk(String.format("%d", pageCount));
-					if (i == 1) {
-						chunk.setLocalDestination("p" + pageCount);
-					}
-					//http://developers.itextpdf.com/examples/stampingcontentexistingpdfsitext5/headerandfooterexamples
-					ColumnText.showTextAligned(stamp.getUnderContent(),
-							com.lowagie.text.Element.ALIGN_RIGHT, new Phrase(chunk),
-							x, y, 0);
-					stamp.alterContents();
-
-					copy.addPage(page);
+			try {
+				mergeFiles(reportFileNames, outputFileName);
+			} finally {
+				for (String reportFileName : reportFileNames) {
+					File reportFile = new File(reportFileName);
+					FileUtils.deleteQuietly(reportFile);
 				}
-			}
-			doc.close();
-
-			for (String reportFileName : reportFileNames) {
-				File reportFile = new File(reportFileName);
-				FileUtils.deleteQuietly(reportFile);
 			}
 
 			PdfHelper pdfHelper = new PdfHelper();
 			pdfHelper.addProtections(dashboardReport, outputFileName);
+		}
+	}
+
+	/**
+	 * Merges pdf files into one pdf file
+	 *
+	 * @param reportFileNames the full path of the pdf files to merge
+	 * @param outputFileName the output file name of the pdf file to generate
+	 * @throws IOException
+	 */
+	private static void mergeFiles(List<String> reportFileNames, String outputFileName) throws IOException {
+		//https://stackoverflow.com/questions/3585329/how-to-merge-two-pdf-files-into-one-in-java
+		//https://stackoverflow.com/questions/37589590/merge-pdf-files-using-pdfbox
+		//https://issues.apache.org/jira/browse/PDFBOX-3188
+		if (CollectionUtils.isEmpty(reportFileNames)) {
+			return;
+		}
+
+		PDFMergerUtility ut = new PDFMergerUtility();
+		for (String reportFileName : reportFileNames) {
+			ut.addSource(reportFileName);
+		}
+
+		ut.setDestinationFileName(outputFileName);
+		ut.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+
+		addPageNumbers(outputFileName);
+	}
+
+	/**
+	 * Adds page numbers to a pdf file
+	 *
+	 * @param outputFileName the path to the pdf file
+	 * @throws IOException
+	 */
+	private static void addPageNumbers(String outputFileName) throws IOException {
+		//https://stackoverflow.com/questions/16817293/how-to-add-a-page-number-to-the-output-pdf-when-merging-two-pdfs
+		//http://www.oodlestechnologies.com/blogs/How-to-Add-Footer-on-Each-Page-of-a-PDF-document-without-iText
+		//https://pdfbox.apache.org/2.0/migration.html
+		//https://pdfbox.apache.org/docs/2.0.5/javadocs/org/apache/pdfbox/pdmodel/PDPageContentStream.html#newLineAtOffset(float,%20float)
+		//https://pdfbox.apache.org/docs/2.0.3/javadocs/org/apache/pdfbox/pdmodel/common/PDRectangle.html
+		try (PDDocument doc = PDDocument.load(new File(outputFileName))) {
+			PDFont font = PDType1Font.HELVETICA;
+			float fontSize = 12f;
+			final float RIGHT_MARGIN = 72f;
+			final float BOTTOM_MARGIN = 36f;
+
+			int pageNumber = 0;
+			for (PDPage page : doc.getPages()) {
+				pageNumber++;
+				boolean compress = true;
+				try (PDPageContentStream footercontentStream = new PDPageContentStream(doc, page, AppendMode.APPEND, compress)) {
+					footercontentStream.beginText();
+					footercontentStream.setFont(font, fontSize);
+					footercontentStream.newLineAtOffset((PDRectangle.A4.getUpperRightX() - RIGHT_MARGIN), (PDRectangle.A4.getLowerLeftY() + BOTTOM_MARGIN));
+					footercontentStream.showText(String.valueOf(pageNumber));
+					footercontentStream.endText();
+				}
+			}
+			doc.save(outputFileName);
 		}
 	}
 }

@@ -24,7 +24,6 @@ import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
-import com.lowagie.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -56,7 +55,6 @@ import net.sf.jasperreports.engine.util.JRVisitorSupport;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
 import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 import org.apache.commons.io.FilenameUtils;
@@ -171,10 +169,6 @@ public class JasperReportsOutput {
 					//http://community.jaspersoft.com/questions/1038606/jasperreports-37-63-migration-how-replace-pdffont-font-mapping-code
 					//http://chager.de/encrypting-and-restricting-pdf-reports-build-with-jasperreports/
 					JRPdfExporter pdfExporter = new JRPdfExporter();
-
-//					SimplePdfExporterConfiguration pdfConfiguration = new SimplePdfExporterConfiguration();
-//					pdfConfiguration.setPermissions(PdfWriter.ALLOW_COPY | PdfWriter.ALLOW_PRINTING);
-//					pdfExporter.setConfiguration(pdfConfiguration);
 
 					pdfExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					pdfExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
