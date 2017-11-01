@@ -63,11 +63,11 @@ public class PdfOutput extends StandardOutput {
 			Rectangle pageSize = pdfHelper.getPageSize(report);
 
 			//set document margins
-			//document with 72pt (1 inch) margins for left, right, top, bottom
+			//document with margins. 72pt = 1 inch
 			final float LEFT_MARGIN = 72f;
 			final float RIGHT_MARGIN = 72f;
 			final float TOP_MARGIN = 72f;
-			final float BOTTOM_MARGIN = 72f;
+			final float BOTTOM_MARGIN = 36f;
 			document = new Document(pageSize, LEFT_MARGIN, RIGHT_MARGIN, TOP_MARGIN, BOTTOM_MARGIN);
 
 			PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));

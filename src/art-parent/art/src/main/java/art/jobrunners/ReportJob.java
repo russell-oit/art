@@ -1228,13 +1228,7 @@ public class ReportJob implements org.quartz.Job {
 					String outputFileName = generateOutputFile(reportRunner, paramProcessorResult, user);
 
 					if (jobType == JobType.Print) {
-						File file = new File(outputFileName);
-						Desktop desktop = Desktop.getDesktop();
-						if (desktop.isSupported(Desktop.Action.PRINT)) {
-							desktop.print(file);
-						} else {
-							logger.warn("Desktop print not supported. Job Id: {}", jobId);
-						}
+						printFile(outputFileName);
 					} else if (generateEmail || recipientDetails != null) {
 						//some kind of emailing required
 						processAndSendEmail(recipientDetails, message, outputFileName, recipientFilterPresent, generateEmail, tos, ccs, bccs, userEmail, cc, bcc);
@@ -2263,6 +2257,35 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Prints a file
+	 * 
+	 * @param outputFileName full path to the file to print
+	 * @throws IOException 
+	 */
+	private void printFile(String outputFileName) throws IOException {
+		//http://www.java2s.com/Tutorial/Java/0261__2D-Graphics/javaxprintAPIandallowsyoutolistavailableprintersqueryanamedprinterprinttextandimagefilestoaprinterandprinttopostscriptfiles.htm
+		//http://www.java2s.com/Code/Java/JDK-6/Usingsystemdefaultprintertoprintafileout.htm
+		//https://docs.oracle.com/javase/7/docs/api/java/awt/Desktop.html
+		//https://stackoverflow.com/questions/18004150/desktop-api-is-not-supported-on-the-current-platform
+		//https://stackoverflow.com/questions/102325/not-supported-platforms-for-java-awt-desktop-getdesktop
+		
+		//use desktop class to print using the default application registered for the output file type
+		//using print service class sends raw data to the printer, and most printers won't be able to recognize/handle this with some file types, and will not print successfully
+		//desktop class prints to the default printer. no way to change the default printer from java code?
+		if (Desktop.isDesktopSupported()) {
+			Desktop desktop = Desktop.getDesktop();
+			if (desktop.isSupported(Desktop.Action.PRINT)) {
+				File file = new File(outputFileName);
+				desktop.print(file);
+			} else {
+				throw new IllegalStateException("Desktop print not supported");
+			}
+		} else {
+			throw new IllegalStateException("Desktop not supported");
 		}
 	}
 
