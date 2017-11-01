@@ -2272,6 +2272,7 @@ public class ReportJob implements org.quartz.Job {
 		//https://docs.oracle.com/javase/7/docs/api/java/awt/Desktop.html
 		//https://stackoverflow.com/questions/18004150/desktop-api-is-not-supported-on-the-current-platform
 		//https://stackoverflow.com/questions/102325/not-supported-platforms-for-java-awt-desktop-getdesktop
+		//http://www.javaquery.com/2013/06/understanding-basics-javaawtdesktop.html
 		
 		//use desktop class to print using the default application registered for the output file type
 		//using print service class sends raw data to the printer, and most printers won't be able to recognize/handle this with some file types, and will not print successfully
