@@ -123,7 +123,6 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("		$('#" + tableId + "').dataTable(" + dataTableOptions + ");");
 		out.println("	});");
 		out.println("</script>");
-
 	}
 
 	@Override

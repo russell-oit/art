@@ -79,13 +79,7 @@ Display section to allow selecting of report parameters and initiate running of 
 			$.post(url, $form.serialize(), function (data, status, xhr) {
 				$("#reportOutput").html(data);
 
-				if (status === "success") {
-					//make htmlgrid output sortable
-					$('.sortable').each(function (i, obj) {
-						sorttable.DATE_RE = /^(\d\d?)[\/\.-](\d\d?)[\/\.-]((\d\d)?\d\d)$/;
-						sorttable.makeSortable(obj);
-					});
-				} else if (status === "error") {
+				if (status === "error") {
 					bootbox.alert("<b>${errorOccurredText}</b><br>"
 							+ xhr.status + "<br>" + data);
 				}
