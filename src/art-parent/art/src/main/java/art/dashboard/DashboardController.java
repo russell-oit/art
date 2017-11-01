@@ -497,9 +497,7 @@ public class DashboardController {
 			//no report defined. use url tag
 			url = xPath.evaluate("URL", itemNode);
 		} else {
-			int reportId = Integer.parseInt(reportIdString);
-
-			url = request.getContextPath() + "/runReport?reportId=" + reportId
+			url = request.getContextPath() + "/runReport?reportId=" + reportIdString
 					+ "&isFragment=true";
 
 			//add report parameters

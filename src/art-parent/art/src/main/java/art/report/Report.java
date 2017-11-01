@@ -854,6 +854,13 @@ public class Report implements Serializable {
 		reportIdStrings.addAll(XmlParser.getXmlElementValues(reportSource, "QUERYID"));
 		reportIdStrings.addAll(XmlParser.getXmlElementValues(reportSource, "REPORTID"));
 
+		//remove any parameter definitions, remaining only with the report id
+		for (int i = 0; i < reportIdStrings.size(); i++) {
+			String reportIdSetting = reportIdStrings.get(i);
+			String reportId = StringUtils.substringBefore(reportIdSetting, "&");
+			reportIdStrings.set(i, reportId);
+		}
+
 		for (String id : reportIdStrings) {
 			reportIds.add(Integer.valueOf(id));
 		}
