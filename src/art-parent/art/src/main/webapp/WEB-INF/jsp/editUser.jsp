@@ -153,14 +153,12 @@ Display edit user page
 								</button>
 							</span>
 						</div>
-						<div class="checkbox">
-							<label>
+						<div>
+							<label class="checkbox-inline">
 								<form:checkbox path="useBlankPassword"/>
 								<spring:message code="page.checkbox.useBlankPassword"/>
 							</label>
-						</div>
-						<div class="checkbox">
-							<label>
+							<label class="checkbox-inline">
 								<form:checkbox path="generateAndSend"/>
 								<spring:message code="users.checkbox.generateAndSend"/>
 							</label>
