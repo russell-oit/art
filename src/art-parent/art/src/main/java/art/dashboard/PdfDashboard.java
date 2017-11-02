@@ -47,6 +47,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -99,39 +100,51 @@ public class PdfDashboard {
 			NodeList objectIdNodes = (NodeList) xPath.evaluate("COLUMN/PORTLET/OBJECTID", rootNode, XPathConstants.NODESET);
 			//http://viralpatel.net/blogs/java-xml-xpath-tutorial-parse-xml/
 			for (int i = 0; i < objectIdNodes.getLength(); i++) {
-				String objectIdString = objectIdNodes.item(i).getFirstChild().getNodeValue();
-				reportIds.add(Integer.parseInt(objectIdString));
+				String objectIdSetting = objectIdNodes.item(i).getFirstChild().getNodeValue();
+				//remove any parameter definitions, remaining only with the report id
+				String reportId = StringUtils.substringBefore(objectIdSetting, "&");
+				reportIds.add(Integer.parseInt(reportId));
 			}
 
 			NodeList queryIdNodes = (NodeList) xPath.evaluate("COLUMN/PORTLET/QUERYID", rootNode, XPathConstants.NODESET);
 			for (int i = 0; i < queryIdNodes.getLength(); i++) {
-				String queryIdString = queryIdNodes.item(i).getFirstChild().getNodeValue();
-				reportIds.add(Integer.parseInt(queryIdString));
+				String queryIdSetting = queryIdNodes.item(i).getFirstChild().getNodeValue();
+				//remove any parameter definitions, remaining only with the report id
+				String reportId = StringUtils.substringBefore(queryIdSetting, "&");
+				reportIds.add(Integer.parseInt(reportId));
 			}
 
 			NodeList reportIdNodes = (NodeList) xPath.evaluate("COLUMN/PORTLET/REPORTID", rootNode, XPathConstants.NODESET);
 			for (int i = 0; i < reportIdNodes.getLength(); i++) {
-				String reportIdString = reportIdNodes.item(i).getFirstChild().getNodeValue();
-				reportIds.add(Integer.parseInt(reportIdString));
+				String reportIdSetting = reportIdNodes.item(i).getFirstChild().getNodeValue();
+				//remove any parameter definitions, remaining only with the report id
+				String reportId = StringUtils.substringBefore(reportIdSetting, "&");
+				reportIds.add(Integer.parseInt(reportId));
 			}
 		} else if (dashboardReportType == ReportType.GridstackDashboard) {
 			NodeList objectIdNodes = (NodeList) xPath.evaluate("ITEM/OBJECTID", rootNode, XPathConstants.NODESET);
 			//http://viralpatel.net/blogs/java-xml-xpath-tutorial-parse-xml/
 			for (int i = 0; i < objectIdNodes.getLength(); i++) {
-				String objectIdString = objectIdNodes.item(i).getFirstChild().getNodeValue();
-				reportIds.add(Integer.parseInt(objectIdString));
+				String objectIdSetting = objectIdNodes.item(i).getFirstChild().getNodeValue();
+				//remove any parameter definitions, remaining only with the report id
+				String reportId = StringUtils.substringBefore(objectIdSetting, "&");
+				reportIds.add(Integer.parseInt(reportId));
 			}
 
 			NodeList queryIdNodes = (NodeList) xPath.evaluate("ITEM/QUERYID", rootNode, XPathConstants.NODESET);
 			for (int i = 0; i < queryIdNodes.getLength(); i++) {
-				String queryIdString = queryIdNodes.item(i).getFirstChild().getNodeValue();
-				reportIds.add(Integer.parseInt(queryIdString));
+				String queryIdSetting = queryIdNodes.item(i).getFirstChild().getNodeValue();
+				//remove any parameter definitions, remaining only with the report id
+				String reportId = StringUtils.substringBefore(queryIdSetting, "&");
+				reportIds.add(Integer.parseInt(reportId));
 			}
 
 			NodeList reportIdNodes = (NodeList) xPath.evaluate("ITEM/REPORTID", rootNode, XPathConstants.NODESET);
 			for (int i = 0; i < reportIdNodes.getLength(); i++) {
-				String reportIdString = reportIdNodes.item(i).getFirstChild().getNodeValue();
-				reportIds.add(Integer.parseInt(reportIdString));
+				String reportIdSetting = reportIdNodes.item(i).getFirstChild().getNodeValue();
+				//remove any parameter definitions, remaining only with the report id
+				String reportId = StringUtils.substringBefore(reportIdSetting, "&");
+				reportIds.add(Integer.parseInt(reportId));
 			}
 		}
 
@@ -141,66 +154,66 @@ public class PdfDashboard {
 
 		ReportService reportService = new ReportService();
 
-		for (Integer reportId : reportIds) {
-			Report report = reportService.getReport(reportId);
-			ReportType reportType = report.getReportType();
+		try {
+			for (Integer reportId : reportIds) {
+				Report report = reportService.getReport(reportId);
+				ReportType reportType = report.getReportType();
 
-			if (reportType.isStandardOutput() || reportType.isChart()) {
-				ReportRunner reportRunner = new ReportRunner();
-				try {
-					reportRunner.setUser(user);
-					reportRunner.setReport(report);
-					reportRunner.setReportParamsMap(reportParamsMap);
+				if (reportType.isStandardOutput() || reportType.isChart()) {
+					ReportRunner reportRunner = new ReportRunner();
+					try {
+						reportRunner.setUser(user);
+						reportRunner.setReport(report);
+						reportRunner.setReportParamsMap(reportParamsMap);
 
-					RunReportHelper runReportHelper = new RunReportHelper();
-					int resultSetType = runReportHelper.getResultSetType(reportType);
+						RunReportHelper runReportHelper = new RunReportHelper();
+						int resultSetType = runReportHelper.getResultSetType(reportType);
 
-					reportRunner.execute(resultSetType);
+						reportRunner.execute(resultSetType);
 
-					FilenameHelper filenameHelper = new FilenameHelper();
-					String baseFileName = filenameHelper.getBaseFilename(report, locale);
-					String exportPath = Config.getReportsExportPath();
-					String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
-					String fileName = baseFileName + "." + extension;
-					String reportFileName = exportPath + fileName;
+						FilenameHelper filenameHelper = new FilenameHelper();
+						String baseFileName = filenameHelper.getBaseFilename(report, locale);
+						String exportPath = Config.getReportsExportPath();
+						String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
+						String fileName = baseFileName + "." + extension;
+						String reportFileName = exportPath + fileName;
 
-					ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+						ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
-					reportOutputGenerator.setIsJob(true);
-					reportOutputGenerator.setPdfPageNumbers(false);
+						reportOutputGenerator.setIsJob(true);
+						reportOutputGenerator.setPdfPageNumbers(false);
 
-					//use blank passwords when generating individual files to make merge more straightforward
-					report.setOpenPassword("");
-					report.setModifyPassword("");
+						//use blank passwords when generating individual files to make merge more straightforward
+						report.setOpenPassword("");
+						report.setModifyPassword("");
 
-					FileOutputStream fos = new FileOutputStream(reportFileName);
-					try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"))) {
-						reportOutputGenerator.generateOutput(report, reportRunner,
-								reportFormat, locale, paramProcessorResult, writer,
-								reportFileName, user, messageSource);
+						FileOutputStream fos = new FileOutputStream(reportFileName);
+						try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8"))) {
+							reportOutputGenerator.generateOutput(report, reportRunner,
+									reportFormat, locale, paramProcessorResult, writer,
+									reportFileName, user, messageSource);
+						} finally {
+							fos.close();
+						}
+
+						reportFileNames.add(reportFileName);
 					} finally {
-						fos.close();
+						reportRunner.close();
 					}
-
-					reportFileNames.add(reportFileName);
-				} finally {
-					reportRunner.close();
 				}
 			}
-		}
 
-		if (CollectionUtils.isNotEmpty(reportFileNames)) {
-			try {
+			if (CollectionUtils.isNotEmpty(reportFileNames)) {
 				mergeFiles(reportFileNames, outputFileName);
-			} finally {
-				for (String reportFileName : reportFileNames) {
-					File reportFile = new File(reportFileName);
-					FileUtils.deleteQuietly(reportFile);
-				}
-			}
 
-			PdfHelper pdfHelper = new PdfHelper();
-			pdfHelper.addProtections(dashboardReport, outputFileName);
+				PdfHelper pdfHelper = new PdfHelper();
+				pdfHelper.addProtections(dashboardReport, outputFileName);
+			}
+		} finally {
+			for (String reportFileName : reportFileNames) {
+				File reportFile = new File(reportFileName);
+				FileUtils.deleteQuietly(reportFile);
+			}
 		}
 	}
 
