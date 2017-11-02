@@ -736,6 +736,36 @@ Edit report page
 							$("#modifyPasswordDiv").hide();
 						}
 				}
+				
+				//show/hide encryptor
+				switch (reportTypeId) {
+					case 0: //tabular
+					case 101: //crosstab
+					case 1: //group
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 115: //jasper template
+					case 116: //jasper art
+					case 117: //jxls template
+					case 118: //jxls art
+					case 123: //xdocreport docx freemarker
+					case 124: //xdocreport docx velocity
+					case 125: //xdocreport odt freemarker
+					case 126: //xdocreport odt velocity
+					case 127: //xdocreport pptx freemarker
+					case 128: //xdocreport pptx velocity
+					case 152: //csv
+					case 141: //fixed width
+						$("#encryptorDiv").show();
+						break;
+					default:
+						if (reportTypeId < 0) {
+							//charts
+							$("#encryptorDiv").show();
+						} else {
+							$("#encryptorDiv").hide();
+						}
+				}
 			}
 		</script>
 
@@ -1161,6 +1191,28 @@ Edit report page
 							</label>
 						</div>
 						<form:errors path="modifyPassword" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="encryptorDiv" class="form-group">
+					<label class="col-md-4 control-label " for="encryptor.encryptorId">
+						<spring:message code="reports.label.encryptor"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="encryptor.encryptorId" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+								<option data-divider="true"></option>
+							<c:forEach var="encryptor" items="${encryptors}">
+								<c:set var="encryptorStatus">
+									<t:displayActiveStatus active="${encryptor.active}" hideActive="true"/>
+								</c:set>
+								<form:option value="${encryptor.encryptorId}"
+											 data-content="${encryptor.name} ${encryptorStatus}">
+									${encryptor.name} 
+								</form:option>
+							</c:forEach>
+						</form:select>
+						<form:errors path="encryptor.encryptorId" cssClass="error"/>
 					</div>
 				</div>
 

@@ -18,23 +18,32 @@
 package art.report;
 
 import art.datasource.Datasource;
+import art.encryptor.Encryptor;
+import art.enums.EncryptorType;
 import art.enums.PageOrientation;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.Reporti18nOptions;
+import art.encryption.AESCrypt;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a report
@@ -42,6 +51,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author Timothy Anyona
  */
 public class Report implements Serializable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Report.class);
 
 	private static final long serialVersionUID = 1L;
 	private int reportId;
@@ -93,6 +104,21 @@ public class Report implements Serializable {
 	private String modifyPassword;
 	private boolean useNoneOpenPassword; //only for use with ui
 	private boolean useNoneModifyPassword; //only for use with ui
+	private Encryptor encryptor;
+
+	/**
+	 * @return the encryptor
+	 */
+	public Encryptor getEncryptor() {
+		return encryptor;
+	}
+
+	/**
+	 * @param encryptor the encryptor to set
+	 */
+	public void setEncryptor(Encryptor encryptor) {
+		this.encryptor = encryptor;
+	}
 
 	/**
 	 * @return the useNoneOpenPassword
@@ -956,6 +982,60 @@ public class Report implements Serializable {
 			ObjectMapper mapper = new ObjectMapper();
 			generalOptions = mapper.readValue(options, GeneralReportOptions.class);
 		}
+	}
+
+	/**
+	 * Encrypts a file using the encryptor defined on the report
+	 *
+	 * @param finalFileName the full path of the final file name of the file
+	 * e.g. c:\test\file.xls.aes
+	 * @throws IOException
+	 * @throws GeneralSecurityException
+	 */
+	public void encryptFile(String finalFileName) throws IOException, GeneralSecurityException {
+		logger.debug("Entering encrypt: finalFileName='{}'", finalFileName);
+
+		File file = new File(finalFileName);
+		if (!file.exists()) {
+			return;
+		}
+
+		List<String> knownExtensions = new ArrayList<>();
+		knownExtensions.add("aes");
+
+		String fileExtension = FilenameUtils.getExtension(finalFileName);
+		logger.debug("fileExtension='{}'", fileExtension);
+		if (!ArtUtils.containsIgnoreCase(knownExtensions, fileExtension)) {
+			return;
+		}
+
+		EncryptorType encryptorType = encryptor.getEncryptorType();
+		logger.debug("encryptorType={}", encryptorType);
+		switch (encryptorType) {
+			case AESCrypt:
+				encryptFileAesCrypt(finalFileName);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected encryptor type: " + encryptorType);
+		}
+	}
+
+	/**
+	 * Encrypts a file using the aescrypt encryptor defined on the report
+	 *
+	 * @param finalFileName the full path of the final file name of the file
+	 * e.g. c:\test\file.xls.aes
+	 * @throws IOException
+	 * @throws GeneralSecurityException
+	 */
+	private void encryptFileAesCrypt(String finalFileName) throws IOException, GeneralSecurityException {
+		AESCrypt aes = new AESCrypt(encryptor.getAesCryptPassword());
+		//http://www.baeldung.com/java-how-to-rename-or-move-a-file
+		String tempFileName = FilenameUtils.removeExtension(finalFileName);
+		File tempFile = new File(tempFileName);
+		FileUtils.moveFile(new File(finalFileName), new File(tempFileName));
+		aes.encrypt(tempFileName, finalFileName);
+		tempFile.delete();
 	}
 
 }

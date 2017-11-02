@@ -1454,10 +1454,6 @@ public class ReportJob implements org.quartz.Job {
 
 		logger.debug("fileName = '{}'", fileName);
 
-		if (!FinalFilenameValidator.isValid(fileName)) {
-			throw new IllegalArgumentException("Invalid file name: " + fileName);
-		}
-
 		String outputFileName = exportPath + fileName;
 
 		if (reportType.isDashboard()) {
@@ -1491,6 +1487,9 @@ public class ReportJob implements org.quartz.Job {
 					fos.close();
 				}
 			}
+			
+			//encrypt file if applicable
+			report.encryptFile(outputFileName);
 		}
 
 		return outputFileName;

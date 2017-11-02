@@ -19,6 +19,7 @@ package art.report;
 
 import art.datasource.DatasourceService;
 import art.encryption.AesEncryptor;
+import art.encryptor.EncryptorService;
 import art.enums.PageOrientation;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
@@ -84,6 +85,9 @@ public class ReportController {
 
 	@Autowired
 	private DatasourceService datasourceService;
+	
+	@Autowired
+	private EncryptorService encryptorService;
 
 	@Autowired
 	private MessageSource messageSource;
@@ -494,6 +498,7 @@ public class ReportController {
 			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));
 			model.addAttribute("reportFormats", ReportFormat.list());
 			model.addAttribute("pageOrientations", PageOrientation.list());
+			model.addAttribute("encryptors", encryptorService.getAllEncryptors());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

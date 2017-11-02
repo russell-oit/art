@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.ftpserver;
+package art.encryptor;
 
 import java.io.Serializable;
 
 /**
- * Represents a multiple ftp server edit
+ * Represents a multiple encryptor edit operation
  * 
  * @author Timothy Anyona
  */
-public class MultipleFtpServerEdit implements Serializable {
+public class MultipleEncryptorEdit implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private String ids;
@@ -75,7 +75,7 @@ public class MultipleFtpServerEdit implements Serializable {
 
 	@Override
 	public String toString() {
-		return "MultipleFtpServerEdit{" + "ids=" + ids + '}';
+		return "MultipleEncryptorEdit{" + "ids=" + ids + '}';
 	}
 	
 }

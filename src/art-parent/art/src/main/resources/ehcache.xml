@@ -32,9 +32,6 @@
 	<cache name="jobs"
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
-	<cache name="filters"
-		   eternal="true" maxEntriesLocalHeap="10" />
-	
 	<cache name="rules"
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
@@ -42,6 +39,9 @@
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
 	<cache name="ftpServers"
+		   eternal="true" maxEntriesLocalHeap="10" />
+	
+	<cache name="encryptors"
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
 </ehcache>

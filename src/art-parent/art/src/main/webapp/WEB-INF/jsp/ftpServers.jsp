@@ -76,7 +76,7 @@
 							},
 							callback: function (result) {
 								if (result) {
-									//ftpServer confirmed delete. make delete request
+									//delete confirmed
 									$.ajax({
 										type: "POST",
 										dataType: "json",
@@ -200,4 +200,3 @@
 		</table>
 	</jsp:body>
 </t:mainConfigPage>
-

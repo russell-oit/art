@@ -9,11 +9,14 @@
 -- increase size of parameter default value column
 -- increase size of job subject and fixed file name columns
 -- add open and modify password fields for reports
+-- add encryptors table
 
 -- NOTES:
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
 --
 -- for postgresql, replace the MODIFY keyword with ALTER COLUMN <column name> TYPE <data type>
+--
+-- for sql server, mysql, replace TIMESTAMP with DATETIME
 -- ------------------------------------------------
 
 
@@ -48,3 +51,23 @@ INSERT INTO ART_REPORT_TYPES VALUES (152,'CSV');
 -- add open and modify password fields for reports
 ALTER TABLE ART_QUERIES ADD OPEN_PASSWORD VARCHAR(100);
 ALTER TABLE ART_QUERIES ADD MODIFY_PASSWORD VARCHAR(100);
+
+-- add encryptors table
+CREATE TABLE ART_ENCRYPTORS
+(
+	ENCRYPTOR_ID INTEGER NOT NULL,
+	NAME VARCHAR(50),
+	DESCRIPTION VARCHAR(200),
+	ACTIVE INTEGER,
+	ENCRYPTOR_TYPE VARCHAR(50),
+	AESCRYPT_PASSWORD VARCHAR(100),
+	CREATION_DATE TIMESTAMP,
+	CREATED_BY VARCHAR(50),
+	UPDATE_DATE TIMESTAMP,
+	UPDATED_BY VARCHAR(50),
+	CONSTRAINT ae_pk PRIMARY KEY(ENCRYPTOR_ID),
+	CONSTRAINT ae_name_uq UNIQUE(NAME)
+);
+
+-- add encryptor id column
+ALTER TABLE ART_QUERIES ADD ENCRYPTOR_ID INTEGER;

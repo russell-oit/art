@@ -139,14 +139,6 @@ public class CacheHelper {
 	}
 
 	/**
-	 * Clears filters cache
-	 */
-	@CacheEvict(value = "filters", allEntries = true)
-	public void clearFilters() {
-		logger.debug("Entering clearFilters");
-	}
-	
-	/**
 	 * Clears rules cache
 	 */
 	@CacheEvict(value = "rules", allEntries = true)

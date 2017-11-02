@@ -112,8 +112,8 @@ public class RunReportController {
 		} else {
 			errorPage = "reportError";
 		}
-		
-		String reportName=null;
+
+		String reportName = null;
 
 		try {
 			report = reportService.getReport(reportId);
@@ -122,7 +122,7 @@ public class RunReportController {
 				model.addAttribute("message", "reports.message.reportNotFound");
 				return errorPage;
 			}
-			
+
 			reportName = report.getLocalizedName(locale);
 
 			//check if user has permission to run report
@@ -152,7 +152,7 @@ public class RunReportController {
 //				response.setHeader("Cache-control", "no-cache");
 //			}
 			response.setHeader("Cache-control", "no-cache");
-			
+
 			ReportType reportType = report.getReportType();
 
 			if (reportType.isDashboard()) {
@@ -440,6 +440,9 @@ public class RunReportController {
 						model.addAttribute("message", outputResult.getMessage());
 						return errorPage;
 					}
+
+					//encrypt file if applicable
+					report.encryptFile(outputFileName);
 
 					if (reportType == ReportType.TabularHeatmap) {
 						TabularHeatmapOptions options;

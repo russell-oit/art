@@ -208,6 +208,9 @@ public class PdfDashboard {
 
 				PdfHelper pdfHelper = new PdfHelper();
 				pdfHelper.addProtections(dashboardReport, outputFileName);
+
+				//encrypt file if applicable
+				dashboardReport.encryptFile(outputFileName);
 			}
 		} finally {
 			for (String reportFileName : reportFileNames) {

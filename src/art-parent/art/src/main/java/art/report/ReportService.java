@@ -23,6 +23,8 @@ import art.dbutils.DatabaseUtils;
 import art.connectionpool.DbConnections;
 import art.datasource.DatasourceService;
 import art.encryption.AesEncryptor;
+import art.encryptor.Encryptor;
+import art.encryptor.EncryptorService;
 import art.enums.AccessLevel;
 import art.enums.PageOrientation;
 import art.enums.ParameterType;
@@ -74,20 +76,23 @@ public class ReportService {
 	private final DbService dbService;
 	private final DatasourceService datasourceService;
 	private final ReportGroupService reportGroupService;
+	private final EncryptorService encryptorService;
 
 	@Autowired
 	public ReportService(DbService dbService, DatasourceService datasourceService,
-			ReportGroupService reportGroupService) {
+			ReportGroupService reportGroupService, EncryptorService encryptorService) {
 
 		this.dbService = dbService;
 		this.datasourceService = datasourceService;
 		this.reportGroupService = reportGroupService;
+		this.encryptorService = encryptorService;
 	}
 
 	public ReportService() {
 		dbService = new DbService();
 		datasourceService = new DatasourceService();
 		reportGroupService = new ReportGroupService();
+		encryptorService = new EncryptorService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERIES AQ";
@@ -155,6 +160,9 @@ public class ReportService {
 
 			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
 			report.setDatasource(datasource);
+			
+			Encryptor encryptor = encryptorService.getEncryptor(rs.getInt("ENCRYPTOR_ID"));
+			report.setEncryptor(encryptor);
 
 			//decrypt open and modify passwords
 			String clearTextOpenPassword = AesEncryptor.decrypt(report.getOpenPassword());
@@ -571,6 +579,13 @@ public class ReportService {
 		} else {
 			datasourceId = report.getDatasource().getDatasourceId();
 		}
+		
+		Integer encryptorId;
+		if (report.getEncryptor() == null) {
+			encryptorId = 0;
+		} else {
+			encryptorId = report.getEncryptor().getEncryptorId();
+		}
 
 		Integer reportTypeId;
 		if (report.getReportType() == null) {
@@ -612,9 +627,9 @@ public class ReportService {
 					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
-					+ " OPEN_PASSWORD, MODIFY_PASSWORD,"
+					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 39) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 40) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -624,7 +639,7 @@ public class ReportService {
 				reportTypeId,
 				report.getGroupColumn(),
 				reportGroupId,
-				datasourceId,
+				encryptorId,
 				report.getContactPerson(),
 				BooleanUtils.toInteger(report.isUsesRules()),
 				BooleanUtils.toInteger(report.isActive()),
@@ -654,6 +669,7 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isLovUseDynamicDatasource()),
 				report.getOpenPassword(),
 				report.getModifyPassword(),
+				encryptorId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -670,7 +686,7 @@ public class ReportService {
 					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?, LOCALE=?,"
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
 					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
-					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?,"
+					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -681,7 +697,7 @@ public class ReportService {
 				report.getReportTypeId(),
 				report.getGroupColumn(),
 				reportGroupId,
-				datasourceId,
+				encryptorId,
 				report.getContactPerson(),
 				BooleanUtils.toInteger(report.isUsesRules()),
 				BooleanUtils.toInteger(report.isActive()),
@@ -711,6 +727,7 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isLovUseDynamicDatasource()),
 				report.getOpenPassword(),
 				report.getModifyPassword(),
+				encryptorId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

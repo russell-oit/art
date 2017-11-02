@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.ftpserver;
+package art.encryptor;
 
 import art.encryption.AesEncryptor;
-import art.enums.FtpConnectionType;
+import art.enums.EncryptorType;
 import art.user.User;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
@@ -39,41 +39,41 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Controller for ftp server configuration pages
+ * Controller for encryptor configuration pages
  *
  * @author Timothy Anyona
  */
 @Controller
-public class FtpServerController {
+public class EncryptorController {
 
-	private static final Logger logger = LoggerFactory.getLogger(FtpServerController.class);
+	private static final Logger logger = LoggerFactory.getLogger(EncryptorController.class);
 
 	@Autowired
-	private FtpServerService ftpServerService;
+	private EncryptorService encryptorService;
 
-	@RequestMapping(value = "/ftpServers", method = RequestMethod.GET)
-	public String showFtpServers(Model model) {
-		logger.debug("Entering showFtpServers");
+	@RequestMapping(value = "/encryptors", method = RequestMethod.GET)
+	public String showEncryptors(Model model) {
+		logger.debug("Entering showEncryptors");
 
 		try {
-			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
+			model.addAttribute("encryptors", encryptorService.getAllEncryptors());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return "ftpServers";
+		return "encryptors";
 	}
 
-	@RequestMapping(value = "/deleteFtpServer", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteEncryptor", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteFtpServer(@RequestParam("id") Integer id) {
-		logger.debug("Entering deleteFtpServer: id={}", id);
+	AjaxResponse deleteEncryptor(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteEncryptor: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			ftpServerService.deleteFtpServer(id);
+			encryptorService.deleteEncryptor(id);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -83,15 +83,15 @@ public class FtpServerController {
 		return response;
 	}
 
-	@RequestMapping(value = "/deleteFtpServers", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteEncryptors", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteFtpServers(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteFtpServers: ids={}", (Object) ids);
+	AjaxResponse deleteEncryptors(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteEncryptors: ids={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			ftpServerService.deleteFtpServers(ids);
+			encryptorService.deleteEncryptors(ids);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -101,113 +101,113 @@ public class FtpServerController {
 		return response;
 	}
 
-	@RequestMapping(value = "/addFtpServer", method = RequestMethod.GET)
-	public String addFtpServer(Model model) {
-		logger.debug("Entering addFtpServer");
+	@RequestMapping(value = "/addEncryptor", method = RequestMethod.GET)
+	public String addEncryptor(Model model) {
+		logger.debug("Entering addEncryptor");
 
-		FtpServer ftpServer = new FtpServer();
+		Encryptor encryptor = new Encryptor();
 
-		model.addAttribute("ftpServer", ftpServer);
+		model.addAttribute("encryptor", encryptor);
 
-		return showEditFtpServer("add", model);
+		return showEditEncryptor("add", model);
 	}
 
-	@RequestMapping(value = "/editFtpServer", method = RequestMethod.GET)
-	public String editFtpServer(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editFtpServer: id={}", id);
+	@RequestMapping(value = "/editEncryptor", method = RequestMethod.GET)
+	public String editEncryptor(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editEncryptor: id={}", id);
 
 		try {
-			model.addAttribute("ftpServer", ftpServerService.getFtpServer(id));
+			model.addAttribute("encryptor", encryptorService.getEncryptor(id));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditFtpServer("edit", model);
+		return showEditEncryptor("edit", model);
 	}
 
-	@RequestMapping(value = "/editFtpServers", method = RequestMethod.GET)
-	public String editFtpServers(@RequestParam("ids") String ids, Model model,
+	@RequestMapping(value = "/editEncryptors", method = RequestMethod.GET)
+	public String editEncryptors(@RequestParam("ids") String ids, Model model,
 			HttpSession session) {
 
-		logger.debug("Entering editFtpServers: ids={}", ids);
+		logger.debug("Entering editEncryptors: ids={}", ids);
 
-		MultipleFtpServerEdit multipleFtpServerEdit = new MultipleFtpServerEdit();
-		multipleFtpServerEdit.setIds(ids);
+		MultipleEncryptorEdit multipleEncryptorEdit = new MultipleEncryptorEdit();
+		multipleEncryptorEdit.setIds(ids);
 
-		model.addAttribute("multipleFtpServerEdit", multipleFtpServerEdit);
+		model.addAttribute("multipleEncryptorEdit", multipleEncryptorEdit);
 
-		return "editFtpServers";
+		return "editEncryptors";
 	}
 
-	@RequestMapping(value = "/saveFtpServer", method = RequestMethod.POST)
-	public String saveFtpServer(@ModelAttribute("ftpServer") @Valid FtpServer ftpServer,
+	@RequestMapping(value = "/saveEncryptor", method = RequestMethod.POST)
+	public String saveEncryptor(@ModelAttribute("encryptor") @Valid Encryptor encryptor,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
-		logger.debug("Entering saveFtpServer: ftpServer={}, action='{}'", ftpServer, action);
+		logger.debug("Entering saveEncryptor: encryptor={}, action='{}'", encryptor, action);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditFtpServer(action, model);
+			return showEditEncryptor(action, model);
 		}
 
 		try {
 			//set password as appropriate
-			String setPasswordMessage = setPassword(ftpServer, action);
+			String setPasswordMessage = setPassword(encryptor, action);
 			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
 			if (setPasswordMessage != null) {
 				model.addAttribute("message", setPasswordMessage);
-				return showEditFtpServer(action, model);
+				return showEditEncryptor(action, model);
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add")) {
-				ftpServerService.addFtpServer(ftpServer, sessionUser);
+				encryptorService.addEncryptor(encryptor, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
-				ftpServerService.updateFtpServer(ftpServer, sessionUser);
+				encryptorService.updateEncryptor(encryptor, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			
-			String recordName = ftpServer.getName() + " (" + ftpServer.getFtpServerId() + ")";
+
+			String recordName = encryptor.getName() + " (" + encryptor.getEncryptorId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
-			return "redirect:/ftpServers";
+			return "redirect:/encryptors";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditFtpServer(action, model);
+		return showEditEncryptor(action, model);
 	}
-	
-	@RequestMapping(value = "/saveFtpServers", method = RequestMethod.POST)
-	public String saveFtpServers(@ModelAttribute("multipleFtpServerEdit") @Valid MultipleFtpServerEdit multipleFtpServerEdit,
+
+	@RequestMapping(value = "/saveEncryptors", method = RequestMethod.POST)
+	public String saveEncryptors(@ModelAttribute("multipleEncryptorEdit") @Valid MultipleEncryptorEdit multipleEncryptorEdit,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
-		logger.debug("Entering saveFtpServers: multipleFtpServerEdit={}", multipleFtpServerEdit);
+		logger.debug("Entering saveEncryptors: multipleEncryptorEdit={}", multipleEncryptorEdit);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditFtpServers();
+			return showEditEncryptors();
 		}
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			ftpServerService.updateFtpServers(multipleFtpServerEdit, sessionUser);
+			encryptorService.updateEncryptors(multipleEncryptorEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
-			redirectAttributes.addFlashAttribute("recordName", multipleFtpServerEdit.getIds());
-			return "redirect:/ftpServers";
+			redirectAttributes.addFlashAttribute("recordName", multipleEncryptorEdit.getIds());
+			return "redirect:/encryptors";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditFtpServers();
+		return showEditEncryptors();
 	}
 
 	/**
@@ -217,15 +217,15 @@ public class FtpServerController {
 	 * @param model the model to use
 	 * @return the jsp file to display
 	 */
-	private String showEditFtpServer(String action, Model model) {
-		logger.debug("Entering showFtpServer: action='{}'", action);
+	private String showEditEncryptor(String action, Model model) {
+		logger.debug("Entering showEncryptor: action='{}'", action);
 
-		model.addAttribute("connectionTypes", FtpConnectionType.list());
+		model.addAttribute("encryptorTypes", EncryptorType.list());
 		model.addAttribute("action", action);
 
-		return "editFtpServer";
+		return "editEncryptor";
 	}
-	
+
 	/**
 	 * Prepares model data and returns jsp file to display
 	 *
@@ -233,49 +233,51 @@ public class FtpServerController {
 	 * @param model
 	 * @return
 	 */
-	private String showEditFtpServers() {
-		logger.debug("Entering showEditFtpServers");
-		
-		return "editFtpServers";
+	private String showEditEncryptors() {
+		logger.debug("Entering showEditEncryptors");
+
+		return "editEncryptors";
 	}
 
 	/**
-	 * Sets the password field of the ftp server
+	 * Sets the password fields of the encryptor
 	 *
-	 * @param ftpServer the ftp server object to set
+	 * @param encryptor the encryptor object to set
 	 * @param action "add or "edit"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws SQLException
 	 */
-	private String setPassword(FtpServer ftpServer, String action) throws SQLException {
-		logger.debug("Entering setPassword: ftpServer={}, action='{}'", ftpServer, action);
+	private String setPassword(Encryptor encryptor, String action) throws SQLException {
+		logger.debug("Entering setPassword: encryptor={}, action='{}'", encryptor, action);
 
-		boolean useCurrentPassword = false;
-		String newPassword = ftpServer.getPassword();
+		//set the aes crypt password
+		boolean useCurrentAesCryptPassword = false;
+		String newAesCryptPassword = encryptor.getAesCryptPassword();
 
-		if (ftpServer.isUseBlankPassword()) {
-			newPassword = "";
-		} else {
-			if (StringUtils.isEmpty(newPassword) && StringUtils.equals(action, "edit")) {
-				//password field blank. use current password
-				useCurrentPassword = true;
-			}
+		if (StringUtils.isEmpty(newAesCryptPassword) && StringUtils.equals(action, "edit")) {
+			//password field blank. use current password
+			useCurrentAesCryptPassword = true;
 		}
 
-		if (useCurrentPassword) {
+		if (useCurrentAesCryptPassword) {
 			//password field blank. use current password
-			FtpServer currentFtpServer = ftpServerService.getFtpServer(ftpServer.getFtpServerId());
-			if (currentFtpServer == null) {
+			Encryptor currentEncryptor = encryptorService.getEncryptor(encryptor.getEncryptorId());
+			if (currentEncryptor == null) {
 				return "page.message.cannotUseCurrentPassword";
 			} else {
-				newPassword = currentFtpServer.getPassword();
+				newAesCryptPassword = currentEncryptor.getAesCryptPassword();
+			}
+		} else {
+			EncryptorType encryptorType = encryptor.getEncryptorType();
+			if (encryptorType == EncryptorType.AESCrypt && StringUtils.isEmpty(newAesCryptPassword)) {
+				return "encryptors.message.passwordMustNotBeEmpty";
 			}
 		}
 
 		//encrypt new password
-		String encryptedPassword = AesEncryptor.encrypt(newPassword);
-		ftpServer.setPassword(encryptedPassword);
+		String encryptedAesCryptPassword = AesEncryptor.encrypt(newAesCryptPassword);
+		encryptor.setAesCryptPassword(encryptedAesCryptPassword);
 
 		return null;
 	}

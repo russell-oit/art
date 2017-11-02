@@ -17,6 +17,8 @@
  */
 package art.utils;
 
+import art.encryptor.Encryptor;
+import art.enums.EncryptorType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.job.Job;
@@ -155,6 +157,18 @@ public class FilenameHelper {
 			extension = getCsvExtension(report);
 		} else {
 			extension = reportFormat.getFilenameExtension();
+		}
+
+		Encryptor encryptor = report.getEncryptor();
+		if (encryptor != null && encryptor.isActive()) {
+			EncryptorType encryptorType = encryptor.getEncryptorType();
+			switch (encryptorType) {
+				case AESCrypt:
+					extension = extension + ".aes";
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected encryptor type: " + encryptorType);
+			}
 		}
 
 		return extension;

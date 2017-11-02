@@ -65,6 +65,7 @@
 						</includes>
 						<excludes>
 							<exclude>src/main/java/**/BCrypt.java</exclude>
+							<exclude>src/main/java/**/AESCrypt.java</exclude>
 						</excludes>
 						<encoding>UTF-8</encoding>
 						<strictCheck>true</strictCheck>
