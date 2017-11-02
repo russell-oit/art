@@ -1000,12 +1000,7 @@ public class Report implements Serializable {
 			return;
 		}
 
-		List<String> knownExtensions = new ArrayList<>();
-		knownExtensions.add("aes");
-
-		String fileExtension = FilenameUtils.getExtension(finalFileName);
-		logger.debug("fileExtension='{}'", fileExtension);
-		if (!ArtUtils.containsIgnoreCase(knownExtensions, fileExtension)) {
+		if (encryptor == null || !encryptor.isActive()) {
 			return;
 		}
 
