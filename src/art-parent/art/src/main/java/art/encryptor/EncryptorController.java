@@ -19,9 +19,14 @@ package art.encryptor;
 
 import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
+import art.report.UploadHelper;
+import art.servlets.Config;
 import art.user.User;
 import art.utils.AjaxResponse;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -144,6 +150,8 @@ public class EncryptorController {
 	public String saveEncryptor(@ModelAttribute("encryptor") @Valid Encryptor encryptor,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam(value = "publicKeyFile", required = false) MultipartFile publicKeyFile,
+			@RequestParam(value = "signingKeyFile", required = false) MultipartFile signingKeyFile,
 			HttpSession session) {
 
 		logger.debug("Entering saveEncryptor: encryptor={}, action='{}'", encryptor, action);
@@ -156,10 +164,18 @@ public class EncryptorController {
 
 		try {
 			//set password as appropriate
-			String setPasswordMessage = setPassword(encryptor, action);
+			String setPasswordMessage = setPasswords(encryptor, action);
 			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
 			if (setPasswordMessage != null) {
 				model.addAttribute("message", setPasswordMessage);
+				return showEditEncryptor(action, model);
+			}
+
+			//save files
+			String saveFilesMessage = saveFiles(encryptor, publicKeyFile, signingKeyFile);
+			logger.debug("saveFilesMessage='{}'", saveFilesMessage);
+			if (saveFilesMessage != null) {
+				model.addAttribute("message", saveFilesMessage);
 				return showEditEncryptor(action, model);
 			}
 
@@ -175,7 +191,7 @@ public class EncryptorController {
 			String recordName = encryptor.getName() + " (" + encryptor.getEncryptorId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/encryptors";
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -248,8 +264,8 @@ public class EncryptorController {
 	 * problem, null otherwise
 	 * @throws SQLException
 	 */
-	private String setPassword(Encryptor encryptor, String action) throws SQLException {
-		logger.debug("Entering setPassword: encryptor={}, action='{}'", encryptor, action);
+	private String setPasswords(Encryptor encryptor, String action) throws SQLException {
+		logger.debug("Entering setPasswords: encryptor={}, action='{}'", encryptor, action);
 
 		//set the aes crypt password
 		boolean useCurrentAesCryptPassword = false;
@@ -278,6 +294,166 @@ public class EncryptorController {
 		//encrypt new password
 		String encryptedAesCryptPassword = AesEncryptor.encrypt(newAesCryptPassword);
 		encryptor.setAesCryptPassword(encryptedAesCryptPassword);
+
+		//set the signing key passphrase
+		boolean useCurrentSigningKeyPassphrase = false;
+		String newSigningKeyPassphrase = encryptor.getOpenPgpSigningKeyPassphrase();
+
+		if (StringUtils.isEmpty(newSigningKeyPassphrase) && StringUtils.equals(action, "edit")) {
+			//password field blank. use current password
+			useCurrentSigningKeyPassphrase = true;
+		}
+
+		if (useCurrentSigningKeyPassphrase) {
+			//password field blank. use current password
+			Encryptor currentEncryptor = encryptorService.getEncryptor(encryptor.getEncryptorId());
+			if (currentEncryptor == null) {
+				return "page.message.cannotUseCurrentPassword";
+			} else {
+				newSigningKeyPassphrase = currentEncryptor.getOpenPgpSigningKeyPassphrase();
+			}
+		}
+
+		EncryptorType encryptorType = encryptor.getEncryptorType();
+		if (encryptorType == EncryptorType.OpenPGP
+				&& StringUtils.isNoneBlank(encryptor.getOpenPgpSigningKeyFile())
+				&& StringUtils.isEmpty(newSigningKeyPassphrase)) {
+			return "encryptors.message.passwordMustNotBeEmpty";
+		}
+
+		//encrypt new passphrase
+		String encryptedSigningKeyPassphrase = AesEncryptor.encrypt(newSigningKeyPassphrase);
+		encryptor.setOpenPgpSigningKeyPassphrase(encryptedSigningKeyPassphrase);
+
+		return null;
+	}
+
+	/**
+	 * Saves an openpgp public key file and updates the appropriate encryptor
+	 * property with the file name
+	 *
+	 * @param file the file to save
+	 * @param encryptor the encryptor object to set
+	 * @return an i18n message string if there was a problem, otherwise null
+	 * @throws IOException
+	 */
+	private String savePublicKeyFile(MultipartFile file, Encryptor encryptor)
+			throws IOException {
+
+		logger.debug("Entering savePublicKeyFile: encryptor={}", encryptor);
+
+		logger.debug("file==null = {}", file == null);
+		if (file == null) {
+			return null;
+		}
+
+		logger.debug("file.isEmpty()={}", file.isEmpty());
+		if (file.isEmpty()) {
+			//can be empty if a file name is just typed
+			//or if upload a 0 byte file
+			//don't show message in case of file name being typed
+			return null;
+		}
+
+		//set allowed upload file types
+		List<String> validExtensions = new ArrayList<>();
+		validExtensions.add("asc");
+		validExtensions.add("gpg");
+
+		//save file
+		String templatesPath = Config.getTemplatesPath();
+		UploadHelper uploadHelper = new UploadHelper();
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+
+		if (message != null) {
+			return message;
+		}
+
+		if (encryptor != null) {
+			String filename = file.getOriginalFilename();
+			encryptor.setOpenPgpPublicKeyFile(filename);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Saves an openpgp signing key file and updates the appropriate encryptor
+	 * property with the file name
+	 *
+	 * @param file the file to save
+	 * @param encryptor the encryptor object to set
+	 * @return an i18n message string if there was a problem, otherwise null
+	 * @throws IOException
+	 */
+	private String saveSigningKeyFile(MultipartFile file, Encryptor encryptor)
+			throws IOException {
+
+		logger.debug("Entering saveSigningKeyFile: encryptor={}", encryptor);
+
+		logger.debug("file==null = {}", file == null);
+		if (file == null) {
+			return null;
+		}
+
+		logger.debug("file.isEmpty()={}", file.isEmpty());
+		if (file.isEmpty()) {
+			//can be empty if a file name is just typed
+			//or if upload a 0 byte file
+			//don't show message in case of file name being typed
+			return null;
+		}
+
+		//set allowed upload file types
+		List<String> validExtensions = new ArrayList<>();
+		validExtensions.add("asc");
+		validExtensions.add("gpg");
+		validExtensions.add("key");
+
+		//save file
+		String templatesPath = Config.getTemplatesPath();
+		UploadHelper uploadHelper = new UploadHelper();
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+
+		if (message != null) {
+			return message;
+		}
+
+		if (encryptor != null) {
+			String filename = file.getOriginalFilename();
+			encryptor.setOpenPgpSigningKeyFile(filename);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Saves openpgp key files and sets the appropriate encryptor properties
+	 *
+	 * @param encryptor the encryptor to use
+	 * @param publicKeyFile the public key file
+	 * @param signingKeyFile the signing key file
+	 * @return i18n message to display in the user interface if there was a
+	 * problem, null otherwise
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	public String saveFiles(Encryptor encryptor, MultipartFile publicKeyFile,
+			MultipartFile signingKeyFile) throws IOException, SQLException {
+
+		logger.debug("Entering saveFiles: encryptor={}", encryptor);
+
+		String message;
+
+		message = savePublicKeyFile(publicKeyFile, encryptor);
+		if (message != null) {
+			return message;
+		}
+
+		message = saveSigningKeyFile(signingKeyFile, encryptor);
+		if (message != null) {
+			return message;
+		}
 
 		return null;
 	}

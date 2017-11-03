@@ -85,7 +85,7 @@ public class ReportController {
 
 	@Autowired
 	private DatasourceService datasourceService;
-	
+
 	@Autowired
 	private EncryptorService encryptorService;
 
@@ -542,7 +542,7 @@ public class ReportController {
 			throws IOException {
 
 		logger.debug("Entering saveFile: report={}", report);
-
+		
 		logger.debug("file==null = {}", file == null);
 		if (file == null) {
 			return null;
@@ -556,18 +556,7 @@ public class ReportController {
 			return null;
 		}
 
-		//check file size
-		long maxUploadSize = Config.getSettings().getMaxFileUploadSizeMB(); //size in MB
-		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes
-
-		long uploadSize = file.getSize();
-		logger.debug("maxUploadSize={}, uploadSize={}", maxUploadSize, uploadSize);
-
-		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //-1 or any negative value means no size limit
-			return "reports.message.fileBiggerThanMax";
-		}
-
-		//check upload file type
+		//set allowed upload file types
 		List<String> validExtensions = new ArrayList<>();
 		validExtensions.add("xml");
 		validExtensions.add("jrxml");
@@ -590,18 +579,6 @@ public class ReportController {
 		validExtensions.add("css"); //for c3.js additional css
 		validExtensions.add("js"); //for datamaps additional js
 		validExtensions.add("json"); //for datamaps optional data file
-
-		String filename = file.getOriginalFilename();
-		logger.debug("filename='{}'", filename);
-		String extension = FilenameUtils.getExtension(filename);
-
-		if (!ArtUtils.containsIgnoreCase(validExtensions, extension)) {
-			return "reports.message.fileTypeNotAllowed";
-		}
-
-		if (!FinalFilenameValidator.isValid(filename)) {
-			return "reports.message.invalidFilename";
-		}
 
 		//save file
 		String templatesPath;
@@ -632,11 +609,15 @@ public class ReportController {
 				templatesPath = Config.getTemplatesPath();
 		}
 
-		String destinationFilename = templatesPath + filename;
-		File destinationFile = new File(destinationFilename);
-		file.transferTo(destinationFile);
+		UploadHelper uploadHelper = new UploadHelper();
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+
+		if (message != null) {
+			return message;
+		}
 
 		if (report != null) {
+			String filename = file.getOriginalFilename();
 			report.setTemplate(filename);
 		}
 

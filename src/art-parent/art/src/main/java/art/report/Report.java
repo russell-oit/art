@@ -26,6 +26,7 @@ import art.reportgroup.ReportGroup;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.Reporti18nOptions;
 import art.encryption.AESCrypt;
+import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +43,9 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.openpgp.PGPException;
+import org.c02e.jpgpj.HashingAlgorithm;
+import org.c02e.jpgpj.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -991,8 +995,11 @@ public class Report implements Serializable {
 	 * e.g. c:\test\file.xls.aes
 	 * @throws IOException
 	 * @throws GeneralSecurityException
+	 * @throws org.bouncycastle.openpgp.PGPException
 	 */
-	public void encryptFile(String finalFileName) throws IOException, GeneralSecurityException {
+	public void encryptFile(String finalFileName) throws IOException,
+			GeneralSecurityException, PGPException {
+
 		logger.debug("Entering encrypt: finalFileName='{}'", finalFileName);
 
 		File file = new File(finalFileName);
@@ -1010,13 +1017,16 @@ public class Report implements Serializable {
 			case AESCrypt:
 				encryptFileAesCrypt(finalFileName);
 				break;
+			case OpenPGP:
+				encryptFileOpenPgp(finalFileName);
+				break;
 			default:
-				throw new IllegalArgumentException("Unexpected encryptor type: " + encryptorType);
+			//do nothing
 		}
 	}
 
 	/**
-	 * Encrypts a file using the aescrypt encryptor defined on the report
+	 * Encrypts a file using the aes crypt encryptor defined on the report
 	 *
 	 * @param finalFileName the full path of the final file name of the file
 	 * e.g. c:\test\file.xls.aes
@@ -1028,8 +1038,70 @@ public class Report implements Serializable {
 		//http://www.baeldung.com/java-how-to-rename-or-move-a-file
 		String tempFileName = FilenameUtils.removeExtension(finalFileName);
 		File tempFile = new File(tempFileName);
-		FileUtils.moveFile(new File(finalFileName), new File(tempFileName));
+		File finalFile = new File(finalFileName);
+		FileUtils.moveFile(finalFile, tempFile);
 		aes.encrypt(tempFileName, finalFileName);
+		tempFile.delete();
+	}
+
+	/**
+	 * Encrypts a file using the openpgp encryptor defined on the report
+	 *
+	 * @param finalFileName the full path of the final file name of the file
+	 * e.g. c:\test\file.xls.aes
+	 * @throws IOException
+	 * @throws PGPException
+	 */
+	private void encryptFileOpenPgp(String finalFileName) throws IOException, PGPException {
+		//http://blog.swwomm.com/2016/07/jpgpj-new-java-gpg-library.html
+
+		String templatesPath = Config.getTemplatesPath();
+
+		Key publicKey;
+		String openPgpPublicKeyString = encryptor.getOpenPgpPublicKeyString();
+		if (StringUtils.isNotBlank(openPgpPublicKeyString)) {
+			publicKey = new Key(openPgpPublicKeyString);
+		} else {
+			String publicKeyFileName = encryptor.getOpenPgpPublicKeyFile();
+			if (StringUtils.isBlank(publicKeyFileName)) {
+				throw new IllegalArgumentException("Public key not specified");
+			}
+
+			String publicKeyFilePath = templatesPath + publicKeyFileName;
+			File publicKeyFile = new File(publicKeyFilePath);
+			if (!publicKeyFile.exists()) {
+				throw new IllegalStateException("Public key file not found: " + publicKeyFilePath);
+			}
+
+			publicKey = new Key(publicKeyFile);
+		}
+
+		Key signingKey = null;
+		String signingKeyFileName = encryptor.getOpenPgpSigningKeyFile();
+		if (StringUtils.isNotBlank(signingKeyFileName)) {
+			String signingKeyFilePath = templatesPath + signingKeyFileName;
+			File signingKeyFile = new File(signingKeyFilePath);
+			if (!signingKeyFile.exists()) {
+				throw new IllegalStateException("Signing key file not found: " + signingKeyFilePath);
+			}
+
+			signingKey = new Key(signingKeyFile, encryptor.getOpenPgpSigningKeyPassphrase());
+		}
+
+		org.c02e.jpgpj.Encryptor pgpEncryptor;
+
+		if (signingKey == null) {
+			pgpEncryptor = new org.c02e.jpgpj.Encryptor(publicKey);
+			pgpEncryptor.setSigningAlgorithm(HashingAlgorithm.Unsigned);
+		} else {
+			pgpEncryptor = new org.c02e.jpgpj.Encryptor(publicKey, signingKey);
+		}
+
+		String tempFileName = FilenameUtils.removeExtension(finalFileName);
+		File tempFile = new File(tempFileName);
+		File finalFile = new File(finalFileName);
+		FileUtils.moveFile(finalFile, tempFile);
+		pgpEncryptor.encrypt(tempFile, finalFile);
 		tempFile.delete();
 	}
 

@@ -9,7 +9,7 @@ ART 3.1
 * Added CSV report type
 * Allow setting of password for xlsx, docx, ods, odt, pdf output
 * Fix for group column not being saved
-* Added ability to encrypt files in AES Crypt format
+* Added ability to encrypt files in AES Crypt or OpenPGP format
 * Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1

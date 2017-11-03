@@ -166,8 +166,11 @@ public class FilenameHelper {
 				case AESCrypt:
 					extension = extension + ".aes";
 					break;
+				case OpenPGP:
+					extension = extension + ".gpg";
+					break;
 				default:
-					throw new IllegalArgumentException("Unexpected encryptor type: " + encryptorType);
+					//do nothing
 			}
 		}
 

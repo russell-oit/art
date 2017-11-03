@@ -28,7 +28,7 @@ import java.util.List;
  */
 public enum EncryptorType {
 
-	AESCrypt("AES Crypt");
+	AESCrypt("AES Crypt"), OpenPGP("OpenPGP");
 
 	private final String value;
 

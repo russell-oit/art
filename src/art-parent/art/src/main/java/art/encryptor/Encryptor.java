@@ -39,6 +39,66 @@ public class Encryptor implements Serializable {
 	private String createdBy;
 	private Date updateDate;
 	private String updatedBy;
+	private String openPgpPublicKeyFile;
+	private String openPgpPublicKeyString;
+	private String openPgpSigningKeyFile;
+	private String openPgpSigningKeyPassphrase;
+
+	/**
+	 * @return the openPgpPublicKeyFile
+	 */
+	public String getOpenPgpPublicKeyFile() {
+		return openPgpPublicKeyFile;
+	}
+
+	/**
+	 * @param openPgpPublicKeyFile the openPgpPublicKeyFile to set
+	 */
+	public void setOpenPgpPublicKeyFile(String openPgpPublicKeyFile) {
+		this.openPgpPublicKeyFile = openPgpPublicKeyFile;
+	}
+
+	/**
+	 * @return the openPgpPublicKeyString
+	 */
+	public String getOpenPgpPublicKeyString() {
+		return openPgpPublicKeyString;
+	}
+
+	/**
+	 * @param openPgpPublicKeyString the openPgpPublicKeyString to set
+	 */
+	public void setOpenPgpPublicKeyString(String openPgpPublicKeyString) {
+		this.openPgpPublicKeyString = openPgpPublicKeyString;
+	}
+
+	/**
+	 * @return the openPgpSigningKeyFile
+	 */
+	public String getOpenPgpSigningKeyFile() {
+		return openPgpSigningKeyFile;
+	}
+
+	/**
+	 * @param openPgpSigningKeyFile the openPgpSigningKeyFile to set
+	 */
+	public void setOpenPgpSigningKeyFile(String openPgpSigningKeyFile) {
+		this.openPgpSigningKeyFile = openPgpSigningKeyFile;
+	}
+
+	/**
+	 * @return the openPgpSigningKeyPassphrase
+	 */
+	public String getOpenPgpSigningKeyPassphrase() {
+		return openPgpSigningKeyPassphrase;
+	}
+
+	/**
+	 * @param openPgpSigningKeyPassphrase the openPgpSigningKeyPassphrase to set
+	 */
+	public void setOpenPgpSigningKeyPassphrase(String openPgpSigningKeyPassphrase) {
+		this.openPgpSigningKeyPassphrase = openPgpSigningKeyPassphrase;
+	}
 
 	/**
 	 * @return the active

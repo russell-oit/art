@@ -28,16 +28,33 @@
 
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="reports.text.selectFile" var="selectFileText"/>
+<spring:message code="reports.text.change" var="changeText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload-ui.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/vendor/jquery.ui.widget.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.iframe-transport.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-process.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -47,15 +64,47 @@
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneResultsText: '${noResultsMatchText}'
+				});
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				$('button.dropdown-toggle').dropdownHover({
+					delay: 100
+				});
+
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
 					offText: '${noText}'
 				});
 
+				$("#encryptorType").change(function () {
+					toggleVisibleFields();
+				});
+
+				toggleVisibleFields(); //show/hide on page load
+
 				$('#name').focus();
 
 			});
+		</script>
+
+		<script type="text/javascript">
+			function toggleVisibleFields() {
+				var encryptorType = $('#encryptorType option:selected').val();
+
+				if (encryptorType === 'AESCrypt') {
+					$("#aesCryptFields").show();
+					$("#openPgpFields").hide();
+				} else if (encryptorType === 'OpenPGP') {
+					$("#aesCryptFields").hide();
+					$("#openPgpFields").show();
+				}
+			}
 		</script>
 	</jsp:attribute>
 
@@ -69,7 +118,7 @@
 
 	<jsp:body>
 		<spring:url var="formUrl" value="/saveEncryptor"/>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="encryptor">
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="encryptor" enctype="multipart/form-data">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -137,24 +186,90 @@
 						<spring:message code="encryptors.label.encryptorType"/>
 					</label>
 					<div class="col-md-8">
-						<c:forEach var="encryptorType" items="${encryptorTypes}">
-							<label class="radio-inline">
-								<form:radiobutton path="encryptorType"
-												  value="${encryptorType}"/> ${encryptorType.description}
-							</label>
-						</c:forEach>
+						<form:select path="encryptorType" class="form-control selectpicker">
+							<c:forEach var="encryptorType" items="${encryptorTypes}">
+								<form:option value="${encryptorType}">
+									${encryptorType.description} 
+								</form:option>
+							</c:forEach>
+						</form:select>
 						<form:errors path="encryptorType" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="aesCryptPassword">
-						<spring:message code="encryptors.label.aesCryptPassword"/>
-					</label>
-					<div class="col-md-8">
-						<form:password path="aesCryptPassword" autocomplete="off" maxlength="50" class="form-control" />
-						<form:errors path="aesCryptPassword" cssClass="error"/>
+
+				<fieldset id="aesCryptFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="aesCryptPassword">
+							<spring:message code="encryptors.label.aesCryptPassword"/>
+						</label>
+						<div class="col-md-8">
+							<form:password path="aesCryptPassword" autocomplete="off" maxlength="50" class="form-control" />
+							<form:errors path="aesCryptPassword" cssClass="error"/>
+						</div>
 					</div>
-				</div>
+				</fieldset>
+
+				<fieldset id="openPgpFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="openPgpPublicKeyFile">
+							<spring:message code="encryptors.label.openPgpPublicKeyFile"/>
+						</label>
+						<div class="col-md-8">
+							<div>
+								<form:input path="openPgpPublicKeyFile" maxlength="100" class="form-control"/>
+								<form:errors path="openPgpPublicKeyFile" cssClass="error"/>
+							</div>
+							<div class="fileinput fileinput-new" data-provides="fileinput">
+								<span class="btn btn-default btn-file">
+									<span class="fileinput-new">${selectFileText}</span>
+									<span class="fileinput-exists">${changeText}</span>
+									<input type="file" name="publicKeyFile">
+								</span>
+								<span class="fileinput-filename"></span>
+								<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="openPgpPublicKeyString">
+							<spring:message code="encryptors.label.openPgpPublicKeyString"/>
+						</label>
+						<div class="col-md-8">
+							<form:textarea path="openPgpPublicKeyString" rows="4" cols="40" class="form-control"/>
+							<form:errors path="openPgpPublicKeyString" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="openPgpSigningKeyFile">
+							<spring:message code="encryptors.label.openPgpSigningKeyFile"/>
+						</label>
+						<div class="col-md-8">
+							<div>
+								<form:input path="openPgpSigningKeyFile" maxlength="100" class="form-control"/>
+								<form:errors path="openPgpSigningKeyFile" cssClass="error"/>
+							</div>
+							<div class="fileinput fileinput-new" data-provides="fileinput">
+								<span class="btn btn-default btn-file">
+									<span class="fileinput-new">${selectFileText}</span>
+									<span class="fileinput-exists">${changeText}</span>
+									<input type="file" name="signingKeyFile">
+								</span>
+								<span class="fileinput-filename"></span>
+								<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="openPgpSigningKeyPassphrase">
+							<spring:message code="encryptors.label.openPgpSigningKeyPassphrase"/>
+						</label>
+						<div class="col-md-8">
+							<form:password path="openPgpSigningKeyPassphrase" autocomplete="off" maxlength="1000" class="form-control" />
+							<form:errors path="openPgpSigningKeyPassphrase" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

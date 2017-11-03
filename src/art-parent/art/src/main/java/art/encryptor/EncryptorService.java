@@ -49,9 +49,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class EncryptorService {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(EncryptorService.class);
-	
+
 	private final DbService dbService;
 
 	@Autowired
@@ -89,15 +89,23 @@ public class EncryptorService {
 			encryptor.setActive(rs.getBoolean("ACTIVE"));
 			encryptor.setEncryptorType(EncryptorType.toEnum(rs.getString("ENCRYPTOR_TYPE")));
 			encryptor.setAesCryptPassword(rs.getString("AESCRYPT_PASSWORD"));
+			encryptor.setOpenPgpPublicKeyFile(rs.getString("OPENPGP_PUBLIC_KEY_FILE"));
+			encryptor.setOpenPgpPublicKeyString(rs.getString("OPENPGP_PUBLIC_KEY_STRING"));
+			encryptor.setOpenPgpSigningKeyFile(rs.getString("OPENPGP_SIGNING_KEY_FILE"));
+			encryptor.setOpenPgpSigningKeyPassphrase(rs.getString("OPENPGP_SIGNING_KEY_PASSPHRASE"));
 			encryptor.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			encryptor.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			encryptor.setCreatedBy(rs.getString("CREATED_BY"));
 			encryptor.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			//decrypt aescrypt password
+			//decrypt passwords
 			String aesCryptPassword = encryptor.getAesCryptPassword();
 			aesCryptPassword = AesEncryptor.decrypt(aesCryptPassword);
 			encryptor.setAesCryptPassword(aesCryptPassword);
+
+			String openPgpSigningKeyPassphrase = encryptor.getOpenPgpSigningKeyPassphrase();
+			openPgpSigningKeyPassphrase = AesEncryptor.decrypt(openPgpSigningKeyPassphrase);
+			encryptor.setOpenPgpSigningKeyPassphrase(openPgpSigningKeyPassphrase);
 
 			return type.cast(encryptor);
 		}
@@ -237,9 +245,11 @@ public class EncryptorService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_ENCRYPTORS"
 					+ " (ENCRYPTOR_ID, NAME, DESCRIPTION, ACTIVE, ENCRYPTOR_TYPE,"
-					+ " AESCRYPT_PASSWORD,"
+					+ " AESCRYPT_PASSWORD, OPENPGP_PUBLIC_KEY_FILE,"
+					+ " OPENPGP_PUBLIC_KEY_STRING, OPENPGP_SIGNING_KEY_FILE,"
+					+ " OPENPGP_SIGNING_KEY_PASSPHRASE,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 8) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -248,6 +258,10 @@ public class EncryptorService {
 				BooleanUtils.toInteger(encryptor.isActive()),
 				encryptor.getEncryptorType().getValue(),
 				encryptor.getAesCryptPassword(),
+				encryptor.getOpenPgpPublicKeyFile(),
+				encryptor.getOpenPgpPublicKeyString(),
+				encryptor.getOpenPgpSigningKeyFile(),
+				encryptor.getOpenPgpSigningKeyPassphrase(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -256,6 +270,8 @@ public class EncryptorService {
 		} else {
 			String sql = "UPDATE ART_ENCRYPTORS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, ENCRYPTOR_TYPE=?, AESCRYPT_PASSWORD=?,"
+					+ " OPENPGP_PUBLIC_KEY_FILE=?, OPENPGP_PUBLIC_KEY_STRING=?,"
+					+ " OPENPGP_SIGNING_KEY_FILE=?, OPENPGP_SIGNING_KEY_PASSPHRASE=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE ENCRYPTOR_ID=?";
 
@@ -265,6 +281,10 @@ public class EncryptorService {
 				BooleanUtils.toInteger(encryptor.isActive()),
 				encryptor.getEncryptorType().getValue(),
 				encryptor.getAesCryptPassword(),
+				encryptor.getOpenPgpPublicKeyFile(),
+				encryptor.getOpenPgpPublicKeyString(),
+				encryptor.getOpenPgpSigningKeyFile(),
+				encryptor.getOpenPgpSigningKeyPassphrase(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				encryptor.getEncryptorId()

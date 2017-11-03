@@ -566,14 +566,14 @@ public class ReportService {
 				report, newRecordId, actionUser);
 
 		//set values for possibly null property objects
-		Integer reportGroupId; //database column doesn't allow null
+		Integer reportGroupId;
 		if (report.getReportGroup() == null) {
 			reportGroupId = 0;
 		} else {
 			reportGroupId = report.getReportGroup().getReportGroupId();
 		}
 
-		Integer datasourceId; //database column doesn't allow null
+		Integer datasourceId;
 		if (report.getDatasource() == null) {
 			datasourceId = 0;
 		} else {
@@ -639,7 +639,7 @@ public class ReportService {
 				reportTypeId,
 				report.getGroupColumn(),
 				reportGroupId,
-				encryptorId,
+				datasourceId,
 				report.getContactPerson(),
 				BooleanUtils.toInteger(report.isUsesRules()),
 				BooleanUtils.toInteger(report.isActive()),
@@ -697,7 +697,7 @@ public class ReportService {
 				report.getReportTypeId(),
 				report.getGroupColumn(),
 				reportGroupId,
-				encryptorId,
+				datasourceId,
 				report.getContactPerson(),
 				BooleanUtils.toInteger(report.isUsesRules()),
 				BooleanUtils.toInteger(report.isActive()),
