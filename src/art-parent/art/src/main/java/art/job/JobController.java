@@ -18,6 +18,7 @@
 package art.job;
 
 import art.datasource.DatasourceService;
+import art.encryptor.Encryptor;
 import art.enums.JobType;
 import art.enums.ReportType;
 import art.ftpserver.FtpServerService;
@@ -27,6 +28,7 @@ import art.jobrunners.ReportJob;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
+import art.report.UploadHelper;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
@@ -39,6 +41,7 @@ import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -78,6 +81,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -328,6 +332,7 @@ public class JobController {
 	public String saveJob(@ModelAttribute("job") @Valid Job job,
 			@RequestParam("action") String action, @RequestParam("nextPage") String nextPage,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam(value = "emailTemplateFile", required = false) MultipartFile emailTemplateFile,
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveJob: job={}, action='{}', nextPage='{}'", job, action, nextPage);
@@ -339,9 +344,17 @@ public class JobController {
 		}
 
 		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
+			//save email template file
+			String saveFileMessage = saveEmailTemplateFile(emailTemplateFile, job);
+			logger.debug("saveFileMessage='{}'", saveFileMessage);
+			if (saveFileMessage != null) {
+				model.addAttribute("message", saveFileMessage);
+				return showEditJob(action, model, job, locale);
+			}
 
 			finalizeSchedule(job);
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			if (StringUtils.equals(action, "add")) {
 				jobService.addJob(job, sessionUser);
@@ -358,7 +371,7 @@ public class JobController {
 			String recordName = job.getName() + " (" + job.getJobId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/" + nextPage;
-		} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {
+		} catch (SQLException | RuntimeException | SchedulerException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -631,8 +644,8 @@ public class JobController {
 					jobTypes.add(JobType.CondEmailAttachment);
 					jobTypes.add(JobType.CondPublish);
 					jobTypes.add(JobType.Print);
-				} else if(reportType == ReportType.FixedWidth
-						|| reportType == ReportType.CSV){
+				} else if (reportType == ReportType.FixedWidth
+						|| reportType == ReportType.CSV) {
 					jobTypes.add(JobType.EmailAttachment);
 					jobTypes.add(JobType.EmailInline);
 					jobTypes.add(JobType.Publish);
@@ -875,6 +888,54 @@ public class JobController {
 
 		//add job and trigger to scheduler
 		scheduler.scheduleJob(quartzJob, trigger);
+	}
+
+	/**
+	 * Saves an email template file and updates the appropriate job property
+	 * with the file name
+	 *
+	 * @param file the file to save
+	 * @param job the job object to set
+	 * @return an i18n message string if there was a problem, otherwise null
+	 * @throws IOException
+	 */
+	private String saveEmailTemplateFile(MultipartFile file, Job job)
+			throws IOException {
+
+		logger.debug("Entering saveEmailTemplateFile: job={}", job);
+
+		logger.debug("file==null = {}", file == null);
+		if (file == null) {
+			return null;
+		}
+
+		logger.debug("file.isEmpty()={}", file.isEmpty());
+		if (file.isEmpty()) {
+			//can be empty if a file name is just typed
+			//or if upload a 0 byte file
+			//don't show message in case of file name being typed
+			return null;
+		}
+
+		//set allowed upload file types
+		List<String> validExtensions = new ArrayList<>();
+		validExtensions.add("html");
+
+		//save file
+		String templatesPath = Config.getThymeleafTemplatesPath();
+		UploadHelper uploadHelper = new UploadHelper();
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+
+		if (message != null) {
+			return message;
+		}
+
+		if (job != null) {
+			String filename = file.getOriginalFilename();
+			job.setEmailTemplate(filename);
+		}
+
+		return null;
 	}
 
 }

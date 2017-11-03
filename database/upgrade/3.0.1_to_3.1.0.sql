@@ -10,6 +10,7 @@
 -- increase size of job subject and fixed file name columns
 -- add open and modify password fields for reports
 -- add encryptors table
+-- add email template column
 
 -- NOTES:
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
@@ -75,3 +76,6 @@ CREATE TABLE ART_ENCRYPTORS
 
 -- add encryptor id column
 ALTER TABLE ART_QUERIES ADD ENCRYPTOR_ID INTEGER;
+
+-- add email template column
+ALTER TABLE ART_JOBS ADD EMAIL_TEMPLATE VARCHAR(100);

@@ -80,6 +80,21 @@ public class Job implements Serializable {
 	private String batchFile;
 	private FtpServer ftpServer;
 	private String fixedFileName;
+	private String emailTemplate;
+
+	/**
+	 * @return the emailTemplate
+	 */
+	public String getEmailTemplate() {
+		return emailTemplate;
+	}
+
+	/**
+	 * @param emailTemplate the emailTemplate to set
+	 */
+	public void setEmailTemplate(String emailTemplate) {
+		this.emailTemplate = emailTemplate;
+	}
 
 	/**
 	 * @return the fixedFileName

@@ -486,13 +486,10 @@ CREATE TABLE ART_USER_GROUP_RULES
 -- ART_JOBS
 -- Stores scheduled jobs
 
--- OUTPUT_FORMAT: html, pdf, xls etc (viewMode code)
--- LAST_FILE_NAME: Contains result of last job execution. Either a status message
--- (if contents start with -), or a file name and status message separated by 
--- newline character (\n) (for publish jobs)
+-- OUTPUT_FORMAT: html, pdf, xls etc
+-- LAST_FILE_NAME: Contains result of last job execution
 -- MIGRATED_TO_QUARTZ is present to allow seamless migration of jobs when
--- upgrading from ART versions before 1.11
--- (before quartz was used as the scheduling engine)
+-- upgrading from ART versions before 1.11 (before quartz was used as the scheduling engine)
 -- ACTIVE: boolean. 0=false, 1=true
 
 CREATE TABLE ART_JOBS
@@ -535,6 +532,7 @@ CREATE TABLE ART_JOBS
 	FIXED_FILE_NAME VARCHAR(1000),
 	BATCH_FILE VARCHAR(50),
 	FTP_SERVER_ID INTEGER,
+	EMAIL_TEMPLATE VARCHAR(100),
 	CREATION_DATE TIMESTAMP,
 	CREATED_BY VARCHAR(50),
 	UPDATE_DATE TIMESTAMP,

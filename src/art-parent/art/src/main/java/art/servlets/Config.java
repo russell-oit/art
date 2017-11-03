@@ -858,6 +858,15 @@ public class Config extends HttpServlet {
 	public static String getArtTempPath() {
 		return workDirectoryPath + "tmp" + File.separator;
 	}
+	
+	/**
+	 * Returns the full path to the thymeleaf templates directory
+	 *
+	 * @return full path to the thymeleaf templates directory
+	 */
+	public static String getThymeleafTemplatesPath() {
+		return webinfPath + "thymeleaf" + File.separator;
+	}
 
 	/**
 	 * Returns the full path to the templates directory

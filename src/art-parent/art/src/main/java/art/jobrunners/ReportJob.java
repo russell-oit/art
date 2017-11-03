@@ -545,7 +545,7 @@ public class ReportJob implements org.quartz.Job {
 
 		logger.debug("Entering prepareAlertMailer: value={}", value);
 
-		setMailerFromSubject(mailer, recipientDetails);
+		setMailerFromAndSubject(mailer, recipientDetails);
 
 		String customMessage = applyDynamicRecipientColumns(message, recipientDetails);
 
@@ -564,8 +564,10 @@ public class ReportJob implements org.quartz.Job {
 		Context ctx = new Context(locale);
 		ctx.setVariable("mainMessage", mainMessage);
 		ctx.setVariable("job", job);
+		ctx.setVariable("value", value);
 
-		String finalMessage = emailTemplateEngine.process("basicEmail", ctx);
+		String emailTemplateName = getEmailTemplateName();
+		String finalMessage = emailTemplateEngine.process(emailTemplateName, ctx);
 		mailer.setMessage(finalMessage);
 	}
 
@@ -600,7 +602,7 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering prepareTemplateAlertMailer: reportType={}, "
 				+ "value={}", reportType, value);
 
-		setMailerFromSubject(mailer, recipientColumns);
+		setMailerFromAndSubject(mailer, recipientColumns);
 
 		//set variables to be passed to template
 		Map<String, Object> data = new HashMap<>();
@@ -638,12 +640,14 @@ public class ReportJob implements org.quartz.Job {
 	 * @param mailer the mailer to use
 	 * @param message the message of the email
 	 * @param outputFileName the full path of a file to include with the email
+	 * @param reportParamsList the report parameters used to run the job
 	 */
-	private void prepareMailer(Mailer mailer, String message, String outputFileName)
+	private void prepareMailer(Mailer mailer, String message, String outputFileName,
+			List<ReportParameter> reportParamsList)
 			throws FileNotFoundException, IOException {
 
 		Map<String, String> recipientDetails = null;
-		prepareMailer(mailer, message, outputFileName, recipientDetails);
+		prepareMailer(mailer, message, outputFileName, recipientDetails, reportParamsList);
 	}
 
 	/**
@@ -653,14 +657,15 @@ public class ReportJob implements org.quartz.Job {
 	 * @param message the message of the email
 	 * @param outputFileName the full path of a file to include with the email
 	 * @param recipientDetails the dynamic recipient details
+	 * @param reportParamsList the report parameters used to run the job
 	 */
 	private void prepareMailer(Mailer mailer, String message, String outputFileName,
-			Map<String, String> recipientDetails)
+			Map<String, String> recipientDetails, List<ReportParameter> reportParamsList)
 			throws FileNotFoundException, IOException {
 
 		logger.debug("Entering prepareEmailMailer: outputFileName='{}'", outputFileName);
 
-		setMailerFromSubject(mailer, recipientDetails);
+		setMailerFromAndSubject(mailer, recipientDetails);
 
 		Report report = job.getReport();
 		ReportType reportType = report.getReportType();
@@ -709,8 +714,18 @@ public class ReportJob implements org.quartz.Job {
 			ctx.setVariable("mainMessage", mainMessage);
 			ctx.setVariable("job", job);
 			ctx.setVariable("data", messageData);
+			
+			//pass report parameters
+			for (ReportParameter reportParam : reportParamsList) {
+				String paramName = reportParam.getParameter().getName();
+				ctx.setVariable(paramName, reportParam);
+			}
 
-			String finalMessage = emailTemplateEngine.process("basicEmail", ctx);
+			ctx.setVariable("params", reportParamsList);
+			ctx.setVariable("locale", locale);
+
+			String emailTemplateName = getEmailTemplateName();
+			String finalMessage = emailTemplateEngine.process(emailTemplateName, ctx);
 			mailer.setMessage(finalMessage);
 		}
 	}
@@ -721,7 +736,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @param mailer the mailer object
 	 * @param recipientDetails the dynamic recipient details
 	 */
-	private void setMailerFromSubject(Mailer mailer, Map<String, String> recipientDetails) {
+	private void setMailerFromAndSubject(Mailer mailer, Map<String, String> recipientDetails) {
 		String from = getMailFrom();
 
 		String subject = job.getMailSubject();
@@ -1158,6 +1173,7 @@ public class ReportJob implements org.quartz.Job {
 
 			ParameterProcessorResult paramProcessorResult = buildParameters(reportId, jobId, user);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 			reportRunner.setReportParamsMap(reportParamsMap);
 
 			ReportType reportType = report.getReportType();
@@ -1231,7 +1247,7 @@ public class ReportJob implements org.quartz.Job {
 						printFile(outputFileName);
 					} else if (generateEmail || recipientDetails != null) {
 						//some kind of emailing required
-						processAndSendEmail(recipientDetails, message, outputFileName, recipientFilterPresent, generateEmail, tos, ccs, bccs, userEmail, cc, bcc);
+						processAndSendEmail(recipientDetails, message, outputFileName, recipientFilterPresent, generateEmail, tos, ccs, bccs, userEmail, cc, bcc, reportParamsList);
 					}
 				}
 			} else if (jobType.isCache()) {
@@ -1272,12 +1288,14 @@ public class ReportJob implements org.quartz.Job {
 	 * @param userEmail
 	 * @param cc
 	 * @param bcc
+	 * @param reportParamsList the report parameters used to run the job
 	 * @throws IOException
 	 */
 	private void processAndSendEmail(Map<String, Map<String, String>> recipientDetails,
 			String message, String outputFileName, boolean recipientFilterPresent,
 			boolean generateEmail, String[] tos, String[] ccs, String[] bccs,
-			String userEmail, String cc, String bcc) throws IOException {
+			String userEmail, String cc, String bcc,
+			List<ReportParameter> reportParamsList) throws IOException {
 
 		logger.debug("Entering processAndSendEmail");
 
@@ -1300,7 +1318,7 @@ public class ReportJob implements org.quartz.Job {
 				String[] emailsArray = StringUtils.split(emails, ";");
 				Map<String, String> recipientColumns = entry.getValue();
 
-				prepareMailer(mailer, finalMessage, outputFileName, recipientColumns);
+				prepareMailer(mailer, finalMessage, outputFileName, recipientColumns, reportParamsList);
 
 				mailer.setTo(emailsArray);
 
@@ -1353,7 +1371,7 @@ public class ReportJob implements org.quartz.Job {
 		if (generateEmail) {
 			Mailer mailer = getMailer();
 
-			prepareMailer(mailer, finalMessage, outputFileName);
+			prepareMailer(mailer, finalMessage, outputFileName, reportParamsList);
 
 			//set recipients
 			mailer.setTo(tos);
@@ -1487,7 +1505,7 @@ public class ReportJob implements org.quartz.Job {
 					fos.close();
 				}
 			}
-			
+
 			//encrypt file if applicable
 			report.encryptFile(outputFileName);
 		}
@@ -2261,9 +2279,9 @@ public class ReportJob implements org.quartz.Job {
 
 	/**
 	 * Prints a file
-	 * 
+	 *
 	 * @param outputFileName full path to the file to print
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private void printFile(String outputFileName) throws IOException {
 		//http://www.java2s.com/Tutorial/Java/0261__2D-Graphics/javaxprintAPIandallowsyoutolistavailableprintersqueryanamedprinterprinttextandimagefilestoaprinterandprinttopostscriptfiles.htm
@@ -2272,7 +2290,7 @@ public class ReportJob implements org.quartz.Job {
 		//https://stackoverflow.com/questions/18004150/desktop-api-is-not-supported-on-the-current-platform
 		//https://stackoverflow.com/questions/102325/not-supported-platforms-for-java-awt-desktop-getdesktop
 		//http://www.javaquery.com/2013/06/understanding-basics-javaawtdesktop.html
-		
+
 		//use desktop class to print using the default application registered for the output file type
 		//using print service class sends raw data to the printer, and most printers won't be able to recognize/handle this with some file types, and will not print successfully
 		//desktop class prints to the default printer. no way to change the default printer from java code?
@@ -2287,6 +2305,29 @@ public class ReportJob implements org.quartz.Job {
 		} else {
 			throw new IllegalStateException("Desktop not supported");
 		}
+	}
+
+	/**
+	 * Returns the name of the email template to use
+	 *
+	 * @return the name of the email template to use
+	 */
+	private String getEmailTemplateName() {
+		String templateName = "basicEmail";
+
+		String jobEmailTemplateFileName = job.getEmailTemplate();
+		logger.debug("jobEmailTemplateFileName='{}'", jobEmailTemplateFileName);
+		if (StringUtils.isNotBlank(jobEmailTemplateFileName)) {
+			String jobEmailTemplateFilePath = Config.getThymeleafTemplatesPath() + jobEmailTemplateFileName;
+			File jobEmailTemplateFile = new File(jobEmailTemplateFilePath);
+			if (!jobEmailTemplateFile.exists()) {
+				throw new IllegalStateException("Email template file not found: " + jobEmailTemplateFilePath);
+			} else {
+				templateName = FilenameUtils.getBaseName(jobEmailTemplateFilePath);
+			}
+		}
+
+		return templateName;
 	}
 
 }

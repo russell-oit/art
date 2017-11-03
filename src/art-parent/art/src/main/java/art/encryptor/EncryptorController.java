@@ -316,7 +316,7 @@ public class EncryptorController {
 
 		EncryptorType encryptorType = encryptor.getEncryptorType();
 		if (encryptorType == EncryptorType.OpenPGP
-				&& StringUtils.isNoneBlank(encryptor.getOpenPgpSigningKeyFile())
+				&& StringUtils.isNotBlank(encryptor.getOpenPgpSigningKeyFile())
 				&& StringUtils.isEmpty(newSigningKeyPassphrase)) {
 			return "encryptors.message.passwordMustNotBeEmpty";
 		}
@@ -408,7 +408,6 @@ public class EncryptorController {
 		List<String> validExtensions = new ArrayList<>();
 		validExtensions.add("asc");
 		validExtensions.add("gpg");
-		validExtensions.add("key");
 
 		//save file
 		String templatesPath = Config.getTemplatesPath();
