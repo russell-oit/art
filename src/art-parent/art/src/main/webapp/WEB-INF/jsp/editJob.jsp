@@ -63,7 +63,7 @@
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
-		
+
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload-ui.css">
@@ -73,7 +73,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects-1.0.1/jquery.chained.remote.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
-		
+
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/vendor/jquery.ui.widget.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.iframe-transport.js"></script>
@@ -720,17 +720,6 @@
 							<form:errors path="mailSubject" cssClass="error"/>
 						</div>
 					</div>
-					<div id="mailMessageDiv">
-						<label class="col-md-12 control-label" style="text-align: center">
-							<spring:message code="jobs.label.mailMessage"/>
-						</label>
-						<div class="form-group">
-							<div class="col-md-12">
-								<form:textarea path="mailMessage" rows="8" cols="60" class="form-control editor"/>
-								<form:errors path="mailMessage" cssClass="error"/>
-							</div>
-						</div>
-					</div>
 					<div class="form-group">
 						<label class="control-label col-md-4" for="emailTemplate">
 							<spring:message code="reports.label.template"/>
@@ -748,6 +737,17 @@
 								</span>
 								<span class="fileinput-filename"></span>
 								<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+							</div>
+						</div>
+					</div>
+					<div id="mailMessageDiv">
+						<label class="col-md-12 control-label" style="text-align: center">
+							<spring:message code="jobs.label.mailMessage"/>
+						</label>
+						<div class="form-group">
+							<div class="col-md-12">
+								<form:textarea path="mailMessage" rows="8" cols="60" class="form-control editor"/>
+								<form:errors path="mailMessage" cssClass="error"/>
 							</div>
 						</div>
 					</div>
