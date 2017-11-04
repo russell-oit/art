@@ -18,7 +18,6 @@
 package art.job;
 
 import art.datasource.DatasourceService;
-import art.encryptor.Encryptor;
 import art.enums.JobType;
 import art.enums.ReportType;
 import art.ftpserver.FtpServerService;
@@ -41,7 +40,6 @@ import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;

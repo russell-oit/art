@@ -17,13 +17,11 @@
  */
 package art.report;
 
-import art.enums.ReportType;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
