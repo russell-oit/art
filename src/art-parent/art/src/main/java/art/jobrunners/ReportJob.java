@@ -555,6 +555,10 @@ public class ReportJob implements org.quartz.Job {
 
 		String customMessage = applyDynamicRecipientColumns(message, recipientDetails);
 
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		String username = job.getUser().getUsername();
+		customMessage = expressionHelper.processString(customMessage, reportParamsMap, username);
+
 		String mainMessage;
 		if (StringUtils.isBlank(customMessage)) {
 			mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
@@ -591,7 +595,7 @@ public class ReportJob implements org.quartz.Job {
 			throws TemplateException, IOException, ParseException {
 
 		Map<String, String> recipientColumns = null;
-		prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns,reportParamsMap);
+		prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns, reportParamsMap);
 	}
 
 	/**
@@ -612,7 +616,7 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering prepareTemplateAlertMailer: reportType={}, "
 				+ "value={}", reportType, value);
 
-		setMailerFromAndSubject(mailer, recipientColumns,reportParamsMap);
+		setMailerFromAndSubject(mailer, recipientColumns, reportParamsMap);
 
 		//set variables to be passed to template
 		Map<String, Object> data = new HashMap<>();
@@ -702,6 +706,10 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		String customMessage = applyDynamicRecipientColumns(message, recipientDetails);
+		
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		String username = job.getUser().getUsername();
+		customMessage = expressionHelper.processString(customMessage, reportParamsMap, username);
 
 		if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
 			String finalMessage;
