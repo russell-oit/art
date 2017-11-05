@@ -527,10 +527,13 @@ public class ReportJob implements org.quartz.Job {
 	 * @param mailer the mailer to use
 	 * @param message the message of the email
 	 * @param value the alert value
+	 * @param reportParamsMap map containing report parameters
 	 */
-	private void prepareAlertMailer(Mailer mailer, String message, int value) {
+	private void prepareAlertMailer(Mailer mailer, String message, int value,
+			Map<String, ReportParameter> reportParamsMap) throws ParseException {
+
 		Map<String, String> recipientDetails = null;
-		prepareAlertMailer(mailer, message, value, recipientDetails);
+		prepareAlertMailer(mailer, message, value, recipientDetails, reportParamsMap);
 	}
 
 	/**
@@ -540,13 +543,15 @@ public class ReportJob implements org.quartz.Job {
 	 * @param message the message of the email
 	 * @param value the alert value
 	 * @param the dynamic recipient details
+	 * @param reportParamsMap map containing report parameters
 	 */
 	private void prepareAlertMailer(Mailer mailer, String message, int value,
-			Map<String, String> recipientDetails) {
+			Map<String, String> recipientDetails, Map<String, ReportParameter> reportParamsMap)
+			throws ParseException {
 
 		logger.debug("Entering prepareAlertMailer: value={}", value);
 
-		setMailerFromAndSubject(mailer, recipientDetails);
+		setMailerFromAndSubject(mailer, recipientDetails, reportParamsMap);
 
 		String customMessage = applyDynamicRecipientColumns(message, recipientDetails);
 
@@ -579,12 +584,14 @@ public class ReportJob implements org.quartz.Job {
 	 * @param reportType the report type
 	 * @param mailer the mailer to use
 	 * @param value the alert value
+	 * @param reportParamsMap map containing report parameters
 	 */
-	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer, int value)
-			throws TemplateException, IOException {
+	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer, int value,
+			Map<String, ReportParameter> reportParamsMap)
+			throws TemplateException, IOException, ParseException {
 
 		Map<String, String> recipientColumns = null;
-		prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns);
+		prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns,reportParamsMap);
 	}
 
 	/**
@@ -595,15 +602,17 @@ public class ReportJob implements org.quartz.Job {
 	 * @param mailer the mailer to use
 	 * @param value the alert value
 	 * @param recipientColumns the recipient column details
+	 * @param reportParamsMap map containing report parameters
 	 */
 	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer,
-			int value, Map<String, String> recipientColumns)
-			throws TemplateException, IOException {
+			int value, Map<String, String> recipientColumns,
+			Map<String, ReportParameter> reportParamsMap)
+			throws TemplateException, IOException, ParseException {
 
 		logger.debug("Entering prepareTemplateAlertMailer: reportType={}, "
 				+ "value={}", reportType, value);
 
-		setMailerFromAndSubject(mailer, recipientColumns);
+		setMailerFromAndSubject(mailer, recipientColumns,reportParamsMap);
 
 		//set variables to be passed to template
 		Map<String, Object> data = new HashMap<>();
@@ -642,13 +651,14 @@ public class ReportJob implements org.quartz.Job {
 	 * @param message the message of the email
 	 * @param outputFileName the full path of a file to include with the email
 	 * @param reportParamsList the report parameters used to run the job
+	 * @param reportParamsMap map containing report parameters
 	 */
 	private void prepareMailer(Mailer mailer, String message, String outputFileName,
-			List<ReportParameter> reportParamsList)
-			throws FileNotFoundException, IOException {
+			List<ReportParameter> reportParamsList, Map<String, ReportParameter> reportParamsMap)
+			throws FileNotFoundException, IOException, ParseException {
 
 		Map<String, String> recipientDetails = null;
-		prepareMailer(mailer, message, outputFileName, recipientDetails, reportParamsList);
+		prepareMailer(mailer, message, outputFileName, recipientDetails, reportParamsList, reportParamsMap);
 	}
 
 	/**
@@ -659,14 +669,16 @@ public class ReportJob implements org.quartz.Job {
 	 * @param outputFileName the full path of a file to include with the email
 	 * @param recipientDetails the dynamic recipient details
 	 * @param reportParamsList the report parameters used to run the job
+	 * @param reportParamsMap map containing report parameters
 	 */
 	private void prepareMailer(Mailer mailer, String message, String outputFileName,
-			Map<String, String> recipientDetails, List<ReportParameter> reportParamsList)
-			throws FileNotFoundException, IOException {
+			Map<String, String> recipientDetails, List<ReportParameter> reportParamsList,
+			Map<String, ReportParameter> reportParamsMap)
+			throws FileNotFoundException, IOException, ParseException {
 
 		logger.debug("Entering prepareEmailMailer: outputFileName='{}'", outputFileName);
 
-		setMailerFromAndSubject(mailer, recipientDetails);
+		setMailerFromAndSubject(mailer, recipientDetails, reportParamsMap);
 
 		Report report = job.getReport();
 		ReportType reportType = report.getReportType();
@@ -736,8 +748,11 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @param mailer the mailer object
 	 * @param recipientDetails the dynamic recipient details
+	 * @param reportParamsMap map containing report parameters
 	 */
-	private void setMailerFromAndSubject(Mailer mailer, Map<String, String> recipientDetails) {
+	private void setMailerFromAndSubject(Mailer mailer, Map<String, String> recipientDetails,
+			Map<String, ReportParameter> reportParamsMap) throws ParseException {
+
 		String from = getMailFrom();
 
 		String subject = job.getMailSubject();
@@ -746,6 +761,10 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		subject = applyDynamicRecipientColumns(subject, recipientDetails);
+
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		String username = job.getUser().getUsername();
+		subject = expressionHelper.processString(subject, reportParamsMap, username);
 
 		mailer.setSubject(subject);
 		mailer.setFrom(from);
@@ -1226,7 +1245,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			if (jobType == JobType.Alert) {
-				runAlertJob(generateEmail, recipientDetails, reportRunner, message, recipientFilterPresent, tos, ccs, bccs);
+				runAlertJob(generateEmail, recipientDetails, reportRunner, message, recipientFilterPresent, tos, ccs, bccs, reportParamsMap);
 			} else if (jobType.isPublish() || jobType.isEmail() || jobType == JobType.Print) {
 				//determine if the query returns records. to know if to generate output for conditional jobs
 				boolean generateOutput = isGenerateOutput(user, reportParamsMap);
@@ -1248,7 +1267,7 @@ public class ReportJob implements org.quartz.Job {
 						printFile(outputFileName);
 					} else if (generateEmail || recipientDetails != null) {
 						//some kind of emailing required
-						processAndSendEmail(recipientDetails, message, outputFileName, recipientFilterPresent, generateEmail, tos, ccs, bccs, userEmail, cc, bcc, reportParamsList);
+						processAndSendEmail(recipientDetails, message, outputFileName, recipientFilterPresent, generateEmail, tos, ccs, bccs, userEmail, cc, bcc, reportParamsList, reportParamsMap);
 					}
 				}
 			} else if (jobType.isCache()) {
@@ -1296,7 +1315,8 @@ public class ReportJob implements org.quartz.Job {
 			String message, String outputFileName, boolean recipientFilterPresent,
 			boolean generateEmail, String[] tos, String[] ccs, String[] bccs,
 			String userEmail, String cc, String bcc,
-			List<ReportParameter> reportParamsList) throws IOException {
+			List<ReportParameter> reportParamsList,
+			Map<String, ReportParameter> reportParamsMap) throws IOException, ParseException {
 
 		logger.debug("Entering processAndSendEmail");
 
@@ -1319,7 +1339,7 @@ public class ReportJob implements org.quartz.Job {
 				String[] emailsArray = StringUtils.split(emails, ";");
 				Map<String, String> recipientColumns = entry.getValue();
 
-				prepareMailer(mailer, finalMessage, outputFileName, recipientColumns, reportParamsList);
+				prepareMailer(mailer, finalMessage, outputFileName, recipientColumns, reportParamsList, reportParamsMap);
 
 				mailer.setTo(emailsArray);
 
@@ -1372,7 +1392,7 @@ public class ReportJob implements org.quartz.Job {
 		if (generateEmail) {
 			Mailer mailer = getMailer();
 
-			prepareMailer(mailer, finalMessage, outputFileName, reportParamsList);
+			prepareMailer(mailer, finalMessage, outputFileName, reportParamsList, reportParamsMap);
 
 			//set recipients
 			mailer.setTo(tos);
@@ -1445,10 +1465,10 @@ public class ReportJob implements org.quartz.Job {
 		if (StringUtils.isNotBlank(fixedFileName)) {
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			String username = job.getUser().getUsername();
-			
+
 			ExpressionHelper expressionHelper = new ExpressionHelper();
 			fixedFileName = expressionHelper.processString(fixedFileName, reportParamsMap, username);
-			
+
 			if (!FinalFilenameValidator.isValid(fixedFileName)) {
 				throw new IllegalArgumentException("Invalid fixed file name: " + fixedFileName);
 			}
@@ -1701,13 +1721,14 @@ public class ReportJob implements org.quartz.Job {
 	 * @param tos
 	 * @param ccs
 	 * @param bccs
+	 * @param reportParamsMap map containing report parameters
 	 * @throws IOException
 	 * @throws SQLException
 	 */
 	private void runAlertJob(boolean generateEmail, Map<String, Map<String, String>> recipientDetails,
 			ReportRunner reportRunner, String message, boolean recipientFilterPresent,
-			String[] tos, String[] ccs, String[] bccs)
-			throws IOException, SQLException, TemplateException {
+			String[] tos, String[] ccs, String[] bccs, Map<String, ReportParameter> reportParamsMap)
+			throws IOException, SQLException, TemplateException, ParseException {
 		/*
 		 * ALERT if the resultset is not null and the first column is a
 		 * positive integer => send the alert email
@@ -1740,9 +1761,9 @@ public class ReportJob implements org.quartz.Job {
 								Map<String, String> recipientColumns = entry.getValue();
 
 								if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
-									prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns);
+									prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns, reportParamsMap);
 								} else {
-									prepareAlertMailer(mailer, message, value, recipientColumns);
+									prepareAlertMailer(mailer, message, value, recipientColumns, reportParamsMap);
 								}
 
 								mailer.setTo(emailsArray);
@@ -1784,9 +1805,9 @@ public class ReportJob implements org.quartz.Job {
 							Mailer mailer = getMailer();
 
 							if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
-								prepareTemplateAlertMailer(reportType, mailer, value);
+								prepareTemplateAlertMailer(reportType, mailer, value, reportParamsMap);
 							} else {
-								prepareAlertMailer(mailer, message, value);
+								prepareAlertMailer(mailer, message, value, reportParamsMap);
 							}
 
 							//set recipients
