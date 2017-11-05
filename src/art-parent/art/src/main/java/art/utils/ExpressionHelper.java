@@ -376,6 +376,18 @@ public class ExpressionHelper {
 	 * the processed value with these items replaced
 	 *
 	 * @param string the string to process
+	 * @return the processed value
+	 */
+	public String processGroovy(String string) {
+		Map<String, ReportParameter> reportParamsMap = null;
+		return processGroovy(string, reportParamsMap);
+	}
+
+	/**
+	 * Processes the contents of a groovy expression specification and returns
+	 * the processed value with these items replaced
+	 *
+	 * @param string the string to process
 	 * @param reportParamsMap a map with report parameters
 	 * @return the processed value
 	 */

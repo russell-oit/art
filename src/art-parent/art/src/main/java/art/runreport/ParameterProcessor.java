@@ -27,6 +27,7 @@ import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.user.User;
 import art.utils.ArtUtils;
+import art.utils.ExpressionHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -439,6 +440,9 @@ public class ParameterProcessor {
 		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
 
 		ParameterDataType paramDataType = param.getDataType();
+
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		value = expressionHelper.processGroovy(value);
 
 		if (paramDataType.isNumeric()) {
 			return convertParameterStringValueToNumber(value, param);
