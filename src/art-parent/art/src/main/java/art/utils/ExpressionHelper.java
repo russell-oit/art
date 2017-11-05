@@ -19,6 +19,9 @@ package art.utils;
 
 import art.enums.DateFieldType;
 import art.reportparameter.ReportParameter;
+import art.servlets.Config;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,6 +36,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +55,7 @@ public class ExpressionHelper {
 	 * returns the processed value with these items replaced
 	 *
 	 * @param string the string to process
-	 * @param reportParamsMap the map containing report parameters to replace
+	 * @param reportParamsMap a map containing report parameters
 	 * @param username the username to replace
 	 * @return the processed value with these items replaced
 	 * @throws ParseException
@@ -61,6 +66,7 @@ public class ExpressionHelper {
 		String finalString = string;
 		finalString = processParameters(finalString, reportParamsMap);
 		finalString = processFields(finalString, username);
+		finalString = processGroovy(finalString, reportParamsMap);
 		return finalString;
 	}
 
@@ -69,7 +75,7 @@ public class ExpressionHelper {
 	 * processed value with these items replaced
 	 *
 	 * @param string the string to process
-	 * @param reportParamsMap the map containing report parameters to replace
+	 * @param reportParamsMap a map containing report parameters
 	 * @return the processed value with these items replaced
 	 */
 	public String processParameters(String string, Map<String, ReportParameter> reportParamsMap) {
@@ -363,6 +369,63 @@ public class ExpressionHelper {
 		}
 
 		return dateValue;
+	}
+
+	/**
+	 * Processes the contents of a groovy expression specification and returns
+	 * the processed value with these items replaced
+	 *
+	 * @param string the string to process
+	 * @param reportParamsMap a map with report parameters
+	 * @return the processed value
+	 */
+	public String processGroovy(String string, Map<String, ReportParameter> reportParamsMap) {
+		String finalString = string;
+
+		final String GROOVY_START_STRING = "g{";
+		final String GROOVY_END_STRING = "}g";
+		String[] groovyExpressions = StringUtils.substringsBetween(string, GROOVY_START_STRING, GROOVY_END_STRING);
+		if (groovyExpressions != null) {
+			CompilerConfiguration cc = new CompilerConfiguration();
+			cc.addCompilationCustomizers(new SandboxTransformer());
+
+			Map<String, Object> variables = new HashMap<>();
+			if (reportParamsMap != null) {
+				variables.putAll(reportParamsMap);
+			}
+
+			Binding binding = new Binding(variables);
+
+			GroovyShell shell = new GroovyShell(binding, cc);
+
+			GroovySandbox sandbox = null;
+			if (Config.getCustomSettings().isEnableGroovySandbox()) {
+				sandbox = new GroovySandbox();
+				sandbox.register();
+			}
+
+			try {
+				Map<String, String> groovyExpressionValues = new HashMap<>();
+				for (String groovyExpression : groovyExpressions) {
+					Object resultObject = shell.evaluate(groovyExpression);
+					String resultString = String.valueOf(resultObject);
+					String groovySpecification = GROOVY_START_STRING + groovyExpression + GROOVY_END_STRING;
+					groovyExpressionValues.put(groovySpecification, resultString);
+				}
+
+				for (Entry<String, String> entry : groovyExpressionValues.entrySet()) {
+					String searchString = entry.getKey();
+					String replaceString = entry.getValue();
+					finalString = StringUtils.replace(finalString, searchString, replaceString);
+				}
+			} finally {
+				if (sandbox != null) {
+					sandbox.unregister();
+				}
+			}
+		}
+
+		return finalString;
 	}
 
 }
