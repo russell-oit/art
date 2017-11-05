@@ -235,7 +235,17 @@ public class ExpressionHelper {
 			String expression = result.substring(1);
 			String[] components = StringUtils.split(expression, separator);
 			String dateString = components[0].trim();
-			String outputFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
+			String outputFormat;
+			switch (dateFieldType) {
+				case Date:
+					outputFormat = ArtUtils.ISO_DATE_FORMAT;
+					break;
+				case DateTime:
+					outputFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected date field type: " + dateFieldType);
+			}
 			if (components.length > 1) {
 				outputFormat = components[1];
 			}

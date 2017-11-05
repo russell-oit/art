@@ -621,7 +621,7 @@
 							<spring:message code="jobs.label.fixedFileName"/>
 						</label>
 						<div class="col-md-8">
-							<form:textarea path="fixedFileName" rows="1" cols="40" class="form-control autosize" style="max-height: 100px"/>
+							<form:textarea path="fixedFileName" rows="1" cols="40" class="form-control autosize" style="max-height: 200px"/>
 							<form:errors path="fixedFileName" cssClass="error"/>
 						</div>
 					</div>
