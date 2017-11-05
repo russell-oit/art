@@ -16,7 +16,7 @@ Display input for date and datetime parameters
 		   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(requestContext.locale))}"
 		   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-		   value="${encode:forHtmlAttribute(reportParam.getHtmlValue(requestContext.local))}">
+		   value="${encode:forHtmlAttribute(reportParam.getHtmlValue(requestContext.locale))}">
 	<span class="input-group-addon">
 		<span class="glyphicon glyphicon-calendar"></span>
 	</span>
