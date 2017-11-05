@@ -47,6 +47,7 @@ import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
+import art.utils.ExpressionHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import com.jcraft.jsch.Channel;
@@ -240,7 +241,7 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		if (!ftpServer.isActive()) {
-			logger.info("FTP Server disabled. Job Id: {}", jobId);
+			logger.info("FTP Server disabled. Job Id {}", jobId);
 			return;
 		}
 
@@ -316,12 +317,12 @@ public class ReportJob implements org.quartz.Job {
 
 			if (!FTPReply.isPositiveCompletion(reply)) {
 				ftpClient.disconnect();
-				logger.info("FTP server refused connection. Job Id: {}", jobId);
+				logger.info("FTP server refused connection. Job Id {}", jobId);
 				return;
 			}
 
 			if (!ftpClient.login(user, password)) {
-				logger.info("FTP login failed. Job Id: {}", jobId);
+				logger.info("FTP login failed. Job Id {}", jobId);
 				return;
 			}
 
@@ -336,9 +337,9 @@ public class ReportJob implements org.quartz.Job {
 				done = ftpClient.storeFile(remoteFileName, inputStream);
 			}
 			if (done) {
-				logger.debug("Ftp file upload successful. Job Id: {}", jobId);
+				logger.debug("Ftp file upload successful. Job Id {}", jobId);
 			} else {
-				logger.info("Ftp file upload failed. Job Id: {}", jobId);
+				logger.info("Ftp file upload failed. Job Id {}", jobId);
 			}
 
 			ftpClient.logout();
@@ -486,10 +487,10 @@ public class ReportJob implements org.quartz.Job {
 				}
 			} else {
 				String os = SystemUtils.OS_NAME;
-				logger.warn("Unexpected OS: '{}'. Job Id: {}", os, jobId);
+				logger.warn("Unexpected OS: '{}'. Job Id {}", os, jobId);
 			}
 		} else {
-			logger.warn("Batch file not found: '{}'. Job Id: {}", fullBatchFileName, jobId);
+			logger.warn("Batch file not found: '{}'. Job Id {}", fullBatchFileName, jobId);
 		}
 	}
 
@@ -507,10 +508,10 @@ public class ReportJob implements org.quartz.Job {
 		boolean emailSent = false;
 
 		if (!Config.getCustomSettings().isEnableEmail()) {
-			logger.info("Email disabled. Job Id: {}", jobId);
+			logger.info("Email disabled. Job Id {}", jobId);
 			runMessage = "jobs.message.emailDisabled";
 		} else if (!Config.isEmailServerConfigured()) {
-			logger.info("Email server not configured. Job Id: {}", jobId);
+			logger.info("Email server not configured. Job Id {}", jobId);
 			runMessage = "jobs.message.emailServerNotConfigured";
 		} else {
 			mailer.send();
@@ -714,7 +715,7 @@ public class ReportJob implements org.quartz.Job {
 			ctx.setVariable("mainMessage", mainMessage);
 			ctx.setVariable("job", job);
 			ctx.setVariable("data", messageData);
-			
+
 			//pass report parameters
 			for (ReportParameter reportParam : reportParamsList) {
 				String paramName = reportParam.getParameter().getName();
@@ -1439,8 +1440,15 @@ public class ReportJob implements org.quartz.Job {
 		//generate file name to use
 		String exportPath = Config.getJobsExportPath();
 		String fixedFileName = job.getFixedFileName();
+		logger.debug("fixedFileName='{}'", fixedFileName);
 
 		if (StringUtils.isNotBlank(fixedFileName)) {
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			String username = job.getUser().getUsername();
+			
+			ExpressionHelper expressionHelper = new ExpressionHelper();
+			fixedFileName = expressionHelper.processString(fixedFileName, reportParamsMap, username);
+			
 			if (!FinalFilenameValidator.isValid(fixedFileName)) {
 				throw new IllegalArgumentException("Invalid fixed file name: " + fixedFileName);
 			}
@@ -1531,7 +1539,7 @@ public class ReportJob implements org.quartz.Job {
 		ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
 
 		if (!reportType.isTabular()) {
-			logger.warn("Invalid report type for burst job: {}. Job Id: {}", reportType, jobId);
+			logger.warn("Invalid report type for burst job: {}. Job Id {}", reportType, jobId);
 			fileName = "";
 			runDetails = "Invalid report type for burst job: " + reportType;
 			return;
@@ -2050,7 +2058,8 @@ public class ReportJob implements org.quartz.Job {
 				updateArchives(splitJob, user);
 			} else {
 				//if not archiving, delete previous file
-				if (StringUtils.isBlank(job.getFixedFileName()) && !StringUtils.startsWith(archiveFileName, "-")) {
+				if (StringUtils.isNotBlank(archiveFileName)
+						&& !StringUtils.equals(archiveFileName, fileName)) {
 					String filePath = Config.getJobsExportPath() + archiveFileName;
 					File previousFile = new File(filePath);
 					if (previousFile.exists()) {

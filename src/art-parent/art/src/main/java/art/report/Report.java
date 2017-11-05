@@ -887,8 +887,8 @@ public class Report implements Serializable {
 		//remove any parameter definitions, remaining only with the report id
 		for (int i = 0; i < reportIdStrings.size(); i++) {
 			String reportIdSetting = reportIdStrings.get(i);
-			String reportId = StringUtils.substringBefore(reportIdSetting, "&");
-			reportIdStrings.set(i, reportId);
+			String reportIdString = StringUtils.substringBefore(reportIdSetting, "&");
+			reportIdStrings.set(i, reportIdString);
 		}
 
 		for (String id : reportIdStrings) {

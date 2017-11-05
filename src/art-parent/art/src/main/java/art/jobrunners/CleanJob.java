@@ -63,7 +63,7 @@ public class CleanJob implements org.quartz.Job {
 
 		File directory = new File(directoryPath);
 		File[] files = directory.listFiles();
-		final long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
+		final long DELETE_FILES_MINUTES = 60; // Delete exported files older than x minutes
 		final long DELETE_FILES_MILLIS = TimeUnit.MINUTES.toMillis(DELETE_FILES_MINUTES);
 		long limit = System.currentTimeMillis() - DELETE_FILES_MILLIS;
 
@@ -84,6 +84,8 @@ public class CleanJob implements org.quartz.Job {
 		validExtensions.add("pptx");
 		validExtensions.add("csv");
 		validExtensions.add("txt");
+		validExtensions.add("aes");
+		validExtensions.add("gpg");
 
 		for (File file : files) {
 			// Delete the file if it is older than DELETE_FILES_MINUTES
