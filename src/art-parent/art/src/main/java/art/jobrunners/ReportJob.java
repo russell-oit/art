@@ -28,7 +28,6 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.ftpserver.FtpServer;
 import art.job.JobService;
-import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
 import art.output.FreeMarkerOutput;
@@ -1927,7 +1926,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @return parameter processor result
 	 * @throws SQLException
 	 */
-	public ParameterProcessorResult buildParameters(int reportId, int jId,
+	private ParameterProcessorResult buildParameters(int reportId, int jId,
 			User user) throws SQLException {
 
 		logger.debug("Entering buildParameters: reportId={}, jId={}", reportId, jId);
@@ -1935,70 +1934,7 @@ public class ReportJob implements org.quartz.Job {
 		ParameterProcessorResult paramProcessorResult = null;
 
 		JobParameterService jobParameterService = new JobParameterService();
-		List<JobParameter> jobParams = jobParameterService.getJobParameters(jId);
-		Map<String, List<String>> paramValues = new HashMap<>();
-
-		//accomodate legacy job parameter names
-		for (JobParameter jobParam : jobParams) {
-			String name = jobParam.getName();
-			String finalName = name;
-			String paramTypeString = jobParam.getParamTypeString();
-
-			switch (paramTypeString) {
-				case "O":
-					switch (name) {
-						case "_showParams":
-							finalName = "showSelectedParameters";
-							break;
-						case "_showGraphData":
-							finalName = "showData";
-							break;
-						case "_showGraphLegend":
-							finalName = "showLegend";
-							break;
-						case "_showGraphLabels":
-							finalName = "showLabels";
-							break;
-						case "_showGraphDataPoints":
-							finalName = "showPoints";
-							break;
-						default:
-							finalName = name;
-					}
-					break;
-				case "I":
-				case "M":
-					finalName = ArtUtils.PARAM_PREFIX + name;
-					break;
-				case "X":
-					finalName = name;
-					break;
-				default:
-					throw new IllegalArgumentException("Unexpected job parameter type: " + paramTypeString);
-			}
-
-			jobParam.setName(finalName);
-			List<String> values = paramValues.get(finalName);
-			if (values == null) {
-				paramValues.put(finalName, new ArrayList<String>());
-			}
-		}
-
-		for (JobParameter jobParam : jobParams) {
-			String name = jobParam.getName();
-			String value = jobParam.getValue();
-			List<String> values = paramValues.get(name);
-			values.add(value);
-		}
-
-		Map<String, String[]> finalValues = new HashMap<>();
-
-		for (JobParameter jobParam : jobParams) {
-			String name = jobParam.getName();
-			List<String> values = paramValues.get(name);
-			String[] valuesArray = values.toArray(new String[0]);
-			finalValues.put(name, valuesArray);
-		}
+		Map<String, String[]> finalValues = jobParameterService.getJobParameterValues(jId);
 
 		try {
 			ParameterProcessor paramProcessor = new ParameterProcessor();

@@ -480,6 +480,11 @@ public class Parameter implements Serializable {
 	 * @return the formatted date string
 	 */
 	public String getDateString(Object value) {
+		if (value instanceof String) {
+			//may be string when value obtained from job parameters for display purposes only in editJob.jsp
+			return (String) value;
+		}
+
 		switch (dataType) {
 			case Date:
 			case DateTime:

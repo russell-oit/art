@@ -18,10 +18,13 @@
 package art.jobparameter;
 
 import art.dbutils.DbService;
+import art.utils.ArtUtils;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -159,5 +162,83 @@ public class JobParameterService {
 		};
 
 		dbService.update(sql, values);
+	}
+	
+	/**
+	 * Returns job parameter values for a given job
+	 * 
+	 * @param jobId the job id
+	 * @return job parameter values for a given job
+	 * @throws SQLException 
+	 */
+	public Map<String, String[]> getJobParameterValues(int jobId) throws SQLException{
+		logger.debug("Entering getJobParameterValues: jobId={}", jobId);
+		
+		List<JobParameter> jobParams = getJobParameters(jobId);
+		Map<String, List<String>> paramValues = new HashMap<>();
+
+		//accomodate legacy job parameter names
+		for (JobParameter jobParam : jobParams) {
+			String name = jobParam.getName();
+			String finalName = name;
+			String paramTypeString = jobParam.getParamTypeString();
+
+			switch (paramTypeString) {
+				case "O":
+					switch (name) {
+						case "_showParams":
+							finalName = "showSelectedParameters";
+							break;
+						case "_showGraphData":
+							finalName = "showData";
+							break;
+						case "_showGraphLegend":
+							finalName = "showLegend";
+							break;
+						case "_showGraphLabels":
+							finalName = "showLabels";
+							break;
+						case "_showGraphDataPoints":
+							finalName = "showPoints";
+							break;
+						default:
+							finalName = name;
+					}
+					break;
+				case "I":
+				case "M":
+					finalName = ArtUtils.PARAM_PREFIX + name;
+					break;
+				case "X":
+					finalName = name;
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected job parameter type: " + paramTypeString);
+			}
+
+			jobParam.setName(finalName);
+			List<String> values = paramValues.get(finalName);
+			if (values == null) {
+				paramValues.put(finalName, new ArrayList<String>());
+			}
+		}
+
+		for (JobParameter jobParam : jobParams) {
+			String name = jobParam.getName();
+			String value = jobParam.getValue();
+			List<String> values = paramValues.get(name);
+			values.add(value);
+		}
+
+		Map<String, String[]> finalValues = new HashMap<>();
+
+		for (JobParameter jobParam : jobParams) {
+			String name = jobParam.getName();
+			List<String> values = paramValues.get(name);
+			String[] valuesArray = values.toArray(new String[0]);
+			finalValues.put(name, valuesArray);
+		}
+		
+		return finalValues;
 	}
 }

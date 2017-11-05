@@ -365,7 +365,7 @@ public class ReportParameter implements Serializable {
 	 * @throws java.io.IOException
 	 */
 	public String getHtmlValue() throws IOException {
-		Locale locale=null;
+		Locale locale = null;
 		return getHtmlValue(locale);
 	}
 

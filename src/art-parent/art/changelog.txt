@@ -11,6 +11,7 @@ ART 3.1
 * Fix for group column not being saved
 * Added ability to encrypt files in AES Crypt or OpenPGP format
 * Allow job fixed file name, email subject, email body to have date expressions
+* Allow parameter values to have groovy expressions
 * Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1

@@ -62,9 +62,24 @@ public class ParameterProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(ParameterProcessor.class);
 
 	private Locale locale;
+	private boolean valuesAsIs;
 
 	public ParameterProcessor() {
 		locale = Locale.getDefault();
+	}
+
+	/**
+	 * @return the valuesAsIs
+	 */
+	public boolean isValuesAsIs() {
+		return valuesAsIs;
+	}
+
+	/**
+	 * @param valuesAsIs the valuesAsIs to set
+	 */
+	public void setValuesAsIs(boolean valuesAsIs) {
+		this.valuesAsIs = valuesAsIs;
 	}
 
 	/**
@@ -438,6 +453,10 @@ public class ParameterProcessor {
 			throws ParseException {
 
 		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
+
+		if (valuesAsIs) {
+			return value;
+		}
 
 		ParameterDataType paramDataType = param.getDataType();
 

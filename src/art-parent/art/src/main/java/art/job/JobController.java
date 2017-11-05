@@ -532,11 +532,16 @@ public class JobController {
 			job = jobService.getJob(id);
 			model.addAttribute("job", job);
 
-			ReportJob reportJob = new ReportJob();
+			Map<String, String[]> finalValues = jobParameterService.getJobParameterValues(id);
+
 			Report report = job.getReport();
 			int reportId = report.getReportId();
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id, sessionUser);
+
+			ParameterProcessor paramProcessor = new ParameterProcessor();
+			paramProcessor.setValuesAsIs(true);
+			ParameterProcessorResult paramProcessorResult = paramProcessor.process(finalValues, reportId, sessionUser, locale);
+
 			addParameters(model, paramProcessorResult, report, request);
 
 			//update job from email if owner email has changed
@@ -546,7 +551,7 @@ public class JobController {
 					job.setMailFrom(sessionUser.getEmail());
 				}
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

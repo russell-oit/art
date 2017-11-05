@@ -16,4 +16,4 @@ Display report parameter that uses textarea input
 <textarea rows="5" class="form-control"
 		  placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(requestContext.locale))}"
 		  name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-		  id="${encode:forHtmlAttribute(reportParam.htmlElementName)}">${encode:forHtmlContent(reportParam.htmlValue)}</textarea>
+		  id="${encode:forHtmlAttribute(reportParam.htmlElementName)}">${encode:forHtmlContent(reportParam.getHtmlValue(requestContext.local))}</textarea>
