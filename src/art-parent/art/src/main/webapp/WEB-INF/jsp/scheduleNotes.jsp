@@ -124,5 +124,10 @@
 		than the right e.g. 22-2 in the hour field to catch 10 o'clock at night until 2 o'clock in the morning,
 		or NOV-FEB in the month field.
 	</li>
+	<li>
+		See <a href="http://www.quartz-scheduler.org/api/2.2.1/org/quartz/CronExpression.html">
+			http://www.quartz-scheduler.org/api/2.2.1/org/quartz/CronExpression.html
+		</a>
+	</li>
 </ul>
 

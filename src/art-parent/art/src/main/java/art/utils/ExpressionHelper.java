@@ -50,6 +50,9 @@ public class ExpressionHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExpressionHelper.class);
 
+	private final String GROOVY_START_STRING = "g{";
+	private final String GROOVY_END_STRING = "}g";
+
 	/**
 	 * Processes a string that may have parameter or field expressions and
 	 * returns the processed value with these items replaced
@@ -394,8 +397,6 @@ public class ExpressionHelper {
 	public String processGroovy(String string, Map<String, ReportParameter> reportParamsMap) {
 		String finalString = string;
 
-		final String GROOVY_START_STRING = "g{";
-		final String GROOVY_END_STRING = "}g";
 		String[] groovyExpressions = StringUtils.substringsBetween(string, GROOVY_START_STRING, GROOVY_END_STRING);
 		if (groovyExpressions != null) {
 			CompilerConfiguration cc = new CompilerConfiguration();
@@ -438,6 +439,42 @@ public class ExpressionHelper {
 		}
 
 		return finalString;
+	}
+
+	/**
+	 * Runs a groovy expression and returns the result
+	 * 
+	 * @param string the string containing the groovy script
+	 * @return the object returned by the groovy script
+	 */
+	public Object runGroovyExpression(String string) {
+		CompilerConfiguration cc = new CompilerConfiguration();
+		cc.addCompilationCustomizers(new SandboxTransformer());
+
+		Binding binding = new Binding();
+
+		GroovyShell shell = new GroovyShell(binding, cc);
+
+		GroovySandbox sandbox = null;
+		if (Config.getCustomSettings().isEnableGroovySandbox()) {
+			sandbox = new GroovySandbox();
+			sandbox.register();
+		}
+
+		if (StringUtils.startsWith(string, GROOVY_START_STRING)) {
+			string = StringUtils.substringBetween(string, GROOVY_START_STRING, GROOVY_END_STRING);
+		}
+
+		Object result = null;
+		try {
+			result = shell.evaluate(string);
+		} finally {
+			if (sandbox != null) {
+				sandbox.unregister();
+			}
+		}
+
+		return result;
 	}
 
 }

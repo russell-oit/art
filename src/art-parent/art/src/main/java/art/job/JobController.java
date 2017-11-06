@@ -739,7 +739,7 @@ public class JobController {
 
 			Date now = new Date();
 
-			java.util.Calendar calStart = java.util.Calendar.getInstance();
+			Calendar calStart = Calendar.getInstance();
 			calStart.setTime(now);
 			calStart.set(Calendar.HOUR_OF_DAY, Integer.parseInt(startHour));
 			calStart.set(Calendar.MINUTE, Integer.parseInt(startMinute));
