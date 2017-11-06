@@ -12,6 +12,7 @@
 -- add encryptors table
 -- add email template column
 -- add extra schedules column
+-- decrease size of last file name column
 
 
 -- NOTES:
@@ -19,6 +20,8 @@
 -- for postgresql, replace the MODIFY keyword with ALTER COLUMN <column name> TYPE <data type>
 
 -- for sql server, mysql, replace TIMESTAMP with DATETIME
+
+-- for oracle, postgresql, replace the SUBSTRING keyword with SUBSTR
 
 -- for sql server, replace CLOB with VARCHAR(MAX)
 -- for mysql, replace CLOB with LONGTEXT
@@ -89,4 +92,8 @@ ALTER TABLE ART_JOBS ADD EMAIL_TEMPLATE VARCHAR(100);
 -- add extra schedules column
 ALTER TABLE ART_JOBS ADD EXTRA_SCHEDULES CLOB;
 ALTER TABLE ART_JOB_SCHEDULES ADD EXTRA_SCHEDULES CLOB;
+
+-- decrease size of last file name column
+UPDATE ART_JOBS SET LAST_FILE_NAME = SUBSTRING(LAST_FILE_NAME,1,200);
+ALTER TABLE ART_JOBS MODIFY LAST_FILE_NAME VARCHAR(200);
 
