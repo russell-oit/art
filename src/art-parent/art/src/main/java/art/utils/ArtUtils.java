@@ -132,8 +132,8 @@ public class ArtUtils {
 	 */
 	public static String cleanBaseFilename(String baseFilename) {
 		//only allow english alphabets, numbers, underscore, dash, space
-		String sane = baseFilename.replaceAll("[^a-zA-Z0-9_\\-\\s]+", "_");
-		return sane;
+		String clean = baseFilename.replaceAll("[^a-zA-Z0-9_\\-\\s]+", "_");
+		return clean;
 	}
 
 	/**

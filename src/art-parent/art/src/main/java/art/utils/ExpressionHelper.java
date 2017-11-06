@@ -149,7 +149,7 @@ public class ExpressionHelper {
 			replaceString = username;
 		}
 
-		String finalString = StringUtils.replaceIgnoreCase(string, "{username}", replaceString);
+		String finalString = StringUtils.replace(string, "{username}", replaceString);
 		return finalString;
 	}
 
