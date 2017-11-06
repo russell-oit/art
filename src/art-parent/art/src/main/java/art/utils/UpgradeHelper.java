@@ -179,8 +179,10 @@ public class UpgradeHelper {
 						String jobName = "job" + jobId;
 						String triggerName = "trigger" + jobId;
 
-						JobDetail quartzJob = newJob(ReportJob.class
-						).withIdentity(jobName, ArtUtils.JOB_GROUP).usingJobData("jobId", jobId).build();
+						JobDetail quartzJob = newJob(ReportJob.class)
+								.withIdentity(jobName, ArtUtils.JOB_GROUP)
+								.usingJobData("jobId", jobId)
+								.build();
 
 						//create trigger that defines the schedule for the job						
 						CronTrigger trigger = newTrigger().withIdentity(triggerName, ArtUtils.TRIGGER_GROUP).withSchedule(cronSchedule(cronString)).build();
