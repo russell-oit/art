@@ -4,8 +4,15 @@
 -- after running this script, ALSO RUN the tables_xxx.sql script for your database
 -- (found in the quartz directory)
 
+
 -- NOTES:
 -- for sql server, mysql replace TIMESTAMP with DATETIME
+
+-- for sql server, replace CLOB with VARCHAR(MAX)
+-- for mysql, replace CLOB with LONGTEXT
+-- for postgresql, replace CLOB with TEXT
+-- for cubrid, replace CLOB with STRING
+
 
 -- UPGRADING:
 -- if you are upgrading, don't use this script. run the scripts available in the
@@ -533,7 +540,7 @@ CREATE TABLE ART_JOBS
 	BATCH_FILE VARCHAR(50),
 	FTP_SERVER_ID INTEGER,
 	EMAIL_TEMPLATE VARCHAR(100),
-	EXTRA_SCHEDULES VARCHAR(4000),
+	EXTRA_SCHEDULES CLOB,	
 	CREATION_DATE TIMESTAMP,
 	CREATED_BY VARCHAR(50),
 	UPDATE_DATE TIMESTAMP,
@@ -636,7 +643,7 @@ CREATE TABLE ART_JOB_SCHEDULES
 	JOB_DAY		    VARCHAR(100), 
 	JOB_MONTH		    VARCHAR(100),   	
 	JOB_WEEKDAY	    VARCHAR(100),
-	EXTRA_SCHEDULES VARCHAR(4000),
+	EXTRA_SCHEDULES CLOB,	
 	CREATION_DATE TIMESTAMP,
 	CREATED_BY VARCHAR(50),
 	UPDATE_DATE TIMESTAMP,

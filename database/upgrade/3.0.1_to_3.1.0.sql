@@ -13,12 +13,17 @@
 -- add email template column
 -- add extra schedules column
 
+
 -- NOTES:
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
---
 -- for postgresql, replace the MODIFY keyword with ALTER COLUMN <column name> TYPE <data type>
---
+
 -- for sql server, mysql, replace TIMESTAMP with DATETIME
+
+-- for sql server, replace CLOB with VARCHAR(MAX)
+-- for mysql, replace CLOB with LONGTEXT
+-- for postgresql, replace CLOB with TEXT
+-- for cubrid, replace CLOB with STRING
 -- ------------------------------------------------
 
 
@@ -82,5 +87,6 @@ ALTER TABLE ART_QUERIES ADD ENCRYPTOR_ID INTEGER;
 ALTER TABLE ART_JOBS ADD EMAIL_TEMPLATE VARCHAR(100);
 
 -- add extra schedules column
-ALTER TABLE ART_JOBS ADD EXTRA_SCHEDULES VARCHAR(4000);
-ALTER TABLE ART_JOB_SCHEDULES ADD EXTRA_SCHEDULES VARCHAR(4000);
+ALTER TABLE ART_JOBS ADD EXTRA_SCHEDULES CLOB;
+ALTER TABLE ART_JOB_SCHEDULES ADD EXTRA_SCHEDULES CLOB;
+

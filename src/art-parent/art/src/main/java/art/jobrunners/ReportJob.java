@@ -207,6 +207,7 @@ public class ReportJob implements org.quartz.Job {
 			try {
 				Scheduler scheduler = context.getScheduler();
 				JobDetail quartJob = context.getJobDetail();
+				@SuppressWarnings("unchecked")
 				List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(quartJob.getKey());
 				List<Date> nextRunDates = new ArrayList<>();
 				Date now = new Date();
