@@ -34,6 +34,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
+import art.utils.ExpressionHelper;
 import art.utils.GroovySandbox;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
@@ -45,6 +46,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -256,8 +258,10 @@ public class ReportRunner {
 		querySb.replace(0, querySb.length(), reportSource);
 
 		applyTags();
+		applyExpressions();
 		applyDynamicSql();
 		applyDirectSubstitution();
+		applyGroovySnippets();
 		applyGroovy();
 		applyParameterPlaceholders(); //question placeholder put here
 		applyDynamicRecipient();
@@ -289,12 +293,54 @@ public class ReportRunner {
 	}
 
 	/**
+	 * Applies expression fields i.e. {username}, {date}, {datetime}
+	 *
+	 * @throws SQLException
+	 */
+	private void applyExpressions() throws SQLException {
+		logger.debug("Entering applyExpressions");
+
+		String querySql = querySb.toString();
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+
+		String username = null;
+		if (user != null) {
+			username = user.getUsername();
+		}
+
+		try {
+			querySql = expressionHelper.processFields(querySql, username);
+		} catch (ParseException ex) {
+			throw new SQLException(ex);
+		}
+
+		//update sb with new sql
+		querySb.replace(0, querySb.length(), querySql);
+	}
+
+	/**
+	 * Applies groovy snippets
+	 *
+	 */
+	private void applyGroovySnippets() {
+		logger.debug("Entering applyGroovySnippets");
+
+		String querySql = querySb.toString();
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+
+		querySql = expressionHelper.processGroovy(querySql, reportParamsMap);
+
+		//update sb with new sql
+		querySb.replace(0, querySb.length(), querySql);
+	}
+
+	/**
 	 * Applies groovy to the report source if the report is configured to use
 	 * groovy
 	 *
 	 * @throws SQLException
 	 */
-	private void applyGroovy() throws SQLException {
+	private void applyGroovy() {
 		logger.debug("Entering applyGroovy");
 
 		GeneralReportOptions generalOptions = report.getGeneralOptions();
