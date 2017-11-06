@@ -174,7 +174,7 @@ Edit schedule page
 						<spring:message code="jobs.label.extraSchedules"/>
 					</label>
 					<div class="col-md-8">
-						<form:textarea path="extraSchedules" rows="5" cols="40" class="form-control"/>
+						<form:textarea path="extraSchedules" rows="3" cols="40" class="form-control"/>
 						<form:errors path="extraSchedules" cssClass="error"/>
 					</div>
 				</div>

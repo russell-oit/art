@@ -75,6 +75,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -96,8 +97,12 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -197,6 +202,23 @@ public class ReportJob implements org.quartz.Job {
 		} else {
 			//not a temp job. set new next run date
 			nextRunDate = context.getNextFireTime();
+			
+			//get least next run date as job may have multiple triggers
+			try {
+				Scheduler scheduler = context.getScheduler();
+				JobDetail quartJob = context.getJobDetail();
+				List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(quartJob.getKey());
+				List<Date> nextRunDates = new ArrayList<>();
+				Date now = new Date();
+				nextRunDates.add(nextRunDate);
+				for (Trigger trigger : triggers) {
+					nextRunDate = trigger.getFireTimeAfter(now);
+					nextRunDates.add(nextRunDate);
+				}
+				nextRunDate = Collections.min(nextRunDates);
+			} catch (SchedulerException ex) {
+				logger.error("Error", ex);
+			}
 		}
 
 		//set overall job start time in the jobs table
