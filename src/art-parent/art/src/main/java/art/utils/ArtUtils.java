@@ -145,10 +145,22 @@ public class ArtUtils {
 	 * underscores
 	 */
 	public static String cleanFilename(String filename) {
+		String finalFilename;
+		
 		String base = FilenameUtils.getBaseName(filename);
 		String extension = FilenameUtils.getExtension(filename);
-		String cleanBase = cleanBaseFilename(base);
-		String finalFilename = cleanBase + "." + extension;
+		
+		if (StringUtils.containsAny(extension, "aes", "gpg")) {
+			//allow second extension to be used for encryped files
+			String base2 = FilenameUtils.getBaseName(base);
+			String extension2 = FilenameUtils.getExtension(base);
+			String cleanBase2 = cleanBaseFilename(base2);
+			finalFilename = cleanBase2 + "." + extension2 + "." + extension;
+		} else {
+			String cleanBase = cleanBaseFilename(base);
+			finalFilename = cleanBase + "." + extension;
+		}
+
 		return finalFilename;
 	}
 

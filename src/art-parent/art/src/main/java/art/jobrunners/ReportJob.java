@@ -705,7 +705,7 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		String customMessage = applyDynamicRecipientColumns(message, recipientDetails);
-		
+
 		ExpressionHelper expressionHelper = new ExpressionHelper();
 		String username = job.getUser().getUsername();
 		customMessage = expressionHelper.processString(customMessage, reportParamsMap, username);
@@ -1476,16 +1476,20 @@ public class ReportJob implements org.quartz.Job {
 			ExpressionHelper expressionHelper = new ExpressionHelper();
 			fixedFileName = expressionHelper.processString(fixedFileName, reportParamsMap, username);
 
-			if (!FinalFilenameValidator.isValid(fixedFileName)) {
-				throw new IllegalArgumentException("Invalid fixed file name: " + fixedFileName);
-			}
+			fixedFileName = ArtUtils.cleanFilename(fixedFileName);
 
 			if (job.getRunsToArchive() > 0) {
 				int randomNumber = ArtUtils.getRandomNumber(100, 999);
 				String baseFilename = FilenameUtils.getBaseName(fixedFileName);
 				String extension = FilenameUtils.getExtension(fixedFileName);
-				String newBaseFilename = baseFilename + "-" + String.valueOf(randomNumber);
-				fileName = newBaseFilename + "." + extension;
+				if (StringUtils.containsAny(extension, "aes", "gpg")) {
+					//allow second extension to be used for encryped files
+					String base2 = FilenameUtils.getBaseName(baseFilename);
+					String extension2 = FilenameUtils.getExtension(baseFilename);
+					fileName = base2 + "-" + String.valueOf(randomNumber) + "." + extension2 + "." + extension;
+				} else {
+					fileName = baseFilename + "-" + String.valueOf(randomNumber) + "." + extension;
+				}
 			} else {
 				fileName = fixedFileName;
 				String fullFixedFileName = exportPath + fixedFileName;
