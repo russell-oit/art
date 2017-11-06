@@ -39,19 +39,23 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
+import art.utils.ExpressionHelper;
 import art.utils.SchedulerUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -65,6 +69,7 @@ import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
@@ -362,7 +367,7 @@ public class JobController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
-			createQuartzJob(job);
+			createQuartzJob(job, sessionUser);
 
 			saveJobParameters(request, job.getJobId());
 
@@ -826,40 +831,21 @@ public class JobController {
 		}
 		job.setEndDate(endDate);
 
-		CronTrigger tempTrigger = newTrigger()
-				.withSchedule(cronSchedule(cronString))
-				.startAt(startDate)
-				.endAt(endDate)
-				.build();
-
-		Date nextRunDate = tempTrigger.getFireTimeAfter(new Date());
-
-		job.setNextRunDate(nextRunDate);
-
 		job.setScheduleMinute(minute);
 		job.setScheduleHour(hour);
 		job.setScheduleDay(day);
 		job.setScheduleMonth(month);
 		job.setScheduleWeekday(weekday);
-
-		job.setStartDate(startDate);
-		job.setEndDate(endDate);
 	}
 
 	/**
 	 * Creates a quartz job for the given art job
 	 *
 	 * @param job the art job
+	 * @param sessionUser the user who is performing the operation
 	 * @throws SchedulerException
 	 */
-	private void createQuartzJob(Job job) throws SchedulerException {
-		Scheduler scheduler = SchedulerUtils.getScheduler();
-
-		if (scheduler == null) {
-			logger.warn("Scheduler not available");
-			return;
-		}
-
+	private void createQuartzJob(Job job, User sessionUser) throws SchedulerException, SQLException {
 		int jobId = job.getJobId();
 
 		String jobName = "job" + jobId;
@@ -885,12 +871,70 @@ public class JobController {
 				.endAt(job.getEndDate())
 				.build();
 
-		//delete any existing jobs or triggers with the same id before adding them to the scheduler
-		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
-		scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP));
+		Set<Trigger> triggers = new HashSet<>();
 
-		//add job and trigger to scheduler
-		scheduler.scheduleJob(quartzJob, trigger);
+		triggers.add(trigger);
+
+		//create triggers for extra schedules
+		String extraSchedules = job.getExtraSchedules();
+		if (StringUtils.isNotBlank(extraSchedules)) {
+			if (StringUtils.startsWith(extraSchedules, ExpressionHelper.GROOVY_START_STRING)) {
+				ExpressionHelper expressionHelper = new ExpressionHelper();
+				Object result = expressionHelper.runGroovyExpression(extraSchedules);
+				if (result instanceof List) {
+					@SuppressWarnings("unchecked")
+					List<Trigger> extraTriggers = (List<Trigger>) result;
+					triggers.addAll(extraTriggers);
+				} else {
+					Trigger extraTrigger = (Trigger) result;
+					triggers.add(extraTrigger);
+				}
+			} else {
+				String values[] = extraSchedules.split("\\r?\\n");
+				int index = 1;
+				for (String value : values) {
+					index++;
+					String extraTriggerName = triggerName + "-" + index;
+					CronTrigger extraTrigger = newTrigger()
+							.withIdentity(triggerKey(extraTriggerName, ArtUtils.TRIGGER_GROUP))
+							.withSchedule(cronSchedule(value))
+							.startAt(job.getStartDate())
+							.endAt(job.getEndDate())
+							.build();
+
+					triggers.add(extraTrigger);
+				}
+			}
+		}
+
+		//get earliest next fire time from all available triggers
+		//https://stackoverflow.com/questions/39791318/how-to-get-the-earliest-date-of-a-list-in-java
+		List<Date> nextFireTimes = new ArrayList<>();
+		Date now = new Date();
+		Date nextRunDate = trigger.getFireTimeAfter(now);
+		nextFireTimes.add(nextRunDate);
+		for (Trigger extraTrigger : triggers) {
+			nextRunDate = extraTrigger.getFireTimeAfter(now);
+			nextFireTimes.add(nextRunDate);
+		}
+		Date nextFireTime = Collections.min(nextFireTimes);
+		job.setNextRunDate(nextFireTime);
+		
+		//update job next run date
+		jobService.updateJob(job, sessionUser);
+		
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		if (scheduler == null) {
+			logger.warn("Scheduler not available");
+			return;
+		}
+
+		//delete any existing jobs and triggers associated with the job before adding the job to the scheduler
+		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
+
+		//add job and triggers to scheduler
+		boolean replace = true;
+		scheduler.scheduleJob(quartzJob, triggers, replace);
 	}
 
 	/**

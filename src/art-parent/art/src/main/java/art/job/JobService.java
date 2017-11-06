@@ -179,6 +179,7 @@ public class JobService {
 		job.setFixedFileName(rs.getString("FIXED_FILE_NAME"));
 		job.setBatchFile(rs.getString("BATCH_FILE"));
 		job.setEmailTemplate(rs.getString("EMAIL_TEMPLATE"));
+		job.setExtraSchedules(rs.getString("EXTRA_SCHEDULES"));
 		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		job.setCreatedBy(rs.getString("CREATED_BY"));
@@ -416,8 +417,9 @@ public class JobService {
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
 					+ " FIXED_FILE_NAME, BATCH_FILE, FTP_SERVER_ID, EMAIL_TEMPLATE,"
+					+ " EXTRA_SCHEDULES,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 36) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 37) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -454,6 +456,7 @@ public class JobService {
 				job.getBatchFile(),
 				ftpServerId,
 				job.getEmailTemplate(),
+				job.getExtraSchedules(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -470,7 +473,7 @@ public class JobService {
 					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
 					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?,"
 					+ " FIXED_FILE_NAME=?, BATCH_FILE=?, FTP_SERVER_ID=?,"
-					+ " EMAIL_TEMPLATE=?,"
+					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -508,6 +511,7 @@ public class JobService {
 				job.getBatchFile(),
 				ftpServerId,
 				job.getEmailTemplate(),
+				job.getExtraSchedules(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()

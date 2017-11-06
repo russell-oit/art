@@ -50,7 +50,7 @@ public class ExpressionHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExpressionHelper.class);
 
-	private final String GROOVY_START_STRING = "g{";
+	public static final String GROOVY_START_STRING = "g{";
 	private final String GROOVY_END_STRING = "}g";
 
 	/**

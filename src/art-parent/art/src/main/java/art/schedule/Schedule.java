@@ -40,6 +40,21 @@ public class Schedule implements Serializable {
 	private String description;
 	private String createdBy;
 	private String updatedBy;
+	private String extraSchedules;
+
+	/**
+	 * @return the extraSchedules
+	 */
+	public String getExtraSchedules() {
+		return extraSchedules;
+	}
+
+	/**
+	 * @param extraSchedules the extraSchedules to set
+	 */
+	public void setExtraSchedules(String extraSchedules) {
+		this.extraSchedules = extraSchedules;
+	}
 
 	/**
 	 * @return the createdBy

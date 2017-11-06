@@ -182,7 +182,7 @@
 
 				toggleVisibleFields(); //show/hide on page load
 				populateOutputFormatField();
-				
+
 				autosize($('textarea.autosize'));
 
 				$('#name').focus();
@@ -209,6 +209,7 @@
 								$('#scheduleDay').val(schedule.day);
 								$('#scheduleMonth').val(schedule.month);
 								$('#scheduleWeekday').val(schedule.weekday);
+								$('#extraSchedules').val(schedule.extraSchedules);
 							}
 						},
 						error: ajaxErrorHandler
@@ -849,6 +850,17 @@
 								</span>
 							</div>
 							<form:errors path="endDateString" cssClass="error"/>
+						</div>
+					</div>
+
+					<hr>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="extraSchedules">
+							<spring:message code="jobs.label.extraSchedules"/>
+						</label>
+						<div class="col-md-8">
+							<form:textarea path="extraSchedules" rows="5" cols="40" class="form-control"/>
+							<form:errors path="extraSchedules" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

@@ -196,7 +196,7 @@ public class ReportJob implements org.quartz.Job {
 			nextRunDate = job.getNextRunDate();
 		} else {
 			//not a temp job. set new next run date
-			nextRunDate = context.getTrigger().getFireTimeAfter(new Date());
+			nextRunDate = context.getNextFireTime();
 		}
 
 		//set overall job start time in the jobs table

@@ -167,6 +167,17 @@ Edit schedule page
 						<form:errors path="weekday" cssClass="error"/>
 					</div>
 				</div>
+
+				<hr>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="extraSchedules">
+						<spring:message code="jobs.label.extraSchedules"/>
+					</label>
+					<div class="col-md-8">
+						<form:textarea path="extraSchedules" rows="5" cols="40" class="form-control"/>
+						<form:errors path="extraSchedules" cssClass="error"/>
+					</div>
+				</div>
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

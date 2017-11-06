@@ -81,6 +81,21 @@ public class Job implements Serializable {
 	private FtpServer ftpServer;
 	private String fixedFileName;
 	private String emailTemplate;
+	private String extraSchedules;
+
+	/**
+	 * @return the extraSchedules
+	 */
+	public String getExtraSchedules() {
+		return extraSchedules;
+	}
+
+	/**
+	 * @param extraSchedules the extraSchedules to set
+	 */
+	public void setExtraSchedules(String extraSchedules) {
+		this.extraSchedules = extraSchedules;
+	}
 
 	/**
 	 * @return the emailTemplate
