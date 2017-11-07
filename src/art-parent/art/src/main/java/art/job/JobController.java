@@ -355,8 +355,8 @@ public class JobController {
 				return showEditJob(action, model, job, locale);
 			}
 
-			finalizeSchedule(job);
-			Set<Trigger> triggers = processTriggers(job);
+			finalizeScheduleFields(job);
+			Set<Trigger> triggers = processSchedules(job);
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -703,13 +703,14 @@ public class JobController {
 	}
 
 	/**
-	 * Processes the job schedule details
+	 * Processes the job schedule details and sets the schedule fields as
+	 * appropriate
 	 *
-	 * @param job the job to schedule
+	 * @param job the art job object
 	 * @throws ParseException
 	 */
-	private void finalizeSchedule(Job job) throws ParseException {
-		logger.debug("Entering finalizeSchedule: job={}", job);
+	private void finalizeScheduleFields(Job job) throws ParseException {
+		logger.debug("Entering finalizeScheduleFields: job={}", job);
 
 		//create quartz job to be running this job
 		//build cron expression for the schedule
@@ -842,7 +843,14 @@ public class JobController {
 		job.setScheduleWeekday(weekday);
 	}
 
-	private Set<Trigger> processTriggers(Job job) {
+	/**
+	 * Processes schedule fields and returns a list of triggers representing the
+	 * set schedules
+	 *
+	 * @param job the art job object
+	 * @return a list of triggers representing the configured schedules
+	 */
+	private Set<Trigger> processSchedules(Job job) {
 		int jobId = job.getJobId();
 		String triggerName = "trigger" + jobId;
 

@@ -50,8 +50,10 @@ public class ExpressionHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExpressionHelper.class);
 
-	public static final String GROOVY_START_STRING = "g{";
-	private final String GROOVY_END_STRING = "}g";
+	public static final String GROOVY_START_STRING = "g[";
+	private final String GROOVY_END_STRING = "]g";
+	private final String FIELD_START_STRING = "f[";
+	private final String FIELD_END_STRING = "]f";
 
 	/**
 	 * Processes a string that may have parameter or field expressions and
@@ -152,7 +154,8 @@ public class ExpressionHelper {
 			replaceString = username;
 		}
 
-		String finalString = StringUtils.replace(string, "{username}", replaceString);
+		String fieldName = FIELD_START_STRING + "username" + FIELD_END_STRING;
+		String finalString = StringUtils.replace(string, fieldName, replaceString);
 		return finalString;
 	}
 
@@ -185,24 +188,23 @@ public class ExpressionHelper {
 		String finalString = string;
 
 		String dateFieldStartString;
-		String dateFieldEndString = "}";
 		switch (dateFieldType) {
 			case Date:
-				dateFieldStartString = "{date";
+				dateFieldStartString = FIELD_START_STRING + "date";
 				break;
 			case DateTime:
-				dateFieldStartString = "{datetime";
+				dateFieldStartString = FIELD_START_STRING + "datetime";
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected date field type: " + dateFieldType);
 		}
 
-		String[] dateFields = StringUtils.substringsBetween(string, dateFieldStartString, dateFieldEndString);
+		String[] dateFields = StringUtils.substringsBetween(string, dateFieldStartString, FIELD_END_STRING);
 		if (dateFields != null) {
 			Map<String, String> dateFieldValues = new HashMap<>();
 			for (String dateField : dateFields) {
 				String dateValue = processDateFieldContents(dateField, dateFieldType);
-				String dateSpecification = dateFieldStartString + dateField + dateFieldEndString;
+				String dateSpecification = dateFieldStartString + dateField + FIELD_END_STRING;
 				dateFieldValues.put(dateSpecification, dateValue);
 			}
 
@@ -443,7 +445,7 @@ public class ExpressionHelper {
 
 	/**
 	 * Runs a groovy expression and returns the result
-	 * 
+	 *
 	 * @param string the string containing the groovy script
 	 * @return the object returned by the groovy script
 	 */
