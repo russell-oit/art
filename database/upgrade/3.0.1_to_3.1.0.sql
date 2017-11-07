@@ -28,6 +28,7 @@
 -- for mysql, replace CLOB with LONGTEXT
 -- for postgresql, replace CLOB with TEXT
 -- for cubrid, replace CLOB with STRING
+-- for hsqldb, replace CLOB with LONGVARCHAR
 -- ------------------------------------------------
 
 
