@@ -1318,12 +1318,11 @@ public class ReportRunner {
 				throw new IllegalStateException("Parameter not found: " + paramName);
 			}
 
-			if (reportParam.getParameter().getParameterType() != ParameterType.SingleValue) {
-				throw new IllegalArgumentException("Non single-value parameter should not be used in dynamic sql: " + paramName);
-			}
-
 			Object actualParameterValue = reportParam.getEffectiveActualParameterValue();
-			if (actualParameterValue instanceof Date) {
+			if( reportParam.getParameter().getParameterType() == ParameterType.MultiValue  ) {
+				expValue = StringUtils.join( actualParameterValue, "," );
+			}
+			else if (actualParameterValue instanceof Date) {
 				Date dateValue = (Date) actualParameterValue;
 				expValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
 			} else {
