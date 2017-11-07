@@ -13,6 +13,7 @@
 -- add email template column
 -- add extra schedules column
 -- decrease size of last file name column
+-- add report source column
 
 
 -- NOTES:
@@ -32,6 +33,9 @@
 
 -- update database version
 UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='3.1-snapshot';
+
+-- insert custom upgrade setting for 3.1
+INSERT INTO ART_CUSTOM_UPGRADES VALUES('3.1', 0);
 
 -- add lov use dynamic datasource column
 ALTER TABLE ART_QUERIES ADD LOV_USE_DYNAMIC_DATASOURCE INTEGER;
@@ -96,4 +100,7 @@ ALTER TABLE ART_JOB_SCHEDULES ADD EXTRA_SCHEDULES CLOB;
 -- decrease size of last file name column
 UPDATE ART_JOBS SET LAST_FILE_NAME = SUBSTRING(LAST_FILE_NAME,1,200);
 ALTER TABLE ART_JOBS MODIFY LAST_FILE_NAME VARCHAR(200);
+
+-- add report source column
+ALTER TABLE ART_QUERIES ADD REPORT_SOURCE CLOB;
 

@@ -126,6 +126,7 @@ public class ReportService {
 			report.setUsesRules(rs.getBoolean("USES_RULES"));
 			report.setActive(rs.getBoolean("ACTIVE"));
 			report.setHidden(rs.getBoolean("HIDDEN"));
+			report.setReportSource(rs.getString("REPORT_SOURCE"));
 			report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
 			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
 			report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));
@@ -372,8 +373,6 @@ public class ReportService {
 		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
 		Report report = dbService.query(sql, h, id);
 
-		setReportSource(report);
-
 		return report;
 	}
 
@@ -391,8 +390,6 @@ public class ReportService {
 		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
 		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
 		Report report = dbService.query(sql, h, reportName);
-
-		setReportSource(report);
 
 		return report;
 	}
@@ -455,10 +452,6 @@ public class ReportService {
 
 		//delete drilldown queries
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID=?";
-		dbService.update(sql, id);
-
-		//delete sql source
-		sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
 		dbService.update(sql, id);
 
 		//lastly, delete query
@@ -620,7 +613,8 @@ public class ReportService {
 			String sql = "INSERT INTO ART_QUERIES"
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
 					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_RULES,"
-					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
+					+ " ACTIVE, HIDDEN, REPORT_SOURCE, PARAMETERS_IN_OUTPUT,"
+					+ " X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
 					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
 					+ " OMIT_TITLE_ROW, HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
@@ -629,7 +623,7 @@ public class ReportService {
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 40) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 41) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -644,6 +638,7 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isUsesRules()),
 				BooleanUtils.toInteger(report.isActive()),
 				BooleanUtils.toInteger(report.isHidden()),
+				report.getReportSource(),
 				BooleanUtils.toInteger(report.isParametersInOutput()),
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),
@@ -679,7 +674,8 @@ public class ReportService {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 					+ " DESCRIPTION=?, QUERY_TYPE=?, GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
 					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
-					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
+					+ " HIDDEN=?, REPORT_SOURCE=?, PARAMETERS_IN_OUTPUT=?,"
+					+ " X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
 					+ " OMIT_TITLE_ROW=?, HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
@@ -702,6 +698,7 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isUsesRules()),
 				BooleanUtils.toInteger(report.isActive()),
 				BooleanUtils.toInteger(report.isHidden()),
+				report.getReportSource(),
 				BooleanUtils.toInteger(report.isParametersInOutput()),
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),
@@ -740,8 +737,6 @@ public class ReportService {
 			report.setReportId(newRecordId);
 		}
 
-		updateReportSource(report.getReportId(), report.getReportSource());
-
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
@@ -777,95 +772,6 @@ public class ReportService {
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
 			dbService.update(sql, valuesArray);
-		}
-	}
-
-	/**
-	 * Updates the report source for a given report
-	 *
-	 * @param reportId the report id
-	 * @param reportSource the new report source
-	 * @throws SQLException
-	 */
-	public void updateReportSource(int reportId, String reportSource) throws SQLException {
-		logger.debug("Entering updateReportSource: reportId={}", reportId);
-
-		// Delete Old Source
-		String sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
-		dbService.update(sql, reportId);
-
-		// Write the source in small segments
-		// This guarantees portability across databases with different max VARCHAR sizes
-		sql = "INSERT INTO ART_ALL_SOURCES "
-				+ " (OBJECT_ID, LINE_NUMBER, SOURCE_INFO)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 3) + ")";
-
-		if (reportSource == null) {
-			reportSource = "";
-		}
-
-		final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
-
-		List<Object[]> values = new ArrayList<>();
-
-		int start = 0;
-		int end = SOURCE_CHUNK_LENGTH;
-		int lineNumber = 1;
-		int textLength = reportSource.length();
-
-		while (end < textLength) {
-			values.add(new Object[]{
-				reportId, lineNumber,
-				reportSource.substring(start, end)
-			});
-			start = end;
-			end = end + SOURCE_CHUNK_LENGTH;
-			lineNumber++;
-		}
-		values.add(new Object[]{
-			reportId, lineNumber,
-			reportSource.substring(start)
-		});
-
-		dbService.batch(sql, values.toArray(new Object[0][]));
-	}
-
-	/**
-	 * Populates the report source property for a report
-	 *
-	 * @param report the report to use
-	 * @throws SQLException
-	 */
-	private void setReportSource(Report report) throws SQLException {
-		logger.debug("Entering setReportSource: report={}", report);
-
-		if (report == null) {
-			return;
-		}
-
-		String sql = "SELECT SOURCE_INFO"
-				+ " FROM ART_ALL_SOURCES "
-				+ " WHERE OBJECT_ID=?"
-				+ " ORDER BY LINE_NUMBER";
-
-		int reportId = report.getReportId();
-
-		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
-		List<Map<String, Object>> sourceLines = dbService.query(sql, h, reportId);
-
-		StringBuilder sb = new StringBuilder(1024);
-		for (Map<String, Object> sourceLine : sourceLines) {
-			//map list handler uses a case insensitive map, so case of column names doesn't matter
-			String line = (String) sourceLine.get("SOURCE_INFO");
-			sb.append(line);
-		}
-
-		String finalSource = sb.toString();
-		report.setReportSource(finalSource);
-		//set html source for use with text reports
-		ReportType reportType = report.getReportType();
-		if (reportType == ReportType.Text) {
-			report.setReportSourceHtml(report.getReportSource());
 		}
 	}
 

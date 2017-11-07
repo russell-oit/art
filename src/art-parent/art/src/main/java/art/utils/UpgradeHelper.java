@@ -235,6 +235,7 @@ public class UpgradeHelper {
 	 */
 	private void upgradeDatabase(String templatesPath) {
 		upgradeDatabaseTo30(templatesPath);
+		upgradeDatabaseTo31();
 	}
 
 	/**
@@ -273,6 +274,73 @@ public class UpgradeHelper {
 			deleteDotJasperFiles(templatesPath);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Upgrades the database to 3.1
+	 *
+	 */
+	private void upgradeDatabaseTo31() {
+		try {
+			String databaseVersionString = "3.1";
+			String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
+			ResultSetHandler<Integer> h = new ScalarHandler<>();
+			Integer upgradedValue = dbService.query(sql, h, databaseVersionString);
+			if (upgradedValue == null || upgradedValue == 1) {
+				return;
+			}
+
+			logger.info("Performing 3.1 upgrade steps");
+
+			populateReportSourceColumn();
+
+			sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
+			dbService.update(sql, databaseVersionString);
+
+			logger.info("Done performing 3.1 upgrade steps");
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Populates report source column. Column added in 3.1
+	 */
+	private void populateReportSourceColumn() throws SQLException {
+		logger.debug("Entering populateReportSourceColumn");
+
+		String sql;
+
+		sql = "SELECT QUERY_ID FROM ART_QUERIES WHERE REPORT_SOURCE IS NULL";
+		ResultSetHandler<List<Integer>> h2 = new ColumnListHandler<>("QUERY_ID");
+		List<Integer> reportIds = dbService.query(sql, h2);
+
+		logger.debug("reportIds.isEmpty()={}", reportIds.isEmpty());
+		if (!reportIds.isEmpty()) {
+			logger.info("Moving report sources");
+
+			for (Integer reportId : reportIds) {
+				sql = "SELECT SOURCE_INFO"
+						+ " FROM ART_ALL_SOURCES "
+						+ " WHERE OBJECT_ID=?"
+						+ " ORDER BY LINE_NUMBER";
+
+				ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+				List<Map<String, Object>> sourceLines = dbService.query(sql, h, reportId);
+
+				StringBuilder sb = new StringBuilder(1024);
+				for (Map<String, Object> sourceLine : sourceLines) {
+					//map list handler uses a case insensitive map, so case of column names doesn't matter
+					String line = (String) sourceLine.get("SOURCE_INFO");
+					sb.append(line);
+				}
+
+				String finalSource = sb.toString();
+				
+				sql = "UPDATE ART_QUERIES SET REPORT_SOURCE=? WHERE QUERY_ID=?";
+				dbService.update(sql, finalSource, reportId);
+			}
 		}
 	}
 
