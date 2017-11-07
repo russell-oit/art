@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -46,7 +45,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -556,73 +554,8 @@ public class ParameterProcessor {
 		logger.debug("Entering convertParameterStringValueToDate: value='{}',"
 				+ " dateFormat='{}'", value, dateFormat);
 
-		Date dateValue;
-		Date now = new Date();
-
-		if (value == null || StringUtils.equalsIgnoreCase(value, "now")
-				|| StringUtils.isBlank(value)) {
-			dateValue = now;
-		} else if (StringUtils.startsWithIgnoreCase(value, "today")) {
-			dateValue = ArtUtils.zeroTime(now);
-		} else if (StringUtils.startsWithIgnoreCase(value, "add")) {
-			//e.g. add days 1
-			String[] tokens = StringUtils.split(value);
-			if (tokens.length != 3) {
-				throw new IllegalArgumentException("Invalid interval: " + value);
-			}
-
-			String period = tokens[1];
-			int offset = Integer.parseInt(tokens[2]);
-
-			if (StringUtils.startsWithIgnoreCase(period, "day")) {
-				dateValue = DateUtils.addDays(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "week")) {
-				dateValue = DateUtils.addWeeks(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "month")) {
-				dateValue = DateUtils.addMonths(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "year")) {
-				dateValue = DateUtils.addYears(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "hour")) {
-				dateValue = DateUtils.addHours(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "min")) {
-				dateValue = DateUtils.addMinutes(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "sec")) {
-				dateValue = DateUtils.addSeconds(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "milli")) {
-				dateValue = DateUtils.addMilliseconds(now, offset);
-			} else {
-				throw new IllegalArgumentException("Invalid period: " + period);
-			}
-		} else {
-			//convert date string as it is to a date
-			if (StringUtils.isBlank(dateFormat)) {
-				if (value.length() == ArtUtils.ISO_DATE_FORMAT.length()) {
-					dateFormat = ArtUtils.ISO_DATE_FORMAT;
-				} else if (value.length() == ArtUtils.ISO_DATE_TIME_FORMAT.length()) {
-					dateFormat = ArtUtils.ISO_DATE_TIME_FORMAT;
-				} else if (value.length() == ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT.length()) {
-					dateFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
-				} else if (value.length() == ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT.length()) {
-					dateFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
-				} else {
-					throw new IllegalArgumentException("Unexpected date format: " + value);
-				}
-			}
-
-			//not all locales work with simpledateformat
-			//with lenient set to false, parsing may throw an error if the locale is not available
-			if (logger.isDebugEnabled()) {
-				Locale[] locales = SimpleDateFormat.getAvailableLocales();
-				if (!Arrays.asList(locales).contains(locale)) {
-					logger.debug("Locale '{}' not available for date parameter parsing", locale);
-				}
-			}
-
-			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat, locale);
-			dateFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates
-			dateValue = dateFormatter.parse(value);
-		}
-
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		Date dateValue = expressionHelper.convertStringToDate(value, dateFormat, locale);
 		return dateValue;
 	}
 

@@ -305,16 +305,18 @@ public class ExpressionHelper {
 		Date dateValue;
 		Date now = new Date();
 
-		if (string == null || StringUtils.equalsIgnoreCase(string, "now")
+		String trimString = StringUtils.trimToEmpty(string);
+
+		if (string == null || StringUtils.equalsIgnoreCase(trimString, "now")
 				|| StringUtils.isBlank(string)) {
 			dateValue = now;
-		} else if (StringUtils.startsWithIgnoreCase(string, "today")) {
+		} else if (StringUtils.equalsIgnoreCase(trimString, "today")) {
 			dateValue = ArtUtils.zeroTime(now);
-		} else if (StringUtils.startsWithIgnoreCase(string, "add")) {
+		} else if (StringUtils.startsWithIgnoreCase(trimString, "add")) {
 			//e.g. add days 1
-			String[] tokens = StringUtils.split(string);
+			String[] tokens = StringUtils.split(trimString); //splits by space
 			if (tokens.length != 3) {
-				throw new IllegalArgumentException("Invalid interval: " + string);
+				throw new IllegalArgumentException("Invalid interval: " + trimString);
 			}
 
 			String period = tokens[1];
