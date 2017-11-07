@@ -356,6 +356,7 @@ public class JobController {
 			}
 
 			finalizeSchedule(job);
+			Set<Trigger> triggers = processTriggers(job);
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -367,14 +368,18 @@ public class JobController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
-			createQuartzJob(job, sessionUser);
-
-			saveJobParameters(request, job.getJobId());
+			try {
+				createQuartzJob(job, triggers);
+				saveJobParameters(request, job.getJobId());
+			} catch (SQLException | RuntimeException | SchedulerException ex) {
+				logger.error("Error", ex);
+				redirectAttributes.addFlashAttribute("error", ex);
+			}
 
 			String recordName = job.getName() + " (" + job.getJobId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/" + nextPage;
-		} catch (SQLException | RuntimeException | SchedulerException | ParseException | IOException ex) {
+		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -424,11 +429,10 @@ public class JobController {
 	 *
 	 * @param request the http request that contains the job parameters
 	 * @param jobId the job's id
-	 * @throws NumberFormatException
 	 * @throws SQLException
 	 */
 	private void saveJobParameters(HttpServletRequest request, int jobId)
-			throws NumberFormatException, SQLException {
+			throws SQLException {
 
 		logger.debug("Entering saveJobParameters: jobId={}", jobId);
 
@@ -838,24 +842,11 @@ public class JobController {
 		job.setScheduleWeekday(weekday);
 	}
 
-	/**
-	 * Creates a quartz job for the given art job
-	 *
-	 * @param job the art job
-	 * @param sessionUser the user who is performing the operation
-	 * @throws SchedulerException
-	 */
-	private void createQuartzJob(Job job, User sessionUser) throws SchedulerException, SQLException {
+	private Set<Trigger> processTriggers(Job job) {
 		int jobId = job.getJobId();
-
-		String jobName = "job" + jobId;
 		String triggerName = "trigger" + jobId;
 
-		JobDetail quartzJob = newJob(ReportJob.class)
-				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
-				.usingJobData("jobId", jobId)
-				.build();
-
+		//create main trigger
 		//build cron expression.
 		//cron format is sec min hr dayofmonth month dayofweek (optionally year)
 		String second = "0";
@@ -864,7 +855,7 @@ public class JobController {
 				+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
 
 		//create trigger that defines the schedule for the job
-		CronTrigger trigger = newTrigger()
+		CronTrigger mainTrigger = newTrigger()
 				.withIdentity(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP))
 				.withSchedule(cronSchedule(cronString))
 				.startAt(job.getStartDate())
@@ -873,7 +864,7 @@ public class JobController {
 
 		Set<Trigger> triggers = new HashSet<>();
 
-		triggers.add(trigger);
+		triggers.add(mainTrigger);
 
 		//create triggers for extra schedules
 		String extraSchedules = job.getExtraSchedules();
@@ -911,7 +902,7 @@ public class JobController {
 		//https://stackoverflow.com/questions/39791318/how-to-get-the-earliest-date-of-a-list-in-java
 		List<Date> nextFireTimes = new ArrayList<>();
 		Date now = new Date();
-		Date nextRunDate = trigger.getFireTimeAfter(now);
+		Date nextRunDate = mainTrigger.getFireTimeAfter(now);
 		nextFireTimes.add(nextRunDate);
 		for (Trigger extraTrigger : triggers) {
 			nextRunDate = extraTrigger.getFireTimeAfter(now);
@@ -919,10 +910,27 @@ public class JobController {
 		}
 		Date nextFireTime = Collections.min(nextFireTimes);
 		job.setNextRunDate(nextFireTime);
-		
-		//update job next run date
-		jobService.updateJob(job, sessionUser);
-		
+
+		return triggers;
+	}
+
+	/**
+	 * Creates a quartz job for the given art job
+	 *
+	 * @param job the art job
+	 * @param triggers the triggers to associate with the job
+	 * @throws SchedulerException
+	 */
+	private void createQuartzJob(Job job, Set<Trigger> triggers) throws SchedulerException {
+		int jobId = job.getJobId();
+
+		String jobName = "job" + jobId;
+
+		JobDetail quartzJob = newJob(ReportJob.class)
+				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
+				.usingJobData("jobId", jobId)
+				.build();
+
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 		if (scheduler == null) {
 			logger.warn("Scheduler not available");
