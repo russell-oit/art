@@ -15,8 +15,8 @@
 
 
 -- UPGRADING:
--- if you are upgrading, don't use this script. run the scripts available in the
--- upgrade directory run the scripts one at a time to upgrade to newer versions.
+-- if you are upgrading, don't use this script. run the scripts in the
+-- upgrade directory. run the scripts one at a time to upgrade to newer versions.
 -- e.g. from 2.0 to 2.1, then 2.1 to 2.2 etc.
 
 -- sql reserved words checker - https://www.petefreitag.com/tools/sql_reserved_words_checker/
@@ -809,7 +809,7 @@ CREATE TABLE ART_ENCRYPTORS
 	ENCRYPTOR_TYPE VARCHAR(50),
 	AESCRYPT_PASSWORD VARCHAR(100),
 	OPENPGP_PUBLIC_KEY_FILE VARCHAR(100),
-	OPENPGP_PUBLIC_KEY_STRING VARCHAR(4000),
+	OPENPGP_PUBLIC_KEY_STRING CLOB,
 	OPENPGP_SIGNING_KEY_FILE VARCHAR(100),
 	OPENPGP_SIGNING_KEY_PASSPHRASE VARCHAR(1000),
 	CREATION_DATE TIMESTAMP,
