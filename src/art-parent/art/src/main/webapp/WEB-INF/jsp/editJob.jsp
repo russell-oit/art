@@ -210,6 +210,7 @@
 								$('#scheduleMonth').val(schedule.month);
 								$('#scheduleWeekday').val(schedule.weekday);
 								$('#extraSchedules').val(schedule.extraSchedules);
+								$('#holidays').val(schedule.holidays);
 							}
 						},
 						error: ajaxErrorHandler
@@ -440,6 +441,8 @@
 
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="nextPage" value="${param.nextPage}">
+				
+				<form:hidden path="quartzCalendarNames" />
 
 				<c:set var="labelColClass" value="col-md-4" scope="request"/>
 				<c:set var="inputColClass" value="col-md-8" scope="request"/>
@@ -861,6 +864,15 @@
 						<div class="col-md-8">
 							<form:textarea path="extraSchedules" rows="3" cols="40" class="form-control"/>
 							<form:errors path="extraSchedules" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="holidays">
+							<spring:message code="schedules.label.holidays"/>
+						</label>
+						<div class="col-md-8">
+							<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
+							<form:errors path="holidays" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

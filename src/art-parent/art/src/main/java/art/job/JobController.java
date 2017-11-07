@@ -60,6 +60,8 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import org.quartz.CronTrigger;
@@ -70,8 +72,11 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
+import org.quartz.impl.calendar.CronCalendar;
+import org.quartz.impl.triggers.CronTriggerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -356,7 +361,6 @@ public class JobController {
 			}
 
 			finalizeScheduleFields(job);
-			Set<Trigger> triggers = processSchedules(job);
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -369,9 +373,9 @@ public class JobController {
 			}
 
 			try {
-				createQuartzJob(job, triggers);
+				processSchedules(job, sessionUser);
 				saveJobParameters(request, job.getJobId());
-			} catch (SQLException | RuntimeException | SchedulerException ex) {
+			} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
@@ -379,7 +383,7 @@ public class JobController {
 			String recordName = job.getName() + " (" + job.getJobId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/" + nextPage;
-		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
+		} catch (SQLException | RuntimeException | IOException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -848,9 +852,36 @@ public class JobController {
 	 * set schedules
 	 *
 	 * @param job the art job object
-	 * @return a list of triggers representing the configured schedules
 	 */
-	private Set<Trigger> processSchedules(Job job) {
+	private void processSchedules(Job job, User sessionUser)
+			throws ParseException, SchedulerException, SQLException {
+
+		//http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-04.html
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		if (scheduler == null) {
+			logger.warn("Scheduler not available. Job Id {}", job.getJobId());
+			return;
+		}
+
+		//get applicable holidays
+		List<org.quartz.Calendar> calendars = processHolidays(job);
+		final int CALENDAR_NAME_LENGTH = 10;
+		String globalCalendarName = RandomStringUtils.randomAlphabetic(CALENDAR_NAME_LENGTH);
+		org.quartz.Calendar globalCalendar = null;
+		List<String> calendarNames = new ArrayList<>();
+		for (org.quartz.Calendar calendar : calendars) {
+			String calendarName = calendar.getDescription();
+			if (StringUtils.isBlank(calendarName)) {
+				globalCalendar = calendar;
+				calendarName = globalCalendarName;
+			}
+			calendarNames.add(calendarName);
+
+			boolean replace = true;
+			boolean updateTriggers = true;
+			scheduler.addCalendar(calendarName, calendar, replace, updateTriggers);
+		}
+
 		int jobId = job.getJobId();
 		String triggerName = "trigger" + jobId;
 
@@ -863,12 +894,16 @@ public class JobController {
 				+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
 
 		//create trigger that defines the schedule for the job
-		CronTrigger mainTrigger = newTrigger()
+		TriggerBuilder<CronTrigger> triggerBuilder = newTrigger()
 				.withIdentity(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP))
 				.withSchedule(cronSchedule(cronString))
 				.startAt(job.getStartDate())
-				.endAt(job.getEndDate())
-				.build();
+				.endAt(job.getEndDate());
+
+		if (globalCalendar != null) {
+			triggerBuilder.modifiedByCalendar(globalCalendarName);
+		}
+		CronTrigger mainTrigger = triggerBuilder.build();
 
 		Set<Trigger> triggers = new HashSet<>();
 
@@ -894,12 +929,14 @@ public class JobController {
 				for (String value : values) {
 					index++;
 					String extraTriggerName = triggerName + "-" + index;
-					CronTrigger extraTrigger = newTrigger()
-							.withIdentity(triggerKey(extraTriggerName, ArtUtils.TRIGGER_GROUP))
-							.withSchedule(cronSchedule(value))
-							.startAt(job.getStartDate())
-							.endAt(job.getEndDate())
-							.build();
+					CronTriggerImpl extraTrigger = new CronTriggerImpl();
+					extraTrigger.setKey(triggerKey(extraTriggerName, ArtUtils.TRIGGER_GROUP));
+					extraTrigger.setCronExpression(value);
+					extraTrigger.setStartTime(job.getStartDate());
+					extraTrigger.setEndTime(job.getEndDate());
+					if (globalCalendar != null) {
+						extraTrigger.setCalendarName(globalCalendarName);
+					}
 
 					triggers.add(extraTrigger);
 				}
@@ -919,18 +956,12 @@ public class JobController {
 		Date nextFireTime = Collections.min(nextFireTimes);
 		job.setNextRunDate(nextFireTime);
 
-		return triggers;
-	}
+		String oldQuartzCalendarNames = job.getQuartzCalendarNames();
+		String quartzCalendarNames = StringUtils.join(calendarNames, ",");
+		job.setQuartzCalendarNames(quartzCalendarNames);
 
-	/**
-	 * Creates a quartz job for the given art job
-	 *
-	 * @param job the art job
-	 * @param triggers the triggers to associate with the job
-	 * @throws SchedulerException
-	 */
-	private void createQuartzJob(Job job, Set<Trigger> triggers) throws SchedulerException {
-		int jobId = job.getJobId();
+		//update next run date and calendar names fields
+		jobService.updateJob(job, sessionUser);
 
 		String jobName = "job" + jobId;
 
@@ -939,18 +970,78 @@ public class JobController {
 				.usingJobData("jobId", jobId)
 				.build();
 
-		Scheduler scheduler = SchedulerUtils.getScheduler();
-		if (scheduler == null) {
-			logger.warn("Scheduler not available");
-			return;
-		}
-
 		//delete any existing jobs and triggers associated with the job before adding the job to the scheduler
 		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
+
+		//can only delete calendars after associated triggers have been deleted (in the deleteJob() call)
+		jobService.deleteCalendars(oldQuartzCalendarNames, scheduler);
 
 		//add job and triggers to scheduler
 		boolean replace = true;
 		scheduler.scheduleJob(quartzJob, triggers, replace);
+	}
+
+	private List<org.quartz.Calendar> processHolidays(Job job) throws ParseException {
+		//https://stackoverflow.com/questions/5863435/quartz-net-multple-calendars
+		List<org.quartz.Calendar> calendars = new ArrayList<>();
+
+		String holidays = job.getHolidays();
+		if (StringUtils.isNotBlank(holidays)) {
+			if (StringUtils.startsWith(holidays, ExpressionHelper.GROOVY_START_STRING)) {
+				ExpressionHelper expressionHelper = new ExpressionHelper();
+				Object result = expressionHelper.runGroovyExpression(holidays);
+				if (result instanceof List) {
+					@SuppressWarnings("unchecked")
+					List<org.quartz.Calendar> groovyCalendars = (List<org.quartz.Calendar>) result;
+					List<org.quartz.Calendar> nonLabelledGroovyCalendars = new ArrayList<>();
+					for (org.quartz.Calendar calendar : groovyCalendars) {
+						if (StringUtils.isBlank(calendar.getDescription())) {
+							nonLabelledGroovyCalendars.add(calendar);
+						} else {
+							calendars.add(calendar);
+						}
+					}
+					if (CollectionUtils.isNotEmpty(nonLabelledGroovyCalendars)) {
+						org.quartz.Calendar finalCalendar = concatenateCalendars(nonLabelledGroovyCalendars);
+						calendars.add(finalCalendar);
+					}
+				} else {
+					org.quartz.Calendar calendar = (org.quartz.Calendar) result;
+					calendars.add(calendar);
+				}
+			} else {
+				String values[] = holidays.split("\\r?\\n");
+				List<org.quartz.Calendar> cronCalendars = new ArrayList<>();
+				for (String value : values) {
+					CronCalendar calendar = new CronCalendar(value);
+					cronCalendars.add(calendar);
+				}
+				if (CollectionUtils.isNotEmpty(cronCalendars)) {
+					org.quartz.Calendar finalCalendar = concatenateCalendars(cronCalendars);
+					calendars.add(finalCalendar);
+				}
+			}
+		}
+
+		return calendars;
+	}
+
+	private org.quartz.Calendar concatenateCalendars(List<org.quartz.Calendar> calendars) {
+		if (CollectionUtils.isEmpty(calendars)) {
+			return null;
+		}
+
+		//concatenate calendars
+		for (int i = 0; i < calendars.size() - 1; i++) {
+			if (i > 0) {
+				org.quartz.Calendar currentCalendar = calendars.get(i);
+				org.quartz.Calendar previousCalendar = calendars.get(i - 1);
+				currentCalendar.setBaseCalendar(previousCalendar);
+			}
+		}
+		org.quartz.Calendar finalCalendar = calendars.get(calendars.size() - 1);
+
+		return finalCalendar;
 	}
 
 	/**

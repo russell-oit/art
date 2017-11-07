@@ -82,6 +82,36 @@ public class Job implements Serializable {
 	private String fixedFileName;
 	private String emailTemplate;
 	private String extraSchedules;
+	private String holidays;
+	private String quartzCalendarNames;
+
+	/**
+	 * @return the quartzCalendarNames
+	 */
+	public String getQuartzCalendarNames() {
+		return quartzCalendarNames;
+	}
+
+	/**
+	 * @param quartzCalendarNames the quartzCalendarNames to set
+	 */
+	public void setQuartzCalendarNames(String quartzCalendarNames) {
+		this.quartzCalendarNames = quartzCalendarNames;
+	}
+
+	/**
+	 * @return the holidays
+	 */
+	public String getHolidays() {
+		return holidays;
+	}
+
+	/**
+	 * @param holidays the holidays to set
+	 */
+	public void setHolidays(String holidays) {
+		this.holidays = holidays;
+	}
 
 	/**
 	 * @return the extraSchedules

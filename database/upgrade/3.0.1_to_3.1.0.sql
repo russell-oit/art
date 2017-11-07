@@ -15,6 +15,7 @@
 -- decrease size of last file name column
 -- add report source column
 -- add source report id column
+-- add holidays column
 
 
 -- NOTES:
@@ -108,3 +109,10 @@ ALTER TABLE ART_QUERIES ADD REPORT_SOURCE CLOB;
 
 -- add source report id column
 ALTER TABLE ART_QUERIES ADD SOURCE_REPORT_ID INTEGER;
+
+-- add holidays column
+ALTER TABLE ART_JOBS ADD HOLIDAYS CLOB;
+ALTER TABLE ART_JOB_SCHEDULES ADD HOLIDAYS CLOB;
+
+-- add calendars column
+ALTER TABLE ART_JOBS ADD QUARTZ_CALENDAR_NAMES VARCHAR(1000);

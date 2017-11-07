@@ -46,7 +46,6 @@ import org.apache.commons.lang3.StringUtils;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -180,6 +179,8 @@ public class JobService {
 		job.setBatchFile(rs.getString("BATCH_FILE"));
 		job.setEmailTemplate(rs.getString("EMAIL_TEMPLATE"));
 		job.setExtraSchedules(rs.getString("EXTRA_SCHEDULES"));
+		job.setHolidays(rs.getString("HOLIDAYS"));
+		job.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
 		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		job.setCreatedBy(rs.getString("CREATED_BY"));
@@ -239,7 +240,7 @@ public class JobService {
 		//get job object. need job details in order to delete cached table for cached result jobs
 		Job job = getJob(id);
 		if (job == null) {
-			logger.warn("Cannot delete job: {}. Job not available.", id);
+			logger.warn("Cannot delete job {}. Job not available.", id);
 			return;
 		}
 
@@ -247,15 +248,15 @@ public class JobService {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler == null) {
-			logger.warn("Cannot delete job: {}. Scheduler not available.", id);
+			logger.warn("Cannot delete job {}. Scheduler not available.", id);
 			return;
 		}
 
 		String jobName = "job" + id;
-		String triggerName = "trigger" + id;
 
 		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
-		scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP));
+
+		deleteCalendars(job.getQuartzCalendarNames(), scheduler);
 
 		// Delete the Cached table if this job is a cache result one
 		JobType jobType = job.getJobType();
@@ -417,9 +418,9 @@ public class JobService {
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
 					+ " FIXED_FILE_NAME, BATCH_FILE, FTP_SERVER_ID, EMAIL_TEMPLATE,"
-					+ " EXTRA_SCHEDULES,"
+					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 37) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 39) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -457,6 +458,8 @@ public class JobService {
 				ftpServerId,
 				job.getEmailTemplate(),
 				job.getExtraSchedules(),
+				job.getHolidays(),
+				job.getQuartzCalendarNames(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -473,7 +476,8 @@ public class JobService {
 					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
 					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?,"
 					+ " FIXED_FILE_NAME=?, BATCH_FILE=?, FTP_SERVER_ID=?,"
-					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?,"
+					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
+					+ " QUARTZ_CALENDAR_NAMES=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -512,6 +516,8 @@ public class JobService {
 				ftpServerId,
 				job.getEmailTemplate(),
 				job.getExtraSchedules(),
+				job.getHolidays(),
+				job.getQuartzCalendarNames(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()
@@ -641,6 +647,29 @@ public class JobService {
 		String sql = SQL_SELECT_ALL + " WHERE AJ.MIGRATED_TO_QUARTZ='N'";
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h);
+	}
+	
+	/**
+	 * Deletes the quartz calendars associated with the given job
+	 * 
+	 * @param quartzCalendarNames comma separated list of calendar names to delete
+	 * @param scheduler the quartz scheduler
+	 */
+	public void deleteCalendars(String quartzCalendarNames, Scheduler scheduler) {
+		if (scheduler == null) {
+			return;
+		}
+
+		if (StringUtils.isNotBlank(quartzCalendarNames)) {
+			String[] calendarNames = StringUtils.split(quartzCalendarNames, ",");
+			for (String calendarName : calendarNames) {
+				try {
+					scheduler.deleteCalendar(calendarName);
+				} catch (SchedulerException ex) {
+					logger.error("Error", ex);
+				}
+			}
+		}
 	}
 
 }
