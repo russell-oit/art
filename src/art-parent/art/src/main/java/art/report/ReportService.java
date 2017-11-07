@@ -151,6 +151,7 @@ public class ReportService {
 			report.setLovUseDynamicDatasource(rs.getBoolean("LOV_USE_DYNAMIC_DATASOURCE"));
 			report.setOpenPassword(rs.getString("OPEN_PASSWORD"));
 			report.setModifyPassword(rs.getString("MODIFY_PASSWORD"));
+			report.setSourceReportId(rs.getInt("SOURCE_REPORT_ID"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -161,7 +162,7 @@ public class ReportService {
 
 			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
 			report.setDatasource(datasource);
-			
+
 			Encryptor encryptor = encryptorService.getEncryptor(rs.getInt("ENCRYPTOR_ID"));
 			report.setEncryptor(encryptor);
 
@@ -373,6 +374,48 @@ public class ReportService {
 		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
 		Report report = dbService.query(sql, h, id);
 
+		setEffectiveReportSource(report);
+
+		return report;
+	}
+
+	/**
+	 * Sets the effective report source for a report, in case it is a clone
+	 * report
+	 *
+	 * @param report the report object to set
+	 * @throws SQLException
+	 */
+	private void setEffectiveReportSource(Report report) throws SQLException {
+		if (report == null) {
+			return;
+		}
+
+		int sourceReportId = report.getSourceReportId();
+		if (sourceReportId > 0) {
+			Report sourceReport = getSourceReport(sourceReportId);
+			if (sourceReport != null) {
+				report.setReportSource(sourceReport.getReportSource());
+				report.setSourceReport(sourceReport);
+			}
+		}
+	}
+
+	/**
+	 * Returns a source report
+	 *
+	 * @param id the source report id
+	 * @return report if found, null otherwise
+	 * @throws SQLException
+	 */
+	private Report getSourceReport(int id) throws SQLException {
+		logger.debug("Entering getSourceReport: id={}", id);
+
+		//use separate method to avoid recursion issues
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
+		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
+		Report report = dbService.query(sql, h, id);
+
 		return report;
 	}
 
@@ -572,7 +615,7 @@ public class ReportService {
 		} else {
 			datasourceId = report.getDatasource().getDatasourceId();
 		}
-		
+
 		Integer encryptorId;
 		if (report.getEncryptor() == null) {
 			encryptorId = 0;
@@ -621,9 +664,9 @@ public class ReportService {
 					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
-					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID,"
+					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 41) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 42) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -665,6 +708,7 @@ public class ReportService {
 				report.getOpenPassword(),
 				report.getModifyPassword(),
 				encryptorId,
+				report.getSourceReportId(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -683,6 +727,7 @@ public class ReportService {
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
 					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
 					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
+					+ " SOURCE_REPORT_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -725,6 +770,7 @@ public class ReportService {
 				report.getOpenPassword(),
 				report.getModifyPassword(),
 				encryptorId,
+				report.getSourceReportId(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()
@@ -1205,4 +1251,5 @@ public class ReportService {
 
 		return exclusive;
 	}
+
 }

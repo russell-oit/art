@@ -109,6 +109,36 @@ public class Report implements Serializable {
 	private boolean useNoneOpenPassword; //only for use with ui
 	private boolean useNoneModifyPassword; //only for use with ui
 	private Encryptor encryptor;
+	private Report sourceReport;
+	private int sourceReportId;
+
+	/**
+	 * @return the sourceReportId
+	 */
+	public int getSourceReportId() {
+		return sourceReportId;
+	}
+
+	/**
+	 * @param sourceReportId the sourceReportId to set
+	 */
+	public void setSourceReportId(int sourceReportId) {
+		this.sourceReportId = sourceReportId;
+	}
+
+	/**
+	 * @return the sourceReport
+	 */
+	public Report getSourceReport() {
+		return sourceReport;
+	}
+
+	/**
+	 * @param sourceReport the sourceReport to set
+	 */
+	public void setSourceReport(Report sourceReport) {
+		this.sourceReport = sourceReport;
+	}
 
 	/**
 	 * @return the encryptor

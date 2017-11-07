@@ -736,7 +736,7 @@ Edit report page
 							$("#modifyPasswordDiv").hide();
 						}
 				}
-				
+
 				//show/hide encryptor
 				switch (reportTypeId) {
 					case 0: //tabular
@@ -1459,6 +1459,16 @@ Edit report page
 						</div>
 					</div>
 				</fieldset>
+
+				<div class="form-group">
+					<label class="control-label col-md-4" for="sourceReportId">
+						<spring:message code="reports.label.sourceReport"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="sourceReportId" maxlength="10" class="form-control"/>
+						<form:errors path="sourceReportId" cssClass="error"/>
+					</div>
+				</div>
 
 				<div id="optionsDiv" class="form-group">
 					<label class="control-label col-md-12" style="text-align: center" for="options">

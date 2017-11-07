@@ -14,6 +14,7 @@
 -- add extra schedules column
 -- decrease size of last file name column
 -- add report source column
+-- add source report id column
 
 
 -- NOTES:
@@ -105,3 +106,5 @@ ALTER TABLE ART_JOBS MODIFY LAST_FILE_NAME VARCHAR(200);
 -- add report source column
 ALTER TABLE ART_QUERIES ADD REPORT_SOURCE CLOB;
 
+-- add source report id column
+ALTER TABLE ART_QUERIES ADD SOURCE_REPORT_ID INTEGER;
