@@ -63,7 +63,6 @@ import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
-import org.quartz.CronTrigger;
 import static org.quartz.JobBuilder.newJob;
 import org.quartz.JobDetail;
 import static org.quartz.JobKey.jobKey;
@@ -71,10 +70,10 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
 import org.quartz.impl.calendar.CronCalendar;
+import org.quartz.impl.triggers.AbstractTrigger;
 import org.quartz.impl.triggers.CronTriggerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -862,6 +861,9 @@ public class JobController {
 			return;
 		}
 		
+		//delete job while it has old calendar names, before updating the calendar names field
+		jobService.deleteQuartzJob(job, scheduler);
+
 		//job must have been saved in order to use job id for job, trigger and calendar names
 		int jobId = job.getJobId();
 
@@ -883,7 +885,6 @@ public class JobController {
 			scheduler.addCalendar(calendarName, calendar, replace, updateTriggers);
 		}
 
-		
 		String mainTriggerName = "trigger" + jobId;
 
 		//create main trigger
@@ -895,16 +896,16 @@ public class JobController {
 				+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
 
 		//create trigger that defines the schedule for the job
-		TriggerBuilder<CronTrigger> triggerBuilder = newTrigger()
+		CronTriggerImpl mainTrigger = (CronTriggerImpl) newTrigger()
 				.withIdentity(triggerKey(mainTriggerName, ArtUtils.TRIGGER_GROUP))
 				.withSchedule(cronSchedule(cronString))
 				.startAt(job.getStartDate())
-				.endAt(job.getEndDate());
+				.endAt(job.getEndDate())
+				.build();
 
 		if (globalCalendar != null) {
-			triggerBuilder.modifiedByCalendar(globalCalendarName);
+			mainTrigger.setCalendarName(globalCalendarName);
 		}
-		CronTrigger mainTrigger = triggerBuilder.build();
 
 		Set<Trigger> triggers = new HashSet<>();
 
@@ -918,11 +919,16 @@ public class JobController {
 				Object result = expressionHelper.runGroovyExpression(extraSchedules);
 				if (result instanceof List) {
 					@SuppressWarnings("unchecked")
-					List<Trigger> extraTriggers = (List<Trigger>) result;
+					List<AbstractTrigger> extraTriggers = (List<AbstractTrigger>) result;
+					for (AbstractTrigger extraTrigger : extraTriggers) {
+						finalizeTriggerProperties(extraTrigger, globalCalendarName, job);
+					}
 					triggers.addAll(extraTriggers);
 				} else {
-					Trigger extraTrigger = (Trigger) result;
-					triggers.add(extraTrigger);
+					if (result instanceof AbstractTrigger) {
+						AbstractTrigger extraTrigger = (AbstractTrigger) result;
+						finalizeTriggerProperties(extraTrigger, globalCalendarName, job);
+					}
 				}
 			} else {
 				String values[] = extraSchedules.split("\\r?\\n");
@@ -948,17 +954,12 @@ public class JobController {
 		//https://stackoverflow.com/questions/39791318/how-to-get-the-earliest-date-of-a-list-in-java
 		List<Date> nextFireTimes = new ArrayList<>();
 		Date now = new Date();
-		Date nextRunDate = mainTrigger.getFireTimeAfter(now);
-		nextFireTimes.add(nextRunDate);
-		for (Trigger extraTrigger : triggers) {
-			nextRunDate = extraTrigger.getFireTimeAfter(now);
+		for (Trigger trigger : triggers) {
+			Date nextRunDate = trigger.getFireTimeAfter(now);
 			nextFireTimes.add(nextRunDate);
 		}
 		Date nextFireTime = Collections.min(nextFireTimes);
 		job.setNextRunDate(nextFireTime);
-		
-		//delete job while it has old calendar names, before updating the calendar names field
-		jobService.deleteQuartzJob(job, scheduler);
 
 		String quartzCalendarNames = StringUtils.join(calendarNames, ",");
 		job.setQuartzCalendarNames(quartzCalendarNames);
@@ -976,6 +977,28 @@ public class JobController {
 		//add job and triggers to scheduler
 		boolean replace = true;
 		scheduler.scheduleJob(quartzJob, triggers, replace);
+	}
+
+	/**
+	 * Sets properties for a trigger where they are not explicitly defined e.g.
+	 * calendar name, start date and end date
+	 *
+	 * @param trigger the trigger to set
+	 * @param globalCalendarName the global calendar name to use
+	 * @param job the art job
+	 */
+	private void finalizeTriggerProperties(AbstractTrigger trigger,
+			String globalCalendarName, Job job) {
+
+		if (StringUtils.isBlank(trigger.getCalendarName())) {
+			trigger.setCalendarName(globalCalendarName);
+		}
+		if (trigger.getStartTime() == null) {
+			trigger.setStartTime(job.getStartDate());
+		}
+		if (trigger.getEndTime() == null) {
+			trigger.setEndTime(job.getEndDate());
+		}
 	}
 
 	private List<org.quartz.Calendar> processHolidays(Job job) throws ParseException {
@@ -1029,7 +1052,7 @@ public class JobController {
 		}
 
 		//concatenate calendars
-		for (int i = 0; i < calendars.size() - 1; i++) {
+		for (int i = 0; i < calendars.size(); i++) {
 			if (i > 0) {
 				org.quartz.Calendar currentCalendar = calendars.get(i);
 				org.quartz.Calendar previousCalendar = calendars.get(i - 1);
