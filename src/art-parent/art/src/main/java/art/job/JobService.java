@@ -252,11 +252,7 @@ public class JobService {
 			return;
 		}
 
-		String jobName = "job" + id;
-
-		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
-
-		deleteCalendars(job.getQuartzCalendarNames(), scheduler);
+		deleteQuartzJob(job, scheduler);
 
 		// Delete the Cached table if this job is a cache result one
 		JobType jobType = job.getJobType();
@@ -648,18 +644,26 @@ public class JobService {
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h);
 	}
-	
+
 	/**
-	 * Deletes the quartz calendars associated with the given job
-	 * 
-	 * @param quartzCalendarNames comma separated list of calendar names to delete
+	 * Deletes the quartz job associated with the given art job, also deleting
+	 * any associated triggers and calendars
+	 *
+	 * @param job the art job object
 	 * @param scheduler the quartz scheduler
+	 * @throws org.quartz.SchedulerException
 	 */
-	public void deleteCalendars(String quartzCalendarNames, Scheduler scheduler) {
+	public void deleteQuartzJob(Job job, Scheduler scheduler) throws SchedulerException {
 		if (scheduler == null) {
 			return;
 		}
 
+		int jobId = job.getJobId();
+		String jobName = "job" + jobId;
+
+		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
+
+		String quartzCalendarNames = job.getQuartzCalendarNames();
 		if (StringUtils.isNotBlank(quartzCalendarNames)) {
 			String[] calendarNames = StringUtils.split(quartzCalendarNames, ",");
 			for (String calendarName : calendarNames) {

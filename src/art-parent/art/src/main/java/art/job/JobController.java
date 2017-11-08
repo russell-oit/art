@@ -61,7 +61,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import org.quartz.CronTrigger;
@@ -862,11 +861,13 @@ public class JobController {
 			logger.warn("Scheduler not available. Job Id {}", job.getJobId());
 			return;
 		}
+		
+		//job must have been saved in order to use job id for job, trigger and calendar names
+		int jobId = job.getJobId();
 
 		//get applicable holidays
 		List<org.quartz.Calendar> calendars = processHolidays(job);
-		final int CALENDAR_NAME_LENGTH = 10;
-		String globalCalendarName = RandomStringUtils.randomAlphabetic(CALENDAR_NAME_LENGTH);
+		String globalCalendarName = "calendar" + jobId;
 		org.quartz.Calendar globalCalendar = null;
 		List<String> calendarNames = new ArrayList<>();
 		for (org.quartz.Calendar calendar : calendars) {
@@ -882,8 +883,8 @@ public class JobController {
 			scheduler.addCalendar(calendarName, calendar, replace, updateTriggers);
 		}
 
-		int jobId = job.getJobId();
-		String triggerName = "trigger" + jobId;
+		
+		String mainTriggerName = "trigger" + jobId;
 
 		//create main trigger
 		//build cron expression.
@@ -895,7 +896,7 @@ public class JobController {
 
 		//create trigger that defines the schedule for the job
 		TriggerBuilder<CronTrigger> triggerBuilder = newTrigger()
-				.withIdentity(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP))
+				.withIdentity(triggerKey(mainTriggerName, ArtUtils.TRIGGER_GROUP))
 				.withSchedule(cronSchedule(cronString))
 				.startAt(job.getStartDate())
 				.endAt(job.getEndDate());
@@ -928,7 +929,7 @@ public class JobController {
 				int index = 1;
 				for (String value : values) {
 					index++;
-					String extraTriggerName = triggerName + "-" + index;
+					String extraTriggerName = mainTriggerName + "-" + index;
 					CronTriggerImpl extraTrigger = new CronTriggerImpl();
 					extraTrigger.setKey(triggerKey(extraTriggerName, ArtUtils.TRIGGER_GROUP));
 					extraTrigger.setCronExpression(value);
@@ -955,8 +956,10 @@ public class JobController {
 		}
 		Date nextFireTime = Collections.min(nextFireTimes);
 		job.setNextRunDate(nextFireTime);
+		
+		//delete job while it has old calendar names, before updating the calendar names field
+		jobService.deleteQuartzJob(job, scheduler);
 
-		String oldQuartzCalendarNames = job.getQuartzCalendarNames();
 		String quartzCalendarNames = StringUtils.join(calendarNames, ",");
 		job.setQuartzCalendarNames(quartzCalendarNames);
 
@@ -969,12 +972,6 @@ public class JobController {
 				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
 				.usingJobData("jobId", jobId)
 				.build();
-
-		//delete any existing jobs and triggers associated with the job before adding the job to the scheduler
-		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
-
-		//can only delete calendars after associated triggers have been deleted (in the deleteJob() call)
-		jobService.deleteCalendars(oldQuartzCalendarNames, scheduler);
 
 		//add job and triggers to scheduler
 		boolean replace = true;
