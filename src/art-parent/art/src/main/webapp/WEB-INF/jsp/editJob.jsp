@@ -441,7 +441,7 @@
 
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="nextPage" value="${param.nextPage}">
-				
+
 				<form:hidden path="quartzCalendarNames" />
 
 				<c:set var="labelColClass" value="col-md-4" scope="request"/>
@@ -799,21 +799,21 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleMonth">
-							<spring:message code="schedules.label.month"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleMonth" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleMonth" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
 						<label class="col-md-4 control-label " for="scheduleDay">
 							<spring:message code="schedules.label.day"/>
 						</label>
 						<div class="col-md-8">
 							<form:input path="scheduleDay" maxlength="100" class="form-control"/>
 							<form:errors path="scheduleDay" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="scheduleMonth">
+							<spring:message code="schedules.label.month"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="scheduleMonth" maxlength="100" class="form-control"/>
+							<form:errors path="scheduleMonth" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
