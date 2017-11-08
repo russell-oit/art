@@ -168,6 +168,13 @@ public class ScheduleController {
 			model.addAttribute("formErrors", "");
 			return showEditSchedule(action, model);
 		}
+		
+		schedule.setSecond(StringUtils.deleteWhitespace(schedule.getSecond()));
+		schedule.setMinute(StringUtils.deleteWhitespace(schedule.getMinute()));
+		schedule.setHour(StringUtils.deleteWhitespace(schedule.getHour()));
+		schedule.setDay(StringUtils.deleteWhitespace(schedule.getDay()));
+		schedule.setMonth(StringUtils.deleteWhitespace(schedule.getMonth()));
+		schedule.setWeekday(StringUtils.deleteWhitespace(schedule.getWeekday()));
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");

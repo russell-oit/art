@@ -20,6 +20,7 @@ package art.job;
 import art.enums.JobType;
 import art.ftpserver.FtpServer;
 import art.report.Report;
+import art.schedule.Schedule;
 import art.user.User;
 import java.io.Serializable;
 import java.util.Date;
@@ -85,6 +86,21 @@ public class Job implements Serializable {
 	private String holidays;
 	private String quartzCalendarNames;
 	private String scheduleSecond;
+	private Schedule schedule;
+
+	/**
+	 * @return the schedule
+	 */
+	public Schedule getSchedule() {
+		return schedule;
+	}
+
+	/**
+	 * @param schedule the schedule to set
+	 */
+	public void setSchedule(Schedule schedule) {
+		this.schedule = schedule;
+	}
 
 	/**
 	 * @return the scheduleSecond

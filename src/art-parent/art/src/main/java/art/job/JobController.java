@@ -34,6 +34,7 @@ import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportOptions;
 import art.runreport.ReportOutputGenerator;
 import art.runreport.RunReportHelper;
+import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.user.User;
@@ -888,70 +889,7 @@ public class JobController {
 			scheduler.addCalendar(calendarName, calendar, replace, updateTriggers);
 		}
 
-		String mainTriggerName = "trigger" + jobId;
-
-		//create main trigger
-		//build cron expression.
-		//cron format is sec min hr dayofmonth month dayofweek (optionally year)
-		String cronString = job.getScheduleSecond() + " " + job.getScheduleMinute()
-				+ " " + job.getScheduleHour() + " " + job.getScheduleDay()
-				+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
-
-		//create trigger that defines the schedule for the job
-		CronTriggerImpl mainTrigger = (CronTriggerImpl) newTrigger()
-				.withIdentity(triggerKey(mainTriggerName, ArtUtils.TRIGGER_GROUP))
-				.withSchedule(cronSchedule(cronString))
-				.startAt(job.getStartDate())
-				.endAt(job.getEndDate())
-				.build();
-
-		if (globalCalendar != null) {
-			mainTrigger.setCalendarName(globalCalendar.getDescription());
-		}
-
-		Set<Trigger> triggers = new HashSet<>();
-
-		triggers.add(mainTrigger);
-
-		//create triggers for extra schedules
-		String extraSchedules = job.getExtraSchedules();
-		if (StringUtils.isNotBlank(extraSchedules)) {
-			if (StringUtils.startsWith(extraSchedules, ExpressionHelper.GROOVY_START_STRING)) {
-				ExpressionHelper expressionHelper = new ExpressionHelper();
-				Object result = expressionHelper.runGroovyExpression(extraSchedules);
-				if (result instanceof List) {
-					@SuppressWarnings("unchecked")
-					List<AbstractTrigger> extraTriggers = (List<AbstractTrigger>) result;
-					for (AbstractTrigger extraTrigger : extraTriggers) {
-						finalizeTriggerProperties(extraTrigger, globalCalendar, job);
-					}
-					triggers.addAll(extraTriggers);
-				} else {
-					if (result instanceof AbstractTrigger) {
-						AbstractTrigger extraTrigger = (AbstractTrigger) result;
-						finalizeTriggerProperties(extraTrigger, globalCalendar, job);
-						triggers.add(extraTrigger);
-					}
-				}
-			} else {
-				String values[] = extraSchedules.split("\\r?\\n");
-				int index = 1;
-				for (String value : values) {
-					index++;
-					String extraTriggerName = mainTriggerName + "-" + index;
-					CronTriggerImpl extraTrigger = new CronTriggerImpl();
-					extraTrigger.setKey(triggerKey(extraTriggerName, ArtUtils.TRIGGER_GROUP));
-					extraTrigger.setCronExpression(value);
-					extraTrigger.setStartTime(job.getStartDate());
-					extraTrigger.setEndTime(job.getEndDate());
-					if (globalCalendar != null) {
-						extraTrigger.setCalendarName(globalCalendar.getDescription());
-					}
-
-					triggers.add(extraTrigger);
-				}
-			}
-		}
+		Set<Trigger> triggers = processTriggers(job, globalCalendar);
 
 		//get earliest next fire time from all available triggers
 		//https://stackoverflow.com/questions/39791318/how-to-get-the-earliest-date-of-a-list-in-java
@@ -983,6 +921,101 @@ public class JobController {
 	}
 
 	/**
+	 * Processes schedule definitions in the main fields and extra section
+	 * 
+	 * @param job the art job
+	 * @param globalCalendar the global calendar to apply to triggers
+	 * @return the list of triggers to use for the job
+	 * @throws ParseException 
+	 */
+	private Set<Trigger> processTriggers(Job job, org.quartz.Calendar globalCalendar)
+			throws ParseException {
+		
+		Set<Trigger> triggers = new HashSet<>();
+
+		int jobId = job.getJobId();
+		String mainTriggerName = "trigger" + jobId;
+
+		String cronString;
+
+		Schedule schedule = job.getSchedule();
+		if (schedule == null) {
+			//create main trigger
+			//build cron expression.
+			//cron format is sec min hr dayofmonth month dayofweek (optionally year)
+			cronString = job.getScheduleSecond() + " " + job.getScheduleMinute()
+					+ " " + job.getScheduleHour() + " " + job.getScheduleDay()
+					+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
+		} else {
+			cronString = schedule.getSecond() + " " + schedule.getMinute()
+					+ " " + schedule.getHour() + " " + schedule.getDay()
+					+ " " + schedule.getMonth() + " " + schedule.getWeekday();
+		}
+
+		//create trigger that defines the schedule for the job
+		CronTriggerImpl mainTrigger = (CronTriggerImpl) newTrigger()
+				.withIdentity(triggerKey(mainTriggerName, ArtUtils.TRIGGER_GROUP))
+				.withSchedule(cronSchedule(cronString))
+				.startAt(job.getStartDate())
+				.endAt(job.getEndDate())
+				.build();
+
+		if (globalCalendar != null) {
+			mainTrigger.setCalendarName(globalCalendar.getDescription());
+		}
+
+		triggers.add(mainTrigger);
+
+		//create triggers for extra schedules
+		String extraSchedules;
+		if (schedule == null) {
+			extraSchedules = job.getExtraSchedules();
+		} else {
+			extraSchedules = schedule.getExtraSchedules();
+		}
+		if (StringUtils.isNotBlank(extraSchedules)) {
+			if (StringUtils.startsWith(extraSchedules, ExpressionHelper.GROOVY_START_STRING)) {
+				ExpressionHelper expressionHelper = new ExpressionHelper();
+				Object result = expressionHelper.runGroovyExpression(extraSchedules);
+				if (result instanceof List) {
+					@SuppressWarnings("unchecked")
+					List<AbstractTrigger<Trigger>> extraTriggers = (List<AbstractTrigger<Trigger>>) result;
+					for (AbstractTrigger<Trigger> extraTrigger : extraTriggers) {
+						finalizeTriggerProperties(extraTrigger, globalCalendar, job);
+					}
+					triggers.addAll(extraTriggers);
+				} else {
+					if (result instanceof AbstractTrigger) {
+						@SuppressWarnings("unchecked")
+						AbstractTrigger<Trigger> extraTrigger = (AbstractTrigger<Trigger>) result;
+						finalizeTriggerProperties(extraTrigger, globalCalendar, job);
+						triggers.add(extraTrigger);
+					}
+				}
+			} else {
+				String values[] = extraSchedules.split("\\r?\\n");
+				int index = 1;
+				for (String value : values) {
+					index++;
+					String extraTriggerName = mainTriggerName + "-" + index;
+					CronTriggerImpl extraTrigger = new CronTriggerImpl();
+					extraTrigger.setKey(triggerKey(extraTriggerName, ArtUtils.TRIGGER_GROUP));
+					extraTrigger.setCronExpression(value);
+					extraTrigger.setStartTime(job.getStartDate());
+					extraTrigger.setEndTime(job.getEndDate());
+					if (globalCalendar != null) {
+						extraTrigger.setCalendarName(globalCalendar.getDescription());
+					}
+
+					triggers.add(extraTrigger);
+				}
+			}
+		}
+
+		return triggers;
+	}
+
+	/**
 	 * Sets properties for a trigger where they are not explicitly defined e.g.
 	 * calendar name, start date and end date
 	 *
@@ -990,7 +1023,7 @@ public class JobController {
 	 * @param globalCalendar the global calendar in use
 	 * @param job the art job
 	 */
-	private void finalizeTriggerProperties(AbstractTrigger trigger,
+	private void finalizeTriggerProperties(AbstractTrigger<Trigger> trigger,
 			org.quartz.Calendar globalCalendar, Job job) {
 
 		if (StringUtils.isBlank(trigger.getCalendarName()) && globalCalendar != null) {
@@ -1014,7 +1047,14 @@ public class JobController {
 	private List<org.quartz.Calendar> processHolidays(Job job) throws ParseException {
 		List<org.quartz.Calendar> calendars = new ArrayList<>();
 
-		String holidays = job.getHolidays();
+		String holidays;
+		Schedule schedule = job.getSchedule();
+		if (schedule == null) {
+			holidays = job.getHolidays();
+		} else {
+			holidays = schedule.getHolidays();
+		}
+
 		if (StringUtils.isNotBlank(holidays)) {
 			if (StringUtils.startsWith(holidays, ExpressionHelper.GROOVY_START_STRING)) {
 				ExpressionHelper expressionHelper = new ExpressionHelper();

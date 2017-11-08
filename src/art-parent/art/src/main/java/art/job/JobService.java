@@ -25,6 +25,8 @@ import art.ftpserver.FtpServer;
 import art.ftpserver.FtpServerService;
 import art.report.Report;
 import art.report.ReportService;
+import art.schedule.Schedule;
+import art.schedule.ScheduleService;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
@@ -67,15 +69,18 @@ public class JobService {
 	private final ReportService reportService;
 	private final UserService userService;
 	private final FtpServerService ftpServerService;
+	private final ScheduleService scheduleService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
-			UserService userService, FtpServerService ftpServerService) {
+			UserService userService, FtpServerService ftpServerService,
+			ScheduleService scheduleService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
 		this.userService = userService;
 		this.ftpServerService = ftpServerService;
+		this.scheduleService = scheduleService;
 	}
 
 	public JobService() {
@@ -83,6 +88,7 @@ public class JobService {
 		reportService = new ReportService();
 		userService = new UserService();
 		ftpServerService = new FtpServerService();
+		scheduleService = new ScheduleService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -195,6 +201,9 @@ public class JobService {
 
 		FtpServer ftpServer = ftpServerService.getFtpServer(rs.getInt("FTP_SERVER_ID"));
 		job.setFtpServer(ftpServer);
+
+		Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
+		job.setSchedule(schedule);
 	}
 
 	/**
@@ -396,6 +405,13 @@ public class JobService {
 			ftpServerId = job.getFtpServer().getFtpServerId();
 		}
 
+		Integer scheduleId;
+		if (job.getSchedule() == null) {
+			scheduleId = 0;
+		} else {
+			scheduleId = job.getSchedule().getScheduleId();
+		}
+
 		String migratedToQuartz = "X";
 
 		int affectedRows;
@@ -416,8 +432,9 @@ public class JobService {
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
 					+ " FIXED_FILE_NAME, BATCH_FILE, FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
+					+ " SCHEDULE_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 40) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 41) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -458,6 +475,7 @@ public class JobService {
 				job.getExtraSchedules(),
 				job.getHolidays(),
 				job.getQuartzCalendarNames(),
+				scheduleId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -475,7 +493,7 @@ public class JobService {
 					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?,"
 					+ " FIXED_FILE_NAME=?, BATCH_FILE=?, FTP_SERVER_ID=?,"
 					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
-					+ " QUARTZ_CALENDAR_NAMES=?,"
+					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -517,6 +535,7 @@ public class JobService {
 				job.getExtraSchedules(),
 				job.getHolidays(),
 				job.getQuartzCalendarNames(),
+				scheduleId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()

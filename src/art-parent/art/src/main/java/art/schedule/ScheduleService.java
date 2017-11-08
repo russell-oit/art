@@ -47,8 +47,16 @@ public class ScheduleService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ScheduleService.class);
 
+	private final DbService dbService;
+
 	@Autowired
-	private DbService dbService;
+	public ScheduleService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public ScheduleService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOB_SCHEDULES";
 

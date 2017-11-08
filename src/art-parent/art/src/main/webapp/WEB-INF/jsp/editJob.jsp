@@ -762,6 +762,21 @@
 				<fieldset>
 					<legend><spring:message code="jobs.text.schedule"/></legend>
 					<div class="form-group">
+						<label class="col-md-4 control-label " for="schedule">
+							<spring:message code="jobs.text.fixedSchedule"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="schedule" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<form:options items="${schedules}" itemLabel="name" itemValue="scheduleId"/>
+							</form:select>
+							<form:errors path="schedule" cssClass="error"/>
+						</div>
+					</div>
+
+					<hr>
+					<div class="form-group">
 						<label class="control-label col-md-4" for="schedules">
 							<spring:message code="jobs.label.schedules"/>
 						</label>
@@ -780,7 +795,6 @@
 						</div>
 					</div>
 
-					<hr>
 					<div class="form-group">
 						<label class="col-md-4 control-label " for="scheduleSecond">
 							<spring:message code="schedules.label.second"/>
@@ -836,7 +850,6 @@
 						</div>
 					</div>
 
-					<hr>
 					<div class="form-group">
 						<label class="col-md-4 control-label " for="startDateString">
 							<spring:message code="jobs.label.startDate"/>
@@ -866,7 +879,6 @@
 						</div>
 					</div>
 
-					<hr>
 					<div class="form-group">
 						<label class="col-md-4 control-label " for="extraSchedules">
 							<spring:message code="jobs.label.extraSchedules"/>

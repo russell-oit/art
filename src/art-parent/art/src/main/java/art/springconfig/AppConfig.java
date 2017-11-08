@@ -18,6 +18,7 @@
 package art.springconfig;
 
 import art.report.StringToReport;
+import art.schedule.StringToSchedule;
 import art.usergroup.StringToUserGroup;
 import art.utils.StringToDouble;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +69,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToDouble stringToDouble;
+	
+	@Autowired
+	private StringToSchedule stringToSchedule;
 	
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
@@ -175,6 +179,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addConverter(stringToUserGroup);
 		registry.addConverter(stringToDouble);
 		registry.addConverter(stringToReport);
+		registry.addConverter(stringToSchedule);
 	}
 
 	@Bean

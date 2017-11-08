@@ -12,7 +12,7 @@ ART 3.1
 * Added ability to encrypt files in AES Crypt or OpenPGP format
 * Allow job fixed file name, email subject, email body to have date expressions
 * Allow parameter values to have groovy expressions
-* Allow a job to have multiple schedules
+* Allow jobs to have multiple schedules
 * Allow jobs to have holidays
 * Updated sqlite driver, jxls, univocity-parsers
 
