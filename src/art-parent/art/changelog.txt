@@ -14,6 +14,7 @@ ART 3.1
 * Allow parameter values to have groovy expressions
 * Allow jobs to have multiple schedules
 * Allow jobs to have holidays
+* Allow jobs to use shared, fixed schedules
 * Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1

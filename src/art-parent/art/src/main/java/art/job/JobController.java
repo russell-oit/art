@@ -128,7 +128,7 @@ public class JobController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			List<Job> jobs = jobService.getJobs(sessionUser.getUserId());
+			List<Job> jobs = jobService.getUserJobs(sessionUser.getUserId());
 			model.addAttribute("jobs", jobs);
 			model.addAttribute("nextPage", "jobs");
 			model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));

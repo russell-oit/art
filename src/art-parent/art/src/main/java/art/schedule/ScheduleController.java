@@ -17,12 +17,23 @@
  */
 package art.schedule;
 
+import art.jobrunners.UpdateQuartzSchedulesJob;
 import art.user.User;
 import art.utils.AjaxResponse;
+import art.utils.ArtUtils;
+import art.utils.SchedulerUtils;
 import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobDetail;
+import static org.quartz.JobKey.jobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
+import static org.quartz.TriggerBuilder.newTrigger;
+import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +134,7 @@ public class ScheduleController {
 		logger.debug("Entering addSchedule");
 
 		model.addAttribute("schedule", new Schedule());
-		
+
 		return showEditSchedule("add", model);
 	}
 
@@ -140,7 +151,7 @@ public class ScheduleController {
 
 		return showEditSchedule("edit", model);
 	}
-	
+
 	@RequestMapping(value = "/copySchedule", method = RequestMethod.GET)
 	public String copySchedule(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering copySchedule: id={}", id);
@@ -168,7 +179,7 @@ public class ScheduleController {
 			model.addAttribute("formErrors", "");
 			return showEditSchedule(action, model);
 		}
-		
+
 		schedule.setSecond(StringUtils.deleteWhitespace(schedule.getSecond()));
 		schedule.setMinute(StringUtils.deleteWhitespace(schedule.getMinute()));
 		schedule.setHour(StringUtils.deleteWhitespace(schedule.getHour()));
@@ -186,6 +197,13 @@ public class ScheduleController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			
+			try{
+				updateQuartzSchedules(schedule, sessionUser);
+			} catch(SchedulerException ex){
+				logger.error("Error", ex);
+				redirectAttributes.addFlashAttribute("error", ex);
+			}
+
 			String recordName = schedule.getName() + " (" + schedule.getScheduleId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/schedules";
@@ -195,6 +213,34 @@ public class ScheduleController {
 		}
 
 		return showEditSchedule(action, model);
+	}
+
+	/**
+	 * Updates quartz schedules for any jobs that use this schedule as a fixed
+	 * schedule
+	 *
+	 * @param schedule the schedule
+	 * @param actionUser the user performing this action
+	 * @throws SchedulerException
+	 */
+	private void updateQuartzSchedules(Schedule schedule, User actionUser) throws SchedulerException {
+		int scheduleId = schedule.getScheduleId();
+		String runId = scheduleId + "-" + ArtUtils.getUniqueId();
+
+		JobDetail tempJob = newJob(UpdateQuartzSchedulesJob.class)
+				.withIdentity(jobKey("updateSchedulesJob-" + runId, "updateSchedulesJobGroup"))
+				.usingJobData("scheduleId", scheduleId)
+				.usingJobData("userId", actionUser.getUserId())
+				.build();
+
+		// create SimpleTrigger that will fire once, immediately		        
+		SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
+				.withIdentity(triggerKey("updateSchedulesTrigger-" + runId, "updateSchedulesTriggerGroup"))
+				.startNow()
+				.build();
+
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		scheduler.scheduleJob(tempJob, tempTrigger);
 	}
 
 	/**
@@ -208,7 +254,7 @@ public class ScheduleController {
 		logger.debug("Entering showSchedule: action='{}'", action);
 
 		model.addAttribute("action", action);
-		
+
 		return "editSchedule";
 	}
 }
