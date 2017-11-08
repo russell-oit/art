@@ -38,7 +38,7 @@
 		<td style="text-align:left;"><code>, - * /</code></td>
 	</tr>
 	<tr>
-		<td style="text-align:left;"><code>Month Day (Day of the month)</code></td>
+		<td style="text-align:left;"><code>Day (Day of the month)</code></td>
 		<td style="text-align:left;">&nbsp;</td>
 		<td style="text-align:left;"><code>1-31</code></td>
 		<td style="text-align:left;">&nbsp;</td>
