@@ -23,6 +23,7 @@ import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
+import java.util.Date;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -254,6 +255,8 @@ public class ScheduleController {
 		logger.debug("Entering showSchedule: action='{}'", action);
 
 		model.addAttribute("action", action);
+		
+		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
 
 		return "editSchedule";
 	}

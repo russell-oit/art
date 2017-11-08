@@ -35,9 +35,34 @@ Edit schedule page
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
+	<jsp:attribute name="headContent">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+
+		<script>
+			//put obtaining of server offset in head to reduce difference between server and client time
+			//https://stackoverflow.com/questions/19629561/moment-js-set-the-base-time-from-the-server
+			var serverDate = '${serverDateString}';
+			var serverOffset = moment(serverDate, 'YYYY-MM-DD HH:mm:ss.SSS').diff(new Date());
+
+			function currentServerDate()
+			{
+				return moment().add(serverOffset, 'milliseconds');
+			}
+
+			function updateClock()
+			{
+				var currentTimeString = currentServerDate().format("YYYY-MM-DD HH:mm:ss");
+				$("#clock").val(currentTimeString);
+			}
+		</script>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function () {
+				//display current time. updates every 1000 milliseconds
+				setInterval('updateClock()', 1000);
+
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="schedules"]').parent().addClass('active');
 
@@ -122,6 +147,14 @@ Edit schedule page
 				</div>
 
 				<hr>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="clock">
+						
+					</label>
+					<div class="col-md-8">
+						<input type="text" id="clock" readonly class="form-control"/>
+					</div>
+				</div>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="second">
 						<spring:message code="schedules.label.second"/>
