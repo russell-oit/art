@@ -769,24 +769,24 @@ public class JobController {
 			minute = String.valueOf(calRandom.get(Calendar.MINUTE));
 		}
 
-		if (minute.length() == 0) {
+		if (StringUtils.isBlank(minute)) {
 			//no minute defined. use random value
 			minute = String.valueOf(ArtUtils.getRandomNumber(0, 59));
 		}
 
-		if (hour.length() == 0) {
+		if (StringUtils.isBlank(hour)) {
 			//no hour defined. use random value between 3-6
 			hour = String.valueOf(ArtUtils.getRandomNumber(3, 6));
 		}
 
 		second = StringUtils.deleteWhitespace(job.getScheduleSecond());
-		if (second.length() == 0) {
+		if (StringUtils.isBlank(second)) {
 			//no second defined. default to 0
 			second = "0";
 		}
 
 		month = StringUtils.deleteWhitespace(job.getScheduleMonth());
-		if (month.length() == 0) {
+		if (StringUtils.isBlank(month)) {
 			//no month defined. default to every month
 			month = "*";
 		}
@@ -795,37 +795,32 @@ public class JobController {
 		weekday = StringUtils.deleteWhitespace(job.getScheduleWeekday());
 
 		//set default day of the month if weekday is defined
-		if (day.length() == 0 && weekday.length() >= 1 && !weekday.equals("?")) {
+		if (StringUtils.isBlank(day) && StringUtils.isNotBlank(weekday)
+				&& !StringUtils.equals(weekday, "?")) {
 			//weekday defined but day of the month is not. default day to ?
 			day = "?";
 		}
 
-		if (day.length() == 0) {
+		if (StringUtils.isBlank(day)) {
 			//no day of month defined. default to *
 			day = "*";
 		}
 
-		if (weekday.length() == 0) {
+		if (StringUtils.isBlank(weekday)) {
 			//no day of week defined. default to undefined
 			weekday = "?";
 		}
 
-		if (day.equals("?") && weekday.equals("?")) {
+		if (StringUtils.equals(day, "?") && StringUtils.equals(weekday, "?")) {
 			//unsupported. only one can be ?
 			day = "*";
 			weekday = "?";
 		}
-		if (day.equals("*") && weekday.equals("*")) {
-			//unsupported. only one can be defined
+		if (StringUtils.equals(day, "*") && StringUtils.equals(weekday, "*")) {
+			//unsupported. only one can be *
 			day = "*";
 			weekday = "?";
 		}
-
-		//build cron expression.
-		//cron format is sec min hr dayofmonth month dayofweek (optionally year)
-		String cronString = second + " " + minute + " " + hour + " " + day + " " + month + " " + weekday;
-
-		logger.debug("cronString='{}'", cronString);
 
 		String startDateString = job.getStartDateString();
 		if (StringUtils.isBlank(startDateString)) {
