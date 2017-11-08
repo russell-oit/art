@@ -15,7 +15,14 @@
 		<th style="text-align:left;">Allowed Values</th>
 		<th style="text-align:left;">&nbsp;</th>
 		<th style="text-align:left;">Allowed Special Characters</th>
-	</tr> 
+	</tr>
+	<tr>
+		<td style="text-align:left;"><code>Second</code></td>
+		<td style="text-align:left;">&nbsp;</td>
+		<td style="text-align:left;"><code>0-59</code></td>
+		<td style="text-align:left;">&nbsp;</td>
+		<td style="text-align:left;"><code>, - * /</code></td>
+	</tr>
 	<tr>
 		<td style="text-align:left;"><code>Minute</code></td>
 		<td style="text-align:left;">&nbsp;</td>
@@ -31,7 +38,7 @@
 		<td style="text-align:left;"><code>, - * /</code></td>
 	</tr>
 	<tr>
-		<td style="text-align:left;"><code>Day (Day of the month)</code></td>
+		<td style="text-align:left;"><code>Month Day (Day of the month)</code></td>
 		<td style="text-align:left;">&nbsp;</td>
 		<td style="text-align:left;"><code>1-31</code></td>
 		<td style="text-align:left;">&nbsp;</td>

@@ -84,6 +84,21 @@ public class Job implements Serializable {
 	private String extraSchedules;
 	private String holidays;
 	private String quartzCalendarNames;
+	private String scheduleSecond;
+
+	/**
+	 * @return the scheduleSecond
+	 */
+	public String getScheduleSecond() {
+		return scheduleSecond;
+	}
+
+	/**
+	 * @param scheduleSecond the scheduleSecond to set
+	 */
+	public void setScheduleSecond(String scheduleSecond) {
+		this.scheduleSecond = scheduleSecond;
+	}
 
 	/**
 	 * @return the quartzCalendarNames

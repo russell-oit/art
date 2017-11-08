@@ -170,6 +170,7 @@ public class ScheduleController {
 		}
 
 		//remove spaces in schedule fields. not legal but may commonly be put by users
+		schedule.setSecond(StringUtils.remove(schedule.getSecond(), " "));
 		schedule.setMinute(StringUtils.remove(schedule.getMinute(), " "));
 		schedule.setHour(StringUtils.remove(schedule.getHour(), " "));
 		schedule.setDay(StringUtils.remove(schedule.getDay(), " "));

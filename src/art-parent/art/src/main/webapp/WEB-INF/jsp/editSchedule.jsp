@@ -123,6 +123,15 @@ Edit schedule page
 
 				<hr>
 				<div class="form-group">
+					<label class="col-md-4 control-label " for="second">
+						<spring:message code="schedules.label.second"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="second" maxlength="100" class="form-control"/>
+						<form:errors path="second" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="col-md-4 control-label " for="minute">
 						<spring:message code="schedules.label.minute"/>
 					</label>

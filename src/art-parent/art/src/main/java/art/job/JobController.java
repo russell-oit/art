@@ -721,7 +721,7 @@ public class JobController {
 		String day;
 		String weekday;
 		String month;
-		String second = "0"; //seconds always 0
+		String second;
 		String actualHour; //allow hour and minute to be left blank, in which case random values are used
 		String actualMinute; //allow hour and minute to be left blank, in which case random values are used
 
@@ -777,6 +777,12 @@ public class JobController {
 		if (hour.length() == 0) {
 			//no hour defined. use random value between 3-6
 			hour = String.valueOf(ArtUtils.getRandomNumber(3, 6));
+		}
+
+		second = StringUtils.deleteWhitespace(job.getScheduleSecond());
+		if (second.length() == 0) {
+			//no second defined. default to 0
+			second = "0";
 		}
 
 		month = StringUtils.deleteWhitespace(job.getScheduleMonth());
@@ -860,7 +866,7 @@ public class JobController {
 			logger.warn("Scheduler not available. Job Id {}", job.getJobId());
 			return;
 		}
-		
+
 		//delete job while it has old calendar names, before updating the calendar names field
 		jobService.deleteQuartzJob(job, scheduler);
 
@@ -890,8 +896,7 @@ public class JobController {
 		//create main trigger
 		//build cron expression.
 		//cron format is sec min hr dayofmonth month dayofweek (optionally year)
-		String second = "0";
-		String cronString = second + " " + job.getScheduleMinute()
+		String cronString = job.getScheduleSecond() + " " + job.getScheduleMinute()
 				+ " " + job.getScheduleHour() + " " + job.getScheduleDay()
 				+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
 
@@ -1001,8 +1006,14 @@ public class JobController {
 		}
 	}
 
+	/**
+	 * Process holiday definitions
+	 *
+	 * @param job the art job
+	 * @return the list of calendars representing configured holidays
+	 * @throws ParseException
+	 */
 	private List<org.quartz.Calendar> processHolidays(Job job) throws ParseException {
-		//https://stackoverflow.com/questions/5863435/quartz-net-multple-calendars
 		List<org.quartz.Calendar> calendars = new ArrayList<>();
 
 		String holidays = job.getHolidays();
@@ -1046,12 +1057,20 @@ public class JobController {
 		return calendars;
 	}
 
+	/**
+	 * Concatenate calendars to get one calendar that includes all the dates in
+	 * the given calendars
+	 *
+	 * @param calendars the list of calendars to concatenate
+	 * @return a calendar that includes all the dates in the given calendars
+	 */
 	private org.quartz.Calendar concatenateCalendars(List<org.quartz.Calendar> calendars) {
+		//https://stackoverflow.com/questions/5863435/quartz-net-multple-calendars
 		if (CollectionUtils.isEmpty(calendars)) {
 			return null;
 		}
 
-		//concatenate calendars
+		//concatenate calendars. you can only specify one calendar for a trigger
 		for (int i = 0; i < calendars.size(); i++) {
 			if (i > 0) {
 				org.quartz.Calendar currentCalendar = calendars.get(i);

@@ -148,11 +148,12 @@ public class JobService {
 		job.setName(rs.getString("JOB_NAME"));
 		job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
 		job.setJobType(JobType.toEnum(rs.getString("JOB_TYPE")));
+		job.setScheduleSecond(rs.getString("JOB_SECOND"));
 		job.setScheduleMinute(rs.getString("JOB_MINUTE"));
 		job.setScheduleHour(rs.getString("JOB_HOUR"));
 		job.setScheduleDay(rs.getString("JOB_DAY"));
-		job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
 		job.setScheduleMonth(rs.getString("JOB_MONTH"));
+		job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
 		job.setMailTo(rs.getString("MAIL_TOS"));
 		job.setMailFrom(rs.getString("MAIL_FROM"));
 		job.setMailCc(rs.getString("MAIL_CC"));
@@ -407,7 +408,7 @@ public class JobService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_JOBS"
 					+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME,"
-					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
+					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_SECOND, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
 					+ " JOB_WEEKDAY, JOB_MONTH, MAIL_TOS, MAIL_FROM, MAIL_CC,"
 					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_DATASOURCE_ID, CACHED_TABLE_NAME,"
 					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
@@ -416,7 +417,7 @@ public class JobService {
 					+ " FIXED_FILE_NAME, BATCH_FILE, FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 39) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 40) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -426,6 +427,7 @@ public class JobService {
 				username,
 				job.getOutputFormat(),
 				job.getJobType().getValue(),
+				job.getScheduleSecond(),
 				job.getScheduleMinute(),
 				job.getScheduleHour(),
 				job.getScheduleDay(),
@@ -464,7 +466,7 @@ public class JobService {
 		} else {
 			String sql = "UPDATE ART_JOBS SET JOB_NAME=?, QUERY_ID=?,"
 					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
-					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?,"
+					+ " JOB_SECOND=?, JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?,"
 					+ " JOB_MONTH=?, MAIL_TOS=?, MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
 					+ " SUBJECT=?, MESSAGE=?, CACHED_DATASOURCE_ID=?, CACHED_TABLE_NAME=?,"
 					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
@@ -484,6 +486,7 @@ public class JobService {
 				username,
 				job.getOutputFormat(),
 				job.getJobType().getValue(),
+				job.getScheduleSecond(),
 				job.getScheduleMinute(),
 				job.getScheduleHour(),
 				job.getScheduleDay(),

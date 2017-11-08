@@ -42,6 +42,21 @@ public class Schedule implements Serializable {
 	private String updatedBy;
 	private String extraSchedules;
 	private String holidays;
+	private String second;
+
+	/**
+	 * @return the second
+	 */
+	public String getSecond() {
+		return second;
+	}
+
+	/**
+	 * @param second the second to set
+	 */
+	public void setSecond(String second) {
+		this.second = second;
+	}
 
 	/**
 	 * @return the holidays

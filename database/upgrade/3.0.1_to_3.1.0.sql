@@ -16,6 +16,7 @@
 -- add report source column
 -- add source report id column
 -- add holidays column
+-- add job second column
 
 
 -- NOTES:
@@ -116,3 +117,7 @@ ALTER TABLE ART_JOB_SCHEDULES ADD HOLIDAYS CLOB;
 
 -- add calendars column
 ALTER TABLE ART_JOBS ADD QUARTZ_CALENDAR_NAMES VARCHAR(100);
+
+-- add job second column
+ALTER TABLE ART_JOBS ADD JOB_SECOND VARCHAR(100);
+ALTER TABLE ART_JOB_SCHEDULES ADD JOB_SECOND VARCHAR(100);
