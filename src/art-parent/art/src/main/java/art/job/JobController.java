@@ -844,6 +844,7 @@ public class JobController {
 		}
 		job.setEndDate(endDate);
 
+		job.setScheduleSecond(second);
 		job.setScheduleMinute(minute);
 		job.setScheduleHour(hour);
 		job.setScheduleDay(day);
@@ -882,6 +883,7 @@ public class JobController {
 			String calendarName = calendar.getDescription();
 			if (StringUtils.isBlank(calendarName)) {
 				globalCalendar = calendar;
+				globalCalendar.setDescription(globalCalendarName);
 				calendarName = globalCalendarName;
 			}
 			calendarNames.add(calendarName);
@@ -909,7 +911,7 @@ public class JobController {
 				.build();
 
 		if (globalCalendar != null) {
-			mainTrigger.setCalendarName(globalCalendarName);
+			mainTrigger.setCalendarName(globalCalendar.getDescription());
 		}
 
 		Set<Trigger> triggers = new HashSet<>();
@@ -926,13 +928,14 @@ public class JobController {
 					@SuppressWarnings("unchecked")
 					List<AbstractTrigger> extraTriggers = (List<AbstractTrigger>) result;
 					for (AbstractTrigger extraTrigger : extraTriggers) {
-						finalizeTriggerProperties(extraTrigger, globalCalendarName, job);
+						finalizeTriggerProperties(extraTrigger, globalCalendar, job);
 					}
 					triggers.addAll(extraTriggers);
 				} else {
 					if (result instanceof AbstractTrigger) {
 						AbstractTrigger extraTrigger = (AbstractTrigger) result;
-						finalizeTriggerProperties(extraTrigger, globalCalendarName, job);
+						finalizeTriggerProperties(extraTrigger, globalCalendar, job);
+						triggers.add(extraTrigger);
 					}
 				}
 			} else {
@@ -947,7 +950,7 @@ public class JobController {
 					extraTrigger.setStartTime(job.getStartDate());
 					extraTrigger.setEndTime(job.getEndDate());
 					if (globalCalendar != null) {
-						extraTrigger.setCalendarName(globalCalendarName);
+						extraTrigger.setCalendarName(globalCalendar.getDescription());
 					}
 
 					triggers.add(extraTrigger);
@@ -989,14 +992,14 @@ public class JobController {
 	 * calendar name, start date and end date
 	 *
 	 * @param trigger the trigger to set
-	 * @param globalCalendarName the global calendar name to use
+	 * @param globalCalendar the global calendar in use
 	 * @param job the art job
 	 */
 	private void finalizeTriggerProperties(AbstractTrigger trigger,
-			String globalCalendarName, Job job) {
+			org.quartz.Calendar globalCalendar, Job job) {
 
-		if (StringUtils.isBlank(trigger.getCalendarName())) {
-			trigger.setCalendarName(globalCalendarName);
+		if (StringUtils.isBlank(trigger.getCalendarName()) && globalCalendar != null) {
+			trigger.setCalendarName(globalCalendar.getDescription());
 		}
 		if (trigger.getStartTime() == null) {
 			trigger.setStartTime(job.getStartDate());
