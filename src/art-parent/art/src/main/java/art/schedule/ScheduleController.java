@@ -181,13 +181,6 @@ public class ScheduleController {
 			return showEditSchedule(action, model);
 		}
 
-		schedule.setSecond(StringUtils.deleteWhitespace(schedule.getSecond()));
-		schedule.setMinute(StringUtils.deleteWhitespace(schedule.getMinute()));
-		schedule.setHour(StringUtils.deleteWhitespace(schedule.getHour()));
-		schedule.setDay(StringUtils.deleteWhitespace(schedule.getDay()));
-		schedule.setMonth(StringUtils.deleteWhitespace(schedule.getMonth()));
-		schedule.setWeekday(StringUtils.deleteWhitespace(schedule.getWeekday()));
-
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
@@ -197,10 +190,10 @@ public class ScheduleController {
 				scheduleService.updateSchedule(schedule, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			
-			try{
+
+			try {
 				updateQuartzSchedules(schedule, sessionUser);
-			} catch(SchedulerException ex){
+			} catch (SchedulerException ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
@@ -255,7 +248,7 @@ public class ScheduleController {
 		logger.debug("Entering showSchedule: action='{}'", action);
 
 		model.addAttribute("action", action);
-		
+
 		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
 
 		return "editSchedule";

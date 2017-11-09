@@ -170,104 +170,109 @@ public class ReportJob implements org.quartz.Job {
 
 		progressLogger.info("Start");
 
-		if (!Config.getSettings().isSchedulingEnabled()) {
-			jobLogAndClose("Scheduling not enabled");
-			return;
-		}
-
 		try {
-			job = jobService.getJob(jobId);
-		} catch (SQLException ex) {
+			if (!Config.getSettings().isSchedulingEnabled()) {
+				jobLogAndClose("Scheduling not enabled");
+				return;
+			}
+
+			try {
+				job = jobService.getJob(jobId);
+			} catch (SQLException ex) {
+				logger.error("Error", ex);
+				progressLogger.error("Error", ex);
+			}
+
+			if (job == null) {
+				logger.info("Job not found: {}", jobId);
+				jobLogAndClose("Job not found");
+				return;
+			}
+
+			Report report = job.getReport();
+			if (report == null) {
+				logger.info("Job report not found: Job ID {}", jobId);
+				jobLogAndClose("Job report not found");
+				return;
+			}
+
+			User user = job.getUser();
+			if (user == null) {
+				logger.info("Job user not found: Job ID {}", jobId);
+				jobLogAndClose("Job user not found");
+				return;
+			}
+
+			jobType = job.getJobType();
+
+			fileName = "";
+			runDetails = "";
+			runMessage = "";
+
+			String systemLocale = Config.getSettings().getSystemLocale();
+			logger.debug("systemLocale='{}'", systemLocale);
+
+			locale = ArtUtils.getLocaleFromString(systemLocale);
+
+			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
+			boolean tempJob = dataMap.getBooleanValue("tempJob");
+			Date nextRunDate;
+			if (tempJob) {
+				//temp job. use existing next run date
+				nextRunDate = job.getNextRunDate();
+			} else {
+				//not a temp job. set new next run date
+				nextRunDate = context.getNextFireTime();
+
+				//get least next run date as job may have multiple triggers
+				try {
+					Scheduler scheduler = context.getScheduler();
+					JobDetail quartJob = context.getJobDetail();
+					@SuppressWarnings("unchecked")
+					List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(quartJob.getKey());
+					List<Date> nextRunDates = new ArrayList<>();
+					Date now = new Date();
+					nextRunDates.add(nextRunDate);
+					for (Trigger trigger : triggers) {
+						nextRunDate = trigger.getFireTimeAfter(now);
+						nextRunDates.add(nextRunDate);
+					}
+					nextRunDate = Collections.min(nextRunDates);
+				} catch (SchedulerException ex) {
+					logger.error("Error", ex);
+				}
+			}
+
+			//set overall job start time in the jobs table
+			beforeExecution(nextRunDate);
+
+			if (!job.isActive()) {
+				runMessage = "jobs.message.jobDisabled";
+			} else if (!job.getReport().isActive()) {
+				runMessage = "jobs.message.reportDisabled";
+			} else if (!job.getUser().isActive()) {
+				runMessage = "jobs.message.ownerDisabled";
+			} else {
+				if (job.getRecipientsReportId() > 0) {
+					//job has dynamic recipients
+					runDynamicRecipientsJob();
+				} else {
+					//job doesn't have dynamic recipients
+					runNormalJob();
+				}
+			}
+
+			afterCompletion();
+
+			ftpFile();
+
+			runBatchFile();
+
+			cacheHelper.clearJobs();
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			progressLogger.error("Error", ex);
 		}
-
-		if (job == null) {
-			logger.info("Job not found: {}", jobId);
-			jobLogAndClose("Job not found");
-			return;
-		}
-
-		Report report = job.getReport();
-		if (report == null) {
-			logger.info("Job report not found: Job ID {}", jobId);
-			jobLogAndClose("Job report not found");
-			return;
-		}
-
-		User user = job.getUser();
-		if (user == null) {
-			logger.info("Job user not found: Job ID {}", jobId);
-			jobLogAndClose("Job user not found");
-			return;
-		}
-
-		jobType = job.getJobType();
-
-		fileName = "";
-		runDetails = "";
-		runMessage = "";
-
-		String systemLocale = Config.getSettings().getSystemLocale();
-		logger.debug("systemLocale='{}'", systemLocale);
-
-		locale = ArtUtils.getLocaleFromString(systemLocale);
-
-		//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
-		boolean tempJob = dataMap.getBooleanValue("tempJob");
-		Date nextRunDate;
-		if (tempJob) {
-			//temp job. use existing next run date
-			nextRunDate = job.getNextRunDate();
-		} else {
-			//not a temp job. set new next run date
-			nextRunDate = context.getNextFireTime();
-
-			//get least next run date as job may have multiple triggers
-			try {
-				Scheduler scheduler = context.getScheduler();
-				JobDetail quartJob = context.getJobDetail();
-				@SuppressWarnings("unchecked")
-				List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(quartJob.getKey());
-				List<Date> nextRunDates = new ArrayList<>();
-				Date now = new Date();
-				nextRunDates.add(nextRunDate);
-				for (Trigger trigger : triggers) {
-					nextRunDate = trigger.getFireTimeAfter(now);
-					nextRunDates.add(nextRunDate);
-				}
-				nextRunDate = Collections.min(nextRunDates);
-			} catch (SchedulerException ex) {
-				logger.error("Error", ex);
-			}
-		}
-
-		//set overall job start time in the jobs table
-		beforeExecution(nextRunDate);
-
-		if (!job.isActive()) {
-			runMessage = "jobs.message.jobDisabled";
-		} else if (!job.getReport().isActive()) {
-			runMessage = "jobs.message.reportDisabled";
-		} else if (!job.getUser().isActive()) {
-			runMessage = "jobs.message.ownerDisabled";
-		} else {
-			if (job.getRecipientsReportId() > 0) {
-				//job has dynamic recipients
-				runDynamicRecipientsJob();
-			} else {
-				//job doesn't have dynamic recipients
-				runNormalJob();
-			}
-		}
-
-		afterCompletion();
-
-		ftpFile();
-
-		runBatchFile();
-
-		cacheHelper.clearJobs();
 
 		long runEndTimeMillis = System.currentTimeMillis();
 
@@ -279,8 +284,9 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Logs a message to the progress logger and closes the job log file appender
-	 * 
+	 * Logs a message to the progress logger and closes the job log file
+	 * appender
+	 *
 	 * @param message the message to log
 	 */
 	private void jobLogAndClose(String message) {
@@ -1098,7 +1104,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void runNormalJob() {
 		logger.debug("Entering runNormalJob");
-		
+
 		String dynamicRecipientEmails = null;
 		runNormalJob(dynamicRecipientEmails);
 	}
@@ -1250,10 +1256,10 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void runJob(boolean splitJob, User user, String userEmail)
 			throws SQLException {
-		
+
 		Map<String, Map<String, String>> recipientDetails = null;
 		boolean recipientFilterPresent = false;
-		
+
 		runJob(splitJob, user, userEmail, recipientDetails, recipientFilterPresent);
 	}
 
