@@ -165,7 +165,7 @@ public class ParameterProcessor {
 			}
 			reportParamsList = new ArrayList<>(cleanMap.values());
 		} else {
-			reportParamsList = reportParameterService.getReportParameters(reportId);
+			reportParamsList = reportParameterService.getEffectiveReportParameters(reportId);
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {

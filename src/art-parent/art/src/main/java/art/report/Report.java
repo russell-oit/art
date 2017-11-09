@@ -26,6 +26,7 @@ import art.reportgroup.ReportGroup;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.Reporti18nOptions;
 import art.encryption.AESCrypt;
+import art.reportoptions.CloneOptions;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
@@ -111,6 +112,21 @@ public class Report implements Serializable {
 	private Encryptor encryptor;
 	private Report sourceReport;
 	private int sourceReportId;
+	private CloneOptions cloneOptions;
+
+	/**
+	 * @return the cloneOptions
+	 */
+	public CloneOptions getCloneOptions() {
+		return cloneOptions;
+	}
+
+	/**
+	 * @param cloneOptions the cloneOptions to set
+	 */
+	public void setCloneOptions(CloneOptions cloneOptions) {
+		this.cloneOptions = cloneOptions;
+	}
 
 	/**
 	 * @return the sourceReportId

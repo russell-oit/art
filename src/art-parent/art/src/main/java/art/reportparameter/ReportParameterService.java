@@ -21,6 +21,7 @@ import art.dbutils.DbService;
 import art.parameter.ParameterService;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.CloneOptions;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -132,6 +133,37 @@ public class ReportParameterService {
 	@Cacheable("parameters")
 	public List<ReportParameter> getReportParameters(int reportId) throws SQLException {
 		logger.debug("Entering getReportParameters: reportId={}", reportId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE REPORT_ID=?";
+
+		ResultSetHandler<List<ReportParameter>> h = new BeanListHandler<>(ReportParameter.class, new ReportParameterMapper());
+		return dbService.query(sql, h, reportId);
+	}
+
+	/**
+	 * Returns the report parameters to use for a given report, returning the
+	 * parent's report parameters for clone reports
+	 *
+	 * @param reportId the report id
+	 * @return the report parameters to use
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public List<ReportParameter> getEffectiveReportParameters(int reportId) throws SQLException {
+		logger.debug("Entering getReportParameters: reportId={}", reportId);
+
+		Report report = reportService.getReport(reportId);
+		if (report != null) {
+			int sourceReportId = report.getSourceReportId();
+			CloneOptions cloneOptions = report.getCloneOptions();
+			if (cloneOptions == null) {
+				cloneOptions = new CloneOptions();
+			}
+			if (sourceReportId > 0 && cloneOptions.isUseParentParameters()) {
+				reportId = sourceReportId;
+			}
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE REPORT_ID=?";

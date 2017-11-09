@@ -31,11 +31,13 @@ import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.CloneOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -174,6 +176,17 @@ public class ReportService {
 			report.setModifyPassword(clearTextModifypassword);
 
 			setChartOptions(report);
+
+			String options = report.getOptions();
+			if (StringUtils.isNotBlank(options)) {
+				try {
+					ObjectMapper mapper = new ObjectMapper();
+					CloneOptions cloneOptions = mapper.readValue(options, CloneOptions.class);
+					report.setCloneOptions(cloneOptions);
+				} catch (IOException ex) {
+					throw new SQLException(ex);
+				}
+			}
 
 			try {
 				report.loadGeneralOptions();
@@ -393,11 +406,15 @@ public class ReportService {
 
 		int sourceReportId = report.getSourceReportId();
 		if (sourceReportId > 0) {
-			Report sourceReport = getSourceReport(sourceReportId);
-			if (sourceReport != null) {
-				report.setReportSource(sourceReport.getReportSource());
-				report.setSourceReport(sourceReport);
+			String newSource = getReportSource(sourceReportId);
+			if (StringUtils.isNotBlank(newSource)) {
+				report.setReportSource(newSource);
 			}
+//			Report sourceReport = getSourceReport(sourceReportId);
+//			if (sourceReport != null) {
+//				report.setReportSource(sourceReport.getReportSource());
+//				report.setSourceReport(sourceReport);
+//			}
 		}
 	}
 
@@ -412,6 +429,37 @@ public class ReportService {
 		logger.debug("Entering getSourceReport: id={}", id);
 
 		//use separate method to avoid recursion issues
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
+		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
+		Report report = dbService.query(sql, h, id);
+
+		return report;
+	}
+
+	/**
+	 * Returns the report source for a given report
+	 *
+	 * @param reportId the report id
+	 * @return the report source
+	 * @throws SQLException
+	 */
+	private String getReportSource(int reportId) throws SQLException {
+		String sql = "SELECT REPORT_SOURCE FROM ART_QUERIES WHERE QUERY_ID=?";
+		ResultSetHandler<String> h = new ScalarHandler<>(1);
+		return dbService.query(sql, h, reportId);
+	}
+	
+	/**
+	 * Returns a report, with it's own source, not that of a parent (for clone reports)
+	 *
+	 * @param id the report id
+	 * @return report if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("reports")
+	public Report getReportWithOwnSource(int id) throws SQLException {
+		logger.debug("Entering getReportWithOwnSource: id={}", id);
+
 		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
 		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
 		Report report = dbService.query(sql, h, id);
@@ -1250,6 +1298,20 @@ public class ReportService {
 		}
 
 		return exclusive;
+	}
+
+	/**
+	 * Returns the source report id for a given report
+	 *
+	 * @param reportId the report id
+	 * @return the source report id
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public Integer getSourceReportId(int reportId) throws SQLException {
+		String sql = "SELECT SOURCE_REPORT_ID FROM ART_QUERIES WHERE QUERY_ID=?";
+		ResultSetHandler<Integer> h = new ScalarHandler<>(1);
+		return dbService.query(sql, h, reportId);
 	}
 
 }
