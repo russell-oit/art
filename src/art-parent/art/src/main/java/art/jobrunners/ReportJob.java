@@ -49,6 +49,11 @@ import art.utils.CachedResult;
 import art.utils.ExpressionHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -93,6 +98,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
@@ -122,7 +128,6 @@ public class ReportJob implements org.quartz.Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportJob.class);
 
-	private DbService dbService;
 	private String fileName;
 	private String jobAuditKey;
 	private art.job.Job job;
@@ -132,6 +137,9 @@ public class ReportJob implements org.quartz.Job {
 	private String runDetails;
 	private String runMessage;
 	private Locale locale;
+	private ch.qos.logback.classic.Logger progressLogger;
+	private long runStartTimeMillis;
+	private FileAppender<ILoggingEvent> progressFileAppender;
 
 	@Autowired
 	private TemplateEngine emailTemplateEngine;
@@ -142,45 +150,59 @@ public class ReportJob implements org.quartz.Job {
 	@Autowired
 	private MessageSource messageSource;
 
+	@Autowired
+	private JobService jobService;
+
+	@Autowired
+	private DbService dbService;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 
+		runStartTimeMillis = System.currentTimeMillis();
+
+		JobDataMap dataMap = context.getMergedJobDataMap();
+		jobId = dataMap.getInt("jobId");
+
+		initializeProgressLogger();
+
+		progressLogger.info("Start");
+
 		if (!Config.getSettings().isSchedulingEnabled()) {
+			jobLogAndClose("Scheduling not enabled");
 			return;
 		}
 
-		JobDataMap dataMap = context.getMergedJobDataMap();
-		int tempJobId = dataMap.getInt("jobId");
-
-		JobService jobService = new JobService();
-
 		try {
-			job = jobService.getJob(tempJobId);
+			job = jobService.getJob(jobId);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
+			progressLogger.error("Error", ex);
 		}
 
 		if (job == null) {
-			logger.info("Job not found: {}", tempJobId);
+			logger.info("Job not found: {}", jobId);
+			jobLogAndClose("Job not found");
 			return;
 		}
 
 		Report report = job.getReport();
 		if (report == null) {
-			logger.info("Job report not available: Job ID {}", tempJobId);
+			logger.info("Job report not found: Job ID {}", jobId);
+			jobLogAndClose("Job report not found");
 			return;
 		}
 
 		User user = job.getUser();
 		if (user == null) {
-			logger.info("Job user not available: Job ID {}", tempJobId);
+			logger.info("Job user not found: Job ID {}", jobId);
+			jobLogAndClose("Job user not found");
 			return;
 		}
 
 		jobType = job.getJobType();
-		jobId = job.getJobId();
 
 		fileName = "";
 		runDetails = "";
@@ -191,8 +213,6 @@ public class ReportJob implements org.quartz.Job {
 
 		locale = ArtUtils.getLocaleFromString(systemLocale);
 
-		dbService = new DbService();
-
 		//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
 		boolean tempJob = dataMap.getBooleanValue("tempJob");
 		Date nextRunDate;
@@ -202,7 +222,7 @@ public class ReportJob implements org.quartz.Job {
 		} else {
 			//not a temp job. set new next run date
 			nextRunDate = context.getNextFireTime();
-			
+
 			//get least next run date as job may have multiple triggers
 			try {
 				Scheduler scheduler = context.getScheduler();
@@ -248,6 +268,62 @@ public class ReportJob implements org.quartz.Job {
 		runBatchFile();
 
 		cacheHelper.clearJobs();
+
+		long runEndTimeMillis = System.currentTimeMillis();
+
+		//https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/time/DurationFormatUtils.html
+		String durationFormat = "m':'s':'S";
+		String duration = DurationFormatUtils.formatPeriod(runStartTimeMillis, runEndTimeMillis, durationFormat);
+		progressLogger.info("End. Time taken - {}", duration);
+		progressFileAppender.stop();
+	}
+
+	/**
+	 * Logs a message to the progress logger and closes the job log file appender
+	 * 
+	 * @param message the message to log
+	 */
+	private void jobLogAndClose(String message) {
+		runDetails = message;
+		progressLogger.info(runDetails);
+		progressFileAppender.stop();
+		updateIncompleteRun();
+	}
+
+	/**
+	 * Initializes the job progress logger
+	 */
+	private void initializeProgressLogger() {
+		//https://stackoverflow.com/questions/7824620/logback-set-log-file-name-programmatically
+		//http://oct.im/how-to-create-logback-loggers-dynamicallypragmatically.html
+		//https://www.programcreek.com/java-api-examples/index.php?api=ch.qos.logback.core.FileAppender
+		//https://stackoverflow.com/questions/7824620/logback-set-log-file-name-programmatically
+		//http://mailman.qos.ch/pipermail/logback-user/2008-November/000800.html
+
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+		String progressLogFilename = Config.getJobsExportPath() + jobId + ".log";
+
+		progressFileAppender = new FileAppender<>();
+		progressFileAppender.setContext(loggerContext);
+		progressFileAppender.setName("jobLog");
+		progressFileAppender.setFile(progressLogFilename);
+		progressFileAppender.setAppend(false);
+
+		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+		encoder.setContext(loggerContext);
+		encoder.setPattern("[%level] %date{dd-MMM-yyyy HH:mm:ss.SSS} - %msg%n");
+		encoder.start();
+
+		progressFileAppender.setEncoder(encoder);
+		progressFileAppender.start();
+
+		progressLogger = loggerContext.getLogger("jobLog");
+		progressLogger.setLevel(Level.INFO);
+
+		// Don't inherit root appender
+		progressLogger.setAdditive(false);
+		progressLogger.addAppender(progressFileAppender);
 	}
 
 	/**
@@ -876,6 +952,29 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
+	 * Updates the last run date and run details fields
+	 */
+	private void updateIncompleteRun() {
+		logger.debug("Entering updateIncompleteRun");
+
+		//update job details
+		String sql = "UPDATE ART_JOBS SET LAST_END_DATE=?,"
+				+ " LAST_RUN_DETAILS=? WHERE JOB_ID=?";
+
+		Object[] values = {
+			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+			runDetails,
+			jobId
+		};
+
+		try {
+			dbService.update(sql, values);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
 	 * Runs a dynamic recipients job
 	 *
 	 */
@@ -982,6 +1081,7 @@ public class ReportJob implements org.quartz.Job {
 		} catch (SQLException | IOException | RuntimeException ex) {
 			runDetails = "<b>Error:</b> " + ex.toString();
 			logger.error("Error", ex);
+			progressLogger.error("Error", ex);
 		} finally {
 			DatabaseUtils.close(rs);
 
@@ -998,6 +1098,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void runNormalJob() {
 		logger.debug("Entering runNormalJob");
+		
 		String dynamicRecipientEmails = null;
 		runNormalJob(dynamicRecipientEmails);
 	}
@@ -1148,10 +1249,11 @@ public class ReportJob implements org.quartz.Job {
 	 * @throws SQLException
 	 */
 	private void runJob(boolean splitJob, User user, String userEmail)
-			throws SQLException, IOException {
+			throws SQLException {
+		
 		Map<String, Map<String, String>> recipientDetails = null;
 		boolean recipientFilterPresent = false;
-
+		
 		runJob(splitJob, user, userEmail, recipientDetails, recipientFilterPresent);
 	}
 
@@ -1167,10 +1269,9 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void runJob(boolean splitJob, User user, String userEmail,
 			Map<String, Map<String, String>> recipientDetails)
-			throws SQLException, IOException {
+			throws SQLException {
 
 		boolean recipientFilterPresent = false;
-
 		runJob(splitJob, user, userEmail, recipientDetails, recipientFilterPresent);
 	}
 
@@ -1315,6 +1416,7 @@ public class ReportJob implements org.quartz.Job {
 			runDetails = "<b>Error:</b> " + ex.toString();
 			fileName = "";
 			logger.error("Error", ex);
+			progressLogger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {
 				reportRunner.close();

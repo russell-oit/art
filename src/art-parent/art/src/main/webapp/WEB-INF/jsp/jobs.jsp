@@ -181,17 +181,24 @@ Display user jobs and jobs configuration
 
 								var result = '';
 								if (job.lastFileName) {
-									result = '<a type="application/octet-stream" ';
+									result = '<p><a type="application/octet-stream" ';
 									result = result + 'href="${pageContext.request.contextPath}/export/jobs/' + job.lastFileName + '">';
-									result = result + job.lastFileName + '</a>';
-									result = result + '<br>';
+									result = result + job.lastFileName + '</a></p>';
 								}
 								if (job.lastRunMessage) {
-									result = result + job.lastRunMessage;
-									result = result + '<br>';
+									result = result + '<p>' + job.lastRunMessage;
+									result = result + '</p>';
 								}
 								if (job.lastRunDetails) {
-									result = result + job.lastRunDetails;
+									result = result + '<p>' + job.lastRunDetails;
+									result = result + '</p>';
+								}
+
+								var accessLevel = ${sessionUser.accessLevel.value};
+								if (accessLevel >= 80) {
+									result = result + '<p><a type="application/octet-stream" ';
+									result = result + 'href="${pageContext.request.contextPath}/export/jobs/' + job.jobId + '.log">';
+									result = result + 'log</a></p>';
 								}
 
 								table.cell(row, 3).data(job.lastEndDateString);
@@ -386,18 +393,30 @@ Display user jobs and jobs configuration
 						</td>
 						<td>
 							<c:if test="${not empty job.lastFileName}">
-								<a type="application/octet-stream" 
-								   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}">
-									${job.lastFileName}
-								</a>
-								<br>
+								<p>
+									<a type="application/octet-stream" 
+									   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}">
+										${job.lastFileName}
+									</a>
+								</p>
 							</c:if>
 							<c:if test="${not empty job.lastRunMessage}">
-								<spring:message code="${job.lastRunMessage}"/>
-								<br>
+								<p>
+									<spring:message code="${job.lastRunMessage}"/>
+								</p>
 							</c:if>
 							<c:if test="${not empty job.lastRunDetails}">
-								${job.lastRunDetails}
+								<p>
+									${job.lastRunDetails}
+								</p>
+							</c:if>
+							<c:if test="${sessionUser.accessLevel.value >= 80}">
+								<p>
+									<a type="application/octet-stream" 
+									   href="${pageContext.request.contextPath}/export/jobs/${job.jobId}.log">
+										log
+									</a>
+								</p>
 							</c:if>
 						</td>
 						<td data-sort="${job.nextRunDate.time}">

@@ -17,6 +17,7 @@
  */
 package art.export;
 
+import art.enums.AccessLevel;
 import art.report.ReportService;
 import art.servlets.Config;
 import art.user.User;
@@ -32,6 +33,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +56,26 @@ public class ExportController {
 	//https://stackoverflow.com/questions/27419743/spring-path-variable-truncate-after-dot-annotation
 	@GetMapping("/export/jobs/{filename:.+}")
 	public void serveJobFile(@PathVariable("filename") String filename,
-			HttpServletRequest request, HttpServletResponse response) {
+			HttpServletRequest request, HttpServletResponse response,
+			HttpSession session) {
 
 		logger.debug("Entering serveJobFile: filename='{}'", filename);
+
+		String baseName = FilenameUtils.getBaseName(filename);
+		String extension = FilenameUtils.getExtension(filename);
+		if (NumberUtils.isCreatable(baseName) && StringUtils.equals(extension, "log")) {
+			try {
+				//only allow senior admins and above to view job log files
+				User sessionUser = (User) session.getAttribute("sessionUser");
+				if (sessionUser.getAccessLevel().getValue() < AccessLevel.SeniorAdmin.getValue()) {
+					request.getRequestDispatcher("/accessDenied").forward(request, response);
+					return;
+				}
+			} catch (ServletException | IOException ex) {
+				logger.error("Error", ex);
+				return;
+			}
+		}
 
 		String jobsExportPath = Config.getJobsExportPath();
 		String fullFilename = jobsExportPath + filename;

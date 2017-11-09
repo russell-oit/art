@@ -9,23 +9,21 @@
 	</appender>
 
 	<!-- appender used to display logs from application interface. -->
-	<!-- don't change name from CYCLIC. hardcoded and used in application code -->
+	<!-- don't change the name from CYCLIC. it is used within application code -->
 	<appender name="CYCLIC" class="ch.qos.logback.core.read.CyclicBufferAppender">
 		<MaxSize>512</MaxSize>
 	</appender>
-
-	<logger name="org.quartz">
-		<level value="info"/>
-	</logger>
 	
-	<logger name="art">
-		<level value="info"/>
-	</logger>
+	
+	<logger name="org.quartz" level="info"/>
+	
+	<logger name="art" level="info"/>
+	
 	
 	<root>
-		<level value="warn" />
-		<appender-ref ref="stdout" />
-		<appender-ref ref="CYCLIC" />
+		<level value="warn"/>
+		<appender-ref ref="stdout"/>
+		<appender-ref ref="CYCLIC"/>
 	</root>
 
 </configuration>
