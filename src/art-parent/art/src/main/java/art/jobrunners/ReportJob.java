@@ -168,7 +168,7 @@ public class ReportJob implements org.quartz.Job {
 
 		initializeProgressLogger();
 
-		progressLogger.info("Start");
+		progressLogger.info("Started");
 
 		try {
 			if (!Config.getSettings().isSchedulingEnabled()) {
@@ -279,7 +279,7 @@ public class ReportJob implements org.quartz.Job {
 		//https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/time/DurationFormatUtils.html
 		String durationFormat = "m':'s':'S";
 		String duration = DurationFormatUtils.formatPeriod(runStartTimeMillis, runEndTimeMillis, durationFormat);
-		progressLogger.info("End. Time taken - {}", duration);
+		progressLogger.info("Completed. Time taken - {}", duration);
 		progressFileAppender.stop();
 	}
 
@@ -308,7 +308,7 @@ public class ReportJob implements org.quartz.Job {
 
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-		String progressLogFilename = Config.getJobsExportPath() + jobId + ".log";
+		String progressLogFilename = Config.getJobLogsPath() + jobId + ".log";
 
 		progressFileAppender = new FileAppender<>();
 		progressFileAppender.setContext(loggerContext);
@@ -1084,7 +1084,7 @@ public class ReportJob implements org.quartz.Job {
 					runJob(splitJob, jobUser, tos, recipients);
 				}
 			}
-		} catch (SQLException | IOException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			runDetails = "<b>Error:</b> " + ex.toString();
 			logger.error("Error", ex);
 			progressLogger.error("Error", ex);
@@ -1199,7 +1199,7 @@ public class ReportJob implements org.quartz.Job {
 				//job is shared with other users but the owner doesn't have a copy. save note in the jobs table
 				runMessage = "jobs.message.jobShared";
 			}
-		} catch (SQLException | IOException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 		}
 	}

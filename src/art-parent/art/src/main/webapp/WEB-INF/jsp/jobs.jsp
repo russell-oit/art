@@ -197,7 +197,7 @@ Display user jobs and jobs configuration
 								var accessLevel = ${sessionUser.accessLevel.value};
 								if (accessLevel >= 80) {
 									result = result + '<p><a type="application/octet-stream" ';
-									result = result + 'href="${pageContext.request.contextPath}/export/jobs/' + job.jobId + '.log">';
+									result = result + 'href="${pageContext.request.contextPath}/export/jobLogs/' + job.jobId + '.log">';
 									result = result + 'log</a></p>';
 								}
 
@@ -413,7 +413,7 @@ Display user jobs and jobs configuration
 							<c:if test="${sessionUser.accessLevel.value >= 80}">
 								<p>
 									<a type="application/octet-stream" 
-									   href="${pageContext.request.contextPath}/export/jobs/${job.jobId}.log">
+									   href="${pageContext.request.contextPath}/export/jobLogs/${job.jobId}.log">
 										log
 									</a>
 								</p>

@@ -831,6 +831,15 @@ public class Config extends HttpServlet {
 	public static String getJobsExportPath() {
 		return exportPath + "jobs" + File.separator;
 	}
+	
+	/**
+	 * Returns the full path to the job logs directory
+	 *
+	 * @return full path to the job logs directory
+	 */
+	public static String getJobLogsPath() {
+		return exportPath + "jobLogs" + File.separator;
+	}
 
 	/**
 	 * Returns the full path to the reports export directory
