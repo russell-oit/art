@@ -468,7 +468,7 @@ public class ReportController {
 		logger.debug("Entering copyReport: id={}", id);
 
 		try {
-			model.addAttribute("report", reportService.getReport(id));
+			model.addAttribute("report", reportService.getReportWithOwnSource(id));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
