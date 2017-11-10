@@ -83,7 +83,7 @@ public class RuleService {
 
 			rule.setRuleId(rs.getInt("RULE_ID"));
 			rule.setName(rs.getString("RULE_NAME"));
-			rule.setDescription(rs.getString("SHORT_DESCRIPTION"));
+			rule.setDescription(rs.getString("DESCRIPTION"));
 			rule.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
 			rule.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			rule.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
@@ -291,7 +291,7 @@ public class RuleService {
 		
 		if (newRecord) {
 			String sql = "INSERT INTO ART_RULES"
-					+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, DATA_TYPE,"
+					+ " (RULE_ID, RULE_NAME, DESCRIPTION, DATA_TYPE,"
 					+ " CREATION_DATE, CREATED_BY)"
 					+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
@@ -306,7 +306,7 @@ public class RuleService {
 
 			affectedRows = dbService.update(sql, values);
 		} else {
-			String sql = "UPDATE ART_RULES SET RULE_NAME=?, SHORT_DESCRIPTION=?,"
+			String sql = "UPDATE ART_RULES SET RULE_NAME=?, DESCRIPTION=?,"
 					+ " DATA_TYPE=?, UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE RULE_ID=?";
 

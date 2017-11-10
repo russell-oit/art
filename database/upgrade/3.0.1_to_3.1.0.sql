@@ -18,6 +18,8 @@
 -- add holidays column
 -- add job second column
 -- add job schedule id column
+-- increase size of description columns
+-- rename rule short description column
 
 
 -- NOTES:
@@ -125,3 +127,13 @@ ALTER TABLE ART_JOB_SCHEDULES ADD JOB_SECOND VARCHAR(100);
 
 -- add job schedule id column
 ALTER TABLE ART_JOBS ADD SCHEDULE_ID INTEGER;
+
+-- increase size of description columns
+ALTER TABLE ART_PARAMETERS MODIFY DESCRIPTION VARCHAR(200);
+ALTER TABLE ART_QUERY_GROUPS MODIFY DESCRIPTION VARCHAR(200);
+ALTER TABLE ART_USER_GROUPS MODIFY DESCRIPTION VARCHAR(200);
+
+-- rename rule short description column
+ALTER TABLE ART_RULES ADD DESCRIPTION VARCHAR(200);
+UPDATE ART_RULES SET DESCRIPTION=SHORT_DESCRIPTION;
+ALTER TABLE ART_RULES DROP COLUMN SHORT_DESCRIPTION;
