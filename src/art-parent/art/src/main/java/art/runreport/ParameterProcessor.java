@@ -61,6 +61,7 @@ public class ParameterProcessor {
 
 	private Locale locale;
 	private boolean valuesAsIs;
+	private User user;
 
 	public ParameterProcessor() {
 		locale = Locale.getDefault();
@@ -78,20 +79,6 @@ public class ParameterProcessor {
 	 */
 	public void setValuesAsIs(boolean valuesAsIs) {
 		this.valuesAsIs = valuesAsIs;
-	}
-
-	/**
-	 * @return the locale
-	 */
-	public Locale getLocale() {
-		return locale;
-	}
-
-	/**
-	 * @param locale the locale to set
-	 */
-	public void setLocale(Locale locale) {
-		this.locale = locale;
 	}
 
 	/**
@@ -146,6 +133,7 @@ public class ParameterProcessor {
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
 		this.locale = locale;
+		this.user = user;
 
 		Map<String, ReportParameter> reportParamsMap = new HashMap<>();
 
@@ -178,11 +166,11 @@ public class ParameterProcessor {
 		//set actual values to be used when running the query
 		setActualParameterValues(reportParamsList);
 
-		handleAllValues(reportParamsMap, user);
+		handleAllValues(reportParamsMap);
 
-		setLovValues(reportParamsMap, user);
+		setLovValues(reportParamsMap);
 
-		setDefaultValueLovValues(reportParamsMap, user);
+		setDefaultValueLovValues(reportParamsMap);
 
 		ParameterProcessorResult result = new ParameterProcessorResult();
 		result.setReportParamsList(reportParamsList);
@@ -203,12 +191,9 @@ public class ParameterProcessor {
 	 * Populates lov values for all lov parameters
 	 *
 	 * @param reportParamsMap the report parameters
-	 * @param user the user under whose permission the report is being run
 	 * @throws SQLException
 	 */
-	private void setLovValues(Map<String, ReportParameter> reportParamsMap,
-			User user) throws SQLException {
-
+	private void setLovValues(Map<String, ReportParameter> reportParamsMap) throws SQLException {
 		ReportService reportService = new ReportService();
 
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
@@ -245,8 +230,8 @@ public class ParameterProcessor {
 	 * @param user the user under whose permission the report is being run
 	 * @throws SQLException
 	 */
-	private void setDefaultValueLovValues(Map<String, ReportParameter> reportParamsMap,
-			User user) throws SQLException {
+	private void setDefaultValueLovValues(Map<String, ReportParameter> reportParamsMap)
+			throws SQLException {
 
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			ReportParameter reportParam = entry.getValue();
@@ -331,12 +316,11 @@ public class ParameterProcessor {
 	 * parameters
 	 *
 	 * @param reportParamsMap the report parameters
-	 * @param user the user under whose permission the report is being run
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	private void handleAllValues(Map<String, ReportParameter> reportParamsMap,
-			User user) throws SQLException, ParseException {
+	private void handleAllValues(Map<String, ReportParameter> reportParamsMap)
+			throws SQLException, ParseException {
 
 		logger.debug("Entering handleAllValues");
 
@@ -458,8 +442,13 @@ public class ParameterProcessor {
 
 		ParameterDataType paramDataType = param.getDataType();
 
+		String username = null;
+		if (user != null) {
+			username = user.getUsername();
+		}
+		
 		ExpressionHelper expressionHelper = new ExpressionHelper();
-		value = expressionHelper.processGroovy(value);
+		value = expressionHelper.processString(value, username);
 
 		if (paramDataType.isNumeric()) {
 			return convertParameterStringValueToNumber(value, param);

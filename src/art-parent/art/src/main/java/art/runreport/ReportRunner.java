@@ -258,11 +258,11 @@ public class ReportRunner {
 		querySb.replace(0, querySb.length(), reportSource);
 
 		applyTags();
-		applyExpressions();
+		applyFieldExpressions();
 		applyDynamicSql();
 		applyDirectSubstitution();
 		applyGroovySnippets();
-		applyGroovy();
+		applyUsesGroovy();
 		applyParameterPlaceholders(); //question placeholder put here
 		applyDynamicRecipient();
 
@@ -293,12 +293,12 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Applies expression fields i.e. {username}, {date}, {datetime}
+	 * Applies field expressions i.e. username, date, datetime
 	 *
 	 * @throws SQLException
 	 */
-	private void applyExpressions() throws SQLException {
-		logger.debug("Entering applyExpressions");
+	private void applyFieldExpressions() throws SQLException {
+		logger.debug("Entering applyFieldExpressions");
 
 		String querySql = querySb.toString();
 		ExpressionHelper expressionHelper = new ExpressionHelper();
@@ -340,8 +340,8 @@ public class ReportRunner {
 	 *
 	 * @throws SQLException
 	 */
-	private void applyGroovy() {
-		logger.debug("Entering applyGroovy");
+	private void applyUsesGroovy() {
+		logger.debug("Entering applyUsesGroovy");
 
 		GeneralReportOptions generalOptions = report.getGeneralOptions();
 

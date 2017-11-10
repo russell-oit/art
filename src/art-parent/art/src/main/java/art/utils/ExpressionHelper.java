@@ -60,6 +60,34 @@ public class ExpressionHelper {
 	 * returns the processed value with these items replaced
 	 *
 	 * @param string the string to process
+	 * @return the processed value with these items replaced
+	 * @throws ParseException
+	 */
+	public String processString(String string) throws ParseException {
+		Map<String, ReportParameter> reportParamsMap = null;
+		String username = null;
+		return processString(string, reportParamsMap, username);
+	}
+
+	/**
+	 * Processes a string that may have parameter or field expressions and
+	 * returns the processed value with these items replaced
+	 *
+	 * @param string the string to process
+	 * @param username the username to replace
+	 * @return the processed value with these items replaced
+	 * @throws ParseException
+	 */
+	public String processString(String string, String username) throws ParseException {
+		Map<String, ReportParameter> reportParamsMap = null;
+		return processString(string, reportParamsMap, username);
+	}
+
+	/**
+	 * Processes a string that may have parameter or field expressions and
+	 * returns the processed value with these items replaced
+	 *
+	 * @param string the string to process
 	 * @param reportParamsMap a map containing report parameters
 	 * @param username the username to replace
 	 * @return the processed value with these items replaced
