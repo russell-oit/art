@@ -141,7 +141,7 @@ Edit schedule page
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="description" maxlength="200" class="form-control"/>
+						<form:textarea path="description" rows="2" cols="40" class="form-control" maxlength="200"/>
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
