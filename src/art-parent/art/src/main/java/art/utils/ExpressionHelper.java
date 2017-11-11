@@ -272,7 +272,7 @@ public class ExpressionHelper {
 		} else {
 			String separator = result.substring(0, 1);
 			String expression = result.substring(1);
-			String[] components = StringUtils.split(expression, separator);
+			String[] components = StringUtils.splitPreserveAllTokens(expression, separator);
 			String dateString = components[0].trim();
 			String outputFormat;
 			switch (dateFieldType) {
@@ -288,13 +288,22 @@ public class ExpressionHelper {
 			if (components.length > 1) {
 				outputFormat = components[1];
 			}
-			String localeString = null;
+			String outputLocaleString = null;
 			if (components.length > 2) {
-				localeString = components[2].trim();
+				outputLocaleString = components[2].trim();
 			}
-			Locale outputLocale = ArtUtils.getLocaleFromString(localeString);
+			Locale outputLocale = ArtUtils.getLocaleFromString(outputLocaleString);
+			String inputFormat=null;
+			if(components.length>3){
+				inputFormat=components[3].trim();
+			}
+			String inputLocaleString = null;
+			if (components.length > 4) {
+				inputLocaleString = components[4].trim();
+			}
+			Locale inputLocale = ArtUtils.getLocaleFromString(inputLocaleString);
 
-			Date dateValue = convertStringToDate(dateString);
+			Date dateValue = convertStringToDate(dateString, inputFormat, inputLocale);
 			SimpleDateFormat dateFormatter = new SimpleDateFormat(outputFormat, outputLocale);
 			result = dateFormatter.format(dateValue);
 		}

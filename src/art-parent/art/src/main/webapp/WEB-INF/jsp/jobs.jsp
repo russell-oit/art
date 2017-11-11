@@ -72,9 +72,6 @@ Display user jobs and jobs configuration
 
 		<script type="text/javascript">
 			$(document).ready(function () {
-				//display current time. updates every 1000 milliseconds
-				setInterval('updateClock()', 1000);
-
 				var actionValue = '${action}';
 				if (actionValue === 'config') {
 					$('a[id="configure"]').parent().addClass('active');
@@ -82,6 +79,9 @@ Display user jobs and jobs configuration
 				} else if (actionValue === 'jobs') {
 					$('a[href*="jobs"]').parent().addClass('active');
 				}
+				
+				//display current time. updates every 1000 milliseconds
+				setInterval('updateClock()', 1000);
 
 				var tbl = $('#jobs');
 
@@ -201,9 +201,9 @@ Display user jobs and jobs configuration
 									result = result + 'log</a></p>';
 								}
 
-								table.cell(row, 3).data(job.lastEndDateString);
-								table.cell(row, 4).data(result);
-								table.cell(row, 5).data(job.nextRunDateString);
+								table.cell(row, 4).data(job.lastEndDateString);
+								table.cell(row, 5).data(result);
+								table.cell(row, 6).data(job.nextRunDateString);
 
 								notifyActionSuccess("${refreshedText}", recordName);
 							} else {
@@ -369,6 +369,7 @@ Display user jobs and jobs configuration
 					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
+					<th class="dtHidden"><spring:message code="page.text.active"/></th>
 					<th><spring:message code="jobs.text.lastEndDate"/></th>
 					<th><spring:message code="jobs.text.result"/></th>
 					<th><spring:message code="jobs.text.nextRunDate"/></th>
@@ -388,6 +389,7 @@ Display user jobs and jobs configuration
 							<t:displayNewLabel creationDate="${job.creationDate}"
 											   updateDate="${job.updateDate}"/>
 						</td>
+						<td><t:displayActiveStatus active="${job.active}"/></td>
 						<td data-sort="${job.lastEndDate.time}">
 							<fmt:formatDate value="${job.lastEndDate}" pattern="${dateDisplayPattern}"/>
 						</td>
