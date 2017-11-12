@@ -421,23 +421,23 @@ public class ReportService {
 		}
 	}
 
-	/**
-	 * Returns a source report
-	 *
-	 * @param id the source report id
-	 * @return report if found, null otherwise
-	 * @throws SQLException
-	 */
-	private Report getSourceReport(int id) throws SQLException {
-		logger.debug("Entering getSourceReport: id={}", id);
-
-		//use separate method to avoid recursion issues
-		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
-		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
-		Report report = dbService.query(sql, h, id);
-
-		return report;
-	}
+//	/**
+//	 * Returns a source report
+//	 *
+//	 * @param id the source report id
+//	 * @return report if found, null otherwise
+//	 * @throws SQLException
+//	 */
+//	private Report getSourceReport(int id) throws SQLException {
+//		logger.debug("Entering getSourceReport: id={}", id);
+//
+//		//use separate method to avoid recursion issues
+//		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
+//		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
+//		Report report = dbService.query(sql, h, id);
+//
+//		return report;
+//	}
 
 	/**
 	 * Returns the report source for a given report

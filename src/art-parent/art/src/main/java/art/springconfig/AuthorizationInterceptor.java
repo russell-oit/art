@@ -457,6 +457,12 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.equals(page, "reportGroupMembership") || StringUtils.endsWith(page, "ReportGroupMembership")
+				|| StringUtils.equals(page, "reportGroupMembershipConfig")) {
+			//standard admins and above
+			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+				authorised = true;
+			}
 		} else if (StringUtils.equals(page, "rules") || StringUtils.endsWith(page, "Rule")
 				|| StringUtils.endsWith(page, "Rules")) {
 			//senior admins and above

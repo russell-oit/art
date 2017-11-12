@@ -99,6 +99,13 @@ Header that appears at the top of all pages, except the login and logs pages
 										</a>
 									</li>
 								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 40}">
+									<li>
+										<a href="${pageContext.request.contextPath}/reportGroupMembershipConfig">
+											<spring:message code="header.link.reportGroupMembership"/>
+										</a>
+									</li>
+								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 40 || sessionUser.accessLevel.value < 0}">
 									<li>
 										<a href="${pageContext.request.contextPath}/users">
