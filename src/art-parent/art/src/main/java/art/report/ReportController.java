@@ -258,6 +258,15 @@ public class ReportController {
 		multipleReportEdit.setIds(ids);
 
 		model.addAttribute("multipleReportEdit", multipleReportEdit);
+		
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			model.addAttribute("reportGroups", reportGroupService.getAdminReportGroups(sessionUser));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
 
 		return "editReports";
 	}
@@ -346,6 +355,22 @@ public class ReportController {
 			reportService.updateReports(multipleReportEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleReportEdit.getIds());
+			
+			if (!multipleReportEdit.isReportGroupsUnchanged()) {
+				try {
+					String[] ids = StringUtils.split(multipleReportEdit.getIds(), ",");
+					for (String idString : ids) {
+						int id = Integer.parseInt(idString);
+						Report report = reportService.getReport(id);
+						report.setReportGroups(multipleReportEdit.getReportGroups());
+						saveReportGroups(report);
+					}
+				} catch (SQLException | RuntimeException ex) {
+					logger.error("Error", ex);
+					redirectAttributes.addFlashAttribute("error", ex);
+				}
+			}
+			
 			return "redirect:/reportsConfig";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
