@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -170,8 +171,10 @@ public class RuleValueController {
 	}
 
 	@RequestMapping(value = "/editUserRuleValue", method = RequestMethod.GET)
-	public String editUserRuleValue(@RequestParam("id") String id, Model model) {
-		logger.debug("Entering editUserRuleValue: id='{}'", id);
+	public String editUserRuleValue(@RequestParam("id") String id, Model model,
+			@RequestParam(value = "returnRuleId", required = false) Integer returnRuleId) {
+
+		logger.debug("Entering editUserRuleValue: id='{}', returnRuleId", id, returnRuleId);
 
 		try {
 			model.addAttribute("value", ruleValueService.getUserRuleValue(id));
@@ -180,19 +183,20 @@ public class RuleValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditUserRuleValue();
+		return showEditUserRuleValue(model, returnRuleId);
 	}
 
 	@RequestMapping(value = "/saveUserRuleValue", method = RequestMethod.POST)
 	public String saveUserRuleValue(@ModelAttribute("value") @Valid UserRuleValue value,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("returnRuleId") Integer returnRuleId) {
 
 		logger.debug("Entering saveUserRuleValue: value={},", value);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditUserRuleValue();
+			return showEditUserRuleValue(model, returnRuleId);
 		}
 
 		try {
@@ -203,18 +207,26 @@ public class RuleValueController {
 					+ value.getRule().getName() + " - " + value.getRuleValue();
 
 			redirectAttributes.addFlashAttribute("recordName", recordName);
-			return "redirect:/ruleValues";
+
+			if (returnRuleId == null) {
+				return "redirect:/ruleValues";
+			} else {
+				return "redirect:/ruleRuleValues?ruleId=" + returnRuleId;
+			}
+
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditUserRuleValue();
+		return showEditUserRuleValue(model, returnRuleId);
 	}
 
 	@RequestMapping(value = "/editUserGroupRuleValue", method = RequestMethod.GET)
-	public String editUserGroupRuleValue(@RequestParam("id") String id, Model model) {
-		logger.debug("Entering editUserGroupRuleValue: id='{}'", id);
+	public String editUserGroupRuleValue(@RequestParam("id") String id, Model model,
+			@RequestParam(value = "returnRuleId", required = false) Integer returnRuleId) {
+		
+		logger.debug("Entering editUserGroupRuleValue: id='{}', returnRuleId", id, returnRuleId);
 
 		try {
 			model.addAttribute("value", ruleValueService.getUserGroupRuleValue(id));
@@ -223,19 +235,20 @@ public class RuleValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditUserGroupRuleValue();
+		return showEditUserGroupRuleValue(model, returnRuleId);
 	}
 
 	@RequestMapping(value = "/saveUserGroupRuleValue", method = RequestMethod.POST)
 	public String saveUserGroupRuleValue(@ModelAttribute("value") @Valid UserGroupRuleValue value,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("returnRuleId") Integer returnRuleId) {
 
 		logger.debug("Entering saveUserGroupRuleValue: value={},", value);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditUserGroupRuleValue();
+			return showEditUserGroupRuleValue(model, returnRuleId);
 		}
 
 		try {
@@ -252,16 +265,21 @@ public class RuleValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditUserGroupRuleValue();
+		return showEditUserGroupRuleValue(model, returnRuleId);
 	}
 
 	/**
 	 * Prepares model data and returns the jsp file to display
 	 *
+	 * @param model the model to use
+	 * @param returnRuleId the rule id to display in the ruleRuleValues page
+	 * after saving the user-rule value, null if not applicable
 	 * @return the jsp file to display
 	 */
-	private String showEditUserRuleValue() {
-		logger.debug("Entering showEditUserRuleValue");
+	private String showEditUserRuleValue(Model model, Integer returnRuleId) {
+		logger.debug("Entering showEditUserRuleValue, returnRuleId={}", returnRuleId);
+
+		model.addAttribute("returnRuleId", returnRuleId);
 
 		return "editUserRuleValue";
 	}
@@ -269,11 +287,34 @@ public class RuleValueController {
 	/**
 	 * Prepares model data and returns the jsp file to display
 	 *
+	 * @param model the model to use
+	 * @param returnRuleId the rule id to display in the ruleRuleValues page
+	 * after saving the user-rule value, null if not applicable
 	 * @return the jsp file to display
 	 */
-	private String showEditUserGroupRuleValue() {
-		logger.debug("Entering showEditUserGroupRuleValue");
+	private String showEditUserGroupRuleValue(Model model, Integer returnRuleId) {
+		logger.debug("Entering showEditUserGroupRuleValue, returnRuleId={}", returnRuleId);
+
+		model.addAttribute("returnRuleId", returnRuleId);
 
 		return "editUserGroupRuleValue";
+	}
+
+	@GetMapping("/ruleRuleValues")
+	public String showRuleRuleValues(Model model,
+			@RequestParam("ruleId") Integer ruleId) {
+
+		logger.debug("Entering showRuleRuleValues: ruleId={}", ruleId);
+
+		try {
+			model.addAttribute("rule", ruleService.getRule(ruleId));
+			model.addAttribute("userRuleValues", ruleValueService.getUserRuleValues(ruleId));
+			model.addAttribute("userGroupRuleValues", ruleValueService.getUserGroupRuleValues(ruleId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "ruleRuleValues";
 	}
 }

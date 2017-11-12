@@ -410,4 +410,34 @@ public class RuleValueService {
 
 		dbService.update(sql, values);
 	}
+
+	/**
+	 * Returns the user-rule values for a given rule
+	 *
+	 * @param ruleId the id of the rule
+	 * @return user-rule values for a given rule
+	 * @throws SQLException
+	 */
+	public List<UserRuleValue> getUserRuleValues(int ruleId) throws SQLException {
+		logger.debug("Entering getUserRuleValues: ruleId={}", ruleId);
+
+		String sql = SQL_SELECT_ALL_USER_RULE_VALUES + " WHERE RULE_ID=?";
+		ResultSetHandler<List<UserRuleValue>> h = new BeanListHandler<>(UserRuleValue.class, new UserRuleValueMapper());
+		return dbService.query(sql, h, ruleId);
+	}
+
+	/**
+	 * Returns the user group-rule values for a given rule
+	 *
+	 * @param ruleId the id of the rule
+	 * @return user group-rule values for a given rule
+	 * @throws SQLException
+	 */
+	public List<UserGroupRuleValue> getUserGroupRuleValues(int ruleId) throws SQLException {
+		logger.debug("Entering getUserGroupRuleValues: ruleId={}", ruleId);
+
+		String sql = SQL_SELECT_ALL_USER_GROUP_RULE_VALUES + " WHERE RULE_ID=?";
+		ResultSetHandler<List<UserGroupRuleValue>> h = new BeanListHandler<>(UserGroupRuleValue.class, new UserGroupRuleValueMapper());
+		return dbService.query(sql, h, ruleId);
+	}
 }
