@@ -409,6 +409,34 @@ public class UserService {
 
 			dbService.update(sql, valuesArray);
 		}
+		if (!multipleUserEdit.isCanChangePasswordUnchanged()) {
+			sql = "UPDATE ART_USERS SET CAN_CHANGE_PASSWORD=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(BooleanUtils.toInteger(multipleUserEdit.isCanChangePassword()));
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, valuesArray);
+		}
+		if (!multipleUserEdit.isAccessLevelUnchanged()) {
+			sql = "UPDATE ART_USERS SET ACCESS_LEVEL=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(multipleUserEdit.getAccessLevel().getValue());
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, valuesArray);
+		}
 	}
 
 	/**

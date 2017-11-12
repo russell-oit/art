@@ -211,6 +211,14 @@ public class UserController {
 
 		model.addAttribute("multipleUserEdit", multipleUserEdit);
 
+		try {
+			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
+			model.addAttribute("accessLevels", getAccessLevels(session));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
 		return "editUsers";
 	}
 
@@ -353,6 +361,22 @@ public class UserController {
 			userService.updateUsers(multipleUserEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleUserEdit.getIds());
+
+			if (!multipleUserEdit.isUserGroupsUnchanged()) {
+				try {
+					String[] ids = StringUtils.split(multipleUserEdit.getIds(), ",");
+					for (String idString : ids) {
+						int id = Integer.parseInt(idString);
+						User user = userService.getUser(id);
+						user.setUserGroups(multipleUserEdit.getUserGroups());
+						saveUserGroups(user);
+					}
+				} catch (SQLException | RuntimeException ex) {
+					logger.error("Error", ex);
+					redirectAttributes.addFlashAttribute("error", ex);
+				}
+			}
+
 			return "redirect:/users";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

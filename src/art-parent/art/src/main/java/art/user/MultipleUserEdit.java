@@ -17,11 +17,14 @@
  */
 package art.user;
 
+import art.enums.AccessLevel;
+import art.usergroup.UserGroup;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Represents a multiple user edit
- * 
+ *
  * @author Timothy Anyona
  */
 public class MultipleUserEdit implements Serializable {
@@ -30,6 +33,96 @@ public class MultipleUserEdit implements Serializable {
 	private String ids;
 	private boolean active;
 	private boolean activeUnchanged = true;
+	private boolean canChangePassword;
+	private boolean canChangePasswordUnchanged = true;
+	private AccessLevel accessLevel;
+	private boolean accessLevelUnchanged = true;
+	private List<UserGroup> userGroups;
+	private boolean userGroupsUnchanged = true;
+
+	/**
+	 * @return the canChangePassword
+	 */
+	public boolean isCanChangePassword() {
+		return canChangePassword;
+	}
+
+	/**
+	 * @param canChangePassword the canChangePassword to set
+	 */
+	public void setCanChangePassword(boolean canChangePassword) {
+		this.canChangePassword = canChangePassword;
+	}
+
+	/**
+	 * @return the canChangePasswordUnchanged
+	 */
+	public boolean isCanChangePasswordUnchanged() {
+		return canChangePasswordUnchanged;
+	}
+
+	/**
+	 * @param canChangePasswordUnchanged the canChangePasswordUnchanged to set
+	 */
+	public void setCanChangePasswordUnchanged(boolean canChangePasswordUnchanged) {
+		this.canChangePasswordUnchanged = canChangePasswordUnchanged;
+	}
+
+	/**
+	 * @return the accessLevel
+	 */
+	public AccessLevel getAccessLevel() {
+		return accessLevel;
+	}
+
+	/**
+	 * @param accessLevel the accessLevel to set
+	 */
+	public void setAccessLevel(AccessLevel accessLevel) {
+		this.accessLevel = accessLevel;
+	}
+
+	/**
+	 * @return the accessLevelUnchanged
+	 */
+	public boolean isAccessLevelUnchanged() {
+		return accessLevelUnchanged;
+	}
+
+	/**
+	 * @param accessLevelUnchanged the accessLevelUnchanged to set
+	 */
+	public void setAccessLevelUnchanged(boolean accessLevelUnchanged) {
+		this.accessLevelUnchanged = accessLevelUnchanged;
+	}
+
+	/**
+	 * @return the userGroups
+	 */
+	public List<UserGroup> getUserGroups() {
+		return userGroups;
+	}
+
+	/**
+	 * @param userGroups the userGroups to set
+	 */
+	public void setUserGroups(List<UserGroup> userGroups) {
+		this.userGroups = userGroups;
+	}
+
+	/**
+	 * @return the userGroupsUnchanged
+	 */
+	public boolean isUserGroupsUnchanged() {
+		return userGroupsUnchanged;
+	}
+
+	/**
+	 * @param userGroupsUnchanged the userGroupsUnchanged to set
+	 */
+	public void setUserGroupsUnchanged(boolean userGroupsUnchanged) {
+		this.userGroupsUnchanged = userGroupsUnchanged;
+	}
 
 	/**
 	 * @return the ids
@@ -72,7 +165,7 @@ public class MultipleUserEdit implements Serializable {
 	public void setActiveUnchanged(boolean activeUnchanged) {
 		this.activeUnchanged = activeUnchanged;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "MultipleUserEdit{" + "ids=" + ids + '}';

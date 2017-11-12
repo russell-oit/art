@@ -123,11 +123,11 @@
 
 		<script type="text/javascript">
 			$(document).ready(function () {
-				//display current time. updates every 1000 milliseconds
-				setInterval('updateClock()', 1000);
-
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="jobsConfig"]').parent().addClass('active');
+				
+				//display current time. updates every 1000 milliseconds
+				setInterval('updateClock()', 1000);
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
