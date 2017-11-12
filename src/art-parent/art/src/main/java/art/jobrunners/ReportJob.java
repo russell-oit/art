@@ -179,7 +179,7 @@ public class ReportJob implements org.quartz.Job {
 			try {
 				job = jobService.getJob(jobId);
 			} catch (SQLException ex) {
-				logger.error("Error", ex);
+				logger.error("Error. Job Id {}", jobId, ex);
 				progressLogger.error("Error", ex);
 			}
 
@@ -239,7 +239,7 @@ public class ReportJob implements org.quartz.Job {
 					}
 					nextRunDate = Collections.min(nextRunDates);
 				} catch (SchedulerException ex) {
-					logger.error("Error", ex);
+					logger.error("Error. Job Id {}", jobId, ex);
 				}
 			}
 
@@ -270,7 +270,7 @@ public class ReportJob implements org.quartz.Job {
 
 			cacheHelper.clearJobs();
 		} catch (Exception ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 			progressLogger.error("Error", ex);
 		}
 
@@ -448,14 +448,14 @@ public class ReportJob implements org.quartz.Job {
 
 			ftpClient.logout();
 		} catch (IOException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		} finally {
 			try {
 				if (ftpClient.isConnected()) {
 					ftpClient.disconnect();
 				}
 			} catch (IOException ex) {
-				logger.error("Error", ex);
+				logger.error("Error. Job Id {}", jobId, ex);
 			}
 		}
 	}
@@ -517,7 +517,7 @@ public class ReportJob implements org.quartz.Job {
 				channelSftp.put(inputStream, remoteFileName, ChannelSftp.OVERWRITE);
 			}
 		} catch (JSchException | SftpException | IOException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		} finally {
 			if (channelSftp != null) {
 				channelSftp.disconnect();
@@ -569,7 +569,7 @@ public class ReportJob implements org.quartz.Job {
 				try {
 					pb.start();
 				} catch (IOException ex) {
-					logger.error("Error", ex);
+					logger.error("Error. Job Id {}", jobId, ex);
 				}
 			} else if (SystemUtils.IS_OS_UNIX) {
 				//https://stackoverflow.com/questions/25403765/when-runtime-getruntime-exec-call-linux-batch-file-could-not-find-its-physical
@@ -587,7 +587,7 @@ public class ReportJob implements org.quartz.Job {
 					// Run the script
 					processBuilder.start();
 				} catch (IOException ex) {
-					logger.error("Error", ex);
+					logger.error("Error. Job Id {}", jobId, ex);
 				}
 			} else {
 				String os = SystemUtils.OS_NAME;
@@ -927,7 +927,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
@@ -953,7 +953,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
@@ -976,7 +976,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
@@ -1086,7 +1086,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} catch (SQLException | RuntimeException ex) {
 			runDetails = "<b>Error:</b> " + ex.toString();
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 			progressLogger.error("Error", ex);
 		} finally {
 			DatabaseUtils.close(rs);
@@ -1200,7 +1200,7 @@ public class ReportJob implements org.quartz.Job {
 				runMessage = "jobs.message.jobShared";
 			}
 		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
@@ -1421,7 +1421,7 @@ public class ReportJob implements org.quartz.Job {
 		} catch (Exception ex) {
 			runDetails = "<b>Error:</b> " + ex.toString();
 			fileName = "";
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 			progressLogger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {
@@ -2075,7 +2075,7 @@ public class ReportJob implements org.quartz.Job {
 			ParameterProcessor paramProcessor = new ParameterProcessor();
 			paramProcessorResult = paramProcessor.process(finalValues, reportId, user, locale);
 		} catch (ParseException | IOException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 
 		return paramProcessorResult;
@@ -2333,7 +2333,7 @@ public class ReportJob implements org.quartz.Job {
 				dbService.update(sql);
 			}
 		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
@@ -2382,7 +2382,7 @@ public class ReportJob implements org.quartz.Job {
 				dbService.update(sql);
 			}
 		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
