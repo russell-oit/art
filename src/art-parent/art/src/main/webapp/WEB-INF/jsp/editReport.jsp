@@ -32,7 +32,11 @@ Edit report page
 	</c:when>
 </c:choose>
 
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
 <spring:message code="reports.text.selectFile" var="selectFileText"/>
 <spring:message code="reports.text.change" var="changeText"/>
 <spring:message code="reports.label.reportSource" var="reportSourceText"/>
@@ -114,7 +118,11 @@ Edit report page
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
-					noneResultsText: '${noResultsMatchText}'
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}',
+					selectAllText: '${selectAllText}',
+					deselectAllText: '${deselectAllText}'
 				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
@@ -831,18 +839,16 @@ Edit report page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="reportGroup.reportGroupId">
-						<spring:message code="page.text.reportGroup"/>
+					<label class="col-md-4 control-label " for="reportGroups">
+						<spring:message code="page.text.reportGroups"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="reportGroup.reportGroupId" class="form-control selectpicker">
-							<form:option value="0">--</form:option>
-								<option data-divider="true"></option>
-							<c:forEach var="group" items="${reportGroups}">
-								<form:option value="${group.reportGroupId}">${group.name}</form:option>
-							</c:forEach>
-						</form:select>
-						<form:errors path="reportGroup.reportGroupId" cssClass="error"/>
+						<form:select path="reportGroups" items="${reportGroups}" multiple="true" 
+									 itemLabel="name" itemValue="reportGroupId" 
+									 class="form-control selectpicker"
+									 data-actions-box="true"
+									 />
+						<form:errors path="reportGroups" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

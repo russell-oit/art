@@ -159,14 +159,14 @@ public class ReportService {
 			report.setCreatedBy(rs.getString("CREATED_BY"));
 			report.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			ReportGroup reportGroup = reportGroupService.getReportGroup(rs.getInt("QUERY_GROUP_ID"));
-			report.setReportGroup(reportGroup);
-
 			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
 			report.setDatasource(datasource);
 
 			Encryptor encryptor = encryptorService.getEncryptor(rs.getInt("ENCRYPTOR_ID"));
 			report.setEncryptor(encryptor);
+
+			List<ReportGroup> reportGroups = reportGroupService.getReportGroupsForReport(report.getReportId());
+			report.setReportGroups(reportGroups);
 
 			//decrypt open and modify passwords
 			String clearTextOpenPassword = AesEncryptor.decrypt(report.getOpenPassword());
@@ -288,15 +288,18 @@ public class ReportService {
 				+ " OR"
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERY_GROUPS AUQG"
-				+ " WHERE AUQG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUQG.USER_ID=?)"
+				+ " FROM ART_USER_QUERY_GROUPS AUQG, ART_REPORT_REPORT_GROUPS ARRG"
+				+ " WHERE AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " AND ARRG.REPORT_ID=AQ.QUERY_ID AND AUQG.USER_ID=?)"
 				+ " OR"
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_GROUPS AUGG"
 				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
 				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
-				+ " WHERE AUGG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUGA.USER_ID=?)"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AUGG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
 				+ ")";
 
 		Object[] values = {
@@ -448,9 +451,10 @@ public class ReportService {
 		ResultSetHandler<String> h = new ScalarHandler<>(1);
 		return dbService.query(sql, h, reportId);
 	}
-	
+
 	/**
-	 * Returns a report, with it's own source, not that of a parent (for clone reports)
+	 * Returns a report, with it's own source, not that of a parent (for clone
+	 * reports)
 	 *
 	 * @param id the report id
 	 * @return report if found, null otherwise
@@ -649,14 +653,9 @@ public class ReportService {
 		logger.debug("Entering saveReport: report={}, newRecordId={}, actionUser={}",
 				report, newRecordId, actionUser);
 
-		//set values for possibly null property objects
-		Integer reportGroupId;
-		if (report.getReportGroup() == null) {
-			reportGroupId = 0;
-		} else {
-			reportGroupId = report.getReportGroup().getReportGroupId();
-		}
+		Integer reportGroupId = 0; //field no longer used but can't be null
 
+		//set values for possibly null property objects
 		Integer datasourceId;
 		if (report.getDatasource() == null) {
 			datasourceId = 0;

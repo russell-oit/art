@@ -20,6 +20,7 @@
 -- add job schedule id column
 -- increase size of description columns
 -- rename rule short description column
+-- create art_report_report_groups table
 
 
 -- NOTES:
@@ -137,3 +138,11 @@ ALTER TABLE ART_USER_GROUPS MODIFY DESCRIPTION VARCHAR(200);
 ALTER TABLE ART_RULES ADD DESCRIPTION VARCHAR(200);
 UPDATE ART_RULES SET DESCRIPTION=SHORT_DESCRIPTION;
 ALTER TABLE ART_RULES DROP COLUMN SHORT_DESCRIPTION;
+
+-- create art_report_report_groups table
+CREATE TABLE ART_REPORT_REPORT_GROUPS
+(
+	REPORT_ID INTEGER NOT NULL,	
+	REPORT_GROUP_ID INTEGER NOT NULL,
+	CONSTRAINT arrg_pk PRIMARY KEY(REPORT_ID, REPORT_GROUP_ID)	
+);

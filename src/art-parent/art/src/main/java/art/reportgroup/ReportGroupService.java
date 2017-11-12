@@ -62,7 +62,7 @@ public class ReportGroupService {
 		dbService = new DbService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERY_GROUPS";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERY_GROUPS AQG";
 
 	/**
 	 * Maps a resultset to an object
@@ -108,30 +108,36 @@ public class ReportGroupService {
 		//union will return distinct results
 		//get groups that user has explicit rights to see
 		String sql = "SELECT AQG.* "
-				+ " FROM ART_USER_QUERY_GROUPS AUQG , ART_QUERY_GROUPS AQG "
-				+ " WHERE AUQG.USERNAME = ? "
-				+ " AND AUQG.QUERY_GROUP_ID = AQG.QUERY_GROUP_ID "
+				+ " FROM ART_USER_QUERY_GROUPS AUQG , ART_QUERY_GROUPS AQG"
+				+ " WHERE AUQG.USERNAME=?"
+				+ " AND AUQG.QUERY_GROUP_ID = AQG.QUERY_GROUP_ID"
 				+ " UNION "
-				//add groups to which the user has access through his report group 
+				//add groups to which the user has access through his user group 
 				+ " SELECT AQG.* "
-				+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERY_GROUPS AQG "
-				+ " WHERE AUGG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
-				+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
+				+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERY_GROUPS AQG"
+				+ " WHERE AUGG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID"
+				+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA"
 				+ " WHERE AUGA.USERNAME = ? AND AUGA.QUERY_GROUP_ID = AUGG.QUERY_GROUP_ID)"
 				+ " UNION "
 				//add groups where user has right to query but not to group
 				+ " SELECT AQG.* "
-				+ " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ, ART_QUERY_GROUPS AQG "
-				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
+				+ " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ,"
+				+ " ART_REPORT_REPORT_GROUPS ARRG, ART_QUERY_GROUPS AQG,"
+				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID"
+				+ " AND AQ.QUERY_ID=ARRG.REPORT_ID"
+				+ " AND ARRG.REPORT_GROUP_ID=AQG.QUERY_GROUP_ID"
 				+ " AND AUQ.USERNAME = ? AND AQG.QUERY_GROUP_ID<>0"
 				+ " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120"
 				+ " UNION "
 				//add groups where user's group has rights to the query
-				+ " SELECT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION "
-				+ " FROM ART_USER_GROUP_QUERIES AUGQ, ART_QUERIES AQ, ART_QUERY_GROUPS AQG "
-				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
-				+ " AND AQG.QUERY_GROUP_ID<>0 AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 "
-				+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
+				+ " SELECT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION"
+				+ " FROM ART_USER_GROUP_QUERIES AUGQ, ART_QUERIES AQ,"
+				+ " ART_REPORT_REPORT_GROUPS ARRG, ART_QUERY_GROUPS AQG,"
+				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID"
+				+ " AND AQ.QUERY_ID=ARRG.REPORT_ID"
+				+ " AND ARRG.REPORT_GROUP_ID=AQG.QUERY_GROUP_ID"
+				+ " AND AQG.QUERY_GROUP_ID<>0 AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120"
+				+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA"
 				+ " WHERE AUGA.USERNAME = ? AND AUGA.QUERY_GROUP_ID = AUGQ.QUERY_GROUP_ID)";
 
 		Object[] values = {username, username, username, username};
@@ -230,6 +236,9 @@ public class ReportGroupService {
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_USER_GROUP_GROUPS WHERE QUERY_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_GROUP_ID=?";
 		dbService.update(sql, id);
 
 		//finally delete report group
@@ -391,11 +400,33 @@ public class ReportGroupService {
 	public List<String> getLinkedReports(int reportGroupId) throws SQLException {
 		logger.debug("Entering getLinkedReports: reportGroupId={}", reportGroupId);
 
-		String sql = "SELECT NAME"
-				+ " FROM ART_QUERIES"
-				+ " WHERE QUERY_GROUP_ID=?";
+		String sql = "SELECT AQ.NAME"
+				+ " FROM ART_QUERIES AQ"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AQ.QUERY_ID=ARRG=REPORT_ID"
+				+ " WHERE ARRG.REPORT_GROUP_ID=?";
 
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("NAME");
 		return dbService.query(sql, h, reportGroupId);
 	}
+	
+	/**
+	 * Returns the report groups that the given report belongs to
+	 *
+	 * @param reportId the report id
+	 * @return the report's report groups
+	 * @throws SQLException
+	 */
+	@Cacheable("reportGroups")
+	public List<ReportGroup> getReportGroupsForReport(int reportId) throws SQLException {
+		logger.debug("Entering getReportGroupsForReport: reportId={}", reportId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG "
+				+ " ON ARRG.REPORT_GROUP_ID=AQG.QUERY_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=?";
+		ResultSetHandler<List<ReportGroup>> h = new BeanListHandler<>(ReportGroup.class, new ReportGroupMapper());
+		return dbService.query(sql, h, reportId);
+	}
+	
 }

@@ -509,7 +509,7 @@ public class JPivotController {
 				}
 				newReport.setName(queryName);
 
-				newReport.setReportGroup(report.getReportGroup());
+				newReport.setReportGroups(report.getReportGroups());
 				newReport.setDatasource(report.getDatasource());
 
 				//save current view's mdx

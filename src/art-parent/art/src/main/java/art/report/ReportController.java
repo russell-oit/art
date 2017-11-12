@@ -25,6 +25,7 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.mail.Mailer;
 import art.reportgroup.ReportGroupService;
+import art.reportgroupmembership.ReportGroupMembershipService;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
@@ -83,6 +84,9 @@ public class ReportController {
 
 	@Autowired
 	private DatasourceService datasourceService;
+
+	@Autowired
+	private ReportGroupMembershipService reportGroupMembershipService;
 
 	@Autowired
 	private EncryptorService encryptorService;
@@ -308,6 +312,13 @@ public class ReportController {
 			String recordName = report.getLocalizedName(locale) + " (" + report.getReportId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			redirectAttributes.addFlashAttribute("record", report);
+
+			try {
+				saveReportGroups(report);
+			} catch (SQLException | RuntimeException ex) {
+				logger.error("Error", ex);
+				redirectAttributes.addFlashAttribute("error", ex);
+			}
 			return "redirect:/reportsConfig";
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
@@ -540,7 +551,7 @@ public class ReportController {
 			throws IOException {
 
 		logger.debug("Entering saveFile: report={}", report);
-		
+
 		logger.debug("file==null = {}", file == null);
 		if (file == null) {
 			return null;
@@ -879,6 +890,17 @@ public class ReportController {
 		report.setModifyPassword(encryptedModifyPassword);
 
 		return null;
+	}
+
+	/**
+	 * Save report groups for the given report
+	 *
+	 * @param report the report
+	 * @throws SQLException
+	 */
+	private void saveReportGroups(Report report) throws SQLException {
+		reportGroupMembershipService.deleteAllReportGroupMembershipsForReport(report.getReportId());
+		reportGroupMembershipService.addReportGroupMemberships(report, report.getReportGroups());
 	}
 
 }

@@ -213,7 +213,7 @@
 						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group" id="userGroupsDiv">
+				<div class="form-group">
 					<label class="col-md-4 control-label " for="userGroups">
 						<spring:message code="page.text.userGroups"/>
 					</label>

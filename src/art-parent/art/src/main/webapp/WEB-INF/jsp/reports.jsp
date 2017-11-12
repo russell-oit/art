@@ -90,7 +90,8 @@ Reports page. Also main/home page
 						[
 							{
 								column_number: 1,
-								filter_default_label: '${selectValueText}'
+								filter_default_label: '${selectValueText}',
+								text_data_delimiter: ","
 							},
 							{
 								column_number: 3,
@@ -172,7 +173,7 @@ Reports page. Also main/home page
 				<c:forEach var="report" items="${reports}">
 					<tr>
 						<td class="details-control"></td> <%-- details control column --%>
-						<td><encode:forHtmlContent value="${report.reportGroup.name}"/></td>
+						<td>${encode:forHtmlContent(report.reportGroupNames)}</td>
 						<td>${encode:forHtmlContent(report.getLocalizedDescription(pageContext.response.locale))}</td>
 						<td>
 							<a href="${pageContext.request.contextPath}/selectReportParameters?reportId=${report.reportId}">

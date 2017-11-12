@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +66,6 @@ public class Report implements Serializable {
 	private String shortDescription;
 	private String description;
 	private int reportTypeId;
-	private ReportGroup reportGroup;
 	private Datasource datasource;
 	private String contactPerson;
 	private boolean usesRules;
@@ -113,6 +113,21 @@ public class Report implements Serializable {
 	private Report sourceReport;
 	private int sourceReportId;
 	private CloneOptions cloneOptions;
+	private List<ReportGroup> reportGroups;
+
+	/**
+	 * @return the reportGroups
+	 */
+	public List<ReportGroup> getReportGroups() {
+		return reportGroups;
+	}
+
+	/**
+	 * @param reportGroups the reportGroups to set
+	 */
+	public void setReportGroups(List<ReportGroup> reportGroups) {
+		this.reportGroups = reportGroups;
+	}
 
 	/**
 	 * @return the cloneOptions
@@ -692,20 +707,6 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the reportGroup
-	 */
-	public ReportGroup getReportGroup() {
-		return reportGroup;
-	}
-
-	/**
-	 * @param reportGroup the reportGroup to set
-	 */
-	public void setReportGroup(ReportGroup reportGroup) {
-		this.reportGroup = reportGroup;
-	}
-
-	/**
 	 * @return the datasource
 	 */
 	public Datasource getDatasource() {
@@ -1149,6 +1150,25 @@ public class Report implements Serializable {
 		FileUtils.moveFile(finalFile, tempFile);
 		pgpEncryptor.encrypt(tempFile, finalFile);
 		tempFile.delete();
+	}
+
+	/**
+	 * Returns the names of the report groups that this report belongs to in a
+	 * comma separated string
+	 *
+	 * @return the names of the report groups that this report belongs to
+	 */
+	public String getReportGroupNames() {
+		String namesString = "";
+		if (CollectionUtils.isNotEmpty(reportGroups)) {
+			List<String> names = new ArrayList<>();
+			for (ReportGroup reportGroup : reportGroups) {
+				names.add(reportGroup.getName());
+			}
+			namesString = StringUtils.join(names, ", ");
+		}
+
+		return namesString;
 	}
 
 }

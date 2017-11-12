@@ -16,6 +16,7 @@ ART 3.1
 * Allow jobs to have holidays
 * Allow jobs to use shared schedules
 * Allow for clone reports, which use the source of another report
+* Allow reports to belong to multiple report groups
 * Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1

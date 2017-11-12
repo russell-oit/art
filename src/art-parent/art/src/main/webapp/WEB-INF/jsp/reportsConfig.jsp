@@ -82,7 +82,8 @@ Reports configuration page
 						[
 							{
 								column_number: 3,
-								filter_default_label: '${selectValueText}'
+								filter_default_label: '${selectValueText}',
+								text_data_delimiter: ","
 							}
 						],
 						{filters_tr_index: 1}
@@ -254,11 +255,7 @@ Reports configuration page
 							<t:displayNewLabel creationDate="${report.creationDate}"
 											   updateDate="${report.updateDate}"/>
 						</td>
-						<td>
-							<c:if test="${not empty report.reportGroup}">
-								${encode:forHtmlContent(report.reportGroup.name)}
-							</c:if>
-						</td>
+						<td>${encode:forHtmlContent(report.reportGroupNames)}</td>
 						<td>${encode:forHtmlContent(report.getLocalizedDescription(pageContext.response.locale))}</td>
 						<td><t:displayActiveStatus active="${report.active}"
 											   activeText="${activeText}"

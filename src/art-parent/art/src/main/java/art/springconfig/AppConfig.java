@@ -18,6 +18,7 @@
 package art.springconfig;
 
 import art.report.StringToReport;
+import art.reportgroup.StringToReportGroup;
 import art.schedule.StringToSchedule;
 import art.usergroup.StringToUserGroup;
 import art.utils.StringToDouble;
@@ -63,6 +64,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToUserGroup stringToUserGroup;
+	
+	@Autowired
+	private StringToReportGroup stringToReportGroup;
 
 	@Autowired
 	private StringToReport stringToReport;
@@ -177,6 +181,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	@Override
 	public void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(stringToUserGroup);
+		registry.addConverter(stringToReportGroup);
 		registry.addConverter(stringToDouble);
 		registry.addConverter(stringToReport);
 		registry.addConverter(stringToSchedule);

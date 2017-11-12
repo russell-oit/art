@@ -294,6 +294,7 @@ public class UpgradeHelper {
 			logger.info("Performing 3.1 upgrade steps");
 
 			populateReportSourceColumn();
+			populateReportReportGroupsTable();
 
 			sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
 			dbService.update(sql, databaseVersionString);
@@ -337,9 +338,46 @@ public class UpgradeHelper {
 				}
 
 				String finalSource = sb.toString();
-				
+
 				sql = "UPDATE ART_QUERIES SET REPORT_SOURCE=? WHERE QUERY_ID=?";
 				dbService.update(sql, finalSource, reportId);
+			}
+		}
+	}
+
+	/**
+	 * Populates the ART_REPORT_REPORT_GROUPS table. Table added in 3.1
+	 *
+	 * @throws SQLException
+	 */
+	private void populateReportReportGroupsTable() throws SQLException {
+		String sql;
+
+		sql = "SELECT QUERY_ID, QUERY_GROUP_ID"
+				+ " FROM ART_QUERIES"
+				+ " WHERE QUERY_GROUP_ID > 0";
+		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+		List<Map<String, Object>> reports = dbService.query(sql, h2);
+
+		logger.debug("reports.isEmpty()={}", reports.isEmpty());
+		if (!reports.isEmpty()) {
+			logger.info("Adding report-report group records");
+
+			for (Map<String, Object> report : reports) {
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				Integer reportId = (Integer) report.get("QUERY_ID");
+				Integer reportGroupId = (Integer) report.get("QUERY_GROUP_ID");
+
+				sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
+				dbService.update(sql, reportId);
+
+				sql = "INSERT INTO ART_REPORT_REPORT_GROUPS(REPORT_ID, REPORT_GROUP_ID)"
+						+ " VALUES(?,?)";
+				dbService.update(sql, reportId, reportGroupId);
+
+				sql = "UPDATE ART_QUERIES SET QUERY_GROUP_ID=0"
+						+ " WHERE QUERY_ID=?";
+				dbService.update(sql, reportId);
 			}
 		}
 	}
