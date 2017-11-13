@@ -175,7 +175,7 @@ public class HolidayController {
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			try {
-				updateQuartzHolidays(holiday, sessionUser);
+				updateQuartzSchedules(holiday, sessionUser);
 			} catch (SchedulerException ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
@@ -191,14 +191,14 @@ public class HolidayController {
 	}
 
 	/**
-	 * Updates quartz schedules for any jobs that use this holiday as a fixed
+	 * Updates quartz schedules for any jobs that use this holiday as a shared
 	 * holiday
 	 *
 	 * @param holiday the holiday
 	 * @param actionUser the user performing this action
 	 * @throws SchedulerException
 	 */
-	private void updateQuartzHolidays(Holiday holiday, User actionUser) throws SchedulerException {
+	private void updateQuartzSchedules(Holiday holiday, User actionUser) throws SchedulerException {
 		int holidayId = holiday.getHolidayId();
 		String runId = holidayId + "-" + ArtUtils.getUniqueId();
 

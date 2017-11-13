@@ -59,11 +59,20 @@ public class UpdateQuartzSchedulesJob implements org.quartz.Job {
 
 		JobDataMap dataMap = context.getMergedJobDataMap();
 		int scheduleId = dataMap.getInt("scheduleId");
+		int holidayId = dataMap.getInt("holidayId");
 		int userId = dataMap.getInt("userId");
 
 		try {
 			if (scheduleId > 0) {
 				List<Job> jobs = jobService.getScheduleJobs(scheduleId);
+				if (CollectionUtils.isNotEmpty(jobs)) {
+					User user = userService.getUser(userId);
+					for (Job job : jobs) {
+						jobService.processSchedules(job, user);
+					}
+				}
+			} else if (holidayId > 0) {
+				List<Job> jobs = jobService.getHolidayJobs(holidayId);
 				if (CollectionUtils.isNotEmpty(jobs)) {
 					User user = userService.getUser(userId);
 					for (Job job : jobs) {

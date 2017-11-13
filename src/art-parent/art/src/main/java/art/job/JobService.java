@@ -740,6 +740,34 @@ public class JobService {
 	}
 
 	/**
+	 * Returns jobs that use a given holiday, either directly as shared holiday
+	 * or as part of a fixed holiday
+	 *
+	 * @param holidayId the holiday id
+	 * @return jobs that use the holiday
+	 * @throws SQLException
+	 */
+	public List<Job> getHolidayJobs(int holidayId) throws SQLException {
+		logger.debug("Entering getHolidayJobs");
+
+		String sql = SQL_SELECT_ALL
+				//where holidays are used directly
+				+ "WHERE EXISTS (SELECT *"
+				+ " FROM ART_JOB_HOLIDAY_MAP AJHM"
+				+ " WHERE AJHM.JOB_ID=AJ.JOB_ID AND AJHM.HOLIDAY_ID=?)"
+				+ " OR"
+				//where holidays are part of the fixed schedule
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_JOB_SCHEDULES AJS"
+				+ " INNER JOIN ART_SCHEDULE_HOLIDAY_MAP ASHM"
+				+ " ON AJS.SCHEDULE_ID=ASHM.SCHEDULE_ID"
+				+ " WHERE AJS.SCHEDULE_ID=AJ.SCHEDULE_ID AND ASHM.HOLIDAY_ID=?)";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, holidayId, holidayId);
+	}
+
+	/**
 	 * Processes schedule fields and creates quartz schedules for the job
 	 *
 	 * @param job the art job object
@@ -950,6 +978,39 @@ public class JobService {
 		} else {
 			holidays = schedule.getHolidays();
 		}
+
+		List<org.quartz.Calendar> mainCalendars = processHolidayString(holidays);
+		calendars.addAll(mainCalendars);
+
+		List<Holiday> sharedHolidays;
+		if (schedule == null) {
+			sharedHolidays = job.getSharedHolidays();
+		} else {
+			sharedHolidays = schedule.getSharedHolidays();
+		}
+
+		if (CollectionUtils.isNotEmpty(sharedHolidays)) {
+			StringBuilder sb = new StringBuilder();
+			for (Holiday holiday : sharedHolidays) {
+				sb.append(holiday.getDetails());
+			}
+			String sharedHolidayDetails = sb.toString();
+			List<org.quartz.Calendar> sharedCalendars = processHolidayString(sharedHolidayDetails);
+			calendars.addAll(sharedCalendars);
+		}
+
+		return calendars;
+	}
+
+	/**
+	 * Processes a string containing holiday definitions
+	 *
+	 * @param holidays the string containing holiday definitions
+	 * @return a list of calendars representing the holiday definitions
+	 * @throws ParseException
+	 */
+	private List<org.quartz.Calendar> processHolidayString(String holidays) throws ParseException {
+		List<org.quartz.Calendar> calendars = new ArrayList<>();
 
 		if (StringUtils.isNotBlank(holidays)) {
 			if (StringUtils.startsWith(holidays, ExpressionHelper.GROOVY_START_STRING)) {
