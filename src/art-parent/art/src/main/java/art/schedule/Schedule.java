@@ -30,11 +30,13 @@ import java.util.List;
 public class Schedule implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private String second;
 	private String minute;
 	private String hour;
 	private String day;
 	private String month;
 	private String weekday;
+	private String year;
 	private String name;
 	private int scheduleId;
 	private Date creationDate;
@@ -44,8 +46,21 @@ public class Schedule implements Serializable {
 	private String updatedBy;
 	private String extraSchedules;
 	private String holidays;
-	private String second;
 	private List<Holiday> sharedHolidays;
+
+	/**
+	 * @return the year
+	 */
+	public String getYear() {
+		return year;
+	}
+
+	/**
+	 * @param year the year to set
+	 */
+	public void setYear(String year) {
+		this.year = year;
+	}
 
 	/**
 	 * @return the sharedHolidays

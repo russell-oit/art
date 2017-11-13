@@ -223,6 +223,7 @@
 								$('#scheduleDay').val(schedule.day);
 								$('#scheduleMonth').val(schedule.month);
 								$('#scheduleWeekday').val(schedule.weekday);
+								$('#scheduleYear').val(schedule.year);
 								$('#extraSchedules').val(schedule.extraSchedules);
 								$('#holidays').val(schedule.holidays);
 							}
@@ -859,6 +860,15 @@
 						<div class="col-md-8">
 							<form:input path="scheduleWeekday" maxlength="100" class="form-control"/>
 							<form:errors path="scheduleWeekday" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="scheduleYear">
+							<spring:message code="schedules.label.year"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="scheduleYear" maxlength="100" class="form-control"/>
+							<form:errors path="scheduleYear" cssClass="error"/>
 						</div>
 					</div>
 

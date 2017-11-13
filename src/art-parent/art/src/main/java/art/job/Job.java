@@ -52,11 +52,13 @@ public class Job implements Serializable {
 	private String mailMessage;
 	private String mailSubject;
 	private String cachedTableName;
+	private String scheduleSecond;
 	private String scheduleMinute;
 	private String scheduleHour;
 	private String scheduleDay;
 	private String scheduleMonth;
 	private String scheduleWeekday;
+	private String scheduleYear;
 	private Date creationDate;
 	private Date updateDate;
 	private Report report;
@@ -87,9 +89,22 @@ public class Job implements Serializable {
 	private String extraSchedules;
 	private String holidays;
 	private String quartzCalendarNames;
-	private String scheduleSecond;
 	private Schedule schedule;
 	private List<Holiday> sharedHolidays;
+
+	/**
+	 * @return the scheduleYear
+	 */
+	public String getScheduleYear() {
+		return scheduleYear;
+	}
+
+	/**
+	 * @param scheduleYear the scheduleYear to set
+	 */
+	public void setScheduleYear(String scheduleYear) {
+		this.scheduleYear = scheduleYear;
+	}
 
 	/**
 	 * @return the sharedHolidays

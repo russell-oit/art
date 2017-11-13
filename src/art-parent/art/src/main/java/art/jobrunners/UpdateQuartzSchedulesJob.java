@@ -78,7 +78,9 @@ public class UpdateQuartzSchedulesJob implements org.quartz.Job {
 						jobService.processSchedules(job, user);
 					}
 				}
-			} else if (holidayId > 0) {
+			}
+			
+			if (holidayId > 0) {
 				List<Job> jobs = jobService.getHolidayJobs(holidayId);
 				if (CollectionUtils.isNotEmpty(jobs)) {
 					User user = userService.getUser(userId);

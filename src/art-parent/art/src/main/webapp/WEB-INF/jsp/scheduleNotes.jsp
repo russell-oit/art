@@ -7,7 +7,8 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
-<!-- Schedule field values. Based on quartz javadoc - CronExpression class -->
+<%-- Schedule field value documentation. Based on quartz javadoc - CronExpression class --%>
+<%-- http://www.quartz-scheduler.org/api/2.2.1/org/quartz/CronExpression.html --%>
 <table class="table">
 	<tr>
 		<th style="text-align:left;">Field</th>
@@ -57,7 +58,14 @@
 		<td style="text-align:left;"><code>1-7 or SUN-SAT</code></td>
 		<td style="text-align:left;">&nbsp;</td>
 		<td style="text-align:left;"><code>, - * ? / L #</code></td>
-	</tr> 
+	</tr>
+	<tr>
+		<td style="text-align:left;"><code>Year</code></td>
+		<td style="text-align:left;">&nbsp;</td>
+		<td style="text-align:left;"><code>1970-2199</code></td>
+		<td style="text-align:left;">&nbsp;</td>
+		<td style="text-align:left;"><code>, - * /</code></td>
+	</tr>
 </table>
 
 <ul>

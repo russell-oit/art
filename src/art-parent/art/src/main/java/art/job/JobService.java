@@ -183,6 +183,7 @@ public class JobService {
 		job.setScheduleDay(rs.getString("JOB_DAY"));
 		job.setScheduleMonth(rs.getString("JOB_MONTH"));
 		job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
+		job.setScheduleYear(rs.getString("JOB_YEAR"));
 		job.setMailTo(rs.getString("MAIL_TOS"));
 		job.setMailFrom(rs.getString("MAIL_FROM"));
 		job.setMailCc(rs.getString("MAIL_CC"));
@@ -451,7 +452,7 @@ public class JobService {
 			String sql = "INSERT INTO ART_JOBS"
 					+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME,"
 					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_SECOND, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
-					+ " JOB_WEEKDAY, JOB_MONTH, MAIL_TOS, MAIL_FROM, MAIL_CC,"
+					+ " JOB_MONTH, JOB_WEEKDAY, JOB_YEAR, MAIL_TOS, MAIL_FROM, MAIL_CC,"
 					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_DATASOURCE_ID, CACHED_TABLE_NAME,"
 					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
@@ -460,7 +461,7 @@ public class JobService {
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
 					+ " SCHEDULE_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 41) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 42) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -474,8 +475,9 @@ public class JobService {
 				job.getScheduleMinute(),
 				job.getScheduleHour(),
 				job.getScheduleDay(),
-				job.getScheduleWeekday(),
 				job.getScheduleMonth(),
+				job.getScheduleWeekday(),
+				job.getScheduleYear(),
 				job.getMailTo(),
 				job.getMailFrom(),
 				job.getMailCc(),
@@ -510,8 +512,9 @@ public class JobService {
 		} else {
 			String sql = "UPDATE ART_JOBS SET JOB_NAME=?, QUERY_ID=?,"
 					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
-					+ " JOB_SECOND=?, JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?,"
-					+ " JOB_MONTH=?, MAIL_TOS=?, MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
+					+ " JOB_SECOND=?, JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?,"
+					+ " JOB_MONTH=?, JOB_WEEKDAY=?, JOB_YEAR=?, MAIL_TOS=?,"
+					+ " MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
 					+ " SUBJECT=?, MESSAGE=?, CACHED_DATASOURCE_ID=?, CACHED_TABLE_NAME=?,"
 					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
 					+ " ACTIVE=?, ENABLE_AUDIT=?,"
@@ -534,8 +537,9 @@ public class JobService {
 				job.getScheduleMinute(),
 				job.getScheduleHour(),
 				job.getScheduleDay(),
-				job.getScheduleWeekday(),
 				job.getScheduleMonth(),
+				job.getScheduleWeekday(),
+				job.getScheduleYear(),
 				job.getMailTo(),
 				job.getMailFrom(),
 				job.getMailCc(),
@@ -875,11 +879,13 @@ public class JobService {
 			//cron format is sec min hr dayofmonth month dayofweek (optionally year)
 			cronString = job.getScheduleSecond() + " " + job.getScheduleMinute()
 					+ " " + job.getScheduleHour() + " " + job.getScheduleDay()
-					+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
+					+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday()
+					+ " " + job.getScheduleYear();
 		} else {
 			cronString = schedule.getSecond() + " " + schedule.getMinute()
 					+ " " + schedule.getHour() + " " + schedule.getDay()
-					+ " " + schedule.getMonth() + " " + schedule.getWeekday();
+					+ " " + schedule.getMonth() + " " + schedule.getWeekday()
+					+ " " + schedule.getYear();
 		}
 
 		//create trigger that defines the schedule for the job
@@ -1110,12 +1116,13 @@ public class JobService {
 	private void finalizeScheduleFields(Job job) throws ParseException {
 		logger.debug("Entering finalizeScheduleFields: job={}", job);
 
+		String second;
 		String minute;
 		String hour;
 		String day;
-		String weekday;
 		String month;
-		String second;
+		String weekday;
+		String year;
 
 		minute = StringUtils.deleteWhitespace(job.getScheduleMinute());
 
@@ -1180,6 +1187,12 @@ public class JobService {
 			month = "*";
 		}
 
+		year = StringUtils.deleteWhitespace(job.getScheduleYear());
+		if (StringUtils.isBlank(year)) {
+			//no year defined. default to every year
+			year = "*";
+		}
+
 		day = StringUtils.deleteWhitespace(job.getScheduleDay());
 		weekday = StringUtils.deleteWhitespace(job.getScheduleWeekday());
 
@@ -1217,6 +1230,7 @@ public class JobService {
 		job.setScheduleDay(day);
 		job.setScheduleMonth(month);
 		job.setScheduleWeekday(weekday);
+		job.setScheduleYear(year);
 	}
 
 }

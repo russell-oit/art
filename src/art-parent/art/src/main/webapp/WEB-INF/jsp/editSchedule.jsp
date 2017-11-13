@@ -237,6 +237,15 @@ Edit schedule page
 						<form:errors path="weekday" cssClass="error"/>
 					</div>
 				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="year">
+						<spring:message code="schedules.label.year"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="year" maxlength="100" class="form-control"/>
+						<form:errors path="year" cssClass="error"/>
+					</div>
+				</div>
 
 				<hr>
 				<div class="form-group">

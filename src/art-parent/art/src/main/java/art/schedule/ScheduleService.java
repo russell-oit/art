@@ -92,6 +92,7 @@ public class ScheduleService {
 			schedule.setDay(rs.getString("JOB_DAY"));
 			schedule.setMonth(rs.getString("JOB_MONTH"));
 			schedule.setWeekday(rs.getString("JOB_WEEKDAY"));
+			schedule.setYear(rs.getString("JOB_YEAR"));
 			schedule.setExtraSchedules(rs.getString("EXTRA_SCHEDULES"));
 			schedule.setHolidays(rs.getString("HOLIDAYS"));
 			schedule.setCreationDate(rs.getTimestamp("CREATION_DATE"));
@@ -240,10 +241,10 @@ public class ScheduleService {
 			String sql = "INSERT INTO ART_JOB_SCHEDULES"
 					+ " (SCHEDULE_ID, SCHEDULE_NAME, DESCRIPTION,"
 					+ " JOB_SECOND, JOB_MINUTE,"
-					+ " JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY,"
+					+ " JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY, JOB_YEAR,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -255,6 +256,7 @@ public class ScheduleService {
 				schedule.getDay(),
 				schedule.getMonth(),
 				schedule.getWeekday(),
+				schedule.getYear(),
 				schedule.getExtraSchedules(),
 				schedule.getHolidays(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
@@ -265,7 +267,7 @@ public class ScheduleService {
 		} else {
 			String sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_NAME=?, DESCRIPTION=?,"
 					+ " JOB_SECOND=?, JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_MONTH=?,"
-					+ " JOB_WEEKDAY=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
+					+ " JOB_WEEKDAY=?, JOB_YEAR=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE SCHEDULE_ID=?";
 
@@ -278,6 +280,7 @@ public class ScheduleService {
 				schedule.getDay(),
 				schedule.getMonth(),
 				schedule.getWeekday(),
+				schedule.getYear(),
 				schedule.getExtraSchedules(),
 				schedule.getHolidays(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),

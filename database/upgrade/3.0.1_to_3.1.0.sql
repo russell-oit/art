@@ -22,6 +22,7 @@
 -- rename rule short description column
 -- create art_report_report_groups table
 -- allow for use of shared job schedule holidays
+-- add job year column
 
 
 -- NOTES:
@@ -178,3 +179,7 @@ CREATE TABLE ART_JOB_HOLIDAY_MAP
 	HOLIDAY_ID INTEGER NOT NULL,
 	CONSTRAINT ajhm_pk PRIMARY KEY(JOB_ID, HOLIDAY_ID)
 );
+
+-- add job year column
+ALTER TABLE ART_JOBS ADD JOB_YEAR VARCHAR(100);
+ALTER TABLE ART_JOB_SCHEDULES ADD JOB_YEAR VARCHAR(100);
