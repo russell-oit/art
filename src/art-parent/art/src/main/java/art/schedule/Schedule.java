@@ -17,8 +17,10 @@
  */
 package art.schedule;
 
+import art.holiday.Holiday;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Represents a schedule
@@ -43,6 +45,21 @@ public class Schedule implements Serializable {
 	private String extraSchedules;
 	private String holidays;
 	private String second;
+	private List<Holiday> sharedHolidays;
+
+	/**
+	 * @return the sharedHolidays
+	 */
+	public List<Holiday> getSharedHolidays() {
+		return sharedHolidays;
+	}
+
+	/**
+	 * @param sharedHolidays the sharedHolidays to set
+	 */
+	public void setSharedHolidays(List<Holiday> sharedHolidays) {
+		this.sharedHolidays = sharedHolidays;
+	}
 
 	/**
 	 * @return the second

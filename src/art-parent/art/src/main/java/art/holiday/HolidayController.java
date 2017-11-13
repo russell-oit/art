@@ -15,16 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.schedule;
+package art.holiday;
 
 import art.jobrunners.UpdateQuartzSchedulesJob;
-import art.scheduleholiday.ScheduleHolidayService;
 import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
-import java.util.Date;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -50,44 +48,41 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Controller for schedule configuration
+ * Controller for holiday configuration
  *
  * @author Timothy Anyona
  */
 @Controller
-public class ScheduleController {
+public class HolidayController {
 
-	private static final Logger logger = LoggerFactory.getLogger(ScheduleController.class);
+	private static final Logger logger = LoggerFactory.getLogger(HolidayController.class);
 
 	@Autowired
-	private ScheduleService scheduleService;
-	
-	@Autowired
-	private ScheduleHolidayService scheduleHolidayService;
+	private HolidayService holidayService;
 
-	@RequestMapping(value = "/schedules", method = RequestMethod.GET)
-	public String showSchedules(Model model) {
-		logger.debug("Entering showSchedules");
+	@RequestMapping(value = "/holidays", method = RequestMethod.GET)
+	public String showHolidays(Model model) {
+		logger.debug("Entering showHolidays");
 
 		try {
-			model.addAttribute("schedules", scheduleService.getAllSchedules());
+			model.addAttribute("holidays", holidayService.getAllHolidays());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return "schedules";
+		return "holidays";
 	}
 
-	@RequestMapping(value = "/deleteSchedule", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteHoliday", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteSchedule(@RequestParam("id") Integer id) {
-		logger.debug("Entering deleteSchedule: id={}", id);
+	AjaxResponse deleteHoliday(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteHoliday: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			scheduleService.deleteSchedule(id);
+			holidayService.deleteHoliday(id);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -97,15 +92,15 @@ public class ScheduleController {
 		return response;
 	}
 
-	@RequestMapping(value = "/deleteSchedules", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteHolidays", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteSchedules(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteSchedules: ids={}", (Object) ids);
+	AjaxResponse deleteHolidays(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteHolidays: ids={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			scheduleService.deleteSchedules(ids);
+			holidayService.deleteHolidays(ids);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -115,126 +110,107 @@ public class ScheduleController {
 		return response;
 	}
 
-	@RequestMapping(value = "/getSchedule", method = RequestMethod.POST)
-	public @ResponseBody
-	AjaxResponse getSchedule(@RequestParam("id") Integer id) {
-		logger.debug("Entering getSchedule: id={}", id);
+	@RequestMapping(value = "/addHoliday", method = RequestMethod.GET)
+	public String addHoliday(Model model) {
+		logger.debug("Entering addHoliday");
 
-		AjaxResponse response = new AjaxResponse();
+		model.addAttribute("holiday", new Holiday());
 
-		try {
-			Schedule schedule = scheduleService.getSchedule(id);
-			response.setSuccess(true);
-			response.setData(schedule);
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
-		}
-
-		return response;
+		return showEditHoliday("add", model);
 	}
 
-	@RequestMapping(value = "/addSchedule", method = RequestMethod.GET)
-	public String addSchedule(Model model) {
-		logger.debug("Entering addSchedule");
-
-		model.addAttribute("schedule", new Schedule());
-
-		return showEditSchedule("add", model);
-	}
-
-	@RequestMapping(value = "/editSchedule", method = RequestMethod.GET)
-	public String editSchedule(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editSchedule: id={}", id);
+	@RequestMapping(value = "/editHoliday", method = RequestMethod.GET)
+	public String editHoliday(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editHoliday: id={}", id);
 
 		try {
-			model.addAttribute("schedule", scheduleService.getSchedule(id));
+			model.addAttribute("holiday", holidayService.getHoliday(id));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditSchedule("edit", model);
+		return showEditHoliday("edit", model);
 	}
 
-	@RequestMapping(value = "/copySchedule", method = RequestMethod.GET)
-	public String copySchedule(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering copySchedule: id={}", id);
+	@RequestMapping(value = "/copyHoliday", method = RequestMethod.GET)
+	public String copyHoliday(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering copyHoliday: id={}", id);
 
 		try {
-			model.addAttribute("schedule", scheduleService.getSchedule(id));
+			model.addAttribute("holiday", holidayService.getHoliday(id));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditSchedule("copy", model);
+		return showEditHoliday("copy", model);
 	}
 
-	@RequestMapping(value = "/saveSchedule", method = RequestMethod.POST)
-	public String saveSchedule(@ModelAttribute("schedule") @Valid Schedule schedule,
+	@RequestMapping(value = "/saveHoliday", method = RequestMethod.POST)
+	public String saveHoliday(@ModelAttribute("holiday") @Valid Holiday holiday,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
-		logger.debug("Entering saveSchedule: schedule={}, action='{}'", schedule, action);
+		logger.debug("Entering saveHoliday: holiday={}, action='{}'", holiday, action);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditSchedule(action, model);
+			return showEditHoliday(action, model);
 		}
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
-				scheduleService.addSchedule(schedule, sessionUser);
+				holidayService.addHoliday(holiday, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
-				scheduleService.updateSchedule(schedule, sessionUser);
+				holidayService.updateHoliday(holiday, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
+			
+			String recordName = holiday.getName() + " (" + holiday.getHolidayId() + ")";
+			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			try {
-				scheduleHolidayService.recreateScheduleHolidays(schedule);
-				updateQuartzSchedules(schedule, sessionUser);
-			} catch (SchedulerException | SQLException | RuntimeException ex) {
+				updateQuartzHolidays(holiday, sessionUser);
+			} catch (SchedulerException ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
 
-			String recordName = schedule.getName() + " (" + schedule.getScheduleId() + ")";
-			redirectAttributes.addFlashAttribute("recordName", recordName);
-			return "redirect:/schedules";
+			return "redirect:/holidays";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditSchedule(action, model);
+		return showEditHoliday(action, model);
 	}
 
 	/**
-	 * Updates quartz schedules for any jobs that use this schedule as a fixed
-	 * schedule
+	 * Updates quartz schedules for any jobs that use this holiday as a fixed
+	 * holiday
 	 *
-	 * @param schedule the schedule
+	 * @param holiday the holiday
 	 * @param actionUser the user performing this action
 	 * @throws SchedulerException
 	 */
-	private void updateQuartzSchedules(Schedule schedule, User actionUser) throws SchedulerException {
-		int scheduleId = schedule.getScheduleId();
-		String runId = scheduleId + "-" + ArtUtils.getUniqueId();
+	private void updateQuartzHolidays(Holiday holiday, User actionUser) throws SchedulerException {
+		int holidayId = holiday.getHolidayId();
+		String runId = holidayId + "-" + ArtUtils.getUniqueId();
 
 		JobDetail tempJob = newJob(UpdateQuartzSchedulesJob.class)
-				.withIdentity(jobKey("updateSchedulesJob-" + runId, "updateSchedulesJobGroup"))
-				.usingJobData("scheduleId", scheduleId)
+				.withIdentity(jobKey("updateHolidaysJob-" + runId, "updateHolidaysJobGroup"))
+				.usingJobData("holidayId", holidayId)
 				.usingJobData("userId", actionUser.getUserId())
 				.build();
 
 		// create SimpleTrigger that will fire once, immediately		        
 		SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
-				.withIdentity(triggerKey("updateSchedulesTrigger-" + runId, "updateSchedulesTriggerGroup"))
+				.withIdentity(triggerKey("updateHolidaysTrigger-" + runId, "updateHolidaysTriggerGroup"))
 				.startNow()
 				.build();
 
@@ -249,13 +225,11 @@ public class ScheduleController {
 	 * @param model the model to use
 	 * @return the jsp file to display
 	 */
-	private String showEditSchedule(String action, Model model) {
-		logger.debug("Entering showSchedule: action='{}'", action);
+	private String showEditHoliday(String action, Model model) {
+		logger.debug("Entering showHoliday: action='{}'", action);
 
 		model.addAttribute("action", action);
 
-		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
-
-		return "editSchedule";
+		return "editHoliday";
 	}
 }

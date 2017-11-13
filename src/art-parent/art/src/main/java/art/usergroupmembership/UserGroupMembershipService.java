@@ -48,14 +48,24 @@ public class UserGroupMembershipService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserGroupMembershipService.class);
 
-	@Autowired
-	private DbService dbService;
+	private final DbService dbService;
+	private final UserService userService;
+	private final UserGroupService userGroupService;
 
 	@Autowired
-	private UserService userService;
+	public UserGroupMembershipService(DbService dbService, UserService userService,
+			UserGroupService userGroupService) {
 
-	@Autowired
-	private UserGroupService userGroupService;
+		this.dbService = dbService;
+		this.userService = userService;
+		this.userGroupService = userGroupService;
+	}
+
+	public UserGroupMembershipService() {
+		dbService = new DbService();
+		userService = new UserService();
+		userGroupService = new UserGroupService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUP_ASSIGNMENT";
 
@@ -131,15 +141,15 @@ public class UserGroupMembershipService {
 
 	/**
 	 * Adds user group memberships for the given user
-	 * 
+	 *
 	 * @param user the user, not null
 	 * @param userGroups the user groups
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
 	public void addUserGroupMemberships(User user, List<UserGroup> userGroups) throws SQLException {
 		Objects.requireNonNull(user, "user must not be null");
-		
+
 		if (CollectionUtils.isEmpty(userGroups)) {
 			return;
 		}

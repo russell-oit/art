@@ -17,6 +17,7 @@
  */
 package art.springconfig;
 
+import art.holiday.StringToHoliday;
 import art.report.StringToReport;
 import art.reportgroup.StringToReportGroup;
 import art.schedule.StringToSchedule;
@@ -64,6 +65,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToUserGroup stringToUserGroup;
+	
+	@Autowired
+	private StringToHoliday stringToHoliday;
 	
 	@Autowired
 	private StringToReportGroup stringToReportGroup;
@@ -185,6 +189,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addConverter(stringToDouble);
 		registry.addConverter(stringToReport);
 		registry.addConverter(stringToSchedule);
+		registry.addConverter(stringToHoliday);
 	}
 
 	@Bean

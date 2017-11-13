@@ -138,6 +138,8 @@ public class ReportGroupMembershipService {
 	 */
 	@CacheEvict(value = {"reports", "reportGroups"}, allEntries = true)
 	public void addReportGroupMemberships(Report report, List<ReportGroup> reportGroups) throws SQLException {
+		logger.debug("Entering addReportGroupMemberships: report={}", report);
+		
 		Objects.requireNonNull(report, "report must not be null");
 		
 		if (CollectionUtils.isEmpty(reportGroups)) {
@@ -189,20 +191,20 @@ public class ReportGroupMembershipService {
 
 		String sqlTest = "UPDATE ART_REPORT_REPORT_GROUPS SET REPORT_ID=? WHERE REPORT_ID=? AND REPORT_GROUP_ID=?";
 		int affectedRows;
-		boolean updateRight;
+		boolean updateRecord;
 
 		for (Integer reportId : reports) {
 			for (Integer reportGroupId : reportGroups) {
-				updateRight = true;
+				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
 					affectedRows = dbService.update(sqlTest, reportId, reportId, reportGroupId);
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
-						updateRight = false;
+						updateRecord = false;
 					}
 				}
-				if (updateRight) {
+				if (updateRecord) {
 					dbService.update(sql, reportId, reportGroupId);
 				}
 			}

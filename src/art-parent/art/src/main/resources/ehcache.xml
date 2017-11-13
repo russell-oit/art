@@ -44,4 +44,7 @@
 	<cache name="encryptors"
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
+	<cache name="holidays"
+		   eternal="true" maxEntriesLocalHeap="10" />
+	
 </ehcache>

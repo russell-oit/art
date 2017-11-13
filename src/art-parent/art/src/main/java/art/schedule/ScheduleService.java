@@ -19,6 +19,8 @@ package art.schedule;
 
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
+import art.holiday.Holiday;
+import art.holiday.HolidayService;
 import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,14 +50,17 @@ public class ScheduleService {
 	private static final Logger logger = LoggerFactory.getLogger(ScheduleService.class);
 
 	private final DbService dbService;
+	private final HolidayService holidayService;
 
 	@Autowired
-	public ScheduleService(DbService dbService) {
+	public ScheduleService(DbService dbService, HolidayService holidayService) {
 		this.dbService = dbService;
+		this.holidayService = holidayService;
 	}
 
 	public ScheduleService() {
 		dbService = new DbService();
+		holidayService = new HolidayService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOB_SCHEDULES";
@@ -93,6 +98,9 @@ public class ScheduleService {
 			schedule.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			schedule.setCreatedBy(rs.getString("CREATED_BY"));
 			schedule.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+			List<Holiday> sharedHolidays = holidayService.getScheduleHolidays(schedule.getScheduleId());
+			schedule.setSharedHolidays(sharedHolidays);
 
 			return type.cast(schedule);
 		}

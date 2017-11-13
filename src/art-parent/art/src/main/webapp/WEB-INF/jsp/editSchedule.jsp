@@ -32,6 +32,12 @@ Edit schedule page
 	</c:when>
 </c:choose>
 
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
+
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
@@ -57,17 +63,39 @@ Edit schedule page
 		</script>
 	</jsp:attribute>
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+
 		<script type="text/javascript">
 			$(document).ready(function () {
-				//display current time. updates every 1000 milliseconds
-				setInterval('updateClock()', 1000);
-
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="schedules"]').parent().addClass('active');
 
+				//display current time. updates every 1000 milliseconds
+				setInterval('updateClock()', 1000);
+
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
+
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}',
+					selectAllText: '${selectAllText}',
+					deselectAllText: '${deselectAllText}'
+				});
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				$('button.dropdown-toggle').dropdownHover({
+					delay: 100
+				});
 
 				$('#name').focus();
 
@@ -149,7 +177,7 @@ Edit schedule page
 				<hr>
 				<div class="form-group">
 					<label class="control-label col-md-4" for="clock">
-						
+
 					</label>
 					<div class="col-md-8">
 						<input type="text" id="clock" readonly class="form-control"/>
@@ -227,6 +255,21 @@ Edit schedule page
 					<div class="col-md-8">
 						<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
 						<form:errors path="holidays" cssClass="error"/>
+					</div>
+				</div>
+
+				<hr>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="sharedHolidays">
+						<spring:message code="schedules.label.sharedHolidays"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="sharedHolidays" items="${holidays}" multiple="true" 
+									 itemLabel="name" itemValue="holidayId" 
+									 class="form-control selectpicker"
+									 data-actions-box="true"
+									 />
+						<form:errors path="sharedHolidays" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
