@@ -288,4 +288,25 @@ public class HolidayService {
 		ResultSetHandler<List<Holiday>> h = new BeanListHandler<>(Holiday.class, new HolidayMapper());
 		return dbService.query(sql, h, scheduleId);
 	}
+	
+	/**
+	 * Returns the shared holidays used by a given job
+	 * 
+	 * @param jobId the job id
+	 * @return the shared holidays used by a given job
+	 * @throws SQLException 
+	 */
+	@Cacheable("holidays")
+	public List<Holiday> getJobHolidays(int jobId) throws SQLException {
+		logger.debug("Entering getJobHolidays: jobId={}", jobId);
+
+		String sql = SQL_SELECT_ALL + " INNER JOIN ART_JOB_HOLIDAY_MAP AJHM"
+				+ " ON AH.HOLIDAY_ID=AJHM.HOLIDAY_ID"
+				+ " INNER JOIN ART_JOBS AJ"
+				+ " ON AJHM.JOB_ID=AJ.JOB_ID"
+				+ " WHERE AJ.JOB_ID=?";
+
+		ResultSetHandler<List<Holiday>> h = new BeanListHandler<>(Holiday.class, new HolidayMapper());
+		return dbService.query(sql, h, jobId);
+	}
 }

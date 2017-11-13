@@ -23,6 +23,8 @@ import art.dbutils.DatabaseUtils;
 import art.enums.JobType;
 import art.ftpserver.FtpServer;
 import art.ftpserver.FtpServerService;
+import art.holiday.Holiday;
+import art.holiday.HolidayService;
 import art.jobrunners.ReportJob;
 import art.report.Report;
 import art.report.ReportService;
@@ -88,17 +90,19 @@ public class JobService {
 	private final UserService userService;
 	private final FtpServerService ftpServerService;
 	private final ScheduleService scheduleService;
+	private final HolidayService holidayService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
 			UserService userService, FtpServerService ftpServerService,
-			ScheduleService scheduleService) {
+			ScheduleService scheduleService, HolidayService holidayService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
 		this.userService = userService;
 		this.ftpServerService = ftpServerService;
 		this.scheduleService = scheduleService;
+		this.holidayService = holidayService;
 	}
 
 	public JobService() {
@@ -107,6 +111,7 @@ public class JobService {
 		userService = new UserService();
 		ftpServerService = new FtpServerService();
 		scheduleService = new ScheduleService();
+		holidayService = new HolidayService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -222,6 +227,9 @@ public class JobService {
 
 		Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
 		job.setSchedule(schedule);
+
+		List<Holiday> sharedHolidays = holidayService.getJobHolidays(job.getJobId());
+		job.setSharedHolidays(sharedHolidays);
 	}
 
 	/**
@@ -749,7 +757,7 @@ public class JobService {
 			logger.warn("Scheduler not available. Job Id {}", job.getJobId());
 			return;
 		}
-		
+
 		finalizeScheduleFields(job);
 
 		//delete job while it has old calendar names, before updating the calendar names field

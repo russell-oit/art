@@ -19,11 +19,13 @@ package art.job;
 
 import art.enums.JobType;
 import art.ftpserver.FtpServer;
+import art.holiday.Holiday;
 import art.report.Report;
 import art.schedule.Schedule;
 import art.user.User;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Represent a report job
@@ -87,6 +89,21 @@ public class Job implements Serializable {
 	private String quartzCalendarNames;
 	private String scheduleSecond;
 	private Schedule schedule;
+	private List<Holiday> sharedHolidays;
+
+	/**
+	 * @return the sharedHolidays
+	 */
+	public List<Holiday> getSharedHolidays() {
+		return sharedHolidays;
+	}
+
+	/**
+	 * @param sharedHolidays the sharedHolidays to set
+	 */
+	public void setSharedHolidays(List<Holiday> sharedHolidays) {
+		this.sharedHolidays = sharedHolidays;
+	}
 
 	/**
 	 * @return the schedule

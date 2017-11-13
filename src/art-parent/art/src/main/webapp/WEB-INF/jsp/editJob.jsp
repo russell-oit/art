@@ -47,6 +47,11 @@
 <spring:message code="reports.format.txtZip" var="txtZipText"/>
 <spring:message code="reports.text.selectFile" var="selectFileText"/>
 <spring:message code="reports.text.change" var="changeText"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -69,6 +74,7 @@
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects-1.0.1/jquery.chained.remote.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
@@ -125,7 +131,7 @@
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="jobsConfig"]').parent().addClass('active');
-				
+
 				//display current time. updates every 1000 milliseconds
 				setInterval('updateClock()', 1000);
 
@@ -161,7 +167,14 @@
 				});
 
 				//Enable Bootstrap-Select
-				$('.selectpicker').selectpicker();
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}',
+					selectAllText: '${selectAllText}',
+					deselectAllText: '${deselectAllText}'
+				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
@@ -414,7 +427,6 @@
 	</jsp:attribute>
 
 	<jsp:body>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<spring:url var="formUrl" value="/saveJob"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="job" enctype="multipart/form-data">
 			<fieldset>
@@ -897,6 +909,21 @@
 						<div class="col-md-8">
 							<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
 							<form:errors path="holidays" cssClass="error"/>
+						</div>
+					</div>
+
+					<hr>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="sharedHolidays">
+							<spring:message code="schedules.label.sharedHolidays"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="sharedHolidays" items="${holidays}" multiple="true" 
+										 itemLabel="name" itemValue="holidayId" 
+										 class="form-control selectpicker"
+										 data-actions-box="true"
+										 />
+							<form:errors path="sharedHolidays" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

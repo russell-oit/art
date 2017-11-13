@@ -17,6 +17,7 @@
  */
 package art.schedule;
 
+import art.holiday.HolidayService;
 import art.jobrunners.UpdateQuartzSchedulesJob;
 import art.scheduleholiday.ScheduleHolidayService;
 import art.user.User;
@@ -64,6 +65,9 @@ public class ScheduleController {
 	
 	@Autowired
 	private ScheduleHolidayService scheduleHolidayService;
+	
+	@Autowired
+	private HolidayService holidayService;
 
 	@RequestMapping(value = "/schedules", method = RequestMethod.GET)
 	public String showSchedules(Model model) {
@@ -251,9 +255,15 @@ public class ScheduleController {
 	 */
 	private String showEditSchedule(String action, Model model) {
 		logger.debug("Entering showSchedule: action='{}'", action);
+		
+		try{
+			model.addAttribute("holidays", holidayService.getAllHolidays());
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
 
 		model.addAttribute("action", action);
-
 		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
 
 		return "editSchedule";
