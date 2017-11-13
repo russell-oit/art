@@ -82,7 +82,7 @@ public class HolidayService {
 			holiday.setHolidayId(rs.getInt("HOLIDAY_ID"));
 			holiday.setName(rs.getString("NAME"));
 			holiday.setDescription(rs.getString("DESCRIPTION"));
-			holiday.setDetails(rs.getString("DETAILS"));
+			holiday.setDefinition(rs.getString("HOLIDAY_DEFINITION"));
 			holiday.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			holiday.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			holiday.setCreatedBy(rs.getString("CREATED_BY"));
@@ -224,7 +224,7 @@ public class HolidayService {
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_HOLIDAYS"
-					+ " (HOLIDAY_ID, NAME, DESCRIPTION, DETAILS,"
+					+ " (HOLIDAY_ID, NAME, DESCRIPTION, HOLIDAY_DEFINITION,"
 					+ " CREATION_DATE, CREATED_BY)"
 					+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
@@ -232,7 +232,7 @@ public class HolidayService {
 				newRecordId,
 				holiday.getName(),
 				holiday.getDescription(),
-				holiday.getDetails(),
+				holiday.getDefinition(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -240,14 +240,14 @@ public class HolidayService {
 			affectedRows = dbService.update(sql, values);
 		} else {
 			String sql = "UPDATE ART_HOLIDAYS SET NAME=?, DESCRIPTION=?,"
-					+ " DETAILS=?,"
+					+ " HOLIDAY_DEFINITION=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE HOLIDAY_ID=?";
 
 			Object[] values = {
 				holiday.getName(),
 				holiday.getDescription(),
-				holiday.getDetails(),
+				holiday.getDefinition(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				holiday.getHolidayId()

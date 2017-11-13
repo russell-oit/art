@@ -17,7 +17,11 @@
  */
 package art.holiday;
 
+import java.sql.SQLException;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -29,12 +33,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class StringToHoliday implements Converter<String, Holiday> {
 
+	private static final Logger logger = LoggerFactory.getLogger(StringToHoliday.class);
+
+	@Autowired
+	private HolidayService holidayService;
+
 	@Override
 	public Holiday convert(String s) {
 		int id = NumberUtils.toInt(s);
 
-		Holiday holiday = new Holiday();
-		holiday.setHolidayId(id);
+		Holiday holiday = null;
+		try {
+			holiday = holidayService.getHoliday(id);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 
 		return holiday;
 	}

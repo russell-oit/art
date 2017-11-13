@@ -111,12 +111,12 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="details">
-						<spring:message code="holidays.label.details"/>
+					<label class="col-md-4 control-label " for="definition">
+						<spring:message code="holidays.label.definition"/>
 					</label>
 					<div class="col-md-8">
-						<form:textarea path="details" rows="3" cols="40" class="form-control"/>
-						<form:errors path="details" cssClass="error"/>
+						<form:textarea path="definition" rows="3" cols="40" class="form-control"/>
+						<form:errors path="definition" cssClass="error"/>
 					</div>
 				</div>
 

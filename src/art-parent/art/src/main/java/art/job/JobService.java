@@ -752,7 +752,7 @@ public class JobService {
 
 		String sql = SQL_SELECT_ALL
 				//where holidays are used directly
-				+ "WHERE EXISTS (SELECT *"
+				+ " WHERE EXISTS (SELECT *"
 				+ " FROM ART_JOB_HOLIDAY_MAP AJHM"
 				+ " WHERE AJHM.JOB_ID=AJ.JOB_ID AND AJHM.HOLIDAY_ID=?)"
 				+ " OR"
@@ -859,6 +859,12 @@ public class JobService {
 
 		int jobId = job.getJobId();
 		String mainTriggerName = "trigger" + jobId;
+
+		//if start date is in the past, job will fire once immediately, for the missed fire time in the past
+		Date now = new Date();
+		if (job.getStartDate().before(now)) {
+			job.setStartDate(now);
+		}
 
 		String cronString;
 
@@ -980,7 +986,15 @@ public class JobService {
 		}
 
 		List<org.quartz.Calendar> mainCalendars = processHolidayString(holidays);
-		calendars.addAll(mainCalendars);
+
+		List<org.quartz.Calendar> nonLabelledCalendars = new ArrayList<>();
+		for (org.quartz.Calendar calendar : mainCalendars) {
+			if (StringUtils.isBlank(calendar.getDescription())) {
+				nonLabelledCalendars.add(calendar);
+			} else {
+				calendars.add(calendar);
+			}
+		}
 
 		List<Holiday> sharedHolidays;
 		if (schedule == null) {
@@ -990,13 +1004,21 @@ public class JobService {
 		}
 
 		if (CollectionUtils.isNotEmpty(sharedHolidays)) {
-			StringBuilder sb = new StringBuilder();
 			for (Holiday holiday : sharedHolidays) {
-				sb.append(holiday.getDetails());
+				List<org.quartz.Calendar> sharedCalendars = processHolidayString(holiday.getDefinition());
+				for (org.quartz.Calendar calendar : sharedCalendars) {
+					if (StringUtils.isBlank(calendar.getDescription())) {
+						nonLabelledCalendars.add(calendar);
+					} else {
+						calendars.add(calendar);
+					}
+				}
 			}
-			String sharedHolidayDetails = sb.toString();
-			List<org.quartz.Calendar> sharedCalendars = processHolidayString(sharedHolidayDetails);
-			calendars.addAll(sharedCalendars);
+		}
+
+		if (CollectionUtils.isNotEmpty(nonLabelledCalendars)) {
+			org.quartz.Calendar finalNonLabelledCalendar = concatenateCalendars(nonLabelledCalendars);
+			calendars.add(finalNonLabelledCalendar);
 		}
 
 		return calendars;

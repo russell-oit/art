@@ -48,7 +48,7 @@ public class UpdateQuartzSchedulesJob implements org.quartz.Job {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private CacheHelper cacheHelper;
 
@@ -57,12 +57,19 @@ public class UpdateQuartzSchedulesJob implements org.quartz.Job {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 
-		JobDataMap dataMap = context.getMergedJobDataMap();
-		int scheduleId = dataMap.getInt("scheduleId");
-		int holidayId = dataMap.getInt("holidayId");
-		int userId = dataMap.getInt("userId");
-
 		try {
+			JobDataMap dataMap = context.getMergedJobDataMap();
+			//must use containsKey() where key may not be there, otherwise getInt() will throw an exception
+			int scheduleId = 0;
+			if (dataMap.containsKey("scheduleId")) {
+				scheduleId = dataMap.getInt("scheduleId");
+			}
+			int holidayId = 0;
+			if (dataMap.containsKey("holidayId")) {
+				holidayId = dataMap.getInt("holidayId");
+			}
+			int userId = dataMap.getInt("userId");
+
 			if (scheduleId > 0) {
 				List<Job> jobs = jobService.getScheduleJobs(scheduleId);
 				if (CollectionUtils.isNotEmpty(jobs)) {
@@ -83,7 +90,7 @@ public class UpdateQuartzSchedulesJob implements org.quartz.Job {
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
-		
+
 		cacheHelper.clearJobs();
 	}
 

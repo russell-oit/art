@@ -10,7 +10,7 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU General Public License for more definition.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
@@ -31,7 +31,7 @@ public class Holiday implements Serializable {
 	private int holidayId;
 	private String name;
 	private String description;
-	private String details;
+	private String definition;
 	private Date creationDate;
 	private String createdBy;
 	private Date updateDate;
@@ -80,17 +80,17 @@ public class Holiday implements Serializable {
 	}
 
 	/**
-	 * @return the details
+	 * @return the definition
 	 */
-	public String getDetails() {
-		return details;
+	public String getDefinition() {
+		return definition;
 	}
 
 	/**
-	 * @param details the details to set
+	 * @param definition the definition to set
 	 */
-	public void setDetails(String details) {
-		this.details = details;
+	public void setDefinition(String definition) {
+		this.definition = definition;
 	}
 
 	/**

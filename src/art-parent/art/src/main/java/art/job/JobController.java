@@ -111,10 +111,10 @@ public class JobController {
 
 	@Autowired
 	private FtpServerService ftpServerService;
-	
+
 	@Autowired
 	private JobHolidayService jobHolidayService;
-	
+
 	@Autowired
 	private HolidayService holidayService;
 
