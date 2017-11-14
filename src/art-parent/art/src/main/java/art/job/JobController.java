@@ -18,6 +18,7 @@
 package art.job;
 
 import art.datasource.DatasourceService;
+import art.destination.DestinationService;
 import art.enums.JobType;
 import art.enums.ReportType;
 import art.ftpserver.FtpServerService;
@@ -119,6 +120,9 @@ public class JobController {
 
 	@Autowired
 	private HolidayService holidayService;
+
+	@Autowired
+	private DestinationService destinationService;
 
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -695,6 +699,7 @@ public class JobController {
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
 			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
 			model.addAttribute("holidays", holidayService.getAllHolidays());
+			model.addAttribute("destinations", destinationService.getAllDestinations());
 
 			if (job != null && !StringUtils.equals(action, "add")) {
 				String mainScheduleDescription = CronStringHelper.getCronScheduleDescription(job, locale);

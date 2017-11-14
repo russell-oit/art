@@ -17,6 +17,7 @@
  */
 package art.job;
 
+import art.destination.Destination;
 import art.enums.JobType;
 import art.ftpserver.FtpServer;
 import art.holiday.Holiday;
@@ -91,6 +92,21 @@ public class Job implements Serializable {
 	private String quartzCalendarNames;
 	private Schedule schedule;
 	private List<Holiday> sharedHolidays;
+	private List<Destination> destinations;
+
+	/**
+	 * @return the destinations
+	 */
+	public List<Destination> getDestinations() {
+		return destinations;
+	}
+
+	/**
+	 * @param destinations the destinations to set
+	 */
+	public void setDestinations(List<Destination> destinations) {
+		this.destinations = destinations;
+	}
 
 	/**
 	 * @return the scheduleYear

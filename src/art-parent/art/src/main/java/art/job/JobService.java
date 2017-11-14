@@ -20,6 +20,8 @@ package art.job;
 import art.connectionpool.DbConnections;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
+import art.destination.Destination;
+import art.destination.DestinationService;
 import art.enums.JobType;
 import art.ftpserver.FtpServer;
 import art.ftpserver.FtpServerService;
@@ -91,11 +93,13 @@ public class JobService {
 	private final FtpServerService ftpServerService;
 	private final ScheduleService scheduleService;
 	private final HolidayService holidayService;
+	private final DestinationService destinationService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
 			UserService userService, FtpServerService ftpServerService,
-			ScheduleService scheduleService, HolidayService holidayService) {
+			ScheduleService scheduleService, HolidayService holidayService,
+			DestinationService destinationService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
@@ -103,6 +107,7 @@ public class JobService {
 		this.ftpServerService = ftpServerService;
 		this.scheduleService = scheduleService;
 		this.holidayService = holidayService;
+		this.destinationService = destinationService;
 	}
 
 	public JobService() {
@@ -112,6 +117,7 @@ public class JobService {
 		ftpServerService = new FtpServerService();
 		scheduleService = new ScheduleService();
 		holidayService = new HolidayService();
+		destinationService = new DestinationService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -231,6 +237,9 @@ public class JobService {
 
 		List<Holiday> sharedHolidays = holidayService.getJobHolidays(job.getJobId());
 		job.setSharedHolidays(sharedHolidays);
+
+		List<Destination> destinations = destinationService.getJobDestinations(job.getJobId());
+		job.setDestinations(destinations);
 	}
 
 	/**

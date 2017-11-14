@@ -183,8 +183,8 @@ Header that appears at the top of all pages, except the login and logs pages
 								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 80}">
 									<li>
-										<a href="${pageContext.request.contextPath}/ftpServers">
-											<spring:message code="header.link.ftpServers"/>
+										<a href="${pageContext.request.contextPath}/destinations">
+											<spring:message code="page.title.destinations"/>
 										</a>
 									</li>
 								</c:if>
