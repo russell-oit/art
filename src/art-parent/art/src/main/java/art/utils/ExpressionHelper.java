@@ -64,9 +64,8 @@ public class ExpressionHelper {
 	 * @throws ParseException
 	 */
 	public String processString(String string) throws ParseException {
-		Map<String, ReportParameter> reportParamsMap = null;
 		String username = null;
-		return processString(string, reportParamsMap, username);
+		return processString(string, username);
 	}
 
 	/**

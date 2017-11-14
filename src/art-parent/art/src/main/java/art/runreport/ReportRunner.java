@@ -839,7 +839,9 @@ public class ReportRunner {
 	 * @throws java.sql.SQLException
 	 */
 	public void execute(int resultSetType) throws SQLException {
-		execute(resultSetType, false, false);
+		boolean overrideUseRules = false;
+		boolean newUseRules = false;
+		execute(resultSetType, overrideUseRules, newUseRules);
 	}
 
 	/**
@@ -850,7 +852,8 @@ public class ReportRunner {
 	 * @throws java.sql.SQLException
 	 */
 	public void execute(boolean newUseRules) throws SQLException {
-		execute(ResultSet.TYPE_FORWARD_ONLY, true, newUseRules);
+		boolean overrideUseRules = true;
+		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 	}
 
 	/**
