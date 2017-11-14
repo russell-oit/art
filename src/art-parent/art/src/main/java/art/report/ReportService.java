@@ -438,7 +438,6 @@ public class ReportService {
 //
 //		return report;
 //	}
-
 	/**
 	 * Returns the report source for a given report
 	 *
@@ -1171,18 +1170,6 @@ public class ReportService {
 	public boolean canUserRunReport(int userId, int reportId) throws SQLException {
 		logger.debug("Entering canUserRunReport: userId={}, reportId={}", userId, reportId);
 
-		Report report = getReport(reportId);
-		if (report != null) {
-			int sourceReportId = report.getSourceReportId();
-			CloneOptions cloneOptions = report.getCloneOptions();
-			if (cloneOptions == null) {
-				cloneOptions = new CloneOptions();
-			}
-			if (sourceReportId > 0 && cloneOptions.isUseParentAccessRights()) {
-				reportId = sourceReportId;
-			}
-		}
-
 		String sql = "SELECT COUNT(*)"
 				+ " FROM ART_QUERIES AQ"
 				+ " WHERE QUERY_ID=?"
@@ -1261,7 +1248,7 @@ public class ReportService {
 		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#3279
 		ResultSetHandler<Number> h = new ScalarHandler<>();
 		Number recordCountNumber = dbService.query(sql, h, values);
-		
+
 		boolean canRunReport;
 		if (recordCountNumber == null) {
 			canRunReport = false;
