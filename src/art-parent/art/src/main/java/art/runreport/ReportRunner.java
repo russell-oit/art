@@ -60,7 +60,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -492,8 +491,9 @@ public class ReportRunner {
 		}
 
 		//replace all occurrences of labelled rule with rule values
-		String replaceString = Matcher.quoteReplacement(labelledValues.toString()); //quote in case it contains special regex characters
-		querySql = querySql.replaceAll("(?iu)#rules#", replaceString);
+		String searchString = "#rules#";
+		String replaceString = labelledValues.toString();
+		querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 
 		//update sb with new sql
 		querySb.replace(0, querySb.length(), querySql);
@@ -1421,8 +1421,9 @@ public class ReportRunner {
 		//replace :USERNAME: with currently logged in user's username
 		if (user != null) {
 			String username = user.getUsername();
-			String replaceString = Matcher.quoteReplacement("'" + username + "'"); //quote in case it contains special regex characters
-			querySql = querySql.replaceAll("(?iu):username:", replaceString); //(?iu) makes replace case insensitive across unicode characters
+			String searchString = ":username:";
+			String replaceString = "'" + username + "'";
+			querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 		}
 
 		//replace :DATE: with current date
