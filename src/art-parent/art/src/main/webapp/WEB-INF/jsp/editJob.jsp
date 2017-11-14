@@ -226,6 +226,13 @@
 								$('#scheduleYear').val(schedule.year);
 								$('#extraSchedules').val(schedule.extraSchedules);
 								$('#holidays').val(schedule.holidays);
+
+								//https://silviomoreto.github.io/bootstrap-select/methods/
+								var sharedHolidayIds = [];
+								$.each(schedule.sharedHolidays, function (index, holiday) {
+									sharedHolidayIds.push(holiday.holidayId);
+								});
+								$('#sharedHolidays').selectpicker('val',sharedHolidayIds);
 							}
 						},
 						error: ajaxErrorHandler
