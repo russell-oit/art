@@ -47,8 +47,16 @@ public class AccessRightService {
 
 	private static final Logger logger = LoggerFactory.getLogger(AccessRightService.class);
 
+	private final DbService dbService;
+
 	@Autowired
-	private DbService dbService;
+	public AccessRightService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public AccessRightService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL_USER_REPORT_RIGHTS
 			= "SELECT AU.USER_ID, AU.USERNAME, AQ.QUERY_ID, AQ.NAME AS REPORT_NAME"

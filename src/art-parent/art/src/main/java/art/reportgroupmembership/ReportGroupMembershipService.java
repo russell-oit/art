@@ -39,7 +39,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
- * Provides methods for retrieving, updating and deleting report group memberships
+ * Provides methods for retrieving, updating and deleting report group
+ * memberships
  *
  * @author Timothy Anyona
  */
@@ -48,14 +49,24 @@ public class ReportGroupMembershipService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportGroupMembershipService.class);
 
-	@Autowired
-	private DbService dbService;
+	private final DbService dbService;
+	private final ReportService reportService;
+	private final ReportGroupService reportGroupService;
 
 	@Autowired
-	private ReportService reportService;
+	public ReportGroupMembershipService(DbService dbService,
+			ReportService reportService, ReportGroupService reportGroupService) {
 
-	@Autowired
-	private ReportGroupService reportGroupService;
+		this.dbService = dbService;
+		this.reportService = reportService;
+		this.reportGroupService = reportGroupService;
+	}
+
+	public ReportGroupMembershipService() {
+		dbService = new DbService();
+		reportService = new ReportService();
+		reportGroupService = new ReportGroupService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_REPORT_REPORT_GROUPS";
 
@@ -131,17 +142,17 @@ public class ReportGroupMembershipService {
 
 	/**
 	 * Adds report group memberships for the given report
-	 * 
+	 *
 	 * @param report the report, not null
 	 * @param reportGroups the report groups
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"reports", "reportGroups"}, allEntries = true)
 	public void addReportGroupMemberships(Report report, List<ReportGroup> reportGroups) throws SQLException {
 		logger.debug("Entering addReportGroupMemberships: report={}", report);
-		
+
 		Objects.requireNonNull(report, "report must not be null");
-		
+
 		if (CollectionUtils.isEmpty(reportGroups)) {
 			return;
 		}

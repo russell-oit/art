@@ -45,8 +45,16 @@ public class AdminRightService {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminRightService.class);
 
+	private final DbService dbService;
+
 	@Autowired
-	private DbService dbService;
+	public AdminRightService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public AdminRightService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL_DATASOURCE_RIGHTS
 			= "SELECT AU.USER_ID, AU.USERNAME, AD.DATABASE_ID, AD.NAME AS DATASOURCE_NAME"
