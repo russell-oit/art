@@ -34,6 +34,7 @@ import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
+import art.utils.CronStringHelper;
 import art.utils.ExpressionHelper;
 import art.utils.SchedulerUtils;
 import java.sql.Connection;
@@ -42,7 +43,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -790,8 +790,6 @@ public class JobService {
 			return;
 		}
 
-		finalizeScheduleFields(job);
-
 		//delete job while it has old calendar names, before updating the calendar names field
 		deleteQuartzJob(job, scheduler);
 
@@ -864,31 +862,22 @@ public class JobService {
 		int jobId = job.getJobId();
 		String mainTriggerName = "trigger" + jobId;
 
+		String cronString;
+
+		Schedule schedule = job.getSchedule();
+		if (schedule == null) {
+			cronString = CronStringHelper.getCronString(job);
+		} else {
+			cronString = CronStringHelper.getCronString(schedule);
+		}
+
 		//if start date is in the past, job will fire once immediately, for the missed fire time in the past
 		Date now = new Date();
 		if (job.getStartDate().before(now)) {
 			job.setStartDate(now);
 		}
 
-		String cronString;
-
-		Schedule schedule = job.getSchedule();
-		if (schedule == null) {
-			//create main trigger
-			//build cron expression.
-			//cron format is sec min hr dayofmonth month dayofweek (optionally year)
-			cronString = job.getScheduleSecond() + " " + job.getScheduleMinute()
-					+ " " + job.getScheduleHour() + " " + job.getScheduleDay()
-					+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday()
-					+ " " + job.getScheduleYear();
-		} else {
-			cronString = schedule.getSecond() + " " + schedule.getMinute()
-					+ " " + schedule.getHour() + " " + schedule.getDay()
-					+ " " + schedule.getMonth() + " " + schedule.getWeekday()
-					+ " " + schedule.getYear();
-		}
-
-		//create trigger that defines the schedule for the job
+		//create trigger that defines the main schedule for the job
 		CronTriggerImpl mainTrigger = (CronTriggerImpl) newTrigger()
 				.withIdentity(triggerKey(mainTriggerName, ArtUtils.TRIGGER_GROUP))
 				.withSchedule(cronSchedule(cronString))
@@ -1104,133 +1093,6 @@ public class JobService {
 		org.quartz.Calendar finalCalendar = calendars.get(calendars.size() - 1);
 
 		return finalCalendar;
-	}
-
-	/**
-	 * Processes the job schedule details and sets the schedule fields as
-	 * appropriate
-	 *
-	 * @param job the art job object
-	 * @throws ParseException
-	 */
-	private void finalizeScheduleFields(Job job) throws ParseException {
-		logger.debug("Entering finalizeScheduleFields: job={}", job);
-
-		String second;
-		String minute;
-		String hour;
-		String day;
-		String month;
-		String weekday;
-		String year;
-
-		minute = StringUtils.deleteWhitespace(job.getScheduleMinute());
-
-		hour = StringUtils.deleteWhitespace(job.getScheduleHour());
-		String originalHour = hour;
-
-		//enable definition of random start time
-		if (StringUtils.contains(originalHour, "|")) {
-			String startPart = StringUtils.substringBefore(originalHour, "|");
-			String endPart = StringUtils.substringAfter(originalHour, "|");
-			String startHour = StringUtils.substringBefore(startPart, ":");
-			String startMinute = StringUtils.substringAfter(startPart, ":");
-			String endHour = StringUtils.substringBefore(endPart, ":");
-			String endMinute = StringUtils.substringAfter(endPart, ":");
-
-			if (StringUtils.isBlank(startMinute)) {
-				startMinute = "0";
-			}
-			if (StringUtils.isBlank(endMinute)) {
-				endMinute = "0";
-			}
-
-			Date now = new Date();
-
-			Calendar calStart = Calendar.getInstance();
-			calStart.setTime(now);
-			calStart.set(Calendar.HOUR_OF_DAY, Integer.parseInt(startHour));
-			calStart.set(Calendar.MINUTE, Integer.parseInt(startMinute));
-
-			Calendar calEnd = Calendar.getInstance();
-			calEnd.setTime(now);
-			calEnd.set(Calendar.HOUR_OF_DAY, Integer.parseInt(endHour));
-			calEnd.set(Calendar.MINUTE, Integer.parseInt(endMinute));
-
-			long randomDate = ArtUtils.getRandomNumber(calStart.getTimeInMillis(), calEnd.getTimeInMillis());
-			Calendar calRandom = Calendar.getInstance();
-			calRandom.setTimeInMillis(randomDate);
-
-			hour = String.valueOf(calRandom.get(Calendar.HOUR_OF_DAY));
-			minute = String.valueOf(calRandom.get(Calendar.MINUTE));
-		}
-
-		if (StringUtils.isBlank(minute)) {
-			//no minute defined. use random value
-			minute = String.valueOf(ArtUtils.getRandomNumber(0, 59));
-		}
-
-		if (StringUtils.isBlank(hour)) {
-			//no hour defined. use random value between 3-6
-			hour = String.valueOf(ArtUtils.getRandomNumber(3, 6));
-		}
-
-		second = StringUtils.deleteWhitespace(job.getScheduleSecond());
-		if (StringUtils.isBlank(second)) {
-			//no second defined. default to 0
-			second = "0";
-		}
-
-		month = StringUtils.deleteWhitespace(job.getScheduleMonth());
-		if (StringUtils.isBlank(month)) {
-			//no month defined. default to every month
-			month = "*";
-		}
-
-		year = StringUtils.deleteWhitespace(job.getScheduleYear());
-		if (StringUtils.isBlank(year)) {
-			//no year defined. default to every year
-			year = "*";
-		}
-
-		day = StringUtils.deleteWhitespace(job.getScheduleDay());
-		weekday = StringUtils.deleteWhitespace(job.getScheduleWeekday());
-
-		//set default day of the month if weekday is defined
-		if (StringUtils.isBlank(day) && StringUtils.isNotBlank(weekday)
-				&& !StringUtils.equals(weekday, "?")) {
-			//weekday defined but day of the month is not. default day to ?
-			day = "?";
-		}
-
-		if (StringUtils.isBlank(day)) {
-			//no day of month defined. default to *
-			day = "*";
-		}
-
-		if (StringUtils.isBlank(weekday)) {
-			//no day of week defined. default to undefined
-			weekday = "?";
-		}
-
-		if (StringUtils.equals(day, "?") && StringUtils.equals(weekday, "?")) {
-			//unsupported. only one can be ?
-			day = "*";
-			weekday = "?";
-		}
-		if (StringUtils.equals(day, "*") && StringUtils.equals(weekday, "*")) {
-			//unsupported. only one can be *
-			day = "*";
-			weekday = "?";
-		}
-
-		job.setScheduleSecond(second);
-		job.setScheduleMinute(minute);
-		job.setScheduleHour(hour);
-		job.setScheduleDay(day);
-		job.setScheduleMonth(month);
-		job.setScheduleWeekday(weekday);
-		job.setScheduleYear(year);
 	}
 
 }

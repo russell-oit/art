@@ -42,6 +42,7 @@ import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.CronStringHelper;
+import art.utils.ExpressionHelper;
 import art.utils.SchedulerUtils;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -276,8 +277,8 @@ public class JobController {
 					.usingJobData("tempJob", Boolean.TRUE)
 					.build();
 
-			ParameterProcessor parameterProcessor = new ParameterProcessor();
-			Date runDate = parameterProcessor.convertParameterStringValueToDate(runLaterDate);
+			ExpressionHelper expressionHelper = new ExpressionHelper();
+			Date runDate = expressionHelper.convertStringToDate(runLaterDate);
 
 			// create SimpleTrigger that will fire once at the given date		        
 			SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
@@ -719,18 +720,15 @@ public class JobController {
 		logger.debug("Entering setScheduleDates: job={}", job);
 
 		String startDateString = job.getStartDateString();
-		if (StringUtils.isBlank(startDateString)) {
-			startDateString = "now";
-		}
-		ParameterProcessor parameterProcessor = new ParameterProcessor();
-		Date startDate = parameterProcessor.convertParameterStringValueToDate(startDateString);
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		Date startDate = expressionHelper.convertStringToDate(startDateString);
 
 		String endDateString = job.getEndDateString();
 		Date endDate;
 		if (StringUtils.isBlank(endDateString)) {
 			endDate = null;
 		} else {
-			endDate = parameterProcessor.convertParameterStringValueToDate(endDateString);
+			endDate = expressionHelper.convertStringToDate(endDateString);
 		}
 
 		job.setStartDate(startDate);
