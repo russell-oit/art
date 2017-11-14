@@ -1171,7 +1171,17 @@ public class ReportService {
 	public boolean canUserRunReport(int userId, int reportId) throws SQLException {
 		logger.debug("Entering canUserRunReport: userId={}, reportId={}", userId, reportId);
 
-		boolean canRunReport;
+		Report report = getReport(reportId);
+		if (report != null) {
+			int sourceReportId = report.getSourceReportId();
+			CloneOptions cloneOptions = report.getCloneOptions();
+			if (cloneOptions == null) {
+				cloneOptions = new CloneOptions();
+			}
+			if (sourceReportId > 0 && cloneOptions.isUseParentAccessRights()) {
+				reportId = sourceReportId;
+			}
+		}
 
 		String sql = "SELECT COUNT(*)"
 				+ " FROM ART_QUERIES AQ"
@@ -1192,7 +1202,9 @@ public class ReportService {
 				+ " FROM ART_USER_QUERY_GROUPS AUQG"
 				+ " INNER JOIN ART_USERS AU"
 				+ " ON AUQG.USER_ID=AU.USER_ID"
-				+ " WHERE AUQG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AU.USERNAME=?)"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AU.USERNAME=?)"
 				+ " OR"
 				//admins can run all reports
 				+ " EXISTS (SELECT *"
@@ -1214,14 +1226,18 @@ public class ReportService {
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_QUERY_GROUPS AUQG"
-				+ " WHERE AUQG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUQG.USER_ID=?)"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUQG.USER_ID=?)"
 				+ " OR"
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_GROUPS AUGG"
 				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
 				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
-				+ " WHERE AUGG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUGA.USER_ID=?)"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AUGG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
 				+ ")";
 
 		Object[] values = {
@@ -1238,13 +1254,15 @@ public class ReportService {
 			userId //user group access to report group
 		};
 
-		//some drivers return long, some integer
+		//some drivers return long for select count(*), some return integer
 		//https://issues.apache.org/jira/browse/DBUTILS-27
 		//https://issues.apache.org/jira/browse/DBUTILS-17
 		//https://stackoverflow.com/questions/10240901/how-best-to-retrieve-result-of-select-count-from-sql-query-in-java-jdbc-lon
 		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#3279
 		ResultSetHandler<Number> h = new ScalarHandler<>();
 		Number recordCountNumber = dbService.query(sql, h, values);
+		
+		boolean canRunReport;
 		if (recordCountNumber == null) {
 			canRunReport = false;
 		} else {

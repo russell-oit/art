@@ -28,6 +28,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class CloneOptions {
 
 	private boolean useParentParameters = true;
+	private boolean useParentAccessRights = true;
+
+	/**
+	 * @return the useParentAccessRights
+	 */
+	public boolean isUseParentAccessRights() {
+		return useParentAccessRights;
+	}
+
+	/**
+	 * @param useParentAccessRights the useParentAccessRights to set
+	 */
+	public void setUseParentAccessRights(boolean useParentAccessRights) {
+		this.useParentAccessRights = useParentAccessRights;
+	}
 
 	/**
 	 * @return the useParentParameters

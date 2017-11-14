@@ -228,6 +228,7 @@
 								$('#holidays').val(schedule.holidays);
 
 								//https://silviomoreto.github.io/bootstrap-select/methods/
+								//https://stackoverflow.com/questions/19543285/use-jquery-each-to-iterate-through-object
 								var sharedHolidayIds = [];
 								$.each(schedule.sharedHolidays, function (index, holiday) {
 									sharedHolidayIds.push(holiday.holidayId);
