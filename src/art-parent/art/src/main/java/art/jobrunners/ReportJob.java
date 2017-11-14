@@ -91,7 +91,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
@@ -657,11 +656,9 @@ public class ReportJob implements org.quartz.Job {
 
 		setMailerFromAndSubject(mailer, recipientDetails, reportParamsMap);
 
-		String customMessage = applyDynamicRecipientColumns(message, recipientDetails);
-
 		ExpressionHelper expressionHelper = new ExpressionHelper();
 		String username = job.getUser().getUsername();
-		customMessage = expressionHelper.processString(customMessage, reportParamsMap, username);
+		String customMessage = expressionHelper.processString(message, reportParamsMap, username, recipientDetails);
 
 		String mainMessage;
 		if (StringUtils.isBlank(customMessage)) {
@@ -809,11 +806,9 @@ public class ReportJob implements org.quartz.Job {
 			}
 		}
 
-		String customMessage = applyDynamicRecipientColumns(message, recipientDetails);
-
 		ExpressionHelper expressionHelper = new ExpressionHelper();
 		String username = job.getUser().getUsername();
-		customMessage = expressionHelper.processString(customMessage, reportParamsMap, username);
+		String customMessage = expressionHelper.processString(message, reportParamsMap, username, recipientDetails);
 
 		if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
 			String finalMessage;
@@ -872,11 +867,9 @@ public class ReportJob implements org.quartz.Job {
 			subject = "ART: (Job " + jobId + ")";
 		}
 
-		subject = applyDynamicRecipientColumns(subject, recipientDetails);
-
 		ExpressionHelper expressionHelper = new ExpressionHelper();
 		String username = job.getUser().getUsername();
-		subject = expressionHelper.processString(subject, reportParamsMap, username);
+		subject = expressionHelper.processString(subject, reportParamsMap, username, recipientDetails);
 
 		mailer.setSubject(subject);
 		mailer.setFrom(from);
@@ -1982,30 +1975,6 @@ public class ReportJob implements org.quartz.Job {
 			//no emails addresses to send to
 			runMessage = "jobs.message.noEmailAddressesAvailable";
 		}
-	}
-
-	/**
-	 * Replaces field labels with values for a particular recipient
-	 *
-	 * @param value the original string
-	 * @param recipientColumns the recipient details
-	 * @return the customized string with field labels replaced
-	 */
-	private String applyDynamicRecipientColumns(String value, Map<String, String> recipientColumns) {
-		String finalValue = value;
-
-		if (StringUtils.isNotBlank(value) && MapUtils.isNotEmpty(recipientColumns)) {
-			for (Entry<String, String> entry : recipientColumns.entrySet()) {
-				String columnName = entry.getKey();
-				String columnValue = entry.getValue();
-
-				String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
-				String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
-				finalValue = finalValue.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
-			}
-		}
-
-		return finalValue;
 	}
 
 	/**

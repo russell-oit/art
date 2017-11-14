@@ -96,8 +96,27 @@ public class ExpressionHelper {
 	public String processString(String string, Map<String, ReportParameter> reportParamsMap,
 			String username) throws ParseException {
 
+		Map<String, String> recipientColumns = null;
+		return processString(string, reportParamsMap, username, recipientColumns);
+	}
+
+	/**
+	 * Processes a string that may have parameter or field expressions and
+	 * returns the processed value with these items replaced
+	 *
+	 * @param string the string to process
+	 * @param reportParamsMap a map containing report parameters
+	 * @param username the username to replace
+	 * @param recipientColumns dynamic recipient details
+	 * @return the processed value with these items replaced
+	 * @throws ParseException
+	 */
+	public String processString(String string, Map<String, ReportParameter> reportParamsMap,
+			String username, Map<String, String> recipientColumns) throws ParseException {
+
 		String finalString = string;
 		finalString = processParameters(finalString, reportParamsMap);
+		finalString = processDynamicRecipients(finalString, recipientColumns);
 		finalString = processFields(finalString, username);
 		finalString = processGroovy(finalString, reportParamsMap);
 		return finalString;
@@ -112,39 +131,61 @@ public class ExpressionHelper {
 	 * @return the processed value with these items replaced
 	 */
 	public String processParameters(String string, Map<String, ReportParameter> reportParamsMap) {
-		if (MapUtils.isEmpty(reportParamsMap)) {
-			return string;
-		}
-
 		String finalString = string;
 
-		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
-			String paramName = entry.getKey();
-			ReportParameter reportParam = entry.getValue();
+		if (StringUtils.isNotBlank(string) && MapUtils.isNotEmpty(reportParamsMap)) {
+			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+				String paramName = entry.getKey();
+				ReportParameter reportParam = entry.getValue();
 
-			List<Object> actualParameterValues = reportParam.getActualParameterValues();
+				List<Object> actualParameterValues = reportParam.getActualParameterValues();
 
-			String replaceString;
-			if (CollectionUtils.isEmpty(actualParameterValues)) {
-				replaceString = "";
-			} else {
-				List<String> paramValues = new ArrayList<>();
-				for (Object value : actualParameterValues) {
-					String paramValue;
-					if (value instanceof Date) {
-						Date dateValue = (Date) value;
-						paramValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
-					} else {
-						paramValue = String.valueOf(value);
+				String replaceString;
+				if (CollectionUtils.isEmpty(actualParameterValues)) {
+					replaceString = "";
+				} else {
+					List<String> paramValues = new ArrayList<>();
+					for (Object value : actualParameterValues) {
+						String paramValue;
+						if (value instanceof Date) {
+							Date dateValue = (Date) value;
+							paramValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
+						} else {
+							paramValue = String.valueOf(value);
+						}
+						paramValues.add(paramValue);
 					}
-					paramValues.add(paramValue);
+
+					replaceString = StringUtils.join(paramValues, ",");
 				}
 
-				replaceString = StringUtils.join(paramValues, ",");
+				String paramIdentifier = "#" + paramName + "#";
+				finalString = StringUtils.replaceIgnoreCase(finalString, paramIdentifier, replaceString);
 			}
+		}
 
-			String paramIdentifier = "#" + paramName + "#";
-			finalString = StringUtils.replaceIgnoreCase(finalString, paramIdentifier, replaceString);
+		return finalString;
+	}
+
+	/**
+	 * Processes a string that may have dynamic recipient column expressions and
+	 * returns the processed value with these items replaced
+	 *
+	 * @param string the string to process
+	 * @param recipientColumns the recipient details
+	 * @return the processed value with these items replaced
+	 */
+	public String processDynamicRecipients(String string, Map<String, String> recipientColumns) {
+		String finalString = string;
+
+		if (StringUtils.isNotBlank(string) && MapUtils.isNotEmpty(recipientColumns)) {
+			for (Entry<String, String> entry : recipientColumns.entrySet()) {
+				String columnName = entry.getKey();
+				String columnValue = entry.getValue();
+
+				String columnIdentifier = "#" + columnName + "#";
+				finalString = StringUtils.replaceIgnoreCase(finalString, columnIdentifier, columnValue);
+			}
 		}
 
 		return finalString;
@@ -293,9 +334,9 @@ public class ExpressionHelper {
 				outputLocaleString = components[2].trim();
 			}
 			Locale outputLocale = ArtUtils.getLocaleFromString(outputLocaleString);
-			String inputFormat=null;
-			if(components.length>3){
-				inputFormat=components[3].trim();
+			String inputFormat = null;
+			if (components.length > 3) {
+				inputFormat = components[3].trim();
 			}
 			String inputLocaleString = null;
 			if (components.length > 4) {
