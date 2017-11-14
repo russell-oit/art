@@ -88,8 +88,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
@@ -667,9 +665,9 @@ public class ReportJob implements org.quartz.Job {
 			mainMessage = customMessage;
 
 			//replace value placeholder in the message if it exists
-			String searchString = Pattern.quote("#value#"); //quote in case it contains special regex characters
-			String replaceString = Matcher.quoteReplacement(String.valueOf(value)); //quote in case it contains special regex characters
-			mainMessage = mainMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+			String searchString = "#value#";
+			String replaceString = String.valueOf(value);
+			mainMessage = StringUtils.replaceIgnoreCase(mainMessage, searchString, replaceString);
 		}
 
 		Context ctx = new Context(locale);

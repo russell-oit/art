@@ -42,8 +42,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.CollectionUtils;
@@ -546,8 +544,7 @@ public class RunReportHelper {
 				continue;
 			}
 
-			String paramIdentifier = placeholderPrefix + "#" + paramName + "#";
-			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
+			String searchString = placeholderPrefix + "#" + paramName + "#";
 
 			List<String> paramValues = new ArrayList<>();
 			for (Object value : actualParameterValues) {
@@ -561,9 +558,8 @@ public class RunReportHelper {
 				paramValues.add(paramValue);
 			}
 
-			String paramValuesString = StringUtils.join(paramValues, ",");
-			String replaceString = Matcher.quoteReplacement(paramValuesString); //quote in case it contains special regex characters
-			outputString = outputString.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+			String replaceString = StringUtils.join(paramValues, ",");
+			outputString = StringUtils.replaceIgnoreCase(outputString, searchString, replaceString);
 		}
 
 		return outputString;

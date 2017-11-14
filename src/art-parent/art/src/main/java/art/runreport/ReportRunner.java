@@ -61,7 +61,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -276,11 +275,8 @@ public class ReportRunner {
 		Object[] paramValues = jdbcParams.toArray(new Object[0]);
 		finalSql = generateFinalSql(querySql, paramValues);
 
-		String questionSearchString = Pattern.quote(QUESTION_PLACEHOLDER);
-		String questionReplaceString = Matcher.quoteReplacement("?");
-
-		querySql = querySql.replaceAll("(?iu)" + questionSearchString, questionReplaceString);
-		finalSql = finalSql.replaceAll("(?iu)" + questionSearchString, questionReplaceString);
+		querySql = StringUtils.replaceIgnoreCase(querySql, QUESTION_PLACEHOLDER, "?");
+		finalSql = StringUtils.replaceIgnoreCase(finalSql, QUESTION_PLACEHOLDER, "?");
 
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
@@ -636,9 +632,7 @@ public class ReportRunner {
 		//replace literal ? in query with a placeholder, before substituting query parameters with ?
 		//to enable show sql to give correct results when ? literals exist in the query
 		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#2c1f/6b3b
-		String questionSearchString = Pattern.quote("?");
-		String questionReplaceString = Matcher.quoteReplacement(QUESTION_PLACEHOLDER);
-		querySql = querySql.replaceAll("(?iu)" + questionSearchString, questionReplaceString);
+		querySql = StringUtils.replaceIgnoreCase(querySql, "?", QUESTION_PLACEHOLDER);
 
 		//replace jdbc parameter identifiers with ?
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
@@ -651,11 +645,9 @@ public class ReportRunner {
 				continue;
 			}
 
-			String paramIdentifier = "#" + paramName + "#";
-			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
-			String replaceString = Matcher.quoteReplacement(StringUtils.repeat(" ? ", ",", reportParam.getActualParameterValues().size())); //quote in case it contains special regex characters
-
-			querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+			String searchString = "#" + paramName + "#";
+			String replaceString = StringUtils.repeat(" ? ", ",", reportParam.getActualParameterValues().size());
+			querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 		}
 
 		//replace x parameter identifiers with ?
@@ -714,10 +706,7 @@ public class ReportRunner {
 			finalSb.append(")");
 			String finalString = finalSb.toString();
 
-			String searchString = Pattern.quote(xParamDefinition); //quote in case it contains special regex characters
-			String replaceString = Matcher.quoteReplacement(finalString); //quote in case it contains special regex characters
-
-			querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+			querySql = StringUtils.replaceIgnoreCase(querySql, xParamDefinition, finalString);
 		}
 
 		//update querySb with new sql
@@ -822,15 +811,13 @@ public class ReportRunner {
 				}
 				String replaceString = recipientColumn + "=" + recipientValue;
 
-				String searchString = Pattern.quote(RECIPIENT_LABEL);
-				replaceString = Matcher.quoteReplacement(replaceString);
-				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString);
+				querySql = StringUtils.replaceIgnoreCase(querySql, RECIPIENT_LABEL, replaceString);
 			}
 		}
 
 		//ignore #recipient# label if it is still there
-		String searchString = Pattern.quote(RECIPIENT_LABEL);
-		querySql = querySql.replaceAll("(?iu)" + searchString, "1=1");
+		String replaceString = "1=1";
+		querySql = StringUtils.replaceIgnoreCase(querySql, RECIPIENT_LABEL, replaceString);
 
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
@@ -1319,10 +1306,9 @@ public class ReportRunner {
 			}
 
 			Object actualParameterValue = reportParam.getEffectiveActualParameterValue();
-			if( reportParam.getParameter().getParameterType() == ParameterType.MultiValue  ) {
-				expValue = StringUtils.join( actualParameterValue, "," );
-			}
-			else if (actualParameterValue instanceof Date) {
+			if (reportParam.getParameter().getParameterType() == ParameterType.MultiValue) {
+				expValue = StringUtils.join(actualParameterValue, ",");
+			} else if (actualParameterValue instanceof Date) {
 				Date dateValue = (Date) actualParameterValue;
 				expValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
 			} else {
