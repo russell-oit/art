@@ -18,6 +18,9 @@
 package art.reportrule;
 
 import art.dbutils.DbService;
+import art.report.Report;
+import art.report.ReportService;
+import art.reportoptions.CloneOptions;
 import art.rule.Rule;
 import art.rule.RuleService;
 import java.sql.ResultSet;
@@ -49,16 +52,21 @@ public class ReportRuleService {
 
 	private final DbService dbService;
 	private final RuleService ruleService;
+	private final ReportService reportService;
 
 	@Autowired
-	public ReportRuleService(DbService dbService, RuleService ruleService) {
+	public ReportRuleService(DbService dbService, RuleService ruleService,
+			ReportService reportService) {
+
 		this.dbService = dbService;
 		this.ruleService = ruleService;
+		this.reportService = reportService;
 	}
 
 	public ReportRuleService() {
 		dbService = new DbService();
 		ruleService = new RuleService();
+		reportService = new ReportService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERY_RULES";
@@ -102,6 +110,35 @@ public class ReportRuleService {
 	@Cacheable("rules")
 	public List<ReportRule> getReportRules(int reportId) throws SQLException {
 		logger.debug("Entering getReportRules: reportId={}", reportId);
+
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
+		ResultSetHandler<List<ReportRule>> h = new BeanListHandler<>(ReportRule.class, new ReportRuleMapper());
+		return dbService.query(sql, h, reportId);
+	}
+
+	/**
+	 * Returns the report rules for a given report, returning the parent's
+	 * report rules if applicable for clone reports
+	 *
+	 * @param reportId the report id
+	 * @return report rules for the given report
+	 * @throws SQLException
+	 */
+	@Cacheable("rules")
+	public List<ReportRule> getEffectiveReportRules(int reportId) throws SQLException {
+		logger.debug("Entering getEffectiveReportRules: reportId={}", reportId);
+
+		Report report = reportService.getReport(reportId);
+		if (report != null) {
+			int sourceReportId = report.getSourceReportId();
+			CloneOptions cloneOptions = report.getCloneOptions();
+			if (cloneOptions == null) {
+				cloneOptions = new CloneOptions();
+			}
+			if (sourceReportId > 0 && cloneOptions.isUseParentRules()) {
+				reportId = sourceReportId;
+			}
+		}
 
 		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
 		ResultSetHandler<List<ReportRule>> h = new BeanListHandler<>(ReportRule.class, new ReportRuleMapper());
@@ -154,7 +191,7 @@ public class ReportRuleService {
 
 		sql = "DELETE FROM ART_QUERY_RULES WHERE"
 				+ " QUERY_RULE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
-		
+
 		dbService.update(sql, (Object[]) ids);
 	}
 

@@ -399,7 +399,7 @@ public class ReportRunner {
 		ReportRuleService reportRuleService = new ReportRuleService();
 
 		int reportId = report.getReportId();
-		List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+		List<ReportRule> reportRules = reportRuleService.getEffectiveReportRules(reportId);
 
 		RuleValueService ruleValueService = new RuleValueService();
 		int count = 0;
@@ -517,7 +517,7 @@ public class ReportRunner {
 		ReportRuleService reportRuleService = new ReportRuleService();
 
 		int reportId = report.getReportId();
-		List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+		List<ReportRule> reportRules = reportRuleService.getEffectiveReportRules(reportId);
 
 		RuleValueService ruleValueService = new RuleValueService();
 

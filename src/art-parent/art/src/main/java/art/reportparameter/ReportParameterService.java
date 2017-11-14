@@ -143,7 +143,7 @@ public class ReportParameterService {
 
 	/**
 	 * Returns the report parameters to use for a given report, returning the
-	 * parent's report parameters for clone reports
+	 * parent's report parameters if applicable for clone reports
 	 *
 	 * @param reportId the report id
 	 * @return the report parameters to use

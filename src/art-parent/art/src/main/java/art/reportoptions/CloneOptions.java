@@ -29,6 +29,21 @@ public class CloneOptions {
 
 	private boolean useParentParameters = true;
 	private boolean useParentAccessRights = true;
+	private boolean useParentRules = true;
+
+	/**
+	 * @return the useParentRules
+	 */
+	public boolean isUseParentRules() {
+		return useParentRules;
+	}
+
+	/**
+	 * @param useParentRules the useParentRules to set
+	 */
+	public void setUseParentRules(boolean useParentRules) {
+		this.useParentRules = useParentRules;
+	}
 
 	/**
 	 * @return the useParentAccessRights
