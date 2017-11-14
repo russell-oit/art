@@ -246,6 +246,13 @@ Edit schedule page
 						<form:errors path="year" cssClass="error"/>
 					</div>
 				</div>
+				<c:if test="${not empty mainScheduleDescription}">
+					<div class="form-group">
+						<div class="col-md-8 col-md-offset-4">
+							<pre>${encode:forHtmlContent(mainScheduleDescription)}</pre>
+						</div>
+					</div>
+				</c:if>
 
 				<hr>
 				<div class="form-group">

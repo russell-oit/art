@@ -23,9 +23,12 @@ import art.scheduleholiday.ScheduleHolidayService;
 import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
+import art.utils.CronStringHelper;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Date;
+import java.util.Locale;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -62,10 +65,10 @@ public class ScheduleController {
 
 	@Autowired
 	private ScheduleService scheduleService;
-	
+
 	@Autowired
 	private ScheduleHolidayService scheduleHolidayService;
-	
+
 	@Autowired
 	private HolidayService holidayService;
 
@@ -139,54 +142,63 @@ public class ScheduleController {
 	}
 
 	@RequestMapping(value = "/addSchedule", method = RequestMethod.GET)
-	public String addSchedule(Model model) {
+	public String addSchedule(Model model, Locale locale) {
 		logger.debug("Entering addSchedule");
 
-		model.addAttribute("schedule", new Schedule());
+		Schedule schedule = new Schedule();
+		model.addAttribute("schedule", schedule);
 
-		return showEditSchedule("add", model);
+		return showEditSchedule("add", model, schedule, locale);
 	}
 
 	@RequestMapping(value = "/editSchedule", method = RequestMethod.GET)
-	public String editSchedule(@RequestParam("id") Integer id, Model model) {
+	public String editSchedule(@RequestParam("id") Integer id, Model model,
+			Locale locale) {
+
 		logger.debug("Entering editSchedule: id={}", id);
 
+		Schedule schedule = null;
 		try {
-			model.addAttribute("schedule", scheduleService.getSchedule(id));
+			schedule = scheduleService.getSchedule(id);
+			model.addAttribute("schedule", schedule);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditSchedule("edit", model);
+		return showEditSchedule("edit", model, schedule, locale);
 	}
 
 	@RequestMapping(value = "/copySchedule", method = RequestMethod.GET)
-	public String copySchedule(@RequestParam("id") Integer id, Model model) {
+	public String copySchedule(@RequestParam("id") Integer id, Model model,
+			Locale locale) {
+
 		logger.debug("Entering copySchedule: id={}", id);
 
+		Schedule schedule = null;
 		try {
-			model.addAttribute("schedule", scheduleService.getSchedule(id));
+			schedule = scheduleService.getSchedule(id);
+			model.addAttribute("schedule", schedule);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditSchedule("copy", model);
+		return showEditSchedule("copy", model, schedule, locale);
 	}
 
 	@RequestMapping(value = "/saveSchedule", method = RequestMethod.POST)
 	public String saveSchedule(@ModelAttribute("schedule") @Valid Schedule schedule,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			HttpSession session) {
+			HttpSession session, Locale locale) {
 
 		logger.debug("Entering saveSchedule: schedule={}, action='{}'", schedule, action);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditSchedule(action, model);
+			return showEditSchedule(action, model, schedule, locale);
 		}
 
 		try {
@@ -215,7 +227,7 @@ public class ScheduleController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditSchedule(action, model);
+		return showEditSchedule(action, model, schedule, locale);
 	}
 
 	/**
@@ -251,14 +263,23 @@ public class ScheduleController {
 	 *
 	 * @param action the action to use
 	 * @param model the model to use
+	 * @param schedule the schedule
+	 * @param locale the locale
 	 * @return the jsp file to display
 	 */
-	private String showEditSchedule(String action, Model model) {
-		logger.debug("Entering showSchedule: action='{}'", action);
-		
-		try{
+	private String showEditSchedule(String action, Model model,
+			Schedule schedule, Locale locale) {
+
+		logger.debug("Entering showSchedule: action='{}', schedule={}", action, schedule);
+
+		try {
 			model.addAttribute("holidays", holidayService.getAllHolidays());
-		} catch (SQLException | RuntimeException ex) {
+
+			if (schedule != null && !StringUtils.equals(action, "add")) {
+				String mainScheduleDescription = CronStringHelper.getCronScheduleDescription(schedule, locale);
+				model.addAttribute("mainScheduleDescription", mainScheduleDescription);
+			}
+		} catch (SQLException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

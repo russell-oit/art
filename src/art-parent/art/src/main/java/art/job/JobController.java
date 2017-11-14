@@ -41,6 +41,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
+import art.utils.CronStringHelper;
 import art.utils.SchedulerUtils;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -693,7 +694,12 @@ public class JobController {
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
 			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
 			model.addAttribute("holidays", holidayService.getAllHolidays());
-		} catch (SQLException | RuntimeException ex) {
+
+			if (job != null && !StringUtils.equals(action, "add")) {
+				String mainScheduleDescription = CronStringHelper.getCronScheduleDescription(job, locale);
+				model.addAttribute("mainScheduleDescription", mainScheduleDescription);
+			}
+		} catch (SQLException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

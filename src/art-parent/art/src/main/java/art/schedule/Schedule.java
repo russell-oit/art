@@ -323,4 +323,13 @@ public class Schedule implements Serializable {
 		return "Schedule{" + "name=" + name + '}';
 	}
 	
+	public String getMainScheduleCronString(){
+		String cronString = second + " " + minute
+					+ " " + hour + " " + day
+					+ " " + month + " " + weekday
+					+ " " + year;
+		
+		return cronString;
+	}
+	
 }
