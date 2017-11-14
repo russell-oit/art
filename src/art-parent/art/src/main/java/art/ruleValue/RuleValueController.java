@@ -208,7 +208,7 @@ public class RuleValueController {
 
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
-			if (returnRuleId == null) {
+			if (returnRuleId == null || returnRuleId == 0) {
 				return "redirect:/ruleValues";
 			} else {
 				return "redirect:/ruleRuleValues?ruleId=" + returnRuleId;
@@ -225,7 +225,7 @@ public class RuleValueController {
 	@RequestMapping(value = "/editUserGroupRuleValue", method = RequestMethod.GET)
 	public String editUserGroupRuleValue(@RequestParam("id") String id, Model model,
 			@RequestParam(value = "returnRuleId", required = false) Integer returnRuleId) {
-		
+
 		logger.debug("Entering editUserGroupRuleValue: id='{}', returnRuleId", id, returnRuleId);
 
 		try {
