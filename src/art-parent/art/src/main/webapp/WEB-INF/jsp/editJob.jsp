@@ -656,11 +656,23 @@
 							<spring:message code="jobs.label.destinations"/>
 						</label>
 						<div class="col-md-8">
-							<form:select path="destinations" items="${destinations}" multiple="true" 
-										 itemLabel="name" itemValue="destinationId" 
-										 class="form-control selectpicker"
-										 data-actions-box="true"
-										 />
+							<form:select path="destinations" class="form-control selectpicker"
+										 multiple="true" data-actions-box="true">
+								<c:forEach var="destination" items="${destinations}">
+									<c:set var="destinationStatus">
+										<t:displayActiveStatus active="${destination.active}" hideActive="true"/>
+									</c:set>
+									<c:if test="${not empty job.destinations}">
+										<c:set var="selected">
+											${job.destinations.contains(destination) ? "selected" : ""}
+										</c:set>
+									</c:if>
+									<option value="${destination.destinationId}" ${selected}
+												 data-content="${encode:forHtmlAttribute(destination.name)}&nbsp;${encode:forHtmlAttribute(destinationStatus)}">
+										${encode:forHtmlContent(destination.name)}
+									</option>
+								</c:forEach>
+							</form:select>
 							<form:errors path="destinations" cssClass="error"/>
 						</div>
 					</div>

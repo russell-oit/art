@@ -29,14 +29,10 @@ Display the active status of a record
 <c:choose>
 	<c:when test="${active}">
 		<c:if test="${!hideActive}">
-			<span class="label label-success">
-				${activeText}
-			</span>
+			<span class="label label-success">${activeText}</span>
 		</c:if>
 	</c:when>
 	<c:otherwise>
-		<span class="label label-danger">
-			${disabledText}
-		</span>
+		<span class="label label-danger">${disabledText}</span>
 	</c:otherwise>
 </c:choose>
