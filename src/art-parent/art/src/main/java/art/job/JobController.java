@@ -23,6 +23,7 @@ import art.enums.JobType;
 import art.enums.ReportType;
 import art.ftpserver.FtpServerService;
 import art.holiday.HolidayService;
+import art.jobdestination.JobDestinationService;
 import art.jobholiday.JobHolidayService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
@@ -123,6 +124,9 @@ public class JobController {
 
 	@Autowired
 	private DestinationService destinationService;
+	
+	@Autowired
+	private JobDestinationService jobDestinationService;
 
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -375,6 +379,7 @@ public class JobController {
 
 			try {
 				jobHolidayService.recreateJobHolidays(job);
+				jobDestinationService.recreateJobDestinations(job);
 				jobService.processSchedules(job, sessionUser);
 				saveJobParameters(request, job.getJobId());
 			} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {

@@ -78,7 +78,7 @@
 				$("#destinationType").change(function () {
 					toggleVisibleFields();
 				});
-				
+
 				toggleVisibleFields(); //show/hide on page load
 
 				var jsonEditor = ace.edit("jsonEditor");
@@ -102,33 +102,53 @@
 			function toggleVisibleFields() {
 				var destinationType = $('#destinationType option:selected').val();
 
-				//show/hide ftp fields
-				switch(destinationType){
+				//show/hide server field
+				switch (destinationType) {
 					case 'FTP':
 					case 'SFTP':
-						$("#ftpFields").show();
+					case 'NetworkShare':
+						$("#serverDiv").show();
 						break;
 					default:
-						$("#ftpFields").hide();
+						$("#serverDiv").hide();
 				}
-				
+
+				//show/hide password field
+				switch (destinationType) {
+					case 'FTP':
+					case 'SFTP':
+						$("#portDiv").show();
+						break;
+					default:
+						$("#portDiv").hide();
+				}
+
 				//show/hide s3 fields
-				switch(destinationType){
+				switch (destinationType) {
 					case 'S3':
 						$("#s3Fields").show();
 						break;
 					default:
 						$("#s3Fields").hide();
 				}
-				
+
 				//show/hide options field
-				switch(destinationType){
+				switch (destinationType) {
 					case 'FTP':
 					case 'SFTP':
 						$("#optionsDiv").show();
 						break;
 					default:
 						$("#optionsDiv").hide();
+				}
+
+				//show/hide user fields
+				switch (destinationType) {
+					case 'S3':
+						$("#userFields").hide();
+						break;
+					default:
+						$("#userFields").show();
 				}
 			}
 		</script>
@@ -228,60 +248,61 @@
 					</div>
 				</div>
 
-				<fieldset id="ftpFields">
+				<div id="serverDiv" class="form-group">
+					<label class="control-label col-md-4" for="server">
+						<spring:message code="destinations.label.server"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="server" maxlength="100" class="form-control"/>
+						<form:errors path="server" cssClass="error"/>
+					</div>
+				</div>
+				<div id="portDiv" class="form-group">
+					<label class="control-label col-md-4" for="port">
+						<spring:message code="destinations.label.port"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="port" maxlength="8" class="form-control"/>
+						<form:errors path="port" cssClass="error"/>
+					</div>
+				</div>
+
+				<fieldset id="userFields">
 					<div class="form-group">
-						<label class="control-label col-md-4" for="server">
-							<spring:message code="destinations.label.server"/>
+						<label class="control-label col-md-4" for="user">
+							<spring:message code="page.text.user"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="server" maxlength="100" class="form-control"/>
-							<form:errors path="server" cssClass="error"/>
+							<form:input path="user" maxlength="50" class="form-control"/>
+							<form:errors path="user" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-4" for="port">
-							<spring:message code="destinations.label.port"/>
+						<label class="control-label col-md-4" for="password">
+							<spring:message code="page.label.password"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="port" maxlength="8" class="form-control"/>
-							<form:errors path="port" cssClass="error"/>
+							<div class="input-group">
+								<form:password path="password" autocomplete="off" maxlength="100" class="form-control" />
+								<spring:message code="page.help.password" var="help" />
+								<span class="input-group-btn" >
+									<button class="btn btn-default" type="button"
+											data-toggle="tooltip" title="${help}">
+										<i class="fa fa-info"></i>
+									</button>
+								</span>
+							</div>
+							<div class="checkbox">
+								<label>
+									<form:checkbox path="useBlankPassword"/>
+									<spring:message code="page.checkbox.useBlankPassword"/>
+								</label>
+							</div>
+							<form:errors path="password" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>
 
-				<div class="form-group">
-					<label class="control-label col-md-4" for="user">
-						<spring:message code="page.text.user"/>
-					</label>
-					<div class="col-md-8">
-						<form:input path="user" maxlength="50" class="form-control"/>
-						<form:errors path="user" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="password">
-						<spring:message code="page.label.password"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:password path="password" autocomplete="off" maxlength="100" class="form-control" />
-							<spring:message code="page.help.password" var="help" />
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<div class="checkbox">
-							<label>
-								<form:checkbox path="useBlankPassword"/>
-								<spring:message code="page.checkbox.useBlankPassword"/>
-							</label>
-						</div>
-						<form:errors path="password" cssClass="error"/>
-					</div>
-				</div>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="path">
 						<spring:message code="destinations.label.path"/>
