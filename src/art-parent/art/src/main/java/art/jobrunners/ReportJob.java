@@ -22,11 +22,13 @@ import art.connectionpool.DbConnections;
 import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
-import art.enums.FtpConnectionType;
+import art.destination.Destination;
+import art.destinationoptions.FtpOptions;
+import art.destinationoptions.SftpOptions;
+import art.enums.DestinationType;
 import art.enums.JobType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
-import art.ftpserver.FtpServer;
 import art.job.JobService;
 import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
@@ -88,7 +90,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
@@ -261,7 +265,7 @@ public class ReportJob implements org.quartz.Job {
 
 			afterCompletion();
 
-			ftpFile();
+			sendFileToDestinations();
 
 			runBatchFile();
 
@@ -330,45 +334,57 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
+	 * Sends the generated job file to destinations set for the job
+	 */
+	private void sendFileToDestinations() {
+		List<Destination> destinations = job.getDestinations();
+
+		if (CollectionUtils.isEmpty(destinations)) {
+			return;
+		}
+
+		for (Destination destination : destinations) {
+			if (destination.isActive()) {
+				DestinationType destinationType = destination.getDestinationType();
+				switch (destinationType) {
+					case FTP:
+					case SFTP:
+						ftpFile(destination);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected destination type: " + destinationType);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Ftps the generated file
 	 */
-	private void ftpFile() {
-		logger.debug("Entering ftpFile");
-
-		FtpServer ftpServer = job.getFtpServer();
-		if (ftpServer == null) {
-			//no ftp server configured
-			return;
-		}
-
-		if (!ftpServer.isActive()) {
-			logger.info("FTP Server disabled. Job Id {}", jobId);
-			return;
-		}
-
-		FtpConnectionType connectionType = ftpServer.getConnectionType();
-		logger.debug("connectionType={}", connectionType);
+	private void ftpFile(Destination destination) {
+		logger.debug("Entering ftpFile: destination={}", destination);
 
 		String jobsExportPath = Config.getJobsExportPath();
 		String fullLocalFileName = jobsExportPath + fileName;
 
-		String remoteDirectory = ftpServer.getRemoteDirectory();
-		logger.debug("remoteDirectory='{}'", remoteDirectory);
-		remoteDirectory = StringUtils.trimToEmpty(remoteDirectory);
-		if (!StringUtils.endsWith(remoteDirectory, "/")) {
-			remoteDirectory += "/";
+		String path = destination.getPath();
+		logger.debug("path='{}'", path);
+		path = StringUtils.trimToEmpty(path);
+		if (!StringUtils.endsWith(path, "/")) {
+			path += "/";
 		}
-		String remoteFileName = remoteDirectory + fileName;
+		String remoteFileName = path + fileName;
 
-		switch (connectionType) {
+		DestinationType destinationType = destination.getDestinationType();
+		switch (destinationType) {
 			case FTP:
-				doFtp(ftpServer, fullLocalFileName, remoteFileName);
+				doFtp(destination, fullLocalFileName, remoteFileName);
 				break;
 			case SFTP:
-				doSftp(ftpServer, fullLocalFileName, remoteFileName);
+				doSftp(destination, fullLocalFileName, remoteFileName);
 				break;
 			default:
-				logger.warn("Unexpected ftp connection type: " + connectionType);
+				logger.warn("Unexpected ftp destination type: " + destinationType);
 		}
 
 	}
@@ -376,13 +392,13 @@ public class ReportJob implements org.quartz.Job {
 	/**
 	 * Ftp the generated file using the ftp protocol
 	 *
-	 * @param ftpServer the ftp server object
-	 * @param fullLocalFileName full path to the local job file to ftp
+	 * @param destination the destination object
+	 * @param fullLocalFileName full path to the local job file
 	 * @param remoteFileName the file name or full path of the ftp destination
 	 */
-	private void doFtp(FtpServer ftpServer, String fullLocalFileName, String remoteFileName) {
-		logger.debug("Entering doFtp: ftpServer={}, fullLocalFileName='{}',"
-				+ " remoteFileName='{}'", ftpServer, fullLocalFileName, remoteFileName);
+	private void doFtp(Destination destination, String fullLocalFileName, String remoteFileName) {
+		logger.debug("Entering doFtp: destination={}, fullLocalFileName='{}',"
+				+ " remoteFileName='{}'", destination, fullLocalFileName, remoteFileName);
 
 		//http://www.codejava.net/java-se/networking/ftp/java-ftp-file-upload-tutorial-and-example
 		//https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
@@ -392,8 +408,8 @@ public class ReportJob implements org.quartz.Job {
 		//https://stackoverflow.com/questions/6651158/apache-commons-ftp-problems
 		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html#completePendingCommand()
 		//https://stackoverflow.com/questions/19209826/android-ftpclient-cannot-upload-file-ftp-response-421-received-server-closed
-		String server = ftpServer.getServer();
-		int port = ftpServer.getPort();
+		String server = destination.getServer();
+		int port = destination.getPort();
 
 		logger.debug("server='{}'", server);
 		logger.debug("port={}", port);
@@ -403,13 +419,41 @@ public class ReportJob implements org.quartz.Job {
 			port = DEFAULT_FTP_PORT;
 		}
 
-		String user = ftpServer.getUser();
-		String password = ftpServer.getPassword();
+		String user = destination.getUser();
+		String password = destination.getPassword();
 
 		logger.debug("user='{}'", user);
 
 		FTPClient ftpClient = new FTPClient();
 		try {
+			FtpOptions ftpOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				ftpOptions = new FtpOptions();
+			} else {
+				ftpOptions = ArtUtils.jsonToObject(options, FtpOptions.class);
+			}
+
+			//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/SocketClient.html#setConnectTimeout(int)
+			int connectTimeoutSeconds = ftpOptions.getConnectTimeoutSeconds();
+			if (connectTimeoutSeconds > 0) {
+				int connectTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(connectTimeoutSeconds);
+				ftpClient.setConnectTimeout(connectTimeoutMillis);
+			}
+
+			//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/SocketClient.html#setDefaultTimeout(int)
+			int defaultTimeoutSeconds = ftpOptions.getDefaultTimeoutSeconds();
+			if (defaultTimeoutSeconds > 0) {
+				int defaultTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(defaultTimeoutSeconds);
+				ftpClient.setDefaultTimeout(defaultTimeoutMillis);
+			}
+
+			//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html#setControlKeepAliveTimeout(long)
+			long controlKeepAliveTimeoutSeconds = ftpOptions.getControlKeepAliveTimeoutSeconds();
+			if (controlKeepAliveTimeoutSeconds != FtpOptions.UNDEFINED_CONTROL_KEEPALIVE_TIMEOUT) {
+				ftpClient.setControlKeepAliveTimeout(controlKeepAliveTimeoutSeconds);
+			}
+
 			ftpClient.connect(server, port);
 
 			// After connection attempt, you should check the reply code to verify
@@ -460,20 +504,20 @@ public class ReportJob implements org.quartz.Job {
 	/**
 	 * Ftp the generated file using the sftp protocol
 	 *
-	 * @param ftpServer the ftp server object
-	 * @param fullLocalFileName full path to the local job file to ftp
+	 * @param destination the destination object
+	 * @param fullLocalFileName full path to the local job file
 	 * @param remoteFileName the file name or full path of the ftp destination
 	 */
-	private void doSftp(FtpServer ftpServer, String fullLocalFileName, String remoteFileName) {
-		logger.debug("Entering doSftp: ftpServer={}, fullLocalFileName='{}',"
-				+ " remoteFileName='{}'", ftpServer, fullLocalFileName, remoteFileName);
+	private void doSftp(Destination destination, String fullLocalFileName, String remoteFileName) {
+		logger.debug("Entering doSftp: destination={}, fullLocalFileName='{}',"
+				+ " remoteFileName='{}'", destination, fullLocalFileName, remoteFileName);
 
 		//https://stackoverflow.com/questions/14830146/how-to-transfer-a-file-through-sftp-in-java
 		//https://github.com/jpbriend/sftp-example/blob/master/src/main/java/com/infinit/sftp/SftpClient.java
 		//https://stackoverflow.com/questions/17473398/java-sftp-upload-using-jsch-but-how-to-overwrite-the-current-file
 		//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/ChannelSftp.html
-		String server = ftpServer.getServer();
-		int port = ftpServer.getPort();
+		String server = destination.getServer();
+		int port = destination.getPort();
 
 		logger.debug("server='{}'", server);
 		logger.debug("port={}", port);
@@ -483,8 +527,8 @@ public class ReportJob implements org.quartz.Job {
 			port = DEFAULT_SFTP_PORT;
 		}
 
-		String user = ftpServer.getUser();
-		String password = ftpServer.getPassword();
+		String user = destination.getUser();
+		String password = destination.getPassword();
 
 		logger.debug("user='{}'", user);
 
@@ -493,6 +537,14 @@ public class ReportJob implements org.quartz.Job {
 		ChannelSftp channelSftp = null;
 
 		try {
+			SftpOptions sftpOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				sftpOptions = new SftpOptions();
+			} else {
+				sftpOptions = ArtUtils.jsonToObject(options, SftpOptions.class);
+			}
+
 			JSch jsch = new JSch();
 			session = jsch.getSession(user, server, port);
 			session.setPassword(password);
@@ -500,11 +552,34 @@ public class ReportJob implements org.quartz.Job {
 			Properties config = new Properties();
 			config.put("StrictHostKeyChecking", "no");
 			session.setConfig(config);
+
+			//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/Session.html#setTimeout-int-
+			int sessionConnectTimeoutSeconds = sftpOptions.getSessionConnectTimeoutSeconds();
+			if (sessionConnectTimeoutSeconds > 0) {
+				int sessionConnectTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(sessionConnectTimeoutSeconds);
+				session.setTimeout(sessionConnectTimeoutMillis);
+			}
+
+			//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/Session.html#setServerAliveInterval-int-
+			int serverAliveIntervalSeconds = sftpOptions.getServerAliveIntervalSeconds();
+			if (serverAliveIntervalSeconds > 0) {
+				int serverAliveIntervalMillis = (int) TimeUnit.SECONDS.toMillis(serverAliveIntervalSeconds);
+				session.setServerAliveInterval(serverAliveIntervalMillis);
+			}
+
 			session.connect();
 			logger.debug("Host connected");
 
 			channel = session.openChannel("sftp");
-			channel.connect();
+
+			//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/Channel.html#connect(int)
+			int channelConnectTimeoutSeconds = sftpOptions.getChannelConnectTimeoutSeconds();
+			if (channelConnectTimeoutSeconds > 0) {
+				int channelConnectTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(channelConnectTimeoutSeconds);
+				channel.connect(channelConnectTimeoutMillis);
+			} else {
+				channel.connect();
+			}
 			logger.debug("Channel connected");
 
 			File localFile = new File(fullLocalFileName);

@@ -1,5 +1,5 @@
 /*
- * ART. A Jobing Tool.
+ * ART. A Reporting Tool.
  * Copyright (C) 2017 Enrico Liboni <eliboni@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify

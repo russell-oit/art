@@ -417,6 +417,20 @@ public class ArtUtils {
 		String jsonString = mapper.writeValueAsString(object);
 		return jsonString;
 	}
+	
+	/**
+	 * Returns an object populated according to a json string
+	 * 
+	 * @param <T> the type of the object to populate
+	 * @param jsonString the json string
+	 * @param clazz the class of the object to populate
+	 * @return  an object populated according to a json string
+	 * @throws IOException 
+	 */
+	public static <T> T jsonToObject(String jsonString, Class<T> clazz) throws IOException{
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.readValue(jsonString, clazz);
+	}
 
 	/**
 	 * Returns <code>true</code> if a list of strings contains a given string,

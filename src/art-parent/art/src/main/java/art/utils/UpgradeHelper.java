@@ -22,6 +22,7 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.encryption.AesEncryptor;
 import art.encryption.DesEncryptor;
+import art.enums.DestinationType;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.job.Job;
@@ -295,6 +296,7 @@ public class UpgradeHelper {
 
 			populateReportSourceColumn();
 			populateReportReportGroupsTable();
+			populateDestinationsTable();
 
 			sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
 			dbService.update(sql, databaseVersionString);
@@ -302,6 +304,86 @@ public class UpgradeHelper {
 			logger.info("Done performing 3.1 upgrade steps");
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Populates the destinations table. Table added in 3.1
+	 */
+	private void populateDestinationsTable() throws SQLException {
+		logger.debug("Entering populateDestinationsTable");
+
+		String sql;
+
+		sql = "SELECT * FROM ART_FTP_SERVERS WHERE MIGRATED IS NULL";
+
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> ftpServers = dbService.query(sql, h);
+
+		logger.debug("ftpServers.isEmpty()={}", ftpServers.isEmpty());
+		if (!ftpServers.isEmpty()) {
+			logger.info("Moving ftp server records");
+
+			//generate new destination id
+			sql = "SELECT MAX(DESTINATION_ID) FROM ART_DESTINATIONS";
+			ResultSetHandler<Integer> h2 = new ScalarHandler<>();
+			Integer maxDestinationId = dbService.query(sql, h2);
+			logger.debug("maxDestinationId={}", maxDestinationId);
+
+			if (maxDestinationId == null || maxDestinationId < 0) {
+				maxDestinationId = 0;
+			}
+
+			for (Map<String, Object> ftpServer : ftpServers) {
+				maxDestinationId++;
+
+				//create destination definition
+				sql = "INSERT INTO ART_DESTINATIONS"
+						+ " (DESTINATION_ID, NAME, DESCRIPTION, ACTIVE, DESTINATION_TYPE,"
+						+ " SERVER, PORT, DESTINATION_USER, DESTINATION_PASSWORD,"
+						+ " DESTINATION_PATH, CREATION_DATE, CREATED_BY,"
+						+ " UPDATE_DATE, UPDATED_BY)"
+						+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
+
+				Integer ftpServerId = (Integer) ftpServer.get("FTP_SERVER_ID");
+
+				Object[] values = {
+					maxDestinationId,
+					ftpServer.get("NAME"),
+					ftpServer.get("DESCRIPTION"),
+					ftpServer.get("ACTIVE"),
+					ftpServer.get("CONNECTION_TYPE"),
+					ftpServer.get("SERVER"),
+					ftpServer.get("PORT"),
+					ftpServer.get("FTP_USER"),
+					ftpServer.get("PASSWORD"),
+					ftpServer.get("REMOTE_DIRECTORY"),
+					ftpServer.get("CREATION_DATE"),
+					ftpServer.get("CREATED_BY"),
+					ftpServer.get("UPDATE_DATE"),
+					ftpServer.get("UPDATED_BY")
+				};
+
+				dbService.update(sql, values);
+
+				//create job-destination record
+				sql = "SELECT JOB_ID FROM ART_JOBS WHERE FTP_SERVER_ID=?";
+				ResultSetHandler<List<Integer>> h3 = new ColumnListHandler<>("JOB_ID");
+				List<Integer> jobIds = dbService.query(sql, h3, ftpServerId);
+
+				logger.debug("jobIds.isEmpty()={}", jobIds.isEmpty());
+				if (!jobIds.isEmpty()) {
+					for (Integer jobId : jobIds) {
+						sql = "INSERT INTO ART_JOB_DESTINATION_MAP(JOB_ID, DESTINATION_ID) VALUES(?,?)";
+						dbService.update(sql, jobId, maxDestinationId);
+					}
+				}
+				
+				//update migrated status
+				sql = "UPDATE ART_FTP_SERVERS SET MIGRATED=1"
+						+ " WHERE FTP_SERVER_ID=?";
+				dbService.update(sql, ftpServerId);
+			}
 		}
 	}
 
