@@ -47,6 +47,21 @@ public class Destination implements Serializable {
 	private Date updateDate;
 	private String updatedBy;
 	private boolean useBlankPassword; //only used for user interface logic
+	private String domain;
+
+	/**
+	 * @return the domain
+	 */
+	public String getDomain() {
+		return domain;
+	}
+
+	/**
+	 * @param domain the domain to set
+	 */
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
 
 	/**
 	 * @return the useBlankPassword

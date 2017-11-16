@@ -27,51 +27,50 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FtpOptions {
 
-	public static final long UNDEFINED_CONTROL_KEEPALIVE_TIMEOUT = -1L;
-	private long controlKeepAliveTimeoutSeconds = UNDEFINED_CONTROL_KEEPALIVE_TIMEOUT;
-	final int DEFAULT_CONNECT_TIMEOUT_SECONDS = 60;
-	private int connectTimeoutSeconds = DEFAULT_CONNECT_TIMEOUT_SECONDS;
-	private int defaultTimeoutSeconds;
+	private Long controlKeepAliveTimeoutSeconds;
+	private final Integer DEFAULT_CONNECT_TIMEOUT_SECONDS = 60;
+	private Integer connectTimeoutSeconds = DEFAULT_CONNECT_TIMEOUT_SECONDS;
+	private Integer defaultTimeoutSeconds;
 
 	/**
 	 * @return the controlKeepAliveTimeoutSeconds
 	 */
-	public long getControlKeepAliveTimeoutSeconds() {
+	public Long getControlKeepAliveTimeoutSeconds() {
 		return controlKeepAliveTimeoutSeconds;
 	}
 
 	/**
 	 * @param controlKeepAliveTimeoutSeconds the controlKeepAliveTimeoutSeconds to set
 	 */
-	public void setControlKeepAliveTimeoutSeconds(long controlKeepAliveTimeoutSeconds) {
+	public void setControlKeepAliveTimeoutSeconds(Long controlKeepAliveTimeoutSeconds) {
 		this.controlKeepAliveTimeoutSeconds = controlKeepAliveTimeoutSeconds;
 	}
 
 	/**
 	 * @return the connectTimeoutSeconds
 	 */
-	public int getConnectTimeoutSeconds() {
+	public Integer getConnectTimeoutSeconds() {
 		return connectTimeoutSeconds;
 	}
 
 	/**
 	 * @param connectTimeoutSeconds the connectTimeoutSeconds to set
 	 */
-	public void setConnectTimeoutSeconds(int connectTimeoutSeconds) {
+	public void setConnectTimeoutSeconds(Integer connectTimeoutSeconds) {
 		this.connectTimeoutSeconds = connectTimeoutSeconds;
 	}
 
 	/**
 	 * @return the defaultTimeoutSeconds
 	 */
-	public int getDefaultTimeoutSeconds() {
+	public Integer getDefaultTimeoutSeconds() {
 		return defaultTimeoutSeconds;
 	}
 
 	/**
 	 * @param defaultTimeoutSeconds the defaultTimeoutSeconds to set
 	 */
-	public void setDefaultTimeoutSeconds(int defaultTimeoutSeconds) {
+	public void setDefaultTimeoutSeconds(Integer defaultTimeoutSeconds) {
 		this.defaultTimeoutSeconds = defaultTimeoutSeconds;
 	}
 

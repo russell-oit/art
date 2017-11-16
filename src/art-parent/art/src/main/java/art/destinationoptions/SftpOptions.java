@@ -27,49 +27,49 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SftpOptions {
 	
-	private int sessionConnectTimeoutSeconds;
-	private int channelConnectTimeoutSeconds;
-	private int serverAliveIntervalSeconds;
+	private Integer sessionConnectTimeoutSeconds;
+	private Integer channelConnectTimeoutSeconds;
+	private Integer serverAliveIntervalSeconds;
 
 	/**
 	 * @return the sessionConnectTimeoutSeconds
 	 */
-	public int getSessionConnectTimeoutSeconds() {
+	public Integer getSessionConnectTimeoutSeconds() {
 		return sessionConnectTimeoutSeconds;
 	}
 
 	/**
 	 * @param sessionConnectTimeoutSeconds the sessionConnectTimeoutSeconds to set
 	 */
-	public void setSessionConnectTimeoutSeconds(int sessionConnectTimeoutSeconds) {
+	public void setSessionConnectTimeoutSeconds(Integer sessionConnectTimeoutSeconds) {
 		this.sessionConnectTimeoutSeconds = sessionConnectTimeoutSeconds;
 	}
 
 	/**
 	 * @return the channelConnectTimeoutSeconds
 	 */
-	public int getChannelConnectTimeoutSeconds() {
+	public Integer getChannelConnectTimeoutSeconds() {
 		return channelConnectTimeoutSeconds;
 	}
 
 	/**
 	 * @param channelConnectTimeoutSeconds the channelConnectTimeoutSeconds to set
 	 */
-	public void setChannelConnectTimeoutSeconds(int channelConnectTimeoutSeconds) {
+	public void setChannelConnectTimeoutSeconds(Integer channelConnectTimeoutSeconds) {
 		this.channelConnectTimeoutSeconds = channelConnectTimeoutSeconds;
 	}
 
 	/**
 	 * @return the serverAliveIntervalSeconds
 	 */
-	public int getServerAliveIntervalSeconds() {
+	public Integer getServerAliveIntervalSeconds() {
 		return serverAliveIntervalSeconds;
 	}
 
 	/**
 	 * @param serverAliveIntervalSeconds the serverAliveIntervalSeconds to set
 	 */
-	public void setServerAliveIntervalSeconds(int serverAliveIntervalSeconds) {
+	public void setServerAliveIntervalSeconds(Integer serverAliveIntervalSeconds) {
 		this.serverAliveIntervalSeconds = serverAliveIntervalSeconds;
 	}
 	

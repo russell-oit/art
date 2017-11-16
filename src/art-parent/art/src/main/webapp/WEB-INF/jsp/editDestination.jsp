@@ -102,25 +102,15 @@
 			function toggleVisibleFields() {
 				var destinationType = $('#destinationType option:selected').val();
 
-				//show/hide server field
+				//show/hide server fields
 				switch (destinationType) {
 					case 'FTP':
 					case 'SFTP':
 					case 'NetworkShare':
-						$("#serverDiv").show();
+						$("#serverFields").show();
 						break;
 					default:
-						$("#serverDiv").hide();
-				}
-
-				//show/hide password field
-				switch (destinationType) {
-					case 'FTP':
-					case 'SFTP':
-						$("#portDiv").show();
-						break;
-					default:
-						$("#portDiv").hide();
+						$("#serverFields").hide();
 				}
 
 				//show/hide s3 fields
@@ -136,6 +126,7 @@
 				switch (destinationType) {
 					case 'FTP':
 					case 'SFTP':
+					case 'NetworkShare':
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -149,6 +140,15 @@
 						break;
 					default:
 						$("#userFields").show();
+				}
+				
+				//show/hide domain field
+				switch (destinationType) {
+					case 'NetworkShare':
+						$("#domainDiv").show();
+						break;
+					default:
+						$("#domainDiv").hide();
 				}
 			}
 		</script>
@@ -248,24 +248,26 @@
 					</div>
 				</div>
 
-				<div id="serverDiv" class="form-group">
-					<label class="control-label col-md-4" for="server">
-						<spring:message code="destinations.label.server"/>
-					</label>
-					<div class="col-md-8">
-						<form:input path="server" maxlength="100" class="form-control"/>
-						<form:errors path="server" cssClass="error"/>
+				<fieldset id="serverFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="server">
+							<spring:message code="destinations.label.server"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="server" maxlength="100" class="form-control"/>
+							<form:errors path="server" cssClass="error"/>
+						</div>
 					</div>
-				</div>
-				<div id="portDiv" class="form-group">
-					<label class="control-label col-md-4" for="port">
-						<spring:message code="destinations.label.port"/>
-					</label>
-					<div class="col-md-8">
-						<form:input path="port" maxlength="8" class="form-control"/>
-						<form:errors path="port" cssClass="error"/>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="port">
+							<spring:message code="destinations.label.port"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="port" maxlength="8" class="form-control"/>
+							<form:errors path="port" cssClass="error"/>
+						</div>
 					</div>
-				</div>
+				</fieldset>
 
 				<fieldset id="userFields">
 					<div class="form-group">
@@ -302,6 +304,16 @@
 						</div>
 					</div>
 				</fieldset>
+
+				<div id="domainDiv" class="form-group">
+					<label class="col-md-4 control-label " for="domain">
+						<spring:message code="login.label.domain"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="domain" maxlength="100" class="form-control"/>
+						<form:errors path="domain" cssClass="error"/>
+					</div>
+				</div>
 
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="path">

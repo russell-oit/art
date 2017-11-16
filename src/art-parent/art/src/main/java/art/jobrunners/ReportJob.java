@@ -24,6 +24,7 @@ import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.destination.Destination;
 import art.destinationoptions.FtpOptions;
+import art.destinationoptions.NetworkShareOptions;
 import art.destinationoptions.SftpOptions;
 import art.enums.DestinationType;
 import art.enums.JobType;
@@ -56,6 +57,11 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.hierynomus.smbj.SMBClient;
+import com.hierynomus.smbj.SmbConfig;
+import com.hierynomus.smbj.auth.AuthenticationContext;
+import com.hierynomus.smbj.share.DiskShare;
+import com.hierynomus.smbj.utils.SmbFiles;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -263,11 +269,11 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 
-			afterCompletion();
-
 			sendFileToDestinations();
 
 			runBatchFile();
+
+			afterCompletion();
 
 			cacheHelper.clearJobs();
 		} catch (Exception ex) {
@@ -343,13 +349,19 @@ public class ReportJob implements org.quartz.Job {
 			return;
 		}
 
+		String jobsExportPath = Config.getJobsExportPath();
+		String fullLocalFileName = jobsExportPath + fileName;
+
 		for (Destination destination : destinations) {
 			if (destination.isActive()) {
 				DestinationType destinationType = destination.getDestinationType();
 				switch (destinationType) {
 					case FTP:
 					case SFTP:
-						ftpFile(destination);
+						ftpFile(destination, fullLocalFileName);
+						break;
+					case NetworkShare:
+						sendFileToNetworkShare(destination, fullLocalFileName);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected destination type: " + destinationType);
@@ -359,13 +371,112 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
+	 * Copies the generated file to a network share (one that uses the SMB2
+	 * protocol)
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path to the file to copy
+	 */
+	private void sendFileToNetworkShare(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering sendFileToNetworkShare: destination={}, fullLocalFileName='{}'",
+				destination, fullLocalFileName);
+
+		com.hierynomus.smbj.connection.Connection connection = null;
+
+		try {
+			NetworkShareOptions networkShareOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				networkShareOptions = new NetworkShareOptions();
+			} else {
+				networkShareOptions = ArtUtils.jsonToObject(options, NetworkShareOptions.class);
+			}
+
+			SmbConfig.Builder configBuilder = SmbConfig.builder();
+			if (networkShareOptions.getTimeoutSeconds() != null) {
+				configBuilder = configBuilder.withTimeout(networkShareOptions.getTimeoutSeconds(), TimeUnit.SECONDS);
+			}
+			if (networkShareOptions.getSocketTimeoutSeconds() != null) {
+				configBuilder = configBuilder.withSoTimeout(networkShareOptions.getSocketTimeoutSeconds(), TimeUnit.SECONDS);
+			}
+			if (networkShareOptions.getMultiProtocolNegotiate() != null) {
+				configBuilder = configBuilder.withMultiProtocolNegotiate(networkShareOptions.getMultiProtocolNegotiate());
+			}
+			if (networkShareOptions.getDfsEnabled() != null) {
+				configBuilder = configBuilder.withDfsEnabled(networkShareOptions.getDfsEnabled());
+			}
+			if (networkShareOptions.getSigningRequired() != null) {
+				configBuilder = configBuilder.withSigningRequired(networkShareOptions.getSigningRequired());
+			}
+			if (networkShareOptions.getBufferSize() != null) {
+				configBuilder = configBuilder.withBufferSize(networkShareOptions.getBufferSize());
+			}
+
+			SmbConfig config = configBuilder.build();
+
+			SMBClient client = new SMBClient(config);
+
+			String server = destination.getServer();
+			int port = destination.getPort();
+
+			if (port > 0) {
+				connection = client.connect(server, port);
+			} else {
+				connection = client.connect(server);
+			}
+
+			String username = destination.getUser();
+			if (username == null) {
+				username = "";
+			}
+
+			String password = destination.getPassword();
+			if (password == null) {
+				password = "";
+			}
+
+			String domain = destination.getDomain();
+
+			AuthenticationContext ac;
+			if (networkShareOptions.isAnonymousUser()) {
+				ac = AuthenticationContext.anonymous();
+			} else if (networkShareOptions.isGuestUser()) {
+				ac = AuthenticationContext.guest();
+			} else {
+				ac = new AuthenticationContext(username, password.toCharArray(), domain);
+			}
+
+			com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
+
+			// Connect to Share
+			String path = destination.getPath();
+			try (DiskShare share = (DiskShare) session.connectShare(path)) {
+				File file = new File(fullLocalFileName);
+				String destPath = fileName;
+				boolean overwrite = true;
+				SmbFiles.copy(file, share, destPath, overwrite);
+			}
+		} catch (Exception ex) {
+			logger.error("Error. Job Id {}", jobId, ex);
+			runDetails = "<b>Error:</b> " + ex.toString();
+			progressLogger.error("Error", ex);
+
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception ex2) {
+					logger.error("Error. Job Id {}", jobId, ex2);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Ftps the generated file
 	 */
-	private void ftpFile(Destination destination) {
-		logger.debug("Entering ftpFile: destination={}", destination);
-
-		String jobsExportPath = Config.getJobsExportPath();
-		String fullLocalFileName = jobsExportPath + fileName;
+	private void ftpFile(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering ftpFile: destination={}, fullLocalFileName='{}'",
+				destination, fullLocalFileName);
 
 		String path = destination.getPath();
 		logger.debug("path='{}'", path);
@@ -435,22 +546,22 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/SocketClient.html#setConnectTimeout(int)
-			int connectTimeoutSeconds = ftpOptions.getConnectTimeoutSeconds();
-			if (connectTimeoutSeconds > 0) {
+			Integer connectTimeoutSeconds = ftpOptions.getConnectTimeoutSeconds();
+			if (connectTimeoutSeconds != null) {
 				int connectTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(connectTimeoutSeconds);
 				ftpClient.setConnectTimeout(connectTimeoutMillis);
 			}
 
 			//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/SocketClient.html#setDefaultTimeout(int)
-			int defaultTimeoutSeconds = ftpOptions.getDefaultTimeoutSeconds();
-			if (defaultTimeoutSeconds > 0) {
+			Integer defaultTimeoutSeconds = ftpOptions.getDefaultTimeoutSeconds();
+			if (defaultTimeoutSeconds != null) {
 				int defaultTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(defaultTimeoutSeconds);
 				ftpClient.setDefaultTimeout(defaultTimeoutMillis);
 			}
 
 			//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html#setControlKeepAliveTimeout(long)
-			long controlKeepAliveTimeoutSeconds = ftpOptions.getControlKeepAliveTimeoutSeconds();
-			if (controlKeepAliveTimeoutSeconds != FtpOptions.UNDEFINED_CONTROL_KEEPALIVE_TIMEOUT) {
+			Long controlKeepAliveTimeoutSeconds = ftpOptions.getControlKeepAliveTimeoutSeconds();
+			if (controlKeepAliveTimeoutSeconds != null) {
 				ftpClient.setControlKeepAliveTimeout(controlKeepAliveTimeoutSeconds);
 			}
 
@@ -490,6 +601,8 @@ public class ReportJob implements org.quartz.Job {
 			ftpClient.logout();
 		} catch (IOException ex) {
 			logger.error("Error. Job Id {}", jobId, ex);
+			runDetails = "<b>Error:</b> " + ex.toString();
+			progressLogger.error("Error", ex);
 		} finally {
 			try {
 				if (ftpClient.isConnected()) {
@@ -554,15 +667,15 @@ public class ReportJob implements org.quartz.Job {
 			session.setConfig(config);
 
 			//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/Session.html#setTimeout-int-
-			int sessionConnectTimeoutSeconds = sftpOptions.getSessionConnectTimeoutSeconds();
-			if (sessionConnectTimeoutSeconds > 0) {
+			Integer sessionConnectTimeoutSeconds = sftpOptions.getSessionConnectTimeoutSeconds();
+			if (sessionConnectTimeoutSeconds != null) {
 				int sessionConnectTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(sessionConnectTimeoutSeconds);
 				session.setTimeout(sessionConnectTimeoutMillis);
 			}
 
 			//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/Session.html#setServerAliveInterval-int-
-			int serverAliveIntervalSeconds = sftpOptions.getServerAliveIntervalSeconds();
-			if (serverAliveIntervalSeconds > 0) {
+			Integer serverAliveIntervalSeconds = sftpOptions.getServerAliveIntervalSeconds();
+			if (serverAliveIntervalSeconds != null) {
 				int serverAliveIntervalMillis = (int) TimeUnit.SECONDS.toMillis(serverAliveIntervalSeconds);
 				session.setServerAliveInterval(serverAliveIntervalMillis);
 			}
@@ -573,8 +686,8 @@ public class ReportJob implements org.quartz.Job {
 			channel = session.openChannel("sftp");
 
 			//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/Channel.html#connect(int)
-			int channelConnectTimeoutSeconds = sftpOptions.getChannelConnectTimeoutSeconds();
-			if (channelConnectTimeoutSeconds > 0) {
+			Integer channelConnectTimeoutSeconds = sftpOptions.getChannelConnectTimeoutSeconds();
+			if (channelConnectTimeoutSeconds != null) {
 				int channelConnectTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(channelConnectTimeoutSeconds);
 				channel.connect(channelConnectTimeoutMillis);
 			} else {
@@ -590,6 +703,8 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} catch (JSchException | SftpException | IOException ex) {
 			logger.error("Error. Job Id {}", jobId, ex);
+			runDetails = "<b>Error:</b> " + ex.toString();
+			progressLogger.error("Error", ex);
 		} finally {
 			if (channelSftp != null) {
 				channelSftp.disconnect();
@@ -636,12 +751,14 @@ public class ReportJob implements org.quartz.Job {
 
 				List<String> cmdAndArgs = Arrays.asList("cmd", "/c", batchFileName, fileName);
 
-				ProcessBuilder pb = new ProcessBuilder(cmdAndArgs);
-				pb.directory(new File(batchDirectory));
+				ProcessBuilder processBuilder = new ProcessBuilder(cmdAndArgs);
+				processBuilder.directory(new File(batchDirectory));
 				try {
-					pb.start();
+					processBuilder.start();
 				} catch (IOException ex) {
 					logger.error("Error. Job Id {}", jobId, ex);
+					runDetails = "<b>Error:</b> " + ex.toString();
+					progressLogger.error("Error", ex);
 				}
 			} else if (SystemUtils.IS_OS_UNIX) {
 				//https://stackoverflow.com/questions/25403765/when-runtime-getruntime-exec-call-linux-batch-file-could-not-find-its-physical
@@ -660,6 +777,8 @@ public class ReportJob implements org.quartz.Job {
 					processBuilder.start();
 				} catch (IOException ex) {
 					logger.error("Error. Job Id {}", jobId, ex);
+					runDetails = "<b>Error:</b> " + ex.toString();
+					progressLogger.error("Error", ex);
 				}
 			} else {
 				String os = SystemUtils.OS_NAME;
@@ -1485,9 +1604,9 @@ public class ReportJob implements org.quartz.Job {
 
 			logger.debug("Job Id {} ...finished", jobId);
 		} catch (Exception ex) {
+			logger.error("Error. Job Id {}", jobId, ex);
 			runDetails = "<b>Error:</b> " + ex.toString();
 			fileName = "";
-			logger.error("Error. Job Id {}", jobId, ex);
 			progressLogger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {

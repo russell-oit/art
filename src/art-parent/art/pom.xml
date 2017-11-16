@@ -845,5 +845,10 @@
 			<artifactId>cron-parser-core</artifactId>
 			<version>3.3</version>
 		</dependency>
+		<dependency>
+			<groupId>com.hierynomus</groupId>
+			<artifactId>smbj</artifactId>
+			<version>0.5.1</version>
+		</dependency>
 	</dependencies>
 </project>
