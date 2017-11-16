@@ -57,6 +57,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.hierynomus.mssmb2.SMBApiException;
 import com.hierynomus.smbj.SMBClient;
 import com.hierynomus.smbj.SmbConfig;
 import com.hierynomus.smbj.auth.AuthenticationContext;
@@ -103,6 +104,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -340,6 +342,17 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
+	 * Log an error as well as set the runDetails variable
+	 * 
+	 * @param ex the error
+	 */
+	private void logErrorAndSetDetails(Throwable ex) {
+		logger.error("Error. Job Id {}", jobId, ex);
+		runDetails = "<b>Error:</b> " + ex.toString();
+		progressLogger.error("Error", ex);
+	}
+
+	/**
 	 * Sends the generated job file to destinations set for the job
 	 */
 	private void sendFileToDestinations() {
@@ -451,15 +464,40 @@ public class ReportJob implements org.quartz.Job {
 			// Connect to Share
 			String path = destination.getPath();
 			try (DiskShare share = (DiskShare) session.connectShare(path)) {
+
+				//https://stackoverflow.com/questions/44634892/java-smb-file-share-without-smb-1-0-cifs-compatibility-enabled
+				String destinationSubDirectory = destination.getSubDirectory();
+				destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
+
+				// if file is in folder(s), create them first
+				if (StringUtils.isNotBlank(destinationSubDirectory)) {
+					//sub-directory must end with the directory separator
+					String directorySeparator = destinationSubDirectory.substring(destinationSubDirectory.length() - 1);
+					//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
+					String[] folders = StringUtils.split(destinationSubDirectory, directorySeparator);
+					for (int i = 0; i < folders.length; i++) {
+						String[] subFolders = ArrayUtils.subarray(folders, 0, i + 1);
+						String folder = StringUtils.join(subFolders, directorySeparator);
+						try {
+							if (!share.folderExists(folder)) {
+								share.mkdir(folder);
+							}
+						} catch (SMBApiException ex) {
+							logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+						}
+					}
+				}
+
+				String finalSubDirectory;
+				finalSubDirectory = destinationSubDirectory;
+
 				File file = new File(fullLocalFileName);
-				String destPath = fileName;
+				String destPath = finalSubDirectory + fileName;
 				boolean overwrite = true;
 				SmbFiles.copy(file, share, destPath, overwrite);
 			}
-		} catch (Exception ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
-			runDetails = "<b>Error:</b> " + ex.toString();
-			progressLogger.error("Error", ex);
+		} catch (IOException ex) {
+			logErrorAndSetDetails(ex);
 
 			if (connection != null) {
 				try {
@@ -600,9 +638,7 @@ public class ReportJob implements org.quartz.Job {
 
 			ftpClient.logout();
 		} catch (IOException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
-			runDetails = "<b>Error:</b> " + ex.toString();
-			progressLogger.error("Error", ex);
+			logErrorAndSetDetails(ex);
 		} finally {
 			try {
 				if (ftpClient.isConnected()) {
@@ -702,9 +738,7 @@ public class ReportJob implements org.quartz.Job {
 				channelSftp.put(inputStream, remoteFileName, ChannelSftp.OVERWRITE);
 			}
 		} catch (JSchException | SftpException | IOException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
-			runDetails = "<b>Error:</b> " + ex.toString();
-			progressLogger.error("Error", ex);
+			logErrorAndSetDetails(ex);
 		} finally {
 			if (channelSftp != null) {
 				channelSftp.disconnect();
@@ -756,9 +790,7 @@ public class ReportJob implements org.quartz.Job {
 				try {
 					processBuilder.start();
 				} catch (IOException ex) {
-					logger.error("Error. Job Id {}", jobId, ex);
-					runDetails = "<b>Error:</b> " + ex.toString();
-					progressLogger.error("Error", ex);
+					logErrorAndSetDetails(ex);
 				}
 			} else if (SystemUtils.IS_OS_UNIX) {
 				//https://stackoverflow.com/questions/25403765/when-runtime-getruntime-exec-call-linux-batch-file-could-not-find-its-physical
@@ -776,9 +808,7 @@ public class ReportJob implements org.quartz.Job {
 					// Run the script
 					processBuilder.start();
 				} catch (IOException ex) {
-					logger.error("Error. Job Id {}", jobId, ex);
-					runDetails = "<b>Error:</b> " + ex.toString();
-					progressLogger.error("Error", ex);
+					logErrorAndSetDetails(ex);
 				}
 			} else {
 				String os = SystemUtils.OS_NAME;

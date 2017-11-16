@@ -94,6 +94,7 @@ public class DestinationService {
 			destination.setPassword(rs.getString("DESTINATION_PASSWORD"));
 			destination.setDomain(rs.getString("USER_DOMAIN"));
 			destination.setPath(rs.getString("DESTINATION_PATH"));
+			destination.setSubDirectory(rs.getString("SUB_DIRECTORY"));
 			destination.setOptions(rs.getString("DESTINATION_OPTIONS"));
 			destination.setS3AccessKeyId(rs.getString("S3_ACCESS_KEY_ID"));
 			destination.setS3SecretAccessKey(rs.getString("S3_SECRET_ACCESS_KEY"));
@@ -254,10 +255,10 @@ public class DestinationService {
 					+ " (DESTINATION_ID, NAME, DESCRIPTION, ACTIVE,"
 					+ " DESTINATION_TYPE, SERVER, PORT, DESTINATION_USER,"
 					+ " DESTINATION_PASSWORD, USER_DOMAIN,"
-					+ " DESTINATION_PATH, DESTINATION_OPTIONS,"
+					+ " DESTINATION_PATH, SUB_DIRECTORY, DESTINATION_OPTIONS,"
 					+ " S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 17) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -271,6 +272,7 @@ public class DestinationService {
 				destination.getPassword(),
 				destination.getDomain(),
 				destination.getPath(),
+				destination.getSubDirectory(),
 				destination.getOptions(),
 				destination.getS3AccessKeyId(),
 				destination.getS3SecretAccessKey(),
@@ -283,7 +285,8 @@ public class DestinationService {
 			String sql = "UPDATE ART_DESTINATIONS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, DESTINATION_TYPE=?, SERVER=?, PORT=?,"
 					+ " DESTINATION_USER=?, DESTINATION_PASSWORD=?,"
-					+ " USER_DOMAIN=?, DESTINATION_PATH=?, DESTINATION_OPTIONS=?,"
+					+ " USER_DOMAIN=?, DESTINATION_PATH=?,"
+					+ " SUB_DIRECTORY=?, DESTINATION_OPTIONS=?,"
 					+ " S3_ACCESS_KEY_ID=?, S3_SECRET_ACCESS_KEY=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE DESTINATION_ID=?";
@@ -299,6 +302,7 @@ public class DestinationService {
 				destination.getPassword(),
 				destination.getDomain(),
 				destination.getPath(),
+				destination.getSubDirectory(),
 				destination.getOptions(),
 				destination.getS3AccessKeyId(),
 				destination.getS3SecretAccessKey(),

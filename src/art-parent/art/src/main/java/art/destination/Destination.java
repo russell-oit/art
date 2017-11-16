@@ -48,6 +48,21 @@ public class Destination implements Serializable {
 	private String updatedBy;
 	private boolean useBlankPassword; //only used for user interface logic
 	private String domain;
+	private String subDirectory;
+
+	/**
+	 * @return the subDirectory
+	 */
+	public String getSubDirectory() {
+		return subDirectory;
+	}
+
+	/**
+	 * @param subDirectory the subDirectory to set
+	 */
+	public void setSubDirectory(String subDirectory) {
+		this.subDirectory = subDirectory;
+	}
 
 	/**
 	 * @return the domain

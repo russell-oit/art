@@ -150,6 +150,15 @@
 					default:
 						$("#domainDiv").hide();
 				}
+				
+				//show/hide sub-directory field
+				switch (destinationType) {
+					case 'NetworkShare':
+						$("#subDirectoryDiv").show();
+						break;
+					default:
+						$("#subDirectoryDiv").hide();
+				}
 			}
 		</script>
 	</jsp:attribute>
@@ -322,6 +331,15 @@
 					<div class="col-md-8">
 						<form:input path="path" maxlength="1000" class="form-control"/>
 						<form:errors path="path" cssClass="error"/>
+					</div>
+				</div>
+				<div id="subDirectoryDiv" class="form-group">
+					<label class="col-md-4 control-label " for="subDirectory">
+						<spring:message code="destinations.label.subDirectory"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="subDirectory" maxlength="100" class="form-control"/>
+						<form:errors path="subDirectory" cssClass="error"/>
 					</div>
 				</div>
 
