@@ -520,12 +520,16 @@ public class ReportJob implements org.quartz.Job {
 		String path = destination.getPath();
 		logger.debug("path='{}'", path);
 		path = StringUtils.trimToEmpty(path);
+
+		if (StringUtils.isNotBlank(path) && !StringUtils.endsWith(path, "/")) {
+			path = path + "/";
+		}
 		String remoteFileName = path + fileName;
 
 		DestinationType destinationType = destination.getDestinationType();
 		switch (destinationType) {
 			case FTP:
-				doFtp(destination, fullLocalFileName);
+				doFtp(destination, fullLocalFileName, remoteFileName);
 				break;
 			case SFTP:
 				doSftp(destination, fullLocalFileName, remoteFileName);
@@ -541,10 +545,11 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @param destination the destination object
 	 * @param fullLocalFileName full path to the local job file
+	 * @param remoteFileName the file name or full path of the ftp destination
 	 */
-	private void doFtp(Destination destination, String fullLocalFileName) {
-		logger.debug("Entering doFtp: destination={}, fullLocalFileName='{}',",
-				destination, fullLocalFileName);
+	private void doFtp(Destination destination, String fullLocalFileName, String remoteFileName) {
+		logger.debug("Entering doFtp: destination={}, fullLocalFileName='{}',"
+				+ " remoteFileName='{}'", destination, fullLocalFileName, remoteFileName);
 
 		//http://www.codejava.net/java-se/networking/ftp/java-ftp-file-upload-tutorial-and-example
 		//https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
@@ -646,16 +651,7 @@ public class ReportJob implements org.quartz.Job {
 						logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
 					}
 				}
-
-				if (!StringUtils.endsWith(path, "/")) {
-					path = path + "/";
-				}
 			}
-
-			String finalRemotePath;
-			finalRemotePath = path;
-
-			String remoteFileName = finalRemotePath + fileName;
 
 			boolean done;
 			try (InputStream inputStream = new FileInputStream(localFile)) {
@@ -762,9 +758,35 @@ public class ReportJob implements org.quartz.Job {
 			}
 			logger.debug("Channel connected");
 
+			channelSftp = (ChannelSftp) channel;
+
 			File localFile = new File(fullLocalFileName);
 
-			channelSftp = (ChannelSftp) channel;
+			//create sub-directories if they don't exist
+			String path = destination.getPath();
+			path = StringUtils.trimToEmpty(path);
+
+			// if file is in folder(s), create them first
+			if (StringUtils.isNotBlank(path)) {
+				String firstCharacter = path.substring(path.length() - 1);
+				//can't create directory hierarchy in one go
+				String[] folders = StringUtils.split(path, "/");
+				//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
+				List<String> subFolders = new ArrayList<>();
+				for (String folder : folders) {
+					subFolders.add(folder);
+					String partialPath = StringUtils.join(subFolders, "/");
+					if (StringUtils.equals(firstCharacter, "/")) {
+						partialPath = "/" + partialPath;
+					}
+					try {
+						channelSftp.mkdir(partialPath);
+					} catch (SftpException ex) {
+						logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+					}
+				}
+			}
+
 			try (InputStream inputStream = new FileInputStream(localFile)) {
 				channelSftp.put(inputStream, remoteFileName, ChannelSftp.OVERWRITE);
 			}
