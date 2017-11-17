@@ -343,7 +343,7 @@ public class ReportJob implements org.quartz.Job {
 
 	/**
 	 * Log an error as well as set the runDetails variable
-	 * 
+	 *
 	 * @param ex the error
 	 */
 	private void logErrorAndSetDetails(Throwable ex) {
@@ -475,12 +475,14 @@ public class ReportJob implements org.quartz.Job {
 					String directorySeparator = destinationSubDirectory.substring(destinationSubDirectory.length() - 1);
 					//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
 					String[] folders = StringUtils.split(destinationSubDirectory, directorySeparator);
-					for (int i = 0; i < folders.length; i++) {
-						String[] subFolders = ArrayUtils.subarray(folders, 0, i + 1);
-						String folder = StringUtils.join(subFolders, directorySeparator);
+					//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
+					List<String> subFolders = new ArrayList<>();
+					for (String folder : folders) {
+						subFolders.add(folder);
+						String partialPath = StringUtils.join(subFolders, directorySeparator);
 						try {
-							if (!share.folderExists(folder)) {
-								share.mkdir(folder);
+							if (!share.folderExists(partialPath)) {
+								share.mkdir(partialPath);
 							}
 						} catch (SMBApiException ex) {
 							logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
