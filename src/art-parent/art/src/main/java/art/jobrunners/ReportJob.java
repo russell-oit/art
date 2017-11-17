@@ -469,7 +469,8 @@ public class ReportJob implements org.quartz.Job {
 				destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
 
 				// if file is in folder(s), create them first
-				if (StringUtils.isNotBlank(destinationSubDirectory)) {
+				if (StringUtils.isNotBlank(destinationSubDirectory)
+						&& networkShareOptions.isCreateSubDirectories()) {
 					//sub-directory must end with the directory separator
 					String directorySeparator = destinationSubDirectory.substring(destinationSubDirectory.length() - 1);
 					//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
@@ -633,7 +634,7 @@ public class ReportJob implements org.quartz.Job {
 			path = StringUtils.trimToEmpty(path);
 
 			// if file is in folder(s), create them first
-			if (StringUtils.isNotBlank(path)) {
+			if (StringUtils.isNotBlank(path) && ftpOptions.isCreateSubDirectories()) {
 				String firstCharacter = path.substring(path.length() - 1);
 				//can't create directory hierarchy in one go
 				String[] folders = StringUtils.split(path, "/");
@@ -767,7 +768,7 @@ public class ReportJob implements org.quartz.Job {
 			path = StringUtils.trimToEmpty(path);
 
 			// if file is in folder(s), create them first
-			if (StringUtils.isNotBlank(path)) {
+			if (StringUtils.isNotBlank(path) && sftpOptions.isCreateSubDirectories()) {
 				String firstCharacter = path.substring(path.length() - 1);
 				//can't create directory hierarchy in one go
 				String[] folders = StringUtils.split(path, "/");

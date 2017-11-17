@@ -21,12 +21,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Represents options for sftp destinations
- * 
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SftpOptions {
-	
+public class SftpOptions extends GeneralDestinationOptions {
+
 	private Integer sessionConnectTimeoutSeconds;
 	private Integer channelConnectTimeoutSeconds;
 	private Integer serverAliveIntervalSeconds;
@@ -39,7 +39,8 @@ public class SftpOptions {
 	}
 
 	/**
-	 * @param sessionConnectTimeoutSeconds the sessionConnectTimeoutSeconds to set
+	 * @param sessionConnectTimeoutSeconds the sessionConnectTimeoutSeconds to
+	 * set
 	 */
 	public void setSessionConnectTimeoutSeconds(Integer sessionConnectTimeoutSeconds) {
 		this.sessionConnectTimeoutSeconds = sessionConnectTimeoutSeconds;
@@ -53,7 +54,8 @@ public class SftpOptions {
 	}
 
 	/**
-	 * @param channelConnectTimeoutSeconds the channelConnectTimeoutSeconds to set
+	 * @param channelConnectTimeoutSeconds the channelConnectTimeoutSeconds to
+	 * set
 	 */
 	public void setChannelConnectTimeoutSeconds(Integer channelConnectTimeoutSeconds) {
 		this.channelConnectTimeoutSeconds = channelConnectTimeoutSeconds;
@@ -72,5 +74,5 @@ public class SftpOptions {
 	public void setServerAliveIntervalSeconds(Integer serverAliveIntervalSeconds) {
 		this.serverAliveIntervalSeconds = serverAliveIntervalSeconds;
 	}
-	
+
 }

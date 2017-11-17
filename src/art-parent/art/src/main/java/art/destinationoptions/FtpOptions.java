@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FtpOptions {
+public class FtpOptions extends GeneralDestinationOptions {
 
 	private Long controlKeepAliveTimeoutSeconds;
 	private final Integer DEFAULT_CONNECT_TIMEOUT_SECONDS = 60;
