@@ -17,7 +17,7 @@ ART 3.1
 * Allow jobs to use shared schedules and shared holidays
 * Allow for clone reports, which use the source of another report
 * Allow reports to belong to multiple report groups
-* Allow publish job files to be copied to a network share
+* Allow publish job files to be copied to a network share, or to Amazon S3 storage
 * Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1

@@ -174,7 +174,7 @@ public class DestinationController {
 				model.addAttribute("message", setPasswordMessage);
 				return showEditDestination(action, model);
 			}
-			
+
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				destinationService.addDestination(destination, sessionUser);
@@ -253,9 +253,9 @@ public class DestinationController {
 	}
 
 	/**
-	 * Sets the password field of the ftp server
+	 * Sets the password field of the destination
 	 *
-	 * @param destination the ftp server object to set
+	 * @param destination the destination object to set
 	 * @param action "add or "edit"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
@@ -290,52 +290,6 @@ public class DestinationController {
 		//encrypt new password
 		String encryptedPassword = AesEncryptor.encrypt(newPassword);
 		destination.setPassword(encryptedPassword);
-
-		//encrypt s3 access key id
-		boolean useCurrentS3AccessKeyId = false;
-		String newS3AccessKeyId = destination.getS3AccessKeyId();
-
-		if (StringUtils.isEmpty(newS3AccessKeyId) && StringUtils.equals(action, "edit")) {
-			//password field blank. use current password
-			useCurrentS3AccessKeyId = true;
-		}
-
-		if (useCurrentS3AccessKeyId) {
-			//password field blank. use current password
-			Destination currentDestination = destinationService.getDestination(destination.getDestinationId());
-			if (currentDestination == null) {
-				return "page.message.cannotUsePassword";
-			} else {
-				newS3AccessKeyId = currentDestination.getS3AccessKeyId();
-			}
-		}
-
-		//encrypt new password
-		String encryptedS3AccessKeyId = AesEncryptor.encrypt(newS3AccessKeyId);
-		destination.setS3AccessKeyId(encryptedS3AccessKeyId);
-
-		//encrypt s3 secret access key
-		boolean useCurrentS3SecretAccessKey = false;
-		String newS3SecretAccessKey = destination.getS3SecretAccessKey();
-
-		if (StringUtils.isEmpty(newS3SecretAccessKey) && StringUtils.equals(action, "edit")) {
-			//password field blank. use current password
-			useCurrentS3SecretAccessKey = true;
-		}
-
-		if (useCurrentS3SecretAccessKey) {
-			//password field blank. use current password
-			Destination currentDestination = destinationService.getDestination(destination.getDestinationId());
-			if (currentDestination == null) {
-				return "page.message.cannotUseCurrentPassword";
-			} else {
-				newS3SecretAccessKey = currentDestination.getS3SecretAccessKey();
-			}
-		}
-
-		//encrypt new password
-		String encryptedS3SecretAccessKey = AesEncryptor.encrypt(newS3SecretAccessKey);
-		destination.setS3SecretAccessKey(encryptedS3SecretAccessKey);
 
 		return null;
 	}

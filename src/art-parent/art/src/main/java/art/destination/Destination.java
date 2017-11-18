@@ -40,8 +40,6 @@ public class Destination implements Serializable {
 	private String password;
 	private String path;
 	private String options;
-	private String s3AccessKeyId;
-	private String s3SecretAccessKey;
 	private Date creationDate;
 	private String createdBy;
 	private Date updateDate;
@@ -244,34 +242,6 @@ public class Destination implements Serializable {
 	 */
 	public void setOptions(String options) {
 		this.options = options;
-	}
-
-	/**
-	 * @return the s3AccessKeyId
-	 */
-	public String getS3AccessKeyId() {
-		return s3AccessKeyId;
-	}
-
-	/**
-	 * @param s3AccessKeyId the s3AccessKeyId to set
-	 */
-	public void setS3AccessKeyId(String s3AccessKeyId) {
-		this.s3AccessKeyId = s3AccessKeyId;
-	}
-
-	/**
-	 * @return the s3SecretAccessKey
-	 */
-	public String getS3SecretAccessKey() {
-		return s3SecretAccessKey;
-	}
-
-	/**
-	 * @param s3SecretAccessKey the s3SecretAccessKey to set
-	 */
-	public void setS3SecretAccessKey(String s3SecretAccessKey) {
-		this.s3SecretAccessKey = s3SecretAccessKey;
 	}
 
 	/**

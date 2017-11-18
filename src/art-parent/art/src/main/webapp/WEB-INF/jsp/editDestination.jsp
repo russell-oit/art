@@ -113,15 +113,6 @@
 						$("#serverFields").hide();
 				}
 
-				//show/hide s3 fields
-				switch (destinationType) {
-					case 'S3':
-						$("#s3Fields").show();
-						break;
-					default:
-						$("#s3Fields").hide();
-				}
-
 				//show/hide options field
 				switch (destinationType) {
 					case 'FTP':
@@ -133,15 +124,6 @@
 						$("#optionsDiv").hide();
 				}
 
-				//show/hide user fields
-				switch (destinationType) {
-					case 'S3':
-						$("#userFields").hide();
-						break;
-					default:
-						$("#userFields").show();
-				}
-				
 				//show/hide domain field
 				switch (destinationType) {
 					case 'NetworkShare':
@@ -150,7 +132,7 @@
 					default:
 						$("#domainDiv").hide();
 				}
-				
+
 				//show/hide sub-directory field
 				switch (destinationType) {
 					case 'NetworkShare':
@@ -278,42 +260,39 @@
 					</div>
 				</fieldset>
 
-				<fieldset id="userFields">
-					<div class="form-group">
-						<label class="control-label col-md-4" for="user">
-							<spring:message code="page.text.user"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="user" maxlength="50" class="form-control"/>
-							<form:errors path="user" cssClass="error"/>
-						</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="user">
+						<spring:message code="page.text.user"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="user" maxlength="50" class="form-control"/>
+						<form:errors path="user" cssClass="error"/>
 					</div>
-					<div class="form-group">
-						<label class="control-label col-md-4" for="password">
-							<spring:message code="page.label.password"/>
-						</label>
-						<div class="col-md-8">
-							<div class="input-group">
-								<form:password path="password" autocomplete="off" maxlength="100" class="form-control" />
-								<spring:message code="page.help.password" var="help" />
-								<span class="input-group-btn" >
-									<button class="btn btn-default" type="button"
-											data-toggle="tooltip" title="${help}">
-										<i class="fa fa-info"></i>
-									</button>
-								</span>
-							</div>
-							<div class="checkbox">
-								<label>
-									<form:checkbox path="useBlankPassword"/>
-									<spring:message code="page.checkbox.useBlankPassword"/>
-								</label>
-							</div>
-							<form:errors path="password" cssClass="error"/>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="password">
+						<spring:message code="page.label.password"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:password path="password" autocomplete="off" maxlength="100" class="form-control" />
+							<spring:message code="page.help.password" var="help" />
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
 						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="useBlankPassword"/>
+								<spring:message code="page.checkbox.useBlankPassword"/>
+							</label>
+						</div>
+						<form:errors path="password" cssClass="error"/>
 					</div>
-				</fieldset>
-
+				</div>
 				<div id="domainDiv" class="form-group">
 					<label class="col-md-4 control-label " for="domain">
 						<spring:message code="login.label.domain"/>
@@ -323,7 +302,6 @@
 						<form:errors path="domain" cssClass="error"/>
 					</div>
 				</div>
-
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="path">
 						<spring:message code="destinations.label.path"/>
@@ -342,28 +320,6 @@
 						<form:errors path="subDirectory" cssClass="error"/>
 					</div>
 				</div>
-
-				<fieldset id="s3Fields">
-					<div class="form-group">
-						<label class="control-label col-md-4" for="s3AccessKeyId">
-							<spring:message code="destinations.label.s3AccessKeyId"/>
-						</label>
-						<div class="col-md-8">
-							<form:password path="s3AccessKeyId" autocomplete="off" maxlength="200" class="form-control" />
-							<form:errors path="s3AccessKeyId" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-md-4" for="s3SecretAccessKey">
-							<spring:message code="destinations.label.s3SecretAccessKey"/>
-						</label>
-						<div class="col-md-8">
-							<form:password path="s3SecretAccessKey" autocomplete="off" maxlength="200" class="form-control" />
-							<form:errors path="s3SecretAccessKey" cssClass="error"/>
-						</div>
-					</div>
-				</fieldset>
-
 				<div id="optionsDiv" class="form-group">
 					<label class="control-label col-md-12" style="text-align: center" for="options">
 						<spring:message code="page.label.options"/>

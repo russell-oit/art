@@ -96,26 +96,16 @@ public class DestinationService {
 			destination.setPath(rs.getString("DESTINATION_PATH"));
 			destination.setSubDirectory(rs.getString("SUB_DIRECTORY"));
 			destination.setOptions(rs.getString("DESTINATION_OPTIONS"));
-			destination.setS3AccessKeyId(rs.getString("S3_ACCESS_KEY_ID"));
-			destination.setS3SecretAccessKey(rs.getString("S3_SECRET_ACCESS_KEY"));
 			destination.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			destination.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			destination.setCreatedBy(rs.getString("CREATED_BY"));
 			destination.setUpdatedBy(rs.getString("UPDATED_BY"));
 			
-			//decrypt passwords
+			//decrypt password
 			String password = destination.getPassword();
 			password = AesEncryptor.decrypt(password);
 			destination.setPassword(password);
 			
-			String s3AccessKeyId = destination.getS3AccessKeyId();
-			s3AccessKeyId = AesEncryptor.decrypt(s3AccessKeyId);
-			destination.setS3AccessKeyId(s3AccessKeyId);
-			
-			String s3SecretAccessKey = destination.getS3SecretAccessKey();
-			s3SecretAccessKey = AesEncryptor.decrypt(s3SecretAccessKey);
-			destination.setS3SecretAccessKey(s3SecretAccessKey);
-
 			return type.cast(destination);
 		}
 	}
@@ -256,9 +246,8 @@ public class DestinationService {
 					+ " DESTINATION_TYPE, SERVER, PORT, DESTINATION_USER,"
 					+ " DESTINATION_PASSWORD, USER_DOMAIN,"
 					+ " DESTINATION_PATH, SUB_DIRECTORY, DESTINATION_OPTIONS,"
-					+ " S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 17) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -274,8 +263,6 @@ public class DestinationService {
 				destination.getPath(),
 				destination.getSubDirectory(),
 				destination.getOptions(),
-				destination.getS3AccessKeyId(),
-				destination.getS3SecretAccessKey(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -287,7 +274,6 @@ public class DestinationService {
 					+ " DESTINATION_USER=?, DESTINATION_PASSWORD=?,"
 					+ " USER_DOMAIN=?, DESTINATION_PATH=?,"
 					+ " SUB_DIRECTORY=?, DESTINATION_OPTIONS=?,"
-					+ " S3_ACCESS_KEY_ID=?, S3_SECRET_ACCESS_KEY=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE DESTINATION_ID=?";
 
@@ -304,8 +290,6 @@ public class DestinationService {
 				destination.getPath(),
 				destination.getSubDirectory(),
 				destination.getOptions(),
-				destination.getS3AccessKeyId(),
-				destination.getS3SecretAccessKey(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				destination.getDestinationId()
