@@ -27,6 +27,7 @@
 		<owasp.encoder.version>1.2.1</owasp.encoder.version>
 		<thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
 		<xdocreport.version>2.0.1</xdocreport.version>
+		<jclouds.version>2.0.2</jclouds.version>
 	</properties>
 
 	<build>
@@ -849,6 +850,16 @@
 			<groupId>com.hierynomus</groupId>
 			<artifactId>smbj</artifactId>
 			<version>0.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.provider</groupId>
+			<artifactId>aws-s3</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.driver</groupId>
+			<artifactId>jclouds-slf4j</artifactId>
+			<version>${jclouds.version}</version>
 		</dependency>
 	</dependencies>
 </project>

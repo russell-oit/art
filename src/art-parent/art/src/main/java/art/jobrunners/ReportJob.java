@@ -57,6 +57,10 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.io.ByteSource;
+import com.google.common.io.Files;
+import com.google.inject.Module;
 import com.hierynomus.mssmb2.SMBApiException;
 import com.hierynomus.smbj.SMBClient;
 import com.hierynomus.smbj.SmbConfig;
@@ -110,6 +114,12 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.jclouds.ContextBuilder;
+import org.jclouds.blobstore.BlobStore;
+import org.jclouds.blobstore.BlobStoreContext;
+import org.jclouds.blobstore.domain.Blob;
+import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
+import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -375,9 +385,79 @@ public class ReportJob implements org.quartz.Job {
 					case NetworkShare:
 						sendFileToNetworkShare(destination, fullLocalFileName);
 						break;
+					case S3:
+						sendFileToS3(destination, fullLocalFileName);
+						break;
 					default:
 						throw new IllegalArgumentException("Unexpected destination type: " + destinationType);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Copies the generated file to an amazon s3 or compatible storage provider
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path to the file to copy
+	 */
+	private void sendFileToS3(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering sendFileToS3: destination={}, fullLocalFileName='{}'",
+				destination, fullLocalFileName);
+
+		//https://www.ashishpaliwal.com/blog/2012/04/playing-with-jclouds-transient-blobstore/
+		//https://jclouds.apache.org/start/blobstore/
+		//https://jclouds.apache.org/reference/logging/
+		//https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudfiles/UploadLargeObject.java
+		//https://github.com/jclouds/jclouds-cloud-storage-workshop/blob/master/exercise4/src/main/java/org/jclouds/labs/blobstore/exercise4/MyDropboxClient.java
+		String provider = "aws-s3";
+		String identity = destination.getUser();
+		String credential = destination.getPassword();
+
+		Iterable<Module> modules = ImmutableSet.<Module>of(
+				new SLF4JLoggingModule());
+
+		BlobStoreContext context = ContextBuilder.newBuilder(provider)
+				.credentials(identity, credential)
+				.modules(modules)
+				.buildView(BlobStoreContext.class);
+
+		try {
+			BlobStore blobStore = context.getBlobStore();
+
+			String containerName = destination.getPath();
+			boolean created = blobStore.createContainerInLocation(null, containerName);
+			if (created) {
+				// the container didn't exist, but does now
+				logger.debug("Container created - '{}'. Job Id {}", containerName, jobId);
+			} else {
+				// the container already existed
+				logger.debug("Container already existed: '{}'. Job Id {}", containerName, jobId);
+			}
+
+			// Create a Blob
+			String destinationSubDirectory = destination.getSubDirectory();
+			destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
+			if (StringUtils.isNotBlank(destinationSubDirectory) && !StringUtils.endsWith(destinationSubDirectory, "/")) {
+				destinationSubDirectory = destinationSubDirectory + "/";
+			}
+			String remoteFileName = destinationSubDirectory + fileName;
+
+			ByteSource payload = Files.asByteSource(new File(fullLocalFileName));
+			Blob blob = blobStore.blobBuilder(remoteFileName)
+					.payload(payload)
+					.contentDisposition(fileName)
+					.contentLength(payload.size())
+					.build();
+
+			// Upload the Blob
+			String eTag = blobStore.putBlob(containerName, blob, multipart());
+			logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", fileName, eTag, jobId);
+		} catch (IOException ex) {
+			logErrorAndSetDetails(ex);
+		} finally {
+			if (context != null) {
+				context.close();
 			}
 		}
 	}

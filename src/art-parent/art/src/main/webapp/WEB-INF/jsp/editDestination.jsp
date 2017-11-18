@@ -136,6 +136,7 @@
 				//show/hide sub-directory field
 				switch (destinationType) {
 					case 'NetworkShare':
+					case 'S3':
 						$("#subDirectoryDiv").show();
 						break;
 					default:
