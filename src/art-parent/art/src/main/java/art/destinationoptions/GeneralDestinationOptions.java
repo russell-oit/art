@@ -27,20 +27,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GeneralDestinationOptions {
 
-	private boolean createSubDirectories = true;
+	private boolean createDirectories = true;
 
 	/**
-	 * @return the createSubDirectories
+	 * @return the createDirectories
 	 */
-	public boolean isCreateSubDirectories() {
-		return createSubDirectories;
+	public boolean isCreateDirectories() {
+		return createDirectories;
 	}
 
 	/**
-	 * @param createSubDirectories the createSubDirectories to set
+	 * @param createDirectories the createDirectories to set
 	 */
-	public void setCreateSubDirectories(boolean createSubDirectories) {
-		this.createSubDirectories = createSubDirectories;
+	public void setCreateDirectories(boolean createDirectories) {
+		this.createDirectories = createDirectories;
 	}
 
 }
