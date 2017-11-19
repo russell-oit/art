@@ -861,5 +861,10 @@
 			<artifactId>jclouds-slf4j</artifactId>
 			<version>${jclouds.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.provider</groupId>
+			<artifactId>azureblob</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
 	</dependencies>
 </project>

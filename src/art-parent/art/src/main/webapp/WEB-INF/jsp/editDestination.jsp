@@ -137,6 +137,7 @@
 				switch (destinationType) {
 					case 'NetworkShare':
 					case 'S3':
+					case 'Azure':
 						$("#subDirectoryDiv").show();
 						break;
 					default:

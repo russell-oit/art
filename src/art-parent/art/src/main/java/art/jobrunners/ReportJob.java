@@ -374,6 +374,7 @@ public class ReportJob implements org.quartz.Job {
 		String jobsExportPath = Config.getJobsExportPath();
 		String fullLocalFileName = jobsExportPath + fileName;
 
+		String provider;
 		for (Destination destination : destinations) {
 			if (destination.isActive()) {
 				DestinationType destinationType = destination.getDestinationType();
@@ -386,7 +387,12 @@ public class ReportJob implements org.quartz.Job {
 						sendFileToNetworkShare(destination, fullLocalFileName);
 						break;
 					case S3:
-						sendFileToS3(destination, fullLocalFileName);
+						provider = "aws-s3";
+						sendFileToCloudStorage(provider, destination, fullLocalFileName);
+						break;
+					case Azure:
+						provider = "azureblob";
+						sendFileToCloudStorage(provider, destination, fullLocalFileName);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected destination type: " + destinationType);
@@ -398,19 +404,27 @@ public class ReportJob implements org.quartz.Job {
 	/**
 	 * Copies the generated file to an amazon s3 or compatible storage provider
 	 *
+	 * @param provider a string representing the cloud storage provider as per
+	 * the jclouds library.
+	 * https://jclouds.apache.org/reference/providers/#blobstore
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path to the file to copy
 	 */
-	private void sendFileToS3(Destination destination, String fullLocalFileName) {
-		logger.debug("Entering sendFileToS3: destination={}, fullLocalFileName='{}'",
-				destination, fullLocalFileName);
+	private void sendFileToCloudStorage(String provider, Destination destination,
+			String fullLocalFileName) {
+
+		logger.debug("Entering sendFileToS3: provider='{}' destination={},"
+				+ " fullLocalFileName='{}'", provider, destination, fullLocalFileName);
 
 		//https://www.ashishpaliwal.com/blog/2012/04/playing-with-jclouds-transient-blobstore/
 		//https://jclouds.apache.org/start/blobstore/
 		//https://jclouds.apache.org/reference/logging/
 		//https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudfiles/UploadLargeObject.java
 		//https://github.com/jclouds/jclouds-cloud-storage-workshop/blob/master/exercise4/src/main/java/org/jclouds/labs/blobstore/exercise4/MyDropboxClient.java
-		String provider = "aws-s3";
+		//https://stackoverflow.com/questions/14582627/what-are-the-credentials-to-use-azure-blob-in-jclouds
+		//https://jclouds.apache.org/guides/azure-storage/
+		//https://jclouds.apache.org/guides/aws/
+		//https://jclouds.apache.org/reference/providers/#blobstore-providers
 		String identity = destination.getUser();
 		String credential = destination.getPassword();
 
