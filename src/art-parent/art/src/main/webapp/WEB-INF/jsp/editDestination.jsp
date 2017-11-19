@@ -138,6 +138,7 @@
 					case 'NetworkShare':
 					case 'S3':
 					case 'Azure':
+					case 'WebDav':
 						$("#subDirectoryDiv").show();
 						break;
 					default:

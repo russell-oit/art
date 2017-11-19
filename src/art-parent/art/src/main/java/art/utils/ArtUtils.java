@@ -22,6 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.awt.Color;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -506,6 +510,26 @@ public class ArtUtils {
 		}
 
 		return localizedValue;
+	}
+	
+	/**
+	 * Encode the main part of a url
+	 * 
+	 * @param s the main url
+	 * @return the main url encoded
+	 * @throws MalformedURLException
+	 * @throws URISyntaxException 
+	 */
+	public static String encodeMainUrl(String s) throws MalformedURLException, URISyntaxException {
+		//https://stackoverflow.com/questions/6198894/java-encode-url/6199056#6199056
+		URL u = new URL(s);
+		return new URI(
+				u.getProtocol(),
+				u.getAuthority(),
+				u.getPath(),
+				u.getQuery(),
+				u.getRef()).
+				toString();
 	}
 
 }

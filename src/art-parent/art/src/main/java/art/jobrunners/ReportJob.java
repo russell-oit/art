@@ -57,6 +57,8 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.github.sardine.Sardine;
+import com.github.sardine.SardineFactory;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
@@ -85,6 +87,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -374,10 +377,10 @@ public class ReportJob implements org.quartz.Job {
 		String jobsExportPath = Config.getJobsExportPath();
 		String fullLocalFileName = jobsExportPath + fileName;
 
-		String provider;
 		for (Destination destination : destinations) {
 			if (destination.isActive()) {
 				DestinationType destinationType = destination.getDestinationType();
+				String provider;
 				switch (destinationType) {
 					case FTP:
 					case SFTP:
@@ -394,9 +397,88 @@ public class ReportJob implements org.quartz.Job {
 						provider = "azureblob";
 						sendFileToCloudStorage(provider, destination, fullLocalFileName);
 						break;
+					case WebDav:
+						sendFileToWebDav(destination, fullLocalFileName);
+						break;
 					default:
 						throw new IllegalArgumentException("Unexpected destination type: " + destinationType);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Copies the generated file to a webdav server location
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path to the file to copy
+	 */
+	private void sendFileToWebDav(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering sendFileToWebDav: destination={}, fullLocalFileName='{}'",
+				destination, fullLocalFileName);
+
+		String username = destination.getUser();
+		String password = destination.getPassword();
+		Sardine sardine;
+		if (StringUtils.isBlank(username)) {
+			sardine = SardineFactory.begin();
+		} else {
+			sardine = SardineFactory.begin(username, password);
+		}
+
+		String path = destination.getPath();
+		if (!StringUtils.endsWith(path, "/")) {
+			path = path + "/";
+		}
+
+		String destinationSubDirectory = destination.getSubDirectory();
+		destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
+		if (StringUtils.isNotBlank(destinationSubDirectory)
+				&& StringUtils.startsWith(destinationSubDirectory, "/")) {
+			destinationSubDirectory = StringUtils.substringAfter(destinationSubDirectory, "/");
+		}
+
+		if (StringUtils.isNotBlank(destinationSubDirectory)
+				&& !StringUtils.endsWith(destinationSubDirectory, "/")) {
+			destinationSubDirectory = destinationSubDirectory + "/";
+		}
+
+		// if file is in folder(s), create them first
+		if (StringUtils.isNotBlank(destinationSubDirectory)
+				&& destination.isCreateDirectories()) {
+			//can't create directory hierarchy in one go. create sub-directories one at a time
+			String[] folders = StringUtils.split(destinationSubDirectory, "/");
+			//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
+			List<String> subFolders = new ArrayList<>();
+			for (String folder : folders) {
+				subFolders.add(folder);
+				String partialPath = StringUtils.join(subFolders, "/");
+				partialPath = path + partialPath;
+				try {
+					String url = ArtUtils.encodeMainUrl(partialPath);
+					if (!sardine.exists(url)) {
+						sardine.createDirectory(url);
+					}
+				} catch (IOException | URISyntaxException ex) {
+					logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+				}
+			}
+		}
+
+		try {
+			String finalPath = path + destinationSubDirectory + fileName;
+			String url = ArtUtils.encodeMainUrl(finalPath);
+
+			try (InputStream fis = new FileInputStream(new File(fullLocalFileName))) {
+				sardine.put(url, fis);
+			}
+		} catch (IOException | URISyntaxException ex) {
+			logErrorAndSetDetails(ex);
+		} finally {
+			try {
+				sardine.shutdown();
+			} catch (IOException ex) {
+				logger.error("Error. Job Id {}", jobId, ex);
 			}
 		}
 	}
