@@ -125,6 +125,20 @@ public class UserGroupController {
 
 		return showEditUserGroup("edit", model);
 	}
+	
+	@RequestMapping(value = "/copyUserGroup", method = RequestMethod.GET)
+	public String copyUserGroup(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering copyUserGroup: id={}", id);
+
+		try {
+			model.addAttribute("group", userGroupService.getUserGroup(id));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditUserGroup("copy", model);
+	}
 
 	@RequestMapping(value = "/saveUserGroup", method = RequestMethod.POST)
 	public String saveUserGroup(@ModelAttribute("group") @Valid UserGroup group,
@@ -142,7 +156,7 @@ public class UserGroupController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (StringUtils.equals(action, "add")) {
+			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				userGroupService.addUserGroup(group, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {

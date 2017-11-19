@@ -184,6 +184,31 @@ public class UserController {
 		return showEditUser("edit", model, session);
 	}
 
+	@RequestMapping(value = "/copyUser", method = RequestMethod.GET)
+	public String copyUser(@RequestParam("id") Integer id, Model model,
+			HttpSession session) {
+
+		logger.debug("Entering copyUser: id={}", id);
+
+		User user = null;
+
+		try {
+			user = userService.getUser(id);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		//ensure an admin cannot edit admins of higher access level than himself
+		if (!canEditUser(session, user)) {
+			return "accessDenied";
+		}
+
+		model.addAttribute("user", user);
+
+		return showEditUser("copy", model, session);
+	}
+
 	@RequestMapping(value = "/editUsers", method = RequestMethod.GET)
 	public String editUsers(@RequestParam("ids") String ids, Model model,
 			HttpSession session) {
@@ -287,7 +312,7 @@ public class UserController {
 				user.setPasswordAlgorithm("bcrypt");
 			}
 
-			if (StringUtils.equals(action, "add")) {
+			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				userService.addUser(user, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
@@ -310,7 +335,7 @@ public class UserController {
 
 				if (user.isGenerateAndSend()) {
 					boolean newAccount;
-					if (StringUtils.equals(action, "add")) {
+					if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 						newAccount = true;
 					} else {
 						newAccount = false;
@@ -507,7 +532,8 @@ public class UserController {
 			newPassword = "";
 		} else {
 			logger.debug("StringUtils.isEmpty(newPassword)={}", StringUtils.isEmpty(newPassword));
-			if (StringUtils.isEmpty(newPassword) && StringUtils.equals(action, "edit")) {
+			if (StringUtils.isEmpty(newPassword)
+					&& StringUtils.equalsAny(action, "edit", "copy")) {
 				//password field blank. use current password
 				useCurrentPassword = true;
 			}

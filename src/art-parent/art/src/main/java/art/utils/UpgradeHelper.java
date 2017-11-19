@@ -22,7 +22,6 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.encryption.AesEncryptor;
 import art.encryption.DesEncryptor;
-import art.enums.DestinationType;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.job.Job;
