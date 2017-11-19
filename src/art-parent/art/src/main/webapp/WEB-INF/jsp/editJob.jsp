@@ -110,7 +110,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/autosize-4.0.0/autosize.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -195,8 +194,6 @@
 
 				toggleVisibleFields(); //show/hide on page load
 				populateOutputFormatField();
-
-				autosize($('textarea.autosize'));
 
 				$('#name').focus();
 			});
