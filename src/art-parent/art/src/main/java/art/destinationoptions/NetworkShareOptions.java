@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class NetworkShareOptions extends GeneralDestinationOptions {
+public class NetworkShareOptions {
 	//https://github.com/hierynomus/smbj/blob/master/src/main/java/com/hierynomus/smbj/SmbConfig.java
 	
 	private boolean anonymousUser;

@@ -47,6 +47,21 @@ public class Destination implements Serializable {
 	private boolean useBlankPassword; //only used for user interface logic
 	private String domain;
 	private String subDirectory;
+	private boolean createDirectories;
+
+	/**
+	 * @return the createDirectories
+	 */
+	public boolean isCreateDirectories() {
+		return createDirectories;
+	}
+
+	/**
+	 * @param createDirectories the createDirectories to set
+	 */
+	public void setCreateDirectories(boolean createDirectories) {
+		this.createDirectories = createDirectories;
+	}
 
 	/**
 	 * @return the subDirectory

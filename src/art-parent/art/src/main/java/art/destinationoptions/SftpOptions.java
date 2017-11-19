@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SftpOptions extends GeneralDestinationOptions {
+public class SftpOptions {
 
 	private Integer sessionConnectTimeoutSeconds;
 	private Integer channelConnectTimeoutSeconds;

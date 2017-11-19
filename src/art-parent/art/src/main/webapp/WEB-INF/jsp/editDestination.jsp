@@ -322,6 +322,16 @@
 						<form:errors path="subDirectory" cssClass="error"/>
 					</div>
 				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="createDirectories">
+						<spring:message code="destinations.label.createDirectories"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="createDirectories" id="createDirectories" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
 				<div id="optionsDiv" class="form-group">
 					<label class="control-label col-md-12" style="text-align: center" for="options">
 						<spring:message code="page.label.options"/>

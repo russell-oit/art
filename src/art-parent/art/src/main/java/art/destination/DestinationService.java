@@ -95,6 +95,7 @@ public class DestinationService {
 			destination.setDomain(rs.getString("USER_DOMAIN"));
 			destination.setPath(rs.getString("DESTINATION_PATH"));
 			destination.setSubDirectory(rs.getString("SUB_DIRECTORY"));
+			destination.setCreateDirectories(rs.getBoolean("CREATE_DIRECTORIES"));
 			destination.setOptions(rs.getString("DESTINATION_OPTIONS"));
 			destination.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			destination.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
@@ -245,9 +246,10 @@ public class DestinationService {
 					+ " (DESTINATION_ID, NAME, DESCRIPTION, ACTIVE,"
 					+ " DESTINATION_TYPE, SERVER, PORT, DESTINATION_USER,"
 					+ " DESTINATION_PASSWORD, USER_DOMAIN,"
-					+ " DESTINATION_PATH, SUB_DIRECTORY, DESTINATION_OPTIONS,"
+					+ " DESTINATION_PATH, SUB_DIRECTORY,"
+					+ " CREATE_DIRECTORIES, DESTINATION_OPTIONS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -262,6 +264,7 @@ public class DestinationService {
 				destination.getDomain(),
 				destination.getPath(),
 				destination.getSubDirectory(),
+				BooleanUtils.toInteger(destination.isCreateDirectories()),
 				destination.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
@@ -273,7 +276,7 @@ public class DestinationService {
 					+ " ACTIVE=?, DESTINATION_TYPE=?, SERVER=?, PORT=?,"
 					+ " DESTINATION_USER=?, DESTINATION_PASSWORD=?,"
 					+ " USER_DOMAIN=?, DESTINATION_PATH=?,"
-					+ " SUB_DIRECTORY=?, DESTINATION_OPTIONS=?,"
+					+ " SUB_DIRECTORY=?, CREATE_DIRECTORIES=?, DESTINATION_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE DESTINATION_ID=?";
 
@@ -289,6 +292,7 @@ public class DestinationService {
 				destination.getDomain(),
 				destination.getPath(),
 				destination.getSubDirectory(),
+				BooleanUtils.toInteger(destination.isCreateDirectories()),
 				destination.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
