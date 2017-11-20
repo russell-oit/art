@@ -147,7 +147,7 @@ public class EncryptorService {
 	 * @param id the encryptor id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "encryptors", allEntries = true)
+	@CacheEvict(value = {"encryptors", "reports"}, allEntries = true)
 	public void deleteEncryptor(int id) throws SQLException {
 		logger.debug("Entering deleteEncryptor: id={}", id);
 
@@ -163,7 +163,7 @@ public class EncryptorService {
 	 * @param ids the encryptor ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "encryptors", allEntries = true)
+	@CacheEvict(value = {"encryptors", "reports"}, allEntries = true)
 	public void deleteEncryptors(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteEncryptors: ids={}", (Object) ids);
 

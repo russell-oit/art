@@ -269,4 +269,19 @@ public class ParameterController {
 
 		return "editParameter";
 	}
+
+	@RequestMapping(value = "/reportsForParameter", method = RequestMethod.GET)
+	public String showReportsForParameter(@RequestParam("parameterId") Integer parameterId, Model model) {
+		logger.debug("Entering showReportsForParameter: parameterId={}", parameterId);
+
+		try {
+			model.addAttribute("reports", reportService.getReportsForParameter(parameterId));
+			model.addAttribute("parameter", parameterService.getParameter(parameterId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "reportsForParameter";
+	}
 }

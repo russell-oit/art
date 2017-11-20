@@ -120,7 +120,7 @@ public class DatasourceService {
 	 * being deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "datasources", allEntries = true)
+	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
 	public ActionResult deleteDatasource(int id) throws SQLException {
 		logger.debug("Entering deleteDatasource: id={}", id);
 
@@ -151,7 +151,7 @@ public class DatasourceService {
 	 * contains a list of datasource ids that were not deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "datasources", allEntries = true)
+	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
 	public ActionResult deleteDatasources(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteDatasource: ids={}", (Object) ids);
 

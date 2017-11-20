@@ -927,5 +927,21 @@ public class ReportController {
 		reportGroupMembershipService.deleteAllReportGroupMembershipsForReport(report.getReportId());
 		reportGroupMembershipService.addReportGroupMemberships(report, report.getReportGroups());
 	}
+	
+	@RequestMapping(value = "/parameterReports", method = RequestMethod.GET)
+	public String showParameterReports(Model model,
+			@RequestParam("parameterId") Integer parameterId) {
+		
+		logger.debug("Entering showParameterReports: parameterId={}", parameterId);
+
+		try {
+			model.addAttribute("report", reportService.getReportWithOwnSource(parameterId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "parameterReports";
+	}
 
 }

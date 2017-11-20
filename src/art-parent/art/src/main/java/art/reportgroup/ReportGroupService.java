@@ -216,7 +216,7 @@ public class ReportGroupService {
 	 * reports which prevented the report group from being deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "reportGroups", allEntries = true)
+	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true)
 	public ActionResult deleteReportGroup(int id) throws SQLException {
 		logger.debug("Entering deleteReportGroup: id={}", id);
 
@@ -237,7 +237,7 @@ public class ReportGroupService {
 
 		sql = "DELETE FROM ART_USER_GROUP_GROUPS WHERE QUERY_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_GROUP_ID=?";
 		dbService.update(sql, id);
 
@@ -258,7 +258,7 @@ public class ReportGroupService {
 	 * groups that were not deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "reportGroups", allEntries = true)
+	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true)
 	public ActionResult deleteReportGroups(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteReportGrousp: ids={}", (Object) ids);
 
@@ -320,7 +320,7 @@ public class ReportGroupService {
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "reportGroups", allEntries = true)
+	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true)
 	public void updateReportGroup(ReportGroup group, User actionUser) throws SQLException {
 		logger.debug("Entering updateReportGroup: group={}, actionUser={}", group, actionUser);
 
@@ -342,12 +342,12 @@ public class ReportGroupService {
 				group, newRecordId, actionUser);
 
 		int affectedRows;
-		
+
 		boolean newRecord = false;
 		if (newRecordId != null) {
 			newRecord = true;
 		}
-		
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERY_GROUPS"
 					+ " (QUERY_GROUP_ID, NAME, DESCRIPTION, CREATION_DATE, CREATED_BY)"
@@ -377,7 +377,7 @@ public class ReportGroupService {
 
 			affectedRows = dbService.update(sql, values);
 		}
-		
+
 		if (newRecordId != null) {
 			group.setReportGroupId(newRecordId);
 		}
@@ -409,7 +409,7 @@ public class ReportGroupService {
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("NAME");
 		return dbService.query(sql, h, reportGroupId);
 	}
-	
+
 	/**
 	 * Returns the report groups that the given report belongs to
 	 *
@@ -428,5 +428,5 @@ public class ReportGroupService {
 		ResultSetHandler<List<ReportGroup>> h = new BeanListHandler<>(ReportGroup.class, new ReportGroupMapper());
 		return dbService.query(sql, h, reportId);
 	}
-	
+
 }

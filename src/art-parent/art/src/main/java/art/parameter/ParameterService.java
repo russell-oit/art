@@ -480,8 +480,8 @@ public class ParameterService {
 		logger.debug("Entering getLinkedReports: parameterId={}", parameterId);
 
 		String sql = "SELECT AQ.NAME"
-				+ " FROM ART_REPORT_PARAMETERS ARP"
-				+ " INNER JOIN ART_QUERIES AQ ON"
+				+ " FROM ART_QUERIES AQ"
+				+ " INNER JOIN ART_REPORT_PARAMETERS ARP ON"
 				+ " ARP.REPORT_ID=AQ.QUERY_ID"
 				+ " WHERE ARP.PARAMETER_ID=?";
 

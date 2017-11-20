@@ -1359,5 +1359,24 @@ public class ReportService {
 		ResultSetHandler<Integer> h = new ScalarHandler<>(1);
 		return dbService.query(sql, h, reportId);
 	}
+	
+	/**
+	 * Returns reports that use a given parameter
+	 *
+	 * @param parameterId the parameter id
+	 * @return linked report names
+	 * @throws SQLException
+	 */
+	public List<Report> getReportsForParameter(int parameterId) throws SQLException {
+		logger.debug("Entering getReportsForParameter: parameterId={}", parameterId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_REPORT_PARAMETERS ARP"
+				+ " ON ARP.REPORT_ID=AQ.QUERY_ID"
+				+ " WHERE ARP.PARAMETER_ID=?";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h, parameterId);
+	}
 
 }
