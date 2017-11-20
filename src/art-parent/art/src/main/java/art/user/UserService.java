@@ -285,12 +285,15 @@ public class UserService {
 		logger.debug("Entering deleteUsers: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords = new ArrayList<>();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
 		for (Integer id : ids) {
 			ActionResult deleteResult = deleteUser(id);
 			if (!deleteResult.isSuccess()) {
-				nonDeletedRecords.add(id);
+				@SuppressWarnings("unchecked")
+				List<String> linkedJobs = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - (" + StringUtils.join(linkedJobs, ", ") + ")";
+				nonDeletedRecords.add(value);
 			}
 		}
 
