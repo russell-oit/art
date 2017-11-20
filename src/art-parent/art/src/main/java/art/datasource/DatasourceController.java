@@ -34,6 +34,7 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -100,7 +101,8 @@ public class DatasourceController {
 				DbConnections.removeConnectionPool(id);
 			} else {
 				//datasource not deleted because of linked reports
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -123,7 +125,8 @@ public class DatasourceController {
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
 			} else {
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
