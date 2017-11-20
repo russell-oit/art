@@ -22,6 +22,7 @@ import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.encryption.AesEncryptor;
 import art.enums.DatasourceType;
+import art.report.ReportService;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
@@ -70,6 +71,9 @@ public class DatasourceController {
 
 	@Autowired
 	private MessageSource messageSource;
+	
+	@Autowired
+	private ReportService reportService;
 
 	@RequestMapping(value = "/datasources", method = RequestMethod.GET)
 	public String showDatasources(Model model) {
@@ -520,5 +524,20 @@ public class DatasourceController {
 		datasource.setPasswordAlgorithm("AES");
 
 		return null;
+	}
+	
+	@RequestMapping(value = "/reportsWithDatasource", method = RequestMethod.GET)
+	public String showReportsWithDatasource(@RequestParam("datasourceId") Integer datasourceId, Model model) {
+		logger.debug("Entering showReportsWithDatasource: datasourceId={}", datasourceId);
+
+		try {
+			model.addAttribute("datasource", datasourceService.getDatasource(datasourceId));
+			model.addAttribute("reports", reportService.getReportsWithDatasource(datasourceId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "reportsWithDatasource";
 	}
 }
