@@ -17,12 +17,17 @@
  */
 package art.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.owasp.encoder.Encode;
+
 /**
  * Represents results of an action
- * 
+ *
  * @author Timothy Anyona
  */
 public class ActionResult {
+
 	private boolean success;
 	private String message; //i18n message
 	private Object data;
@@ -68,5 +73,23 @@ public class ActionResult {
 	public void setData(Object data) {
 		this.data = data;
 	}
-	
+
+	/**
+	 * Cleans the result data for html output. The data is expected to be
+	 * a List of String.
+	 *
+	 * @return the cleaned data
+	 */
+	public List<String> cleanData() {
+		@SuppressWarnings("unchecked")
+		List<String> rawData = (List<String>) data;
+		List<String> cleanedData = new ArrayList<>();
+		for (String item : rawData) {
+			String cleanedItem = Encode.forHtmlContent(item);
+			cleanedData.add(cleanedItem);
+		}
+
+		return cleanedData;
+	}
+
 }

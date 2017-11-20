@@ -1378,5 +1378,22 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, parameterId);
 	}
+	
+	/**
+	 * Returns reports that use a given datasource
+	 *
+	 * @param datasourceId the datasource id
+	 * @return linked report names
+	 * @throws SQLException
+	 */
+	public List<Report> getReportsWithDatasource(int datasourceId) throws SQLException {
+		logger.debug("Entering getReportsWithDatasource: datasourceId={}", datasourceId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE DATABASE_ID=?";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h, datasourceId);
+	}
 
 }
