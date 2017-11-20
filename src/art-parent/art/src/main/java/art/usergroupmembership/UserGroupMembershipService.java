@@ -108,6 +108,23 @@ public class UserGroupMembershipService {
 	}
 
 	/**
+	 * Returns user group memberships for a particular user group
+	 *
+	 * @param userGroupId the user group id
+	 * @return user group memberships for a particular user group
+	 * @throws SQLException
+	 */
+	public List<UserGroupMembership> getUserGroupMembershipsForUserGroup(int userGroupId)
+			throws SQLException {
+
+		logger.debug("Entering getUserGroupMembershipsForUserGroup: userGroupId={}", userGroupId);
+
+		String sql = SQL_SELECT_ALL + " WHERE USER_GROUP_ID=?";
+		ResultSetHandler<List<UserGroupMembership>> h = new BeanListHandler<>(UserGroupMembership.class, new UserGroupMembershipMapper());
+		return dbService.query(sql, h, userGroupId);
+	}
+
+	/**
 	 * Deletes a user group membership
 	 *
 	 * @param userId the user id

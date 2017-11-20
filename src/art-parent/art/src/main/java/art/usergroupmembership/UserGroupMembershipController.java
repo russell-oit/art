@@ -65,6 +65,23 @@ public class UserGroupMembershipController {
 
 		return "userGroupMembership";
 	}
+	
+	@RequestMapping(value = "/userGroupUserGroupMembership", method = RequestMethod.GET)
+	public String showUserGroupUserGroupMembership(Model model,
+			@RequestParam("userGroupId") Integer userGroupId) {
+		
+		logger.debug("Entering showUserGroupUserGroupMembership: userGroupId={}", userGroupId);
+
+		try {
+			model.addAttribute("userGroup", userGroupService.getUserGroup(userGroupId));
+			model.addAttribute("memberships", userGroupMembershipService.getUserGroupMembershipsForUserGroup(userGroupId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "userGroupUserGroupMembership";
+	}
 
 	@RequestMapping(value = "/userGroupMembershipConfig", method = RequestMethod.GET)
 	public String showUserGroupMembershipConfig(Model model) {
