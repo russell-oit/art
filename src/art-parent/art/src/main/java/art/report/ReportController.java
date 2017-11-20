@@ -183,7 +183,8 @@ public class ReportController {
 				response.setSuccess(true);
 			} else {
 				//report not deleted because of linked jobs
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -207,7 +208,8 @@ public class ReportController {
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
 			} else {
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

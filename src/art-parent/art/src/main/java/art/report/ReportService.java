@@ -574,12 +574,15 @@ public class ReportService {
 		logger.debug("Entering deleteReports: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords = new ArrayList<>();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
 		for (Integer id : ids) {
 			ActionResult deleteResult = deleteReport(id);
 			if (!deleteResult.isSuccess()) {
-				nonDeletedRecords.add(id);
+				@SuppressWarnings("unchecked")
+				List<String> linkedJobs = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - (" + StringUtils.join(linkedJobs, ", ") + ")";
+				nonDeletedRecords.add(value);
 			}
 		}
 
@@ -1359,7 +1362,7 @@ public class ReportService {
 		ResultSetHandler<Integer> h = new ScalarHandler<>(1);
 		return dbService.query(sql, h, reportId);
 	}
-	
+
 	/**
 	 * Returns reports that use a given parameter
 	 *
@@ -1378,7 +1381,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, parameterId);
 	}
-	
+
 	/**
 	 * Returns reports that use a given datasource
 	 *
