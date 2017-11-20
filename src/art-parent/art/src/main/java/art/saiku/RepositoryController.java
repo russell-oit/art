@@ -21,7 +21,6 @@ import art.enums.ReportType;
 import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
-import art.utils.ActionResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
@@ -29,7 +28,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -137,13 +135,7 @@ public class RepositoryController {
 		}
 
 		if (canDelete) {
-			ActionResult result = reportService.deleteReport(reportId);
-			if (!result.isSuccess()) {
-				@SuppressWarnings("unchecked")
-				List<String> linkedJobs = (List<String>) result.getData();
-				String linkedJobsString = "(" + StringUtils.join(linkedJobs, ", ") + ")";
-				throw new RuntimeException("Report not deleted. Linked jobs exist " + linkedJobsString);
-			}
+			reportService.deleteReport(reportId);
 		} else {
 			throw new RuntimeException("Report not deleted. You do not have access to delete the report.");
 		}
