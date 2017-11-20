@@ -66,7 +66,7 @@ public class ApiExportController {
 		byte[] b = out.toByteArray();
 
 		if (name == null || name.equals("")) {
-			name = "chart-" + new SimpleDateFormat("yyyy-MM-dd-hhmmss").format(new Date());
+			name = "chart-" + new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date());
 		}
 
 		String cleanName = ArtUtils.cleanBaseFilename(name);

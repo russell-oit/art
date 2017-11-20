@@ -365,7 +365,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 		drilldownLinks = new HashMap<>();
 		openLinksInNewWindow = drilldown.isOpenInNewWindow();
-		drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList);
+		drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList, locale);
 	}
 
 	private void prepareHyperLinkDetails(ResultSet rs) throws SQLException {

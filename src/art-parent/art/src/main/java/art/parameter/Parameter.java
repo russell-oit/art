@@ -443,30 +443,32 @@ public class Parameter implements Serializable {
 	 * Returns the default value string to be used in html elements. Null is
 	 * returned as an empty string.
 	 *
+	 * @param locale the locale to use
 	 * @return the default value string to be used in html elements
 	 */
-	public String getHtmlDefaultValue() {
+	public String getHtmlDefaultValue(Locale locale) {
 		String value = defaultValue;
 
 		if (defaultValue == null) {
 			value = "";
 		}
 
-		return getHtmlValue(value);
+		return getHtmlValue(value, locale);
 	}
 
 	/**
 	 * Returns the string that should be used in html elements
 	 *
 	 * @param value the original value
+	 * @param locale the locale to use
 	 * @return the string that should be used in html elements
 	 */
-	public String getHtmlValue(Object value) {
+	public String getHtmlValue(Object value, Locale locale) {
 		switch (dataType) {
 			case Date:
 			case DateTime:
 				//convert date to string that will be recognised by parameter processor class
-				return getDateString(value);
+				return getDateString(value, locale);
 			default:
 				return String.valueOf(value);
 		}
@@ -477,9 +479,10 @@ public class Parameter implements Serializable {
 	 * parameter's date format setting
 	 *
 	 * @param value the date value
+	 * @param locale the locale to use
 	 * @return the formatted date string
 	 */
-	public String getDateString(Object value) {
+	public String getDateString(Object value, Locale locale) {
 		if (value instanceof String) {
 			//may be string when value obtained from job parameters for display purposes only in editJob.jsp
 			return (String) value;
@@ -495,7 +498,7 @@ public class Parameter implements Serializable {
 						return ArtUtils.isoDateTimeFormatter.format(value);
 					}
 				} else {
-					SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+					SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat, locale);
 					return dateFormatter.format(value);
 				}
 			default:

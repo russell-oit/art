@@ -1516,7 +1516,7 @@ public abstract class StandardOutput {
 		}
 
 		for (Drilldown drilldown : drilldowns) {
-			DrilldownLinkHelper drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList);
+			DrilldownLinkHelper drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList, locale);
 			String drilldownUrl = drilldownLinkHelper.getDrilldownLink(columnValues.toArray());
 
 			String drilldownText = drilldown.getLinkText();

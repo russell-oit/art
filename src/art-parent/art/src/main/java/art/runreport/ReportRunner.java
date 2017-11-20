@@ -1429,14 +1429,12 @@ public class ReportRunner {
 		//replace :DATE: with current date
 		Date now = new Date();
 
-		String dateFormat = ArtUtils.ISO_DATE_FORMAT;
-		SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+		SimpleDateFormat dateFormatter = new SimpleDateFormat(ArtUtils.ISO_DATE_FORMAT);
 		String date = dateFormatter.format(now);
 		querySql = querySql.replaceAll("(?iu):date:", "'" + date + "'"); //postgresql has casting syntax like ::date
 
 		//replace :TIME: with current date and time
-		String timeFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
-		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
+		SimpleDateFormat timeFormatter = new SimpleDateFormat(ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT);
 		String time = timeFormatter.format(now);
 		querySql = querySql.replaceAll("(?iu):time:", "'" + time + "'");
 

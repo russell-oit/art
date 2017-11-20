@@ -265,7 +265,7 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		if (extraOptions != null && StringUtils.isNotBlank(extraOptions.getDateFormat())) {
 			XYPlot plot = (XYPlot) chart.getPlot();
 			DateAxis axis = (DateAxis) plot.getDomainAxis();
-			axis.setDateFormatOverride(new SimpleDateFormat(extraOptions.getDateFormat()));
+			axis.setDateFormatOverride(new SimpleDateFormat(extraOptions.getDateFormat(), locale));
 		}
 
 	}
