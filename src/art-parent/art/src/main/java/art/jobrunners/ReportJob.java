@@ -380,7 +380,6 @@ public class ReportJob implements org.quartz.Job {
 		for (Destination destination : destinations) {
 			if (destination.isActive()) {
 				DestinationType destinationType = destination.getDestinationType();
-				String provider;
 				switch (destinationType) {
 					case FTP:
 					case SFTP:
@@ -390,12 +389,10 @@ public class ReportJob implements org.quartz.Job {
 						sendFileToNetworkShare(destination, fullLocalFileName);
 						break;
 					case S3:
-						provider = "aws-s3";
-						sendFileToCloudStorage(provider, destination, fullLocalFileName);
+						sendFileToS3(destination, fullLocalFileName);
 						break;
 					case Azure:
-						provider = "azureblob";
-						sendFileToCloudStorage(provider, destination, fullLocalFileName);
+						sendFileToAzure(destination, fullLocalFileName);
 						break;
 					case WebDav:
 						sendFileToWebDav(destination, fullLocalFileName);
@@ -411,7 +408,7 @@ public class ReportJob implements org.quartz.Job {
 	 * Copies the generated file to a webdav server location
 	 *
 	 * @param destination the destination object
-	 * @param fullLocalFileName the path to the file to copy
+	 * @param fullLocalFileName the path of the file to copy
 	 */
 	private void sendFileToWebDav(Destination destination, String fullLocalFileName) {
 		logger.debug("Entering sendFileToWebDav: destination={}, fullLocalFileName='{}'",
@@ -486,11 +483,33 @@ public class ReportJob implements org.quartz.Job {
 	/**
 	 * Copies the generated file to an amazon s3 or compatible storage provider
 	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToAzure(Destination destination, String fullLocalFileName) {
+		String provider = "azureblob";
+		sendFileToCloudStorage(provider, destination, fullLocalFileName);
+	}
+
+	/**
+	 * Copies the generated file to an amazon s3 or compatible storage provider
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToS3(Destination destination, String fullLocalFileName) {
+		String provider = "aws-s3";
+		sendFileToCloudStorage(provider, destination, fullLocalFileName);
+	}
+
+	/**
+	 * Copies the generated file to a cloud blob storage provider
+	 *
 	 * @param provider a string representing the cloud storage provider as per
 	 * the jclouds library.
 	 * https://jclouds.apache.org/reference/providers/#blobstore
 	 * @param destination the destination object
-	 * @param fullLocalFileName the path to the file to copy
+	 * @param fullLocalFileName the path of the file to copy
 	 */
 	private void sendFileToCloudStorage(String provider, Destination destination,
 			String fullLocalFileName) {
@@ -563,7 +582,7 @@ public class ReportJob implements org.quartz.Job {
 	 * protocol)
 	 *
 	 * @param destination the destination object
-	 * @param fullLocalFileName the path to the file to copy
+	 * @param fullLocalFileName the path of the file to copy
 	 */
 	private void sendFileToNetworkShare(Destination destination, String fullLocalFileName) {
 		logger.debug("Entering sendFileToNetworkShare: destination={}, fullLocalFileName='{}'",
@@ -721,7 +740,7 @@ public class ReportJob implements org.quartz.Job {
 	 * Ftp the generated file using the ftp protocol
 	 *
 	 * @param destination the destination object
-	 * @param fullLocalFileName full path to the local job file
+	 * @param fullLocalFileName full path of the local job file
 	 * @param remoteFileName the file name or full path of the ftp destination
 	 */
 	private void doFtp(Destination destination, String fullLocalFileName, String remoteFileName) {
@@ -858,7 +877,7 @@ public class ReportJob implements org.quartz.Job {
 	 * Ftp the generated file using the sftp protocol
 	 *
 	 * @param destination the destination object
-	 * @param fullLocalFileName full path to the local job file
+	 * @param fullLocalFileName full path of the local job file
 	 * @param remoteFileName the file name or full path of the ftp destination
 	 */
 	private void doSftp(Destination destination, String fullLocalFileName, String remoteFileName) {
