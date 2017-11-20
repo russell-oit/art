@@ -263,12 +263,15 @@ public class ReportGroupService {
 		logger.debug("Entering deleteReportGrousp: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords = new ArrayList<>();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
 		for (Integer id : ids) {
 			ActionResult deleteResult = deleteReportGroup(id);
 			if (!deleteResult.isSuccess()) {
-				nonDeletedRecords.add(id);
+				@SuppressWarnings("unchecked")
+				List<String> linkedReports = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - (" + StringUtils.join(linkedReports, ", ") + ")";
+				nonDeletedRecords.add(value);
 			}
 		}
 
