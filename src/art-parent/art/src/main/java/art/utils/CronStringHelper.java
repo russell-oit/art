@@ -27,6 +27,9 @@ import java.util.Objects;
 import net.redhogs.cronparser.CronExpressionDescriptor;
 import net.redhogs.cronparser.Options;
 import org.apache.commons.lang3.StringUtils;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
+import org.quartz.impl.triggers.CronTriggerImpl;
 
 /**
  * Provides methods for getting cron strings for a job or schedule's main
@@ -230,6 +233,44 @@ public class CronStringHelper {
 
 		String description = CronExpressionDescriptor.getDescription(cronString, cronOptions, locale);
 		return description;
+	}
+
+	/**
+	 * Returns the next run date for a schedule's main schedule
+	 *
+	 * @param schedule the schedule
+	 * @return the next run date
+	 */
+	public static Date getNextRunDate(Schedule schedule) {
+		String cronString = getCronString(schedule);
+		return getNextRunDate(cronString);
+	}
+	
+	/**
+	 * Returns the next run date for a job's main schedule
+	 * 
+	 * @param job the job
+	 * @return the next run date
+	 */
+	public static Date getNextRunDate(Job job){
+		String cronString = getCronString(job);
+		return getNextRunDate(cronString);
+	}
+
+	/**
+	 * Returns the next run date for a quartz cron schedule
+	 * 
+	 * @param cronString the cron string
+	 * @return the next run date
+	 */
+	public static Date getNextRunDate(String cronString) {
+		CronTriggerImpl dummyTrigger = (CronTriggerImpl) newTrigger()
+				.withSchedule(cronSchedule(cronString))
+				.build();
+
+		Date nextRunDate = dummyTrigger.getFireTimeAfter(new Date());
+		
+		return nextRunDate;
 	}
 
 }

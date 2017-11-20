@@ -276,8 +276,11 @@ public class ScheduleController {
 			model.addAttribute("holidays", holidayService.getAllHolidays());
 
 			if (schedule != null && !StringUtils.equals(action, "add")) {
-				String mainScheduleDescription = CronStringHelper.getCronScheduleDescription(schedule, locale);
+				String cronString = CronStringHelper.getCronString(schedule);
+				String mainScheduleDescription = CronStringHelper.getCronScheduleDescription(cronString, locale);
 				model.addAttribute("mainScheduleDescription", mainScheduleDescription);
+				Date nextRunDate = CronStringHelper.getNextRunDate(cronString);
+				model.addAttribute("nextRunDate", nextRunDate);
 			}
 		} catch (SQLException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);

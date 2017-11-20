@@ -124,7 +124,7 @@ public class JobController {
 
 	@Autowired
 	private DestinationService destinationService;
-	
+
 	@Autowired
 	private JobDestinationService jobDestinationService;
 
@@ -707,8 +707,11 @@ public class JobController {
 			model.addAttribute("destinations", destinationService.getAllDestinations());
 
 			if (job != null && !StringUtils.equals(action, "add")) {
-				String mainScheduleDescription = CronStringHelper.getCronScheduleDescription(job, locale);
+				String cronString = CronStringHelper.getCronString(job);
+				String mainScheduleDescription = CronStringHelper.getCronScheduleDescription(cronString, locale);
 				model.addAttribute("mainScheduleDescription", mainScheduleDescription);
+				Date nextRunDate = CronStringHelper.getNextRunDate(cronString);
+				model.addAttribute("nextRunDate", nextRunDate);
 			}
 		} catch (SQLException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);

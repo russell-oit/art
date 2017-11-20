@@ -12,6 +12,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <c:choose>
 	<c:when test="${action == 'add'}">
@@ -884,6 +885,7 @@
 						<div class="form-group">
 							<div class="col-md-8 col-md-offset-4">
 								<pre>${encode:forHtmlContent(mainScheduleDescription)}</pre>
+								<b><spring:message code="jobs.text.nextRunDate"/>:</b> <pre><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
 							</div>
 						</div>
 					</c:if>
