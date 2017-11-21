@@ -159,8 +159,6 @@ public class CsvOutputUnivocity {
 				csvRoutines.write(rs, writer);
 				writer.write("</pre>");
 			} else {
-				//https://github.com/uniVocity/univocity-parsers/issues/203
-				csvRoutines.setKeepResourcesOpen(false);
 				try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 					if (reportFormat == ReportFormat.csv) {
 						csvRoutines.write(rs, fout);
