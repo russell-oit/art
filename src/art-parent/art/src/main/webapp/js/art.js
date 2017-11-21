@@ -389,9 +389,9 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		lengthMenu: [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
 		pageLength: pageLength,
 		columnDefs: [{
+				targets: 0,
 				orderable: false,
-				className: 'select-checkbox',
-				targets: 0
+				className: 'select-checkbox'
 			},
 			{
 				targets: "dtHidden", //target name matches class name of th.
