@@ -630,6 +630,7 @@ public class ReportJob implements org.quartz.Job {
 		//https://jclouds.apache.org/guides/azure-storage/
 		//https://jclouds.apache.org/guides/aws/
 		//https://jclouds.apache.org/reference/providers/#blobstore-providers
+		//https://github.com/apache/camel/blob/master/components/camel-jclouds/src/main/java/org/apache/camel/component/jclouds/JcloudsBlobStoreHelper.java
 		String identity = destination.getUser();
 		String credential = destination.getPassword();
 
@@ -661,7 +662,7 @@ public class ReportJob implements org.quartz.Job {
 				destinationSubDirectory = destinationSubDirectory + "/";
 			}
 			String remoteFileName = destinationSubDirectory + fileName;
-
+			
 			ByteSource payload = Files.asByteSource(new File(fullLocalFileName));
 			Blob blob = blobStore.blobBuilder(remoteFileName)
 					.payload(payload)

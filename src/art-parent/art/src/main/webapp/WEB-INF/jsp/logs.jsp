@@ -176,7 +176,7 @@ Display application logs
 						<th><spring:message code="page.text.user"/></th>
 						<th class="dtHidden"><spring:message code="logs.text.page"/></th>
 						<th class="dtHidden"><spring:message code="logs.text.ipAddress"/></th>
-						<th class="dtHidden"></th> <%-- exception details column. must be last column. hidden --%>
+						<th class="dtHidden"><spring:message code="logs.text.details"/></th> <%-- exception details column. must be last column. hidden --%>
 							<%-- if change number of columns, must modify array index in format function --%>
 					</tr>
 				</thead>
