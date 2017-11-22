@@ -25,6 +25,7 @@
 -- add job year column
 -- create destinations table
 -- create job-destination table
+-- add job sub-directory column
 
 
 -- NOTES:
@@ -221,3 +222,6 @@ CREATE TABLE ART_JOB_DESTINATION_MAP
 
 -- add ftp server migrated column
 ALTER TABLE ART_FTP_SERVERS ADD MIGRATED INTEGER;
+
+-- add job sub-directory column
+ALTER TABLE ART_JOBS ADD SUB_DIRECTORY VARCHAR(100);

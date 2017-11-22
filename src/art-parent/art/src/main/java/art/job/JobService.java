@@ -213,6 +213,7 @@ public class JobService {
 		job.setRecipientsReportId(rs.getInt("RECIPIENTS_QUERY_ID"));
 		job.setRunsToArchive(rs.getInt("RUNS_TO_ARCHIVE"));
 		job.setFixedFileName(rs.getString("FIXED_FILE_NAME"));
+		job.setSubDirectory(rs.getString("SUB_DIRECTORY"));
 		job.setBatchFile(rs.getString("BATCH_FILE"));
 		job.setEmailTemplate(rs.getString("EMAIL_TEMPLATE"));
 		job.setExtraSchedules(rs.getString("EXTRA_SCHEDULES"));
@@ -466,11 +467,12 @@ public class JobService {
 					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
-					+ " FIXED_FILE_NAME, BATCH_FILE, FTP_SERVER_ID, EMAIL_TEMPLATE,"
+					+ " FIXED_FILE_NAME, SUB_DIRECTORY, BATCH_FILE,"
+					+ " FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
 					+ " SCHEDULE_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 42) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 43) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -506,6 +508,7 @@ public class JobService {
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getFixedFileName(),
+				job.getSubDirectory(),
 				job.getBatchFile(),
 				ftpServerId,
 				job.getEmailTemplate(),
@@ -529,7 +532,8 @@ public class JobService {
 					+ " ACTIVE=?, ENABLE_AUDIT=?,"
 					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
 					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?,"
-					+ " FIXED_FILE_NAME=?, BATCH_FILE=?, FTP_SERVER_ID=?,"
+					+ " FIXED_FILE_NAME=?, SUB_DIRECTORY=?,"
+					+ " BATCH_FILE=?, FTP_SERVER_ID=?,"
 					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
@@ -568,6 +572,7 @@ public class JobService {
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getFixedFileName(),
+				job.getSubDirectory(),
 				job.getBatchFile(),
 				ftpServerId,
 				job.getEmailTemplate(),

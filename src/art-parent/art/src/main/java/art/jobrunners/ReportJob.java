@@ -447,7 +447,7 @@ public class ReportJob implements org.quartz.Job {
 			String fileField = websiteOptions.getFileField();
 			String csrfTokenInputField = websiteOptions.getCsrfTokenInputField();
 			String csrfTokenCookie = websiteOptions.getCsrfTokenCookie();
-			String csrfTokenOutputField=websiteOptions.getCsrfTokenOutputField();
+			String csrfTokenOutputField = websiteOptions.getCsrfTokenOutputField();
 			String csrfTokenValue = null;
 
 			if (StringUtils.isNotBlank(startUrl)) {
@@ -534,8 +534,7 @@ public class ReportJob implements org.quartz.Job {
 
 		String destinationSubDirectory = destination.getSubDirectory();
 		destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
-		if (StringUtils.isNotBlank(destinationSubDirectory)
-				&& StringUtils.startsWith(destinationSubDirectory, "/")) {
+		if (StringUtils.startsWith(destinationSubDirectory, "/")) {
 			destinationSubDirectory = StringUtils.substringAfter(destinationSubDirectory, "/");
 		}
 
@@ -544,11 +543,24 @@ public class ReportJob implements org.quartz.Job {
 			destinationSubDirectory = destinationSubDirectory + "/";
 		}
 
+		String jobSubDirectory = job.getSubDirectory();
+		jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
+		if (StringUtils.startsWith(jobSubDirectory, "/")) {
+			jobSubDirectory = StringUtils.substringAfter(jobSubDirectory, "/");
+		}
+
+		if (StringUtils.isNotBlank(jobSubDirectory)
+				&& !StringUtils.endsWith(jobSubDirectory, "/")) {
+			jobSubDirectory = jobSubDirectory + "/";
+		}
+
+		String finalSubDirectory = destinationSubDirectory + jobSubDirectory;
+
 		// if file is in folder(s), create them first
-		if (StringUtils.isNotBlank(destinationSubDirectory)
+		if (StringUtils.isNotBlank(finalSubDirectory)
 				&& destination.isCreateDirectories()) {
 			//can't create directory hierarchy in one go. create sub-directories one at a time
-			String[] folders = StringUtils.split(destinationSubDirectory, "/");
+			String[] folders = StringUtils.split(finalSubDirectory, "/");
 			//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
 			List<String> subFolders = new ArrayList<>();
 			for (String folder : folders) {
@@ -567,7 +579,7 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		try {
-			String finalPath = path + destinationSubDirectory + fileName;
+			String finalPath = path + finalSubDirectory + fileName;
 			String url = ArtUtils.encodeMainUrl(finalPath);
 
 			try (InputStream fis = new FileInputStream(new File(fullLocalFileName))) {
@@ -658,11 +670,26 @@ public class ReportJob implements org.quartz.Job {
 			// Create a Blob
 			String destinationSubDirectory = destination.getSubDirectory();
 			destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
-			if (StringUtils.isNotBlank(destinationSubDirectory) && !StringUtils.endsWith(destinationSubDirectory, "/")) {
+			if (StringUtils.isNotBlank(destinationSubDirectory)
+					&& !StringUtils.endsWith(destinationSubDirectory, "/")) {
 				destinationSubDirectory = destinationSubDirectory + "/";
 			}
-			String remoteFileName = destinationSubDirectory + fileName;
-			
+
+			String jobSubDirectory = job.getSubDirectory();
+			jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
+			if (StringUtils.startsWith(jobSubDirectory, "/")) {
+				jobSubDirectory = StringUtils.substringAfter(jobSubDirectory, "/");
+			}
+
+			if (StringUtils.isNotBlank(jobSubDirectory)
+					&& !StringUtils.endsWith(jobSubDirectory, "/")) {
+				jobSubDirectory = jobSubDirectory + "/";
+			}
+
+			String finalSubDirectory = destinationSubDirectory + jobSubDirectory;
+
+			String remoteFileName = finalSubDirectory + fileName;
+
 			ByteSource payload = Files.asByteSource(new File(fullLocalFileName));
 			Blob blob = blobStore.blobBuilder(remoteFileName)
 					.payload(payload)
@@ -760,21 +787,25 @@ public class ReportJob implements org.quartz.Job {
 
 			com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
 
+			String destinationSubDirectory = destination.getSubDirectory();
+			destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
+
+			String jobSubDirectory = job.getSubDirectory();
+			jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
+
+			String finalSubDirectory = destinationSubDirectory + jobSubDirectory;
+
 			// Connect to Share
 			String path = destination.getPath();
 			try (DiskShare share = (DiskShare) session.connectShare(path)) {
-
 				//https://stackoverflow.com/questions/44634892/java-smb-file-share-without-smb-1-0-cifs-compatibility-enabled
-				String destinationSubDirectory = destination.getSubDirectory();
-				destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
-
 				// if file is in folder(s), create them first
-				if (StringUtils.isNotBlank(destinationSubDirectory)
+				if (StringUtils.isNotBlank(finalSubDirectory)
 						&& destination.isCreateDirectories()) {
 					//sub-directory must end with the directory separator
-					String directorySeparator = destinationSubDirectory.substring(destinationSubDirectory.length() - 1);
+					String directorySeparator = finalSubDirectory.substring(finalSubDirectory.length() - 1);
 					//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
-					String[] folders = StringUtils.split(destinationSubDirectory, directorySeparator);
+					String[] folders = StringUtils.split(finalSubDirectory, directorySeparator);
 					//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
 					List<String> subFolders = new ArrayList<>();
 					for (String folder : folders) {
@@ -790,11 +821,8 @@ public class ReportJob implements org.quartz.Job {
 					}
 				}
 
-				String finalRemotePath;
-				finalRemotePath = destinationSubDirectory;
-
 				File file = new File(fullLocalFileName);
-				String destPath = finalRemotePath + fileName;
+				String destPath = finalSubDirectory + fileName;
 				boolean overwrite = true;
 				SmbFiles.copy(file, share, destPath, overwrite);
 			}
@@ -825,20 +853,32 @@ public class ReportJob implements org.quartz.Job {
 		if (StringUtils.isNotBlank(path) && !StringUtils.endsWith(path, "/")) {
 			path = path + "/";
 		}
-		String remoteFileName = path + fileName;
+
+		String jobSubDirectory = job.getSubDirectory();
+		jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
+		if (StringUtils.startsWith(jobSubDirectory, "/")) {
+			jobSubDirectory = StringUtils.substringAfter(jobSubDirectory, "/");
+		}
+
+		if (StringUtils.isNotBlank(jobSubDirectory)
+				&& !StringUtils.endsWith(jobSubDirectory, "/")) {
+			jobSubDirectory = jobSubDirectory + "/";
+		}
+
+		String finalPath = path + jobSubDirectory;
+		String remoteFileName = finalPath + fileName;
 
 		DestinationType destinationType = destination.getDestinationType();
 		switch (destinationType) {
 			case FTP:
-				doFtp(destination, fullLocalFileName, remoteFileName);
+				doFtp(destination, fullLocalFileName, remoteFileName, finalPath);
 				break;
 			case SFTP:
-				doSftp(destination, fullLocalFileName, remoteFileName);
+				doSftp(destination, fullLocalFileName, remoteFileName, finalPath);
 				break;
 			default:
 				logger.warn("Unexpected ftp destination type: " + destinationType);
 		}
-
 	}
 
 	/**
@@ -846,11 +886,14 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @param destination the destination object
 	 * @param fullLocalFileName full path of the local job file
-	 * @param remoteFileName the file name or full path of the ftp destination
+	 * @param remoteFileName the full file name of the ftp destination
+	 * @param path the final path (minus the file name) of the ftp file
 	 */
-	private void doFtp(Destination destination, String fullLocalFileName, String remoteFileName) {
+	private void doFtp(Destination destination, String fullLocalFileName,
+			String remoteFileName, String path) {
 		logger.debug("Entering doFtp: destination={}, fullLocalFileName='{}',"
-				+ " remoteFileName='{}'", destination, fullLocalFileName, remoteFileName);
+				+ " remoteFileName='{}', path='{}'",
+				destination, fullLocalFileName, remoteFileName, path);
 
 		//http://www.codejava.net/java-se/networking/ftp/java-ftp-file-upload-tutorial-and-example
 		//https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
@@ -929,11 +972,7 @@ public class ReportJob implements org.quartz.Job {
 
 			File localFile = new File(fullLocalFileName);
 
-			//create sub-directories if they don't exist
-			String path = destination.getPath();
-			path = StringUtils.trimToEmpty(path);
-
-			// if file is in folder(s), create them first
+			//create path if it don't exist
 			if (StringUtils.isNotBlank(path) && destination.isCreateDirectories()) {
 				String firstCharacter = path.substring(path.length() - 1);
 				//can't create directory hierarchy in one go
@@ -984,10 +1023,13 @@ public class ReportJob implements org.quartz.Job {
 	 * @param destination the destination object
 	 * @param fullLocalFileName full path of the local job file
 	 * @param remoteFileName the file name or full path of the ftp destination
+	 * @param path the final path (minus the file name) of the ftp file
 	 */
-	private void doSftp(Destination destination, String fullLocalFileName, String remoteFileName) {
+	private void doSftp(Destination destination, String fullLocalFileName,
+			String remoteFileName, String path) {
 		logger.debug("Entering doSftp: destination={}, fullLocalFileName='{}',"
-				+ " remoteFileName='{}'", destination, fullLocalFileName, remoteFileName);
+				+ " remoteFileName='{}', path='{}'",
+				destination, fullLocalFileName, remoteFileName, path);
 
 		//https://stackoverflow.com/questions/14830146/how-to-transfer-a-file-through-sftp-in-java
 		//https://github.com/jpbriend/sftp-example/blob/master/src/main/java/com/infinit/sftp/SftpClient.java
@@ -1063,11 +1105,7 @@ public class ReportJob implements org.quartz.Job {
 
 			File localFile = new File(fullLocalFileName);
 
-			//create sub-directories if they don't exist
-			String path = destination.getPath();
-			path = StringUtils.trimToEmpty(path);
-
-			// if file is in folder(s), create them first
+			//create path if it don't exist
 			if (StringUtils.isNotBlank(path) && destination.isCreateDirectories()) {
 				String firstCharacter = path.substring(path.length() - 1);
 				//can't create directory hierarchy in one go

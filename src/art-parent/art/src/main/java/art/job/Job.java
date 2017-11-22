@@ -93,6 +93,21 @@ public class Job implements Serializable {
 	private Schedule schedule;
 	private List<Holiday> sharedHolidays;
 	private List<Destination> destinations;
+	private String subDirectory;
+
+	/**
+	 * @return the subDirectory
+	 */
+	public String getSubDirectory() {
+		return subDirectory;
+	}
+
+	/**
+	 * @param subDirectory the subDirectory to set
+	 */
+	public void setSubDirectory(String subDirectory) {
+		this.subDirectory = subDirectory;
+	}
 
 	/**
 	 * @return the destinations
