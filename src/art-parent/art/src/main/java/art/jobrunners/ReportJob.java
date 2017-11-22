@@ -26,6 +26,7 @@ import art.destination.Destination;
 import art.destinationoptions.FtpOptions;
 import art.destinationoptions.NetworkShareOptions;
 import art.destinationoptions.SftpOptions;
+import art.destinationoptions.WebsiteOptions;
 import art.enums.DestinationType;
 import art.enums.JobType;
 import art.enums.ReportFormat;
@@ -106,7 +107,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
@@ -123,6 +124,10 @@ import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
+import org.jsoup.Connection.Method;
+import org.jsoup.Connection.Response;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -397,10 +402,109 @@ public class ReportJob implements org.quartz.Job {
 					case WebDav:
 						sendFileToWebDav(destination, fullLocalFileName);
 						break;
+					case Website:
+						sendFileToWebsite(destination, fullLocalFileName);
+						break;
 					default:
 						throw new IllegalArgumentException("Unexpected destination type: " + destinationType);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Copies the generated file to a web address that accepts file uploads
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToWebsite(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering sendFileToWebsite: destination={}, fullLocalFileName='{}'",
+				destination, fullLocalFileName);
+
+		//https://stackoverflow.com/questions/7370771/how-to-post-files-using-jsoup
+		//https://stackoverflow.com/questions/39814877/jsoup-login-to-website-and-visit
+		//https://stackoverflow.com/questions/1445919/how-to-enable-wire-logging-for-a-java-httpurlconnection-traffic
+		//https://stackoverflow.com/questions/30406264/cannot-login-to-website-by-using-jsoup-with-x-www-form-urlencoded-parameters
+		//http://neembuuuploader.sourceforge.net/wiki/index.php/Identifying_the_HTTP_GET/POST_requests_for_upload
+		try {
+			WebsiteOptions websiteOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				websiteOptions = new WebsiteOptions();
+			} else {
+				websiteOptions = ArtUtils.jsonToObject(options, WebsiteOptions.class);
+			}
+
+			Map<String, String> cookies = null;
+
+			String username = destination.getUser();
+			String password = destination.getPassword();
+			String startUrl = websiteOptions.getStartUrl();
+			String loginUrl = websiteOptions.getLoginUrl();
+			String usernameField = websiteOptions.getUsernameField();
+			String passwordField = websiteOptions.getPasswordField();
+			String fileField = websiteOptions.getFileField();
+			String csrfTokenInputField = websiteOptions.getCsrfTokenInputField();
+			String csrfTokenCookie = websiteOptions.getCsrfTokenCookie();
+			String csrfTokenOutputField=websiteOptions.getCsrfTokenOutputField();
+			String csrfTokenValue = null;
+
+			if (StringUtils.isNotBlank(startUrl)) {
+				Response response = Jsoup.connect(startUrl)
+						.method(Method.GET)
+						.execute();
+				cookies = response.cookies();
+				if (StringUtils.isNotBlank(csrfTokenCookie)) {
+					csrfTokenValue = cookies.get(csrfTokenCookie);
+					logger.debug("csrfTokenValue='{}'", csrfTokenValue);
+				} else if (StringUtils.isNotBlank(csrfTokenInputField)) {
+					Document doc = response.parse();
+					//doc.select().val() doesn't throw an error if field not there. returns empty string if field not there
+					csrfTokenValue = doc.select("input[name=" + csrfTokenInputField + "]").val();
+					logger.debug("csrfTokenValue='{}'", csrfTokenValue);
+				}
+			}
+			if (StringUtils.isNotBlank(loginUrl) && StringUtils.isNotBlank(username)) {
+				Response response = Jsoup.connect(loginUrl)
+						.data(usernameField, username)
+						.data(passwordField, password)
+						.method(Method.POST)
+						.execute();
+				cookies = response.cookies();
+				if (StringUtils.isNotBlank(csrfTokenCookie)) {
+					csrfTokenValue = cookies.get(csrfTokenCookie);
+					logger.debug("csrfTokenValue='{}'. Job Id {}", csrfTokenValue, jobId);
+				} else if (StringUtils.isNotBlank(csrfTokenInputField)) {
+					Document doc = response.parse();
+					csrfTokenValue = doc.select("input[name=" + csrfTokenInputField + "]").val();
+					logger.debug("csrfTokenValue='{}'. Job Id {}", csrfTokenValue, jobId);
+				}
+			}
+			String path = destination.getPath();
+			File file = new File(fullLocalFileName);
+			try (FileInputStream fis = new FileInputStream(file)) {
+				org.jsoup.Connection connection = Jsoup.connect(path)
+						.ignoreContentType(true)
+						.data(fileField, file.getName(), fis);
+				if (cookies != null) {
+					connection.cookies(cookies);
+				}
+				List<Map<String, String>> otherFields = websiteOptions.getOtherFields();
+				if (CollectionUtils.isNotEmpty(otherFields)) {
+					for (Map<String, String> otherField : otherFields) {
+						connection.data(otherField);
+					}
+				}
+				if (StringUtils.isNotBlank(csrfTokenOutputField)) {
+					connection.data(csrfTokenOutputField, csrfTokenValue);
+				}
+				Document document = connection.post();
+				String postReply = document.body().text();
+				logger.debug("postReply='{}'. Job Id {}", postReply, jobId);
+			}
+		} catch (IOException ex) {
+			logErrorAndSetDetails(ex);
 		}
 	}
 
@@ -488,7 +592,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void sendFileToAzure(Destination destination, String fullLocalFileName) {
 		String provider = "azureblob";
-		sendFileToCloudStorage(provider, destination, fullLocalFileName);
+		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
 
 	/**
@@ -499,7 +603,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void sendFileToS3(Destination destination, String fullLocalFileName) {
 		String provider = "aws-s3";
-		sendFileToCloudStorage(provider, destination, fullLocalFileName);
+		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
 
 	/**
@@ -511,7 +615,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
-	private void sendFileToCloudStorage(String provider, Destination destination,
+	private void sendFileToBlobStorage(String provider, Destination destination,
 			String fullLocalFileName) {
 
 		logger.debug("Entering sendFileToS3: provider='{}' destination={},"

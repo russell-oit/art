@@ -29,7 +29,7 @@ import java.util.List;
 public enum DestinationType {
 	
 	FTP("FTP"), SFTP("SFTP"), NetworkShare("Network Share"), S3("S3"),
-	Azure("Azure"), WebDav("WebDAV");
+	Azure("Azure"), WebDav("WebDAV"), Website("Website");
 	
 	private final String value;
 

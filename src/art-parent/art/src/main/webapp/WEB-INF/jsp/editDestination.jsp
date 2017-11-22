@@ -118,6 +118,7 @@
 					case 'FTP':
 					case 'SFTP':
 					case 'NetworkShare':
+					case 'Website':
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -143,6 +144,15 @@
 						break;
 					default:
 						$("#subDirectoryDiv").hide();
+				}
+				
+				//show/hide create directories field
+				switch (destinationType) {
+					case 'Website':
+						$("#createDirectoriesDiv").hide();
+						break;
+					default:
+						$("#createDirectoriesDiv").show();
 				}
 			}
 		</script>
@@ -323,7 +333,7 @@
 						<form:errors path="subDirectory" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
+				<div id="createDirectoriesDiv" class="form-group">
 					<label class="control-label col-md-4" for="createDirectories">
 						<spring:message code="destinations.label.createDirectories"/>
 					</label>
