@@ -38,6 +38,8 @@ Edit schedule page
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
 <spring:message code="select.text.selectAll" var="selectAllText"/>
 <spring:message code="select.text.deselectAll" var="deselectAllText"/>
+<spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -70,6 +72,8 @@ Edit schedule page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -99,6 +103,42 @@ Edit schedule page
 				});
 
 				$('#name').focus();
+
+				$('#describeSchedule').click(function () {
+					var second = $('#second').val();
+					var minute = $('#minute').val();
+					var hour = $('#hour').val();
+					var day = $('#day').val();
+					var month = $('#month').val();
+					var weekday = $('#weekday').val();
+					var year = $('#year').val();
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/describeSchedule',
+						dataType: 'json',
+						data: {second: second, minute: minute, hour: hour, day: day,
+							month: month, weekday: weekday, year: year},
+						success: function (response)
+						{
+							if (response.success) {
+								var scheduleDescription = response.data;
+								var finalString = "<p><pre>" + escapeHtmlContent(scheduleDescription.description)
+										+ "</pre><b>${nextRunDateText}:</b> <pre>"
+										+ escapeHtmlContent(scheduleDescription.nextRunDateString)
+										+ "</pre></p>";
+								$("#mainScheduleDescriptionDiv").html(finalString);
+							} else {
+								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+								$.notify("${errorOccurredText}", "error");
+							}
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert(xhr.responseText);
+						}
+					});
+				});
 
 			});
 		</script>
@@ -139,6 +179,16 @@ Edit schedule page
 						</c:if>
 					</div>
 				</c:if>
+
+				<c:if test="${not empty message}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<spring:message code="${message}"/>
+					</div>
+				</c:if>
+
+				<div id="ajaxResponse">
+				</div>
 
 				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
@@ -247,56 +297,62 @@ Edit schedule page
 						<form:errors path="year" cssClass="error"/>
 					</div>
 				</div>
-				<c:if test="${not empty mainScheduleDescription}">
-					<div class="form-group">
-						<div class="col-md-8 col-md-offset-4">
-							<pre>${encode:forHtmlContent(mainScheduleDescription)}</pre>
-							<b><spring:message code="jobs.text.nextRunDate"/>:</b> <pre><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
+				<div class="form-group">
+					<div class="col-md-8 col-md-offset-4">
+						<button type="button" id="describeSchedule" class="btn btn-default">
+							<spring:message code="schedules.button.describe"/>
+						</button>
+						<div id="mainScheduleDescriptionDiv">
+							<p>
+								<c:if test="${not empty mainScheduleDescription}">
+								<pre>${encode:forHtmlContent(mainScheduleDescription)}</pre>
+								<b><spring:message code="jobs.text.nextRunDate"/>:</b> <pre><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
+							</c:if>
+							</p>
 						</div>
 					</div>
-				</c:if>
 
-				<hr>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="extraSchedules">
-						<spring:message code="jobs.label.extraSchedules"/>
-					</label>
-					<div class="col-md-8">
-						<form:textarea path="extraSchedules" rows="3" cols="40" class="form-control"/>
-						<form:errors path="extraSchedules" cssClass="error"/>
+					<hr>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="extraSchedules">
+							<spring:message code="jobs.label.extraSchedules"/>
+						</label>
+						<div class="col-md-8">
+							<form:textarea path="extraSchedules" rows="3" cols="40" class="form-control"/>
+							<form:errors path="extraSchedules" cssClass="error"/>
+						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="holidays">
-						<spring:message code="schedules.label.holidays"/>
-					</label>
-					<div class="col-md-8">
-						<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
-						<form:errors path="holidays" cssClass="error"/>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="holidays">
+							<spring:message code="schedules.label.holidays"/>
+						</label>
+						<div class="col-md-8">
+							<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
+							<form:errors path="holidays" cssClass="error"/>
+						</div>
 					</div>
-				</div>
 
-				<hr>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="sharedHolidays">
-						<spring:message code="schedules.label.sharedHolidays"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="sharedHolidays" items="${holidays}" multiple="true" 
-									 itemLabel="name" itemValue="holidayId" 
-									 class="form-control selectpicker"
-									 data-actions-box="true"
-									 />
-						<form:errors path="sharedHolidays" cssClass="error"/>
+					<hr>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="sharedHolidays">
+							<spring:message code="schedules.label.sharedHolidays"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="sharedHolidays" items="${holidays}" multiple="true" 
+										 itemLabel="name" itemValue="holidayId" 
+										 class="form-control selectpicker"
+										 data-actions-box="true"
+										 />
+							<form:errors path="sharedHolidays" cssClass="error"/>
+						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<div class="col-md-12">
-						<button type="submit" class="btn btn-primary pull-right">
-							<spring:message code="page.button.save"/>
-						</button>
+					<div class="form-group">
+						<div class="col-md-12">
+							<button type="submit" class="btn btn-primary pull-right">
+								<spring:message code="page.button.save"/>
+							</button>
+						</div>
 					</div>
-				</div>
 			</fieldset>
 		</form:form>
 	</jsp:body>

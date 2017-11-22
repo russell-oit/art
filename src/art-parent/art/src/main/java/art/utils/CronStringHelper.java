@@ -79,7 +79,7 @@ public class CronStringHelper {
 	 * @param year the year
 	 * @return
 	 */
-	private static String getCronString(String second, String minute, String hour,
+	public static String getCronString(String second, String minute, String hour,
 			String day, String month, String weekday, String year) {
 
 		minute = StringUtils.deleteWhitespace(minute);

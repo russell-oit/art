@@ -53,6 +53,8 @@
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
 <spring:message code="select.text.selectAll" var="selectAllText"/>
 <spring:message code="select.text.deselectAll" var="deselectAllText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -111,6 +113,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -197,6 +200,42 @@
 				populateOutputFormatField();
 
 				$('#name').focus();
+
+				$('#describeSchedule').click(function () {
+					var second = $('#scheduleSecond').val();
+					var minute = $('#scheduleMinute').val();
+					var hour = $('#scheduleHour').val();
+					var day = $('#scheduleDay').val();
+					var month = $('#scheduleMonth').val();
+					var weekday = $('#scheduleWeekday').val();
+					var year = $('#scheduleYear').val();
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/describeSchedule',
+						dataType: 'json',
+						data: {second: second, minute: minute, hour: hour, day: day,
+							month: month, weekday: weekday, year: year},
+						success: function (response)
+						{
+							if (response.success) {
+								var scheduleDescription = response.data;
+								var finalString = "<p><pre>" + escapeHtmlContent(scheduleDescription.description)
+										+ "</pre><b>${nextRunDateText}:</b> <pre>"
+										+ escapeHtmlContent(scheduleDescription.nextRunDateString)
+										+ "</pre></p>";
+								$("#mainScheduleDescriptionDiv").html(finalString);
+							} else {
+								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+								$.notify("${errorOccurredText}", "error");
+							}
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert(xhr.responseText);
+						}
+					});
+				});
 			});
 		</script>
 
@@ -214,24 +253,30 @@
 						{
 							var schedule = response.data;
 
-							if (schedule !== null) {
-								$('#scheduleSecond').val(schedule.second);
-								$('#scheduleMinute').val(schedule.minute);
-								$('#scheduleHour').val(schedule.hour);
-								$('#scheduleDay').val(schedule.day);
-								$('#scheduleMonth').val(schedule.month);
-								$('#scheduleWeekday').val(schedule.weekday);
-								$('#scheduleYear').val(schedule.year);
-								$('#extraSchedules').val(schedule.extraSchedules);
-								$('#holidays').val(schedule.holidays);
+							if (response.success) {
+								if (schedule !== null) {
+									$('#scheduleSecond').val(schedule.second);
+									$('#scheduleMinute').val(schedule.minute);
+									$('#scheduleHour').val(schedule.hour);
+									$('#scheduleDay').val(schedule.day);
+									$('#scheduleMonth').val(schedule.month);
+									$('#scheduleWeekday').val(schedule.weekday);
+									$('#scheduleYear').val(schedule.year);
+									$('#extraSchedules').val(schedule.extraSchedules);
+									$('#holidays').val(schedule.holidays);
 
-								//https://silviomoreto.github.io/bootstrap-select/methods/
-								//https://stackoverflow.com/questions/19543285/use-jquery-each-to-iterate-through-object
-								var sharedHolidayIds = [];
-								$.each(schedule.sharedHolidays, function (index, holiday) {
-									sharedHolidayIds.push(holiday.holidayId);
-								});
-								$('#sharedHolidays').selectpicker('val', sharedHolidayIds);
+									//https://silviomoreto.github.io/bootstrap-select/methods/
+									//https://stackoverflow.com/questions/19543285/use-jquery-each-to-iterate-through-object
+									var sharedHolidayIds = [];
+									$.each(schedule.sharedHolidays, function (index, holiday) {
+										sharedHolidayIds.push(holiday.holidayId);
+									});
+									$('#sharedHolidays').selectpicker('val', sharedHolidayIds);
+								}
+							} else {
+								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+								$.notify("${errorOccurredText}", "error");
 							}
 						},
 						error: ajaxErrorHandler
@@ -459,6 +504,9 @@
 					</div>
 				</c:if>
 
+				<div id="ajaxResponse">
+				</div>
+
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="nextPage" value="${param.nextPage}">
 
@@ -666,7 +714,7 @@
 										</c:set>
 									</c:if>
 									<option value="${destination.destinationId}" ${selected}
-												 data-content="${encode:forHtmlAttribute(destination.name)}&nbsp;${encode:forHtmlAttribute(destinationStatus)}">
+											data-content="${encode:forHtmlAttribute(destination.name)}&nbsp;${encode:forHtmlAttribute(destinationStatus)}">
 										${encode:forHtmlContent(destination.name)}
 									</option>
 								</c:forEach>
@@ -804,16 +852,20 @@
 							<spring:message code="jobs.label.schedules"/>
 						</label>
 						<div class="col-md-8">
-							<select name="schedules" id="schedules" class="form-control selectpicker">
-								<option value="0">--</option>
-								<option data-divider="true"></option>
-								<c:forEach var="schedule" items="${schedules}">
-									<option value="${schedule.scheduleId}">${schedule.name}</option>
-								</c:forEach>
-							</select>
-							<button type="button" id="getSchedule" class="btn btn-default">
-								<spring:message code="jobs.button.getSchedule"/>
-							</button>
+							<p>
+								<select name="schedules" id="schedules" class="form-control selectpicker">
+									<option value="0">--</option>
+									<option data-divider="true"></option>
+									<c:forEach var="schedule" items="${schedules}">
+										<option value="${schedule.scheduleId}">${schedule.name}</option>
+									</c:forEach>
+								</select>
+							</p>
+							<p>
+								<button type="button" id="getSchedule" class="btn btn-default">
+									<spring:message code="jobs.button.getSchedule"/>
+								</button>
+							</p>
 							<input type="text" id="clock" readonly class="form-control"/>
 						</div>
 					</div>
@@ -881,14 +933,21 @@
 							<form:errors path="scheduleYear" cssClass="error"/>
 						</div>
 					</div>
-					<c:if test="${not empty mainScheduleDescription}">
-						<div class="form-group">
-							<div class="col-md-8 col-md-offset-4">
-								<pre>${encode:forHtmlContent(mainScheduleDescription)}</pre>
-								<b><spring:message code="jobs.text.nextRunDate"/>:</b> <pre><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
+					<div class="form-group">
+						<div class="col-md-8 col-md-offset-4">
+							<button type="button" id="describeSchedule" class="btn btn-default">
+								<spring:message code="schedules.button.describe"/>
+							</button>
+							<div id="mainScheduleDescriptionDiv">
+								<p>
+									<c:if test="${not empty mainScheduleDescription}">
+									<pre>${encode:forHtmlContent(mainScheduleDescription)}</pre>
+									<b><spring:message code="jobs.text.nextRunDate"/>:</b> <pre><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
+								</c:if>
+								</p>
 							</div>
 						</div>
-					</c:if>
+					</div>
 
 					<hr>
 					<div class="form-group">

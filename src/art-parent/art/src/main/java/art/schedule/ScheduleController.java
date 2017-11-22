@@ -27,8 +27,10 @@ import art.utils.CronStringHelper;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +49,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -71,6 +74,9 @@ public class ScheduleController {
 
 	@Autowired
 	private HolidayService holidayService;
+
+	@Autowired
+	private ServletContext servletContext;
 
 	@RequestMapping(value = "/schedules", method = RequestMethod.GET)
 	public String showSchedules(Model model) {
@@ -291,5 +297,49 @@ public class ScheduleController {
 		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
 
 		return "editSchedule";
+	}
+
+	@PostMapping("/describeSchedule")
+	public @ResponseBody
+	AjaxResponse describeSchedule(@RequestParam("second") String second,
+			@RequestParam("minute") String minute,
+			@RequestParam("hour") String hour,
+			@RequestParam("day") String day,
+			@RequestParam("month") String month,
+			@RequestParam("weekday") String weekday,
+			@RequestParam("year") String year, Locale locale) {
+
+		logger.debug("Entering describeSchedule: second='{}', minute='{}',"
+				+ " hour='{}', day='{}', month='{}', weekday='{}', year='{}'",
+				second, minute, hour, day, month, weekday, year);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			String cronString = CronStringHelper.getCronString(second, minute, hour, day, month, weekday, year);
+			String description = CronStringHelper.getCronScheduleDescription(cronString, locale);
+			Date nextRunDate = CronStringHelper.getNextRunDate(cronString);
+
+			String dateDisplayPattern = (String) servletContext.getAttribute("dateDisplayPattern");
+			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateDisplayPattern, locale);
+			String nextRunDateString = "";
+			if (nextRunDate != null) {
+				//may be null if the schedule will never run in the future
+				nextRunDateString = dateFormatter.format(nextRunDate);
+			}
+
+			ScheduleDescription scheduleDescription = new ScheduleDescription();
+			scheduleDescription.setDescription(description);
+			scheduleDescription.setNextRunDate(nextRunDate);
+			scheduleDescription.setNextRunDateString(nextRunDateString);
+
+			response.setData(scheduleDescription);
+			response.setSuccess(true);
+		} catch (ParseException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
 	}
 }

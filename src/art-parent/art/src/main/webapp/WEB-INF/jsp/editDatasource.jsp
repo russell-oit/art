@@ -82,11 +82,11 @@ Edit datasource page
 							action: action},
 						success: function (response) {
 							if (response.success) {
-								msg = alertCloseButton + "${connectionSuccessfulText}";
+								var msg = alertCloseButton + "${connectionSuccessfulText}";
 								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 								$.notify("${connectionSuccessfulText}", "success");
 							} else {
-								msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
 								$.notify("${errorOccurredText}", "error");
 							}
