@@ -490,10 +490,10 @@ public class ReportJob implements org.quartz.Job {
 				if (cookies != null) {
 					connection.cookies(cookies);
 				}
-				List<Map<String, String>> otherFields = websiteOptions.getOtherFields();
-				if (CollectionUtils.isNotEmpty(otherFields)) {
-					for (Map<String, String> otherField : otherFields) {
-						connection.data(otherField);
+				List<Map<String, String>> staticFields = websiteOptions.getStaticFields();
+				if (CollectionUtils.isNotEmpty(staticFields)) {
+					for (Map<String, String> staticField : staticFields) {
+						connection.data(staticField);
 					}
 				}
 				if (StringUtils.isNotBlank(csrfTokenOutputField)) {

@@ -35,7 +35,7 @@ public class WebsiteOptions {
 	private String csrfTokenInputField;
 	private String loginUrl;
 	private String startUrl;
-	private List<Map<String, String>> otherFields;
+	private List<Map<String, String>> staticFields;
 	private String csrfTokenCookie;
 	private String csrfTokenOutputField;
 
@@ -124,17 +124,17 @@ public class WebsiteOptions {
 	}
 
 	/**
-	 * @return the otherFields
+	 * @return the staticFields
 	 */
-	public List<Map<String, String>> getOtherFields() {
-		return otherFields;
+	public List<Map<String, String>> getStaticFields() {
+		return staticFields;
 	}
 
 	/**
-	 * @param otherFields the otherFields to set
+	 * @param staticFields the staticFields to set
 	 */
-	public void setOtherFields(List<Map<String, String>> otherFields) {
-		this.otherFields = otherFields;
+	public void setStaticFields(List<Map<String, String>> staticFields) {
+		this.staticFields = staticFields;
 	}
 
 	/**
