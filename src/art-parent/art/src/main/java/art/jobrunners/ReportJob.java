@@ -419,8 +419,8 @@ public class ReportJob implements org.quartz.Job {
 	 * @param fullLocalFileName the path of the file to copy
 	 */
 	private void sendFileToWebsite(Destination destination, String fullLocalFileName) {
-		logger.debug("Entering sendFileToWebsite: destination={}, fullLocalFileName='{}'",
-				destination, fullLocalFileName);
+		logger.debug("Entering sendFileToWebsite: destination={},"
+				+ " fullLocalFileName='{}'", destination, fullLocalFileName);
 
 		//https://stackoverflow.com/questions/7370771/how-to-post-files-using-jsoup
 		//https://stackoverflow.com/questions/39814877/jsoup-login-to-website-and-visit
@@ -474,11 +474,11 @@ public class ReportJob implements org.quartz.Job {
 				cookies = response.cookies();
 				if (StringUtils.isNotBlank(csrfTokenCookie)) {
 					csrfTokenValue = cookies.get(csrfTokenCookie);
-					logger.debug("csrfTokenValue='{}'. Job Id {}", csrfTokenValue, jobId);
+					logger.debug("csrfTokenValue='{}'", csrfTokenValue);
 				} else if (StringUtils.isNotBlank(csrfTokenInputField)) {
 					Document doc = response.parse();
 					csrfTokenValue = doc.select("input[name=" + csrfTokenInputField + "]").val();
-					logger.debug("csrfTokenValue='{}'. Job Id {}", csrfTokenValue, jobId);
+					logger.debug("csrfTokenValue='{}'", csrfTokenValue);
 				}
 			}
 			String path = destination.getPath();
@@ -501,7 +501,7 @@ public class ReportJob implements org.quartz.Job {
 				}
 				Document document = connection.post();
 				String postReply = document.body().text();
-				logger.debug("postReply='{}'. Job Id {}", postReply, jobId);
+				logger.debug("postReply='{}'", postReply);
 			}
 		} catch (IOException ex) {
 			logErrorAndSetDetails(ex);
@@ -515,10 +515,11 @@ public class ReportJob implements org.quartz.Job {
 	 * @param fullLocalFileName the path of the file to copy
 	 */
 	private void sendFileToWebDav(Destination destination, String fullLocalFileName) {
-		logger.debug("Entering sendFileToWebDav: destination={}, fullLocalFileName='{}'",
-				destination, fullLocalFileName);
+		logger.debug("Entering sendFileToWebDav: destination={},"
+				+ " fullLocalFileName='{}'", destination, fullLocalFileName);
 
 		String username = destination.getUser();
+		logger.debug("username='{}'", username);
 		String password = destination.getPassword();
 		Sardine sardine;
 		if (StringUtils.isBlank(username)) {
@@ -527,34 +528,22 @@ public class ReportJob implements org.quartz.Job {
 			sardine = SardineFactory.begin(username, password);
 		}
 
-		String path = destination.getPath();
-		if (!StringUtils.endsWith(path, "/")) {
-			path = path + "/";
+		String mainUrl = destination.getPath();
+		logger.debug("mainUrl='{}'", mainUrl);
+		if (!StringUtils.endsWith(mainUrl, "/")) {
+			mainUrl = mainUrl + "/";
 		}
 
 		String destinationSubDirectory = destination.getSubDirectory();
-		destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
-		if (StringUtils.startsWith(destinationSubDirectory, "/")) {
-			destinationSubDirectory = StringUtils.substringAfter(destinationSubDirectory, "/");
-		}
-
-		if (StringUtils.isNotBlank(destinationSubDirectory)
-				&& !StringUtils.endsWith(destinationSubDirectory, "/")) {
-			destinationSubDirectory = destinationSubDirectory + "/";
-		}
-
+		logger.debug("destinationSubDirectory='{}'", destinationSubDirectory);
 		String jobSubDirectory = job.getSubDirectory();
-		jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
-		if (StringUtils.startsWith(jobSubDirectory, "/")) {
-			jobSubDirectory = StringUtils.substringAfter(jobSubDirectory, "/");
-		}
+		logger.debug("jobSubDirectory='{}'", jobSubDirectory);
 
-		if (StringUtils.isNotBlank(jobSubDirectory)
-				&& !StringUtils.endsWith(jobSubDirectory, "/")) {
-			jobSubDirectory = jobSubDirectory + "/";
-		}
+		String directorySeparator = "/";
+		String finalSubDirectory = combineSubDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
+		logger.debug("finalSubDirectory='{}'", finalSubDirectory);
 
-		String finalSubDirectory = destinationSubDirectory + jobSubDirectory;
+		logger.debug("destination.isCreateDirectories()={}", destination.isCreateDirectories());
 
 		// if file is in folder(s), create them first
 		if (StringUtils.isNotBlank(finalSubDirectory)
@@ -566,10 +555,12 @@ public class ReportJob implements org.quartz.Job {
 			for (String folder : folders) {
 				subFolders.add(folder);
 				String partialPath = StringUtils.join(subFolders, "/");
-				partialPath = path + partialPath;
+				partialPath = mainUrl + partialPath;
 				try {
 					String url = ArtUtils.encodeMainUrl(partialPath);
+					logger.debug("url='{}'", url);
 					if (!sardine.exists(url)) {
+						logger.debug("Creating directory - '{}'", url);
 						sardine.createDirectory(url);
 					}
 				} catch (IOException | URISyntaxException ex) {
@@ -579,8 +570,11 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		try {
-			String finalPath = path + finalSubDirectory + fileName;
+			String finalPath = mainUrl + finalSubDirectory + fileName;
+			logger.debug("finalPath='{}'", finalPath);
+
 			String url = ArtUtils.encodeMainUrl(finalPath);
+			logger.debug("url='{}'", url);
 
 			try (InputStream fis = new FileInputStream(new File(fullLocalFileName))) {
 				sardine.put(url, fis);
@@ -669,26 +663,12 @@ public class ReportJob implements org.quartz.Job {
 
 			// Create a Blob
 			String destinationSubDirectory = destination.getSubDirectory();
-			destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
-			if (StringUtils.isNotBlank(destinationSubDirectory)
-					&& !StringUtils.endsWith(destinationSubDirectory, "/")) {
-				destinationSubDirectory = destinationSubDirectory + "/";
-			}
-
 			String jobSubDirectory = job.getSubDirectory();
-			jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
-			if (StringUtils.startsWith(jobSubDirectory, "/")) {
-				jobSubDirectory = StringUtils.substringAfter(jobSubDirectory, "/");
-			}
 
-			if (StringUtils.isNotBlank(jobSubDirectory)
-					&& !StringUtils.endsWith(jobSubDirectory, "/")) {
-				jobSubDirectory = jobSubDirectory + "/";
-			}
+			String directorySeparator = "/";
+			String finalPath = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
 
-			String finalSubDirectory = destinationSubDirectory + jobSubDirectory;
-
-			String remoteFileName = finalSubDirectory + fileName;
+			String remoteFileName = finalPath + fileName;
 
 			ByteSource payload = Files.asByteSource(new File(fullLocalFileName));
 			Blob blob = blobStore.blobBuilder(remoteFileName)
@@ -793,7 +773,17 @@ public class ReportJob implements org.quartz.Job {
 			String jobSubDirectory = job.getSubDirectory();
 			jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
 
-			String finalSubDirectory = destinationSubDirectory + jobSubDirectory;
+			//linux shares can use either "\" or "/" as a directory separator
+			//windows shares can only use "\" as a directory separator
+			String directorySeparator;
+			if (StringUtils.contains(destinationSubDirectory, "/")
+					|| StringUtils.contains(jobSubDirectory, "/")) {
+				directorySeparator = "/";
+			} else {
+				directorySeparator = "\\";
+			}
+
+			String finalSubDirectory = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
 
 			// Connect to Share
 			String path = destination.getPath();
@@ -802,8 +792,6 @@ public class ReportJob implements org.quartz.Job {
 				// if file is in folder(s), create them first
 				if (StringUtils.isNotBlank(finalSubDirectory)
 						&& destination.isCreateDirectories()) {
-					//sub-directory must end with the directory separator
-					String directorySeparator = finalSubDirectory.substring(finalSubDirectory.length() - 1);
 					//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
 					String[] folders = StringUtils.split(finalSubDirectory, directorySeparator);
 					//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
@@ -826,7 +814,7 @@ public class ReportJob implements org.quartz.Job {
 				boolean overwrite = true;
 				SmbFiles.copy(file, share, destPath, overwrite);
 			}
-		} catch (IOException ex) {
+		} catch (IOException | SMBApiException ex) {
 			logErrorAndSetDetails(ex);
 		} finally {
 			if (connection != null) {
@@ -840,6 +828,66 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
+	 * Returns the result of combining several directory paths
+	 *
+	 * @param directorySeparator the directory separator in use
+	 * @param firstDirectoryPath the first directory path
+	 * @param otherDirectoryPaths other directory paths
+	 * @return the final, combined directory path
+	 */
+	private String combineDirectoryPaths(String directorySeparator,
+			String firstDirectoryPath, String... otherDirectoryPaths) {
+
+		logger.debug("Entering combineDirectoryPaths: directorySeparator='{}',"
+				+ " firstDirectoryPath='{}'", directorySeparator, firstDirectoryPath);
+
+		String finalPath = StringUtils.trimToEmpty(firstDirectoryPath);
+
+		if (StringUtils.isNotBlank(finalPath)
+				&& !StringUtils.endsWith(finalPath, directorySeparator)) {
+			finalPath = finalPath + directorySeparator;
+		}
+
+		String subDirectoryPath = combineSubDirectoryPaths(directorySeparator, otherDirectoryPaths);
+
+		finalPath = finalPath + subDirectoryPath;
+
+		return finalPath;
+	}
+
+	/**
+	 * Returns the result of combining several sub-directory paths
+	 *
+	 * @param directorySeparator the directory separator in use
+	 * @param subDirectoryPaths the sub-directory paths
+	 * @return the final, combined sub-directory path
+	 */
+	private String combineSubDirectoryPaths(String directorySeparator,
+			String... subDirectoryPaths) {
+
+		logger.debug("Entering combineSubDirectoryPaths: directorySeparator='{}'", directorySeparator);
+
+		String finalPath = "";
+
+		for (String directoryPath : subDirectoryPaths) {
+			logger.debug("directoryPath='{}'", directoryPath);
+			directoryPath = StringUtils.trimToEmpty(directoryPath);
+			if (StringUtils.startsWith(directoryPath, directorySeparator)) {
+				directoryPath = StringUtils.substringAfter(directoryPath, directorySeparator);
+			}
+
+			if (StringUtils.isNotBlank(directoryPath)
+					&& !StringUtils.endsWith(directoryPath, directorySeparator)) {
+				directoryPath = directoryPath + directorySeparator;
+			}
+
+			finalPath = finalPath + directoryPath;
+		}
+
+		return finalPath;
+	}
+
+	/**
 	 * Ftps the generated file
 	 */
 	private void ftpFile(Destination destination, String fullLocalFileName) {
@@ -848,24 +896,11 @@ public class ReportJob implements org.quartz.Job {
 
 		String path = destination.getPath();
 		logger.debug("path='{}'", path);
-		path = StringUtils.trimToEmpty(path);
-
-		if (StringUtils.isNotBlank(path) && !StringUtils.endsWith(path, "/")) {
-			path = path + "/";
-		}
-
 		String jobSubDirectory = job.getSubDirectory();
-		jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
-		if (StringUtils.startsWith(jobSubDirectory, "/")) {
-			jobSubDirectory = StringUtils.substringAfter(jobSubDirectory, "/");
-		}
+		logger.debug("jobSubDirectory='{}'", jobSubDirectory);
 
-		if (StringUtils.isNotBlank(jobSubDirectory)
-				&& !StringUtils.endsWith(jobSubDirectory, "/")) {
-			jobSubDirectory = jobSubDirectory + "/";
-		}
-
-		String finalPath = path + jobSubDirectory;
+		String directorySeparator = "/";
+		String finalPath = combineDirectoryPaths(directorySeparator, path, jobSubDirectory);
 		String remoteFileName = finalPath + fileName;
 
 		DestinationType destinationType = destination.getDestinationType();
@@ -974,7 +1009,6 @@ public class ReportJob implements org.quartz.Job {
 
 			//create path if it don't exist
 			if (StringUtils.isNotBlank(path) && destination.isCreateDirectories()) {
-				String firstCharacter = path.substring(path.length() - 1);
 				//can't create directory hierarchy in one go
 				String[] folders = StringUtils.split(path, "/");
 				//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
@@ -982,9 +1016,6 @@ public class ReportJob implements org.quartz.Job {
 				for (String folder : folders) {
 					subFolders.add(folder);
 					String partialPath = StringUtils.join(subFolders, "/");
-					if (StringUtils.equals(firstCharacter, "/")) {
-						partialPath = "/" + partialPath;
-					}
 					try {
 						ftpClient.makeDirectory(partialPath);
 					} catch (IOException ex) {
@@ -1107,7 +1138,6 @@ public class ReportJob implements org.quartz.Job {
 
 			//create path if it don't exist
 			if (StringUtils.isNotBlank(path) && destination.isCreateDirectories()) {
-				String firstCharacter = path.substring(path.length() - 1);
 				//can't create directory hierarchy in one go
 				String[] folders = StringUtils.split(path, "/");
 				//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
@@ -1115,9 +1145,6 @@ public class ReportJob implements org.quartz.Job {
 				for (String folder : folders) {
 					subFolders.add(folder);
 					String partialPath = StringUtils.join(subFolders, "/");
-					if (StringUtils.equals(firstCharacter, "/")) {
-						partialPath = "/" + partialPath;
-					}
 					try {
 						channelSftp.mkdir(partialPath);
 					} catch (SftpException ex) {
