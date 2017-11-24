@@ -22,6 +22,7 @@ import art.dbutils.DbService;
 import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -145,34 +147,65 @@ public class EncryptorService {
 	 * Deletes the encryptor with the given id
 	 *
 	 * @param id the encryptor id
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * reports which prevented the encryptor from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"encryptors", "reports"}, allEntries = true)
-	public void deleteEncryptor(int id) throws SQLException {
+	public ActionResult deleteEncryptor(int id) throws SQLException {
 		logger.debug("Entering deleteEncryptor: id={}", id);
+
+		ActionResult result = new ActionResult();
+
+		//don't delete if important linked records exist
+		List<String> linkedJobs = getLinkedReports(id);
+		if (!linkedJobs.isEmpty()) {
+			result.setData(linkedJobs);
+			return result;
+		}
 
 		String sql;
 
 		sql = "DELETE FROM ART_ENCRYPTORS WHERE ENCRYPTOR_ID=?";
 		dbService.update(sql, id);
+
+		result.setSuccess(true);
+
+		return result;
 	}
 
 	/**
 	 * Deletes the encryptors with the given ids
 	 *
 	 * @param ids the encryptor ids
+	 * @return ActionResult. if not successful, data contains details of
+	 * encrptors which weren't deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"encryptors", "reports"}, allEntries = true)
-	public void deleteEncryptors(Integer[] ids) throws SQLException {
+	public ActionResult deleteEncryptors(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteEncryptors: ids={}", (Object) ids);
 
-		String sql;
+		ActionResult result = new ActionResult();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
-		sql = "DELETE FROM ART_ENCRYPTORS"
-				+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteEncryptor(id);
+			if (!deleteResult.isSuccess()) {
+				@SuppressWarnings("unchecked")
+				List<String> linkedReports = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedReports, ", ");
+				nonDeletedRecords.add(value);
+			}
+		}
 
-		dbService.update(sql, (Object[]) ids);
+		if (nonDeletedRecords.isEmpty()) {
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+
+		return result;
 	}
 
 	/**
@@ -338,4 +371,21 @@ public class EncryptorService {
 		}
 	}
 
+	/**
+	 * Returns reports that use a given encryptor
+	 *
+	 * @param encryptorId the encryptor id
+	 * @return linked report names
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedReports(int encryptorId) throws SQLException {
+		logger.debug("Entering getLinkedReports: encryptorId={}", encryptorId);
+
+		String sql = "SELECT NAME"
+				+ " FROM ART_QUERIES"
+				+ " WHERE ENCRYPTOR_ID=?";
+
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
+		return dbService.query(sql, h, encryptorId);
+	}
 }

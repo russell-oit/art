@@ -22,6 +22,7 @@ import art.enums.EncryptorType;
 import art.report.UploadHelper;
 import art.servlets.Config;
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -79,8 +80,16 @@ public class EncryptorController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			encryptorService.deleteEncryptor(id);
-			response.setSuccess(true);
+			ActionResult deleteResult = encryptorService.deleteEncryptor(id);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				//encryptor not deleted because of linked reports
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
@@ -97,8 +106,15 @@ public class EncryptorController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			encryptorService.deleteEncryptors(ids);
-			response.setSuccess(true);
+			ActionResult deleteResult = encryptorService.deleteEncryptors(ids);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());

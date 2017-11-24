@@ -276,7 +276,7 @@ public class UserService {
 	 * Deletes multiple users
 	 *
 	 * @param ids the ids for users to delete
-	 * @return ActionResult. if not successful, data contains the ids of users
+	 * @return ActionResult. if not successful, data contains details of users
 	 * who weren't deleted
 	 * @throws SQLException
 	 */
