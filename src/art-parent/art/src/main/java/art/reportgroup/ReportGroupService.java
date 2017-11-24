@@ -270,7 +270,7 @@ public class ReportGroupService {
 			if (!deleteResult.isSuccess()) {
 				@SuppressWarnings("unchecked")
 				List<String> linkedReports = (List<String>) deleteResult.getData();
-				String value = String.valueOf(id) + " - (" + StringUtils.join(linkedReports, ", ") + ")";
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedReports, ", ");
 				nonDeletedRecords.add(value);
 			}
 		}

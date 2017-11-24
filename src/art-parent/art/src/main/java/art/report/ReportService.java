@@ -581,7 +581,7 @@ public class ReportService {
 			if (!deleteResult.isSuccess()) {
 				@SuppressWarnings("unchecked")
 				List<String> linkedJobs = (List<String>) deleteResult.getData();
-				String value = String.valueOf(id) + " - (" + StringUtils.join(linkedJobs, ", ") + ")";
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedJobs, ", ");
 				nonDeletedRecords.add(value);
 			}
 		}
