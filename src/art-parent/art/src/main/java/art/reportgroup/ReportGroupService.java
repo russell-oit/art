@@ -254,7 +254,7 @@ public class ReportGroupService {
 	 * Deletes multiple report groups
 	 *
 	 * @param ids the ids of the report groups to delete
-	 * @return ActionResult. if not successful, data contains ids of the report
+	 * @return ActionResult. if not successful, data contains details of the report
 	 * groups that were not deleted
 	 * @throws SQLException
 	 */
