@@ -35,12 +35,14 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +73,7 @@ public class DatasourceController {
 
 	@Autowired
 	private MessageSource messageSource;
-	
+
 	@Autowired
 	private ReportService reportService;
 
@@ -237,6 +239,8 @@ public class DatasourceController {
 			}
 
 			try {
+				String clearTextPassword = AesEncryptor.decrypt(datasource.getPassword());
+				datasource.setPassword(clearTextPassword);
 				updateConnectionPool(datasource);
 			} catch (Exception ex) {
 				logger.error("Error", ex);
@@ -272,6 +276,23 @@ public class DatasourceController {
 			datasourceService.updateDatasources(multipleDatasourceEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleDatasourceEdit.getIds());
+
+			List<String> errors = new ArrayList<>();
+			String[] ids = StringUtils.split(multipleDatasourceEdit.getIds(), ",");
+			for (String idString : ids) {
+				try {
+					int id = Integer.parseInt(idString);
+					Datasource datasource = datasourceService.getDatasource(id);
+					updateConnectionPool(datasource);
+				} catch (Exception ex) {
+					logger.error("Error", ex);
+					errors.add(idString + " - " + ex.toString());
+				}
+			}
+			if (CollectionUtils.isNotEmpty(errors)) {
+				redirectAttributes.addFlashAttribute("errors", errors);
+			}
+
 			return "redirect:/datasources";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -377,13 +398,12 @@ public class DatasourceController {
 		String driver = datasource.getDriver();
 		String url = datasource.getUrl();
 		String username = datasource.getUsername();
-		String clearTextPassword = AesEncryptor.decrypt(datasource.getPassword());
-		datasource.setPassword(clearTextPassword);
+		String password = datasource.getPassword();
 		boolean jndi = datasource.isJndi();
 
 		logger.debug("datasource.isActive()={}", datasource.isActive());
 		if (datasource.isActive()) {
-			testConnection(jndi, driver, url, username, clearTextPassword);
+			testConnection(jndi, driver, url, username, password);
 
 			DatasourceType datasourceType = datasource.getDatasourceType();
 			logger.debug("datasourceType={}", datasourceType);
@@ -398,6 +418,8 @@ public class DatasourceController {
 				default:
 				//do nothing
 			}
+		} else {
+			DbConnections.removeConnectionPool(datasource.getDatasourceId());
 		}
 	}
 
@@ -472,8 +494,13 @@ public class DatasourceController {
 					//with some urls/drivers, the jvm tries to use the wrong driver
 					//e.g. with neo4j driver if driver is not included in application lib/classpath or in jre\lib\ext
 					Properties dbProperties = new Properties();
-					dbProperties.put("user", username);
-					dbProperties.put("password", password);
+					//can't put null values in a properties object (underlying hashtable.put() throws a nullpointer exception)
+					if (username != null) {
+						dbProperties.put("user", username);
+					}
+					if (password != null) {
+						dbProperties.put("password", password);
+					}
 					Driver driverObject = DriverManager.getDriver(url); // get the right driver for the given url
 					conn = driverObject.connect(url, dbProperties); // get the connection
 				}
@@ -525,7 +552,7 @@ public class DatasourceController {
 
 		return null;
 	}
-	
+
 	@RequestMapping(value = "/reportsWithDatasource", method = RequestMethod.GET)
 	public String showReportsWithDatasource(@RequestParam("datasourceId") Integer datasourceId, Model model) {
 		logger.debug("Entering showReportsWithDatasource: datasourceId={}", datasourceId);

@@ -135,6 +135,19 @@ Display datasources
 				</c:if>
 			</div>
 		</c:if>
+		<c:if test="${not empty errors}">
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+				<p><spring:message code="page.message.errorOccurred"/></p>
+				<c:if test="${showErrors}">
+					<ul>
+						<c:forEach var="err" items="${errors}">
+							<li>${encode:forHtmlContent(err)}</li>
+							</c:forEach>
+					</ul>
+				</c:if>
+			</div>
+		</c:if>
 		<c:if test="${not empty recordSavedMessage}">
 			<div class="alert alert-success alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>

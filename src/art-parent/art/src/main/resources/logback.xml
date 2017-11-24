@@ -20,8 +20,7 @@
 	<logger name="art" level="info"/>
 	
 	
-	<root>
-		<level value="warn"/>
+	<root level="warn">
 		<appender-ref ref="stdout"/>
 		<appender-ref ref="CYCLIC"/>
 	</root>
