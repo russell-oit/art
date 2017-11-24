@@ -406,7 +406,7 @@ public class ReportGroupService {
 		String sql = "SELECT AQ.NAME"
 				+ " FROM ART_QUERIES AQ"
 				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
-				+ " ON AQ.QUERY_ID=ARRG=REPORT_ID"
+				+ " ON AQ.QUERY_ID=ARRG.REPORT_ID"
 				+ " WHERE ARRG.REPORT_GROUP_ID=?";
 
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("NAME");
