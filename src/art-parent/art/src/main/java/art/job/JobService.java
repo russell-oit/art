@@ -939,7 +939,8 @@ public class JobService {
 					String extraTriggerName = mainTriggerName + "-" + index;
 					CronTriggerImpl extraTrigger = new CronTriggerImpl();
 					extraTrigger.setKey(triggerKey(extraTriggerName, ArtUtils.TRIGGER_GROUP));
-					extraTrigger.setCronExpression(value);
+					String finalCronString = CronStringHelper.processDynamicTime(value);
+					extraTrigger.setCronExpression(finalCronString);
 					extraTrigger.setStartTime(job.getStartDate());
 					extraTrigger.setEndTime(job.getEndDate());
 					if (globalCalendar != null) {

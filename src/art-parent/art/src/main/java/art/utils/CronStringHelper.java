@@ -68,6 +68,34 @@ public class CronStringHelper {
 	}
 
 	/**
+	 * Processes a cron string that may contain a dynamic time specification and
+	 * returns the final cron string to use
+	 *
+	 * @param cronString the initial cron string
+	 * @return the final cron string
+	 */
+	public static String processDynamicTime(String cronString) {
+		String[] cronParts = StringUtils.split(cronString, " ");
+
+		String second = cronParts[0];
+		String minute = cronParts[1];
+		String hour = cronParts[2];
+		String day = cronParts[3];
+		String month = cronParts[4];
+		String weekday = cronParts[5];
+
+		//year section is optional in quartz cron string
+		String year;
+		if (cronParts.length > 6) {
+			year = cronParts[6];
+		} else {
+			year = "*";
+		}
+
+		return getCronString(second, minute, hour, day, month, weekday, year);
+	}
+
+	/**
 	 * Returns a quartz cron string for the given schedule fields
 	 *
 	 * @param second the second
@@ -245,21 +273,21 @@ public class CronStringHelper {
 		String cronString = getCronString(schedule);
 		return getNextRunDate(cronString);
 	}
-	
+
 	/**
 	 * Returns the next run date for a job's main schedule
-	 * 
+	 *
 	 * @param job the job
 	 * @return the next run date
 	 */
-	public static Date getNextRunDate(Job job){
+	public static Date getNextRunDate(Job job) {
 		String cronString = getCronString(job);
 		return getNextRunDate(cronString);
 	}
 
 	/**
 	 * Returns the next run date for a quartz cron schedule
-	 * 
+	 *
 	 * @param cronString the cron string
 	 * @return the next run date
 	 */
@@ -269,7 +297,7 @@ public class CronStringHelper {
 				.build();
 
 		Date nextRunDate = dummyTrigger.getFireTimeAfter(new Date());
-		
+
 		return nextRunDate;
 	}
 
