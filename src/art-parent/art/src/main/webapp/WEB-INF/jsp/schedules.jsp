@@ -25,6 +25,8 @@ Display schedules
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
+<spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
+<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 
 <t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -52,7 +54,7 @@ Display schedules
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
-						undefined, //cannotDeleteRecordText
+						"${cannotDeleteRecordText}", //cannotDeleteRecordText
 						undefined //linkedRecordsExistText
 						);
 
@@ -85,9 +87,12 @@ Display schedules
 										url: "${pageContext.request.contextPath}/deleteSchedules",
 										data: {ids: ids},
 										success: function (response) {
+											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
 												notifyActionSuccess("${recordsDeletedText}", ids);
+											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
 												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
 											}

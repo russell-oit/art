@@ -22,6 +22,7 @@ import art.dbutils.DatabaseUtils;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -141,34 +143,65 @@ public class ScheduleService {
 	 * Deletes a schedule
 	 *
 	 * @param id the schedule id
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * jobs which prevented the schedule from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
-	public void deleteSchedule(int id) throws SQLException {
+	public ActionResult deleteSchedule(int id) throws SQLException {
 		logger.debug("Entering deleteSchedule: id={}", id);
+
+		ActionResult result = new ActionResult();
+
+		//don't delete if important linked records exist
+		List<String> linkedJobs = getLinkedJobs(id);
+		if (!linkedJobs.isEmpty()) {
+			result.setData(linkedJobs);
+			return result;
+		}
 
 		String sql;
 
 		sql = "DELETE FROM ART_JOB_SCHEDULES WHERE SCHEDULE_ID=?";
 		dbService.update(sql, id);
+
+		result.setSuccess(true);
+
+		return result;
 	}
 
 	/**
-	 * Deletes multiple schedule
+	 * Deletes multiple schedules
 	 *
 	 * @param ids the ids of schedules to delete
+	 * @return ActionResult. if not successful, data contains details of
+	 * schedules which weren't deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
-	public void deleteSchedules(Integer[] ids) throws SQLException {
+	public ActionResult deleteSchedules(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteSchedules: ids={}", (Object) ids);
 
-		String sql;
+		ActionResult result = new ActionResult();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
-		sql = "DELETE FROM ART_JOB_SCHEDULES"
-				+ " WHERE SCHEDULE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteSchedule(id);
+			if (!deleteResult.isSuccess()) {
+				@SuppressWarnings("unchecked")
+				List<String> linkedJobs = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedJobs, ", ");
+				nonDeletedRecords.add(value);
+			}
+		}
 
-		dbService.update(sql, (Object[]) ids);
+		if (nonDeletedRecords.isEmpty()) {
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+
+		return result;
 	}
 
 	/**
@@ -301,5 +334,23 @@ public class ScheduleService {
 			logger.warn("Problem with save. affectedRows={}, newRecord={}, schedule={}",
 					affectedRows, newRecord, schedule);
 		}
+	}
+
+	/**
+	 * Returns jobs that use a given schedule as a fixed schedule
+	 *
+	 * @param scheduleId the schedule id
+	 * @return linked job names
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedJobs(int scheduleId) throws SQLException {
+		logger.debug("Entering getLinkedJobs: scheduleId={}", scheduleId);
+
+		String sql = "SELECT JOB_NAME"
+				+ " FROM ART_JOBS"
+				+ " WHERE SCHEDULE_ID=?";
+
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
+		return dbService.query(sql, h, scheduleId);
 	}
 }
