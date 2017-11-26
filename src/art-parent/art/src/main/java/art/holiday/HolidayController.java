@@ -19,10 +19,12 @@ package art.holiday;
 
 import art.jobrunners.UpdateQuartzSchedulesJob;
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -82,8 +84,16 @@ public class HolidayController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			holidayService.deleteHoliday(id);
-			response.setSuccess(true);
+			ActionResult deleteResult = holidayService.deleteHoliday(id);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				//holiday not deleted because of linked schedules or jobs
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
@@ -100,8 +110,15 @@ public class HolidayController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			holidayService.deleteHolidays(ids);
-			response.setSuccess(true);
+			ActionResult deleteResult = holidayService.deleteHolidays(ids);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());

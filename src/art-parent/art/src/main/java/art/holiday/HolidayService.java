@@ -20,6 +20,7 @@ package art.holiday;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -126,34 +128,71 @@ public class HolidayService {
 	 * Deletes a holiday
 	 *
 	 * @param id the holiday id
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * schedules and jobs which prevented the holiday from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "holidays", allEntries = true)
-	public void deleteHoliday(int id) throws SQLException {
+	public ActionResult deleteHoliday(int id) throws SQLException {
 		logger.debug("Entering deleteHoliday: id={}", id);
+
+		ActionResult result = new ActionResult();
+
+		//don't delete if important linked records exist
+		List<String> linkedRecords = getLinkedRecords(id);
+		if (!linkedRecords.isEmpty()) {
+			result.setData(linkedRecords);
+			return result;
+		}
 
 		String sql;
 
+		sql = "DELETE FROM ART_SCHEDULE_HOLIDAY_MAP WHERE HOLIDAY_ID=?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_JOB_HOLIDAY_MAP WHERE HOLIDAY_ID=?";
+		dbService.update(sql, id);
+
 		sql = "DELETE FROM ART_HOLIDAYS WHERE HOLIDAY_ID=?";
 		dbService.update(sql, id);
+
+		result.setSuccess(true);
+
+		return result;
 	}
 
 	/**
 	 * Deletes multiple holiday
 	 *
 	 * @param ids the ids of holidays to delete
+	 * @return ActionResult. if not successful, data contains details of
+	 * holidays which weren't deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "holidays", allEntries = true)
-	public void deleteHolidays(Integer[] ids) throws SQLException {
+	public ActionResult deleteHolidays(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteHolidays: ids={}", (Object) ids);
 
-		String sql;
+		ActionResult result = new ActionResult();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
-		sql = "DELETE FROM ART_HOLIDAYS"
-				+ " WHERE HOLIDAY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteHoliday(id);
+			if (!deleteResult.isSuccess()) {
+				@SuppressWarnings("unchecked")
+				List<String> linkedRecords = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedRecords, ", ");
+				nonDeletedRecords.add(value);
+			}
+		}
 
-		dbService.update(sql, (Object[]) ids);
+		if (nonDeletedRecords.isEmpty()) {
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+
+		return result;
 	}
 
 	/**
@@ -270,10 +309,10 @@ public class HolidayService {
 
 	/**
 	 * Returns the shared holidays used by a given schedule
-	 * 
+	 *
 	 * @param scheduleId the schedule id
 	 * @return the shared holidays used by a given schedule
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	@Cacheable("holidays")
 	public List<Holiday> getScheduleHolidays(int scheduleId) throws SQLException {
@@ -288,13 +327,13 @@ public class HolidayService {
 		ResultSetHandler<List<Holiday>> h = new BeanListHandler<>(Holiday.class, new HolidayMapper());
 		return dbService.query(sql, h, scheduleId);
 	}
-	
+
 	/**
 	 * Returns the shared holidays used by a given job
-	 * 
+	 *
 	 * @param jobId the job id
 	 * @return the shared holidays used by a given job
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	@Cacheable("holidays")
 	public List<Holiday> getJobHolidays(int jobId) throws SQLException {
@@ -308,5 +347,33 @@ public class HolidayService {
 
 		ResultSetHandler<List<Holiday>> h = new BeanListHandler<>(Holiday.class, new HolidayMapper());
 		return dbService.query(sql, h, jobId);
+	}
+
+	/**
+	 * Returns schedules and jobs that use a given holiday
+	 *
+	 * @param holidayId the holiday id
+	 * @return linked schedule and job names
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedRecords(int holidayId) throws SQLException {
+		logger.debug("Entering getLinkedRecords: holidayId={}", holidayId);
+
+		//union removes duplicate records, union all does not
+		//use union all in case a schedule and a job have the same name? or two jobs have the same name
+		String sql = "SELECT AJS.SCHEDULE_NAME"
+				+ " FROM ART_JOB_SCHEDULES AJS"
+				+ " INNER JOIN ART_SCHEDULE_HOLIDAY_MAP ASHM"
+				+ " ON AJS.SCHEDULE_ID=ASHM.SCHEDULE_ID"
+				+ " WHERE ASHM.HOLIDAY_ID=?"
+				+ " UNION ALL"
+				+ " SELECT AJ.JOB_NAME"
+				+ " FROM ART_JOBS AJ"
+				+ " INNER JOIN ART_JOB_HOLIDAY_MAP AJHM"
+				+ " ON AJ.JOB_ID=AJHM.JOB_ID"
+				+ " WHERE AJHM.HOLIDAY_ID=?";
+
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
+		return dbService.query(sql, h, holidayId, holidayId);
 	}
 }
