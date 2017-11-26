@@ -311,48 +311,49 @@ Edit schedule page
 							</p>
 						</div>
 					</div>
+				</div>
 
-					<hr>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="extraSchedules">
-							<spring:message code="jobs.label.extraSchedules"/>
-						</label>
-						<div class="col-md-8">
-							<form:textarea path="extraSchedules" rows="3" cols="40" class="form-control"/>
-							<form:errors path="extraSchedules" cssClass="error"/>
-						</div>
+				<hr>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="extraSchedules">
+						<spring:message code="jobs.label.extraSchedules"/>
+					</label>
+					<div class="col-md-8">
+						<form:textarea path="extraSchedules" rows="3" cols="40" class="form-control"/>
+						<form:errors path="extraSchedules" cssClass="error"/>
 					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="holidays">
-							<spring:message code="schedules.label.holidays"/>
-						</label>
-						<div class="col-md-8">
-							<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
-							<form:errors path="holidays" cssClass="error"/>
-						</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="holidays">
+						<spring:message code="schedules.label.holidays"/>
+					</label>
+					<div class="col-md-8">
+						<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
+						<form:errors path="holidays" cssClass="error"/>
 					</div>
+				</div>
 
-					<hr>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="sharedHolidays">
-							<spring:message code="schedules.label.sharedHolidays"/>
-						</label>
-						<div class="col-md-8">
-							<form:select path="sharedHolidays" items="${holidays}" multiple="true" 
-										 itemLabel="name" itemValue="holidayId" 
-										 class="form-control selectpicker"
-										 data-actions-box="true"
-										 />
-							<form:errors path="sharedHolidays" cssClass="error"/>
-						</div>
+				<hr>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="sharedHolidays">
+						<spring:message code="schedules.label.sharedHolidays"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="sharedHolidays" items="${holidays}" multiple="true" 
+									 itemLabel="name" itemValue="holidayId" 
+									 class="form-control selectpicker"
+									 data-actions-box="true"
+									 />
+						<form:errors path="sharedHolidays" cssClass="error"/>
 					</div>
-					<div class="form-group">
-						<div class="col-md-12">
-							<button type="submit" class="btn btn-primary pull-right">
-								<spring:message code="page.button.save"/>
-							</button>
-						</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12">
+						<button type="submit" class="btn btn-primary pull-right">
+							<spring:message code="page.button.save"/>
+						</button>
 					</div>
+				</div>
 			</fieldset>
 		</form:form>
 	</jsp:body>
