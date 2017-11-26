@@ -63,7 +63,9 @@ Header that appears at the top of all pages, except the login and logs pages
 								<spring:message code="header.link.configure"/>
 								<b class="caret"></b>
 							</a>
-							<ul class="dropdown-menu">
+							<%-- https://stackoverflow.com/questions/19227496/scrollable-menu-with-bootstrap-3-menu-expanding-its-container-when-it-should-n --%>
+							<%-- https://stackoverflow.com/questions/39147226/fixed-height-for-bootstrap-pre-scrollable-div --%>
+							<ul class="dropdown-menu pre-scrollable" style="max-height: 90vh">
 								<c:if test="${sessionUser.accessLevel.value >= 100 || sessionUser.accessLevel.value < 0}">
 									<li>
 										<a href="${pageContext.request.contextPath}/artDatabase">
