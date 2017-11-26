@@ -33,6 +33,36 @@ public abstract class DashboardItem implements Serializable {
 	private boolean executeOnLoad;
 	private int refreshPeriodSeconds;
 	private int index;
+	private String baseUrl;
+	private String parametersJson;
+
+	/**
+	 * @return the parametersJson
+	 */
+	public String getParametersJson() {
+		return parametersJson;
+	}
+
+	/**
+	 * @param parametersJson the parametersJson to set
+	 */
+	public void setParametersJson(String parametersJson) {
+		this.parametersJson = parametersJson;
+	}
+
+	/**
+	 * @return the baseUrl
+	 */
+	public String getBaseUrl() {
+		return baseUrl;
+	}
+
+	/**
+	 * @param baseUrl the baseUrl to set
+	 */
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
 
 	/**
 	 * @return the url

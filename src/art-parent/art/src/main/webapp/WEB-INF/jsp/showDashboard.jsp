@@ -29,7 +29,7 @@
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-
+		
 	</head>
 	<body>
 		<div id="wrap">

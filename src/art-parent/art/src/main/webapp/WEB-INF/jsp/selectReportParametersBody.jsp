@@ -188,7 +188,6 @@ Display section to allow selecting of report parameters and initiate running of 
 			}
 		}
 	}
-
 </script>
 
 <c:if test="${enableEmail}">

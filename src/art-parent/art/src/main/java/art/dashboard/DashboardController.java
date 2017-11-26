@@ -31,10 +31,10 @@ import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -46,18 +46,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +71,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  * Controller for displaying a dashboard report
@@ -102,7 +100,7 @@ public class DashboardController {
 		logger.debug("Entering showDashboard: reportId={}", reportId);
 
 		long startTime = System.currentTimeMillis();
-		
+
 		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
 
 		//set appropriate error page to use
@@ -112,7 +110,7 @@ public class DashboardController {
 		} else {
 			errorPage = "reportError";
 		}
-		
+
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		String reportFormatString = request.getParameter("reportFormat");
@@ -251,17 +249,11 @@ public class DashboardController {
 	 * @param reportParamsMap the report parameters map
 	 * @return the dashboard object to be displayed
 	 * @throws UnsupportedEncodingException
-	 * @throws SQLException
-	 * @throws ParseException
-	 * @throws javax.xml.parsers.ParserConfigurationException
-	 * @throws org.xml.sax.SAXException
-	 * @throws javax.xml.xpath.XPathExpressionException
+	 * @throws Exception
 	 */
 	private Dashboard buildDashboard(Report report, HttpServletRequest request,
 			Locale locale, Map<String, ReportParameter> reportParamsMap)
-			throws UnsupportedEncodingException, ParseException,
-			SQLException, ParserConfigurationException, IOException,
-			SAXException, IllegalArgumentException, XPathExpressionException {
+			throws Exception {
 
 		logger.debug("Entering buildDashboard");
 
@@ -410,15 +402,15 @@ public class DashboardController {
 	 */
 	private void setPortletProperties(Portlet portlet, Node portletNode,
 			HttpServletRequest request, Locale locale, String columnSize)
-			throws UnsupportedEncodingException, ParseException, XPathExpressionException {
+			throws UnsupportedEncodingException, ParseException,
+			XPathExpressionException, JsonProcessingException {
 
 		logger.debug("Entering setPortletProperties");
 
 		int refreshPeriodSeconds = getPortletRefreshPeriod(portletNode);
 		portlet.setRefreshPeriodSeconds(refreshPeriodSeconds);
 
-		String url = getPortletUrl(portletNode, request);
-		portlet.setUrl(url);
+		setPortletUrl(portlet, portletNode, request);
 
 		boolean executeOnLoad = getPortletExecuteOnLoad(portletNode);
 		portlet.setExecuteOnLoad(executeOnLoad);
@@ -461,20 +453,23 @@ public class DashboardController {
 	}
 
 	/**
-	 * Returns the url to use for a portlet's data
+	 * Sets the url to use for a portlet's data. Also sets the baseUrl and
+	 * parametersJson properties
 	 *
+	 * @param dashboardItem the portlet object
 	 * @param itemNode the portlet's node
 	 * @param request
-	 * @return the url to use for the portlet's data
 	 * @throws UnsupportedEncodingException
 	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
-	public String getPortletUrl(Node itemNode, HttpServletRequest request)
-			throws UnsupportedEncodingException, XPathExpressionException {
+	private void setPortletUrl(DashboardItem dashboardItem,
+			Node itemNode, HttpServletRequest request)
+			throws UnsupportedEncodingException, XPathExpressionException,
+			JsonProcessingException {
 
-		logger.debug("Entering getPortletUrl");
+		logger.debug("Entering setPortletUrl");
 
-		String url;
+		String url = null;
 
 		//string returning form of xpath.evaluate() returns empty string if tag is not found
 		//if require null, pass QName e.g. XPathConstants.NODE
@@ -497,28 +492,17 @@ public class DashboardController {
 			//no report defined. use url tag
 			url = xPath.evaluate("URL", itemNode);
 		} else {
-			url = request.getContextPath() + "/runReport?reportId=" + reportIdString
-					+ "&isFragment=true";
+			String baseUrl = request.getContextPath() + "/runReport?reportId="
+					+ reportIdString + "&isFragment=true";
 
-			//add report parameters
-			StringBuilder paramsSb = new StringBuilder(254);
+			dashboardItem.setBaseUrl(baseUrl);
+
 			Map<String, String[]> requestParameters = request.getParameterMap();
-			for (Entry<String, String[]> entry : requestParameters.entrySet()) {
-				String htmlParamName = entry.getKey();
-				if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)) {
-					String[] paramValues = entry.getValue();
-					String encodedParamName = URLEncoder.encode(htmlParamName, "UTF-8");
-					for (String value : paramValues) {
-						String encodedParamValue = URLEncoder.encode(value, "UTF-8");
-						paramsSb.append("&").append(encodedParamName).append("=").append(encodedParamValue);
-					}
-				}
-			}
-
-			url = url + paramsSb.toString();
+			String parametersJson = ArtUtils.objectToJson(requestParameters);
+			dashboardItem.setParametersJson(parametersJson);
 		}
 
-		return url;
+		dashboardItem.setUrl(url);
 	}
 
 	/**
@@ -563,6 +547,9 @@ public class DashboardController {
 		logger.debug("Entering getPortletTitle");
 
 		String title = xPath.evaluate("TITLE", itemNode);
+		
+		title = StringUtils.trimToEmpty(title);
+		title = Encode.forHtmlContent(title);
 
 		String contextPath = request.getContextPath();
 		if (!executeOnLoad) {
@@ -604,18 +591,11 @@ public class DashboardController {
 	 * @param reportParamsMap the report parameters map
 	 * @return the gridstack dashboard object to be used to display the
 	 * gridstack dashboard
-	 * @throws SQLException
-	 * @throws ParseException
-	 * @throws UnsupportedEncodingException
-	 * @throws org.xml.sax.SAXException
-	 * @throws javax.xml.parsers.ParserConfigurationException
-	 * @throws javax.xml.xpath.XPathExpressionException
+	 * @throws Exception
 	 */
 	private GridstackDashboard buildGridstackDashboard(Report report, HttpServletRequest request,
 			Locale locale, Map<String, ReportParameter> reportParamsMap)
-			throws SQLException, ParseException, UnsupportedEncodingException,
-			SAXException, IOException, ParserConfigurationException, IllegalArgumentException,
-			XPathExpressionException {
+			throws Exception {
 
 		logger.debug("Entering buildGridstackDashboard: Report={}", report);
 
@@ -680,15 +660,15 @@ public class DashboardController {
 	 */
 	private void setGridstackItemProperties(GridstackItem item, Node itemNode,
 			HttpServletRequest request, Locale locale)
-			throws UnsupportedEncodingException, XPathExpressionException {
+			throws UnsupportedEncodingException, XPathExpressionException,
+			JsonProcessingException {
 
 		logger.debug("Entering setGridstackItemProperties");
 
 		int refreshPeriodSeconds = getPortletRefreshPeriod(itemNode);
 		item.setRefreshPeriodSeconds(refreshPeriodSeconds);
 
-		String url = getPortletUrl(itemNode, request);
-		item.setUrl(url);
+		setPortletUrl(item, itemNode, request);
 
 		boolean executeOnLoad = getPortletExecuteOnLoad(itemNode);
 		item.setExecuteOnLoad(executeOnLoad);

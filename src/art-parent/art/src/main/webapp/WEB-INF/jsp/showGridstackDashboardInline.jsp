@@ -50,12 +50,15 @@
 									<div class="portletAUTOBox">
 										<div class="portletAUTOTools"
 											 data-content-div-id="#itemContent_${item.index}"
-											 data-url="${item.url}"
-											 data-refresh-period-seconds="${item.refreshPeriodSeconds}">
+											 data-url="${encode:forHtmlAttribute(item.url)}"
+											 data-refresh-period-seconds="${item.refreshPeriodSeconds}"
+											 data-base-url="${encode:forHtmlAttribute(item.baseUrl)}"
+											 data-parameters-json="${encode:forHtmlAttribute(item.parametersJson)}">
 											<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 											<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 										</div>
 										<div class="portletAUTOTitle">
+											<%-- don't encode title because it may contain image source where onload is false --%>
 											${item.title}
 										</div>
 										<div id="itemContent_${item.index}" class="portletAUTOContent">
@@ -95,8 +98,10 @@
 												<div class="portletAUTOBox">
 													<div class="portletAUTOTools"
 														 data-content-div-id="#itemContent_${item.index}"
-														 data-url="${item.url}"
-														 data-refresh-period-seconds="${item.refreshPeriodSeconds}">
+														 data-url="${encode:forHtmlAttribute(item.url)}"
+														 data-refresh-period-seconds="${item.refreshPeriodSeconds}"
+														 data-base-url="${encode:forHtmlAttribute(item.baseUrl)}"
+														 data-parameters-json="${encode:forHtmlAttribute(item.parametersJson)}">
 														<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 														<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 													</div>
@@ -139,17 +144,35 @@
 		var itemUrl = "${item.url}";
 
 		if (${item.executeOnLoad}) {
-			$(contentDivId).load(itemUrl);
+			var baseUrl = "${item.baseUrl}";
+			if (baseUrl) {
+				//use post for art reports
+				//https://api.jquery.com/load/
+				//use single quote as json string will have double quotes for attribute names and values
+				var parametersJson = '${item.parametersJson}';
+				var parametersObject = JSON.parse(parametersJson);
+				$(contentDivId).load(baseUrl, parametersObject);
+			} else {
+				$(contentDivId).load(itemUrl);
+			}
 		}
 
 		var refreshPeriodSeconds = ${item.refreshPeriodSeconds};
 		if (refreshPeriodSeconds !== -1) {
 			var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
 			var intervalId = setInterval(function () {
-				$("#itemContent_${item.index}").load("${item.url}");
+				if ("${item.baseUrl}") {
+					//use post for art reports
+					//use single quote as json string will have double quotes for attribute names and values
+					var parametersJson = '${item.parametersJson}';
+					var parametersObject = JSON.parse(parametersJson);
+					$("#itemContent_${item.index}").load("${item.baseUrl}", parametersObject);
+				} else {
+					$("#itemContent_${item.index}").load("${item.url}");
+				}
 				//https://stackoverflow.com/questions/2441197/javascript-setinterval-loop-not-holding-variable
-				//using variables like below doesn't work properly. setinterval will be set on the last item (last variable contents)
-//				$(contentDivId).load(itemUrl);
+				//using variables like below doesn't work properly. setinterval will be set on the last portlet (last variable contents)
+				//$(contentDivId).load(itemUrl);
 			}, refreshPeriodMilliseconds);
 
 			intervalIds[contentDivId] = intervalId;
@@ -163,14 +186,24 @@
 			var src = $(this).attr('src'); //this.src gives full url i.e. http://... while $(this).attr('src') gives relative url i.e. contextpath/...
 			var mimimizeUrl = "${pageContext.request.contextPath}/images/minimize.png";
 			var maximizeUrl = "${pageContext.request.contextPath}/images/maximize.png";
+			
 			if (src === mimimizeUrl) {
 				$(contentDivId).hide();
 				$(this).attr('src', maximizeUrl);
 			} else {
 				$(contentDivId).show();
 				$(this).attr('src', mimimizeUrl);
+				
 				//refresh item contents every time it's maximized/shown
-				$(contentDivId).load(itemUrl);
+				var baseUrl = parentDiv.data("base-url");
+				var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
+
+				if (baseUrl) {
+					//use post for art reports
+					$(contentDivId).load(baseUrl, parametersObject);
+				} else {
+					$(contentDivId).load(itemUrl);
+				}
 			}
 		});
 
@@ -179,8 +212,15 @@
 			var contentDivId = parentDiv.data("content-div-id");
 			var itemUrl = parentDiv.data("url");
 			var refreshPeriodSeconds = parentDiv.data("refresh-period-seconds");
+			var baseUrl = parentDiv.data("base-url");
+			var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
 
-			$(contentDivId).load(itemUrl);
+			if (baseUrl) {
+				//use post for art reports
+				$(contentDivId).load(baseUrl, parametersObject);
+			} else {
+				$(contentDivId).load(itemUrl);
+			}
 
 			//reset/restart refresh interval
 			if (refreshPeriodSeconds !== -1) {
@@ -189,7 +229,12 @@
 				var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
 
 				var setIntervalId = setInterval(function () {
-					$(contentDivId).load(itemUrl);
+					if (baseUrl) {
+						//use post for art reports
+						$(contentDivId).load(baseUrl, parametersObject);
+					} else {
+						$(contentDivId).load(itemUrl);
+					}
 				}, refreshPeriodMilliseconds);
 
 				intervalIds[contentDivId] = setIntervalId;

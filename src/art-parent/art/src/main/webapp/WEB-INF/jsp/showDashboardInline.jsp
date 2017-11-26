@@ -35,18 +35,22 @@
 							<td style="vertical-align: top">
 								<c:forEach var="portlet" items="${column}">
 									<div id="portlet_${portlet.index}">
-										<div class="${portlet.classNamePrefix}Box">
-											<div class="${portlet.classNamePrefix}Tools"
+										<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Box">
+											<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Tools"
 												 data-content-div-id="#portletContent_${portlet.index}"
-												 data-url="${portlet.url}"
-												 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}">
+												 data-url="${encode:forHtmlAttribute(portlet.url)}"
+												 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}"
+												 data-base-url="${encode:forHtmlAttribute(portlet.baseUrl)}"
+												 data-parameters-json="${encode:forHtmlAttribute(portlet.parametersJson)}">
 												<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 												<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 											</div>
-											<div class="${portlet.classNamePrefix}Title">
+											<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Title">
+												<%-- don't encode title because it may contain image source where onload is false --%>
 												${portlet.title}
 											</div>
-											<div id="portletContent_${portlet.index}" class="${portlet.classNamePrefix}Content">
+											<div id="portletContent_${portlet.index}"
+												 class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Content">
 											</div>
 										</div>
 									</div>
@@ -75,18 +79,21 @@
 											<c:forEach var="portlet" items="${tab.items}">
 												<c:if test="${loop2.count == portlet.columnIndex}">
 													<div id="portlet_${portlet.index}">
-														<div class="${portlet.classNamePrefix}Box">
-															<div class="${portlet.classNamePrefix}Tools"
+														<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Box">
+															<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Tools"
 																 data-content-div-id="#portletContent_${portlet.index}"
-																 data-url="${portlet.url}"
-																 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}">
+																 data-url="${encode:forHtmlAttribute(portlet.url)}"
+																 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}"
+																 data-base-url="${encode:forHtmlAttribute(portlet.baseUrl)}"
+																 data-parameters-json="${encode:forHtmlAttribute(portlet.parametersJson)}">
 																<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 																<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 															</div>
-															<div class="${portlet.classNamePrefix}Title">
+															<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Title">
 																${portlet.title}
 															</div>
-															<div id="portletContent_${portlet.index}" class="${portlet.classNamePrefix}Content">
+															<div id="portletContent_${portlet.index}"
+																 class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Content">
 															</div>
 														</div>
 													</div>
@@ -125,17 +132,35 @@
 
 		//http://balusc.omnifaces.org/2009/05/javajspjsf-and-javascript.html
 		if (${portlet.executeOnLoad}) {
-			$(contentDivId).load(portletUrl);
+			var baseUrl = "${portlet.baseUrl}";
+			if (baseUrl) {
+				//use post for art reports
+				//https://api.jquery.com/load/
+				//use single quote as json string will have double quotes for attribute names and values
+				var parametersJson = '${portlet.parametersJson}';
+				var parametersObject = JSON.parse(parametersJson);
+				$(contentDivId).load(baseUrl, parametersObject);
+			} else {
+				$(contentDivId).load(portletUrl);
+			}
 		}
 
 		var refreshPeriodSeconds = ${portlet.refreshPeriodSeconds};
 		if (refreshPeriodSeconds !== -1) {
 			var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
 			var intervalId = setInterval(function () {
-				$("#portletContent_${portlet.index}").load("${portlet.url}");
+				if ("${portlet.baseUrl}") {
+					//use post for art reports
+					//use single quote as json string will have double quotes for attribute names and values
+					var parametersJson = '${portlet.parametersJson}';
+					var parametersObject = JSON.parse(parametersJson);
+					$("#portletContent_${portlet.index}").load("${portlet.baseUrl}", parametersObject);
+				} else {
+					$("#portletContent_${portlet.index}").load("${portlet.url}");
+				}
 				//https://stackoverflow.com/questions/2441197/javascript-setinterval-loop-not-holding-variable
 				//using variables like below doesn't work properly. setinterval will be set on the last portlet (last variable contents)
-//				$(contentDivId).load(portletUrl);
+				//$(contentDivId).load(portletUrl);
 			}, refreshPeriodMilliseconds);
 
 			intervalIds[contentDivId] = intervalId;
@@ -149,14 +174,24 @@
 			var src = $(this).attr('src'); //this.src gives full url i.e. http://... while $(this).attr('src') gives relative url i.e. contextpath/...
 			var mimimizeUrl = "${pageContext.request.contextPath}/images/minimize.png";
 			var maximizeUrl = "${pageContext.request.contextPath}/images/maximize.png";
+
 			if (src === mimimizeUrl) {
 				$(contentDivId).hide();
 				$(this).attr('src', maximizeUrl);
 			} else {
 				$(contentDivId).show();
 				$(this).attr('src', mimimizeUrl);
+
 				//refresh portlet contents every time it's maximized/shown
-				$(contentDivId).load(portletUrl);
+				var baseUrl = parentDiv.data("base-url");
+				var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
+
+				if (baseUrl) {
+					//use post for art reports
+					$(contentDivId).load(baseUrl, parametersObject);
+				} else {
+					$(contentDivId).load(portletUrl);
+				}
 			}
 		});
 
@@ -165,8 +200,15 @@
 			var contentDivId = parentDiv.data("content-div-id");
 			var portletUrl = parentDiv.data("url");
 			var refreshPeriodSeconds = parentDiv.data("refresh-period-seconds");
+			var baseUrl = parentDiv.data("base-url");
+			var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
 
-			$(contentDivId).load(portletUrl);
+			if (baseUrl) {
+				//use post for art reports
+				$(contentDivId).load(baseUrl, parametersObject);
+			} else {
+				$(contentDivId).load(portletUrl);
+			}
 
 			//reset/restart refresh interval
 			if (refreshPeriodSeconds !== -1) {
@@ -175,7 +217,12 @@
 				var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
 
 				var setIntervalId = setInterval(function () {
-					$(contentDivId).load(portletUrl);
+					if (baseUrl) {
+						//use post for art reports
+						$(contentDivId).load(baseUrl, parametersObject);
+					} else {
+						$(contentDivId).load(portletUrl);
+					}
 				}, refreshPeriodMilliseconds);
 
 				intervalIds[contentDivId] = setIntervalId;
