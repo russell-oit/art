@@ -554,7 +554,7 @@ public class UserService {
 				+ " FROM ART_JOBS"
 				+ " WHERE USER_ID=?";
 
-		ResultSetHandler<List<String>> h = new ColumnListHandler<>("JOB_NAME");
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
 		return dbService.query(sql, h, userId);
 	}
 }

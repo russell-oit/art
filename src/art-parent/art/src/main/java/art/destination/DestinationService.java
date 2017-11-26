@@ -22,6 +22,7 @@ import art.dbutils.DbService;
 import art.encryption.AesEncryptor;
 import art.enums.DestinationType;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -101,12 +103,12 @@ public class DestinationService {
 			destination.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			destination.setCreatedBy(rs.getString("CREATED_BY"));
 			destination.setUpdatedBy(rs.getString("UPDATED_BY"));
-			
+
 			//decrypt password
 			String password = destination.getPassword();
 			password = AesEncryptor.decrypt(password);
 			destination.setPassword(password);
-			
+
 			return type.cast(destination);
 		}
 	}
@@ -145,34 +147,68 @@ public class DestinationService {
 	 * Deletes a destination
 	 *
 	 * @param id the destination id
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * jobs which prevented the destination from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "destinations", allEntries = true)
-	public void deleteDestination(int id) throws SQLException {
+	public ActionResult deleteDestination(int id) throws SQLException {
 		logger.debug("Entering deleteDestination: id={}", id);
+
+		ActionResult result = new ActionResult();
+
+		//don't delete if important linked records exist
+		List<String> linkedJobs = getLinkedJobs(id);
+		if (!linkedJobs.isEmpty()) {
+			result.setData(linkedJobs);
+			return result;
+		}
 
 		String sql;
 
+		sql = "DELETE FROM ART_JOB_DESTINATION_MAP WHERE DESTINATION_ID=?";
+		dbService.update(sql, id);
+
 		sql = "DELETE FROM ART_DESTINATIONS WHERE DESTINATION_ID=?";
 		dbService.update(sql, id);
+
+		result.setSuccess(true);
+
+		return result;
 	}
 
 	/**
 	 * Deletes multiple destinations
 	 *
 	 * @param ids the ids of destinations to delete
+	 * @return ActionResult. if not successful, data contains details of
+	 * destinations which weren't deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "destinations", allEntries = true)
-	public void deleteDestinations(Integer[] ids) throws SQLException {
+	public ActionResult deleteDestinations(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteDestinations: ids={}", (Object) ids);
 
-		String sql;
+		ActionResult result = new ActionResult();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
-		sql = "DELETE FROM ART_DESTINATIONS"
-				+ " WHERE DESTINATION_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteDestination(id);
+			if (!deleteResult.isSuccess()) {
+				@SuppressWarnings("unchecked")
+				List<String> linkedJobs = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedJobs, ", ");
+				nonDeletedRecords.add(value);
+			}
+		}
 
-		dbService.update(sql, (Object[]) ids);
+		if (nonDeletedRecords.isEmpty()) {
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+
+		return result;
 	}
 
 	/**
@@ -334,7 +370,7 @@ public class DestinationService {
 		ResultSetHandler<List<Destination>> h = new BeanListHandler<>(Destination.class, new DestinationMapper());
 		return dbService.query(sql, h, jobId);
 	}
-	
+
 	/**
 	 * Updates multiple destinations
 	 *
@@ -366,5 +402,25 @@ public class DestinationService {
 
 			dbService.update(sql, valuesArray);
 		}
+	}
+
+	/**
+	 * Returns jobs that use a given destination
+	 *
+	 * @param destinationId the destination id
+	 * @return linked job names
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedJobs(int destinationId) throws SQLException {
+		logger.debug("Entering getLinkedJobs: destinationId={}", destinationId);
+
+		String sql = "SELECT AJ.JOB_NAME"
+				+ " FROM ART_JOBS AJ"
+				+ " INNER JOIN ART_JOB_DESTINATION_MAP AJDM"
+				+ " ON AJ.JOB_ID=AJDM.JOB_ID"
+				+ " WHERE AJDM.DESTINATION_ID=?";
+
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
+		return dbService.query(sql, h, destinationId);
 	}
 }

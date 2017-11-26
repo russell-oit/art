@@ -20,8 +20,10 @@ package art.destination;
 import art.encryption.AesEncryptor;
 import art.enums.DestinationType;
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -73,8 +75,16 @@ public class DestinationController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			destinationService.deleteDestination(id);
-			response.setSuccess(true);
+			ActionResult deleteResult = destinationService.deleteDestination(id);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				//destination not deleted because of linked jobs
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
@@ -91,8 +101,15 @@ public class DestinationController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			destinationService.deleteDestinations(ids);
-			response.setSuccess(true);
+			ActionResult deleteResult = destinationService.deleteDestinations(ids);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
