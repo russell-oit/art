@@ -50,7 +50,6 @@ public class XlsxOutput extends StandardOutput {
 	private CellStyle numberStyle;
 	private int currentRow;
 	private int cellNumber;
-	private Map<String, CellStyle> styles;
 	private Row row;
 	private Cell cell;
 	private final String javaDateFormat;
@@ -78,11 +77,6 @@ public class XlsxOutput extends StandardOutput {
 		dateStyle = null;
 		totalStyle = null;
 		numberStyle = null;
-
-		if (styles != null) {
-			styles.clear();
-			styles = null;
-		}
 	}
 
 	@Override
@@ -104,8 +98,6 @@ public class XlsxOutput extends StandardOutput {
 			sheet.getPrintSetup().setLandscape(true);
 		}
 
-		styles = new HashMap<>();
-
 		Font headerFont = wb.createFont();
 		headerFont.setBold(true);
 		headerFont.setColor(IndexedColors.BLUE.getIndex());
@@ -115,7 +107,6 @@ public class XlsxOutput extends StandardOutput {
 		headerStyle = wb.createCellStyle();
 		headerStyle.setFont(headerFont);
 		headerStyle.setBorderBottom(BorderStyle.THIN);
-		styles.put("header", headerStyle);
 
 		Font bodyFont = wb.createFont();
 		bodyFont.setColor(Font.COLOR_NORMAL);
@@ -124,7 +115,6 @@ public class XlsxOutput extends StandardOutput {
 
 		bodyStyle = wb.createCellStyle();
 		bodyStyle.setFont(bodyFont);
-		styles.put("body", bodyStyle);
 
 		dateStyle = wb.createCellStyle();
 		if (StringUtils.isBlank(javaDateFormat)) {
@@ -135,14 +125,12 @@ public class XlsxOutput extends StandardOutput {
 			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 		}
 		dateStyle.setFont(bodyFont);
-		styles.put("date", dateStyle);
 
 		if (StringUtils.isNotBlank(numberFormat)) {
 			numberStyle = wb.createCellStyle();
 			DataFormat poiFormat = wb.createDataFormat();
 			numberStyle.setDataFormat(poiFormat.getFormat(numberFormat));
 			numberStyle.setFont(bodyFont);
-			styles.put("number", numberStyle);
 		}
 
 		Font totalFont = wb.createFont();
@@ -156,7 +144,6 @@ public class XlsxOutput extends StandardOutput {
 			totalStyle.setDataFormat(poiFormat.getFormat(numberFormat));
 		}
 		totalStyle.setFont(totalFont);
-		styles.put("total", totalStyle);
 	}
 
 	@Override
