@@ -109,8 +109,9 @@ public class XlsOutput extends StandardOutput {
 				zout.putNextEntry(ze);
 			}
 
-			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 			wb = new HSSFWorkbook();
+			
+			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 			sheet = wb.createSheet(sheetName);
 
 			sheet.getPrintSetup().setPaperSize(PrintSetup.A4_PAPERSIZE);

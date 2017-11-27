@@ -272,18 +272,16 @@ public class XlsxOutput extends StandardOutput {
 		try {
 
 			//set modify password
-			if (sheet != null && StringUtils.isNotEmpty(report.getModifyPassword())) {
+			if (StringUtils.isNotEmpty(report.getModifyPassword())) {
 				sheet.protectSheet(report.getModifyPassword());
 			}
 
-			if (wb != null) {
-				try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
-					wb.write(fout);
-				}
-
-				// dispose of temporary files backing this workbook on disk
-				wb.dispose();
+			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
+				wb.write(fout);
 			}
+
+			// dispose of temporary files backing this workbook on disk
+			wb.dispose();
 
 			//set open password
 			String openPassword = report.getOpenPassword();
