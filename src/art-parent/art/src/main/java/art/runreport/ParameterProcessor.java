@@ -247,7 +247,12 @@ public class ParameterProcessor {
 
 					Map<Object, String> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
 					if (reportParam.getPassedParameterValues() == null) {
-						reportParam.getActualParameterValues().addAll(lovValues.keySet());
+						if (param.getParameterType() == ParameterType.SingleValue) {
+							List<Object> values = new ArrayList<>(lovValues.keySet());
+							reportParam.setActualParameterValues(values);
+						} else {
+							reportParam.getActualParameterValues().addAll(lovValues.keySet());
+						}
 					}
 
 					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
@@ -446,7 +451,7 @@ public class ParameterProcessor {
 		if (user != null) {
 			username = user.getUsername();
 		}
-		
+
 		ExpressionHelper expressionHelper = new ExpressionHelper();
 		value = expressionHelper.processString(value, username);
 
