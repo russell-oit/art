@@ -291,6 +291,16 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="control-label col-md-4" for="useDefaultValueInJobs">
+						<spring:message code="parameters.label.useDefaultValueInJobs"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="useDefaultValueInJobs" id="useDefaultValueInJobs" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="control-label col-md-4" for="shared">
 						<spring:message code="parameters.label.shared"/>
 					</label>

@@ -26,6 +26,7 @@
 -- create destinations table
 -- create job-destination table
 -- add job sub-directory column
+-- add use default value in jobs column
 
 
 -- NOTES:
@@ -225,3 +226,6 @@ ALTER TABLE ART_FTP_SERVERS ADD MIGRATED INTEGER;
 
 -- add job sub-directory column
 ALTER TABLE ART_JOBS ADD SUB_DIRECTORY VARCHAR(100);
+
+-- add use default value in jobs column
+ALTER TABLE ART_PARAMETERS ADD USE_DEFAULT_VALUE_IN_JOBS INTEGER;

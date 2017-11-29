@@ -62,6 +62,21 @@ public class Parameter implements Serializable {
 	private String dateFormat;
 	private ParameterOptions parameterOptions;
 	private String placeholderText;
+	private boolean useDefaultValueInJobs;
+
+	/**
+	 * @return the useDefaultValueInJobs
+	 */
+	public boolean isUseDefaultValueInJobs() {
+		return useDefaultValueInJobs;
+	}
+
+	/**
+	 * @param useDefaultValueInJobs the useDefaultValueInJobs to set
+	 */
+	public void setUseDefaultValueInJobs(boolean useDefaultValueInJobs) {
+		this.useDefaultValueInJobs = useDefaultValueInJobs;
+	}
 
 	/**
 	 * @return the placeholderText

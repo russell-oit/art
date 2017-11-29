@@ -108,6 +108,7 @@ public class ParameterService {
 			parameter.setOptions(rs.getString("PARAMETER_OPTIONS"));
 			parameter.setDateFormat(rs.getString("PARAMETER_DATE_FORMAT"));
 			parameter.setPlaceholderText(rs.getString("PLACEHOLDER_TEXT"));
+			parameter.setUseDefaultValueInJobs(rs.getBoolean("USE_DEFAULT_VALUE_IN_JOBS"));
 			parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			parameter.setCreatedBy(rs.getString("CREATED_BY"));
@@ -395,9 +396,9 @@ public class ParameterService {
 					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, DEFAULT_VALUE_REPORT_ID,"
 					+ " HIDDEN, SHARED, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
 					+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION, PARAMETER_OPTIONS,"
-					+ " PARAMETER_DATE_FORMAT, PLACEHOLDER_TEXT,"
+					+ " PARAMETER_DATE_FORMAT, PLACEHOLDER_TEXT, USE_DEFAULT_VALUE_IN_JOBS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 21) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 22) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -419,6 +420,7 @@ public class ParameterService {
 				parameter.getOptions(),
 				parameter.getDateFormat(),
 				parameter.getPlaceholderText(),
+				BooleanUtils.toInteger(parameter.isUseDefaultValueInJobs()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -430,6 +432,7 @@ public class ParameterService {
 					+ " DEFAULT_VALUE_REPORT_ID=?, HIDDEN=?, SHARED=?, USE_LOV=?, LOV_REPORT_ID=?,"
 					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
 					+ " PARAMETER_OPTIONS=?, PARAMETER_DATE_FORMAT=?, PLACEHOLDER_TEXT=?,"
+					+ " USE_DEFAULT_VALUE_IN_JOBS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
 
@@ -452,6 +455,7 @@ public class ParameterService {
 				parameter.getOptions(),
 				parameter.getDateFormat(),
 				parameter.getPlaceholderText(),
+				BooleanUtils.toInteger(parameter.isUseDefaultValueInJobs()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()

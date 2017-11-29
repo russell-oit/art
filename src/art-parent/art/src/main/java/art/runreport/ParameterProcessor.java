@@ -62,9 +62,24 @@ public class ParameterProcessor {
 	private Locale locale;
 	private boolean valuesAsIs;
 	private User user;
+	private Boolean isJob = false;
 
 	public ParameterProcessor() {
 		locale = Locale.getDefault();
+	}
+
+	/**
+	 * @return the isJob
+	 */
+	public Boolean getIsJob() {
+		return isJob;
+	}
+
+	/**
+	 * @param isJob the isJob to set
+	 */
+	public void setIsJob(Boolean isJob) {
+		this.isJob = isJob;
 	}
 
 	/**
@@ -246,7 +261,8 @@ public class ParameterProcessor {
 					defaultValueLovReportRunner.setReportParamsMap(reportParamsMap);
 
 					Map<Object, String> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
-					if (reportParam.getPassedParameterValues() == null) {
+					if (reportParam.getPassedParameterValues() == null
+							|| (isJob && param.isUseDefaultValueInJobs())) {
 						if (param.getParameterType() == ParameterType.SingleValue) {
 							List<Object> values = new ArrayList<>(lovValues.keySet());
 							reportParam.setActualParameterValues(values);
@@ -386,8 +402,8 @@ public class ParameterProcessor {
 
 			if (param.getParameterType() == ParameterType.SingleValue) {
 				String actualValueString;
-				if (passedValues == null) {
-					//parameter value not specified. use default value
+				if (passedValues == null || (isJob && param.isUseDefaultValueInJobs())) {
+					//parameter value not specified or using default value in a isJob. use default value
 					actualValueString = param.getLocalizedDefaultValue(locale);
 				} else {
 					actualValueString = passedValues[0];
@@ -399,8 +415,8 @@ public class ParameterProcessor {
 				reportParam.setActualParameterValues(actualValues);
 			} else if (param.getParameterType() == ParameterType.MultiValue) {
 				List<String> actualValueStrings = new ArrayList<>();
-				if (passedValues == null) {
-					//parameter value not specified. use default value
+				if (passedValues == null || (isJob && param.isUseDefaultValueInJobs())) {
+					//parameter value not specified or using default value in a isJob. use default value
 					String defaultValue = param.getLocalizedDefaultValue(locale);
 					if (StringUtils.isNotEmpty(defaultValue)) {
 						String defaultValues[] = defaultValue.split("\\r?\\n");
