@@ -28,7 +28,7 @@ import art.reportoptions.Reporti18nOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtUtils;
-import art.utils.DrilldownLinkHelper;
+import art.drilldown.DrilldownLinkHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import java.io.File;

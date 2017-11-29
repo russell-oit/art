@@ -26,7 +26,7 @@ import art.report.Report;
 import art.reportoptions.JFreeChartOptions;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
-import art.utils.DrilldownLinkHelper;
+import art.drilldown.DrilldownLinkHelper;
 import net.sf.cewolfart.ChartPostProcessor;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
