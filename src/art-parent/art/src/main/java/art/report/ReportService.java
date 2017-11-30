@@ -53,7 +53,6 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
@@ -498,12 +497,21 @@ public class ReportService {
 	public List<String> getLinkedJobs(int reportId) throws SQLException {
 		logger.debug("Entering getLinkedJobs: reportId={}", reportId);
 
-		String sql = "SELECT JOB_NAME"
+		String sql = "SELECT JOB_ID, JOB_NAME"
 				+ " FROM ART_JOBS"
 				+ " WHERE QUERY_ID=?";
 
-		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
-		return dbService.query(sql, h, reportId);
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> jobDetails = dbService.query(sql, h, reportId);
+
+		List<String> jobs = new ArrayList<>();
+		for (Map<String, Object> jobDetail : jobDetails) {
+			Integer jobId = (Integer) jobDetail.get("JOB_ID");
+			String jobName = (String) jobDetail.get("JOB_NAME");
+			jobs.add(jobName + " (" + jobId + ")");
+		}
+
+		return jobs;
 	}
 
 	/**
