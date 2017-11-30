@@ -2174,20 +2174,13 @@ public class ReportJob implements org.quartz.Job {
 			try {
 				boolean emailSent = sendEmail(mailer);
 				if (emailSent) {
-					runMessage = "jobs.message.fileEmailed";
-				}
-
-				if (jobType.isEmail()) {
-					// delete the file since it has
-					// been sent via email
-					File file = new File(outputFileName);
-					file.delete();
-					fileName = "";
-				} else if (jobType.isPublish()) {
-					if (emailSent) {
+					if (jobType.isPublish()) {
 						runMessage = "jobs.message.reminderSent";
+					} else {
+						runMessage = "jobs.message.fileEmailed";
 					}
 				}
+
 			} catch (MessagingException ex) {
 				logger.debug("Error", ex);
 				fileName = "";
@@ -2759,29 +2752,27 @@ public class ReportJob implements org.quartz.Job {
 
 		String sql;
 
-		if (jobType.isPublish()) {
-			String archiveFileName = job.getLastFileName();
+		String lastFileName = job.getLastFileName();
 
-			int runsToArchive = job.getRunsToArchive();
+		int runsToArchive = job.getRunsToArchive();
 
-			if (runsToArchive > 0 && archiveFileName != null) {
-				//update archives
-				updateArchives(splitJob, user);
-			} else {
-				//if not archiving, delete previous file
-				if (StringUtils.isNotBlank(archiveFileName)
-						&& !StringUtils.equals(archiveFileName, fileName)) {
-					String filePath = Config.getJobsExportPath() + archiveFileName;
-					File previousFile = new File(filePath);
-					if (previousFile.exists()) {
-						previousFile.delete();
-					}
+		if (runsToArchive > 0 && lastFileName != null) {
+			//update archives
+			updateArchives(splitJob, user);
+		} else {
+			//if not archiving, delete previous file
+			if (StringUtils.isNotBlank(lastFileName)
+					&& !StringUtils.equals(lastFileName, fileName)) {
+				String filePath = Config.getJobsExportPath() + lastFileName;
+				File previousFile = new File(filePath);
+				if (previousFile.exists()) {
+					previousFile.delete();
 				}
+			}
 
-				//delete old archives if they exist
-				if (runsToArchive == 0) {
-					deleteArchives();
-				}
+			//delete old archives if they exist
+			if (runsToArchive == 0) {
+				deleteArchives();
 			}
 		}
 
