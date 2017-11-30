@@ -30,11 +30,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -541,20 +542,29 @@ public class UserService {
 	}
 
 	/**
-	 * Returns jobs that are owned by a given user
+	 * Returns details of jobs that are owned by a given user
 	 *
 	 * @param userId the user id
-	 * @return linked job names
+	 * @return linked job details
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedJobs(int userId) throws SQLException {
 		logger.debug("Entering getLinkedJobs: userId={}", userId);
 
-		String sql = "SELECT JOB_NAME"
+		String sql = "SELECT JOB_ID, JOB_NAME"
 				+ " FROM ART_JOBS"
 				+ " WHERE USER_ID=?";
 
-		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
-		return dbService.query(sql, h, userId);
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> jobDetails = dbService.query(sql, h, userId);
+
+		List<String> jobs = new ArrayList<>();
+		for (Map<String, Object> jobDetail : jobDetails) {
+			Integer jobId = (Integer) jobDetail.get("JOB_ID");
+			String jobName = (String) jobDetail.get("JOB_NAME");
+			jobs.add(jobName + " (" + jobId + ")");
+		}
+
+		return jobs;
 	}
 }

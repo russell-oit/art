@@ -488,10 +488,10 @@ public class ReportService {
 	}
 
 	/**
-	 * Returns jobs that use a given report
+	 * Returns details of jobs that use a given report
 	 *
 	 * @param reportId the report id
-	 * @return linked job names
+	 * @return linked job details
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedJobs(int reportId) throws SQLException {

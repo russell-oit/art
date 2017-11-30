@@ -25,11 +25,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -350,10 +351,10 @@ public class HolidayService {
 	}
 
 	/**
-	 * Returns schedules and jobs that use a given holiday
+	 * Returns details of schedules and jobs that use a given holiday
 	 *
 	 * @param holidayId the holiday id
-	 * @return linked schedule and job names
+	 * @return linked schedule and job details
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedRecords(int holidayId) throws SQLException {
@@ -361,19 +362,28 @@ public class HolidayService {
 
 		//union removes duplicate records, union all does not
 		//use union all in case a schedule and a job have the same name? or two jobs have the same name
-		String sql = "SELECT AJS.SCHEDULE_NAME"
+		String sql = "SELECT AJS.SCHEDULE_ID AS RECORD_ID, AJS.SCHEDULE_NAME AS RECORD_NAME"
 				+ " FROM ART_JOB_SCHEDULES AJS"
 				+ " INNER JOIN ART_SCHEDULE_HOLIDAY_MAP ASHM"
 				+ " ON AJS.SCHEDULE_ID=ASHM.SCHEDULE_ID"
 				+ " WHERE ASHM.HOLIDAY_ID=?"
 				+ " UNION ALL"
-				+ " SELECT AJ.JOB_NAME"
+				+ " SELECT AJ.JOB_ID AS RECORD_ID, AJ.JOB_NAME AS RECORD_NAME"
 				+ " FROM ART_JOBS AJ"
 				+ " INNER JOIN ART_JOB_HOLIDAY_MAP AJHM"
 				+ " ON AJ.JOB_ID=AJHM.JOB_ID"
 				+ " WHERE AJHM.HOLIDAY_ID=?";
 
-		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
-		return dbService.query(sql, h, holidayId, holidayId);
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> recordDetails = dbService.query(sql, h, holidayId, holidayId);
+
+		List<String> records = new ArrayList<>();
+		for (Map<String, Object> recordDetail : recordDetails) {
+			Integer recordId = (Integer) recordDetail.get("RECORD_ID");
+			String recordName = (String) recordDetail.get("RECORD_NAME");
+			records.add(recordName + " (" + recordId + ")");
+		}
+
+		return records;
 	}
 }

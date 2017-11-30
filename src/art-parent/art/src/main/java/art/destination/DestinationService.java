@@ -28,11 +28,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -405,22 +406,31 @@ public class DestinationService {
 	}
 
 	/**
-	 * Returns jobs that use a given destination
+	 * Returns details of jobs that use a given destination
 	 *
 	 * @param destinationId the destination id
-	 * @return linked job names
+	 * @return linked job details
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedJobs(int destinationId) throws SQLException {
 		logger.debug("Entering getLinkedJobs: destinationId={}", destinationId);
 
-		String sql = "SELECT AJ.JOB_NAME"
+		String sql = "SELECT AJ.JOB_ID, AJ.JOB_NAME"
 				+ " FROM ART_JOBS AJ"
 				+ " INNER JOIN ART_JOB_DESTINATION_MAP AJDM"
 				+ " ON AJ.JOB_ID=AJDM.JOB_ID"
 				+ " WHERE AJDM.DESTINATION_ID=?";
 
-		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
-		return dbService.query(sql, h, destinationId);
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> jobDetails = dbService.query(sql, h, destinationId);
+
+		List<String> jobs = new ArrayList<>();
+		for (Map<String, Object> jobDetail : jobDetails) {
+			Integer jobId = (Integer) jobDetail.get("JOB_ID");
+			String jobName = (String) jobDetail.get("JOB_NAME");
+			jobs.add(jobName + " (" + jobId + ")");
+		}
+
+		return jobs;
 	}
 }
