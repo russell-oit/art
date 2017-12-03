@@ -14,7 +14,7 @@ Footer that appears on all pages
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div id="footer">
-	<div class="container"> 
+	<div class="container-fluid">
 		<span class="navbar-text text-muted">
 			<a href="http://art.sourceforge.net">ART</a>
 			&nbsp; A Reporting Tool &nbsp;${artVersion}
