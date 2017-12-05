@@ -241,7 +241,14 @@ public class ReportController {
 		logger.debug("Entering editReport: id={}", id);
 
 		try {
-			model.addAttribute("report", reportService.getReportWithOwnSource(id));
+			Report report = reportService.getReportWithOwnSource(id);
+			if (report != null) {
+				ReportType reportType = report.getReportType();
+				if (reportType == ReportType.Text) {
+					report.setReportSourceHtml(report.getReportSource());
+				}
+			}
+			model.addAttribute("report", report);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -260,7 +267,7 @@ public class ReportController {
 		multipleReportEdit.setIds(ids);
 
 		model.addAttribute("multipleReportEdit", multipleReportEdit);
-		
+
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -357,7 +364,7 @@ public class ReportController {
 			reportService.updateReports(multipleReportEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleReportEdit.getIds());
-			
+
 			if (!multipleReportEdit.isReportGroupsUnchanged()) {
 				try {
 					String[] ids = StringUtils.split(multipleReportEdit.getIds(), ",");
@@ -372,7 +379,7 @@ public class ReportController {
 					redirectAttributes.addFlashAttribute("error", ex);
 				}
 			}
-			
+
 			return "redirect:/reportsConfig";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -929,11 +936,11 @@ public class ReportController {
 		reportGroupMembershipService.deleteAllReportGroupMembershipsForReport(report.getReportId());
 		reportGroupMembershipService.addReportGroupMemberships(report, report.getReportGroups());
 	}
-	
+
 	@RequestMapping(value = "/parameterReports", method = RequestMethod.GET)
 	public String showParameterReports(Model model,
 			@RequestParam("parameterId") Integer parameterId) {
-		
+
 		logger.debug("Entering showParameterReports: parameterId={}", parameterId);
 
 		try {
