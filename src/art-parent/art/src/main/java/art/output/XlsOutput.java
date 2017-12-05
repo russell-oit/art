@@ -33,9 +33,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.PrintSetup;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
 
@@ -256,6 +261,24 @@ public class XlsOutput extends StandardOutput {
 		if (value != null) {
 			cell.setCellValue(value);
 			cell.setCellStyle(dateStyle);
+		}
+	}
+	
+	@Override
+	public void addCellImage(byte[] binaryData) {
+		cell = row.createCell(cellNumber++);
+
+		if (binaryData != null) {
+			//https://stackoverflow.com/questions/33712621/how-put-a-image-in-a-cell-of-excel-java
+			//https://poi.apache.org/spreadsheet/quick-guide.html#Images
+			int pictureIdx = wb.addPicture(binaryData, Workbook.PICTURE_TYPE_PNG);
+			CreationHelper helper = wb.getCreationHelper();
+			Drawing drawing = sheet.createDrawingPatriarch();
+			ClientAnchor anchor = helper.createClientAnchor();
+			anchor.setCol1(cellNumber - 1);
+			anchor.setRow1(currentRow - 1);
+			Picture pict = drawing.createPicture(anchor, pictureIdx);
+			pict.resize();
 		}
 	}
 

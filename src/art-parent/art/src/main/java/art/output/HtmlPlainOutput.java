@@ -21,6 +21,7 @@ import art.reportparameter.ReportParameter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.CollectionUtils;
 import org.owasp.encoder.Encode;
 
@@ -185,6 +186,16 @@ public class HtmlPlainOutput extends StandardOutput {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
 		out.println("<td style='text-align: left'>" + escapedFormattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellImage(byte[] binaryData) {
+		if (binaryData == null) {
+			out.println("<td></td>");
+		} else {
+			String stringData = Base64.encodeBase64String(binaryData);
+			out.println("<td style='text-align: center'><img src='data:image/png;base64," + stringData + "'></td>");
+		}
 	}
 
 	@Override

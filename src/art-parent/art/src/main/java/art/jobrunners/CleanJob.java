@@ -86,6 +86,8 @@ public class CleanJob implements org.quartz.Job {
 		validExtensions.add("txt");
 		validExtensions.add("aes");
 		validExtensions.add("gpg");
+		validExtensions.add("png");
+		validExtensions.add("xlsm");
 
 		for (File file : files) {
 			// Delete the file if it is older than DELETE_FILES_MINUTES

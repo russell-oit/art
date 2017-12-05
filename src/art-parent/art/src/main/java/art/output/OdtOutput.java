@@ -20,6 +20,7 @@ package art.output;
 import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
@@ -182,6 +183,33 @@ public class OdtOutput extends StandardOutput {
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		outputCellText(formattedValue);
+	}
+
+	@Override
+	public void addCellImage(byte[] binaryData) {
+		outputCellText("");
+				
+		//cell.setImage() or Image.newImage() doesn't release handle to image file
+//		if (binaryData == null) {
+//			outputCellText("");
+//		} else {
+//			//https://apache.googlesource.com/odftoolkit/+/refs/heads/trunk/simple/src/test/java/org/odftoolkit/simple/draw/ImageTest.java
+//			//https://incubator.apache.org/odftoolkit/simple/document/cookbook/index.html
+//			//https://stackoverflow.com/questions/4350084/byte-to-file-in-java
+//			//http://www.java2s.com/Tutorial/Java/0320__Network/GetURIfromFile.htm
+//			//http://www.java2s.com/Code/Java/JDK-7/ConvertPathtoURI.htm
+//			cell = row.getCellByIndex(cellNumber++);
+//			String tempFileName = RandomStringUtils.randomAlphanumeric(10) + ".png";
+//			String tempFilePath = Config.getReportsExportPath() + tempFileName;
+//			File file = new File(tempFilePath);
+//			try {
+//				FileUtils.writeByteArrayToFile(file, binaryData);
+//				cell.setImage(file.toURI());
+//			} catch (IOException ex) {
+//				endOutput();
+//				throw new RuntimeException(ex);
+//			}
+//		}
 	}
 
 	@Override

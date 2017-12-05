@@ -19,8 +19,10 @@ package art.output;
 
 import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -29,6 +31,7 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -220,6 +223,31 @@ public class DocxOutput extends StandardOutput {
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
 		outputCellText(formattedValue);
+	}
+
+	@Override
+	public void addCellImage(byte[] binaryData) {
+		if (binaryData == null) {
+			outputCellText("");
+		} else {
+			cell = row.getCell(cellNumber++);
+			XWPFParagraph paragraph = cell.getParagraphs().get(0);
+
+			//https://apache.googlesource.com/poi/+/7263a10fd779109dce17e803f32fb75dd3e43b41/src/examples/src/org/apache/poi/xwpf/usermodel/SimpleImages.java
+			//https://stackoverflow.com/questions/9897458/how-convert-byte-to-inputstream
+			XWPFRun run = paragraph.createRun();
+			try {
+				try (InputStream is = new ByteArrayInputStream(binaryData)) {
+					String filename = "";
+					final int WIDTH_PIXELS = 200;
+					final int HEIGHT_PIXELS = 200;
+					run.addPicture(is, XWPFDocument.PICTURE_TYPE_PNG, filename, Units.toEMU(WIDTH_PIXELS), Units.toEMU(HEIGHT_PIXELS));
+				}
+			} catch (IOException | InvalidFormatException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
+		}
 	}
 
 	@Override

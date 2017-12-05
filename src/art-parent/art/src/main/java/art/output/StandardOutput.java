@@ -29,6 +29,7 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
+import art.reportoptions.StandardOutputOptions;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
@@ -441,6 +442,15 @@ public abstract class StandardOutput {
 	 */
 	protected void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		addCellDate(dateValue);
+	}
+
+	/**
+	 * Outputs an image to the current row
+	 *
+	 * @param binaryData the binary data for the image
+	 */
+	protected void addCellImage(byte[] binaryData) {
+		addCellString("");
 	}
 
 	/**
@@ -1305,6 +1315,38 @@ public abstract class StandardOutput {
 
 	/**
 	 * Returns <code>true</code> if the resultset column with the given index
+	 * should be output as an image
+	 *
+	 * @param columnIndex the column's index
+	 * @param imageColumns the list of image columns
+	 * @param rsmd the resultset metadata object
+	 * @return <code>true</code> if the resultset column with the given index
+	 * should be output as an image
+	 * @throws SQLException
+	 */
+	private boolean isImageColumn(int columnIndex, List<String> imageColumns,
+			ResultSetMetaData rsmd) throws SQLException {
+
+		if (CollectionUtils.isEmpty(imageColumns)) {
+			return false;
+		}
+
+		boolean imageColumn;
+
+		String columnName = rsmd.getColumnLabel(columnIndex);
+
+		if (imageColumns.contains(String.valueOf(columnIndex))
+				|| ArtUtils.containsIgnoreCase(imageColumns, columnName)) {
+			imageColumn = true;
+		} else {
+			imageColumn = false;
+		}
+
+		return imageColumn;
+	}
+
+	/**
+	 * Returns <code>true</code> if the resultset column with the given index
 	 * should be totalled
 	 *
 	 * @param columnIndex the column's index
@@ -1350,11 +1392,21 @@ public abstract class StandardOutput {
 	 */
 	private List<Object> outputResultSetColumns(Map<Integer, ColumnTypeDefinition> columnTypes,
 			ResultSet rs, List<String> hiddenColumns, String nullNumberDisplay,
-			String nullStringDisplay, ReportFormat reportFormat) throws SQLException {
+			String nullStringDisplay, ReportFormat reportFormat) throws SQLException, IOException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
 		List<Object> columnValues = new ArrayList<>();
+
+		StandardOutputOptions standardOutputOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			standardOutputOptions = new StandardOutputOptions();
+		} else {
+			standardOutputOptions = ArtUtils.jsonToObject(options, StandardOutputOptions.class);
+		}
+
+		List<String> imageColumns = standardOutputOptions.getImageColumns();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 
@@ -1483,10 +1535,14 @@ public abstract class StandardOutput {
 					//https://stackoverflow.com/questions/14013534/jdbctemplate-accessing-mysql-varbinary-field-as-string
 					//https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
 					byte[] bytes = rs.getBytes(columnIndex);
-					if (bytes != null) {
-						value = Hex.encodeHexString(bytes);
+					if (isImageColumn(columnIndex, imageColumns, rsmd)) {
+						addCellImage(bytes);
+					} else {
+						if (bytes != null) {
+							value = Hex.encodeHexString(bytes);
+						}
+						addString(value, nullStringDisplay);
 					}
-					addString(value, nullStringDisplay);
 					break;
 				default:
 					value = rs.getString(columnIndex);

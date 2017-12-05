@@ -18,6 +18,7 @@
 package art.output;
 
 import java.util.Date;
+import org.apache.commons.codec.binary.Base64;
 import org.owasp.encoder.Encode;
 
 /**
@@ -161,6 +162,16 @@ public class HtmlFancyOutput extends StandardOutput {
 		}
 
 		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellImage(byte[] binaryData) {
+		if (binaryData == null) {
+			out.println("<td></td>");
+		} else {
+			String stringData = Base64.encodeBase64String(binaryData);
+			out.println("<td style='text-align: center'><img src='data:image/png;base64," + stringData + "'></td>");
+		}
 	}
 
 	@Override

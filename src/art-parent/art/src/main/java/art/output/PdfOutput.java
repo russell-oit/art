@@ -248,6 +248,27 @@ public class PdfOutput extends StandardOutput {
 	}
 
 	@Override
+	public void addCellImage(byte[] binaryData) {
+		if (binaryData == null) {
+			cell = new PdfPCell(new Paragraph(fsBody.process("")));
+		} else {
+			//https://stackoverflow.com/questions/22877006/how-to-display-an-image-in-pdf-which-is-retrieved-from-mysql-database-using-jsp
+			//https://developers.itextpdf.com/examples/tables-itext5/adding-images-table
+			//http://tutorials.jenkov.com/java-itext/table.html#images
+			try {
+				Image image = Image.getInstance(binaryData);
+				boolean fitToCell = true;
+				cell = new PdfPCell(image, fitToCell);
+			} catch (BadElementException | IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
+		}
+
+		table.addCell(cell);
+	}
+
+	@Override
 	public void newRow() {
 		// split table in smaller pieces in order to save memory:
 		// fragment size should come from Config servlet, web.xml or properties		
@@ -299,7 +320,7 @@ public class PdfOutput extends StandardOutput {
 					document.add(table);
 				}
 				document.close();
-				
+
 				PdfHelper pdfHelper = new PdfHelper();
 				pdfHelper.addProtections(report, fullOutputFileName);
 			}

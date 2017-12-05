@@ -84,7 +84,7 @@ public class OdsOutput extends StandardOutput {
 			//so append sheet and remove the first one created by default
 			table = document.appendSheet(reportName);
 			document.removeSheet(0);
-			
+
 			PageOrientation pageOrientation = report.getPageOrientation();
 			if (pageOrientation == PageOrientation.Landscape) {
 				setLandscapeOrientation();
@@ -200,6 +200,25 @@ public class OdsOutput extends StandardOutput {
 	}
 
 	@Override
+	public void addCellImage(byte[] binaryData) {
+		cell = row.getCellByIndex(cellNumber++);
+
+		//images being repeated in the generated file. not sure why
+//		if (binaryData != null) {
+//			String tempFileName = RandomStringUtils.randomAlphanumeric(10) + ".png";
+//			String tempFilePath = Config.getReportsExportPath() + tempFileName;
+//			File file = new File(tempFilePath);
+//			try {
+//				FileUtils.writeByteArrayToFile(file, binaryData);
+//				cell.setImage(file.toURI());
+//			} catch (IOException ex) {
+//				endOutput();
+//				throw new RuntimeException(ex);
+//			}
+//		}
+	}
+
+	@Override
 	public void newRow() {
 		//don't use table.appendRow(). a new table/sheet seems to have 2 rows already in it
 		row = table.getRowByIndex(currentRow++);
@@ -230,10 +249,9 @@ public class OdsOutput extends StandardOutput {
 				if (StringUtils.isNotEmpty(openPassword)) {
 					document.setPassword(openPassword);
 				}
-				
+
 				//no way to set modify password. can only protect the worksheet, which can be unprotected without a password
 				//table.setProtected(true);
-
 				document.save(fullOutputFileName);
 				document.close();
 			}

@@ -18,6 +18,7 @@ ART 3.1
 * Allow for clone reports, which use the source of another report
 * Allow reports to belong to multiple report groups
 * Allow publish job files to be copied to network shares, Amazon S3 storage, Microsoft Azure Blob storage or WebDAV servers
+* Allow display of images from database columns
 * Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1
