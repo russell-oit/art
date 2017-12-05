@@ -30,6 +30,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
+import org.apache.poi.xssf.streaming.SXSSFDrawing;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -241,7 +242,7 @@ public class XlsxOutput extends StandardOutput {
 			//https://poi.apache.org/spreadsheet/quick-guide.html#Images
 			int pictureIdx = wb.addPicture(binaryData, Workbook.PICTURE_TYPE_PNG);
 			CreationHelper helper = wb.getCreationHelper();
-			Drawing drawing = sheet.createDrawingPatriarch();
+			SXSSFDrawing drawing = sheet.createDrawingPatriarch();
 			ClientAnchor anchor = helper.createClientAnchor();
 			anchor.setCol1(cellNumber - 1);
 			anchor.setRow1(currentRow - 1);

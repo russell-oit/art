@@ -36,7 +36,6 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.PrintSetup;
@@ -273,7 +272,7 @@ public class XlsOutput extends StandardOutput {
 			//https://poi.apache.org/spreadsheet/quick-guide.html#Images
 			int pictureIdx = wb.addPicture(binaryData, Workbook.PICTURE_TYPE_PNG);
 			CreationHelper helper = wb.getCreationHelper();
-			Drawing drawing = sheet.createDrawingPatriarch();
+			HSSFPatriarch drawing = sheet.createDrawingPatriarch();
 			ClientAnchor anchor = helper.createClientAnchor();
 			anchor.setCol1(cellNumber - 1);
 			anchor.setRow1(currentRow - 1);

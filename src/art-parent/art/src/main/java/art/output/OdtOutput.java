@@ -20,7 +20,6 @@ package art.output;
 import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
