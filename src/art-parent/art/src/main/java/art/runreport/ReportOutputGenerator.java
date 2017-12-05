@@ -521,6 +521,7 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				XDocReportOutput xdocReportOutput = new XDocReportOutput();
+				xdocReportOutput.setLocale(locale);
 				xdocReportOutput.generateReport(report, applicableReportParamsList, rs, reportFormat, fullOutputFilename);
 
 				rowsRetrieved = getResultSetRowCount(rs);

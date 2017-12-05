@@ -43,6 +43,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
@@ -58,6 +59,22 @@ import org.slf4j.LoggerFactory;
 public class XDocReportOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(XDocReportOutput.class);
+	
+	private Locale locale;
+
+	/**
+	 * @return the locale
+	 */
+	public Locale getLocale() {
+		return locale;
+	}
+
+	/**
+	 * @param locale the locale to set
+	 */
+	public void setLocale(Locale locale) {
+		this.locale = locale;
+	}
 
 	/**
 	 * Generates report output
@@ -129,7 +146,11 @@ public class XDocReportOutput {
 					String paramName = reportParam.getParameter().getName();
 					context.put(paramName, reportParam);
 				}
+				
+				context.put("params", reportParams);
 			}
+			
+			context.put("locale", getLocale());
 
 			//pass report data
 			boolean useLowerCaseProperties = false;
