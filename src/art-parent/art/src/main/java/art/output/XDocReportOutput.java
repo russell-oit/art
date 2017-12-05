@@ -17,10 +17,12 @@
  */
 package art.output;
 
+import art.dbutils.DatabaseUtils;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
+import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import fr.opensagres.xdocreport.converter.ConverterTypeTo;
 import fr.opensagres.xdocreport.converter.ConverterTypeVia;
@@ -37,6 +39,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -80,107 +83,120 @@ public class XDocReportOutput {
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 
-		String templateFileName = report.getTemplate();
-		String templatesPath = Config.getTemplatesPath();
-		String fullTemplateFileName = templatesPath + templateFileName;
+		Connection conn = null;
 
-		logger.debug("templateFileName='{}'", templateFileName);
+		try {
 
-		//need to explicitly check if template file is empty string
-		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-		if (StringUtils.isBlank(templateFileName)) {
-			throw new IllegalArgumentException("Template file not specified");
-		}
+			String templateFileName = report.getTemplate();
+			String templatesPath = Config.getTemplatesPath();
+			String fullTemplateFileName = templatesPath + templateFileName;
 
-		//check if template file exists
-		File templateFile = new File(fullTemplateFileName);
-		if (!templateFile.exists()) {
-			throw new IllegalStateException("Template file not found: " + templateFileName);
-		}
+			logger.debug("templateFileName='{}'", templateFileName);
 
-		//load doc
-		ReportType reportType = report.getReportType();
-		TemplateEngineKind templateEngineKind;
-
-		if (reportType.isXDocReportFreeMarker()) {
-			templateEngineKind = TemplateEngineKind.Freemarker;
-		} else if (reportType.isXDocReportVelocity()) {
-			templateEngineKind = TemplateEngineKind.Velocity;
-		} else {
-			throw new IllegalArgumentException("Unexpected report type: " + reportType);
-		}
-
-		InputStream in = new FileInputStream(fullTemplateFileName);
-		IXDocReport xdocReport = XDocReportRegistry.getRegistry().loadReport(in, templateEngineKind);
-
-		//set objects to be passed to template
-		IContext context = xdocReport.createContext();
-
-		//pass report parameters
-		if (reportParams != null) {
-			for (ReportParameter reportParam : reportParams) {
-				String paramName = reportParam.getParameter().getName();
-				context.put(paramName, reportParam);
+			//need to explicitly check if template file is empty string
+			//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+			if (StringUtils.isBlank(templateFileName)) {
+				throw new IllegalArgumentException("Template file not specified");
 			}
-		}
 
-		//pass report data
-		boolean useLowerCaseProperties = false;
-		boolean useColumnLabels = true;
-		RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
-		context.put("results", rsdc.getRows());
+			//check if template file exists
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + templateFileName);
+			}
 
-		//add metadata to indicate results fields are list fields
-		FieldsMetadata metadata = new FieldsMetadata();
-		DynaProperty[] columns = rsdc.getDynaProperties();
-		for (DynaProperty column : columns) {
-			String metadataFieldName = "results." + column.getName();
-			metadata.addFieldAsList(metadataFieldName);
-		}
-		xdocReport.setFieldsMetadata(metadata);
+			//load doc
+			ReportType reportType = report.getReportType();
+			TemplateEngineKind templateEngineKind;
 
-		//create output
-		try (OutputStream out = new FileOutputStream(new File(outputFileName))) {
-			if ((reportType.isXDocReportDocx() && reportFormat == ReportFormat.docx)
-					|| (reportType.isXDocReportOdt() && reportFormat == ReportFormat.odt)
-					|| (reportType.isXDocReportPptx() && reportFormat == ReportFormat.pptx)) {
-				//no conversion
-				xdocReport.process(context, out);
+			if (reportType.isXDocReportFreeMarker()) {
+				templateEngineKind = TemplateEngineKind.Freemarker;
+			} else if (reportType.isXDocReportVelocity()) {
+				templateEngineKind = TemplateEngineKind.Velocity;
 			} else {
-				Options options = null;
-				if (reportType.isXDocReportDocx()) {
-					switch (reportFormat) {
-						case html:
-							options = Options.getTo(ConverterTypeTo.XHTML).via(ConverterTypeVia.XWPF);
-							break;
-						case pdf:
-							options = Options.getTo(ConverterTypeTo.PDF).via(ConverterTypeVia.XWPF);
-							break;
-						default:
-							throw new IllegalArgumentException("Unexpected report format: " + reportFormat);
-					}
-				} else if (reportType.isXDocReportOdt()) {
-					switch (reportFormat) {
-						case html:
-							options = Options.getTo(ConverterTypeTo.XHTML).via(ConverterTypeVia.ODFDOM);
-							break;
-						case pdf:
-							options = Options.getTo(ConverterTypeTo.PDF).via(ConverterTypeVia.ODFDOM);
-							break;
-						default:
-							throw new IllegalArgumentException("Unexpected report format: " + reportFormat);
-					}
-				} else {
-					throw new IllegalArgumentException("Unexpected report type: " + reportType);
-				}
-
-				xdocReport.convert(context, options, out);
+				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
-		}
 
-		if (reportFormat == ReportFormat.pdf) {
-			PdfHelper pdfHelper = new PdfHelper();
-			pdfHelper.addProtections(report, outputFileName);
+			InputStream in = new FileInputStream(fullTemplateFileName);
+			IXDocReport xdocReport = XDocReportRegistry.getRegistry().loadReport(in, templateEngineKind);
+
+			//set objects to be passed to template
+			IContext context = xdocReport.createContext();
+
+			//pass report parameters
+			if (reportParams != null) {
+				for (ReportParameter reportParam : reportParams) {
+					String paramName = reportParam.getParameter().getName();
+					context.put(paramName, reportParam);
+				}
+			}
+
+			//pass report data
+			boolean useLowerCaseProperties = false;
+			boolean useColumnLabels = true;
+			RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
+			context.put("results", rsdc.getRows());
+
+			//add metadata to indicate results fields are list fields
+			FieldsMetadata metadata = new FieldsMetadata();
+			DynaProperty[] columns = rsdc.getDynaProperties();
+			for (DynaProperty column : columns) {
+				String metadataFieldName = "results." + column.getName();
+				metadata.addFieldAsList(metadataFieldName);
+			}
+			xdocReport.setFieldsMetadata(metadata);
+
+			RunReportHelper runReportHelper = new RunReportHelper();
+			conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
+			ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn);
+			context.put("jdbc", jdbcHelper);
+
+			//create output
+			try (OutputStream out = new FileOutputStream(new File(outputFileName))) {
+				if ((reportType.isXDocReportDocx() && reportFormat == ReportFormat.docx)
+						|| (reportType.isXDocReportOdt() && reportFormat == ReportFormat.odt)
+						|| (reportType.isXDocReportPptx() && reportFormat == ReportFormat.pptx)) {
+					//no conversion
+					xdocReport.process(context, out);
+				} else {
+					Options options = null;
+					if (reportType.isXDocReportDocx()) {
+						switch (reportFormat) {
+							case html:
+								options = Options.getTo(ConverterTypeTo.XHTML).via(ConverterTypeVia.XWPF);
+								break;
+							case pdf:
+								options = Options.getTo(ConverterTypeTo.PDF).via(ConverterTypeVia.XWPF);
+								break;
+							default:
+								throw new IllegalArgumentException("Unexpected report format: " + reportFormat);
+						}
+					} else if (reportType.isXDocReportOdt()) {
+						switch (reportFormat) {
+							case html:
+								options = Options.getTo(ConverterTypeTo.XHTML).via(ConverterTypeVia.ODFDOM);
+								break;
+							case pdf:
+								options = Options.getTo(ConverterTypeTo.PDF).via(ConverterTypeVia.ODFDOM);
+								break;
+							default:
+								throw new IllegalArgumentException("Unexpected report format: " + reportFormat);
+						}
+					} else {
+						throw new IllegalArgumentException("Unexpected report type: " + reportType);
+					}
+
+					xdocReport.convert(context, options, out);
+				}
+			}
+
+			if (reportFormat == ReportFormat.pdf) {
+				PdfHelper pdfHelper = new PdfHelper();
+				pdfHelper.addProtections(report, outputFileName);
+			}
+
+		} finally {
+			DatabaseUtils.close(conn);
 		}
 	}
 }
