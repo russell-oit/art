@@ -146,10 +146,9 @@ public class XDocReportOutput {
 					String paramName = reportParam.getParameter().getName();
 					context.put(paramName, reportParam);
 				}
-				
-				context.put("params", reportParams);
 			}
 			
+			context.put("params", reportParams);
 			context.put("locale", getLocale());
 
 			//pass report data
