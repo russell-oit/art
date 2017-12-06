@@ -48,6 +48,8 @@ import java.util.Objects;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.velocity.tools.generic.DateTool;
+import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +61,7 @@ import org.slf4j.LoggerFactory;
 public class XDocReportOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(XDocReportOutput.class);
-	
+
 	private Locale locale;
 
 	/**
@@ -147,9 +149,17 @@ public class XDocReportOutput {
 					context.put(paramName, reportParam);
 				}
 			}
-			
+
 			context.put("params", reportParams);
 			context.put("locale", getLocale());
+
+			if (reportType.isXDocReportVelocity()) {
+				NumberTool numberTool = new NumberTool();
+				context.put("numberTool", numberTool);
+
+				DateTool dateTool = new DateTool();
+				context.put("dateTool", dateTool);
+			}
 
 			//pass report data
 			boolean useLowerCaseProperties = false;
