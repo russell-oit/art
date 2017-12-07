@@ -677,20 +677,6 @@ public class ReportService {
 			reportTypeId = report.getReportType().getValue();
 		}
 
-		String shortDescription; //database column doesn't allow null
-		if (report.getShortDescription() == null) {
-			shortDescription = "";
-		} else {
-			shortDescription = report.getShortDescription();
-		}
-
-		String description; //database column doesn't allow null
-		if (report.getDescription() == null) {
-			description = "";
-		} else {
-			description = report.getDescription();
-		}
-
 		int affectedRows;
 
 		boolean newRecord = false;
@@ -717,8 +703,8 @@ public class ReportService {
 			Object[] values = {
 				newRecordId,
 				report.getName(),
-				shortDescription,
-				description,
+				report.getShortDescription(),
+				report.getDescription(),
 				reportTypeId,
 				report.getGroupColumn(),
 				reportGroupId,
@@ -779,8 +765,8 @@ public class ReportService {
 
 			Object[] values = {
 				report.getName(),
-				shortDescription,
-				description,
+				report.getShortDescription(),
+				report.getDescription(),
 				report.getReportTypeId(),
 				report.getGroupColumn(),
 				reportGroupId,
