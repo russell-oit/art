@@ -47,7 +47,7 @@
 
 
 -- update database version
-UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='3.1-snapshot';
+UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='3.1';
 
 -- insert custom upgrade setting for 3.1
 INSERT INTO ART_CUSTOM_UPGRADES VALUES('3.1', 0);
