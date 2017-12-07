@@ -916,7 +916,12 @@ public class ReportRunner {
 		}
 
 		if (connQuery == null) {
-			throw new IllegalStateException("Datasource not found");
+			if (reportType.isXDocReport()) {
+				//xdocreport may only have template queries
+				return;
+			} else {
+				throw new IllegalStateException("Datasource not found");
+			}
 		}
 
 		int fetchSize = report.getFetchSize();
@@ -936,7 +941,7 @@ public class ReportRunner {
 				}
 			}
 		}
-
+		
 		String querySql = querySb.toString();
 
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
@@ -968,6 +973,10 @@ public class ReportRunner {
 	 * @throws SQLException
 	 */
 	public ResultSet getResultSet() throws SQLException {
+		if (psQuery == null) {
+			return null;
+		}
+
 		ResultSet rs = psQuery.getResultSet();
 		updateCount = psQuery.getUpdateCount();
 

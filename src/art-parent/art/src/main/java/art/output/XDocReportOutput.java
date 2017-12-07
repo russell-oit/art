@@ -83,7 +83,7 @@ public class XDocReportOutput {
 	 *
 	 * @param report the report to use, not null
 	 * @param reportParams the report parameters
-	 * @param resultSet the resultset containing report data, not null
+	 * @param resultSet the resultset containing report data
 	 * @param reportFormat the report format for the report
 	 * @param outputFileName the full output file name to use for the generated
 	 * report
@@ -98,7 +98,6 @@ public class XDocReportOutput {
 		logger.debug("Entering generateReport");
 
 		Objects.requireNonNull(report, "report must not be null");
-		Objects.requireNonNull(resultSet, "resultset must not be null");
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 
@@ -162,19 +161,21 @@ public class XDocReportOutput {
 			}
 
 			//pass report data
-			boolean useLowerCaseProperties = false;
-			boolean useColumnLabels = true;
-			RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
-			context.put("results", rsdc.getRows());
+			if (resultSet != null) {
+				boolean useLowerCaseProperties = false;
+				boolean useColumnLabels = true;
+				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
+				context.put("results", rsdc.getRows());
 
-			//add metadata to indicate results fields are list fields
-			FieldsMetadata metadata = new FieldsMetadata();
-			DynaProperty[] columns = rsdc.getDynaProperties();
-			for (DynaProperty column : columns) {
-				String metadataFieldName = "results." + column.getName();
-				metadata.addFieldAsList(metadataFieldName);
+				//add metadata to indicate results fields are list fields
+				FieldsMetadata metadata = new FieldsMetadata();
+				DynaProperty[] columns = rsdc.getDynaProperties();
+				for (DynaProperty column : columns) {
+					String metadataFieldName = "results." + column.getName();
+					metadata.addFieldAsList(metadataFieldName);
+				}
+				xdocReport.setFieldsMetadata(metadata);
 			}
-			xdocReport.setFieldsMetadata(metadata);
 
 			RunReportHelper runReportHelper = new RunReportHelper();
 			conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
