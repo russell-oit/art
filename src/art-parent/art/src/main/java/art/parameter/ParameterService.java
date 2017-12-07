@@ -312,20 +312,7 @@ public class ParameterService {
 
 		//generate new id
 		String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		saveParameter(parameter, newId, actionUser);
 

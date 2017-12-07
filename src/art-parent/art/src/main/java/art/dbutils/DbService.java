@@ -21,6 +21,9 @@ import art.connectionpool.DbConnections;
 import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,6 +33,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DbService {
+
+	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
 
 	/**
 	 * Executes an INSERT, UPDATE or DELETE query against the art database
@@ -74,4 +79,50 @@ public class DbService {
 		QueryRunner run = new QueryRunner(DbConnections.getArtDbDataSource());
 		return run.batch(sql, params);
 	}
+
+	/**
+	 * Returns the max record id for a table
+	 *
+	 * @param sql the sql to get the current max id for the table
+	 * @param params query parameters
+	 * @return the max record id
+	 * @throws SQLException
+	 */
+	public int getMaxRecordId(String sql, Object... params) throws SQLException {
+		//use Number rather than Integer because oracle returns a java.math.BigDecimal object
+		//oracle doesn't have an "INTEGER" data type. When INTEGER is specified, it's stored as NUMBER(38,0)
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number maxIdNumber = query(sql, h, params);
+		logger.debug("maxIdNumber={}", maxIdNumber);
+
+		int maxIdInt;
+		if (maxIdNumber == null) {
+			//no records in the table
+			maxIdInt = 0;
+		} else {
+			maxIdInt = maxIdNumber.intValue();
+		}
+
+		if (maxIdInt < 0) {
+			//only hardcoded records present in the table
+			maxIdInt = 0;
+		}
+
+		return maxIdInt;
+	}
+
+	/**
+	 * Returns a new record id for a table
+	 *
+	 * @param sql the sql query to get the current max id for the table
+	 * @param params parameters to be used in the query
+	 * @return the new record id
+	 * @throws SQLException
+	 */
+	public int getNewRecordId(String sql, Object... params) throws SQLException {
+		int maxId = getMaxRecordId(sql, params);
+		int newId = maxId + 1;
+		return newId;
+	}
+
 }

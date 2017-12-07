@@ -20,6 +20,7 @@ ART 3.1
 * Allow publish job files to be copied to network shares, Amazon S3 storage, Microsoft Azure Blob storage or WebDAV servers
 * Allow display of images from database columns
 * Allow xdocreport to use queries defined in the template
+* Fix for oracle error when upgrading or adding records
 * Updated sqlite driver, jxls, univocity-parsers
 
 ART 3.0.1

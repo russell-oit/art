@@ -617,18 +617,7 @@ public class ReportService {
 
 		//generate new id
 		String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		saveReport(report, newId, actionUser);
 
@@ -1003,11 +992,7 @@ public class ReportService {
 					} else if (primaryKeyColumn != null && StringUtils.equalsIgnoreCase(rsmd.getColumnName(i + 1), primaryKeyColumn)) {
 						//generate new id
 						String sql2 = "SELECT MAX(" + primaryKeyColumn + ") FROM " + tableName;
-						ResultSetHandler<Integer> h = new ScalarHandler<>();
-						Integer maxId = dbService.query(sql2, h);
-						logger.debug("maxId={}", maxId);
-
-						int newId = maxId + 1;;
+						int newId = dbService.getNewRecordId(sql2);
 						columnValues.add(newId);
 					} else {
 						columnValues.add(rs.getObject(i + 1));
@@ -1355,20 +1340,6 @@ public class ReportService {
 		}
 
 		return exclusive;
-	}
-
-	/**
-	 * Returns the source report id for a given report
-	 *
-	 * @param reportId the report id
-	 * @return the source report id
-	 * @throws SQLException
-	 */
-	@Cacheable(value = "reports")
-	public Integer getSourceReportId(int reportId) throws SQLException {
-		String sql = "SELECT SOURCE_REPORT_ID FROM ART_QUERIES WHERE QUERY_ID=?";
-		ResultSetHandler<Integer> h = new ScalarHandler<>(1);
-		return dbService.query(sql, h, reportId);
 	}
 
 	/**
