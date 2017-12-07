@@ -155,18 +155,35 @@ public class CacheHelper {
 	}
 	
 	/**
-	 * Clears the ftp servers cache
+	 * Clears the encryptors cache
 	 */
-	@CacheEvict(value = "ftpServers", allEntries = true)
-	public void clearFtpServers() {
-		logger.debug("Entering clearFtpServers");
+	@CacheEvict(value = "encryptors", allEntries = true)
+	public void clearEncryptors() {
+		logger.debug("Entering clearEncryptors");
 	}
-
+	
+	/**
+	 * Clears the holidays cache
+	 */
+	@CacheEvict(value = "holidays", allEntries = true)
+	public void clearHolidays() {
+		logger.debug("Entering clearHolidays");
+	}
+	
+	/**
+	 * Clears the destinations cache
+	 */
+	@CacheEvict(value = "destinations", allEntries = true)
+	public void clearDestinations() {
+		logger.debug("Entering clearDestinations");
+	}
+	
 	/**
 	 * Clears all caches
 	 */
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
-		"datasources", "schedules", "jobs", "rules", "parameters", "ftpServers"}, allEntries = true)
+		"datasources", "schedules", "jobs", "rules", "parameters",
+		"encryptors", "holidays", "destinations"}, allEntries = true)
 	public void clearAll() {
 		logger.debug("Entering clearAll");
 		
