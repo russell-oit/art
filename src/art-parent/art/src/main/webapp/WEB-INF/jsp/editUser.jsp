@@ -20,6 +20,10 @@ Display edit user page
 		<spring:message code="page.title.addUser" var="pageTitle"/>
 		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
+	<c:when test="${action == 'copy'}">
+		<spring:message code="page.title.copyUser" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
+	</c:when>
 	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editUser" var="panelTitle"/>
 		<c:set var="pageTitle">
@@ -124,9 +128,14 @@ Display edit user page
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action == 'edit'}">
-							<form:input path="userId" readonly="true" class="form-control"/>
-						</c:if>
+						<c:choose>
+							<c:when test="${action == 'edit'}">
+								<form:input path="userId" readonly="true" class="form-control"/>
+							</c:when>
+							<c:when test="${action == 'copy'}">
+								<form:hidden path="userId"/>
+							</c:when>
+						</c:choose>
 					</div>
 				</div>
 				<div class="form-group">
@@ -153,14 +162,12 @@ Display edit user page
 								</button>
 							</span>
 						</div>
-						<div class="checkbox">
-							<label>
+						<div>
+							<label class="checkbox-inline">
 								<form:checkbox path="useBlankPassword"/>
 								<spring:message code="page.checkbox.useBlankPassword"/>
 							</label>
-						</div>
-						<div class="checkbox">
-							<label>
+							<label class="checkbox-inline">
 								<form:checkbox path="generateAndSend"/>
 								<spring:message code="users.checkbox.generateAndSend"/>
 							</label>
@@ -253,7 +260,7 @@ Display edit user page
 						<form:errors path="startReport" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group" id="userGroupsDiv">
+				<div class="form-group">
 					<label class="col-md-4 control-label " for="userGroups">
 						<spring:message code="page.text.userGroups"/>
 					</label>

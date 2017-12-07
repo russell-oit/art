@@ -29,11 +29,9 @@ Display datasources
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -137,6 +135,19 @@ Display datasources
 				</c:if>
 			</div>
 		</c:if>
+		<c:if test="${not empty errors}">
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+				<p><spring:message code="page.message.errorOccurred"/></p>
+				<c:if test="${showErrors}">
+					<ul>
+						<c:forEach var="err" items="${errors}">
+							<li>${encode:forHtmlContent(err)}</li>
+							</c:forEach>
+					</ul>
+				</c:if>
+			</div>
+		</c:if>
 		<c:if test="${not empty recordSavedMessage}">
 			<div class="alert alert-success alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
@@ -207,10 +218,26 @@ Display datasources
 									<spring:message code="page.action.copy"/>
 								</a>
 							</div>
+							<div class="btn-group">
+								<button type="button" class="btn btn-default dropdown-toggle"
+										data-toggle="dropdown" data-hover="dropdown"
+										data-delay="100">
+									<spring:message code="reports.action.more"/>
+									<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu">
+									<li>
+										<a 
+											href="${pageContext.request.contextPath}/reportsWithDatasource?datasourceId=${datasource.datasourceId}">
+											<spring:message code="page.text.usage"/>
+										</a>
+									</li>
+								</ul>
+							</div>
 						</td>
 					</tr>
 				</c:forEach>
 			</tbody>
 		</table>
 	</jsp:body>
-</t:mainPageWithPanel>
+</t:mainConfigPage>

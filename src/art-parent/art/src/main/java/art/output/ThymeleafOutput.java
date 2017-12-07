@@ -46,24 +46,58 @@ public class ThymeleafOutput {
 	private static final Logger logger = LoggerFactory.getLogger(ThymeleafOutput.class);
 
 	/**
-	 * Generates report output
+	 * Generates output, updating the writer with the final output
 	 *
 	 * @param report the report to use, not null
-	 * @param reportParams the report parameters
-	 * @param resultSet the resultset containing report data, not null
 	 * @param writer the writer to output to, not null
+	 * @param rs the resultset containing report data, not null
+	 * @param reportParams the report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 */
-	public void generateReport(Report report, List<ReportParameter> reportParams,
-			ResultSet resultSet, Writer writer) throws SQLException, IOException {
+	public void generateOutput(Report report, Writer writer, ResultSet rs,
+			List<ReportParameter> reportParams) throws SQLException, IOException {
 
-		logger.debug("Entering generateReport");
+		Objects.requireNonNull(rs, "resultset must not be null");
+
+		//set variables to be passed to thymeleaf
+		Map<String, Object> variables = new HashMap<>();
+
+		//pass report parameters
+		if (reportParams != null) {
+			for (ReportParameter reportParam : reportParams) {
+				String paramName = reportParam.getParameter().getName();
+				variables.put(paramName, reportParam);
+			}
+
+			variables.put("params", reportParams);
+		}
+
+		//pass report data
+		boolean useLowerCaseProperties = false;
+		boolean useColumnLabels = true;
+		RowSetDynaClass rsdc = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
+		variables.put("results", rsdc.getRows());
+
+		generateOutput(report, writer, variables);
+	}
+	
+		/**
+	 * Generates output, updating the writer with the final output
+	 *
+	 * @param report the report to use, not null
+	 * @param writer the writer to output to, not null
+	 * @param variables the variables to be passed to the template
+	 * @throws java.io.IOException
+	 */
+	public void generateOutput(Report report, Writer writer,
+			Map<String, Object> variables) throws IOException {
+		
+		logger.debug("Entering generateOutput: report={}", report);
 
 		Objects.requireNonNull(report, "report must not be null");
-		Objects.requireNonNull(resultSet, "resultset must not be null");
 		Objects.requireNonNull(writer, "writer must not be null");
-
+		
 		String templateFileName = report.getTemplate();
 		String templatesPath = Config.getTemplatesPath();
 		String fullTemplateFileName = templatesPath + templateFileName;
@@ -81,26 +115,7 @@ public class ThymeleafOutput {
 		if (!templateFile.exists()) {
 			throw new IllegalStateException("Template file not found: " + templateFileName);
 		}
-
-		//set variables to be passed to thymeleaf
-		Map<String, Object> variables = new HashMap<>();
-
-		//pass report parameters
-		if (reportParams != null) {
-			for (ReportParameter reportParam : reportParams) {
-				String paramName = reportParam.getParameter().getName();
-				variables.put(paramName, reportParam);
-			}
-			
-			variables.put("params", reportParams);
-		}
-
-		//pass report data
-		boolean useLowerCaseProperties = false;
-		boolean useColumnLabels = true;
-		RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
-		variables.put("results", rsdc.getRows());
-
+		
 		//create output
 		Context ctx = new Context();
 		ctx.setVariables(variables);

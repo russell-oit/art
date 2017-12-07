@@ -69,10 +69,10 @@ import art.report.ReportService;
 import art.reportoptions.C3Options;
 import art.reportoptions.ChartJsOptions;
 import art.reportoptions.CsvOutputArtOptions;
+import art.reportoptions.CsvOutputUnivocityOptions;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
 import art.reportoptions.DatamapsOptions;
-import art.reportoptions.FixedWidthOptions;
 import art.reportoptions.JFreeChartOptions;
 import art.reportoptions.MongoDbOptions;
 import art.reportoptions.WebMapOptions;
@@ -275,6 +275,14 @@ public class ReportOutputGenerator {
 				}
 			}
 
+			Locale reportOutputLocale;
+			String reportLocale = report.getLocale();
+			if (StringUtils.isBlank(reportLocale)) {
+				reportOutputLocale = locale;
+			} else {
+				reportOutputLocale = ArtUtils.getLocaleFromString(reportLocale);
+			}
+
 			int reportId = report.getReportId();
 			ReportType reportType = report.getReportType();
 
@@ -330,8 +338,9 @@ public class ReportOutputGenerator {
 						break;
 					case xlsx:
 						groupOutput = new GroupXlsxOutput();
-						groupOutput.setReportName(report.getName());
+						groupOutput.setReportName(report.getLocalizedName(locale));
 						groupOutput.setFullOutputFileName(fullOutputFilename);
+						groupOutput.setReport(report);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
@@ -339,7 +348,7 @@ public class ReportOutputGenerator {
 
 				rowsRetrieved = groupOutput.generateGroupReport(rs, splitColumn);
 
-				if (reportFormat == ReportFormat.xlsx) {
+				if (!isJob && reportFormat == ReportFormat.xlsx) {
 					displayFileLink(fileName);
 				}
 			} else if (reportType.isChart()) {
@@ -419,11 +428,14 @@ public class ReportOutputGenerator {
 				}
 			} else if (reportType.isStandardOutput() && reportFormat.isJson()) {
 				rs = reportRunner.getResultSet();
+
 				JsonOutput jsonOutput = new JsonOutput();
 				jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonString = jsonOutputResult.getJsonData();
+
 				rowsRetrieved = jsonOutputResult.getRowCount();
+
 				switch (reportFormat) {
 					case jsonBrowser:
 						//https://stackoverflow.com/questions/14533530/how-to-show-pretty-print-json-string-in-a-jsp-page
@@ -432,6 +444,7 @@ public class ReportOutputGenerator {
 					default:
 						writer.print(jsonString);
 				}
+
 				writer.flush();
 			} else if (reportType.isStandardOutput()) {
 				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
@@ -441,7 +454,7 @@ public class ReportOutputGenerator {
 				standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
 				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
 				standardOutput.setLocale(locale);
-				standardOutput.setReportName(report.getName());
+				standardOutput.setReportName(report.getLocalizedName(locale));
 				standardOutput.setMessageSource(messageSource);
 				standardOutput.setIsJob(isJob);
 				standardOutput.setPdfPageNumbers(pdfPageNumbers);
@@ -491,20 +504,28 @@ public class ReportOutputGenerator {
 					outputResult.setMessage(standardOutputResult.getMessage());
 				}
 			} else if (reportType == ReportType.FreeMarker) {
-				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
 				rs = reportRunner.getResultSet();
-				freemarkerOutput.generateReport(report, applicableReportParamsList, rs, writer);
+
+				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+				freemarkerOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType == ReportType.Thymeleaf) {
-				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
 				rs = reportRunner.getResultSet();
-				thymeleafOutput.generateReport(report, applicableReportParamsList, rs, writer);
+
+				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+				thymeleafOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType.isXDocReport()) {
-				XDocReportOutput xdocReportOutput = new XDocReportOutput();
 				rs = reportRunner.getResultSet();
+
+				XDocReportOutput xdocReportOutput = new XDocReportOutput();
+				xdocReportOutput.setLocale(locale);
 				xdocReportOutput.generateReport(report, applicableReportParamsList, rs, reportFormat, fullOutputFilename);
+
 				rowsRetrieved = getResultSetRowCount(rs);
+
 				if (!isJob) {
 					displayFileLink(fileName);
 				}
@@ -514,9 +535,11 @@ public class ReportOutputGenerator {
 				}
 
 				rs = reportRunner.getResultSet();
+
 				JsonOutput jsonOutput = new JsonOutput();
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonData = jsonOutputResult.getJsonData();
+
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -548,9 +571,11 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.PivotTableJs) {
 					rs = reportRunner.getResultSet();
+
 					JsonOutput jsonOutput = new JsonOutput();
 					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 					String jsonData = jsonOutputResult.getJsonData();
+
 					rowsRetrieved = jsonOutputResult.getRowCount();
 					request.setAttribute("input", jsonData);
 				}
@@ -624,20 +649,25 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.Dygraphs) {
 					rs = reportRunner.getResultSet();
+
 					CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
 					//use appropriate date formats to ensure correct interpretation by browsers
 					//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
 					//http://dygraphs.com/date-formats.html
 					String dateFormat = "yyyy/MM/dd";
 					String dateTimeFormat = "yyyy/MM/dd HH:mm";
-					csvOutputUnivocity.setDateFormat(dateFormat);
-					csvOutputUnivocity.setDateTimeFormat(dateTimeFormat);
+					CsvOutputUnivocityOptions csvOptions = new CsvOutputUnivocityOptions();
+					csvOptions.setDateFormat(dateFormat);
+					csvOptions.setDateTimeFormat(dateTimeFormat);
+
 					String csvString;
 					try (StringWriter stringWriter = new StringWriter()) {
-						csvOutputUnivocity.generateOutput(rs, stringWriter);
+						csvOutputUnivocity.generateOutput(rs, stringWriter, csvOptions, Locale.ENGLISH);
 						csvString = stringWriter.toString();
 					}
+
 					rowsRetrieved = getResultSetRowCount(rs);
+
 					//need to escape string for javascript, otherwise you get Unterminated string literal error
 					//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
 					String escapedCsvString = Encode.forJavaScript(csvString);
@@ -698,9 +728,11 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.DataTables) {
 					rs = reportRunner.getResultSet();
+
 					JsonOutput jsonOutput = new JsonOutput();
 					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 					String jsonData = jsonOutputResult.getJsonData();
+
 					List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 					request.setAttribute("data", jsonData);
 					request.setAttribute("columns", columns);
@@ -762,22 +794,26 @@ public class ReportOutputGenerator {
 				request.setAttribute("locale", localeString);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 			} else if (reportType == ReportType.FixedWidth) {
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					throw new IllegalArgumentException("Options not specified");
-				}
-
-				ObjectMapper mapper = new ObjectMapper();
-				FixedWidthOptions options = mapper.readValue(optionsString, FixedWidthOptions.class);
-				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
 				rs = reportRunner.getResultSet();
-				if (!isJob) {
-					writer.println("<pre>");
-				}
-				fixedWidthOutput.generateOutput(rs, writer, options);
+
+				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
+				fixedWidthOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+
 				rowsRetrieved = getResultSetRowCount(rs);
-				if (!isJob) {
-					writer.println("</pre>");
+
+				if (!isJob && !reportFormat.isHtml()) {
+					displayFileLink(fileName);
+				}
+			} else if (reportType == ReportType.CSV) {
+				rs = reportRunner.getResultSet();
+
+				CsvOutputUnivocity csvOutput = new CsvOutputUnivocity();
+				csvOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+
+				rowsRetrieved = getResultSetRowCount(rs);
+
+				if (!isJob && !reportFormat.isHtml()) {
+					displayFileLink(fileName);
 				}
 			} else if (reportType == ReportType.C3) {
 				if (isJob) {
@@ -785,9 +821,11 @@ public class ReportOutputGenerator {
 				}
 
 				rs = reportRunner.getResultSet();
+
 				JsonOutput jsonOutput = new JsonOutput();
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonData = jsonOutputResult.getJsonData();
+
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -838,9 +876,11 @@ public class ReportOutputGenerator {
 				}
 
 				rs = reportRunner.getResultSet();
+
 				JsonOutput jsonOutput = new JsonOutput();
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonData = jsonOutputResult.getJsonData();
+
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -882,9 +922,11 @@ public class ReportOutputGenerator {
 
 				if (reportType == ReportType.Datamaps) {
 					rs = reportRunner.getResultSet();
+
 					JsonOutput jsonOutput = new JsonOutput();
 					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 					String jsonData = jsonOutputResult.getJsonData();
+
 					rowsRetrieved = jsonOutputResult.getRowCount();
 					request.setAttribute("data", jsonData);
 				}
@@ -965,9 +1007,11 @@ public class ReportOutputGenerator {
 				}
 
 				rs = reportRunner.getResultSet();
+
 				JsonOutput jsonOutput = new JsonOutput();
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 				String jsonData = jsonOutputResult.getJsonData();
+
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -1111,8 +1155,8 @@ public class ReportOutputGenerator {
 				Binding binding = new Binding(variables);
 
 				GroovyShell shell = new GroovyShell(binding, cc);
-				GroovySandbox sandbox = null;
 
+				GroovySandbox sandbox = null;
 				if (Config.getCustomSettings().isEnableGroovySandbox()) {
 					sandbox = new GroovySandbox();
 					sandbox.register();
@@ -1305,7 +1349,7 @@ public class ReportOutputGenerator {
 
 		ChartOptions effectiveChartOptions = getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
 
-		String shortDescription = report.getShortDescription();
+		String shortDescription = report.getLocalizedShortDescription(locale);
 		RunReportHelper runReportHelper = new RunReportHelper();
 		shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
@@ -1446,7 +1490,7 @@ public class ReportOutputGenerator {
 				standardOutput = new XlsOutput(xlsDateFormat, xlsNumberFormat);
 				break;
 			case xlsZip:
-				standardOutput = new XlsOutput(ZipType.Zip, xlsDateFormat, xlsNumberFormat);
+				standardOutput = new XlsOutput(xlsDateFormat, xlsNumberFormat, ZipType.Zip);
 				break;
 			case xlsx:
 				standardOutput = new XlsxOutput(xlsDateFormat, xlsNumberFormat);
@@ -1476,6 +1520,7 @@ public class ReportOutputGenerator {
 				standardOutput = new OdsOutput();
 				break;
 			case csv:
+			case csvZip:
 				CsvOutputArtOptions options;
 				String optionsString = report.getOptions();
 				if (StringUtils.isBlank(optionsString)) {
@@ -1484,7 +1529,13 @@ public class ReportOutputGenerator {
 					ObjectMapper mapper = new ObjectMapper();
 					options = mapper.readValue(optionsString, CsvOutputArtOptions.class);
 				}
-				standardOutput = new CsvOutputArt(options);
+
+				ZipType zipType = ZipType.None;
+				if (reportFormat == ReportFormat.csvZip) {
+					zipType = ZipType.Zip;
+				}
+
+				standardOutput = new CsvOutputArt(options, zipType);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);

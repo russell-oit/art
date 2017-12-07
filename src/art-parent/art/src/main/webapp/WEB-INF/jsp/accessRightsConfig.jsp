@@ -33,6 +33,7 @@ Access rights configuration
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
 		
@@ -183,7 +184,7 @@ Access rights configuration
 						<select name="reports" id="reports" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="report" items="${reports}">
 								<option value="${report.reportId}">
-									<encode:forHtmlContent value="${report.name}"/>
+									<encode:forHtmlContent value="${report.getLocalizedName(pageContext.response.locale)}"/>
 								</option>
 							</c:forEach>
 						</select>

@@ -21,6 +21,7 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.CollectionUtils;
 import org.owasp.encoder.Encode;
 
@@ -124,7 +125,7 @@ public class XmlOutput extends StandardOutput {
 		} else {
 			formattedValue = String.valueOf(value);
 		}
-		
+
 		String escapedFormattedValue = Encode.forXml(formattedValue);
 
 		out.println("<col type=\"numeric\">" + escapedFormattedValue + "</col>");
@@ -147,6 +148,19 @@ public class XmlOutput extends StandardOutput {
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forXml(formattedValue);
 		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
+	}
+
+	@Override
+	public void addCellImage(byte[] binaryData) {
+		String stringData;
+		if (binaryData == null) {
+			stringData = "";
+		} else {
+			stringData = Base64.encodeBase64String(binaryData);
+		}
+
+		String escapedValue = Encode.forXml(stringData);
+		out.println("<col type=\"image\">" + escapedValue + "</col>");
 	}
 
 	@Override

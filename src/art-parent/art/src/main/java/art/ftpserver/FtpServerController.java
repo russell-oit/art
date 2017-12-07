@@ -106,7 +106,6 @@ public class FtpServerController {
 		logger.debug("Entering addFtpServer");
 
 		FtpServer ftpServer = new FtpServer();
-		ftpServer.setActive(true);
 
 		model.addAttribute("ftpServer", ftpServer);
 

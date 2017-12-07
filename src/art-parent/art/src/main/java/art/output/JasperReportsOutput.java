@@ -24,7 +24,6 @@ import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
-import com.lowagie.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -56,7 +55,6 @@ import net.sf.jasperreports.engine.util.JRVisitorSupport;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
 import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 import org.apache.commons.io.FilenameUtils;
@@ -73,6 +71,7 @@ import org.slf4j.LoggerFactory;
 public class JasperReportsOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(JasperReportsOutput.class);
+
 	private final List<String> completedSubReports = new ArrayList<>(); //used with recursive compileReport call
 	private ResultSet resultSet;
 
@@ -171,62 +170,61 @@ public class JasperReportsOutput {
 					//http://chager.de/encrypting-and-restricting-pdf-reports-build-with-jasperreports/
 					JRPdfExporter pdfExporter = new JRPdfExporter();
 
-					SimplePdfExporterConfiguration pdfConfiguration = new SimplePdfExporterConfiguration();
-					pdfConfiguration.setPermissions(PdfWriter.ALLOW_COPY | PdfWriter.ALLOW_PRINTING);
-					pdfExporter.setConfiguration(pdfConfiguration);
-
 					pdfExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					pdfExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					pdfExporter.exportReport();
+
+					PdfHelper pdfHelper = new PdfHelper();
+					pdfHelper.addProtections(report, outputFileName);
 					break;
 				case html:
 					HtmlExporter htmlExporter = new HtmlExporter();
-					
+
 					htmlExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					htmlExporter.setExporterOutput(new SimpleHtmlExporterOutput(outputFileName));
 					htmlExporter.exportReport();
 					break;
 				case xls:
 					JRXlsExporter xlsExporter = new JRXlsExporter();
-					
+
 					SimpleXlsReportConfiguration xlsConfiguration = new SimpleXlsReportConfiguration();
 					xlsConfiguration.setOnePagePerSheet(Boolean.FALSE);
 					xlsConfiguration.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
 					xlsExporter.setConfiguration(xlsConfiguration);
-					
+
 					xlsExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					xlsExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					xlsExporter.exportReport();
 					break;
 				case xlsx:
 					JRXlsxExporter xlsxExporter = new JRXlsxExporter();
-					
+
 					SimpleXlsxReportConfiguration xlsxConfiguration = new SimpleXlsxReportConfiguration();
 					xlsxConfiguration.setOnePagePerSheet(Boolean.FALSE);
 					xlsxConfiguration.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
 					xlsxExporter.setConfiguration(xlsxConfiguration);
-					
+
 					xlsxExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					xlsxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					xlsxExporter.exportReport();
 					break;
 				case docx:
 					JRDocxExporter docxExporter = new JRDocxExporter();
-					
+
 					docxExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					docxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					docxExporter.exportReport();
 					break;
 				case odt:
 					JROdtExporter odtExporter = new JROdtExporter();
-					
+
 					odtExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					odtExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					odtExporter.exportReport();
 					break;
 				case ods:
 					JROdsExporter odsExporter = new JROdsExporter();
-					
+
 					odsExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					odsExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					odsExporter.exportReport();

@@ -17,14 +17,18 @@
  */
 package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
- *
+ * Represents report options for csv output for tabular reports
+ * 
  * @author Timothy Anyona
  */
-public class CsvOutputArtOptions extends GeneralReportOptions {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CsvOutputArtOptions {
 
 	private String delimiter = ",";
-	private String quoteChar = "\"";
+	private String quote = "\"";
 
 	/**
 	 * @return the delimiter
@@ -41,17 +45,17 @@ public class CsvOutputArtOptions extends GeneralReportOptions {
 	}
 
 	/**
-	 * @return the quoteChar
+	 * @return the quote
 	 */
-	public String getQuoteChar() {
-		return quoteChar;
+	public String getQuote() {
+		return quote;
 	}
 
 	/**
-	 * @param quoteChar the quoteChar to set
+	 * @param quote the quote to set
 	 */
-	public void setQuoteChar(String quoteChar) {
-		this.quoteChar = quoteChar;
+	public void setQuote(String quote) {
+		this.quote = quote;
 	}
 
 }

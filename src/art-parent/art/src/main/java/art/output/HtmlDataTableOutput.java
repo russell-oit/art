@@ -20,6 +20,7 @@ package art.output;
 import art.servlets.Config;
 import java.io.File;
 import java.util.Date;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.owasp.encoder.Encode;
 
@@ -123,7 +124,6 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("		$('#" + tableId + "').dataTable(" + dataTableOptions + ");");
 		out.println("	});");
 		out.println("</script>");
-
 	}
 
 	@Override
@@ -215,6 +215,17 @@ public class HtmlDataTableOutput extends StandardOutput {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
 				+ escapedFormattedValue + "</td>");
+	}
+
+	@Override
+	public void addCellImage(byte[] binaryData) {
+		//https://stackoverflow.com/questions/34111390/displaying-blob-image-from-mysql-database-into-dynamic-div-in-html
+		if (binaryData == null) {
+			out.println("<td></td>");
+		} else {
+			String stringData = Base64.encodeBase64String(binaryData);
+			out.println("<td style='text-align: center'><img src='data:image/png;base64," + stringData + "'></td>");
+		}
 	}
 
 	@Override

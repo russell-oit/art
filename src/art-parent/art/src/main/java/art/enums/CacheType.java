@@ -31,7 +31,7 @@ public enum CacheType {
 	JPivot("JPivot"), Saiku("Saiku"), Reports("Reports"), ReportGroups("ReportGroups"),
 	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources"),
 	Schedules("Schedules"), Jobs("Jobs"), Rules("Rules"), Parameters("Parameters"),
-	FtpServers("FtpServers");
+	Encryptors("Encryptors"), Holidays("Holidays"), Destinations("Destinations");
 	
 	private final String value;
 

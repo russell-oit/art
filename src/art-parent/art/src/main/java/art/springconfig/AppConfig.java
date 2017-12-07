@@ -17,10 +17,13 @@
  */
 package art.springconfig;
 
+import art.destination.StringToDestination;
+import art.holiday.StringToHoliday;
 import art.report.StringToReport;
+import art.reportgroup.StringToReportGroup;
+import art.schedule.StringToSchedule;
 import art.usergroup.StringToUserGroup;
 import art.utils.StringToDouble;
-import art.utils.StringToInteger;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.LocaleUtils;
@@ -63,6 +66,12 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToUserGroup stringToUserGroup;
+	
+	@Autowired
+	private StringToHoliday stringToHoliday;
+	
+	@Autowired
+	private StringToReportGroup stringToReportGroup;
 
 	@Autowired
 	private StringToReport stringToReport;
@@ -71,8 +80,11 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	private StringToDouble stringToDouble;
 	
 	@Autowired
-	private StringToInteger stringToInteger;
-
+	private StringToSchedule stringToSchedule;
+	
+	@Autowired
+	private StringToDestination stringToDestination;
+	
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
 
@@ -120,6 +132,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	@Bean
 	public TemplateEngine emailTemplateEngine() {
 		SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+		templateEngine.setEnableSpringELCompiler(true);
 		templateEngine.setTemplateResolver(emailTemplateResolver());
 		return templateEngine;
 	}
@@ -131,6 +144,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setSuffix(".html");
 		resolver.setCharacterEncoding("UTF-8");
+		resolver.setCacheable(false);
 		return resolver;
 	}
 
@@ -175,9 +189,12 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	@Override
 	public void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(stringToUserGroup);
+		registry.addConverter(stringToReportGroup);
 		registry.addConverter(stringToDouble);
-		registry.addConverter(stringToInteger);
 		registry.addConverter(stringToReport);
+		registry.addConverter(stringToSchedule);
+		registry.addConverter(stringToHoliday);
+		registry.addConverter(stringToDestination);
 	}
 
 	@Bean

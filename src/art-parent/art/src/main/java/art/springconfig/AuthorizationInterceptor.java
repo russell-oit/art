@@ -97,6 +97,17 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		String message = null;
 
 		User user = (User) session.getAttribute("sessionUser");
+
+		String urlUsername = request.getParameter("username");
+		String urlPassword = request.getParameter("password");
+
+		//reset session user if different username passed in url
+		if (user != null && processUrlCredentials(page, urlUsername, urlPassword)
+				&& !StringUtils.equalsIgnoreCase(user.getUsername(), urlUsername)) {
+			session.removeAttribute("sessionUser");
+			user = null;
+		}
+
 		if (user == null) {
 			//custom authentication, public user session, credentials in url or session expired
 			ArtAuthenticationMethod loginMethod = null;
@@ -112,14 +123,13 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 					loginMethod = ArtAuthenticationMethod.Public;
 				} else {
 					//check if credentials passed in url
-					String urlUsername = request.getParameter("username");
-					String password = request.getParameter("password");
 					String windowsDomain = request.getParameter("windowsDomain");
 					String authenticationMethodString = request.getParameter("authenticationMethod");
-					if (urlUsername != null && password != null) {
+					//some pages e.g. saveUser, saveDatasource send the fields "username" and "password"
+					if (processUrlCredentials(page, urlUsername, urlPassword)) {
 						LoginHelper loginHelper = new LoginHelper();
 						ArtAuthenticationMethod authenticationMethod = ArtAuthenticationMethod.toEnum(authenticationMethodString);
-						LoginResult result = loginHelper.authenticate(authenticationMethod, urlUsername, password, windowsDomain);
+						LoginResult result = loginHelper.authenticate(authenticationMethod, urlUsername, urlPassword, windowsDomain);
 						message = result.getMessage();
 						if (result.isAuthenticated()) {
 							username = urlUsername;
@@ -137,15 +147,15 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			} else {
 				//either custom authentication or public user session or credentials in url
 				//ensure user exists
-				LoginHelper loginHelper = new LoginHelper();
-				String ip = request.getRemoteAddr();
-
 				UserService userService = new UserService();
 				try {
 					user = userService.getUser(username);
 				} catch (SQLException ex) {
 					logger.error("Error", ex);
 				}
+
+				LoginHelper loginHelper = new LoginHelper();
+				String ip = request.getRemoteAddr();
 
 				if (user == null) {
 					//user doesn't exist
@@ -246,6 +256,34 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				request.getRequestDispatcher("/accessDenied").forward(request, response);
 				return false;
 			}
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if credentials in the url should be considered
+	 *
+	 * @param page the page being processed
+	 * @param urlUsername the "username" url parameter value
+	 * @param urlPassword the "password" url parameter value
+	 * @return <code>true</code> if credentials in the url should be considered
+	 */
+	private boolean processUrlCredentials(String page, String urlUsername, String urlPassword) {
+		//some pages e.g. saveUser, saveDatasource, testDatasource send the fields "username" and "password"
+		//and so should not be considered. mainly considering running reports via url, page = runReport
+		//login doesn't pass through authorizationInterceptor
+//		if (!StringUtils.startsWith(page, "save") && !StringUtils.equals(page, "testDatasource")
+//				&& !StringUtils.equals(page, "artDatabase")
+//				&& urlUsername != null && urlPassword != null) {
+//			return true;
+//		} else {
+//			return false;
+//		}
+
+		if ((StringUtils.equals(page, "runReport") || StringUtils.equals(page, "reports"))
+				&& urlUsername != null && urlPassword != null) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -393,6 +431,18 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.equals(page, "holidays") || StringUtils.endsWith(page, "Holiday")
+				|| StringUtils.endsWith(page, "Holidays")) {
+			//senior admins and above
+			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "destinations") || StringUtils.endsWith(page, "Destination")
+				|| StringUtils.endsWith(page, "Destinations")) {
+			//senior admins and above
+			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+				authorised = true;
+			}
 		} else if (StringUtils.equals(page, "drilldowns")
 				|| StringUtils.endsWith(page, "Drilldown")
 				|| StringUtils.endsWith(page, "Drilldowns")) {
@@ -415,6 +465,12 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			}
 		} else if (StringUtils.equals(page, "userGroupMembership") || StringUtils.endsWith(page, "UserGroupMembership")
 				|| StringUtils.equals(page, "userGroupMembershipConfig")) {
+			//standard admins and above
+			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "reportGroupMembership") || StringUtils.endsWith(page, "ReportGroupMembership")
+				|| StringUtils.equals(page, "reportGroupMembershipConfig")) {
 			//standard admins and above
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
@@ -451,6 +507,12 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			}
 		} else if (StringUtils.equals(page, "ftpServers") || StringUtils.endsWith(page, "FtpServer")
 				|| StringUtils.endsWith(page, "FtpServers")) {
+			//senior admins and above
+			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "encryptors") || StringUtils.endsWith(page, "Encryptor")
+				|| StringUtils.endsWith(page, "Encryptors")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;

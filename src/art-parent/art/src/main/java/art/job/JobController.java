@@ -18,15 +18,20 @@
 package art.job;
 
 import art.datasource.DatasourceService;
+import art.destination.DestinationService;
 import art.enums.JobType;
 import art.enums.ReportType;
 import art.ftpserver.FtpServerService;
+import art.holiday.HolidayService;
+import art.jobdestination.JobDestinationService;
+import art.jobholiday.JobHolidayService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
 import art.jobrunners.ReportJob;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
+import art.report.UploadHelper;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
@@ -38,12 +43,13 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
+import art.utils.CronStringHelper;
+import art.utils.ExpressionHelper;
 import art.utils.SchedulerUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -56,8 +62,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import org.quartz.CronTrigger;
 import static org.quartz.JobBuilder.newJob;
 import org.quartz.JobDetail;
 import static org.quartz.JobKey.jobKey;
@@ -78,6 +82,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -111,13 +116,25 @@ public class JobController {
 	@Autowired
 	private FtpServerService ftpServerService;
 
+	@Autowired
+	private JobHolidayService jobHolidayService;
+
+	@Autowired
+	private HolidayService holidayService;
+
+	@Autowired
+	private DestinationService destinationService;
+
+	@Autowired
+	private JobDestinationService jobDestinationService;
+
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
 		logger.debug("Entering showJobs");
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			List<Job> jobs = jobService.getJobs(sessionUser.getUserId());
+			List<Job> jobs = jobService.getUserJobs(sessionUser.getUserId());
 			model.addAttribute("jobs", jobs);
 			model.addAttribute("nextPage", "jobs");
 			model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
@@ -268,8 +285,8 @@ public class JobController {
 					.usingJobData("tempJob", Boolean.TRUE)
 					.build();
 
-			ParameterProcessor parameterProcessor = new ParameterProcessor();
-			Date runDate = parameterProcessor.convertParameterStringValueToDate(runLaterDate);
+			ExpressionHelper expressionHelper = new ExpressionHelper();
+			Date runDate = expressionHelper.convertStringToDate(runLaterDate);
 
 			// create SimpleTrigger that will fire once at the given date		        
 			SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
@@ -303,7 +320,7 @@ public class JobController {
 			if (reportIdString != null) {
 				Report report = reportService.getReport(Integer.parseInt(reportIdString));
 				job.setReport(report);
-				job.setName(report.getName());
+				job.setName(report.getLocalizedName(locale));
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
@@ -313,7 +330,7 @@ public class JobController {
 			model.addAttribute("job", job);
 
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
-			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request);
+			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request, locale);
 			Report report = job.getReport();
 			addParameters(model, paramProcessorResult, report, request);
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
@@ -328,6 +345,7 @@ public class JobController {
 	public String saveJob(@ModelAttribute("job") @Valid Job job,
 			@RequestParam("action") String action, @RequestParam("nextPage") String nextPage,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam(value = "emailTemplateFile", required = false) MultipartFile emailTemplateFile,
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveJob: job={}, action='{}', nextPage='{}'", job, action, nextPage);
@@ -339,9 +357,17 @@ public class JobController {
 		}
 
 		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
+			//save email template file
+			String saveFileMessage = saveEmailTemplateFile(emailTemplateFile, job);
+			logger.debug("saveFileMessage='{}'", saveFileMessage);
+			if (saveFileMessage != null) {
+				model.addAttribute("message", saveFileMessage);
+				return showEditJob(action, model, job, locale);
+			}
 
-			finalizeSchedule(job);
+			setScheduleDates(job);
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			if (StringUtils.equals(action, "add")) {
 				jobService.addJob(job, sessionUser);
@@ -351,14 +377,20 @@ public class JobController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
-			createQuartzJob(job);
-
-			saveJobParameters(request, job.getJobId());
+			try {
+				jobHolidayService.recreateJobHolidays(job);
+				jobDestinationService.recreateJobDestinations(job);
+				jobService.processSchedules(job, sessionUser);
+				saveJobParameters(request, job.getJobId());
+			} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {
+				logger.error("Error", ex);
+				redirectAttributes.addFlashAttribute("error", ex);
+			}
 
 			String recordName = job.getName() + " (" + job.getJobId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/" + nextPage;
-		} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {
+		} catch (SQLException | RuntimeException | IOException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -408,11 +440,10 @@ public class JobController {
 	 *
 	 * @param request the http request that contains the job parameters
 	 * @param jobId the job's id
-	 * @throws NumberFormatException
 	 * @throws SQLException
 	 */
 	private void saveJobParameters(HttpServletRequest request, int jobId)
-			throws NumberFormatException, SQLException {
+			throws SQLException {
 
 		logger.debug("Entering saveJobParameters: jobId={}", jobId);
 
@@ -521,11 +552,16 @@ public class JobController {
 			job = jobService.getJob(id);
 			model.addAttribute("job", job);
 
-			ReportJob reportJob = new ReportJob();
+			Map<String, String[]> finalValues = jobParameterService.getJobParameterValues(id);
+
 			Report report = job.getReport();
 			int reportId = report.getReportId();
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id, sessionUser);
+
+			ParameterProcessor paramProcessor = new ParameterProcessor();
+			paramProcessor.setValuesAsIs(true);
+			ParameterProcessorResult paramProcessorResult = paramProcessor.process(finalValues, reportId, sessionUser, locale);
+
 			addParameters(model, paramProcessorResult, report, request);
 
 			//update job from email if owner email has changed
@@ -535,7 +571,7 @@ public class JobController {
 					job.setMailFrom(sessionUser.getEmail());
 				}
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -624,12 +660,20 @@ public class JobController {
 					jobTypes.add(JobType.JustRun);
 				} else if (reportType.isChart() || reportType.isXDocReport()
 						|| reportType == ReportType.Group
-						|| reportType == ReportType.FixedWidth
 						|| reportType == ReportType.JasperReportsArt
 						|| reportType == ReportType.JxlsArt) {
 					jobTypes.add(JobType.EmailAttachment);
 					jobTypes.add(JobType.Publish);
 					jobTypes.add(JobType.CondEmailAttachment);
+					jobTypes.add(JobType.CondPublish);
+					jobTypes.add(JobType.Print);
+				} else if (reportType == ReportType.FixedWidth
+						|| reportType == ReportType.CSV) {
+					jobTypes.add(JobType.EmailAttachment);
+					jobTypes.add(JobType.EmailInline);
+					jobTypes.add(JobType.Publish);
+					jobTypes.add(JobType.CondEmailAttachment);
+					jobTypes.add(JobType.CondEmailInline);
 					jobTypes.add(JobType.CondPublish);
 					jobTypes.add(JobType.Print);
 				} else {
@@ -646,9 +690,6 @@ public class JobController {
 		jobReportFormats.remove("htmlFancy");
 		jobReportFormats.remove("htmlGrid");
 		jobReportFormats.remove("htmlDataTable");
-		if (!ArtUtils.containsIgnoreCase(jobReportFormats, "csv")) {
-			jobReportFormats.add("csv");
-		}
 
 		final String REPORT_FORMAT_PREFIX = "reports.format.";
 		for (String reportFormat : jobReportFormats) {
@@ -662,7 +703,17 @@ public class JobController {
 			model.addAttribute("schedules", scheduleService.getAllSchedules());
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
 			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
-		} catch (SQLException | RuntimeException ex) {
+			model.addAttribute("holidays", holidayService.getAllHolidays());
+			model.addAttribute("destinations", destinationService.getAllDestinations());
+
+			if (job != null && !StringUtils.equals(action, "add")) {
+				String cronString = CronStringHelper.getCronString(job);
+				String mainScheduleDescription = CronStringHelper.getCronScheduleDescription(cronString, locale);
+				model.addAttribute("mainScheduleDescription", mainScheduleDescription);
+				Date nextRunDate = CronStringHelper.getNextRunDate(cronString);
+				model.addAttribute("nextRunDate", nextRunDate);
+			}
+		} catch (SQLException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -673,203 +724,76 @@ public class JobController {
 	}
 
 	/**
-	 * Processes the job schedule details
+	 * Sets the job schedule start and end date
 	 *
-	 * @param job the job to schedule
+	 * @param job the art job object
 	 * @throws ParseException
 	 */
-	private void finalizeSchedule(Job job) throws ParseException {
-		logger.debug("Entering finalizeSchedule: job={}", job);
-
-		//create quartz job to be running this job
-		//build cron expression for the schedule
-		String minute;
-		String hour;
-		String day;
-		String weekday;
-		String month;
-		String second = "0"; //seconds always 0
-		String actualHour; //allow hour and minute to be left blank, in which case random values are used
-		String actualMinute; //allow hour and minute to be left blank, in which case random values are used
-
-		actualMinute = job.getScheduleMinute();
-		actualMinute = StringUtils.deleteWhitespace(actualMinute); // cron fields shouldn't have any spaces in them
-		minute = actualMinute;
-
-		actualHour = job.getScheduleHour();
-		actualHour = StringUtils.deleteWhitespace(actualHour);
-		hour = actualHour;
-
-		//enable definition of random start time
-		if (StringUtils.contains(actualHour, "|")) {
-			String startPart = StringUtils.substringBefore(actualHour, "|");
-			String endPart = StringUtils.substringAfter(actualHour, "|");
-			String startHour = StringUtils.substringBefore(startPart, ":");
-			String startMinute = StringUtils.substringAfter(startPart, ":");
-			String endHour = StringUtils.substringBefore(endPart, ":");
-			String endMinute = StringUtils.substringAfter(endPart, ":");
-
-			if (StringUtils.isBlank(startMinute)) {
-				startMinute = "0";
-			}
-			if (StringUtils.isBlank(endMinute)) {
-				endMinute = "0";
-			}
-
-			Date now = new Date();
-
-			java.util.Calendar calStart = java.util.Calendar.getInstance();
-			calStart.setTime(now);
-			calStart.set(Calendar.HOUR_OF_DAY, Integer.parseInt(startHour));
-			calStart.set(Calendar.MINUTE, Integer.parseInt(startMinute));
-
-			Calendar calEnd = Calendar.getInstance();
-			calEnd.setTime(now);
-			calEnd.set(Calendar.HOUR_OF_DAY, Integer.parseInt(endHour));
-			calEnd.set(Calendar.MINUTE, Integer.parseInt(endMinute));
-
-			long randomDate = ArtUtils.getRandomNumber(calStart.getTimeInMillis(), calEnd.getTimeInMillis());
-			Calendar calRandom = Calendar.getInstance();
-			calRandom.setTimeInMillis(randomDate);
-
-			hour = String.valueOf(calRandom.get(Calendar.HOUR_OF_DAY));
-			minute = String.valueOf(calRandom.get(Calendar.MINUTE));
-		}
-
-		if (minute.length() == 0) {
-			//no minute defined. use random value
-			minute = String.valueOf(ArtUtils.getRandomNumber(0, 59));
-		}
-
-		if (hour.length() == 0) {
-			//no hour defined. use random value between 3-6
-			hour = String.valueOf(ArtUtils.getRandomNumber(3, 6));
-		}
-
-		month = StringUtils.deleteWhitespace(job.getScheduleMonth());
-		if (month.length() == 0) {
-			//no month defined. default to every month
-			month = "*";
-		}
-
-		day = StringUtils.deleteWhitespace(job.getScheduleDay());
-		weekday = StringUtils.deleteWhitespace(job.getScheduleWeekday());
-
-		//set default day of the month if weekday is defined
-		if (day.length() == 0 && weekday.length() >= 1 && !weekday.equals("?")) {
-			//weekday defined but day of the month is not. default day to ?
-			day = "?";
-		}
-
-		if (day.length() == 0) {
-			//no day of month defined. default to *
-			day = "*";
-		}
-
-		if (weekday.length() == 0) {
-			//no day of week defined. default to undefined
-			weekday = "?";
-		}
-
-		if (day.equals("?") && weekday.equals("?")) {
-			//unsupported. only one can be ?
-			day = "*";
-			weekday = "?";
-		}
-		if (day.equals("*") && weekday.equals("*")) {
-			//unsupported. only one can be defined
-			day = "*";
-			weekday = "?";
-		}
-
-		//build cron expression.
-		//cron format is sec min hr dayofmonth month dayofweek (optionally year)
-		String cronString = second + " " + minute + " " + hour + " " + day + " " + month + " " + weekday;
-
-		logger.debug("cronString='{}'", cronString);
+	private void setScheduleDates(Job job) throws ParseException {
+		logger.debug("Entering setScheduleDates: job={}", job);
 
 		String startDateString = job.getStartDateString();
-		if (StringUtils.isBlank(startDateString)) {
-			startDateString = "now";
-		}
-		ParameterProcessor parameterProcessor = new ParameterProcessor();
-		Date startDate = parameterProcessor.convertParameterStringValueToDate(startDateString);
-		job.setStartDate(startDate);
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		Date startDate = expressionHelper.convertStringToDate(startDateString);
 
 		String endDateString = job.getEndDateString();
 		Date endDate;
 		if (StringUtils.isBlank(endDateString)) {
 			endDate = null;
 		} else {
-			endDate = parameterProcessor.convertParameterStringValueToDate(endDateString);
+			endDate = expressionHelper.convertStringToDate(endDateString);
 		}
-		job.setEndDate(endDate);
-
-		CronTrigger tempTrigger = newTrigger()
-				.withSchedule(cronSchedule(cronString))
-				.startAt(startDate)
-				.endAt(endDate)
-				.build();
-
-		Date nextRunDate = tempTrigger.getFireTimeAfter(new Date());
-
-		job.setNextRunDate(nextRunDate);
-
-		job.setScheduleMinute(minute);
-		job.setScheduleHour(hour);
-		job.setScheduleDay(day);
-		job.setScheduleMonth(month);
-		job.setScheduleWeekday(weekday);
 
 		job.setStartDate(startDate);
 		job.setEndDate(endDate);
 	}
 
 	/**
-	 * Creates a quartz job for the given art job
+	 * Saves an email template file and updates the appropriate job property
+	 * with the file name
 	 *
-	 * @param job the art job
-	 * @throws SchedulerException
+	 * @param file the file to save
+	 * @param job the job object to set
+	 * @return an i18n message string if there was a problem, otherwise null
+	 * @throws IOException
 	 */
-	private void createQuartzJob(Job job) throws SchedulerException {
-		Scheduler scheduler = SchedulerUtils.getScheduler();
+	private String saveEmailTemplateFile(MultipartFile file, Job job)
+			throws IOException {
 
-		if (scheduler == null) {
-			logger.warn("Scheduler not available");
-			return;
+		logger.debug("Entering saveEmailTemplateFile: job={}", job);
+
+		logger.debug("file==null = {}", file == null);
+		if (file == null) {
+			return null;
 		}
 
-		int jobId = job.getJobId();
+		logger.debug("file.isEmpty()={}", file.isEmpty());
+		if (file.isEmpty()) {
+			//can be empty if a file name is just typed
+			//or if upload a 0 byte file
+			//don't show message in case of file name being typed
+			return null;
+		}
 
-		String jobName = "job" + jobId;
-		String triggerName = "trigger" + jobId;
+		//set allowed upload file types
+		List<String> validExtensions = new ArrayList<>();
+		validExtensions.add("html");
 
-		JobDetail quartzJob = newJob(ReportJob.class)
-				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
-				.usingJobData("jobId", jobId)
-				.build();
+		//save file
+		String templatesPath = Config.getThymeleafTemplatesPath();
+		UploadHelper uploadHelper = new UploadHelper();
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
 
-		//build cron expression.
-		//cron format is sec min hr dayofmonth month dayofweek (optionally year)
-		String second = "0";
-		String cronString = second + " " + job.getScheduleMinute()
-				+ " " + job.getScheduleHour() + " " + job.getScheduleDay()
-				+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
+		if (message != null) {
+			return message;
+		}
 
-		//create trigger that defines the schedule for the job
-		CronTrigger trigger = newTrigger()
-				.withIdentity(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP))
-				.withSchedule(cronSchedule(cronString))
-				.startAt(job.getStartDate())
-				.endAt(job.getEndDate())
-				.build();
+		if (job != null) {
+			String filename = file.getOriginalFilename();
+			job.setEmailTemplate(filename);
+		}
 
-		//delete any existing jobs or triggers with the same id before adding them to the scheduler
-		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
-		scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP));
-
-		//add job and trigger to scheduler
-		scheduler.scheduleJob(quartzJob, trigger);
+		return null;
 	}
 
 }

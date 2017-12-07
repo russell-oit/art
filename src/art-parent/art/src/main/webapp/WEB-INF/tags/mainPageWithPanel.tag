@@ -11,7 +11,7 @@ Includes main page, plus a bootstrap panel where the contents go
 <%@tag trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
-<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
@@ -52,10 +52,10 @@ Includes main page, plus a bootstrap panel where the contents go
 						<h4 class="panel-title text-center">
 							<c:choose>
 								<c:when test="${empty mainPanelTitle}">
-									${fn:escapeXml(title)}
+									${encode:forHtmlContent(title)}
 								</c:when>
 								<c:otherwise>
-									${fn:escapeXml(mainPanelTitle)}
+									${encode:forHtmlContent(mainPanelTitle)}
 								</c:otherwise>
 							</c:choose>
 						</h4>

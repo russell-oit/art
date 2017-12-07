@@ -50,6 +50,8 @@ Edit user rule value
 						</c:if>
 					</div>
 				</c:if>
+				
+				<input type="hidden" name="returnRuleId" value="${returnRuleId}">
 
 				<form:hidden path="ruleValueKey"/>
 				<div class="form-group">

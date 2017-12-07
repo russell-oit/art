@@ -21,8 +21,10 @@ import art.enums.ReportFormat;
 import art.report.Report;
 import art.report.ReportService;
 import art.utils.AjaxResponse;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -55,15 +57,21 @@ public class DrilldownController {
 	private ReportService reportService;
 
 	@RequestMapping(value = "/drilldowns", method = RequestMethod.GET)
-	public String showDrilldowns(Model model, @RequestParam("reportId") Integer reportId) {
+	public String showDrilldowns(Model model, @RequestParam("reportId") Integer reportId,
+			Locale locale) {
 
 		logger.debug("Entering showDrilldowns: reportId={}", reportId);
 
 		try {
 			model.addAttribute("parentReportId", reportId);
-			model.addAttribute("parentReportName", reportService.getReportName(reportId));
+			String parentReportName = "";
+			Report report = reportService.getReport(reportId);
+			if (report != null) {
+				parentReportName = report.getLocalizedName(locale);
+			}
+			model.addAttribute("parentReportName", parentReportName);
 			model.addAttribute("drilldowns", drilldownService.getDrilldowns(reportId));
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -109,17 +117,19 @@ public class DrilldownController {
 
 	@RequestMapping(value = "/addDrilldown", method = RequestMethod.GET)
 	public String addDrilldown(Model model,
-			@RequestParam("parent") Integer parent) {
+			@RequestParam("parent") Integer parent,
+			Locale locale) {
 
 		logger.debug("Entering addDrilldown: parent={}", parent);
 
 		model.addAttribute("drilldown", new Drilldown());
 
-		return showEditDrilldown("add", model, parent);
+		return showEditDrilldown("add", model, parent, locale);
 	}
 
 	@RequestMapping(value = "/editDrilldown", method = RequestMethod.GET)
-	public String editDrilldown(@RequestParam("id") Integer id, Model model) {
+	public String editDrilldown(@RequestParam("id") Integer id, Model model,
+			Locale locale) {
 
 		logger.debug("Entering editDrilldown: id={}", id);
 
@@ -136,14 +146,15 @@ public class DrilldownController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditDrilldown("edit", model, parentReportId);
+		return showEditDrilldown("edit", model, parentReportId, locale);
 	}
 
 	@RequestMapping(value = "/saveDrilldown", method = RequestMethod.POST)
 	public String saveDrilldown(@ModelAttribute("drilldown") @Valid Drilldown drilldown,
 			@RequestParam("action") String action,
 			@RequestParam("parent") Integer parent,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			Locale locale) {
 
 		logger.debug("Entering saveDrilldown: drilldown={}, action='{}', parent={}",
 				drilldown, action, parent);
@@ -151,7 +162,7 @@ public class DrilldownController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditDrilldown(action, model, parent);
+			return showEditDrilldown(action, model, parent, locale);
 		}
 
 		try {
@@ -162,14 +173,20 @@ public class DrilldownController {
 				drilldownService.updateDrilldown(drilldown);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", reportService.getReportName(drilldown.getDrilldownReport().getReportId()));
+			
+			String reportName = "";
+			Report report = reportService.getReport(drilldown.getDrilldownReport().getReportId());
+			if (report != null) {
+				reportName = report.getLocalizedName(locale);
+			}
+			redirectAttributes.addFlashAttribute("recordName", reportName);
 			return "redirect:/drilldowns?reportId=" + parent;
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditDrilldown(action, model, parent);
+		return showEditDrilldown(action, model, parent, locale);
 	}
 
 	/**
@@ -177,25 +194,34 @@ public class DrilldownController {
 	 *
 	 * @param action "add" or "edit"
 	 * @param model the spring model to populate
-	 * @param parent the report id of the parent report
+	 * @param parentReportId the report id of the parent report
+	 * @param locale
 	 * @return the jsp file to display
 	 */
-	private String showEditDrilldown(String action, Model model, Integer parent) {
-		logger.debug("Entering showEditDrilldown: action='{}', parent={}", action, parent);
+	private String showEditDrilldown(String action, Model model, 
+			Integer parentReportId, Locale locale) {
+		
+		logger.debug("Entering showEditDrilldown: action='{}', parentReportId={}", action, parentReportId);
 
 		try {
-			model.addAttribute("parentReportName", reportService.getReportName(parent));
+			String parentReportName = "";
+			Report report = reportService.getReport(parentReportId);
+			if (report != null) {
+				parentReportName = report.getLocalizedName(locale);
+			}
+			model.addAttribute("parentReportName", parentReportName);
+			
 			List<Report> drilldownReports = reportService.getDrilldownReports();
 			drilldownReports.addAll(reportService.getDashboardReports());
 			model.addAttribute("drilldownReports", drilldownReports);
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
 		model.addAttribute("reportFormats", ReportFormat.list());
 
-		model.addAttribute("parent", parent);
+		model.addAttribute("parent", parentReportId);
 		model.addAttribute("action", action);
 
 		return "editDrilldown";
@@ -203,7 +229,7 @@ public class DrilldownController {
 
 	@RequestMapping(value = "/moveDrilldown", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse moveDrilldown(Model model,
+	AjaxResponse moveDrilldown(Model model, Locale locale,
 			@RequestParam("id") Integer id,
 			@RequestParam("fromPosition") Integer fromPosition,
 			@RequestParam("toPosition") Integer toPosition,
@@ -221,9 +247,9 @@ public class DrilldownController {
 			} else {
 				drilldownService.moveDrilldown(id, fromPosition, toPosition, direction, drilldown.getParentReportId());
 				response.setSuccess(true);
-				response.setData(drilldown.getDrilldownReport().getName());
+				response.setData(drilldown.getDrilldownReport().getLocalizedName(locale));
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

@@ -31,11 +31,9 @@ Display user configuration page
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -207,6 +205,27 @@ Display user configuration page
 									<i class="fa fa-trash-o"></i>
 									<spring:message code="page.action.delete"/>
 								</button>
+								<a class="btn btn-default" 
+								   href="${pageContext.request.contextPath}/copyUser?id=${user.userId}">
+									<i class="fa fa-copy"></i>
+									<spring:message code="page.action.copy"/>
+								</a>
+							</div>
+							<div class="btn-group">
+								<button type="button" class="btn btn-default dropdown-toggle"
+										data-toggle="dropdown" data-hover="dropdown"
+										data-delay="100">
+									<spring:message code="reports.action.more"/>
+									<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu">
+									<li>
+										<a 
+											href="${pageContext.request.contextPath}/userAccessRights?userId=${user.userId}">
+											<spring:message code="page.action.accessRights"/>
+										</a>
+									</li>
+								</ul>
 							</div>
 						</td>
 					</tr>
@@ -214,5 +233,5 @@ Display user configuration page
 			</tbody>
 		</table>
 	</jsp:body>
-</t:mainPageWithPanel>
+</t:mainConfigPage>
 

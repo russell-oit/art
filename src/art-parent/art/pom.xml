@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>3.0.1</version>
+		<version>3.1</version>
 	</parent>
 
 	<artifactId>art</artifactId>
@@ -27,6 +27,7 @@
 		<owasp.encoder.version>1.2.1</owasp.encoder.version>
 		<thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
 		<xdocreport.version>2.0.1</xdocreport.version>
+		<jclouds.version>2.0.2</jclouds.version>
 	</properties>
 
 	<build>
@@ -65,6 +66,7 @@
 						</includes>
 						<excludes>
 							<exclude>src/main/java/**/BCrypt.java</exclude>
+							<exclude>src/main/java/**/AESCrypt.java</exclude>
 						</excludes>
 						<encoding>UTF-8</encoding>
 						<strictCheck>true</strictCheck>
@@ -181,22 +183,22 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-dbcp</artifactId>
-			<version>3.0.1</version>
+			<version>3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
-			<version>3.0.1</version>
+			<version>3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>3.0.1</version>
+			<version>3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
-			<version>3.0.1</version>
+			<version>3.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -211,7 +213,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>3.0.1</version>
+			<version>3.1</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
@@ -231,7 +233,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>3.0.1</version>
+			<version>3.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -242,7 +244,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jdbc-n1ql-art</artifactId>
-			<version>3.0.1</version>
+			<version>3.1</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
@@ -383,6 +385,17 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- ucanaccess needed at compile time for class that supports password protected files -->
+		<dependency>
+			<groupId>net.sf.ucanaccess</groupId>
+			<artifactId>ucanaccess</artifactId>
+			<version>4.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.healthmarketscience.jackcess</groupId>
+			<artifactId>jackcess-encrypt</artifactId>
+			<version>2.1.4</version>
+		</dependency>
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -421,15 +434,9 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.ucanaccess</groupId>
-			<artifactId>ucanaccess</artifactId>
-			<version>4.0.2</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.19.3</version>
+			<version>3.20.1</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -555,7 +562,7 @@
 		<dependency>
 			<groupId>org.jxls</groupId>
 			<artifactId>jxls</artifactId>
-			<version>2.4.1</version>
+			<version>2.4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jxls</groupId>
@@ -719,7 +726,7 @@
 		<dependency>
 			<groupId>com.univocity</groupId>
 			<artifactId>univocity-parsers</artifactId>
-			<version>2.5.0</version>
+			<version>2.5.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -818,6 +825,56 @@
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
 			<version>0.1.54</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>2.0.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.58</version>
+		</dependency>
+		<dependency>
+			<groupId>org.c02e.jpgpj</groupId>
+			<artifactId>jpgpj</artifactId>
+			<version>0.1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>net.redhogs.cronparser</groupId>
+			<artifactId>cron-parser-core</artifactId>
+			<version>3.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hierynomus</groupId>
+			<artifactId>smbj</artifactId>
+			<version>0.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.provider</groupId>
+			<artifactId>aws-s3</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.driver</groupId>
+			<artifactId>jclouds-slf4j</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.provider</groupId>
+			<artifactId>azureblob</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.lookfirst</groupId>
+			<artifactId>sardine</artifactId>
+			<version>5.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity-tools</artifactId>
+			<version>2.0</version>
 		</dependency>
 	</dependencies>
 </project>

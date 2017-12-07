@@ -19,16 +19,20 @@ package art.schedule;
 
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
+import art.holiday.Holiday;
+import art.holiday.HolidayService;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +51,19 @@ public class ScheduleService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ScheduleService.class);
 
+	private final DbService dbService;
+	private final HolidayService holidayService;
+
 	@Autowired
-	private DbService dbService;
+	public ScheduleService(DbService dbService, HolidayService holidayService) {
+		this.dbService = dbService;
+		this.holidayService = holidayService;
+	}
+
+	public ScheduleService() {
+		dbService = new DbService();
+		holidayService = new HolidayService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOB_SCHEDULES";
 
@@ -73,15 +88,22 @@ public class ScheduleService {
 			schedule.setScheduleId(rs.getInt("SCHEDULE_ID"));
 			schedule.setName(rs.getString("SCHEDULE_NAME"));
 			schedule.setDescription(rs.getString("DESCRIPTION"));
+			schedule.setSecond(rs.getString("JOB_SECOND"));
 			schedule.setMinute(rs.getString("JOB_MINUTE"));
 			schedule.setHour(rs.getString("JOB_HOUR"));
 			schedule.setDay(rs.getString("JOB_DAY"));
 			schedule.setMonth(rs.getString("JOB_MONTH"));
 			schedule.setWeekday(rs.getString("JOB_WEEKDAY"));
+			schedule.setYear(rs.getString("JOB_YEAR"));
+			schedule.setExtraSchedules(rs.getString("EXTRA_SCHEDULES"));
+			schedule.setHolidays(rs.getString("HOLIDAYS"));
 			schedule.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			schedule.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			schedule.setCreatedBy(rs.getString("CREATED_BY"));
 			schedule.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+			List<Holiday> sharedHolidays = holidayService.getScheduleHolidays(schedule.getScheduleId());
+			schedule.setSharedHolidays(sharedHolidays);
 
 			return type.cast(schedule);
 		}
@@ -121,34 +143,65 @@ public class ScheduleService {
 	 * Deletes a schedule
 	 *
 	 * @param id the schedule id
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * jobs which prevented the schedule from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
-	public void deleteSchedule(int id) throws SQLException {
+	public ActionResult deleteSchedule(int id) throws SQLException {
 		logger.debug("Entering deleteSchedule: id={}", id);
+
+		ActionResult result = new ActionResult();
+
+		//don't delete if important linked records exist
+		List<String> linkedJobs = getLinkedJobs(id);
+		if (!linkedJobs.isEmpty()) {
+			result.setData(linkedJobs);
+			return result;
+		}
 
 		String sql;
 
 		sql = "DELETE FROM ART_JOB_SCHEDULES WHERE SCHEDULE_ID=?";
 		dbService.update(sql, id);
+
+		result.setSuccess(true);
+
+		return result;
 	}
 
 	/**
-	 * Deletes multiple schedule
+	 * Deletes multiple schedules
 	 *
 	 * @param ids the ids of schedules to delete
+	 * @return ActionResult. if not successful, data contains details of
+	 * schedules which weren't deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
-	public void deleteSchedules(Integer[] ids) throws SQLException {
+	public ActionResult deleteSchedules(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteSchedules: ids={}", (Object) ids);
 
-		String sql;
+		ActionResult result = new ActionResult();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
-		sql = "DELETE FROM ART_JOB_SCHEDULES"
-				+ " WHERE SCHEDULE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteSchedule(id);
+			if (!deleteResult.isSuccess()) {
+				@SuppressWarnings("unchecked")
+				List<String> linkedJobs = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedJobs, ", ");
+				nonDeletedRecords.add(value);
+			}
+		}
 
-		dbService.update(sql, (Object[]) ids);
+		if (nonDeletedRecords.isEmpty()) {
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+
+		return result;
 	}
 
 	/**
@@ -165,18 +218,7 @@ public class ScheduleService {
 
 		//generate new id
 		String sql = "SELECT MAX(SCHEDULE_ID) FROM ART_JOB_SCHEDULES";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		saveSchedule(schedule, newId, actionUser);
 
@@ -219,19 +261,26 @@ public class ScheduleService {
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_JOB_SCHEDULES"
-					+ " (SCHEDULE_ID, SCHEDULE_NAME, DESCRIPTION, JOB_MINUTE,"
-					+ " JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 10) + ")";
+					+ " (SCHEDULE_ID, SCHEDULE_NAME, DESCRIPTION,"
+					+ " JOB_SECOND, JOB_MINUTE,"
+					+ " JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY, JOB_YEAR,"
+					+ " EXTRA_SCHEDULES, HOLIDAYS,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
 			Object[] values = {
 				newRecordId,
 				schedule.getName(),
 				schedule.getDescription(),
+				schedule.getSecond(),
 				schedule.getMinute(),
 				schedule.getHour(),
 				schedule.getDay(),
 				schedule.getMonth(),
 				schedule.getWeekday(),
+				schedule.getYear(),
+				schedule.getExtraSchedules(),
+				schedule.getHolidays(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -239,18 +288,23 @@ public class ScheduleService {
 			affectedRows = dbService.update(sql, values);
 		} else {
 			String sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_NAME=?, DESCRIPTION=?,"
-					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_MONTH=?,"
-					+ " JOB_WEEKDAY=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " JOB_SECOND=?, JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_MONTH=?,"
+					+ " JOB_WEEKDAY=?, JOB_YEAR=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
+					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE SCHEDULE_ID=?";
 
 			Object[] values = {
 				schedule.getName(),
 				schedule.getDescription(),
+				schedule.getSecond(),
 				schedule.getMinute(),
 				schedule.getHour(),
 				schedule.getDay(),
 				schedule.getMonth(),
 				schedule.getWeekday(),
+				schedule.getYear(),
+				schedule.getExtraSchedules(),
+				schedule.getHolidays(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				schedule.getScheduleId()
@@ -269,5 +323,32 @@ public class ScheduleService {
 			logger.warn("Problem with save. affectedRows={}, newRecord={}, schedule={}",
 					affectedRows, newRecord, schedule);
 		}
+	}
+
+	/**
+	 * Returns details of jobs that use a given schedule as a fixed schedule
+	 *
+	 * @param scheduleId the schedule id
+	 * @return linked job details
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedJobs(int scheduleId) throws SQLException {
+		logger.debug("Entering getLinkedJobs: scheduleId={}", scheduleId);
+
+		String sql = "SELECT JOB_ID, JOB_NAME"
+				+ " FROM ART_JOBS"
+				+ " WHERE SCHEDULE_ID=?";
+
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> jobDetails = dbService.query(sql, h, scheduleId);
+
+		List<String> jobs = new ArrayList<>();
+		for (Map<String, Object> jobDetail : jobDetails) {
+			Integer jobId = (Integer) jobDetail.get("JOB_ID");
+			String jobName = (String) jobDetail.get("JOB_NAME");
+			jobs.add(jobName + " (" + jobId + ")");
+		}
+
+		return jobs;
 	}
 }

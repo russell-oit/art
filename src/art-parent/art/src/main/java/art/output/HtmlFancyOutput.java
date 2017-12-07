@@ -18,6 +18,7 @@
 package art.output;
 
 import java.util.Date;
+import org.apache.commons.codec.binary.Base64;
 import org.owasp.encoder.Encode;
 
 /**
@@ -55,7 +56,14 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCellAlignLeft(String value) {
-		out.println("<th class='text-left'>" + value + "</th>");
+		out.println("<th style='text-align: left'>" + value + "</th>");
+	}
+	
+	@Override
+	public void addHeaderCellAlignLeft(String value, String sortValue) {
+		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
+		out.println("<th style='text-align: left' data-order='" + escapedSortValue + "'>"
+				+ value + "</th>");
 	}
 
 	@Override
@@ -70,46 +78,26 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String value) {
-		String cssClass;
-		if (evenRow) {
-			cssClass = "text-left";
-		} else {
-			cssClass = "text-left";
-		}
-
-		out.println("<td class='" + cssClass + "'>" + value + "</td>");
+		out.println("<td style='text-align: left'>" + value + "</td>");
 	}
 
 	@Override
 	public void addCellStringUnsafe(String value) {
 		String escapedValue = Encode.forHtmlContent(value);
-
-		String cssClass;
-		if (evenRow) {
-			cssClass = "text-left";
-		} else {
-			cssClass = "text-left";
-		}
-
-		out.println("<td class='" + cssClass + "'>" + escapedValue + "</td>");
+		out.println("<td style='text-align: left'>" + escapedValue + "</td>");
 	}
 
 	@Override
 	public void addCellNumeric(Double value) {
 		String formattedValue = formatNumericValue(value);
+		String sortValue = getNumericSortValue(value);
 
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-
-		String cssClass;
-		if (evenRow) {
-			cssClass = "text-right";
-		} else {
-			cssClass = "text-right";
-		}
+		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
 
 		double heatmapValue = getHeatmapValue(value);
 
-		out.println("<td class='" + cssClass
+		out.println("<td style='text-align: right' data-order='" + escapedSortValue
 				+ "' data-value='" + heatmapValue + "'>"
 				+ escapedFormattedValue + "</td>");
 	}
@@ -117,17 +105,11 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-
-		String cssClass;
-		if (evenRow) {
-			cssClass = "text-right";
-		} else {
-			cssClass = "text-right";
-		}
+		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
 
 		double heatmapValue = getHeatmapValue(numericValue);
 
-		out.println("<td class='" + cssClass
+		out.println("<td style='text-align: right' data-order='" + escapedSortValue
 				+ "' data-value='" + heatmapValue + "'>"
 				+ escapedFormattedValue + "</td>");
 	}
@@ -135,32 +117,29 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
+		long sortValue = getDateSortValue(value);
 
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
-		String cssClass;
-		if (evenRow) {
-			cssClass = "text-left";
-		} else {
-			cssClass = "text-left";
-		}
-
-		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
+		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
+				+ escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
-
-		String cssClass;
-
-		if (evenRow) {
-			cssClass = "text-left";
+		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
+				+ escapedFormattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellImage(byte[] binaryData) {
+		if (binaryData == null) {
+			out.println("<td></td>");
 		} else {
-			cssClass = "text-left";
+			String stringData = Base64.encodeBase64String(binaryData);
+			out.println("<td style='text-align: center'><img src='data:image/png;base64," + stringData + "'></td>");
 		}
-
-		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override

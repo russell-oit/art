@@ -34,19 +34,19 @@ import art.servlets.Config;
 import art.user.User;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
+import art.utils.ExpressionHelper;
 import art.utils.GroovySandbox;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,8 +60,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -258,9 +256,11 @@ public class ReportRunner {
 		querySb.replace(0, querySb.length(), reportSource);
 
 		applyTags();
+		applyFieldExpressions();
 		applyDynamicSql();
 		applyDirectSubstitution();
-		applyGroovy();
+		applyGroovySnippets();
+		applyUsesGroovy();
 		applyParameterPlaceholders(); //question placeholder put here
 		applyDynamicRecipient();
 
@@ -274,11 +274,8 @@ public class ReportRunner {
 		Object[] paramValues = jdbcParams.toArray(new Object[0]);
 		finalSql = generateFinalSql(querySql, paramValues);
 
-		String questionSearchString = Pattern.quote(QUESTION_PLACEHOLDER);
-		String questionReplaceString = Matcher.quoteReplacement("?");
-
-		querySql = querySql.replaceAll("(?iu)" + questionSearchString, questionReplaceString);
-		finalSql = finalSql.replaceAll("(?iu)" + questionSearchString, questionReplaceString);
+		querySql = StringUtils.replaceIgnoreCase(querySql, QUESTION_PLACEHOLDER, "?");
+		finalSql = StringUtils.replaceIgnoreCase(finalSql, QUESTION_PLACEHOLDER, "?");
 
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
@@ -291,28 +288,59 @@ public class ReportRunner {
 	}
 
 	/**
+	 * Applies field expressions i.e. username, date, datetime
+	 *
+	 * @throws SQLException
+	 */
+	private void applyFieldExpressions() throws SQLException {
+		logger.debug("Entering applyFieldExpressions");
+
+		String querySql = querySb.toString();
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+
+		String username = null;
+		if (user != null) {
+			username = user.getUsername();
+		}
+
+		try {
+			querySql = expressionHelper.processFields(querySql, username);
+		} catch (ParseException ex) {
+			throw new SQLException(ex);
+		}
+
+		//update sb with new sql
+		querySb.replace(0, querySb.length(), querySql);
+	}
+
+	/**
+	 * Applies groovy snippets
+	 *
+	 */
+	private void applyGroovySnippets() {
+		logger.debug("Entering applyGroovySnippets");
+
+		String querySql = querySb.toString();
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+
+		querySql = expressionHelper.processGroovy(querySql, reportParamsMap);
+
+		//update sb with new sql
+		querySb.replace(0, querySb.length(), querySql);
+	}
+
+	/**
 	 * Applies groovy to the report source if the report is configured to use
 	 * groovy
 	 *
 	 * @throws SQLException
 	 */
-	private void applyGroovy() throws SQLException {
-		logger.debug("Entering applyGroovy");
+	private void applyUsesGroovy() {
+		logger.debug("Entering applyUsesGroovy");
 
-		String optionsString = report.getOptions();
-		GeneralReportOptions options;
-		if (StringUtils.isBlank(optionsString)) {
-			options = new GeneralReportOptions();
-		} else {
-			ObjectMapper mapper = new ObjectMapper();
-			try {
-				options = mapper.readValue(optionsString, GeneralReportOptions.class);
-			} catch (IOException ex) {
-				throw new SQLException(ex);
-			}
-		}
+		GeneralReportOptions generalOptions = report.getGeneralOptions();
 
-		if (options.isUsesGroovy()) {
+		if (generalOptions != null && generalOptions.isUsesGroovy()) {
 			CompilerConfiguration cc = new CompilerConfiguration();
 			cc.addCompilationCustomizers(new SandboxTransformer());
 
@@ -324,8 +352,8 @@ public class ReportRunner {
 			Binding binding = new Binding(variables);
 
 			GroovyShell shell = new GroovyShell(binding, cc);
-			GroovySandbox sandbox = null;
 
+			GroovySandbox sandbox = null;
 			if (Config.getCustomSettings().isEnableGroovySandbox()) {
 				sandbox = new GroovySandbox();
 				sandbox.register();
@@ -371,7 +399,7 @@ public class ReportRunner {
 		ReportRuleService reportRuleService = new ReportRuleService();
 
 		int reportId = report.getReportId();
-		List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+		List<ReportRule> reportRules = reportRuleService.getEffectiveReportRules(reportId);
 
 		RuleValueService ruleValueService = new RuleValueService();
 		int count = 0;
@@ -463,8 +491,9 @@ public class ReportRunner {
 		}
 
 		//replace all occurrences of labelled rule with rule values
-		String replaceString = Matcher.quoteReplacement(labelledValues.toString()); //quote in case it contains special regex characters
-		querySql = querySql.replaceAll("(?iu)#rules#", replaceString);
+		String searchString = "#rules#";
+		String replaceString = labelledValues.toString();
+		querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 
 		//update sb with new sql
 		querySb.replace(0, querySb.length(), querySql);
@@ -488,7 +517,7 @@ public class ReportRunner {
 		ReportRuleService reportRuleService = new ReportRuleService();
 
 		int reportId = report.getReportId();
-		List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+		List<ReportRule> reportRules = reportRuleService.getEffectiveReportRules(reportId);
 
 		RuleValueService ruleValueService = new RuleValueService();
 
@@ -603,9 +632,7 @@ public class ReportRunner {
 		//replace literal ? in query with a placeholder, before substituting query parameters with ?
 		//to enable show sql to give correct results when ? literals exist in the query
 		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#2c1f/6b3b
-		String questionSearchString = Pattern.quote("?");
-		String questionReplaceString = Matcher.quoteReplacement(QUESTION_PLACEHOLDER);
-		querySql = querySql.replaceAll("(?iu)" + questionSearchString, questionReplaceString);
+		querySql = StringUtils.replaceIgnoreCase(querySql, "?", QUESTION_PLACEHOLDER);
 
 		//replace jdbc parameter identifiers with ?
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
@@ -618,11 +645,9 @@ public class ReportRunner {
 				continue;
 			}
 
-			String paramIdentifier = "#" + paramName + "#";
-			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
-			String replaceString = Matcher.quoteReplacement(StringUtils.repeat(" ? ", ",", reportParam.getActualParameterValues().size())); //quote in case it contains special regex characters
-
-			querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+			String searchString = "#" + paramName + "#";
+			String replaceString = StringUtils.repeat(" ? ", ",", reportParam.getActualParameterValues().size());
+			querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 		}
 
 		//replace x parameter identifiers with ?
@@ -681,10 +706,7 @@ public class ReportRunner {
 			finalSb.append(")");
 			String finalString = finalSb.toString();
 
-			String searchString = Pattern.quote(xParamDefinition); //quote in case it contains special regex characters
-			String replaceString = Matcher.quoteReplacement(finalString); //quote in case it contains special regex characters
-
-			querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+			querySql = StringUtils.replaceIgnoreCase(querySql, xParamDefinition, finalString);
 		}
 
 		//update querySb with new sql
@@ -789,15 +811,13 @@ public class ReportRunner {
 				}
 				String replaceString = recipientColumn + "=" + recipientValue;
 
-				String searchString = Pattern.quote(RECIPIENT_LABEL);
-				replaceString = Matcher.quoteReplacement(replaceString);
-				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString);
+				querySql = StringUtils.replaceIgnoreCase(querySql, RECIPIENT_LABEL, replaceString);
 			}
 		}
 
 		//ignore #recipient# label if it is still there
-		String searchString = Pattern.quote(RECIPIENT_LABEL);
-		querySql = querySql.replaceAll("(?iu)" + searchString, "1=1");
+		String replaceString = "1=1";
+		querySql = StringUtils.replaceIgnoreCase(querySql, RECIPIENT_LABEL, replaceString);
 
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
@@ -819,7 +839,9 @@ public class ReportRunner {
 	 * @throws java.sql.SQLException
 	 */
 	public void execute(int resultSetType) throws SQLException {
-		execute(resultSetType, false, false);
+		boolean overrideUseRules = false;
+		boolean newUseRules = false;
+		execute(resultSetType, overrideUseRules, newUseRules);
 	}
 
 	/**
@@ -830,7 +852,8 @@ public class ReportRunner {
 	 * @throws java.sql.SQLException
 	 */
 	public void execute(boolean newUseRules) throws SQLException {
-		execute(ResultSet.TYPE_FORWARD_ONLY, true, newUseRules);
+		boolean overrideUseRules = true;
+		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 	}
 
 	/**
@@ -882,12 +905,18 @@ public class ReportRunner {
 		}
 
 		//use dynamic datasource if so configured
-		if (reportType == ReportType.LovDynamic) {
+		if (reportType == ReportType.LovDynamic && !report.isLovUseDynamicDatasource()) {
 			Datasource reportDatasource = report.getDatasource();
-			connQuery = DbConnections.getConnection(reportDatasource.getDatasourceId());
+			if (reportDatasource != null) {
+				connQuery = DbConnections.getConnection(reportDatasource.getDatasourceId());
+			}
 		} else {
 			RunReportHelper runReportHelper = new RunReportHelper();
 			connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
+		}
+
+		if (connQuery == null) {
+			throw new IllegalStateException("Datasource not found");
 		}
 
 		int fetchSize = report.getFetchSize();
@@ -1279,12 +1308,10 @@ public class ReportRunner {
 				throw new IllegalStateException("Parameter not found: " + paramName);
 			}
 
-			if (reportParam.getParameter().getParameterType() != ParameterType.SingleValue) {
-				throw new IllegalArgumentException("Non single-value parameter should not be used in dynamic sql: " + paramName);
-			}
-
 			Object actualParameterValue = reportParam.getEffectiveActualParameterValue();
-			if (actualParameterValue instanceof Date) {
+			if (reportParam.getParameter().getParameterType() == ParameterType.MultiValue) {
+				expValue = StringUtils.join(actualParameterValue, ",");
+			} else if (actualParameterValue instanceof Date) {
 				Date dateValue = (Date) actualParameterValue;
 				expValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
 			} else {
@@ -1394,21 +1421,20 @@ public class ReportRunner {
 		//replace :USERNAME: with currently logged in user's username
 		if (user != null) {
 			String username = user.getUsername();
-			String replaceString = Matcher.quoteReplacement("'" + username + "'"); //quote in case it contains special regex characters
-			querySql = querySql.replaceAll("(?iu):username:", replaceString); //(?iu) makes replace case insensitive across unicode characters
+			String searchString = ":username:";
+			String replaceString = "'" + username + "'";
+			querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 		}
 
 		//replace :DATE: with current date
 		Date now = new Date();
 
-		String dateFormat = ArtUtils.ISO_DATE_FORMAT;
-		SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+		SimpleDateFormat dateFormatter = new SimpleDateFormat(ArtUtils.ISO_DATE_FORMAT);
 		String date = dateFormatter.format(now);
 		querySql = querySql.replaceAll("(?iu):date:", "'" + date + "'"); //postgresql has casting syntax like ::date
 
 		//replace :TIME: with current date and time
-		String timeFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
-		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
+		SimpleDateFormat timeFormatter = new SimpleDateFormat(ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT);
 		String time = timeFormatter.format(now);
 		querySql = querySql.replaceAll("(?iu):time:", "'" + time + "'");
 

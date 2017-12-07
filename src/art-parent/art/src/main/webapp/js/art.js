@@ -151,8 +151,17 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "msaccess-ucanaccess") {
 		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
-		urlElement.value = "jdbc:ucanaccess://c:/file_path.mdb";
+		urlElement.value = "jdbc:ucanaccess://<file_path>";
 		testSqlElement.value = "";
+	} else if (dbType === "msaccess-ucanaccess-password") {
+		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
+		urlElement.value = "jdbc:ucanaccess://<file_path>;jackcessOpener=art.utils.CryptCodecOpener";
+		testSqlElement.value = "";
+		
+		var usernameElement = document.getElementById("username");
+		if (usernameElement !== null) {
+			usernameElement.value = "";
+		}
 	} else if (dbType === "sqlite-xerial") {
 		driverElement.value = "org.sqlite.JDBC";
 		urlElement.value = "jdbc:sqlite:<file_path>";
@@ -380,9 +389,9 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		lengthMenu: [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
 		pageLength: pageLength,
 		columnDefs: [{
+				targets: 0,
 				orderable: false,
-				className: 'select-checkbox',
-				targets: 0
+				className: 'select-checkbox'
 			},
 			{
 				targets: "dtHidden", //target name matches class name of th.

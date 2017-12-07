@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.report.Report;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,10 +29,25 @@ import java.sql.SQLException;
  */
 public abstract class GroupOutput {
 	
-	protected String fullOutputFilename;
+	protected String fullOutputFileName;
 	protected String reportName;
 	protected PrintWriter out;
 	protected String contextPath;
+	protected Report report;
+
+	/**
+	 * @return the report
+	 */
+	public Report getReport() {
+		return report;
+	}
+
+	/**
+	 * @param report the report to set
+	 */
+	public void setReport(Report report) {
+		this.report = report;
+	}
 
 	/**
 	 * @return the contextPath
@@ -48,17 +64,17 @@ public abstract class GroupOutput {
 	}
 	
 	/**
-	 * @return the fullOutputFilename
+	 * @return the fullOutputFileName
 	 */
 	public String getFullOutputFileName() {
-		return fullOutputFilename;
+		return fullOutputFileName;
 	}
 
 	/**
-	 * @param fullOutputFileName the fullOutputFilename to set
+	 * @param fullOutputFileName the fullOutputFileName to set
 	 */
 	public void setFullOutputFileName(String fullOutputFileName) {
-		this.fullOutputFilename = fullOutputFileName;
+		this.fullOutputFileName = fullOutputFileName;
 	}
 	
 	/**

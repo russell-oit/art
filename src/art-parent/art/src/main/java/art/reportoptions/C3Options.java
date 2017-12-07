@@ -17,12 +17,15 @@
  */
 package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Represents report options for c3.js reports
  *
  * @author Timothy Anyona
  */
-public class C3Options extends GeneralReportOptions {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class C3Options {
 
 	private String cssFile;
 

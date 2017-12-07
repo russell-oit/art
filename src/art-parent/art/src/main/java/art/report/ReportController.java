@@ -18,18 +18,20 @@
 package art.report;
 
 import art.datasource.DatasourceService;
+import art.encryption.AesEncryptor;
+import art.encryptor.EncryptorService;
 import art.enums.PageOrientation;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.mail.Mailer;
 import art.reportgroup.ReportGroupService;
+import art.reportgroupmembership.ReportGroupMembershipService;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtHelper;
-import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +47,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -85,8 +86,14 @@ public class ReportController {
 	private DatasourceService datasourceService;
 
 	@Autowired
+	private ReportGroupMembershipService reportGroupMembershipService;
+
+	@Autowired
+	private EncryptorService encryptorService;
+
+	@Autowired
 	private MessageSource messageSource;
-	
+
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
 		logger.debug("Entering showReports");
@@ -101,7 +108,7 @@ public class ReportController {
 
 		return "reports";
 	}
-	
+
 	@RequestMapping(value = "/selectReportParameters", method = RequestMethod.GET)
 	public String selectReportParameters(HttpSession session,
 			@RequestParam("reportId") Integer reportId,
@@ -176,7 +183,8 @@ public class ReportController {
 				response.setSuccess(true);
 			} else {
 				//report not deleted because of linked jobs
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -200,7 +208,8 @@ public class ReportController {
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
 			} else {
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -232,7 +241,14 @@ public class ReportController {
 		logger.debug("Entering editReport: id={}", id);
 
 		try {
-			model.addAttribute("report", reportService.getReport(id));
+			Report report = reportService.getReportWithOwnSource(id);
+			if (report != null) {
+				ReportType reportType = report.getReportType();
+				if (reportType == ReportType.Text) {
+					report.setReportSourceHtml(report.getReportSource());
+				}
+			}
+			model.addAttribute("report", report);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -252,6 +268,15 @@ public class ReportController {
 
 		model.addAttribute("multipleReportEdit", multipleReportEdit);
 
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			model.addAttribute("reportGroups", reportGroupService.getAdminReportGroups(sessionUser));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
 		return "editReports";
 	}
 
@@ -260,7 +285,8 @@ public class ReportController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session, @RequestParam("action") String action,
 			@RequestParam(value = "templateFile", required = false) MultipartFile templateFile,
-			@RequestParam(value = "resourcesFile", required = false) MultipartFile resourcesFile) {
+			@RequestParam(value = "resourcesFile", required = false) MultipartFile resourcesFile,
+			Locale locale) {
 
 		logger.debug("Entering saveReport: report={}, action='{}'", report, action);
 
@@ -271,6 +297,14 @@ public class ReportController {
 		}
 
 		try {
+			//set passwords as appropriate
+			String setPasswordsMessage = setPasswords(report, action);
+			logger.debug("setPasswordsMessage='{}'", setPasswordsMessage);
+			if (setPasswordsMessage != null) {
+				model.addAttribute("message", setPasswordsMessage);
+				return showEditReport(action, model, session);
+			}
+
 			//finalise report properties
 			String prepareReportMessage = prepareReport(report, templateFile, resourcesFile, action);
 			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
@@ -292,9 +326,17 @@ public class ReportController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
-			String recordName = report.getName() + " (" + report.getReportId() + ")";
+			report.loadGeneralOptions();
+			String recordName = report.getLocalizedName(locale) + " (" + report.getReportId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			redirectAttributes.addFlashAttribute("record", report);
+
+			try {
+				saveReportGroups(report);
+			} catch (SQLException | RuntimeException ex) {
+				logger.error("Error", ex);
+				redirectAttributes.addFlashAttribute("error", ex);
+			}
 			return "redirect:/reportsConfig";
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
@@ -322,6 +364,22 @@ public class ReportController {
 			reportService.updateReports(multipleReportEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleReportEdit.getIds());
+
+			if (!multipleReportEdit.isReportGroupsUnchanged()) {
+				try {
+					String[] ids = StringUtils.split(multipleReportEdit.getIds(), ",");
+					for (String idString : ids) {
+						int id = Integer.parseInt(idString);
+						Report report = reportService.getReport(id);
+						report.setReportGroups(multipleReportEdit.getReportGroups());
+						saveReportGroups(report);
+					}
+				} catch (SQLException | RuntimeException ex) {
+					logger.error("Error", ex);
+					redirectAttributes.addFlashAttribute("error", ex);
+				}
+			}
+
 			return "redirect:/reportsConfig";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -412,14 +470,14 @@ public class ReportController {
 
 		ArtHelper artHelper = new ArtHelper();
 		Mailer mailer = artHelper.getMailer();
-		
+
 		mailer.setFrom(from);
 		mailer.setSubject(subject);
 		mailer.setMessage(mailMessage);
 		mailer.setTo(tos);
 		mailer.setCc(ccs);
 		mailer.setBcc(bccs);
-		
+
 		List<File> attachments = new ArrayList<>();
 		attachments.add(reportFile);
 		mailer.setAttachments(attachments);
@@ -455,7 +513,7 @@ public class ReportController {
 		logger.debug("Entering copyReport: id={}", id);
 
 		try {
-			model.addAttribute("report", reportService.getReport(id));
+			model.addAttribute("report", reportService.getReportWithOwnSource(id));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -483,6 +541,7 @@ public class ReportController {
 			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));
 			model.addAttribute("reportFormats", ReportFormat.list());
 			model.addAttribute("pageOrientations", PageOrientation.list());
+			model.addAttribute("encryptors", encryptorService.getAllEncryptors());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -540,18 +599,7 @@ public class ReportController {
 			return null;
 		}
 
-		//check file size
-		long maxUploadSize = Config.getSettings().getMaxFileUploadSizeMB(); //size in MB
-		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes
-
-		long uploadSize = file.getSize();
-		logger.debug("maxUploadSize={}, uploadSize={}", maxUploadSize, uploadSize);
-
-		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //-1 or any negative value means no size limit
-			return "reports.message.fileBiggerThanMax";
-		}
-
-		//check upload file type
+		//set allowed upload file types
 		List<String> validExtensions = new ArrayList<>();
 		validExtensions.add("xml");
 		validExtensions.add("jrxml");
@@ -574,18 +622,6 @@ public class ReportController {
 		validExtensions.add("css"); //for c3.js additional css
 		validExtensions.add("js"); //for datamaps additional js
 		validExtensions.add("json"); //for datamaps optional data file
-
-		String filename = file.getOriginalFilename();
-		logger.debug("filename='{}'", filename);
-		String extension = FilenameUtils.getExtension(filename);
-
-		if (!ArtUtils.containsIgnoreCase(validExtensions, extension)) {
-			return "reports.message.fileTypeNotAllowed";
-		}
-
-		if (!FinalFilenameValidator.isValid(filename)) {
-			return "reports.message.invalidFilename";
-		}
 
 		//save file
 		String templatesPath;
@@ -616,11 +652,15 @@ public class ReportController {
 				templatesPath = Config.getTemplatesPath();
 		}
 
-		String destinationFilename = templatesPath + filename;
-		File destinationFile = new File(destinationFilename);
-		file.transferTo(destinationFile);
+		UploadHelper uploadHelper = new UploadHelper();
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+
+		if (message != null) {
+			return message;
+		}
 
 		if (report != null) {
+			String filename = file.getOriginalFilename();
 			report.setTemplate(filename);
 		}
 
@@ -810,6 +850,107 @@ public class ReportController {
 		response.put("files", fileList);
 
 		return response;
+	}
+
+	/**
+	 * Sets the password fields, encrypting them in preparation for saving
+	 *
+	 * @param report the report
+	 * @param action the action
+	 * @return i18n message to display in the user interface if there was a
+	 * problem, null otherwise
+	 * @throws SQLException
+	 */
+	private String setPasswords(Report report, String action) throws SQLException {
+		logger.debug("Entering setPasswords: report={}, action='{}'", report, action);
+
+		//set open password
+		boolean useCurrentOpenPassword = false;
+		String newOpenPassword = report.getOpenPassword();
+
+		if (report.isUseNoneOpenPassword()) {
+			newOpenPassword = null;
+		} else if (StringUtils.isEmpty(newOpenPassword)
+				&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
+			//password field blank. use current password
+			useCurrentOpenPassword = true;
+		}
+
+		if (useCurrentOpenPassword) {
+			//password field blank. use current password
+			Report currentReport = reportService.getReport(report.getReportId());
+			if (currentReport == null) {
+				return "page.message.cannotUseCurrentPassword";
+			} else {
+				newOpenPassword = currentReport.getOpenPassword();
+			}
+		}
+
+		//encrypt new password
+		if (StringUtils.equals(newOpenPassword, "")) {
+			//if password set as empty string, there is no way to specify empty string as password for xlsx workbooks
+			newOpenPassword = null;
+		}
+		String encryptedOpenPassword = AesEncryptor.encrypt(newOpenPassword);
+		report.setOpenPassword(encryptedOpenPassword);
+
+		//set modify password
+		boolean useCurrentModifyPassword = false;
+		String newModifyPassword = report.getModifyPassword();
+
+		if (report.isUseNoneModifyPassword()) {
+			newModifyPassword = null;
+		} else if (StringUtils.isEmpty(newModifyPassword)
+				&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
+			//password field blank. use current password
+			useCurrentModifyPassword = true;
+		}
+
+		if (useCurrentModifyPassword) {
+			//password field blank. use current password
+			Report currentReport = reportService.getReport(report.getReportId());
+			if (currentReport == null) {
+				return "page.message.cannotUseCurrentPassword";
+			} else {
+				newModifyPassword = currentReport.getModifyPassword();
+			}
+		}
+
+		//encrypt new password
+		if (StringUtils.equals(newModifyPassword, "")) {
+			newModifyPassword = null;
+		}
+		String encryptedModifyPassword = AesEncryptor.encrypt(newModifyPassword);
+		report.setModifyPassword(encryptedModifyPassword);
+
+		return null;
+	}
+
+	/**
+	 * Save report groups for the given report
+	 *
+	 * @param report the report
+	 * @throws SQLException
+	 */
+	private void saveReportGroups(Report report) throws SQLException {
+		reportGroupMembershipService.deleteAllReportGroupMembershipsForReport(report.getReportId());
+		reportGroupMembershipService.addReportGroupMemberships(report, report.getReportGroups());
+	}
+
+	@RequestMapping(value = "/parameterReports", method = RequestMethod.GET)
+	public String showParameterReports(Model model,
+			@RequestParam("parameterId") Integer parameterId) {
+
+		logger.debug("Entering showParameterReports: parameterId={}", parameterId);
+
+		try {
+			model.addAttribute("report", reportService.getReportWithOwnSource(parameterId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "parameterReports";
 	}
 
 }

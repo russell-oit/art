@@ -22,17 +22,23 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.connectionpool.DbConnections;
 import art.datasource.DatasourceService;
+import art.encryption.AesEncryptor;
+import art.encryptor.Encryptor;
+import art.encryptor.EncryptorService;
 import art.enums.AccessLevel;
 import art.enums.PageOrientation;
 import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.CloneOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,12 +47,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
@@ -71,20 +77,23 @@ public class ReportService {
 	private final DbService dbService;
 	private final DatasourceService datasourceService;
 	private final ReportGroupService reportGroupService;
+	private final EncryptorService encryptorService;
 
 	@Autowired
 	public ReportService(DbService dbService, DatasourceService datasourceService,
-			ReportGroupService reportGroupService) {
+			ReportGroupService reportGroupService, EncryptorService encryptorService) {
 
 		this.dbService = dbService;
 		this.datasourceService = datasourceService;
 		this.reportGroupService = reportGroupService;
+		this.encryptorService = encryptorService;
 	}
 
 	public ReportService() {
 		dbService = new DbService();
 		datasourceService = new DatasourceService();
 		reportGroupService = new ReportGroupService();
+		encryptorService = new EncryptorService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERIES AQ";
@@ -118,6 +127,7 @@ public class ReportService {
 			report.setUsesRules(rs.getBoolean("USES_RULES"));
 			report.setActive(rs.getBoolean("ACTIVE"));
 			report.setHidden(rs.getBoolean("HIDDEN"));
+			report.setReportSource(rs.getString("REPORT_SOURCE"));
 			report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
 			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
 			report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));
@@ -139,18 +149,49 @@ public class ReportService {
 			report.setFetchSize(rs.getInt("FETCH_SIZE"));
 			report.setOptions(rs.getString("REPORT_OPTIONS"));
 			report.setPageOrientation(PageOrientation.toEnum(rs.getString("PAGE_ORIENTATION"), PageOrientation.Portrait));
+			report.setLovUseDynamicDatasource(rs.getBoolean("LOV_USE_DYNAMIC_DATASOURCE"));
+			report.setOpenPassword(rs.getString("OPEN_PASSWORD"));
+			report.setModifyPassword(rs.getString("MODIFY_PASSWORD"));
+			report.setSourceReportId(rs.getInt("SOURCE_REPORT_ID"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
 			report.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			ReportGroup reportGroup = reportGroupService.getReportGroup(rs.getInt("QUERY_GROUP_ID"));
-			report.setReportGroup(reportGroup);
-
 			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
 			report.setDatasource(datasource);
 
+			Encryptor encryptor = encryptorService.getEncryptor(rs.getInt("ENCRYPTOR_ID"));
+			report.setEncryptor(encryptor);
+
+			List<ReportGroup> reportGroups = reportGroupService.getReportGroupsForReport(report.getReportId());
+			report.setReportGroups(reportGroups);
+
+			//decrypt open and modify passwords
+			String clearTextOpenPassword = AesEncryptor.decrypt(report.getOpenPassword());
+			report.setOpenPassword(clearTextOpenPassword);
+
+			String clearTextModifypassword = AesEncryptor.decrypt(report.getModifyPassword());
+			report.setModifyPassword(clearTextModifypassword);
+
 			setChartOptions(report);
+
+			String options = report.getOptions();
+			if (StringUtils.isNotBlank(options)) {
+				try {
+					ObjectMapper mapper = new ObjectMapper();
+					CloneOptions cloneOptions = mapper.readValue(options, CloneOptions.class);
+					report.setCloneOptions(cloneOptions);
+				} catch (IOException ex) {
+					throw new SQLException(ex);
+				}
+			}
+
+			try {
+				report.loadGeneralOptions();
+			} catch (IOException ex) {
+				throw new SQLException(ex);
+			}
 
 			return type.cast(report);
 		}
@@ -246,15 +287,18 @@ public class ReportService {
 				+ " OR"
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERY_GROUPS AUQG"
-				+ " WHERE AUQG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUQG.USER_ID=?)"
+				+ " FROM ART_USER_QUERY_GROUPS AUQG, ART_REPORT_REPORT_GROUPS ARRG"
+				+ " WHERE AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " AND ARRG.REPORT_ID=AQ.QUERY_ID AND AUQG.USER_ID=?)"
 				+ " OR"
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_GROUPS AUGG"
 				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
 				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
-				+ " WHERE AUGG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUGA.USER_ID=?)"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AUGG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
 				+ ")";
 
 		Object[] values = {
@@ -345,7 +389,82 @@ public class ReportService {
 		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
 		Report report = dbService.query(sql, h, id);
 
-		setReportSource(report);
+		setEffectiveReportSource(report);
+
+		return report;
+	}
+
+	/**
+	 * Sets the effective report source for a report, in case it is a clone
+	 * report
+	 *
+	 * @param report the report object to set
+	 * @throws SQLException
+	 */
+	private void setEffectiveReportSource(Report report) throws SQLException {
+		if (report == null) {
+			return;
+		}
+
+		int sourceReportId = report.getSourceReportId();
+		if (sourceReportId > 0) {
+			String newSource = getReportSource(sourceReportId);
+			if (StringUtils.isNotBlank(newSource)) {
+				report.setReportSource(newSource);
+			}
+//			Report sourceReport = getSourceReport(sourceReportId);
+//			if (sourceReport != null) {
+//				report.setReportSource(sourceReport.getReportSource());
+//				report.setSourceReport(sourceReport);
+//			}
+		}
+	}
+
+//	/**
+//	 * Returns a source report
+//	 *
+//	 * @param id the source report id
+//	 * @return report if found, null otherwise
+//	 * @throws SQLException
+//	 */
+//	private Report getSourceReport(int id) throws SQLException {
+//		logger.debug("Entering getSourceReport: id={}", id);
+//
+//		//use separate method to avoid recursion issues
+//		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
+//		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
+//		Report report = dbService.query(sql, h, id);
+//
+//		return report;
+//	}
+	/**
+	 * Returns the report source for a given report
+	 *
+	 * @param reportId the report id
+	 * @return the report source
+	 * @throws SQLException
+	 */
+	private String getReportSource(int reportId) throws SQLException {
+		String sql = "SELECT REPORT_SOURCE FROM ART_QUERIES WHERE QUERY_ID=?";
+		ResultSetHandler<String> h = new ScalarHandler<>(1);
+		return dbService.query(sql, h, reportId);
+	}
+
+	/**
+	 * Returns a report, with it's own source, not that of a parent (for clone
+	 * reports)
+	 *
+	 * @param id the report id
+	 * @return report if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("reports")
+	public Report getReportWithOwnSource(int id) throws SQLException {
+		logger.debug("Entering getReportWithOwnSource: id={}", id);
+
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
+		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
+		Report report = dbService.query(sql, h, id);
 
 		return report;
 	}
@@ -365,27 +484,34 @@ public class ReportService {
 		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
 		Report report = dbService.query(sql, h, reportName);
 
-		setReportSource(report);
-
 		return report;
 	}
 
 	/**
-	 * Returns jobs that use a given report
+	 * Returns details of jobs that use a given report
 	 *
 	 * @param reportId the report id
-	 * @return linked job names
+	 * @return linked job details
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedJobs(int reportId) throws SQLException {
 		logger.debug("Entering getLinkedJobs: reportId={}", reportId);
 
-		String sql = "SELECT JOB_NAME"
+		String sql = "SELECT JOB_ID, JOB_NAME"
 				+ " FROM ART_JOBS"
 				+ " WHERE QUERY_ID=?";
 
-		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
-		return dbService.query(sql, h, reportId);
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> jobDetails = dbService.query(sql, h, reportId);
+
+		List<String> jobs = new ArrayList<>();
+		for (Map<String, Object> jobDetail : jobDetails) {
+			Integer jobId = (Integer) jobDetail.get("JOB_ID");
+			String jobName = (String) jobDetail.get("JOB_NAME");
+			jobs.add(jobName + " (" + jobId + ")");
+		}
+
+		return jobs;
 	}
 
 	/**
@@ -430,10 +556,6 @@ public class ReportService {
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
-		//delete sql source
-		sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
-		dbService.update(sql, id);
-
 		//lastly, delete query
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID=?";
 		int affectedRows = dbService.update(sql, id);
@@ -460,12 +582,15 @@ public class ReportService {
 		logger.debug("Entering deleteReports: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords = new ArrayList<>();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
 		for (Integer id : ids) {
 			ActionResult deleteResult = deleteReport(id);
 			if (!deleteResult.isSuccess()) {
-				nonDeletedRecords.add(id);
+				@SuppressWarnings("unchecked")
+				List<String> linkedJobs = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedJobs, ", ");
+				nonDeletedRecords.add(value);
 			}
 		}
 
@@ -492,18 +617,7 @@ public class ReportService {
 
 		//generate new id
 		String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		saveReport(report, newId, actionUser);
 
@@ -538,19 +652,21 @@ public class ReportService {
 		logger.debug("Entering saveReport: report={}, newRecordId={}, actionUser={}",
 				report, newRecordId, actionUser);
 
-		//set values for possibly null property objects
-		Integer reportGroupId; //database column doesn't allow null
-		if (report.getReportGroup() == null) {
-			reportGroupId = 0;
-		} else {
-			reportGroupId = report.getReportGroup().getReportGroupId();
-		}
+		Integer reportGroupId = 0; //field no longer used but can't be null
 
-		Integer datasourceId; //database column doesn't allow null
+		//set values for possibly null property objects
+		Integer datasourceId;
 		if (report.getDatasource() == null) {
 			datasourceId = 0;
 		} else {
 			datasourceId = report.getDatasource().getDatasourceId();
+		}
+
+		Integer encryptorId;
+		if (report.getEncryptor() == null) {
+			encryptorId = 0;
+		} else {
+			encryptorId = report.getEncryptor().getEncryptorId();
 		}
 
 		Integer reportTypeId;
@@ -559,20 +675,6 @@ public class ReportService {
 			reportTypeId = 0;
 		} else {
 			reportTypeId = report.getReportType().getValue();
-		}
-
-		String shortDescription; //database column doesn't allow null
-		if (report.getShortDescription() == null) {
-			shortDescription = "";
-		} else {
-			shortDescription = report.getShortDescription();
-		}
-
-		String description; //database column doesn't allow null
-		if (report.getDescription() == null) {
-			description = "";
-		} else {
-			description = report.getDescription();
 		}
 
 		int affectedRows;
@@ -585,29 +687,33 @@ public class ReportService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
-					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_RULES,"
-					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
+					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_RULES,"
+					+ " ACTIVE, HIDDEN, REPORT_SOURCE, PARAMETERS_IN_OUTPUT,"
+					+ " X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
 					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
 					+ " OMIT_TITLE_ROW, HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
 					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
-					+ " REPORT_OPTIONS, PAGE_ORIENTATION,"
+					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
+					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 35) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 42) + ")";
 
 			Object[] values = {
 				newRecordId,
 				report.getName(),
-				shortDescription,
-				description,
+				report.getShortDescription(),
+				report.getDescription(),
 				reportTypeId,
+				report.getGroupColumn(),
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
 				BooleanUtils.toInteger(report.isUsesRules()),
 				BooleanUtils.toInteger(report.isActive()),
 				BooleanUtils.toInteger(report.isHidden()),
+				report.getReportSource(),
 				BooleanUtils.toInteger(report.isParametersInOutput()),
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),
@@ -630,6 +736,11 @@ public class ReportService {
 				report.getFetchSize(),
 				report.getOptions(),
 				report.getPageOrientation().getValue(),
+				BooleanUtils.toInteger(report.isLovUseDynamicDatasource()),
+				report.getOpenPassword(),
+				report.getModifyPassword(),
+				encryptorId,
+				report.getSourceReportId(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -637,29 +748,34 @@ public class ReportService {
 			affectedRows = dbService.update(sql, values);
 		} else {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
-					+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
+					+ " DESCRIPTION=?, QUERY_TYPE=?, GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
 					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
-					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
+					+ " HIDDEN=?, REPORT_SOURCE=?, PARAMETERS_IN_OUTPUT=?,"
+					+ " X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
 					+ " OMIT_TITLE_ROW=?, HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
 					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?, LOCALE=?,"
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
-					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?,"
+					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
+					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
+					+ " SOURCE_REPORT_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
 			Object[] values = {
 				report.getName(),
-				shortDescription,
-				description,
+				report.getShortDescription(),
+				report.getDescription(),
 				report.getReportTypeId(),
+				report.getGroupColumn(),
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
 				BooleanUtils.toInteger(report.isUsesRules()),
 				BooleanUtils.toInteger(report.isActive()),
 				BooleanUtils.toInteger(report.isHidden()),
+				report.getReportSource(),
 				BooleanUtils.toInteger(report.isParametersInOutput()),
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),
@@ -682,6 +798,11 @@ public class ReportService {
 				report.getFetchSize(),
 				report.getOptions(),
 				report.getPageOrientation().getValue(),
+				BooleanUtils.toInteger(report.isLovUseDynamicDatasource()),
+				report.getOpenPassword(),
+				report.getModifyPassword(),
+				encryptorId,
+				report.getSourceReportId(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()
@@ -693,8 +814,6 @@ public class ReportService {
 		if (newRecordId != null) {
 			report.setReportId(newRecordId);
 		}
-
-		updateReportSource(report.getReportId(), report.getReportSource());
 
 		logger.debug("affectedRows={}", affectedRows);
 
@@ -732,94 +851,47 @@ public class ReportService {
 
 			dbService.update(sql, valuesArray);
 		}
-	}
+		if (!multipleReportEdit.isHiddenUnchanged()) {
+			sql = "UPDATE ART_QUERIES SET HIDDEN=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 
-	/**
-	 * Updates the report source for a given report
-	 *
-	 * @param reportId the report id
-	 * @param reportSource the new report source
-	 * @throws SQLException
-	 */
-	public void updateReportSource(int reportId, String reportSource) throws SQLException {
-		logger.debug("Entering updateReportSource: reportId={}", reportId);
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isHidden()));
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
 
-		// Delete Old Source
-		String sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
-		dbService.update(sql, reportId);
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
-		// Write the source in small segments
-		// This guarantees portability across databases with different max VARCHAR sizes
-		sql = "INSERT INTO ART_ALL_SOURCES "
-				+ " (OBJECT_ID, LINE_NUMBER, SOURCE_INFO)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 3) + ")";
-
-		if (reportSource == null) {
-			reportSource = "";
+			dbService.update(sql, valuesArray);
 		}
+		if (!multipleReportEdit.isContactPersonUnchanged()) {
+			sql = "UPDATE ART_QUERIES SET CONTACT_PERSON=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 
-		final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(multipleReportEdit.getContactPerson());
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
 
-		List<Object[]> values = new ArrayList<>();
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
-		int start = 0;
-		int end = SOURCE_CHUNK_LENGTH;
-		int lineNumber = 1;
-		int textLength = reportSource.length();
-
-		while (end < textLength) {
-			values.add(new Object[]{
-				reportId, lineNumber,
-				reportSource.substring(start, end)
-			});
-			start = end;
-			end = end + SOURCE_CHUNK_LENGTH;
-			lineNumber++;
+			dbService.update(sql, valuesArray);
 		}
-		values.add(new Object[]{
-			reportId, lineNumber,
-			reportSource.substring(start)
-		});
+		if (!multipleReportEdit.isOmitTitleRowUnchanged()) {
+			sql = "UPDATE ART_QUERIES SET OMIT_TITLE_ROW=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 
-		dbService.batch(sql, values.toArray(new Object[0][]));
-	}
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isOmitTitleRow()));
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
 
-	/**
-	 * Populates the report source property for a report
-	 *
-	 * @param report the report to use
-	 * @throws SQLException
-	 */
-	private void setReportSource(Report report) throws SQLException {
-		logger.debug("Entering setReportSource: report={}", report);
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
-		if (report == null) {
-			return;
-		}
-
-		String sql = "SELECT SOURCE_INFO"
-				+ " FROM ART_ALL_SOURCES "
-				+ " WHERE OBJECT_ID=?"
-				+ " ORDER BY LINE_NUMBER";
-
-		int reportId = report.getReportId();
-
-		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
-		List<Map<String, Object>> sourceLines = dbService.query(sql, h, reportId);
-
-		StringBuilder sb = new StringBuilder(1024);
-		for (Map<String, Object> sourceLine : sourceLines) {
-			//map list handler uses a case insensitive map, so case of column names doesn't matter
-			String line = (String) sourceLine.get("SOURCE_INFO");
-			sb.append(line);
-		}
-
-		String finalSource = sb.toString();
-		report.setReportSource(finalSource);
-		//set html source for use with text reports
-		ReportType reportType = report.getReportType();
-		if (reportType == ReportType.Text) {
-			report.setReportSourceHtml(report.getReportSource());
+			dbService.update(sql, valuesArray);
 		}
 	}
 
@@ -906,11 +978,7 @@ public class ReportService {
 					} else if (primaryKeyColumn != null && StringUtils.equalsIgnoreCase(rsmd.getColumnName(i + 1), primaryKeyColumn)) {
 						//generate new id
 						String sql2 = "SELECT MAX(" + primaryKeyColumn + ") FROM " + tableName;
-						ResultSetHandler<Integer> h = new ScalarHandler<>();
-						Integer maxId = dbService.query(sql2, h);
-						logger.debug("maxId={}", maxId);
-
-						int newId = maxId + 1;;
+						int newId = dbService.getNewRecordId(sql2);
 						columnValues.add(newId);
 					} else {
 						columnValues.add(rs.getObject(i + 1));
@@ -1002,11 +1070,15 @@ public class ReportService {
 	 * Returns saiku reports that a given user can access
 	 *
 	 * @param userId the id of the user
+	 * @param locale the locale to determine the report name, description, etc
 	 * @return saiku reports that a given user can access
 	 * @throws SQLException
+	 * @throws java.io.IOException
 	 */
 	@Cacheable(value = "reports")
-	public List<SaikuReport> getAvailableSaikuReports(int userId) throws SQLException {
+	public List<SaikuReport> getAvailableSaikuReports(int userId, Locale locale)
+			throws SQLException, IOException {
+
 		logger.debug("Entering getAvailableSaikuReports: userId={}", userId);
 
 		List<SaikuReport> saikuReports = new ArrayList<>();
@@ -1016,9 +1088,9 @@ public class ReportService {
 			if (report.getReportType() == ReportType.SaikuReport) {
 				SaikuReport saikuReport = new SaikuReport();
 				saikuReport.setReportId(report.getReportId());
-				saikuReport.setName(report.getName());
-				saikuReport.setShortDescription(report.getShortDescription());
-				saikuReport.setDescription(report.getDescription());
+				saikuReport.setName(report.getLocalizedName(locale));
+				saikuReport.setShortDescription(report.getLocalizedShortDescription(locale));
+				saikuReport.setDescription(report.getLocalizedDescription(locale));
 				saikuReports.add(saikuReport);
 			}
 		}
@@ -1080,8 +1152,6 @@ public class ReportService {
 	public boolean canUserRunReport(int userId, int reportId) throws SQLException {
 		logger.debug("Entering canUserRunReport: userId={}, reportId={}", userId, reportId);
 
-		boolean canRunReport;
-
 		String sql = "SELECT COUNT(*)"
 				+ " FROM ART_QUERIES AQ"
 				+ " WHERE QUERY_ID=?"
@@ -1101,7 +1171,9 @@ public class ReportService {
 				+ " FROM ART_USER_QUERY_GROUPS AUQG"
 				+ " INNER JOIN ART_USERS AU"
 				+ " ON AUQG.USER_ID=AU.USER_ID"
-				+ " WHERE AUQG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AU.USERNAME=?)"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AU.USERNAME=?)"
 				+ " OR"
 				//admins can run all reports
 				+ " EXISTS (SELECT *"
@@ -1123,14 +1195,18 @@ public class ReportService {
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_QUERY_GROUPS AUQG"
-				+ " WHERE AUQG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUQG.USER_ID=?)"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUQG.USER_ID=?)"
 				+ " OR"
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_GROUPS AUGG"
 				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
 				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
-				+ " WHERE AUGG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUGA.USER_ID=?)"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AUGG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
 				+ ")";
 
 		Object[] values = {
@@ -1147,13 +1223,15 @@ public class ReportService {
 			userId //user group access to report group
 		};
 
-		//some drivers return long, some integer
+		//some drivers return long for select count(*), some return integer
 		//https://issues.apache.org/jira/browse/DBUTILS-27
 		//https://issues.apache.org/jira/browse/DBUTILS-17
 		//https://stackoverflow.com/questions/10240901/how-best-to-retrieve-result-of-select-count-from-sql-query-in-java-jdbc-lon
 		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#3279
 		ResultSetHandler<Number> h = new ScalarHandler<>();
 		Number recordCountNumber = dbService.query(sql, h, values);
+
+		boolean canRunReport;
 		if (recordCountNumber == null) {
 			canRunReport = false;
 		} else {
@@ -1249,4 +1327,41 @@ public class ReportService {
 
 		return exclusive;
 	}
+
+	/**
+	 * Returns reports that use a given parameter
+	 *
+	 * @param parameterId the parameter id
+	 * @return linked report names
+	 * @throws SQLException
+	 */
+	public List<Report> getReportsForParameter(int parameterId) throws SQLException {
+		logger.debug("Entering getReportsForParameter: parameterId={}", parameterId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_REPORT_PARAMETERS ARP"
+				+ " ON ARP.REPORT_ID=AQ.QUERY_ID"
+				+ " WHERE ARP.PARAMETER_ID=?";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h, parameterId);
+	}
+
+	/**
+	 * Returns reports that use a given datasource
+	 *
+	 * @param datasourceId the datasource id
+	 * @return linked report names
+	 * @throws SQLException
+	 */
+	public List<Report> getReportsWithDatasource(int datasourceId) throws SQLException {
+		logger.debug("Entering getReportsWithDatasource: datasourceId={}", datasourceId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE DATABASE_ID=?";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h, datasourceId);
+	}
+
 }

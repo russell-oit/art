@@ -19,7 +19,9 @@ package art.output;
 
 import art.enums.PageOrientation;
 import art.report.Report;
+import art.reportoptions.PdfOptions;
 import art.servlets.Config;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.Document;
 import com.lowagie.text.Element;
 import com.lowagie.text.Font;
@@ -30,7 +32,13 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.FontSelector;
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
+import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 
 /**
  * Provides common methods and variables used in pdf generation
@@ -46,7 +54,7 @@ public class PdfHelper {
 
 	/**
 	 * Adds page numbers to a pdf document
-	 * 
+	 *
 	 * @param document the pdf document
 	 */
 	public void addPageNumbers(Document document) {
@@ -118,6 +126,73 @@ public class PdfHelper {
 		//add default font after custom font			
 		body.addFont(FontFactory.getFont(BaseFont.HELVETICA, 8, Font.NORMAL));
 		header.addFont(FontFactory.getFont(BaseFont.HELVETICA, 10, Font.BOLD));
+	}
+
+	/**
+	 * Adds protections to a pdf file, including user and owner passwords, and
+	 * whether one can print or copy contents
+	 *
+	 * @param report the report object for the report associated with the file.
+	 * The repot object contains pdf options e.g. whether one can print
+	 * @param fullOutputFileName the full file path to the pdf file
+	 * @throws java.io.IOException
+	 */
+	public void addProtections(Report report, String fullOutputFileName) throws IOException {
+		//https://www.tutorialspoint.com/pdfbox/
+		//https://self-learning-java-tutorial.blogspot.co.ke/2016/03/pdfbox-encrypt-password-protect-pdf.html
+		//https://pdfbox.apache.org/2.0/cookbook/encryption.html
+
+		Objects.requireNonNull(report, "report must not be null");
+
+		File file = new File(fullOutputFileName);
+		if (!file.exists()) {
+			return;
+		}
+
+		String userPassword = report.getOpenPassword();
+		if (userPassword == null) {
+			userPassword = "";
+		}
+
+		String ownerPassword = report.getModifyPassword();
+		if (ownerPassword == null) {
+			ownerPassword = "";
+		}
+
+		String options = report.getOptions();
+		PdfOptions pdfOptions;
+		if (StringUtils.isBlank(options)) {
+			pdfOptions = new PdfOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			pdfOptions = mapper.readValue(options, PdfOptions.class);
+		}
+
+		if (StringUtils.equals(userPassword, "") && StringUtils.equals(ownerPassword, "")
+				&& pdfOptions.isPdfCanPrint() && pdfOptions.isPdfCanCopyContent()
+				&& pdfOptions.isPdfCanModify()) {
+			//nothing to secure
+			return;
+		}
+
+		try (PDDocument doc = PDDocument.load(file)) {
+			AccessPermission ap = new AccessPermission();
+
+			ap.setCanPrint(pdfOptions.isPdfCanPrint());
+			ap.setCanExtractContent(pdfOptions.isPdfCanCopyContent());
+			ap.setCanModify(pdfOptions.isPdfCanModify());
+
+			// Owner password (to open the file with all permissions)
+			// User password (to open the file but with restricted permissions)
+			StandardProtectionPolicy spp = new StandardProtectionPolicy(ownerPassword, userPassword, ap);
+			int keyLength = pdfOptions.getKeyLength();
+			spp.setEncryptionKeyLength(keyLength);
+			spp.setPreferAES(pdfOptions.isPreferAes());
+			spp.setPermissions(ap);
+			doc.protect(spp);
+
+			doc.save(fullOutputFileName);
+		}
 	}
 
 }

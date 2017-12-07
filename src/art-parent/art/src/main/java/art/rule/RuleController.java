@@ -24,6 +24,7 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -85,7 +86,8 @@ public class RuleController {
 				response.setSuccess(true);
 			} else {
 				//rule not deleted because of linked reports
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -109,7 +111,8 @@ public class RuleController {
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
 			} else {
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -147,7 +150,7 @@ public class RuleController {
 		Integer reportId = null;
 		return showEditRule("edit", model, reportId, returnReportId);
 	}
-	
+
 	@RequestMapping(value = "/copyRule", method = RequestMethod.GET)
 	public String copyRule(@RequestParam("id") Integer id, Model model,
 			@RequestParam(value = "reportId", required = false) Integer reportId,
@@ -186,7 +189,7 @@ public class RuleController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				ruleService.addRule(rule, sessionUser);
-				if (reportId != null) {
+				if (reportId != null && reportId != 0) {
 					ReportRule reportRule = new ReportRule();
 					reportRule.setRule(rule);
 					reportRule.setReportId(reportId);
@@ -203,9 +206,9 @@ public class RuleController {
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			Integer reportRulesReportId = null;
-			if (reportId != null) {
+			if (reportId != null && reportId != 0) {
 				reportRulesReportId = reportId;
-			} else if (returnReportId != null) {
+			} else if (returnReportId != null && returnReportId != 0) {
 				reportRulesReportId = returnReportId;
 			}
 

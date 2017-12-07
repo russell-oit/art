@@ -12,6 +12,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <c:choose>
 	<c:when test="${action == 'add'}">
@@ -43,6 +44,17 @@
 <spring:message code="reports.format.csv" var="csvText"/>
 <spring:message code="reports.format.slk" var="slkText"/>
 <spring:message code="reports.format.tsv" var="tsvText"/>
+<spring:message code="reports.format.txt" var="txtText"/>
+<spring:message code="reports.format.txtZip" var="txtZipText"/>
+<spring:message code="reports.text.selectFile" var="selectFileText"/>
+<spring:message code="reports.text.change" var="changeText"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -59,12 +71,23 @@
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload-ui.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects-1.0.1/jquery.chained.remote.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/vendor/jquery.ui.widget.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.iframe-transport.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-process.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
 
 		<script>
 			//put obtaining of server offset in head to reduce difference between server and client time
@@ -89,6 +112,8 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -107,11 +132,11 @@
 
 		<script type="text/javascript">
 			$(document).ready(function () {
-				//display current time. updates every 1000 milliseconds
-				setInterval('updateClock()', 1000);
-
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="jobsConfig"]').parent().addClass('active');
+
+				//display current time. updates every 1000 milliseconds
+				setInterval('updateClock()', 1000);
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
@@ -145,7 +170,14 @@
 				});
 
 				//Enable Bootstrap-Select
-				$('.selectpicker').selectpicker();
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}',
+					selectAllText: '${selectAllText}',
+					deselectAllText: '${deselectAllText}'
+				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
@@ -168,6 +200,42 @@
 				populateOutputFormatField();
 
 				$('#name').focus();
+
+				$('#describeSchedule').click(function () {
+					var second = $('#scheduleSecond').val();
+					var minute = $('#scheduleMinute').val();
+					var hour = $('#scheduleHour').val();
+					var day = $('#scheduleDay').val();
+					var month = $('#scheduleMonth').val();
+					var weekday = $('#scheduleWeekday').val();
+					var year = $('#scheduleYear').val();
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/describeSchedule',
+						dataType: 'json',
+						data: {second: second, minute: minute, hour: hour, day: day,
+							month: month, weekday: weekday, year: year},
+						success: function (response)
+						{
+							if (response.success) {
+								var scheduleDescription = response.data;
+								var finalString = "<p><pre>" + escapeHtmlContent(scheduleDescription.description)
+										+ "</pre><b>${nextRunDateText}:</b> <pre>"
+										+ escapeHtmlContent(scheduleDescription.nextRunDateString)
+										+ "</pre></p>";
+								$("#mainScheduleDescriptionDiv").html(finalString);
+							} else {
+								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+								$.notify("${errorOccurredText}", "error");
+							}
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert(xhr.responseText);
+						}
+					});
+				});
 			});
 		</script>
 
@@ -185,12 +253,30 @@
 						{
 							var schedule = response.data;
 
-							if (schedule !== null) {
-								$('#scheduleMinute').val(schedule.minute);
-								$('#scheduleHour').val(schedule.hour);
-								$('#scheduleDay').val(schedule.day);
-								$('#scheduleMonth').val(schedule.month);
-								$('#scheduleWeekday').val(schedule.weekday);
+							if (response.success) {
+								if (schedule !== null) {
+									$('#scheduleSecond').val(schedule.second);
+									$('#scheduleMinute').val(schedule.minute);
+									$('#scheduleHour').val(schedule.hour);
+									$('#scheduleDay').val(schedule.day);
+									$('#scheduleMonth').val(schedule.month);
+									$('#scheduleWeekday').val(schedule.weekday);
+									$('#scheduleYear').val(schedule.year);
+									$('#extraSchedules').val(schedule.extraSchedules);
+									$('#holidays').val(schedule.holidays);
+
+									//https://silviomoreto.github.io/bootstrap-select/methods/
+									//https://stackoverflow.com/questions/19543285/use-jquery-each-to-iterate-through-object
+									var sharedHolidayIds = [];
+									$.each(schedule.sharedHolidays, function (index, holiday) {
+										sharedHolidayIds.push(holiday.holidayId);
+									});
+									$('#sharedHolidays').selectpicker('val', sharedHolidayIds);
+								}
+							} else {
+								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+								$.notify("${errorOccurredText}", "error");
 							}
 						},
 						error: ajaxErrorHandler
@@ -241,7 +327,14 @@
 					list.append(new Option('${pptxText}', 'pptx'));
 				} else if (reportTypeId === 141) {
 					//fixed width
-					list.append(new Option('--', '--'));
+					list.append(new Option('${txtText}', 'txt'));
+					list.append(new Option('${txtZipText}', 'txtZip'));
+					list.append(new Option('${htmlText}', 'html'));
+				} else if (reportTypeId === 152) {
+					//csv
+					list.append(new Option('${txtText}', 'csv'));
+					list.append(new Option('${txtZipText}', 'csvZip'));
+					list.append(new Option('${htmlText}', 'html'));
 				} else if (reportTypeId === 110 || reportTypeId === 129) {
 					//dashboard
 					list.append(new Option('${pdfText}', 'pdf'));
@@ -249,6 +342,7 @@
 					//group
 					list.append(new Option('${xlsxText}', 'xlsx'));
 				} else {
+					//tabular
 					switch (jobType) {
 						case 'Alert':
 						case 'JustRun':
@@ -309,20 +403,23 @@
 
 			function toggleEmailFieldsVisibility(jobType, reportTypeId) {
 				//show/hide emailFields
-				if (reportTypeId === 122) {
-					//freemarker
-					$("#mailMessageDiv").hide();
-				} else {
-					switch (jobType) {
-						case 'CacheAppend':
-						case 'CacheInsert':
-						case 'JustRun':
-						case 'Print':
-							$("#emailFields").hide();
-							break;
-						default:
-							$("#emailFields").show();
-					}
+				switch (jobType) {
+					case 'CacheAppend':
+					case 'CacheInsert':
+					case 'JustRun':
+					case 'Print':
+						$("#emailFields").hide();
+						break;
+					case 'EmailInline':
+					case 'CondEmailInline':
+						if (reportTypeId === 122 || reportTypeId === 131) {
+							//freemarker, thymeleaf
+							$("#mailMessageDiv").hide();
+						}
+						break;
+					default:
+						$("#emailFields").show();
+						$("#mailMessageDiv").show();
 				}
 			}
 
@@ -340,8 +437,10 @@
 
 			function toggleOutputFormatVisibility(jobType, reportTypeId) {
 				//show/hide outputFormatDiv
-				if (reportTypeId === 122) {
-					//freemarker
+				if (reportTypeId === 122
+						|| reportTypeId === 131
+						|| reportTypeId === 117 || reportTypeId === 118) {
+					//freemarker, thymeleaf, jxls
 					$("#outputFormatDiv").hide();
 				} else {
 					switch (jobType) {
@@ -380,9 +479,8 @@
 	</jsp:attribute>
 
 	<jsp:body>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<spring:url var="formUrl" value="/saveJob"/>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="job">
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="job" enctype="multipart/form-data">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -399,9 +497,20 @@
 						</c:if>
 					</div>
 				</c:if>
+				<c:if test="${not empty message}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<spring:message code="${message}"/>
+					</div>
+				</c:if>
+
+				<div id="ajaxResponse">
+				</div>
 
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="nextPage" value="${param.nextPage}">
+
+				<form:hidden path="quartzCalendarNames" />
 
 				<c:set var="labelColClass" value="col-md-4" scope="request"/>
 				<c:set var="inputColClass" value="col-md-8" scope="request"/>
@@ -447,7 +556,7 @@
 							<spring:message code="page.text.report"/>
 						</label>
 						<div class="col-sm-8">
-							<p class="form-control-static">${job.report.name}</p>
+							<p class="form-control-static">${job.report.getLocalizedName(pageContext.response.locale)}</p>
 						</div>
 					</div>
 					<form:hidden path="report.reportId" />
@@ -555,7 +664,7 @@
 							<spring:message code="jobs.label.runsToArchive"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="runsToArchive" maxlength="2" class="form-control"/>
+							<form:input path="runsToArchive" maxlength="3" class="form-control"/>
 							<form:errors path="runsToArchive" cssClass="error"/>
 						</div>
 					</div>
@@ -584,29 +693,42 @@
 							<spring:message code="jobs.label.fixedFileName"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="fixedFileName" maxlength="50" class="form-control"/>
+							<form:textarea path="fixedFileName" rows="3" cols="40" class="form-control" maxlength="1000"/>
 							<form:errors path="fixedFileName" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-md-4 control-label " for="ftpServer.ftpServerId">
-							<spring:message code="jobs.label.ftpServer"/>
+						<label class="col-md-4 control-label " for="destinations">
+							<spring:message code="jobs.label.destinations"/>
 						</label>
 						<div class="col-md-8">
-							<form:select path="ftpServer.ftpServerId" class="form-control selectpicker">
-								<form:option value="0">--</form:option>
-									<option data-divider="true"></option>
-								<c:forEach var="ftpServer" items="${ftpServers}">
-									<c:set var="ftpServerStatus">
-										<t:displayActiveStatus active="${ftpServer.active}" hideActive="true"/>
+							<form:select path="destinations" class="form-control selectpicker"
+										 multiple="true" data-actions-box="true">
+								<c:forEach var="destination" items="${destinations}">
+									<c:set var="destinationStatus">
+										<t:displayActiveStatus active="${destination.active}" hideActive="true"/>
 									</c:set>
-									<form:option value="${ftpServer.ftpServerId}"
-												 data-content="${ftpServer.name} ${ftpServerStatus}">
-										${ftpServer.name} 
-									</form:option>
+									<c:if test="${not empty job.destinations}">
+										<c:set var="selected">
+											${job.destinations.contains(destination) ? "selected" : ""}
+										</c:set>
+									</c:if>
+									<option value="${destination.destinationId}" ${selected}
+											data-content="${encode:forHtmlAttribute(destination.name)}&nbsp;${encode:forHtmlAttribute(destinationStatus)}">
+										${encode:forHtmlContent(destination.name)}
+									</option>
 								</c:forEach>
 							</form:select>
-							<form:errors path="ftpServer.ftpServerId" cssClass="error"/>
+							<form:errors path="destinations" cssClass="error"/>
+						</div>
+					</div>
+					<div id="subDirectoryDiv" class="form-group">
+						<label class="col-md-4 control-label " for="subDirectory">
+							<spring:message code="destinations.label.subDirectory"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="subDirectory" maxlength="100" class="form-control"/>
+							<form:errors path="subDirectory" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
@@ -636,7 +758,7 @@
 							<spring:message code="jobs.label.mailTo"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailTo" class="form-control"/>
+							<form:input path="mailTo" maxlength="254" class="form-control"/>
 							<form:errors path="mailTo" cssClass="error"/>
 						</div>
 					</div>
@@ -650,7 +772,7 @@
 									<option data-divider="true"></option>
 								<c:forEach var="dynamicRecipientReport" items="${dynamicRecipientReports}">
 									<form:option value="${dynamicRecipientReport.reportId}">
-										${dynamicRecipientReport.name} 
+										${dynamicRecipientReport.getLocalizedName(pageContext.response.locale)} 
 									</form:option>
 								</c:forEach>
 							</form:select>
@@ -662,7 +784,7 @@
 							<spring:message code="jobs.label.mailCc"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailCc" class="form-control"/>
+							<form:input path="mailCc" maxlength="254" class="form-control"/>
 							<form:errors path="mailCc" cssClass="error"/>
 						</div>
 					</div>
@@ -671,7 +793,7 @@
 							<spring:message code="jobs.label.mailBcc"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailBcc" class="form-control"/>
+							<form:input path="mailBcc" maxlength="254" class="form-control"/>
 							<form:errors path="mailBcc" cssClass="error"/>
 						</div>
 					</div>
@@ -680,8 +802,28 @@
 							<spring:message code="jobs.label.mailSubject"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailSubject" class="form-control"/>
+							<form:input path="mailSubject" maxlength="1000" class="form-control"/>
 							<form:errors path="mailSubject" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="emailTemplate">
+							<spring:message code="reports.label.template"/>
+						</label>
+						<div class="col-md-8">
+							<div>
+								<form:input path="emailTemplate" maxlength="100" class="form-control"/>
+								<form:errors path="emailTemplate" cssClass="error"/>
+							</div>
+							<div class="fileinput fileinput-new" data-provides="fileinput">
+								<span class="btn btn-default btn-file">
+									<span class="fileinput-new">${selectFileText}</span>
+									<span class="fileinput-exists">${changeText}</span>
+									<input type="file" name="emailTemplateFile">
+								</span>
+								<span class="fileinput-filename"></span>
+								<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+							</div>
 						</div>
 					</div>
 					<div id="mailMessageDiv">
@@ -700,25 +842,52 @@
 				<fieldset>
 					<legend><spring:message code="jobs.text.schedule"/></legend>
 					<div class="form-group">
-						<label class="control-label col-md-4" for="schedules">
-							<spring:message code="jobs.label.schedules"/>
+						<label class="col-md-4 control-label " for="schedule">
+							<spring:message code="jobs.text.fixedSchedule"/>
 						</label>
 						<div class="col-md-8">
-							<select name="schedules" id="schedules" class="form-control selectpicker">
-								<option value="0">--</option>
-								<option data-divider="true"></option>
-								<c:forEach var="schedule" items="${schedules}">
-									<option value="${schedule.scheduleId}">${schedule.name}</option>
-								</c:forEach>
-							</select>
-							<button type="button" id="getSchedule" class="btn btn-default">
-								<spring:message code="jobs.button.getSchedule"/>
-							</button>
-							<input type="text" id="clock" readonly class="form-control"/>
+							<form:select path="schedule" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<form:options items="${schedules}" itemLabel="name" itemValue="scheduleId"/>
+							</form:select>
+							<form:errors path="schedule" cssClass="error"/>
 						</div>
 					</div>
 
 					<hr>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="schedules">
+							<spring:message code="jobs.label.schedules"/>
+						</label>
+						<div class="col-md-8">
+							<p>
+								<select name="schedules" id="schedules" class="form-control selectpicker">
+									<option value="0">--</option>
+									<option data-divider="true"></option>
+									<c:forEach var="schedule" items="${schedules}">
+										<option value="${schedule.scheduleId}">${schedule.name}</option>
+									</c:forEach>
+								</select>
+							</p>
+							<p>
+								<button type="button" id="getSchedule" class="btn btn-default">
+									<spring:message code="jobs.button.getSchedule"/>
+								</button>
+							</p>
+							<input type="text" id="clock" readonly class="form-control"/>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="scheduleSecond">
+							<spring:message code="schedules.label.second"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="scheduleSecond" maxlength="100" class="form-control"/>
+							<form:errors path="scheduleSecond" cssClass="error"/>
+						</div>
+					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label " for="scheduleMinute">
 							<spring:message code="schedules.label.minute"/>
@@ -738,15 +907,6 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleMonth">
-							<spring:message code="schedules.label.month"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleMonth" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleMonth" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
 						<label class="col-md-4 control-label " for="scheduleDay">
 							<spring:message code="schedules.label.day"/>
 						</label>
@@ -756,12 +916,45 @@
 						</div>
 					</div>
 					<div class="form-group">
+						<label class="col-md-4 control-label " for="scheduleMonth">
+							<spring:message code="schedules.label.month"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="scheduleMonth" maxlength="100" class="form-control"/>
+							<form:errors path="scheduleMonth" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
 						<label class="col-md-4 control-label " for="scheduleWeekday">
 							<spring:message code="schedules.label.weekday"/>
 						</label>
 						<div class="col-md-8">
 							<form:input path="scheduleWeekday" maxlength="100" class="form-control"/>
 							<form:errors path="scheduleWeekday" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="scheduleYear">
+							<spring:message code="schedules.label.year"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="scheduleYear" maxlength="100" class="form-control"/>
+							<form:errors path="scheduleYear" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-8 col-md-offset-4">
+							<button type="button" id="describeSchedule" class="btn btn-default">
+								<spring:message code="schedules.button.describe"/>
+							</button>
+							<div id="mainScheduleDescriptionDiv">
+								<p>
+									<c:if test="${not empty mainScheduleDescription}">
+									<pre>${encode:forHtmlContent(mainScheduleDescription)}</pre>
+									<b><spring:message code="jobs.text.nextRunDate"/>:</b> <pre><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
+								</c:if>
+								</p>
+							</div>
 						</div>
 					</div>
 
@@ -792,6 +985,41 @@
 								</span>
 							</div>
 							<form:errors path="endDateString" cssClass="error"/>
+						</div>
+					</div>
+
+					<hr>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="extraSchedules">
+							<spring:message code="jobs.label.extraSchedules"/>
+						</label>
+						<div class="col-md-8">
+							<form:textarea path="extraSchedules" rows="3" cols="40" class="form-control"/>
+							<form:errors path="extraSchedules" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="holidays">
+							<spring:message code="schedules.label.holidays"/>
+						</label>
+						<div class="col-md-8">
+							<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
+							<form:errors path="holidays" cssClass="error"/>
+						</div>
+					</div>
+
+					<hr>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="sharedHolidays">
+							<spring:message code="schedules.label.sharedHolidays"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="sharedHolidays" items="${holidays}" multiple="true" 
+										 itemLabel="name" itemValue="holidayId" 
+										 class="form-control selectpicker"
+										 data-actions-box="true"
+										 />
+							<form:errors path="sharedHolidays" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

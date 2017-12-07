@@ -17,6 +17,7 @@
  */
 package art.export;
 
+import art.enums.AccessLevel;
 import art.report.ReportService;
 import art.servlets.Config;
 import art.user.User;
@@ -60,6 +61,30 @@ public class ExportController {
 
 		String jobsExportPath = Config.getJobsExportPath();
 		String fullFilename = jobsExportPath + filename;
+		serveFile(fullFilename, request, response);
+	}
+
+	@GetMapping("/export/jobLogs/{filename:.+}")
+	public void serveJobLogFile(@PathVariable("filename") String filename,
+			HttpServletRequest request, HttpServletResponse response,
+			HttpSession session) {
+
+		logger.debug("Entering serveJobLogFile: filename='{}'", filename);
+
+		try {
+			//only allow senior admins and above to view job log files
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			if (sessionUser.getAccessLevel().getValue() < AccessLevel.SeniorAdmin.getValue()) {
+				request.getRequestDispatcher("/accessDenied").forward(request, response);
+				return;
+			}
+		} catch (ServletException | IOException ex) {
+			logger.error("Error", ex);
+			return;
+		}
+
+		String jobLogsPath = Config.getJobLogsPath();
+		String fullFilename = jobLogsPath + filename;
 		serveFile(fullFilename, request, response);
 	}
 

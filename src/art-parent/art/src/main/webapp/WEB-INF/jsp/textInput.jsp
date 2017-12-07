@@ -16,5 +16,5 @@ Display report parameter that uses text input
 	   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(requestContext.locale))}"
 	   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 	   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-	   value="${encode:forHtmlAttribute(reportParam.getHtmlValue(requestContext.locale))}">
+	   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(requestContext.locale))}">
 

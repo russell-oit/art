@@ -100,7 +100,7 @@ public class JPivotController {
 				return errorPage;
 			}
 
-			String reportName = report.getName();
+			String reportName = report.getLocalizedName(locale);
 			model.addAttribute("reportName", reportName);
 
 			//check if user has permission to run report
@@ -189,7 +189,7 @@ public class JPivotController {
 			model.addAttribute("reportType", reportType);
 
 			//put title in session. may be lost if olap navigator option on jpivot toolbar is used
-			String title = report.getName();
+			String title = report.getLocalizedName(locale);
 			session.setAttribute("pivotTitle" + reportId, title);
 
 			Datasource datasource = report.getDatasource();
@@ -253,8 +253,7 @@ public class JPivotController {
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				paramProcessor.setLocale(locale);
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 
@@ -431,7 +430,8 @@ public class JPivotController {
 
 	@RequestMapping(value = "/saveJPivot", method = RequestMethod.POST)
 	public String saveJPivot(HttpServletRequest request,
-			HttpSession session, RedirectAttributes redirectAttributes) {
+			HttpSession session, RedirectAttributes redirectAttributes,
+			Locale locale) {
 
 		logger.debug("Entering saveJPivot");
 
@@ -473,7 +473,7 @@ public class JPivotController {
 				//overwrite query source with current mdx
 				//query details loaded. update query
 				report.setReportSource(mdx);
-				if (StringUtils.length(queryDescription) > 0) {
+				if (StringUtils.isNotBlank(queryDescription)) {
 					//update description
 					report.setDescription(queryDescription);
 				}
@@ -496,20 +496,20 @@ public class JPivotController {
 				newReport.setActive(report.isActive());
 				newReport.setHidden(report.isHidden());
 
-				if (queryDescription == null || queryDescription.length() == 0) {
+				if (StringUtils.isBlank(queryDescription)) {
 					//no description provided. use original query description
-					queryDescription = report.getDescription();
+					queryDescription = report.getLocalizedDescription(locale);
 				}
 				newReport.setDescription(queryDescription);
 
 				String queryName = request.getParameter("newPivotName");
 				if (StringUtils.isBlank(queryName)) {
 					//no name provided for the new query. create a default name
-					queryName = report.getName() + "-2";
+					queryName = report.getLocalizedName(locale) + "-2";
 				}
 				newReport.setName(queryName);
 
-				newReport.setReportGroup(report.getReportGroup());
+				newReport.setReportGroups(report.getReportGroups());
 				newReport.setDatasource(report.getDatasource());
 
 				//save current view's mdx
@@ -524,7 +524,7 @@ public class JPivotController {
 				redirectAttributes.addFlashAttribute("message", "jpivot.message.reportAdded");
 				return "redirect:/success";
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			redirectAttributes.addFlashAttribute("error", ex);
 			return "redirect:/reportError";
 		}

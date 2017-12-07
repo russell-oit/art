@@ -17,13 +17,16 @@
  */
 package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Represents report options for report types that define a csv file on the
  * server
  *
  * @author Timothy Anyona
  */
-public class CsvServerOptions extends GeneralReportOptions {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CsvServerOptions {
 
 	private String dataFile;
 

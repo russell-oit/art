@@ -113,6 +113,8 @@ public class RunReportController {
 			errorPage = "reportError";
 		}
 
+		String reportName = null;
+
 		try {
 			report = reportService.getReport(reportId);
 
@@ -120,6 +122,8 @@ public class RunReportController {
 				model.addAttribute("message", "reports.message.reportNotFound");
 				return errorPage;
 			}
+
+			reportName = report.getLocalizedName(locale);
 
 			//check if user has permission to run report
 			//admins can run all reports, even disabled ones. only check for non admin users
@@ -143,14 +147,13 @@ public class RunReportController {
 				}
 			}
 
-			String reportName = report.getName();
-			ReportType reportType = report.getReportType();
-
 			//make sure the browser does not cache the result using Ajax (this happens in IE)
 //			if (isFragment) {
 //				response.setHeader("Cache-control", "no-cache");
 //			}
 			response.setHeader("Cache-control", "no-cache");
+
+			ReportType reportType = report.getReportType();
 
 			if (reportType.isDashboard()) {
 				return "forward:/showDashboard";
@@ -169,8 +172,7 @@ public class RunReportController {
 				int fetchTime = NOT_APPLICABLE;
 
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				paramProcessor.setLocale(locale);
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "jpivot", reportParamsList);
 
@@ -186,8 +188,7 @@ public class RunReportController {
 				int fetchTime = NOT_APPLICABLE;
 
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				paramProcessor.setLocale(locale);
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "saiku", reportParamsList);
 
@@ -332,8 +333,7 @@ public class RunReportController {
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				paramProcessor.setLocale(locale);
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				reportParamsList = paramProcessorResult.getReportParamsList();
@@ -370,7 +370,7 @@ public class RunReportController {
 
 				// display status information, parameters and final sql
 				if (showReportHeaderAndFooter) {
-					String shortDescription = report.getShortDescription();
+					String shortDescription = report.getLocalizedShortDescription(locale);
 					shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
 					String description = "";
@@ -418,7 +418,7 @@ public class RunReportController {
 					//generate output
 					//generate file name to use for report types and formats that generate files
 					FilenameHelper filenameHelper = new FilenameHelper();
-					String baseFileName = filenameHelper.getBaseFilename(report);
+					String baseFileName = filenameHelper.getBaseFilename(report, locale);
 					String exportPath = Config.getReportsExportPath();
 					String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 					String fileName = baseFileName + "." + extension;
@@ -440,6 +440,9 @@ public class RunReportController {
 						model.addAttribute("message", outputResult.getMessage());
 						return errorPage;
 					}
+
+					//encrypt file if applicable
+					report.encryptFile(outputFileName);
 
 					if (reportType == ReportType.TabularHeatmap) {
 						TabularHeatmapOptions options;
@@ -497,8 +500,8 @@ public class RunReportController {
 			ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
 		} catch (Exception ex) {
 			logger.error("Error. {}, {}", report, sessionUser, ex);
-			if (report != null) {
-				model.addAttribute("reportName", report.getName());
+			if (reportName != null) {
+				model.addAttribute("reportName", reportName);
 			}
 			model.addAttribute("error", ex);
 			return errorPage;

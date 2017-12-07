@@ -17,16 +17,23 @@
 
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
-	
+
 	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -34,7 +41,17 @@
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				
+
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}',
+					selectAllText: '${selectAllText}',
+					deselectAllText: '${deselectAllText}'
+				});
+
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
@@ -44,12 +61,30 @@
 				$('#activeUnchanged').change(function () {
 					toggleActiveEnabled();
 				});
-				
+
 				toggleActiveEnabled();
+
+				$('#hiddenUnchanged').change(function () {
+					toggleHiddenEnabled();
+				});
+
+				toggleHiddenEnabled();
+
+				$('#reportGroupsUnchanged').change(function () {
+					toggleReportGroupsEnabled();
+				});
+
+				toggleReportGroupsEnabled();
+
+				$('#omitTitleRowUnchanged').change(function () {
+					toggleOmitTitleRowEnabled();
+				});
+
+				toggleOmitTitleRowEnabled();
 
 			});
 		</script>
-		
+
 		<script type="text/javascript">
 			function toggleActiveEnabled() {
 				if ($('#activeUnchanged').is(':checked')) {
@@ -58,6 +93,34 @@
 				} else {
 //					$('#active').prop('disabled', false);
 					$('#active').bootstrapSwitch('disabled', false);
+				}
+			}
+
+			function toggleHiddenEnabled() {
+				if ($('#hiddenUnchanged').is(':checked')) {
+//					$('#active').prop('disabled', true);
+					$('#hidden').bootstrapSwitch('disabled', true);
+				} else {
+//					$('#active').prop('disabled', false);
+					$('#hidden').bootstrapSwitch('disabled', false);
+				}
+			}
+
+			function toggleReportGroupsEnabled() {
+				if ($('#reportGroupsUnchanged').is(':checked')) {
+					$('#reportGroups').prop('disabled', true);
+				} else {
+					$('#reportGroups').prop('disabled', false);
+				}
+			}
+
+			function toggleOmitTitleRowEnabled() {
+				if ($('#omitTitleRowUnchanged').is(':checked')) {
+//					$('#active').prop('disabled', true);
+					$('#omitTitleRow').bootstrapSwitch('disabled', true);
+				} else {
+//					$('#active').prop('disabled', false);
+					$('#omitTitleRow').bootstrapSwitch('disabled', false);
 				}
 			}
 		</script>
@@ -111,6 +174,58 @@
 								<spring:message code="page.checkbox.unchanged"/>
 							</label>
 						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="hidden">
+						<spring:message code="parameters.label.hidden"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="hidden" id="hidden" class="switch-yes-no"/>
+						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="hiddenUnchanged" id="hiddenUnchanged"/>
+								<spring:message code="page.checkbox.unchanged"/>
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="reportGroups">
+						<spring:message code="page.text.reportGroups"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="reportGroups" items="${reportGroups}" multiple="true" 
+									 itemLabel="name" itemValue="reportGroupId" 
+									 class="form-control selectpicker"
+									 data-actions-box="true"
+									 />
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="reportGroupsUnchanged" id="reportGroupsUnchanged"/>
+								<spring:message code="page.checkbox.unchanged"/>
+							</label>
+						</div>
+						<form:errors path="reportGroups" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="omitTitleRow">
+						<spring:message code="reports.label.omitTitleRow"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="omitTitleRow" id="omitTitleRow" class="switch-yes-no"/>
+						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="omitTitleRowUnchanged" id="omitTitleRowUnchanged"/>
+								<spring:message code="page.checkbox.unchanged"/>
+							</label>
+						</div>
+						<form:errors path="omitTitleRow" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

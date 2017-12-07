@@ -7,7 +7,8 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
-<!-- Schedule field values. Based on quartz javadoc - CronExpression class -->
+<%-- Schedule field value documentation. Based on quartz javadoc - CronExpression class --%>
+<%-- http://www.quartz-scheduler.org/api/2.2.1/org/quartz/CronExpression.html --%>
 <table class="table">
 	<tr>
 		<th style="text-align:left;">Field</th>
@@ -15,7 +16,14 @@
 		<th style="text-align:left;">Allowed Values</th>
 		<th style="text-align:left;">&nbsp;</th>
 		<th style="text-align:left;">Allowed Special Characters</th>
-	</tr> 
+	</tr>
+	<tr>
+		<td style="text-align:left;"><code>Second</code></td>
+		<td style="text-align:left;">&nbsp;</td>
+		<td style="text-align:left;"><code>0-59</code></td>
+		<td style="text-align:left;">&nbsp;</td>
+		<td style="text-align:left;"><code>, - * /</code></td>
+	</tr>
 	<tr>
 		<td style="text-align:left;"><code>Minute</code></td>
 		<td style="text-align:left;">&nbsp;</td>
@@ -50,7 +58,14 @@
 		<td style="text-align:left;"><code>1-7 or SUN-SAT</code></td>
 		<td style="text-align:left;">&nbsp;</td>
 		<td style="text-align:left;"><code>, - * ? / L #</code></td>
-	</tr> 
+	</tr>
+	<tr>
+		<td style="text-align:left;"><code>Year</code></td>
+		<td style="text-align:left;">&nbsp;</td>
+		<td style="text-align:left;"><code>1970-2199</code></td>
+		<td style="text-align:left;">&nbsp;</td>
+		<td style="text-align:left;"><code>, - * /</code></td>
+	</tr>
 </table>
 
 <ul>
@@ -123,6 +138,11 @@
 		Overflowing ranges is supported - that is, having a larger number on the left hand side
 		than the right e.g. 22-2 in the hour field to catch 10 o'clock at night until 2 o'clock in the morning,
 		or NOV-FEB in the month field.
+	</li>
+	<li>
+		See <a href="http://www.quartz-scheduler.org/api/2.2.1/org/quartz/CronExpression.html">
+			http://www.quartz-scheduler.org/api/2.2.1/org/quartz/CronExpression.html
+		</a>
 	</li>
 </ul>
 

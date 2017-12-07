@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.odftoolkit.odfdom.dom.element.style.StyleMasterPageElement;
 import org.odftoolkit.odfdom.dom.style.props.OdfPageLayoutProperties;
 import org.odftoolkit.odfdom.incubator.doc.style.OdfStylePageLayout;
@@ -199,6 +200,25 @@ public class OdsOutput extends StandardOutput {
 	}
 
 	@Override
+	public void addCellImage(byte[] binaryData) {
+		cell = row.getCellByIndex(cellNumber++);
+
+		//images being repeated in the generated file. not sure why
+//		if (binaryData != null) {
+//			String tempFileName = RandomStringUtils.randomAlphanumeric(10) + ".png";
+//			String tempFilePath = Config.getReportsExportPath() + tempFileName;
+//			File file = new File(tempFilePath);
+//			try {
+//				FileUtils.writeByteArrayToFile(file, binaryData);
+//				cell.setImage(file.toURI());
+//			} catch (IOException ex) {
+//				endOutput();
+//				throw new RuntimeException(ex);
+//			}
+//		}
+	}
+
+	@Override
 	public void newRow() {
 		//don't use table.appendRow(). a new table/sheet seems to have 2 rows already in it
 		row = table.getRowByIndex(currentRow++);
@@ -224,6 +244,14 @@ public class OdsOutput extends StandardOutput {
 	public void endOutput() {
 		try {
 			if (document != null) {
+				//set open password
+				String openPassword = report.getOpenPassword();
+				if (StringUtils.isNotEmpty(openPassword)) {
+					document.setPassword(openPassword);
+				}
+
+				//no way to set modify password. can only protect the worksheet, which can be unprotected without a password
+				//table.setProtected(true);
 				document.save(fullOutputFileName);
 				document.close();
 			}

@@ -17,6 +17,7 @@
  */
 package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 /**
@@ -24,7 +25,8 @@ import java.util.List;
  *
  * @author Timothy Anyona
  */
-public class WebMapOptions extends GeneralReportOptions {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class WebMapOptions {
 
 	private String height = "400px";
 	private String cssFile;

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.odftoolkit.odfdom.dom.element.style.StyleMasterPageElement;
 import org.odftoolkit.odfdom.dom.style.props.OdfPageLayoutProperties;
 import org.odftoolkit.odfdom.incubator.doc.style.OdfStylePageLayout;
@@ -184,6 +185,33 @@ public class OdtOutput extends StandardOutput {
 	}
 
 	@Override
+	public void addCellImage(byte[] binaryData) {
+		outputCellText("");
+				
+		//cell.setImage() or Image.newImage() doesn't release handle to image file
+//		if (binaryData == null) {
+//			outputCellText("");
+//		} else {
+//			//https://apache.googlesource.com/odftoolkit/+/refs/heads/trunk/simple/src/test/java/org/odftoolkit/simple/draw/ImageTest.java
+//			//https://incubator.apache.org/odftoolkit/simple/document/cookbook/index.html
+//			//https://stackoverflow.com/questions/4350084/byte-to-file-in-java
+//			//http://www.java2s.com/Tutorial/Java/0320__Network/GetURIfromFile.htm
+//			//http://www.java2s.com/Code/Java/JDK-7/ConvertPathtoURI.htm
+//			cell = row.getCellByIndex(cellNumber++);
+//			String tempFileName = RandomStringUtils.randomAlphanumeric(10) + ".png";
+//			String tempFilePath = Config.getReportsExportPath() + tempFileName;
+//			File file = new File(tempFilePath);
+//			try {
+//				FileUtils.writeByteArrayToFile(file, binaryData);
+//				cell.setImage(file.toURI());
+//			} catch (IOException ex) {
+//				endOutput();
+//				throw new RuntimeException(ex);
+//			}
+//		}
+	}
+
+	@Override
 	public void newRow() {
 		row = table.appendRow();
 		cellNumber = 0;
@@ -213,6 +241,12 @@ public class OdtOutput extends StandardOutput {
 	public void endOutput() {
 		try {
 			if (document != null) {
+				//set open password
+				String openPassword = report.getOpenPassword();
+				if (StringUtils.isNotEmpty(openPassword)) {
+					document.setPassword(openPassword);
+				}
+
 				document.save(fullOutputFileName);
 				document.close();
 			}

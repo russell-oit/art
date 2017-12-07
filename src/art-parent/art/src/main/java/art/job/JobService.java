@@ -20,33 +20,55 @@ package art.job;
 import art.connectionpool.DbConnections;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
+import art.destination.Destination;
+import art.destination.DestinationService;
 import art.enums.JobType;
 import art.ftpserver.FtpServer;
 import art.ftpserver.FtpServerService;
+import art.holiday.Holiday;
+import art.holiday.HolidayService;
+import art.jobrunners.ReportJob;
 import art.report.Report;
 import art.report.ReportService;
+import art.schedule.Schedule;
+import art.schedule.ScheduleService;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
+import art.utils.CronStringHelper;
+import art.utils.ExpressionHelper;
 import art.utils.SchedulerUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobDetail;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
+import org.quartz.impl.calendar.CronCalendar;
+import org.quartz.impl.triggers.AbstractTrigger;
+import org.quartz.impl.triggers.CronTriggerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,15 +90,23 @@ public class JobService {
 	private final ReportService reportService;
 	private final UserService userService;
 	private final FtpServerService ftpServerService;
+	private final ScheduleService scheduleService;
+	private final HolidayService holidayService;
+	private final DestinationService destinationService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
-			UserService userService, FtpServerService ftpServerService) {
+			UserService userService, FtpServerService ftpServerService,
+			ScheduleService scheduleService, HolidayService holidayService,
+			DestinationService destinationService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
 		this.userService = userService;
 		this.ftpServerService = ftpServerService;
+		this.scheduleService = scheduleService;
+		this.holidayService = holidayService;
+		this.destinationService = destinationService;
 	}
 
 	public JobService() {
@@ -84,6 +114,9 @@ public class JobService {
 		reportService = new ReportService();
 		userService = new UserService();
 		ftpServerService = new FtpServerService();
+		scheduleService = new ScheduleService();
+		holidayService = new HolidayService();
+		destinationService = new DestinationService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -149,11 +182,13 @@ public class JobService {
 		job.setName(rs.getString("JOB_NAME"));
 		job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
 		job.setJobType(JobType.toEnum(rs.getString("JOB_TYPE")));
+		job.setScheduleSecond(rs.getString("JOB_SECOND"));
 		job.setScheduleMinute(rs.getString("JOB_MINUTE"));
 		job.setScheduleHour(rs.getString("JOB_HOUR"));
 		job.setScheduleDay(rs.getString("JOB_DAY"));
-		job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
 		job.setScheduleMonth(rs.getString("JOB_MONTH"));
+		job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
+		job.setScheduleYear(rs.getString("JOB_YEAR"));
 		job.setMailTo(rs.getString("MAIL_TOS"));
 		job.setMailFrom(rs.getString("MAIL_FROM"));
 		job.setMailCc(rs.getString("MAIL_CC"));
@@ -177,7 +212,12 @@ public class JobService {
 		job.setRecipientsReportId(rs.getInt("RECIPIENTS_QUERY_ID"));
 		job.setRunsToArchive(rs.getInt("RUNS_TO_ARCHIVE"));
 		job.setFixedFileName(rs.getString("FIXED_FILE_NAME"));
+		job.setSubDirectory(rs.getString("SUB_DIRECTORY"));
 		job.setBatchFile(rs.getString("BATCH_FILE"));
+		job.setEmailTemplate(rs.getString("EMAIL_TEMPLATE"));
+		job.setExtraSchedules(rs.getString("EXTRA_SCHEDULES"));
+		job.setHolidays(rs.getString("HOLIDAYS"));
+		job.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
 		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		job.setCreatedBy(rs.getString("CREATED_BY"));
@@ -191,6 +231,15 @@ public class JobService {
 
 		FtpServer ftpServer = ftpServerService.getFtpServer(rs.getInt("FTP_SERVER_ID"));
 		job.setFtpServer(ftpServer);
+
+		Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
+		job.setSchedule(schedule);
+
+		List<Holiday> sharedHolidays = holidayService.getJobHolidays(job.getJobId());
+		job.setSharedHolidays(sharedHolidays);
+
+		List<Destination> destinations = destinationService.getJobDestinations(job.getJobId());
+		job.setDestinations(destinations);
 	}
 
 	/**
@@ -237,7 +286,7 @@ public class JobService {
 		//get job object. need job details in order to delete cached table for cached result jobs
 		Job job = getJob(id);
 		if (job == null) {
-			logger.warn("Cannot delete job: {}. Job not available.", id);
+			logger.warn("Cannot delete job {}. Job not available.", id);
 			return;
 		}
 
@@ -245,15 +294,11 @@ public class JobService {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler == null) {
-			logger.warn("Cannot delete job: {}. Scheduler not available.", id);
+			logger.warn("Cannot delete job {}. Scheduler not available.", id);
 			return;
 		}
 
-		String jobName = "job" + id;
-		String triggerName = "trigger" + id;
-
-		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
-		scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP));
+		deleteQuartzJob(job, scheduler);
 
 		// Delete the Cached table if this job is a cache result one
 		JobType jobType = job.getJobType();
@@ -325,18 +370,7 @@ public class JobService {
 
 		//generate new id
 		String sql = "SELECT MAX(JOB_ID) FROM ART_JOBS";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		saveJob(job, newId, actionUser);
 
@@ -396,6 +430,13 @@ public class JobService {
 			ftpServerId = job.getFtpServer().getFtpServerId();
 		}
 
+		Integer scheduleId;
+		if (job.getSchedule() == null) {
+			scheduleId = 0;
+		} else {
+			scheduleId = job.getSchedule().getScheduleId();
+		}
+
 		String migratedToQuartz = "X";
 
 		int affectedRows;
@@ -408,15 +449,18 @@ public class JobService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_JOBS"
 					+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME,"
-					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
-					+ " JOB_WEEKDAY, JOB_MONTH, MAIL_TOS, MAIL_FROM, MAIL_CC,"
+					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_SECOND, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
+					+ " JOB_MONTH, JOB_WEEKDAY, JOB_YEAR, MAIL_TOS, MAIL_FROM, MAIL_CC,"
 					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_DATASOURCE_ID, CACHED_TABLE_NAME,"
 					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
-					+ " FIXED_FILE_NAME, BATCH_FILE, FTP_SERVER_ID,"
+					+ " FIXED_FILE_NAME, SUB_DIRECTORY, BATCH_FILE,"
+					+ " FTP_SERVER_ID, EMAIL_TEMPLATE,"
+					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
+					+ " SCHEDULE_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 35) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 43) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -426,11 +470,13 @@ public class JobService {
 				username,
 				job.getOutputFormat(),
 				job.getJobType().getValue(),
+				job.getScheduleSecond(),
 				job.getScheduleMinute(),
 				job.getScheduleHour(),
 				job.getScheduleDay(),
-				job.getScheduleWeekday(),
 				job.getScheduleMonth(),
+				job.getScheduleWeekday(),
+				job.getScheduleYear(),
 				job.getMailTo(),
 				job.getMailFrom(),
 				job.getMailCc(),
@@ -450,8 +496,14 @@ public class JobService {
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getFixedFileName(),
+				job.getSubDirectory(),
 				job.getBatchFile(),
 				ftpServerId,
+				job.getEmailTemplate(),
+				job.getExtraSchedules(),
+				job.getHolidays(),
+				job.getQuartzCalendarNames(),
+				scheduleId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -460,14 +512,18 @@ public class JobService {
 		} else {
 			String sql = "UPDATE ART_JOBS SET JOB_NAME=?, QUERY_ID=?,"
 					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
-					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?,"
-					+ " JOB_MONTH=?, MAIL_TOS=?, MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
+					+ " JOB_SECOND=?, JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?,"
+					+ " JOB_MONTH=?, JOB_WEEKDAY=?, JOB_YEAR=?, MAIL_TOS=?,"
+					+ " MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
 					+ " SUBJECT=?, MESSAGE=?, CACHED_DATASOURCE_ID=?, CACHED_TABLE_NAME=?,"
 					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
 					+ " ACTIVE=?, ENABLE_AUDIT=?,"
 					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
 					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?,"
-					+ " FIXED_FILE_NAME=?, BATCH_FILE=?, FTP_SERVER_ID=?,"
+					+ " FIXED_FILE_NAME=?, SUB_DIRECTORY=?,"
+					+ " BATCH_FILE=?, FTP_SERVER_ID=?,"
+					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
+					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -478,11 +534,13 @@ public class JobService {
 				username,
 				job.getOutputFormat(),
 				job.getJobType().getValue(),
+				job.getScheduleSecond(),
 				job.getScheduleMinute(),
 				job.getScheduleHour(),
 				job.getScheduleDay(),
-				job.getScheduleWeekday(),
 				job.getScheduleMonth(),
+				job.getScheduleWeekday(),
+				job.getScheduleYear(),
 				job.getMailTo(),
 				job.getMailFrom(),
 				job.getMailCc(),
@@ -502,8 +560,14 @@ public class JobService {
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getFixedFileName(),
+				job.getSubDirectory(),
 				job.getBatchFile(),
 				ftpServerId,
+				job.getEmailTemplate(),
+				job.getExtraSchedules(),
+				job.getHolidays(),
+				job.getQuartzCalendarNames(),
+				scheduleId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()
@@ -562,8 +626,8 @@ public class JobService {
 	 * @return all the jobs the user has access to
 	 * @throws java.sql.SQLException
 	 */
-	public List<Job> getJobs(int userId) throws SQLException {
-		logger.debug("Entering getJobs: userId={}", userId);
+	public List<Job> getUserJobs(int userId) throws SQLException {
+		logger.debug("Entering getUserJobs: userId={}", userId);
 
 		List<Job> jobs = new ArrayList<>();
 
@@ -633,6 +697,405 @@ public class JobService {
 		String sql = SQL_SELECT_ALL + " WHERE AJ.MIGRATED_TO_QUARTZ='N'";
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h);
+	}
+
+	/**
+	 * Deletes the quartz job associated with the given art job, also deleting
+	 * any associated triggers and calendars
+	 *
+	 * @param job the art job object
+	 * @param scheduler the quartz scheduler
+	 * @throws org.quartz.SchedulerException
+	 */
+	public void deleteQuartzJob(Job job, Scheduler scheduler) throws SchedulerException {
+		if (scheduler == null) {
+			return;
+		}
+
+		int jobId = job.getJobId();
+		String jobName = "job" + jobId;
+
+		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
+
+		String quartzCalendarNames = job.getQuartzCalendarNames();
+		if (StringUtils.isNotBlank(quartzCalendarNames)) {
+			String[] calendarNames = StringUtils.split(quartzCalendarNames, ",");
+			for (String calendarName : calendarNames) {
+				try {
+					scheduler.deleteCalendar(calendarName);
+				} catch (SchedulerException ex) {
+					logger.error("Error", ex);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns jobs that use a given schedule as a fixed schedule
+	 *
+	 * @param scheduleId the schedule id
+	 * @return jobs that use the schedule as a fixed schedule
+	 * @throws SQLException
+	 */
+	public List<Job> getScheduleJobs(int scheduleId) throws SQLException {
+		logger.debug("Entering getScheduleJobs");
+
+		String sql = SQL_SELECT_ALL + " WHERE SCHEDULE_ID=?";
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, scheduleId);
+	}
+
+	/**
+	 * Returns jobs that use a given holiday, either directly as shared holiday
+	 * or as part of a fixed holiday
+	 *
+	 * @param holidayId the holiday id
+	 * @return jobs that use the holiday
+	 * @throws SQLException
+	 */
+	public List<Job> getHolidayJobs(int holidayId) throws SQLException {
+		logger.debug("Entering getHolidayJobs");
+
+		String sql = SQL_SELECT_ALL
+				//where holidays are used directly
+				+ " WHERE EXISTS (SELECT *"
+				+ " FROM ART_JOB_HOLIDAY_MAP AJHM"
+				+ " WHERE AJHM.JOB_ID=AJ.JOB_ID AND AJHM.HOLIDAY_ID=?)"
+				+ " OR"
+				//where holidays are part of the fixed schedule
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_JOB_SCHEDULES AJS"
+				+ " INNER JOIN ART_SCHEDULE_HOLIDAY_MAP ASHM"
+				+ " ON AJS.SCHEDULE_ID=ASHM.SCHEDULE_ID"
+				+ " WHERE AJS.SCHEDULE_ID=AJ.SCHEDULE_ID AND ASHM.HOLIDAY_ID=?)";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, holidayId, holidayId);
+	}
+
+	/**
+	 * Processes schedule fields and creates quartz schedules for the job
+	 *
+	 * @param job the art job object
+	 * @param actionUser the user who initiated the action
+	 * @throws java.text.ParseException
+	 * @throws org.quartz.SchedulerException
+	 * @throws java.sql.SQLException
+	 */
+	public void processSchedules(Job job, User actionUser)
+			throws ParseException, SchedulerException, SQLException {
+
+		//http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-04.html
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		if (scheduler == null) {
+			logger.warn("Scheduler not available. Job Id {}", job.getJobId());
+			return;
+		}
+
+		//delete job while it has old calendar names, before updating the calendar names field
+		deleteQuartzJob(job, scheduler);
+
+		//job must have been saved in order to use job id for job, trigger and calendar names
+		int jobId = job.getJobId();
+
+		//get applicable holidays
+		List<org.quartz.Calendar> calendars = processHolidays(job);
+		String globalCalendarName = "calendar" + jobId;
+		org.quartz.Calendar globalCalendar = null;
+		List<String> calendarNames = new ArrayList<>();
+		for (org.quartz.Calendar calendar : calendars) {
+			String calendarName = calendar.getDescription();
+			if (StringUtils.isBlank(calendarName)) {
+				globalCalendar = calendar;
+				globalCalendar.setDescription(globalCalendarName);
+				calendarName = globalCalendarName;
+			}
+			calendarNames.add(calendarName);
+
+			boolean replace = true;
+			boolean updateTriggers = true;
+			scheduler.addCalendar(calendarName, calendar, replace, updateTriggers);
+		}
+
+		Set<Trigger> triggers = processTriggers(job, globalCalendar);
+
+		//get earliest next fire time from all available triggers
+		//https://stackoverflow.com/questions/39791318/how-to-get-the-earliest-date-of-a-list-in-java
+		List<Date> nextFireTimes = new ArrayList<>();
+		Date now = new Date();
+		for (Trigger trigger : triggers) {
+			Date nextRunDate = trigger.getFireTimeAfter(now);
+			nextFireTimes.add(nextRunDate);
+		}
+		Date nextFireTime = Collections.min(nextFireTimes);
+		job.setNextRunDate(nextFireTime);
+
+		String quartzCalendarNames = StringUtils.join(calendarNames, ",");
+		job.setQuartzCalendarNames(quartzCalendarNames);
+
+		//update next run date and calendar names fields
+		updateJob(job, actionUser);
+
+		String jobName = "job" + jobId;
+
+		JobDetail quartzJob = newJob(ReportJob.class)
+				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
+				.usingJobData("jobId", jobId)
+				.build();
+
+		//add job and triggers to scheduler
+		boolean replace = true;
+		scheduler.scheduleJob(quartzJob, triggers, replace);
+	}
+
+	/**
+	 * Processes schedule definitions in the main fields and extra section
+	 *
+	 * @param job the art job
+	 * @param globalCalendar the global calendar to apply to triggers
+	 * @return the list of triggers to use for the job
+	 * @throws ParseException
+	 */
+	private Set<Trigger> processTriggers(Job job, org.quartz.Calendar globalCalendar)
+			throws ParseException {
+
+		Set<Trigger> triggers = new HashSet<>();
+
+		int jobId = job.getJobId();
+		String mainTriggerName = "trigger" + jobId;
+
+		String cronString;
+
+		Schedule schedule = job.getSchedule();
+		if (schedule == null) {
+			cronString = CronStringHelper.getCronString(job);
+		} else {
+			cronString = CronStringHelper.getCronString(schedule);
+		}
+
+		//if start date is in the past, job will fire once immediately, for the missed fire time in the past
+		Date now = new Date();
+		if (job.getStartDate().before(now)) {
+			job.setStartDate(now);
+		}
+
+		//create trigger that defines the main schedule for the job
+		CronTriggerImpl mainTrigger = (CronTriggerImpl) newTrigger()
+				.withIdentity(triggerKey(mainTriggerName, ArtUtils.TRIGGER_GROUP))
+				.withSchedule(cronSchedule(cronString))
+				.startAt(job.getStartDate())
+				.endAt(job.getEndDate())
+				.build();
+
+		if (globalCalendar != null) {
+			mainTrigger.setCalendarName(globalCalendar.getDescription());
+		}
+
+		triggers.add(mainTrigger);
+
+		//create triggers for extra schedules
+		String extraSchedules;
+		if (schedule == null) {
+			extraSchedules = job.getExtraSchedules();
+		} else {
+			extraSchedules = schedule.getExtraSchedules();
+		}
+		if (StringUtils.isNotBlank(extraSchedules)) {
+			if (StringUtils.startsWith(extraSchedules, ExpressionHelper.GROOVY_START_STRING)) {
+				ExpressionHelper expressionHelper = new ExpressionHelper();
+				Object result = expressionHelper.runGroovyExpression(extraSchedules);
+				if (result instanceof List) {
+					@SuppressWarnings("unchecked")
+					List<AbstractTrigger<Trigger>> extraTriggers = (List<AbstractTrigger<Trigger>>) result;
+					for (AbstractTrigger<Trigger> extraTrigger : extraTriggers) {
+						finalizeTriggerProperties(extraTrigger, globalCalendar, job);
+					}
+					triggers.addAll(extraTriggers);
+				} else {
+					if (result instanceof AbstractTrigger) {
+						@SuppressWarnings("unchecked")
+						AbstractTrigger<Trigger> extraTrigger = (AbstractTrigger<Trigger>) result;
+						finalizeTriggerProperties(extraTrigger, globalCalendar, job);
+						triggers.add(extraTrigger);
+					}
+				}
+			} else {
+				String values[] = extraSchedules.split("\\r?\\n");
+				int index = 1;
+				for (String value : values) {
+					index++;
+					String extraTriggerName = mainTriggerName + "-" + index;
+					CronTriggerImpl extraTrigger = new CronTriggerImpl();
+					extraTrigger.setKey(triggerKey(extraTriggerName, ArtUtils.TRIGGER_GROUP));
+					String finalCronString = CronStringHelper.processDynamicTime(value);
+					extraTrigger.setCronExpression(finalCronString);
+					extraTrigger.setStartTime(job.getStartDate());
+					extraTrigger.setEndTime(job.getEndDate());
+					if (globalCalendar != null) {
+						extraTrigger.setCalendarName(globalCalendar.getDescription());
+					}
+
+					triggers.add(extraTrigger);
+				}
+			}
+		}
+
+		return triggers;
+	}
+
+	/**
+	 * Sets properties for a trigger where they are not explicitly defined e.g.
+	 * calendar name, start date and end date
+	 *
+	 * @param trigger the trigger to set
+	 * @param globalCalendar the global calendar in use
+	 * @param job the art job
+	 */
+	private void finalizeTriggerProperties(AbstractTrigger<Trigger> trigger,
+			org.quartz.Calendar globalCalendar, Job job) {
+
+		if (StringUtils.isBlank(trigger.getCalendarName()) && globalCalendar != null) {
+			trigger.setCalendarName(globalCalendar.getDescription());
+		}
+		if (trigger.getStartTime() == null) {
+			trigger.setStartTime(job.getStartDate());
+		}
+		if (trigger.getEndTime() == null) {
+			trigger.setEndTime(job.getEndDate());
+		}
+	}
+
+	/**
+	 * Process holiday definitions
+	 *
+	 * @param job the art job
+	 * @return the list of calendars representing configured holidays
+	 * @throws ParseException
+	 */
+	private List<org.quartz.Calendar> processHolidays(Job job) throws ParseException {
+		List<org.quartz.Calendar> calendars = new ArrayList<>();
+
+		String holidays;
+		Schedule schedule = job.getSchedule();
+		if (schedule == null) {
+			holidays = job.getHolidays();
+		} else {
+			holidays = schedule.getHolidays();
+		}
+
+		List<org.quartz.Calendar> mainCalendars = processHolidayString(holidays);
+
+		List<org.quartz.Calendar> nonLabelledCalendars = new ArrayList<>();
+		for (org.quartz.Calendar calendar : mainCalendars) {
+			if (StringUtils.isBlank(calendar.getDescription())) {
+				nonLabelledCalendars.add(calendar);
+			} else {
+				calendars.add(calendar);
+			}
+		}
+
+		List<Holiday> sharedHolidays;
+		if (schedule == null) {
+			sharedHolidays = job.getSharedHolidays();
+		} else {
+			sharedHolidays = schedule.getSharedHolidays();
+		}
+
+		if (CollectionUtils.isNotEmpty(sharedHolidays)) {
+			for (Holiday holiday : sharedHolidays) {
+				List<org.quartz.Calendar> sharedCalendars = processHolidayString(holiday.getDefinition());
+				for (org.quartz.Calendar calendar : sharedCalendars) {
+					if (StringUtils.isBlank(calendar.getDescription())) {
+						nonLabelledCalendars.add(calendar);
+					} else {
+						calendars.add(calendar);
+					}
+				}
+			}
+		}
+
+		if (CollectionUtils.isNotEmpty(nonLabelledCalendars)) {
+			org.quartz.Calendar finalNonLabelledCalendar = concatenateCalendars(nonLabelledCalendars);
+			calendars.add(finalNonLabelledCalendar);
+		}
+
+		return calendars;
+	}
+
+	/**
+	 * Processes a string containing holiday definitions
+	 *
+	 * @param holidays the string containing holiday definitions
+	 * @return a list of calendars representing the holiday definitions
+	 * @throws ParseException
+	 */
+	private List<org.quartz.Calendar> processHolidayString(String holidays) throws ParseException {
+		List<org.quartz.Calendar> calendars = new ArrayList<>();
+
+		if (StringUtils.isNotBlank(holidays)) {
+			if (StringUtils.startsWith(holidays, ExpressionHelper.GROOVY_START_STRING)) {
+				ExpressionHelper expressionHelper = new ExpressionHelper();
+				Object result = expressionHelper.runGroovyExpression(holidays);
+				if (result instanceof List) {
+					@SuppressWarnings("unchecked")
+					List<org.quartz.Calendar> groovyCalendars = (List<org.quartz.Calendar>) result;
+					List<org.quartz.Calendar> nonLabelledGroovyCalendars = new ArrayList<>();
+					for (org.quartz.Calendar calendar : groovyCalendars) {
+						if (StringUtils.isBlank(calendar.getDescription())) {
+							nonLabelledGroovyCalendars.add(calendar);
+						} else {
+							calendars.add(calendar);
+						}
+					}
+					if (CollectionUtils.isNotEmpty(nonLabelledGroovyCalendars)) {
+						org.quartz.Calendar finalCalendar = concatenateCalendars(nonLabelledGroovyCalendars);
+						calendars.add(finalCalendar);
+					}
+				} else {
+					org.quartz.Calendar calendar = (org.quartz.Calendar) result;
+					calendars.add(calendar);
+				}
+			} else {
+				String values[] = holidays.split("\\r?\\n");
+				List<org.quartz.Calendar> cronCalendars = new ArrayList<>();
+				for (String value : values) {
+					CronCalendar calendar = new CronCalendar(value);
+					cronCalendars.add(calendar);
+				}
+				if (CollectionUtils.isNotEmpty(cronCalendars)) {
+					org.quartz.Calendar finalCalendar = concatenateCalendars(cronCalendars);
+					calendars.add(finalCalendar);
+				}
+			}
+		}
+
+		return calendars;
+	}
+
+	/**
+	 * Concatenate calendars to get one calendar that includes all the dates in
+	 * the given calendars
+	 *
+	 * @param calendars the list of calendars to concatenate
+	 * @return a calendar that includes all the dates in the given calendars
+	 */
+	private org.quartz.Calendar concatenateCalendars(List<org.quartz.Calendar> calendars) {
+		//https://stackoverflow.com/questions/5863435/quartz-net-multple-calendars
+		if (CollectionUtils.isEmpty(calendars)) {
+			return null;
+		}
+
+		//concatenate calendars. you can only specify one calendar for a trigger
+		for (int i = 0; i < calendars.size(); i++) {
+			if (i > 0) {
+				org.quartz.Calendar currentCalendar = calendars.get(i);
+				org.quartz.Calendar previousCalendar = calendars.get(i - 1);
+				currentCalendar.setBaseCalendar(previousCalendar);
+			}
+		}
+		org.quartz.Calendar finalCalendar = calendars.get(calendars.size() - 1);
+
+		return finalCalendar;
 	}
 
 }

@@ -19,8 +19,10 @@ package art.usergroup;
 
 import art.reportgroup.ReportGroupService;
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -75,8 +77,16 @@ public class UserGroupController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			userGroupService.deleteUserGroup(id);
-			response.setSuccess(true);
+			ActionResult deleteResult = userGroupService.deleteUserGroup(id);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				//user group not deleted because of linked users
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
@@ -88,13 +98,20 @@ public class UserGroupController {
 	@RequestMapping(value = "/deleteUserGroups", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteUserGroups(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteUserGroups: ids={}", (Object)ids);
+		logger.debug("Entering deleteUserGroups: ids={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			userGroupService.deleteUserGroups(ids);
-			response.setSuccess(true);
+			ActionResult deleteResult = userGroupService.deleteUserGroups(ids);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
@@ -108,7 +125,7 @@ public class UserGroupController {
 		logger.debug("Entering addUserGroup");
 
 		model.addAttribute("group", new UserGroup());
-		
+
 		return showEditUserGroup("add", model);
 	}
 
@@ -124,6 +141,20 @@ public class UserGroupController {
 		}
 
 		return showEditUserGroup("edit", model);
+	}
+
+	@RequestMapping(value = "/copyUserGroup", method = RequestMethod.GET)
+	public String copyUserGroup(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering copyUserGroup: id={}", id);
+
+		try {
+			model.addAttribute("group", userGroupService.getUserGroup(id));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditUserGroup("copy", model);
 	}
 
 	@RequestMapping(value = "/saveUserGroup", method = RequestMethod.POST)
@@ -142,14 +173,14 @@ public class UserGroupController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (StringUtils.equals(action, "add")) {
+			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				userGroupService.addUserGroup(group, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
 				userGroupService.updateUserGroup(group, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			
+
 			String recordName = group.getName() + " (" + group.getUserGroupId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/userGroups";
@@ -179,7 +210,7 @@ public class UserGroupController {
 		}
 
 		model.addAttribute("action", action);
-		
+
 		return "editUserGroup";
 	}
 }

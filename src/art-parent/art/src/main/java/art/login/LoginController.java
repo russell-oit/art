@@ -380,11 +380,15 @@ public class LoginController {
 		session.removeAttribute("nextPageAfterLogin");
 
 		if (nextPageAfterLogin == null) {
-			String startReport = user.getEffectiveStartReport();
-			if (StringUtils.isBlank(startReport)) {
-				nextPageAfterLogin = "/reports";
+			if (user.getAccessLevel() == AccessLevel.RepositoryUser) {
+				nextPageAfterLogin = "/users";
 			} else {
-				nextPageAfterLogin = "/runReport?reportId=" + startReport;
+				String startReport = user.getEffectiveStartReport();
+				if (StringUtils.isBlank(startReport)) {
+					nextPageAfterLogin = "/reports";
+				} else {
+					nextPageAfterLogin = "/runReport?reportId=" + startReport;
+				}
 			}
 		}
 

@@ -26,6 +26,7 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -90,7 +91,8 @@ public class ParameterController {
 				response.setSuccess(true);
 			} else {
 				//parameter not deleted because of linked reports
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -114,7 +116,8 @@ public class ParameterController {
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
 			} else {
-				response.setData(deleteResult.getData());
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -198,7 +201,7 @@ public class ParameterController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
 				parameterService.addParameter(parameter, sessionUser);
-				if (reportId != null) {
+				if (reportId != null && reportId != 0) {
 					ReportParameter reportParameter = new ReportParameter();
 					reportParameter.setParameter(parameter);
 					reportParameterService.addReportParameter(reportParameter, reportId);
@@ -213,9 +216,9 @@ public class ParameterController {
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			Integer reportParameterConfigReportId = null;
-			if (reportId != null) {
+			if (reportId != null && reportId != 0) {
 				reportParameterConfigReportId = reportId;
-			} else if (returnReportId != null) {
+			} else if (returnReportId != null && returnReportId != 0) {
 				reportParameterConfigReportId = returnReportId;
 			}
 
@@ -268,5 +271,20 @@ public class ParameterController {
 		model.addAttribute("returnReportId", returnReportId);
 
 		return "editParameter";
+	}
+
+	@RequestMapping(value = "/reportsForParameter", method = RequestMethod.GET)
+	public String showReportsForParameter(@RequestParam("parameterId") Integer parameterId, Model model) {
+		logger.debug("Entering showReportsForParameter: parameterId={}", parameterId);
+
+		try {
+			model.addAttribute("reports", reportService.getReportsForParameter(parameterId));
+			model.addAttribute("parameter", parameterService.getParameter(parameterId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "reportsForParameter";
 	}
 }

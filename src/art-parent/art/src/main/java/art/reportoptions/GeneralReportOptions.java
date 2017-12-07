@@ -21,12 +21,28 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Represents report options that can be used in a wide variety of report types
- * 
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GeneralReportOptions {
+
 	private boolean usesGroovy;
+	private Reporti18nOptions i18n;
+
+	/**
+	 * @return the i18n
+	 */
+	public Reporti18nOptions getI18n() {
+		return i18n;
+	}
+
+	/**
+	 * @param i18n the i18n to set
+	 */
+	public void setI18n(Reporti18nOptions i18n) {
+		this.i18n = i18n;
+	}
 
 	/**
 	 * @return the usesGroovy

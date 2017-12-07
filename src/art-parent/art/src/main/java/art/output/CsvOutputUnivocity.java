@@ -17,19 +17,33 @@
  */
 package art.output;
 
+import art.enums.ReportFormat;
+import art.report.Report;
+import art.reportoptions.CsvOutputUnivocityOptions;
+import art.utils.FilenameHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.common.processor.ObjectRowWriterProcessor;
-import com.univocity.parsers.conversions.Conversions;
 import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvRoutines;
 import com.univocity.parsers.csv.CsvWriterSettings;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generates csv output. Also supports any delimiter, other than comma.
+ * Generates csv output using the univocity-parsers library. Also supports
+ * generating the file with another delimiter, other than comma.
  *
  * @author Timothy Anyona
  */
@@ -42,120 +56,83 @@ public class CsvOutputUnivocity {
 
 	private static final Logger logger = LoggerFactory.getLogger(CsvOutputUnivocity.class);
 
-	private String dateFormat = "dd-MMM-yyyy";
-	private String dateTimeFormat = "dd-MMM-yyy HH:mm:ss";
-	private boolean includeHeaders = true;
-	private char delimiter = ',';
-	private char quote = '"';
-	private boolean quoteAllFields = false;
-
 	/**
-	 * @return the delimiter
+	 * Generates fixed width output for data in the given resultset
+	 *
+	 * @param rs the resultset that contains the data to output
+	 * @param writer the writer to output to. If html report format is required,
+	 * a writer must be supplied
+	 * @param report the report object for the report being run
+	 * @param reportFormat the report format to use
+	 * @param fullOutputFileName the output file name to use
+	 * @param locale the locale that determines date format output
+	 * @throws java.io.IOException
 	 */
-	public char getDelimiter() {
-		return delimiter;
-	}
+	public void generateOutput(ResultSet rs, PrintWriter writer, Report report,
+			ReportFormat reportFormat, String fullOutputFileName,
+			Locale locale) throws IOException {
 
-	/**
-	 * @param delimiter the delimiter to set
-	 */
-	public void setDelimiter(char delimiter) {
-		this.delimiter = delimiter;
-	}
+		Objects.requireNonNull(report, "report must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 
-	/**
-	 * @return the quote
-	 */
-	public char getQuote() {
-		return quote;
-	}
+		CsvOutputUnivocityOptions csvOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			csvOptions = new CsvOutputUnivocityOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			csvOptions = mapper.readValue(options, CsvOutputUnivocityOptions.class);
+		}
 
-	/**
-	 * @param quote the quote to set
-	 */
-	public void setQuote(char quote) {
-		this.quote = quote;
-	}
-
-	/**
-	 * @return the quoteAllFields
-	 */
-	public boolean isQuoteAllFields() {
-		return quoteAllFields;
-	}
-
-	/**
-	 * @param quoteAllFields the quoteAllFields to set
-	 */
-	public void setQuoteAllFields(boolean quoteAllFields) {
-		this.quoteAllFields = quoteAllFields;
-	}
-
-	/**
-	 * @return the dateFormat
-	 */
-	public String getDateFormat() {
-		return dateFormat;
-	}
-
-	/**
-	 * @param dateFormat the dateFormat to set
-	 */
-	public void setDateFormat(String dateFormat) {
-		this.dateFormat = dateFormat;
-	}
-
-	/**
-	 * @return the dateTimeFormat
-	 */
-	public String getDateTimeFormat() {
-		return dateTimeFormat;
-	}
-
-	/**
-	 * @param dateTimeFormat the dateTimeFormat to set
-	 */
-	public void setDateTimeFormat(String dateTimeFormat) {
-		this.dateTimeFormat = dateTimeFormat;
-	}
-
-	/**
-	 * @return the includeHeaders
-	 */
-	public boolean isIncludeHeaders() {
-		return includeHeaders;
-	}
-
-	/**
-	 * @param includeHeaders the includeHeaders to set
-	 */
-	public void setIncludeHeaders(boolean includeHeaders) {
-		this.includeHeaders = includeHeaders;
+		generateOutput(rs, writer, csvOptions, reportFormat, fullOutputFileName, report, locale);
 	}
 
 	/**
 	 * Generates csv output for data in the given resultset
 	 *
 	 * @param rs the resultset that contains the data to output
-	 * @param outputWriter the writer to output to
+	 * @param writer the writer to output to
+	 * @param csvOptions the csv output options
+	 * @param locale the locale that determines date format output
+	 * @throws java.io.IOException
 	 */
-	public void generateOutput(ResultSet rs, Writer outputWriter) {
+	public void generateOutput(ResultSet rs, Writer writer,
+			CsvOutputUnivocityOptions csvOptions, Locale locale) throws IOException {
+
 		logger.debug("Entering generateOutput");
+
+		ReportFormat reportFormat = null;
+		String fullOutputFileName = null;
+		Report report = null;
+		generateOutput(rs, writer, csvOptions, reportFormat, fullOutputFileName, report, locale);
+	}
+
+	/**
+	 * Generates fixed width output for data in the given resultset
+	 *
+	 * @param rs the resultset that contains the data to output
+	 * @param writer the writer to output to. If html report format is required,
+	 * a writer must be supplied
+	 * @param csvOptions the csv options
+	 * @param reportFormat the report format to use
+	 * @param fullOutputFileName the output file name to use
+	 * @param report the report object for the report being run
+	 * @param locale the locale that determines date format output
+	 * @throws java.io.IOException
+	 */
+	private void generateOutput(ResultSet rs, Writer writer,
+			CsvOutputUnivocityOptions csvOptions, ReportFormat reportFormat,
+			String fullOutputFileName, Report report, Locale locale) throws IOException {
+
+		Objects.requireNonNull(rs, "rs must not be null");
+		Objects.requireNonNull(csvOptions, "csvOptions must not be null");
+
 		//https://stackoverflow.com/questions/37556698/mysql-dump-character-escaping-and-csv-read
 		//https://stackoverflow.com/a/36974864/3274227
 		//https://github.com/uniVocity/univocity-parsers/issues/133#issuecomment-278208696
 		//https://stackoverflow.com/questions/41099391/saving-a-dinamic-sql-query-to-csv
 		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
-		//assigns a "global" date format conversion for any timestamp that gets written.
-		//you can also define field-specific conversions, which will override the default set here.
-		logger.debug("dateFormat='{}'", dateFormat);
-		logger.debug("dateTimeFormat='{}'", dateTimeFormat);
-		if (StringUtils.isNotBlank(dateFormat)) {
-			processor.convertType(java.sql.Date.class, Conversions.toDate(dateFormat));
-		}
-		if (StringUtils.isNotBlank(dateTimeFormat)) {
-			processor.convertType(java.sql.Timestamp.class, Conversions.toDate(dateTimeFormat));
-		}
+		csvOptions.initializeProcessor(processor, locale);
 
 		//http://docs.univocity.com/parsers/2.0.0/com/univocity/parsers/csv/CsvWriterSettings.html
 		//http://docs.univocity.com/parsers/2.0.0/com/univocity/parsers/common/CommonWriterSettings.html
@@ -163,17 +140,43 @@ public class CsvOutputUnivocity {
 		//https://stackoverflow.com/questions/36936943/jackson-serialize-csv-property-order
 		CsvWriterSettings csvWriterSettings = new CsvWriterSettings();
 		csvWriterSettings.setRowWriterProcessor(processor);
-		csvWriterSettings.setHeaderWritingEnabled(includeHeaders);
-		csvWriterSettings.setQuoteAllFields(quoteAllFields);
+		csvWriterSettings.setHeaderWritingEnabled(csvOptions.isIncludeHeaders());
+		csvWriterSettings.setQuoteAllFields(csvOptions.isQuoteAllFields());
 
 		//http://docs.univocity.com/parsers/2.0.0/com/univocity/parsers/csv/CsvFormat.html
 		CsvFormat csvFormat = csvWriterSettings.getFormat();
-		csvFormat.setDelimiter(delimiter);
-		csvFormat.setQuote(quote);
+		csvFormat.setDelimiter(csvOptions.getDelimiter());
+		csvFormat.setQuote(csvOptions.getQuote());
 
 		CsvRoutines csvRoutines = new CsvRoutines(csvWriterSettings);
 		csvRoutines.setKeepResourcesOpen(true);
-		csvRoutines.write(rs, outputWriter);
+
+		if (writer instanceof StringWriter) {
+			csvRoutines.write(rs, writer);
+		} else {
+			if (reportFormat.isHtml()) {
+				writer.write("<pre>");
+				csvRoutines.write(rs, writer);
+				writer.write("</pre>");
+			} else {
+				try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
+					if (reportFormat == ReportFormat.csv) {
+						csvRoutines.write(rs, fout);
+					} else if (reportFormat == ReportFormat.csvZip) {
+						String filename = FilenameUtils.getBaseName(fullOutputFileName);
+						FilenameHelper filenameHelper = new FilenameHelper();
+						String zipEntryFilenameExtension = filenameHelper.getCsvExtension(report);
+						String zipEntryFilename = filename + "." + zipEntryFilenameExtension;
+						ZipEntry ze = new ZipEntry(zipEntryFilename);
+						try (ZipOutputStream zout = new ZipOutputStream(fout)) {
+							zout.putNextEntry(ze);
+							csvRoutines.write(rs, zout);
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 }

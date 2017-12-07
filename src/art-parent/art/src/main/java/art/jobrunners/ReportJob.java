@@ -22,16 +22,21 @@ import art.connectionpool.DbConnections;
 import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
-import art.enums.FtpConnectionType;
+import art.destination.Destination;
+import art.destinationoptions.FtpOptions;
+import art.destinationoptions.NetworkShareOptions;
+import art.destinationoptions.SftpOptions;
+import art.destinationoptions.WebsiteOptions;
+import art.enums.DestinationType;
 import art.enums.JobType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
-import art.ftpserver.FtpServer;
 import art.job.JobService;
-import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
+import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
+import art.output.ThymeleafOutput;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -45,16 +50,32 @@ import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
+import art.utils.ExpressionHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
+import com.github.sardine.Sardine;
+import com.github.sardine.SardineFactory;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.io.ByteSource;
+import com.google.common.io.Files;
+import com.google.inject.Module;
+import com.hierynomus.mssmb2.SMBApiException;
+import com.hierynomus.smbj.SMBClient;
+import com.hierynomus.smbj.SmbConfig;
+import com.hierynomus.smbj.auth.AuthenticationContext;
+import com.hierynomus.smbj.share.DiskShare;
+import com.hierynomus.smbj.utils.SmbFiles;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import java.awt.Desktop;
 import java.io.File;
@@ -67,6 +88,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -75,6 +97,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -82,20 +105,36 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.jclouds.ContextBuilder;
+import org.jclouds.blobstore.BlobStore;
+import org.jclouds.blobstore.BlobStoreContext;
+import org.jclouds.blobstore.domain.Blob;
+import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
+import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
+import org.jsoup.Connection.Method;
+import org.jsoup.Connection.Response;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +153,7 @@ import org.thymeleaf.context.Context;
 public class ReportJob implements org.quartz.Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportJob.class);
-	private DbService dbService;
+
 	private String fileName;
 	private String jobAuditKey;
 	private art.job.Job job;
@@ -124,6 +163,9 @@ public class ReportJob implements org.quartz.Job {
 	private String runDetails;
 	private String runMessage;
 	private Locale locale;
+	private ch.qos.logback.classic.Logger progressLogger;
+	private long runStartTimeMillis;
+	private FileAppender<ILoggingEvent> progressFileAppender;
 
 	@Autowired
 	private TemplateEngine emailTemplateEngine;
@@ -134,138 +176,759 @@ public class ReportJob implements org.quartz.Job {
 	@Autowired
 	private MessageSource messageSource;
 
+	@Autowired
+	private JobService jobService;
+
+	@Autowired
+	private DbService dbService;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 
-		if (!Config.getSettings().isSchedulingEnabled()) {
-			return;
-		}
+		runStartTimeMillis = System.currentTimeMillis();
 
 		JobDataMap dataMap = context.getMergedJobDataMap();
-		int tempJobId = dataMap.getInt("jobId");
+		jobId = dataMap.getInt("jobId");
 
-		JobService jobService = new JobService();
+		initializeProgressLogger();
+
+		progressLogger.info("Started");
 
 		try {
-			job = jobService.getJob(tempJobId);
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			if (!Config.getSettings().isSchedulingEnabled()) {
+				jobLogAndClose("Scheduling not enabled");
+				return;
+			}
+
+			try {
+				job = jobService.getJob(jobId);
+			} catch (SQLException ex) {
+				logger.error("Error. Job Id {}", jobId, ex);
+				progressLogger.error("Error", ex);
+			}
+
+			if (job == null) {
+				logger.info("Job not found: {}", jobId);
+				jobLogAndClose("Job not found");
+				return;
+			}
+
+			Report report = job.getReport();
+			if (report == null) {
+				logger.info("Job report not found: Job ID {}", jobId);
+				jobLogAndClose("Job report not found");
+				return;
+			}
+
+			User user = job.getUser();
+			if (user == null) {
+				logger.info("Job user not found: Job ID {}", jobId);
+				jobLogAndClose("Job user not found");
+				return;
+			}
+
+			jobType = job.getJobType();
+
+			fileName = "";
+			runDetails = "";
+			runMessage = "";
+
+			String systemLocale = Config.getSettings().getSystemLocale();
+			logger.debug("systemLocale='{}'", systemLocale);
+
+			locale = ArtUtils.getLocaleFromString(systemLocale);
+
+			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
+			boolean tempJob = dataMap.getBooleanValue("tempJob");
+			Date nextRunDate;
+			if (tempJob) {
+				//temp job. use existing next run date
+				nextRunDate = job.getNextRunDate();
+			} else {
+				//not a temp job. set new next run date
+				nextRunDate = context.getNextFireTime();
+
+				//get least next run date as job may have multiple triggers
+				try {
+					Scheduler scheduler = context.getScheduler();
+					JobDetail quartJob = context.getJobDetail();
+					@SuppressWarnings("unchecked")
+					List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(quartJob.getKey());
+					List<Date> nextRunDates = new ArrayList<>();
+					Date now = new Date();
+					nextRunDates.add(nextRunDate);
+					for (Trigger trigger : triggers) {
+						nextRunDate = trigger.getFireTimeAfter(now);
+						nextRunDates.add(nextRunDate);
+					}
+					nextRunDate = Collections.min(nextRunDates);
+				} catch (SchedulerException ex) {
+					logger.error("Error. Job Id {}", jobId, ex);
+				}
+			}
+
+			//set overall job start time in the jobs table
+			beforeExecution(nextRunDate);
+
+			if (!job.isActive()) {
+				runMessage = "jobs.message.jobDisabled";
+			} else if (!job.getReport().isActive()) {
+				runMessage = "jobs.message.reportDisabled";
+			} else if (!job.getUser().isActive()) {
+				runMessage = "jobs.message.ownerDisabled";
+			} else {
+				if (job.getRecipientsReportId() > 0) {
+					//job has dynamic recipients
+					runDynamicRecipientsJob();
+				} else {
+					//job doesn't have dynamic recipients
+					runNormalJob();
+				}
+			}
+
+			sendFileToDestinations();
+
+			runBatchFile();
+
+			afterCompletion();
+
+			cacheHelper.clearJobs();
+		} catch (Exception ex) {
+			logger.error("Error. Job Id {}", jobId, ex);
+			progressLogger.error("Error", ex);
 		}
 
-		if (job == null) {
-			logger.info("Job not found: {}", tempJobId);
+		long runEndTimeMillis = System.currentTimeMillis();
+
+		//https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/time/DurationFormatUtils.html
+		String durationFormat = "m':'s':'S";
+		String duration = DurationFormatUtils.formatPeriod(runStartTimeMillis, runEndTimeMillis, durationFormat);
+		progressLogger.info("Completed. Time taken - {}", duration);
+		progressFileAppender.stop();
+	}
+
+	/**
+	 * Logs a message to the progress logger and closes the job log file
+	 * appender
+	 *
+	 * @param message the message to log
+	 */
+	private void jobLogAndClose(String message) {
+		runDetails = message;
+		progressLogger.info(runDetails);
+		progressFileAppender.stop();
+		updateIncompleteRun();
+	}
+
+	/**
+	 * Initializes the job progress logger
+	 */
+	private void initializeProgressLogger() {
+		//https://stackoverflow.com/questions/7824620/logback-set-log-file-name-programmatically
+		//http://oct.im/how-to-create-logback-loggers-dynamicallypragmatically.html
+		//https://www.programcreek.com/java-api-examples/index.php?api=ch.qos.logback.core.FileAppender
+		//https://stackoverflow.com/questions/7824620/logback-set-log-file-name-programmatically
+		//http://mailman.qos.ch/pipermail/logback-user/2008-November/000800.html
+
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+		String progressLogFilename = Config.getJobLogsPath() + jobId + ".log";
+
+		progressFileAppender = new FileAppender<>();
+		progressFileAppender.setContext(loggerContext);
+		progressFileAppender.setName("jobLog");
+		progressFileAppender.setFile(progressLogFilename);
+		progressFileAppender.setAppend(false);
+
+		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+		encoder.setContext(loggerContext);
+		encoder.setPattern("[%level] %date{dd-MMM-yyyy HH:mm:ss.SSS} - %msg%n");
+		encoder.start();
+
+		progressFileAppender.setEncoder(encoder);
+		progressFileAppender.start();
+
+		progressLogger = loggerContext.getLogger("jobLog");
+		progressLogger.setLevel(Level.INFO);
+
+		// Don't inherit root appender
+		progressLogger.setAdditive(false);
+		progressLogger.addAppender(progressFileAppender);
+	}
+
+	/**
+	 * Log an error as well as set the runDetails variable
+	 *
+	 * @param ex the error
+	 */
+	private void logErrorAndSetDetails(Throwable ex) {
+		logger.error("Error. Job Id {}", jobId, ex);
+		runDetails = "<b>Error:</b> " + ex.toString();
+		progressLogger.error("Error", ex);
+	}
+
+	/**
+	 * Sends the generated job file to destinations set for the job
+	 */
+	private void sendFileToDestinations() {
+		List<Destination> destinations = job.getDestinations();
+
+		if (CollectionUtils.isEmpty(destinations)) {
 			return;
 		}
 
-		jobType = job.getJobType();
-		jobId = job.getJobId();
+		String jobsExportPath = Config.getJobsExportPath();
+		String fullLocalFileName = jobsExportPath + fileName;
 
-		fileName = "";
-		runDetails = "";
-		runMessage = "";
+		for (Destination destination : destinations) {
+			if (destination.isActive()) {
+				DestinationType destinationType = destination.getDestinationType();
+				switch (destinationType) {
+					case FTP:
+					case SFTP:
+						ftpFile(destination, fullLocalFileName);
+						break;
+					case NetworkShare:
+						sendFileToNetworkShare(destination, fullLocalFileName);
+						break;
+					case S3:
+						sendFileToS3(destination, fullLocalFileName);
+						break;
+					case Azure:
+						sendFileToAzure(destination, fullLocalFileName);
+						break;
+					case WebDav:
+						sendFileToWebDav(destination, fullLocalFileName);
+						break;
+					case Website:
+						sendFileToWebsite(destination, fullLocalFileName);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected destination type: " + destinationType);
+				}
+			}
+		}
+	}
 
-		String systemLocale = Config.getSettings().getSystemLocale();
-		logger.debug("systemLocale='{}'", systemLocale);
+	/**
+	 * Copies the generated file to a web address that accepts file uploads
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToWebsite(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering sendFileToWebsite: destination={},"
+				+ " fullLocalFileName='{}'", destination, fullLocalFileName);
 
-		locale = ArtUtils.getLocaleFromString(systemLocale);
+		//https://stackoverflow.com/questions/7370771/how-to-post-files-using-jsoup
+		//https://stackoverflow.com/questions/39814877/jsoup-login-to-website-and-visit
+		//https://stackoverflow.com/questions/1445919/how-to-enable-wire-logging-for-a-java-httpurlconnection-traffic
+		//https://stackoverflow.com/questions/30406264/cannot-login-to-website-by-using-jsoup-with-x-www-form-urlencoded-parameters
+		//http://neembuuuploader.sourceforge.net/wiki/index.php/Identifying_the_HTTP_GET/POST_requests_for_upload
+		try {
+			WebsiteOptions websiteOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				websiteOptions = new WebsiteOptions();
+			} else {
+				websiteOptions = ArtUtils.jsonToObject(options, WebsiteOptions.class);
+			}
 
-		dbService = new DbService();
+			Map<String, String> cookies = null;
 
-		//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
-		boolean tempJob = dataMap.getBooleanValue("tempJob");
-		Date nextRunDate;
-		if (tempJob) {
-			//temp job. use existing next run date
-			nextRunDate = job.getNextRunDate();
+			String username = destination.getUser();
+			String password = destination.getPassword();
+			String startUrl = websiteOptions.getStartUrl();
+			String loginUrl = websiteOptions.getLoginUrl();
+			String usernameField = websiteOptions.getUsernameField();
+			String passwordField = websiteOptions.getPasswordField();
+			String fileField = websiteOptions.getFileField();
+			String csrfTokenInputField = websiteOptions.getCsrfTokenInputField();
+			String csrfTokenCookie = websiteOptions.getCsrfTokenCookie();
+			String csrfTokenOutputField = websiteOptions.getCsrfTokenOutputField();
+			String csrfTokenValue = null;
+
+			if (StringUtils.isNotBlank(startUrl)) {
+				Response response = Jsoup.connect(startUrl)
+						.method(Method.GET)
+						.execute();
+				cookies = response.cookies();
+				if (StringUtils.isNotBlank(csrfTokenCookie)) {
+					csrfTokenValue = cookies.get(csrfTokenCookie);
+					logger.debug("csrfTokenValue='{}'", csrfTokenValue);
+				} else if (StringUtils.isNotBlank(csrfTokenInputField)) {
+					Document doc = response.parse();
+					//doc.select().val() doesn't throw an error if field not there. returns empty string if field not there
+					csrfTokenValue = doc.select("input[name=" + csrfTokenInputField + "]").val();
+					logger.debug("csrfTokenValue='{}'", csrfTokenValue);
+				}
+			}
+			if (StringUtils.isNotBlank(loginUrl) && StringUtils.isNotBlank(username)) {
+				Response response = Jsoup.connect(loginUrl)
+						.data(usernameField, username)
+						.data(passwordField, password)
+						.method(Method.POST)
+						.execute();
+				cookies = response.cookies();
+				if (StringUtils.isNotBlank(csrfTokenCookie)) {
+					csrfTokenValue = cookies.get(csrfTokenCookie);
+					logger.debug("csrfTokenValue='{}'", csrfTokenValue);
+				} else if (StringUtils.isNotBlank(csrfTokenInputField)) {
+					Document doc = response.parse();
+					csrfTokenValue = doc.select("input[name=" + csrfTokenInputField + "]").val();
+					logger.debug("csrfTokenValue='{}'", csrfTokenValue);
+				}
+			}
+			String path = destination.getPath();
+			File file = new File(fullLocalFileName);
+			try (FileInputStream fis = new FileInputStream(file)) {
+				org.jsoup.Connection connection = Jsoup.connect(path)
+						.ignoreContentType(true)
+						.data(fileField, file.getName(), fis);
+				if (cookies != null) {
+					connection.cookies(cookies);
+				}
+				List<Map<String, String>> staticFields = websiteOptions.getStaticFields();
+				if (CollectionUtils.isNotEmpty(staticFields)) {
+					for (Map<String, String> staticField : staticFields) {
+						connection.data(staticField);
+					}
+				}
+				if (StringUtils.isNotBlank(csrfTokenOutputField)) {
+					connection.data(csrfTokenOutputField, csrfTokenValue);
+				}
+				Document document = connection.post();
+				String postReply = document.body().text();
+				logger.debug("postReply='{}'", postReply);
+			}
+		} catch (IOException ex) {
+			logErrorAndSetDetails(ex);
+		}
+	}
+
+	/**
+	 * Copies the generated file to a webdav server location
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToWebDav(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering sendFileToWebDav: destination={},"
+				+ " fullLocalFileName='{}'", destination, fullLocalFileName);
+
+		String username = destination.getUser();
+		logger.debug("username='{}'", username);
+		String password = destination.getPassword();
+		Sardine sardine;
+		if (StringUtils.isBlank(username)) {
+			sardine = SardineFactory.begin();
 		} else {
-			//not a temp job. set new next run date
-			nextRunDate = context.getTrigger().getFireTimeAfter(new Date());
+			sardine = SardineFactory.begin(username, password);
 		}
 
-		//set overall job start time in the jobs table
-		beforeExecution(nextRunDate);
+		String mainUrl = destination.getPath();
+		logger.debug("mainUrl='{}'", mainUrl);
+		if (!StringUtils.endsWith(mainUrl, "/")) {
+			mainUrl = mainUrl + "/";
+		}
 
-		if (!job.isActive()) {
-			runMessage = "jobs.message.jobDisabled";
-		} else if (!job.getReport().isActive()) {
-			runMessage = "jobs.message.reportDisabled";
-		} else if (!job.getUser().isActive()) {
-			runMessage = "jobs.message.ownerDisabled";
-		} else {
-			if (job.getRecipientsReportId() > 0) {
-				//job has dynamic recipients
-				runDynamicRecipientsJob();
-			} else {
-				//job doesn't have dynamic recipients
-				runNormalJob();
+		String destinationSubDirectory = destination.getSubDirectory();
+		logger.debug("destinationSubDirectory='{}'", destinationSubDirectory);
+		String jobSubDirectory = job.getSubDirectory();
+		logger.debug("jobSubDirectory='{}'", jobSubDirectory);
+
+		String directorySeparator = "/";
+		String finalSubDirectory = combineSubDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
+		logger.debug("finalSubDirectory='{}'", finalSubDirectory);
+
+		logger.debug("destination.isCreateDirectories()={}", destination.isCreateDirectories());
+
+		// if file is in folder(s), create them first
+		if (StringUtils.isNotBlank(finalSubDirectory)
+				&& destination.isCreateDirectories()) {
+			//can't create directory hierarchy in one go. create sub-directories one at a time
+			String[] folders = StringUtils.split(finalSubDirectory, "/");
+			//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
+			List<String> subFolders = new ArrayList<>();
+			for (String folder : folders) {
+				subFolders.add(folder);
+				String partialPath = StringUtils.join(subFolders, "/");
+				partialPath = mainUrl + partialPath;
+				try {
+					String url = ArtUtils.encodeMainUrl(partialPath);
+					logger.debug("url='{}'", url);
+					if (!sardine.exists(url)) {
+						logger.debug("Creating directory - '{}'", url);
+						sardine.createDirectory(url);
+					}
+				} catch (IOException | URISyntaxException ex) {
+					logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+				}
 			}
 		}
 
-		afterCompletion();
+		try {
+			String finalPath = mainUrl + finalSubDirectory + fileName;
+			logger.debug("finalPath='{}'", finalPath);
 
-		ftpFile();
+			String url = ArtUtils.encodeMainUrl(finalPath);
+			logger.debug("url='{}'", url);
 
-		runBatchFile();
+			try (InputStream fis = new FileInputStream(new File(fullLocalFileName))) {
+				sardine.put(url, fis);
+			}
+		} catch (IOException | URISyntaxException ex) {
+			logErrorAndSetDetails(ex);
+		} finally {
+			try {
+				sardine.shutdown();
+			} catch (IOException ex) {
+				logger.error("Error. Job Id {}", jobId, ex);
+			}
+		}
+	}
 
-		cacheHelper.clearJobs();
+	/**
+	 * Copies the generated file to an amazon s3 or compatible storage provider
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToAzure(Destination destination, String fullLocalFileName) {
+		String provider = "azureblob";
+		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+	}
+
+	/**
+	 * Copies the generated file to an amazon s3 or compatible storage provider
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToS3(Destination destination, String fullLocalFileName) {
+		String provider = "aws-s3";
+		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+	}
+
+	/**
+	 * Copies the generated file to a cloud blob storage provider
+	 *
+	 * @param provider a string representing the cloud storage provider as per
+	 * the jclouds library.
+	 * https://jclouds.apache.org/reference/providers/#blobstore
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToBlobStorage(String provider, Destination destination,
+			String fullLocalFileName) {
+
+		logger.debug("Entering sendFileToS3: provider='{}' destination={},"
+				+ " fullLocalFileName='{}'", provider, destination, fullLocalFileName);
+
+		//https://www.ashishpaliwal.com/blog/2012/04/playing-with-jclouds-transient-blobstore/
+		//https://jclouds.apache.org/start/blobstore/
+		//https://jclouds.apache.org/reference/logging/
+		//https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudfiles/UploadLargeObject.java
+		//https://github.com/jclouds/jclouds-cloud-storage-workshop/blob/master/exercise4/src/main/java/org/jclouds/labs/blobstore/exercise4/MyDropboxClient.java
+		//https://stackoverflow.com/questions/14582627/what-are-the-credentials-to-use-azure-blob-in-jclouds
+		//https://jclouds.apache.org/guides/azure-storage/
+		//https://jclouds.apache.org/guides/aws/
+		//https://jclouds.apache.org/reference/providers/#blobstore-providers
+		//https://github.com/apache/camel/blob/master/components/camel-jclouds/src/main/java/org/apache/camel/component/jclouds/JcloudsBlobStoreHelper.java
+		String identity = destination.getUser();
+		String credential = destination.getPassword();
+
+		Iterable<Module> modules = ImmutableSet.<Module>of(
+				new SLF4JLoggingModule());
+
+		BlobStoreContext context = ContextBuilder.newBuilder(provider)
+				.credentials(identity, credential)
+				.modules(modules)
+				.buildView(BlobStoreContext.class);
+
+		try {
+			BlobStore blobStore = context.getBlobStore();
+
+			String containerName = destination.getPath();
+			boolean created = blobStore.createContainerInLocation(null, containerName);
+			if (created) {
+				// the container didn't exist, but does now
+				logger.debug("Container created - '{}'. Job Id {}", containerName, jobId);
+			} else {
+				// the container already existed
+				logger.debug("Container already existed: '{}'. Job Id {}", containerName, jobId);
+			}
+
+			// Create a Blob
+			String destinationSubDirectory = destination.getSubDirectory();
+			String jobSubDirectory = job.getSubDirectory();
+
+			String directorySeparator = "/";
+			String finalPath = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
+
+			String remoteFileName = finalPath + fileName;
+
+			ByteSource payload = Files.asByteSource(new File(fullLocalFileName));
+			Blob blob = blobStore.blobBuilder(remoteFileName)
+					.payload(payload)
+					.contentDisposition(fileName)
+					.contentLength(payload.size())
+					.build();
+
+			// Upload the Blob
+			String eTag = blobStore.putBlob(containerName, blob, multipart());
+			logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", fileName, eTag, jobId);
+		} catch (IOException ex) {
+			logErrorAndSetDetails(ex);
+		} finally {
+			if (context != null) {
+				context.close();
+			}
+		}
+	}
+
+	/**
+	 * Copies the generated file to a network share (one that uses the SMB2
+	 * protocol)
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToNetworkShare(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering sendFileToNetworkShare: destination={}, fullLocalFileName='{}'",
+				destination, fullLocalFileName);
+
+		com.hierynomus.smbj.connection.Connection connection = null;
+
+		try {
+			NetworkShareOptions networkShareOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				networkShareOptions = new NetworkShareOptions();
+			} else {
+				networkShareOptions = ArtUtils.jsonToObject(options, NetworkShareOptions.class);
+			}
+
+			SmbConfig.Builder configBuilder = SmbConfig.builder();
+			if (networkShareOptions.getTimeoutSeconds() != null) {
+				configBuilder = configBuilder.withTimeout(networkShareOptions.getTimeoutSeconds(), TimeUnit.SECONDS);
+			}
+			if (networkShareOptions.getSocketTimeoutSeconds() != null) {
+				configBuilder = configBuilder.withSoTimeout(networkShareOptions.getSocketTimeoutSeconds(), TimeUnit.SECONDS);
+			}
+			if (networkShareOptions.getMultiProtocolNegotiate() != null) {
+				configBuilder = configBuilder.withMultiProtocolNegotiate(networkShareOptions.getMultiProtocolNegotiate());
+			}
+			if (networkShareOptions.getDfsEnabled() != null) {
+				configBuilder = configBuilder.withDfsEnabled(networkShareOptions.getDfsEnabled());
+			}
+			if (networkShareOptions.getSigningRequired() != null) {
+				configBuilder = configBuilder.withSigningRequired(networkShareOptions.getSigningRequired());
+			}
+			if (networkShareOptions.getBufferSize() != null) {
+				configBuilder = configBuilder.withBufferSize(networkShareOptions.getBufferSize());
+			}
+
+			SmbConfig config = configBuilder.build();
+
+			SMBClient client = new SMBClient(config);
+
+			String server = destination.getServer();
+			int port = destination.getPort();
+
+			if (port > 0) {
+				connection = client.connect(server, port);
+			} else {
+				connection = client.connect(server);
+			}
+
+			String username = destination.getUser();
+			if (username == null) {
+				username = "";
+			}
+
+			String password = destination.getPassword();
+			if (password == null) {
+				password = "";
+			}
+
+			String domain = destination.getDomain();
+
+			AuthenticationContext ac;
+			if (networkShareOptions.isAnonymousUser()) {
+				ac = AuthenticationContext.anonymous();
+			} else if (networkShareOptions.isGuestUser()) {
+				ac = AuthenticationContext.guest();
+			} else {
+				ac = new AuthenticationContext(username, password.toCharArray(), domain);
+			}
+
+			com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
+
+			String destinationSubDirectory = destination.getSubDirectory();
+			destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
+
+			String jobSubDirectory = job.getSubDirectory();
+			jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
+
+			//linux shares can use either "\" or "/" as a directory separator
+			//windows shares can only use "\" as a directory separator
+			String directorySeparator;
+			if (StringUtils.contains(destinationSubDirectory, "/")
+					|| StringUtils.contains(jobSubDirectory, "/")) {
+				directorySeparator = "/";
+			} else {
+				directorySeparator = "\\";
+			}
+
+			String finalSubDirectory = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
+
+			// Connect to Share
+			String path = destination.getPath();
+			try (DiskShare share = (DiskShare) session.connectShare(path)) {
+				//https://stackoverflow.com/questions/44634892/java-smb-file-share-without-smb-1-0-cifs-compatibility-enabled
+				// if file is in folder(s), create them first
+				if (StringUtils.isNotBlank(finalSubDirectory)
+						&& destination.isCreateDirectories()) {
+					//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
+					String[] folders = StringUtils.split(finalSubDirectory, directorySeparator);
+					//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
+					List<String> subFolders = new ArrayList<>();
+					for (String folder : folders) {
+						subFolders.add(folder);
+						String partialPath = StringUtils.join(subFolders, directorySeparator);
+						try {
+							if (!share.folderExists(partialPath)) {
+								share.mkdir(partialPath);
+							}
+						} catch (SMBApiException ex) {
+							logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+						}
+					}
+				}
+
+				File file = new File(fullLocalFileName);
+				String destPath = finalSubDirectory + fileName;
+				boolean overwrite = true;
+				SmbFiles.copy(file, share, destPath, overwrite);
+			}
+		} catch (IOException | SMBApiException ex) {
+			logErrorAndSetDetails(ex);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (Exception ex2) {
+					logger.error("Error. Job Id {}", jobId, ex2);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns the result of combining several directory paths
+	 *
+	 * @param directorySeparator the directory separator in use
+	 * @param firstDirectoryPath the first directory path
+	 * @param otherDirectoryPaths other directory paths
+	 * @return the final, combined directory path
+	 */
+	private String combineDirectoryPaths(String directorySeparator,
+			String firstDirectoryPath, String... otherDirectoryPaths) {
+
+		logger.debug("Entering combineDirectoryPaths: directorySeparator='{}',"
+				+ " firstDirectoryPath='{}'", directorySeparator, firstDirectoryPath);
+
+		String finalPath = StringUtils.trimToEmpty(firstDirectoryPath);
+
+		if (StringUtils.isNotBlank(finalPath)
+				&& !StringUtils.endsWith(finalPath, directorySeparator)) {
+			finalPath = finalPath + directorySeparator;
+		}
+
+		String subDirectoryPath = combineSubDirectoryPaths(directorySeparator, otherDirectoryPaths);
+
+		finalPath = finalPath + subDirectoryPath;
+
+		return finalPath;
+	}
+
+	/**
+	 * Returns the result of combining several sub-directory paths
+	 *
+	 * @param directorySeparator the directory separator in use
+	 * @param subDirectoryPaths the sub-directory paths
+	 * @return the final, combined sub-directory path
+	 */
+	private String combineSubDirectoryPaths(String directorySeparator,
+			String... subDirectoryPaths) {
+
+		logger.debug("Entering combineSubDirectoryPaths: directorySeparator='{}'", directorySeparator);
+
+		String finalPath = "";
+
+		for (String directoryPath : subDirectoryPaths) {
+			logger.debug("directoryPath='{}'", directoryPath);
+			directoryPath = StringUtils.trimToEmpty(directoryPath);
+			if (StringUtils.startsWith(directoryPath, directorySeparator)) {
+				directoryPath = StringUtils.substringAfter(directoryPath, directorySeparator);
+			}
+
+			if (StringUtils.isNotBlank(directoryPath)
+					&& !StringUtils.endsWith(directoryPath, directorySeparator)) {
+				directoryPath = directoryPath + directorySeparator;
+			}
+
+			finalPath = finalPath + directoryPath;
+		}
+
+		return finalPath;
 	}
 
 	/**
 	 * Ftps the generated file
 	 */
-	private void ftpFile() {
-		logger.debug("Entering ftpFile");
+	private void ftpFile(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering ftpFile: destination={}, fullLocalFileName='{}'",
+				destination, fullLocalFileName);
 
-		FtpServer ftpServer = job.getFtpServer();
-		if (ftpServer == null) {
-			//no ftp server configured
-			return;
-		}
+		String path = destination.getPath();
+		logger.debug("path='{}'", path);
+		String jobSubDirectory = job.getSubDirectory();
+		logger.debug("jobSubDirectory='{}'", jobSubDirectory);
 
-		if (!ftpServer.isActive()) {
-			logger.info("FTP Server disabled. Job Id: {}", jobId);
-			return;
-		}
+		String directorySeparator = "/";
+		String finalPath = combineDirectoryPaths(directorySeparator, path, jobSubDirectory);
+		String remoteFileName = finalPath + fileName;
 
-		FtpConnectionType connectionType = ftpServer.getConnectionType();
-		logger.debug("connectionType={}", connectionType);
-
-		String jobsExportPath = Config.getJobsExportPath();
-		String fullLocalFileName = jobsExportPath + fileName;
-
-		String remoteDirectory = ftpServer.getRemoteDirectory();
-		logger.debug("remoteDirectory='{}'", remoteDirectory);
-		remoteDirectory = StringUtils.trimToEmpty(remoteDirectory);
-		if (!StringUtils.endsWith(remoteDirectory, "/")) {
-			remoteDirectory += "/";
-		}
-		String remoteFileName = remoteDirectory + fileName;
-
-		switch (connectionType) {
+		DestinationType destinationType = destination.getDestinationType();
+		switch (destinationType) {
 			case FTP:
-				doFtp(ftpServer, fullLocalFileName, remoteFileName);
+				doFtp(destination, fullLocalFileName, remoteFileName, finalPath);
 				break;
 			case SFTP:
-				doSftp(ftpServer, fullLocalFileName, remoteFileName);
+				doSftp(destination, fullLocalFileName, remoteFileName, finalPath);
 				break;
 			default:
-				logger.warn("Unexpected ftp connection type: " + connectionType);
+				logger.warn("Unexpected ftp destination type: " + destinationType);
 		}
-
 	}
 
 	/**
 	 * Ftp the generated file using the ftp protocol
 	 *
-	 * @param ftpServer the ftp server object
-	 * @param fullLocalFileName full path to the local job file to ftp
-	 * @param remoteFileName the file name or full path of the ftp destination
+	 * @param destination the destination object
+	 * @param fullLocalFileName full path of the local job file
+	 * @param remoteFileName the full file name of the ftp destination
+	 * @param path the final path (minus the file name) of the ftp file
 	 */
-	private void doFtp(FtpServer ftpServer, String fullLocalFileName, String remoteFileName) {
-		logger.debug("Entering doFtp: ftpServer={}, fullLocalFileName='{}',"
-				+ " remoteFileName='{}'", ftpServer, fullLocalFileName, remoteFileName);
+	private void doFtp(Destination destination, String fullLocalFileName,
+			String remoteFileName, String path) {
+		logger.debug("Entering doFtp: destination={}, fullLocalFileName='{}',"
+				+ " remoteFileName='{}', path='{}'",
+				destination, fullLocalFileName, remoteFileName, path);
 
 		//http://www.codejava.net/java-se/networking/ftp/java-ftp-file-upload-tutorial-and-example
 		//https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
@@ -275,8 +938,8 @@ public class ReportJob implements org.quartz.Job {
 		//https://stackoverflow.com/questions/6651158/apache-commons-ftp-problems
 		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html#completePendingCommand()
 		//https://stackoverflow.com/questions/19209826/android-ftpclient-cannot-upload-file-ftp-response-421-received-server-closed
-		String server = ftpServer.getServer();
-		int port = ftpServer.getPort();
+		String server = destination.getServer();
+		int port = destination.getPort();
 
 		logger.debug("server='{}'", server);
 		logger.debug("port={}", port);
@@ -286,13 +949,41 @@ public class ReportJob implements org.quartz.Job {
 			port = DEFAULT_FTP_PORT;
 		}
 
-		String user = ftpServer.getUser();
-		String password = ftpServer.getPassword();
+		String user = destination.getUser();
+		String password = destination.getPassword();
 
 		logger.debug("user='{}'", user);
 
 		FTPClient ftpClient = new FTPClient();
 		try {
+			FtpOptions ftpOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				ftpOptions = new FtpOptions();
+			} else {
+				ftpOptions = ArtUtils.jsonToObject(options, FtpOptions.class);
+			}
+
+			//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/SocketClient.html#setConnectTimeout(int)
+			Integer connectTimeoutSeconds = ftpOptions.getConnectTimeoutSeconds();
+			if (connectTimeoutSeconds != null) {
+				int connectTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(connectTimeoutSeconds);
+				ftpClient.setConnectTimeout(connectTimeoutMillis);
+			}
+
+			//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/SocketClient.html#setDefaultTimeout(int)
+			Integer defaultTimeoutSeconds = ftpOptions.getDefaultTimeoutSeconds();
+			if (defaultTimeoutSeconds != null) {
+				int defaultTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(defaultTimeoutSeconds);
+				ftpClient.setDefaultTimeout(defaultTimeoutMillis);
+			}
+
+			//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html#setControlKeepAliveTimeout(long)
+			Long controlKeepAliveTimeoutSeconds = ftpOptions.getControlKeepAliveTimeoutSeconds();
+			if (controlKeepAliveTimeoutSeconds != null) {
+				ftpClient.setControlKeepAliveTimeout(controlKeepAliveTimeoutSeconds);
+			}
+
 			ftpClient.connect(server, port);
 
 			// After connection attempt, you should check the reply code to verify
@@ -301,12 +992,12 @@ public class ReportJob implements org.quartz.Job {
 
 			if (!FTPReply.isPositiveCompletion(reply)) {
 				ftpClient.disconnect();
-				logger.info("FTP server refused connection. Job Id: {}", jobId);
+				logger.info("FTP server refused connection. Job Id {}", jobId);
 				return;
 			}
 
 			if (!ftpClient.login(user, password)) {
-				logger.info("FTP login failed. Job Id: {}", jobId);
+				logger.info("FTP login failed. Job Id {}", jobId);
 				return;
 			}
 
@@ -316,26 +1007,43 @@ public class ReportJob implements org.quartz.Job {
 
 			File localFile = new File(fullLocalFileName);
 
+			//create path if it don't exist
+			if (StringUtils.isNotBlank(path) && destination.isCreateDirectories()) {
+				//can't create directory hierarchy in one go
+				String[] folders = StringUtils.split(path, "/");
+				//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
+				List<String> subFolders = new ArrayList<>();
+				for (String folder : folders) {
+					subFolders.add(folder);
+					String partialPath = StringUtils.join(subFolders, "/");
+					try {
+						ftpClient.makeDirectory(partialPath);
+					} catch (IOException ex) {
+						logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+					}
+				}
+			}
+
 			boolean done;
 			try (InputStream inputStream = new FileInputStream(localFile)) {
 				done = ftpClient.storeFile(remoteFileName, inputStream);
 			}
 			if (done) {
-				logger.debug("Ftp file upload successful. Job Id: {}", jobId);
+				logger.debug("Ftp file upload successful. Job Id {}", jobId);
 			} else {
-				logger.info("Ftp file upload failed. Job Id: {}", jobId);
+				logger.info("Ftp file upload failed. Job Id {}", jobId);
 			}
 
 			ftpClient.logout();
 		} catch (IOException ex) {
-			logger.error("Error", ex);
+			logErrorAndSetDetails(ex);
 		} finally {
 			try {
 				if (ftpClient.isConnected()) {
 					ftpClient.disconnect();
 				}
 			} catch (IOException ex) {
-				logger.error("Error", ex);
+				logger.error("Error. Job Id {}", jobId, ex);
 			}
 		}
 	}
@@ -343,20 +1051,23 @@ public class ReportJob implements org.quartz.Job {
 	/**
 	 * Ftp the generated file using the sftp protocol
 	 *
-	 * @param ftpServer the ftp server object
-	 * @param fullLocalFileName full path to the local job file to ftp
+	 * @param destination the destination object
+	 * @param fullLocalFileName full path of the local job file
 	 * @param remoteFileName the file name or full path of the ftp destination
+	 * @param path the final path (minus the file name) of the ftp file
 	 */
-	private void doSftp(FtpServer ftpServer, String fullLocalFileName, String remoteFileName) {
-		logger.debug("Entering doSftp: ftpServer={}, fullLocalFileName='{}',"
-				+ " remoteFileName='{}'", ftpServer, fullLocalFileName, remoteFileName);
+	private void doSftp(Destination destination, String fullLocalFileName,
+			String remoteFileName, String path) {
+		logger.debug("Entering doSftp: destination={}, fullLocalFileName='{}',"
+				+ " remoteFileName='{}', path='{}'",
+				destination, fullLocalFileName, remoteFileName, path);
 
 		//https://stackoverflow.com/questions/14830146/how-to-transfer-a-file-through-sftp-in-java
 		//https://github.com/jpbriend/sftp-example/blob/master/src/main/java/com/infinit/sftp/SftpClient.java
 		//https://stackoverflow.com/questions/17473398/java-sftp-upload-using-jsch-but-how-to-overwrite-the-current-file
 		//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/ChannelSftp.html
-		String server = ftpServer.getServer();
-		int port = ftpServer.getPort();
+		String server = destination.getServer();
+		int port = destination.getPort();
 
 		logger.debug("server='{}'", server);
 		logger.debug("port={}", port);
@@ -366,8 +1077,8 @@ public class ReportJob implements org.quartz.Job {
 			port = DEFAULT_SFTP_PORT;
 		}
 
-		String user = ftpServer.getUser();
-		String password = ftpServer.getPassword();
+		String user = destination.getUser();
+		String password = destination.getPassword();
 
 		logger.debug("user='{}'", user);
 
@@ -376,6 +1087,14 @@ public class ReportJob implements org.quartz.Job {
 		ChannelSftp channelSftp = null;
 
 		try {
+			SftpOptions sftpOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				sftpOptions = new SftpOptions();
+			} else {
+				sftpOptions = ArtUtils.jsonToObject(options, SftpOptions.class);
+			}
+
 			JSch jsch = new JSch();
 			session = jsch.getSession(user, server, port);
 			session.setPassword(password);
@@ -383,21 +1102,62 @@ public class ReportJob implements org.quartz.Job {
 			Properties config = new Properties();
 			config.put("StrictHostKeyChecking", "no");
 			session.setConfig(config);
+
+			//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/Session.html#setTimeout-int-
+			Integer sessionConnectTimeoutSeconds = sftpOptions.getSessionConnectTimeoutSeconds();
+			if (sessionConnectTimeoutSeconds != null) {
+				int sessionConnectTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(sessionConnectTimeoutSeconds);
+				session.setTimeout(sessionConnectTimeoutMillis);
+			}
+
+			//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/Session.html#setServerAliveInterval-int-
+			Integer serverAliveIntervalSeconds = sftpOptions.getServerAliveIntervalSeconds();
+			if (serverAliveIntervalSeconds != null) {
+				int serverAliveIntervalMillis = (int) TimeUnit.SECONDS.toMillis(serverAliveIntervalSeconds);
+				session.setServerAliveInterval(serverAliveIntervalMillis);
+			}
+
 			session.connect();
 			logger.debug("Host connected");
 
 			channel = session.openChannel("sftp");
-			channel.connect();
+
+			//https://epaul.github.io/jsch-documentation/simple.javadoc/com/jcraft/jsch/Channel.html#connect(int)
+			Integer channelConnectTimeoutSeconds = sftpOptions.getChannelConnectTimeoutSeconds();
+			if (channelConnectTimeoutSeconds != null) {
+				int channelConnectTimeoutMillis = (int) TimeUnit.SECONDS.toMillis(channelConnectTimeoutSeconds);
+				channel.connect(channelConnectTimeoutMillis);
+			} else {
+				channel.connect();
+			}
 			logger.debug("Channel connected");
+
+			channelSftp = (ChannelSftp) channel;
 
 			File localFile = new File(fullLocalFileName);
 
-			channelSftp = (ChannelSftp) channel;
+			//create path if it don't exist
+			if (StringUtils.isNotBlank(path) && destination.isCreateDirectories()) {
+				//can't create directory hierarchy in one go
+				String[] folders = StringUtils.split(path, "/");
+				//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
+				List<String> subFolders = new ArrayList<>();
+				for (String folder : folders) {
+					subFolders.add(folder);
+					String partialPath = StringUtils.join(subFolders, "/");
+					try {
+						channelSftp.mkdir(partialPath);
+					} catch (SftpException ex) {
+						logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+					}
+				}
+			}
+
 			try (InputStream inputStream = new FileInputStream(localFile)) {
 				channelSftp.put(inputStream, remoteFileName, ChannelSftp.OVERWRITE);
 			}
 		} catch (JSchException | SftpException | IOException ex) {
-			logger.error("Error", ex);
+			logErrorAndSetDetails(ex);
 		} finally {
 			if (channelSftp != null) {
 				channelSftp.disconnect();
@@ -444,12 +1204,12 @@ public class ReportJob implements org.quartz.Job {
 
 				List<String> cmdAndArgs = Arrays.asList("cmd", "/c", batchFileName, fileName);
 
-				ProcessBuilder pb = new ProcessBuilder(cmdAndArgs);
-				pb.directory(new File(batchDirectory));
+				ProcessBuilder processBuilder = new ProcessBuilder(cmdAndArgs);
+				processBuilder.directory(new File(batchDirectory));
 				try {
-					pb.start();
+					processBuilder.start();
 				} catch (IOException ex) {
-					logger.error("Error", ex);
+					logErrorAndSetDetails(ex);
 				}
 			} else if (SystemUtils.IS_OS_UNIX) {
 				//https://stackoverflow.com/questions/25403765/when-runtime-getruntime-exec-call-linux-batch-file-could-not-find-its-physical
@@ -467,14 +1227,14 @@ public class ReportJob implements org.quartz.Job {
 					// Run the script
 					processBuilder.start();
 				} catch (IOException ex) {
-					logger.error("Error", ex);
+					logErrorAndSetDetails(ex);
 				}
 			} else {
 				String os = SystemUtils.OS_NAME;
-				logger.warn("Unexpected OS: '{}'. Job Id: {}", os, jobId);
+				logger.warn("Unexpected OS: '{}'. Job Id {}", os, jobId);
 			}
 		} else {
-			logger.warn("Batch file not found: '{}'. Job Id: {}", fullBatchFileName, jobId);
+			logger.warn("Batch file not found: '{}'. Job Id {}", fullBatchFileName, jobId);
 		}
 	}
 
@@ -492,10 +1252,10 @@ public class ReportJob implements org.quartz.Job {
 		boolean emailSent = false;
 
 		if (!Config.getCustomSettings().isEnableEmail()) {
-			logger.info("Email disabled. Job Id: {}", jobId);
+			logger.info("Email disabled. Job Id {}", jobId);
 			runMessage = "jobs.message.emailDisabled";
 		} else if (!Config.isEmailServerConfigured()) {
-			logger.info("Email server not configured. Job Id: {}", jobId);
+			logger.info("Email server not configured. Job Id {}", jobId);
 			runMessage = "jobs.message.emailServerNotConfigured";
 		} else {
 			mailer.send();
@@ -509,103 +1269,98 @@ public class ReportJob implements org.quartz.Job {
 	 * Prepares a mailer object for sending an alert job
 	 *
 	 * @param mailer the mailer to use
-	 * @param msg the message of the email
+	 * @param message the message of the email
 	 * @param value the alert value
+	 * @param reportParamsMap map containing report parameters
 	 */
-	private void prepareAlertMailer(Mailer mailer, String msg, int value) {
-		logger.debug("Entering prepareAlertMailer");
+	private void prepareAlertMailer(Mailer mailer, String message, int value,
+			Map<String, ReportParameter> reportParamsMap) throws ParseException {
 
-		String from = getMailFrom();
+		Map<String, String> recipientDetails = null;
+		prepareAlertMailer(mailer, message, value, recipientDetails, reportParamsMap);
+	}
 
-		String subject = job.getMailSubject();
-		// compatibility with Art pre 1.8 where subject was not editable
-		if (subject == null) {
-			subject = "ART Alert: (Job " + jobId + ")";
-		}
+	/**
+	 * Prepares a mailer object for sending an alert job
+	 *
+	 * @param mailer the mailer to use
+	 * @param message the message of the email
+	 * @param value the alert value
+	 * @param the dynamic recipient details
+	 * @param reportParamsMap map containing report parameters
+	 */
+	private void prepareAlertMailer(Mailer mailer, String message, int value,
+			Map<String, String> recipientDetails, Map<String, ReportParameter> reportParamsMap)
+			throws ParseException {
 
-		mailer.setSubject(subject);
-		mailer.setFrom(from);
+		logger.debug("Entering prepareAlertMailer: value={}", value);
+
+		setMailerFromAndSubject(mailer, recipientDetails, reportParamsMap);
+
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		String username = job.getUser().getUsername();
+		String customMessage = expressionHelper.processString(message, reportParamsMap, username, recipientDetails);
 
 		String mainMessage;
-		if (StringUtils.isBlank(msg)) {
+		if (StringUtils.isBlank(customMessage)) {
 			mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
 		} else {
-			mainMessage = msg;
+			mainMessage = customMessage;
 
 			//replace value placeholder in the message if it exists
-			String searchString = Pattern.quote("#value#"); //quote in case it contains special regex characters
-			String replaceString = Matcher.quoteReplacement(String.valueOf(value)); //quote in case it contains special regex characters
-			mainMessage = mainMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+			String searchString = "#value#";
+			String replaceString = String.valueOf(value);
+			mainMessage = StringUtils.replaceIgnoreCase(mainMessage, searchString, replaceString);
 		}
 
 		Context ctx = new Context(locale);
 		ctx.setVariable("mainMessage", mainMessage);
 		ctx.setVariable("job", job);
+		ctx.setVariable("value", value);
 
-		String finalMessage = emailTemplateEngine.process("basicEmail", ctx);
+		String emailTemplateName = getEmailTemplateName();
+		String finalMessage = emailTemplateEngine.process(emailTemplateName, ctx);
 		mailer.setMessage(finalMessage);
 	}
 
 	/**
 	 * Prepares a mailer object for sending an alert job based on a freemarker
-	 * report
+	 * or thymeleaf report
 	 *
+	 * @param reportType the report type
 	 * @param mailer the mailer to use
 	 * @param value the alert value
+	 * @param reportParamsMap map containing report parameters
 	 */
-	private void prepareFreeMarkerAlertMailer(Mailer mailer, int value)
-			throws TemplateException, IOException {
+	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer, int value,
+			Map<String, ReportParameter> reportParamsMap)
+			throws TemplateException, IOException, ParseException {
 
-		prepareFreeMarkerAlertMailer(mailer, value, null);
+		Map<String, String> recipientColumns = null;
+		prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns, reportParamsMap);
 	}
 
 	/**
 	 * Prepares a mailer object for sending an alert job based on a freemarker
-	 * report
+	 * or thymeleaf report
 	 *
+	 * @param reportType the report type
 	 * @param mailer the mailer to use
 	 * @param value the alert value
 	 * @param recipientColumns the recipient column details
+	 * @param reportParamsMap map containing report parameters
 	 */
-	private void prepareFreeMarkerAlertMailer(Mailer mailer, int value,
-			Map<String, String> recipientColumns) throws TemplateException, IOException {
+	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer,
+			int value, Map<String, String> recipientColumns,
+			Map<String, ReportParameter> reportParamsMap)
+			throws TemplateException, IOException, ParseException {
 
-		logger.debug("Entering prepareFreeMarkerAlertMailer");
+		logger.debug("Entering prepareTemplateAlertMailer: reportType={}, "
+				+ "value={}", reportType, value);
 
-		String from = getMailFrom();
+		setMailerFromAndSubject(mailer, recipientColumns, reportParamsMap);
 
-		String subject = job.getMailSubject();
-		// compatibility with Art pre 1.8 where subject was not editable
-		if (subject == null) {
-			subject = "ART Alert: (Job " + jobId + ")";
-		}
-
-		mailer.setSubject(subject);
-		mailer.setFrom(from);
-
-		Report report = job.getReport();
-		String templateFileName = report.getTemplate();
-		String templatesPath = Config.getTemplatesPath();
-		String fullTemplateFileName = templatesPath + templateFileName;
-
-		logger.debug("templateFileName='{}'", templateFileName);
-
-		//need to explicitly check if template file is empty string
-		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-		if (StringUtils.isBlank(templateFileName)) {
-			throw new IllegalArgumentException("Template file not specified");
-		}
-
-		//check if template file exists
-		File templateFile = new File(fullTemplateFileName);
-		if (!templateFile.exists()) {
-			throw new IllegalStateException("Template file not found: " + templateFileName);
-		}
-
-		Configuration cfg = Config.getFreemarkerConfig();
-		Template template = cfg.getTemplate(templateFileName);
-
-		//set objects to be passed to freemarker
+		//set variables to be passed to template
 		Map<String, Object> data = new HashMap<>();
 
 		if (recipientColumns != null) {
@@ -618,9 +1373,18 @@ public class ReportJob implements org.quartz.Job {
 
 		data.put("value", value);
 
+		Report report = job.getReport();
+
 		//create output
 		Writer writer = new StringWriter();
-		template.process(data, writer);
+
+		if (reportType == ReportType.FreeMarker) {
+			FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+			freemarkerOutput.generateOutput(report, writer, data);
+		} else if (reportType == ReportType.Thymeleaf) {
+			ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+			thymeleafOutput.generateOutput(report, writer, data);
+		}
 
 		String finalMessage = writer.toString();
 		mailer.setMessage(finalMessage);
@@ -630,24 +1394,37 @@ public class ReportJob implements org.quartz.Job {
 	 * Prepares a mailer object for sending an email job
 	 *
 	 * @param mailer the mailer to use
-	 * @param msg the message of the email
+	 * @param message the message of the email
 	 * @param outputFileName the full path of a file to include with the email
+	 * @param reportParamsList the report parameters used to run the job
+	 * @param reportParamsMap map containing report parameters
 	 */
-	private void prepareMailer(Mailer mailer, String msg, String outputFileName)
-			throws FileNotFoundException, IOException {
+	private void prepareMailer(Mailer mailer, String message, String outputFileName,
+			List<ReportParameter> reportParamsList, Map<String, ReportParameter> reportParamsMap)
+			throws FileNotFoundException, IOException, ParseException {
+
+		Map<String, String> recipientDetails = null;
+		prepareMailer(mailer, message, outputFileName, recipientDetails, reportParamsList, reportParamsMap);
+	}
+
+	/**
+	 * Prepares a mailer object for sending an email job
+	 *
+	 * @param mailer the mailer to use
+	 * @param message the message of the email
+	 * @param outputFileName the full path of a file to include with the email
+	 * @param recipientDetails the dynamic recipient details
+	 * @param reportParamsList the report parameters used to run the job
+	 * @param reportParamsMap map containing report parameters
+	 */
+	private void prepareMailer(Mailer mailer, String message, String outputFileName,
+			Map<String, String> recipientDetails, List<ReportParameter> reportParamsList,
+			Map<String, ReportParameter> reportParamsMap)
+			throws FileNotFoundException, IOException, ParseException {
 
 		logger.debug("Entering prepareEmailMailer: outputFileName='{}'", outputFileName);
 
-		String from = getMailFrom();
-
-		String subject = job.getMailSubject();
-		// compatibility with Art pre 1.8 where subject was not editable
-		if (subject == null) {
-			subject = "ART: (Job " + jobId + ")";
-		}
-
-		mailer.setSubject(subject);
-		mailer.setFrom(from);
+		setMailerFromAndSubject(mailer, recipientDetails, reportParamsMap);
 
 		Report report = job.getReport();
 		ReportType reportType = report.getReportType();
@@ -662,35 +1439,36 @@ public class ReportJob implements org.quartz.Job {
 		} else if (jobType.isEmailInline()) {
 			// inline html within email
 			// read the file and include it in the HTML message
-			try (FileInputStream fis = new FileInputStream(outputFileName)) {
-				byte fileBytes[] = new byte[fis.available()];
-
-				int result = fis.read(fileBytes);
-				if (result == -1) {
-					logger.warn("EOF reached for inline email file: '{}'", outputFileName);
-				}
-
-				// convert the file to a string and get only the html table
-				messageData = new String(fileBytes, "UTF-8");
-
-				if (reportType != ReportType.FreeMarker) {
-					messageData = messageData.substring(messageData.indexOf("<body>") + 6, messageData.indexOf("</body>")); //html plain output now has head and body sections
-				}
-
+			// convert the file to a string and get only the html table
+			File outputFile = new File(outputFileName);
+			messageData = FileUtils.readFileToString(outputFile, "UTF-8");
+			if (reportType.isStandardOutput()) {
+				messageData = StringUtils.substringBetween(messageData, "<body>", "</body>");
 			}
 		}
 
-		if (reportType == ReportType.FreeMarker) {
-			if (messageData == null) {
-				messageData = "";
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		String username = job.getUser().getUsername();
+		String customMessage = expressionHelper.processString(message, reportParamsMap, username, recipientDetails);
+
+		if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+			String finalMessage;
+			if (jobType.isEmailInline()) {
+				finalMessage = messageData;
+			} else {
+				finalMessage = customMessage;
 			}
-			mailer.setMessage(messageData);
+
+			if (finalMessage == null) {
+				finalMessage = "";
+			}
+			mailer.setMessage(finalMessage);
 		} else {
 			String mainMessage;
-			if (StringUtils.isBlank(msg)) {
+			if (StringUtils.isBlank(customMessage)) {
 				mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
 			} else {
-				mainMessage = msg;
+				mainMessage = customMessage;
 			}
 
 			Context ctx = new Context(locale);
@@ -698,9 +1476,44 @@ public class ReportJob implements org.quartz.Job {
 			ctx.setVariable("job", job);
 			ctx.setVariable("data", messageData);
 
-			String finalMessage = emailTemplateEngine.process("basicEmail", ctx);
+			//pass report parameters
+			for (ReportParameter reportParam : reportParamsList) {
+				String paramName = reportParam.getParameter().getName();
+				ctx.setVariable(paramName, reportParam);
+			}
+
+			ctx.setVariable("params", reportParamsList);
+			ctx.setVariable("locale", locale);
+
+			String emailTemplateName = getEmailTemplateName();
+			String finalMessage = emailTemplateEngine.process(emailTemplateName, ctx);
 			mailer.setMessage(finalMessage);
 		}
+	}
+
+	/**
+	 * Sets the from and subject properties of a mailer object
+	 *
+	 * @param mailer the mailer object
+	 * @param recipientDetails the dynamic recipient details
+	 * @param reportParamsMap map containing report parameters
+	 */
+	private void setMailerFromAndSubject(Mailer mailer, Map<String, String> recipientDetails,
+			Map<String, ReportParameter> reportParamsMap) throws ParseException {
+
+		String from = getMailFrom();
+
+		String subject = job.getMailSubject();
+		if (subject == null) {
+			subject = "ART: (Job " + jobId + ")";
+		}
+
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		String username = job.getUser().getUsername();
+		subject = expressionHelper.processString(subject, reportParamsMap, username, recipientDetails);
+
+		mailer.setSubject(subject);
+		mailer.setFrom(from);
 	}
 
 	/**
@@ -748,7 +1561,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
@@ -774,7 +1587,30 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
+		}
+	}
+
+	/**
+	 * Updates the last run date and run details fields
+	 */
+	private void updateIncompleteRun() {
+		logger.debug("Entering updateIncompleteRun");
+
+		//update job details
+		String sql = "UPDATE ART_JOBS SET LAST_END_DATE=?,"
+				+ " LAST_RUN_DETAILS=? WHERE JOB_ID=?";
+
+		Object[] values = {
+			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+			runDetails,
+			jobId
+		};
+
+		try {
+			dbService.update(sql, values);
+		} catch (SQLException ex) {
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
@@ -882,8 +1718,10 @@ public class ReportJob implements org.quartz.Job {
 					runJob(splitJob, jobUser, tos, recipients);
 				}
 			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
+		} catch (SQLException | RuntimeException ex) {
+			runDetails = "<b>Error:</b> " + ex.toString();
+			logger.error("Error. Job Id {}", jobId, ex);
+			progressLogger.error("Error", ex);
 		} finally {
 			DatabaseUtils.close(rs);
 
@@ -900,6 +1738,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void runNormalJob() {
 		logger.debug("Entering runNormalJob");
+
 		String dynamicRecipientEmails = null;
 		runNormalJob(dynamicRecipientEmails);
 	}
@@ -994,8 +1833,8 @@ public class ReportJob implements org.quartz.Job {
 				//job is shared with other users but the owner doesn't have a copy. save note in the jobs table
 				runMessage = "jobs.message.jobShared";
 			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
@@ -1049,7 +1888,9 @@ public class ReportJob implements org.quartz.Job {
 	 * email
 	 * @throws SQLException
 	 */
-	private void runJob(boolean splitJob, User user, String userEmail) throws SQLException {
+	private void runJob(boolean splitJob, User user, String userEmail)
+			throws SQLException {
+
 		Map<String, Map<String, String>> recipientDetails = null;
 		boolean recipientFilterPresent = false;
 
@@ -1067,10 +1908,10 @@ public class ReportJob implements org.quartz.Job {
 	 * @throws SQLException
 	 */
 	private void runJob(boolean splitJob, User user, String userEmail,
-			Map<String, Map<String, String>> recipientDetails) throws SQLException {
+			Map<String, Map<String, String>> recipientDetails)
+			throws SQLException {
 
 		boolean recipientFilterPresent = false;
-
 		runJob(splitJob, user, userEmail, recipientDetails, recipientFilterPresent);
 	}
 
@@ -1123,6 +1964,7 @@ public class ReportJob implements org.quartz.Job {
 
 			ParameterProcessorResult paramProcessorResult = buildParameters(reportId, jobId, user);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 			reportRunner.setReportParamsMap(reportParamsMap);
 
 			ReportType reportType = report.getReportType();
@@ -1174,7 +2016,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			if (jobType == JobType.Alert) {
-				runAlertJob(generateEmail, recipientDetails, reportRunner, message, recipientFilterPresent, tos, ccs, bccs);
+				runAlertJob(generateEmail, recipientDetails, reportRunner, message, recipientFilterPresent, tos, ccs, bccs, reportParamsMap);
 			} else if (jobType.isPublish() || jobType.isEmail() || jobType == JobType.Print) {
 				//determine if the query returns records. to know if to generate output for conditional jobs
 				boolean generateOutput = isGenerateOutput(user, reportParamsMap);
@@ -1184,7 +2026,7 @@ public class ReportJob implements org.quartz.Job {
 					//email attachment, email inline, conditional email attachment, conditional email inline
 					if (!generateEmail && recipientDetails == null) {
 						generateOutput = false;
-						runMessage = "jobs.message.noEmailsConfigured";
+						runMessage = "jobs.message.noEmailAddressesAvailable";
 					}
 				}
 
@@ -1193,16 +2035,10 @@ public class ReportJob implements org.quartz.Job {
 					String outputFileName = generateOutputFile(reportRunner, paramProcessorResult, user);
 
 					if (jobType == JobType.Print) {
-						File file = new File(outputFileName);
-						Desktop desktop = Desktop.getDesktop();
-						if (desktop.isSupported(Desktop.Action.PRINT)) {
-							desktop.print(file);
-						} else {
-							logger.warn("Desktop print not supported. Job Id: {}", jobId);
-						}
+						printFile(outputFileName);
 					} else if (generateEmail || recipientDetails != null) {
 						//some kind of emailing required
-						processAndSendEmail(recipientDetails, message, outputFileName, recipientFilterPresent, generateEmail, tos, ccs, bccs, userEmail, cc, bcc);
+						processAndSendEmail(recipientDetails, message, outputFileName, recipientFilterPresent, generateEmail, tos, ccs, bccs, userEmail, cc, bcc, reportParamsList, reportParamsMap);
 					}
 				}
 			} else if (jobType.isCache()) {
@@ -1217,9 +2053,10 @@ public class ReportJob implements org.quartz.Job {
 
 			logger.debug("Job Id {} ...finished", jobId);
 		} catch (Exception ex) {
+			logger.error("Error. Job Id {}", jobId, ex);
 			runDetails = "<b>Error:</b> " + ex.toString();
 			fileName = "";
-			logger.error("Error", ex);
+			progressLogger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {
 				reportRunner.close();
@@ -1243,12 +2080,15 @@ public class ReportJob implements org.quartz.Job {
 	 * @param userEmail
 	 * @param cc
 	 * @param bcc
+	 * @param reportParamsList the report parameters used to run the job
 	 * @throws IOException
 	 */
 	private void processAndSendEmail(Map<String, Map<String, String>> recipientDetails,
 			String message, String outputFileName, boolean recipientFilterPresent,
 			boolean generateEmail, String[] tos, String[] ccs, String[] bccs,
-			String userEmail, String cc, String bcc) throws IOException {
+			String userEmail, String cc, String bcc,
+			List<ReportParameter> reportParamsList,
+			Map<String, ReportParameter> reportParamsMap) throws IOException, ParseException {
 
 		logger.debug("Entering processAndSendEmail");
 
@@ -1271,9 +2111,7 @@ public class ReportJob implements org.quartz.Job {
 				String[] emailsArray = StringUtils.split(emails, ";");
 				Map<String, String> recipientColumns = entry.getValue();
 
-				//customize message by replacing field labels with values for this recipient
-				String customMessage = prepareCustomMessage(finalMessage, recipientColumns); //message for a particular recipient. may include personalization e.g. Dear Jane
-				prepareMailer(mailer, customMessage, outputFileName);
+				prepareMailer(mailer, finalMessage, outputFileName, recipientColumns, reportParamsList, reportParamsMap);
 
 				mailer.setTo(emailsArray);
 
@@ -1326,7 +2164,7 @@ public class ReportJob implements org.quartz.Job {
 		if (generateEmail) {
 			Mailer mailer = getMailer();
 
-			prepareMailer(mailer, finalMessage, outputFileName);
+			prepareMailer(mailer, finalMessage, outputFileName, reportParamsList, reportParamsMap);
 
 			//set recipients
 			mailer.setTo(tos);
@@ -1336,20 +2174,13 @@ public class ReportJob implements org.quartz.Job {
 			try {
 				boolean emailSent = sendEmail(mailer);
 				if (emailSent) {
-					runMessage = "jobs.message.fileEmailed";
-				}
-
-				if (jobType.isEmail()) {
-					// delete the file since it has
-					// been sent via email
-					File file = new File(outputFileName);
-					file.delete();
-					fileName = "";
-				} else if (jobType.isPublish()) {
-					if (emailSent) {
+					if (jobType.isPublish()) {
 						runMessage = "jobs.message.reminderSent";
+					} else {
+						runMessage = "jobs.message.fileEmailed";
 					}
 				}
+
 			} catch (MessagingException ex) {
 				logger.debug("Error", ex);
 				fileName = "";
@@ -1383,10 +2214,9 @@ public class ReportJob implements org.quartz.Job {
 		ReportType reportType = report.getReportType();
 		String outputFormat = job.getOutputFormat();
 		ReportFormat reportFormat;
-		if (reportType == ReportType.FixedWidth) {
-			//fixed width jobs don't have a report format
-			//they will have undefined/invalid output format - set in editJob.jsp
-			//just set some default report format
+		if (StringUtils.isBlank(outputFormat) || StringUtils.startsWith(outputFormat, "-")) {
+			//set some default report format. note that it may determine the file name extension
+			//fixed width reports didn't have a report format in 3.0. Was saved in database as "--"
 			reportFormat = ReportFormat.html;
 		} else {
 			reportFormat = ReportFormat.toEnum(outputFormat);
@@ -1395,18 +2225,29 @@ public class ReportJob implements org.quartz.Job {
 		//generate file name to use
 		String exportPath = Config.getJobsExportPath();
 		String fixedFileName = job.getFixedFileName();
+		logger.debug("fixedFileName='{}'", fixedFileName);
 
 		if (StringUtils.isNotBlank(fixedFileName)) {
-			if (!FinalFilenameValidator.isValid(fixedFileName)) {
-				throw new IllegalArgumentException("Invalid fixed file name: " + fixedFileName);
-			}
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			String username = job.getUser().getUsername();
+
+			ExpressionHelper expressionHelper = new ExpressionHelper();
+			fixedFileName = expressionHelper.processString(fixedFileName, reportParamsMap, username);
+
+			fixedFileName = ArtUtils.cleanFilename(fixedFileName);
 
 			if (job.getRunsToArchive() > 0) {
 				int randomNumber = ArtUtils.getRandomNumber(100, 999);
 				String baseFilename = FilenameUtils.getBaseName(fixedFileName);
 				String extension = FilenameUtils.getExtension(fixedFileName);
-				String newBaseFilename = baseFilename + "-" + String.valueOf(randomNumber);
-				fileName = newBaseFilename + "." + extension;
+				if (StringUtils.containsAny(extension, "aes", "gpg")) {
+					//allow second extension to be used for encryped files
+					String base2 = FilenameUtils.getBaseName(baseFilename);
+					String extension2 = FilenameUtils.getExtension(baseFilename);
+					fileName = base2 + "-" + String.valueOf(randomNumber) + "." + extension2 + "." + extension;
+				} else {
+					fileName = baseFilename + "-" + String.valueOf(randomNumber) + "." + extension;
+				}
 			} else {
 				fileName = fixedFileName;
 				String fullFixedFileName = exportPath + fixedFileName;
@@ -1420,17 +2261,13 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} else {
 			FilenameHelper filenameHelper = new FilenameHelper();
-			String baseFilename = filenameHelper.getBaseFilename(job);
+			String baseFilename = filenameHelper.getBaseFilename(job, locale);
 			String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 
 			fileName = baseFilename + "." + extension;
 		}
 
 		logger.debug("fileName = '{}'", fileName);
-
-		if (!FinalFilenameValidator.isValid(fileName)) {
-			throw new IllegalArgumentException("Invalid file name: " + fileName);
-		}
 
 		String outputFileName = exportPath + fileName;
 
@@ -1442,8 +2279,7 @@ public class ReportJob implements org.quartz.Job {
 			PrintWriter writer = null;
 
 			if (reportFormat.isHtml() || reportFormat == ReportFormat.xml
-					|| reportFormat == ReportFormat.rss20
-					|| reportType == ReportType.FixedWidth) {
+					|| reportFormat == ReportFormat.rss20) {
 				fos = new FileOutputStream(outputFileName);
 				writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
 			}
@@ -1466,6 +2302,9 @@ public class ReportJob implements org.quartz.Job {
 					fos.close();
 				}
 			}
+
+			//encrypt file if applicable
+			report.encryptFile(outputFileName);
 		}
 
 		return outputFileName;
@@ -1489,7 +2328,7 @@ public class ReportJob implements org.quartz.Job {
 		ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
 
 		if (!reportType.isTabular()) {
-			logger.warn("Invalid report type for burst job: {}. Job Id: {}", reportType, jobId);
+			logger.warn("Invalid report type for burst job: {}. Job Id {}", reportType, jobId);
 			fileName = "";
 			runDetails = "Invalid report type for burst job: " + reportType;
 			return;
@@ -1607,7 +2446,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @param reportRunner the report runner to use
 	 * @throws Exception
 	 */
-	private void runCacheJob(ReportRunner reportRunner) throws SQLException {
+	private void runCacheJob(ReportRunner reportRunner) throws SQLException, IOException {
 		logger.debug("Entering runCacheJob");
 
 		Connection cacheDatabaseConnection = null;
@@ -1624,7 +2463,7 @@ public class ReportJob implements org.quartz.Job {
 
 			String cachedTableName = job.getCachedTableName();
 			if (StringUtils.isBlank(cachedTableName)) {
-				String reportName = job.getReport().getName();
+				String reportName = job.getReport().getLocalizedName(locale);
 				cachedTableName = reportName + "_J" + jobId;
 			}
 			cr.setCachedTableName(cachedTableName);
@@ -1651,13 +2490,14 @@ public class ReportJob implements org.quartz.Job {
 	 * @param tos
 	 * @param ccs
 	 * @param bccs
+	 * @param reportParamsMap map containing report parameters
 	 * @throws IOException
 	 * @throws SQLException
 	 */
 	private void runAlertJob(boolean generateEmail, Map<String, Map<String, String>> recipientDetails,
 			ReportRunner reportRunner, String message, boolean recipientFilterPresent,
-			String[] tos, String[] ccs, String[] bccs)
-			throws IOException, SQLException, TemplateException {
+			String[] tos, String[] ccs, String[] bccs, Map<String, ReportParameter> reportParamsMap)
+			throws IOException, SQLException, TemplateException, ParseException {
 		/*
 		 * ALERT if the resultset is not null and the first column is a
 		 * positive integer => send the alert email
@@ -1689,11 +2529,10 @@ public class ReportJob implements org.quartz.Job {
 								String[] emailsArray = StringUtils.split(emails, ";");
 								Map<String, String> recipientColumns = entry.getValue();
 
-								if (reportType == ReportType.FreeMarker) {
-									prepareFreeMarkerAlertMailer(mailer, value, recipientColumns);
+								if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+									prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns, reportParamsMap);
 								} else {
-									String customMessage = prepareCustomMessage(message, recipientColumns);
-									prepareAlertMailer(mailer, customMessage, value);
+									prepareAlertMailer(mailer, message, value, recipientColumns, reportParamsMap);
 								}
 
 								mailer.setTo(emailsArray);
@@ -1734,10 +2573,10 @@ public class ReportJob implements org.quartz.Job {
 						if (generateEmail) {
 							Mailer mailer = getMailer();
 
-							if (reportType == ReportType.FreeMarker) {
-								prepareFreeMarkerAlertMailer(mailer, value);
+							if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+								prepareTemplateAlertMailer(reportType, mailer, value, reportParamsMap);
 							} else {
-								prepareAlertMailer(mailer, message, value);
+								prepareAlertMailer(mailer, message, value, reportParamsMap);
 							}
 
 							//set recipients
@@ -1767,34 +2606,9 @@ public class ReportJob implements org.quartz.Job {
 				DatabaseUtils.close(rs);
 			}
 		} else {
-			//no emails configured
-			runMessage = "jobs.message.noEmailsConfigured";
+			//no emails addresses to send to
+			runMessage = "jobs.message.noEmailAddressesAvailable";
 		}
-	}
-
-	/**
-	 * Customizes the email message for a dynamic recipient by replacing field
-	 * labels with values for this recipient
-	 *
-	 * @param message the original email message
-	 * @param recipientColumns the recipient details
-	 * @return the customized message with field labels replaced
-	 */
-	private String prepareCustomMessage(String message, Map<String, String> recipientColumns) {
-		String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
-
-		if (StringUtils.isNotBlank(customMessage)) {
-			for (Entry<String, String> entry : recipientColumns.entrySet()) {
-				String columnName = entry.getKey();
-				String columnValue = entry.getValue();
-
-				String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
-				String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
-				customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
-			}
-		}
-
-		return customMessage;
 	}
 
 	/**
@@ -1850,7 +2664,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @return parameter processor result
 	 * @throws SQLException
 	 */
-	public ParameterProcessorResult buildParameters(int reportId, int jId,
+	private ParameterProcessorResult buildParameters(int reportId, int jId,
 			User user) throws SQLException {
 
 		logger.debug("Entering buildParameters: reportId={}, jId={}", reportId, jId);
@@ -1858,76 +2672,14 @@ public class ReportJob implements org.quartz.Job {
 		ParameterProcessorResult paramProcessorResult = null;
 
 		JobParameterService jobParameterService = new JobParameterService();
-		List<JobParameter> jobParams = jobParameterService.getJobParameters(jId);
-		Map<String, List<String>> paramValues = new HashMap<>();
-
-		//accomodate legacy job parameter names
-		for (JobParameter jobParam : jobParams) {
-			String name = jobParam.getName();
-			String finalName = name;
-			String paramTypeString = jobParam.getParamTypeString();
-
-			switch (paramTypeString) {
-				case "O":
-					switch (name) {
-						case "_showParams":
-							finalName = "showSelectedParameters";
-							break;
-						case "_showGraphData":
-							finalName = "showData";
-							break;
-						case "_showGraphLegend":
-							finalName = "showLegend";
-							break;
-						case "_showGraphLabels":
-							finalName = "showLabels";
-							break;
-						case "_showGraphDataPoints":
-							finalName = "showPoints";
-							break;
-						default:
-							finalName = name;
-					}
-					break;
-				case "I":
-				case "M":
-					finalName = ArtUtils.PARAM_PREFIX + name;
-					break;
-				case "X":
-					finalName = name;
-					break;
-				default:
-					throw new IllegalArgumentException("Unexpected job parameter type: " + paramTypeString);
-			}
-
-			jobParam.setName(finalName);
-			List<String> values = paramValues.get(finalName);
-			if (values == null) {
-				paramValues.put(finalName, new ArrayList<String>());
-			}
-		}
-
-		for (JobParameter jobParam : jobParams) {
-			String name = jobParam.getName();
-			String value = jobParam.getValue();
-			List<String> values = paramValues.get(name);
-			values.add(value);
-		}
-
-		Map<String, String[]> finalValues = new HashMap<>();
-
-		for (JobParameter jobParam : jobParams) {
-			String name = jobParam.getName();
-			List<String> values = paramValues.get(name);
-			String[] valuesArray = values.toArray(new String[0]);
-			finalValues.put(name, valuesArray);
-		}
+		Map<String, String[]> finalValues = jobParameterService.getJobParameterValues(jId);
 
 		try {
 			ParameterProcessor paramProcessor = new ParameterProcessor();
-			paramProcessorResult = paramProcessor.process(finalValues, reportId, user);
+			paramProcessor.setIsJob(true);
+			paramProcessorResult = paramProcessor.process(finalValues, reportId, user, locale);
 		} catch (ParseException | IOException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 
 		return paramProcessorResult;
@@ -2000,28 +2752,27 @@ public class ReportJob implements org.quartz.Job {
 
 		String sql;
 
-		if (jobType.isPublish()) {
-			String archiveFileName = job.getLastFileName();
+		String lastFileName = job.getLastFileName();
 
-			int runsToArchive = job.getRunsToArchive();
+		int runsToArchive = job.getRunsToArchive();
 
-			if (runsToArchive > 0 && archiveFileName != null) {
-				//update archives
-				updateArchives(splitJob, user);
-			} else {
-				//if not archiving, delete previous file
-				if (StringUtils.isBlank(job.getFixedFileName()) && !StringUtils.startsWith(archiveFileName, "-")) {
-					String filePath = Config.getJobsExportPath() + archiveFileName;
-					File previousFile = new File(filePath);
-					if (previousFile.exists()) {
-						previousFile.delete();
-					}
+		if (runsToArchive > 0 && lastFileName != null) {
+			//update archives
+			updateArchives(splitJob, user);
+		} else {
+			//if not archiving, delete previous file
+			if (StringUtils.isNotBlank(lastFileName)
+					&& !StringUtils.equals(lastFileName, fileName)) {
+				String filePath = Config.getJobsExportPath() + lastFileName;
+				File previousFile = new File(filePath);
+				if (previousFile.exists()) {
+					previousFile.delete();
 				}
+			}
 
-				//delete old archives if they exist
-				if (runsToArchive == 0) {
-					deleteArchives();
-				}
+			//delete old archives if they exist
+			if (runsToArchive == 0) {
+				deleteArchives();
 			}
 		}
 
@@ -2184,7 +2935,7 @@ public class ReportJob implements org.quartz.Job {
 				dbService.update(sql);
 			}
 		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
 	}
 
@@ -2233,8 +2984,61 @@ public class ReportJob implements org.quartz.Job {
 				dbService.update(sql);
 			}
 		} catch (SQLException ex) {
-			logger.error("Error", ex);
+			logger.error("Error. Job Id {}", jobId, ex);
 		}
+	}
+
+	/**
+	 * Prints a file
+	 *
+	 * @param outputFileName full path to the file to print
+	 * @throws IOException
+	 */
+	private void printFile(String outputFileName) throws IOException {
+		//http://www.java2s.com/Tutorial/Java/0261__2D-Graphics/javaxprintAPIandallowsyoutolistavailableprintersqueryanamedprinterprinttextandimagefilestoaprinterandprinttopostscriptfiles.htm
+		//http://www.java2s.com/Code/Java/JDK-6/Usingsystemdefaultprintertoprintafileout.htm
+		//https://docs.oracle.com/javase/7/docs/api/java/awt/Desktop.html
+		//https://stackoverflow.com/questions/18004150/desktop-api-is-not-supported-on-the-current-platform
+		//https://stackoverflow.com/questions/102325/not-supported-platforms-for-java-awt-desktop-getdesktop
+		//http://www.javaquery.com/2013/06/understanding-basics-javaawtdesktop.html
+
+		//use desktop class to print using the default application registered for the output file type
+		//using print service class sends raw data to the printer, and most printers won't be able to recognize/handle this with some file types, and will not print successfully
+		//desktop class prints to the default printer. no way to change the default printer from java code?
+		if (Desktop.isDesktopSupported()) {
+			Desktop desktop = Desktop.getDesktop();
+			if (desktop.isSupported(Desktop.Action.PRINT)) {
+				File file = new File(outputFileName);
+				desktop.print(file);
+			} else {
+				throw new IllegalStateException("Desktop print not supported");
+			}
+		} else {
+			throw new IllegalStateException("Desktop not supported");
+		}
+	}
+
+	/**
+	 * Returns the name of the email template to use
+	 *
+	 * @return the name of the email template to use
+	 */
+	private String getEmailTemplateName() {
+		String templateName = "basicEmail";
+
+		String jobEmailTemplateFileName = job.getEmailTemplate();
+		logger.debug("jobEmailTemplateFileName='{}'", jobEmailTemplateFileName);
+		if (StringUtils.isNotBlank(jobEmailTemplateFileName)) {
+			String jobEmailTemplateFilePath = Config.getThymeleafTemplatesPath() + jobEmailTemplateFileName;
+			File jobEmailTemplateFile = new File(jobEmailTemplateFilePath);
+			if (!jobEmailTemplateFile.exists()) {
+				throw new IllegalStateException("Email template file not found: " + jobEmailTemplateFilePath);
+			} else {
+				templateName = FilenameUtils.getBaseName(jobEmailTemplateFilePath);
+			}
+		}
+
+		return templateName;
 	}
 
 }

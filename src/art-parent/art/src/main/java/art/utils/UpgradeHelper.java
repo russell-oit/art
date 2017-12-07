@@ -179,8 +179,10 @@ public class UpgradeHelper {
 						String jobName = "job" + jobId;
 						String triggerName = "trigger" + jobId;
 
-						JobDetail quartzJob = newJob(ReportJob.class
-						).withIdentity(jobName, ArtUtils.JOB_GROUP).usingJobData("jobId", jobId).build();
+						JobDetail quartzJob = newJob(ReportJob.class)
+								.withIdentity(jobName, ArtUtils.JOB_GROUP)
+								.usingJobData("jobId", jobId)
+								.build();
 
 						//create trigger that defines the schedule for the job						
 						CronTrigger trigger = newTrigger().withIdentity(triggerName, ArtUtils.TRIGGER_GROUP).withSchedule(cronSchedule(cronString)).build();
@@ -233,6 +235,7 @@ public class UpgradeHelper {
 	 */
 	private void upgradeDatabase(String templatesPath) {
 		upgradeDatabaseTo30(templatesPath);
+		upgradeDatabaseTo31();
 	}
 
 	/**
@@ -244,9 +247,9 @@ public class UpgradeHelper {
 		try {
 			String databaseVersionString = "3.0";
 			String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
-			ResultSetHandler<Integer> h = new ScalarHandler<>();
-			Integer upgradedValue = dbService.query(sql, h, databaseVersionString);
-			if (upgradedValue == null || upgradedValue == 1) {
+			ResultSetHandler<Number> h = new ScalarHandler<>();
+			Number upgradedValue = dbService.query(sql, h, databaseVersionString);
+			if (upgradedValue == null || upgradedValue.intValue() == 1) {
 				return;
 			}
 
@@ -275,6 +278,200 @@ public class UpgradeHelper {
 	}
 
 	/**
+	 * Upgrades the database to 3.1
+	 *
+	 */
+	private void upgradeDatabaseTo31() {
+		try {
+			String databaseVersionString = "3.1";
+			String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
+			ResultSetHandler<Number> h = new ScalarHandler<>();
+			Number upgradedValue = dbService.query(sql, h, databaseVersionString);
+			if (upgradedValue == null || upgradedValue.intValue() == 1) {
+				return;
+			}
+
+			logger.info("Performing 3.1 upgrade steps");
+
+			populateReportSourceColumn();
+			populateReportReportGroupsTable();
+			populateDestinationsTable();
+
+			sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
+			dbService.update(sql, databaseVersionString);
+
+			logger.info("Done performing 3.1 upgrade steps");
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Populates the destinations table. Table added in 3.1
+	 */
+	private void populateDestinationsTable() throws SQLException {
+		logger.debug("Entering populateDestinationsTable");
+
+		String sql;
+
+		sql = "SELECT * FROM ART_FTP_SERVERS WHERE MIGRATED IS NULL";
+
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> ftpServers = dbService.query(sql, h);
+
+		logger.debug("ftpServers.isEmpty()={}", ftpServers.isEmpty());
+		if (!ftpServers.isEmpty()) {
+			logger.info("Moving ftp server records");
+
+			//generate new destination id
+			sql = "SELECT MAX(DESTINATION_ID) FROM ART_DESTINATIONS";
+			int maxId = dbService.getMaxRecordId(sql);
+
+			for (Map<String, Object> ftpServer : ftpServers) {
+				maxId++;
+
+				//create destination definition
+				sql = "INSERT INTO ART_DESTINATIONS"
+						+ " (DESTINATION_ID, NAME, DESCRIPTION, ACTIVE, DESTINATION_TYPE,"
+						+ " SERVER, PORT, DESTINATION_USER, DESTINATION_PASSWORD,"
+						+ " DESTINATION_PATH, CREATION_DATE, CREATED_BY,"
+						+ " UPDATE_DATE, UPDATED_BY)"
+						+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
+
+				Integer ftpServerId = (Integer) ftpServer.get("FTP_SERVER_ID");
+
+				Object[] values = {
+					maxId,
+					ftpServer.get("NAME"),
+					ftpServer.get("DESCRIPTION"),
+					ftpServer.get("ACTIVE"),
+					ftpServer.get("CONNECTION_TYPE"),
+					ftpServer.get("SERVER"),
+					ftpServer.get("PORT"),
+					ftpServer.get("FTP_USER"),
+					ftpServer.get("PASSWORD"),
+					ftpServer.get("REMOTE_DIRECTORY"),
+					ftpServer.get("CREATION_DATE"),
+					ftpServer.get("CREATED_BY"),
+					ftpServer.get("UPDATE_DATE"),
+					ftpServer.get("UPDATED_BY")
+				};
+
+				dbService.update(sql, values);
+
+				//create job-destination record
+				sql = "SELECT JOB_ID FROM ART_JOBS WHERE FTP_SERVER_ID=?";
+				ResultSetHandler<List<Number>> h3 = new ColumnListHandler<>("JOB_ID");
+				List<Number> jobIds = dbService.query(sql, h3, ftpServerId);
+
+				logger.debug("jobIds.isEmpty()={}", jobIds.isEmpty());
+				if (!jobIds.isEmpty()) {
+					for (Number jobIdNumber : jobIds) {
+						int jobIdInt;
+						if (jobIdNumber == null) {
+							jobIdInt = 0;
+						} else {
+							jobIdInt = jobIdNumber.intValue();
+						}
+
+						sql = "INSERT INTO ART_JOB_DESTINATION_MAP(JOB_ID, DESTINATION_ID) VALUES(?,?)";
+						dbService.update(sql, jobIdInt, maxId);
+					}
+				}
+
+				//update migrated status
+				sql = "UPDATE ART_FTP_SERVERS SET MIGRATED=1"
+						+ " WHERE FTP_SERVER_ID=?";
+				dbService.update(sql, ftpServerId);
+			}
+		}
+	}
+
+	/**
+	 * Populates report source column. Column added in 3.1
+	 */
+	private void populateReportSourceColumn() throws SQLException {
+		logger.debug("Entering populateReportSourceColumn");
+
+		String sql;
+
+		sql = "SELECT QUERY_ID FROM ART_QUERIES WHERE REPORT_SOURCE IS NULL";
+		ResultSetHandler<List<Number>> h2 = new ColumnListHandler<>("QUERY_ID");
+		List<Number> reportIds = dbService.query(sql, h2);
+
+		logger.debug("reportIds.isEmpty()={}", reportIds.isEmpty());
+		if (!reportIds.isEmpty()) {
+			logger.info("Moving report sources");
+
+			for (Number reportIdNumber : reportIds) {
+				int reportIdInt;
+				if (reportIdNumber == null) {
+					reportIdInt = 0;
+				} else {
+					reportIdInt = reportIdNumber.intValue();
+				}
+
+				sql = "SELECT SOURCE_INFO"
+						+ " FROM ART_ALL_SOURCES "
+						+ " WHERE OBJECT_ID=?"
+						+ " ORDER BY LINE_NUMBER";
+
+				ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+				List<Map<String, Object>> sourceLines = dbService.query(sql, h, reportIdInt);
+
+				StringBuilder sb = new StringBuilder(1024);
+				for (Map<String, Object> sourceLine : sourceLines) {
+					//map list handler uses a case insensitive map, so case of column names doesn't matter
+					String line = (String) sourceLine.get("SOURCE_INFO");
+					sb.append(line);
+				}
+
+				String finalSource = sb.toString();
+
+				sql = "UPDATE ART_QUERIES SET REPORT_SOURCE=? WHERE QUERY_ID=?";
+				dbService.update(sql, finalSource, reportIdInt);
+			}
+		}
+	}
+
+	/**
+	 * Populates the ART_REPORT_REPORT_GROUPS table. Table added in 3.1
+	 *
+	 * @throws SQLException
+	 */
+	private void populateReportReportGroupsTable() throws SQLException {
+		String sql;
+
+		sql = "SELECT QUERY_ID, QUERY_GROUP_ID"
+				+ " FROM ART_QUERIES"
+				+ " WHERE QUERY_GROUP_ID > 0";
+		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+		List<Map<String, Object>> reports = dbService.query(sql, h2);
+
+		logger.debug("reports.isEmpty()={}", reports.isEmpty());
+		if (!reports.isEmpty()) {
+			logger.info("Adding report-report group records");
+
+			for (Map<String, Object> report : reports) {
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				Integer reportId = (Integer) report.get("QUERY_ID");
+				Integer reportGroupId = (Integer) report.get("QUERY_GROUP_ID");
+
+				sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
+				dbService.update(sql, reportId);
+
+				sql = "INSERT INTO ART_REPORT_REPORT_GROUPS(REPORT_ID, REPORT_GROUP_ID)"
+						+ " VALUES(?,?)";
+				dbService.update(sql, reportId, reportGroupId);
+
+				sql = "UPDATE ART_QUERIES SET QUERY_GROUP_ID=0"
+						+ " WHERE QUERY_ID=?";
+				dbService.update(sql, reportId);
+			}
+		}
+	}
+
+	/**
 	 * Populates user_id columns. Columns added in 3.0
 	 */
 	private void addUserIds() throws SQLException {
@@ -292,13 +489,7 @@ public class UpgradeHelper {
 
 			//generate new id
 			sql = "SELECT MAX(USER_ID) FROM ART_USERS";
-			ResultSetHandler<Integer> h = new ScalarHandler<>();
-			Integer maxId = dbService.query(sql, h);
-			logger.debug("maxId={}", maxId);
-
-			if (maxId == null || maxId < 0) {
-				maxId = 0;
-			}
+			int maxId = dbService.getMaxRecordId(sql);
 
 			for (String user : users) {
 				maxId++;
@@ -355,13 +546,7 @@ public class UpgradeHelper {
 
 			//generate new id
 			sql = "SELECT MAX(SCHEDULE_ID) FROM ART_JOB_SCHEDULES";
-			ResultSetHandler<Integer> h = new ScalarHandler<>();
-			Integer maxId = dbService.query(sql, h);
-			logger.debug("maxId={}", maxId);
-
-			if (maxId == null || maxId < 0) {
-				maxId = 0;
-			}
+			int maxId = dbService.getMaxRecordId(sql);
 
 			for (String schedule : schedules) {
 				maxId++;
@@ -391,13 +576,7 @@ public class UpgradeHelper {
 
 			//generate new id
 			sql = "SELECT MAX(DRILLDOWN_ID) FROM ART_DRILLDOWN_QUERIES";
-			ResultSetHandler<Integer> h = new ScalarHandler<>();
-			Integer maxId = dbService.query(sql, h);
-			logger.debug("maxId={}", maxId);
-
-			if (maxId == null || maxId < 0) {
-				maxId = 0;
-			}
+			int maxId = dbService.getMaxRecordId(sql);
 
 			for (Map<String, Object> drilldown : drilldowns) {
 				maxId++;
@@ -429,13 +608,7 @@ public class UpgradeHelper {
 
 			//generate new id
 			sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
-			ResultSetHandler<Integer> h = new ScalarHandler<>();
-			Integer maxId = dbService.query(sql, h);
-			logger.debug("maxId={}", maxId);
-
-			if (maxId == null || maxId < 0) {
-				maxId = 0;
-			}
+			int maxId = dbService.getMaxRecordId(sql);
 
 			for (String rule : rules) {
 				maxId++;
@@ -475,13 +648,7 @@ public class UpgradeHelper {
 
 			//generate new id
 			sql = "SELECT MAX(QUERY_RULE_ID) FROM ART_QUERY_RULES";
-			ResultSetHandler<Integer> h = new ScalarHandler<>();
-			Integer maxId = dbService.query(sql, h);
-			logger.debug("maxId={}", maxId);
-
-			if (maxId == null || maxId < 0) {
-				maxId = 0;
-			}
+			int maxId = dbService.getMaxRecordId(sql);
 
 			for (Map<String, Object> reportRule : reportRules) {
 				maxId++;
@@ -515,23 +682,11 @@ public class UpgradeHelper {
 
 			//generate new parameter id
 			sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
-			ResultSetHandler<Integer> h = new ScalarHandler<>();
-			Integer maxParameterId = dbService.query(sql, h);
-			logger.debug("maxParameterId={}", maxParameterId);
-
-			if (maxParameterId == null || maxParameterId < 0) {
-				maxParameterId = 0;
-			}
+			int maxParameterId = dbService.getMaxRecordId(sql);
 
 			//generate new report parameter id
 			sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
-			ResultSetHandler<Integer> h3 = new ScalarHandler<>();
-			Integer maxReportParameterId = dbService.query(sql, h3);
-			logger.debug("maxReportParameterId={}", maxReportParameterId);
-
-			if (maxReportParameterId == null || maxReportParameterId < 0) {
-				maxReportParameterId = 0;
-			}
+			int maxReportParameterId = dbService.getMaxRecordId(sql);
 
 			for (Map<String, Object> parameter : parameters) {
 				maxParameterId++;

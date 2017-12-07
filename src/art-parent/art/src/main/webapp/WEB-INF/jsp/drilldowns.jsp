@@ -29,8 +29,19 @@ Display report drilldowns
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Select-1.2.0/css/select.bootstrap.min.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/css/buttons.dataTables.min.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/css/buttons.bootstrap.min.css"/>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+		
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Select-1.2.0/js/dataTables.select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js"></script>
 
 		<script type="text/javascript">
 			//enable use of bootstrap tooltips. both jquery ui and bootstrap define the tooltip function
@@ -229,14 +240,14 @@ Display report drilldowns
 			<tbody>
 				<c:forEach var="drilldown" items="${drilldowns}">
 					<tr data-id="${drilldown.drilldownId}" 
-						data-name="${encode:forHtmlAttribute(drilldown.drilldownReport.name)}"
+						data-name="${encode:forHtmlAttribute(drilldown.drilldownReport.getLocalizedName(pageContext.response.locale))}"
 						id="${drilldown.drilldownId}">
 
 						<td></td>
 						<td>${drilldown.position}</td>
 						<td>${drilldown.drilldownId}</td>
 						<td data-toggle="tooltip" title="${dragToReorderText}">
-							${encode:forHtmlContent(drilldown.drilldownReport.name)}
+							${encode:forHtmlContent(drilldown.drilldownReport.getLocalizedName(pageContext.response.locale))}
 						</td>
 						<td>
 							<div class="btn-group">

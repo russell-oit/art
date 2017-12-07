@@ -27,12 +27,16 @@ Edit report page
 	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editReport" var="panelTitle"/>
 		<c:set var="pageTitle">
-			${panelTitle} - ${report.name}
+			${panelTitle} - ${report.getLocalizedName(pageContext.response.locale)}
 		</c:set>
 	</c:when>
 </c:choose>
 
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
 <spring:message code="reports.text.selectFile" var="selectFileText"/>
 <spring:message code="reports.text.change" var="changeText"/>
 <spring:message code="reports.label.reportSource" var="reportSourceText"/>
@@ -114,7 +118,11 @@ Edit report page
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
-					noneResultsText: '${noResultsMatchText}'
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}',
+					selectAllText: '${selectAllText}',
+					deselectAllText: '${deselectAllText}'
 				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
@@ -315,35 +323,6 @@ Edit report page
 		<script type="text/javascript">
 			function toggleVisibleFields() {
 				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
-
-				//show/hide report options
-				switch (reportTypeId) {
-					case 134: //pivottable.js csv server
-					case 137: //dygraphs csv server
-					case 138: //datatables
-					case 139: //datatables csv local
-					case 140: //datatables csv server
-					case 0: //tabular
-					case 141: //fixed width
-					case 142: //c3
-					case 143: //chart.js
-					case 144: //datamaps
-					case 145: //datamaps file
-					case 146: //leaflet
-					case 147: //openlayers
-					case 148: //tabular heatmap
-					case 151: //mongodb
-					case 117: //jxls template
-					case 118: //jxls art
-						$("#optionsDiv").show();
-						break;
-					default:
-						if (reportTypeId < 0) {
-							$("#optionsDiv").show();
-						} else {
-							$("#optionsDiv").hide();
-						}
-				}
 
 				//show/hide report source
 				if (reportTypeId === 111) {
@@ -599,12 +578,11 @@ Edit report page
 				}
 
 				//show/hide group column
-				switch (reportTypeId) {
-					case 1: //group
-						$("#groupColumnDiv").show();
-						break;
-					default:
-						$("#groupColumnDiv").hide();
+				if (reportTypeId === 1) {
+					//group
+					$("#groupColumnDiv").show();
+				} else {
+					$("#groupColumnDiv").hide();
 				}
 
 				//show/hide default report format
@@ -653,6 +631,8 @@ Edit report page
 					case 0: //tabular
 					case 103: //tabular html
 					case 148: //tabular heatmap
+					case 101: //crosstab
+					case 102: //crosstab html
 						$("#tabularFields").show();
 						break;
 					default:
@@ -713,6 +693,86 @@ Edit report page
 					$("#pageOrientationDiv").show();
 				} else {
 					$("#pageOrientationDiv").hide();
+				}
+
+				//show/hide lov use dynamic datasource
+				if (reportTypeId === 119) {
+					//lov dynamic
+					$("#lovUseDynamicDatasourceDiv").show();
+				} else {
+					$("#lovUseDynamicDatasourceDiv").hide();
+				}
+
+				//show/hide locale
+				switch (reportTypeId) {
+					case 0: //tabular
+					case 103: //tabular html
+					case 148: //tabular heatmap
+					case 101: //crosstab
+					case 102: //crosstab html
+					case 141: //fixed width
+					case 152: //csv
+						$("#localeDiv").show();
+						break;
+					default:
+						$("#localeDiv").hide();
+				}
+
+				//show/hide open and modify password
+				switch (reportTypeId) {
+					case 0: //tabular
+					case 101: //crosstab
+					case 1: //group
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 115: //jasper template
+					case 116: //jasper art
+					case 123: //xdocreport docx freemarker
+					case 124: //xdocreport docx velocity
+					case 125: //xdocreport odt freemarker
+					case 126: //xdocreport odt velocity
+						$("#openPasswordDiv").show();
+						$("#modifyPasswordDiv").show();
+						break;
+					default:
+						if (reportTypeId < 0) {
+							//charts
+							$("#openPasswordDiv").show();
+							$("#modifyPasswordDiv").show();
+						} else {
+							$("#openPasswordDiv").hide();
+							$("#modifyPasswordDiv").hide();
+						}
+				}
+
+				//show/hide encryptor
+				switch (reportTypeId) {
+					case 0: //tabular
+					case 101: //crosstab
+					case 1: //group
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 115: //jasper template
+					case 116: //jasper art
+					case 117: //jxls template
+					case 118: //jxls art
+					case 123: //xdocreport docx freemarker
+					case 124: //xdocreport docx velocity
+					case 125: //xdocreport odt freemarker
+					case 126: //xdocreport odt velocity
+					case 127: //xdocreport pptx freemarker
+					case 128: //xdocreport pptx velocity
+					case 152: //csv
+					case 141: //fixed width
+						$("#encryptorDiv").show();
+						break;
+					default:
+						if (reportTypeId < 0) {
+							//charts
+							$("#encryptorDiv").show();
+						} else {
+							$("#encryptorDiv").hide();
+						}
 				}
 			}
 		</script>
@@ -779,18 +839,16 @@ Edit report page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="reportGroup.reportGroupId">
-						<spring:message code="page.text.reportGroup"/>
+					<label class="col-md-4 control-label " for="reportGroups">
+						<spring:message code="page.text.reportGroups"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="reportGroup.reportGroupId" class="form-control selectpicker">
-							<form:option value="0">--</form:option>
-								<option data-divider="true"></option>
-							<c:forEach var="group" items="${reportGroups}">
-								<form:option value="${group.reportGroupId}">${group.name}</form:option>
-							</c:forEach>
-						</form:select>
-						<form:errors path="reportGroup.reportGroupId" cssClass="error"/>
+						<form:select path="reportGroups" items="${reportGroups}" multiple="true" 
+									 itemLabel="name" itemValue="reportGroupId" 
+									 class="form-control selectpicker"
+									 data-actions-box="true"
+									 />
+						<form:errors path="reportGroups" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -836,7 +894,7 @@ Edit report page
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:textarea path="description" rows="2" cols="40" class="form-control"/>
+						<form:textarea path="description" rows="2" cols="40" class="form-control" maxlength="2000"/>
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
@@ -1039,15 +1097,6 @@ Edit report page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-4" for="locale">
-							<spring:message code="reports.label.locale"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="locale" maxlength="50" class="form-control"/>
-							<form:errors path="locale" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
 						<label class="control-label col-md-4" for="nullNumberDisplay">
 							<spring:message code="reports.label.nullNumberDisplay"/>
 						</label>
@@ -1066,6 +1115,16 @@ Edit report page
 						</div>
 					</div>
 				</fieldset>
+
+				<div id="localeDiv" class="form-group">
+					<label class="control-label col-md-4" for="locale">
+						<spring:message code="reports.label.locale"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="locale" maxlength="50" class="form-control"/>
+						<form:errors path="locale" cssClass="error"/>
+					</div>
+				</div>
 
 				<div id="fetchSizeDiv" class="form-group">
 					<label class="control-label col-md-4" for="fetchSize">
@@ -1090,6 +1149,76 @@ Edit report page
 							</label>
 						</c:forEach>
 						<form:errors path="pageOrientation" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="lovUseDynamicDatasourceDiv" class="form-group">
+					<label class="control-label col-md-4" for="lovUseDynamicDatasource">
+						<spring:message code="reports.label.lovUseDynamicDatasource"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="lovUseDynamicDatasource" id="lovUseDynamicDatasource" class="switch-yes-no"/>
+						</div>
+						<form:errors path="lovUseDynamicDatasource" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="openPasswordDiv" class="form-group">
+					<label class="control-label col-md-4" for="openPassword">
+						<spring:message code="reports.label.openPassword"/>
+					</label>
+					<div class="col-md-8">
+						<div>
+							<form:password path="openPassword" autocomplete="off" maxlength="50" class="form-control"/>
+						</div>
+						<div>
+							<label class="checkbox-inline">
+								<form:checkbox path="useNoneOpenPassword" id="useNoneOpenPassword"/>
+								<spring:message code="reports.checkbox.none"/>
+							</label>
+						</div>
+						<form:errors path="openPassword" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="modifyPasswordDiv" class="form-group">
+					<label class="control-label col-md-4" for="modifyPassword">
+						<spring:message code="reports.label.modifyPassword"/>
+					</label>
+					<div class="col-md-8">
+						<div>
+							<form:password path="modifyPassword" autocomplete="off" maxlength="50" class="form-control"/>
+						</div>
+						<div>
+							<label class="checkbox-inline">
+								<form:checkbox path="useNoneModifyPassword" id="useNoneModifyPassword"/>
+								<spring:message code="reports.checkbox.none"/>
+							</label>
+						</div>
+						<form:errors path="modifyPassword" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="encryptorDiv" class="form-group">
+					<label class="col-md-4 control-label " for="encryptor.encryptorId">
+						<spring:message code="reports.label.encryptor"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="encryptor.encryptorId" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+								<option data-divider="true"></option>
+							<c:forEach var="encryptor" items="${encryptors}">
+								<c:set var="encryptorStatus">
+									<t:displayActiveStatus active="${encryptor.active}" hideActive="true"/>
+								</c:set>
+								<form:option value="${encryptor.encryptorId}"
+											 data-content="${encryptor.name} ${encryptorStatus}">
+									${encryptor.name} 
+								</form:option>
+							</c:forEach>
+						</form:select>
+						<form:errors path="encryptor.encryptorId" cssClass="error"/>
 					</div>
 				</div>
 
@@ -1336,6 +1465,16 @@ Edit report page
 						</div>
 					</div>
 				</fieldset>
+
+				<div class="form-group">
+					<label class="control-label col-md-4" for="sourceReportId">
+						<spring:message code="reports.label.sourceReport"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="sourceReportId" maxlength="10" class="form-control"/>
+						<form:errors path="sourceReportId" cssClass="error"/>
+					</div>
+				</div>
 
 				<div id="optionsDiv" class="form-group">
 					<label class="control-label col-md-12" style="text-align: center" for="options">

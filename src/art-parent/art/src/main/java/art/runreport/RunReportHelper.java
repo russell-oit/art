@@ -42,10 +42,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -106,7 +105,7 @@ public class RunReportHelper {
 				}
 			}
 		}
-		
+
 		logger.debug("dynamicDatasourceIdString='{}'", dynamicDatasourceIdString);
 
 		if (dynamicDatasourceIdString == null) {
@@ -159,8 +158,7 @@ public class RunReportHelper {
 
 		//prepare report parameters
 		ParameterProcessor paramProcessor = new ParameterProcessor();
-		paramProcessor.setLocale(locale);
-		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 
@@ -214,7 +212,6 @@ public class RunReportHelper {
 			case DataTables:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
-			case FixedWidth:
 			case C3:
 			case ChartJs:
 			case Datamaps:
@@ -347,7 +344,6 @@ public class RunReportHelper {
 			case DataTables:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
-			case FixedWidth:
 			case Datamaps:
 			case DatamapsFile:
 			case Leaflet:
@@ -381,7 +377,6 @@ public class RunReportHelper {
 			case DataTables:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
-			case FixedWidth:
 			case C3:
 			case ChartJs:
 			case Datamaps:
@@ -491,6 +486,16 @@ public class RunReportHelper {
 					formats.add("htmlFancy");
 					formats.add("htmlPlain");
 					break;
+				case FixedWidth:
+					formats.add("html");
+					formats.add("txt");
+					formats.add("txtZip");
+					break;
+				case CSV:
+					formats.add("html");
+					formats.add("csv");
+					formats.add("csvZip");
+					break;
 				default:
 					//tabular, crosstab, lov dynamic, etc
 					formats = Config.getReportFormats();
@@ -535,12 +540,11 @@ public class RunReportHelper {
 
 			List<Object> actualParameterValues = reportParam.getActualParameterValues();
 
-			if (actualParameterValues == null || actualParameterValues.isEmpty()) {
+			if (CollectionUtils.isEmpty(actualParameterValues)) {
 				continue;
 			}
 
-			String paramIdentifier = placeholderPrefix + "#" + paramName + "#";
-			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
+			String searchString = placeholderPrefix + "#" + paramName + "#";
 
 			List<String> paramValues = new ArrayList<>();
 			for (Object value : actualParameterValues) {
@@ -554,9 +558,8 @@ public class RunReportHelper {
 				paramValues.add(paramValue);
 			}
 
-			String paramValuesString = StringUtils.join(paramValues, ",");
-			String replaceString = Matcher.quoteReplacement(paramValuesString); //quote in case it contains special regex characters
-			outputString = outputString.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+			String replaceString = StringUtils.join(paramValues, ",");
+			outputString = StringUtils.replaceIgnoreCase(outputString, searchString, replaceString);
 		}
 
 		return outputString;
@@ -576,9 +579,9 @@ public class RunReportHelper {
 				|| reportType == ReportType.Group || reportType.isChart()
 				|| reportType == ReportType.Thymeleaf
 				|| reportType == ReportType.Dygraphs
+				|| reportType == ReportType.CSV
 				|| reportType == ReportType.FixedWidth) {
-			//need scrollable resultset for jasper art report, jxls art report,
-			//freemarker, xdocreport, thymeleaf, dygraphs, fixedwidth in order to display record count
+			//need scrollable resultset in order to display record count
 			//need scrollable resultset in order to generate group report
 			//need scrollable resultset for charts for show data option
 			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;

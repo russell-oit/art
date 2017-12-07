@@ -37,7 +37,7 @@ Display user jobs and jobs configuration
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 <spring:message code="jobs.message.scheduled" var="scheduledText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
@@ -72,9 +72,6 @@ Display user jobs and jobs configuration
 
 		<script type="text/javascript">
 			$(document).ready(function () {
-				//display current time. updates every 1000 milliseconds
-				setInterval('updateClock()', 1000);
-
 				var actionValue = '${action}';
 				if (actionValue === 'config') {
 					$('a[id="configure"]').parent().addClass('active');
@@ -82,6 +79,9 @@ Display user jobs and jobs configuration
 				} else if (actionValue === 'jobs') {
 					$('a[href*="jobs"]').parent().addClass('active');
 				}
+				
+				//display current time. updates every 1000 milliseconds
+				setInterval('updateClock()', 1000);
 
 				var tbl = $('#jobs');
 
@@ -181,22 +181,29 @@ Display user jobs and jobs configuration
 
 								var result = '';
 								if (job.lastFileName) {
-									result = '<a type="application/octet-stream" ';
+									result = '<p><a type="application/octet-stream" ';
 									result = result + 'href="${pageContext.request.contextPath}/export/jobs/' + job.lastFileName + '">';
-									result = result + job.lastFileName + '</a>';
-									result = result + '<br>';
+									result = result + job.lastFileName + '</a></p>';
 								}
 								if (job.lastRunMessage) {
-									result = result + job.lastRunMessage;
-									result = result + '<br>';
+									result = result + '<p>' + job.lastRunMessage;
+									result = result + '</p>';
 								}
 								if (job.lastRunDetails) {
-									result = result + job.lastRunDetails;
+									result = result + '<p>' + job.lastRunDetails;
+									result = result + '</p>';
 								}
 
-								table.cell(row, 3).data(job.lastEndDateString);
-								table.cell(row, 4).data(result);
-								table.cell(row, 5).data(job.nextRunDateString);
+								var accessLevel = ${sessionUser.accessLevel.value};
+								if (accessLevel >= 80) {
+									result = result + '<p><br><a type="application/octet-stream" ';
+									result = result + 'href="${pageContext.request.contextPath}/export/jobLogs/' + job.jobId + '.log">';
+									result = result + 'log</a></p>';
+								}
+
+								table.cell(row, 4).data(job.lastEndDateString);
+								table.cell(row, 5).data(result);
+								table.cell(row, 6).data(job.nextRunDateString);
 
 								notifyActionSuccess("${refreshedText}", recordName);
 							} else {
@@ -362,6 +369,7 @@ Display user jobs and jobs configuration
 					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
+					<th class="dtHidden"><spring:message code="page.text.active"/></th>
 					<th><spring:message code="jobs.text.lastEndDate"/></th>
 					<th><spring:message code="jobs.text.result"/></th>
 					<th><spring:message code="jobs.text.nextRunDate"/></th>
@@ -381,23 +389,36 @@ Display user jobs and jobs configuration
 							<t:displayNewLabel creationDate="${job.creationDate}"
 											   updateDate="${job.updateDate}"/>
 						</td>
+						<td><t:displayActiveStatus active="${job.active}"/></td>
 						<td data-sort="${job.lastEndDate.time}">
 							<fmt:formatDate value="${job.lastEndDate}" pattern="${dateDisplayPattern}"/>
 						</td>
 						<td>
 							<c:if test="${not empty job.lastFileName}">
-								<a type="application/octet-stream" 
-								   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}">
-									${job.lastFileName}
-								</a>
-								<br>
+								<p>
+									<a type="application/octet-stream" 
+									   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}">
+										${job.lastFileName}
+									</a>
+								</p>
 							</c:if>
 							<c:if test="${not empty job.lastRunMessage}">
-								<spring:message code="${job.lastRunMessage}"/>
-								<br>
+								<p>
+									<spring:message code="${job.lastRunMessage}"/>
+								</p>
 							</c:if>
 							<c:if test="${not empty job.lastRunDetails}">
-								${job.lastRunDetails}
+								<p>
+									${job.lastRunDetails}
+								</p>
+							</c:if>
+							<c:if test="${sessionUser.accessLevel.value >= 80}">
+								<p><br>
+									<a type="application/octet-stream" 
+									   href="${pageContext.request.contextPath}/export/jobLogs/${job.jobId}.log">
+										log
+									</a>
+								</p>
 							</c:if>
 						</td>
 						<td data-sort="${job.nextRunDate.time}">
@@ -522,5 +543,5 @@ Display user jobs and jobs configuration
 			</div>
 		</div>
 	</jsp:body>
-</t:mainPageWithPanel>
+</t:mainConfigPage>
 

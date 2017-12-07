@@ -365,8 +365,8 @@ public class ReportParameter implements Serializable {
 	 * @throws java.io.IOException
 	 */
 	public String getHtmlValue() throws IOException {
-		Locale locale=null;
-		return getHtmlValue(locale);
+		Locale locale = null;
+		return getHtmlValueWithLocale(locale);
 	}
 
 	/**
@@ -376,7 +376,9 @@ public class ReportParameter implements Serializable {
 	 * @return the html element value to be used for this parameter
 	 * @throws java.io.IOException
 	 */
-	public String getHtmlValue(Locale locale) throws IOException {
+	public String getHtmlValueWithLocale(Locale locale) throws IOException {
+		//note that el can't reliably call overloaded methods, so if a method is to be called from el, don't overload it
+		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
 		Object value = getEffectiveActualParameterValue();
 
 		if (value == null) {
@@ -385,7 +387,7 @@ public class ReportParameter implements Serializable {
 
 		ParameterDataType parameterDataType = parameter.getDataType();
 		if (parameterDataType.isDate()) {
-			return parameter.getDateString(value);
+			return parameter.getDateString(value, locale);
 		}
 
 		String defaultValue = parameter.getLocalizedDefaultValue(locale);

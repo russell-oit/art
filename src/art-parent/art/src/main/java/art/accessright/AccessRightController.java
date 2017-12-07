@@ -25,6 +25,7 @@ import art.user.UserService;
 import art.usergroup.UserGroupService;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.Locale;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -167,13 +168,15 @@ public class AccessRightController {
 	}
 	
 	@GetMapping("/reportAccessRights")
-	public String showReportAccessRights(Model model, @RequestParam("reportId") Integer reportId){
+	public String showReportAccessRights(Model model,
+			@RequestParam("reportId") Integer reportId, Locale locale){
+		
 		logger.debug("Entering showReportAccessRights: reportId={}", reportId);
 
 		try {
-			model.addAttribute("reportName", reportService.getReportName(reportId));
-			model.addAttribute("userReportRights", accessRightService.getUserReportRights(reportId));
-			model.addAttribute("userGroupReportRights", accessRightService.getUserGroupReportRights(reportId));
+			model.addAttribute("report", reportService.getReport(reportId));
+			model.addAttribute("userReportRights", accessRightService.getUserReportRightsForReport(reportId));
+			model.addAttribute("userGroupReportRights", accessRightService.getUserGroupReportRightsForReport(reportId));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -190,8 +193,8 @@ public class AccessRightController {
 
 		try {
 			model.addAttribute("reportGroup", reportGroupService.getReportGroup(reportGroupId));
-			model.addAttribute("userReportGroupRights", accessRightService.getUserReportGroupRights(reportGroupId));
-			model.addAttribute("userGroupReportGroupRights", accessRightService.getUserGroupReportGroupRights(reportGroupId));
+			model.addAttribute("userReportGroupRights", accessRightService.getUserReportGroupRightsForReportGroup(reportGroupId));
+			model.addAttribute("userGroupReportGroupRights", accessRightService.getUserGroupReportGroupRightsForReportGroup(reportGroupId));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -201,19 +204,55 @@ public class AccessRightController {
 	}
 	
 	@GetMapping("/jobAccessRights")
-	public String jobAccessRights(Model model, @RequestParam("jobId") Integer jobId){
-		logger.debug("Entering jobAccessRights: jobId={}", jobId);
+	public String showJobAccessRights(Model model, @RequestParam("jobId") Integer jobId){
+		logger.debug("Entering showJobAccessRights: jobId={}", jobId);
 
 		try {
 			model.addAttribute("job", jobService.getJob(jobId));
-			model.addAttribute("userJobRights", accessRightService.getUserJobRights(jobId));
-			model.addAttribute("userGroupJobRights", accessRightService.getUserGroupJobRights(jobId));
+			model.addAttribute("userJobRights", accessRightService.getUserJobRightsForJob(jobId));
+			model.addAttribute("userGroupJobRights", accessRightService.getUserGroupJobRightsForJob(jobId));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 		
 		return "jobAccessRights";
+	}
+	
+	@GetMapping("/userAccessRights")
+	public String showUserAccessRights(Model model, @RequestParam("userId") Integer userId){
+		logger.debug("Entering showUserAccessRights: userId={}", userId);
+
+		try {
+			model.addAttribute("user", userService.getUser(userId));
+			model.addAttribute("userReportRights", accessRightService.getUserReportRightsForUser(userId));
+			model.addAttribute("userReportGroupRights", accessRightService.getUserReportGroupRightsForUser(userId));
+			model.addAttribute("userJobRights", accessRightService.getUserJobRightsForUser(userId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+		
+		return "userAccessRights";
+	}
+	
+	@GetMapping("/userGroupAccessRights")
+	public String showUserGroupAccessRights(Model model,
+			@RequestParam("userGroupId") Integer userGroupId){
+		
+		logger.debug("Entering showUserGroupAccessRights: userGroupId={}", userGroupId);
+
+		try {
+			model.addAttribute("userGroup", userGroupService.getUserGroup(userGroupId));
+			model.addAttribute("userGroupReportRights", accessRightService.getUserGroupReportRightsForUserGroup(userGroupId));
+			model.addAttribute("userGroupReportGroupRights", accessRightService.getUserGroupReportGroupRightsForUserGroup(userGroupId));
+			model.addAttribute("userGroupJobRights", accessRightService.getUserGroupJobRightsForUserGroup(userGroupId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+		
+		return "userGroupAccessRights";
 	}
 
 }

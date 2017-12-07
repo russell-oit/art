@@ -43,10 +43,10 @@ public class TsvOutput extends StandardOutput {
 	private GZIPOutputStream gzout;
 	private StringBuilder sb;
 	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
-	private final ZipType zipType;
-
-	public TsvOutput() {
-		zipType = ZipType.None;
+	private ZipType zipType = ZipType.None;
+	
+	public TsvOutput(){
+		
 	}
 
 	public TsvOutput(ZipType zipType) {
@@ -74,9 +74,8 @@ public class TsvOutput extends StandardOutput {
 		try {
 			fout = new FileOutputStream(fullOutputFileName);
 
-			String filename = FilenameUtils.getBaseName(fullOutputFileName);
-
 			if (zipType == ZipType.Zip) {
+				String filename = FilenameUtils.getBaseName(fullOutputFileName);
 				ZipEntry ze = new ZipEntry(filename + ".tsv");
 				zout = new ZipOutputStream(fout);
 				zout.putNextEntry(ze);

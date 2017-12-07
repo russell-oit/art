@@ -19,11 +19,14 @@ package art.reportparameter;
 
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
+import art.report.Report;
 import art.report.ReportService;
 import art.utils.AjaxResponse;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,14 +62,21 @@ public class ReportParameterController {
 	private ParameterService parameterService;
 
 	@RequestMapping(value = "/reportParameterConfig", method = RequestMethod.GET)
-	public String showReportParameterConfig(Model model, @RequestParam("reportId") Integer reportId) {
+	public String showReportParameterConfig(Model model,
+			@RequestParam("reportId") Integer reportId, Locale locale) {
+		
 		logger.debug("Entering showReportParameterConfig: reportId={}", reportId);
 
 		try {
 			model.addAttribute("reportId", reportId);
-			model.addAttribute("reportName", reportService.getReportName(reportId));
+			String reportName = "";
+			Report report = reportService.getReport(reportId);
+			if (report != null) {
+				reportName = report.getLocalizedName(locale);
+			}
+			model.addAttribute("reportName", reportName);
 			model.addAttribute("reportParameters", reportParameterService.getReportParameters(reportId));
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -133,16 +143,20 @@ public class ReportParameterController {
 	}
 
 	@RequestMapping(value = "/addReportParameter", method = RequestMethod.GET)
-	public String addReportParameter(Model model, @RequestParam("reportId") Integer reportId) {
+	public String addReportParameter(Model model, @RequestParam("reportId") Integer reportId,
+			Locale locale) {
+		
 		logger.debug("Entering addReportParameter: reportId={}", reportId);
 
 		model.addAttribute("reportParameter", new ReportParameter());
 
-		return showEditReportParameter("add", model, reportId);
+		return showEditReportParameter("add", model, reportId, locale);
 	}
 
 	@RequestMapping(value = "/editReportParameter", method = RequestMethod.GET)
-	public String editReportParameter(@RequestParam("id") Integer id, Model model) {
+	public String editReportParameter(@RequestParam("id") Integer id, Model model,
+			Locale locale) {
+		
 		logger.debug("Entering editReportParameter: id={}", id);
 
 		int reportId = 0;
@@ -158,14 +172,15 @@ public class ReportParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReportParameter("edit", model, reportId);
+		return showEditReportParameter("edit", model, reportId, locale);
 	}
 
 	@RequestMapping(value = "/saveReportParameter", method = RequestMethod.POST)
 	public String saveReportParameter(@ModelAttribute("reportParameter") @Valid ReportParameter reportParameter,
 			@RequestParam("action") String action,
 			@RequestParam("reportId") Integer reportId,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			Locale locale) {
 
 		logger.debug("Entering saveReportParameter: reportParameter={}, action='{}', "
 				+ "reportId={}", reportParameter, action, reportId);
@@ -173,7 +188,7 @@ public class ReportParameterController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditReportParameter(action, model, reportId);
+			return showEditReportParameter(action, model, reportId, locale);
 		}
 
 		try {
@@ -197,7 +212,7 @@ public class ReportParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReportParameter(action, model, reportId);
+		return showEditReportParameter(action, model, reportId, locale);
 	}
 
 	/**
@@ -205,18 +220,27 @@ public class ReportParameterController {
 	 *
 	 * @param action the action to take
 	 * @param model the model to use
+	 * @param reportId the report id
+	 * @param locale the current locale
 	 * @return the jsp file to display
 	 */
-	private String showEditReportParameter(String action, Model model, Integer reportId) {
+	private String showEditReportParameter(String action, Model model,
+			Integer reportId, Locale locale) {
+		
 		logger.debug("Entering showEditReportParameter: action='{}', reportId={}", action, reportId);
 
 		try {
-			model.addAttribute("reportName", reportService.getReportName(reportId));
+			String reportName = "";
+			Report report = reportService.getReport(reportId);
+			if (report != null) {
+				reportName = report.getLocalizedName(locale);
+			}
+			model.addAttribute("reportName", reportName);
 
 			if (StringUtils.equals(action, "add")) {
 				model.addAttribute("parameters", parameterService.getSharedParameters());
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

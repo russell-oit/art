@@ -20,6 +20,7 @@ Display section to allow selecting of report parameters and initiate running of 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
 
 <script type="text/javascript">
@@ -57,7 +58,9 @@ Display section to allow selecting of report parameters and initiate running of 
 
 		$("#runInNewPage").click(function () {
 			$("#showInline").val("false");
-			$("#parametersForm").submit();
+			//need to explicitly set. if click on schedule, then back then run in new page - goes to schedule again
+			var url = "${pageContext.request.contextPath}/runReport";
+			$('#parametersForm').attr('action', url).submit();
 		});
 
 		$("#runInline").click(function (e) {
@@ -76,13 +79,7 @@ Display section to allow selecting of report parameters and initiate running of 
 			$.post(url, $form.serialize(), function (data, status, xhr) {
 				$("#reportOutput").html(data);
 
-				if (status === "success") {
-					//make htmlgrid output sortable
-					$('.sortable').each(function (i, obj) {
-						sorttable.DATE_RE = /^(\d\d?)[\/\.-](\d\d?)[\/\.-]((\d\d)?\d\d)$/;
-						sorttable.makeSortable(obj);
-					});
-				} else if (status === "error") {
+				if (status === "error") {
 					bootbox.alert("<b>${errorOccurredText}</b><br>"
 							+ xhr.status + "<br>" + data);
 				}
@@ -138,8 +135,8 @@ Display section to allow selecting of report parameters and initiate running of 
 
 	function Popup(data)
 	{
-		var mywindow = window.open('', '${report.name}', 'height=400,width=600');
-		mywindow.document.write('<html><head><title>${report.name}</title>');
+		var mywindow = window.open('', '${encode:forJavaScript(report.getLocalizedName(pageContext.response.locale))}', 'height=400,width=600');
+		mywindow.document.write('<html><head><title>${encode:forJavaScript(report.getLocalizedName(pageContext.response.locale))}</title>');
 		/*optional stylesheet*/ //mywindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
 		mywindow.document.write('</head><body>');
 		mywindow.document.write(data);
@@ -191,7 +188,6 @@ Display section to allow selecting of report parameters and initiate running of 
 			}
 		}
 	}
-
 </script>
 
 <c:if test="${enableEmail}">
@@ -224,7 +220,7 @@ Display section to allow selecting of report parameters and initiate running of 
 
 <div class="row  page-header">
     <div class="col-md-10">
-        <h3>${encode:forHtmlContent(report.name)}</h3>
+        <h3>${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}</h3>
     </div>
 	<div class="col-md-2">
 		<h3 class="text-right">

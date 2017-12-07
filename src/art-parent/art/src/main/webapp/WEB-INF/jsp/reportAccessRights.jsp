@@ -25,6 +25,7 @@
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -112,7 +113,7 @@
 		</div>
 		
 		<div class="text-center">
-			<b><spring:message code="page.text.report"/>:</b> ${encode:forHtmlContent(reportName)}
+			<b><spring:message code="page.text.report"/>:</b> ${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}
 		</div>
 
 		<table id="rights" class="table table-striped table-bordered">
@@ -126,7 +127,7 @@
 			<tbody>
 				<c:forEach var="userReportRight" items="${userReportRights}">
 					<tr data-name="${encode:forHtmlAttribute(userReportRight.user.username)} -
-						${encode:forHtmlAttribute(userReportRight.report.name)}"
+						${encode:forHtmlAttribute(userReportRight.report.getLocalizedName(pageContext.response.locale))}"
 						data-id="userReportRight-${userReportRight.user.userId}-${userReportRight.report.reportId}">
 
 						<td><encode:forHtmlContent value="${userReportRight.user.username}"/></td>
@@ -142,7 +143,7 @@
 
 				<c:forEach var="userGroupReportRight" items="${userGroupReportRights}">
 					<tr data-name="${encode:forHtmlAttribute(userGroupReportRight.userGroup.name)} -
-						${encode:forHtmlAttribute(userGroupReportRight.report.name)}"
+						${encode:forHtmlAttribute(userGroupReportRight.report.getLocalizedName(pageContext.response.locale))}"
 						data-id="userGroupReportRight-${userGroupReportRight.userGroup.userGroupId}-${userGroupReportRight.report.reportId}">
 
 						<td></td>

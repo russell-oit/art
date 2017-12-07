@@ -22,6 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.awt.Color;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -31,12 +35,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
 import java.util.TreeMap;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -130,8 +136,8 @@ public class ArtUtils {
 	 */
 	public static String cleanBaseFilename(String baseFilename) {
 		//only allow english alphabets, numbers, underscore, dash, space
-		String sane = baseFilename.replaceAll("[^a-zA-Z0-9_\\-\\s]+", "_");
-		return sane;
+		String clean = baseFilename.replaceAll("[^a-zA-Z0-9_\\-\\s]+", "_");
+		return clean;
 	}
 
 	/**
@@ -143,10 +149,22 @@ public class ArtUtils {
 	 * underscores
 	 */
 	public static String cleanFilename(String filename) {
+		String finalFilename;
+		
 		String base = FilenameUtils.getBaseName(filename);
 		String extension = FilenameUtils.getExtension(filename);
-		String cleanBase = cleanBaseFilename(base);
-		String finalFilename = cleanBase + "." + extension;
+		
+		if (StringUtils.containsAny(extension, "aes", "gpg")) {
+			//allow second extension to be used for encryped files
+			String base2 = FilenameUtils.getBaseName(base);
+			String extension2 = FilenameUtils.getExtension(base);
+			String cleanBase2 = cleanBaseFilename(base2);
+			finalFilename = cleanBase2 + "." + extension2 + "." + extension;
+		} else {
+			String cleanBase = cleanBaseFilename(base);
+			finalFilename = cleanBase + "." + extension;
+		}
+
 		return finalFilename;
 	}
 
@@ -254,6 +272,7 @@ public class ArtUtils {
 		databaseTypes.put("other", "Other");
 		databaseTypes.put("hbase-phoenix", "HBase (Phoenix driver) - driver not included"); //adds 50MB
 		databaseTypes.put("msaccess-ucanaccess", "MS Access (UCanAccess driver)");
+		databaseTypes.put("msaccess-ucanaccess-password", "MS Access with password (UCanAccess driver)");
 		databaseTypes.put("sqlite-xerial", "SQLite (Xerial driver)");
 		databaseTypes.put("csv-csvjdbc", "CSV (CsvJdbc driver)");
 		databaseTypes.put("h2-server", "H2 Server");
@@ -402,6 +421,20 @@ public class ArtUtils {
 		String jsonString = mapper.writeValueAsString(object);
 		return jsonString;
 	}
+	
+	/**
+	 * Returns an object populated according to a json string
+	 * 
+	 * @param <T> the type of the object to populate
+	 * @param jsonString the json string
+	 * @param clazz the class of the object to populate
+	 * @return  an object populated according to a json string
+	 * @throws IOException 
+	 */
+	public static <T> T jsonToObject(String jsonString, Class<T> clazz) throws IOException{
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.readValue(jsonString, clazz);
+	}
 
 	/**
 	 * Returns <code>true</code> if a list of strings contains a given string,
@@ -437,6 +470,66 @@ public class ArtUtils {
 		} else {
 			return LocaleUtils.toLocale(localeString);
 		}
+	}
+
+	/**
+	 * Returns an i18n value to use, given a particular locale, taking into
+	 * consideration the i18n options defined
+	 *
+	 * @param locale the locale to use
+	 * @param i18nValueOptions the i18n definition of locales and values
+	 * @return the localized value to use, or null if a localization is not
+	 * found
+	 */
+	public static String getLocalizedValue(Locale locale,
+			List<Map<String, String>> i18nValueOptions) {
+
+		String localizedValue = null;
+
+		if (CollectionUtils.isNotEmpty(i18nValueOptions) && locale != null) {
+			boolean valueFound = false;
+			for (Map<String, String> i18nValueOption : i18nValueOptions) {
+				//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
+				// Get the first entry that the iterator returns
+				Entry<String, String> entry = i18nValueOption.entrySet().iterator().next();
+				String localeSetting = entry.getKey();
+				String localeValue = entry.getValue();
+				String[] locales = StringUtils.split(localeSetting, ",");
+				for (String localeString : locales) {
+					if (StringUtils.equalsIgnoreCase(localeString.trim(), locale.toString())) {
+						localizedValue = localeValue;
+						valueFound = true;
+						break;
+					}
+				}
+
+				if (valueFound) {
+					break;
+				}
+			}
+		}
+
+		return localizedValue;
+	}
+	
+	/**
+	 * Encode the main part of a url
+	 * 
+	 * @param s the main url
+	 * @return the main url encoded
+	 * @throws MalformedURLException
+	 * @throws URISyntaxException 
+	 */
+	public static String encodeMainUrl(String s) throws MalformedURLException, URISyntaxException {
+		//https://stackoverflow.com/questions/6198894/java-encode-url/6199056#6199056
+		URL u = new URL(s);
+		return new URI(
+				u.getProtocol(),
+				u.getAuthority(),
+				u.getPath(),
+				u.getQuery(),
+				u.getRef()).
+				toString();
 	}
 
 }

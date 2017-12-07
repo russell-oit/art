@@ -172,7 +172,7 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 	@Override
 	public String generateToolTip(XYDataset data, int series, int item) {
 		//display formatted values
-		NumberFormat nf = NumberFormat.getInstance(getLocale());
+		NumberFormat nf = NumberFormat.getInstance(locale);
 
 		XYZDataset dataset = (XYZDataset) data;
 

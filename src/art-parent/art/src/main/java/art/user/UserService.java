@@ -30,12 +30,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ColumnListHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -276,7 +276,7 @@ public class UserService {
 	 * Deletes multiple users
 	 *
 	 * @param ids the ids for users to delete
-	 * @return ActionResult. if not successful, data contains the ids of users
+	 * @return ActionResult. if not successful, data contains details of users
 	 * who weren't deleted
 	 * @throws SQLException
 	 */
@@ -285,12 +285,15 @@ public class UserService {
 		logger.debug("Entering deleteUsers: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords = new ArrayList<>();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
 		for (Integer id : ids) {
 			ActionResult deleteResult = deleteUser(id);
 			if (!deleteResult.isSuccess()) {
-				nonDeletedRecords.add(id);
+				@SuppressWarnings("unchecked")
+				List<String> linkedJobs = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedJobs, ", ");
+				nonDeletedRecords.add(value);
 			}
 		}
 
@@ -348,18 +351,7 @@ public class UserService {
 
 		//generate new id
 		String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		saveUser(user, newId, actionUser);
 
@@ -401,6 +393,34 @@ public class UserService {
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleUserEdit.isActive()));
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, valuesArray);
+		}
+		if (!multipleUserEdit.isCanChangePasswordUnchanged()) {
+			sql = "UPDATE ART_USERS SET CAN_CHANGE_PASSWORD=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(BooleanUtils.toInteger(multipleUserEdit.isCanChangePassword()));
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, valuesArray);
+		}
+		if (!multipleUserEdit.isAccessLevelUnchanged()) {
+			sql = "UPDATE ART_USERS SET ACCESS_LEVEL=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(multipleUserEdit.getAccessLevel().getValue());
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
 			valuesList.addAll(Arrays.asList(ids));
@@ -510,20 +530,29 @@ public class UserService {
 	}
 
 	/**
-	 * Returns jobs that are owned by a given user
+	 * Returns details of jobs that are owned by a given user
 	 *
 	 * @param userId the user id
-	 * @return linked job names
+	 * @return linked job details
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedJobs(int userId) throws SQLException {
 		logger.debug("Entering getLinkedJobs: userId={}", userId);
 
-		String sql = "SELECT JOB_NAME"
+		String sql = "SELECT JOB_ID, JOB_NAME"
 				+ " FROM ART_JOBS"
 				+ " WHERE USER_ID=?";
 
-		ResultSetHandler<List<String>> h = new ColumnListHandler<>("JOB_NAME");
-		return dbService.query(sql, h, userId);
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> jobDetails = dbService.query(sql, h, userId);
+
+		List<String> jobs = new ArrayList<>();
+		for (Map<String, Object> jobDetail : jobDetails) {
+			Integer jobId = (Integer) jobDetail.get("JOB_ID");
+			String jobName = (String) jobDetail.get("JOB_NAME");
+			jobs.add(jobName + " (" + jobId + ")");
+		}
+
+		return jobs;
 	}
 }

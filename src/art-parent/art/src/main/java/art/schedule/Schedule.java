@@ -17,8 +17,10 @@
  */
 package art.schedule;
 
+import art.holiday.Holiday;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Represents a schedule
@@ -28,11 +30,13 @@ import java.util.Date;
 public class Schedule implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private String second;
 	private String minute;
 	private String hour;
 	private String day;
 	private String month;
 	private String weekday;
+	private String year;
 	private String name;
 	private int scheduleId;
 	private Date creationDate;
@@ -40,6 +44,79 @@ public class Schedule implements Serializable {
 	private String description;
 	private String createdBy;
 	private String updatedBy;
+	private String extraSchedules;
+	private String holidays;
+	private List<Holiday> sharedHolidays;
+
+	/**
+	 * @return the year
+	 */
+	public String getYear() {
+		return year;
+	}
+
+	/**
+	 * @param year the year to set
+	 */
+	public void setYear(String year) {
+		this.year = year;
+	}
+
+	/**
+	 * @return the sharedHolidays
+	 */
+	public List<Holiday> getSharedHolidays() {
+		return sharedHolidays;
+	}
+
+	/**
+	 * @param sharedHolidays the sharedHolidays to set
+	 */
+	public void setSharedHolidays(List<Holiday> sharedHolidays) {
+		this.sharedHolidays = sharedHolidays;
+	}
+
+	/**
+	 * @return the second
+	 */
+	public String getSecond() {
+		return second;
+	}
+
+	/**
+	 * @param second the second to set
+	 */
+	public void setSecond(String second) {
+		this.second = second;
+	}
+
+	/**
+	 * @return the holidays
+	 */
+	public String getHolidays() {
+		return holidays;
+	}
+
+	/**
+	 * @param holidays the holidays to set
+	 */
+	public void setHolidays(String holidays) {
+		this.holidays = holidays;
+	}
+
+	/**
+	 * @return the extraSchedules
+	 */
+	public String getExtraSchedules() {
+		return extraSchedules;
+	}
+
+	/**
+	 * @param extraSchedules the extraSchedules to set
+	 */
+	public void setExtraSchedules(String extraSchedules) {
+		this.extraSchedules = extraSchedules;
+	}
 
 	/**
 	 * @return the createdBy
@@ -244,6 +321,15 @@ public class Schedule implements Serializable {
 	@Override
 	public String toString() {
 		return "Schedule{" + "name=" + name + '}';
+	}
+	
+	public String getMainScheduleCronString(){
+		String cronString = second + " " + minute
+					+ " " + hour + " " + day
+					+ " " + month + " " + weekday
+					+ " " + year;
+		
+		return cronString;
 	}
 	
 }

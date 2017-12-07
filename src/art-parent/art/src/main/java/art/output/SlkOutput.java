@@ -45,7 +45,7 @@ public class SlkOutput extends StandardOutput {
 
 	private FileOutputStream fout;
 	private ZipOutputStream zout;
-	private StringBuilder exportFileStrBuf;
+	private StringBuilder sb;
 	private NumberFormat nfPlain;
 	private int localRowCount;
 	private int columnCount;
@@ -70,7 +70,7 @@ public class SlkOutput extends StandardOutput {
 	private void resetVariables() {
 		fout = null;
 		zout = null;
-		exportFileStrBuf = null;
+		sb = null;
 		nfPlain = null;
 		localRowCount = 0;
 		columnCount = 0;
@@ -82,10 +82,10 @@ public class SlkOutput extends StandardOutput {
 	public void init() {
 		resetVariables();
 
-		exportFileStrBuf = new StringBuilder(8 * 1024);
+		sb = new StringBuilder(8 * 1024);
 		// insert slk header
 		// This is the Ooo header:
-		exportFileStrBuf.append("ID;PSCALC3\n");
+		sb.append("ID;PSCALC3\n");
 
 		nfPlain = NumberFormat.getInstance(locale);
 		nfPlain.setMinimumFractionDigits(0);
@@ -95,9 +95,8 @@ public class SlkOutput extends StandardOutput {
 		try {
 			fout = new FileOutputStream(fullOutputFileName);
 
-			String filename = FilenameUtils.getBaseName(fullOutputFileName);
-
 			if (zipType == ZipType.Zip) {
+				String filename = FilenameUtils.getBaseName(fullOutputFileName);
 				ZipEntry ze = new ZipEntry(filename + ".slk");
 				zout = new ZipOutputStream(fout);
 				zout.putNextEntry(ze);
@@ -116,7 +115,7 @@ public class SlkOutput extends StandardOutput {
 		
 		newRow();
 
-		exportFileStrBuf.append("C;Y").append(localRowCount++).append(";X1;K\"")
+		sb.append("C;Y").append(localRowCount++).append(";X1;K\"")
 				.append(reportName).append(" - ")
 				.append(ArtUtils.isoDateTimeSecondsFormatter.format(new Date()))
 				.append("\"\n"); // first row Y1
@@ -151,7 +150,7 @@ public class SlkOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String s) {
-		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+		sb.append("C;Y").append(localRowCount).append(";X")
 				.append(columnCount++).append(";K\"").append(s).append("\"\n");
 	}
 
@@ -167,13 +166,13 @@ public class SlkOutput extends StandardOutput {
 	@Override
 	public void addCellString(String value) {
 		if (value == null) {
-			exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+			sb.append("C;Y").append(localRowCount).append(";X")
 					.append(columnCount++).append(";K\"").append(value).append("\"\n");
 		} else {
 			if (value.trim().length() > 250) {
 				value = value.substring(0, 250) + "[...]";
 			}
-			exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+			sb.append("C;Y").append(localRowCount).append(";X")
 					.append(columnCount++).append(";K\"")
 					.append(value.replace('\n', ' ').replace('\r', ' ').replace(';', '-').trim()).append("\"\n");
 		}
@@ -182,10 +181,10 @@ public class SlkOutput extends StandardOutput {
 	@Override
 	public void addCellNumeric(Double value) {
 		if (value == null) {
-			exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+			sb.append("C;Y").append(localRowCount).append(";X")
 					.append(columnCount++).append(";K\"").append(value).append("\"\n");
 		} else {
-			exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+			sb.append("C;Y").append(localRowCount).append(";X")
 					.append(columnCount++).append(";K")
 					.append(nfPlain.format(value.doubleValue())).append("\n");
 		}
@@ -193,7 +192,7 @@ public class SlkOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
-		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+		sb.append("C;Y").append(localRowCount).append(";X")
 				.append(columnCount++).append(";K\"").append(formattedValue).append("\"\n");
 	}
 
@@ -201,14 +200,14 @@ public class SlkOutput extends StandardOutput {
 	public void addCellDate(Date value) {
 		String formattedValue = Config.getDateDisplayString(value);
 
-		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+		sb.append("C;Y").append(localRowCount).append(";X")
 				.append(columnCount++).append(";K\"")
 				.append(formattedValue).append("\"\n");
 	}
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
-		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+		sb.append("C;Y").append(localRowCount).append(";X")
 				.append(columnCount++).append(";K\"")
 				.append(formattedValue).append("\"\n");
 	}
@@ -221,11 +220,11 @@ public class SlkOutput extends StandardOutput {
 		counter++;
 		if ((counter * columns) > FLUSH_SIZE) {
 			try {
-				String tmpstr = exportFileStrBuf.toString();
+				String tmpstr = sb.toString();
 				byte[] buf = tmpstr.getBytes("UTF-8");
 				fout.write(buf);
 				fout.flush();
-				exportFileStrBuf = new StringBuilder(32 * 1024);
+				sb = new StringBuilder(8 * 1024);
 			} catch (IOException ex) {
 				endOutput();
 				throw new RuntimeException(ex);
@@ -238,13 +237,13 @@ public class SlkOutput extends StandardOutput {
 //		newRow();
 //		addCellString("Total rows retrieved:");
 //		addCellNumeric(Double.valueOf(counter));
-		exportFileStrBuf.append("E");
+		sb.append("E");
 
 		try {
-			String tmpstr = exportFileStrBuf.toString();
+			String tmpstr = sb.toString();
 //			byte[] buf = new byte[tmpstr.length()];
 			byte[] buf = tmpstr.getBytes("UTF-8");
-			exportFileStrBuf = null;
+			sb = null;
 
 			if (zout == null) {
 				if (fout != null) {

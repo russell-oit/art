@@ -18,16 +18,38 @@
 package art.report;
 
 import art.datasource.Datasource;
+import art.encryptor.Encryptor;
+import art.enums.EncryptorType;
 import art.enums.PageOrientation;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
+import art.reportoptions.GeneralReportOptions;
+import art.reportoptions.Reporti18nOptions;
+import art.encryption.AESCrypt;
+import art.reportoptions.CloneOptions;
+import art.servlets.Config;
+import art.utils.ArtUtils;
 import art.utils.XmlParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.openpgp.PGPException;
+import org.c02e.jpgpj.HashingAlgorithm;
+import org.c02e.jpgpj.Key;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a report
@@ -36,13 +58,14 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Report implements Serializable {
 
+	private static final Logger logger = LoggerFactory.getLogger(Report.class);
+
 	private static final long serialVersionUID = 1L;
 	private int reportId;
 	private String name;
 	private String shortDescription;
 	private String description;
 	private int reportTypeId;
-	private ReportGroup reportGroup;
 	private Datasource datasource;
 	private String contactPerson;
 	private boolean usesRules;
@@ -80,6 +103,171 @@ public class Report implements Serializable {
 	private String options;
 	private PageOrientation pageOrientation = PageOrientation.Portrait;
 	private boolean omitTitleRow;
+	private boolean lovUseDynamicDatasource;
+	private GeneralReportOptions generalOptions;
+	private String openPassword;
+	private String modifyPassword;
+	private boolean useNoneOpenPassword; //only for use with ui
+	private boolean useNoneModifyPassword; //only for use with ui
+	private Encryptor encryptor;
+	private Report sourceReport;
+	private int sourceReportId;
+	private CloneOptions cloneOptions;
+	private List<ReportGroup> reportGroups;
+
+	/**
+	 * @return the reportGroups
+	 */
+	public List<ReportGroup> getReportGroups() {
+		return reportGroups;
+	}
+
+	/**
+	 * @param reportGroups the reportGroups to set
+	 */
+	public void setReportGroups(List<ReportGroup> reportGroups) {
+		this.reportGroups = reportGroups;
+	}
+
+	/**
+	 * @return the cloneOptions
+	 */
+	public CloneOptions getCloneOptions() {
+		return cloneOptions;
+	}
+
+	/**
+	 * @param cloneOptions the cloneOptions to set
+	 */
+	public void setCloneOptions(CloneOptions cloneOptions) {
+		this.cloneOptions = cloneOptions;
+	}
+
+	/**
+	 * @return the sourceReportId
+	 */
+	public int getSourceReportId() {
+		return sourceReportId;
+	}
+
+	/**
+	 * @param sourceReportId the sourceReportId to set
+	 */
+	public void setSourceReportId(int sourceReportId) {
+		this.sourceReportId = sourceReportId;
+	}
+
+	/**
+	 * @return the sourceReport
+	 */
+	public Report getSourceReport() {
+		return sourceReport;
+	}
+
+	/**
+	 * @param sourceReport the sourceReport to set
+	 */
+	public void setSourceReport(Report sourceReport) {
+		this.sourceReport = sourceReport;
+	}
+
+	/**
+	 * @return the encryptor
+	 */
+	public Encryptor getEncryptor() {
+		return encryptor;
+	}
+
+	/**
+	 * @param encryptor the encryptor to set
+	 */
+	public void setEncryptor(Encryptor encryptor) {
+		this.encryptor = encryptor;
+	}
+
+	/**
+	 * @return the useNoneOpenPassword
+	 */
+	public boolean isUseNoneOpenPassword() {
+		return useNoneOpenPassword;
+	}
+
+	/**
+	 * @param useNoneOpenPassword the useNoneOpenPassword to set
+	 */
+	public void setUseNoneOpenPassword(boolean useNoneOpenPassword) {
+		this.useNoneOpenPassword = useNoneOpenPassword;
+	}
+
+	/**
+	 * @return the useNoneModifyPassword
+	 */
+	public boolean isUseNoneModifyPassword() {
+		return useNoneModifyPassword;
+	}
+
+	/**
+	 * @param useNoneModifyPassword the useNoneModifyPassword to set
+	 */
+	public void setUseNoneModifyPassword(boolean useNoneModifyPassword) {
+		this.useNoneModifyPassword = useNoneModifyPassword;
+	}
+
+	/**
+	 * @return the openPassword
+	 */
+	public String getOpenPassword() {
+		return openPassword;
+	}
+
+	/**
+	 * @param openPassword the openPassword to set
+	 */
+	public void setOpenPassword(String openPassword) {
+		this.openPassword = openPassword;
+	}
+
+	/**
+	 * @return the modifyPassword
+	 */
+	public String getModifyPassword() {
+		return modifyPassword;
+	}
+
+	/**
+	 * @param modifyPassword the modifyPassword to set
+	 */
+	public void setModifyPassword(String modifyPassword) {
+		this.modifyPassword = modifyPassword;
+	}
+
+	/**
+	 * @return the generalOptions
+	 */
+	public GeneralReportOptions getGeneralOptions() {
+		return generalOptions;
+	}
+
+	/**
+	 * @param generalOptions the generalOptions to set
+	 */
+	public void setGeneralOptions(GeneralReportOptions generalOptions) {
+		this.generalOptions = generalOptions;
+	}
+
+	/**
+	 * @return the lovUseDynamicDatasource
+	 */
+	public boolean isLovUseDynamicDatasource() {
+		return lovUseDynamicDatasource;
+	}
+
+	/**
+	 * @param lovUseDynamicDatasource the lovUseDynamicDatasource to set
+	 */
+	public void setLovUseDynamicDatasource(boolean lovUseDynamicDatasource) {
+		this.lovUseDynamicDatasource = lovUseDynamicDatasource;
+	}
 
 	/**
 	 * @return the omitTitleRow
@@ -519,20 +707,6 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the reportGroup
-	 */
-	public ReportGroup getReportGroup() {
-		return reportGroup;
-	}
-
-	/**
-	 * @param reportGroup the reportGroup to set
-	 */
-	public void setReportGroup(ReportGroup reportGroup) {
-		this.reportGroup = reportGroup;
-	}
-
-	/**
 	 * @return the datasource
 	 */
 	public Datasource getDatasource() {
@@ -757,11 +931,244 @@ public class Report implements Serializable {
 		reportIdStrings.addAll(XmlParser.getXmlElementValues(reportSource, "QUERYID"));
 		reportIdStrings.addAll(XmlParser.getXmlElementValues(reportSource, "REPORTID"));
 
+		//remove any parameter definitions, remaining only with the report id
+		for (int i = 0; i < reportIdStrings.size(); i++) {
+			String reportIdSetting = reportIdStrings.get(i);
+			String reportIdString = StringUtils.substringBefore(reportIdSetting, "&");
+			reportIdStrings.set(i, reportIdString);
+		}
+
 		for (String id : reportIdStrings) {
 			reportIds.add(Integer.valueOf(id));
 		}
 
 		return reportIds;
+	}
+
+	/**
+	 * Returns the name to use for this report, given a particular locale,
+	 * taking into consideration the i18n options defined for the report
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the localized name
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedName(Locale locale) throws IOException {
+		String localizedName = null;
+
+		if (generalOptions != null && locale != null) {
+			Reporti18nOptions i18nOptions = generalOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nNameOptions = i18nOptions.getName();
+				localizedName = ArtUtils.getLocalizedValue(locale, i18nNameOptions);
+			}
+		}
+
+		if (localizedName == null) {
+			localizedName = name;
+		}
+
+		return localizedName;
+	}
+
+	/**
+	 * Returns the short description to use for this report, given a particular
+	 * locale, taking into consideration the i18n options defined for the report
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the localized short description
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedShortDescription(Locale locale) throws IOException {
+		String localizedShortDescription = null;
+
+		if (generalOptions != null && locale != null) {
+			Reporti18nOptions i18nOptions = generalOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nShortDescriptionOptions = i18nOptions.getShortDescription();
+				localizedShortDescription = ArtUtils.getLocalizedValue(locale, i18nShortDescriptionOptions);
+			}
+		}
+
+		if (localizedShortDescription == null) {
+			localizedShortDescription = shortDescription;
+		}
+
+		return localizedShortDescription;
+	}
+
+	/**
+	 * Returns the description to use for this report, given a particular
+	 * locale, taking into consideration the i18n options defined for the report
+	 *
+	 * @param locale the locale object for the relevant locale
+	 * @return the localized description
+	 * @throws java.io.IOException
+	 */
+	public String getLocalizedDescription(Locale locale) throws IOException {
+		String localizedDescription = null;
+
+		if (generalOptions != null && locale != null) {
+			Reporti18nOptions i18nOptions = generalOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, String>> i18nDescriptionOptions = i18nOptions.getDescription();
+				localizedDescription = ArtUtils.getLocalizedValue(locale, i18nDescriptionOptions);
+			}
+		}
+
+		if (localizedDescription == null) {
+			localizedDescription = description;
+		}
+
+		return localizedDescription;
+	}
+
+	/**
+	 * Loads the general report options object from the options string
+	 *
+	 * @throws java.io.IOException
+	 */
+	public void loadGeneralOptions() throws IOException {
+		if (StringUtils.isNotBlank(options)) {
+			ObjectMapper mapper = new ObjectMapper();
+			generalOptions = mapper.readValue(options, GeneralReportOptions.class);
+		}
+	}
+
+	/**
+	 * Encrypts a file using the encryptor defined on the report
+	 *
+	 * @param finalFileName the full path of the final file name of the file
+	 * e.g. c:\test\file.xls.aes
+	 * @throws IOException
+	 * @throws GeneralSecurityException
+	 * @throws org.bouncycastle.openpgp.PGPException
+	 */
+	public void encryptFile(String finalFileName) throws IOException,
+			GeneralSecurityException, PGPException {
+
+		logger.debug("Entering encrypt: finalFileName='{}'", finalFileName);
+
+		File file = new File(finalFileName);
+		if (!file.exists()) {
+			return;
+		}
+
+		if (encryptor == null || !encryptor.isActive()) {
+			return;
+		}
+
+		EncryptorType encryptorType = encryptor.getEncryptorType();
+		logger.debug("encryptorType={}", encryptorType);
+		switch (encryptorType) {
+			case AESCrypt:
+				encryptFileAesCrypt(finalFileName);
+				break;
+			case OpenPGP:
+				encryptFileOpenPgp(finalFileName);
+				break;
+			default:
+			//do nothing
+		}
+	}
+
+	/**
+	 * Encrypts a file using the aes crypt encryptor defined on the report
+	 *
+	 * @param finalFileName the full path of the final file name of the file
+	 * e.g. c:\test\file.xls.aes
+	 * @throws IOException
+	 * @throws GeneralSecurityException
+	 */
+	private void encryptFileAesCrypt(String finalFileName) throws IOException, GeneralSecurityException {
+		AESCrypt aes = new AESCrypt(encryptor.getAesCryptPassword());
+		//http://www.baeldung.com/java-how-to-rename-or-move-a-file
+		String tempFileName = FilenameUtils.removeExtension(finalFileName);
+		File tempFile = new File(tempFileName);
+		File finalFile = new File(finalFileName);
+		FileUtils.moveFile(finalFile, tempFile);
+		aes.encrypt(tempFileName, finalFileName);
+		tempFile.delete();
+	}
+
+	/**
+	 * Encrypts a file using the openpgp encryptor defined on the report
+	 *
+	 * @param finalFileName the full path of the final file name of the file
+	 * e.g. c:\test\file.xls.aes
+	 * @throws IOException
+	 * @throws PGPException
+	 */
+	private void encryptFileOpenPgp(String finalFileName) throws IOException, PGPException {
+		//http://blog.swwomm.com/2016/07/jpgpj-new-java-gpg-library.html
+
+		String templatesPath = Config.getTemplatesPath();
+
+		Key publicKey;
+		String openPgpPublicKeyString = encryptor.getOpenPgpPublicKeyString();
+		if (StringUtils.isNotBlank(openPgpPublicKeyString)) {
+			publicKey = new Key(openPgpPublicKeyString);
+		} else {
+			String publicKeyFileName = encryptor.getOpenPgpPublicKeyFile();
+			if (StringUtils.isBlank(publicKeyFileName)) {
+				throw new IllegalArgumentException("Public key not specified");
+			}
+
+			String publicKeyFilePath = templatesPath + publicKeyFileName;
+			File publicKeyFile = new File(publicKeyFilePath);
+			if (!publicKeyFile.exists()) {
+				throw new IllegalStateException("Public key file not found: " + publicKeyFilePath);
+			}
+
+			publicKey = new Key(publicKeyFile);
+		}
+
+		Key signingKey = null;
+		String signingKeyFileName = encryptor.getOpenPgpSigningKeyFile();
+		if (StringUtils.isNotBlank(signingKeyFileName)) {
+			String signingKeyFilePath = templatesPath + signingKeyFileName;
+			File signingKeyFile = new File(signingKeyFilePath);
+			if (!signingKeyFile.exists()) {
+				throw new IllegalStateException("Signing key file not found: " + signingKeyFilePath);
+			}
+
+			signingKey = new Key(signingKeyFile, encryptor.getOpenPgpSigningKeyPassphrase());
+		}
+
+		org.c02e.jpgpj.Encryptor pgpEncryptor;
+
+		if (signingKey == null) {
+			pgpEncryptor = new org.c02e.jpgpj.Encryptor(publicKey);
+			pgpEncryptor.setSigningAlgorithm(HashingAlgorithm.Unsigned);
+		} else {
+			pgpEncryptor = new org.c02e.jpgpj.Encryptor(publicKey, signingKey);
+		}
+
+		String tempFileName = FilenameUtils.removeExtension(finalFileName);
+		File tempFile = new File(tempFileName);
+		File finalFile = new File(finalFileName);
+		FileUtils.moveFile(finalFile, tempFile);
+		pgpEncryptor.encrypt(tempFile, finalFile);
+		tempFile.delete();
+	}
+
+	/**
+	 * Returns the names of the report groups that this report belongs to in a
+	 * comma separated string
+	 *
+	 * @return the names of the report groups that this report belongs to
+	 */
+	public String getReportGroupNames() {
+		String namesString = "";
+		if (CollectionUtils.isNotEmpty(reportGroups)) {
+			List<String> names = new ArrayList<>();
+			for (ReportGroup reportGroup : reportGroups) {
+				names.add(reportGroup.getName());
+			}
+			namesString = StringUtils.join(names, ", ");
+		}
+
+		return namesString;
 	}
 
 }

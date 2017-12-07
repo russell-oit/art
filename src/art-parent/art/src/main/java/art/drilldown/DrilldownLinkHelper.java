@@ -15,18 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.utils;
+package art.drilldown;
 
 import art.drilldown.Drilldown;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.reportparameter.ReportParameter;
+import art.utils.ArtUtils;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -42,21 +44,24 @@ public class DrilldownLinkHelper implements Serializable {
 	private final List<Parameter> drilldownParams;
 	private final Set<String> drilldownParamNames;
 	private final List<ReportParameter> reportParamsList;
+	private final Locale locale;
 
 	/**
 	 * Constructs a new drilldown link helper
 	 *
 	 * @param drilldown the drilldown to use
 	 * @param reportParamsList the report parameters, may be null
+	 * @param locale the locale to use
 	 * @throws SQLException
 	 */
-	public DrilldownLinkHelper(Drilldown drilldown, List<ReportParameter> reportParamsList)
-			throws SQLException {
+	public DrilldownLinkHelper(Drilldown drilldown, List<ReportParameter> reportParamsList,
+			 Locale locale) throws SQLException {
 		
 		Objects.requireNonNull(drilldown, "drilldown must not be null");
 
 		this.drilldown = drilldown;
 		this.reportParamsList = reportParamsList;
+		this.locale=locale;
 
 		int drilldownReportId = drilldown.getDrilldownReport().getReportId();
 		ParameterService parameterService = new ParameterService();
@@ -157,7 +162,7 @@ public class DrilldownLinkHelper implements Serializable {
 				int drilldownColumnIndex = drilldownParam.getDrilldownColumnIndex();
 				String paramName = drilldownParam.getName();
 				Object paramValueObject = paramValues[drilldownColumnIndex - 1];
-				String paramValueString = drilldownParam.getHtmlValue(paramValueObject);
+				String paramValueString = drilldownParam.getHtmlValue(paramValueObject, locale);
 				addUrlParameter(paramName, paramValueString, sb);
 			}
 		}

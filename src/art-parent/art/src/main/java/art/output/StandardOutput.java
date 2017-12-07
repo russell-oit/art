@@ -23,10 +23,13 @@ import art.enums.ColumnType;
 import art.enums.ReportType;
 import art.job.Job;
 import art.report.Report;
+import art.reportoptions.GeneralReportOptions;
+import art.reportoptions.Reporti18nOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtUtils;
-import art.utils.DrilldownLinkHelper;
+import art.drilldown.DrilldownLinkHelper;
+import art.reportoptions.StandardOutputOptions;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
@@ -57,6 +60,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -441,6 +445,15 @@ public abstract class StandardOutput {
 	}
 
 	/**
+	 * Outputs an image to the current row
+	 *
+	 * @param binaryData the binary data for the image
+	 */
+	protected void addCellImage(byte[] binaryData) {
+		addCellString("");
+	}
+
+	/**
 	 * Closes the current row and opens a new one.
 	 */
 	protected abstract void newRow();
@@ -598,15 +611,18 @@ public abstract class StandardOutput {
 	 * of rows in the resultset. if not, message contains the i18n message
 	 * indicating the problem
 	 * @throws SQLException
+	 * @throws java.io.IOException
 	 */
 	public StandardOutputResult generateTabularOutput(ResultSet rs, ReportFormat reportFormat,
-			Report report) throws SQLException {
+			Report report) throws SQLException, IOException {
 
 		logger.debug("Entering generateTabularOutput");
 
 		Objects.requireNonNull(rs, "rs must not be null");
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(report, "report must not be null");
+
+		this.report = report;
 
 		StandardOutputResult result = new StandardOutputResult();
 
@@ -643,10 +659,12 @@ public abstract class StandardOutput {
 		//begin header output
 		beginHeader();
 
+		List<String> localizedColumnNames = getLocalizedColumnNames(rsmd, report);
+
 		//output header columns for the result set columns
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
-				addHeaderCell(rsmd.getColumnLabel(i));
+				addHeaderCell(localizedColumnNames.get(i));
 			}
 		}
 
@@ -656,7 +674,7 @@ public abstract class StandardOutput {
 			for (Drilldown drilldown : drilldowns) {
 				String drilldownTitle = drilldown.getHeaderText();
 				if (drilldownTitle == null || drilldownTitle.trim().length() == 0) {
-					drilldownTitle = drilldown.getDrilldownReport().getName();
+					drilldownTitle = drilldown.getDrilldownReport().getLocalizedName(locale);
 				}
 				addHeaderCell(drilldownTitle);
 			}
@@ -944,7 +962,10 @@ public abstract class StandardOutput {
 	public void generateBurstOutput(ResultSet rs, ReportFormat reportFormat, Job job,
 			Report report, ReportType reportType) throws SQLException, IOException {
 
-		logger.debug("Entering generateBurstOutput");
+		logger.debug("Entering generateBurstOutput: reportFormat={}, job={},"
+				+ " report={}, reportType={}", reportFormat, job, report, reportType);
+
+		this.report = report;
 
 		initializeNumberFormatters();
 
@@ -1046,7 +1067,7 @@ public abstract class StandardOutput {
 						}
 					} else {
 						FilenameHelper filenameHelper = new FilenameHelper();
-						baseFileName = filenameHelper.getBaseFilename(job, fileNameBurstId); //getBaseFilename() does cleaning
+						baseFileName = filenameHelper.getBaseFilename(job, fileNameBurstId, locale); //getBaseFilename() does cleaning
 						extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 						fileName = baseFileName + "." + extension;
 
@@ -1064,9 +1085,9 @@ public abstract class StandardOutput {
 						out = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
 					}
 
-					reportName = report.getName() + " - " + currentBurstId;
+					reportName = report.getLocalizedName(locale) + " - " + currentBurstId;
 
-					initializeBurstOutput(rsmd, hiddenColumns);
+					initializeBurstOutput(rsmd, hiddenColumns, report);
 				}
 
 				newRow();
@@ -1161,8 +1182,8 @@ public abstract class StandardOutput {
 	 * should not be included in the output
 	 * @throws SQLException
 	 */
-	private void initializeBurstOutput(ResultSetMetaData rsmd, List<String> hiddenColumns)
-			throws SQLException {
+	private void initializeBurstOutput(ResultSetMetaData rsmd, List<String> hiddenColumns,
+			Report report) throws SQLException {
 
 		//perform any required output initialization
 		init();
@@ -1176,10 +1197,12 @@ public abstract class StandardOutput {
 		//begin header output
 		beginHeader();
 
+		List<String> localizedColumnNames = getLocalizedColumnNames(rsmd, report);
+
 		//output header columns for the result set columns
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
-				addHeaderCell(rsmd.getColumnLabel(i));
+				addHeaderCell(localizedColumnNames.get(i));
 			}
 		}
 
@@ -1292,6 +1315,38 @@ public abstract class StandardOutput {
 
 	/**
 	 * Returns <code>true</code> if the resultset column with the given index
+	 * should be output as an image
+	 *
+	 * @param columnIndex the column's index
+	 * @param imageColumns the list of image columns
+	 * @param rsmd the resultset metadata object
+	 * @return <code>true</code> if the resultset column with the given index
+	 * should be output as an image
+	 * @throws SQLException
+	 */
+	private boolean isImageColumn(int columnIndex, List<String> imageColumns,
+			ResultSetMetaData rsmd) throws SQLException {
+
+		if (CollectionUtils.isEmpty(imageColumns)) {
+			return false;
+		}
+
+		boolean imageColumn;
+
+		String columnName = rsmd.getColumnLabel(columnIndex);
+
+		if (imageColumns.contains(String.valueOf(columnIndex))
+				|| ArtUtils.containsIgnoreCase(imageColumns, columnName)) {
+			imageColumn = true;
+		} else {
+			imageColumn = false;
+		}
+
+		return imageColumn;
+	}
+
+	/**
+	 * Returns <code>true</code> if the resultset column with the given index
 	 * should be totalled
 	 *
 	 * @param columnIndex the column's index
@@ -1337,11 +1392,21 @@ public abstract class StandardOutput {
 	 */
 	private List<Object> outputResultSetColumns(Map<Integer, ColumnTypeDefinition> columnTypes,
 			ResultSet rs, List<String> hiddenColumns, String nullNumberDisplay,
-			String nullStringDisplay, ReportFormat reportFormat) throws SQLException {
+			String nullStringDisplay, ReportFormat reportFormat) throws SQLException, IOException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
 		List<Object> columnValues = new ArrayList<>();
+
+		StandardOutputOptions standardOutputOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			standardOutputOptions = new StandardOutputOptions();
+		} else {
+			standardOutputOptions = ArtUtils.jsonToObject(options, StandardOutputOptions.class);
+		}
+
+		List<String> imageColumns = standardOutputOptions.getImageColumns();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 
@@ -1470,10 +1535,14 @@ public abstract class StandardOutput {
 					//https://stackoverflow.com/questions/14013534/jdbctemplate-accessing-mysql-varbinary-field-as-string
 					//https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
 					byte[] bytes = rs.getBytes(columnIndex);
-					if (bytes != null) {
-						value = Hex.encodeHexString(bytes);
+					if (isImageColumn(columnIndex, imageColumns, rsmd)) {
+						addCellImage(bytes);
+					} else {
+						if (bytes != null) {
+							value = Hex.encodeHexString(bytes);
+						}
+						addString(value, nullStringDisplay);
 					}
-					addString(value, nullStringDisplay);
 					break;
 				default:
 					value = rs.getString(columnIndex);
@@ -1503,7 +1572,7 @@ public abstract class StandardOutput {
 		}
 
 		for (Drilldown drilldown : drilldowns) {
-			DrilldownLinkHelper drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList);
+			DrilldownLinkHelper drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList, locale);
 			String drilldownUrl = drilldownLinkHelper.getDrilldownLink(columnValues.toArray());
 
 			String drilldownText = drilldown.getLinkText();
@@ -1663,6 +1732,9 @@ public abstract class StandardOutput {
 	public StandardOutputResult generateCrosstabOutput(ResultSet rs,
 			ReportFormat reportFormat, Report report) throws SQLException {
 
+		logger.debug("Entering generateCrosstabOutput: reportFormat={},"
+				+ " report={}", reportFormat, report);
+
 		/*
 		 * input
 		 */ /*
@@ -1689,6 +1761,8 @@ public abstract class StandardOutput {
 		//           B    24  14  -      	 	    B	14  24   -   
 		//           C    -   04  44      	 	    C	04   -  44   
 		//                   ^--- Jan comes after Feb!			     	 
+
+		this.report = report;
 
 		StandardOutputResult result = new StandardOutputResult();
 
@@ -1729,6 +1803,8 @@ public abstract class StandardOutput {
 			alternateSort = false;
 		}
 
+		List<String> localizedColumnNames = getLocalizedColumnNames(rsmd, report);
+
 		HashMap<String, Object> values = new HashMap<>();
 		Object[] xa;
 		Object[] ya;
@@ -1765,7 +1841,7 @@ public abstract class StandardOutput {
 			//begin header output
 			beginHeader();
 
-			addHeaderCell(rsmd.getColumnLabel(5) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(3) + ")");
+			addHeaderCell(localizedColumnNames.get(5) + " (" + localizedColumnNames.get(1) + " / " + localizedColumnNames.get(3) + ")");
 			int i, j;
 			for (i = 0; i < xa.length; i++) {
 				addHeaderCell(x.get(xa[i]).toString());
@@ -1835,7 +1911,7 @@ public abstract class StandardOutput {
 
 			//begin header output
 			beginHeader();
-			addHeaderCell(rsmd.getColumnLabel(3) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(2) + ")");
+			addHeaderCell(localizedColumnNames.get(3) + " (" + localizedColumnNames.get(1) + " / " + localizedColumnNames.get(2) + ")");
 			int i, j;
 			for (i = 0; i < xa.length; i++) {
 				addHeaderCell(xa[i].toString());
@@ -2051,5 +2127,70 @@ public abstract class StandardOutput {
 			default:
 				addString(value, nullStringDisplay);
 		}
+	}
+
+	/**
+	 * Returns the column names to use in report output, considering the current
+	 * locale and report i18n options
+	 *
+	 * @param rsmd the resultset metadata object for the data result set
+	 * @param report the report being run
+	 * @return the localized column names to use
+	 * @throws SQLException
+	 */
+	private List<String> getLocalizedColumnNames(ResultSetMetaData rsmd,
+			Report report) throws SQLException {
+
+		List<String> localizedColumnNames = new ArrayList<>();
+
+		//set defaults
+		//add dummy item in index 0. to allow retrieving of column names using 1-based index like with rsmd
+		//without it, the index based add() or set() fails with an empty list
+		localizedColumnNames.add("dummy");
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			localizedColumnNames.add(i, rsmd.getColumnLabel(i));
+		}
+
+		//set localized column names if configured
+		GeneralReportOptions generalReportOptions = report.getGeneralOptions();
+		if (generalReportOptions != null) {
+			Reporti18nOptions i18nOptions = generalReportOptions.getI18n();
+			if (i18nOptions != null) {
+				List<Map<String, List<Map<String, String>>>> i18nColumnNamesSettings = i18nOptions.getColumnNames();
+
+				if (CollectionUtils.isNotEmpty(i18nColumnNamesSettings)) {
+					//use case insensitive map so that column names specified in i18n options are not case sensitive
+					Map<String, String> localizedColumnNamesMap = new CaseInsensitiveMap<>();
+
+					for (Map<String, List<Map<String, String>>> i18nColumnNameSetting : i18nColumnNamesSettings) {
+						//Get the first entry that the iterator returns
+						Entry<String, List<Map<String, String>>> entry = i18nColumnNameSetting.entrySet().iterator().next();
+						String i18nColumnName = entry.getKey();
+						List<Map<String, String>> i18nColumnNameOptions = entry.getValue();
+						String localizedColumnName = ArtUtils.getLocalizedValue(locale, i18nColumnNameOptions);
+						//https://stackoverflow.com/questions/15091148/hashmaps-and-null-values
+						localizedColumnNamesMap.put(i18nColumnName, localizedColumnName);
+					}
+
+					//set final column names
+					for (int i = 1; i < localizedColumnNames.size(); i++) {
+						String columnName = localizedColumnNames.get(i);
+						String columnIndexString = String.valueOf(i);
+						//try see if localized column index defined
+						String localizedColumnName = localizedColumnNamesMap.get(columnIndexString);
+						if (localizedColumnName == null) {
+							//try search using column name
+							localizedColumnName = localizedColumnNamesMap.get(columnName);
+						}
+
+						if (localizedColumnName != null) {
+							localizedColumnNames.set(i, localizedColumnName);
+						}
+					}
+				}
+			}
+		}
+
+		return localizedColumnNames;
 	}
 }

@@ -1,3 +1,28 @@
+ART 3.1
+* Allow dynamic lov to use a dynamic datasource when the lov is a chained parameter
+* Fix for error with thymleaf email inline jobs
+* Allow localization of report name, short description, description
+* Allow localization of report output column names
+* Added csv zip report format
+* Allow outputting of fixed width reports as txt or zip file
+* Allow use of dynamic recipient details in email subject
+* Added CSV report type
+* Allow setting of password for xlsx, docx, ods, odt, pdf output
+* Fix for group column not being saved
+* Added ability to encrypt files in AES Crypt or OpenPGP format
+* Allow job fixed file name, email subject, email body to have date expressions
+* Allow parameter values to have groovy expressions
+* Allow jobs to have multiple schedules
+* Allow jobs to have holidays
+* Allow jobs to use shared schedules and shared holidays
+* Allow for clone reports, which use the source of another report
+* Allow reports to belong to multiple report groups
+* Allow publish job files to be copied to network shares, Amazon S3 storage, Microsoft Azure Blob storage or WebDAV servers
+* Allow display of images from database columns
+* Allow xdocreport to use queries defined in the template
+* Fix for oracle error when upgrading or adding records
+* Updated sqlite driver, jxls, univocity-parsers
+
 ART 3.0.1
 * Removed column autosizing for xls and xlsx output. Was causing greatly increased execution times for xlsx output.
 * Always use report datasource for dynamic lovs

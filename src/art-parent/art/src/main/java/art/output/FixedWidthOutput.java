@@ -17,22 +17,32 @@
  */
 package art.output;
 
+import art.enums.ReportFormat;
+import art.report.Report;
 import art.reportoptions.FixedWidthOptions;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.common.processor.ObjectRowWriterProcessor;
-import com.univocity.parsers.conversions.Conversions;
 import com.univocity.parsers.fixed.FieldAlignment;
 import com.univocity.parsers.fixed.FixedWidthFields;
+import com.univocity.parsers.fixed.FixedWidthFormat;
 import com.univocity.parsers.fixed.FixedWidthRoutines;
 import com.univocity.parsers.fixed.FixedWidthWriterSettings;
-import java.io.Writer;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -53,96 +63,47 @@ public class FixedWidthOutput {
 	 * Generates fixed width output for data in the given resultset
 	 *
 	 * @param rs the resultset that contains the data to output
-	 * @param outputWriter the writer to output to
-	 * @param options options that determine the format of the output
+	 * @param writer the writer to output to. If html report format is required,
+	 * a writer must be supplied
+	 * @param report the report object for the report being run
+	 * @param reportFormat the report format to use
+	 * @param fullOutputFileName the output file name to use
+	 * @param locale the locale that determines date format output
 	 * @throws java.sql.SQLException
+	 * @throws java.io.IOException
 	 */
-	public void generateOutput(ResultSet rs, Writer outputWriter, FixedWidthOptions options) throws SQLException {
-		logger.debug("Entering generateOutput");
+	public void generateOutput(ResultSet rs, PrintWriter writer, Report report,
+			ReportFormat reportFormat, String fullOutputFileName, Locale locale)
+			throws SQLException, IOException {
+
+		logger.debug("Entering generateOutput: report={}, reportFormat={},"
+				+ " fullOutputFileName='{}'", report, reportFormat, fullOutputFileName);
+
+		Objects.requireNonNull(rs, "rs must not be null");
+		Objects.requireNonNull(report, "report must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			throw new IllegalArgumentException("Options not specified");
+		}
+
+		ObjectMapper mapper = new ObjectMapper();
+		FixedWidthOptions fixedWidthOptions = mapper.readValue(options, FixedWidthOptions.class);
 
 		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
-
-		String dateFormat = options.getDateFormat();
-		String dateTimeFormat = options.getDateTimeFormat();
-		String numberFormat = options.getNumberFormat();
-
-		logger.debug("dateFormat='{}'", dateFormat);
-		logger.debug("dateTimeFormat='{}'", dateTimeFormat);
-
-		if (StringUtils.isNotBlank(dateFormat)) {
-			processor.convertType(java.sql.Date.class, Conversions.toDate(dateFormat));
-		}
-		
-		if (StringUtils.isNotBlank(dateTimeFormat)) {
-			processor.convertType(java.sql.Timestamp.class, Conversions.toDate(dateTimeFormat));
-		}
-		
-		if (StringUtils.isNotBlank(numberFormat)) {
-			processor.convertType(java.lang.Integer.class, Conversions.formatToNumber(java.lang.Integer.class, numberFormat));
-			processor.convertType(java.lang.Long.class, Conversions.formatToNumber(java.lang.Long.class, numberFormat));
-			processor.convertType(java.lang.Double.class, Conversions.formatToNumber(java.lang.Double.class, numberFormat));
-		}
-		
-		List<Map<String,List<String>>> fieldNumberFormats=options.getFieldNumberFormats();
-		if(!CollectionUtils.isEmpty(fieldNumberFormats)){
-			for(Map<String,List<String>> numberFormatDefinition: fieldNumberFormats){
-				Entry<String, List<String>> entry = numberFormatDefinition.entrySet().iterator().next();
-				String fieldNumberFormat = entry.getKey();
-				List<String> fieldNames = entry.getValue();
-				processor.convertFields(Conversions.formatToNumber(fieldNumberFormat)).set(fieldNames);
-			}
-		}
-		
-		List<Map<String,List<String>>> fieldIntegerFormats=options.getFieldIntegerFormats();
-		if(!CollectionUtils.isEmpty(fieldIntegerFormats)){
-			for(Map<String,List<String>> integerFormatDefinition: fieldIntegerFormats){
-				Entry<String, List<String>> entry = integerFormatDefinition.entrySet().iterator().next();
-				String fieldIntegerFormat = entry.getKey();
-				List<String> fieldNames = entry.getValue();
-				processor.convertFields(Conversions.formatToNumber(java.lang.Integer.class, fieldIntegerFormat)).set(fieldNames);
-			}
-		}
-		
-		List<Map<String,List<String>>> fieldLongFormats=options.getFieldLongFormats();
-		if(!CollectionUtils.isEmpty(fieldLongFormats)){
-			for(Map<String,List<String>> longFormatDefinition: fieldLongFormats){
-				Entry<String, List<String>> entry = longFormatDefinition.entrySet().iterator().next();
-				String fieldLongFormat = entry.getKey();
-				List<String> fieldNames = entry.getValue();
-				processor.convertFields(Conversions.formatToNumber(java.lang.Long.class, fieldLongFormat)).set(fieldNames);
-			}
-		}
-		
-		List<Map<String,List<String>>> fieldDoubleFormats=options.getFieldDoubleFormats();
-		if(!CollectionUtils.isEmpty(fieldDoubleFormats)){
-			for(Map<String,List<String>> doubleFormatDefinition: fieldDoubleFormats){
-				Entry<String, List<String>> entry = doubleFormatDefinition.entrySet().iterator().next();
-				String fieldDoubleFormat = entry.getKey();
-				List<String> fieldNames = entry.getValue();
-				processor.convertFields(Conversions.formatToNumber(java.lang.Double.class, fieldDoubleFormat)).set(fieldNames);
-			}
-		}
-		
-		List<Map<String,List<String>>> fieldDateFormats=options.getFieldDateFormats();
-		if(!CollectionUtils.isEmpty(fieldDateFormats)){
-			for(Map<String,List<String>> dateFormatDefinition: fieldDateFormats){
-				Entry<String, List<String>> entry = dateFormatDefinition.entrySet().iterator().next();
-				String fieldDateFormat = entry.getKey();
-				List<String> fieldNames = entry.getValue();
-				processor.convertFields(Conversions.toDate(fieldDateFormat)).set(fieldNames);
-			}
-		}
+		fixedWidthOptions.initializeProcessor(processor, locale);
 
 		FixedWidthFields fields;
 
-		List<Integer> fieldLengths = options.getFieldLengths();
-		List<Map<String, Integer>> fieldLengthsByName = options.getFieldLengthsByName();
+		List<Integer> fieldLengths = fixedWidthOptions.getFieldLengths();
+		List<Map<String, Integer>> fieldLengthsByName = fixedWidthOptions.getFieldLengthsByName();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 
-		if (!CollectionUtils.isEmpty(fieldLengths)) {
+		if (CollectionUtils.isNotEmpty(fieldLengths)) {
 			//https://stackoverflow.com/questions/718554/how-to-convert-an-arraylist-containing-integers-to-primitive-int-array
-			int[] fieldLengthsArray = ArrayUtils.toPrimitive(options.getFieldLengths().toArray(new Integer[0]));
+			int[] fieldLengthsArray = ArrayUtils.toPrimitive(fixedWidthOptions.getFieldLengths().toArray(new Integer[0]));
 
 			List<String> columnNames = new ArrayList<>();
 			for (int i = 1; i <= fieldLengthsArray.length; i++) {
@@ -152,7 +113,7 @@ public class FixedWidthOutput {
 			String[] headers = columnNames.toArray(new String[0]);
 
 			fields = new FixedWidthFields(headers, fieldLengthsArray);
-		} else if (!CollectionUtils.isEmpty(fieldLengthsByName)) {
+		} else if (CollectionUtils.isNotEmpty(fieldLengthsByName)) {
 			fields = new FixedWidthFields();
 			//addField() will just add fields in the order added, which may not be the order in the resultset
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
@@ -173,7 +134,7 @@ public class FixedWidthOutput {
 			throw new IllegalStateException("fieldLengths or fieldLengthsByName not defined");
 		}
 
-		List<Map<String, List<String>>> fieldAlignmentByName = options.getFieldAlignmentByName();
+		List<Map<String, List<String>>> fieldAlignmentByName = fixedWidthOptions.getFieldAlignmentByName();
 		if (CollectionUtils.isNotEmpty(fieldAlignmentByName)) {
 			for (Map<String, List<String>> alignmentDefinition : fieldAlignmentByName) {
 				// Get the first entry that the iterator returns
@@ -193,7 +154,7 @@ public class FixedWidthOutput {
 			}
 		}
 
-		List<Map<String, List<Integer>>> fieldAlignmentByPosition = options.getFieldAlignmentByPosition();
+		List<Map<String, List<Integer>>> fieldAlignmentByPosition = fixedWidthOptions.getFieldAlignmentByPosition();
 		if (CollectionUtils.isNotEmpty(fieldAlignmentByPosition)) {
 			for (Map<String, List<Integer>> alignmentDefinition : fieldAlignmentByPosition) {
 				// Get the first entry that the iterator returns
@@ -213,7 +174,7 @@ public class FixedWidthOutput {
 			}
 		}
 
-		List<Map<Character, List<String>>> fieldPaddingByName = options.getFieldPaddingByName();
+		List<Map<Character, List<String>>> fieldPaddingByName = fixedWidthOptions.getFieldPaddingByName();
 		if (CollectionUtils.isNotEmpty(fieldPaddingByName)) {
 			for (Map<Character, List<String>> paddingDefinition : fieldPaddingByName) {
 				// Get the first entry that the iterator returns
@@ -225,7 +186,7 @@ public class FixedWidthOutput {
 			}
 		}
 
-		List<Map<Character, List<Integer>>> fieldPaddingByPosition = options.getFieldPaddingByPosition();
+		List<Map<Character, List<Integer>>> fieldPaddingByPosition = fixedWidthOptions.getFieldPaddingByPosition();
 		if (CollectionUtils.isNotEmpty(fieldPaddingByPosition)) {
 			for (Map<Character, List<Integer>> paddingDefinition : fieldPaddingByPosition) {
 				// Get the first entry that the iterator returns
@@ -240,11 +201,13 @@ public class FixedWidthOutput {
 		FixedWidthWriterSettings writerSettings = new FixedWidthWriterSettings(fields);
 
 		writerSettings.setRowWriterProcessor(processor);
-		writerSettings.setHeaderWritingEnabled(options.isIncludeHeaders());
-		writerSettings.getFormat().setPadding(options.getPadding());
-		writerSettings.setUseDefaultPaddingForHeaders(options.isUseDefaultPaddingForHeaders());
+		writerSettings.setHeaderWritingEnabled(fixedWidthOptions.isIncludeHeaders());
+		writerSettings.setUseDefaultPaddingForHeaders(fixedWidthOptions.isUseDefaultPaddingForHeaders());
 
-		String defaultAlignmentForHeaders = options.getDefaultAlignmentForHeaders();
+		FixedWidthFormat fixedWidthFormat = writerSettings.getFormat();
+		fixedWidthFormat.setPadding(fixedWidthOptions.getPadding());
+
+		String defaultAlignmentForHeaders = fixedWidthOptions.getDefaultAlignmentForHeaders();
 		if (StringUtils.isNotBlank(defaultAlignmentForHeaders)) {
 			if (StringUtils.equalsIgnoreCase(defaultAlignmentForHeaders, "left")) {
 				writerSettings.setDefaultAlignmentForHeaders(FieldAlignment.LEFT);
@@ -259,7 +222,26 @@ public class FixedWidthOutput {
 
 		FixedWidthRoutines routines = new FixedWidthRoutines(writerSettings);
 		routines.setKeepResourcesOpen(true);
-		routines.write(rs, outputWriter);
+
+		if (reportFormat.isHtml()) {
+			writer.println("<pre>");
+			routines.write(rs, writer);
+			writer.println("</pre>");
+		} else {
+			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
+				if (reportFormat == ReportFormat.txt) {
+					routines.write(rs, fout);
+				} else if (reportFormat == ReportFormat.txtZip) {
+					String filename = FilenameUtils.getBaseName(fullOutputFileName);
+					ZipEntry ze = new ZipEntry(filename + ".txt");
+					try (ZipOutputStream zout = new ZipOutputStream(fout)) {
+						zout.putNextEntry(ze);
+						routines.write(rs, zout);
+					}
+				}
+			}
+		}
+
 	}
 
 }

@@ -83,7 +83,7 @@ public class RuleService {
 
 			rule.setRuleId(rs.getInt("RULE_ID"));
 			rule.setName(rs.getString("RULE_NAME"));
-			rule.setDescription(rs.getString("SHORT_DESCRIPTION"));
+			rule.setDescription(rs.getString("DESCRIPTION"));
 			rule.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
 			rule.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			rule.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
@@ -195,12 +195,15 @@ public class RuleService {
 		logger.debug("Entering deleteRules: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords = new ArrayList<>();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
 		for (Integer id : ids) {
 			ActionResult deleteResult = deleteRule(id);
 			if (!deleteResult.isSuccess()) {
-				nonDeletedRecords.add(id);
+				@SuppressWarnings("unchecked")
+				List<String> linkedReports = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedReports, ", ");
+				nonDeletedRecords.add(value);
 			}
 		}
 
@@ -227,18 +230,7 @@ public class RuleService {
 
 		//generate new id
 		String sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		saveRule(rule, newId, actionUser);
 
@@ -291,7 +283,7 @@ public class RuleService {
 		
 		if (newRecord) {
 			String sql = "INSERT INTO ART_RULES"
-					+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, DATA_TYPE,"
+					+ " (RULE_ID, RULE_NAME, DESCRIPTION, DATA_TYPE,"
 					+ " CREATION_DATE, CREATED_BY)"
 					+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
@@ -306,7 +298,7 @@ public class RuleService {
 
 			affectedRows = dbService.update(sql, values);
 		} else {
-			String sql = "UPDATE ART_RULES SET RULE_NAME=?, SHORT_DESCRIPTION=?,"
+			String sql = "UPDATE ART_RULES SET RULE_NAME=?, DESCRIPTION=?,"
 					+ " DATA_TYPE=?, UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE RULE_ID=?";
 

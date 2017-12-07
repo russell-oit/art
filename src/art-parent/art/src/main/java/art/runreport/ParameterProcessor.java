@@ -27,11 +27,11 @@ import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.user.User;
 import art.utils.ArtUtils;
+import art.utils.ExpressionHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -45,7 +45,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,19 +60,40 @@ public class ParameterProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(ParameterProcessor.class);
 
 	private Locale locale;
+	private boolean valuesAsIs;
+	private User user;
+	private Boolean isJob = false;
 
-	/**
-	 * @return the locale
-	 */
-	public Locale getLocale() {
-		return locale;
+	public ParameterProcessor() {
+		locale = Locale.getDefault();
 	}
 
 	/**
-	 * @param locale the locale to set
+	 * @return the isJob
 	 */
-	public void setLocale(Locale locale) {
-		this.locale = locale;
+	public Boolean getIsJob() {
+		return isJob;
+	}
+
+	/**
+	 * @param isJob the isJob to set
+	 */
+	public void setIsJob(Boolean isJob) {
+		this.isJob = isJob;
+	}
+
+	/**
+	 * @return the valuesAsIs
+	 */
+	public boolean isValuesAsIs() {
+		return valuesAsIs;
+	}
+
+	/**
+	 * @param valuesAsIs the valuesAsIs to set
+	 */
+	public void setValuesAsIs(boolean valuesAsIs) {
+		this.valuesAsIs = valuesAsIs;
 	}
 
 	/**
@@ -81,15 +101,20 @@ public class ParameterProcessor {
 	 * parameter values to be used when running a report
 	 *
 	 * @param request the http request
+	 * @param locale the locale being used
 	 * @return final report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.text.ParseException
 	 * @throws java.io.IOException
 	 */
 	public ParameterProcessorResult processHttpParameters(
-			HttpServletRequest request) throws SQLException, ParseException, IOException {
+			HttpServletRequest request, Locale locale)
+			throws SQLException, ParseException, IOException {
 
-		int reportId = Integer.parseInt(request.getParameter("reportId"));
+		String reportIdString = request.getParameter("reportId");
+		logger.debug("reportIdString='{}'", reportIdString);
+
+		int reportId = Integer.parseInt(reportIdString);
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
@@ -100,7 +125,7 @@ public class ParameterProcessor {
 		HttpSession session = request.getSession();
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
-		return process(passedValues, reportId, sessionUser);
+		return process(passedValues, reportId, sessionUser, locale);
 	}
 
 	/**
@@ -111,15 +136,19 @@ public class ParameterProcessor {
 	 * e.g. p-due_date, value is string array with values
 	 * @param reportId the report id
 	 * @param user the user under whose permission the report is being run
+	 * @param locale the locale being used
 	 * @return final report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.text.ParseException
 	 * @throws java.io.IOException
 	 */
 	public ParameterProcessorResult process(Map<String, String[]> passedValuesMap,
-			int reportId, User user) throws SQLException, ParseException, IOException {
+			int reportId, User user, Locale locale) throws SQLException, ParseException, IOException {
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
+
+		this.locale = locale;
+		this.user = user;
 
 		Map<String, ReportParameter> reportParamsMap = new HashMap<>();
 
@@ -139,7 +168,7 @@ public class ParameterProcessor {
 			}
 			reportParamsList = new ArrayList<>(cleanMap.values());
 		} else {
-			reportParamsList = reportParameterService.getReportParameters(reportId);
+			reportParamsList = reportParameterService.getEffectiveReportParameters(reportId);
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
@@ -152,11 +181,11 @@ public class ParameterProcessor {
 		//set actual values to be used when running the query
 		setActualParameterValues(reportParamsList);
 
-		handleAllValues(reportParamsMap, user);
+		handleAllValues(reportParamsMap);
 
-		setLovValues(reportParamsMap, user);
+		setLovValues(reportParamsMap);
 
-		setDefaultValueLovValues(reportParamsMap, user);
+		setDefaultValueLovValues(reportParamsMap);
 
 		ParameterProcessorResult result = new ParameterProcessorResult();
 		result.setReportParamsList(reportParamsList);
@@ -177,12 +206,9 @@ public class ParameterProcessor {
 	 * Populates lov values for all lov parameters
 	 *
 	 * @param reportParamsMap the report parameters
-	 * @param user the user under whose permission the report is being run
 	 * @throws SQLException
 	 */
-	private void setLovValues(Map<String, ReportParameter> reportParamsMap,
-			User user) throws SQLException {
-
+	private void setLovValues(Map<String, ReportParameter> reportParamsMap) throws SQLException {
 		ReportService reportService = new ReportService();
 
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
@@ -219,8 +245,8 @@ public class ParameterProcessor {
 	 * @param user the user under whose permission the report is being run
 	 * @throws SQLException
 	 */
-	private void setDefaultValueLovValues(Map<String, ReportParameter> reportParamsMap,
-			User user) throws SQLException {
+	private void setDefaultValueLovValues(Map<String, ReportParameter> reportParamsMap)
+			throws SQLException {
 
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			ReportParameter reportParam = entry.getValue();
@@ -235,8 +261,14 @@ public class ParameterProcessor {
 					defaultValueLovReportRunner.setReportParamsMap(reportParamsMap);
 
 					Map<Object, String> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
-					if (reportParam.getPassedParameterValues() == null) {
-						reportParam.getActualParameterValues().addAll(lovValues.keySet());
+					if (reportParam.getPassedParameterValues() == null
+							|| (isJob && param.isUseDefaultValueInJobs())) {
+						if (param.getParameterType() == ParameterType.SingleValue) {
+							List<Object> values = new ArrayList<>(lovValues.keySet());
+							reportParam.setActualParameterValues(values);
+						} else {
+							reportParam.getActualParameterValues().addAll(lovValues.keySet());
+						}
 					}
 
 					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
@@ -305,12 +337,11 @@ public class ParameterProcessor {
 	 * parameters
 	 *
 	 * @param reportParamsMap the report parameters
-	 * @param user the user under whose permission the report is being run
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	private void handleAllValues(Map<String, ReportParameter> reportParamsMap,
-			User user) throws SQLException, ParseException {
+	private void handleAllValues(Map<String, ReportParameter> reportParamsMap)
+			throws SQLException, ParseException {
 
 		logger.debug("Entering handleAllValues");
 
@@ -371,8 +402,8 @@ public class ParameterProcessor {
 
 			if (param.getParameterType() == ParameterType.SingleValue) {
 				String actualValueString;
-				if (passedValues == null) {
-					//parameter value not specified. use default value
+				if (passedValues == null || (isJob && param.isUseDefaultValueInJobs())) {
+					//parameter value not specified or using default value in a isJob. use default value
 					actualValueString = param.getLocalizedDefaultValue(locale);
 				} else {
 					actualValueString = passedValues[0];
@@ -384,8 +415,8 @@ public class ParameterProcessor {
 				reportParam.setActualParameterValues(actualValues);
 			} else if (param.getParameterType() == ParameterType.MultiValue) {
 				List<String> actualValueStrings = new ArrayList<>();
-				if (passedValues == null) {
-					//parameter value not specified. use default value
+				if (passedValues == null || (isJob && param.isUseDefaultValueInJobs())) {
+					//parameter value not specified or using default value in a isJob. use default value
 					String defaultValue = param.getLocalizedDefaultValue(locale);
 					if (StringUtils.isNotEmpty(defaultValue)) {
 						String defaultValues[] = defaultValue.split("\\r?\\n");
@@ -421,12 +452,24 @@ public class ParameterProcessor {
 	 * @return an object of the appropriate type
 	 * @throws ParseException
 	 */
-	public Object convertParameterStringValueToObject(String value, Parameter param)
+	private Object convertParameterStringValueToObject(String value, Parameter param)
 			throws ParseException {
 
 		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
 
+		if (valuesAsIs) {
+			return value;
+		}
+
 		ParameterDataType paramDataType = param.getDataType();
+
+		String username = null;
+		if (user != null) {
+			username = user.getUsername();
+		}
+
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		value = expressionHelper.processString(value, username);
 
 		if (paramDataType.isNumeric()) {
 			return convertParameterStringValueToNumber(value, param);
@@ -493,7 +536,7 @@ public class ParameterProcessor {
 	 * @return a date object
 	 * @throws ParseException
 	 */
-	public Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
+	private Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
 		return convertParameterStringValueToDate(value, param.getDateFormat());
 	}
 
@@ -517,68 +560,12 @@ public class ParameterProcessor {
 	 * @return a date object
 	 * @throws ParseException
 	 */
-	public Date convertParameterStringValueToDate(String value, String dateFormat) throws ParseException {
+	private Date convertParameterStringValueToDate(String value, String dateFormat) throws ParseException {
 		logger.debug("Entering convertParameterStringValueToDate: value='{}',"
 				+ " dateFormat='{}'", value, dateFormat);
 
-		Date dateValue;
-		Date now = new Date();
-
-		if (value == null || StringUtils.equalsIgnoreCase(value, "now")
-				|| StringUtils.isBlank(value)) {
-			dateValue = now;
-		} else if (StringUtils.startsWithIgnoreCase(value, "today")) {
-			dateValue = ArtUtils.zeroTime(now);
-		} else if (StringUtils.startsWithIgnoreCase(value, "add")) {
-			//e.g. add days 1
-			String[] tokens = StringUtils.split(value);
-			if (tokens.length != 3) {
-				throw new IllegalArgumentException("Invalid interval: " + value);
-			}
-
-			String period = tokens[1];
-			int offset = Integer.parseInt(tokens[2]);
-
-			if (StringUtils.startsWithIgnoreCase(period, "day")) {
-				dateValue = DateUtils.addDays(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "week")) {
-				dateValue = DateUtils.addWeeks(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "month")) {
-				dateValue = DateUtils.addMonths(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "year")) {
-				dateValue = DateUtils.addYears(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "hour")) {
-				dateValue = DateUtils.addHours(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "min")) {
-				dateValue = DateUtils.addMinutes(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "sec")) {
-				dateValue = DateUtils.addSeconds(now, offset);
-			} else if (StringUtils.startsWithIgnoreCase(period, "milli")) {
-				dateValue = DateUtils.addMilliseconds(now, offset);
-			} else {
-				throw new IllegalArgumentException("Invalid period: " + period);
-			}
-		} else {
-			//convert date string as it is to a date
-			if (StringUtils.isBlank(dateFormat)) {
-				if (value.length() == ArtUtils.ISO_DATE_FORMAT.length()) {
-					dateFormat = ArtUtils.ISO_DATE_FORMAT;
-				} else if (value.length() == ArtUtils.ISO_DATE_TIME_FORMAT.length()) {
-					dateFormat = ArtUtils.ISO_DATE_TIME_FORMAT;
-				} else if (value.length() == ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT.length()) {
-					dateFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
-				} else if (value.length() == ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT.length()) {
-					dateFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
-				} else {
-					throw new IllegalArgumentException("Unexpected date format: " + value);
-				}
-			}
-
-			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
-			dateFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates
-			dateValue = dateFormatter.parse(value);
-		}
-
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		Date dateValue = expressionHelper.convertStringToDate(value, dateFormat, locale);
 		return dateValue;
 	}
 
@@ -630,7 +617,7 @@ public class ParameterProcessor {
 		logger.debug("Entering processChartOptions");
 
 		ChartOptions chartOptions = new ChartOptions();
-		
+
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
 			String htmlParamName = entry.getKey();
 			String[] paramValues = entry.getValue();

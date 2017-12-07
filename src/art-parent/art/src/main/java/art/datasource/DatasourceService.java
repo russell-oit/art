@@ -31,7 +31,6 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -120,7 +119,7 @@ public class DatasourceService {
 	 * being deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "datasources", allEntries = true)
+	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
 	public ActionResult deleteDatasource(int id) throws SQLException {
 		logger.debug("Entering deleteDatasource: id={}", id);
 
@@ -151,17 +150,20 @@ public class DatasourceService {
 	 * contains a list of datasource ids that were not deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "datasources", allEntries = true)
+	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
 	public ActionResult deleteDatasources(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteDatasource: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords = new ArrayList<>();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
 		for (Integer id : ids) {
 			ActionResult deleteResult = deleteDatasource(id);
 			if (!deleteResult.isSuccess()) {
-				nonDeletedRecords.add(id);
+				@SuppressWarnings("unchecked")
+				List<String> linkedReports = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedReports, ", ");
+				nonDeletedRecords.add(value);
 			}
 		}
 
@@ -188,18 +190,7 @@ public class DatasourceService {
 
 		//generate new id
 		String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		//only set new id after successful save. in case copy is attempted and there is an error
 		//new id will be set in save, if no exception is thrown

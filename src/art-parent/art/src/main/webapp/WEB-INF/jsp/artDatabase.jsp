@@ -162,7 +162,7 @@ Display art database configuration page
 				</div>
 				<div class="form-group">
 					<label class="control-label col-md-4" for="url">
-						<spring:message code="page.label.jdbcUrl"/>
+						<spring:message code="datasources.label.url"/>
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">

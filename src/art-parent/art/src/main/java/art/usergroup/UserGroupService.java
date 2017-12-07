@@ -22,6 +22,7 @@ import art.dbutils.DatabaseUtils;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,11 +154,22 @@ public class UserGroupService {
 	 * Deletes the user group with the given id
 	 *
 	 * @param id the user group id
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * users which prevented the user group from being deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "userGroups", allEntries = true)
-	public void deleteUserGroup(int id) throws SQLException {
+	@CacheEvict(value = {"userGroups", "users"}, allEntries = true)
+	public ActionResult deleteUserGroup(int id) throws SQLException {
 		logger.debug("Entering deleteUserGroup: id={}", id);
+
+		ActionResult result = new ActionResult();
+
+		//don't delete if important linked records exist
+		List<String> linkedUsers = getLinkedUsers(id);
+		if (!linkedUsers.isEmpty()) {
+			result.setData(linkedUsers);
+			return result;
+		}
 
 		String sql;
 
@@ -183,21 +195,44 @@ public class UserGroupService {
 		//finally delete user group
 		sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
+
+		result.setSuccess(true);
+
+		return result;
 	}
 
 	/**
 	 * Deletes the user groups with the given ids
 	 *
 	 * @param ids the user group ids
+	 * @return ActionResult. if not successful, data contains details of the
+	 * user groups that were not deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "userGroups", allEntries = true)
-	public void deleteUserGroups(Integer[] ids) throws SQLException {
+	@CacheEvict(value = {"userGroups", "users"}, allEntries = true)
+	public ActionResult deleteUserGroups(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteUserGroups: ids={}", (Object) ids);
 
+		ActionResult result = new ActionResult();
+		List<String> nonDeletedRecords = new ArrayList<>();
+
 		for (Integer id : ids) {
-			deleteUserGroup(id);
+			ActionResult deleteResult = deleteUserGroup(id);
+			if (!deleteResult.isSuccess()) {
+				@SuppressWarnings("unchecked")
+				List<String> linkedUsers = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedUsers, ", ");
+				nonDeletedRecords.add(value);
+			}
 		}
+
+		if (nonDeletedRecords.isEmpty()) {
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+
+		return result;
 	}
 
 	/**
@@ -214,18 +249,7 @@ public class UserGroupService {
 
 		//generate new id
 		String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		saveUserGroup(group, newId, actionUser);
 
@@ -320,5 +344,25 @@ public class UserGroupService {
 			logger.warn("Problem with save. affectedRows={}, newRecord={}, group={}",
 					affectedRows, newRecord, group);
 		}
+	}
+
+	/**
+	 * Returns users that are in a given user group
+	 *
+	 * @param userGroupId the user group id
+	 * @return linked user names
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedUsers(int userGroupId) throws SQLException {
+		logger.debug("Entering getLinkedUsers: userGroupId={}", userGroupId);
+
+		String sql = "SELECT AU.USERNAME"
+				+ " FROM ART_USERS AU"
+				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
+				+ " ON AU.USER_ID=AUGA.USER_ID"
+				+ " WHERE AUGA.USER_GROUP_ID=?";
+
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>("USERNAME");
+		return dbService.query(sql, h, userGroupId);
 	}
 }

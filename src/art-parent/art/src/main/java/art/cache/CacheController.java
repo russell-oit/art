@@ -112,8 +112,14 @@ public class CacheController {
 				case Parameters:
 					cacheHelper.clearParameters();
 					break;
-				case FtpServers:
-					cacheHelper.clearFtpServers();
+				case Encryptors:
+					cacheHelper.clearEncryptors();
+					break;
+				case Holidays:
+					cacheHelper.clearHolidays();
+					break;
+				case Destinations:
+					cacheHelper.clearDestinations();
 					break;
 				default:
 					message = "Clear cache not available: " + id;

@@ -108,6 +108,7 @@ public class ParameterService {
 			parameter.setOptions(rs.getString("PARAMETER_OPTIONS"));
 			parameter.setDateFormat(rs.getString("PARAMETER_DATE_FORMAT"));
 			parameter.setPlaceholderText(rs.getString("PLACEHOLDER_TEXT"));
+			parameter.setUseDefaultValueInJobs(rs.getBoolean("USE_DEFAULT_VALUE_IN_JOBS"));
 			parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			parameter.setCreatedBy(rs.getString("CREATED_BY"));
@@ -276,12 +277,15 @@ public class ParameterService {
 		logger.debug("Entering deleteParameters: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords = new ArrayList<>();
+		List<String> nonDeletedRecords = new ArrayList<>();
 
 		for (Integer id : ids) {
 			ActionResult deleteResult = deleteParameter(id);
 			if (!deleteResult.isSuccess()) {
-				nonDeletedRecords.add(id);
+				@SuppressWarnings("unchecked")
+				List<String> linkedReports = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedReports, ", ");
+				nonDeletedRecords.add(value);
 			}
 		}
 
@@ -308,20 +312,7 @@ public class ParameterService {
 
 		//generate new id
 		String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		saveParameter(parameter, newId, actionUser);
 
@@ -392,9 +383,9 @@ public class ParameterService {
 					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, DEFAULT_VALUE_REPORT_ID,"
 					+ " HIDDEN, SHARED, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
 					+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION, PARAMETER_OPTIONS,"
-					+ " PARAMETER_DATE_FORMAT, PLACEHOLDER_TEXT,"
+					+ " PARAMETER_DATE_FORMAT, PLACEHOLDER_TEXT, USE_DEFAULT_VALUE_IN_JOBS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 21) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 22) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -416,6 +407,7 @@ public class ParameterService {
 				parameter.getOptions(),
 				parameter.getDateFormat(),
 				parameter.getPlaceholderText(),
+				BooleanUtils.toInteger(parameter.isUseDefaultValueInJobs()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -427,6 +419,7 @@ public class ParameterService {
 					+ " DEFAULT_VALUE_REPORT_ID=?, HIDDEN=?, SHARED=?, USE_LOV=?, LOV_REPORT_ID=?,"
 					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
 					+ " PARAMETER_OPTIONS=?, PARAMETER_DATE_FORMAT=?, PLACEHOLDER_TEXT=?,"
+					+ " USE_DEFAULT_VALUE_IN_JOBS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
 
@@ -449,6 +442,7 @@ public class ParameterService {
 				parameter.getOptions(),
 				parameter.getDateFormat(),
 				parameter.getPlaceholderText(),
+				BooleanUtils.toInteger(parameter.isUseDefaultValueInJobs()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()
@@ -480,8 +474,8 @@ public class ParameterService {
 		logger.debug("Entering getLinkedReports: parameterId={}", parameterId);
 
 		String sql = "SELECT AQ.NAME"
-				+ " FROM ART_REPORT_PARAMETERS ARP"
-				+ " INNER JOIN ART_QUERIES AQ ON"
+				+ " FROM ART_QUERIES AQ"
+				+ " INNER JOIN ART_REPORT_PARAMETERS ARP ON"
 				+ " ARP.REPORT_ID=AQ.QUERY_ID"
 				+ " WHERE ARP.PARAMETER_ID=?";
 

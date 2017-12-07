@@ -76,6 +76,7 @@ import org.saiku.service.olap.ThinQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
 
@@ -274,12 +275,14 @@ public class Config extends HttpServlet {
 	 * html template mode
 	 */
 	private static void createThymeleafReportTemplateEngine() {
-		thymeleafReportTemplateEngine = new TemplateEngine();
 		FileTemplateResolver templateResolver = new FileTemplateResolver();
 		templateResolver.setPrefix(getTemplatesPath());
 		templateResolver.setTemplateMode(TemplateMode.HTML);
 		templateResolver.setCharacterEncoding("UTF-8");
 		templateResolver.setCacheable(false);
+		
+		thymeleafReportTemplateEngine = new SpringTemplateEngine();
+		((SpringTemplateEngine) thymeleafReportTemplateEngine).setEnableSpringELCompiler(true);
 		thymeleafReportTemplateEngine.setTemplateResolver(templateResolver);
 	}
 
@@ -427,7 +430,7 @@ public class Config extends HttpServlet {
 				String encryptedPassword = artDatabase.getPassword();
 				String decryptedPassword = AesEncryptor.decrypt(encryptedPassword);
 				artDatabase.setPassword(decryptedPassword);
-				
+
 				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
 			} else {
@@ -828,6 +831,15 @@ public class Config extends HttpServlet {
 	public static String getJobsExportPath() {
 		return exportPath + "jobs" + File.separator;
 	}
+	
+	/**
+	 * Returns the full path to the job logs directory
+	 *
+	 * @return full path to the job logs directory
+	 */
+	public static String getJobLogsPath() {
+		return exportPath + "jobLogs" + File.separator;
+	}
 
 	/**
 	 * Returns the full path to the reports export directory
@@ -854,6 +866,15 @@ public class Config extends HttpServlet {
 	 */
 	public static String getArtTempPath() {
 		return workDirectoryPath + "tmp" + File.separator;
+	}
+	
+	/**
+	 * Returns the full path to the thymeleaf templates directory
+	 *
+	 * @return full path to the thymeleaf templates directory
+	 */
+	public static String getThymeleafTemplatesPath() {
+		return webinfPath + "thymeleaf" + File.separator;
 	}
 
 	/**

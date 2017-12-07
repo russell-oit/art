@@ -72,5 +72,10 @@ public class MultipleFtpServerEdit implements Serializable {
 	public void setActiveUnchanged(boolean activeUnchanged) {
 		this.activeUnchanged = activeUnchanged;
 	}
+
+	@Override
+	public String toString() {
+		return "MultipleFtpServerEdit{" + "ids=" + ids + '}';
+	}
 	
 }

@@ -88,8 +88,8 @@ public class AesEncryptor {
 	 * is null
 	 */
 	public static String decrypt(String cipherText) {
-		if (cipherText == null) {
-			return null;
+		if (cipherText == null || cipherText.equals("")) {
+			return cipherText;
 		}
 
 		try {

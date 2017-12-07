@@ -26,7 +26,7 @@ import java.util.Date;
 import org.apache.commons.collections4.CollectionUtils;
 
 /**
- * Generates pdf output. See
+ * Generates pdf output using the itext library. See
  * http://itextdocs.lowagie.com/examples/com/lowagie/examples/objects/tables/pdfptable/FragmentTable.java
  *
  * @author Marios Timotheou
@@ -63,11 +63,11 @@ public class PdfOutput extends StandardOutput {
 			Rectangle pageSize = pdfHelper.getPageSize(report);
 
 			//set document margins
-			//document with 72pt (1 inch) margins for left, right, top, bottom
+			//document with margins. 72pt = 1 inch
 			final float LEFT_MARGIN = 72f;
 			final float RIGHT_MARGIN = 72f;
 			final float TOP_MARGIN = 72f;
-			final float BOTTOM_MARGIN = 72f;
+			final float BOTTOM_MARGIN = 36f;
 			document = new Document(pageSize, LEFT_MARGIN, RIGHT_MARGIN, TOP_MARGIN, BOTTOM_MARGIN);
 
 			PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));
@@ -248,6 +248,27 @@ public class PdfOutput extends StandardOutput {
 	}
 
 	@Override
+	public void addCellImage(byte[] binaryData) {
+		if (binaryData == null) {
+			cell = new PdfPCell(new Paragraph(fsBody.process("")));
+		} else {
+			//https://stackoverflow.com/questions/22877006/how-to-display-an-image-in-pdf-which-is-retrieved-from-mysql-database-using-jsp
+			//https://developers.itextpdf.com/examples/tables-itext5/adding-images-table
+			//http://tutorials.jenkov.com/java-itext/table.html#images
+			try {
+				Image image = Image.getInstance(binaryData);
+				boolean fitToCell = true;
+				cell = new PdfPCell(image, fitToCell);
+			} catch (BadElementException | IOException ex) {
+				endOutput();
+				throw new RuntimeException(ex);
+			}
+		}
+
+		table.addCell(cell);
+	}
+
+	@Override
 	public void newRow() {
 		// split table in smaller pieces in order to save memory:
 		// fragment size should come from Config servlet, web.xml or properties		
@@ -299,8 +320,11 @@ public class PdfOutput extends StandardOutput {
 					document.add(table);
 				}
 				document.close();
+
+				PdfHelper pdfHelper = new PdfHelper();
+				pdfHelper.addProtections(report, fullOutputFileName);
 			}
-		} catch (DocumentException ex) {
+		} catch (DocumentException | IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

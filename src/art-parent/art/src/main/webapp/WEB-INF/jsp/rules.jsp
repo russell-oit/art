@@ -29,11 +29,9 @@ Display rules
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -187,10 +185,26 @@ Display rules
 									<spring:message code="page.action.copy"/>
 								</a>
 							</div>
+							<div class="btn-group">
+								<button type="button" class="btn btn-default dropdown-toggle"
+										data-toggle="dropdown" data-hover="dropdown"
+										data-delay="100">
+									<spring:message code="reports.action.more"/>
+									<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu">
+									<li>
+										<a 
+											href="${pageContext.request.contextPath}/ruleRuleValues?ruleId=${rule.ruleId}">
+											<spring:message code="page.title.ruleValues"/>
+										</a>
+									</li>
+								</ul>
+							</div>
 						</td>
 					</tr>
 				</c:forEach>
 			</tbody>
 		</table>
 	</jsp:body>
-</t:mainPageWithPanel>
+</t:mainConfigPage>

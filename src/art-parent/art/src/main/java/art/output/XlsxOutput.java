@@ -21,18 +21,19 @@ import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
 import java.io.*;
+import java.security.GeneralSecurityException;
 import java.util.*;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
+import org.apache.poi.xssf.streaming.SXSSFDrawing;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Generates xlsx output
@@ -50,8 +51,6 @@ public class XlsxOutput extends StandardOutput {
 	private CellStyle numberStyle;
 	private int currentRow;
 	private int cellNumber;
-	private String templateFileName;
-	private Map<String, CellStyle> styles;
 	private Row row;
 	private Cell cell;
 	private final String javaDateFormat;
@@ -79,106 +78,73 @@ public class XlsxOutput extends StandardOutput {
 		dateStyle = null;
 		totalStyle = null;
 		numberStyle = null;
-
-		if (styles != null) {
-			styles.clear();
-			styles = null;
-		}
 	}
 
 	@Override
 	public void init() {
-		try {
-			resetVariables();
+		resetVariables();
 
-			// Create a template file. Setup sheets and workbook-level objects e.g. cell styles, number formats, etc.
-			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
+		//https://poi.apache.org/spreadsheet/how-to.html#sxssf
+		wb = new SXSSFWorkbook();
+		wb.setCompressTempFiles(true);
 
-			String fullPath = FilenameUtils.getFullPath(fullOutputFileName);
-			String baseName = FilenameUtils.getBaseName(fullOutputFileName);
-			templateFileName = fullPath + "template-" + baseName + ".xlsx";
+		String sheetName = WorkbookUtil.createSafeSheetName(reportName);
+		sheet = wb.createSheet(sheetName);
+		sheet.setRandomAccessWindowSize(100);// keep 100 rows in memory, exceeding rows will be flushed to disk
 
-			//save the template
-			try (FileOutputStream fout = new FileOutputStream(templateFileName); XSSFWorkbook tmpwb = new XSSFWorkbook()) {
-				tmpwb.createSheet(sheetName);
-				tmpwb.write(fout);
-			}
+		sheet.getPrintSetup().setPaperSize(PrintSetup.A4_PAPERSIZE);
 
-			XSSFWorkbook wb_template;
-			try (FileInputStream inputStream = new FileInputStream(templateFileName)) {
-				wb_template = new XSSFWorkbook(inputStream);
-			}
-
-			wb = new SXSSFWorkbook(wb_template);
-			wb.setCompressTempFiles(true);
-
-			sheet = wb.getSheetAt(0);
-			sheet.setRandomAccessWindowSize(100);// keep 100 rows in memory, exceeding rows will be flushed to disk
-
-			sheet.getPrintSetup().setPaperSize(PrintSetup.A4_PAPERSIZE);
-
-			PageOrientation pageOrientation = report.getPageOrientation();
-			if (pageOrientation == PageOrientation.Landscape) {
-				sheet.getPrintSetup().setLandscape(true);
-			}
-
-			styles = new HashMap<>();
-
-			Font headerFont = wb.createFont();
-			headerFont.setBold(true);
-			headerFont.setColor(IndexedColors.BLUE.getIndex());
-			short headerFontSize = 12;
-			headerFont.setFontHeightInPoints(headerFontSize);
-
-			headerStyle = wb.createCellStyle();
-			headerStyle.setFont(headerFont);
-			headerStyle.setBorderBottom(BorderStyle.THIN);
-			styles.put("header", headerStyle);
-
-			Font bodyFont = wb.createFont();
-			bodyFont.setColor(Font.COLOR_NORMAL);
-			short bodyFontSize = 10;
-			bodyFont.setFontHeightInPoints(bodyFontSize);
-
-			bodyStyle = wb.createCellStyle();
-			bodyStyle.setFont(bodyFont);
-			styles.put("body", bodyStyle);
-
-			dateStyle = wb.createCellStyle();
-			if (StringUtils.isBlank(javaDateFormat)) {
-				dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
-			} else {
-				DataFormat poiFormat = wb.createDataFormat();
-				String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
-				dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
-			}
-			dateStyle.setFont(bodyFont);
-			styles.put("date", dateStyle);
-
-			if (StringUtils.isNotBlank(numberFormat)) {
-				numberStyle = wb.createCellStyle();
-				DataFormat poiFormat = wb.createDataFormat();
-				numberStyle.setDataFormat(poiFormat.getFormat(numberFormat));
-				numberStyle.setFont(bodyFont);
-				styles.put("number", numberStyle);
-			}
-
-			Font totalFont = wb.createFont();
-			totalFont.setBold(true);
-			totalFont.setColor(Font.COLOR_NORMAL);
-			totalFont.setFontHeightInPoints(bodyFontSize);
-
-			totalStyle = wb.createCellStyle();
-			if (StringUtils.isNotBlank(numberFormat)) {
-				DataFormat poiFormat = wb.createDataFormat();
-				totalStyle.setDataFormat(poiFormat.getFormat(numberFormat));
-			}
-			totalStyle.setFont(totalFont);
-			styles.put("total", totalStyle);
-		} catch (IOException ex) {
-			endOutput();
-			throw new RuntimeException(ex);
+		PageOrientation pageOrientation = report.getPageOrientation();
+		if (pageOrientation == PageOrientation.Landscape) {
+			sheet.getPrintSetup().setLandscape(true);
 		}
+
+		Font headerFont = wb.createFont();
+		headerFont.setBold(true);
+		headerFont.setColor(IndexedColors.BLUE.getIndex());
+		short headerFontSize = 12;
+		headerFont.setFontHeightInPoints(headerFontSize);
+
+		headerStyle = wb.createCellStyle();
+		headerStyle.setFont(headerFont);
+		headerStyle.setBorderBottom(BorderStyle.THIN);
+
+		Font bodyFont = wb.createFont();
+		bodyFont.setColor(Font.COLOR_NORMAL);
+		short bodyFontSize = 10;
+		bodyFont.setFontHeightInPoints(bodyFontSize);
+
+		bodyStyle = wb.createCellStyle();
+		bodyStyle.setFont(bodyFont);
+
+		dateStyle = wb.createCellStyle();
+		if (StringUtils.isBlank(javaDateFormat)) {
+			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+		} else {
+			DataFormat poiFormat = wb.createDataFormat();
+			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
+			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+		}
+		dateStyle.setFont(bodyFont);
+
+		if (StringUtils.isNotBlank(numberFormat)) {
+			numberStyle = wb.createCellStyle();
+			DataFormat poiFormat = wb.createDataFormat();
+			numberStyle.setDataFormat(poiFormat.getFormat(numberFormat));
+			numberStyle.setFont(bodyFont);
+		}
+
+		Font totalFont = wb.createFont();
+		totalFont.setBold(true);
+		totalFont.setColor(Font.COLOR_NORMAL);
+		totalFont.setFontHeightInPoints(bodyFontSize);
+
+		totalStyle = wb.createCellStyle();
+		if (StringUtils.isNotBlank(numberFormat)) {
+			DataFormat poiFormat = wb.createDataFormat();
+			totalStyle.setDataFormat(poiFormat.getFormat(numberFormat));
+		}
+		totalStyle.setFont(totalFont);
 	}
 
 	@Override
@@ -268,6 +234,24 @@ public class XlsxOutput extends StandardOutput {
 	}
 
 	@Override
+	public void addCellImage(byte[] binaryData) {
+		cell = row.createCell(cellNumber++);
+
+		if (binaryData != null) {
+			//https://stackoverflow.com/questions/33712621/how-put-a-image-in-a-cell-of-excel-java
+			//https://poi.apache.org/spreadsheet/quick-guide.html#Images
+			int pictureIdx = wb.addPicture(binaryData, Workbook.PICTURE_TYPE_PNG);
+			CreationHelper helper = wb.getCreationHelper();
+			SXSSFDrawing drawing = sheet.createDrawingPatriarch();
+			ClientAnchor anchor = helper.createClientAnchor();
+			anchor.setCol1(cellNumber - 1);
+			anchor.setRow1(currentRow - 1);
+			Picture pict = drawing.createPicture(anchor, pictureIdx);
+			pict.resize();
+		}
+	}
+
+	@Override
 	public void newRow() {
 		row = sheet.createRow(currentRow++);
 		cellNumber = 0;
@@ -293,20 +277,26 @@ public class XlsxOutput extends StandardOutput {
 	public void endOutput() {
 		try {
 
-			if (wb != null) {
-				try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
-					wb.write(fout);
-				}
-
-				// dispose of temporary files backing this workbook on disk
-				wb.dispose();
+			//set modify password
+			if (StringUtils.isNotEmpty(report.getModifyPassword())) {
+				sheet.protectSheet(report.getModifyPassword());
 			}
 
-			//delete template file
-			File templateFile = new File(templateFileName);
-			templateFile.delete();
-		} catch (IOException ex) {
+			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
+				wb.write(fout);
+			}
+
+			// dispose of temporary files backing this workbook on disk
+			wb.dispose();
+
+			//set open password
+			String openPassword = report.getOpenPassword();
+			if (StringUtils.isNotEmpty(openPassword)) {
+				PoiUtils.addOpenPassword(openPassword, fullOutputFileName);
+			}
+		} catch (IOException | GeneralSecurityException | InvalidFormatException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
+
 }

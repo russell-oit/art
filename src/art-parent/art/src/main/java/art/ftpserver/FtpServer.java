@@ -34,7 +34,7 @@ public class FtpServer implements Serializable {
 	private String description;
 	private String server;
 	private int port;
-	private boolean active;
+	private boolean active = true;
 	private String user;
 	private String password;
 	private boolean useBlankPassword; //only used for user interface logic

@@ -20,6 +20,10 @@ Edit user group page
 		<spring:message code="page.title.addUserGroup" var="pageTitle"/>
 		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
+	<c:when test="${action == 'copy'}">
+		<spring:message code="page.title.copyUserGroup" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
+	</c:when>
 	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editUserGroup" var="panelTitle"/>
 		<c:set var="pageTitle">
@@ -100,9 +104,14 @@ Edit user group page
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action == 'edit'}">
-							<form:input path="userGroupId" readonly="true" class="form-control"/>
-						</c:if>
+						<c:choose>
+							<c:when test="${action == 'edit'}">
+								<form:input path="userGroupId" readonly="true" class="form-control"/>
+							</c:when>
+							<c:when test="${action == 'copy'}">
+								<form:hidden path="userGroupId"/>
+							</c:when>
+						</c:choose>
 					</div>
 				</div>
 				<div class="form-group">
@@ -119,7 +128,7 @@ Edit user group page
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="description" maxlength="100" class="form-control"/>
+						<form:textarea path="description" rows="2" cols="40" class="form-control" maxlength="200"/>
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>

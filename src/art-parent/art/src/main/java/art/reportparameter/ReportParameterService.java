@@ -21,6 +21,7 @@ import art.dbutils.DbService;
 import art.parameter.ParameterService;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.CloneOptions;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,6 +132,37 @@ public class ReportParameterService {
 	@Cacheable("parameters")
 	public List<ReportParameter> getReportParameters(int reportId) throws SQLException {
 		logger.debug("Entering getReportParameters: reportId={}", reportId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE REPORT_ID=?";
+
+		ResultSetHandler<List<ReportParameter>> h = new BeanListHandler<>(ReportParameter.class, new ReportParameterMapper());
+		return dbService.query(sql, h, reportId);
+	}
+
+	/**
+	 * Returns the report parameters to use for a given report, returning the
+	 * parent's report parameters if applicable for clone reports
+	 *
+	 * @param reportId the report id
+	 * @return the report parameters to use
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public List<ReportParameter> getEffectiveReportParameters(int reportId) throws SQLException {
+		logger.debug("Entering getReportParameters: reportId={}", reportId);
+
+		Report report = reportService.getReport(reportId);
+		if (report != null) {
+			int sourceReportId = report.getSourceReportId();
+			CloneOptions cloneOptions = report.getCloneOptions();
+			if (cloneOptions == null) {
+				cloneOptions = new CloneOptions();
+			}
+			if (sourceReportId > 0 && cloneOptions.isUseParentParameters()) {
+				reportId = sourceReportId;
+			}
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE REPORT_ID=?";
@@ -251,35 +282,13 @@ public class ReportParameterService {
 
 		//generate new id
 		String sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer maxId = dbService.query(sql, h);
-		logger.debug("maxId={}", maxId);
-
-		int newId;
-		if (maxId == null || maxId < 0) {
-			//no records in the table, or only hardcoded records
-			newId = 1;
-		} else {
-			newId = maxId + 1;
-		}
-		logger.debug("newId={}", newId);
+		int newId = dbService.getNewRecordId(sql);
 
 		//generate new position
 		sql = "SELECT MAX(PARAMETER_POSITION)"
 				+ " FROM ART_REPORT_PARAMETERS"
 				+ " WHERE REPORT_ID=?";
-		ResultSetHandler<Integer> h2 = new ScalarHandler<>();
-		Integer maxPosition = dbService.query(sql, h2, reportId);
-		logger.debug("maxPosition={}", maxPosition);
-
-		int newPosition;
-		if (maxPosition == null || maxPosition < 0) {
-			//no records in the table, or only hardcoded records
-			newPosition = 1;
-		} else {
-			newPosition = maxPosition + 1;
-		}
-		logger.debug("newPosition={}", newPosition);
+		int newPosition = dbService.getNewRecordId(sql, reportId);
 
 		reportParam.setPosition(newPosition);
 

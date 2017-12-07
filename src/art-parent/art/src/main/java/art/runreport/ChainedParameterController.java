@@ -15,14 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.common;
+package art.runreport;
 
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
-import art.runreport.ParameterProcessor;
-import art.runreport.ParameterProcessorResult;
-import art.runreport.ReportRunner;
 import art.user.User;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -77,8 +74,7 @@ public class ChainedParameterController {
 			reportRunner.setUser(sessionUser);
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
-			paramProcessor.setLocale(locale);
-			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportRunner.setReportParamsMap(reportParamsMap);
 

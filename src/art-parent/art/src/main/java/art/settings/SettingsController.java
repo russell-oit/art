@@ -25,11 +25,13 @@ import art.enums.PdfPageSize;
 import art.servlets.Config;
 import java.io.IOException;
 import java.util.List;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -47,6 +49,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class SettingsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
+	
+	@Autowired
+	private ServletContext servletContext;
 
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
@@ -133,7 +138,7 @@ public class SettingsController {
 			session.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
 
 			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
-			session.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
+			servletContext.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");

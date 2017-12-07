@@ -53,7 +53,7 @@ public class MondrianHelper {
 		ReportRuleService reportRuleService = new ReportRuleService();
 		RuleValueService ruleValueService = new RuleValueService();
 
-		List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+		List<ReportRule> reportRules = reportRuleService.getEffectiveReportRules(reportId);
 
 		for (ReportRule reportRule : reportRules) {
 			int userId = user.getUserId();

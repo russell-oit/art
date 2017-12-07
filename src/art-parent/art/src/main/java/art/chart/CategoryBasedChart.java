@@ -191,7 +191,7 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 		//format data value
 		double dataValue = data.getValue(series, item).doubleValue();
 
-		NumberFormat nf = NumberFormat.getInstance(getLocale());
+		NumberFormat nf = NumberFormat.getInstance(locale);
 		String formattedValue = nf.format(dataValue);
 
 		//in case one wishes to show category names

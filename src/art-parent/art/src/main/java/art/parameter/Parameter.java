@@ -28,8 +28,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -64,6 +62,21 @@ public class Parameter implements Serializable {
 	private String dateFormat;
 	private ParameterOptions parameterOptions;
 	private String placeholderText;
+	private boolean useDefaultValueInJobs;
+
+	/**
+	 * @return the useDefaultValueInJobs
+	 */
+	public boolean isUseDefaultValueInJobs() {
+		return useDefaultValueInJobs;
+	}
+
+	/**
+	 * @param useDefaultValueInJobs the useDefaultValueInJobs to set
+	 */
+	public void setUseDefaultValueInJobs(boolean useDefaultValueInJobs) {
+		this.useDefaultValueInJobs = useDefaultValueInJobs;
+	}
 
 	/**
 	 * @return the placeholderText
@@ -445,30 +458,32 @@ public class Parameter implements Serializable {
 	 * Returns the default value string to be used in html elements. Null is
 	 * returned as an empty string.
 	 *
+	 * @param locale the locale to use
 	 * @return the default value string to be used in html elements
 	 */
-	public String getHtmlDefaultValue() {
+	public String getHtmlDefaultValue(Locale locale) {
 		String value = defaultValue;
 
 		if (defaultValue == null) {
 			value = "";
 		}
 
-		return getHtmlValue(value);
+		return getHtmlValue(value, locale);
 	}
 
 	/**
 	 * Returns the string that should be used in html elements
 	 *
 	 * @param value the original value
+	 * @param locale the locale to use
 	 * @return the string that should be used in html elements
 	 */
-	public String getHtmlValue(Object value) {
+	public String getHtmlValue(Object value, Locale locale) {
 		switch (dataType) {
 			case Date:
 			case DateTime:
 				//convert date to string that will be recognised by parameter processor class
-				return getDateString(value);
+				return getDateString(value, locale);
 			default:
 				return String.valueOf(value);
 		}
@@ -479,9 +494,15 @@ public class Parameter implements Serializable {
 	 * parameter's date format setting
 	 *
 	 * @param value the date value
+	 * @param locale the locale to use
 	 * @return the formatted date string
 	 */
-	public String getDateString(Object value) {
+	public String getDateString(Object value, Locale locale) {
+		if (value instanceof String) {
+			//may be string when value obtained from job parameters for display purposes only in editJob.jsp
+			return (String) value;
+		}
+
 		switch (dataType) {
 			case Date:
 			case DateTime:
@@ -492,7 +513,7 @@ public class Parameter implements Serializable {
 						return ArtUtils.isoDateTimeFormatter.format(value);
 					}
 				} else {
-					SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+					SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat, locale);
 					return dateFormatter.format(value);
 				}
 			default:
@@ -512,17 +533,12 @@ public class Parameter implements Serializable {
 		//note that el can't reliably call overloaded methods, so if a method is to be called from el, don't overload it
 		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
 		String localizedLabel = null;
-		
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
 
-		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (parameterOptions != null && locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nLabelOptions = i18nOptions.getLabel();
-				localizedLabel = getLocalizedValue(localeString, i18nLabelOptions);
+				localizedLabel = ArtUtils.getLocalizedValue(locale, i18nLabelOptions);
 			}
 		}
 
@@ -544,17 +560,12 @@ public class Parameter implements Serializable {
 	 */
 	public String getLocalizedHelpText(Locale locale) throws IOException {
 		String localizedHelpText = null;
-		
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
 
-		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (parameterOptions != null && locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nHelpTextOptions = i18nOptions.getHelpText();
-				localizedHelpText = getLocalizedValue(localeString, i18nHelpTextOptions);
+				localizedHelpText = ArtUtils.getLocalizedValue(locale, i18nHelpTextOptions);
 			}
 		}
 
@@ -576,17 +587,12 @@ public class Parameter implements Serializable {
 	 */
 	public String getLocalizedDefaultValue(Locale locale) throws IOException {
 		String localizedDefaultValue = null;
-		
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
 
-		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (parameterOptions != null && locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nDefaultValueOptions = i18nOptions.getDefaultValue();
-				localizedDefaultValue = getLocalizedValue(localeString, i18nDefaultValueOptions);
+				localizedDefaultValue = ArtUtils.getLocalizedValue(locale, i18nDefaultValueOptions);
 			}
 		}
 
@@ -608,17 +614,12 @@ public class Parameter implements Serializable {
 	 */
 	public String getLocalizedPlaceholderText(Locale locale) throws IOException {
 		String localizedPlaceholderText = null;
-		
-		String localeString = null;
-		if (locale != null) {
-			localeString = locale.toString();
-		}
 
-		if (parameterOptions != null && StringUtils.isNotBlank(localeString)) {
+		if (parameterOptions != null && locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nPlaceholderTextOptions = i18nOptions.getPlaceholderText();
-				localizedPlaceholderText = getLocalizedValue(localeString, i18nPlaceholderTextOptions);
+				localizedPlaceholderText = ArtUtils.getLocalizedValue(locale, i18nPlaceholderTextOptions);
 			}
 		}
 
@@ -627,47 +628,6 @@ public class Parameter implements Serializable {
 		}
 
 		return localizedPlaceholderText;
-	}
-
-	/**
-	 * Returns an i18n value to use for this parameter, given a particular
-	 * locale, taking into consideration the i18n options defined for the
-	 * parameter
-	 *
-	 * @param localeString the string that represents the locale to use
-	 * @param i18nValueOptions the i18n definition of locales and values
-	 * @return the localized value to use, or null if a localization is not
-	 * found
-	 */
-	private String getLocalizedValue(String localeString,
-			List<Map<String, String>> i18nValueOptions) {
-
-		String localizedValue = null;
-
-		if (CollectionUtils.isNotEmpty(i18nValueOptions)) {
-			boolean valueFound = false;
-			for (Map<String, String> i18nValueOption : i18nValueOptions) {
-				//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
-				// Get the first entry that the iterator returns
-				Entry<String, String> entry = i18nValueOption.entrySet().iterator().next();
-				String localeSetting = entry.getKey();
-				String localeValue = entry.getValue();
-				String[] locales = StringUtils.split(localeSetting, ",");
-				for (String locale : locales) {
-					if (StringUtils.equalsIgnoreCase(locale.trim(), localeString)) {
-						localizedValue = localeValue;
-						valueFound = true;
-						break;
-					}
-				}
-
-				if (valueFound) {
-					break;
-				}
-			}
-		}
-
-		return localizedValue;
 	}
 
 	/**

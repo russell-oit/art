@@ -25,6 +25,7 @@ Page to allow manual clearing of caches
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {

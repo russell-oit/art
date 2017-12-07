@@ -17,19 +17,141 @@
  */
 package art.report;
 
+import art.reportgroup.ReportGroup;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Represents multiple report edit details
- * 
+ *
  * @author Timothy Anyona
  */
 public class MultipleReportEdit implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private String ids;
 	private boolean active;
 	private boolean activeUnchanged = true;
+	private boolean hidden;
+	private boolean hiddenUnchanged = true;
+	private String contactPerson;
+	private boolean contactPersonUnchanged = true;
+	private List<ReportGroup> reportGroups;
+	private boolean reportGroupsUnchanged = true;
+	private boolean omitTitleRow;
+	private boolean omitTitleRowUnchanged = true;
+
+	/**
+	 * @return the hidden
+	 */
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	/**
+	 * @param hidden the hidden to set
+	 */
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
+	}
+
+	/**
+	 * @return the hiddenUnchanged
+	 */
+	public boolean isHiddenUnchanged() {
+		return hiddenUnchanged;
+	}
+
+	/**
+	 * @param hiddenUnchanged the hiddenUnchanged to set
+	 */
+	public void setHiddenUnchanged(boolean hiddenUnchanged) {
+		this.hiddenUnchanged = hiddenUnchanged;
+	}
+
+	/**
+	 * @return the contactPerson
+	 */
+	public String getContactPerson() {
+		return contactPerson;
+	}
+
+	/**
+	 * @param contactPerson the contactPerson to set
+	 */
+	public void setContactPerson(String contactPerson) {
+		this.contactPerson = contactPerson;
+	}
+
+	/**
+	 * @return the contactPersonUnchanged
+	 */
+	public boolean isContactPersonUnchanged() {
+		return contactPersonUnchanged;
+	}
+
+	/**
+	 * @param contactPersonUnchanged the contactPersonUnchanged to set
+	 */
+	public void setContactPersonUnchanged(boolean contactPersonUnchanged) {
+		this.contactPersonUnchanged = contactPersonUnchanged;
+	}
+
+	/**
+	 * @return the reportGroups
+	 */
+	public List<ReportGroup> getReportGroups() {
+		return reportGroups;
+	}
+
+	/**
+	 * @param reportGroups the reportGroups to set
+	 */
+	public void setReportGroups(List<ReportGroup> reportGroups) {
+		this.reportGroups = reportGroups;
+	}
+
+	/**
+	 * @return the reportGroupsUnchanged
+	 */
+	public boolean isReportGroupsUnchanged() {
+		return reportGroupsUnchanged;
+	}
+
+	/**
+	 * @param reportGroupsUnchanged the reportGroupsUnchanged to set
+	 */
+	public void setReportGroupsUnchanged(boolean reportGroupsUnchanged) {
+		this.reportGroupsUnchanged = reportGroupsUnchanged;
+	}
+
+	/**
+	 * @return the omitTitleRow
+	 */
+	public boolean isOmitTitleRow() {
+		return omitTitleRow;
+	}
+
+	/**
+	 * @param omitTitleRow the omitTitleRow to set
+	 */
+	public void setOmitTitleRow(boolean omitTitleRow) {
+		this.omitTitleRow = omitTitleRow;
+	}
+
+	/**
+	 * @return the omitTitleRowUnchanged
+	 */
+	public boolean isOmitTitleRowUnchanged() {
+		return omitTitleRowUnchanged;
+	}
+
+	/**
+	 * @param omitTitleRowUnchanged the omitTitleRowUnchanged to set
+	 */
+	public void setOmitTitleRowUnchanged(boolean omitTitleRowUnchanged) {
+		this.omitTitleRowUnchanged = omitTitleRowUnchanged;
+	}
 
 	/**
 	 * @return the ids
@@ -72,7 +194,7 @@ public class MultipleReportEdit implements Serializable {
 	public void setActiveUnchanged(boolean activeUnchanged) {
 		this.activeUnchanged = activeUnchanged;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "MultipleReportEdit{" + "ids=" + ids + '}';

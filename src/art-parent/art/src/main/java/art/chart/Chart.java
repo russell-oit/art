@@ -20,12 +20,13 @@ package art.chart;
 import art.drilldown.Drilldown;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.output.PdfHelper;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.reportoptions.JFreeChartOptions;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
-import art.utils.DrilldownLinkHelper;
+import art.drilldown.DrilldownLinkHelper;
 import net.sf.cewolfart.ChartPostProcessor;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
@@ -84,12 +85,13 @@ import org.slf4j.LoggerFactory;
 public abstract class Chart extends AbstractChartDefinition implements DatasetProducer, ChartPostProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(Chart.class);
+
 	private static final long serialVersionUID = 1L;
 	private String backgroundColor = ArtUtils.WHITE_HEX_COLOR_CODE;
 	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
 	private Dataset dataset;
 	private ChartOptions chartOptions;
-	private Locale locale;
+	protected Locale locale;
 	private Map<String, String> hyperLinks;
 	private Map<String, String> drilldownLinks;
 	private boolean openLinksInNewWindow;
@@ -363,7 +365,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 		drilldownLinks = new HashMap<>();
 		openLinksInNewWindow = drilldown.isOpenInNewWindow();
-		drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList);
+		drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList, locale);
 	}
 
 	private void prepareHyperLinkDetails(ResultSet rs) throws SQLException {
@@ -581,6 +583,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				break;
 			case pdf:
 				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList, report, pdfPageNumbers);
+				PdfHelper pdfHelper = new PdfHelper();
+				pdfHelper.addProtections(report, outputFileName);
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported report format: " + reportFormat);
@@ -674,8 +678,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	private void applySeriesColors(JFreeChart chart) {
 		logger.debug("Entering applySeriesColors");
-		
-		if(extraOptions == null){
+
+		if (extraOptions == null) {
 			return;
 		}
 

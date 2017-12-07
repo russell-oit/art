@@ -185,7 +185,7 @@ Edit parameter definition
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="description" maxlength="50" class="form-control"/>
+						<form:textarea path="description" rows="2" cols="40" class="form-control" maxlength="200"/>
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
@@ -288,6 +288,16 @@ Edit parameter definition
 							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
 						</form:select>
 						<form:errors path="defaultValueReport.reportId" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="useDefaultValueInJobs">
+						<spring:message code="parameters.label.useDefaultValueInJobs"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="useDefaultValueInJobs" id="useDefaultValueInJobs" class="switch-yes-no"/>
+						</div>
 					</div>
 				</div>
 				<div class="form-group">

@@ -36,6 +36,7 @@ public enum ReportType {
 	SaikuConnection(150), SaikuReport(149),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122), Thymeleaf(131),
+	FixedWidth(141), CSV(152),
 	ReactPivot(130), PivotTableJs(132), PivotTableJsCsvLocal(133), PivotTableJsCsvServer(134),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
 	XDocReportFreeMarkerOdt(125), XDocReportVelocityOdt(126),
@@ -47,7 +48,7 @@ public enum ReportType {
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17),
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
-	FixedWidth(141), C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
+	C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
 	Leaflet(146), OpenLayers(147);
 
 	private final int value;
@@ -661,6 +662,8 @@ public enum ReportType {
 				return "Saiku: Connection";
 			case MongoDB:
 				return "MongoDB";
+			case CSV:
+				return "CSV";
 			default:
 				return this.name();
 		}

@@ -5,9 +5,11 @@ import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
 import art.utils.MondrianHelper;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
@@ -26,11 +28,13 @@ public class SaikuConnectionManager implements IConnectionManager {
 	private Map<String, Properties> connectProperties;
 	private final User user;
 	private final String templatesPath;
+	private Locale locale;
 
-	public SaikuConnectionManager(User user, String templatesPath) {
+	public SaikuConnectionManager(User user, String templatesPath, Locale locale) {
 		this.user = user;
 		//pass template instead of calling Config.getTemplatesPath() to avoid circular reference. Config references this class
 		this.templatesPath = templatesPath;
+		this.locale = locale;
 	}
 
 	public void init() throws SaikuOlapException {
@@ -48,9 +52,9 @@ public class SaikuConnectionManager implements IConnectionManager {
 			for (Report report : reports) {
 				String roles = mondrianHelper.getRolesString(report.getReportId(), user);
 				Properties properties = getSaikuConnectProperties(report, roles, templatesPath);
-				connectProperties.put(report.getName(), properties);
+				connectProperties.put(report.getLocalizedName(locale), properties);
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | IOException ex) {
 			throw new SaikuOlapException(ex);
 		}
 

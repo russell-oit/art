@@ -25,11 +25,9 @@
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -78,7 +76,7 @@
 							},
 							callback: function (result) {
 								if (result) {
-									//ftpServer confirmed delete. make delete request
+									//delete confirmed
 									$.ajax({
 										type: "POST",
 										dataType: "json",
@@ -201,5 +199,4 @@
 			</tbody>
 		</table>
 	</jsp:body>
-</t:mainPageWithPanel>
-
+</t:mainConfigPage>

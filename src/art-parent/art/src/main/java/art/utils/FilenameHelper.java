@@ -17,6 +17,8 @@
  */
 package art.utils;
 
+import art.encryptor.Encryptor;
+import art.enums.EncryptorType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.job.Job;
@@ -25,10 +27,13 @@ import art.reportoptions.CsvOutputArtOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides methods for generating file names for use with report output
@@ -37,15 +42,18 @@ import org.apache.commons.lang3.RandomStringUtils;
  */
 public class FilenameHelper {
 
+	private static final Logger logger = LoggerFactory.getLogger(FilenameHelper.class);
+
 	/**
 	 * Returns the base file name (file name before extension) to be used for
 	 * the given report
 	 *
 	 * @param report the report
+	 * @param locale the locale being used
 	 * @return the base file name to be used for the given report
 	 */
-	public String getBaseFilename(Report report) {
-		return getBaseFilename(report, null, null);
+	public String getBaseFilename(Report report, Locale locale) {
+		return getBaseFilename(report, null, null, locale);
 	}
 
 	/**
@@ -53,10 +61,11 @@ public class FilenameHelper {
 	 * the given job
 	 *
 	 * @param job the job
+	 * @param locale the locale being used
 	 * @return the base file name to be used for the given job
 	 */
-	public String getBaseFilename(Job job) {
-		return getBaseFilename(job.getReport(), job, null);
+	public String getBaseFilename(Job job, Locale locale) {
+		return getBaseFilename(job.getReport(), job, null, locale);
 	}
 
 	/**
@@ -65,10 +74,11 @@ public class FilenameHelper {
 	 *
 	 * @param job the job
 	 * @param burstId the burst id for the job
+	 * @param locale the locale being used
 	 * @return the base file name to be used for the given job
 	 */
-	public String getBaseFilename(Job job, String burstId) {
-		return getBaseFilename(job.getReport(), job, burstId);
+	public String getBaseFilename(Job job, String burstId, Locale locale) {
+		return getBaseFilename(job.getReport(), job, burstId, locale);
 	}
 
 	/**
@@ -78,22 +88,34 @@ public class FilenameHelper {
 	 * @param report the report, not null
 	 * @param job the job, may be null
 	 * @param burstId the burst id for the job, may be null
+	 * @param locale the locale being used
 	 * @return the base file name to be used for the given report or job
 	 */
-	private String getBaseFilename(Report report, Job job, String burstId) {
+	private String getBaseFilename(Report report, Job job, String burstId,
+			Locale locale) {
+
 		Objects.requireNonNull(report, "report must not be null");
 
 		int jobId;
 		String namePart;
 
+		String reportName = report.getName();
+		try {
+			reportName = report.getLocalizedName(locale);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+
 		if (job == null) {
 			jobId = 0;
-			namePart = report.getName();
+			namePart = reportName;
 		} else {
 			jobId = job.getJobId();
-			namePart = job.getName();
-			if (StringUtils.isBlank(namePart)) {
-				namePart = report.getName();
+			String jobName = job.getName();
+			if (StringUtils.isBlank(jobName)) {
+				namePart = reportName;
+			} else {
+				namePart = jobName;
 			}
 		}
 
@@ -132,24 +154,56 @@ public class FilenameHelper {
 			String jxlsFilename = report.getTemplate();
 			extension = FilenameUtils.getExtension(jxlsFilename);
 		} else if (reportFormat == ReportFormat.csv) {
-			CsvOutputArtOptions options;
-			String optionsString = report.getOptions();
-			if (StringUtils.isBlank(optionsString)) {
-				options = new CsvOutputArtOptions(); //has default values set
-			} else {
-				ObjectMapper mapper = new ObjectMapper();
-				options = mapper.readValue(optionsString, CsvOutputArtOptions.class);
-			}
-			String delimiter = options.getDelimiter();
-			if (StringUtils.equals(delimiter, ",")) {
-				extension = "csv";
-			} else {
-				extension = "txt";
-			}
-		} else if (reportType == ReportType.FixedWidth) {
-			extension = "txt";
+			extension = getCsvExtension(report);
 		} else {
 			extension = reportFormat.getFilenameExtension();
+		}
+
+		Encryptor encryptor = report.getEncryptor();
+		if (encryptor != null && encryptor.isActive()) {
+			EncryptorType encryptorType = encryptor.getEncryptorType();
+			switch (encryptorType) {
+				case AESCrypt:
+					extension = extension + ".aes";
+					break;
+				case OpenPGP:
+					extension = extension + ".gpg";
+					break;
+				default:
+					//do nothing
+			}
+		}
+
+		return extension;
+	}
+
+	/**
+	 * Returns the file name extension to use for a csv file. "csv" if delimited
+	 * is comma, "txt" otherwise
+	 *
+	 * @param report
+	 * @return
+	 * @throws java.io.IOException
+	 */
+	public String getCsvExtension(Report report) throws IOException {
+		Objects.requireNonNull(report, "report must not be null");
+
+		String extension;
+
+		CsvOutputArtOptions csvOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			csvOptions = new CsvOutputArtOptions(); //has default values set
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			csvOptions = mapper.readValue(options, CsvOutputArtOptions.class);
+		}
+
+		String delimiter = csvOptions.getDelimiter();
+		if (StringUtils.equals(delimiter, ",")) {
+			extension = "csv";
+		} else {
+			extension = "txt";
 		}
 
 		return extension;

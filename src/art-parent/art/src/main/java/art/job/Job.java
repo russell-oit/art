@@ -17,12 +17,16 @@
  */
 package art.job;
 
+import art.destination.Destination;
 import art.enums.JobType;
 import art.ftpserver.FtpServer;
+import art.holiday.Holiday;
 import art.report.Report;
+import art.schedule.Schedule;
 import art.user.User;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Represent a report job
@@ -49,11 +53,13 @@ public class Job implements Serializable {
 	private String mailMessage;
 	private String mailSubject;
 	private String cachedTableName;
+	private String scheduleSecond;
 	private String scheduleMinute;
 	private String scheduleHour;
 	private String scheduleDay;
 	private String scheduleMonth;
 	private String scheduleWeekday;
+	private String scheduleYear;
 	private Date creationDate;
 	private Date updateDate;
 	private Report report;
@@ -80,6 +86,154 @@ public class Job implements Serializable {
 	private String batchFile;
 	private FtpServer ftpServer;
 	private String fixedFileName;
+	private String emailTemplate;
+	private String extraSchedules;
+	private String holidays;
+	private String quartzCalendarNames;
+	private Schedule schedule;
+	private List<Holiday> sharedHolidays;
+	private List<Destination> destinations;
+	private String subDirectory;
+
+	/**
+	 * @return the subDirectory
+	 */
+	public String getSubDirectory() {
+		return subDirectory;
+	}
+
+	/**
+	 * @param subDirectory the subDirectory to set
+	 */
+	public void setSubDirectory(String subDirectory) {
+		this.subDirectory = subDirectory;
+	}
+
+	/**
+	 * @return the destinations
+	 */
+	public List<Destination> getDestinations() {
+		return destinations;
+	}
+
+	/**
+	 * @param destinations the destinations to set
+	 */
+	public void setDestinations(List<Destination> destinations) {
+		this.destinations = destinations;
+	}
+
+	/**
+	 * @return the scheduleYear
+	 */
+	public String getScheduleYear() {
+		return scheduleYear;
+	}
+
+	/**
+	 * @param scheduleYear the scheduleYear to set
+	 */
+	public void setScheduleYear(String scheduleYear) {
+		this.scheduleYear = scheduleYear;
+	}
+
+	/**
+	 * @return the sharedHolidays
+	 */
+	public List<Holiday> getSharedHolidays() {
+		return sharedHolidays;
+	}
+
+	/**
+	 * @param sharedHolidays the sharedHolidays to set
+	 */
+	public void setSharedHolidays(List<Holiday> sharedHolidays) {
+		this.sharedHolidays = sharedHolidays;
+	}
+
+	/**
+	 * @return the schedule
+	 */
+	public Schedule getSchedule() {
+		return schedule;
+	}
+
+	/**
+	 * @param schedule the schedule to set
+	 */
+	public void setSchedule(Schedule schedule) {
+		this.schedule = schedule;
+	}
+
+	/**
+	 * @return the scheduleSecond
+	 */
+	public String getScheduleSecond() {
+		return scheduleSecond;
+	}
+
+	/**
+	 * @param scheduleSecond the scheduleSecond to set
+	 */
+	public void setScheduleSecond(String scheduleSecond) {
+		this.scheduleSecond = scheduleSecond;
+	}
+
+	/**
+	 * @return the quartzCalendarNames
+	 */
+	public String getQuartzCalendarNames() {
+		return quartzCalendarNames;
+	}
+
+	/**
+	 * @param quartzCalendarNames the quartzCalendarNames to set
+	 */
+	public void setQuartzCalendarNames(String quartzCalendarNames) {
+		this.quartzCalendarNames = quartzCalendarNames;
+	}
+
+	/**
+	 * @return the holidays
+	 */
+	public String getHolidays() {
+		return holidays;
+	}
+
+	/**
+	 * @param holidays the holidays to set
+	 */
+	public void setHolidays(String holidays) {
+		this.holidays = holidays;
+	}
+
+	/**
+	 * @return the extraSchedules
+	 */
+	public String getExtraSchedules() {
+		return extraSchedules;
+	}
+
+	/**
+	 * @param extraSchedules the extraSchedules to set
+	 */
+	public void setExtraSchedules(String extraSchedules) {
+		this.extraSchedules = extraSchedules;
+	}
+
+	/**
+	 * @return the emailTemplate
+	 */
+	public String getEmailTemplate() {
+		return emailTemplate;
+	}
+
+	/**
+	 * @param emailTemplate the emailTemplate to set
+	 */
+	public void setEmailTemplate(String emailTemplate) {
+		this.emailTemplate = emailTemplate;
+	}
 
 	/**
 	 * @return the fixedFileName
