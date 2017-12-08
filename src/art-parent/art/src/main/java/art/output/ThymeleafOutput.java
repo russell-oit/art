@@ -18,8 +18,10 @@
 package art.output;
 
 import art.report.Report;
+import art.reportoptions.TemplateResultOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -72,10 +74,18 @@ public class ThymeleafOutput {
 
 			variables.put("params", reportParams);
 		}
+		
+		TemplateResultOptions templateResultOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			templateResultOptions = new TemplateResultOptions();
+		} else {
+			templateResultOptions = ArtUtils.jsonToObject(options, TemplateResultOptions.class);
+		}
 
 		//pass report data
-		boolean useLowerCaseProperties = false;
-		boolean useColumnLabels = true;
+		boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
+		boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
 		RowSetDynaClass rsdc = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
 		variables.put("results", rsdc.getRows());
 

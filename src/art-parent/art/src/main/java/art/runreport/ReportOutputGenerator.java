@@ -366,9 +366,9 @@ public class ReportOutputGenerator {
 					int rsType = rs.getType();
 					if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
 						rs.beforeFirst();
-						boolean lowercaseColumnNames = false;
-						boolean useColumnAlias = true;
-						data = new RowSetDynaClass(rs, lowercaseColumnNames, useColumnAlias);
+						boolean useLowerCaseProperties = false;
+						boolean useColumnLabels = true;
+						data = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
 					}
 
 				}

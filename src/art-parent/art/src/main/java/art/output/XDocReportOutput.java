@@ -21,9 +21,11 @@ import art.dbutils.DatabaseUtils;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.report.Report;
+import art.reportoptions.TemplateResultOptions;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import fr.opensagres.xdocreport.converter.ConverterTypeTo;
 import fr.opensagres.xdocreport.converter.ConverterTypeVia;
 import fr.opensagres.xdocreport.converter.Options;
@@ -160,10 +162,18 @@ public class XDocReportOutput {
 				context.put("dateTool", dateTool);
 			}
 
+			TemplateResultOptions templateResultOptions;
+			String reportOptions = report.getOptions();
+			if (StringUtils.isBlank(reportOptions)) {
+				templateResultOptions = new TemplateResultOptions();
+			} else {
+				templateResultOptions = ArtUtils.jsonToObject(reportOptions, TemplateResultOptions.class);
+			}
+
 			//pass report data
 			if (resultSet != null) {
-				boolean useLowerCaseProperties = false;
-				boolean useColumnLabels = true;
+				boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
+				boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
 				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
 				context.put("results", rsdc.getRows());
 
@@ -179,7 +189,7 @@ public class XDocReportOutput {
 
 			RunReportHelper runReportHelper = new RunReportHelper();
 			conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
-			ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn);
+			ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn, templateResultOptions);
 			context.put("jdbc", jdbcHelper);
 
 			//create output

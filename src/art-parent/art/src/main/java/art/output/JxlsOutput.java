@@ -21,9 +21,11 @@ import art.dbutils.DatabaseUtils;
 import art.enums.ReportType;
 import art.report.Report;
 import art.reportoptions.JxlsOptions;
+import art.reportoptions.TemplateResultOptions;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileInputStream;
@@ -136,17 +138,16 @@ public class JxlsOutput {
 			context.putVar("params", reportParams);
 			context.putVar("locale", locale);
 
-			String optionsString = report.getOptions();
+			String options = report.getOptions();
 
-			JxlsOptions options;
-			if (StringUtils.isBlank(optionsString)) {
-				options = new JxlsOptions();
+			JxlsOptions jxlsOptions;
+			if (StringUtils.isBlank(options)) {
+				jxlsOptions = new JxlsOptions();
 			} else {
-				ObjectMapper mapper = new ObjectMapper();
-				options = mapper.readValue(optionsString, JxlsOptions.class);
+				jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
 			}
 
-			String areaConfigFilename = options.getAreaConfigFile();
+			String areaConfigFilename = jxlsOptions.getAreaConfigFile();
 			String fullAreaConfigFilename = templatesPath + areaConfigFilename;
 
 			if (StringUtils.isNotBlank(areaConfigFilename)) {
@@ -156,21 +157,28 @@ public class JxlsOutput {
 				}
 			}
 
+			TemplateResultOptions templateResultOptions;
+			if (StringUtils.isBlank(options)) {
+				templateResultOptions = new TemplateResultOptions();
+			} else {
+				templateResultOptions = ArtUtils.jsonToObject(options, TemplateResultOptions.class);
+			}
+
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
 				RunReportHelper runReportHelper = new RunReportHelper();
 				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
-				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn);
+				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn, templateResultOptions);
 				context.putVar("jdbc", jdbcHelper);
 			} else {
 				//use recordset based on art query
-				boolean useLowerCaseProperties = false;
-				boolean useColumnLabels = true;
+				boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
+				boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
 				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
 				context.putVar("results", rsdc.getRows());
 			}
 
-			process(fullTemplateFileName, outputFileName, areaConfigFilename, context, fullAreaConfigFilename, options);
+			process(fullTemplateFileName, outputFileName, areaConfigFilename, context, fullAreaConfigFilename, jxlsOptions);
 		} finally {
 			DatabaseUtils.close(conn);
 		}

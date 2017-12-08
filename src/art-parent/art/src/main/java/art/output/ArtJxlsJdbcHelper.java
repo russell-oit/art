@@ -19,6 +19,7 @@ package art.output;
 
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
+import art.reportoptions.TemplateResultOptions;
 import java.sql.Connection;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
@@ -28,7 +29,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.jxls.common.JxlsException;
 import org.jxls.jdbc.CaseInsensitiveHashMap;
 
@@ -42,13 +45,15 @@ public class ArtJxlsJdbcHelper {
 	//code from jxls jdbc helper
 	//https://bitbucket.org/leonate/jxls/src
 	private Connection conn;
+	private final TemplateResultOptions templateResultOptions;
 
-	public ArtJxlsJdbcHelper(Connection conn) {
+	public ArtJxlsJdbcHelper(Connection conn, TemplateResultOptions templateResultOptions) {
 		this.conn = conn;
+		this.templateResultOptions = templateResultOptions;
 	}
 
 	public ArtJxlsJdbcHelper() {
-
+		templateResultOptions = new TemplateResultOptions();
 	}
 
 	public List<Map<String, Object>> query(String sql, Object... params) {
@@ -139,11 +144,17 @@ public class ArtJxlsJdbcHelper {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int cols = rsmd.getColumnCount();
 		for (int i = 1; i <= cols; i++) {
-			String columnName = rsmd.getColumnLabel(i);
-			if (null == columnName || 0 == columnName.length()) {
-				columnName = rsmd.getColumnName(i);
+			String columnLabel = rsmd.getColumnLabel(i);
+			String columnName = rsmd.getColumnName(i);
+			String finalColumnName;
+			if (templateResultOptions.isUseColumnLabels()
+					&& StringUtils.isNotBlank(columnLabel)) {
+				finalColumnName = columnLabel;
+			} else {
+				finalColumnName = columnName;
 			}
-			result.put(columnName, rs.getObject(i));
+
+			result.put(finalColumnName, rs.getObject(i));
 		}
 		return result;
 	}
@@ -170,7 +181,7 @@ public class ArtJxlsJdbcHelper {
 
 		return result;
 	}
-	
+
 	public List<Map<String, Object>> query2(String datasourceName, String sql, Object... params) {
 		//use different method name to avoid errors with wrong method being called with query(String, Object...)
 		List<Map<String, Object>> result;
