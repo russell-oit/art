@@ -26,7 +26,6 @@ import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.utils.ArtUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

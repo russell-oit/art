@@ -27,6 +27,7 @@ Display schedules
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
+<spring:message code="schedules.message.linkedJobsExist" var="linkedJobsExistText"/>
 
 <t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -55,7 +56,7 @@ Display schedules
 						"${errorOccurredText}",
 						true, //deleteRow
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
+						"${linkedJobsExistText}" //linkedRecordsExistText
 						);
 
 				var table = oTable.api();

@@ -27,6 +27,7 @@ Display user groups
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
+<spring:message code="userGroups.message.linkedUsersExist" var="linkedUsersExistText"/>
 
 <t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -55,7 +56,7 @@ Display user groups
 						"${errorOccurredText}",
 						true, //deleteRow
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
+						"${linkedUsersExistText}" //linkedRecordsExistText
 						);
 
 				var table = oTable.api();

@@ -25,6 +25,7 @@
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
+<spring:message code="holidays.message.linkedRecordsExist" var="linkedRecordsExistText"/>
 
 <t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -53,7 +54,7 @@
 						"${errorOccurredText}",
 						true, //deleteRow
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
+						"${linkedRecordsExistText}" //linkedRecordsExistText
 						);
 
 				var table = oTable.api();
