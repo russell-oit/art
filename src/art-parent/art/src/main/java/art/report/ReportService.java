@@ -1332,7 +1332,7 @@ public class ReportService {
 	 * Returns reports that use a given parameter
 	 *
 	 * @param parameterId the parameter id
-	 * @return linked report names
+	 * @return reports that use the parameter
 	 * @throws SQLException
 	 */
 	public List<Report> getReportsForParameter(int parameterId) throws SQLException {
@@ -1351,7 +1351,7 @@ public class ReportService {
 	 * Returns reports that use a given datasource
 	 *
 	 * @param datasourceId the datasource id
-	 * @return linked report names
+	 * @return reports that use the datasource
 	 * @throws SQLException
 	 */
 	public List<Report> getReportsWithDatasource(int datasourceId) throws SQLException {
@@ -1362,6 +1362,23 @@ public class ReportService {
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, datasourceId);
+	}
+
+	/**
+	 * Returns reports that use a given encryptor
+	 *
+	 * @param encryptorId the encryptor id
+	 * @return reports that use the encryptor
+	 * @throws SQLException
+	 */
+	public List<Report> getReportsWithEncryptor(int encryptorId) throws SQLException {
+		logger.debug("Entering getReportsWithEncryptor: encryptorId={}", encryptorId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE ENCRYPTOR_ID=?";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h, encryptorId);
 	}
 
 }
