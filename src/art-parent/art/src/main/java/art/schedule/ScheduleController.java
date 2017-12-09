@@ -18,6 +18,7 @@
 package art.schedule;
 
 import art.holiday.HolidayService;
+import art.job.JobService;
 import art.jobrunners.UpdateQuartzSchedulesJob;
 import art.scheduleholiday.ScheduleHolidayService;
 import art.user.User;
@@ -76,6 +77,9 @@ public class ScheduleController {
 
 	@Autowired
 	private HolidayService holidayService;
+	
+	@Autowired
+	private JobService jobService;
 
 	@Autowired
 	private ServletContext servletContext;
@@ -358,5 +362,20 @@ public class ScheduleController {
 		}
 
 		return response;
+	}
+	
+	@RequestMapping(value = "/jobsWithSchedule", method = RequestMethod.GET)
+	public String showJobsWithSchedule(@RequestParam("scheduleId") Integer scheduleId, Model model) {
+		logger.debug("Entering showJobsWithSchedule: scheduleId={}", scheduleId);
+
+		try {
+			model.addAttribute("jobs", jobService.getJobsWithSchedule(scheduleId));
+			model.addAttribute("schedule", scheduleService.getSchedule(scheduleId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "jobsWithSchedule";
 	}
 }

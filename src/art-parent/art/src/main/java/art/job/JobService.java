@@ -1097,5 +1097,22 @@ public class JobService {
 
 		return finalCalendar;
 	}
+	
+	/**
+	 * Returns jobs that use a given schedule
+	 *
+	 * @param scheduleId the schedule id
+	 * @return jobs that use the schedule
+	 * @throws SQLException
+	 */
+	public List<Job> getJobsWithSchedule(int scheduleId) throws SQLException {
+		logger.debug("Entering getJobsWithSchedule: scheduleId={}", scheduleId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE SCHEDULE_ID=?";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, scheduleId);
+	}
 
 }
