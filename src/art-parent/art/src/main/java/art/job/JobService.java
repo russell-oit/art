@@ -1133,4 +1133,23 @@ public class JobService {
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h, destinationId);
 	}
+	
+	/**
+	 * Returns jobs that use a given holiday
+	 *
+	 * @param holidayId the holiday id
+	 * @return jobs that use the holiday
+	 * @throws SQLException
+	 */
+	public List<Job> getJobsWithHoliday(int holidayId) throws SQLException {
+		logger.debug("Entering getJobsWithHoliday: holidayId={}", holidayId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_JOB_HOLIDAY_MAP AJHM"
+				+ " ON AJ.JOB_ID=AJHM.JOB_ID"
+				+ " WHERE AJHM.HOLIDAY_ID=?";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, holidayId);
+	}
 }

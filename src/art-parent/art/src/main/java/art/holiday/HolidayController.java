@@ -17,7 +17,9 @@
  */
 package art.holiday;
 
+import art.job.JobService;
 import art.jobrunners.UpdateQuartzSchedulesJob;
+import art.schedule.ScheduleService;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
@@ -61,6 +63,12 @@ public class HolidayController {
 
 	@Autowired
 	private HolidayService holidayService;
+	
+	@Autowired
+	private JobService jobService;
+	
+	@Autowired
+	private ScheduleService scheduleService;
 
 	@RequestMapping(value = "/holidays", method = RequestMethod.GET)
 	public String showHolidays(Model model) {
@@ -248,5 +256,21 @@ public class HolidayController {
 		model.addAttribute("action", action);
 
 		return "editHoliday";
+	}
+	
+	@RequestMapping(value = "/recordsWithHoliday", method = RequestMethod.GET)
+	public String showRecordsWithHoliday(@RequestParam("holidayId") Integer holidayId, Model model) {
+		logger.debug("Entering showRecordsWithHoliday: holidayId={}", holidayId);
+
+		try {
+			model.addAttribute("schedules", scheduleService.getSchedulesWithHoliday(holidayId));
+			model.addAttribute("jobs", jobService.getJobsWithHoliday(holidayId));
+			model.addAttribute("holiday", holidayService.getHoliday(holidayId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "recordsWithHoliday";
 	}
 }
