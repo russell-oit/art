@@ -1115,4 +1115,22 @@ public class JobService {
 		return dbService.query(sql, h, scheduleId);
 	}
 
+	/**
+	 * Returns jobs that use a given destination
+	 *
+	 * @param destinationId the destination id
+	 * @return jobs that use the destination
+	 * @throws SQLException
+	 */
+	public List<Job> getJobsWithDestination(int destinationId) throws SQLException {
+		logger.debug("Entering getJobsWithDestination: destinationId={}", destinationId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_JOB_DESTINATION_MAP AJDM"
+				+ " ON AJ.JOB_ID=AJDM.JOB_ID"
+				+ " WHERE AJDM.DESTINATION_ID=?";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, destinationId);
+	}
 }

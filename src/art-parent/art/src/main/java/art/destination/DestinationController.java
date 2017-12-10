@@ -19,6 +19,7 @@ package art.destination;
 
 import art.encryption.AesEncryptor;
 import art.enums.DestinationType;
+import art.job.JobService;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
@@ -52,6 +53,9 @@ public class DestinationController {
 
 	@Autowired
 	private DestinationService destinationService;
+	
+	@Autowired
+	private JobService jobService;
 
 	@RequestMapping(value = "/destinations", method = RequestMethod.GET)
 	public String showDestinations(Model model) {
@@ -309,5 +313,20 @@ public class DestinationController {
 		destination.setPassword(encryptedPassword);
 
 		return null;
+	}
+	
+	@RequestMapping(value = "/jobsWithDestination", method = RequestMethod.GET)
+	public String showJobsWithDestination(@RequestParam("destinationId") Integer destinationId, Model model) {
+		logger.debug("Entering showJobsWithDestination: destinationId={}", destinationId);
+
+		try {
+			model.addAttribute("jobs", jobService.getJobsWithDestination(destinationId));
+			model.addAttribute("destination", destinationService.getDestination(destinationId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "jobsWithDestination";
 	}
 }
