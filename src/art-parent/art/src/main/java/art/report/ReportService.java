@@ -1380,5 +1380,24 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, encryptorId);
 	}
+	
+	/**
+	 * Returns reports are in a given report group
+	 *
+	 * @param reportGroupId the report group id
+	 * @return reports that are in the report group
+	 * @throws SQLException
+	 */
+	public List<Report> getReportsInReportGroup(int reportGroupId) throws SQLException {
+		logger.debug("Entering getReportsInReportGroup: reportGroupId={}", reportGroupId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON ARRG.REPORT_ID=AQ.QUERY_ID"
+				+ " WHERE ARRG.REPORT_GROUP_ID=?";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h, reportGroupId);
+	}
 
 }
