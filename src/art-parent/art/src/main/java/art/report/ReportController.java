@@ -644,6 +644,9 @@ public class ReportController {
 			case DatamapsFile:
 			case Leaflet:
 			case OpenLayers:
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
 				templatesPath = Config.getJsTemplatesPath();
 				break;
 			case JPivotMondrian:

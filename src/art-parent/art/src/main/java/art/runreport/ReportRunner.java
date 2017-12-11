@@ -899,6 +899,8 @@ public class ReportRunner {
 			case DatamapsFile:
 			case SaikuReport:
 			case MongoDB:
+			case OrgChartJson:
+			case OrgChartList:
 				return;
 			default:
 			//do nothing

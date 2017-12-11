@@ -50,7 +50,8 @@ public enum ReportType {
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
 	C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
-	Leaflet(146), OpenLayers(147);
+	Leaflet(146), OpenLayers(147),
+	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156);
 
 	private final int value;
 
@@ -90,6 +91,9 @@ public enum ReportType {
 			case SaikuReport:
 			case SaikuConnection:
 			case MongoDB:
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
 				return false;
 			default:
 				return true;
@@ -185,6 +189,22 @@ public enum ReportType {
 		switch (this) {
 			case Dashboard:
 			case GridstackDashboard:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is an org chart report type
+	 *
+	 * @return <code>true</code> if this is an org chart report type
+	 */
+	public boolean isOrgChart() {
+		switch (this) {
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
 				return true;
 			default:
 				return false;
@@ -667,6 +687,12 @@ public enum ReportType {
 				return "CSV";
 			case Velocity:
 				return "Velocity";
+			case OrgChartDatabase:
+				return "OrgChart: Database";
+			case OrgChartJson:
+				return "OrgChart: JSON";
+			case OrgChartList:
+				return "OrgChart: List";
 			default:
 				return this.name();
 		}

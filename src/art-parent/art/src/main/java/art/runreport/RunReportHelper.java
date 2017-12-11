@@ -222,6 +222,9 @@ public class RunReportHelper {
 			case SaikuConnection:
 			case MongoDB:
 			case Velocity:
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
 				enableReportFormats = false;
 				break;
 			default:
@@ -265,6 +268,8 @@ public class RunReportHelper {
 			case SaikuReport:
 			case SaikuConnection:
 			case MongoDB:
+			case OrgChartJson:
+			case OrgChartList:
 				enableShowSql = false;
 				enableShowSelectedParameters = false;
 				break;
@@ -389,6 +394,9 @@ public class RunReportHelper {
 			case SaikuReport:
 			case MongoDB:
 			case Velocity:
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
 				enableEmail = false;
 				break;
 			default:

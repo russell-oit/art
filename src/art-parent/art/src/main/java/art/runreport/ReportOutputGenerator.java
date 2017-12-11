@@ -76,6 +76,7 @@ import art.reportoptions.DataTablesOptions;
 import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JFreeChartOptions;
 import art.reportoptions.MongoDbOptions;
+import art.reportoptions.OrgChartOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -1324,6 +1325,58 @@ public class ReportOutputGenerator {
 						writer.print(result);
 					}
 				}
+			} else if (reportType.isOrgChart()) {
+				if (isJob) {
+					throw new IllegalStateException("OrgChart report types not supported for jobs");
+				}
+
+				request.setAttribute("reportType", reportType);
+
+				String jsonData;
+				switch (reportType) {
+					case OrgChartDatabase:
+						rs = reportRunner.getResultSet();
+
+						JsonOutput jsonOutput = new JsonOutput();
+						JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+						jsonData = jsonOutputResult.getJsonData();
+
+						rowsRetrieved = jsonOutputResult.getRowCount();
+						break;
+					case OrgChartJson:
+					case OrgChartList:
+						jsonData = report.getReportSource();
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected OrgChart report type: " + reportType);
+				}
+
+				jsonData = Encode.forJavaScript(jsonData);
+				request.setAttribute("data", jsonData);
+
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+
+				OrgChartOptions options;
+				String optionsString = report.getOptions();
+				if (StringUtils.isBlank(optionsString)) {
+					options = new OrgChartOptions();
+				} else {
+					ObjectMapper mapper = new ObjectMapper();
+					options = mapper.readValue(optionsString, OrgChartOptions.class);
+				}
+
+				String cssFileName = options.getCssFile();
+				if (StringUtils.isNotBlank(cssFileName)) {
+					String fullCssFileName = jsTemplatesPath + cssFileName;
+
+					File cssFile = new File(fullCssFileName);
+					if (!cssFile.exists()) {
+						throw new IllegalStateException("Css file not found: " + cssFileName);
+					}
+				}
+
+				request.setAttribute("options", options);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
