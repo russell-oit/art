@@ -37,6 +37,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.tools.generic.DateTool;
+import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +151,12 @@ public class VelocityOutput {
 		String artBaseUrl = Config.getSettings().getArtBaseUrl();
 		data.put("artBaseUrl", artBaseUrl);
 		data.put("locale", locale);
+
+		NumberTool numberTool = new NumberTool();
+		data.put("numberTool", numberTool);
+
+		DateTool dateTool = new DateTool();
+		data.put("dateTool", dateTool);
 
 		String templateFileName = report.getTemplate();
 		String templatesPath = Config.getTemplatesPath();

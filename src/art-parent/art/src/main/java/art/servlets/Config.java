@@ -235,8 +235,7 @@ public class Config extends HttpServlet {
 
 		createThymeleafReportTemplateEngine();
 
-		velocityEngine = new VelocityEngine();
-		velocityEngine.init();
+		createVelocityEngine();
 
 		loadLanguages();
 
@@ -299,13 +298,27 @@ public class Config extends HttpServlet {
 	public static TemplateEngine getThymeleafReportTemplateEngine() {
 		return thymeleafReportTemplateEngine;
 	}
-	
+
 	/**
-	 * Returns the velocity engine to use for velocity report types
-	 * 
-	 * @return the velocity engine to use for velocity report types
+	 * Creates the velocity engine used by velocity reports
 	 */
-	public static VelocityEngine getVelocityEngine(){
+	private static void createVelocityEngine() {
+		velocityEngine = new VelocityEngine();
+
+		//https://stackoverflow.com/questions/22056967/apache-velocity-resource-not-found-exception-even-though-template-file-is-in-the
+		//https://stackoverflow.com/questions/34662161/velocitys-fileresourceloader-cant-find-resources
+		//https://velocity.apache.org/engine/1.7/developer-guide.html#resource-management
+		velocityEngine.setProperty("file.resource.loader.path", "");
+		
+		velocityEngine.init();
+	}
+
+	/**
+	 * Returns the velocity engine to use for velocity reports
+	 *
+	 * @return the velocity engine to use for velocity reports
+	 */
+	public static VelocityEngine getVelocityEngine() {
 		return velocityEngine;
 	}
 
