@@ -480,6 +480,7 @@ Edit report page
 					case 112: //jpivot mondrian
 					case 122: //freemarker
 					case 131: //thymeleaf
+					case 153: //velocity
 					case 123: //xdocreport freemarker docx
 					case 124: //xdocreport velocity docx
 					case 125: //xdocreport freemarker odt
@@ -600,6 +601,7 @@ Edit report page
 					case 117: //jxls template
 					case 122: //freemarker
 					case 131: //thymeleaf
+					case 153: //velocity
 					case 130: //react pivot
 					case 132: //pivottable.js
 					case 133: //pivottable.js csv local

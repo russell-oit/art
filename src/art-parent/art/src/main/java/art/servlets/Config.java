@@ -62,6 +62,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.velocity.app.VelocityEngine;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import org.quartz.CronTrigger;
 import static org.quartz.JobBuilder.newJob;
@@ -110,6 +111,7 @@ public class Config extends HttpServlet {
 	private static Configuration freemarkerConfig;
 	private static TemplateEngine thymeleafReportTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
+	private static VelocityEngine velocityEngine;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -233,6 +235,9 @@ public class Config extends HttpServlet {
 
 		createThymeleafReportTemplateEngine();
 
+		velocityEngine = new VelocityEngine();
+		velocityEngine.init();
+
 		loadLanguages();
 
 		//load settings and initialize variables
@@ -280,7 +285,7 @@ public class Config extends HttpServlet {
 		templateResolver.setTemplateMode(TemplateMode.HTML);
 		templateResolver.setCharacterEncoding("UTF-8");
 		templateResolver.setCacheable(false);
-		
+
 		thymeleafReportTemplateEngine = new SpringTemplateEngine();
 		((SpringTemplateEngine) thymeleafReportTemplateEngine).setEnableSpringELCompiler(true);
 		thymeleafReportTemplateEngine.setTemplateResolver(templateResolver);
@@ -293,6 +298,15 @@ public class Config extends HttpServlet {
 	 */
 	public static TemplateEngine getThymeleafReportTemplateEngine() {
 		return thymeleafReportTemplateEngine;
+	}
+	
+	/**
+	 * Returns the velocity engine to use for velocity report types
+	 * 
+	 * @return the velocity engine to use for velocity report types
+	 */
+	public static VelocityEngine getVelocityEngine(){
+		return velocityEngine;
 	}
 
 	/**
@@ -831,7 +845,7 @@ public class Config extends HttpServlet {
 	public static String getJobsExportPath() {
 		return exportPath + "jobs" + File.separator;
 	}
-	
+
 	/**
 	 * Returns the full path to the job logs directory
 	 *
@@ -867,7 +881,7 @@ public class Config extends HttpServlet {
 	public static String getArtTempPath() {
 		return workDirectoryPath + "tmp" + File.separator;
 	}
-	
+
 	/**
 	 * Returns the full path to the thymeleaf templates directory
 	 *

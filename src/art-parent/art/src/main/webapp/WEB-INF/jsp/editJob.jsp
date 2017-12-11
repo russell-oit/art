@@ -312,6 +312,9 @@
 				} else if (reportTypeId === 131) {
 					//thymeleaf
 					list.append(new Option('${htmlText}', 'html'));
+				} else if (reportTypeId === 153) {
+					//velocity
+					list.append(new Option('${htmlText}', 'html'));
 				} else if (reportTypeId === 123 || reportTypeId === 124) {
 					//xdocreport docx
 					list.append(new Option('${docxText}', 'docx'));
@@ -412,8 +415,9 @@
 						break;
 					case 'EmailInline':
 					case 'CondEmailInline':
-						if (reportTypeId === 122 || reportTypeId === 131) {
-							//freemarker, thymeleaf
+						if (reportTypeId === 122 || reportTypeId === 131
+								|| reportTypeId === 153) {
+							//freemarker, thymeleaf, velocity
 							$("#mailMessageDiv").hide();
 						}
 						break;
@@ -438,9 +442,9 @@
 			function toggleOutputFormatVisibility(jobType, reportTypeId) {
 				//show/hide outputFormatDiv
 				if (reportTypeId === 122
-						|| reportTypeId === 131
+						|| reportTypeId === 131 || reportTypeId === 153
 						|| reportTypeId === 117 || reportTypeId === 118) {
-					//freemarker, thymeleaf, jxls
+					//freemarker, thymeleaf, velocity, jxls
 					$("#outputFormatDiv").hide();
 				} else {
 					switch (jobType) {

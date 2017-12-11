@@ -35,7 +35,8 @@ public enum ReportType {
 	JPivotMondrianXmla(113), JPivotSqlServerXmla(114),
 	SaikuConnection(150), SaikuReport(149),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
-	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122), Thymeleaf(131),
+	LovDynamic(119), LovStatic(120), JobRecipients(121),
+	FreeMarker(122), Velocity(153), Thymeleaf(131),
 	FixedWidth(141), CSV(152),
 	ReactPivot(130), PivotTableJs(132), PivotTableJsCsvLocal(133), PivotTableJsCsvServer(134),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
@@ -664,6 +665,8 @@ public enum ReportType {
 				return "MongoDB";
 			case CSV:
 				return "CSV";
+			case Velocity:
+				return "Velocity";
 			default:
 				return this.name();
 		}

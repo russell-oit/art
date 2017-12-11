@@ -59,6 +59,7 @@ import art.output.SlkOutput;
 import art.output.StandardOutputResult;
 import art.output.ThymeleafOutput;
 import art.output.TsvOutput;
+import art.output.VelocityOutput;
 import art.output.XDocReportOutput;
 import art.output.XlsOutput;
 import art.output.XlsxOutput;
@@ -518,6 +519,15 @@ public class ReportOutputGenerator {
 				thymeleafOutput.setContextPath(contextPath);
 				thymeleafOutput.setLocale(locale);
 				thymeleafOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+
+				rowsRetrieved = getResultSetRowCount(rs);
+			} else if (reportType == ReportType.Velocity) {
+				rs = reportRunner.getResultSet();
+
+				VelocityOutput velocityOutput = new VelocityOutput();
+				velocityOutput.setContextPath(contextPath);
+				velocityOutput.setLocale(locale);
+				velocityOutput.generateOutput(report, writer, rs, applicableReportParamsList);
 
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType.isXDocReport()) {

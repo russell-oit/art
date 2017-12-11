@@ -37,6 +37,7 @@ import art.mail.Mailer;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.ThymeleafOutput;
+import art.output.VelocityOutput;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -1386,6 +1387,10 @@ public class ReportJob implements org.quartz.Job {
 			ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
 			thymeleafOutput.setLocale(locale);
 			thymeleafOutput.generateOutput(report, writer, data);
+		} else if (reportType == ReportType.Velocity) {
+			VelocityOutput velocityOutput = new VelocityOutput();
+			velocityOutput.setLocale(locale);
+			velocityOutput.generateOutput(report, writer, data);
 		}
 
 		String finalMessage = writer.toString();
@@ -1453,7 +1458,9 @@ public class ReportJob implements org.quartz.Job {
 		String username = job.getUser().getUsername();
 		String customMessage = expressionHelper.processString(message, reportParamsMap, username, recipientDetails);
 
-		if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+		if (reportType == ReportType.FreeMarker
+				|| reportType == ReportType.Velocity
+				|| reportType == ReportType.Thymeleaf) {
 			String finalMessage;
 			if (jobType.isEmailInline()) {
 				finalMessage = messageData;
@@ -2531,7 +2538,9 @@ public class ReportJob implements org.quartz.Job {
 								String[] emailsArray = StringUtils.split(emails, ";");
 								Map<String, String> recipientColumns = entry.getValue();
 
-								if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+								if (reportType == ReportType.FreeMarker
+										|| reportType == ReportType.Velocity
+										|| reportType == ReportType.Thymeleaf) {
 									prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns, reportParamsMap);
 								} else {
 									prepareAlertMailer(mailer, message, value, recipientColumns, reportParamsMap);
@@ -2575,7 +2584,9 @@ public class ReportJob implements org.quartz.Job {
 						if (generateEmail) {
 							Mailer mailer = getMailer();
 
-							if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+							if (reportType == ReportType.FreeMarker
+									|| reportType == ReportType.Velocity
+									|| reportType == ReportType.Thymeleaf) {
 								prepareTemplateAlertMailer(reportType, mailer, value, reportParamsMap);
 							} else {
 								prepareAlertMailer(mailer, message, value, reportParamsMap);

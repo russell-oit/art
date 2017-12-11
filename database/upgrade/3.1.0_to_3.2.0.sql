@@ -8,3 +8,6 @@
 
 -- update database version
 UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='3.2-snapshot';
+
+-- add velocity reference report type
+INSERT INTO ART_REPORT_TYPES VALUES (153,'Velocity');

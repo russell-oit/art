@@ -221,6 +221,7 @@ public class RunReportHelper {
 			case SaikuReport:
 			case SaikuConnection:
 			case MongoDB:
+			case Velocity:
 				enableReportFormats = false;
 				break;
 			default:
@@ -349,6 +350,7 @@ public class RunReportHelper {
 			case Leaflet:
 			case OpenLayers:
 			case MongoDB:
+			case Velocity:
 				enablePrintAlways = true;
 				break;
 			default:
@@ -386,6 +388,7 @@ public class RunReportHelper {
 			case TabularHeatmap:
 			case SaikuReport:
 			case MongoDB:
+			case Velocity:
 				enableEmail = false;
 				break;
 			default:
@@ -574,10 +577,13 @@ public class RunReportHelper {
 	public int getResultSetType(ReportType reportType) {
 		//is scroll insensitive much slower than forward only?
 		int resultSetType;
-		if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
-				|| reportType == ReportType.FreeMarker || reportType.isXDocReport()
-				|| reportType == ReportType.Group || reportType.isChart()
+		if (reportType.isChart() || reportType.isXDocReport()
+				|| reportType == ReportType.Group
+				|| reportType == ReportType.JasperReportsArt
+				|| reportType == ReportType.JxlsArt
+				|| reportType == ReportType.FreeMarker
 				|| reportType == ReportType.Thymeleaf
+				|| reportType == ReportType.Velocity
 				|| reportType == ReportType.Dygraphs
 				|| reportType == ReportType.CSV
 				|| reportType == ReportType.FixedWidth) {
