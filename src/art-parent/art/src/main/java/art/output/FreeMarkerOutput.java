@@ -50,6 +50,21 @@ public class FreeMarkerOutput {
 	private static final Logger logger = LoggerFactory.getLogger(FreeMarkerOutput.class);
 
 	private String contextPath;
+	private Locale locale;
+
+	/**
+	 * @return the locale
+	 */
+	public Locale getLocale() {
+		return locale;
+	}
+
+	/**
+	 * @param locale the locale to set
+	 */
+	public void setLocale(Locale locale) {
+		this.locale = locale;
+	}
 
 	/**
 	 * @return the contextPath
@@ -72,13 +87,12 @@ public class FreeMarkerOutput {
 	 * @param writer the writer to output to, not null
 	 * @param rs the resultset containing report data, not null
 	 * @param reportParams the report parameters
-	 * @param locale the locale in use
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 * @throws freemarker.template.TemplateException
 	 */
 	public void generateOutput(Report report, Writer writer, ResultSet rs,
-			List<ReportParameter> reportParams, Locale locale)
+			List<ReportParameter> reportParams)
 			throws SQLException, IOException, TemplateException {
 
 		Objects.requireNonNull(rs, "rs must not be null");
@@ -110,7 +124,7 @@ public class FreeMarkerOutput {
 		RowSetDynaClass rsdc = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
 		data.put("results", rsdc.getRows());
 
-		generateOutput(report, writer, data, locale);
+		generateOutput(report, writer, data);
 	}
 
 	/**
@@ -119,12 +133,11 @@ public class FreeMarkerOutput {
 	 * @param report the report to use, not null
 	 * @param writer the writer to output to, not null
 	 * @param data the objects to be passed to the template
-	 * @param locale the locale in use
 	 * @throws java.io.IOException
 	 * @throws freemarker.template.TemplateException
 	 */
-	public void generateOutput(Report report, Writer writer, Map<String, Object> data,
-			Locale locale) throws IOException, TemplateException {
+	public void generateOutput(Report report, Writer writer, Map<String, Object> data)
+			throws IOException, TemplateException {
 
 		logger.debug("Entering generateOutput: report={}", report);
 

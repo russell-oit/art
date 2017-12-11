@@ -1380,9 +1380,11 @@ public class ReportJob implements org.quartz.Job {
 
 		if (reportType == ReportType.FreeMarker) {
 			FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
-			freemarkerOutput.generateOutput(report, writer, data, locale);
+			freemarkerOutput.setLocale(locale);
+			freemarkerOutput.generateOutput(report, writer, data);
 		} else if (reportType == ReportType.Thymeleaf) {
 			ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+			thymeleafOutput.setLocale(locale);
 			thymeleafOutput.generateOutput(report, writer, data);
 		}
 

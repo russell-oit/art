@@ -507,13 +507,16 @@ public class ReportOutputGenerator {
 
 				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
 				freemarkerOutput.setContextPath(contextPath);
-				freemarkerOutput.generateOutput(report, writer, rs, applicableReportParamsList, locale);
+				freemarkerOutput.setLocale(locale);
+				freemarkerOutput.generateOutput(report, writer, rs, applicableReportParamsList);
 
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType == ReportType.Thymeleaf) {
 				rs = reportRunner.getResultSet();
 
 				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+				thymeleafOutput.setContextPath(contextPath);
+				thymeleafOutput.setLocale(locale);
 				thymeleafOutput.generateOutput(report, writer, rs, applicableReportParamsList);
 
 				rowsRetrieved = getResultSetRowCount(rs);

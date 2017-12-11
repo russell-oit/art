@@ -29,6 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.beanutils.RowSetDynaClass;
@@ -46,6 +47,37 @@ import org.thymeleaf.context.Context;
 public class ThymeleafOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(ThymeleafOutput.class);
+	
+	private String contextPath;
+	private Locale locale;
+
+	/**
+	 * @return the locale
+	 */
+	public Locale getLocale() {
+		return locale;
+	}
+
+	/**
+	 * @param locale the locale to set
+	 */
+	public void setLocale(Locale locale) {
+		this.locale = locale;
+	}
+
+	/**
+	 * @return the contextPath
+	 */
+	public String getContextPath() {
+		return contextPath;
+	}
+
+	/**
+	 * @param contextPath the contextPath to set
+	 */
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
 
 	/**
 	 * Generates output, updating the writer with the final output
@@ -107,6 +139,15 @@ public class ThymeleafOutput {
 
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(writer, "writer must not be null");
+		
+		if (variables == null) {
+			variables = new HashMap<>();
+		}
+
+		variables.put("contextPath", contextPath);
+		String artBaseUrl = Config.getSettings().getArtBaseUrl();
+		variables.put("artBaseUrl", artBaseUrl);
+		variables.put("locale", locale);
 		
 		String templateFileName = report.getTemplate();
 		String templatesPath = Config.getTemplatesPath();
