@@ -5,11 +5,11 @@
 Region ID: ${regionId.displayValues}
 <br>
 
-<table class='sortable'>
+<table id='htmlGridTable' class='sortable'>
 	<thead>
 		<tr>
-			<td>ID</td>
-			<td>Name</td>
+			<th>ID</th>
+			<th>Name</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -21,3 +21,11 @@ Region ID: ${regionId.displayValues}
 		</#list>
 	</tbody>
 </table>
+
+<script>
+	$(document).ready(function() {
+		var table = document.getElementById('htmlGridTable');
+		sorttable.DATE_RE = /^(\\d\\d?)[\\/\\.-](\\d\\d?)[\\/\\.-]((\\d\\d)?\\d\\d)$/;
+		sorttable.makeSortable(table);
+	});
+</script>
