@@ -259,6 +259,11 @@ public class ReportOutputGenerator {
 			Objects.requireNonNull(drilldownService, "drilldownService must not be null");
 		}
 
+		String contextPath = null;
+		if (request != null) {
+			contextPath = request.getContextPath();
+		}
+
 		String fileName = FilenameUtils.getName(fullOutputFilename);
 
 		try {
@@ -322,11 +327,6 @@ public class ReportOutputGenerator {
 					splitColumn = splitColumnOption;
 				} else {
 					splitColumn = report.getGroupColumn();
-				}
-
-				String contextPath = null;
-				if (request != null) {
-					contextPath = request.getContextPath();
 				}
 
 				GroupOutput groupOutput;
@@ -461,7 +461,6 @@ public class ReportOutputGenerator {
 				standardOutput.setReport(report);
 
 				if (request != null) {
-					String contextPath = request.getContextPath();
 					standardOutput.setContextPath(contextPath);
 
 					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
@@ -507,7 +506,8 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
-				freemarkerOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+				freemarkerOutput.setContextPath(contextPath);
+				freemarkerOutput.generateOutput(report, writer, rs, applicableReportParamsList, locale);
 
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType == ReportType.Thymeleaf) {
