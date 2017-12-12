@@ -1374,7 +1374,11 @@ public class ReportOutputGenerator {
 						throw new IllegalStateException("Css file not found: " + cssFileName);
 					}
 				}
+				
+				String optionsJson=ArtUtils.objectToJson(options);
+				optionsJson=Encode.forJavaScript(optionsJson);
 
+				request.setAttribute("optionsJson", optionsJson);
 				request.setAttribute("options", options);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
 			} else {

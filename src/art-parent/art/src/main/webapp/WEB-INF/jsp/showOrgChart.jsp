@@ -18,6 +18,13 @@
 <script src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
 <script src="${pageContext.request.contextPath}/js/OrgChart-2.0.10/js/jquery.orgchart.min.js"></script>
 
+<c:if test="${options.exportButton}">
+	<script src="${pageContext.request.contextPath}/js/html2canvas-0.5.0-beta4/html2canvas.min.js"></script>
+	<%-- es6-promise.auto only needed for IE. https://caniuse.com/#search=promise --%>
+	<script src="${pageContext.request.contextPath}/js/es6-promise-4.1.1/es6-promise.auto.min.js"></script>
+	<script src="${pageContext.request.contextPath}/js/jsPDF-1.3.5/jspdf.min.js"></script>
+</c:if>
+
 <c:if test="${reportType == 'OrgChartDatabase'}">
 	<script src="${pageContext.request.contextPath}/js/JSONLoop.js"></script>
 </c:if>
@@ -80,21 +87,28 @@
 		datasource = $($.parseHTML(dataString));
 	}
 
-	var orgChartOptions = {
-		data: datasource,
-		'nodeContent': 'title'
+	var orgChartSettings = {
+		data: datasource
 	};
 
-	if (reportType === 'OrgChartDatabase') {
-		$.extend(orgChartOptions, {
+	var orgChartOptions = JSON.parse('${optionsJson}');
+	$.extend(orgChartSettings, orgChartOptions);
+
+	var nodeContent = orgChartSettings.nodeContent;
+	if (!nodeContent) {
+		delete orgChartSettings.nodeContent;
+	}
+
+	if (reportType === 'OrgChartDatabase' && nodeContent) {
+		$.extend(orgChartSettings, {
 			initCompleted: function () {
-				$('.orgchart div.title').each(function () {
+				$('.orgchart div.' + nodeContent).each(function () {
 					var text = $(this).text();
-					$(this).attr('title', text);
+					$(this).attr(nodeContent, text);
 				});
 			}
 		});
 	}
 
-	$('#chart-container').orgchart(orgChartOptions);
+	$('#chart-container').orgchart(orgChartSettings);
 </script>
