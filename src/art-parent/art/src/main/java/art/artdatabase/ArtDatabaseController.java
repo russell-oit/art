@@ -217,7 +217,7 @@ public class ArtDatabaseController {
 				ps.setString(1, sampleDbUrl);
 				ps.setInt(2, 1);
 				ps.addBatch();
-
+				
 				ps.setString(1, demoDbUrl);
 				ps.setInt(2, 2);
 				ps.addBatch();
@@ -228,6 +228,11 @@ public class ArtDatabaseController {
 				String mondrianUrl = "jdbc:mondrian:Jdbc=" + mondrianJdbcUrl + ";JdbcDrivers=org.hsqldb.jdbcDriver";
 				ps.setString(1, mondrianUrl);
 				ps.setInt(2, 3);
+				ps.addBatch();
+				
+				String orgChartDbUrl = String.format(hsqldbUrl, "OrgChartDB");
+				ps.setString(1, orgChartDbUrl);
+				ps.setInt(2, 4);
 				ps.addBatch();
 
 				ps.executeBatch();

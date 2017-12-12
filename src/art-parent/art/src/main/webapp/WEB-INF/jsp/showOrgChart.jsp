@@ -101,12 +101,13 @@
 		delete orgChartSettings.nodeContent;
 	}
 
-	if (reportType === 'OrgChartDatabase' && nodeContent) {
+	//show tooltips. use title text. may be too long and therefore not shown completely
+	if (reportType === 'OrgChartDatabase') {
 		$.extend(orgChartSettings, {
 			initCompleted: function () {
-				$('.orgchart div.' + nodeContent).each(function () {
+				$('.orgchart div.title').each(function () {
 					var text = $(this).text();
-					$(this).attr(nodeContent, text);
+					$(this).attr('title', text);
 				});
 			}
 		});
