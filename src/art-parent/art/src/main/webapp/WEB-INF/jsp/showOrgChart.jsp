@@ -85,6 +85,8 @@
 		//https://stackoverflow.com/questions/19443345/convert-html-string-into-jquery-object
 		//https://rawgit.com/dabeng/OrgChart/master/demo/ul-datasource.html
 		datasource = $($.parseHTML(dataString));
+	} else if (reportType === 'OrgChartAjax') {
+		datasource = '${data}';
 	}
 
 	var orgChartSettings = {

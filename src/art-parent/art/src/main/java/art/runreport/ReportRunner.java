@@ -901,6 +901,7 @@ public class ReportRunner {
 			case MongoDB:
 			case OrgChartJson:
 			case OrgChartList:
+			case OrgChartAjax:
 				return;
 			default:
 			//do nothing
@@ -943,7 +944,7 @@ public class ReportRunner {
 				}
 			}
 		}
-		
+
 		String querySql = querySb.toString();
 
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);

@@ -1345,6 +1345,7 @@ public class ReportOutputGenerator {
 						break;
 					case OrgChartJson:
 					case OrgChartList:
+					case OrgChartAjax:
 						jsonData = report.getReportSource();
 						break;
 					default:
@@ -1374,9 +1375,9 @@ public class ReportOutputGenerator {
 						throw new IllegalStateException("Css file not found: " + cssFileName);
 					}
 				}
-				
-				String optionsJson=ArtUtils.objectToJson(options);
-				optionsJson=Encode.forJavaScript(optionsJson);
+
+				String optionsJson = ArtUtils.objectToJson(options);
+				optionsJson = Encode.forJavaScript(optionsJson);
 
 				request.setAttribute("optionsJson", optionsJson);
 				request.setAttribute("options", options);

@@ -449,6 +449,7 @@ Edit report page
 					case 149: //saiku report
 					case 155: //org chart json
 					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -471,6 +472,7 @@ Edit report page
 					case 149: //saiku report
 					case 155: //org chart json
 					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -515,7 +517,7 @@ Edit report page
 					default:
 						$("#templateDiv").hide();
 				}
-				
+
 				//show/hide resources
 				switch (reportTypeId) {
 					case 115: //jasper template
@@ -533,6 +535,7 @@ Edit report page
 					case 154: //org chart database
 					case 155: //org chart json
 					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#resourcesDiv").show();
 						break;
 					default:
@@ -578,6 +581,7 @@ Edit report page
 					case 151: //mongodb
 					case 155: //org chart json
 					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -656,6 +660,7 @@ Edit report page
 					case 154: //org chart database
 					case 155: //org chart json
 					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -699,6 +704,7 @@ Edit report page
 					case 151: //mongodb
 					case 155: //org chart json
 					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#fetchSizeDiv").hide();
 						break;
 					default:

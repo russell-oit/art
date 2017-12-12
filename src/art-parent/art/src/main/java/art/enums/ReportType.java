@@ -51,7 +51,7 @@ public enum ReportType {
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
 	C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
 	Leaflet(146), OpenLayers(147),
-	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156);
+	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157);
 
 	private final int value;
 
@@ -94,6 +94,7 @@ public enum ReportType {
 			case OrgChartDatabase:
 			case OrgChartJson:
 			case OrgChartList:
+			case OrgChartAjax:
 				return false;
 			default:
 				return true;
@@ -205,6 +206,7 @@ public enum ReportType {
 			case OrgChartDatabase:
 			case OrgChartJson:
 			case OrgChartList:
+			case OrgChartAjax:
 				return true;
 			default:
 				return false;
@@ -693,6 +695,8 @@ public enum ReportType {
 				return "OrgChart: JSON";
 			case OrgChartList:
 				return "OrgChart: List";
+			case OrgChartAjax:
+				return "OrgChart: Ajax";
 			default:
 				return this.name();
 		}

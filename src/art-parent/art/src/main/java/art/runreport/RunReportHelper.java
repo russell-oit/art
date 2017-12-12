@@ -225,6 +225,7 @@ public class RunReportHelper {
 			case OrgChartDatabase:
 			case OrgChartJson:
 			case OrgChartList:
+			case OrgChartAjax:
 				enableReportFormats = false;
 				break;
 			default:
@@ -270,6 +271,7 @@ public class RunReportHelper {
 			case MongoDB:
 			case OrgChartJson:
 			case OrgChartList:
+			case OrgChartAjax:
 				enableShowSql = false;
 				enableShowSelectedParameters = false;
 				break;
@@ -334,6 +336,7 @@ public class RunReportHelper {
 			case OrgChartDatabase:
 			case OrgChartJson:
 			case OrgChartList:
+			case OrgChartAjax:
 				enablePrint = false;
 				break;
 			default:
@@ -400,6 +403,7 @@ public class RunReportHelper {
 			case OrgChartDatabase:
 			case OrgChartJson:
 			case OrgChartList:
+			case OrgChartAjax:
 				enableEmail = false;
 				break;
 			default:
