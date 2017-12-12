@@ -27,18 +27,25 @@
 </c:if>
 
 <script>
-	var orgChartOptions = {
-		'nodeContent': 'title'
-	};
-
+	var datasource;
 	var dataString = '${data}';
-	var datasource = {};
 	var reportType = '${reportType}';
 
 	if (reportType === 'OrgChartDatabase') {
-		dataString = '[' + dataString + ']';
+		//http://www.orgchartcomponent.com/walkthrough/Article1/
+		//https://stackoverflow.com/questions/15862976/what-is-the-best-way-to-model-an-organization-using-people-positions-and-teams
+		//http://mikehillyer.com/articles/managing-hierarchical-data-in-mysql/
+		//http://www.orgchartcomponent.com/walkthrough/VeryLargeOrgCharts/
+		//https://github.com/dabeng/OrgChart/issues/154
+		//https://codepen.io/dabeng/pen/mRZpLK
+		//https://github.com/dabeng/JSON-Loop
+		//https://support.office.com/en-ie/article/Create-an-organization-chart-automatically-from-employee-data-8f2e693e-25fc-410e-8264-9084eb0b9360
+		//https://www.smartdraw.com/organizational-chart/organizational-chart-tips.htm
+		//https://sharepointorgchart.com/how-to/creating-org-chart-sql-database
+
 		var dataset = JSON.parse(dataString);
 
+		datasource = {};
 		dataset.forEach(function (item, index) {
 			if (!item.parent_id) {
 				delete item.parent_id;
@@ -61,28 +68,22 @@
 				});
 			}
 		});
-
-		$.extend(orgChartOptions, {
-			data: datasource
-		});
 	} else if (reportType === 'OrgChartJson') {
 		//https://www.w3schools.com/js/js_json_parse.asp
 		//https://api.jquery.com/jquery.parsejson/
 		//https://stackoverflow.com/questions/23311182/convert-json-string-to-object-jquery
 		datasource = JSON.parse(dataString);
-		$.extend(orgChartOptions, {
-			data: datasource
-		});
 	} else if (reportType === 'OrgChartList') {
 		//https://stackoverflow.com/questions/11047670/creating-a-jquery-object-from-a-big-html-string
 		//https://stackoverflow.com/questions/19443345/convert-html-string-into-jquery-object
-		var ul = $($.parseHTML(dataString));
-
 		//https://rawgit.com/dabeng/OrgChart/master/demo/ul-datasource.html
-		$.extend(orgChartOptions, {
-			data: ul
-		});
+		datasource = $($.parseHTML(dataString));
 	}
+
+	var orgChartOptions = {
+		data: datasource,
+		'nodeContent': 'title'
+	};
 
 	if (reportType === 'OrgChartDatabase') {
 		$.extend(orgChartOptions, {
