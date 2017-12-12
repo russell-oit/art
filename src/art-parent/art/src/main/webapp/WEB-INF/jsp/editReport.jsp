@@ -515,6 +515,29 @@ Edit report page
 					default:
 						$("#templateDiv").hide();
 				}
+				
+				//show/hide resources
+				switch (reportTypeId) {
+					case 115: //jasper template
+					case 116: //jasper art
+					case 134: //pivottable.js csv server
+					case 137: //dygraphs csv server
+					case 140: //datatables csv server
+					case 142: //c3
+					case 144: //datamaps
+					case 145: //datamaps file
+					case 146: //leaflet
+					case 147: //openlayers
+					case 117: //jxls template
+					case 118: //jxls art
+					case 154: //org chart database
+					case 155: //org chart json
+					case 156: //org chart list
+						$("#resourcesDiv").show();
+						break;
+					default:
+						$("#resourcesDiv").hide();
+				}
 
 				//show/hide xmla fields
 				switch (reportTypeId) {
@@ -650,29 +673,6 @@ Edit report page
 						break;
 					default:
 						$("#tabularFields").hide();
-				}
-
-				//show/hide resources
-				switch (reportTypeId) {
-					case 115: //jasper template
-					case 116: //jasper art
-					case 134: //pivottable.js csv server
-					case 137: //dygraphs csv server
-					case 140: //datatables csv server
-					case 142: //c3
-					case 144: //datamaps
-					case 145: //datamaps file
-					case 146: //leaflet
-					case 147: //openlayers
-					case 117: //jxls template
-					case 118: //jxls art
-					case 154: //org chart database
-					case 155: //org chart json
-					case 156: //org chart list
-						$("#resourcesDiv").show();
-						break;
-					default:
-						$("#resourcesDiv").hide();
 				}
 
 				//show/hide fetch size
