@@ -1422,44 +1422,46 @@ Edit report page
 							<span class="fileinput-filename"></span>
 							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
 						</div>
-						<div id="resourcesDiv">
+					</div>
+				</div>
+				<div id="resourcesDiv" class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="reports.text.resources"/>
+					</label>
+					<div class="col-md-8">
+						<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+						<div class="fileupload-buttonbar">
 							<div>
-								<b><spring:message code="reports.text.resources"/></b>
+								<!-- The fileinput-button span is used to style the file input field as button -->
+								<span class="btn btn-success fileinput-button">
+									<i class="glyphicon glyphicon-plus"></i>
+									<span><spring:message code="fileupload.button.addFiles"/></span>
+									<input id="fileuploadInput" type="file" name="files[]" multiple>
+								</span>
+								<%-- https://stackoverflow.com/questions/925334/how-is-the-default-submit-button-on-an-html-form-determined --%>
+								<button type="button" class="btn btn-primary start">
+									<i class="glyphicon glyphicon-upload"></i>
+									<span><spring:message code="fileupload.button.startUpload"/></span>
+								</button>
+								<button type="reset" class="btn btn-warning cancel">
+									<i class="glyphicon glyphicon-ban-circle"></i>
+									<span><spring:message code="fileupload.button.cancelUpload"/></span>
+								</button>
+								<!-- The global file processing state -->
+								<span class="fileupload-process"></span>
 							</div>
-							<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-							<div class="fileupload-buttonbar">
-								<div>
-									<!-- The fileinput-button span is used to style the file input field as button -->
-									<span class="btn btn-success fileinput-button">
-										<i class="glyphicon glyphicon-plus"></i>
-										<span><spring:message code="fileupload.button.addFiles"/></span>
-										<input id="fileuploadInput" type="file" name="files[]" multiple>
-									</span>
-									<%-- https://stackoverflow.com/questions/925334/how-is-the-default-submit-button-on-an-html-form-determined --%>
-									<button type="button" class="btn btn-primary start">
-										<i class="glyphicon glyphicon-upload"></i>
-										<span><spring:message code="fileupload.button.startUpload"/></span>
-									</button>
-									<button type="reset" class="btn btn-warning cancel">
-										<i class="glyphicon glyphicon-ban-circle"></i>
-										<span><spring:message code="fileupload.button.cancelUpload"/></span>
-									</button>
-									<!-- The global file processing state -->
-									<span class="fileupload-process"></span>
+							<!-- The global progress state -->
+							<div class="fileupload-progress fade">
+								<!-- The global progress bar -->
+								<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+									<div class="progress-bar progress-bar-success" style="width:0%;"></div>
 								</div>
-								<!-- The global progress state -->
-								<div class="fileupload-progress fade">
-									<!-- The global progress bar -->
-									<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-										<div class="progress-bar progress-bar-success" style="width:0%;"></div>
-									</div>
-									<!-- The extended global progress state -->
-									<div class="progress-extended">&nbsp;</div>
-								</div>
+								<!-- The extended global progress state -->
+								<div class="progress-extended">&nbsp;</div>
 							</div>
-							<!-- The table listing the files available for upload/download -->
-							<table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
 						</div>
+						<!-- The table listing the files available for upload/download -->
+						<table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
 					</div>
 				</div>
 
