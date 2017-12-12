@@ -512,6 +512,10 @@ Edit report page
 					case 146: //leaflet
 					case 147: //openlayers
 					case 150: //saiku connection
+					case 154: //org chart database
+					case 155: //org chart json
+					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#templateDiv").show();
 						break;
 					default:

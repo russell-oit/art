@@ -647,6 +647,7 @@ public class ReportController {
 			case OrgChartDatabase:
 			case OrgChartJson:
 			case OrgChartList:
+			case OrgChartAjax:
 				templatesPath = Config.getJsTemplatesPath();
 				break;
 			case JPivotMondrian:

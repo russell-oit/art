@@ -1376,11 +1376,24 @@ public class ReportOutputGenerator {
 					}
 				}
 
+				String templateFileName = report.getTemplate();
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				if (StringUtils.isNotBlank(templateFileName)) {
+					String fullTemplateFileName = jsTemplatesPath + templateFileName;
+					File templateFile = new File(fullTemplateFileName);
+					if (!templateFile.exists()) {
+						throw new IllegalStateException("Template file not found: " + templateFileName);
+					}
+				}
+
 				String optionsJson = ArtUtils.objectToJson(options);
 				optionsJson = Encode.forJavaScript(optionsJson);
 
 				request.setAttribute("optionsJson", optionsJson);
 				request.setAttribute("options", options);
+				request.setAttribute("templateFileName", templateFileName);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);

@@ -105,9 +105,18 @@
 
 	var nodeContent = orgChartSettings.nodeContent;
 	if (!nodeContent) {
+		//https://stackoverflow.com/questions/5601681/removing-one-property-of-an-object
+		//https://stackoverflow.com/questions/208105/how-do-i-remove-a-property-from-a-javascript-object
+		//https://stackoverflow.com/questions/6485127/how-to-delete-unset-the-properties-of-a-javascript-object
 		delete orgChartSettings.nodeContent;
 	}
+</script>
 
+<c:if test="${not empty templateFileName}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+</c:if>
+
+<script>
 	$('#chart-container').orgchart(orgChartSettings);
 </script>
 
