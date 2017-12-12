@@ -331,6 +331,9 @@ public class RunReportHelper {
 			case ChartJs:
 			case C3:
 			case TabularHeatmap:
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
 				enablePrint = false;
 				break;
 			default:
