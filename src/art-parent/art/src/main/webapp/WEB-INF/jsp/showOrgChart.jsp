@@ -90,7 +90,14 @@
 	}
 
 	var orgChartSettings = {
-		data: datasource
+		data: datasource,
+		initCompleted: function () {
+			//show tooltips for title text. may be too long and therefore not shown completely
+			$('.orgchart div.title').each(function () {
+				var text = $(this).text();
+				$(this).attr('title', text);
+			});
+		}
 	};
 
 	var orgChartOptions = JSON.parse('${optionsJson}');
@@ -101,17 +108,17 @@
 		delete orgChartSettings.nodeContent;
 	}
 
-	//show tooltips. use title text. may be too long and therefore not shown completely
-	if (reportType === 'OrgChartDatabase') {
-		$.extend(orgChartSettings, {
-			initCompleted: function () {
-				$('.orgchart div.title').each(function () {
-					var text = $(this).text();
-					$(this).attr('title', text);
-				});
-			}
-		});
-	}
-
 	$('#chart-container').orgchart(orgChartSettings);
+</script>
+
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
+
+<script type="text/javascript">
+	$(document).ready(function () {
+		$('.orgchart div.title').tooltipster({
+			delay: 0,
+			animationDuration: 0
+		});
+	});
 </script>
