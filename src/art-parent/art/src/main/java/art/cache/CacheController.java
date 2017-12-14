@@ -47,7 +47,7 @@ public class CacheController {
 		logger.debug("Entering showCaches");
 
 		model.addAttribute("caches", CacheType.list());
-		
+
 		return "caches";
 	}
 
@@ -55,13 +55,13 @@ public class CacheController {
 	public @ResponseBody
 	AjaxResponse clearAllCaches() {
 		logger.debug("Entering clearAllCaches");
-		
+
 		AjaxResponse response = new AjaxResponse();
-		
+
 		cacheHelper.clearAll();
-		
+
 		response.setSuccess(true);
-		
+
 		return response;
 	}
 
@@ -121,6 +121,9 @@ public class CacheController {
 				case Destinations:
 					cacheHelper.clearDestinations();
 					break;
+				case SmtpServers:
+					cacheHelper.clearSmtpServers();
+					break;
 				default:
 					message = "Clear cache not available: " + id;
 			}
@@ -135,5 +138,5 @@ public class CacheController {
 
 		return response;
 	}
-	
+
 }

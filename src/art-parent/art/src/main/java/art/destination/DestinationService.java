@@ -367,7 +367,7 @@ public class DestinationService {
 	 * @param actionUser the user who is performing the edit
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "destinations", allEntries = true)
+	@CacheEvict(value = {"destinations", "jobs"}, allEntries = true)
 	public void updateDestinations(MultipleDestinationEdit multipleDestinationEdit, User actionUser)
 			throws SQLException {
 

@@ -40,6 +40,7 @@ import art.runreport.ReportOutputGenerator;
 import art.runreport.RunReportHelper;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
+import art.smtpserver.SmtpServerService;
 import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
@@ -127,6 +128,9 @@ public class JobController {
 
 	@Autowired
 	private JobDestinationService jobDestinationService;
+	
+	@Autowired
+	private SmtpServerService smtpServerService;
 
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -705,6 +709,7 @@ public class JobController {
 			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
 			model.addAttribute("holidays", holidayService.getAllHolidays());
 			model.addAttribute("destinations", destinationService.getAllDestinations());
+			model.addAttribute("smtpServers", smtpServerService.getAllSmtpServers());
 
 			if (job != null && !StringUtils.equals(action, "add")) {
 				String cronString = CronStringHelper.getCronString(job);

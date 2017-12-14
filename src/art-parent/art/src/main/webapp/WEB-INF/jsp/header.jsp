@@ -192,6 +192,13 @@ Header that appears at the top of all pages, except the login and logs pages
 								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 80}">
 									<li>
+										<a href="${pageContext.request.contextPath}/smtpServers">
+											<spring:message code="page.title.smtpServers"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 80}">
+									<li>
 										<a href="${pageContext.request.contextPath}/encryptors">
 											<spring:message code="page.title.encryptors"/>
 										</a>

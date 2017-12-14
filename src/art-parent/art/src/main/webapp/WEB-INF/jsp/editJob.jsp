@@ -830,6 +830,27 @@
 							</div>
 						</div>
 					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="smtpServer.smtpServerId">
+							<spring:message code="settings.label.smtpServer"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="smtpServer.smtpServerId" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<c:forEach var="smtpServer" items="${smtpServers}">
+									<c:set var="smtpServerStatus">
+										<t:displayActiveStatus active="${smtpServer.active}" hideActive="true"/>
+									</c:set>
+									<form:option value="${smtpServer.smtpServerId}"
+												 data-content="${smtpServer.name} ${smtpServerStatus}">
+										${smtpServer.name} 
+									</form:option>
+								</c:forEach>
+							</form:select>
+							<form:errors path="smtpServer.smtpServerId" cssClass="error"/>
+						</div>
+					</div>
 					<div id="mailMessageDiv">
 						<label class="col-md-12 control-label" style="text-align: center">
 							<spring:message code="jobs.label.mailMessage"/>

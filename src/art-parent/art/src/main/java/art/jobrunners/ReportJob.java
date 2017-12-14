@@ -47,6 +47,7 @@ import art.runreport.ReportOptions;
 import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
+import art.smtpserver.SmtpServer;
 import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
@@ -1250,20 +1251,34 @@ public class ReportJob implements org.quartz.Job {
 	private boolean sendEmail(Mailer mailer) throws MessagingException, IOException {
 		logger.debug("Entering sendEmail");
 
-		boolean emailSent = false;
+		SmtpServer jobSmtpServer = job.getSmtpServer();
 
+		boolean sendEmail = true;
 		if (!Config.getCustomSettings().isEnableEmail()) {
+			sendEmail = false;
 			logger.info("Email disabled. Job Id {}", jobId);
 			runMessage = "jobs.message.emailDisabled";
+		} else if (jobSmtpServer != null) {
+			if (!jobSmtpServer.isActive()) {
+				sendEmail = false;
+				logger.info("Job smtp server disabled. Job Id {}", jobId);
+				runMessage = "jobs.message.jobSmtpServerDisabled";
+			} else if (StringUtils.isBlank(jobSmtpServer.getServer())) {
+				sendEmail = false;
+				logger.info("Job email server not configured. Job Id {}", jobId);
+				runMessage = "jobs.message.emailServerNotConfigured";
+			}
 		} else if (!Config.isEmailServerConfigured()) {
+			sendEmail = false;
 			logger.info("Email server not configured. Job Id {}", jobId);
 			runMessage = "jobs.message.emailServerNotConfigured";
-		} else {
-			mailer.send();
-			emailSent = true;
 		}
 
-		return emailSent;
+		if (sendEmail) {
+			mailer.send();
+		}
+
+		return sendEmail;
 	}
 
 	/**
@@ -1537,11 +1552,24 @@ public class ReportJob implements org.quartz.Job {
 		String settingsFrom = Config.getSettings().getSmtpFrom();
 		logger.debug("settingsFrom='{}'", settingsFrom);
 
-		if (StringUtils.isBlank(settingsFrom)) {
-			logger.debug("job.getMailFrom()='{}'", job.getMailFrom());
-			from = job.getMailFrom();
-		} else {
+		String jobSmtpServerFrom = null;
+		SmtpServer jobSmtpServer = job.getSmtpServer();
+		logger.debug("jobSmtpServer={}", jobSmtpServer);
+
+		String jobMailFrom = job.getMailFrom();
+		logger.debug("jobMailFrom='{}'", jobMailFrom);
+
+		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
+			jobSmtpServerFrom = jobSmtpServer.getFrom();
+			logger.debug("jobSmtpServerFrom='{}'", jobSmtpServerFrom);
+		}
+
+		if (StringUtils.isNotBlank(jobSmtpServerFrom)) {
+			from = jobSmtpServerFrom;
+		} else if (StringUtils.isNotBlank(settingsFrom)) {
 			from = settingsFrom;
+		} else {
+			from = jobMailFrom;
 		}
 
 		return from;
@@ -2750,8 +2778,28 @@ public class ReportJob implements org.quartz.Job {
 	private Mailer getMailer() {
 		logger.debug("Entering getMailer");
 
-		ArtHelper artHelper = new ArtHelper();
-		Mailer mailer = artHelper.getMailer();
+		Mailer mailer;
+
+		SmtpServer jobSmtpServer = job.getSmtpServer();
+		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
+			String smtpServer = jobSmtpServer.getServer();
+			String smtpUsername = jobSmtpServer.getUser();
+			String smtpPassword = jobSmtpServer.getPassword();
+
+			mailer = new Mailer();
+			mailer.setHost(smtpServer);
+			if (StringUtils.length(smtpUsername) > 3 && smtpPassword != null) {
+				mailer.setUsername(smtpUsername);
+				mailer.setPassword(smtpPassword);
+			}
+
+			mailer.setPort(jobSmtpServer.getPort());
+			mailer.setUseAuthentication(jobSmtpServer.isUseSmtpAuthentication());
+			mailer.setUseStartTls(jobSmtpServer.isUseStartTls());
+		} else {
+			ArtHelper artHelper = new ArtHelper();
+			mailer = artHelper.getMailer();
+		}
 
 		return mailer;
 	}

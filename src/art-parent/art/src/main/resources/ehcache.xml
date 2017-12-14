@@ -50,4 +50,7 @@
 	<cache name="destinations"
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
+	<cache name="smtpServers"
+		   eternal="true" maxEntriesLocalHeap="10" />
+	
 </ehcache>
