@@ -23,6 +23,7 @@ import art.enums.ReportType;
 import art.mail.Mailer;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import art.smtpserver.SmtpServer;
 import art.user.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -166,7 +167,7 @@ public class ArtHelper {
 
 	/**
 	 * Returns the default show legend option depending on the report type
-	 * 
+	 *
 	 * @param reportType the report type
 	 * @return the default show legend option
 	 */
@@ -180,7 +181,7 @@ public class ArtHelper {
 
 	/**
 	 * Returns the default show labels option depending on the report type
-	 * 
+	 *
 	 * @param reportType the report type
 	 * @return the default show labels option
 	 */
@@ -191,29 +192,46 @@ public class ArtHelper {
 			return false;
 		}
 	}
-	
+
 	/**
-	 * Returns a mailer object that can be used to send emails
+	 * Returns a mailer object that can be used to send emails, using
+	 * configuration defined in application settings
 	 *
 	 * @return a mailer object that can be used to send emails
 	 */
 	public Mailer getMailer() {
 		logger.debug("Entering getMailer");
 
-		String smtpServer = Config.getSettings().getSmtpServer();
-		String smtpUsername = Config.getSettings().getSmtpUsername();
-		String smtpPassword = Config.getSettings().getSmtpPassword();
+		Mailer mailer = new Mailer();
+
+		mailer.setHost(Config.getSettings().getSmtpServer());
+		mailer.setPort(Config.getSettings().getSmtpPort());
+		mailer.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
+		mailer.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
+		mailer.setUsername(Config.getSettings().getSmtpUsername());
+		mailer.setPassword(Config.getSettings().getSmtpPassword());
+
+		return mailer;
+	}
+
+	/**
+	 * Returns a mailer object that can be used to send emails, using
+	 * configuration defined in an smtp server object
+	 *
+	 * @param smtpServer the smtp server object
+	 * @return a mailer object that can be used to send emails
+	 */
+	public Mailer getMailer(SmtpServer smtpServer) {
+		logger.debug("Entering getMailer: smtpServer={}", smtpServer);
 
 		Mailer mailer = new Mailer();
-		mailer.setHost(smtpServer);
-		if (StringUtils.length(smtpUsername) > 3 && smtpPassword != null) {
-			mailer.setUsername(smtpUsername);
-			mailer.setPassword(smtpPassword);
-		}
 
-		mailer.setPort(Config.getSettings().getSmtpPort());
-		mailer.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
-		mailer.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
+		mailer.setHost(smtpServer.getServer());
+		mailer.setPort(smtpServer.getPort());
+		mailer.setUseStartTls(smtpServer.isUseStartTls());
+		mailer.setUseAuthentication(smtpServer.isUseSmtpAuthentication());
+		mailer.setUsername(smtpServer.getUser());
+		mailer.setPassword(smtpServer.getPassword());
 
 		return mailer;
 	}

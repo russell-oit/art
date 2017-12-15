@@ -19,24 +19,18 @@ package art.smtpserver;
 
 import art.encryption.AesEncryptor;
 import art.job.JobService;
+import art.mail.Mailer;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
+import art.utils.ArtHelper;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.PrintCommandListener;
-import org.apache.commons.net.smtp.AuthenticatingSMTPClient;
-import org.apache.commons.net.smtp.AuthenticatingSMTPClient.AUTH_METHOD;
-import org.apache.commons.net.smtp.SMTPClient;
-import org.apache.commons.net.smtp.SMTPCommand;
-import org.apache.commons.net.smtp.SMTPReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -386,119 +380,28 @@ public class SmtpServerController {
 				}
 			}
 
-			testConnection(server, port, useStartTls, useSmtpAuthentication, user, password);
-			//if we are here, connection successful
+			SmtpServer smtpServer = new SmtpServer();
+			smtpServer.setServer(server);
+			smtpServer.setPort(port);
+			smtpServer.setUseStartTls(useStartTls);
+			smtpServer.setUseSmtpAuthentication(useSmtpAuthentication);
+			smtpServer.setUser(user);
+			smtpServer.setPassword(password);
+
+			ArtHelper artHelper = new ArtHelper();
+			Mailer mailer = artHelper.getMailer(smtpServer);
+
+			mailer.setDebug(logger.isDebugEnabled());
+
+			mailer.testConnection();
+			//if we are here, connection was successful
 			response.setSuccess(true);
-		} catch (Exception ex) {
+		} catch (SQLException | MessagingException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
 
 		return response;
-	}
-
-	/**
-	 * Tests a connection to an smtp server
-	 *
-	 * @param server the ip address or hostname of the server
-	 * @param port the smtp port
-	 * @param useStartTls whether to use STARTTLS
-	 * @param useSmtpAuthentication whether to use authentication
-	 * @param user the smtp user
-	 * @param password the smtp user's password
-	 * @throws Exception
-	 */
-	private void testConnection(String server, int port, Boolean useStartTls,
-			Boolean useSmtpAuthentication, String user, String password) throws Exception {
-
-		//https://blog.dahanne.net/2013/06/17/sending-a-mail-in-java-and-android-with-apache-commons-net/
-		//https://stackoverflow.com/questions/14863730/login-to-smtp-server-with-apache-commons-net
-		//https://github.com/caarmen/network-monitor/blob/master/networkmonitor/src/main/java/ca/rmen/android/networkmonitor/app/email/Emailer.java
-		//https://stackoverflow.com/questions/3060837/validate-smtp-server-credentials-using-java-without-actually-sending-mail
-		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/AuthenticatingSMTPClient.html
-		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/SMTPClient.html
-		//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/SMTPSClient.html#DEFAULT_PROTOCOL
-		AuthenticatingSMTPClient client = new AuthenticatingSMTPClient("TLS",false);
-
-		try {
-			if (logger.isDebugEnabled()) {
-				boolean suppressLogin = true;
-				client.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out), suppressLogin));
-			}
-
-			final int DEFAULT_TIMEOUT_SECONDS = 5;
-			client.setDefaultTimeout((int) TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS));
-
-			client.connect(server, port);
-			checkReply(client);
-			
-			client.ehlo("localhost");
-			
-			if (useStartTls) {
-				boolean tlsSuccess = client.execTLS();
-				if (!tlsSuccess) {
-					checkReply(client);
-					throw new Exception("TLS negotiation failed");
-				}
-			}
-
-			if (useSmtpAuthentication) {
-				//http://grepcode.com/file/repo1.maven.org/maven2/commons-net/commons-net/3.0/org/apache/commons/net/smtp/AuthenticatingSMTPClient.java
-				//https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/smtp/AuthenticatingSMTPClient.AUTH_METHOD.html
-				//http://www.samlogic.net/articles/smtp-commands-reference-auth.htm
-				boolean authSuccessful;
-
-				//null user or password will cause null pointer exception with LOGIN authentication method
-				if (user == null) {
-					user = "";
-				}
-
-				if (password == null) {
-					password = "";
-				}
-
-				authSuccessful = client.auth(AUTH_METHOD.LOGIN, user, password);
-				logReply(client);
-
-				if (!authSuccessful) {
-					authSuccessful = client.auth(AUTH_METHOD.PLAIN, user, password);
-					logReply(client);
-				}
-
-				if (!authSuccessful) {
-					authSuccessful = client.auth(AUTH_METHOD.CRAM_MD5, user, password);
-					logReply(client);
-				}
-
-				if (!authSuccessful) {
-					throw new Exception("Authentication failed with AUTH LOGIN, PLAIN and CRAM-MD5");
-				}
-			}
-		} finally {
-			if (client.isConnected()) {
-				try {
-					client.disconnect();
-				} catch (IOException ex) {
-					logger.error("Error", ex);
-				}
-			}
-		}
-	}
-
-	private void checkReply(SMTPClient sc) throws Exception {
-		if (SMTPReply.isNegativeTransient(sc.getReplyCode())) {
-			throw new Exception("Transient SMTP error " + sc.getReplyString());
-		} else if (SMTPReply.isNegativePermanent(sc.getReplyCode())) {
-			throw new Exception("Permanent SMTP error " + sc.getReplyString());
-		}
-	}
-
-	private void logReply(SMTPClient sc) {
-		if (SMTPReply.isNegativeTransient(sc.getReplyCode())) {
-			logger.info("Transient SMTP error {}", sc.getReplyString());
-		} else if (SMTPReply.isNegativePermanent(sc.getReplyCode())) {
-			logger.info("Permanent SMTP error {}", sc.getReplyString());
-		}
 	}
 
 }

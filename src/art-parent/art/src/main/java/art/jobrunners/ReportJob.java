@@ -2779,27 +2779,17 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering getMailer");
 
 		Mailer mailer;
+		
+		ArtHelper artHelper = new ArtHelper();
 
 		SmtpServer jobSmtpServer = job.getSmtpServer();
 		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
-			String smtpServer = jobSmtpServer.getServer();
-			String smtpUsername = jobSmtpServer.getUser();
-			String smtpPassword = jobSmtpServer.getPassword();
-
-			mailer = new Mailer();
-			mailer.setHost(smtpServer);
-			if (StringUtils.length(smtpUsername) > 3 && smtpPassword != null) {
-				mailer.setUsername(smtpUsername);
-				mailer.setPassword(smtpPassword);
-			}
-
-			mailer.setPort(jobSmtpServer.getPort());
-			mailer.setUseAuthentication(jobSmtpServer.isUseSmtpAuthentication());
-			mailer.setUseStartTls(jobSmtpServer.isUseStartTls());
+			mailer = artHelper.getMailer(jobSmtpServer);
 		} else {
-			ArtHelper artHelper = new ArtHelper();
 			mailer = artHelper.getMailer();
 		}
+		
+		mailer.setDebug(logger.isDebugEnabled());
 
 		return mailer;
 	}
