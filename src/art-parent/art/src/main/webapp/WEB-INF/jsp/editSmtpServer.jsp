@@ -32,6 +32,8 @@
 
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -42,6 +44,8 @@
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -50,11 +54,50 @@
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				
+
+				$('#testConnection').on('click', function () {
+					var action = '${action}';
+					var id = 0;
+					if (action === 'edit' || action === 'copy') {
+						id = $("#smtpServerId").val();
+					}
+					var server = $("#server").val();
+					var port = $("#port").val();
+					var useStartTls = $("#useStartTls").is(":checked");
+					var useSmtpAuthentication = $("#useSmtpAuthentication").is(":checked");
+					var user = $("#user").val();
+					var password = $("#password").val();
+					var useBlankPassword = $("#useBlankPassword").is(":checked");
+
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "${pageContext.request.contextPath}/testSmtpServer",
+						data: {id: id, server: server, port: port,
+							useStartTls: useStartTls, useSmtpAuthentication: useSmtpAuthentication,
+							user: user, password: password,
+							useBlankPassword: useBlankPassword, action: action},
+						success: function (response) {
+							if (response.success) {
+								var msg = alertCloseButton + "${connectionSuccessfulText}";
+								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
+								$.notify("${connectionSuccessfulText}", "success");
+							} else {
+								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+								$.notify("${errorOccurredText}", "error");
+							}
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert(xhr.responseText);
+						}
+					});
+				});
+
 				$('#useSmtpAuthentication').on('switchChange.bootstrapSwitch', function (event, state) {
 					toggleCredentialsFieldsEnabled();
 				});
-				
+
 				// enable/disable on page load
 				toggleCredentialsFieldsEnabled();
 
@@ -65,9 +108,9 @@
 				});
 
 				$('#name').focus();
-				
+
 			});
-			
+
 			function toggleCredentialsFieldsEnabled() {
 				if ($('#useSmtpAuthentication').is(':checked')) {
 					$('#credentialsFields').prop('disabled', false);
@@ -111,6 +154,9 @@
 						<spring:message code="${message}"/>
 					</div>
 				</c:if>
+				
+				<div id="ajaxResponse">
+				</div>
 
 				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
@@ -194,7 +240,7 @@
 						</div>
 					</div>
 				</div>
-				
+
 				<fieldset id="credentialsFields">
 					<div class="form-group">
 						<label class="control-label col-md-4" for="user">
@@ -230,9 +276,9 @@
 						</div>
 					</div>
 				</fieldset>
-				
+
 				<div class="form-group">
-					 <label class="control-label col-md-4" for="from">
+					<label class="control-label col-md-4" for="from">
 						<spring:message code="smtpServers.label.from"/>
 					</label>
 					<div class="col-md-8">
@@ -242,9 +288,14 @@
 				</div>
 				<div class="form-group">
 					<div class="col-md-12">
-						<button type="submit" class="btn btn-primary pull-right">
-							<spring:message code="page.button.save"/>
-						</button>
+						<span class="pull-right">
+							<button type="button" id="testConnection" class="btn btn-default">
+								<spring:message code="datasources.button.test"/>
+							</button>
+							<button type="submit" class="btn btn-primary">
+								<spring:message code="page.button.save"/>
+							</button>
+						</span>
 					</div>
 				</div>
 			</fieldset>

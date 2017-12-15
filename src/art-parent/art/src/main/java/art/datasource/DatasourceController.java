@@ -344,9 +344,9 @@ public class DatasourceController {
 			@RequestParam("action") String action,
 			Locale locale) {
 
-		logger.debug("Entering testDatasource: jndi={}, driver='{}', url='{}', username='{}',"
-				+ " useBlankPassword={}, action='{}'", jndi, driver, url, username,
-				useBlankPassword, action);
+		logger.debug("Entering testDatasource: id={}, jndi={}, driver='{}',"
+				+ " url='{}', username='{}', useBlankPassword={}, action='{}'",
+				id, jndi, driver, url, username, useBlankPassword, action);
 
 		AjaxResponse response = new AjaxResponse();
 
