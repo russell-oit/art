@@ -567,14 +567,6 @@ public class JobController {
 			ParameterProcessorResult paramProcessorResult = paramProcessor.process(finalValues, reportId, sessionUser, locale);
 
 			addParameters(model, paramProcessorResult, report, request);
-
-			//update job from email if owner email has changed
-			User jobUser = job.getUser();
-			if (jobUser != null && (sessionUser.getUserId() == jobUser.getUserId())) {
-				if (!StringUtils.equals(sessionUser.getEmail(), job.getMailFrom())) {
-					job.setMailFrom(sessionUser.getEmail());
-				}
-			}
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
