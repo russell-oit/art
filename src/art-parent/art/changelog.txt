@@ -2,6 +2,7 @@ ART 3.2
 * Added Velocity report type
 * Added OrgChart report types
 * Allow individual jobs to use a different smtp server
+* Fix for jpivot reports not working
 
 ART 3.1
 * Allow dynamic lov to use a dynamic datasource when the lov is a chained parameter
