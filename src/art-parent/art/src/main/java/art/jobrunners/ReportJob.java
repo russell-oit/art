@@ -31,6 +31,7 @@ import art.enums.DestinationType;
 import art.enums.JobType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.job.JobOptions;
 import art.job.JobService;
 import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
@@ -102,6 +103,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -168,6 +170,7 @@ public class ReportJob implements org.quartz.Job {
 	private ch.qos.logback.classic.Logger progressLogger;
 	private long runStartTimeMillis;
 	private FileAppender<ILoggingEvent> progressFileAppender;
+	private JobOptions jobOptions;
 
 	@Autowired
 	private TemplateEngine emailTemplateEngine;
@@ -241,6 +244,13 @@ public class ReportJob implements org.quartz.Job {
 			logger.debug("systemLocale='{}'", systemLocale);
 
 			locale = ArtUtils.getLocaleFromString(systemLocale);
+
+			String options = job.getOptions();
+			if (StringUtils.isBlank(options)) {
+				jobOptions = new JobOptions();
+			} else {
+				jobOptions = ArtUtils.jsonToObject(options, JobOptions.class);
+			}
 
 			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
 			boolean tempJob = dataMap.getBooleanValue("tempJob");
@@ -1261,12 +1271,12 @@ public class ReportJob implements org.quartz.Job {
 		} else if (jobSmtpServer != null) {
 			if (!jobSmtpServer.isActive()) {
 				sendEmail = false;
-				logger.info("Job smtp server disabled. Job Id {}", jobId);
+				logger.info("Job smtp server disabled. jobSmtpServer={}. Job Id {}", jobSmtpServer, jobId);
 				runMessage = "jobs.message.jobSmtpServerDisabled";
 			} else if (StringUtils.isBlank(jobSmtpServer.getServer())) {
 				sendEmail = false;
-				logger.info("Job email server not configured. Job Id {}", jobId);
-				runMessage = "jobs.message.emailServerNotConfigured";
+				logger.info("Job smtp server not configured. jobSmtpServer={}. Job Id {}", jobSmtpServer, jobId);
+				runMessage = "jobs.message.jobSmtpServerNotConfigured";
 			}
 		} else if (!Config.isEmailServerConfigured()) {
 			sendEmail = false;
@@ -1700,10 +1710,14 @@ public class ReportJob implements org.quartz.Job {
 					columnList.add(columnName);
 				}
 
+				int recordCount = 0;
+
 				if (ArtUtils.containsIgnoreCase(columnList, ArtUtils.RECIPIENT_COLUMN)
 						&& ArtUtils.containsIgnoreCase(columnList, ArtUtils.RECIPIENT_ID)) {
 					//separate emails, different email message, different report data
 					while (rs.next()) {
+						recordCount++;
+
 						String email = rs.getString(1); //first column has email addresses
 						if (StringUtils.length(email) > 4) {
 							Map<String, String> recipientColumns = new HashMap<>();
@@ -1723,6 +1737,13 @@ public class ReportJob implements org.quartz.Job {
 							boolean splitJob = true;
 							boolean recipientFilterPresent = true;
 							runJob(splitJob, jobUser, tos, recipientDetails, recipientFilterPresent);
+
+							int logInterval = jobOptions.getLogInterval();
+							if (logInterval > 0) {
+								if (recordCount % logInterval == 0) {
+									progressLogger.info("Record {} - '{}'", recordCount, email);
+								}
+							}
 						}
 					}
 
@@ -1733,7 +1754,7 @@ public class ReportJob implements org.quartz.Job {
 					}
 				} else {
 					//separate emails, different email message, same report data
-					Map<String, Map<String, String>> recipients = new HashMap<>();
+					Map<String, Map<String, String>> recipients = new LinkedHashMap<>();
 					while (rs.next()) {
 						String email = rs.getString(1); //first column has email addresses
 						if (StringUtils.length(email) > 4) {
@@ -1756,9 +1777,7 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 		} catch (SQLException | RuntimeException ex) {
-			runDetails = "<b>Error:</b> " + ex.toString();
-			logger.error("Error. Job Id {}", jobId, ex);
-			progressLogger.error("Error", ex);
+			logErrorAndSetDetails(ex);
 		} finally {
 			DatabaseUtils.close(rs);
 
@@ -2143,7 +2162,10 @@ public class ReportJob implements org.quartz.Job {
 		//send customized emails to dynamic recipients
 		if (recipientDetails != null) {
 			Mailer mailer = getMailer();
+			int recordCount = 0;
 			for (Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
+				recordCount++;
+
 				String emails = entry.getKey();
 				String[] emailsArray = StringUtils.split(emails, ";");
 				Map<String, String> recipientColumns = entry.getValue();
@@ -2170,6 +2192,15 @@ public class ReportJob implements org.quartz.Job {
 					if (emailSent) {
 						runMessage = "jobs.message.fileEmailed";
 					}
+
+					if (!recipientFilterPresent) {
+						int logInterval = jobOptions.getLogInterval();
+						if (logInterval > 0) {
+							if (recordCount % logInterval == 0) {
+								progressLogger.info("Record {} - '{}'", recordCount, emails);
+							}
+						}
+					}
 				} catch (MessagingException ex) {
 					logger.debug("Error", ex);
 					fileName = "";
@@ -2181,6 +2212,12 @@ public class ReportJob implements org.quartz.Job {
 							+ " \n" + ex.toString()
 							+ " \n To: " + emails;
 					logger.warn(msg);
+
+					if (recipientFilterPresent) {
+						progressLogger.warn("'{}'. {}", emails, msg);
+					} else {
+						progressLogger.warn("Record {} - '{}'. {}", recordCount, emails, msg);
+					}
 				}
 			}
 
@@ -2779,7 +2816,7 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering getMailer");
 
 		Mailer mailer;
-		
+
 		ArtHelper artHelper = new ArtHelper();
 
 		SmtpServer jobSmtpServer = job.getSmtpServer();
@@ -2788,7 +2825,7 @@ public class ReportJob implements org.quartz.Job {
 		} else {
 			mailer = artHelper.getMailer();
 		}
-		
+
 		mailer.setDebug(logger.isDebugEnabled());
 
 		return mailer;

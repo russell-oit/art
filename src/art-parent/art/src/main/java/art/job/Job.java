@@ -96,6 +96,21 @@ public class Job implements Serializable {
 	private List<Destination> destinations;
 	private String subDirectory;
 	private SmtpServer smtpServer;
+	private String options;
+
+	/**
+	 * @return the options
+	 */
+	public String getOptions() {
+		return options;
+	}
+
+	/**
+	 * @param options the options to set
+	 */
+	public void setOptions(String options) {
+		this.options = options;
+	}
 
 	/**
 	 * @return the smtpServer

@@ -114,6 +114,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -236,6 +237,21 @@
 						}
 					});
 				});
+				
+				var optionsEditor = ace.edit("optionsEditor");
+				optionsEditor.$blockScrolling = Infinity;
+				optionsEditor.getSession().setMode("ace/mode/json");
+				optionsEditor.setHighlightActiveLine(false);
+				optionsEditor.setShowPrintMargin(false);
+				optionsEditor.setOption("showLineNumbers", false);
+				document.getElementById('optionsEditor').style.fontSize = '14px';
+
+				var options = $('#options');
+				optionsEditor.getSession().setValue(options.val());
+				optionsEditor.getSession().on('change', function () {
+					options.val(optionsEditor.getSession().getValue());
+				});
+
 			});
 		</script>
 
@@ -1048,6 +1064,18 @@
 						</div>
 					</div>
 				</fieldset>
+						
+				<hr>
+						
+				<div class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="options">
+						<spring:message code="page.label.options"/>
+					</label>
+					<div class="col-md-12">
+						<form:hidden path="options"/>
+						<div id="optionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
+					</div>
+				</div>
 
 				<div class="form-group">
 					<div class="col-md-12">

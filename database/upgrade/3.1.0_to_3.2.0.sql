@@ -5,10 +5,17 @@
 -- add reference report types
 -- add smtp servers table
 -- add smtp server id to jobs
+-- add job options field
 
 
 -- NOTES:
 -- for sql server, mysql replace TIMESTAMP with DATETIME
+
+-- for sql server, replace CLOB with VARCHAR(MAX)
+-- for mysql, replace CLOB with LONGTEXT
+-- for postgresql, replace CLOB with TEXT
+-- for cubrid, replace CLOB with STRING
+-- for hsqldb, replace CLOB with LONGVARCHAR
 -- ------------------------------------------------
 
 
@@ -46,3 +53,6 @@ CREATE TABLE ART_SMTP_SERVERS
 
 -- add smtp server id to jobs
 ALTER TABLE ART_JOBS ADD SMTP_SERVER_ID INTEGER;
+
+-- add job options field
+ALTER TABLE ART_JOBS ADD JOB_OPTIONS CLOB;

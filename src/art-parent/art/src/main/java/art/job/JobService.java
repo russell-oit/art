@@ -223,6 +223,7 @@ public class JobService {
 		job.setExtraSchedules(rs.getString("EXTRA_SCHEDULES"));
 		job.setHolidays(rs.getString("HOLIDAYS"));
 		job.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
+		job.setOptions(rs.getString("JOB_OPTIONS"));
 		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		job.setCreatedBy(rs.getString("CREATED_BY"));
@@ -473,9 +474,9 @@ public class JobService {
 					+ " FIXED_FILE_NAME, SUB_DIRECTORY, BATCH_FILE,"
 					+ " FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
-					+ " SCHEDULE_ID, SMTP_SERVER_ID,"
+					+ " SCHEDULE_ID, SMTP_SERVER_ID, JOB_OPTIONS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 44) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 45) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -520,6 +521,7 @@ public class JobService {
 				job.getQuartzCalendarNames(),
 				scheduleId,
 				smtpServerId,
+				job.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -540,6 +542,7 @@ public class JobService {
 					+ " BATCH_FILE=?, FTP_SERVER_ID=?,"
 					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?, SMTP_SERVER_ID=?,"
+					+ " JOB_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -585,6 +588,7 @@ public class JobService {
 				job.getQuartzCalendarNames(),
 				scheduleId,
 				smtpServerId,
+				job.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()
