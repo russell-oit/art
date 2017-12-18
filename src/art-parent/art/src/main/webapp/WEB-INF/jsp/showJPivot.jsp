@@ -32,7 +32,7 @@
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/jpivot.css">
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
@@ -67,7 +67,7 @@
 					<% }%>
 					
 
-					<table class="pivot centerTable" style="margin: 0 auto; width: 50%">
+					<table class="pivot" style="margin: 0 auto; width: 50%">
 						<tr> <td class="title">
 								<b> <br /> ${encode:forHtmlContent(title)} </b> <br /> <br />
 							</td> </tr>
@@ -183,7 +183,7 @@
 										<spring:message code="page.text.name"/>
 										</td>
 										<td>
-											<input type="text" name="newPivotName" value="" size="20" maxlength="40" />
+											<input type="text" name="newPivotName" value="" size="20" maxlength="50" />
 											<c:if test="${exclusiveAccess}">
 											<input type="checkbox" name="overwrite" /><spring:message code="jpivot.text.overwrite"/> &nbsp;
 											<input type="checkbox" name="delete" /><spring:message code="page.action.delete"/> &nbsp;
