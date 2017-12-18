@@ -418,7 +418,7 @@
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
 			<!-- 2.x is for java 8 -->
-			<version>1.6.1</version>
+			<version>1.7.0</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>

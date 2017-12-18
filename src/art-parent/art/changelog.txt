@@ -3,6 +3,7 @@ ART 3.2
 * Added OrgChart report types
 * Allow individual jobs to use a different smtp server
 * Fix for jpivot reports not working
+* Updated mariadb driver
 
 ART 3.1
 * Allow dynamic lov to use a dynamic datasource when the lov is a chained parameter
