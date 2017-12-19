@@ -1699,14 +1699,13 @@ public class ReportJob implements org.quartz.Job {
 				while (rs.next()) {
 					String emailColumn = rs.getString(1); //first column has email addresses
 					if (StringUtils.length(emailColumn) > 4) {
-						String[] emailArray = StringUtils.split(emailColumn, ";"); //allow multiple emails separated by ;
+						String[] emailArray = separateEmails(emailColumn);
 						emailsList.addAll(Arrays.asList(emailArray));
 					}
 				}
 
 				if (emailsList.size() > 0) {
-					String emails = StringUtils.join(emailsList, ";");
-					runNormalJob(emails);
+					runNormalJob(emailsList);
 				}
 			} else if (columnCount > 1) {
 				//personalization fields present
@@ -1802,7 +1801,7 @@ public class ReportJob implements org.quartz.Job {
 	private void runNormalJob() {
 		logger.debug("Entering runNormalJob");
 
-		String dynamicRecipientEmails = null;
+		List<String> dynamicRecipientEmails = null;
 		runNormalJob(dynamicRecipientEmails);
 	}
 
@@ -1810,11 +1809,10 @@ public class ReportJob implements org.quartz.Job {
 	 * Runs a normal job (not a dynamic recipients job)
 	 *
 	 * @param conn a connection the the art database
-	 * @param dynamicRecipientEmails a list of dynamic recipient emails, each
-	 * separated by ;
+	 * @param dynamicRecipientEmails a list of dynamic recipient emails
 	 */
-	private void runNormalJob(String dynamicRecipientEmails) {
-		logger.debug("Entering runNormalJob: dynamicRecipientEmails='{}'", dynamicRecipientEmails);
+	private void runNormalJob(List<String> dynamicRecipientEmails) {
+		logger.debug("Entering runNormalJob");
 
 		//run job. if job isn't shared, generate single output
 		//if job is shared and doesn't use rules, generate single output to be used by all users
@@ -1826,6 +1824,8 @@ public class ReportJob implements org.quartz.Job {
 			boolean splitJob = false; //flag to determine if job will generate one file or multiple individualized files. to know which tables to update
 
 			User jobUser = job.getUser();
+
+			String emails = combineEmails(job.getMailTo(), dynamicRecipientEmails);
 
 			if (job.isAllowSharing()) {
 				if (job.isSplitJob()) {
@@ -1866,26 +1866,14 @@ public class ReportJob implements org.quartz.Job {
 
 					if (userCount == 0) {
 						//no shared users defined yet. generate one file for the job owner
-						String emails = job.getMailTo();
-						if (dynamicRecipientEmails != null) {
-							emails = emails + ";" + dynamicRecipientEmails;
-						}
 						runJob(splitJob, jobUser, emails);
 					}
 				} else {
 					//generate one single output to be used by all users
-					String emails = job.getMailTo();
-					if (dynamicRecipientEmails != null) {
-						emails = emails + ";" + dynamicRecipientEmails;
-					}
 					runJob(splitJob, jobUser, emails);
 				}
 			} else {
 				//job isn't shared. generate one file for the job owner
-				String emails = job.getMailTo();
-				if (dynamicRecipientEmails != null) {
-					emails = emails + ";" + dynamicRecipientEmails;
-				}
 				runJob(splitJob, jobUser, emails);
 			}
 
@@ -2069,9 +2057,9 @@ public class ReportJob implements org.quartz.Job {
 			String[] bccs = null;
 
 			if (generateEmail) {
-				tos = StringUtils.split(userEmail, ";");
-				ccs = StringUtils.split(cc, ";");
-				bccs = StringUtils.split(bcc, ";");
+				tos = separateEmails(userEmail);
+				ccs = separateEmails(cc);
+				bccs = separateEmails(bcc);
 
 				logger.debug("Job Id {}. to: {}", jobId, userEmail);
 				logger.debug("Job Id {}. cc: {}", jobId, cc);
@@ -2172,7 +2160,7 @@ public class ReportJob implements org.quartz.Job {
 				recordCount++;
 
 				String emails = entry.getKey();
-				String[] emailsArray = StringUtils.split(emails, ";");
+				String[] emailsArray = separateEmails(emails);
 				Map<String, String> recipientColumns = entry.getValue();
 
 				prepareMailer(mailer, finalMessage, outputFileName, recipientColumns, reportParamsList, reportParamsMap);
@@ -2181,13 +2169,13 @@ public class ReportJob implements org.quartz.Job {
 
 				String emailCcs = recipientColumns.get(ArtUtils.EMAIL_CC);
 				if (emailCcs != null) {
-					String[] emailCcsArray = StringUtils.split(emailCcs, ";");
+					String[] emailCcsArray = separateEmails(emailCcs);
 					mailer.setCc(emailCcsArray);
 				}
 
 				String emailBccs = recipientColumns.get(ArtUtils.EMAIL_BCC);
 				if (emailBccs != null) {
-					String[] emailBccsArray = StringUtils.split(emailBccs, ";");
+					String[] emailBccsArray = separateEmails(emailBccs);
 					mailer.setBcc(emailBccsArray);
 				}
 
@@ -2607,7 +2595,7 @@ public class ReportJob implements org.quartz.Job {
 
 							for (Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 								String emails = entry.getKey();
-								String[] emailsArray = StringUtils.split(emails, ";");
+								String[] emailsArray = separateEmails(emails);
 								Map<String, String> recipientColumns = entry.getValue();
 
 								if (reportType == ReportType.FreeMarker
@@ -2622,13 +2610,13 @@ public class ReportJob implements org.quartz.Job {
 
 								String emailCcs = recipientColumns.get(ArtUtils.EMAIL_CC);
 								if (emailCcs != null) {
-									String[] emailCcsArray = StringUtils.split(emailCcs, ";");
+									String[] emailCcsArray = separateEmails(emailCcs);
 									mailer.setCc(emailCcsArray);
 								}
 
 								String emailBccs = recipientColumns.get(ArtUtils.EMAIL_BCC);
 								if (emailBccs != null) {
-									String[] emailBccsArray = StringUtils.split(emailBccs, ";");
+									String[] emailBccsArray = separateEmails(emailBccs);
 									mailer.setBcc(emailBccsArray);
 								}
 
@@ -3134,6 +3122,60 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		return templateName;
+	}
+
+	/**
+	 * Separates a list of email addresses separated by , or ; and returns an
+	 * array of separated email addresses
+	 *
+	 * @param emailString the string containing possible multiple email
+	 * addresses
+	 * @return an array of separated, individual email addresses
+	 */
+	private String[] separateEmails(String emailString) {
+		//https://blogs.msdn.microsoft.com/oldnewthing/20150119-00/?p=44883
+		//https://stackoverflow.com/questions/12120190/what-is-the-best-separator-to-separate-multiple-emails
+		//http://forums.mozillazine.org/viewtopic.php?t=212106
+		//https://support.mozilla.org/en-US/questions/1038045
+		//https://www.lifewire.com/separate-multiple-email-recipients-1173274
+		//https://www.lifewire.com/commas-to-separate-email-recipients-1173680
+		//https://www.extendoffice.com/documents/outlook/1649-outlook-allow-comma-as-address-separator.html
+		
+		String[] emailArray;
+
+		//allow multiple emails separated by , or ;
+		if (StringUtils.contains(emailString, ",")) {
+			emailArray = StringUtils.split(emailString, ",");
+		} else {
+			emailArray = StringUtils.split(emailString, ";");
+		}
+
+		return emailArray;
+	}
+
+	/**
+	 * Combines a string containing possible multiple email addresses with a
+	 * list of email addresses returning a single string with multiple email
+	 * addresses separated by ,
+	 *
+	 * @param emailString string containing possible multiple email addresses
+	 * separated using either , or ;
+	 * @param emailList a list of email addresses
+	 * @return string containing all email addresses separated by ,
+	 */
+	private String combineEmails(String emailString, List<String> emailList) {
+		List<String> finalEmailList = new ArrayList<>();
+		String[] emailArray = separateEmails(emailString);
+		if (emailArray != null) {
+			CollectionUtils.addAll(finalEmailList, emailArray);
+		}
+
+		if (CollectionUtils.isNotEmpty(emailList)) {
+			finalEmailList.addAll(emailList);
+		}
+
+		String emails = StringUtils.join(finalEmailList, ",");
+		return emails;
 	}
 
 }
