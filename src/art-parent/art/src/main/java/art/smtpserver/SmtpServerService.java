@@ -136,6 +136,7 @@ public class SmtpServerService {
 
 		String sql = SQL_SELECT_ALL + " WHERE SMTP_SERVER_ID=?";
 		ResultSetHandler<SmtpServer> h = new BeanHandler<>(SmtpServer.class, new SmtpServerMapper());
+		logger.info("test getsmtpserver: id={}", id);
 		return dbService.query(sql, h, id);
 	}
 

@@ -210,8 +210,7 @@ public class ReportJob implements org.quartz.Job {
 			try {
 				job = jobService.getJob(jobId);
 			} catch (SQLException ex) {
-				logger.error("Error. Job Id {}", jobId, ex);
-				progressLogger.error("Error", ex);
+				logError(ex);
 			}
 
 			if (job == null) {
@@ -277,7 +276,7 @@ public class ReportJob implements org.quartz.Job {
 					}
 					nextRunDate = Collections.min(nextRunDates);
 				} catch (SchedulerException ex) {
-					logger.error("Error. Job Id {}", jobId, ex);
+					logError(ex);
 				}
 			}
 
@@ -308,8 +307,7 @@ public class ReportJob implements org.quartz.Job {
 
 			cacheHelper.clearJobs();
 		} catch (Exception ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
-			progressLogger.error("Error", ex);
+			logError(ex);
 		}
 
 		long runEndTimeMillis = System.currentTimeMillis();
@@ -371,14 +369,23 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
+	 * Log an error to stdout and to the progress logger
+	 *
+	 * @param ex the error
+	 */
+	private void logError(Throwable ex) {
+		logger.error("Error. Job Id {}", jobId, ex);
+		progressLogger.error("Error", ex);
+	}
+
+	/**
 	 * Log an error as well as set the runDetails variable
 	 *
 	 * @param ex the error
 	 */
 	private void logErrorAndSetDetails(Throwable ex) {
-		logger.error("Error. Job Id {}", jobId, ex);
+		logError(ex);
 		runDetails = "<b>Error:</b> " + ex.toString();
-		progressLogger.error("Error", ex);
 	}
 
 	/**
@@ -597,7 +604,7 @@ public class ReportJob implements org.quartz.Job {
 			try {
 				sardine.shutdown();
 			} catch (IOException ex) {
-				logger.error("Error. Job Id {}", jobId, ex);
+				logError(ex);
 			}
 		}
 	}
@@ -816,7 +823,7 @@ public class ReportJob implements org.quartz.Job {
 								share.mkdir(partialPath);
 							}
 						} catch (SMBApiException ex) {
-							logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+							logError(ex);
 						}
 					}
 				}
@@ -833,7 +840,7 @@ public class ReportJob implements org.quartz.Job {
 				try {
 					connection.close();
 				} catch (Exception ex2) {
-					logger.error("Error. Job Id {}", jobId, ex2);
+					logError(ex2);
 				}
 			}
 		}
@@ -1031,7 +1038,7 @@ public class ReportJob implements org.quartz.Job {
 					try {
 						ftpClient.makeDirectory(partialPath);
 					} catch (IOException ex) {
-						logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+						logError(ex);
 					}
 				}
 			}
@@ -1055,7 +1062,7 @@ public class ReportJob implements org.quartz.Job {
 					ftpClient.disconnect();
 				}
 			} catch (IOException ex) {
-				logger.error("Error. Job Id {}", jobId, ex);
+				logError(ex);
 			}
 		}
 	}
@@ -1160,7 +1167,7 @@ public class ReportJob implements org.quartz.Job {
 					try {
 						channelSftp.mkdir(partialPath);
 					} catch (SftpException ex) {
-						logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+						logError(ex);
 					}
 				}
 			}
@@ -1608,7 +1615,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -1634,7 +1641,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -1657,7 +1664,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -1890,7 +1897,7 @@ public class ReportJob implements org.quartz.Job {
 				runMessage = "jobs.message.jobShared";
 			}
 		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -2109,10 +2116,8 @@ public class ReportJob implements org.quartz.Job {
 
 			logger.debug("Job Id {} ...finished", jobId);
 		} catch (Exception ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
-			runDetails = "<b>Error:</b> " + ex.toString();
+			logErrorAndSetDetails(ex);
 			fileName = "";
-			progressLogger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {
 				reportRunner.close();
@@ -2266,6 +2271,8 @@ public class ReportJob implements org.quartz.Job {
 						+ " \n" + ex.toString()
 						+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
 				logger.warn(msg);
+
+				progressLogger.warn(msg);
 			}
 		}
 	}
@@ -2757,7 +2764,7 @@ public class ReportJob implements org.quartz.Job {
 			paramProcessor.setIsJob(true);
 			paramProcessorResult = paramProcessor.process(finalValues, reportId, user, locale);
 		} catch (ParseException | IOException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 
 		return paramProcessorResult;
@@ -3023,7 +3030,7 @@ public class ReportJob implements org.quartz.Job {
 				dbService.update(sql);
 			}
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -3072,7 +3079,7 @@ public class ReportJob implements org.quartz.Job {
 				dbService.update(sql);
 			}
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
