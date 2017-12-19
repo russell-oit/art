@@ -84,6 +84,21 @@ public class Settings implements Serializable {
 	private String casLogoutUrl;
 	private String smtpFrom;
 	private String systemLocale;
+	private int logsDatasourceId;
+
+	/**
+	 * @return the logsDatasourceId
+	 */
+	public int getLogsDatasourceId() {
+		return logsDatasourceId;
+	}
+
+	/**
+	 * @param logsDatasourceId the logsDatasourceId to set
+	 */
+	public void setLogsDatasourceId(int logsDatasourceId) {
+		this.logsDatasourceId = logsDatasourceId;
+	}
 
 	/**
 	 * @return the systemLocale

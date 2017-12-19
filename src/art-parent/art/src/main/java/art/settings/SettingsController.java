@@ -17,13 +17,19 @@
  */
 package art.settings;
 
+import art.connectionpool.DbConnections;
+import art.datasource.DatasourceService;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.servlets.Config;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.db.DBAppender;
+import ch.qos.logback.core.db.DataSourceConnectionSource;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -49,9 +55,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class SettingsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
-	
+
 	@Autowired
 	private ServletContext servletContext;
+
+	@Autowired
+	private DatasourceService datasourceService;
 
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
@@ -92,8 +101,8 @@ public class SettingsController {
 		Settings settings = Config.getSettings();
 
 		model.addAttribute("settings", settings);
-		
-		return "settings";
+
+		return showEditSettings(model);
 	}
 
 	@RequestMapping(value = "settings", method = RequestMethod.POST)
@@ -105,7 +114,7 @@ public class SettingsController {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return "settings";
+			return showEditSettings(model);
 		}
 
 		//set password field as appropriate
@@ -140,6 +149,8 @@ public class SettingsController {
 			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
 			servletContext.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 
+			createDbAppender(settings);
+
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");
 			return "redirect:/success";
@@ -148,6 +159,63 @@ public class SettingsController {
 			model.addAttribute("error", ex);
 		}
 
+		return showEditSettings(model);
+	}
+
+	/**
+	 * Prepares model data and returns the jsp file to display
+	 *
+	 * @param model the spring model
+	 * @return the jsp file to display
+	 */
+	private String showEditSettings(Model model) {
+		try {
+			model.addAttribute("datasources", datasourceService.getAllDatasources());
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
 		return "settings";
+	}
+
+	private void createDbAppender(Settings settings) {
+		logger.debug("Entering createDbAppender");
+		
+		//https://stackoverflow.com/questions/43536302/set-sqldialect-to-logback-db-appender-programaticaly
+		//https://stackoverflow.com/questions/22000995/configuring-logback-dbappender-programmatically
+		//https://logback.qos.ch/apidocs/ch/qos/logback/classic/db/DBAppender.html
+		//https://logback.qos.ch/manual/appenders.html
+		//https://stackoverflow.com/questions/40460684/how-to-disable-logback-output-to-console-programmatically-but-append-to-file
+
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
+		final String DB_APPENDER_NAME = "db";
+		DBAppender dbAppender = (DBAppender) rootLogger.getAppender(DB_APPENDER_NAME);
+		if (dbAppender != null) {
+			dbAppender.stop();
+			rootLogger.detachAppender(dbAppender);
+		}
+
+		int logsDatasourceId = settings.getLogsDatasourceId();
+		logger.debug("logsDatasourceId={}", logsDatasourceId);
+		
+		if (logsDatasourceId == 0) {
+			return;
+		}
+
+		DataSourceConnectionSource source = new DataSourceConnectionSource();
+
+		source.setDataSource(DbConnections.getDataSource(logsDatasourceId));
+		source.start();
+
+		dbAppender = new DBAppender();
+		dbAppender.setName(DB_APPENDER_NAME);
+		dbAppender.setConnectionSource(source);
+		dbAppender.setContext(loggerContext);
+		dbAppender.start();
+
+		rootLogger.addAppender(dbAppender);
 	}
 }

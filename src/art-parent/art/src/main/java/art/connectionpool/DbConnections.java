@@ -211,7 +211,7 @@ public class DbConnections {
 	 * @param datasourceId the art datasource id
 	 * @return a javax.sql.DataSource for the given art datasource
 	 */
-	private static DataSource getDataSource(int datasourceId) {
+	public static DataSource getDataSource(int datasourceId) {
 		logger.debug("Entering getDataSource: datasourceId={}", datasourceId);
 
 		return getConnectionPool(datasourceId).getPool();

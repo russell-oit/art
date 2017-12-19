@@ -19,15 +19,18 @@ Settings configuration page
 
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -61,6 +64,18 @@ Settings configuration page
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
 					offText: '${noText}'
+				});
+
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneResultsText: '${noResultsMatchText}'
+				});
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				$('button.dropdown-toggle').dropdownHover({
+					delay: 100
 				});
 
 			});
@@ -798,6 +813,29 @@ Settings configuration page
 						<div class="col-md-7">
 							<form:input path="systemLocale" class="form-control"/>
 							<form:errors path="systemLocale" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-5 control-label " for="logsDatasourceId">
+							<spring:message code="settings.label.logsDatasource"/>
+						</label>
+						<div class="col-md-7">
+							<form:select path="logsDatasourceId" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<form:option value="-1"><spring:message code="page.title.artDatabase"/></form:option>
+									<option data-divider="true"></option>
+								<c:forEach var="datasource" items="${datasources}">
+									<c:set var="datasourceStatus">
+										<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>
+									</c:set>
+									<form:option value="${datasource.datasourceId}"
+												 data-content="${datasource.name} ${datasourceStatus}">
+										${datasource.name} 
+									</form:option>
+								</c:forEach>
+							</form:select>
+							<form:errors path="logsDatasourceId" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>
