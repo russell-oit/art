@@ -31,10 +31,13 @@ import art.saiku.SaikuConnectionManager;
 import art.saiku.SaikuConnectionProvider;
 import art.settings.CustomSettings;
 import art.settings.Settings;
+import art.settings.SettingsService;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import art.utils.UpgradeHelper;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.db.DBAppender;
+import ch.qos.logback.core.db.DataSourceConnectionSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
 import freemarker.template.Configuration;
@@ -102,7 +105,6 @@ public class Config extends HttpServlet {
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
 	private static ArtDatabase artDbConfig;
-	private static String settingsFilePath;
 	private static Settings settings;
 	private static CustomSettings customSettings;
 	private static String workDirectoryPath;
@@ -225,9 +227,6 @@ public class Config extends HttpServlet {
 		//set art-database file path
 		artDatabaseFilePath = workDirectoryPath + "art-database.json";
 
-		//set settings file path
-		settingsFilePath = workDirectoryPath + "art-settings.json";
-
 		//ensure work directories exist
 		createWorkDirectories();
 
@@ -239,14 +238,11 @@ public class Config extends HttpServlet {
 
 		loadLanguages();
 
-		//load settings and initialize variables
-		loadSettings();
+		//initialize datasources
+		initializeArtDatabase();
 
 		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
 		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
-
-		//initialize datasources
-		initializeArtDatabase();
 	}
 
 	/**
@@ -309,7 +305,7 @@ public class Config extends HttpServlet {
 		//https://stackoverflow.com/questions/34662161/velocitys-fileresourceloader-cant-find-resources
 		//https://velocity.apache.org/engine/1.7/developer-guide.html#resource-management
 		velocityEngine.setProperty("file.resource.loader.path", "");
-		
+
 		velocityEngine.init();
 	}
 
@@ -435,6 +431,9 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
+			
+			//load settings
+			loadSettings();
 		} catch (SQLException | RuntimeException ex) {
 			//include runtime exception in case of PoolInitializationException when using hikaricp
 			logger.error("Error", ex);
@@ -500,19 +499,16 @@ public class Config extends HttpServlet {
 	/**
 	 * Loads application settings
 	 */
-	private static void loadSettings() {
+	public static void loadSettings() {
 		Settings newSettings = null;
 
+		SettingsService settingsService = new SettingsService();
+
 		try {
-			File settingsFile = new File(settingsFilePath);
-			if (settingsFile.exists()) {
-				ObjectMapper mapper = new ObjectMapper();
-				newSettings = mapper.readValue(settingsFile, Settings.class);
-				//decrypt password fields
-				newSettings.setSmtpPassword(AesEncryptor.decrypt(newSettings.getSmtpPassword()));
-				newSettings.setLdapBindPassword(AesEncryptor.decrypt(newSettings.getLdapBindPassword()));
+			if (isArtDatabaseConfigured()) {
+				newSettings = settingsService.getSettings();
 			}
-		} catch (IOException ex) {
+		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
 
@@ -525,7 +521,7 @@ public class Config extends HttpServlet {
 		settings = newSettings;
 
 		//set defaults for settings with invalid values
-		setSettingsDefaults(settings);
+		settingsService.setSettingsDefaults(settings);
 
 		//set date formatters
 		String dateFormat = settings.getDateFormat();
@@ -555,32 +551,9 @@ public class Config extends HttpServlet {
 				logger.error("Error while registering Database Authentication JDBC Driver: {}", driver, e);
 			}
 		}
-
-	}
-
-	/**
-	 * Saves application settings to file
-	 *
-	 * @param newSettings the settings to save
-	 * @throws IOException
-	 */
-	public static void saveSettings(Settings newSettings) throws IOException {
-		//encrypt password fields
-		String clearTextSmtpPassword = newSettings.getSmtpPassword();
-		String clearTextLdapBindPassword = newSettings.getLdapBindPassword();
-
-		String encryptedSmtpPassword = AesEncryptor.encrypt(clearTextSmtpPassword);
-		String encryptedLdapBindPassword = AesEncryptor.encrypt(clearTextLdapBindPassword);
-
-		newSettings.setSmtpPassword(encryptedSmtpPassword);
-		newSettings.setLdapBindPassword(encryptedLdapBindPassword);
-
-		File settingsFile = new File(settingsFilePath);
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, newSettings);
-
-		//refresh settings and related configuration, and set defaults for invalid values
-		loadSettings();
+		
+		//create the db appender if configured
+		createDbAppender();
 	}
 
 	/**
@@ -650,55 +623,6 @@ public class Config extends HttpServlet {
 			scheduler.scheduleJob(quartzJob, trigger);
 		} catch (SchedulerException ex) {
 			logger.error("Error", ex);
-		}
-	}
-
-	/**
-	 * Sets defaults for application settings that have invalid values
-	 */
-	private static void setSettingsDefaults(Settings parSettings) {
-		if (parSettings == null) {
-			return;
-		}
-
-		if (parSettings.getSmtpPort() <= 0) {
-			parSettings.setSmtpPort(25);
-		}
-		if (parSettings.getMaxRowsDefault() <= 0) {
-			parSettings.setMaxRowsDefault(10000);
-		}
-		if (parSettings.getLdapPort() <= 0) {
-			parSettings.setLdapPort(389);
-		}
-		if (StringUtils.isBlank(parSettings.getLdapUserIdAttribute())) {
-			parSettings.setLdapUserIdAttribute("uid");
-		}
-		if (StringUtils.isBlank(parSettings.getDateFormat())) {
-			parSettings.setDateFormat("dd-MMM-yyyy");
-		}
-		if (StringUtils.isBlank(parSettings.getTimeFormat())) {
-			parSettings.setTimeFormat("HH:mm:ss");
-		}
-		if (StringUtils.isBlank(parSettings.getReportFormats())) {
-			parSettings.setReportFormats("htmlDataTable,htmlGrid,xlsx,pdf,docx,htmlPlain");
-		}
-		if (parSettings.getMaxRunningReports() <= 0) {
-			parSettings.setMaxRunningReports(1000);
-		}
-		if (parSettings.getArtAuthenticationMethod() == null) {
-			parSettings.setArtAuthenticationMethod(ArtAuthenticationMethod.Internal);
-		}
-		if (parSettings.getLdapConnectionEncryptionMethod() == null) {
-			parSettings.setLdapConnectionEncryptionMethod(LdapConnectionEncryptionMethod.None);
-		}
-		if (parSettings.getLdapAuthenticationMethod() == null) {
-			parSettings.setLdapAuthenticationMethod(LdapAuthenticationMethod.Simple);
-		}
-		if (parSettings.getPdfPageSize() == null) {
-			parSettings.setPdfPageSize(PdfPageSize.A4Landscape);
-		}
-		if (parSettings.getDisplayNull() == null) {
-			parSettings.setDisplayNull(DisplayNull.NoNumbersAsZero);
 		}
 	}
 
@@ -1161,5 +1085,48 @@ public class Config extends HttpServlet {
 	public static ThinQueryService getThinQueryService(int userId) {
 		SaikuConnectionProvider connectionProvider = saikuConnections.get(userId);
 		return connectionProvider.getThinQueryService();
+	}
+
+	/**
+	 * Creates a db appender if configured in application settings
+	 */
+	private static void createDbAppender() {
+		logger.debug("Entering createDbAppender");
+
+		//https://stackoverflow.com/questions/43536302/set-sqldialect-to-logback-db-appender-programaticaly
+		//https://stackoverflow.com/questions/22000995/configuring-logback-dbappender-programmatically
+		//https://logback.qos.ch/apidocs/ch/qos/logback/classic/db/DBAppender.html
+		//https://logback.qos.ch/manual/appenders.html
+		//https://stackoverflow.com/questions/40460684/how-to-disable-logback-output-to-console-programmatically-but-append-to-file
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
+		final String DB_APPENDER_NAME = "db";
+		DBAppender dbAppender = (DBAppender) rootLogger.getAppender(DB_APPENDER_NAME);
+		if (dbAppender != null) {
+			dbAppender.stop();
+			rootLogger.detachAppender(dbAppender);
+		}
+
+		int logsDatasourceId = settings.getLogsDatasourceId();
+		logger.debug("logsDatasourceId={}", logsDatasourceId);
+
+		if (logsDatasourceId == 0) {
+			return;
+		}
+
+		DataSourceConnectionSource source = new DataSourceConnectionSource();
+
+		source.setDataSource(DbConnections.getDataSource(logsDatasourceId));
+		source.setContext(loggerContext);
+		source.start();
+
+		dbAppender = new DBAppender();
+		dbAppender.setName(DB_APPENDER_NAME);
+		dbAppender.setConnectionSource(source);
+		dbAppender.setContext(loggerContext);
+		dbAppender.start();
+
+		rootLogger.addAppender(dbAppender);
 	}
 }

@@ -18,13 +18,12 @@
 package art.settings;
 
 import art.enums.ArtAuthenticationMethod;
-import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
-import art.enums.PdfPageSize;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Represents application settings
@@ -63,7 +62,6 @@ public class Settings implements Serializable {
 	private String ldapUserIdAttribute;
 	private LdapAuthenticationMethod ldapAuthenticationMethod;
 	private String ldapRealm;
-	private PdfPageSize pdfPageSize;
 	private String pdfFontName;
 	private String pdfFontFile;
 	private String pdfFontDirectory;
@@ -73,7 +71,6 @@ public class Settings implements Serializable {
 	private String dateFormat;
 	private String timeFormat;
 	private String reportFormats;
-	private DisplayNull displayNull;
 	private int maxRunningReports;
 	private boolean showHeaderInPublicUserSession;
 	private int mondrianCacheExpiryPeriod;
@@ -85,6 +82,36 @@ public class Settings implements Serializable {
 	private String smtpFrom;
 	private String systemLocale;
 	private int logsDatasourceId;
+	private Date updateDate;
+	private String updatedBy;
+
+	/**
+	 * @return the updateDate
+	 */
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	/**
+	 * @param updateDate the updateDate to set
+	 */
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
+
+	/**
+	 * @return the updatedBy
+	 */
+	public String getUpdatedBy() {
+		return updatedBy;
+	}
+
+	/**
+	 * @param updatedBy the updatedBy to set
+	 */
+	public void setUpdatedBy(String updatedBy) {
+		this.updatedBy = updatedBy;
+	}
 
 	/**
 	 * @return the logsDatasourceId
@@ -535,24 +562,6 @@ public class Settings implements Serializable {
 	}
 
 	/**
-	 * Get the value of displayNull
-	 *
-	 * @return the value of displayNull
-	 */
-	public DisplayNull getDisplayNull() {
-		return displayNull;
-	}
-
-	/**
-	 * Set the value of displayNull
-	 *
-	 * @param displayNull new value of displayNull
-	 */
-	public void setDisplayNull(DisplayNull displayNull) {
-		this.displayNull = displayNull;
-	}
-
-	/**
 	 * Get the value of maxRunningReports
 	 *
 	 * @return the value of maxRunningReports
@@ -821,24 +830,6 @@ public class Settings implements Serializable {
 	 */
 	public void setPdfFontName(String pdfFontName) {
 		this.pdfFontName = pdfFontName;
-	}
-
-	/**
-	 * Get the value of pdfPageSize
-	 *
-	 * @return the value of pdfPageSize
-	 */
-	public PdfPageSize getPdfPageSize() {
-		return pdfPageSize;
-	}
-
-	/**
-	 * Set the value of pdfPageSize
-	 *
-	 * @param pdfPageSize new value of pdfPageSize
-	 */
-	public void setPdfPageSize(PdfPageSize pdfPageSize) {
-		this.pdfPageSize = pdfPageSize;
 	}
 
 	/**

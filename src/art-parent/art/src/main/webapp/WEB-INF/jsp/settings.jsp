@@ -243,7 +243,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="windowsDomainController" maxlength="50" class="form-control"/>
+								<form:input path="windowsDomainController" maxlength="100" class="form-control"/>
 								<spring:message code="settings.help.windowsDomainController" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -288,7 +288,7 @@ Settings configuration page
 							<spring:message code="settings.label.databaseAuthenticationUrl"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="databaseAuthenticationUrl" maxlength="2000" class="form-control"/>
+							<form:input path="databaseAuthenticationUrl" maxlength="500" class="form-control"/>
 							<form:errors path="databaseAuthenticationUrl" cssClass="error"/>
 						</div>
 					</div>
@@ -340,7 +340,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="ldapUrl" maxlength="2000" class="form-control"/>
+								<form:input path="ldapUrl" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.ldapUrl" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -481,7 +481,7 @@ Settings configuration page
 							<spring:message code="settings.label.casLogoutUrl"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="casLogoutUrl" class="form-control"/>
+							<form:input path="casLogoutUrl" maxlength="100" class="form-control"/>
 							<form:errors path="casLogoutUrl" cssClass="error"/>
 						</div>
 					</div>
@@ -535,7 +535,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontName" maxlength="100" class="form-control"/>
+								<form:input path="pdfFontName" maxlength="50" class="form-control"/>
 								<spring:message code="settings.help.pdfFontName" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -553,7 +553,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontFile" maxlength="2000" class="form-control"/>
+								<form:input path="pdfFontFile" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.pdfFontFile" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -571,7 +571,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontDirectory" maxlength="2000" class="form-control"/>
+								<form:input path="pdfFontDirectory" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.pdfFontDirectory" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -589,7 +589,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontEncoding" maxlength="100" class="form-control"/>
+								<form:input path="pdfFontEncoding" maxlength="50" class="form-control"/>
 								<spring:message code="settings.help.pdfFontEncoding" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -648,7 +648,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="dateFormat" maxlength="100" class="form-control"/>
+								<form:input path="dateFormat" maxlength="50" class="form-control"/>
 								<spring:message code="settings.help.dateFormat" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -666,7 +666,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="timeFormat" maxlength="100" class="form-control"/>
+								<form:input path="timeFormat" maxlength="50" class="form-control"/>
 								<spring:message code="settings.help.timeFormat" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -684,7 +684,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="reportFormats" maxlength="500" class="form-control"/>
+								<form:input path="reportFormats" maxlength="200" class="form-control"/>
 								<spring:message code="settings.help.reportFormats" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -758,7 +758,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="rssLink" maxlength="2000" class="form-control"/>
+								<form:input path="rssLink" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.rssLink" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -794,7 +794,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="artBaseUrl" class="form-control"/>
+								<form:input path="artBaseUrl" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.artBaseUrl" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -811,7 +811,7 @@ Settings configuration page
 							<spring:message code="settings.label.systemLocale"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="systemLocale" class="form-control"/>
+							<form:input path="systemLocale" maxlength="50" class="form-control"/>
 							<form:errors path="systemLocale" cssClass="error"/>
 						</div>
 					</div>

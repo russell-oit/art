@@ -3,6 +3,7 @@ ART 3.2
 * Added OrgChart report types
 * Allow individual jobs to use a different smtp server
 * Fix for jpivot reports not working
+* Save settings in the art database
 * Updated mariadb driver
 
 ART 3.1
