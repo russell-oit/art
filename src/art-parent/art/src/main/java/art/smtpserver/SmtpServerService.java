@@ -92,7 +92,7 @@ public class SmtpServerService {
 			smtpServer.setPort(rs.getInt("PORT"));
 			smtpServer.setUseStartTls(rs.getBoolean("USE_STARTTLS"));
 			smtpServer.setUseSmtpAuthentication(rs.getBoolean("USE_SMTP_AUTHENTICATION"));
-			smtpServer.setUser(rs.getString("SMTP_USER"));
+			smtpServer.setUsername(rs.getString("USERNAME"));
 			smtpServer.setPassword(rs.getString("PASSWORD"));
 			smtpServer.setFrom(rs.getString("SMTP_FROM"));
 			smtpServer.setCreationDate(rs.getTimestamp("CREATION_DATE"));
@@ -265,7 +265,7 @@ public class SmtpServerService {
 			String sql = "INSERT INTO ART_SMTP_SERVERS"
 					+ " (SMTP_SERVER_ID, NAME, DESCRIPTION, ACTIVE,"
 					+ " SERVER, PORT, USE_STARTTLS, USE_SMTP_AUTHENTICATION,"
-					+ " SMTP_USER, PASSWORD, SMTP_FROM,"
+					+ " USERNAME, PASSWORD, SMTP_FROM,"
 					+ " CREATION_DATE, CREATED_BY)"
 					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
 
@@ -278,7 +278,7 @@ public class SmtpServerService {
 				smtpServer.getPort(),
 				BooleanUtils.toInteger(smtpServer.isUseStartTls()),
 				BooleanUtils.toInteger(smtpServer.isUseSmtpAuthentication()),
-				smtpServer.getUser(),
+				smtpServer.getUsername(),
 				smtpServer.getPassword(),
 				smtpServer.getFrom(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
@@ -289,7 +289,7 @@ public class SmtpServerService {
 		} else {
 			String sql = "UPDATE ART_SMTP_SERVERS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, SERVER=?, PORT=?, USE_STARTTLS=?,"
-					+ " USE_SMTP_AUTHENTICATION=?, SMTP_USER=?, PASSWORD=?,"
+					+ " USE_SMTP_AUTHENTICATION=?, USERNAME=?, PASSWORD=?,"
 					+ " SMTP_FROM=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE SMTP_SERVER_ID=?";
@@ -302,7 +302,7 @@ public class SmtpServerService {
 				smtpServer.getPort(),
 				BooleanUtils.toInteger(smtpServer.isUseStartTls()),
 				BooleanUtils.toInteger(smtpServer.isUseSmtpAuthentication()),
-				smtpServer.getUser(),
+				smtpServer.getUsername(),
 				smtpServer.getPassword(),
 				smtpServer.getFrom(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),

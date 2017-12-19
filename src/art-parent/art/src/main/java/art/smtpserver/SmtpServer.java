@@ -36,9 +36,9 @@ public class SmtpServer implements Serializable {
 	private int port = 25;
 	private boolean useStartTls;
 	private boolean useSmtpAuthentication;
-	private String user;
+	private String username;
 	private String password;
-	private boolean useBlankPassword; //only used for user interface logic
+	private boolean useBlankPassword; //only used for username interface logic
 	private String from;
 	private Date creationDate;
 	private String createdBy;
@@ -158,17 +158,17 @@ public class SmtpServer implements Serializable {
 	}
 
 	/**
-	 * @return the user
+	 * @return the username
 	 */
-	public String getUser() {
-		return user;
+	public String getUsername() {
+		return username;
 	}
 
 	/**
-	 * @param user the user to set
+	 * @param username the username to set
 	 */
-	public void setUser(String user) {
-		this.user = user;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	/**

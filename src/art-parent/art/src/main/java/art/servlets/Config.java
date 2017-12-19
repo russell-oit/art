@@ -413,6 +413,9 @@ public class Config extends HttpServlet {
 		loadArtDatabaseConfiguration();
 
 		if (artDbConfig == null) {
+			SettingsService settingsService = new SettingsService();
+			settings = new Settings();
+			settingsService.setSettingsDefaults(settings);
 			return;
 		}
 
@@ -427,7 +430,7 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
-			
+
 			//load settings
 			loadSettings();
 		} catch (SQLException | RuntimeException ex) {
@@ -547,7 +550,7 @@ public class Config extends HttpServlet {
 				logger.error("Error while registering Database Authentication JDBC Driver: {}", driver, e);
 			}
 		}
-		
+
 		//create the db appender if configured
 		createDbAppender();
 	}
@@ -1094,6 +1097,7 @@ public class Config extends HttpServlet {
 		//https://logback.qos.ch/apidocs/ch/qos/logback/classic/db/DBAppender.html
 		//https://logback.qos.ch/manual/appenders.html
 		//https://stackoverflow.com/questions/40460684/how-to-disable-logback-output-to-console-programmatically-but-append-to-file
+		//https://learningviacode.blogspot.co.ke/2014/01/writing-logs-to-database.html
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 

@@ -65,7 +65,7 @@
 					var port = $("#port").val();
 					var useStartTls = $("#useStartTls").is(":checked");
 					var useSmtpAuthentication = $("#useSmtpAuthentication").is(":checked");
-					var user = $("#user").val();
+					var username = $("#username").val();
 					var password = $("#password").val();
 					var useBlankPassword = $("#useBlankPassword").is(":checked");
 
@@ -75,7 +75,7 @@
 						url: "${pageContext.request.contextPath}/testSmtpServer",
 						data: {id: id, server: server, port: port,
 							useStartTls: useStartTls, useSmtpAuthentication: useSmtpAuthentication,
-							user: user, password: password,
+							username: username, password: password,
 							useBlankPassword: useBlankPassword, action: action},
 						success: function (response) {
 							if (response.success) {
@@ -243,12 +243,12 @@
 
 				<fieldset id="credentialsFields">
 					<div class="form-group">
-						<label class="control-label col-md-4" for="user">
-							<spring:message code="page.text.user"/>
+						<label class="control-label col-md-4" for="username">
+							<spring:message code="page.label.username"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="user" maxlength="100" class="form-control"/>
-							<form:errors path="user" cssClass="error"/>
+							<form:input path="username" maxlength="100" class="form-control"/>
+							<form:errors path="username" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">

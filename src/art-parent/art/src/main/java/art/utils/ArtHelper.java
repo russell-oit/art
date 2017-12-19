@@ -230,7 +230,7 @@ public class ArtHelper {
 		mailer.setPort(smtpServer.getPort());
 		mailer.setUseStartTls(smtpServer.isUseStartTls());
 		mailer.setUseAuthentication(smtpServer.isUseSmtpAuthentication());
-		mailer.setUsername(smtpServer.getUser());
+		mailer.setUsername(smtpServer.getUsername());
 		mailer.setPassword(smtpServer.getPassword());
 
 		return mailer;

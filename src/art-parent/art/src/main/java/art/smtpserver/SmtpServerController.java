@@ -343,15 +343,15 @@ public class SmtpServerController {
 			@RequestParam("server") String server, @RequestParam("port") Integer port,
 			@RequestParam("useStartTls") Boolean useStartTls,
 			@RequestParam("useSmtpAuthentication") Boolean useSmtpAuthentication,
-			@RequestParam("user") String user, @RequestParam("password") String password,
+			@RequestParam("username") String username, @RequestParam("password") String password,
 			@RequestParam("useBlankPassword") Boolean useBlankPassword,
 			@RequestParam("action") String action,
 			Locale locale) {
 
 		logger.debug("Entering testSmtpServer: id={}, server='{}', port={},"
-				+ " useStartTls={}, useSmtpAuthentication={}, user='{}',"
+				+ " useStartTls={}, useSmtpAuthentication={}, username='{}',"
 				+ " useBlankPassword={}, action='{}'", id, server, port,
-				useStartTls, useSmtpAuthentication, user, useBlankPassword, action);
+				useStartTls, useSmtpAuthentication, username, useBlankPassword, action);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -380,12 +380,14 @@ public class SmtpServerController {
 				}
 			}
 
+			//https://forum.avast.com/index.php?topic=179599.0
+			//https://stackoverflow.com/questions/16115453/javamail-could-not-convert-socket-to-tls-gmail
 			SmtpServer smtpServer = new SmtpServer();
 			smtpServer.setServer(server);
 			smtpServer.setPort(port);
 			smtpServer.setUseStartTls(useStartTls);
 			smtpServer.setUseSmtpAuthentication(useSmtpAuthentication);
-			smtpServer.setUser(user);
+			smtpServer.setUsername(username);
 			smtpServer.setPassword(password);
 
 			ArtHelper artHelper = new ArtHelper();
@@ -394,6 +396,7 @@ public class SmtpServerController {
 			mailer.setDebug(logger.isDebugEnabled());
 
 			mailer.testConnection();
+
 			//if we are here, connection was successful
 			response.setSuccess(true);
 		} catch (SQLException | MessagingException | RuntimeException ex) {
