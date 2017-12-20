@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -129,7 +129,7 @@ public class JsonOutput {
 		int rowCount = 0;
 		while (rs.next()) {
 			rowCount++;
-			Map<String, Object> row = new HashMap<>();
+			Map<String, Object> row = new LinkedHashMap<>();
 			for (int i = 1; i <= columnCount; ++i) {
 				String columnName = rsmd.getColumnLabel(i);
 				Object columnData = rs.getObject(i);;
