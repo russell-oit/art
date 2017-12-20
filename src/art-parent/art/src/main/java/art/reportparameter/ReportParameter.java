@@ -381,12 +381,7 @@ public class ReportParameter implements Serializable {
 		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
 		Object value = getEffectiveActualParameterValue();
 
-		String[] passedValues = getPassedParameterValues();
-		String defaultValue = parameter.getLocalizedDefaultValue(locale);
-		Report defaultValueReport = parameter.getDefaultValueReport();
-
-		if (value == null || (passedValues == null && StringUtils.isBlank(defaultValue)
-				&& defaultValueReport == null)) {
+		if (value == null) {
 			return "";
 		}
 
@@ -408,6 +403,17 @@ public class ReportParameter implements Serializable {
 			ParameterDataType parameterDataType = parameter.getDataType();
 			if (parameterDataType.isDate()) {
 				returnValue = parameter.getDateString(value, locale);
+			} else if (parameterDataType.isNumeric()) {
+				String[] passedValues = getPassedParameterValues();
+				String defaultValue = parameter.getLocalizedDefaultValue(locale);
+				Report defaultValueReport = parameter.getDefaultValueReport();
+
+				if (passedValues == null && StringUtils.isBlank(defaultValue)
+						&& defaultValueReport == null) {
+					returnValue = ""; //return blank instead of "0" for integers or "0.0" for doubles
+				} else {
+					returnValue = String.valueOf(value);
+				}
 			} else {
 				returnValue = String.valueOf(value);
 			}

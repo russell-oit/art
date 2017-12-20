@@ -88,26 +88,24 @@ public class LoginController {
 			return "redirect:/artDatabase";
 		}
 
-		session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
-		session.setAttribute("casLogoutUrl", Config.getSettings().getCasLogoutUrl());
-
 		//ensure art database connection is available
 		Connection conn = null;
-		boolean artDbConnectionOk = false;
 		try {
 			conn = DbConnections.getArtDbConnection();
-			artDbConnectionOk = true;
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
-		} finally {
+		}
+
+		if (conn == null) {
+			model.addAttribute("message", "page.message.artDatabaseNotAvailable");
+			return "headerlessError";
+		} else {
 			DatabaseUtils.close(conn);
 		}
 
-		if (!artDbConnectionOk) {
-			model.addAttribute("message", "page.message.artDatabaseNotAvailable");
-			return "headerlessError";
-		}
+		session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
+		session.setAttribute("casLogoutUrl", Config.getSettings().getCasLogoutUrl());
 
 		ArtAuthenticationMethod loginMethod;
 		ArtAuthenticationMethod loginMethodAppSetting = Config.getSettings().getArtAuthenticationMethod();

@@ -430,13 +430,15 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
-
-			//load settings
-			loadSettings();
 		} catch (SQLException | RuntimeException ex) {
 			//include runtime exception in case of PoolInitializationException when using hikaricp
 			logger.error("Error", ex);
 		}
+
+		//load settings
+		//put outside try block so that a settings object is always available
+		//even if there's an error in connection pool creation
+		loadSettings();
 	}
 
 	/**
@@ -999,6 +1001,16 @@ public class Config extends HttpServlet {
 	 */
 	public static Settings getSettings() {
 		return settings;
+	}
+
+	/**
+	 * Sets the settings variable
+	 *
+	 * @param newSettings the new settings
+	 */
+	public static void setSettings(Settings newSettings) {
+		settings = null;
+		settings = newSettings;
 	}
 
 	/**

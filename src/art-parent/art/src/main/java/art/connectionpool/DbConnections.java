@@ -106,7 +106,12 @@ public class DbConnections {
 		List<Datasource> datasources = run.query(sql, h, DatasourceType.JDBC.getValue());
 
 		for (Datasource datasource : datasources) {
-			createConnectionPool(datasource, maxPoolSize, connectionPoolLibrary);
+			try {
+				createConnectionPool(datasource, maxPoolSize, connectionPoolLibrary);
+			} catch (RuntimeException ex) {
+				//include runtime exception in case of PoolInitializationException when using hikaricp
+				logger.error("Error", ex);
+			}
 		}
 	}
 
@@ -163,7 +168,11 @@ public class DbConnections {
 		}
 
 		pool.create(datasourceInfo, maxPoolSize);
-		connectionPoolMap.put(pool.getPoolId(), pool);
+		DataSource dataSource = pool.getPool();
+		if (dataSource != null) {
+			//may be null if jndi connection and there was an error
+			connectionPoolMap.put(pool.getPoolId(), pool);
+		}
 	}
 
 	/**
@@ -275,14 +284,14 @@ public class DbConnections {
 
 		return conn;
 	}
-	
+
 	/**
 	 * Returns a mongodb connection for a datasource with the given id
-	 * 
+	 *
 	 * @param datasourceId the datasource id
 	 * @return a mongodb connection for a datasource with the given id
 	 */
-	public static MongoClient getMongodbConnection(int datasourceId){
+	public static MongoClient getMongodbConnection(int datasourceId) {
 		logger.debug("Entering getMongodbConnection: datasourceId={}", datasourceId);
 		return mongodbConnections.get(datasourceId);
 	}
