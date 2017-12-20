@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * @since 3.0.0, rename of art.dbcp.EnhancedConnection
  */
 public class PooledConnection implements Connection {
+
 	/* 20050612  Statements are closed automatically when the EnanchedConnection is 
 	 returned to the pool
 	 20050612  test conection with a dummy sql, if it fails refresh the connection
@@ -84,6 +85,8 @@ public class PooledConnection implements Connection {
 			dbProperties.putAll(properties);
 		}
 		Driver driver = DriverManager.getDriver(jdbcUrl); // get the right driver for the given url
+		logger.debug("driver={}", driver);
+
 		conn = driver.connect(jdbcUrl, dbProperties); // get the connection
 		openStatements = new ArrayList<>();
 	}
@@ -149,7 +152,7 @@ public class PooledConnection implements Connection {
 		try {
 			//this.close(); // close all the open statements: not needed... since the driver should do this
 			conn.close();    // note: the caller (ArtDBCPDataSource) must remove the object from the pool
-		} finally{
+		} finally {
 			openStatements.clear();
 		}
 	}

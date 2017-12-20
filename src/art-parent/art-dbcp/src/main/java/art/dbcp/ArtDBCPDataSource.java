@@ -530,7 +530,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 					removeConnection = true;
 				} else if (busyTime > maxQueryRunningTimeMillis) {
 					removeConnection = true;
-					logger.warn("Connection {i} of Connection pool '{}'"
+					logger.warn("Connection {} of connection pool '{}'"
 							+ " was in use for too much time and has been"
 							+ " removed from the pool", i, poolName);
 				} else if (testSql != null && testSql.length() > 0) {

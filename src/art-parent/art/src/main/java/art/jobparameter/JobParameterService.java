@@ -102,9 +102,9 @@ public class JobParameterService {
 
 	/**
 	 * Updates a job parameter
-	 * 
+	 *
 	 * @param jobParam the updated job parameter
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public void updateJobParameter(JobParameter jobParam) throws SQLException {
 		logger.debug("Entering updateJobParameter");
@@ -123,9 +123,9 @@ public class JobParameterService {
 
 	/**
 	 * Deletes job parameters for the given job
-	 * 
+	 *
 	 * @param jobId the job id
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public void deleteJobParameters(int jobId) throws SQLException {
 		logger.debug("Entering deleteJobParameters: jobId={}", jobId);
@@ -141,9 +141,9 @@ public class JobParameterService {
 
 	/**
 	 * Adds a job parameter
-	 * 
+	 *
 	 * @param jobParam the job parameter to add
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public void addJobParameter(JobParameter jobParam) throws SQLException {
 		logger.debug("Entering addJobParameter");
@@ -151,8 +151,8 @@ public class JobParameterService {
 		String sql = "INSERT INTO ART_JOBS_PARAMETERS"
 				+ " (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE)"
 				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
-		
-		String parameterTypeString="X";
+
+		String parameterTypeString = "X";
 
 		Object[] values = {
 			jobParam.getJobId(),
@@ -163,17 +163,17 @@ public class JobParameterService {
 
 		dbService.update(sql, values);
 	}
-	
+
 	/**
 	 * Returns job parameter values for a given job
-	 * 
+	 *
 	 * @param jobId the job id
 	 * @return job parameter values for a given job
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public Map<String, String[]> getJobParameterValues(int jobId) throws SQLException{
+	public Map<String, String[]> getJobParameterValues(int jobId) throws SQLException {
 		logger.debug("Entering getJobParameterValues: jobId={}", jobId);
-		
+
 		List<JobParameter> jobParams = getJobParameters(jobId);
 		Map<String, List<String>> paramValues = new HashMap<>();
 
@@ -238,7 +238,7 @@ public class JobParameterService {
 			String[] valuesArray = values.toArray(new String[0]);
 			finalValues.put(name, valuesArray);
 		}
-		
+
 		return finalValues;
 	}
 }

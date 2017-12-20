@@ -3166,6 +3166,7 @@ public class ReportJob implements org.quartz.Job {
 	private String combineEmails(String emailString, List<String> emailList) {
 		List<String> finalEmailList = new ArrayList<>();
 		String[] emailArray = separateEmails(emailString);
+		
 		if (emailArray != null) {
 			CollectionUtils.addAll(finalEmailList, emailArray);
 		}
