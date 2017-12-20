@@ -643,7 +643,7 @@ public class Config extends HttpServlet {
 			artDatabase.setMaxPoolConnections(20);
 		}
 		if (artDatabase.getConnectionPoolLibrary() == null) {
-			artDatabase.setConnectionPoolLibrary(ConnectionPoolLibrary.ArtDBCP);
+			artDatabase.setConnectionPoolLibrary(ConnectionPoolLibrary.HikariCP);
 		}
 
 	}
