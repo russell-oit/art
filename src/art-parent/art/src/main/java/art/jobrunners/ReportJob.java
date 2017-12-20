@@ -1278,11 +1278,11 @@ public class ReportJob implements org.quartz.Job {
 		} else if (jobSmtpServer != null) {
 			if (!jobSmtpServer.isActive()) {
 				sendEmail = false;
-				logger.info("Job smtp server disabled. jobSmtpServer={}. Job Id {}", jobSmtpServer, jobId);
+				logger.info("Job smtp server disabled. Job Id {}", jobId);
 				runMessage = "jobs.message.jobSmtpServerDisabled";
 			} else if (StringUtils.isBlank(jobSmtpServer.getServer())) {
 				sendEmail = false;
-				logger.info("Job smtp server not configured. jobSmtpServer={}. Job Id {}", jobSmtpServer, jobId);
+				logger.info("Job smtp server not configured. Job Id {}", jobId);
 				runMessage = "jobs.message.jobSmtpServerNotConfigured";
 			}
 		} else if (!Config.isEmailServerConfigured()) {
