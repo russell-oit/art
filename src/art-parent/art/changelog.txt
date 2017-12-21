@@ -5,6 +5,13 @@ ART 3.2
 * Fix for jpivot reports not working
 * Save settings in the art database. Settings will need to be re-entered.
 * Fix for job parameter value being blank on edit
+* Preserve column order in JSON output
+* Changed default connection pool library to hikaricp
+* Allow job email addresses to be separated by ,
+* Allow application logs to be written to a database
+* Added context path variable for freemarker and thymleaf output
+* Added useLowerCaseProperties option for template reports
+* Allow for testing of ftp, sftp and network share connections
 * Updated mariadb driver
 
 ART 3.1
