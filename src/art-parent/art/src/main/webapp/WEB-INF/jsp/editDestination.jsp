@@ -33,6 +33,8 @@
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -46,6 +48,8 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -54,6 +58,49 @@
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
+
+				$('#testConnection').on('click', function () {
+					var action = '${action}';
+					var id = 0;
+					if (action === 'edit' || action === 'copy') {
+						id = $("#destinationId").val();
+					}
+
+					var destinationType = $('#destinationType option:selected').val();
+					var server = $("#server").val();
+					var port = $("#port").val();
+					var user = $("#user").val();
+					var password = $("#password").val();
+					var useBlankPassword = $("#useBlankPassword").is(":checked");
+					var domain = $("#domain").val();
+					var path = $("#path").val();
+					var options = $("#options").val();
+
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "${pageContext.request.contextPath}/testDestination",
+						data: {id: id, destinationType: destinationType,
+							server: server, port: port, user: user,
+							password: password, useBlankPassword: useBlankPassword,
+							domain: domain, path: path, options: options,
+							action: action},
+						success: function (response) {
+							if (response.success) {
+								var msg = alertCloseButton + "${connectionSuccessfulText}";
+								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
+								$.notify("${connectionSuccessfulText}", "success");
+							} else {
+								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+								$.notify("${errorOccurredText}", "error");
+							}
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert(xhr.responseText);
+						}
+					});
+				});
 
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
@@ -145,7 +192,7 @@
 					default:
 						$("#subDirectoryDiv").hide();
 				}
-				
+
 				//show/hide create directories field
 				switch (destinationType) {
 					case 'Website':
@@ -153,6 +200,17 @@
 						break;
 					default:
 						$("#createDirectoriesDiv").show();
+				}
+
+				//show/hide test button
+				switch (destinationType) {
+					case 'FTP':
+					case 'SFTP':
+					case 'NetworkShare':
+						$("#testConnection").show();
+						break;
+					default:
+						$("#testConnection").hide();
 				}
 			}
 		</script>
@@ -191,6 +249,9 @@
 						<spring:message code="${message}"/>
 					</div>
 				</c:if>
+				
+				<div id="ajaxResponse">
+				</div>
 
 				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
@@ -354,9 +415,14 @@
 				</div>
 				<div class="form-group">
 					<div class="col-md-12">
-						<button type="submit" class="btn btn-primary pull-right">
-							<spring:message code="page.button.save"/>
-						</button>
+						<span class="pull-right">
+							<button type="button" id="testConnection" class="btn btn-default">
+								<spring:message code="datasources.button.test"/>
+							</button>
+							<button type="submit" class="btn btn-primary">
+								<spring:message code="page.button.save"/>
+							</button>
+						</span>
 					</div>
 				</div>
 			</fieldset>
