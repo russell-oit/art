@@ -31,9 +31,18 @@ import art.settings.SettingsService;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import art.utils.UpgradeHelper;
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.db.DBAppender;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.filter.LevelFilter;
+import ch.qos.logback.classic.filter.ThresholdFilter;
+import ch.qos.logback.classic.net.SMTPAppender;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.db.DataSourceConnectionSource;
+import ch.qos.logback.core.spi.FilterReply;
+import com.eclecticlogic.whisper.logback.WhisperAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
 import freemarker.template.Configuration;
@@ -56,6 +65,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -141,8 +151,20 @@ public class Config extends HttpServlet {
 
 		//http://logback.10977.n7.nabble.com/Shutting-down-async-appenders-when-using-logback-through-slf4j-td12505.html
 		//http://logback.qos.ch/manual/configuration.html#stopContext
-		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-		loggerContext.stop();
+//		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+//		loggerContext.stop();
+		try {
+			//wait for a while to avoid tomcat reporting that quartz threads were not stopped
+			//https://jira.terracotta.org/jira/browse/QTZ-122
+			//http://forums.terracotta.org/forums/posts/list/3479.page
+			//https://stackoverflow.com/questions/34869562/quartz-scheduler-memory-leak-in-tomcat
+			//https://stackoverflow.com/questions/7586255/quartz-memory-leak
+
+			final long QUARTZ_SHUTDOWN_DELAY_SECONDS = 2;
+			TimeUnit.SECONDS.sleep(QUARTZ_SHUTDOWN_DELAY_SECONDS);
+		} catch (InterruptedException ex) {
+			//logger.error("Error", ex);
+		}
 	}
 
 	/**
@@ -555,6 +577,9 @@ public class Config extends HttpServlet {
 
 		//create the db appender if configured
 		createDbAppender();
+
+		//create error notification appender if required
+		createErrorNotificationAppender();
 	}
 
 	/**
@@ -1128,7 +1153,6 @@ public class Config extends HttpServlet {
 		}
 
 		DataSourceConnectionSource source = new DataSourceConnectionSource();
-
 		source.setDataSource(DbConnections.getDataSource(logsDatasourceId));
 		source.setContext(loggerContext);
 		source.start();
@@ -1140,5 +1164,129 @@ public class Config extends HttpServlet {
 		dbAppender.start();
 
 		rootLogger.addAppender(dbAppender);
+	}
+
+	private static void createErrorNotificationAppender() {
+		//http://www.eclecticlogic.com/whisper/
+		//http://www.eclecticlogic.com/2014/08/25/introducing-whisper/
+		//http://mailman.qos.ch/pipermail/logback-user/2014-January/004285.html
+		//https://stackoverflow.com/questions/47315788/logback-not-sending-email-for-level-less-than-error?rq=1
+		//https://stackoverflow.com/questions/24739509/logback-fire-mail-for-warnings?rq=1
+		//https://stackoverflow.com/questions/11527702/logback-programatically-added-smtpappender-leaves-message-body-blank
+		//https://stackoverflow.com/questions/1993038/logback-smtpappender-limiting-rate/3985862
+		//https://logback.qos.ch/xref/ch/qos/logback/classic/net/SMTPAppender.html
+		//https://logback.qos.ch/xref/ch/qos/logback/classic/boolex/OnErrorEvaluator.html
+		//https://logback.qos.ch/manual/filters.html#DuplicateMessageFilter
+		//https://logback.qos.ch/manual/filters.html
+		//https://logback.qos.ch/manual/filters.html#GEventEvaluator
+		//https://stackoverflow.com/questions/13179773/logback-thresholdfilter-how-todo-the-opposite
+		//https://dzone.com/articles/limiting-repetitive-log-messages-with-logback
+
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
+		final String WHISPER_APPENDER_NAME = "whisper";
+		WhisperAppender tempWhisperAppender = (WhisperAppender) rootLogger.getAppender(WHISPER_APPENDER_NAME);
+		if (tempWhisperAppender != null) {
+			tempWhisperAppender.stop();
+			rootLogger.detachAppender(tempWhisperAppender);
+		}
+
+		if (!customSettings.isEnableEmailing()) {
+			logger.info("Emailing disabled");
+			return;
+		}
+
+		if (!isEmailServerConfigured()) {
+			return;
+		}
+
+		String level = "error";
+//		ThresholdFilter levelFilter = new ThresholdFilter();
+//		levelFilter.setName("levelFilter");
+//		levelFilter.setContext(loggerContext);
+//		levelFilter.setLevel(level);
+//		levelFilter.start();
+
+		LevelFilter levelFilter = new LevelFilter();
+		levelFilter.setName("levelFilter");
+		levelFilter.setContext(loggerContext);
+		levelFilter.setLevel(Level.ERROR);
+		levelFilter.setOnMatch(FilterReply.ACCEPT);
+		levelFilter.setOnMismatch(FilterReply.DENY);
+		levelFilter.start();
+
+		PatternLayout layout = new PatternLayout();
+		layout.setContext(loggerContext);
+		layout.setPattern("[%level] %date{dd-MMM-yyyy HH:mm:ss.SSS} - %msg%n");
+		layout.start();
+
+		String errorNotificationTo = "admin@localhost.local";
+		String errorNotificationFrom = "admin@localhost.local";
+		String smtpHost = settings.getSmtpServer();
+		int port = settings.getSmtpPort();
+		boolean userStartTls = settings.isSmtpUseStartTls();
+		boolean useSmtpAuthentication = settings.isUseSmtpAuthentication();
+		String username = settings.getSmtpUsername();
+		String password = settings.getSmtpPassword();
+		String subject = "ART [%level]: %logger - %m";
+
+		SMTPAppender errorEmailAppender = new SMTPAppender();
+		errorEmailAppender.setName("errorEmail");
+		errorEmailAppender.setContext(loggerContext);
+		errorEmailAppender.addFilter(levelFilter);
+		errorEmailAppender.setSmtpHost(smtpHost);
+		errorEmailAppender.setSmtpPort(port);
+		errorEmailAppender.setSTARTTLS(userStartTls);
+		if (useSmtpAuthentication) {
+			errorEmailAppender.setUsername(username);
+			errorEmailAppender.setPassword(password);
+		}
+		//context must be set before calling addTo() otherwise you get a null pointer exception
+		errorEmailAppender.addTo(errorNotificationTo);
+		errorEmailAppender.setFrom(errorNotificationFrom);
+		errorEmailAppender.setSubject(subject);
+		errorEmailAppender.setLayout(layout);
+		errorEmailAppender.start();
+
+		subject = "%X{whisper.digest.subject}";
+		SMTPAppender errorDigestAppender = new SMTPAppender();
+		errorDigestAppender.setName("errorDigest");
+		errorDigestAppender.setContext(loggerContext);
+		errorDigestAppender.setSmtpHost(smtpHost);
+		errorDigestAppender.setSmtpPort(port);
+		errorDigestAppender.setSTARTTLS(userStartTls);
+		if (useSmtpAuthentication) {
+			errorDigestAppender.setUsername(username);
+			errorDigestAppender.setPassword(password);
+		}
+		errorDigestAppender.addTo(errorNotificationTo);
+		errorDigestAppender.setFrom(errorNotificationFrom);
+		errorDigestAppender.setSubject(subject);
+		errorDigestAppender.setLayout(layout);
+		errorDigestAppender.start();
+
+		String digestLoggerName = "digest.appender.logger";
+		String suppressAfter = "3 in 5 minutes";
+		String expireAfter = "5 minutes";
+		String digestFrequency = "30 minutes";
+
+		WhisperAppender whisperAppender = new WhisperAppender();
+		whisperAppender.setName(WHISPER_APPENDER_NAME);
+		whisperAppender.setContext(loggerContext);
+		whisperAppender.addFilter(levelFilter);
+		whisperAppender.setDigestLoggerName(digestLoggerName);
+		whisperAppender.setSuppressAfter(suppressAfter);
+		whisperAppender.setExpireAfter(expireAfter);
+		whisperAppender.setDigestFrequency(digestFrequency);
+		whisperAppender.addAppender(errorEmailAppender);
+		whisperAppender.start();
+
+		ch.qos.logback.classic.Logger digestLogger = loggerContext.getLogger(digestLoggerName);
+		digestLogger.setLevel(Level.ERROR);
+		digestLogger.setAdditive(false);
+		digestLogger.addAppender(errorDigestAppender);
+
+		rootLogger.addAppender(whisperAppender);
 	}
 }

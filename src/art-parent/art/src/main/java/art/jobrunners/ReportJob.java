@@ -1271,10 +1271,10 @@ public class ReportJob implements org.quartz.Job {
 		SmtpServer jobSmtpServer = job.getSmtpServer();
 
 		boolean sendEmail = true;
-		if (!Config.getCustomSettings().isEnableEmail()) {
+		if (!Config.getCustomSettings().isEnableEmailing()) {
 			sendEmail = false;
-			logger.info("Email disabled. Job Id {}", jobId);
-			runMessage = "jobs.message.emailDisabled";
+			logger.info("Emailing disabled. Job Id {}", jobId);
+			runMessage = "jobs.message.emailingDisabled";
 		} else if (jobSmtpServer != null) {
 			if (!jobSmtpServer.isActive()) {
 				sendEmail = false;
