@@ -20,6 +20,7 @@ package art.settings;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
+import art.enums.LoggerLevel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
@@ -84,6 +85,14 @@ public class Settings implements Serializable {
 	private int logsDatasourceId;
 	private Date updateDate;
 	private String updatedBy;
+	private String errorNotificationTo;
+	private String errorNotificationFrom;
+	private String errorNotificationSubjectPattern;
+	private LoggerLevel errorNotificatonLevel;
+	private String errorNotificationLogger;
+	private String errorNotificationSuppressAfter;
+	private String errorNotificationExpireAfter;
+	private String errorNotificationDigestFrequency;
 
 	/**
 	 * @return the updateDate
@@ -920,5 +929,117 @@ public class Settings implements Serializable {
 	 */
 	public void setAdministratorEmail(String administratorEmail) {
 		this.administratorEmail = administratorEmail;
+	}
+
+	/**
+	 * @return the errorNotificationTo
+	 */
+	public String getErrorNotificationTo() {
+		return errorNotificationTo;
+	}
+
+	/**
+	 * @param errorNotificationTo the errorNotificationTo to set
+	 */
+	public void setErrorNotificationTo(String errorNotificationTo) {
+		this.errorNotificationTo = errorNotificationTo;
+	}
+
+	/**
+	 * @return the errorNotificationFrom
+	 */
+	public String getErrorNotificationFrom() {
+		return errorNotificationFrom;
+	}
+
+	/**
+	 * @param errorNotificationFrom the errorNotificationFrom to set
+	 */
+	public void setErrorNotificationFrom(String errorNotificationFrom) {
+		this.errorNotificationFrom = errorNotificationFrom;
+	}
+
+	/**
+	 * @return the errorNotificationSubjectPattern
+	 */
+	public String getErrorNotificationSubjectPattern() {
+		return errorNotificationSubjectPattern;
+	}
+
+	/**
+	 * @param errorNotificationSubjectPattern the errorNotificationSubjectPattern to set
+	 */
+	public void setErrorNotificationSubjectPattern(String errorNotificationSubjectPattern) {
+		this.errorNotificationSubjectPattern = errorNotificationSubjectPattern;
+	}
+
+	/**
+	 * @return the errorNotificatonLevel
+	 */
+	public LoggerLevel getErrorNotificatonLevel() {
+		return errorNotificatonLevel;
+	}
+
+	/**
+	 * @param errorNotificatonLevel the errorNotificatonLevel to set
+	 */
+	public void setErrorNotificatonLevel(LoggerLevel errorNotificatonLevel) {
+		this.errorNotificatonLevel = errorNotificatonLevel;
+	}
+
+	/**
+	 * @return the errorNotificationLogger
+	 */
+	public String getErrorNotificationLogger() {
+		return errorNotificationLogger;
+	}
+
+	/**
+	 * @param errorNotificationLogger the errorNotificationLogger to set
+	 */
+	public void setErrorNotificationLogger(String errorNotificationLogger) {
+		this.errorNotificationLogger = errorNotificationLogger;
+	}
+
+	/**
+	 * @return the errorNotificationSuppressAfter
+	 */
+	public String getErrorNotificationSuppressAfter() {
+		return errorNotificationSuppressAfter;
+	}
+
+	/**
+	 * @param errorNotificationSuppressAfter the errorNotificationSuppressAfter to set
+	 */
+	public void setErrorNotificationSuppressAfter(String errorNotificationSuppressAfter) {
+		this.errorNotificationSuppressAfter = errorNotificationSuppressAfter;
+	}
+
+	/**
+	 * @return the errorNotificationExpireAfter
+	 */
+	public String getErrorNotificationExpireAfter() {
+		return errorNotificationExpireAfter;
+	}
+
+	/**
+	 * @param errorNotificationExpireAfter the errorNotificationExpireAfter to set
+	 */
+	public void setErrorNotificationExpireAfter(String errorNotificationExpireAfter) {
+		this.errorNotificationExpireAfter = errorNotificationExpireAfter;
+	}
+
+	/**
+	 * @return the errorNotificationDigestFrequency
+	 */
+	public String getErrorNotificationDigestFrequency() {
+		return errorNotificationDigestFrequency;
+	}
+
+	/**
+	 * @param errorNotificationDigestFrequency the errorNotificationDigestFrequency to set
+	 */
+	public void setErrorNotificationDigestFrequency(String errorNotificationDigestFrequency) {
+		this.errorNotificationDigestFrequency = errorNotificationDigestFrequency;
 	}
 }

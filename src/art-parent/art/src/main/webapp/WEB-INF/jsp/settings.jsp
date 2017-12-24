@@ -839,6 +839,87 @@ Settings configuration page
 						</div>
 					</div>
 				</fieldset>
+						
+				<fieldset>
+					<legend><spring:message code="settings.text.errorNotification"/></legend>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationTo">
+							<spring:message code="jobs.label.mailTo"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationTo" maxlength="500" class="form-control"/>
+							<form:errors path="errorNotificationTo" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationFrom">
+							<spring:message code="jobs.label.mailFrom"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationFrom" maxlength="100" class="form-control"/>
+							<form:errors path="errorNotificationFrom" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationSubjectPattern">
+							<spring:message code="settings.label.subjectPattern"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationSubjectPattern" maxlength="50" class="form-control"/>
+							<form:errors path="errorNotificationSubjectPattern" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5">
+							<spring:message code="page.text.level"/>
+						</label>
+						<div class="col-md-7">
+							<c:forEach var="errorNotificatonLevel" items="${errorNotificationLevels}">
+								<label class="radio-inline">
+									<form:radiobutton path="errorNotificatonLevel"
+													  value="${errorNotificatonLevel}"/> ${errorNotificatonLevel.description}
+								</label>
+							</c:forEach>
+							<form:errors path="errorNotificatonLevel" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationLogger">
+							<spring:message code="logs.text.logger"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationLogger" maxlength="200" class="form-control"/>
+							<form:errors path="errorNotificationLogger" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationSuppressAfter">
+							<spring:message code="settings.label.suppressAfter"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationSuppressAfter" maxlength="30" class="form-control"/>
+							<form:errors path="errorNotificationSuppressAfter" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationExpireAfter">
+							<spring:message code="settings.label.expireAfter"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationExpireAfter" maxlength="20" class="form-control"/>
+							<form:errors path="errorNotificationExpireAfter" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationDigestFrequency">
+							<spring:message code="settings.label.digestFrequency"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationDigestFrequency" maxlength="20" class="form-control"/>
+							<form:errors path="errorNotificationDigestFrequency" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
 
 				<div class="form-group">
 					<div class="col-md-12">

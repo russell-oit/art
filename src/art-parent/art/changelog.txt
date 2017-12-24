@@ -12,6 +12,7 @@ ART 3.2
 * Added context path variable for freemarker and thymleaf output
 * Added useLowerCaseProperties option for template reports
 * Allow for testing of ftp, sftp and network share connections
+* Allow for email notification on application errors
 * Updated mariadb driver
 
 ART 3.1

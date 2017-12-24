@@ -23,6 +23,7 @@ import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
+import art.enums.LoggerLevel;
 import art.enums.PdfPageSize;
 import art.servlets.Config;
 import art.user.User;
@@ -58,7 +59,7 @@ public class SettingsController {
 
 	@Autowired
 	private DatasourceService datasourceService;
-	
+
 	@Autowired
 	private SettingsService settingsService;
 
@@ -139,7 +140,7 @@ public class SettingsController {
 			}
 		}
 		settings.setLdapBindPassword(newLdapBindPassword);
-		
+
 		//encrypt password fields
 		String clearTextSmtpPassword = settings.getSmtpPassword();
 		String clearTextLdapBindPassword = settings.getLdapBindPassword();
@@ -153,13 +154,13 @@ public class SettingsController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			settingsService.updateSettings(settings, sessionUser);
-			
+
 			session.setAttribute("administratorEmail", settings.getAdministratorEmail());
 			session.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
 
 			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
 			servletContext.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
-			
+
 			Config.loadSettings();
 
 			//use redirect after successful submission 
@@ -180,6 +181,13 @@ public class SettingsController {
 	 * @return the jsp file to display
 	 */
 	private String showEditSettings(Model model) {
+		List<LoggerLevel> errorNotificationLevels = LoggerLevel.list();
+		errorNotificationLevels.remove(LoggerLevel.OFF);
+		errorNotificationLevels.remove(LoggerLevel.DEBUG);
+		errorNotificationLevels.remove(LoggerLevel.INFO);
+
+		model.addAttribute("errorNotificationLevels", errorNotificationLevels);
+
 		try {
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
 		} catch (SQLException ex) {

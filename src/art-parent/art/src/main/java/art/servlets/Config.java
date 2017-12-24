@@ -23,6 +23,8 @@ import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionPoolLibrary;
 import art.jobrunners.CleanJob;
+import art.logback.LevelAndLoggerFilter;
+import art.logback.OnLevelEvaluator;
 import art.saiku.SaikuConnectionManager;
 import art.saiku.SaikuConnectionProvider;
 import art.settings.CustomSettings;
@@ -33,15 +35,10 @@ import art.utils.SchedulerUtils;
 import art.utils.UpgradeHelper;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.db.DBAppender;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.filter.LevelFilter;
-import ch.qos.logback.classic.filter.ThresholdFilter;
+import ch.qos.logback.classic.html.HTMLLayout;
 import ch.qos.logback.classic.net.SMTPAppender;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.db.DataSourceConnectionSource;
-import ch.qos.logback.core.spi.FilterReply;
 import com.eclecticlogic.whisper.logback.WhisperAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
@@ -134,8 +131,6 @@ public class Config extends HttpServlet {
 	 */
 	@Override
 	public void destroy() {
-		logger.debug("Entering destroy");
-
 		//shutdown quartz scheduler
 		SchedulerUtils.shutdownScheduler();
 
@@ -151,19 +146,19 @@ public class Config extends HttpServlet {
 
 		//http://logback.10977.n7.nabble.com/Shutting-down-async-appenders-when-using-logback-through-slf4j-td12505.html
 		//http://logback.qos.ch/manual/configuration.html#stopContext
-//		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-//		loggerContext.stop();
+		//explicitly stop logback to avoid tomcat reporting that some threads were not stopped
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		loggerContext.stop();
 		try {
 			//wait for a while to avoid tomcat reporting that quartz threads were not stopped
 			//https://jira.terracotta.org/jira/browse/QTZ-122
 			//http://forums.terracotta.org/forums/posts/list/3479.page
 			//https://stackoverflow.com/questions/34869562/quartz-scheduler-memory-leak-in-tomcat
 			//https://stackoverflow.com/questions/7586255/quartz-memory-leak
-
-			final long QUARTZ_SHUTDOWN_DELAY_SECONDS = 2;
+			final long QUARTZ_SHUTDOWN_DELAY_SECONDS = 1;
 			TimeUnit.SECONDS.sleep(QUARTZ_SHUTDOWN_DELAY_SECONDS);
 		} catch (InterruptedException ex) {
-			//logger.error("Error", ex);
+			//logger already stopped so can't use logger.error()
 		}
 	}
 
@@ -1192,49 +1187,62 @@ public class Config extends HttpServlet {
 			rootLogger.detachAppender(tempWhisperAppender);
 		}
 
+		final String DIGEST_LOGGER_NAME = "digest.appender.logger";
+		ch.qos.logback.classic.Logger digestLogger = loggerContext.getLogger(DIGEST_LOGGER_NAME);
+		digestLogger.detachAndStopAllAppenders();
+		digestLogger.setLevel(Level.OFF);
+		digestLogger.setAdditive(false);
+
+		String errorNotificationTo = settings.getErrorNotificationTo();
+		if (StringUtils.isBlank(errorNotificationTo)) {
+			return;
+		}
+
 		if (!customSettings.isEnableEmailing()) {
 			logger.info("Emailing disabled");
 			return;
 		}
 
 		if (!isEmailServerConfigured()) {
+			logger.info("Email server not configured");
 			return;
 		}
 
-		String level = "error";
-//		ThresholdFilter levelFilter = new ThresholdFilter();
-//		levelFilter.setName("levelFilter");
-//		levelFilter.setContext(loggerContext);
-//		levelFilter.setLevel(level);
-//		levelFilter.start();
+		String levelString = settings.getErrorNotificatonLevel().getValue();
+		Level level = Level.toLevel(levelString);
 
-		LevelFilter levelFilter = new LevelFilter();
-		levelFilter.setName("levelFilter");
-		levelFilter.setContext(loggerContext);
-		levelFilter.setLevel(Level.ERROR);
-		levelFilter.setOnMatch(FilterReply.ACCEPT);
-		levelFilter.setOnMismatch(FilterReply.DENY);
-		levelFilter.start();
+		String loggers = settings.getErrorNotificationLogger();
 
-		PatternLayout layout = new PatternLayout();
+		LevelAndLoggerFilter filter = new LevelAndLoggerFilter(level, loggers);
+		filter.setName("filter");
+		filter.setContext(loggerContext);
+		filter.start();
+
+		//https://stackoverflow.com/questions/47315788/logback-not-sending-email-for-level-less-than-error
+		//https://stackoverflow.com/questions/24739509/logback-fire-mail-for-warnings
+		//https://stackoverflow.com/questions/16827033/why-is-logback-smtpappender-only-sending-1-email
+		//https://amitstechblog.wordpress.com/2011/11/02/email-alerts-with-logback/
+		OnLevelEvaluator evaluator = new OnLevelEvaluator(level);
+
+		//https://logback.qos.ch/manual/layouts.html#ClassicHTMLLayout
+		HTMLLayout layout = new HTMLLayout();
 		layout.setContext(loggerContext);
-		layout.setPattern("[%level] %date{dd-MMM-yyyy HH:mm:ss.SSS} - %msg%n");
 		layout.start();
 
-		String errorNotificationTo = "admin@localhost.local";
-		String errorNotificationFrom = "admin@localhost.local";
+		String errorNotificationFrom = settings.getErrorNotificationFrom();
 		String smtpHost = settings.getSmtpServer();
 		int port = settings.getSmtpPort();
 		boolean userStartTls = settings.isSmtpUseStartTls();
 		boolean useSmtpAuthentication = settings.isUseSmtpAuthentication();
 		String username = settings.getSmtpUsername();
 		String password = settings.getSmtpPassword();
-		String subject = "ART [%level]: %logger - %m";
+		String subject = settings.getErrorNotificationSubjectPattern();
 
+		//https://logback.qos.ch/manual/appenders.html#SMTPAppender
 		SMTPAppender errorEmailAppender = new SMTPAppender();
 		errorEmailAppender.setName("errorEmail");
 		errorEmailAppender.setContext(loggerContext);
-		errorEmailAppender.addFilter(levelFilter);
+		errorEmailAppender.addFilter(filter);
 		errorEmailAppender.setSmtpHost(smtpHost);
 		errorEmailAppender.setSmtpPort(port);
 		errorEmailAppender.setSTARTTLS(userStartTls);
@@ -1247,6 +1255,7 @@ public class Config extends HttpServlet {
 		errorEmailAppender.setFrom(errorNotificationFrom);
 		errorEmailAppender.setSubject(subject);
 		errorEmailAppender.setLayout(layout);
+		errorEmailAppender.setEvaluator(evaluator);
 		errorEmailAppender.start();
 
 		subject = "%X{whisper.digest.subject}";
@@ -1264,26 +1273,27 @@ public class Config extends HttpServlet {
 		errorDigestAppender.setFrom(errorNotificationFrom);
 		errorDigestAppender.setSubject(subject);
 		errorDigestAppender.setLayout(layout);
+		errorDigestAppender.setEvaluator(evaluator);
 		errorDigestAppender.start();
 
-		String digestLoggerName = "digest.appender.logger";
-		String suppressAfter = "3 in 5 minutes";
-		String expireAfter = "5 minutes";
-		String digestFrequency = "30 minutes";
+		String suppressAfter = settings.getErrorNotificationSuppressAfter();
+		String expireAfter = settings.getErrorNotificationExpireAfter();
+		String digestFrequency = settings.getErrorNotificationDigestFrequency();
 
 		WhisperAppender whisperAppender = new WhisperAppender();
 		whisperAppender.setName(WHISPER_APPENDER_NAME);
 		whisperAppender.setContext(loggerContext);
-		whisperAppender.addFilter(levelFilter);
-		whisperAppender.setDigestLoggerName(digestLoggerName);
+		whisperAppender.addFilter(filter);
+		whisperAppender.setDigestLoggerName(DIGEST_LOGGER_NAME);
 		whisperAppender.setSuppressAfter(suppressAfter);
 		whisperAppender.setExpireAfter(expireAfter);
 		whisperAppender.setDigestFrequency(digestFrequency);
 		whisperAppender.addAppender(errorEmailAppender);
 		whisperAppender.start();
 
-		ch.qos.logback.classic.Logger digestLogger = loggerContext.getLogger(digestLoggerName);
-		digestLogger.setLevel(Level.ERROR);
+		//note that digest logger messages will always appear as error
+		//https://github.com/eclecticlogic/whisper/blob/master/src/main/java/com/eclecticlogic/whisper/logback/WhisperAppender.java
+		digestLogger.setLevel(level);
 		digestLogger.setAdditive(false);
 		digestLogger.addAppender(errorDigestAppender);
 

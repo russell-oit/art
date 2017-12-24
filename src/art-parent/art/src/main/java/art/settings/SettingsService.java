@@ -23,6 +23,7 @@ import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
+import art.enums.LoggerLevel;
 import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -123,6 +124,14 @@ public class SettingsService {
 			settings.setArtBaseUrl(rs.getString("ART_BASE_URL"));
 			settings.setSystemLocale(rs.getString("SYSTEM_LOCALE"));
 			settings.setLogsDatasourceId(rs.getInt("LOGS_DATASOURCE_ID"));
+			settings.setErrorNotificationTo(rs.getString("ERROR_EMAIL_TO"));
+			settings.setErrorNotificationFrom(rs.getString("ERROR_EMAIL_FROM"));
+			settings.setErrorNotificationSubjectPattern(rs.getString("ERROR_EMAIL_SUBJECT_PATTERN"));
+			settings.setErrorNotificatonLevel(LoggerLevel.toEnum(rs.getString("ERROR_EMAIL_LEVEL")));
+			settings.setErrorNotificationLogger(rs.getString("ERROR_EMAIL_LOGGER"));
+			settings.setErrorNotificationSuppressAfter(rs.getString("ERROR_EMAIL_SUPPRESS_AFTER"));
+			settings.setErrorNotificationExpireAfter(rs.getString("ERROR_EMAIL_EXPIRE_AFTER"));
+			settings.setErrorNotificationDigestFrequency(rs.getString("ERROR_EMAIL_DIGEST_FREQUENCY"));
 			settings.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			settings.setUpdatedBy(rs.getString("UPDATED_BY"));
 
@@ -154,10 +163,10 @@ public class SettingsService {
 
 	/**
 	 * Updates system settings
-	 * 
+	 *
 	 * @param settings the updated settings
 	 * @param actionUser the user performing the action
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public void updateSettings(Settings settings, User actionUser) throws SQLException {
 		logger.debug("Entering updateSettings: actionUser={}", actionUser);
@@ -166,7 +175,7 @@ public class SettingsService {
 
 		sql = "DELETE FROM ART_SETTINGS";
 		dbService.update(sql);
-		
+
 		setSettingsDefaults(settings);
 
 		sql = "INSERT INTO ART_SETTINGS"
@@ -185,9 +194,12 @@ public class SettingsService {
 				+ " MAX_RUNNING_REPORTS, HEADER_IN_PUBLIC_SESSION,"
 				+ " MONDRIAN_CACHE_EXPIRY, SCHEDULING_ENABLED, RSS_LINK,"
 				+ " MAX_FILE_UPLOAD_SIZE, ART_BASE_URL, SYSTEM_LOCALE,"
-				+ " LOGS_DATASOURCE_ID,"
+				+ " LOGS_DATASOURCE_ID, ERROR_EMAIL_TO, ERROR_EMAIL_FROM,"
+				+ " ERROR_EMAIL_SUBJECT_PATTERN, ERROR_EMAIL_LEVEL,"
+				+ " ERROR_EMAIL_LOGGER, ERROR_EMAIL_SUPPRESS_AFTER,"
+				+ " ERROR_EMAIL_EXPIRE_AFTER, ERROR_EMAIL_DIGEST_FREQUENCY,"
 				+ " UPDATE_DATE, UPDATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 46) + ")";
+				+ " VALUES(" + StringUtils.repeat("?", ",", 54) + ")";
 
 		Object[] values = {
 			settings.getSmtpServer(),
@@ -234,6 +246,14 @@ public class SettingsService {
 			settings.getArtBaseUrl(),
 			settings.getSystemLocale(),
 			settings.getLogsDatasourceId(),
+			settings.getErrorNotificationTo(),
+			settings.getErrorNotificationFrom(),
+			settings.getErrorNotificationSubjectPattern(),
+			settings.getErrorNotificatonLevel().getValue(),
+			settings.getErrorNotificationLogger(),
+			settings.getErrorNotificationSuppressAfter(),
+			settings.getErrorNotificationExpireAfter(),
+			settings.getErrorNotificationDigestFrequency(),
 			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 			actionUser.getUsername()
 		};
@@ -249,7 +269,7 @@ public class SettingsService {
 
 	/**
 	 * Sets default values for some settings
-	 * 
+	 *
 	 * @param settings the settings object to set
 	 */
 	public void setSettingsDefaults(Settings settings) {
@@ -290,6 +310,21 @@ public class SettingsService {
 		if (settings.getLdapAuthenticationMethod() == null) {
 			settings.setLdapAuthenticationMethod(LdapAuthenticationMethod.Simple);
 		}
+		if (StringUtils.isBlank(settings.getErrorNotificationSubjectPattern())) {
+			settings.setErrorNotificationSubjectPattern("ART [%level]: %logger - %m");
+		}
+		if (settings.getErrorNotificatonLevel() == null) {
+			settings.setErrorNotificatonLevel(LoggerLevel.ERROR);
+		}
+		if (StringUtils.isBlank(settings.getErrorNotificationSuppressAfter())) {
+			settings.setErrorNotificationSuppressAfter("3 in 5 minutes");
+		}
+		if (StringUtils.isBlank(settings.getErrorNotificationExpireAfter())) {
+			settings.setErrorNotificationExpireAfter("5 minutes");
+		}
+		if (StringUtils.isBlank(settings.getErrorNotificationDigestFrequency())) {
+			settings.setErrorNotificationDigestFrequency("30 minutes");
+		}
 	}
-	
+
 }
