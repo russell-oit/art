@@ -165,7 +165,8 @@ public class Config extends HttpServlet {
 			final long QUARTZ_SHUTDOWN_DELAY_SECONDS = 1;
 			TimeUnit.SECONDS.sleep(QUARTZ_SHUTDOWN_DELAY_SECONDS);
 		} catch (InterruptedException ex) {
-			//logger already stopped so can't use logger.error()
+			//logger context already stopped so can't use logger.error()
+			System.out.println(ex);
 		}
 	}
 
@@ -1206,12 +1207,12 @@ public class Config extends HttpServlet {
 		}
 
 		if (!customSettings.isEnableEmailing()) {
-			logger.info("Emailing disabled");
+			logger.warn("Emailing disabled");
 			return;
 		}
 
 		if (!isEmailServerConfigured()) {
-			logger.info("Email server not configured");
+			logger.warn("Email server not configured");
 			return;
 		}
 

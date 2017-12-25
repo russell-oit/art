@@ -214,21 +214,21 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			if (job == null) {
-				logger.info("Job not found: {}", jobId);
+				logger.warn("Job not found: {}", jobId);
 				jobLogAndClose("Job not found");
 				return;
 			}
 
 			Report report = job.getReport();
 			if (report == null) {
-				logger.info("Job report not found: Job ID {}", jobId);
+				logger.warn("Job report not found: Job Id {}", jobId);
 				jobLogAndClose("Job report not found");
 				return;
 			}
 
 			User user = job.getUser();
 			if (user == null) {
-				logger.info("Job user not found: Job ID {}", jobId);
+				logger.warn("Job user not found: Job Id {}", jobId);
 				jobLogAndClose("Job user not found");
 				return;
 			}
@@ -1011,12 +1011,12 @@ public class ReportJob implements org.quartz.Job {
 
 			if (!FTPReply.isPositiveCompletion(reply)) {
 				ftpClient.disconnect();
-				logger.info("FTP server refused connection. Job Id {}", jobId);
+				logger.warn("FTP server refused connection. Job Id {}", jobId);
 				return;
 			}
 
 			if (!ftpClient.login(user, password)) {
-				logger.info("FTP login failed. Job Id {}", jobId);
+				logger.warn("FTP login failed. Job Id {}", jobId);
 				return;
 			}
 
@@ -1050,7 +1050,7 @@ public class ReportJob implements org.quartz.Job {
 			if (done) {
 				logger.debug("Ftp file upload successful. Job Id {}", jobId);
 			} else {
-				logger.info("Ftp file upload failed. Job Id {}", jobId);
+				logger.warn("Ftp file upload failed. Job Id {}", jobId);
 			}
 
 			ftpClient.logout();
@@ -1273,21 +1273,21 @@ public class ReportJob implements org.quartz.Job {
 		boolean sendEmail = true;
 		if (!Config.getCustomSettings().isEnableEmailing()) {
 			sendEmail = false;
-			logger.info("Emailing disabled. Job Id {}", jobId);
+			logger.warn("Emailing disabled. Job Id {}", jobId);
 			runMessage = "jobs.message.emailingDisabled";
 		} else if (jobSmtpServer != null) {
 			if (!jobSmtpServer.isActive()) {
 				sendEmail = false;
-				logger.info("Job smtp server disabled. Job Id {}", jobId);
+				logger.warn("Job smtp server disabled. Job Id {}", jobId);
 				runMessage = "jobs.message.jobSmtpServerDisabled";
 			} else if (StringUtils.isBlank(jobSmtpServer.getServer())) {
 				sendEmail = false;
-				logger.info("Job smtp server not configured. Job Id {}", jobId);
+				logger.warn("Job smtp server not configured. Job Id {}", jobId);
 				runMessage = "jobs.message.jobSmtpServerNotConfigured";
 			}
 		} else if (!Config.isEmailServerConfigured()) {
 			sendEmail = false;
-			logger.info("Email server not configured. Job Id {}", jobId);
+			logger.warn("Email server not configured. Job Id {}", jobId);
 			runMessage = "jobs.message.emailServerNotConfigured";
 		}
 
