@@ -55,7 +55,7 @@ public class WindowsDomainLogin {
 		logger.debug("domainController='{}'", domainController);
 
 		if (StringUtils.isBlank(domainController)) {
-			logger.warn("Windows Domain authentication not configured. username='{}'", username);
+			logger.info("Windows Domain authentication not configured. username='{}'", username);
 
 			result.setMessage("login.message.windowsDomainAuthenticationNotConfigured");
 			result.setDetails("windows domain authentication not configured");

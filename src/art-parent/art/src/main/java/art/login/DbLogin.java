@@ -55,7 +55,7 @@ public class DbLogin {
 		logger.debug("Url='{}'", url);
 
 		if (StringUtils.isBlank(url)) {
-			logger.warn("Database authentication not configured. username='{}'", username);
+			logger.info("Database authentication not configured. username='{}'", username);
 
 			result.setMessage("login.message.databaseAuthenticationNotConfigured");
 			result.setDetails("database authentication not configured");

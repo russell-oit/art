@@ -1207,12 +1207,12 @@ public class Config extends HttpServlet {
 		}
 
 		if (!customSettings.isEnableEmailing()) {
-			logger.warn("Emailing disabled");
+			logger.info("Emailing disabled");
 			return;
 		}
 
 		if (!isEmailServerConfigured()) {
-			logger.warn("Email server not configured");
+			logger.info("Email server not configured");
 			return;
 		}
 
