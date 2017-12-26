@@ -93,6 +93,11 @@ public class Settings implements Serializable {
 	private String errorNotificationSuppressAfter;
 	private String errorNotificationExpireAfter;
 	private String errorNotificationDigestFrequency;
+	private int passwordMinLength;
+	private int passwordMinLowercase;
+	private int passwordMinUppercase;
+	private int passwordMinNumeric;
+	private int passwordMinSpecial;
 
 	/**
 	 * @return the updateDate
@@ -1041,5 +1046,75 @@ public class Settings implements Serializable {
 	 */
 	public void setErrorNotificationDigestFrequency(String errorNotificationDigestFrequency) {
 		this.errorNotificationDigestFrequency = errorNotificationDigestFrequency;
+	}
+
+	/**
+	 * @return the passwordMinLength
+	 */
+	public int getPasswordMinLength() {
+		return passwordMinLength;
+	}
+
+	/**
+	 * @param passwordMinLength the passwordMinLength to set
+	 */
+	public void setPasswordMinLength(int passwordMinLength) {
+		this.passwordMinLength = passwordMinLength;
+	}
+
+	/**
+	 * @return the passwordMinLowercase
+	 */
+	public int getPasswordMinLowercase() {
+		return passwordMinLowercase;
+	}
+
+	/**
+	 * @param passwordMinLowercase the passwordMinLowercase to set
+	 */
+	public void setPasswordMinLowercase(int passwordMinLowercase) {
+		this.passwordMinLowercase = passwordMinLowercase;
+	}
+
+	/**
+	 * @return the passwordMinUppercase
+	 */
+	public int getPasswordMinUppercase() {
+		return passwordMinUppercase;
+	}
+
+	/**
+	 * @param passwordMinUppercase the passwordMinUppercase to set
+	 */
+	public void setPasswordMinUppercase(int passwordMinUppercase) {
+		this.passwordMinUppercase = passwordMinUppercase;
+	}
+
+	/**
+	 * @return the passwordMinNumeric
+	 */
+	public int getPasswordMinNumeric() {
+		return passwordMinNumeric;
+	}
+
+	/**
+	 * @param passwordMinNumeric the passwordMinNumeric to set
+	 */
+	public void setPasswordMinNumeric(int passwordMinNumeric) {
+		this.passwordMinNumeric = passwordMinNumeric;
+	}
+
+	/**
+	 * @return the passwordMinSpecial
+	 */
+	public int getPasswordMinSpecial() {
+		return passwordMinSpecial;
+	}
+
+	/**
+	 * @param passwordMinSpecial the passwordMinSpecial to set
+	 */
+	public void setPasswordMinSpecial(int passwordMinSpecial) {
+		this.passwordMinSpecial = passwordMinSpecial;
 	}
 }

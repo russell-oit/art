@@ -839,7 +839,7 @@ Settings configuration page
 						</div>
 					</div>
 				</fieldset>
-						
+
 				<fieldset>
 					<legend><spring:message code="settings.text.errorNotification"/></legend>
 					<div class="form-group">
@@ -917,6 +917,55 @@ Settings configuration page
 						<div class="col-md-7">
 							<form:input path="errorNotificationDigestFrequency" maxlength="20" class="form-control"/>
 							<form:errors path="errorNotificationDigestFrequency" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset>
+					<legend><spring:message code="settings.text.passwordPolicy"/></legend>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinLength">
+							<spring:message code="settings.label.passwordMinLength"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinLength" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinLength" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinLowercase">
+							<spring:message code="settings.label.passwordMinLowercase"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinLowercase" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinLowercase" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinUppercase">
+							<spring:message code="settings.label.passwordMinUppercase"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinUppercase" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinUppercase" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinNumeric">
+							<spring:message code="settings.label.passwordMinNumeric"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinNumeric" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinNumeric" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinSpecial">
+							<spring:message code="settings.label.passwordMinSpecial"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinSpecial" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinSpecial" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

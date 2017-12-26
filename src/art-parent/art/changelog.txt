@@ -13,6 +13,7 @@ ART 3.2
 * Added useLowerCaseProperties option for template reports
 * Allow for testing of ftp, sftp and network share connections
 * Allow for email notification on application errors
+* Allow for specifying of password policy for internal authentication passwords
 * Updated mariadb driver
 
 ART 3.1
