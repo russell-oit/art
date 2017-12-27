@@ -14,7 +14,7 @@ ART 3.2
 * Allow for testing of ftp, sftp and network share connections
 * Allow for email notification on application errors
 * Allow for specifying of password policy for internal authentication passwords
-* Updated mariadb driver
+* Updated mariadb driver, poi, jxls
 
 ART 3.1
 * Allow dynamic lov to use a dynamic datasource when the lov is a chained parameter
