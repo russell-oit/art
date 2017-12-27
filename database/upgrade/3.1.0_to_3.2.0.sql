@@ -7,9 +7,13 @@
 -- add smtp server id to jobs
 -- add job options field
 -- create settings table
+-- change jobs message column to clob
 
 
 -- NOTES:
+-- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
+-- for postgresql, replace the MODIFY keyword with ALTER COLUMN <column name> TYPE <data type>
+
 -- for sql server, mysql replace TIMESTAMP with DATETIME
 
 -- for sql server, replace CLOB with VARCHAR(MAX)
@@ -121,3 +125,6 @@ CREATE TABLE ART_SETTINGS
 	UPDATE_DATE TIMESTAMP,
 	UPDATED_BY VARCHAR(50)
 );
+
+-- change jobs message column to clob
+ALTER TABLE ART_JOBS MODIFY MESSAGE CLOB;
