@@ -127,7 +127,24 @@
 				],
 				toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
 				toolbar2: "print preview | forecolor backcolor | link image | code",
-				image_advtab: true
+				image_advtab: true,
+				//https://codepen.io/nirajmchauhan/pen/EjQLpV
+				paste_data_images: true,
+				file_picker_callback: function (callback, value, meta) {
+					if (meta.filetype == 'image') {
+						$('#upload').trigger('click');
+						$('#upload').on('change', function () {
+							var file = this.files[0];
+							var reader = new FileReader();
+							reader.onload = function (e) {
+								callback(e.target.result, {
+									alt: ''
+								});
+							};
+							reader.readAsDataURL(file);
+						});
+					}
+				}
 			});
 		</script>
 
@@ -874,6 +891,7 @@
 						<div class="form-group">
 							<div class="col-md-12">
 								<form:textarea path="mailMessage" rows="8" cols="60" class="form-control editor"/>
+								<input name="image" type="file" id="upload" style="display:none;" onchange="">
 								<form:errors path="mailMessage" cssClass="error"/>
 							</div>
 						</div>
