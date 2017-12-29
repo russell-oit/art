@@ -172,21 +172,7 @@ public class RunReportHelper {
 		ReportType reportType = report.getReportType();
 
 		//create map in order to display parameters by position
-		Map<Integer, ReportParameter> reportParams = new TreeMap<>();
-		//for dashboard different report parameters for different reports may have
-		//same position so just display all in the order of the list (an arbitrary order)
-		if (reportType.isDashboard()) {
-			Integer count = 0;
-			for (ReportParameter reportParam : reportParamsList) {
-				count++;
-				reportParams.put(count, reportParam);
-			}
-		} else {
-			for (ReportParameter reportParam : reportParamsList) {
-				reportParams.put(reportParam.getPosition(), reportParam);
-			}
-		}
-
+		Map<Integer, ReportParameter> reportParams = getSelectParameters(report, reportParamsList);
 		request.setAttribute("reportParams", reportParams);
 
 		boolean enableReportFormats;
@@ -613,6 +599,37 @@ public class RunReportHelper {
 		}
 
 		return resultSetType;
+	}
+
+	/**
+	 * Returns a map of select report parameters. Parameters to be displayed in
+	 * position order.
+	 *
+	 * @param report the relevant report
+	 * @param reportParamsList the report parameters list
+	 * @return map of select report parameters
+	 */
+	public Map<Integer, ReportParameter> getSelectParameters(Report report,
+			List<ReportParameter> reportParamsList) {
+
+		//create map in order to display parameters by position
+		Map<Integer, ReportParameter> reportParams = new TreeMap<>();
+		//for dashboard different report parameters for different reports may have
+		//same position so just display all in the order of the list (an arbitrary order)
+		ReportType reportType = report.getReportType();
+		if (reportType.isDashboard()) {
+			Integer count = 0;
+			for (ReportParameter reportParam : reportParamsList) {
+				count++;
+				reportParams.put(count, reportParam);
+			}
+		} else {
+			for (ReportParameter reportParam : reportParamsList) {
+				reportParams.put(reportParam.getPosition(), reportParam);
+			}
+		}
+
+		return reportParams;
 	}
 
 }

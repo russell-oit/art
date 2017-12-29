@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -586,15 +585,12 @@ public class JobController {
 	 */
 	private void addParameters(Model model, ParameterProcessorResult paramProcessorResult,
 			Report report, HttpServletRequest request) {
-
-		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+		
+		RunReportHelper runReportHelper = new RunReportHelper();
 
 		//create map in order to display parameters by position
-		Map<Integer, ReportParameter> reportParams = new TreeMap<>();
-		for (ReportParameter reportParam : reportParamsList) {
-			reportParams.put(reportParam.getPosition(), reportParam);
-		}
-
+		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+		Map<Integer, ReportParameter> reportParams = runReportHelper.getSelectParameters(report, reportParamsList);
 		model.addAttribute("reportParams", reportParams);
 
 		//add report options for the showSelectedParameters and swapAxes options
@@ -606,7 +602,6 @@ public class JobController {
 		ChartOptions effectiveChartOptions = reportOutputGenerator.getEffectiveChartOptions(report, parameterChartOptions);
 		model.addAttribute("chartOptions", effectiveChartOptions);
 
-		RunReportHelper runReportHelper = new RunReportHelper();
 		runReportHelper.setEnableSwapAxes(report.getReportType(), request);
 	}
 
