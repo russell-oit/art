@@ -175,18 +175,6 @@
 					$('#startDatePicker').data("DateTimePicker").maxDate(e.date);
 				});
 
-				$('.datepicker').datetimepicker({
-					format: 'YYYY-MM-DD',
-					locale: '${pageContext.response.locale}',
-					keepInvalid: true
-				});
-
-				$('.datetimepicker').datetimepicker({
-					format: 'YYYY-MM-DD HH:mm:ss',
-					locale: '${pageContext.response.locale}',
-					keepInvalid: true
-				});
-
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,

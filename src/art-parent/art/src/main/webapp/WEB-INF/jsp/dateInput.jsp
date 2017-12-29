@@ -11,8 +11,8 @@ Display input for date and datetime parameters
 
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<div class='input-group date datepicker'>
-	<input type='text' class="form-control" data-date-format="YYYY-MM-DD"
+<div id="div-${encode:forHtmlAttribute(reportParam.htmlElementName)}" class='input-group date'>
+	<input type='text' class="form-control"
 		   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(requestContext.locale))}"
 		   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
@@ -23,10 +23,24 @@ Display input for date and datetime parameters
 </div>
 
 <script>
-	var javaDateFormat = '${reportParam.parameter.dateFormat}';
+	var javaDateFormat = '${encode:forJavaScript(reportParam.parameter.dateFormat)}';
+	var finalDateFormat;
 	if (javaDateFormat) {
 		var momentDateFormat = moment().toMomentFormatString(javaDateFormat);
-		$('#${reportParam.htmlElementName}').data('date-format', momentDateFormat);
+		finalDateFormat = momentDateFormat;
+	} else {
+		finalDateFormat = 'YYYY-MM-DD';
 	}
+
+	//must use useStrict in addition to keepInvalid if using the format property
+	//https://github.com/Eonasdan/bootstrap-datetimepicker/issues/1711
+	//https://github.com/Eonasdan/bootstrap-datetimepicker/issues/919
+	//https://eonasdan.github.io/bootstrap-datetimepicker/Options/
+	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').datetimepicker({
+		locale: '${requestContext.locale}',
+		format: finalDateFormat,
+		keepInvalid: true,
+		useStrict: true
+	});
 </script>
 
