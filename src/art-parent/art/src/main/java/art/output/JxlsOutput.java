@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,8 +40,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jxls.area.Area;
 import org.jxls.builder.AreaBuilder;
 import org.jxls.builder.xml.XmlAreaBuilder;
@@ -97,7 +102,7 @@ public class JxlsOutput {
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
 			String outputFileName)
-			throws SQLException, IOException, InvalidFormatException {
+			throws SQLException, IOException, InvalidFormatException, GeneralSecurityException {
 
 		logger.debug("Entering generateReport");
 
@@ -178,6 +183,34 @@ public class JxlsOutput {
 			}
 
 			process(fullTemplateFileName, outputFileName, areaConfigFilename, context, fullAreaConfigFilename, jxlsOptions);
+
+			String extension = FilenameUtils.getExtension(templateFileName);
+			if (!StringUtils.equalsIgnoreCase(extension, "xls")) {
+				//set modify password
+				String modifyPassword = report.getModifyPassword();
+				if (StringUtils.isNotEmpty(modifyPassword)) {
+					//https://stackoverflow.com/questions/17556108/open-existing-xls-in-apache-poi
+					//https://stackoverflow.com/questions/20340915/how-to-go-though-the-sheets-of-a-workbook-with-apache-poi
+					try (InputStream is = new FileInputStream(outputFileName)) {
+						//use inputstream instead of File. Using File results in an exception on wb.write()
+						Workbook wb = WorkbookFactory.create(is);
+						for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+							Sheet sheet = wb.getSheetAt(i);
+							sheet.protectSheet(modifyPassword);
+						}
+
+						try (FileOutputStream fout = new FileOutputStream(outputFileName)) {
+							wb.write(fout);
+						}
+					}
+				}
+
+				//set open password
+				String openPassword = report.getOpenPassword();
+				if (StringUtils.isNotEmpty(openPassword)) {
+					PoiUtils.addOpenPassword(openPassword, outputFileName);
+				}
+			}
 		} finally {
 			DatabaseUtils.close(conn);
 		}

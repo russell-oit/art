@@ -14,6 +14,7 @@ ART 3.2
 * Allow for testing of ftp, sftp and network share connections
 * Allow for email notification on application errors
 * Allow for specifying of password policy for internal authentication passwords
+* Allow jxls reports to use open and modify passwords
 * Updated mariadb driver, poi, jxls
 
 ART 3.1

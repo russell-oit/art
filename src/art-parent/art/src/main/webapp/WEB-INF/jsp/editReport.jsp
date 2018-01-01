@@ -759,6 +759,8 @@ Edit report page
 					case 124: //xdocreport docx velocity
 					case 125: //xdocreport odt freemarker
 					case 126: //xdocreport odt velocity
+					case 117: //jxls template
+					case 118: //jxls art
 						$("#openPasswordDiv").show();
 						$("#modifyPasswordDiv").show();
 						break;
