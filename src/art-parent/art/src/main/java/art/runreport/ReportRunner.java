@@ -624,6 +624,7 @@ public class ReportRunner {
 			jdbcParams.clear();
 			for (ReportParameter reportParam : jdbcParamOrder.values()) {
 				for (Object paramValue : reportParam.getActualParameterValues()) {
+					logger.debug("{} - {}", reportParam, paramValue);
 					addJdbcParam(paramValue, reportParam.getParameter().getDataType());
 				}
 			}
