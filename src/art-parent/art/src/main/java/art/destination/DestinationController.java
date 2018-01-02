@@ -25,6 +25,8 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Module;
 import com.hierynomus.smbj.SMBClient;
 import com.hierynomus.smbj.SmbConfig;
 import com.hierynomus.smbj.auth.AuthenticationContext;
@@ -44,6 +46,10 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.jclouds.ContextBuilder;
+import org.jclouds.blobstore.BlobStore;
+import org.jclouds.blobstore.BlobStoreContext;
+import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -435,6 +441,12 @@ public class DestinationController {
 			case NetworkShare:
 				testNetworkShare(server, port, user, password, domain, path, options);
 				break;
+			case S3:
+				testBlobStorage("aws-s3", user, password, path);
+				break;
+			case Azure:
+				testBlobStorage("azureblob", user, password, path);
+				break;
 			default:
 			//do nothing
 		}
@@ -632,5 +644,35 @@ public class DestinationController {
 			}
 		}
 
+	}
+
+	/**
+	 * Tests an s3 or azure connection. Throws a runtime exception if the
+	 * connection was not successful. Otherwise the connection was successful.
+	 *
+	 * @param provider either "aws-s3" or "azureblob"
+	 * @param user the user to connect to the blob store
+	 * @param password the password to connect to the blob store
+	 * @param path the bucket or container name
+	 */
+	private void testBlobStorage(String provider, String user, String password,
+			String path) {
+
+		Iterable<Module> modules = ImmutableSet.<Module>of(
+				new SLF4JLoggingModule());
+
+		BlobStoreContext context = ContextBuilder.newBuilder(provider)
+				.credentials(user, password)
+				.modules(modules)
+				.buildView(BlobStoreContext.class);
+
+		try {
+			BlobStore blobStore = context.getBlobStore();
+			blobStore.createContainerInLocation(null, path);
+		} finally {
+			if (context != null) {
+				context.close();
+			}
+		}
 	}
 }

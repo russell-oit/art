@@ -207,6 +207,8 @@
 					case 'FTP':
 					case 'SFTP':
 					case 'NetworkShare':
+					case 'S3':
+					case 'Azure':
 						$("#testConnection").show();
 						break;
 					default:

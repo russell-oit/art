@@ -11,7 +11,7 @@ ART 3.2
 * Allow application logs to be written to a database
 * Added context path variable for freemarker and thymleaf output
 * Added useLowerCaseProperties option for template reports
-* Allow for testing of ftp, sftp and network share connections
+* Allow for testing of ftp, sftp, network share, s3 and azure connections
 * Allow for email notification on application errors
 * Allow for specifying of password policy for internal authentication passwords
 * Allow jxls reports to use open and modify passwords
