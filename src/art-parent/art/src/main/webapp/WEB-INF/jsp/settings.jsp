@@ -190,7 +190,7 @@ Settings configuration page
 							</label>
 							<div class="col-md-7">
 								<div class="input-group">
-									<form:password path="smtpPassword" maxlength="50" autocomplete="off" class="form-control" />
+									<form:password path="smtpPassword" maxlength="100" autocomplete="off" class="form-control" />
 									<spring:message code="page.help.password" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
@@ -405,7 +405,7 @@ Settings configuration page
 							</label>
 							<div class="col-md-7">
 								<div class="input-group">
-									<form:password path="ldapBindPassword" maxlength="50"
+									<form:password path="ldapBindPassword" maxlength="100"
 												   autocomplete="off" class="form-control"/>
 									<spring:message code="page.help.password" var="help"/>
 									<span class="input-group-btn" >

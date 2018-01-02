@@ -1200,7 +1200,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div>
-							<form:password path="openPassword" autocomplete="off" maxlength="50" class="form-control"/>
+							<form:password path="openPassword" autocomplete="off" maxlength="100" class="form-control"/>
 						</div>
 						<div>
 							<label class="checkbox-inline">
@@ -1218,7 +1218,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div>
-							<form:password path="modifyPassword" autocomplete="off" maxlength="50" class="form-control"/>
+							<form:password path="modifyPassword" autocomplete="off" maxlength="100" class="form-control"/>
 						</div>
 						<div>
 							<label class="checkbox-inline">

@@ -201,7 +201,7 @@
 							<spring:message code="encryptors.label.aesCryptPassword"/>
 						</label>
 						<div class="col-md-8">
-							<form:password path="aesCryptPassword" autocomplete="off" maxlength="50" class="form-control" />
+							<form:password path="aesCryptPassword" autocomplete="off" maxlength="100" class="form-control" />
 							<form:errors path="aesCryptPassword" cssClass="error"/>
 						</div>
 					</div>
