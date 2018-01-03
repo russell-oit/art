@@ -27,7 +27,7 @@
 		<owasp.encoder.version>1.2.1</owasp.encoder.version>
 		<thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
 		<xdocreport.version>2.0.1</xdocreport.version>
-		<jclouds.version>2.0.2</jclouds.version>
+		<jclouds.version>2.0.3</jclouds.version>
 	</properties>
 
 	<build>

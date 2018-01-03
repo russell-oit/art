@@ -15,7 +15,7 @@ ART 3.2
 * Allow for email notification on application errors
 * Allow for specifying of password policy for internal authentication passwords
 * Allow jxls reports to use open and modify passwords
-* Updated mariadb driver, poi, jxls
+* Updated mariadb driver, poi, jxls, jclouds
 
 ART 3.1
 * Allow dynamic lov to use a dynamic datasource when the lov is a chained parameter
