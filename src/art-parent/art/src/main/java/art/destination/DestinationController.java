@@ -668,6 +668,10 @@ public class DestinationController {
 
 		try {
 			BlobStore blobStore = context.getBlobStore();
+			//requires s3:GetBucketLocation and s3:ListBucket permissions.
+			//user may only have s3:PutObject so the only way to test in that case
+			//would be by upload a test file, which may not be desirable
+			//https://sourceforge.net/p/art/discussion/352129/thread/d7715b2c/?limit=25
 			blobStore.createContainerInLocation(null, path);
 		} finally {
 			if (context != null) {
