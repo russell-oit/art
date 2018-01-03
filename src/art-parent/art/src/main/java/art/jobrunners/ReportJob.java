@@ -123,6 +123,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.tika.Tika;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -699,7 +700,7 @@ public class ReportJob implements org.quartz.Job {
 						throw new IllegalArgumentException("unknown location: " + containerLocation);
 					}
 				}
-				
+
 				boolean created = blobStore.createContainerInLocation(location, containerName);
 				if (created) {
 					// the container didn't exist, but does now
@@ -719,11 +720,22 @@ public class ReportJob implements org.quartz.Job {
 
 			String remoteFileName = finalPath + fileName;
 
-			ByteSource payload = Files.asByteSource(new File(fullLocalFileName));
+			File localFile = new File(fullLocalFileName);
+
+			String mimeType = "application/unknown"; //if contentType() is not specified, uploaded file has metadata content type of application/unknown
+			Tika tika = new Tika();
+			try {
+				mimeType = tika.detect(localFile);
+			} catch (IOException ex) {
+				logError(ex);
+			}
+
+			ByteSource payload = Files.asByteSource(localFile);
 			Blob blob = blobStore.blobBuilder(remoteFileName)
 					.payload(payload)
 					.contentDisposition(fileName)
 					.contentLength(payload.size())
+					.contentType(mimeType)
 					.build();
 
 			// Upload the Blob
