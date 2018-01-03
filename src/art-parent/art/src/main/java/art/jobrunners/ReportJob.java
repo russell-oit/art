@@ -23,6 +23,7 @@ import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.destination.Destination;
+import art.destinationoptions.BlobStorageOptions;
 import art.destinationoptions.FtpOptions;
 import art.destinationoptions.NetworkShareOptions;
 import art.destinationoptions.SftpOptions;
@@ -127,6 +128,7 @@ import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
+import org.jclouds.domain.Location;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
@@ -671,13 +673,41 @@ public class ReportJob implements org.quartz.Job {
 			BlobStore blobStore = context.getBlobStore();
 
 			String containerName = destination.getPath();
-			boolean created = blobStore.createContainerInLocation(null, containerName);
-			if (created) {
-				// the container didn't exist, but does now
-				logger.debug("Container created - '{}'. Job Id {}", containerName, jobId);
+
+			BlobStorageOptions blobStorageOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				blobStorageOptions = new BlobStorageOptions();
 			} else {
-				// the container already existed
-				logger.debug("Container already existed: '{}'. Job Id {}", containerName, jobId);
+				blobStorageOptions = ArtUtils.jsonToObject(options, BlobStorageOptions.class);
+			}
+
+			if (blobStorageOptions.isCreateContainer()) {
+				//https://www.programcreek.com/java-api-examples/index.php?class=org.jclouds.blobstore.BlobStore&method=createContainerInLocation
+				//https://issues.apache.org/jira/browse/JCLOUDS-1213
+				String containerLocation = blobStorageOptions.getContainerLocation();
+				Location location = null;
+				if (StringUtils.isNotBlank(containerLocation)) {
+					for (Location loc : blobStore.listAssignableLocations()) {
+						logger.debug("Location Id - {}", loc.getId());
+						if (loc.getId().equalsIgnoreCase(containerLocation)) {
+							location = loc;
+							break;
+						}
+					}
+					if (location == null) {
+						throw new IllegalArgumentException("unknown location: " + containerLocation);
+					}
+				}
+				
+				boolean created = blobStore.createContainerInLocation(location, containerName);
+				if (created) {
+					// the container didn't exist, but does now
+					logger.debug("Container created - '{}'. Job Id {}", containerName, jobId);
+				} else {
+					// the container already existed
+					logger.debug("Container already existed: '{}'. Job Id {}", containerName, jobId);
+				}
 			}
 
 			// Create a Blob
@@ -3140,7 +3170,7 @@ public class ReportJob implements org.quartz.Job {
 		//https://www.lifewire.com/separate-multiple-email-recipients-1173274
 		//https://www.lifewire.com/commas-to-separate-email-recipients-1173680
 		//https://www.extendoffice.com/documents/outlook/1649-outlook-allow-comma-as-address-separator.html
-		
+
 		String[] emailArray;
 
 		//allow multiple emails separated by , or ;
@@ -3166,7 +3196,7 @@ public class ReportJob implements org.quartz.Job {
 	private String combineEmails(String emailString, List<String> emailList) {
 		List<String> finalEmailList = new ArrayList<>();
 		String[] emailArray = separateEmails(emailString);
-		
+
 		if (emailArray != null) {
 			CollectionUtils.addAll(finalEmailList, emailArray);
 		}

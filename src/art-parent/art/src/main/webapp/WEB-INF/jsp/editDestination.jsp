@@ -166,6 +166,8 @@
 					case 'SFTP':
 					case 'NetworkShare':
 					case 'Website':
+					case 'S3':
+					case 'Azure':
 						$("#optionsDiv").show();
 						break;
 					default:
