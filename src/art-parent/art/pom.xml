@@ -125,6 +125,11 @@
 			<name>Pentaho</name>
 			<url>http://nexus.pentaho.org/content/groups/omni</url>
 		</repository>
+		<!-- jaspersoft repository -->
+		<repository>
+			<id>jaspersoft-repo</id>
+			<url>http://jaspersoft.jfrog.io/jaspersoft/jaspersoft-repo/</url>
+		</repository>
 		<!-- repository for jasperreports itext -->
 		<repository>
 			<id>jaspersoft-third-party</id>
@@ -549,6 +554,11 @@
 					<artifactId>olap4j</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.jaspersoft.connectors.mongodb</groupId>
+			<artifactId>js-mongodb-datasource</artifactId>
+			<version>2.0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
