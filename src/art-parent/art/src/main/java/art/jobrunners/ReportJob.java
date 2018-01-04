@@ -23,6 +23,7 @@ import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.destination.Destination;
+import art.destinationoptions.AmazonS3Options;
 import art.destinationoptions.BlobStorageOptions;
 import art.destinationoptions.FtpOptions;
 import art.destinationoptions.NetworkShareOptions;
@@ -62,6 +63,15 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.github.sardine.Sardine;
 import com.github.sardine.SardineFactory;
 import com.google.common.collect.ImmutableSet;
@@ -303,15 +313,13 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			sendFileToDestinations();
-
 			runBatchFile();
-
-			cacheHelper.clearJobs();
 		} catch (Exception ex) {
 			logErrorAndSetDetails(ex);
 		}
-		
+
 		afterCompletion();
+		cacheHelper.clearJobs();
 
 		long runEndTimeMillis = System.currentTimeMillis();
 
@@ -417,6 +425,9 @@ public class ReportJob implements org.quartz.Job {
 						break;
 					case S3:
 						sendFileToS3(destination, fullLocalFileName);
+						break;
+					case AmazonS3:
+						sendFileToAmazonS3(destination, fullLocalFileName);
 						break;
 					case Azure:
 						sendFileToAzure(destination, fullLocalFileName);
@@ -525,7 +536,7 @@ public class ReportJob implements org.quartz.Job {
 				String postReply = document.body().text();
 				logger.debug("postReply='{}'", postReply);
 			}
-		} catch (IOException ex) {
+		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
 		}
 	}
@@ -621,6 +632,110 @@ public class ReportJob implements org.quartz.Job {
 	private void sendFileToAzure(Destination destination, String fullLocalFileName) {
 		String provider = "azureblob";
 		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+	}
+
+	/**
+	 * Copies the generated file to amazon s3 using the aws-sdk library
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToAmazonS3(Destination destination, String fullLocalFileName) {
+		//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/examples-s3.html
+		//https://javatutorial.net/java-s3-example
+		AmazonS3 s3Client = null;
+
+		try {
+			String accessKeyId = destination.getUser();
+			String secretAccessKey = destination.getPassword();
+
+			//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html#credentials-explicit
+			BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKeyId, secretAccessKey);
+			AmazonS3ClientBuilder s3ClientBuilder = AmazonS3ClientBuilder.standard()
+					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+					.withForceGlobalBucketAccessEnabled(true);
+
+			AmazonS3Options amazonS3Options;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				amazonS3Options = new AmazonS3Options();
+			} else {
+				amazonS3Options = ArtUtils.jsonToObject(options, AmazonS3Options.class);
+			}
+
+			String region = amazonS3Options.getRegion();
+
+			if (StringUtils.isBlank(region)) {
+				//must set a region, otherwise an exception will be thrown
+				//https://stackoverflow.com/questions/17117648/can-the-s3-sdk-figure-out-a-buckets-region-on-its-own?noredirect=1&lq=1
+				//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-logging.html
+				//https://github.com/aws/aws-sdk-java/issues/1284
+				//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-region-selection.html
+				//https://stackoverflow.com/questions/43857570/setting-the-aws-region-programmatically
+				//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html
+				//https://stackoverflow.com/questions/31485331/how-to-set-connection-type-in-aws-java-sdk-https-vs-http
+				final String DEFAULT_REGION = "us-east-1";
+				s3ClientBuilder.withRegion(DEFAULT_REGION);
+			} else {
+				s3ClientBuilder.withRegion(region);
+			}
+
+			s3Client = s3ClientBuilder.build();
+
+			String bucketName = destination.getPath();
+
+			if (amazonS3Options.isCreateBucket()) {
+				if (s3Client.doesBucketExistV2(bucketName)) {
+					logger.debug("Bucket already exists - '{}'. Job Id {}", bucketName, jobId);
+				} else {
+					s3Client.createBucket(bucketName);
+				}
+			}
+
+			String destinationSubDirectory = destination.getSubDirectory();
+			String jobSubDirectory = job.getSubDirectory();
+
+			String directorySeparator = "/";
+			String finalPath = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
+
+			String remoteFileName = finalPath + fileName;
+
+			File localFile = new File(fullLocalFileName);
+
+			String mimeType = "application/unknown";
+			Tika tika = new Tika();
+			try {
+				mimeType = tika.detect(localFile);
+			} catch (IOException ex) {
+				logError(ex);
+			}
+
+			ByteSource payload = Files.asByteSource(localFile);
+
+			ObjectMetadata metadata = new ObjectMetadata();
+			metadata.setContentDisposition(fileName);
+			metadata.setContentLength(payload.size());
+			metadata.setContentType(mimeType);
+
+			try (InputStream is = new FileInputStream(localFile)) {
+				PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, remoteFileName, is, metadata);
+				CannedAccessControlList cannedAcl = amazonS3Options.getCannedAcl();
+				if (cannedAcl != null) {
+					putObjectRequest.withCannedAcl(cannedAcl);
+				}
+
+				PutObjectResult putObjectResult = s3Client.putObject(putObjectRequest);
+				String eTag = putObjectResult.getETag();
+				logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", remoteFileName, eTag, jobId);
+			}
+		} catch (IOException | RuntimeException ex) {
+			logErrorAndSetDetails(ex);
+		} finally {
+			//https://stackoverflow.com/questions/26866739/how-do-i-close-an-aws-s3-client-connection
+			if (s3Client != null) {
+				s3Client.shutdown();
+			}
+		}
 	}
 
 	/**
@@ -741,7 +856,7 @@ public class ReportJob implements org.quartz.Job {
 			// Upload the Blob
 			String eTag = blobStore.putBlob(containerName, blob, multipart());
 			logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", fileName, eTag, jobId);
-		} catch (IOException ex) {
+		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
 		} finally {
 			if (context != null) {
@@ -1096,7 +1211,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			ftpClient.logout();
-		} catch (IOException ex) {
+		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
 		} finally {
 			try {
@@ -1217,7 +1332,7 @@ public class ReportJob implements org.quartz.Job {
 			try (InputStream inputStream = new FileInputStream(localFile)) {
 				channelSftp.put(inputStream, remoteFileName, ChannelSftp.OVERWRITE);
 			}
-		} catch (JSchException | SftpException | IOException ex) {
+		} catch (JSchException | SftpException | IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
 		} finally {
 			if (channelSftp != null) {

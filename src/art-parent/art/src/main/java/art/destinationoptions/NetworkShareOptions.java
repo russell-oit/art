@@ -17,17 +17,14 @@
  */
 package art.destinationoptions;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 /**
  * Represents options for network share destinations
- * 
+ *
  * @author Timothy Anyona
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkShareOptions {
 	//https://github.com/hierynomus/smbj/blob/master/src/main/java/com/hierynomus/smbj/SmbConfig.java
-	
+
 	private boolean anonymousUser;
 	private boolean guestUser;
 	private Long timeoutSeconds;
@@ -148,5 +145,5 @@ public class NetworkShareOptions {
 	public void setBufferSize(Integer bufferSize) {
 		this.bufferSize = bufferSize;
 	}
-	
+
 }

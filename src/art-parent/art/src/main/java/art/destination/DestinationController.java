@@ -25,8 +25,6 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Module;
 import com.hierynomus.smbj.SMBClient;
 import com.hierynomus.smbj.SmbConfig;
 import com.hierynomus.smbj.auth.AuthenticationContext;
@@ -46,10 +44,6 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,7 +217,7 @@ public class DestinationController {
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
+			if (StringUtils.equalsAny(action, "add", "copy")) {
 				destinationService.addDestination(destination, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
@@ -318,7 +312,7 @@ public class DestinationController {
 		if (destination.isUseBlankPassword()) {
 			newPassword = "";
 		} else {
-			if (StringUtils.isEmpty(newPassword) && StringUtils.equals(action, "edit")) {
+			if (StringUtils.isEmpty(newPassword) && StringUtils.equalsAny(action, "edit", "copy")) {
 				//password field blank. use current password
 				useCurrentPassword = true;
 			}
@@ -440,12 +434,6 @@ public class DestinationController {
 				break;
 			case NetworkShare:
 				testNetworkShare(server, port, user, password, domain, path, options);
-				break;
-			case S3:
-				testBlobStorage("aws-s3", user, password, path);
-				break;
-			case Azure:
-				testBlobStorage("azureblob", user, password, path);
 				break;
 			default:
 			//do nothing
@@ -646,37 +634,4 @@ public class DestinationController {
 
 	}
 
-	/**
-	 * Tests an s3 or azure connection. Throws a runtime exception if the
-	 * connection was not successful. Otherwise the connection was successful.
-	 *
-	 * @param provider either "aws-s3" or "azureblob"
-	 * @param user the user to connect to the blob store
-	 * @param password the password to connect to the blob store
-	 * @param path the bucket or container name
-	 */
-	private void testBlobStorage(String provider, String user, String password,
-			String path) {
-
-		Iterable<Module> modules = ImmutableSet.<Module>of(
-				new SLF4JLoggingModule());
-
-		BlobStoreContext context = ContextBuilder.newBuilder(provider)
-				.credentials(user, password)
-				.modules(modules)
-				.buildView(BlobStoreContext.class);
-
-		try {
-			BlobStore blobStore = context.getBlobStore();
-			//requires s3:GetBucketLocation and s3:ListBucket permissions.
-			//user may only have s3:PutObject so the only way to test in that case
-			//would be by upload a test file, which may not be desirable
-			//https://sourceforge.net/p/art/discussion/352129/thread/d7715b2c/?limit=25
-			blobStore.createContainerInLocation(null, path);
-		} finally {
-			if (context != null) {
-				context.close();
-			}
-		}
-	}
 }

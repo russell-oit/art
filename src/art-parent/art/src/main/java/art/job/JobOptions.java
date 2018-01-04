@@ -17,14 +17,11 @@
  */
 package art.job;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 /**
  * Represents options for jobs
  * 
  * @author Timothy Anyona
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class JobOptions {
 	
 	private int logInterval;

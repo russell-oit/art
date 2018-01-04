@@ -314,7 +314,7 @@ public class UserController {
 				user.setPasswordAlgorithm("bcrypt");
 			}
 
-			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
+			if (StringUtils.equalsAny(action, "add", "copy")) {
 				userService.addUser(user, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {

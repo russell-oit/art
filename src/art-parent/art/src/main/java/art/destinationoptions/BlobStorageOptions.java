@@ -17,16 +17,13 @@
  */
 package art.destinationoptions;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 /**
  * Options for blob store destinations i.e. s3, azure
- * 
+ *
  * @author Timothy Anyona
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class BlobStorageOptions {
-	
+
 	private boolean createContainer;
 	private String containerLocation;
 
@@ -57,5 +54,5 @@ public class BlobStorageOptions {
 	public void setContainerLocation(String containerLocation) {
 		this.containerLocation = containerLocation;
 	}
-	
+
 }

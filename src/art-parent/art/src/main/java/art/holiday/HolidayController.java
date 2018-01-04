@@ -188,7 +188,7 @@ public class HolidayController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
+			if (StringUtils.equalsAny(action, "add", "copy")) {
 				holidayService.addHoliday(holiday, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {

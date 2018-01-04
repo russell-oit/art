@@ -167,6 +167,7 @@
 					case 'NetworkShare':
 					case 'Website':
 					case 'S3':
+					case 'AmazonS3':
 					case 'Azure':
 						$("#optionsDiv").show();
 						break;
@@ -187,6 +188,7 @@
 				switch (destinationType) {
 					case 'NetworkShare':
 					case 'S3':
+					case 'AmazonS3':
 					case 'Azure':
 					case 'WebDav':
 						$("#subDirectoryDiv").show();

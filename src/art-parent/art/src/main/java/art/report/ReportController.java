@@ -875,8 +875,7 @@ public class ReportController {
 
 		if (report.isUseNoneOpenPassword()) {
 			newOpenPassword = null;
-		} else if (StringUtils.isEmpty(newOpenPassword)
-				&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
+		} else if (StringUtils.isEmpty(newOpenPassword) && StringUtils.equalsAny(action, "edit", "copy")) {
 			//password field blank. use current password
 			useCurrentOpenPassword = true;
 		}
@@ -905,8 +904,7 @@ public class ReportController {
 
 		if (report.isUseNoneModifyPassword()) {
 			newModifyPassword = null;
-		} else if (StringUtils.isEmpty(newModifyPassword)
-				&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
+		} else if (StringUtils.isEmpty(newModifyPassword) && StringUtils.equalsAny(action, "edit", "copy")) {
 			//password field blank. use current password
 			useCurrentModifyPassword = true;
 		}
