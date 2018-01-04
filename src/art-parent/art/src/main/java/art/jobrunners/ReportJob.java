@@ -306,12 +306,12 @@ public class ReportJob implements org.quartz.Job {
 
 			runBatchFile();
 
-			afterCompletion();
-
 			cacheHelper.clearJobs();
 		} catch (Exception ex) {
-			logError(ex);
+			logErrorAndSetDetails(ex);
 		}
+		
+		afterCompletion();
 
 		long runEndTimeMillis = System.currentTimeMillis();
 
@@ -1669,8 +1669,10 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering afterCompletion");
 
 		//update job details
-		String sql = "UPDATE ART_JOBS SET LAST_END_DATE = ?, LAST_FILE_NAME = ?,"
-				+ " LAST_RUN_MESSAGE=?, LAST_RUN_DETAILS=? WHERE JOB_ID = ?";
+		String sql = "UPDATE ART_JOBS"
+				+ " SET LAST_END_DATE=?, LAST_FILE_NAME=?,"
+				+ " LAST_RUN_MESSAGE=?, LAST_RUN_DETAILS=?"
+				+ " WHERE JOB_ID=?";
 
 		Object[] values = {
 			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
