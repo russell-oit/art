@@ -23,14 +23,15 @@ import java.util.List;
 
 /**
  * Represents destination types
- * 
+ *
  * @author Timothy Anyona
  */
 public enum DestinationType {
-	
-	FTP("FTP"), SFTP("SFTP"), NetworkShare("Network Share"), S3("S3"),
-	AmazonS3("Amazon S3"), Azure("Azure"), WebDav("WebDAV"), Website("Website");
-	
+
+	FTP("FTP"), SFTP("SFTP"), NetworkShare("Network Share"),
+	S3jclouds("Amazon S3 - jclouds"), S3AwsSdk("Amazon S3 - AWS SDK"),
+	Azure("Microsoft Azure"), WebDav("WebDAV"), Website("Website");
+
 	private final String value;
 
 	private DestinationType(String value) {
@@ -82,5 +83,5 @@ public enum DestinationType {
 	public String getDescription() {
 		return value;
 	}
-	
+
 }

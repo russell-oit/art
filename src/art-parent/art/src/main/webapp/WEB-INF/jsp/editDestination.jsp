@@ -166,8 +166,8 @@
 					case 'SFTP':
 					case 'NetworkShare':
 					case 'Website':
-					case 'S3':
-					case 'AmazonS3':
+					case 'S3jclouds':
+					case 'S3AwsSdk':
 					case 'Azure':
 						$("#optionsDiv").show();
 						break;
@@ -187,8 +187,8 @@
 				//show/hide sub-directory field
 				switch (destinationType) {
 					case 'NetworkShare':
-					case 'S3':
-					case 'AmazonS3':
+					case 'S3jclouds':
+					case 'S3AwsSdk':
 					case 'Azure':
 					case 'WebDav':
 						$("#subDirectoryDiv").show();

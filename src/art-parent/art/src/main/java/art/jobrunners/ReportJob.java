@@ -423,11 +423,11 @@ public class ReportJob implements org.quartz.Job {
 					case NetworkShare:
 						sendFileToNetworkShare(destination, fullLocalFileName);
 						break;
-					case S3:
-						sendFileToS3(destination, fullLocalFileName);
+					case S3jclouds:
+						sendFileToS3jclouds(destination, fullLocalFileName);
 						break;
-					case AmazonS3:
-						sendFileToAmazonS3(destination, fullLocalFileName);
+					case S3AwsSdk:
+						sendFileToS3AwsSdk(destination, fullLocalFileName);
 						break;
 					case Azure:
 						sendFileToAzure(destination, fullLocalFileName);
@@ -640,7 +640,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
-	private void sendFileToAmazonS3(Destination destination, String fullLocalFileName) {
+	private void sendFileToS3AwsSdk(Destination destination, String fullLocalFileName) {
 		//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/examples-s3.html
 		//https://javatutorial.net/java-s3-example
 		//https://docs.aws.amazon.com/AmazonS3/latest/dev/HLuploadFileJava.html
@@ -745,12 +745,12 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Copies the generated file to an amazon s3 or compatible storage provider
+	 * Copies the generated file to amazon s3, using the jclouds library
 	 *
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
-	private void sendFileToS3(Destination destination, String fullLocalFileName) {
+	private void sendFileToS3jclouds(Destination destination, String fullLocalFileName) {
 		String provider = "aws-s3";
 		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
