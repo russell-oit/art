@@ -145,25 +145,19 @@ public class JasperReportsOutput {
 			JasperPrint jasperPrint;
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JasperReportsTemplate) {
-
 				// What kind of a datasource are we using?
 				Datasource ds = report.getDatasource();
-				if( ds.getDatasourceType() == DatasourceType.MongoDB ) {
-
+				if (ds.getDatasourceType() == DatasourceType.MongoDB) {
 					MongoDbConnection conn = null;
 					try {
-
-						conn = new MongoDbConnection( ds.getUrl(), ds.getUsername(), ds.getPassword() );
+						conn = new MongoDbConnection(ds.getUrl(), ds.getUsername(), ds.getPassword());
 						jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, conn);
-					}
-					finally {
-
-						if( conn != null )
+					} finally {
+						if (conn != null) {
 							conn.close();
+						}
 					}
-				}
-				else {
-
+				} else {
 					Connection conn = null;
 					try {
 						RunReportHelper runReportHelper = new RunReportHelper();
