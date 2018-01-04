@@ -643,6 +643,12 @@ public class ReportJob implements org.quartz.Job {
 	private void sendFileToAmazonS3(Destination destination, String fullLocalFileName) {
 		//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/examples-s3.html
 		//https://javatutorial.net/java-s3-example
+		//https://docs.aws.amazon.com/AmazonS3/latest/dev/HLuploadFileJava.html
+		//https://stackoverflow.com/questions/46276121/java-aws-sdk-s3-upload-performance
+		//http://improve.dk/pushing-the-limits-of-amazon-s3-upload-performance/
+		//http://javasampleapproach.com/aws/amazon-s3/amazon-s3-uploaddownload-large-files-s3-springboot-amazon-s3-multipartfile-application
+		//https://stackoverflow.com/questions/6590088/uploading-large-files-with-user-metadata-to-amazon-s3-using-java-sdk
+		//https://stackoverflow.com/questions/4698869/problems-when-uploading-large-files-to-amazon-s3
 		AmazonS3 s3Client = null;
 
 		try {
