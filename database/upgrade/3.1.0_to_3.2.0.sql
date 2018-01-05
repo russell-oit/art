@@ -9,7 +9,7 @@
 -- create settings table
 -- change jobs message column to clob
 -- increase length of password columns
--- update name for s3 destination type
+-- update names of destination types
 
 
 -- NOTES:
@@ -139,5 +139,6 @@ ALTER TABLE ART_ENCRYPTORS MODIFY AESCRYPT_PASSWORD VARCHAR(200);
 ALTER TABLE ART_DESTINATIONS MODIFY DESTINATION_PASSWORD VARCHAR(200);
 ALTER TABLE ART_SMTP_SERVERS MODIFY PASSWORD VARCHAR(200);
 
--- update name for s3 destination type
+-- update names of destination types
 UPDATE ART_DESTINATIONS SET DESTINATION_TYPE='Amazon S3 - jclouds' WHERE DESTINATION_TYPE='S3';
+UPDATE ART_DESTINATIONS SET DESTINATION_TYPE='Microsoft Azure' WHERE DESTINATION_TYPE='Azure';
