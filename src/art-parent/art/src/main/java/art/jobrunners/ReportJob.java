@@ -24,7 +24,6 @@ import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.destination.Destination;
 import art.destinationoptions.S3AwsSdkOptions;
-import art.destinationoptions.BlobStorageOptions;
 import art.destinationoptions.FtpOptions;
 import art.destinationoptions.NetworkShareOptions;
 import art.destinationoptions.SftpOptions;
@@ -66,10 +65,8 @@ import ch.qos.logback.core.FileAppender;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
@@ -140,7 +137,6 @@ import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
-import org.jclouds.domain.Location;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
@@ -690,27 +686,6 @@ public class ReportJob implements org.quartz.Job {
 
 			String bucketName = destination.getPath();
 
-			if (s3AwsSdkOptions.isCreateBucket()) {
-				if (s3Client.doesBucketExistV2(bucketName)) {
-					logger.debug("Bucket already exists - '{}'. Job Id {}", bucketName, jobId);
-				} else {
-					String bucketLocation = s3AwsSdkOptions.getBucketLocation();
-					CreateBucketRequest createBucketRequest;
-					if (StringUtils.isBlank(bucketLocation)) {
-						createBucketRequest = new CreateBucketRequest(bucketName);
-					} else {
-						createBucketRequest = new CreateBucketRequest(bucketName, bucketLocation);
-					}
-					
-					CannedAccessControlList createBucketCannedAcl = s3AwsSdkOptions.getCreateBucketCannedAcl();
-					if (createBucketCannedAcl != null) {
-						createBucketRequest.setCannedAcl(createBucketCannedAcl);
-					}
-					
-					s3Client.createBucket(createBucketRequest);
-				}
-			}
-
 			String destinationSubDirectory = destination.getSubDirectory();
 			String jobSubDirectory = job.getSubDirectory();
 
@@ -805,47 +780,6 @@ public class ReportJob implements org.quartz.Job {
 				.buildView(BlobStoreContext.class);
 
 		try {
-			BlobStore blobStore = context.getBlobStore();
-
-			String containerName = destination.getPath();
-
-			BlobStorageOptions blobStorageOptions;
-			String options = destination.getOptions();
-			if (StringUtils.isBlank(options)) {
-				blobStorageOptions = new BlobStorageOptions();
-			} else {
-				blobStorageOptions = ArtUtils.jsonToObject(options, BlobStorageOptions.class);
-			}
-
-			if (blobStorageOptions.isCreateContainer()) {
-				//https://www.programcreek.com/java-api-examples/index.php?class=org.jclouds.blobstore.BlobStore&method=createContainerInLocation
-				//https://issues.apache.org/jira/browse/JCLOUDS-1213
-				String containerLocation = blobStorageOptions.getContainerLocation();
-				Location location = null;
-				if (StringUtils.isNotBlank(containerLocation)) {
-					for (Location loc : blobStore.listAssignableLocations()) {
-						logger.debug("Location Id - {}", loc.getId());
-						if (loc.getId().equalsIgnoreCase(containerLocation)) {
-							location = loc;
-							break;
-						}
-					}
-					if (location == null) {
-						throw new IllegalArgumentException("unknown location: " + containerLocation);
-					}
-				}
-
-				boolean created = blobStore.createContainerInLocation(location, containerName);
-				if (created) {
-					// the container didn't exist, but does now
-					logger.debug("Container created - '{}'. Job Id {}", containerName, jobId);
-				} else {
-					// the container already existed
-					logger.debug("Container already existed: '{}'. Job Id {}", containerName, jobId);
-				}
-			}
-
-			// Create a Blob
 			String destinationSubDirectory = destination.getSubDirectory();
 			String jobSubDirectory = job.getSubDirectory();
 
@@ -864,6 +798,8 @@ public class ReportJob implements org.quartz.Job {
 				logError(ex);
 			}
 
+			BlobStore blobStore = context.getBlobStore();
+
 			ByteSource payload = Files.asByteSource(localFile);
 			Blob blob = blobStore.blobBuilder(remoteFileName)
 					.payload(payload)
@@ -871,6 +807,8 @@ public class ReportJob implements org.quartz.Job {
 					.contentLength(payload.size())
 					.contentType(mimeType)
 					.build();
+
+			String containerName = destination.getPath();
 
 			// Upload the Blob
 			String eTag = blobStore.putBlob(containerName, blob, multipart());

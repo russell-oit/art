@@ -166,9 +166,7 @@
 					case 'SFTP':
 					case 'NetworkShare':
 					case 'Website':
-					case 'S3jclouds':
 					case 'S3AwsSdk':
-					case 'Azure':
 						$("#optionsDiv").show();
 						break;
 					default:
