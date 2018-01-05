@@ -23,7 +23,7 @@ import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.destination.Destination;
-import art.destinationoptions.AmazonS3Options;
+import art.destinationoptions.S3AwsSdkOptions;
 import art.destinationoptions.BlobStorageOptions;
 import art.destinationoptions.FtpOptions;
 import art.destinationoptions.NetworkShareOptions;
@@ -69,6 +69,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
@@ -661,15 +662,15 @@ public class ReportJob implements org.quartz.Job {
 					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
 					.withForceGlobalBucketAccessEnabled(true);
 
-			AmazonS3Options amazonS3Options;
+			S3AwsSdkOptions s3AwsSdkOptions;
 			String options = destination.getOptions();
 			if (StringUtils.isBlank(options)) {
-				amazonS3Options = new AmazonS3Options();
+				s3AwsSdkOptions = new S3AwsSdkOptions();
 			} else {
-				amazonS3Options = ArtUtils.jsonToObject(options, AmazonS3Options.class);
+				s3AwsSdkOptions = ArtUtils.jsonToObject(options, S3AwsSdkOptions.class);
 			}
 
-			String region = amazonS3Options.getRegion();
+			String region = s3AwsSdkOptions.getRegion();
 
 			if (StringUtils.isBlank(region)) {
 				//must set a region, otherwise an exception will be thrown
@@ -681,20 +682,32 @@ public class ReportJob implements org.quartz.Job {
 				//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html
 				//https://stackoverflow.com/questions/31485331/how-to-set-connection-type-in-aws-java-sdk-https-vs-http
 				final String DEFAULT_REGION = "us-east-1";
-				s3ClientBuilder.withRegion(DEFAULT_REGION);
-			} else {
-				s3ClientBuilder.withRegion(region);
+				region = DEFAULT_REGION;
 			}
 
+			s3ClientBuilder.withRegion(region);
 			s3Client = s3ClientBuilder.build();
 
 			String bucketName = destination.getPath();
 
-			if (amazonS3Options.isCreateBucket()) {
+			if (s3AwsSdkOptions.isCreateBucket()) {
 				if (s3Client.doesBucketExistV2(bucketName)) {
 					logger.debug("Bucket already exists - '{}'. Job Id {}", bucketName, jobId);
 				} else {
-					s3Client.createBucket(bucketName);
+					String bucketLocation = s3AwsSdkOptions.getBucketLocation();
+					CreateBucketRequest createBucketRequest;
+					if (StringUtils.isBlank(bucketLocation)) {
+						createBucketRequest = new CreateBucketRequest(bucketName);
+					} else {
+						createBucketRequest = new CreateBucketRequest(bucketName, bucketLocation);
+					}
+					
+					CannedAccessControlList createBucketCannedAcl = s3AwsSdkOptions.getCreateBucketCannedAcl();
+					if (createBucketCannedAcl != null) {
+						createBucketRequest.setCannedAcl(createBucketCannedAcl);
+					}
+					
+					s3Client.createBucket(createBucketRequest);
 				}
 			}
 
@@ -725,7 +738,7 @@ public class ReportJob implements org.quartz.Job {
 
 			try (InputStream is = new FileInputStream(localFile)) {
 				PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, remoteFileName, is, metadata);
-				CannedAccessControlList cannedAcl = amazonS3Options.getCannedAcl();
+				CannedAccessControlList cannedAcl = s3AwsSdkOptions.getCannedAcl();
 				if (cannedAcl != null) {
 					putObjectRequest.withCannedAcl(cannedAcl);
 				}

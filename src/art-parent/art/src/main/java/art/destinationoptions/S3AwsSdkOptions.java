@@ -20,15 +20,17 @@ package art.destinationoptions;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 
 /**
- * Options for amazon s3 destinations
+ * Options for amazon s3 - aws sdk destinations
  * 
  * @author Timothy Anyona
  */
-public class AmazonS3Options {
+public class S3AwsSdkOptions {
 	
 	private String region;
 	private boolean createBucket;
 	private CannedAccessControlList cannedAcl;
+	private String bucketLocation;
+	private CannedAccessControlList createBucketCannedAcl;
 
 	/**
 	 * @return the region
@@ -70,6 +72,34 @@ public class AmazonS3Options {
 	 */
 	public void setCannedAcl(CannedAccessControlList cannedAcl) {
 		this.cannedAcl = cannedAcl;
+	}
+
+	/**
+	 * @return the bucketLocation
+	 */
+	public String getBucketLocation() {
+		return bucketLocation;
+	}
+
+	/**
+	 * @param bucketLocation the bucketLocation to set
+	 */
+	public void setBucketLocation(String bucketLocation) {
+		this.bucketLocation = bucketLocation;
+	}
+
+	/**
+	 * @return the createBucketCannedAcl
+	 */
+	public CannedAccessControlList getCreateBucketCannedAcl() {
+		return createBucketCannedAcl;
+	}
+
+	/**
+	 * @param createBucketCannedAcl the createBucketCannedAcl to set
+	 */
+	public void setCreateBucketCannedAcl(CannedAccessControlList createBucketCannedAcl) {
+		this.createBucketCannedAcl = createBucketCannedAcl;
 	}
 	
 }
