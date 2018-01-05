@@ -16,6 +16,7 @@ ART 3.2
 * Allow for specifying of password policy for internal authentication passwords
 * Allow jxls reports to use open and modify passwords
 * Enable generation of Jasper reports from MongoDB datasources (thanks to Tin Blaskovic)
+* Fix for reports within dashboards not using parameter values
 * Updated mariadb driver, poi, jxls, jclouds
 
 ART 3.1
