@@ -68,9 +68,6 @@ public class LoginHelper {
 		}
 
 		ArtHelper.log(username, loginStatus, ip, logMessage);
-
-		//also log to file
-		logger.info("{}. username={}, message={}", loginStatus, username, logMessage);
 	}
 
 	/**
