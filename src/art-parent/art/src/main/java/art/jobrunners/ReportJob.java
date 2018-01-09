@@ -318,6 +318,8 @@ public class ReportJob implements org.quartz.Job {
 		afterCompletion();
 		cacheHelper.clearJobs();
 
+		sendErrorNotification();
+
 		long runEndTimeMillis = System.currentTimeMillis();
 
 		//https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/time/DurationFormatUtils.html
@@ -325,6 +327,49 @@ public class ReportJob implements org.quartz.Job {
 		String duration = DurationFormatUtils.formatPeriod(runStartTimeMillis, runEndTimeMillis, durationFormat);
 		progressLogger.info("Completed. Time taken - {}", duration);
 		progressFileAppender.stop();
+	}
+
+	/**
+	 * Sends an email to configured email addresses if there was an error while
+	 * running the job
+	 *
+	 */
+	private void sendErrorNotification() {
+		String errorNotificationTo = job.getErrorNotificationTo();
+		if (StringUtils.isBlank(errorNotificationTo)) {
+			return;
+		}
+
+		if (StringUtils.startsWith(runDetails, "<b>Error:</b>")) {
+			if (!Config.getCustomSettings().isEnableEmailing()) {
+				logger.info("Emailing disabled. Job Id {}", jobId);
+			} else {
+				ArtHelper artHelper = new ArtHelper();
+				Mailer mailer = artHelper.getMailer();
+				mailer.setDebug(logger.isDebugEnabled());
+
+				String[] emailsArray = separateEmails(errorNotificationTo);
+				String subject = "ART [Error]: " + job.getName() + " (" + jobId + ")";
+
+				mailer.setTo(emailsArray);
+				mailer.setFrom(Config.getSettings().getErrorNotificationFrom());
+				mailer.setSubject(subject);
+
+				try {
+					Context ctx = new Context(locale);
+					ctx.setVariable("error", runDetails);
+					ctx.setVariable("job", job);
+
+					String emailTemplateName = "jobErrorEmail";
+					String message = emailTemplateEngine.process(emailTemplateName, ctx);
+					mailer.setMessage(message);
+
+					mailer.send();
+				} catch (IOException | MessagingException | RuntimeException ex) {
+					logError(ex);
+				}
+			}
+		}
 	}
 
 	/**
@@ -356,7 +401,7 @@ public class ReportJob implements org.quartz.Job {
 
 		progressFileAppender = new FileAppender<>();
 		progressFileAppender.setContext(loggerContext);
-		progressFileAppender.setName("jobLog");
+		progressFileAppender.setName("jobLog" + jobId);
 		progressFileAppender.setFile(progressLogFilename);
 		progressFileAppender.setAppend(false);
 
@@ -368,7 +413,7 @@ public class ReportJob implements org.quartz.Job {
 		progressFileAppender.setEncoder(encoder);
 		progressFileAppender.start();
 
-		progressLogger = loggerContext.getLogger("jobLog");
+		progressLogger = loggerContext.getLogger("jobLog" + jobId);
 		progressLogger.setLevel(Level.INFO);
 
 		// Don't inherit root appender
@@ -1525,18 +1570,24 @@ public class ReportJob implements org.quartz.Job {
 		//create output
 		Writer writer = new StringWriter();
 
-		if (reportType == ReportType.FreeMarker) {
-			FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
-			freemarkerOutput.setLocale(locale);
-			freemarkerOutput.generateOutput(report, writer, data);
-		} else if (reportType == ReportType.Thymeleaf) {
-			ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
-			thymeleafOutput.setLocale(locale);
-			thymeleafOutput.generateOutput(report, writer, data);
-		} else if (reportType == ReportType.Velocity) {
-			VelocityOutput velocityOutput = new VelocityOutput();
-			velocityOutput.setLocale(locale);
-			velocityOutput.generateOutput(report, writer, data);
+		switch (reportType) {
+			case FreeMarker:
+				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+				freemarkerOutput.setLocale(locale);
+				freemarkerOutput.generateOutput(report, writer, data);
+				break;
+			case Thymeleaf:
+				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+				thymeleafOutput.setLocale(locale);
+				thymeleafOutput.generateOutput(report, writer, data);
+				break;
+			case Velocity:
+				VelocityOutput velocityOutput = new VelocityOutput();
+				velocityOutput.setLocale(locale);
+				velocityOutput.generateOutput(report, writer, data);
+				break;
+			default:
+				break;
 		}
 
 		String finalMessage = writer.toString();

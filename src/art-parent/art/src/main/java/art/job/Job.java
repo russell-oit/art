@@ -97,6 +97,21 @@ public class Job implements Serializable {
 	private String subDirectory;
 	private SmtpServer smtpServer;
 	private String options;
+	private String errorNotificationTo;
+
+	/**
+	 * @return the errorNotificationTo
+	 */
+	public String getErrorNotificationTo() {
+		return errorNotificationTo;
+	}
+
+	/**
+	 * @param errorNotificationTo the errorNotificationTo to set
+	 */
+	public void setErrorNotificationTo(String errorNotificationTo) {
+		this.errorNotificationTo = errorNotificationTo;
+	}
 
 	/**
 	 * @return the options

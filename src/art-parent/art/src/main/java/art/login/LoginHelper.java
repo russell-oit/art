@@ -19,8 +19,6 @@ package art.login;
 
 import art.enums.ArtAuthenticationMethod;
 import art.utils.ArtHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides methods for logging success or failure of login attempts
@@ -28,8 +26,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class LoginHelper {
-
-	private static final Logger logger = LoggerFactory.getLogger(LoginHelper.class);
 
 	/**
 	 * Logs login attempts
