@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.1"> 
+  <meta name="version" content="3.2"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -85,6 +85,7 @@
          <li><a href="#jxls-template-query">Jxls: Template Query</a></li> 
          <li><a href="#jxls-art-query">Jxls: ART Query</a></li> 
          <li><a href="#freemarker">FreeMarker</a></li> 
+         <li><a href="#velocity">Velocity</a></li> 
          <li><a href="#thymeleaf">Thymeleaf</a></li> 
          <li><a href="#reactpivot">ReactPivot</a></li> 
          <li><a href="#pivottablejs">PivotTable.js</a></li> 
@@ -115,6 +116,10 @@
          <li><a href="#openlayers">OpenLayers</a></li> 
          <li><a href="#saiku-connection">Saiku: Connection</a></li> 
          <li><a href="#saiku-report">Saiku: Report</a></li> 
+         <li><a href="#orgchart-database">OrgChart: Database</a></li> 
+         <li><a href="#orgchart-json">OrgChart: JSON</a></li> 
+         <li><a href="#orgchart-list">OrgChart: List</a></li> 
+         <li><a href="#orgchart-ajax">OrgChart: Ajax</a></li> 
          <li><a href="#mongodb">MongoDB</a></li> 
         </ol></li> 
        <li><a href="#general-report-options">General Report Options</a> 
@@ -123,6 +128,7 @@
          <li><a href="#pdf-options">PDF Options</a></li> 
          <li><a href="#clone-options">Clone Options</a></li> 
          <li><a href="#tabular-options">Tabular Options</a></li> 
+         <li><a href="#template-result-options">Template Result Options</a></li> 
         </ol></li> 
        <li><a href="#running-a-report-via-url">Running a report via URL</a> 
         <ol> 
@@ -233,6 +239,7 @@
      <li><a href="#scheduling">Scheduling</a> 
       <ol> 
        <li><a href="#scheduling-a-new-job">Scheduling a new job</a></li> 
+       <li><a href="#job-options">Job Options</a></li> 
        <li><a href="#job-types">Job Types</a> 
         <ol> 
          <li><a href="#e-mail-output-attachment">E-Mail Output (Attachment)</a></li> 
@@ -267,8 +274,10 @@
          <li><a href="#sftp-options">SFTP Options</a></li> 
          <li><a href="#network-share-options">Network Share Options</a></li> 
          <li><a href="#website-options">Website Options</a></li> 
+         <li><a href="#amazon-s3-aws-sdk-options">Amazon S3 - AWS SDK Options</a></li> 
         </ol></li> 
       </ol></li> 
+     <li><a href="#smtp-servers">SMTP Servers</a></li> 
      <li><a href="#cached-results">Cached Results</a> 
       <ol> 
        <li><a href="#create-a-new-cached-result">Create a new Cached Result</a></li> 
@@ -451,11 +460,11 @@
       <tbody> 
        <tr> 
         <td><strong>SMTP Server</strong></td> 
-        <td>Host name for the email server used to send emails</td> 
+        <td>The host name for the email server used to send emails</td> 
        </tr> 
        <tr> 
         <td><strong>SMTP Port</strong></td> 
-        <td>Port on which SMTP server is listening</td> 
+        <td>The port to use for SMTP</td> 
        </tr> 
        <tr> 
         <td><strong>Use StartTLS</strong></td> 
@@ -467,11 +476,11 @@
        </tr> 
        <tr> 
         <td><strong>SMTP Username</strong></td> 
-        <td>Username to be used when sending emails if the email server is configured to require SMTP authentication</td> 
+        <td>The username to be used when sending emails if the email server is configured to require SMTP authentication</td> 
        </tr> 
        <tr> 
         <td><strong>SMTP Password</strong></td> 
-        <td>Password to be used when sending emails if the email server is configured to require SMTP authentication</td> 
+        <td>The password to be used when sending emails if the email server is configured to require SMTP authentication</td> 
        </tr> 
        <tr> 
         <td><strong>SMTP From</strong></td> 
@@ -613,6 +622,62 @@
         <td><strong>System Locale</strong></td> 
         <td>The locale to use in non-interactive scenarios e.g. jobs. Leave blank to use the default.</td> 
        </tr> 
+       <tr> 
+        <td><strong>Logs Datasource</strong></td> 
+        <td>A database to which application logs should be written. The script located in the <strong>ART_PACKAGE\database\dbappender</strong> directory needs to have been run on the database. The demo database already has this script run on it. See <a href="https://logback.qos.ch/manual/appenders.html#DBAppender" rel="nofollow">https://logback.qos.ch/manual/appenders.html#DBAppender</a> for more details.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Error Notification To</strong></td> 
+        <td>Email address to send emails when errors occur within the application. Multiple email addresses can be specified separated by commas. Set blank to disable error notification.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Error Notification From</strong></td> 
+        <td>The "From" email address for error notification emails. The SMTP server used is the one configured within the Settings page.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Error Notification Subject Pattern</strong></td> 
+        <td>A string representing how the error notification email subject will look like. The syntax is Logback syntax.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Error Notification Level</strong></td> 
+        <td>The level for which error notification emails will be sent</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Error Notification Logger</strong></td> 
+        <td>The logger for which error notification emails are sent. Blank means notifications are sent for errors logged from all classes. If you would like to only receive notifications for errors occuring in jobs, you can set this to <code>art.jobrunners.ReportJob</code>. Multiple loggers can be specified separated by commas.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Error Notification Suppress After</strong></td> 
+        <td>The condition at which to suppress sending of duplicate error emails. See the <a class="" href="http://www.eclecticlogic.com/whisper/" rel="nofollow">Whisper</a> documentation for details.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Error Notification Expire After</strong></td> 
+        <td>The amount of time after which duplicate error email suppression is expired. See the <a class="" href="http://www.eclecticlogic.com/whisper/" rel="nofollow">Whisper</a> documentation for details.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Error Notification Digest Frequency</strong></td> 
+        <td>The frequency with which to send duplicate error email digest messages. See the <a class="" href="http://www.eclecticlogic.com/whisper/" rel="nofollow">Whisper</a> documentation for details.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Minimum Password Length</strong></td> 
+        <td>The mimimum password length when a password is set from the Password page. If set to 0, this check is not done.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Minimum Lowercase Characters</strong></td> 
+        <td>The minimum number of lowercase characters in a password as set from the Password page. If set to 0, this check is not done.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Minimum Uppercase Characters</strong></td> 
+        <td>The minimum number of uppercase characters in a password as set from the Password page. If set to 0, this check is not done.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Minimum Numeric Characters</strong></td> 
+        <td>The minimum number of numeric characters in a password as set from the Password page. If set to 0, this check is not done.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Minimum Special Characters</strong></td> 
+        <td>The minimum number of special characters in a password as set from the Password page. If set to 0, this check is not done.</td> 
+       </tr> 
       </tbody> 
      </table> 
     </div> 
@@ -662,7 +727,7 @@
         <td>Whether to apply a sandbox when running groovy scripts</td> 
        </tr> 
        <tr> 
-        <td><strong>enableEmail</strong></td> 
+        <td><strong>enableEmailing</strong></td> 
         <td>Boolean</td> 
         <td>Whether sending of emails is enabled</td> 
        </tr> 
@@ -1269,6 +1334,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
@@ -1276,16 +1342,19 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        <tr> 
         <td><strong>columns</strong></td> 
         <td>Array of integers</td> 
+        <td></td> 
         <td>The columns that should be coloured. If not specified, all columns are included in the colouring. If any cell in the applicable columns contains a non-numeric value, no colouring will be done. An error will be displayed in the javascript console for the web browser indicating that <strong>hex is undefined</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>colors</strong></td> 
         <td>Array of strings</td> 
+        <td></td> 
         <td>Colours that should be applied, beginning with colours for the lower values going up. The colour strings are specified in hex format e.g. <code>#ffffff</code>. For example for a two colour scheme in a red range, one can specify the setting as <code>"colors": ["#ffffff", "#ff4a53"]</code></td> 
        </tr> 
        <tr> 
         <td><strong>perColumn</strong></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>If true, each applicable column is graded and coloured separately. If false, the whole table is considered when grading the colours.</td> 
        </tr> 
       </tbody> 
@@ -1429,37 +1498,37 @@ FROM mytable
         <td><strong>upperBound</strong></td> 
         <td>Any number, positive or negative</td> 
         <td>1</td> 
-        <td>Highest value displayed. If you don't specify this option, the chart may appear blank if all your values are above 1.</td> 
+        <td>The highest value displayed. If you don't specify this option, the chart may appear blank if all your values are above 1.</td> 
        </tr> 
        <tr> 
         <td><strong>lowerBound</strong></td> 
         <td>Any number, positive or negative</td> 
         <td>0</td> 
-        <td>Lowest value displayed</td> 
+        <td>The lowest value displayed</td> 
        </tr> 
        <tr> 
         <td><strong>scalePos</strong></td> 
         <td>top <br> left <br> bottom <br> right</td> 
         <td>bottom</td> 
-        <td>Default position of the colour scale relative to the chart</td> 
+        <td>The default position of the colour scale relative to the chart</td> 
        </tr> 
        <tr> 
         <td><strong>scaleLabel</strong></td> 
         <td>Any string</td> 
-        <td>None</td> 
-        <td>Title the colour scale</td> 
+        <td></td> 
+        <td>The title of the colour scale</td> 
        </tr> 
        <tr> 
         <td><strong>scaleTextPos</strong></td> 
         <td>topleft <br> topright <br> bottomleft <br> bottomright</td> 
         <td>topleft</td> 
-        <td>Position of the scale title relative to the colour scale</td> 
+        <td>The position of the scale title relative to the colour scale</td> 
        </tr> 
        <tr> 
         <td><strong>scaleBorder</strong></td> 
         <td>Hex colour code e.g. <code>#00E000</code></td> 
-        <td>None</td> 
-        <td>Colour of border displayed around the colour scale box</td> 
+        <td></td> 
+        <td>The colour of the border displayed around the colour scale box</td> 
        </tr> 
        <tr> 
         <td><strong>stripWidth</strong></td> 
@@ -1476,19 +1545,19 @@ FROM mytable
        <tr> 
         <td><strong><code>color#&lt;n&gt;</code></strong> e.g. <code>color#1</code>, <code>color#2</code></td> 
         <td><code>&lt;number&gt;:&lt;hex colour code&gt;</code> e.g. <code>0.0:#FF0000</code></td> 
-        <td>None</td> 
+        <td></td> 
         <td>The colour to use for a given range of values. The colour is determined by <code>Value3</code> of the result set. The number is the lower bound of the range. The option value has the lower bound and colour separated by <code>:</code> e.g. to display 0-10 in red and 11-50 in green, you'll define two columns in the result set, <code>"color#1=0:#FF0000", "color#2=11:#00FF00"</code></td> 
        </tr> 
        <tr> 
         <td><strong>lowerColor</strong></td> 
         <td>Hex colour code</td> 
-        <td>None</td> 
+        <td></td> 
         <td>The colour of the lowest value if you want a 2 colour scheme with a linear gradient from the lower colour to the upper colour e.g. set <code>lowerColor</code> to white (<code>#FFFFFF</code>) and <code>upperColor</code> to red (<code>#FF0000</code>) if you want values to be represented as shades of red</td> 
        </tr> 
        <tr> 
         <td><strong>upperColor</strong></td> 
         <td>Hex colour code</td> 
-        <td>None</td> 
+        <td></td> 
         <td>The colour of the highest value if you want a 2 colour scheme with a linear gradient from the lower colour to the upper colour e.g. set <code>lowerColor</code> to white (<code>#FFFFFF</code>) and <code>upperColor</code> to red (<code>#FF0000</code>) if you want values to be represented as shades of red</td> 
        </tr> 
       </tbody> 
@@ -1569,9 +1638,11 @@ FROM mytable
      <h3 id="jxls-art-query">Jxls: ART Query</h3> 
      <p>Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted Jxls template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</p> 
      <h3 id="freemarker">FreeMarker</h3> 
-     <p>Displays a report in the browser based on a <a class="" href="http://freemarker.org/" rel="nofollow">FreeMarker</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use the default-value operator "!" after the column name e.g. <strong>${result.description!}</strong>. (See <a href="http://freemarker.org/docs/dgui_template_exp.html#dgui_template_exp_missing" rel="nofollow">http://freemarker.org/docs/dgui_template_exp.html#dgui_template_exp_missing</a>). The field name may be case sensitive depending on the RDBMS being used. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. An example report is included in the demo database.</p> 
+     <p>Displays a report in the browser based on a <a class="" href="http://freemarker.org/" rel="nofollow">FreeMarker</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use the default-value operator "!" after the column name e.g. <strong>${result.description!}</strong>. (See <a href="http://freemarker.org/docs/dgui_template_exp.html#dgui_template_exp_missing" rel="nofollow">http://freemarker.org/docs/dgui_template_exp.html#dgui_template_exp_missing</a>). The field name may be case sensitive depending on the RDBMS being used. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. Variables named <strong>contextPath</strong> and <strong>artBaseUrl</strong> are available e.g. to include css or javascript files. <strong>artBaseUrl</strong> is only available if it is set in the <strong>Settings</strong> page and <strong>contextPath</strong> is only available for interactive reports and is not available with jobs. An example report is included in the demo database.</p> 
+     <h3 id="velocity">Velocity</h3> 
+     <p>Displays a report in the browser based on a <a class="" href="https://velocity.apache.org/engine/index.html" rel="nofollow">Velocity</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use quiet reference notation e.g. <strong>$!{result.description}</strong>. (See <a href="https://velocity.apache.org/engine/2.0/user-guide.html#quiet-reference-notation" rel="nofollow">https://velocity.apache.org/engine/2.0/user-guide.html#quiet-reference-notation</a>). The field name may be case sensitive depending on the RDBMS being used. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. Variables named <strong>contextPath</strong> and <strong>artBaseUrl</strong> are available e.g. to include css or javascript files. <strong>artBaseUrl</strong> is only available if it is set in the <strong>Settings</strong> page and <strong>contextPath</strong> is only available for interactive reports and is not available with jobs. Also a <a class="" href="https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/NumberTool.html" rel="nofollow">NumberTool</a> object named <strong>numberTool</strong> is available for formatting numbers e.g. <strong>$numberTool.format('#,##0.00',$result.amount)</strong>. Similarly, a <a class="" href="https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/DateTool.html" rel="nofollow">DateTool</a> object named <strong>dateTool</strong> is available for formatting dates. An example report is included in the demo database.</p> 
      <h3 id="thymeleaf">Thymeleaf</h3> 
-     <p>Displays a report in the browser based on a <a class="" href="http://www.thymeleaf.org/" rel="nofollow">Thymeleaf</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use the <strong>get()</strong> method e.g. <strong>${result.get('description')}</strong>. The field name may be case sensitive depending on the RDBMS being used. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. An example report is included in the demo database.</p> 
+     <p>Displays a report in the browser based on a <a class="" href="http://www.thymeleaf.org/" rel="nofollow">Thymeleaf</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use the <strong>get()</strong> method e.g. <strong>${result.get('description')}</strong>. The field name may be case sensitive depending on the RDBMS being used. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. Variables named <strong>contextPath</strong> and <strong>artBaseUrl</strong> are available e.g. to include css or javascript files. <strong>artBaseUrl</strong> is only available if it is set in the <strong>Settings</strong> page and <strong>contextPath</strong> is only available for interactive reports and is not available with jobs. An example report is included in the demo database.</p> 
      <h3 id="reactpivot">ReactPivot</h3> 
      <p>Generates a pivot-table-like report based on tabular data using the <a class="" href="https://davidguttman.github.io/react-pivot/" rel="nofollow">ReactPivot</a> library. You will need to create a javascript file that contains the react pivot configuration for the report. You need to define <strong>dimensions</strong>, <strong>reduce</strong> and <strong>calculations</strong> options. Other options can also be defined to override the defaults. The demo database also comes with some samples of this report type. This report type is useful when you want summary and analysis of numeric data by category.</p> 
      <h3 id="pivottablejs">PivotTable.js</h3> 
@@ -1644,23 +1715,27 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><strong>outputDateFormat</strong></td> 
-        <td>String (default = blank)</td> 
+        <td>String</td> 
+        <td></td> 
         <td>The format of output data for date columns. If blank, the data will be output as is. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateTimeFormat</strong></td> 
-        <td>String (default = blank)</td> 
+        <td>String</td> 
+        <td></td> 
         <td>The format of output data for datetime columns. If blank, the data will be output as is. The format is as per<a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>showColumnFilters</strong></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Determines if column filters will be displayed</td> 
        </tr> 
       </tbody> 
@@ -1683,6 +1758,7 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
@@ -1690,76 +1766,91 @@ FROM mytable
        <tr> 
         <td><strong>fieldLengths</strong></td> 
         <td>Array of integers. <strong>required</strong></td> 
+        <td></td> 
         <td>Used to define the field lengths of the output e.g. <code>[5,6]</code> means that the first field will have a length of 5 and the second field will have a length of 6</td> 
        </tr> 
        <tr> 
         <td><strong>fieldLengthsByName</strong></td> 
         <td>Array of objects. <strong>required</strong></td> 
+        <td></td> 
         <td>Each object specifies the field name and the field length e.g. <code>[{"order_id": 8}, {"order_date": 14}]</code> means the <code>order_id</code> field will have a length of 8 and the <code>order_date</code> field will have a length of 14. You must specify either the <strong>fieldLengths</strong> or the <strong>fieldLengthsByName</strong> property.</td> 
        </tr> 
        <tr> 
         <td><strong>includeHeaders</strong></td> 
-        <td>Boolean (default = true)</td> 
+        <td>Boolean</td> 
+        <td>true</td> 
         <td>Determines whether the column names will be included in the output as the first row</td> 
        </tr> 
        <tr> 
         <td><strong>defaultAlignmentForHeaders</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>Either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>. If present, overrides any field alignment set and uses the given alignment for the header columns</td> 
        </tr> 
        <tr> 
         <td><strong>padding</strong></td> 
-        <td>String (default = space)</td> 
+        <td>String</td> 
+        <td>space</td> 
         <td>A single character defining the default padding to use for fields. Must not be the empty string.</td> 
        </tr> 
        <tr> 
         <td><strong>useDefaultPaddingForHeaders</strong></td> 
-        <td>Boolean (default = true)</td> 
+        <td>Boolean</td> 
+        <td>true</td> 
         <td>Determines if the headers should use the global <strong>padding</strong> setting or use the padding set for individual fields</td> 
        </tr> 
        <tr> 
         <td><strong>dateFormat</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>Determines the format that should be used for DATE columns</td> 
        </tr> 
        <tr> 
         <td><strong>dateTimeFormat</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>Determines the format that should be used for DATETIME columns</td> 
        </tr> 
        <tr> 
         <td><strong>numberFormat</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>Determines the format that should be used for numeric columns</td> 
        </tr> 
        <tr> 
         <td><strong>fieldDateFormats</strong></td> 
         <td>Array of objects</td> 
+        <td></td> 
         <td>Each object specifies the date format and an array of fields that should use that format e.g. <code>[{"dd/MM/yyyy": ["order_date", "due_date"]}, {"dd-MMM-yyyy": ["payment_date"]}]</code></td> 
        </tr> 
        <tr> 
         <td><strong>fieldNumberFormats</strong></td> 
         <td>Array of objects</td> 
+        <td></td> 
         <td>Each object specifies the number format and an array of fields that should use that format e.g. <code>[{"0.00": ["amount"]}, {"#,##0.#": ["volume"]}]</code></td> 
        </tr> 
        <tr> 
         <td><strong>fieldAlignmentByName</strong></td> 
         <td>Array of objects</td> 
+        <td></td> 
         <td>Each object specifies the alignment to be used and an array of field names that should use that alignment e.g. <code>[{"right": ["amount", "volume"]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldAlignmentByPosition</strong></td> 
         <td>Array of objects</td> 
+        <td></td> 
         <td>Each object specifies the alignment to be used and an array of field positions that should use that alignment e.g. <code>[{"right": [2, 5]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>. The first field in the output is marked as position 0.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldPaddingByName</strong></td> 
         <td>Array of objects</td> 
+        <td></td> 
         <td>Each object specifies the padding to be used and an array of field names that should use that padding e.g. <code>[{"_": ["amount", "volume"]}]</code>. The padding should be a single character.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldPaddingByPosition</strong></td> 
         <td>Array of objects</td> 
+        <td></td> 
         <td>Each object specifies the padding to be used and an array of field positions that should use that padding e.g. <code>[{"_": [2, 5]}]</code>. The padding should be a single character. The first field in the output is marked as position 0.</td> 
        </tr> 
       </tbody> 
@@ -1772,23 +1863,27 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><strong>delimiter</strong></td> 
-        <td>Character (default = , )</td> 
+        <td>Character</td> 
+        <td>,</td> 
         <td>The delimiter to use</td> 
        </tr> 
        <tr> 
         <td><strong>quote</strong></td> 
-        <td>Character (default = " )</td> 
+        <td>Character</td> 
+        <td>"</td> 
         <td>The character to use to quote fields in which the delimiter appears</td> 
        </tr> 
        <tr> 
         <td><strong>quoteAllFields</strong></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether all the data should be quoted, whether the data contains the delimiter or not</td> 
        </tr> 
       </tbody> 
@@ -1811,6 +1906,7 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
@@ -1818,36 +1914,43 @@ FROM mytable
        <tr> 
         <td><strong>datamapsJsFile</strong></td> 
         <td>String. <strong>required</strong></td> 
+        <td></td> 
         <td>The file name of the datamaps javascript file. Appropriate files can be downloaded from <a href="https://github.com/markmarkoh/datamaps/tree/master/dist." rel="nofollow">https://github.com/markmarkoh/datamaps/tree/master/dist.</a></td> 
        </tr> 
        <tr> 
         <td><strong>width</strong></td> 
-        <td>String (default = 500px)</td> 
+        <td>String</td> 
+        <td>500px</td> 
         <td>CSS width for the div that contains the map</td> 
        </tr> 
        <tr> 
         <td><strong>height</strong></td> 
-        <td>String (default = 300px)</td> 
+        <td>String</td> 
+        <td>300px</td> 
         <td>CSS height for the div that contains the map</td> 
        </tr> 
        <tr> 
         <td><strong>dataFile</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>The file name of the json or csv file that contains data elements for the map. This file can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
        <tr> 
         <td><strong>dataType</strong></td> 
-        <td>String (default = json)</td> 
+        <td>String</td> 
+        <td>json</td> 
         <td>Either <strong>csv</strong> if the dataFile specified is in csv format or <strong>json</strong> if it's in json format.</td> 
        </tr> 
        <tr> 
         <td><strong>mapFile</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>The file name of a file that contains the custom map in TopoJSON format. When using this option, use the <strong>datamaps.none.min.js</strong> datamaps js file. This file can be uploaded using the <strong>Add files</strong> option. It is important to note that if using the Add files option to upload files, files with multiple dots in the name are not allowed, so such files need to be renamed e.g. datamaps-none-min.js</td> 
        </tr> 
        <tr> 
         <td><strong>cssFile</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>The file name of a css file that contains custom css to be used with the display. This file can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
       </tbody> 
@@ -1862,33 +1965,39 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><strong>height</strong></td> 
-        <td>String (default = 400px)</td> 
+        <td>String</td> 
+        <td>400px</td> 
         <td>CSS height for the div that contains the map</td> 
        </tr> 
        <tr> 
         <td><strong>cssFile</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>The file name of a css file that contains custom css to be used with the display. This file can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
        <tr> 
         <td><strong>dataFile</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>The file name of a file that contains extra data to be used with the map e.g. a GeoJSON file. This file can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
        <tr> 
         <td><strong>jsFiles</strong></td> 
         <td>Array of strings</td> 
+        <td></td> 
         <td>File names of javascript files that need to be incorporated for the map display e.g. leaflet plugins. The files can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
        <tr> 
         <td><strong>cssFiles</strong></td> 
         <td>Array of strings</td> 
+        <td></td> 
         <td>File names of additional css files to be used with the display. The files can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
       </tbody> 
@@ -1904,6 +2013,123 @@ FROM mytable
      <h3 id="saiku-report">Saiku: Report</h3> 
      <p>When you perform some analysis from the Analytics view, you can save that analysis. When you do this, this is saved as a <strong>Saiku: Report</strong> type. The report source for this report type is a JSON representation of a saiku QueryModel. You can have a look at it to see what is generated. It isn't recommended to build this by hand.</p> 
      <p>Once you have created a saiku report, you can give users access to it like with other report types. The users will also need to be given access to the saiku connection that is the basis for the saiku report. Users will see a list of saiku reports they have access to by clicking on the <strong>Open query</strong> icon at the top of the Analytics view. Users can then run the reports, edit and save new reports, and delete reports they have created. Users cannot overwrite or delete reports for which they don't have exclusive access i.e. they are the only ones who have access to the report. Only junior admins and above can overwrite or delete any saiku report.</p> 
+     <h3 id="orgchart-database">OrgChart: Database</h3> 
+     <p>Displays an organisation chart using data from a database. It makes use of the <a class="" href="https://github.com/dabeng/OrgChart" rel="nofollow">OrgChart</a> library to display the org chart. The database query must have at least a column named <strong>id</strong>, another named <strong>parent_id</strong>, one named <strong>name</strong> and another named <strong>title</strong>. These names are case sensitive. The id column is a unique id among the returned records. It would typically represent a position. The parent_id column refers to the id that is the parent of the given record. The name column would typically be an employee name and appears at the top half of an org chart node. The title column would typically be the role or job title for the employee and would appear at the bottom half of an org chart node. The demo database contains a sample report of this type.</p> 
+     <p>A javascript file containing chart configuration can be set/uploaded using the <strong>Template</strong> field. This file can be used to extend the <strong>orgChartSettings</strong> variable e.g. to set the <strong>nodeTemplate</strong> or <strong>createNode</strong> property. There are also a number of options that can be specified in the <strong>Options</strong> field.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>cssFile</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The file name of a css file that contains custom css to be used with the org chart e.g. <code>"org.css"</code>. This file can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>nodeTitle</strong></td> 
+        <td>String</td> 
+        <td>name</td> 
+        <td>The name of the field that will be displayed in the top half of a node</td> 
+       </tr> 
+       <tr> 
+        <td><strong>nodeId</strong></td> 
+        <td>String</td> 
+        <td>id</td> 
+        <td>The name of the field that is a unique identifier among all the records</td> 
+       </tr> 
+       <tr> 
+        <td><strong>toggleSiblingsResp</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether users can show/hide left/right sibling nodes respectively by clicking left/right arrow.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>depth</strong></td> 
+        <td>Integer</td> 
+        <td>999</td> 
+        <td>The level that the org chart is expanded to when it is shown initially</td> 
+       </tr> 
+       <tr> 
+        <td><strong>exportButton</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether the export button is displayed</td> 
+       </tr> 
+       <tr> 
+        <td><strong>exportFilename</strong></td> 
+        <td>String</td> 
+        <td>OrgChart</td> 
+        <td>The name of the file used when exporting</td> 
+       </tr> 
+       <tr> 
+        <td><strong>exportFileextension</strong></td> 
+        <td>String</td> 
+        <td>png</td> 
+        <td>Either <strong>png</strong> of <strong>pdf</strong>. Determines whether the export will be to png or pdf</td> 
+       </tr> 
+       <tr> 
+        <td><strong>parentNodeSymbol</strong></td> 
+        <td>String</td> 
+        <td>fa-users</td> 
+        <td>The icon to be displayed for nodes that have children nodes under them</td> 
+       </tr> 
+       <tr> 
+        <td><strong>draggable</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether users can drag &amp; drop the nodes. Note that this feature doesn't work on IE</td> 
+       </tr> 
+       <tr> 
+        <td><strong>direction</strong></td> 
+        <td>String</td> 
+        <td>t2b</td> 
+        <td>How the hierarchy is rendered. One of <strong>t2b</strong> ("top to bottom"), <strong>b2t</strong> ("bottom to top"), <strong>l2r</strong> ("left to right") or <strong>r2l</strong> ("right to left").</td> 
+       </tr> 
+       <tr> 
+        <td><strong>pan</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether users can pan the org chart by mouse drag&amp;drop</td> 
+       </tr> 
+       <tr> 
+        <td><strong>zoom</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether users can zoom in or out using the mouse</td> 
+       </tr> 
+       <tr> 
+        <td><strong>zoominLimit</strong></td> 
+        <td>Double</td> 
+        <td>7</td> 
+        <td>The zoom in limit</td> 
+       </tr> 
+       <tr> 
+        <td><strong>zoomoutLimit</strong></td> 
+        <td>Double</td> 
+        <td>0.5</td> 
+        <td>The zoom out limit</td> 
+       </tr> 
+       <tr> 
+        <td><strong>nodeContent</strong></td> 
+        <td>String</td> 
+        <td>title</td> 
+        <td>The name of the field that will be displayed in the bottom half of the node. Set to <strong>null</strong> or the empty string to have this section omitted from nodes.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="orgchart-json">OrgChart: JSON</h3> 
+     <p>Displays an organisation chart using data from a JSON definition specified in the report source section. The same options applicable with the <strong>OrgChart: Database</strong> report type are also applicable. The demo database contains a sample report of this type.</p> 
+     <h3 id="orgchart-list">OrgChart: List</h3> 
+     <p>Displays an organisation chart using data from a html unordered list definition specified in the report source section. The same options applicable with the <strong>OrgChart: Database</strong> report type are also applicable. The demo database contains a sample report of this type.</p> 
+     <h3 id="orgchart-ajax">OrgChart: Ajax</h3> 
+     <p>Displays an organisation chart using data from a url specified in the report source section. The same options applicable with the <strong>OrgChart: Database</strong> report type are also applicable.</p> 
      <h3 id="mongodb">MongoDB</h3> 
      <p>Allows you to query a MongoDB database. To use it, first create a datasource of type <strong>MongoDB</strong>. Set the URL as appropriate. Next, create the report, setting the report <strong>Type</strong> as <strong>MongoDB</strong> and selecting the mongodb datasource in the <strong>Datasource</strong> field. In the report source field, enter the groovy script that will be used to retrieve data from the mongodb database. The syntax of querying can either be that of the <a class="" href="https://mongodb.github.io/mongo-java-driver/" rel="nofollow">MongoDB Java Driver</a>, the <a class="" href="http://jongo.org/" rel="nofollow">Jongo</a> library or the <a class="" href="https://mongodb.github.io/morphia/" rel="nofollow">Morphia</a> library. ART passes a MongoClient connection object to the groovy script with the variable name <strong>mongoClient</strong>. This is the variable that is to be used as the connection to the mongodb server. ART also passes any report parameters specified using the parameter name as the variable name.</p> 
      <p>If it is required to display the returned results in a table, the groovy script must return a <code>List</code> of objects that are to be displayed. Also, the groovy script is run through a sandbox and only classes contained in the <strong>WEB-INF\groovy-whitelist.txt</strong> file will be allowed to be used within the script. If you use a class that is not contained in the whitelist, a <strong>SecurityException</strong> error will occur when you run the report. If you get such an error, add the class mentioned to the whitelist and run the report again.</p> 
@@ -1995,6 +2221,7 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
@@ -2002,36 +2229,43 @@ FROM mytable
        <tr> 
         <td><strong>columns</strong></td> 
         <td>Array of strings</td> 
+        <td></td> 
         <td>Names of columns that should be included in the tabular output. This may be useful when querying documents that may have different attributes. If not specified, ART will use the first document retrieved to determine the columns that will be included in the output.</td> 
        </tr> 
        <tr> 
         <td><strong>columnDataTypes</strong></td> 
         <td>Array of objects</td> 
+        <td></td> 
         <td>Each object specifies a column name and the data type that is to be used for that column e.g. <code>[{"col1": "numeric"}]</code>. The possible data types are <strong>string</strong>, <strong>numeric</strong>, <strong>date</strong> and <strong>datetime</strong>. The default is <code>string</code> so if a column is to be treated as a general string, it doesn't need to be specified.</td> 
        </tr> 
        <tr> 
         <td><strong>inputDateFormat</strong></td> 
-        <td>String (defalut = yyyy-MM-dd)</td> 
+        <td>String</td> 
+        <td>yyyy-MM-dd</td> 
         <td>The format of input data for columns with a <strong>date</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateFormat</strong></td> 
-        <td>String (default = blank)</td> 
+        <td>String</td> 
+        <td></td> 
         <td>The format of output/displayed data for columns with a <strong>date</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>inputDateTimeFormat</strong></td> 
-        <td>String (default = yyyy-MM-dd HH:mm:ss.SSS)</td> 
+        <td>String</td> 
+        <td>yyyy-MM-dd HH:mm:ss.SSS</td> 
         <td>The format of input data for columns with a <strong>datetime</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateTimeFormat</strong></td> 
-        <td>String (default = blank)</td> 
+        <td>String</td> 
+        <td></td> 
         <td>The format of output/displayed data for columns with a <strong>datetime</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
        </tr> 
        <tr> 
         <td><strong>showColumnFilters</strong></td> 
-        <td>Boolean (default = true)</td> 
+        <td>Boolean</td> 
+        <td>true</td> 
         <td>Determines if column filters will be displayed in the tabular output.</td> 
        </tr> 
       </tbody> 
@@ -2050,6 +2284,7 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
@@ -2057,11 +2292,13 @@ FROM mytable
        <tr> 
         <td><strong>i18n</strong></td> 
         <td>Object</td> 
+        <td></td> 
         <td>Allows for localization of some aspects of a report. It can have the properties <strong>name</strong>, <strong>shortDescription</strong>, <strong>description</strong>, with each property being an array of objects providing the locale and the appropriate localized string. e.g. <code>"i18n": { "name": [{"en, sw": "A report name"}, {"pt": "Another report name"}], "description": [{"lt": "Sample help text"}] }</code>. In addition, the <strong>i18n</strong> object can have a property named <strong>columnNames</strong> that enables localization of data output column names. This property also holds an array of objects defining the localized column names e.g. <code>"i18n": { "columnNames": [ {"col1": [{"lt": "Some name"}]}, {"2": [{"lt": "A name"}]} ]}</code>. You can specify a column name e.g. "col1" or a column index e.g. "2", the first column being index 1.</td> 
        </tr> 
        <tr> 
         <td><strong>usesGroovy</strong></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether the SQL source field is actually a groovy script. For MongoDB reports, this doesn't need to be set as MongoDB reports always use groovy in the source.</td> 
        </tr> 
       </tbody> 
@@ -2073,28 +2310,33 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><strong>pdfCanPrint</strong></td> 
-        <td>Boolean (default = true)</td> 
+        <td>Boolean</td> 
+        <td>true</td> 
         <td>Whether the Print menu is enabled in the generated pdf</td> 
        </tr> 
        <tr> 
         <td><strong>pdfCanCopyContent</strong></td> 
-        <td>Boolean (default = true)</td> 
+        <td>Boolean</td> 
+        <td>true</td> 
         <td>Whether one can select and copy text in the generated pdf</td> 
        </tr> 
        <tr> 
         <td><strong>keyLength</strong></td> 
-        <td>Integer (default = 128)</td> 
+        <td>Integer</td> 
+        <td>128</td> 
         <td>The encryption key length to be used. Can only be either 40, 128 or 256. If you set it to 256, you must have JCE unlimited strength jurisdiction policy files installed in the JVM.</td> 
        </tr> 
        <tr> 
         <td><strong>preferAes</strong></td> 
-        <td>Boolean (default = true)</td> 
+        <td>Boolean</td> 
+        <td>true</td> 
         <td>Whether the AES algorithm should be used if available</td> 
        </tr> 
       </tbody> 
@@ -2106,18 +2348,21 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><strong>useParentParameters</strong></td> 
-        <td>Boolean (default = true)</td> 
+        <td>Boolean</td> 
+        <td>true</td> 
         <td>Whether the clone report will use parent report's parameters, or if false, use its own parameters.</td> 
        </tr> 
        <tr> 
         <td><strong>useParentRules</strong></td> 
-        <td>Boolean (default = true)</td> 
+        <td>Boolean</td> 
+        <td>true</td> 
         <td>Whether the clone report will use the parent report's rules, or if false, use its own rules.</td> 
        </tr> 
       </tbody> 
@@ -2137,6 +2382,32 @@ FROM mytable
         <td><strong>imageColumns</strong></td> 
         <td>Array of strings</td> 
         <td>An indication of the column indices or column names for blob columns that contain images. The first column has an index of 1. e.g. <code>["2"]</code> or <code>["image"]</code> or <code>["3", "image"]</code>. A note that ods and odt report formats will not display images.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="template-result-options">Template Result Options</h3> 
+     <p>For jxls, xdocreport, freemarker, velocity and thymeleaf report types, the following options can be specified to determine the column names to use with the <strong>results</strong> object.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>useLowerCaseProperties</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether to use lower case property names (column names) regardless of if they are saved as upper case by the database. This setting doesn't need to be specified if using the <strong>jdbc</strong> object. In this case, the property names are not case sensitive.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>useColumnLabels</strong></td> 
+        <td>Boolean</td> 
+        <td>true</td> 
+        <td>Whether to use column labels (aliases) as the property names. If false, column names will be used.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -3430,18 +3701,21 @@ WHERE REGION = #region#
        <tr> 
         <th>Tag</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><code>&lt;SIZE&gt;</code></td> 
-        <td>String (default = auto). Either <strong>small</strong>, <strong>medium</strong>, <strong>large</strong> or <strong>auto</strong></td> 
-        <td>The size of the column</td> 
+        <td>String</td> 
+        <td>auto</td> 
+        <td>The size of the column. Either <strong>small</strong>, <strong>medium</strong>, <strong>large</strong> or <strong>auto</strong>.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;PORTLET&gt;</code></td> 
         <td>None</td> 
+        <td></td> 
         <td>The parent/containter tag for a portlet. A column can have any number of portlets.</td> 
        </tr> 
       </tbody> 
@@ -3453,33 +3727,39 @@ WHERE REGION = #region#
        <tr> 
         <th>Tag</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><code>&lt;TITLE&gt;</code></td> 
-        <td>String (default = blank)</td> 
+        <td>String</td> 
+        <td></td> 
         <td>The title of the portlet</td> 
        </tr> 
        <tr> 
         <td><code>&lt;REPORTID&gt;</code></td> 
-        <td>String (no default)</td> 
+        <td>String</td> 
+        <td></td> 
         <td>A report ID of an ART report that should be displayed in the portlet e.g. <code>25</code>. You can add parameters after the report ID, being careful to use <code>&amp;amp;</code> where <code>&amp;</code> would be used in a url e.g. <code>25&amp;amp;reportFormat=htmlGrid</code></td> 
        </tr> 
        <tr> 
         <td><code>&lt;URL&gt;</code></td> 
-        <td>String (no default)</td> 
+        <td>String</td> 
+        <td></td> 
         <td>An external url that should be displayed in the portlet e.g. <code>http://www.example.com</code>. If both url and report id tags are present, the content of the report id tag will be used.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;REFRESH&gt;</code></td> 
-        <td>Integer (default = -1)</td> 
+        <td>Integer</td> 
+        <td>-1</td> 
         <td>The time in seconds after which the portlet refreshes itself. -1 means no auto-refresh. The minimum refresh time allowed is 5 seconds. Setting a low value may overload your servers/databases. A portlet can be refreshed manually by clicking on the refresh button in the portlet header.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;ONLOAD&gt;</code></td> 
-        <td>Boolean ( default = true)</td> 
+        <td>Boolean</td> 
+        <td>true</td> 
         <td>Whether the report or url content is retrieved when the dashboard is run. If set to false, the portlet content is not loaded initially and can be loaded later manually by using the refresh button.</td> 
        </tr> 
       </tbody> 
@@ -3540,6 +3820,7 @@ WHERE REGION = #region#
        <tr> 
         <th>Tag</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
@@ -3547,56 +3828,67 @@ WHERE REGION = #region#
        <tr> 
         <td><code>&lt;DASHBOARD&gt;</code></td> 
         <td>None</td> 
+        <td></td> 
         <td>The parent/containter tag for the dashboard definition</td> 
        </tr> 
        <tr> 
         <td><code>&lt;DASHBOARDWIDTH&gt;</code></td> 
-        <td>Integer (default = 12)</td> 
+        <td>Integer</td> 
+        <td>12</td> 
         <td>The number of columns to be taken up by the grid, forming the basis of the horizontal axis (x axis) of the grid co-ordinates.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;FLOAT&gt;</code></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether report items can be moved to arbitrary locations on the dashboard. If false, grid items can only snap to given locations.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;ANIMATE&gt;</code></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether animation is used when grid items are moved around</td> 
        </tr> 
        <tr> 
         <td><code>&lt;DISABLEDRAG&gt;</code></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether dragging of items is disabled</td> 
        </tr> 
        <tr> 
         <td><code>&lt;DISABLERESIZE&gt;</code></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether resizing of items is disabled</td> 
        </tr> 
        <tr> 
         <td><code>&lt;CELLHEIGHT&gt;</code></td> 
-        <td>String (default = 60px)</td> 
+        <td>String</td> 
+        <td>60px</td> 
         <td>The dimensions of one unit of the grid co-ordinates on the vertical axis (y axis). It can be defined as <strong>px</strong>, <strong>em</strong> or <strong>rem</strong> units e.g. 10em or 10rem. It can also be defined as "<strong>auto</strong>", in which case the height will be calculated from the cell width.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;VERTICALMARGIN&gt;</code></td> 
-        <td>String (default = 20px)</td> 
+        <td>String</td> 
+        <td>20px</td> 
         <td>The size of the vertical gap between cells. It can be defined as <strong>px</strong>, <strong>em</strong> or <strong>rem</strong> units e.g. 2em or 2rem.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;ALWAYSSHOWRESIZEHANDLE&gt;</code></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether the resizing handles on the bottom corners of a cell are shown, even if the user is not hovering over the item.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;DASHBOARDHEIGHT&gt;</code></td> 
-        <td>Integer (default = 0)</td> 
+        <td>Integer</td> 
+        <td>0</td> 
         <td>The maximum number of rows or y units on the grid co-ordinate system. Items cannot be resized or moved beyond this limit. A value of 0 means no maximum.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;ITEM&gt;</code></td> 
         <td>None</td> 
+        <td></td> 
         <td>The parent/container tag for a dashboard item. The dashboard can have any number of items.</td> 
        </tr> 
       </tbody> 
@@ -3608,6 +3900,7 @@ WHERE REGION = #region#
        <tr> 
         <th>Tag</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
@@ -3615,61 +3908,73 @@ WHERE REGION = #region#
        <tr> 
         <td><code>&lt;XPOSITION&gt;</code></td> 
         <td>Integer. <strong>required</strong></td> 
+        <td></td> 
         <td>The x axis position of the item</td> 
        </tr> 
        <tr> 
         <td><code>&lt;YPOSITION&gt;</code></td> 
         <td>Integer. <strong>required</strong></td> 
+        <td></td> 
         <td>The y axis position of the item</td> 
        </tr> 
        <tr> 
         <td><code>&lt;WIDTH&gt;</code></td> 
         <td>Integer. <strong>required</strong></td> 
+        <td></td> 
         <td>The width of the item. This defines the number of columns that the item will occupy, in relation to the number of columns of the whole grid as defined by the dashboard's <code>&lt;DASHBOARDWIDTH&gt;</code> property.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;HEIGHT&gt;</code></td> 
         <td>Integer. <strong>required</strong></td> 
+        <td></td> 
         <td>The height of the item. This defines the number of rows that the item will occupy, one row being the size defined in the dashboard's <code>&lt;CELLHEIGHT&gt;</code> property.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;NORESIZE&gt;</code></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether element resizing is disabled</td> 
        </tr> 
        <tr> 
         <td><code>&lt;NOMOVE&gt;</code></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether element moving is disabled</td> 
        </tr> 
        <tr> 
         <td><code>&lt;AUTOPOSITION&gt;</code></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether to ignore the <code>&lt;XPOSITION&gt;</code> and <code>&lt;YPOSITION&gt;</code> and instead place the element in the first available position.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;LOCKED&gt;</code></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>Whether the widget will be locked. If it is locked, another widget will not be able to move it during dragging or resizing. Even though it is locked, the widget can still be dragged or resized. You need to specify the <code>&lt;NORESIZE&gt;</code> and <code>&lt;NOMOVE&gt;</code> options to prevent this and thereby completely lock the widget.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;MINWIDTH&gt;</code></td> 
-        <td>Integer (default = 0)</td> 
+        <td>Integer</td> 
+        <td>0</td> 
         <td>The minimum width beyond which the item cannot be resized</td> 
        </tr> 
        <tr> 
         <td><code>&lt;MINHEIGHT&gt;</code></td> 
-        <td>Integer (default = 0)</td> 
+        <td>Integer</td> 
+        <td>0</td> 
         <td>The minimum height beyond which the item cannot be resized</td> 
        </tr> 
        <tr> 
         <td><code>&lt;MAXWIDTH&gt;</code></td> 
-        <td>Integer (default = 0)</td> 
+        <td>Integer</td> 
+        <td>0</td> 
         <td>The maximum width beyond which the item cannot be resized. A value of 0 means no maximum.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;MAXHEIGHT&gt;</code></td> 
-        <td>Integer (default = 0)</td> 
+        <td>Integer</td> 
+        <td>0</td> 
         <td>The maximum height beyond which the item cannot be resized. A value of 0 means no maximum.</td> 
        </tr> 
       </tbody> 
@@ -3709,18 +4014,21 @@ WHERE REGION = #region#
        <tr> 
         <th>Tag</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><code>&lt;DEFAULTTAB&gt;</code></td> 
-        <td>Integer (default = 1)</td> 
+        <td>Integer</td> 
+        <td>1</td> 
         <td>The index of the tab that will be active when the dashboard is displayed. The first tab has an index of 1.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;TAB&gt;</code></td> 
         <td>None</td> 
+        <td></td> 
         <td>The parent/container tag for a tab. A tablist can have any number of tabs.</td> 
        </tr> 
       </tbody> 
@@ -3732,18 +4040,21 @@ WHERE REGION = #region#
        <tr> 
         <th>Tag</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><code>&lt;TITLE&gt;</code></td> 
-        <td>String (default = blank)</td> 
+        <td>String</td> 
+        <td></td> 
         <td>The title/heading of the tab. Even though this tag is optional, it is recommended to set it so as to have better identification of the different tabs.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;ITEM&gt;</code></td> 
-        <td>Integer (no default)</td> 
+        <td>Integer</td> 
+        <td></td> 
         <td>The index of the item to display, as it appears in the main dashboard xml definition. The dashboard portlets/items are assigned an index according to the order in which they appear in the xml. The first item has an index of 1 e.g. setting this to 1 indicates that the first portlet/item in the main dashboard xml should be displayed. A tab can have any number of items.</td> 
        </tr> 
       </tbody> 
@@ -4064,7 +4375,7 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>To</strong></td> 
-        <td>The email address to send job output to. Multiple addresses can be specified, separated by <code>;</code></td> 
+        <td>The email address to send job output to. Multiple addresses can be specified separated by <code>,</code></td> 
        </tr> 
        <tr> 
         <td><strong>Dynamic Recipients</strong></td> 
@@ -4072,11 +4383,11 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>Cc</strong></td> 
-        <td>The "Cc" email address for a job. Multiple addresses can be specified, separated by <code>;</code></td> 
+        <td>The "Cc" email address for a job. Multiple addresses can be specified separated by <code>,</code></td> 
        </tr> 
        <tr> 
         <td><strong>BCc</strong></td> 
-        <td>The "BCc" email address for a job. Multiple addresses can be specified, separated by <code>;</code></td> 
+        <td>The "BCc" email address for a job. Multiple addresses can be specified separated by <code>,</code></td> 
        </tr> 
        <tr> 
         <td><strong>Subject</strong></td> 
@@ -4085,6 +4396,10 @@ WHERE {#!saleTypes#}
        <tr> 
         <td><strong>Template</strong></td> 
         <td>A thymeleaf template file that can be used as a template for the email body. The template file name must have a <strong>.html</strong> extension.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>SMTP Server</strong></td> 
+        <td>The smtp server to use, if different from the one configured in the <strong>Settings</strong> page</td> 
        </tr> 
        <tr> 
         <td><strong>Message</strong></td> 
@@ -4142,6 +4457,10 @@ WHERE {#!saleTypes#}
         <td><strong>Shared Holidays</strong></td> 
         <td>Shared holidays configured from the <strong>Configure | Holidays</strong> menu that should be applied for this job.</td> 
        </tr> 
+       <tr> 
+        <td><strong>Options</strong></td> 
+        <td>Any optional job options, specified in JSON format</td> 
+       </tr> 
       </tbody> 
      </table> 
      <p><strong>Note:</strong></p> 
@@ -4149,6 +4468,26 @@ WHERE {#!saleTypes#}
       <li>Not all report types can be scheduled</li> 
       <li>If the output for a job creates a file e.g. publish to pdf, this file is stored in the <strong>WEB-INF\work\export\jobs</strong> directory</li> 
      </ul> 
+     <h2 id="job-options">Job Options</h2> 
+     <p>Some options can be defined in the <strong>Options</strong> field. Options are specified in JSON format and include the following.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>logInterval</strong></td> 
+        <td>Integer</td> 
+        <td>0</td> 
+        <td>For jobs that use dynamic recipients, this specifies an interval or number of records after which an item is included in the job log to indicate progress of the job. A value of 0 means this intermediate logging is not done.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <h2 id="job-types">Job Types</h2> 
      <h3 id="e-mail-output-attachment">E-Mail Output (Attachment)</h3> 
      <p>The output is emailed as an attachment to the specified recipients (in the "To" section). The attachment type can be selected in the <strong>Output Format</strong> field.</p> 
@@ -4316,11 +4655,11 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>User</strong></td> 
-        <td>The user to use to connect to the destination. For Amazon S3 storage, this is the access key id. For Microsoft Azure Blob storage, this is the storage account name.</td> 
+        <td>The user to use to connect to the destination. For <strong>Amazon S3</strong> destinations, this is the IAM user's access key id. For <strong>Microsoft Azure</strong> Blob Storage destinations, this is the storage account name.</td> 
        </tr> 
        <tr> 
         <td><strong>Password</strong></td> 
-        <td>The destination user's password. For Amazon S3 storage, this is the secret access key. For Microsoft Azure Blob storage, this is the primary access key.</td> 
+        <td>The destination user's password. For <strong>Amazon S3</strong> destinations, this is the IAM user's secret access key. For <strong>Microsoft Azure</strong> Blob Storage destinations, this is the primary access key.</td> 
        </tr> 
        <tr> 
         <td><strong>Domain</strong></td> 
@@ -4328,7 +4667,7 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>Path</strong></td> 
-        <td>The location of the destination. For <strong>Network Share</strong> destinations, this is the share name. For <strong>FTP</strong> and <strong>SFTP</strong> destinations, this is an optional directory path where files should be copied. For Amazon S3 storage, this is the bucket name. For <strong>Azure</strong> destinations, this is the container name. For <strong>WebDAV</strong> destinations, this is the URL of the WebDAV server e.g. <code>http://localhost</code>. For <strong>Website</strong> destinations, this is a URL that POSTs a form, which includes a file field.</td> 
+        <td>The location of the destination. For <strong>Network Share</strong> destinations, this is the share name. For <strong>FTP</strong> and <strong>SFTP</strong> destinations, this is an optional directory path where files should be copied. For <strong>Amazon S3</strong> destinations, this is the bucket name. For <strong>Microsoft Azure</strong> destinations, this is the container name. For <strong>WebDAV</strong> destinations, this is the URL of the WebDAV server e.g. <code>http://localhost</code>. For <strong>Website</strong> destinations, this is a URL that POSTs a form, which includes a file field.</td> 
        </tr> 
        <tr> 
         <td><strong>Sub-Directory</strong></td> 
@@ -4344,6 +4683,10 @@ WHERE {#!saleTypes#}
        </tr> 
       </tbody> 
      </table> 
+     <p><strong>Note</strong></p> 
+     <ul> 
+      <li>For <strong>Amazon S3</strong> destinations, the IAM user needs the <strong>s3:GetBucketLocation</strong> permission in order for the file upload to be successful. In addition, the user will need at least the <strong>s3:PutObject</strong> permission on the bucket where the file is to be copied.</li> 
+     </ul> 
      <h2 id="options">Options</h2> 
      <p>Some destinations can have additional options that can be specified. These are included in the <strong>Options</strong> field using JSON syntax.</p> 
      <h3 id="ftp-options">FTP Options</h3> 
@@ -4353,18 +4696,21 @@ WHERE {#!saleTypes#}
        <tr> 
         <th>Attribute</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><strong>connectTimeoutSeconds</strong></td> 
-        <td>Integer (default = 60)</td> 
+        <td>Integer</td> 
+        <td>60</td> 
         <td>The timeout (in seconds) to use when connecting to the server.</td> 
        </tr> 
        <tr> 
         <td><strong>controlKeepAliveTimeoutSeconds</strong></td> 
         <td>Long</td> 
+        <td></td> 
         <td>The time period (in seconds) after which to send a keep alive (NOOP) message. Zero disables.</td> 
        </tr> 
       </tbody> 
@@ -4376,13 +4722,15 @@ WHERE {#!saleTypes#}
        <tr> 
         <th>Attribute</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><strong>sessionConnectTimeoutSeconds</strong></td> 
-        <td>Integer (default = 0)</td> 
+        <td>Integer</td> 
+        <td>0</td> 
         <td>The timeout (in seconds) to use when opening a session. Zero indicates "no timeout".</td> 
        </tr> 
       </tbody> 
@@ -4394,18 +4742,21 @@ WHERE {#!saleTypes#}
        <tr> 
         <th>Attribute</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
       <tbody> 
        <tr> 
         <td><strong>timeoutSeconds</strong></td> 
-        <td>Integer (default = 60)</td> 
+        <td>Integer</td> 
+        <td>60</td> 
         <td>The timeout (in seconds) for read/write operations.</td> 
        </tr> 
        <tr> 
         <td><strong>multiProtocolNegotiate</strong></td> 
-        <td>Boolean (default = false)</td> 
+        <td>Boolean</td> 
+        <td>false</td> 
         <td>For suspected SMB1 shares, this can be enabled in order to get an error message indicating that SMB1 is not supported.</td> 
        </tr> 
       </tbody> 
@@ -4417,6 +4768,7 @@ WHERE {#!saleTypes#}
        <tr> 
         <th>Attribute</th> 
         <th>Data Type</th> 
+        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
@@ -4424,47 +4776,144 @@ WHERE {#!saleTypes#}
        <tr> 
         <td><strong>loginUrl</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>A url that takes a POST request that will be used to log in before uploading the file</td> 
        </tr> 
        <tr> 
         <td><strong>startUrl</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>A url that takes a GET request that should be visited first before uploading the file</td> 
        </tr> 
        <tr> 
         <td><strong>fileField</strong></td> 
-        <td>String (default = file)</td> 
+        <td>String</td> 
+        <td>file</td> 
         <td>The name of the html field for the file that is being submitted</td> 
        </tr> 
        <tr> 
         <td><strong>usernameField</strong></td> 
-        <td>String (default = username)</td> 
+        <td>String</td> 
+        <td>username</td> 
         <td>When using a <strong>loginUrl</strong>, this is the name of the html field that contains the username to use to authenticate</td> 
        </tr> 
        <tr> 
         <td><strong>passwordField</strong></td> 
-        <td>String (default = password)</td> 
+        <td>String</td> 
+        <td>password</td> 
         <td>When using a <strong>loginUrl</strong>, this is the name of the html field that contains the password to use to authenticate</td> 
        </tr> 
        <tr> 
         <td><strong>csrfTokenCookie</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>The name of a cookie that contains a csrf token that needs to be included when submitting the file. This is used either with a <strong>startUrl</strong> or <strong>loginUrl</strong> in order to obtain the csrf token.</td> 
        </tr> 
        <tr> 
         <td><strong>csrfTokenInputField</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>The name of a html input element that contains a csrf token that needs to be included when submitting the file. This is used either with a <strong>startUrl</strong> or <strong>loginUrl</strong> in order to obtain the csrf token.</td> 
        </tr> 
        <tr> 
         <td><strong>csrfTokenOutputField</strong></td> 
         <td>String</td> 
+        <td></td> 
         <td>The name of a html field that contains a csrf token when submitting the file</td> 
        </tr> 
        <tr> 
         <td><strong>staticFields</strong></td> 
         <td>Array of objects</td> 
+        <td></td> 
         <td>An array of key-value pairs representing fields that contain static data that should be included when submitting the file. The keys are the html field names and values are the field values e.g. <code>"staticFields": [{"field1": "value1"}, {"field2": "value2"}]</code>.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="amazon-s3-aws-sdk-options">Amazon S3 - AWS SDK Options</h3> 
+     <p>For <strong>Amazon S3 - AWS SDK</strong> destinations, the following options are available.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Attribute</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>region</strong></td> 
+        <td>String</td> 
+        <td>us-east-1</td> 
+        <td>The region that will process the requests. This is not necessarily the region where the bucket is located. You can set a region near where the ART server is in order to get faster operation. See the <a class="" href="https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region" rel="nofollow">s3 regions</a> documentation for a list of possible region values.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>cannedAcl</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>A canned acl that should be applied to the uploaded file. The possible strings are as per the <a class="" href="https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/model/CannedAccessControlList.html" rel="nofollow">CannedAccessControlList</a> class i.e. either <strong>AuthenticatedRead</strong>, <strong>AwsExecRead</strong>, <strong>BucketOwnerFullControl</strong>, <strong>BucketOwnerRead</strong>, <strong>LogDeliveryWrite</strong>, <strong>Private</strong>, <strong>PublicRead</strong> or <strong>PublicReadWrite</strong>. See the <a class="" href="https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl" rel="nofollow">canned acl</a> documentation for more details about canned acl options.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+    </div> 
+   </div> 
+   <div> 
+    <div class="markdown_content"> 
+     <!--NewPage--> 
+     <h1 id="smtp-servers">SMTP Servers</h1> 
+     <p>You can configure smtp servers to be used by individual jobs. You may want a job to use a different smtp server from the one configured in the <strong>Settings</strong> page.</p> 
+     <p>Use the <strong>Configure | SMTP Servers</strong> menu to manage smtp server configurations. When adding an smtp server, the following fields are available.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Field</th> 
+        <th>Comment</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>An auto-generated ID used to identify the smtp server configuration</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Name</strong></td> 
+        <td>A name for the smtp server configuration</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Description</strong></td> 
+        <td>A description for the smtp server configuration</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Active</strong></td> 
+        <td>Whether this configuration is active or not. If it is not active, jobs that use this smtp server will not send emails.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Server</strong></td> 
+        <td>The IP address or host name of the smtp server</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Port</strong></td> 
+        <td>The smtp port to use</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Use StartTLS</strong></td> 
+        <td>Whether to use STARTTLS when connecting to the server</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Use SMTP Authentication</strong></td> 
+        <td>Whether to use a username and password when connecting to the smtp server</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Username</strong></td> 
+        <td>The username to use to connect to the smtp server, typically an email address on the server</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Password</strong></td> 
+        <td>The password to use to connect to the smtp server</td> 
+       </tr> 
+       <tr> 
+        <td><strong>From</strong></td> 
+        <td>The "From" email address for jobs that will use this smtp configuration. This can be left blank in which case individual "From" email addresses specified within jobs will be used.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -4807,20 +5256,18 @@ spnego-server {
      <p>In addition to being available on the application server's standard output log files, e.g stdout.log or catalina.log on Tomcat, application logs can also be viewed from within ART. This means that you don't need to have access to the application server machine in order to view application logs. </p> 
      <p>Application logs can be viewed from the <strong>Logs</strong> menu. New logs are added to the bottom and you'll need to refresh the page to view them. Also note that this page doesn't display all the logs ever generated by the application, only the most recent ones.</p> 
      <h2 id="sql-logging">SQL Logging</h2> 
-     <p>You can set up logging for the sql that is generated when queries are run, e.g. to see the final sql generated, or to see how long queries take to execute. ART uses the <a class="" href="http://log4jdbc.brunorozendo.com/" rel="nofollow">log4jdbc-log4j2</a> library to enable such logging. Take the following steps to configure sql logging.</p> 
+     <p>You can set up logging for the sql that is generated when reports are run, e.g. to see the final sql generated, or to see how long queries take to execute. ART uses the <a class="" href="http://log4jdbc.brunorozendo.com/" rel="nofollow">log4jdbc-log4j2</a> library to enable such logging. Take the following steps to configure sql logging.</p> 
      <ul> 
       <li>Select the <strong>Configure | Datasources</strong> menu and <strong>Edit</strong> the datasource you're interested in</li> 
       <li>Select <strong>SQL Logging</strong> in the <code>Database Type</code> field. This will set the JDBC Driver and JDBC fields appropriately for sql logging. Alternatively, you can set the values manually as follows. Set the <code>JDBC Driver</code> field to <code>net.sf.log4jdbc.sql.jdbcapi.DriverSpy</code> and modify the <code>JDBC URL</code> field by prepending <strong>jdbc:log4</strong> to the existing url, e.g. resulting in a url like <code>jdbc:log4jdbc:mysql://localhost/mydb</code></li> 
       <li><strong>Save</strong> the datasource details</li> 
       <li> <p>Modify the <strong>WEB-INF\classes\logback.xml</strong> file and add loggers for the items you are interested in e.g.</p> 
        <div class="codehilite"> 
-        <pre><span></span><span class="nt">&lt;logger</span> <span class="na">name=</span><span class="s">"jdbc.sqltiming"</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;level</span> <span class="na">value=</span><span class="s">"info"</span> <span class="nt">/&gt;</span>
-<span class="nt">&lt;/logger&gt;</span>
+        <pre><span></span>&lt;logger name="jdbc.sqltiming" level="info"/&gt;
 </pre> 
        </div> </li> 
       <li> <p>The available loggers and what events they log can be found on the log4jdbc-log4j2 project home page, <a href="http://log4jdbc.brunorozendo.com/." rel="nofollow">http://log4jdbc.brunorozendo.com/.</a> ART uses the SLF4J configuration.</p> </li> 
-      <li>That's all. The logging information will now be included in the application logs when reports are run against that datasource.</li> 
+      <li>That's all. The logging information will now be included in the application logs when queries are run against that datasource.</li> 
      </ul> 
     </div> 
    </div> 
