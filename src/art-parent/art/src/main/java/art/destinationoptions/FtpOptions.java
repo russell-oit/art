@@ -17,14 +17,11 @@
  */
 package art.destinationoptions;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 /**
  * Represents options for ftp destinations
  *
  * @author Timothy Anyona
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class FtpOptions {
 
 	private Long controlKeepAliveTimeoutSeconds;

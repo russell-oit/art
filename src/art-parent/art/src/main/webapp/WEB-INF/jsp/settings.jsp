@@ -19,15 +19,18 @@ Settings configuration page
 
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -61,6 +64,18 @@ Settings configuration page
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
 					offText: '${noText}'
+				});
+
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneResultsText: '${noResultsMatchText}'
+				});
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				$('button.dropdown-toggle').dropdownHover({
+					delay: 100
 				});
 
 			});
@@ -175,7 +190,7 @@ Settings configuration page
 							</label>
 							<div class="col-md-7">
 								<div class="input-group">
-									<form:password path="smtpPassword" maxlength="50" autocomplete="off" class="form-control" />
+									<form:password path="smtpPassword" maxlength="100" autocomplete="off" class="form-control" />
 									<spring:message code="page.help.password" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
@@ -228,7 +243,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="windowsDomainController" maxlength="50" class="form-control"/>
+								<form:input path="windowsDomainController" maxlength="100" class="form-control"/>
 								<spring:message code="settings.help.windowsDomainController" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -273,7 +288,7 @@ Settings configuration page
 							<spring:message code="settings.label.databaseAuthenticationUrl"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="databaseAuthenticationUrl" maxlength="2000" class="form-control"/>
+							<form:input path="databaseAuthenticationUrl" maxlength="500" class="form-control"/>
 							<form:errors path="databaseAuthenticationUrl" cssClass="error"/>
 						</div>
 					</div>
@@ -325,7 +340,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="ldapUrl" maxlength="2000" class="form-control"/>
+								<form:input path="ldapUrl" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.ldapUrl" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -390,7 +405,7 @@ Settings configuration page
 							</label>
 							<div class="col-md-7">
 								<div class="input-group">
-									<form:password path="ldapBindPassword" maxlength="50"
+									<form:password path="ldapBindPassword" maxlength="100"
 												   autocomplete="off" class="form-control"/>
 									<spring:message code="page.help.password" var="help"/>
 									<span class="input-group-btn" >
@@ -466,7 +481,7 @@ Settings configuration page
 							<spring:message code="settings.label.casLogoutUrl"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="casLogoutUrl" class="form-control"/>
+							<form:input path="casLogoutUrl" maxlength="100" class="form-control"/>
 							<form:errors path="casLogoutUrl" cssClass="error"/>
 						</div>
 					</div>
@@ -520,7 +535,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontName" maxlength="100" class="form-control"/>
+								<form:input path="pdfFontName" maxlength="50" class="form-control"/>
 								<spring:message code="settings.help.pdfFontName" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -538,7 +553,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontFile" maxlength="2000" class="form-control"/>
+								<form:input path="pdfFontFile" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.pdfFontFile" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -556,7 +571,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontDirectory" maxlength="2000" class="form-control"/>
+								<form:input path="pdfFontDirectory" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.pdfFontDirectory" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -574,7 +589,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontEncoding" maxlength="100" class="form-control"/>
+								<form:input path="pdfFontEncoding" maxlength="50" class="form-control"/>
 								<spring:message code="settings.help.pdfFontEncoding" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -633,7 +648,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="dateFormat" maxlength="100" class="form-control"/>
+								<form:input path="dateFormat" maxlength="50" class="form-control"/>
 								<spring:message code="settings.help.dateFormat" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -651,7 +666,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="timeFormat" maxlength="100" class="form-control"/>
+								<form:input path="timeFormat" maxlength="50" class="form-control"/>
 								<spring:message code="settings.help.timeFormat" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -669,7 +684,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="reportFormats" maxlength="500" class="form-control"/>
+								<form:input path="reportFormats" maxlength="200" class="form-control"/>
 								<spring:message code="settings.help.reportFormats" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -743,7 +758,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="rssLink" maxlength="2000" class="form-control"/>
+								<form:input path="rssLink" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.rssLink" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -779,7 +794,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="artBaseUrl" class="form-control"/>
+								<form:input path="artBaseUrl" maxlength="500" class="form-control"/>
 								<spring:message code="settings.help.artBaseUrl" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -796,8 +811,161 @@ Settings configuration page
 							<spring:message code="settings.label.systemLocale"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="systemLocale" class="form-control"/>
+							<form:input path="systemLocale" maxlength="50" class="form-control"/>
 							<form:errors path="systemLocale" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-5 control-label " for="logsDatasourceId">
+							<spring:message code="settings.label.logsDatasource"/>
+						</label>
+						<div class="col-md-7">
+							<form:select path="logsDatasourceId" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<form:option value="-1"><spring:message code="page.title.artDatabase"/></form:option>
+									<option data-divider="true"></option>
+								<c:forEach var="datasource" items="${datasources}">
+									<c:set var="datasourceStatus">
+										<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>
+									</c:set>
+									<form:option value="${datasource.datasourceId}"
+												 data-content="${datasource.name} ${datasourceStatus}">
+										${datasource.name} 
+									</form:option>
+								</c:forEach>
+							</form:select>
+							<form:errors path="logsDatasourceId" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset>
+					<legend><spring:message code="settings.text.errorNotification"/></legend>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationTo">
+							<spring:message code="jobs.label.mailTo"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationTo" maxlength="500" class="form-control"/>
+							<form:errors path="errorNotificationTo" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationFrom">
+							<spring:message code="jobs.label.mailFrom"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationFrom" maxlength="100" class="form-control"/>
+							<form:errors path="errorNotificationFrom" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationSubjectPattern">
+							<spring:message code="settings.label.subjectPattern"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationSubjectPattern" maxlength="50" class="form-control"/>
+							<form:errors path="errorNotificationSubjectPattern" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5">
+							<spring:message code="page.text.level"/>
+						</label>
+						<div class="col-md-7">
+							<c:forEach var="errorNotificatonLevel" items="${errorNotificationLevels}">
+								<label class="radio-inline">
+									<form:radiobutton path="errorNotificatonLevel"
+													  value="${errorNotificatonLevel}"/> ${errorNotificatonLevel.description}
+								</label>
+							</c:forEach>
+							<form:errors path="errorNotificatonLevel" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationLogger">
+							<spring:message code="logs.text.logger"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationLogger" maxlength="200" class="form-control"/>
+							<form:errors path="errorNotificationLogger" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationSuppressAfter">
+							<spring:message code="settings.label.suppressAfter"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationSuppressAfter" maxlength="30" class="form-control"/>
+							<form:errors path="errorNotificationSuppressAfter" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationExpireAfter">
+							<spring:message code="settings.label.expireAfter"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationExpireAfter" maxlength="20" class="form-control"/>
+							<form:errors path="errorNotificationExpireAfter" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="errorNotificationDigestFrequency">
+							<spring:message code="settings.label.digestFrequency"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="errorNotificationDigestFrequency" maxlength="20" class="form-control"/>
+							<form:errors path="errorNotificationDigestFrequency" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset>
+					<legend><spring:message code="settings.text.passwordPolicy"/></legend>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinLength">
+							<spring:message code="settings.label.passwordMinLength"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinLength" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinLength" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinLowercase">
+							<spring:message code="settings.label.passwordMinLowercase"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinLowercase" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinLowercase" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinUppercase">
+							<spring:message code="settings.label.passwordMinUppercase"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinUppercase" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinUppercase" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinNumeric">
+							<spring:message code="settings.label.passwordMinNumeric"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinNumeric" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinNumeric" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="passwordMinSpecial">
+							<spring:message code="settings.label.passwordMinSpecial"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="passwordMinSpecial" maxlength="2" class="form-control"/>
+							<form:errors path="passwordMinSpecial" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

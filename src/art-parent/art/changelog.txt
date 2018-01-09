@@ -1,3 +1,24 @@
+ART 3.2
+* Added Velocity report type
+* Added OrgChart report types
+* Allow individual jobs to use different smtp servers
+* Fix for jpivot reports not working
+* Save settings in the art database. Settings will need to be re-entered.
+* Fix for job parameter value being blank on edit
+* Preserve column order in JSON output (thanks to Tin Blaskovic)
+* Changed default connection pool library to hikaricp
+* Allow job email addresses to be separated by ,
+* Allow application logs to be written to a database
+* Added context path variable for freemarker and thymleaf output
+* Added useLowerCaseProperties option for template reports
+* Allow for testing of ftp, sftp, network share, s3 and azure connections
+* Allow for email notification on application errors
+* Allow for specifying of password policy for internal authentication passwords
+* Allow jxls reports to use open and modify passwords
+* Enable generation of Jasper reports from MongoDB datasources (thanks to Tin Blaskovic)
+* Fix for reports within dashboards not using parameter values
+* Updated mariadb driver, poi, jxls, jclouds
+
 ART 3.1
 * Allow dynamic lov to use a dynamic datasource when the lov is a chained parameter
 * Fix for error with thymleaf email inline jobs

@@ -296,7 +296,8 @@ public class ParameterProcessor {
 			String htmlParamName = entry.getKey();
 			logger.debug("htmlParamName='{}'", htmlParamName);
 
-			if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)) { //use startswith instead of substring(0,2) because chrome passes a parameter "-" which causes StringIndexOutOfBoundsException. reported by yidong123
+			//use startswith instead of substring(0,2) because chrome passes a parameter "-" which causes StringIndexOutOfBoundsException. reported by yidong123
+			if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)) {
 				//this is a report parameter. set it's value
 				String[] paramValues = entry.getValue();
 
@@ -408,6 +409,8 @@ public class ParameterProcessor {
 				} else {
 					actualValueString = passedValues[0];
 				}
+				
+				logger.debug("actualValueString = '{}'", actualValueString);
 
 				//convert string value to appropriate object
 				Object actualValue = convertParameterStringValueToObject(actualValueString, param);
@@ -437,9 +440,7 @@ public class ParameterProcessor {
 					}
 					reportParam.setActualParameterValues(actualValues);
 				}
-
 			}
-
 		}
 	}
 

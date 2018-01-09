@@ -199,7 +199,7 @@ public class ParameterController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
+			if (StringUtils.equalsAny(action, "add", "copy")) {
 				parameterService.addParameter(parameter, sessionUser);
 				if (reportId != null && reportId != 0) {
 					ReportParameter reportParameter = new ReportParameter();

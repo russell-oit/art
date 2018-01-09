@@ -179,11 +179,19 @@ public class CacheHelper {
 	}
 	
 	/**
+	 * Clears the smtp servers cache
+	 */
+	@CacheEvict(value = "smtpServers", allEntries = true)
+	public void clearSmtpServers() {
+		logger.debug("Entering clearSmtpServers");
+	}
+	
+	/**
 	 * Clears all caches
 	 */
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
 		"datasources", "schedules", "jobs", "rules", "parameters",
-		"encryptors", "holidays", "destinations"}, allEntries = true)
+		"encryptors", "holidays", "destinations", "smtpServers"}, allEntries = true)
 	public void clearAll() {
 		logger.debug("Entering clearAll");
 		

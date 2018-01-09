@@ -33,6 +33,7 @@
 		srcdir="${dist}/WEB-INF/classes" includeAntRuntime="no"
 		debug="true" encoding="UTF-8">
 			<!-- <compilerarg value="-Xlint"/> -->
+			<compilerarg value="-implicit:class"/>
 		</javac>
 	</target>
 

@@ -17,6 +17,7 @@
  */
 package art.reportgroup;
 
+import art.report.ReportService;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
@@ -50,6 +51,9 @@ public class ReportGroupController {
 
 	@Autowired
 	private ReportGroupService reportGroupService;
+	
+	@Autowired
+	private ReportService reportService;
 
 	@RequestMapping(value = "/reportGroups", method = RequestMethod.GET)
 	public String showReportGroups(Model model) {
@@ -189,5 +193,20 @@ public class ReportGroupController {
 		model.addAttribute("action", action);
 		
 		return "editReportGroup";
+	}
+	
+	@RequestMapping(value = "/reportsInReportGroup", method = RequestMethod.GET)
+	public String reportsInReportGroup(@RequestParam("reportGroupId") Integer reportGroupId, Model model) {
+		logger.debug("Entering reportsInReportGroup: reportGroupId={}", reportGroupId);
+
+		try {
+			model.addAttribute("reports", reportService.getReportsInReportGroup(reportGroupId));
+			model.addAttribute("reportGroup", reportGroupService.getReportGroup(reportGroupId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "reportsInReportGroup";
 	}
 }

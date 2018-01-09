@@ -17,13 +17,16 @@
  */
 package art.output;
 
+import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
+import art.enums.DatasourceType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
+import com.jaspersoft.mongodb.connection.MongoDbConnection;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -142,13 +145,27 @@ public class JasperReportsOutput {
 			JasperPrint jasperPrint;
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JasperReportsTemplate) {
-				Connection conn = null;
-				try {
-					RunReportHelper runReportHelper = new RunReportHelper();
-					conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
-					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, conn);
-				} finally {
-					DatabaseUtils.close(conn);
+				// What kind of a datasource are we using?
+				Datasource ds = report.getDatasource();
+				if (ds.getDatasourceType() == DatasourceType.MongoDB) {
+					MongoDbConnection conn = null;
+					try {
+						conn = new MongoDbConnection(ds.getUrl(), ds.getUsername(), ds.getPassword());
+						jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, conn);
+					} finally {
+						if (conn != null) {
+							conn.close();
+						}
+					}
+				} else {
+					Connection conn = null;
+					try {
+						RunReportHelper runReportHelper = new RunReportHelper();
+						conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
+						jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, conn);
+					} finally {
+						DatabaseUtils.close(conn);
+					}
 				}
 			} else {
 				//use recordset from art query

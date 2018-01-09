@@ -65,7 +65,7 @@ public class ScheduleService {
 		holidayService = new HolidayService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOB_SCHEDULES";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOB_SCHEDULES AJS";
 
 	/**
 	 * Maps a resultset to an object
@@ -350,5 +350,24 @@ public class ScheduleService {
 		}
 
 		return jobs;
+	}
+	
+	/**
+	 * Returns schedules that use a given holiday
+	 *
+	 * @param holidayId the holiday id
+	 * @return schedules that use the holiday
+	 * @throws SQLException
+	 */
+	public List<Schedule> getSchedulesWithHoliday(int holidayId) throws SQLException {
+		logger.debug("Entering getSchedulesWithHoliday: holidayId={}", holidayId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_SCHEDULE_HOLIDAY_MAP ASHM"
+				+ " ON AJS.SCHEDULE_ID=ASHM.SCHEDULE_ID"
+				+ " WHERE ASHM.HOLIDAY_ID=?";
+
+		ResultSetHandler<List<Schedule>> h = new BeanListHandler<>(Schedule.class, new ScheduleMapper());
+		return dbService.query(sql, h, holidayId);
 	}
 }

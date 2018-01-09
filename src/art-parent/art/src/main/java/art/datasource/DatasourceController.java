@@ -230,7 +230,7 @@ public class DatasourceController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
+			if (StringUtils.equalsAny(action, "add", "copy")) {
 				datasourceService.addDatasource(datasource, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
@@ -344,9 +344,9 @@ public class DatasourceController {
 			@RequestParam("action") String action,
 			Locale locale) {
 
-		logger.debug("Entering testDatasource: jndi={}, driver='{}', url='{}', username='{}',"
-				+ " useBlankPassword={}, action='{}'", jndi, driver, url, username,
-				useBlankPassword, action);
+		logger.debug("Entering testDatasource: id={}, jndi={}, driver='{}',"
+				+ " url='{}', username='{}', useBlankPassword={}, action='{}'",
+				id, jndi, driver, url, username, useBlankPassword, action);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -528,8 +528,7 @@ public class DatasourceController {
 		if (datasource.isUseBlankPassword()) {
 			newPassword = "";
 		} else {
-			if (StringUtils.isEmpty(newPassword)
-					&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
+			if (StringUtils.isEmpty(newPassword) && StringUtils.equalsAny(action, "edit", "copy")) {
 				//password field blank. use current password
 				useCurrentPassword = true;
 			}

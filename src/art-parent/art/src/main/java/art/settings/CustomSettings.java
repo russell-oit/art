@@ -34,7 +34,7 @@ public class CustomSettings {
 	private String workDirectory; //custom work directory for art files e.g. settings, templates
 	private boolean checkExportFileAccess; //whether export files should be checked for user access before being accessed
 	private boolean enableGroovySandbox = true; //whether to apply the groovy sandbox when running groovy scripts
-	private boolean enableEmail = true; //whether sending of emails is enabled
+	private boolean enableEmailing = true; //whether sending of emails is enabled
 
 	/**
 	 * @return the checkExportFileAccess
@@ -126,17 +126,17 @@ public class CustomSettings {
 	}
 
 	/**
-	 * @return the enableEmail
+	 * @return the enableEmailing
 	 */
-	public boolean isEnableEmail() {
-		return enableEmail;
+	public boolean isEnableEmailing() {
+		return enableEmailing;
 	}
 
 	/**
-	 * @param enableEmail the enableEmail to set
+	 * @param enableEmailing the enableEmailing to set
 	 */
-	public void setEnableEmail(boolean enableEmail) {
-		this.enableEmail = enableEmail;
+	public void setEnableEmailing(boolean enableEmailing) {
+		this.enableEmailing = enableEmailing;
 	}
 
 }

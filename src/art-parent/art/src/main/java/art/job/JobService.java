@@ -32,6 +32,8 @@ import art.report.Report;
 import art.report.ReportService;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
+import art.smtpserver.SmtpServer;
+import art.smtpserver.SmtpServerService;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
@@ -93,12 +95,13 @@ public class JobService {
 	private final ScheduleService scheduleService;
 	private final HolidayService holidayService;
 	private final DestinationService destinationService;
+	private final SmtpServerService smtpServerService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
 			UserService userService, FtpServerService ftpServerService,
 			ScheduleService scheduleService, HolidayService holidayService,
-			DestinationService destinationService) {
+			DestinationService destinationService, SmtpServerService smtpServerService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
@@ -107,6 +110,7 @@ public class JobService {
 		this.scheduleService = scheduleService;
 		this.holidayService = holidayService;
 		this.destinationService = destinationService;
+		this.smtpServerService = smtpServerService;
 	}
 
 	public JobService() {
@@ -117,6 +121,7 @@ public class JobService {
 		scheduleService = new ScheduleService();
 		holidayService = new HolidayService();
 		destinationService = new DestinationService();
+		smtpServerService = new SmtpServerService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -218,6 +223,7 @@ public class JobService {
 		job.setExtraSchedules(rs.getString("EXTRA_SCHEDULES"));
 		job.setHolidays(rs.getString("HOLIDAYS"));
 		job.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
+		job.setOptions(rs.getString("JOB_OPTIONS"));
 		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		job.setCreatedBy(rs.getString("CREATED_BY"));
@@ -234,6 +240,9 @@ public class JobService {
 
 		Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
 		job.setSchedule(schedule);
+		
+		SmtpServer smtpServer = smtpServerService.getSmtpServer(rs.getInt("SMTP_SERVER_ID"));
+		job.setSmtpServer(smtpServer);
 
 		List<Holiday> sharedHolidays = holidayService.getJobHolidays(job.getJobId());
 		job.setSharedHolidays(sharedHolidays);
@@ -436,6 +445,13 @@ public class JobService {
 		} else {
 			scheduleId = job.getSchedule().getScheduleId();
 		}
+		
+		Integer smtpServerId;
+		if (job.getSmtpServer() == null) {
+			smtpServerId = 0;
+		} else {
+			smtpServerId = job.getSmtpServer().getSmtpServerId();
+		}
 
 		String migratedToQuartz = "X";
 
@@ -458,9 +474,9 @@ public class JobService {
 					+ " FIXED_FILE_NAME, SUB_DIRECTORY, BATCH_FILE,"
 					+ " FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
-					+ " SCHEDULE_ID,"
+					+ " SCHEDULE_ID, SMTP_SERVER_ID, JOB_OPTIONS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 43) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 45) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -504,6 +520,8 @@ public class JobService {
 				job.getHolidays(),
 				job.getQuartzCalendarNames(),
 				scheduleId,
+				smtpServerId,
+				job.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -523,7 +541,8 @@ public class JobService {
 					+ " FIXED_FILE_NAME=?, SUB_DIRECTORY=?,"
 					+ " BATCH_FILE=?, FTP_SERVER_ID=?,"
 					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
-					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?,"
+					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?, SMTP_SERVER_ID=?,"
+					+ " JOB_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -568,6 +587,8 @@ public class JobService {
 				job.getHolidays(),
 				job.getQuartzCalendarNames(),
 				scheduleId,
+				smtpServerId,
+				job.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()
@@ -1098,4 +1119,75 @@ public class JobService {
 		return finalCalendar;
 	}
 
+	/**
+	 * Returns jobs that use a given schedule
+	 *
+	 * @param scheduleId the schedule id
+	 * @return jobs that use the schedule
+	 * @throws SQLException
+	 */
+	public List<Job> getJobsWithSchedule(int scheduleId) throws SQLException {
+		logger.debug("Entering getJobsWithSchedule: scheduleId={}", scheduleId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE SCHEDULE_ID=?";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, scheduleId);
+	}
+	
+	/**
+	 * Returns jobs that use a given smtp server
+	 *
+	 * @param smtpServerId the smtp server id
+	 * @return jobs that use the smtp server
+	 * @throws SQLException
+	 */
+	public List<Job> getJobsWithSmtpServer(int smtpServerId) throws SQLException {
+		logger.debug("Entering getJobsWithSmtpServer: smtpServerId={}", smtpServerId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE SMTP_SERVER_ID=?";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, smtpServerId);
+	}
+
+	/**
+	 * Returns jobs that use a given destination
+	 *
+	 * @param destinationId the destination id
+	 * @return jobs that use the destination
+	 * @throws SQLException
+	 */
+	public List<Job> getJobsWithDestination(int destinationId) throws SQLException {
+		logger.debug("Entering getJobsWithDestination: destinationId={}", destinationId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_JOB_DESTINATION_MAP AJDM"
+				+ " ON AJ.JOB_ID=AJDM.JOB_ID"
+				+ " WHERE AJDM.DESTINATION_ID=?";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, destinationId);
+	}
+
+	/**
+	 * Returns jobs that use a given holiday
+	 *
+	 * @param holidayId the holiday id
+	 * @return jobs that use the holiday
+	 * @throws SQLException
+	 */
+	public List<Job> getJobsWithHoliday(int holidayId) throws SQLException {
+		logger.debug("Entering getJobsWithHoliday: holidayId={}", holidayId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_JOB_HOLIDAY_MAP AJHM"
+				+ " ON AJ.JOB_ID=AJHM.JOB_ID"
+				+ " WHERE AJHM.HOLIDAY_ID=?";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, holidayId);
+	}
 }

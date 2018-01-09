@@ -22,21 +22,27 @@ import art.connectionpool.DbConnections;
 import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionPoolLibrary;
-import art.enums.DisplayNull;
-import art.enums.LdapAuthenticationMethod;
-import art.enums.LdapConnectionEncryptionMethod;
-import art.enums.PdfPageSize;
 import art.jobrunners.CleanJob;
+import art.logback.LevelAndLoggerFilter;
+import art.logback.OnLevelEvaluator;
 import art.saiku.SaikuConnectionManager;
 import art.saiku.SaikuConnectionProvider;
 import art.settings.CustomSettings;
 import art.settings.Settings;
+import art.settings.SettingsService;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import art.utils.UpgradeHelper;
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.db.DBAppender;
+import ch.qos.logback.classic.html.HTMLLayout;
+import ch.qos.logback.classic.net.SMTPAppender;
+import ch.qos.logback.core.db.DataSourceConnectionSource;
+import com.eclecticlogic.whisper.logback.WhisperAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
+import com.mysql.jdbc.AbandonedConnectionCleanupThread;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 import java.io.File;
@@ -57,11 +63,13 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.velocity.app.VelocityEngine;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import org.quartz.CronTrigger;
 import static org.quartz.JobBuilder.newJob;
@@ -101,7 +109,6 @@ public class Config extends HttpServlet {
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
 	private static ArtDatabase artDbConfig;
-	private static String settingsFilePath;
 	private static Settings settings;
 	private static CustomSettings customSettings;
 	private static String workDirectoryPath;
@@ -110,6 +117,7 @@ public class Config extends HttpServlet {
 	private static Configuration freemarkerConfig;
 	private static TemplateEngine thymeleafReportTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
+	private static VelocityEngine velocityEngine;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -124,8 +132,6 @@ public class Config extends HttpServlet {
 	 */
 	@Override
 	public void destroy() {
-		logger.debug("Entering destroy");
-
 		//shutdown quartz scheduler
 		SchedulerUtils.shutdownScheduler();
 
@@ -133,6 +139,12 @@ public class Config extends HttpServlet {
 
 		//close database connections
 		DbConnections.closeAllConnections();
+		
+		//prevent tomcat warning concerning mysql cleanup thread
+		//https://www.ralph-schuster.eu/2014/07/09/solution-to-tomcat-cant-stop-an-abandoned-connection-cleanup-thread/
+		//https://stackoverflow.com/questions/25699985/the-web-application-appears-to-have-started-a-thread-named-abandoned-connect
+		//https://dev.mysql.com/doc/relnotes/connector-j/5.1/en/news-5-1-41.html
+		AbandonedConnectionCleanupThread.checkedShutdown();
 
 		//deregister jdbc drivers
 		deregisterJdbcDrivers();
@@ -141,8 +153,21 @@ public class Config extends HttpServlet {
 
 		//http://logback.10977.n7.nabble.com/Shutting-down-async-appenders-when-using-logback-through-slf4j-td12505.html
 		//http://logback.qos.ch/manual/configuration.html#stopContext
+		//explicitly stop logback to avoid tomcat reporting that some threads were not stopped
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();
+		try {
+			//wait for a while to avoid tomcat reporting that quartz threads were not stopped
+			//https://jira.terracotta.org/jira/browse/QTZ-122
+			//http://forums.terracotta.org/forums/posts/list/3479.page
+			//https://stackoverflow.com/questions/34869562/quartz-scheduler-memory-leak-in-tomcat
+			//https://stackoverflow.com/questions/7586255/quartz-memory-leak
+			final long QUARTZ_SHUTDOWN_DELAY_SECONDS = 1;
+			TimeUnit.SECONDS.sleep(QUARTZ_SHUTDOWN_DELAY_SECONDS);
+		} catch (InterruptedException ex) {
+			//logger context already stopped so can't use logger.error()
+			System.out.println(ex);
+		}
 	}
 
 	/**
@@ -223,9 +248,6 @@ public class Config extends HttpServlet {
 		//set art-database file path
 		artDatabaseFilePath = workDirectoryPath + "art-database.json";
 
-		//set settings file path
-		settingsFilePath = workDirectoryPath + "art-settings.json";
-
 		//ensure work directories exist
 		createWorkDirectories();
 
@@ -233,16 +255,15 @@ public class Config extends HttpServlet {
 
 		createThymeleafReportTemplateEngine();
 
+		createVelocityEngine();
+
 		loadLanguages();
-
-		//load settings and initialize variables
-		loadSettings();
-
-		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
-		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 
 		//initialize datasources
 		initializeArtDatabase();
+
+		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
+		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 	}
 
 	/**
@@ -280,7 +301,7 @@ public class Config extends HttpServlet {
 		templateResolver.setTemplateMode(TemplateMode.HTML);
 		templateResolver.setCharacterEncoding("UTF-8");
 		templateResolver.setCacheable(false);
-		
+
 		thymeleafReportTemplateEngine = new SpringTemplateEngine();
 		((SpringTemplateEngine) thymeleafReportTemplateEngine).setEnableSpringELCompiler(true);
 		thymeleafReportTemplateEngine.setTemplateResolver(templateResolver);
@@ -293,6 +314,29 @@ public class Config extends HttpServlet {
 	 */
 	public static TemplateEngine getThymeleafReportTemplateEngine() {
 		return thymeleafReportTemplateEngine;
+	}
+
+	/**
+	 * Creates the velocity engine used by velocity reports
+	 */
+	private static void createVelocityEngine() {
+		velocityEngine = new VelocityEngine();
+
+		//https://stackoverflow.com/questions/22056967/apache-velocity-resource-not-found-exception-even-though-template-file-is-in-the
+		//https://stackoverflow.com/questions/34662161/velocitys-fileresourceloader-cant-find-resources
+		//https://velocity.apache.org/engine/1.7/developer-guide.html#resource-management
+		velocityEngine.setProperty("file.resource.loader.path", "");
+
+		velocityEngine.init();
+	}
+
+	/**
+	 * Returns the velocity engine to use for velocity reports
+	 *
+	 * @return the velocity engine to use for velocity reports
+	 */
+	public static VelocityEngine getVelocityEngine() {
+		return velocityEngine;
 	}
 
 	/**
@@ -394,6 +438,9 @@ public class Config extends HttpServlet {
 		loadArtDatabaseConfiguration();
 
 		if (artDbConfig == null) {
+			SettingsService settingsService = new SettingsService();
+			settings = new Settings();
+			settingsService.setSettingsDefaults(settings);
 			return;
 		}
 
@@ -412,6 +459,11 @@ public class Config extends HttpServlet {
 			//include runtime exception in case of PoolInitializationException when using hikaricp
 			logger.error("Error", ex);
 		}
+
+		//load settings
+		//put outside try block so that a settings object is always available
+		//even if there's an error in connection pool creation
+		loadSettings();
 	}
 
 	/**
@@ -473,19 +525,16 @@ public class Config extends HttpServlet {
 	/**
 	 * Loads application settings
 	 */
-	private static void loadSettings() {
+	public static void loadSettings() {
 		Settings newSettings = null;
 
+		SettingsService settingsService = new SettingsService();
+
 		try {
-			File settingsFile = new File(settingsFilePath);
-			if (settingsFile.exists()) {
-				ObjectMapper mapper = new ObjectMapper();
-				newSettings = mapper.readValue(settingsFile, Settings.class);
-				//decrypt password fields
-				newSettings.setSmtpPassword(AesEncryptor.decrypt(newSettings.getSmtpPassword()));
-				newSettings.setLdapBindPassword(AesEncryptor.decrypt(newSettings.getLdapBindPassword()));
+			if (isArtDatabaseConfigured()) {
+				newSettings = settingsService.getSettings();
 			}
-		} catch (IOException ex) {
+		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
 
@@ -498,7 +547,7 @@ public class Config extends HttpServlet {
 		settings = newSettings;
 
 		//set defaults for settings with invalid values
-		setSettingsDefaults(settings);
+		settingsService.setSettingsDefaults(settings);
 
 		//set date formatters
 		String dateFormat = settings.getDateFormat();
@@ -529,31 +578,11 @@ public class Config extends HttpServlet {
 			}
 		}
 
-	}
+		//create the db appender if configured
+		createDbAppender();
 
-	/**
-	 * Saves application settings to file
-	 *
-	 * @param newSettings the settings to save
-	 * @throws IOException
-	 */
-	public static void saveSettings(Settings newSettings) throws IOException {
-		//encrypt password fields
-		String clearTextSmtpPassword = newSettings.getSmtpPassword();
-		String clearTextLdapBindPassword = newSettings.getLdapBindPassword();
-
-		String encryptedSmtpPassword = AesEncryptor.encrypt(clearTextSmtpPassword);
-		String encryptedLdapBindPassword = AesEncryptor.encrypt(clearTextLdapBindPassword);
-
-		newSettings.setSmtpPassword(encryptedSmtpPassword);
-		newSettings.setLdapBindPassword(encryptedLdapBindPassword);
-
-		File settingsFile = new File(settingsFilePath);
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, newSettings);
-
-		//refresh settings and related configuration, and set defaults for invalid values
-		loadSettings();
+		//create error notification appender if required
+		createErrorNotificationAppender();
 	}
 
 	/**
@@ -627,55 +656,6 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Sets defaults for application settings that have invalid values
-	 */
-	private static void setSettingsDefaults(Settings parSettings) {
-		if (parSettings == null) {
-			return;
-		}
-
-		if (parSettings.getSmtpPort() <= 0) {
-			parSettings.setSmtpPort(25);
-		}
-		if (parSettings.getMaxRowsDefault() <= 0) {
-			parSettings.setMaxRowsDefault(10000);
-		}
-		if (parSettings.getLdapPort() <= 0) {
-			parSettings.setLdapPort(389);
-		}
-		if (StringUtils.isBlank(parSettings.getLdapUserIdAttribute())) {
-			parSettings.setLdapUserIdAttribute("uid");
-		}
-		if (StringUtils.isBlank(parSettings.getDateFormat())) {
-			parSettings.setDateFormat("dd-MMM-yyyy");
-		}
-		if (StringUtils.isBlank(parSettings.getTimeFormat())) {
-			parSettings.setTimeFormat("HH:mm:ss");
-		}
-		if (StringUtils.isBlank(parSettings.getReportFormats())) {
-			parSettings.setReportFormats("htmlDataTable,htmlGrid,xlsx,pdf,docx,htmlPlain");
-		}
-		if (parSettings.getMaxRunningReports() <= 0) {
-			parSettings.setMaxRunningReports(1000);
-		}
-		if (parSettings.getArtAuthenticationMethod() == null) {
-			parSettings.setArtAuthenticationMethod(ArtAuthenticationMethod.Internal);
-		}
-		if (parSettings.getLdapConnectionEncryptionMethod() == null) {
-			parSettings.setLdapConnectionEncryptionMethod(LdapConnectionEncryptionMethod.None);
-		}
-		if (parSettings.getLdapAuthenticationMethod() == null) {
-			parSettings.setLdapAuthenticationMethod(LdapAuthenticationMethod.Simple);
-		}
-		if (parSettings.getPdfPageSize() == null) {
-			parSettings.setPdfPageSize(PdfPageSize.A4Landscape);
-		}
-		if (parSettings.getDisplayNull() == null) {
-			parSettings.setDisplayNull(DisplayNull.NoNumbersAsZero);
-		}
-	}
-
-	/**
 	 * Sets defaults for art database configuration items that have invalid
 	 * values
 	 *
@@ -693,7 +673,7 @@ public class Config extends HttpServlet {
 			artDatabase.setMaxPoolConnections(20);
 		}
 		if (artDatabase.getConnectionPoolLibrary() == null) {
-			artDatabase.setConnectionPoolLibrary(ConnectionPoolLibrary.ArtDBCP);
+			artDatabase.setConnectionPoolLibrary(ConnectionPoolLibrary.HikariCP);
 		}
 
 	}
@@ -831,7 +811,7 @@ public class Config extends HttpServlet {
 	public static String getJobsExportPath() {
 		return exportPath + "jobs" + File.separator;
 	}
-	
+
 	/**
 	 * Returns the full path to the job logs directory
 	 *
@@ -867,7 +847,7 @@ public class Config extends HttpServlet {
 	public static String getArtTempPath() {
 		return workDirectoryPath + "tmp" + File.separator;
 	}
-	
+
 	/**
 	 * Returns the full path to the thymeleaf templates directory
 	 *
@@ -1052,6 +1032,16 @@ public class Config extends HttpServlet {
 	}
 
 	/**
+	 * Sets the settings variable
+	 *
+	 * @param newSettings the new settings
+	 */
+	public static void setSettings(Settings newSettings) {
+		settings = null;
+		settings = newSettings;
+	}
+
+	/**
 	 * Returns the saiku connections
 	 *
 	 * @return the saiku connections
@@ -1134,5 +1124,187 @@ public class Config extends HttpServlet {
 	public static ThinQueryService getThinQueryService(int userId) {
 		SaikuConnectionProvider connectionProvider = saikuConnections.get(userId);
 		return connectionProvider.getThinQueryService();
+	}
+
+	/**
+	 * Creates a db appender if configured in application settings
+	 */
+	private static void createDbAppender() {
+		logger.debug("Entering createDbAppender");
+
+		//https://stackoverflow.com/questions/43536302/set-sqldialect-to-logback-db-appender-programaticaly
+		//https://stackoverflow.com/questions/22000995/configuring-logback-dbappender-programmatically
+		//https://logback.qos.ch/apidocs/ch/qos/logback/classic/db/DBAppender.html
+		//https://logback.qos.ch/manual/appenders.html
+		//https://stackoverflow.com/questions/40460684/how-to-disable-logback-output-to-console-programmatically-but-append-to-file
+		//https://learningviacode.blogspot.co.ke/2014/01/writing-logs-to-database.html
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
+		final String DB_APPENDER_NAME = "db";
+		DBAppender dbAppender = (DBAppender) rootLogger.getAppender(DB_APPENDER_NAME);
+		if (dbAppender != null) {
+			dbAppender.stop();
+			rootLogger.detachAppender(dbAppender);
+		}
+
+		int logsDatasourceId = settings.getLogsDatasourceId();
+		logger.debug("logsDatasourceId={}", logsDatasourceId);
+
+		if (logsDatasourceId == 0) {
+			return;
+		}
+
+		DataSourceConnectionSource source = new DataSourceConnectionSource();
+		source.setDataSource(DbConnections.getDataSource(logsDatasourceId));
+		source.setContext(loggerContext);
+		source.start();
+
+		dbAppender = new DBAppender();
+		dbAppender.setName(DB_APPENDER_NAME);
+		dbAppender.setConnectionSource(source);
+		dbAppender.setContext(loggerContext);
+		dbAppender.start();
+
+		rootLogger.addAppender(dbAppender);
+	}
+
+	private static void createErrorNotificationAppender() {
+		//http://www.eclecticlogic.com/whisper/
+		//http://www.eclecticlogic.com/2014/08/25/introducing-whisper/
+		//http://mailman.qos.ch/pipermail/logback-user/2014-January/004285.html
+		//https://stackoverflow.com/questions/47315788/logback-not-sending-email-for-level-less-than-error?rq=1
+		//https://stackoverflow.com/questions/24739509/logback-fire-mail-for-warnings?rq=1
+		//https://stackoverflow.com/questions/11527702/logback-programatically-added-smtpappender-leaves-message-body-blank
+		//https://stackoverflow.com/questions/1993038/logback-smtpappender-limiting-rate/3985862
+		//https://logback.qos.ch/xref/ch/qos/logback/classic/net/SMTPAppender.html
+		//https://logback.qos.ch/xref/ch/qos/logback/classic/boolex/OnErrorEvaluator.html
+		//https://logback.qos.ch/manual/filters.html#DuplicateMessageFilter
+		//https://logback.qos.ch/manual/filters.html
+		//https://logback.qos.ch/manual/filters.html#GEventEvaluator
+		//https://stackoverflow.com/questions/13179773/logback-thresholdfilter-how-todo-the-opposite
+		//https://dzone.com/articles/limiting-repetitive-log-messages-with-logback
+
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
+		final String WHISPER_APPENDER_NAME = "whisper";
+		WhisperAppender tempWhisperAppender = (WhisperAppender) rootLogger.getAppender(WHISPER_APPENDER_NAME);
+		if (tempWhisperAppender != null) {
+			tempWhisperAppender.stop();
+			rootLogger.detachAppender(tempWhisperAppender);
+		}
+
+		final String DIGEST_LOGGER_NAME = "digest.appender.logger";
+		ch.qos.logback.classic.Logger digestLogger = loggerContext.getLogger(DIGEST_LOGGER_NAME);
+		digestLogger.detachAndStopAllAppenders();
+		digestLogger.setLevel(Level.OFF);
+		digestLogger.setAdditive(false);
+
+		String errorNotificationTo = settings.getErrorNotificationTo();
+		if (StringUtils.isBlank(errorNotificationTo)) {
+			return;
+		}
+
+		if (!customSettings.isEnableEmailing()) {
+			logger.info("Emailing disabled");
+			return;
+		}
+
+		if (!isEmailServerConfigured()) {
+			logger.info("Email server not configured");
+			return;
+		}
+
+		String levelString = settings.getErrorNotificatonLevel().getValue();
+		Level level = Level.toLevel(levelString);
+
+		String loggers = settings.getErrorNotificationLogger();
+
+		LevelAndLoggerFilter filter = new LevelAndLoggerFilter(level, loggers);
+		filter.setName("filter");
+		filter.setContext(loggerContext);
+		filter.start();
+
+		//https://stackoverflow.com/questions/47315788/logback-not-sending-email-for-level-less-than-error
+		//https://stackoverflow.com/questions/24739509/logback-fire-mail-for-warnings
+		//https://stackoverflow.com/questions/16827033/why-is-logback-smtpappender-only-sending-1-email
+		//https://amitstechblog.wordpress.com/2011/11/02/email-alerts-with-logback/
+		OnLevelEvaluator evaluator = new OnLevelEvaluator(level);
+
+		//https://logback.qos.ch/manual/layouts.html#ClassicHTMLLayout
+		HTMLLayout layout = new HTMLLayout();
+		layout.setContext(loggerContext);
+		layout.start();
+
+		String errorNotificationFrom = settings.getErrorNotificationFrom();
+		String smtpHost = settings.getSmtpServer();
+		int port = settings.getSmtpPort();
+		boolean userStartTls = settings.isSmtpUseStartTls();
+		boolean useSmtpAuthentication = settings.isUseSmtpAuthentication();
+		String username = settings.getSmtpUsername();
+		String password = settings.getSmtpPassword();
+		String subject = settings.getErrorNotificationSubjectPattern();
+
+		//https://logback.qos.ch/manual/appenders.html#SMTPAppender
+		SMTPAppender errorEmailAppender = new SMTPAppender();
+		errorEmailAppender.setName("errorEmail");
+		errorEmailAppender.setContext(loggerContext);
+		errorEmailAppender.addFilter(filter);
+		errorEmailAppender.setSmtpHost(smtpHost);
+		errorEmailAppender.setSmtpPort(port);
+		errorEmailAppender.setSTARTTLS(userStartTls);
+		if (useSmtpAuthentication) {
+			errorEmailAppender.setUsername(username);
+			errorEmailAppender.setPassword(password);
+		}
+		//context must be set before calling addTo() otherwise you get a null pointer exception
+		errorEmailAppender.addTo(errorNotificationTo);
+		errorEmailAppender.setFrom(errorNotificationFrom);
+		errorEmailAppender.setSubject(subject);
+		errorEmailAppender.setLayout(layout);
+		errorEmailAppender.setEvaluator(evaluator);
+		errorEmailAppender.start();
+
+		subject = "%X{whisper.digest.subject}";
+		SMTPAppender errorDigestAppender = new SMTPAppender();
+		errorDigestAppender.setName("errorDigest");
+		errorDigestAppender.setContext(loggerContext);
+		errorDigestAppender.setSmtpHost(smtpHost);
+		errorDigestAppender.setSmtpPort(port);
+		errorDigestAppender.setSTARTTLS(userStartTls);
+		if (useSmtpAuthentication) {
+			errorDigestAppender.setUsername(username);
+			errorDigestAppender.setPassword(password);
+		}
+		errorDigestAppender.addTo(errorNotificationTo);
+		errorDigestAppender.setFrom(errorNotificationFrom);
+		errorDigestAppender.setSubject(subject);
+		errorDigestAppender.setLayout(layout);
+		errorDigestAppender.setEvaluator(evaluator);
+		errorDigestAppender.start();
+
+		String suppressAfter = settings.getErrorNotificationSuppressAfter();
+		String expireAfter = settings.getErrorNotificationExpireAfter();
+		String digestFrequency = settings.getErrorNotificationDigestFrequency();
+
+		WhisperAppender whisperAppender = new WhisperAppender();
+		whisperAppender.setName(WHISPER_APPENDER_NAME);
+		whisperAppender.setContext(loggerContext);
+		whisperAppender.addFilter(filter);
+		whisperAppender.setDigestLoggerName(DIGEST_LOGGER_NAME);
+		whisperAppender.setSuppressAfter(suppressAfter);
+		whisperAppender.setExpireAfter(expireAfter);
+		whisperAppender.setDigestFrequency(digestFrequency);
+		whisperAppender.addAppender(errorEmailAppender);
+		whisperAppender.start();
+
+		//note that digest logger messages will always appear as error
+		//https://github.com/eclecticlogic/whisper/blob/master/src/main/java/com/eclecticlogic/whisper/logback/WhisperAppender.java
+		digestLogger.setLevel(level);
+		digestLogger.setAdditive(false);
+		digestLogger.addAppender(errorDigestAppender);
+
+		rootLogger.addAppender(whisperAppender);
 	}
 }

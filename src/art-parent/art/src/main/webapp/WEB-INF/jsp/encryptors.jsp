@@ -26,6 +26,7 @@
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
+<spring:message code="encryptors.message.linkedReportsExist" var="linkedReportsExistText"/>
 
 <t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -54,7 +55,7 @@
 						"${errorOccurredText}",
 						true, //deleteRow
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
+						"${linkedReportsExistText}" //linkedRecordsExistText
 						);
 
 				var table = oTable.api();
@@ -197,6 +198,22 @@
 									<i class="fa fa-trash-o"></i>
 									<spring:message code="page.action.delete"/>
 								</button>
+							</div>
+							<div class="btn-group">
+								<button type="button" class="btn btn-default dropdown-toggle"
+										data-toggle="dropdown" data-hover="dropdown"
+										data-delay="100">
+									<spring:message code="reports.action.more"/>
+									<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu">
+									<li>
+										<a 
+											href="${pageContext.request.contextPath}/reportsWithEncryptor?encryptorId=${encryptor.encryptorId}">
+											<spring:message code="page.text.usage"/>
+										</a>
+									</li>
+								</ul>
 							</div>
 						</td>
 					</tr>

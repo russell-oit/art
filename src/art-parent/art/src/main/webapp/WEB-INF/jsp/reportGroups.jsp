@@ -190,6 +190,12 @@ Report groups configuration page
 								<ul class="dropdown-menu">
 									<li>
 										<a 
+											href="${pageContext.request.contextPath}/reportsInReportGroup?reportGroupId=${group.reportGroupId}">
+											<spring:message code="page.text.reports"/>
+										</a>
+									</li>
+									<li>
+										<a 
 											href="${pageContext.request.contextPath}/reportGroupAccessRights?reportGroupId=${group.reportGroupId}">
 											<spring:message code="page.action.accessRights"/>
 										</a>

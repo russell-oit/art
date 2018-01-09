@@ -385,32 +385,41 @@ public class ReportParameter implements Serializable {
 			return "";
 		}
 
-		ParameterDataType parameterDataType = parameter.getDataType();
-		if (parameterDataType.isDate()) {
-			return parameter.getDateString(value, locale);
-		}
+		String returnValue;
 
-		String defaultValue = parameter.getLocalizedDefaultValue(locale);
-		Report defaultValueReport = parameter.getDefaultValueReport();
-		if (StringUtils.isBlank(defaultValue) && defaultValueReport == null) {
-			return ""; //return blank instead of "0" for integers or "0.0" for doubles
+		if (value instanceof List) {
+			List<String> values = new ArrayList<>();
+			@SuppressWarnings("unchecked")
+			List<Object> valueList = (List<Object>) value;
+			for (int i = 0; i < valueList.size(); i++) {
+				String htmlValue = String.valueOf(valueList.get(i));
+				values.add(htmlValue);
+			}
+			//https://stackoverflow.com/questions/8627902/new-line-in-text-area
+			//https://stackoverflow.com/questions/7693994/how-to-convert-ascii-code-0-255-to-a-string-of-the-associated-character
+			int NEWLINE_CHAR_ASCII = 10;
+			returnValue = StringUtils.join(values, String.valueOf(Character.toChars(NEWLINE_CHAR_ASCII)));
 		} else {
-			if (value instanceof List) {
-				List<String> values = new ArrayList<>();
-				@SuppressWarnings("unchecked")
-				List<Object> valueList = (List<Object>) value;
-				for (int i = 0; i < valueList.size(); i++) {
-					String htmlValue = String.valueOf(valueList.get(i));
-					values.add(htmlValue);
+			ParameterDataType parameterDataType = parameter.getDataType();
+			if (parameterDataType.isDate()) {
+				returnValue = parameter.getDateString(value, locale);
+			} else if (parameterDataType.isNumeric()) {
+				String[] passedValues = getPassedParameterValues();
+				String defaultValue = parameter.getLocalizedDefaultValue(locale);
+				Report defaultValueReport = parameter.getDefaultValueReport();
+
+				if (passedValues == null && StringUtils.isBlank(defaultValue)
+						&& defaultValueReport == null) {
+					returnValue = ""; //return blank instead of "0" for integers or "0.0" for doubles
+				} else {
+					returnValue = String.valueOf(value);
 				}
-				//https://stackoverflow.com/questions/8627902/new-line-in-text-area
-				//https://stackoverflow.com/questions/7693994/how-to-convert-ascii-code-0-255-to-a-string-of-the-associated-character
-				int NEWLINE_CHAR_ASCII = 10;
-				return StringUtils.join(values, String.valueOf(Character.toChars(NEWLINE_CHAR_ASCII)));
 			} else {
-				return String.valueOf(value);
+				returnValue = String.valueOf(value);
 			}
 		}
+
+		return returnValue;
 	}
 
 	/**

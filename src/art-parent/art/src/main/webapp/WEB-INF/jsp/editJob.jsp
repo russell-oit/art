@@ -114,6 +114,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -126,7 +127,24 @@
 				],
 				toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
 				toolbar2: "print preview | forecolor backcolor | link image | code",
-				image_advtab: true
+				image_advtab: true,
+				//https://codepen.io/nirajmchauhan/pen/EjQLpV
+				paste_data_images: true,
+				file_picker_callback: function (callback, value, meta) {
+					if (meta.filetype == 'image') {
+						$('#upload').trigger('click');
+						$('#upload').on('change', function () {
+							var file = this.files[0];
+							var reader = new FileReader();
+							reader.onload = function (e) {
+								callback(e.target.result, {
+									alt: ''
+								});
+							};
+							reader.readAsDataURL(file);
+						});
+					}
+				}
 			});
 		</script>
 
@@ -155,18 +173,6 @@
 				});
 				$("#endDatePicker").on("dp.change", function (e) {
 					$('#startDatePicker').data("DateTimePicker").maxDate(e.date);
-				});
-
-				$('.datepicker').datetimepicker({
-					format: 'YYYY-MM-DD',
-					locale: '${pageContext.response.locale}',
-					keepInvalid: true
-				});
-
-				$('.datetimepicker').datetimepicker({
-					format: 'YYYY-MM-DD HH:mm:ss',
-					locale: '${pageContext.response.locale}',
-					keepInvalid: true
 				});
 
 				//Enable Bootstrap-Select
@@ -236,6 +242,21 @@
 						}
 					});
 				});
+				
+				var optionsEditor = ace.edit("optionsEditor");
+				optionsEditor.$blockScrolling = Infinity;
+				optionsEditor.getSession().setMode("ace/mode/json");
+				optionsEditor.setHighlightActiveLine(false);
+				optionsEditor.setShowPrintMargin(false);
+				optionsEditor.setOption("showLineNumbers", false);
+				document.getElementById('optionsEditor').style.fontSize = '14px';
+
+				var options = $('#options');
+				optionsEditor.getSession().setValue(options.val());
+				optionsEditor.getSession().on('change', function () {
+					options.val(optionsEditor.getSession().getValue());
+				});
+
 			});
 		</script>
 
@@ -311,6 +332,9 @@
 					list.append(new Option('${htmlText}', 'html'));
 				} else if (reportTypeId === 131) {
 					//thymeleaf
+					list.append(new Option('${htmlText}', 'html'));
+				} else if (reportTypeId === 153) {
+					//velocity
 					list.append(new Option('${htmlText}', 'html'));
 				} else if (reportTypeId === 123 || reportTypeId === 124) {
 					//xdocreport docx
@@ -412,8 +436,9 @@
 						break;
 					case 'EmailInline':
 					case 'CondEmailInline':
-						if (reportTypeId === 122 || reportTypeId === 131) {
-							//freemarker, thymeleaf
+						if (reportTypeId === 122 || reportTypeId === 131
+								|| reportTypeId === 153) {
+							//freemarker, thymeleaf, velocity
 							$("#mailMessageDiv").hide();
 						}
 						break;
@@ -438,9 +463,9 @@
 			function toggleOutputFormatVisibility(jobType, reportTypeId) {
 				//show/hide outputFormatDiv
 				if (reportTypeId === 122
-						|| reportTypeId === 131
+						|| reportTypeId === 131 || reportTypeId === 153
 						|| reportTypeId === 117 || reportTypeId === 118) {
-					//freemarker, thymeleaf, jxls
+					//freemarker, thymeleaf, velocity, jxls
 					$("#outputFormatDiv").hide();
 				} else {
 					switch (jobType) {
@@ -749,7 +774,7 @@
 							<spring:message code="jobs.label.mailFrom"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailFrom" readonly="true" class="form-control"/>
+							<form:input path="mailFrom" readonly="${sessionUser.accessLevel.value >= 80 ? 'false' : 'true'}" class="form-control"/>
 							<form:errors path="mailFrom" cssClass="error"/>
 						</div>
 					</div>
@@ -826,6 +851,27 @@
 							</div>
 						</div>
 					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="smtpServer.smtpServerId">
+							<spring:message code="settings.label.smtpServer"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="smtpServer.smtpServerId" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<c:forEach var="smtpServer" items="${smtpServers}">
+									<c:set var="smtpServerStatus">
+										<t:displayActiveStatus active="${smtpServer.active}" hideActive="true"/>
+									</c:set>
+									<form:option value="${smtpServer.smtpServerId}"
+												 data-content="${smtpServer.name} ${smtpServerStatus}">
+										${smtpServer.name} 
+									</form:option>
+								</c:forEach>
+							</form:select>
+							<form:errors path="smtpServer.smtpServerId" cssClass="error"/>
+						</div>
+					</div>
 					<div id="mailMessageDiv">
 						<label class="col-md-12 control-label" style="text-align: center">
 							<spring:message code="jobs.label.mailMessage"/>
@@ -833,6 +879,7 @@
 						<div class="form-group">
 							<div class="col-md-12">
 								<form:textarea path="mailMessage" rows="8" cols="60" class="form-control editor"/>
+								<input name="image" type="file" id="upload" style="display:none;" onchange="">
 								<form:errors path="mailMessage" cssClass="error"/>
 							</div>
 						</div>
@@ -1023,6 +1070,18 @@
 						</div>
 					</div>
 				</fieldset>
+						
+				<hr>
+						
+				<div class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="options">
+						<spring:message code="page.label.options"/>
+					</label>
+					<div class="col-md-12">
+						<form:hidden path="options"/>
+						<div id="optionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
+					</div>
+				</div>
 
 				<div class="form-group">
 					<div class="col-md-12">

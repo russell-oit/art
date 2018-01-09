@@ -18,8 +18,10 @@
 package art.output;
 
 import art.report.Report;
+import art.reportoptions.TemplateResultOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -30,6 +32,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.beanutils.RowSetDynaClass;
@@ -45,6 +48,37 @@ import org.slf4j.LoggerFactory;
 public class FreeMarkerOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(FreeMarkerOutput.class);
+
+	private String contextPath;
+	private Locale locale;
+
+	/**
+	 * @return the locale
+	 */
+	public Locale getLocale() {
+		return locale;
+	}
+
+	/**
+	 * @param locale the locale to set
+	 */
+	public void setLocale(Locale locale) {
+		this.locale = locale;
+	}
+
+	/**
+	 * @return the contextPath
+	 */
+	public String getContextPath() {
+		return contextPath;
+	}
+
+	/**
+	 * @param contextPath the contextPath to set
+	 */
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
 
 	/**
 	 * Generates output, updating the writer with the final output
@@ -76,9 +110,17 @@ public class FreeMarkerOutput {
 			data.put("params", reportParams);
 		}
 
+		TemplateResultOptions templateResultOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			templateResultOptions = new TemplateResultOptions();
+		} else {
+			templateResultOptions = ArtUtils.jsonToObject(options, TemplateResultOptions.class);
+		}
+
 		//pass report data
-		boolean useLowerCaseProperties = false;
-		boolean useColumnLabels = true;
+		boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
+		boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
 		RowSetDynaClass rsdc = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
 		data.put("results", rsdc.getRows());
 
@@ -101,6 +143,15 @@ public class FreeMarkerOutput {
 
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(writer, "writer must not be null");
+
+		if (data == null) {
+			data = new HashMap<>();
+		}
+
+		data.put("contextPath", contextPath);
+		String artBaseUrl = Config.getSettings().getArtBaseUrl();
+		data.put("artBaseUrl", artBaseUrl);
+		data.put("locale", locale);
 
 		String templateFileName = report.getTemplate();
 		String templatesPath = Config.getTemplatesPath();

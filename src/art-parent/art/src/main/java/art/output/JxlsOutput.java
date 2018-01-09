@@ -21,16 +21,18 @@ import art.dbutils.DatabaseUtils;
 import art.enums.ReportType;
 import art.report.Report;
 import art.reportoptions.JxlsOptions;
+import art.reportoptions.TemplateResultOptions;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import art.utils.ArtUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,8 +40,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jxls.area.Area;
 import org.jxls.builder.AreaBuilder;
 import org.jxls.builder.xml.XmlAreaBuilder;
@@ -96,7 +102,7 @@ public class JxlsOutput {
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
 			String outputFileName)
-			throws SQLException, IOException, InvalidFormatException {
+			throws SQLException, IOException, InvalidFormatException, GeneralSecurityException {
 
 		logger.debug("Entering generateReport");
 
@@ -136,17 +142,16 @@ public class JxlsOutput {
 			context.putVar("params", reportParams);
 			context.putVar("locale", locale);
 
-			String optionsString = report.getOptions();
+			String options = report.getOptions();
 
-			JxlsOptions options;
-			if (StringUtils.isBlank(optionsString)) {
-				options = new JxlsOptions();
+			JxlsOptions jxlsOptions;
+			if (StringUtils.isBlank(options)) {
+				jxlsOptions = new JxlsOptions();
 			} else {
-				ObjectMapper mapper = new ObjectMapper();
-				options = mapper.readValue(optionsString, JxlsOptions.class);
+				jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
 			}
 
-			String areaConfigFilename = options.getAreaConfigFile();
+			String areaConfigFilename = jxlsOptions.getAreaConfigFile();
 			String fullAreaConfigFilename = templatesPath + areaConfigFilename;
 
 			if (StringUtils.isNotBlank(areaConfigFilename)) {
@@ -156,21 +161,57 @@ public class JxlsOutput {
 				}
 			}
 
+			TemplateResultOptions templateResultOptions;
+			if (StringUtils.isBlank(options)) {
+				templateResultOptions = new TemplateResultOptions();
+			} else {
+				templateResultOptions = ArtUtils.jsonToObject(options, TemplateResultOptions.class);
+			}
+
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
 				RunReportHelper runReportHelper = new RunReportHelper();
 				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
-				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn);
+				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn, templateResultOptions);
 				context.putVar("jdbc", jdbcHelper);
 			} else {
 				//use recordset based on art query
-				boolean useLowerCaseProperties = false;
-				boolean useColumnLabels = true;
+				boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
+				boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
 				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
 				context.putVar("results", rsdc.getRows());
 			}
 
-			process(fullTemplateFileName, outputFileName, areaConfigFilename, context, fullAreaConfigFilename, options);
+			process(fullTemplateFileName, outputFileName, areaConfigFilename, context, fullAreaConfigFilename, jxlsOptions);
+
+			String extension = FilenameUtils.getExtension(templateFileName);
+			if (!StringUtils.equalsIgnoreCase(extension, "xls")) {
+				//set modify password
+				String modifyPassword = report.getModifyPassword();
+				if (StringUtils.isNotEmpty(modifyPassword)) {
+					//https://poi.apache.org/spreadsheet/quick-guide.html#ReadWriteWorkbook
+					//https://stackoverflow.com/questions/17556108/open-existing-xls-in-apache-poi
+					//https://stackoverflow.com/questions/20340915/how-to-go-though-the-sheets-of-a-workbook-with-apache-poi
+					try (InputStream is = new FileInputStream(outputFileName)) {
+						//use inputstream instead of File. Using File results in an exception on wb.write()
+						Workbook wb = WorkbookFactory.create(is);
+						for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+							Sheet sheet = wb.getSheetAt(i);
+							sheet.protectSheet(modifyPassword);
+						}
+
+						try (FileOutputStream fout = new FileOutputStream(outputFileName)) {
+							wb.write(fout);
+						}
+					}
+				}
+
+				//set open password
+				String openPassword = report.getOpenPassword();
+				if (StringUtils.isNotEmpty(openPassword)) {
+					PoiUtils.addOpenPassword(openPassword, outputFileName);
+				}
+			}
 		} finally {
 			DatabaseUtils.close(conn);
 		}

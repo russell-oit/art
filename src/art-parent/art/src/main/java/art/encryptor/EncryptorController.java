@@ -19,6 +19,7 @@ package art.encryptor;
 
 import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
+import art.report.ReportService;
 import art.report.UploadHelper;
 import art.servlets.Config;
 import art.user.User;
@@ -57,6 +58,9 @@ public class EncryptorController {
 
 	@Autowired
 	private EncryptorService encryptorService;
+	
+	@Autowired
+	private ReportService reportService;
 
 	@RequestMapping(value = "/encryptors", method = RequestMethod.GET)
 	public String showEncryptors(Model model) {
@@ -471,6 +475,21 @@ public class EncryptorController {
 		}
 
 		return null;
+	}
+	
+	@RequestMapping(value = "/reportsWithEncryptor", method = RequestMethod.GET)
+	public String showReportsWithEncryptor(@RequestParam("encryptorId") Integer encryptorId, Model model) {
+		logger.debug("Entering showReportsWithEncryptor: encryptorId={}", encryptorId);
+
+		try {
+			model.addAttribute("reports", reportService.getReportsWithEncryptor(encryptorId));
+			model.addAttribute("encryptor", encryptorService.getEncryptor(encryptorId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "reportsWithEncryptor";
 	}
 
 }

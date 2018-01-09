@@ -517,7 +517,7 @@ public class Parameter implements Serializable {
 					return dateFormatter.format(value);
 				}
 			default:
-				throw new IllegalArgumentException("Unexpected parameter data type: " + dataType);
+				throw new IllegalArgumentException("Unexpected date data type: " + dataType);
 		}
 	}
 

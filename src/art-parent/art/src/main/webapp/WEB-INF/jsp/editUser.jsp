@@ -153,7 +153,7 @@ Display edit user page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:password path="password" autocomplete="off" maxlength="50" class="form-control" />
+							<form:password path="password" autocomplete="off" maxlength="100" class="form-control" />
 							<spring:message code="page.help.password" var="help" />
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"

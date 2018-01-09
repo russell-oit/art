@@ -277,6 +277,20 @@ Edit report page
 					reportSource.val(xmlEditor.getSession().getValue());
 				});
 
+				var optionsEditor = ace.edit("optionsEditor");
+				optionsEditor.$blockScrolling = Infinity;
+				optionsEditor.getSession().setMode("ace/mode/json");
+				optionsEditor.setHighlightActiveLine(false);
+				optionsEditor.setShowPrintMargin(false);
+				optionsEditor.setOption("showLineNumbers", false);
+				document.getElementById('optionsEditor').style.fontSize = '14px';
+
+				var options = $('#options');
+				optionsEditor.getSession().setValue(options.val());
+				optionsEditor.getSession().on('change', function () {
+					options.val(optionsEditor.getSession().getValue());
+				});
+
 				var jsonEditor = ace.edit("jsonEditor");
 				jsonEditor.$blockScrolling = Infinity;
 				jsonEditor.getSession().setMode("ace/mode/json");
@@ -285,36 +299,22 @@ Edit report page
 				jsonEditor.setOption("showLineNumbers", false);
 				document.getElementById('jsonEditor').style.fontSize = '14px';
 
-				var options = $('#options');
-				jsonEditor.getSession().setValue(options.val());
+				jsonEditor.getSession().setValue(reportSource.val());
 				jsonEditor.getSession().on('change', function () {
-					options.val(jsonEditor.getSession().getValue());
+					reportSource.val(jsonEditor.getSession().getValue());
 				});
 
-				var saikuEditor = ace.edit("saikuEditor");
-				saikuEditor.$blockScrolling = Infinity;
-				saikuEditor.getSession().setMode("ace/mode/json");
-				saikuEditor.setHighlightActiveLine(false);
-				saikuEditor.setShowPrintMargin(false);
-				saikuEditor.setOption("showLineNumbers", false);
-				document.getElementById('saikuEditor').style.fontSize = '14px';
+				var groovyEditor = ace.edit("groovyEditor");
+				groovyEditor.$blockScrolling = Infinity;
+				groovyEditor.getSession().setMode("ace/mode/groovy");
+				groovyEditor.setHighlightActiveLine(false);
+				groovyEditor.setShowPrintMargin(false);
+				groovyEditor.setOption("showLineNumbers", true);
+				document.getElementById('groovyEditor').style.fontSize = '14px';
 
-				saikuEditor.getSession().setValue(reportSource.val());
-				saikuEditor.getSession().on('change', function () {
-					reportSource.val(saikuEditor.getSession().getValue());
-				});
-
-				var mongoEditor = ace.edit("mongoEditor");
-				mongoEditor.$blockScrolling = Infinity;
-				mongoEditor.getSession().setMode("ace/mode/groovy");
-				mongoEditor.setHighlightActiveLine(false);
-				mongoEditor.setShowPrintMargin(false);
-				mongoEditor.setOption("showLineNumbers", true);
-				document.getElementById('mongoEditor').style.fontSize = '14px';
-
-				mongoEditor.getSession().setValue(reportSource.val());
-				mongoEditor.getSession().on('change', function () {
-					reportSource.val(mongoEditor.getSession().getValue());
+				groovyEditor.getSession().setValue(reportSource.val());
+				groovyEditor.getSession().on('change', function () {
+					reportSource.val(groovyEditor.getSession().getValue());
 				});
 
 			});
@@ -350,31 +350,32 @@ Edit report page
 					}
 
 					switch (reportTypeId) {
-						case 110:
-						case 129:
-							//dashboard
+						case 110: //dashboard
+						case 129: //gridstack dashboard
+						case 156: //org chart list
 							$("#sqlEditor").hide();
 							$("#xmlEditor").show();
-							$("#saikuEditor").hide();
-							$("#mongoEditor").hide();
+							$("#jsonEditor").hide();
+							$("#groovyEditor").hide();
 							break;
 						case 149: //saiku report
+						case 155: //org chart json
 							$("#sqlEditor").hide();
 							$("#xmlEditor").hide();
-							$("#saikuEditor").show();
-							$("#mongoEditor").hide();
+							$("#jsonEditor").show();
+							$("#groovyEditor").hide();
 							break;
 						case 151: //mongodb
 							$("#sqlEditor").hide();
 							$("#xmlEditor").hide();
-							$("#saikuEditor").hide();
-							$("#mongoEditor").show();
+							$("#jsonEditor").hide();
+							$("#groovyEditor").show();
 							break;
 						default:
 							$("#sqlEditor").show();
 							$("#xmlEditor").hide();
-							$("#saikuEditor").hide();
-							$("#mongoEditor").hide();
+							$("#jsonEditor").hide();
+							$("#groovyEditor").hide();
 					}
 				}
 
@@ -403,9 +404,9 @@ Edit report page
 						//text
 						reportSourceType = "(HTML)";
 						break;
-					case 110:
-					case 129:
-						//dashboard
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 156: //org chart list
 						reportSourceType = "(XML)";
 						break;
 					case 112:
@@ -415,6 +416,7 @@ Edit report page
 						reportSourceType = "(MDX)";
 						break;
 					case 149: //saiku report
+					case 155: //org chart json
 						reportSourceType = "(JSON)";
 						break;
 					case 151: //mongodb
@@ -445,6 +447,9 @@ Edit report page
 					case 140: //datatables csv server
 					case 145: //datamaps file
 					case 149: //saiku report
+					case 155: //org chart json
+					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -465,6 +470,9 @@ Edit report page
 					case 140: //datatables csv server
 					case 145: //datamaps file
 					case 149: //saiku report
+					case 155: //org chart json
+					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -480,6 +488,7 @@ Edit report page
 					case 112: //jpivot mondrian
 					case 122: //freemarker
 					case 131: //thymeleaf
+					case 153: //velocity
 					case 123: //xdocreport freemarker docx
 					case 124: //xdocreport velocity docx
 					case 125: //xdocreport freemarker odt
@@ -503,10 +512,38 @@ Edit report page
 					case 146: //leaflet
 					case 147: //openlayers
 					case 150: //saiku connection
+					case 154: //org chart database
+					case 155: //org chart json
+					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#templateDiv").show();
 						break;
 					default:
 						$("#templateDiv").hide();
+				}
+
+				//show/hide resources
+				switch (reportTypeId) {
+					case 115: //jasper template
+					case 116: //jasper art
+					case 134: //pivottable.js csv server
+					case 137: //dygraphs csv server
+					case 140: //datatables csv server
+					case 142: //c3
+					case 144: //datamaps
+					case 145: //datamaps file
+					case 146: //leaflet
+					case 147: //openlayers
+					case 117: //jxls template
+					case 118: //jxls art
+					case 154: //org chart database
+					case 155: //org chart json
+					case 156: //org chart list
+					case 157: //org chart ajax
+						$("#resourcesDiv").show();
+						break;
+					default:
+						$("#resourcesDiv").hide();
 				}
 
 				//show/hide xmla fields
@@ -546,6 +583,9 @@ Edit report page
 					case 149: //saiku report
 					case 150: //saiku connection
 					case 151: //mongodb
+					case 155: //org chart json
+					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -600,6 +640,7 @@ Edit report page
 					case 117: //jxls template
 					case 122: //freemarker
 					case 131: //thymeleaf
+					case 153: //velocity
 					case 130: //react pivot
 					case 132: //pivottable.js
 					case 133: //pivottable.js csv local
@@ -620,6 +661,10 @@ Edit report page
 					case 149: //saiku report
 					case 150: //saiku connection
 					case 151: //mongodb
+					case 154: //org chart database
+					case 155: //org chart json
+					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -637,26 +682,6 @@ Edit report page
 						break;
 					default:
 						$("#tabularFields").hide();
-				}
-
-				//show/hide resources
-				switch (reportTypeId) {
-					case 115: //jasper template
-					case 116: //jasper art
-					case 134: //pivottable.js csv server
-					case 137: //dygraphs csv server
-					case 140: //datatables csv server
-					case 142: //c3
-					case 144: //datamaps
-					case 145: //datamaps file
-					case 146: //leaflet
-					case 147: //openlayers
-					case 117: //jxls template
-					case 118: //jxls art
-						$("#resourcesDiv").show();
-						break;
-					default:
-						$("#resourcesDiv").hide();
 				}
 
 				//show/hide fetch size
@@ -681,6 +706,9 @@ Edit report page
 					case 149: //saiku report
 					case 150: //saiku connection
 					case 151: //mongodb
+					case 155: //org chart json
+					case 156: //org chart list
+					case 157: //org chart ajax
 						$("#fetchSizeDiv").hide();
 						break;
 					default:
@@ -731,6 +759,8 @@ Edit report page
 					case 124: //xdocreport docx velocity
 					case 125: //xdocreport odt freemarker
 					case 126: //xdocreport odt velocity
+					case 117: //jxls template
+					case 118: //jxls art
 						$("#openPasswordDiv").show();
 						$("#modifyPasswordDiv").show();
 						break;
@@ -1170,7 +1200,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div>
-							<form:password path="openPassword" autocomplete="off" maxlength="50" class="form-control"/>
+							<form:password path="openPassword" autocomplete="off" maxlength="100" class="form-control"/>
 						</div>
 						<div>
 							<label class="checkbox-inline">
@@ -1188,7 +1218,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div>
-							<form:password path="modifyPassword" autocomplete="off" maxlength="50" class="form-control"/>
+							<form:password path="modifyPassword" autocomplete="off" maxlength="100" class="form-control"/>
 						</div>
 						<div>
 							<label class="checkbox-inline">
@@ -1404,44 +1434,46 @@ Edit report page
 							<span class="fileinput-filename"></span>
 							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
 						</div>
-						<div id="resourcesDiv">
+					</div>
+				</div>
+				<div id="resourcesDiv" class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="reports.text.resources"/>
+					</label>
+					<div class="col-md-8">
+						<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+						<div class="fileupload-buttonbar">
 							<div>
-								<b><spring:message code="reports.text.resources"/></b>
+								<!-- The fileinput-button span is used to style the file input field as button -->
+								<span class="btn btn-success fileinput-button">
+									<i class="glyphicon glyphicon-plus"></i>
+									<span><spring:message code="fileupload.button.addFiles"/></span>
+									<input id="fileuploadInput" type="file" name="files[]" multiple>
+								</span>
+								<%-- https://stackoverflow.com/questions/925334/how-is-the-default-submit-button-on-an-html-form-determined --%>
+								<button type="button" class="btn btn-primary start">
+									<i class="glyphicon glyphicon-upload"></i>
+									<span><spring:message code="fileupload.button.startUpload"/></span>
+								</button>
+								<button type="reset" class="btn btn-warning cancel">
+									<i class="glyphicon glyphicon-ban-circle"></i>
+									<span><spring:message code="fileupload.button.cancelUpload"/></span>
+								</button>
+								<!-- The global file processing state -->
+								<span class="fileupload-process"></span>
 							</div>
-							<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-							<div class="fileupload-buttonbar">
-								<div>
-									<!-- The fileinput-button span is used to style the file input field as button -->
-									<span class="btn btn-success fileinput-button">
-										<i class="glyphicon glyphicon-plus"></i>
-										<span><spring:message code="fileupload.button.addFiles"/></span>
-										<input id="fileuploadInput" type="file" name="files[]" multiple>
-									</span>
-									<%-- https://stackoverflow.com/questions/925334/how-is-the-default-submit-button-on-an-html-form-determined --%>
-									<button type="button" class="btn btn-primary start">
-										<i class="glyphicon glyphicon-upload"></i>
-										<span><spring:message code="fileupload.button.startUpload"/></span>
-									</button>
-									<button type="reset" class="btn btn-warning cancel">
-										<i class="glyphicon glyphicon-ban-circle"></i>
-										<span><spring:message code="fileupload.button.cancelUpload"/></span>
-									</button>
-									<!-- The global file processing state -->
-									<span class="fileupload-process"></span>
+							<!-- The global progress state -->
+							<div class="fileupload-progress fade">
+								<!-- The global progress bar -->
+								<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+									<div class="progress-bar progress-bar-success" style="width:0%;"></div>
 								</div>
-								<!-- The global progress state -->
-								<div class="fileupload-progress fade">
-									<!-- The global progress bar -->
-									<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-										<div class="progress-bar progress-bar-success" style="width:0%;"></div>
-									</div>
-									<!-- The extended global progress state -->
-									<div class="progress-extended">&nbsp;</div>
-								</div>
+								<!-- The extended global progress state -->
+								<div class="progress-extended">&nbsp;</div>
 							</div>
-							<!-- The table listing the files available for upload/download -->
-							<table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
 						</div>
+						<!-- The table listing the files available for upload/download -->
+						<table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
 					</div>
 				</div>
 
@@ -1482,7 +1514,7 @@ Edit report page
 					</label>
 					<div class="col-md-12">
 						<form:hidden path="options"/>
-						<div id="jsonEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
+						<div id="optionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 
@@ -1494,8 +1526,8 @@ Edit report page
 						<form:hidden path="reportSource"/>
 						<div id="sqlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 						<div id="xmlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
-						<div id="saikuEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
-						<div id="mongoEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
+						<div id="jsonEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
+						<div id="groovyEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 				<div id="reportSourceHtmlDiv" class="form-group">

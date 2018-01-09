@@ -23,6 +23,7 @@ import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.destination.Destination;
+import art.destinationoptions.S3AwsSdkOptions;
 import art.destinationoptions.FtpOptions;
 import art.destinationoptions.NetworkShareOptions;
 import art.destinationoptions.SftpOptions;
@@ -31,12 +32,14 @@ import art.enums.DestinationType;
 import art.enums.JobType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.job.JobOptions;
 import art.job.JobService;
 import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.ThymeleafOutput;
+import art.output.VelocityOutput;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -46,6 +49,7 @@ import art.runreport.ReportOptions;
 import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
+import art.smtpserver.SmtpServer;
 import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
@@ -58,6 +62,14 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.github.sardine.Sardine;
 import com.github.sardine.SardineFactory;
 import com.google.common.collect.ImmutableSet;
@@ -100,6 +112,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -118,6 +131,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.tika.Tika;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -166,6 +180,7 @@ public class ReportJob implements org.quartz.Job {
 	private ch.qos.logback.classic.Logger progressLogger;
 	private long runStartTimeMillis;
 	private FileAppender<ILoggingEvent> progressFileAppender;
+	private JobOptions jobOptions;
 
 	@Autowired
 	private TemplateEngine emailTemplateEngine;
@@ -205,26 +220,25 @@ public class ReportJob implements org.quartz.Job {
 			try {
 				job = jobService.getJob(jobId);
 			} catch (SQLException ex) {
-				logger.error("Error. Job Id {}", jobId, ex);
-				progressLogger.error("Error", ex);
+				logError(ex);
 			}
 
 			if (job == null) {
-				logger.info("Job not found: {}", jobId);
+				logger.warn("Job not found: {}", jobId);
 				jobLogAndClose("Job not found");
 				return;
 			}
 
 			Report report = job.getReport();
 			if (report == null) {
-				logger.info("Job report not found: Job ID {}", jobId);
+				logger.warn("Job report not found: Job Id {}", jobId);
 				jobLogAndClose("Job report not found");
 				return;
 			}
 
 			User user = job.getUser();
 			if (user == null) {
-				logger.info("Job user not found: Job ID {}", jobId);
+				logger.warn("Job user not found: Job Id {}", jobId);
 				jobLogAndClose("Job user not found");
 				return;
 			}
@@ -239,6 +253,13 @@ public class ReportJob implements org.quartz.Job {
 			logger.debug("systemLocale='{}'", systemLocale);
 
 			locale = ArtUtils.getLocaleFromString(systemLocale);
+
+			String options = job.getOptions();
+			if (StringUtils.isBlank(options)) {
+				jobOptions = new JobOptions();
+			} else {
+				jobOptions = ArtUtils.jsonToObject(options, JobOptions.class);
+			}
 
 			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
 			boolean tempJob = dataMap.getBooleanValue("tempJob");
@@ -265,7 +286,7 @@ public class ReportJob implements org.quartz.Job {
 					}
 					nextRunDate = Collections.min(nextRunDates);
 				} catch (SchedulerException ex) {
-					logger.error("Error. Job Id {}", jobId, ex);
+					logError(ex);
 				}
 			}
 
@@ -289,16 +310,13 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			sendFileToDestinations();
-
 			runBatchFile();
-
-			afterCompletion();
-
-			cacheHelper.clearJobs();
 		} catch (Exception ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
-			progressLogger.error("Error", ex);
+			logErrorAndSetDetails(ex);
 		}
+
+		afterCompletion();
+		cacheHelper.clearJobs();
 
 		long runEndTimeMillis = System.currentTimeMillis();
 
@@ -359,14 +377,23 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
+	 * Log an error to stdout and to the progress logger
+	 *
+	 * @param ex the error
+	 */
+	private void logError(Throwable ex) {
+		logger.error("Error. Job Id {}", jobId, ex);
+		progressLogger.error("Error", ex);
+	}
+
+	/**
 	 * Log an error as well as set the runDetails variable
 	 *
 	 * @param ex the error
 	 */
 	private void logErrorAndSetDetails(Throwable ex) {
-		logger.error("Error. Job Id {}", jobId, ex);
+		logError(ex);
 		runDetails = "<b>Error:</b> " + ex.toString();
-		progressLogger.error("Error", ex);
 	}
 
 	/**
@@ -393,8 +420,11 @@ public class ReportJob implements org.quartz.Job {
 					case NetworkShare:
 						sendFileToNetworkShare(destination, fullLocalFileName);
 						break;
-					case S3:
-						sendFileToS3(destination, fullLocalFileName);
+					case S3jclouds:
+						sendFileToS3jclouds(destination, fullLocalFileName);
+						break;
+					case S3AwsSdk:
+						sendFileToS3AwsSdk(destination, fullLocalFileName);
 						break;
 					case Azure:
 						sendFileToAzure(destination, fullLocalFileName);
@@ -503,7 +533,7 @@ public class ReportJob implements org.quartz.Job {
 				String postReply = document.body().text();
 				logger.debug("postReply='{}'", postReply);
 			}
-		} catch (IOException ex) {
+		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
 		}
 	}
@@ -585,7 +615,7 @@ public class ReportJob implements org.quartz.Job {
 			try {
 				sardine.shutdown();
 			} catch (IOException ex) {
-				logger.error("Error. Job Id {}", jobId, ex);
+				logError(ex);
 			}
 		}
 	}
@@ -602,12 +632,113 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Copies the generated file to an amazon s3 or compatible storage provider
+	 * Copies the generated file to amazon s3 using the aws-sdk library
 	 *
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
-	private void sendFileToS3(Destination destination, String fullLocalFileName) {
+	private void sendFileToS3AwsSdk(Destination destination, String fullLocalFileName) {
+		//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/examples-s3.html
+		//https://javatutorial.net/java-s3-example
+		//https://docs.aws.amazon.com/AmazonS3/latest/dev/HLuploadFileJava.html
+		//https://stackoverflow.com/questions/46276121/java-aws-sdk-s3-upload-performance
+		//http://improve.dk/pushing-the-limits-of-amazon-s3-upload-performance/
+		//http://javasampleapproach.com/aws/amazon-s3/amazon-s3-uploaddownload-large-files-s3-springboot-amazon-s3-multipartfile-application
+		//https://stackoverflow.com/questions/6590088/uploading-large-files-with-user-metadata-to-amazon-s3-using-java-sdk
+		//https://stackoverflow.com/questions/4698869/problems-when-uploading-large-files-to-amazon-s3
+		AmazonS3 s3Client = null;
+
+		try {
+			String accessKeyId = destination.getUser();
+			String secretAccessKey = destination.getPassword();
+
+			//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html#credentials-explicit
+			BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKeyId, secretAccessKey);
+			AmazonS3ClientBuilder s3ClientBuilder = AmazonS3ClientBuilder.standard()
+					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+					.withForceGlobalBucketAccessEnabled(true);
+
+			S3AwsSdkOptions s3AwsSdkOptions;
+			String options = destination.getOptions();
+			if (StringUtils.isBlank(options)) {
+				s3AwsSdkOptions = new S3AwsSdkOptions();
+			} else {
+				s3AwsSdkOptions = ArtUtils.jsonToObject(options, S3AwsSdkOptions.class);
+			}
+
+			String region = s3AwsSdkOptions.getRegion();
+
+			if (StringUtils.isBlank(region)) {
+				//must set a region, otherwise an exception will be thrown
+				//https://stackoverflow.com/questions/17117648/can-the-s3-sdk-figure-out-a-buckets-region-on-its-own?noredirect=1&lq=1
+				//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-logging.html
+				//https://github.com/aws/aws-sdk-java/issues/1284
+				//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-region-selection.html
+				//https://stackoverflow.com/questions/43857570/setting-the-aws-region-programmatically
+				//https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html
+				//https://stackoverflow.com/questions/31485331/how-to-set-connection-type-in-aws-java-sdk-https-vs-http
+				final String DEFAULT_REGION = "us-east-1";
+				region = DEFAULT_REGION;
+			}
+
+			s3ClientBuilder.withRegion(region);
+			s3Client = s3ClientBuilder.build();
+
+			String bucketName = destination.getPath();
+
+			String destinationSubDirectory = destination.getSubDirectory();
+			String jobSubDirectory = job.getSubDirectory();
+
+			String directorySeparator = "/";
+			String finalPath = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
+
+			String remoteFileName = finalPath + fileName;
+
+			File localFile = new File(fullLocalFileName);
+
+			String mimeType = "application/unknown";
+			Tika tika = new Tika();
+			try {
+				mimeType = tika.detect(localFile);
+			} catch (IOException ex) {
+				logError(ex);
+			}
+
+			ByteSource payload = Files.asByteSource(localFile);
+
+			ObjectMetadata metadata = new ObjectMetadata();
+			metadata.setContentDisposition(fileName);
+			metadata.setContentLength(payload.size());
+			metadata.setContentType(mimeType);
+
+			try (InputStream is = new FileInputStream(localFile)) {
+				PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, remoteFileName, is, metadata);
+				CannedAccessControlList cannedAcl = s3AwsSdkOptions.getCannedAcl();
+				if (cannedAcl != null) {
+					putObjectRequest.withCannedAcl(cannedAcl);
+				}
+
+				PutObjectResult putObjectResult = s3Client.putObject(putObjectRequest);
+				String eTag = putObjectResult.getETag();
+				logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", remoteFileName, eTag, jobId);
+			}
+		} catch (IOException | RuntimeException ex) {
+			logErrorAndSetDetails(ex);
+		} finally {
+			//https://stackoverflow.com/questions/26866739/how-do-i-close-an-aws-s3-client-connection
+			if (s3Client != null) {
+				s3Client.shutdown();
+			}
+		}
+	}
+
+	/**
+	 * Copies the generated file to amazon s3, using the jclouds library
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToS3jclouds(Destination destination, String fullLocalFileName) {
 		String provider = "aws-s3";
 		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
@@ -649,19 +780,6 @@ public class ReportJob implements org.quartz.Job {
 				.buildView(BlobStoreContext.class);
 
 		try {
-			BlobStore blobStore = context.getBlobStore();
-
-			String containerName = destination.getPath();
-			boolean created = blobStore.createContainerInLocation(null, containerName);
-			if (created) {
-				// the container didn't exist, but does now
-				logger.debug("Container created - '{}'. Job Id {}", containerName, jobId);
-			} else {
-				// the container already existed
-				logger.debug("Container already existed: '{}'. Job Id {}", containerName, jobId);
-			}
-
-			// Create a Blob
 			String destinationSubDirectory = destination.getSubDirectory();
 			String jobSubDirectory = job.getSubDirectory();
 
@@ -670,17 +788,32 @@ public class ReportJob implements org.quartz.Job {
 
 			String remoteFileName = finalPath + fileName;
 
-			ByteSource payload = Files.asByteSource(new File(fullLocalFileName));
+			File localFile = new File(fullLocalFileName);
+
+			String mimeType = "application/unknown"; //if contentType() is not specified, uploaded file has metadata content type of application/unknown
+			Tika tika = new Tika();
+			try {
+				mimeType = tika.detect(localFile);
+			} catch (IOException ex) {
+				logError(ex);
+			}
+
+			BlobStore blobStore = context.getBlobStore();
+
+			ByteSource payload = Files.asByteSource(localFile);
 			Blob blob = blobStore.blobBuilder(remoteFileName)
 					.payload(payload)
 					.contentDisposition(fileName)
 					.contentLength(payload.size())
+					.contentType(mimeType)
 					.build();
+
+			String containerName = destination.getPath();
 
 			// Upload the Blob
 			String eTag = blobStore.putBlob(containerName, blob, multipart());
 			logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", fileName, eTag, jobId);
-		} catch (IOException ex) {
+		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
 		} finally {
 			if (context != null) {
@@ -804,7 +937,7 @@ public class ReportJob implements org.quartz.Job {
 								share.mkdir(partialPath);
 							}
 						} catch (SMBApiException ex) {
-							logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+							logError(ex);
 						}
 					}
 				}
@@ -821,7 +954,7 @@ public class ReportJob implements org.quartz.Job {
 				try {
 					connection.close();
 				} catch (Exception ex2) {
-					logger.error("Error. Job Id {}", jobId, ex2);
+					logError(ex2);
 				}
 			}
 		}
@@ -992,12 +1125,12 @@ public class ReportJob implements org.quartz.Job {
 
 			if (!FTPReply.isPositiveCompletion(reply)) {
 				ftpClient.disconnect();
-				logger.info("FTP server refused connection. Job Id {}", jobId);
+				logger.warn("FTP server refused connection. Job Id {}", jobId);
 				return;
 			}
 
 			if (!ftpClient.login(user, password)) {
-				logger.info("FTP login failed. Job Id {}", jobId);
+				logger.warn("FTP login failed. Job Id {}", jobId);
 				return;
 			}
 
@@ -1019,7 +1152,7 @@ public class ReportJob implements org.quartz.Job {
 					try {
 						ftpClient.makeDirectory(partialPath);
 					} catch (IOException ex) {
-						logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+						logError(ex);
 					}
 				}
 			}
@@ -1031,11 +1164,11 @@ public class ReportJob implements org.quartz.Job {
 			if (done) {
 				logger.debug("Ftp file upload successful. Job Id {}", jobId);
 			} else {
-				logger.info("Ftp file upload failed. Job Id {}", jobId);
+				logger.warn("Ftp file upload failed. Job Id {}", jobId);
 			}
 
 			ftpClient.logout();
-		} catch (IOException ex) {
+		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
 		} finally {
 			try {
@@ -1043,7 +1176,7 @@ public class ReportJob implements org.quartz.Job {
 					ftpClient.disconnect();
 				}
 			} catch (IOException ex) {
-				logger.error("Error. Job Id {}", jobId, ex);
+				logError(ex);
 			}
 		}
 	}
@@ -1148,7 +1281,7 @@ public class ReportJob implements org.quartz.Job {
 					try {
 						channelSftp.mkdir(partialPath);
 					} catch (SftpException ex) {
-						logger.error("Error while creating sub-directory. Job Id {}", jobId, ex);
+						logError(ex);
 					}
 				}
 			}
@@ -1156,7 +1289,7 @@ public class ReportJob implements org.quartz.Job {
 			try (InputStream inputStream = new FileInputStream(localFile)) {
 				channelSftp.put(inputStream, remoteFileName, ChannelSftp.OVERWRITE);
 			}
-		} catch (JSchException | SftpException | IOException ex) {
+		} catch (JSchException | SftpException | IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
 		} finally {
 			if (channelSftp != null) {
@@ -1249,20 +1382,34 @@ public class ReportJob implements org.quartz.Job {
 	private boolean sendEmail(Mailer mailer) throws MessagingException, IOException {
 		logger.debug("Entering sendEmail");
 
-		boolean emailSent = false;
+		SmtpServer jobSmtpServer = job.getSmtpServer();
 
-		if (!Config.getCustomSettings().isEnableEmail()) {
-			logger.info("Email disabled. Job Id {}", jobId);
-			runMessage = "jobs.message.emailDisabled";
+		boolean sendEmail = true;
+		if (!Config.getCustomSettings().isEnableEmailing()) {
+			sendEmail = false;
+			logger.info("Emailing disabled. Job Id {}", jobId);
+			runMessage = "jobs.message.emailingDisabled";
+		} else if (jobSmtpServer != null) {
+			if (!jobSmtpServer.isActive()) {
+				sendEmail = false;
+				logger.info("Job smtp server disabled. Job Id {}", jobId);
+				runMessage = "jobs.message.jobSmtpServerDisabled";
+			} else if (StringUtils.isBlank(jobSmtpServer.getServer())) {
+				sendEmail = false;
+				logger.info("Job smtp server not configured. Job Id {}", jobId);
+				runMessage = "jobs.message.jobSmtpServerNotConfigured";
+			}
 		} else if (!Config.isEmailServerConfigured()) {
+			sendEmail = false;
 			logger.info("Email server not configured. Job Id {}", jobId);
 			runMessage = "jobs.message.emailServerNotConfigured";
-		} else {
-			mailer.send();
-			emailSent = true;
 		}
 
-		return emailSent;
+		if (sendEmail) {
+			mailer.send();
+		}
+
+		return sendEmail;
 	}
 
 	/**
@@ -1380,10 +1527,16 @@ public class ReportJob implements org.quartz.Job {
 
 		if (reportType == ReportType.FreeMarker) {
 			FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+			freemarkerOutput.setLocale(locale);
 			freemarkerOutput.generateOutput(report, writer, data);
 		} else if (reportType == ReportType.Thymeleaf) {
 			ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+			thymeleafOutput.setLocale(locale);
 			thymeleafOutput.generateOutput(report, writer, data);
+		} else if (reportType == ReportType.Velocity) {
+			VelocityOutput velocityOutput = new VelocityOutput();
+			velocityOutput.setLocale(locale);
+			velocityOutput.generateOutput(report, writer, data);
 		}
 
 		String finalMessage = writer.toString();
@@ -1451,7 +1604,9 @@ public class ReportJob implements org.quartz.Job {
 		String username = job.getUser().getUsername();
 		String customMessage = expressionHelper.processString(message, reportParamsMap, username, recipientDetails);
 
-		if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+		if (reportType == ReportType.FreeMarker
+				|| reportType == ReportType.Velocity
+				|| reportType == ReportType.Thymeleaf) {
 			String finalMessage;
 			if (jobType.isEmailInline()) {
 				finalMessage = messageData;
@@ -1528,11 +1683,24 @@ public class ReportJob implements org.quartz.Job {
 		String settingsFrom = Config.getSettings().getSmtpFrom();
 		logger.debug("settingsFrom='{}'", settingsFrom);
 
-		if (StringUtils.isBlank(settingsFrom)) {
-			logger.debug("job.getMailFrom()='{}'", job.getMailFrom());
-			from = job.getMailFrom();
-		} else {
+		String jobSmtpServerFrom = null;
+		SmtpServer jobSmtpServer = job.getSmtpServer();
+		logger.debug("jobSmtpServer={}", jobSmtpServer);
+
+		String jobMailFrom = job.getMailFrom();
+		logger.debug("jobMailFrom='{}'", jobMailFrom);
+
+		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
+			jobSmtpServerFrom = jobSmtpServer.getFrom();
+			logger.debug("jobSmtpServerFrom='{}'", jobSmtpServerFrom);
+		}
+
+		if (StringUtils.isNotBlank(jobSmtpServerFrom)) {
+			from = jobSmtpServerFrom;
+		} else if (StringUtils.isNotBlank(settingsFrom)) {
 			from = settingsFrom;
+		} else {
+			from = jobMailFrom;
 		}
 
 		return from;
@@ -1561,7 +1729,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -1573,8 +1741,10 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering afterCompletion");
 
 		//update job details
-		String sql = "UPDATE ART_JOBS SET LAST_END_DATE = ?, LAST_FILE_NAME = ?,"
-				+ " LAST_RUN_MESSAGE=?, LAST_RUN_DETAILS=? WHERE JOB_ID = ?";
+		String sql = "UPDATE ART_JOBS"
+				+ " SET LAST_END_DATE=?, LAST_FILE_NAME=?,"
+				+ " LAST_RUN_MESSAGE=?, LAST_RUN_DETAILS=?"
+				+ " WHERE JOB_ID=?";
 
 		Object[] values = {
 			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
@@ -1587,7 +1757,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -1610,7 +1780,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			dbService.update(sql, values);
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -1645,14 +1815,13 @@ public class ReportJob implements org.quartz.Job {
 				while (rs.next()) {
 					String emailColumn = rs.getString(1); //first column has email addresses
 					if (StringUtils.length(emailColumn) > 4) {
-						String[] emailArray = StringUtils.split(emailColumn, ";"); //allow multiple emails separated by ;
+						String[] emailArray = separateEmails(emailColumn);
 						emailsList.addAll(Arrays.asList(emailArray));
 					}
 				}
 
 				if (emailsList.size() > 0) {
-					String emails = StringUtils.join(emailsList, ";");
-					runNormalJob(emails);
+					runNormalJob(emailsList);
 				}
 			} else if (columnCount > 1) {
 				//personalization fields present
@@ -1663,10 +1832,14 @@ public class ReportJob implements org.quartz.Job {
 					columnList.add(columnName);
 				}
 
+				int recordCount = 0;
+
 				if (ArtUtils.containsIgnoreCase(columnList, ArtUtils.RECIPIENT_COLUMN)
 						&& ArtUtils.containsIgnoreCase(columnList, ArtUtils.RECIPIENT_ID)) {
 					//separate emails, different email message, different report data
 					while (rs.next()) {
+						recordCount++;
+
 						String email = rs.getString(1); //first column has email addresses
 						if (StringUtils.length(email) > 4) {
 							Map<String, String> recipientColumns = new HashMap<>();
@@ -1686,6 +1859,13 @@ public class ReportJob implements org.quartz.Job {
 							boolean splitJob = true;
 							boolean recipientFilterPresent = true;
 							runJob(splitJob, jobUser, tos, recipientDetails, recipientFilterPresent);
+
+							int logInterval = jobOptions.getLogInterval();
+							if (logInterval > 0) {
+								if (recordCount % logInterval == 0) {
+									progressLogger.info("Record {} - '{}'", recordCount, email);
+								}
+							}
 						}
 					}
 
@@ -1696,7 +1876,7 @@ public class ReportJob implements org.quartz.Job {
 					}
 				} else {
 					//separate emails, different email message, same report data
-					Map<String, Map<String, String>> recipients = new HashMap<>();
+					Map<String, Map<String, String>> recipients = new LinkedHashMap<>();
 					while (rs.next()) {
 						String email = rs.getString(1); //first column has email addresses
 						if (StringUtils.length(email) > 4) {
@@ -1719,9 +1899,7 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 		} catch (SQLException | RuntimeException ex) {
-			runDetails = "<b>Error:</b> " + ex.toString();
-			logger.error("Error. Job Id {}", jobId, ex);
-			progressLogger.error("Error", ex);
+			logErrorAndSetDetails(ex);
 		} finally {
 			DatabaseUtils.close(rs);
 
@@ -1739,7 +1917,7 @@ public class ReportJob implements org.quartz.Job {
 	private void runNormalJob() {
 		logger.debug("Entering runNormalJob");
 
-		String dynamicRecipientEmails = null;
+		List<String> dynamicRecipientEmails = null;
 		runNormalJob(dynamicRecipientEmails);
 	}
 
@@ -1747,11 +1925,10 @@ public class ReportJob implements org.quartz.Job {
 	 * Runs a normal job (not a dynamic recipients job)
 	 *
 	 * @param conn a connection the the art database
-	 * @param dynamicRecipientEmails a list of dynamic recipient emails, each
-	 * separated by ;
+	 * @param dynamicRecipientEmails a list of dynamic recipient emails
 	 */
-	private void runNormalJob(String dynamicRecipientEmails) {
-		logger.debug("Entering runNormalJob: dynamicRecipientEmails='{}'", dynamicRecipientEmails);
+	private void runNormalJob(List<String> dynamicRecipientEmails) {
+		logger.debug("Entering runNormalJob");
 
 		//run job. if job isn't shared, generate single output
 		//if job is shared and doesn't use rules, generate single output to be used by all users
@@ -1763,6 +1940,8 @@ public class ReportJob implements org.quartz.Job {
 			boolean splitJob = false; //flag to determine if job will generate one file or multiple individualized files. to know which tables to update
 
 			User jobUser = job.getUser();
+
+			String emails = combineEmails(job.getMailTo(), dynamicRecipientEmails);
 
 			if (job.isAllowSharing()) {
 				if (job.isSplitJob()) {
@@ -1803,26 +1982,14 @@ public class ReportJob implements org.quartz.Job {
 
 					if (userCount == 0) {
 						//no shared users defined yet. generate one file for the job owner
-						String emails = job.getMailTo();
-						if (dynamicRecipientEmails != null) {
-							emails = emails + ";" + dynamicRecipientEmails;
-						}
 						runJob(splitJob, jobUser, emails);
 					}
 				} else {
 					//generate one single output to be used by all users
-					String emails = job.getMailTo();
-					if (dynamicRecipientEmails != null) {
-						emails = emails + ";" + dynamicRecipientEmails;
-					}
 					runJob(splitJob, jobUser, emails);
 				}
 			} else {
 				//job isn't shared. generate one file for the job owner
-				String emails = job.getMailTo();
-				if (dynamicRecipientEmails != null) {
-					emails = emails + ";" + dynamicRecipientEmails;
-				}
 				runJob(splitJob, jobUser, emails);
 			}
 
@@ -1834,7 +2001,7 @@ public class ReportJob implements org.quartz.Job {
 				runMessage = "jobs.message.jobShared";
 			}
 		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -2006,9 +2173,9 @@ public class ReportJob implements org.quartz.Job {
 			String[] bccs = null;
 
 			if (generateEmail) {
-				tos = StringUtils.split(userEmail, ";");
-				ccs = StringUtils.split(cc, ";");
-				bccs = StringUtils.split(bcc, ";");
+				tos = separateEmails(userEmail);
+				ccs = separateEmails(cc);
+				bccs = separateEmails(bcc);
 
 				logger.debug("Job Id {}. to: {}", jobId, userEmail);
 				logger.debug("Job Id {}. cc: {}", jobId, cc);
@@ -2053,10 +2220,8 @@ public class ReportJob implements org.quartz.Job {
 
 			logger.debug("Job Id {} ...finished", jobId);
 		} catch (Exception ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
-			runDetails = "<b>Error:</b> " + ex.toString();
+			logErrorAndSetDetails(ex);
 			fileName = "";
-			progressLogger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {
 				reportRunner.close();
@@ -2106,9 +2271,12 @@ public class ReportJob implements org.quartz.Job {
 		//send customized emails to dynamic recipients
 		if (recipientDetails != null) {
 			Mailer mailer = getMailer();
+			int recordCount = 0;
 			for (Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
+				recordCount++;
+
 				String emails = entry.getKey();
-				String[] emailsArray = StringUtils.split(emails, ";");
+				String[] emailsArray = separateEmails(emails);
 				Map<String, String> recipientColumns = entry.getValue();
 
 				prepareMailer(mailer, finalMessage, outputFileName, recipientColumns, reportParamsList, reportParamsMap);
@@ -2117,13 +2285,13 @@ public class ReportJob implements org.quartz.Job {
 
 				String emailCcs = recipientColumns.get(ArtUtils.EMAIL_CC);
 				if (emailCcs != null) {
-					String[] emailCcsArray = StringUtils.split(emailCcs, ";");
+					String[] emailCcsArray = separateEmails(emailCcs);
 					mailer.setCc(emailCcsArray);
 				}
 
 				String emailBccs = recipientColumns.get(ArtUtils.EMAIL_BCC);
 				if (emailBccs != null) {
-					String[] emailBccsArray = StringUtils.split(emailBccs, ";");
+					String[] emailBccsArray = separateEmails(emailBccs);
 					mailer.setBcc(emailBccsArray);
 				}
 
@@ -2132,6 +2300,15 @@ public class ReportJob implements org.quartz.Job {
 					boolean emailSent = sendEmail(mailer);
 					if (emailSent) {
 						runMessage = "jobs.message.fileEmailed";
+					}
+
+					if (!recipientFilterPresent) {
+						int logInterval = jobOptions.getLogInterval();
+						if (logInterval > 0) {
+							if (recordCount % logInterval == 0) {
+								progressLogger.info("Record {} - '{}'", recordCount, emails);
+							}
+						}
 					}
 				} catch (MessagingException ex) {
 					logger.debug("Error", ex);
@@ -2144,6 +2321,12 @@ public class ReportJob implements org.quartz.Job {
 							+ " \n" + ex.toString()
 							+ " \n To: " + emails;
 					logger.warn(msg);
+
+					if (recipientFilterPresent) {
+						progressLogger.warn("'{}'. {}", emails, msg);
+					} else {
+						progressLogger.warn("Record {} - '{}'. {}", recordCount, emails, msg);
+					}
 				}
 			}
 
@@ -2192,6 +2375,8 @@ public class ReportJob implements org.quartz.Job {
 						+ " \n" + ex.toString()
 						+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
 				logger.warn(msg);
+
+				progressLogger.warn(msg);
 			}
 		}
 	}
@@ -2526,10 +2711,12 @@ public class ReportJob implements org.quartz.Job {
 
 							for (Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 								String emails = entry.getKey();
-								String[] emailsArray = StringUtils.split(emails, ";");
+								String[] emailsArray = separateEmails(emails);
 								Map<String, String> recipientColumns = entry.getValue();
 
-								if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+								if (reportType == ReportType.FreeMarker
+										|| reportType == ReportType.Velocity
+										|| reportType == ReportType.Thymeleaf) {
 									prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns, reportParamsMap);
 								} else {
 									prepareAlertMailer(mailer, message, value, recipientColumns, reportParamsMap);
@@ -2539,13 +2726,13 @@ public class ReportJob implements org.quartz.Job {
 
 								String emailCcs = recipientColumns.get(ArtUtils.EMAIL_CC);
 								if (emailCcs != null) {
-									String[] emailCcsArray = StringUtils.split(emailCcs, ";");
+									String[] emailCcsArray = separateEmails(emailCcs);
 									mailer.setCc(emailCcsArray);
 								}
 
 								String emailBccs = recipientColumns.get(ArtUtils.EMAIL_BCC);
 								if (emailBccs != null) {
-									String[] emailBccsArray = StringUtils.split(emailBccs, ";");
+									String[] emailBccsArray = separateEmails(emailBccs);
 									mailer.setBcc(emailBccsArray);
 								}
 
@@ -2573,7 +2760,9 @@ public class ReportJob implements org.quartz.Job {
 						if (generateEmail) {
 							Mailer mailer = getMailer();
 
-							if (reportType == ReportType.FreeMarker || reportType == ReportType.Thymeleaf) {
+							if (reportType == ReportType.FreeMarker
+									|| reportType == ReportType.Velocity
+									|| reportType == ReportType.Thymeleaf) {
 								prepareTemplateAlertMailer(reportType, mailer, value, reportParamsMap);
 							} else {
 								prepareAlertMailer(mailer, message, value, reportParamsMap);
@@ -2679,7 +2868,7 @@ public class ReportJob implements org.quartz.Job {
 			paramProcessor.setIsJob(true);
 			paramProcessorResult = paramProcessor.process(finalValues, reportId, user, locale);
 		} catch (ParseException | IOException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 
 		return paramProcessorResult;
@@ -2737,8 +2926,18 @@ public class ReportJob implements org.quartz.Job {
 	private Mailer getMailer() {
 		logger.debug("Entering getMailer");
 
+		Mailer mailer;
+
 		ArtHelper artHelper = new ArtHelper();
-		Mailer mailer = artHelper.getMailer();
+
+		SmtpServer jobSmtpServer = job.getSmtpServer();
+		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
+			mailer = artHelper.getMailer(jobSmtpServer);
+		} else {
+			mailer = artHelper.getMailer();
+		}
+
+		mailer.setDebug(logger.isDebugEnabled());
 
 		return mailer;
 	}
@@ -2935,7 +3134,7 @@ public class ReportJob implements org.quartz.Job {
 				dbService.update(sql);
 			}
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -2984,7 +3183,7 @@ public class ReportJob implements org.quartz.Job {
 				dbService.update(sql);
 			}
 		} catch (SQLException ex) {
-			logger.error("Error. Job Id {}", jobId, ex);
+			logError(ex);
 		}
 	}
 
@@ -3039,6 +3238,61 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		return templateName;
+	}
+
+	/**
+	 * Separates a list of email addresses separated by , or ; and returns an
+	 * array of separated email addresses
+	 *
+	 * @param emailString the string containing possible multiple email
+	 * addresses
+	 * @return an array of separated, individual email addresses
+	 */
+	private String[] separateEmails(String emailString) {
+		//https://blogs.msdn.microsoft.com/oldnewthing/20150119-00/?p=44883
+		//https://stackoverflow.com/questions/12120190/what-is-the-best-separator-to-separate-multiple-emails
+		//http://forums.mozillazine.org/viewtopic.php?t=212106
+		//https://support.mozilla.org/en-US/questions/1038045
+		//https://www.lifewire.com/separate-multiple-email-recipients-1173274
+		//https://www.lifewire.com/commas-to-separate-email-recipients-1173680
+		//https://www.extendoffice.com/documents/outlook/1649-outlook-allow-comma-as-address-separator.html
+
+		String[] emailArray;
+
+		//allow multiple emails separated by , or ;
+		if (StringUtils.contains(emailString, ",")) {
+			emailArray = StringUtils.split(emailString, ",");
+		} else {
+			emailArray = StringUtils.split(emailString, ";");
+		}
+
+		return emailArray;
+	}
+
+	/**
+	 * Combines a string containing possible multiple email addresses with a
+	 * list of email addresses returning a single string with multiple email
+	 * addresses separated by ,
+	 *
+	 * @param emailString string containing possible multiple email addresses
+	 * separated using either , or ;
+	 * @param emailList a list of email addresses
+	 * @return string containing all email addresses separated by ,
+	 */
+	private String combineEmails(String emailString, List<String> emailList) {
+		List<String> finalEmailList = new ArrayList<>();
+		String[] emailArray = separateEmails(emailString);
+
+		if (emailArray != null) {
+			CollectionUtils.addAll(finalEmailList, emailArray);
+		}
+
+		if (CollectionUtils.isNotEmpty(emailList)) {
+			finalEmailList.addAll(emailList);
+		}
+
+		String emails = StringUtils.join(finalEmailList, ",");
+		return emails;
 	}
 
 }

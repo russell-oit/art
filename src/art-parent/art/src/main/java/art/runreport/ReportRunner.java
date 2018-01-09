@@ -624,6 +624,7 @@ public class ReportRunner {
 			jdbcParams.clear();
 			for (ReportParameter reportParam : jdbcParamOrder.values()) {
 				for (Object paramValue : reportParam.getActualParameterValues()) {
+					logger.debug("{} - {}", reportParam, paramValue);
 					addJdbcParam(paramValue, reportParam.getParameter().getDataType());
 				}
 			}
@@ -899,6 +900,9 @@ public class ReportRunner {
 			case DatamapsFile:
 			case SaikuReport:
 			case MongoDB:
+			case OrgChartJson:
+			case OrgChartList:
+			case OrgChartAjax:
 				return;
 			default:
 			//do nothing
@@ -916,7 +920,12 @@ public class ReportRunner {
 		}
 
 		if (connQuery == null) {
-			throw new IllegalStateException("Datasource not found");
+			if (reportType.isXDocReport()) {
+				//xdocreport may only have template queries
+				return;
+			} else {
+				throw new IllegalStateException("Datasource not found");
+			}
 		}
 
 		int fetchSize = report.getFetchSize();
@@ -968,6 +977,10 @@ public class ReportRunner {
 	 * @throws SQLException
 	 */
 	public ResultSet getResultSet() throws SQLException {
+		if (psQuery == null) {
+			return null;
+		}
+
 		ResultSet rs = psQuery.getResultSet();
 		updateCount = psQuery.getUpdateCount();
 

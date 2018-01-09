@@ -17,13 +17,17 @@
  */
 package art.settings;
 
+import art.datasource.DatasourceService;
+import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
+import art.enums.LoggerLevel;
 import art.enums.PdfPageSize;
 import art.servlets.Config;
-import java.io.IOException;
+import art.user.User;
+import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -49,9 +53,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class SettingsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
-	
+
 	@Autowired
 	private ServletContext servletContext;
+
+	@Autowired
+	private DatasourceService datasourceService;
+
+	@Autowired
+	private SettingsService settingsService;
 
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
@@ -92,8 +102,8 @@ public class SettingsController {
 		Settings settings = Config.getSettings();
 
 		model.addAttribute("settings", settings);
-		
-		return "settings";
+
+		return showEditSettings(model);
 	}
 
 	@RequestMapping(value = "settings", method = RequestMethod.POST)
@@ -105,7 +115,7 @@ public class SettingsController {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return "settings";
+			return showEditSettings(model);
 		}
 
 		//set password field as appropriate
@@ -131,8 +141,19 @@ public class SettingsController {
 		}
 		settings.setLdapBindPassword(newLdapBindPassword);
 
+		//encrypt password fields
+		String clearTextSmtpPassword = settings.getSmtpPassword();
+		String clearTextLdapBindPassword = settings.getLdapBindPassword();
+
+		String encryptedSmtpPassword = AesEncryptor.encrypt(clearTextSmtpPassword);
+		String encryptedLdapBindPassword = AesEncryptor.encrypt(clearTextLdapBindPassword);
+
+		settings.setSmtpPassword(encryptedSmtpPassword);
+		settings.setLdapBindPassword(encryptedLdapBindPassword);
+
 		try {
-			Config.saveSettings(settings);
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			settingsService.updateSettings(settings, sessionUser);
 
 			session.setAttribute("administratorEmail", settings.getAdministratorEmail());
 			session.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
@@ -140,14 +161,41 @@ public class SettingsController {
 			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
 			servletContext.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 
+			Config.loadSettings();
+
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");
 			return "redirect:/success";
-		} catch (IOException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditSettings(model);
+	}
+
+	/**
+	 * Prepares model data and returns the jsp file to display
+	 *
+	 * @param model the spring model
+	 * @return the jsp file to display
+	 */
+	private String showEditSettings(Model model) {
+		List<LoggerLevel> errorNotificationLevels = LoggerLevel.list();
+		errorNotificationLevels.remove(LoggerLevel.OFF);
+		errorNotificationLevels.remove(LoggerLevel.DEBUG);
+		errorNotificationLevels.remove(LoggerLevel.INFO);
+
+		model.addAttribute("errorNotificationLevels", errorNotificationLevels);
+
+		try {
+			model.addAttribute("datasources", datasourceService.getAllDatasources());
+		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
 		return "settings";
 	}
+
 }

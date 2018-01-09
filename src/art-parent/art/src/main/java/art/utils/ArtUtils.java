@@ -28,6 +28,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -150,10 +152,10 @@ public class ArtUtils {
 	 */
 	public static String cleanFilename(String filename) {
 		String finalFilename;
-		
+
 		String base = FilenameUtils.getBaseName(filename);
 		String extension = FilenameUtils.getExtension(filename);
-		
+
 		if (StringUtils.containsAny(extension, "aes", "gpg")) {
 			//allow second extension to be used for encryped files
 			String base2 = FilenameUtils.getBaseName(base);
@@ -421,17 +423,17 @@ public class ArtUtils {
 		String jsonString = mapper.writeValueAsString(object);
 		return jsonString;
 	}
-	
+
 	/**
 	 * Returns an object populated according to a json string
-	 * 
+	 *
 	 * @param <T> the type of the object to populate
 	 * @param jsonString the json string
 	 * @param clazz the class of the object to populate
-	 * @return  an object populated according to a json string
-	 * @throws IOException 
+	 * @return an object populated according to a json string
+	 * @throws IOException
 	 */
-	public static <T> T jsonToObject(String jsonString, Class<T> clazz) throws IOException{
+	public static <T> T jsonToObject(String jsonString, Class<T> clazz) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.readValue(jsonString, clazz);
 	}
@@ -511,14 +513,14 @@ public class ArtUtils {
 
 		return localizedValue;
 	}
-	
+
 	/**
 	 * Encode the main part of a url
-	 * 
+	 *
 	 * @param s the main url
 	 * @return the main url encoded
 	 * @throws MalformedURLException
-	 * @throws URISyntaxException 
+	 * @throws URISyntaxException
 	 */
 	public static String encodeMainUrl(String s) throws MalformedURLException, URISyntaxException {
 		//https://stackoverflow.com/questions/6198894/java-encode-url/6199056#6199056
@@ -530,6 +532,31 @@ public class ArtUtils {
 				u.getQuery(),
 				u.getRef()).
 				toString();
+	}
+
+	/**
+	 * Returns a string representation of a number, using . as decimal character
+	 * and without thousands separator
+	 *
+	 * @param number the number to format
+	 * @return the formatted number
+	 */
+	public static String formatNumberForComputer(Object number) {
+		if (number == null) {
+			return "";
+		}
+
+		//https://stackoverflow.com/questions/703396/how-to-nicely-format-floating-numbers-to-string-without-unnecessary-decimal-0
+		final int OPTIONAL_DECIMAL_COUNT = 300;
+		String optionalDecimals = StringUtils.repeat("#", OPTIONAL_DECIMAL_COUNT);
+		String pattern = "0." + optionalDecimals;
+
+		DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
+		df.applyPattern(pattern);
+		df.setGroupingUsed(false);
+
+		String formattedNumber = df.format(number);
+		return formattedNumber;
 	}
 
 }

@@ -283,8 +283,8 @@ public class UserController {
 
 			if (user.isGenerateAndSend()) {
 				String message = null;
-				if (!Config.getCustomSettings().isEnableEmail()) {
-					message = "jobs.message.emailDisabled";
+				if (!Config.getCustomSettings().isEnableEmailing()) {
+					message = "jobs.message.emailingDisabled";
 				} else if (!Config.isEmailServerConfigured()) {
 					message = "jobs.message.emailServerNotConfigured";
 				} else if (StringUtils.isBlank(user.getEmail())) {
@@ -314,7 +314,7 @@ public class UserController {
 				user.setPasswordAlgorithm("bcrypt");
 			}
 
-			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
+			if (StringUtils.equalsAny(action, "add", "copy")) {
 				userService.addUser(user, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {

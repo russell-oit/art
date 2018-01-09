@@ -97,16 +97,6 @@ Display section to allow selecting of report parameters and initiate running of 
 
 		toggleVisibleButtons(); //show/hide on page load
 
-		$('.datepicker').datetimepicker({
-			locale: '${pageContext.response.locale}',
-			keepInvalid: true
-		});
-
-		$('.datetimepicker').datetimepicker({
-			locale: '${pageContext.response.locale}',
-			keepInvalid: true
-		});
-
 		//Enable Bootstrap-Select
 //		$('.selectpicker').selectpicker();
 

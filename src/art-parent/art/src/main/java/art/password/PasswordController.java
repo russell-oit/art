@@ -18,14 +18,17 @@
 package art.password;
 
 import art.encryption.PasswordUtils;
+import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
 import java.sql.SQLException;
+import java.util.Locale;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,12 +49,15 @@ public class PasswordController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private MessageSource messageSource;
+
 	@RequestMapping(value = "/password", method = RequestMethod.GET)
 	public String showPassword(HttpSession session) {
 		logger.debug("Entering showPassword");
-		
+
 		User sessionUser = (User) session.getAttribute("sessionUser");
-		
+
 		if (sessionUser.isCanChangePassword()) {
 			return "password";
 		} else {
@@ -63,12 +69,38 @@ public class PasswordController {
 	public String processPassword(HttpSession session,
 			@RequestParam("newPassword1") String newPassword1,
 			@RequestParam("newPassword2") String newPassword2,
-			Model model, RedirectAttributes redirectAttributes) {
-		
+			Model model, RedirectAttributes redirectAttributes,
+			Locale locale) {
+
 		logger.debug("Entering processPassword");
 
 		if (!StringUtils.equals(newPassword1, newPassword2)) {
 			model.addAttribute("message", "password.message.passwordsDontMatch");
+		} else if (!PasswordValidator.validateLength(newPassword1)) {
+			int passwordMinLength = Config.getSettings().getPasswordMinLength();
+			String message = messageSource.getMessage("settings.label.passwordMinLength", null, locale);
+			message = message + ": " + passwordMinLength;
+			model.addAttribute("message", message);
+		} else if (!PasswordValidator.validateLowercase(newPassword1)) {
+			int passwordMinLowercase = Config.getSettings().getPasswordMinLowercase();
+			String message = messageSource.getMessage("settings.label.passwordMinLowercase", null, locale);
+			message = message + ": " + passwordMinLowercase;
+			model.addAttribute("message", message);
+		} else if (!PasswordValidator.validateUppercase(newPassword1)) {
+			int passwordMinUppercase = Config.getSettings().getPasswordMinUppercase();
+			String message = messageSource.getMessage("settings.label.passwordMinUppercase", null, locale);
+			message = message + ": " + passwordMinUppercase;
+			model.addAttribute("message", message);
+		} else if (!PasswordValidator.validateNumeric(newPassword1)) {
+			int passwordMinNumeric = Config.getSettings().getPasswordMinNumeric();
+			String message = messageSource.getMessage("settings.label.passwordMinNumeric", null, locale);
+			message = message + ": " + passwordMinNumeric;
+			model.addAttribute("message", message);
+		} else if (!PasswordValidator.validateSpecial(newPassword1)) {
+			int passwordMinSpecial = Config.getSettings().getPasswordMinSpecial();
+			String message = messageSource.getMessage("settings.label.passwordMinSpecial", null, locale);
+			message = message + ": " + passwordMinSpecial;
+			model.addAttribute("message", message);
 		} else {
 			//change password
 			String passwordHash = PasswordUtils.HashPasswordBcrypt(newPassword1);

@@ -86,7 +86,7 @@ public class UpgradeHelper {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler == null) {
-			logger.info("Can't migrate jobs to Quartz. Scheduler not available");
+			logger.warn("Can't migrate jobs to Quartz. Scheduler not available");
 			return;
 		}
 

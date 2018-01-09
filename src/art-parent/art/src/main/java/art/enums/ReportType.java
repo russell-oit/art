@@ -35,7 +35,8 @@ public enum ReportType {
 	JPivotMondrianXmla(113), JPivotSqlServerXmla(114),
 	SaikuConnection(150), SaikuReport(149),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
-	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122), Thymeleaf(131),
+	LovDynamic(119), LovStatic(120), JobRecipients(121),
+	FreeMarker(122), Velocity(153), Thymeleaf(131),
 	FixedWidth(141), CSV(152),
 	ReactPivot(130), PivotTableJs(132), PivotTableJsCsvLocal(133), PivotTableJsCsvServer(134),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
@@ -49,7 +50,8 @@ public enum ReportType {
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
 	C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
-	Leaflet(146), OpenLayers(147);
+	Leaflet(146), OpenLayers(147),
+	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157);
 
 	private final int value;
 
@@ -89,6 +91,10 @@ public enum ReportType {
 			case SaikuReport:
 			case SaikuConnection:
 			case MongoDB:
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
+			case OrgChartAjax:
 				return false;
 			default:
 				return true;
@@ -184,6 +190,23 @@ public enum ReportType {
 		switch (this) {
 			case Dashboard:
 			case GridstackDashboard:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is an org chart report type
+	 *
+	 * @return <code>true</code> if this is an org chart report type
+	 */
+	public boolean isOrgChart() {
+		switch (this) {
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
+			case OrgChartAjax:
 				return true;
 			default:
 				return false;
@@ -664,6 +687,16 @@ public enum ReportType {
 				return "MongoDB";
 			case CSV:
 				return "CSV";
+			case Velocity:
+				return "Velocity";
+			case OrgChartDatabase:
+				return "OrgChart: Database";
+			case OrgChartJson:
+				return "OrgChart: JSON";
+			case OrgChartList:
+				return "OrgChart: List";
+			case OrgChartAjax:
+				return "OrgChart: Ajax";
 			default:
 				return this.name();
 		}

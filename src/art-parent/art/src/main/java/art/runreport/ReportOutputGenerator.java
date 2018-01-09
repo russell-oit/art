@@ -59,6 +59,7 @@ import art.output.SlkOutput;
 import art.output.StandardOutputResult;
 import art.output.ThymeleafOutput;
 import art.output.TsvOutput;
+import art.output.VelocityOutput;
 import art.output.XDocReportOutput;
 import art.output.XlsOutput;
 import art.output.XlsxOutput;
@@ -75,6 +76,7 @@ import art.reportoptions.DataTablesOptions;
 import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JFreeChartOptions;
 import art.reportoptions.MongoDbOptions;
+import art.reportoptions.OrgChartOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -259,6 +261,11 @@ public class ReportOutputGenerator {
 			Objects.requireNonNull(drilldownService, "drilldownService must not be null");
 		}
 
+		String contextPath = null;
+		if (request != null) {
+			contextPath = request.getContextPath();
+		}
+
 		String fileName = FilenameUtils.getName(fullOutputFilename);
 
 		try {
@@ -324,11 +331,6 @@ public class ReportOutputGenerator {
 					splitColumn = report.getGroupColumn();
 				}
 
-				String contextPath = null;
-				if (request != null) {
-					contextPath = request.getContextPath();
-				}
-
 				GroupOutput groupOutput;
 				switch (reportFormat) {
 					case html:
@@ -366,9 +368,9 @@ public class ReportOutputGenerator {
 					int rsType = rs.getType();
 					if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
 						rs.beforeFirst();
-						boolean lowercaseColumnNames = false;
-						boolean useColumnAlias = true;
-						data = new RowSetDynaClass(rs, lowercaseColumnNames, useColumnAlias);
+						boolean useLowerCaseProperties = false;
+						boolean useColumnLabels = true;
+						data = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
 					}
 
 				}
@@ -461,7 +463,6 @@ public class ReportOutputGenerator {
 				standardOutput.setReport(report);
 
 				if (request != null) {
-					String contextPath = request.getContextPath();
 					standardOutput.setContextPath(contextPath);
 
 					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
@@ -507,6 +508,8 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+				freemarkerOutput.setContextPath(contextPath);
+				freemarkerOutput.setLocale(locale);
 				freemarkerOutput.generateOutput(report, writer, rs, applicableReportParamsList);
 
 				rowsRetrieved = getResultSetRowCount(rs);
@@ -514,7 +517,18 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+				thymeleafOutput.setContextPath(contextPath);
+				thymeleafOutput.setLocale(locale);
 				thymeleafOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+
+				rowsRetrieved = getResultSetRowCount(rs);
+			} else if (reportType == ReportType.Velocity) {
+				rs = reportRunner.getResultSet();
+
+				VelocityOutput velocityOutput = new VelocityOutput();
+				velocityOutput.setContextPath(contextPath);
+				velocityOutput.setLocale(locale);
+				velocityOutput.generateOutput(report, writer, rs, applicableReportParamsList);
 
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType.isXDocReport()) {
@@ -1311,6 +1325,76 @@ public class ReportOutputGenerator {
 						writer.print(result);
 					}
 				}
+			} else if (reportType.isOrgChart()) {
+				if (isJob) {
+					throw new IllegalStateException("OrgChart report types not supported for jobs");
+				}
+
+				request.setAttribute("reportType", reportType);
+
+				String jsonData;
+				switch (reportType) {
+					case OrgChartDatabase:
+						rs = reportRunner.getResultSet();
+
+						JsonOutput jsonOutput = new JsonOutput();
+						JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+						jsonData = jsonOutputResult.getJsonData();
+
+						rowsRetrieved = jsonOutputResult.getRowCount();
+						break;
+					case OrgChartJson:
+					case OrgChartList:
+					case OrgChartAjax:
+						jsonData = report.getReportSource();
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected OrgChart report type: " + reportType);
+				}
+
+				jsonData = Encode.forJavaScript(jsonData);
+				request.setAttribute("data", jsonData);
+
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+
+				OrgChartOptions options;
+				String optionsString = report.getOptions();
+				if (StringUtils.isBlank(optionsString)) {
+					options = new OrgChartOptions();
+				} else {
+					ObjectMapper mapper = new ObjectMapper();
+					options = mapper.readValue(optionsString, OrgChartOptions.class);
+				}
+
+				String cssFileName = options.getCssFile();
+				if (StringUtils.isNotBlank(cssFileName)) {
+					String fullCssFileName = jsTemplatesPath + cssFileName;
+
+					File cssFile = new File(fullCssFileName);
+					if (!cssFile.exists()) {
+						throw new IllegalStateException("Css file not found: " + cssFileName);
+					}
+				}
+
+				String templateFileName = report.getTemplate();
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				if (StringUtils.isNotBlank(templateFileName)) {
+					String fullTemplateFileName = jsTemplatesPath + templateFileName;
+					File templateFile = new File(fullTemplateFileName);
+					if (!templateFile.exists()) {
+						throw new IllegalStateException("Template file not found: " + templateFileName);
+					}
+				}
+
+				String optionsJson = ArtUtils.objectToJson(options);
+				optionsJson = Encode.forJavaScript(optionsJson);
+
+				request.setAttribute("optionsJson", optionsJson);
+				request.setAttribute("options", options);
+				request.setAttribute("templateFileName", templateFileName);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

@@ -130,7 +130,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "db2") {
 		driverElement.value = "com.ibm.db2.jcc.DB2Driver";
-		urlElement.value = "jdbc:db2://<server_name>/<database_name>";
+		urlElement.value = "jdbc:db2://<server_name>:<port>/<database_name>";
 		testSqlElement.value = "select 1 from sysibm.sysdummy1";
 	} else if (dbType === "generic-odbc") {
 		driverElement.value = "sun.jdbc.odbc.JdbcOdbcDriver";

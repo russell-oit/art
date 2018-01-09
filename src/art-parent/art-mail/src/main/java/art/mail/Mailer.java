@@ -349,29 +349,8 @@ public class Mailer {
 	public void send() throws MessagingException, IOException {
 		logger.debug("Entering send");
 
-		//Set session properties
-		Properties props = new Properties();
-
-		logger.debug("port={}", port);
-		logger.debug("host='{}'", host);
-		props.put("mail.smtp.port", port);
-		props.put("mail.smtp.host", host);
-
-		logger.debug("useStartTls={}", useStartTls);
-		props.put("mail.smtp.starttls.enable", useStartTls);
-
-		//If you're sending to multiple recipients, if one recipient address fails,
-		//by default no email is sent to the other recipients
-		//set the sendpartial property to true to have emails sent to the valid addresses,
-		//even if invalid ones exist
-		logger.debug("sendPartial={}", sendPartial);
-		props.put("mail.smtp.sendpartial", sendPartial);
-
-		logger.debug("debug={}", debug);
-		props.put("mail.debug", debug);
-
 		//get Session            
-		Session session = Session.getInstance(props);
+		Session session = getSession();
 
 		// Create a message
 		Message msg = new MimeMessage(session);
@@ -456,9 +435,66 @@ public class Mailer {
 		logger.debug("useAuthentication={}", useAuthentication);
 		if (useAuthentication) {
 			logger.debug("username='{}'", username);
+			logger.debug("password==null = {}", password==null);
 			Transport.send(msg, username, password);
 		} else {
 			Transport.send(msg);
 		}
+	}
+
+	/**
+	 * Returns a session to use for smtp
+	 *
+	 * @return a session to use for smtp
+	 */
+	private Session getSession() {
+		logger.debug("Entering getSession");
+
+		//set session properties
+		Properties props = new Properties();
+
+		logger.debug("port={}", port);
+		logger.debug("host='{}'", host);
+		props.put("mail.smtp.port", port);
+		props.put("mail.smtp.host", host);
+
+		logger.debug("useStartTls={}", useStartTls);
+		props.put("mail.smtp.starttls.enable", useStartTls);
+
+		//If you're sending to multiple recipients, if one recipient address fails,
+		//by default no email is sent to the other recipients
+		//set the sendpartial property to true to have emails sent to the valid addresses,
+		//even if invalid ones exist
+		logger.debug("sendPartial={}", sendPartial);
+		props.put("mail.smtp.sendpartial", sendPartial);
+
+		logger.debug("debug={}", debug);
+		props.put("mail.debug", debug);
+
+		//get Session            
+		Session session = Session.getInstance(props);
+
+		return session;
+	}
+
+	/**
+	 * Tests smtp configuration details. Throws exception if connection not
+	 * successful. Otherwise connection was successful.
+	 *
+	 * @throws MessagingException
+	 */
+	public void testConnection() throws MessagingException {
+		Session session = getSession();
+		Transport transport = session.getTransport("smtp");
+		
+		logger.debug("useAuthentication={}", useAuthentication);
+		if (useAuthentication) {
+			logger.debug("username='{}'", username);
+			logger.debug("password==null = {}", password==null);
+			transport.connect(username, password);
+		} else {
+			transport.connect();
+		}
+		transport.close();
 	}
 }

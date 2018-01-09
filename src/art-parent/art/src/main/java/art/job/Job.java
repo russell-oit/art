@@ -23,6 +23,7 @@ import art.ftpserver.FtpServer;
 import art.holiday.Holiday;
 import art.report.Report;
 import art.schedule.Schedule;
+import art.smtpserver.SmtpServer;
 import art.user.User;
 import java.io.Serializable;
 import java.util.Date;
@@ -94,6 +95,36 @@ public class Job implements Serializable {
 	private List<Holiday> sharedHolidays;
 	private List<Destination> destinations;
 	private String subDirectory;
+	private SmtpServer smtpServer;
+	private String options;
+
+	/**
+	 * @return the options
+	 */
+	public String getOptions() {
+		return options;
+	}
+
+	/**
+	 * @param options the options to set
+	 */
+	public void setOptions(String options) {
+		this.options = options;
+	}
+
+	/**
+	 * @return the smtpServer
+	 */
+	public SmtpServer getSmtpServer() {
+		return smtpServer;
+	}
+
+	/**
+	 * @param smtpServer the smtpServer to set
+	 */
+	public void setSmtpServer(SmtpServer smtpServer) {
+		this.smtpServer = smtpServer;
+	}
 
 	/**
 	 * @return the subDirectory

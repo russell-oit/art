@@ -40,6 +40,7 @@ import art.runreport.ReportOutputGenerator;
 import art.runreport.RunReportHelper;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
+import art.smtpserver.SmtpServerService;
 import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
@@ -57,7 +58,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -127,6 +127,9 @@ public class JobController {
 
 	@Autowired
 	private JobDestinationService jobDestinationService;
+	
+	@Autowired
+	private SmtpServerService smtpServerService;
 
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -563,14 +566,6 @@ public class JobController {
 			ParameterProcessorResult paramProcessorResult = paramProcessor.process(finalValues, reportId, sessionUser, locale);
 
 			addParameters(model, paramProcessorResult, report, request);
-
-			//update job from email if owner email has changed
-			User jobUser = job.getUser();
-			if (jobUser != null && (sessionUser.getUserId() == jobUser.getUserId())) {
-				if (!StringUtils.equals(sessionUser.getEmail(), job.getMailFrom())) {
-					job.setMailFrom(sessionUser.getEmail());
-				}
-			}
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -590,15 +585,12 @@ public class JobController {
 	 */
 	private void addParameters(Model model, ParameterProcessorResult paramProcessorResult,
 			Report report, HttpServletRequest request) {
-
-		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+		
+		RunReportHelper runReportHelper = new RunReportHelper();
 
 		//create map in order to display parameters by position
-		Map<Integer, ReportParameter> reportParams = new TreeMap<>();
-		for (ReportParameter reportParam : reportParamsList) {
-			reportParams.put(reportParam.getPosition(), reportParam);
-		}
-
+		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+		Map<Integer, ReportParameter> reportParams = runReportHelper.getSelectParameters(report, reportParamsList);
 		model.addAttribute("reportParams", reportParams);
 
 		//add report options for the showSelectedParameters and swapAxes options
@@ -610,7 +602,6 @@ public class JobController {
 		ChartOptions effectiveChartOptions = reportOutputGenerator.getEffectiveChartOptions(report, parameterChartOptions);
 		model.addAttribute("chartOptions", effectiveChartOptions);
 
-		RunReportHelper runReportHelper = new RunReportHelper();
 		runReportHelper.setEnableSwapAxes(report.getReportType(), request);
 	}
 
@@ -705,6 +696,7 @@ public class JobController {
 			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
 			model.addAttribute("holidays", holidayService.getAllHolidays());
 			model.addAttribute("destinations", destinationService.getAllDestinations());
+			model.addAttribute("smtpServers", smtpServerService.getAllSmtpServers());
 
 			if (job != null && !StringUtils.equals(action, "add")) {
 				String cronString = CronStringHelper.getCronString(job);

@@ -612,6 +612,7 @@ public class ReportController {
 		validExtensions.add("ftl");
 		validExtensions.add("ftlh"); //http://freemarker.org/docs/pgui_config_outputformatsautoesc.html
 		validExtensions.add("ftlx");
+		validExtensions.add("vm");
 		validExtensions.add("docx");
 		validExtensions.add("odt");
 		validExtensions.add("pptx");
@@ -643,6 +644,10 @@ public class ReportController {
 			case DatamapsFile:
 			case Leaflet:
 			case OpenLayers:
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
+			case OrgChartAjax:
 				templatesPath = Config.getJsTemplatesPath();
 				break;
 			case JPivotMondrian:
@@ -870,8 +875,7 @@ public class ReportController {
 
 		if (report.isUseNoneOpenPassword()) {
 			newOpenPassword = null;
-		} else if (StringUtils.isEmpty(newOpenPassword)
-				&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
+		} else if (StringUtils.isEmpty(newOpenPassword) && StringUtils.equalsAny(action, "edit", "copy")) {
 			//password field blank. use current password
 			useCurrentOpenPassword = true;
 		}
@@ -900,8 +904,7 @@ public class ReportController {
 
 		if (report.isUseNoneModifyPassword()) {
 			newModifyPassword = null;
-		} else if (StringUtils.isEmpty(newModifyPassword)
-				&& (StringUtils.equals(action, "edit") || StringUtils.equals(action, "copy"))) {
+		} else if (StringUtils.isEmpty(newModifyPassword) && StringUtils.equalsAny(action, "edit", "copy")) {
 			//password field blank. use current password
 			useCurrentModifyPassword = true;
 		}

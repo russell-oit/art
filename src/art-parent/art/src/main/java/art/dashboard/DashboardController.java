@@ -35,6 +35,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -46,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
@@ -492,14 +494,50 @@ public class DashboardController {
 			//no report defined. use url tag
 			url = xPath.evaluate("URL", itemNode);
 		} else {
+			Map<String, String[]> requestParameters = request.getParameterMap();
+			Map<String, String> singleValueParameters = new HashMap<>();
+			Map<String, String[]> multipleValueParameters = new HashMap<>();
+
+			//separate single value and multi value parameters
+			//multi value parameters will have [] appended to the parameter name when called by jquery.load() using an object
+			//https://sourceforge.net/p/art/discussion/352129/thread/84063367/
+			for (Entry<String, String[]> entry : requestParameters.entrySet()) {
+				String name = entry.getKey();
+				if (StringUtils.startsWithIgnoreCase(name, ArtUtils.PARAM_PREFIX)) {
+					String[] values = entry.getValue();
+					if (values == null) {
+						singleValueParameters.put(name, null);
+					} else {
+						if (values.length == 1) {
+							singleValueParameters.put(name, values[0]);
+						} else {
+							multipleValueParameters.put(name, values);
+						}
+					}
+				}
+			}
+
+			String parametersJson = ArtUtils.objectToJson(singleValueParameters);
+			dashboardItem.setParametersJson(parametersJson);
+
 			String baseUrl = request.getContextPath() + "/runReport?reportId="
 					+ reportIdString + "&isFragment=true";
 
-			dashboardItem.setBaseUrl(baseUrl);
+			//add multi value parameters to the url
+			StringBuilder paramsSb = new StringBuilder();
+			for (Entry<String, String[]> entry : multipleValueParameters.entrySet()) {
+				String htmlParamName = entry.getKey();
+				String[] paramValues = entry.getValue();
+				String encodedParamName = URLEncoder.encode(htmlParamName, "UTF-8");
+				for (String value : paramValues) {
+					String encodedParamValue = URLEncoder.encode(value, "UTF-8");
+					paramsSb.append("&").append(encodedParamName).append("=")
+							.append(encodedParamValue);
+				}
+			}
 
-			Map<String, String[]> requestParameters = request.getParameterMap();
-			String parametersJson = ArtUtils.objectToJson(requestParameters);
-			dashboardItem.setParametersJson(parametersJson);
+			baseUrl = baseUrl + paramsSb.toString();
+			dashboardItem.setBaseUrl(baseUrl);
 		}
 
 		dashboardItem.setUrl(url);
@@ -547,7 +585,7 @@ public class DashboardController {
 		logger.debug("Entering getPortletTitle");
 
 		String title = xPath.evaluate("TITLE", itemNode);
-		
+
 		title = StringUtils.trimToEmpty(title);
 		title = Encode.forHtmlContent(title);
 

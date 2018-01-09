@@ -17,7 +17,6 @@
  */
 package art.destinationoptions;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +25,6 @@ import java.util.Map;
  *
  * @author Timothy Anyona
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class WebsiteOptions {
 
 	private String usernameField = "username";
