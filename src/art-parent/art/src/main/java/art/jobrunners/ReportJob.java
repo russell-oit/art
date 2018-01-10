@@ -326,7 +326,7 @@ public class ReportJob implements org.quartz.Job {
 		String durationFormat = "m':'s':'S";
 		String duration = DurationFormatUtils.formatPeriod(runStartTimeMillis, runEndTimeMillis, durationFormat);
 		progressLogger.info("Completed. Time taken - {}", duration);
-		progressFileAppender.stop();
+		progressLogger.detachAndStopAllAppenders();
 	}
 
 	/**
@@ -381,7 +381,7 @@ public class ReportJob implements org.quartz.Job {
 	private void jobLogAndClose(String message) {
 		runDetails = message;
 		progressLogger.info(runDetails);
-		progressFileAppender.stop();
+		progressLogger.detachAndStopAllAppenders();
 		updateIncompleteRun();
 	}
 
