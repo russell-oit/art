@@ -401,7 +401,7 @@ public class ReportJob implements org.quartz.Job {
 
 		progressFileAppender = new FileAppender<>();
 		progressFileAppender.setContext(loggerContext);
-		progressFileAppender.setName("jobLog" + jobId);
+		progressFileAppender.setName("jobLogAppender" + jobId);
 		progressFileAppender.setFile(progressLogFilename);
 		progressFileAppender.setAppend(false);
 
