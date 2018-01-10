@@ -327,6 +327,7 @@ public class ReportJob implements org.quartz.Job {
 		String duration = DurationFormatUtils.formatPeriod(runStartTimeMillis, runEndTimeMillis, durationFormat);
 		progressLogger.info("Completed. Time taken - {}", duration);
 		progressLogger.detachAndStopAllAppenders();
+		progressLogger.setLevel(Level.OFF);
 	}
 
 	/**
@@ -382,6 +383,7 @@ public class ReportJob implements org.quartz.Job {
 		runDetails = message;
 		progressLogger.info(runDetails);
 		progressLogger.detachAndStopAllAppenders();
+		progressLogger.setLevel(Level.OFF);
 		updateIncompleteRun();
 	}
 

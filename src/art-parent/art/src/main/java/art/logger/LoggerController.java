@@ -60,7 +60,7 @@ public class LoggerController {
 			LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 			List<ch.qos.logback.classic.Logger> logList = new ArrayList<>();
 			for (ch.qos.logback.classic.Logger log : lc.getLoggerList()) {
-				if (log.getLevel() != null || hasAppenders(log)) {
+				if ((log.getLevel() != null && log.getLevel() != Level.OFF) || hasAppenders(log)) {
 					logList.add(log);
 				}
 			}
