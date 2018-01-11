@@ -31,7 +31,6 @@ import net.sf.reportengine.core.algorithm.report.DeleteTempSortedFilesAlgo;
 import net.sf.reportengine.core.algorithm.report.LoopThroughTableInputAlgo;
 import net.sf.reportengine.core.algorithm.report.MultipleSortedFilesInputAlgo;
 import net.sf.reportengine.core.steps.ColumnHeaderOutputInitStep;
-import net.sf.reportengine.core.steps.DataRowsOutputStep;
 import net.sf.reportengine.core.steps.EndTableExitStep;
 import net.sf.reportengine.core.steps.ExternalSortPreparationStep;
 import net.sf.reportengine.core.steps.FlatReportExtractTotalsDataInitStep;
@@ -119,7 +118,7 @@ final class ObjectFlatTable extends AbstractColumnBasedTable implements FlatTabl
 	 * @return
 	 */
 	private AbstractAlgo configSortingAlgo() {
-		// TODO: this sorting algo does not have multiple steps
+		// this sorting algo does not have multiple steps
 		AbstractMultiStepAlgo sortingAlgo
 				= new LoopThroughTableInputAlgo("Sorting Algorithm",
 						new StepAlgoKeyMapBuilder()
@@ -149,7 +148,7 @@ final class ObjectFlatTable extends AbstractColumnBasedTable implements FlatTabl
 		}
 
 		reportAlgo.addInitStep(new InitReportDataInitStep());
-		// TODO: only when report has totals
+		// only when report has totals
 		reportAlgo.addInitStep(new FlatReportExtractTotalsDataInitStep());
 		reportAlgo.addInitStep(new StartTableInitStep());
 		reportAlgo.addInitStep(new ColumnHeaderOutputInitStep());

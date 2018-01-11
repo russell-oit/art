@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -40,11 +39,9 @@ import net.sf.reportengine.components.ParagraphProps;
 import net.sf.reportengine.components.RowProps;
 import net.sf.reportengine.config.DefaultDataColumn;
 import net.sf.reportengine.config.DefaultGroupColumn;
-import net.sf.reportengine.config.HorizAlign;
 import net.sf.reportengine.core.calc.AvgGroupCalculator;
 import net.sf.reportengine.core.calc.CountGroupCalculator;
 import net.sf.reportengine.core.calc.FirstGroupCalculator;
-import net.sf.reportengine.core.calc.GroupCalculators;
 import net.sf.reportengine.core.calc.LastGroupCalculator;
 import net.sf.reportengine.core.calc.MaxGroupCalculator;
 import net.sf.reportengine.core.calc.MinGroupCalculator;
@@ -66,7 +63,6 @@ import org.springframework.context.MessageSource;
 public class ReportEngineOutput extends AbstractReportOutput {
 
 	private StandardOutput so;
-	private int headerCount = 0;
 	private int bodyCount = 0;
 
 	public ReportEngineOutput(StandardOutput so) {
@@ -234,11 +230,11 @@ public class ReportEngineOutput extends AbstractReportOutput {
 									break;
 								case FIRST:
 									String firstString = messageSource.getMessage("reportengine.text.first", null, locale);
-									dataColumnBuilder.useCalculator(new FirstGroupCalculator(firstString));
+									dataColumnBuilder.useCalculator(new FirstGroupCalculator<>(firstString));
 									break;
 								case LAST:
 									String lastString = messageSource.getMessage("reportengine.text.last", null, locale);
-									dataColumnBuilder.useCalculator(new LastGroupCalculator(lastString));
+									dataColumnBuilder.useCalculator(new LastGroupCalculator<>(lastString));
 									break;
 								default:
 								//do nothing

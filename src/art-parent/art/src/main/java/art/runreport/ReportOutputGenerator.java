@@ -67,7 +67,6 @@ import art.output.XmlOutput;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
-import art.reportengine.GeneralOutputFormat;
 import art.reportengine.ReportEngineOutput;
 import art.reportoptions.C3Options;
 import art.reportoptions.ChartJsOptions;

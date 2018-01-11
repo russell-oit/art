@@ -22,15 +22,9 @@ import net.sf.reportengine.config.DataColumn;
 import net.sf.reportengine.config.GroupColumn;
 import net.sf.reportengine.core.algorithm.NewRowEvent;
 import net.sf.reportengine.core.steps.AbstractOutputStep;
-import net.sf.reportengine.core.steps.DataRowsOutputStep;
-import static net.sf.reportengine.core.steps.DataRowsOutputStep.DATA_CELL_TEMPLATE;
-import static net.sf.reportengine.core.steps.DataRowsOutputStep.END_DATA_ROW_TEMPLATE;
-import static net.sf.reportengine.core.steps.DataRowsOutputStep.START_DATA_ROW_TEMPLATE;
 import net.sf.reportengine.core.steps.StepInput;
 import net.sf.reportengine.core.steps.StepResult;
 import net.sf.reportengine.util.StepIOKeys;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Modification of net.sf.reportengine.core.steps.DataRowsOutputStep to use
@@ -40,10 +34,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ObjectDataRowsOutputStep extends AbstractOutputStep<String, Integer, String> {
 
-	/**
-	 * the one and only logger
-	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(ObjectDataRowsOutputStep.class);
 
 	public static final String DATA_CELL_TEMPLATE = "dataCell.ftl";
 	public static final String START_DATA_ROW_TEMPLATE = "startDataRow.ftl";

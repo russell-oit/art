@@ -20,7 +20,6 @@ import static net.sf.reportengine.util.UserProvidedBoolean.TRUE_NOT_PROVIDED_BY_
 import static net.sf.reportengine.util.UserProvidedBoolean.TRUE_PROVIDED_BY_USER;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import net.sf.reportengine.components.FlatTable;
 
