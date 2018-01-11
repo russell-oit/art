@@ -17,12 +17,21 @@
  */
 package art.reportengine;
 
+import art.enums.ReportEngineCalculator;
 import art.output.StandardOutput;
+import art.reportoptions.ReportEngineGroupColumn;
+import art.reportoptions.ReportEngineOptions;
+import art.utils.ArtUtils;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import net.sf.reportengine.Report;
 import net.sf.reportengine.ReportBuilder;
 import net.sf.reportengine.components.CellProps;
@@ -30,14 +39,25 @@ import net.sf.reportengine.components.FlatTable;
 import net.sf.reportengine.components.ParagraphProps;
 import net.sf.reportengine.components.RowProps;
 import net.sf.reportengine.config.DefaultDataColumn;
+import net.sf.reportengine.config.DefaultGroupColumn;
 import net.sf.reportengine.config.HorizAlign;
+import net.sf.reportengine.core.calc.AvgGroupCalculator;
+import net.sf.reportengine.core.calc.CountGroupCalculator;
+import net.sf.reportengine.core.calc.FirstGroupCalculator;
+import net.sf.reportengine.core.calc.GroupCalculators;
+import net.sf.reportengine.core.calc.LastGroupCalculator;
+import net.sf.reportengine.core.calc.MaxGroupCalculator;
+import net.sf.reportengine.core.calc.MinGroupCalculator;
+import net.sf.reportengine.core.calc.SumGroupCalculator;
 import net.sf.reportengine.core.steps.ColumnHeaderOutputInitStep;
 import net.sf.reportengine.core.steps.DataRowsOutputStep;
 import net.sf.reportengine.in.ColumnMetadata;
 import net.sf.reportengine.in.JdbcResultsetTableInput;
 import net.sf.reportengine.out.AbstractReportOutput;
 import net.sf.reportengine.out.OutputFormat;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.MessageSource;
 
 /**
  *
@@ -129,21 +149,118 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		}
 	}
 
-	public void generateReportEngineOutput(ResultSet rs) throws SQLException {
+	public void generateReportEngineOutput(ResultSet rs) throws SQLException, IOException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 		so.setTotalColumnCount(columnCount);
 
+		MessageSource messageSource = so.getMessageSource();
+		Locale locale = so.getLocale();
+
+		art.report.Report artReport = so.getReport();
+		String options = artReport.getOptions();
+		ReportEngineOptions reportEngineOptions;
+		if (StringUtils.isBlank(options)) {
+			reportEngineOptions = new ReportEngineOptions();
+		} else {
+			reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
+		}
+
 		JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(rs);
 		ObjectFlatTableBuilder flatTableBuilder = new ObjectFlatTableBuilder(rsInput);
 		rsInput.open();
+
+		List<ReportEngineGroupColumn> groupColumns = reportEngineOptions.getGroupColumns();
+		List<Map<String, ReportEngineCalculator>> calculators = reportEngineOptions.getCalculators();
+
 		List<ColumnMetadata> columnMetadata = rsInput.getColumnMetadata();
 		for (int i = 0; i < columnMetadata.size(); i++) {
 			ColumnMetadata column = columnMetadata.get(i);
-			flatTableBuilder.addDataColumn(new DefaultDataColumn.Builder(i)
-					.header(column.getColumnLabel())
-					.horizAlign(HorizAlign.LEFT)
-					.build());
+			String columnLabel = column.getColumnLabel();
+
+			boolean isGroupColumn = false;
+
+			if (CollectionUtils.isNotEmpty(groupColumns)) {
+				for (ReportEngineGroupColumn groupColumn : groupColumns) {
+					String id = groupColumn.getId();
+					if (StringUtils.equalsIgnoreCase(columnLabel, id)
+							|| StringUtils.equals(String.valueOf(i), id)) {
+						isGroupColumn = true;
+						DefaultGroupColumn.Builder groupColumnBuilder = new DefaultGroupColumn.Builder(i);
+						groupColumnBuilder.header(columnLabel);
+						Integer level = groupColumn.getLevel();
+						if (level != null) {
+							groupColumnBuilder.level(level);
+						}
+						flatTableBuilder.addGroupColumn(groupColumnBuilder.build());
+						break;
+					}
+				}
+			}
+
+			if (!isGroupColumn) {
+				DefaultDataColumn.Builder dataColumnBuilder = new DefaultDataColumn.Builder(i);
+				dataColumnBuilder.header(columnLabel);
+				if (CollectionUtils.isNotEmpty(calculators)) {
+					for (Map<String, ReportEngineCalculator> calculatorDefinition : calculators) {
+						// Get the first entry that the iterator returns
+						Entry<String, ReportEngineCalculator> entry = calculatorDefinition.entrySet().iterator().next();
+						String id = entry.getKey();
+						ReportEngineCalculator reportEngineCalculator = entry.getValue();
+
+						if ((StringUtils.equalsIgnoreCase(columnLabel, id)
+								|| StringUtils.equals(String.valueOf(i), id))
+								&& reportEngineCalculator != null) {
+							switch (reportEngineCalculator) {
+								case SUM:
+									String totalString = messageSource.getMessage("reportengine.text.total", null, locale);
+									dataColumnBuilder.useCalculator(new SumGroupCalculator(totalString));
+									break;
+								case COUNT:
+									String countString = messageSource.getMessage("reportengine.text.count", null, locale);
+									dataColumnBuilder.useCalculator(new CountGroupCalculator(countString));
+									break;
+								case AVG:
+									String avgString = messageSource.getMessage("reportengine.text.average", null, locale);
+									dataColumnBuilder.useCalculator(new AvgGroupCalculator(avgString));
+									break;
+								case MIN:
+									String minString = messageSource.getMessage("reportengine.text.minimum", null, locale);
+									dataColumnBuilder.useCalculator(new MinGroupCalculator(minString));
+									break;
+								case MAX:
+									String maxString = messageSource.getMessage("reportengine.text.maximum", null, locale);
+									dataColumnBuilder.useCalculator(new MaxGroupCalculator(maxString));
+									break;
+								case FIRST:
+									String firstString = messageSource.getMessage("reportengine.text.first", null, locale);
+									dataColumnBuilder.useCalculator(new FirstGroupCalculator(firstString));
+									break;
+								case LAST:
+									String lastString = messageSource.getMessage("reportengine.text.last", null, locale);
+									dataColumnBuilder.useCalculator(new LastGroupCalculator(lastString));
+									break;
+								default:
+								//do nothing
+							}
+							break;
+						}
+					}
+				}
+				flatTableBuilder.addDataColumn(dataColumnBuilder.build());
+			}
+		}
+
+		if (reportEngineOptions.isSortValues()) {
+			flatTableBuilder.sortValues();
+		}
+		Boolean showTotals = reportEngineOptions.getShowTotals();
+		if (showTotals != null) {
+			flatTableBuilder.showTotals(showTotals);
+		}
+		Boolean showGrandTotal = reportEngineOptions.getShowGrandTotal();
+		if (showGrandTotal != null) {
+			flatTableBuilder.showGrandTotal(showGrandTotal);
 		}
 
 		FlatTable flatTable = flatTableBuilder.build();

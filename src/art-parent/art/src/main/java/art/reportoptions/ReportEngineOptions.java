@@ -1,0 +1,139 @@
+/*
+ * ART. A Reporting Tool.
+ * Copyright (C) 2018 Enrico Liboni <eliboni@users.sf.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+package art.reportoptions;
+
+import art.enums.ReportEngineCalculator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Options for reportengine reports
+ * 
+ * @author Timothy Anyona
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ReportEngineOptions {
+	
+	private boolean sortValues;
+	private String url;
+	private String separator;
+	private List<ReportEngineGroupColumn> groupColumns;
+	private Boolean showTotals;
+	private Boolean showGrandTotal;
+	private List<Map<String, ReportEngineCalculator>> calculators;
+
+	/**
+	 * @return the sortValues
+	 */
+	public boolean isSortValues() {
+		return sortValues;
+	}
+
+	/**
+	 * @param sortValues the sortValues to set
+	 */
+	public void setSortValues(boolean sortValues) {
+		this.sortValues = sortValues;
+	}
+
+	/**
+	 * @return the url
+	 */
+	public String getUrl() {
+		return url;
+	}
+
+	/**
+	 * @param url the url to set
+	 */
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	/**
+	 * @return the separator
+	 */
+	public String getSeparator() {
+		return separator;
+	}
+
+	/**
+	 * @param separator the separator to set
+	 */
+	public void setSeparator(String separator) {
+		this.separator = separator;
+	}
+
+	/**
+	 * @return the groupColumns
+	 */
+	public List<ReportEngineGroupColumn> getGroupColumns() {
+		return groupColumns;
+	}
+
+	/**
+	 * @param groupColumns the groupColumns to set
+	 */
+	public void setGroupColumns(List<ReportEngineGroupColumn> groupColumns) {
+		this.groupColumns = groupColumns;
+	}
+
+	/**
+	 * @return the showTotals
+	 */
+	public Boolean getShowTotals() {
+		return showTotals;
+	}
+
+	/**
+	 * @param showTotals the showTotals to set
+	 */
+	public void setShowTotals(Boolean showTotals) {
+		this.showTotals = showTotals;
+	}
+
+	/**
+	 * @return the showGrandTotal
+	 */
+	public Boolean getShowGrandTotal() {
+		return showGrandTotal;
+	}
+
+	/**
+	 * @param showGrandTotal the showGrandTotal to set
+	 */
+	public void setShowGrandTotal(Boolean showGrandTotal) {
+		this.showGrandTotal = showGrandTotal;
+	}
+
+	/**
+	 * @return the calculators
+	 */
+	public List<Map<String, ReportEngineCalculator>> getCalculators() {
+		return calculators;
+	}
+
+	/**
+	 * @param calculators the calculators to set
+	 */
+	public void setCalculators(List<Map<String, ReportEngineCalculator>> calculators) {
+		this.calculators = calculators;
+	}
+	
+}
