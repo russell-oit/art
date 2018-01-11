@@ -29,8 +29,12 @@ import org.owasp.encoder.Encode;
  */
 public class HtmlFancyOutput extends StandardOutput {
 
+	private int localRowCount;
+
 	@Override
 	public void init() {
+		localRowCount = 0;
+
 		//include required css and javascript files
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/DataTables-1.10.13/css/dataTables.bootstrap.min.css'>");
@@ -58,7 +62,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	public void addHeaderCellAlignLeft(String value) {
 		out.println("<th style='text-align: left'>" + value + "</th>");
 	}
-	
+
 	@Override
 	public void addHeaderCellAlignLeft(String value, String sortValue) {
 		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
@@ -131,7 +135,7 @@ public class HtmlFancyOutput extends StandardOutput {
 		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
 				+ escapedFormattedValue + "</td>");
 	}
-	
+
 	@Override
 	public void addCellImage(byte[] binaryData) {
 		if (binaryData == null) {
@@ -144,7 +148,8 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		if (rowCount > 1) {
+		localRowCount++;
+		if (localRowCount > 1) {
 			//close previous row
 			out.println("</tr>");
 		}

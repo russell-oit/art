@@ -103,6 +103,20 @@ public abstract class StandardOutput {
 	protected boolean ajax;
 
 	/**
+	 * @return the totalColumnCount
+	 */
+	public int getTotalColumnCount() {
+		return totalColumnCount;
+	}
+
+	/**
+	 * @param totalColumnCount the totalColumnCount to set
+	 */
+	public void setTotalColumnCount(int totalColumnCount) {
+		this.totalColumnCount = totalColumnCount;
+	}
+
+	/**
 	 * @return the ajax
 	 */
 	public boolean isAjax() {
@@ -331,7 +345,7 @@ public abstract class StandardOutput {
 	/**
 	 * Outputs the report title
 	 */
-	protected void addTitle() {
+	public void addTitle() {
 
 	}
 
@@ -636,7 +650,7 @@ public abstract class StandardOutput {
 			drilldownCount = drilldowns.size();
 		}
 
-		totalColumnCount = resultSetColumnCount + drilldownCount;
+		setTotalColumnCount(resultSetColumnCount + drilldownCount);
 
 		List<String> hiddenColumns = getHiddenColumnsList(report);
 
@@ -645,7 +659,7 @@ public abstract class StandardOutput {
 			hiddenColumnCount = hiddenColumns.size();
 		}
 
-		totalColumnCount = totalColumnCount - hiddenColumnCount;
+		setTotalColumnCount(totalColumnCount - hiddenColumnCount);
 
 		//perform any required output initialization
 		init();
@@ -974,7 +988,7 @@ public abstract class StandardOutput {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		resultSetColumnCount = rsmd.getColumnCount();
 
-		totalColumnCount = resultSetColumnCount;
+		setTotalColumnCount(resultSetColumnCount);
 
 		List<String> hiddenColumns = getHiddenColumnsList(report);
 
@@ -983,7 +997,7 @@ public abstract class StandardOutput {
 			hiddenColumnCount = hiddenColumns.size();
 		}
 
-		totalColumnCount = totalColumnCount - hiddenColumnCount;
+		setTotalColumnCount(totalColumnCount - hiddenColumnCount);
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
 		Map<Integer, ColumnTypeDefinition> columnTypes = getColumnTypes(rsmd);
@@ -1829,7 +1843,7 @@ public abstract class StandardOutput {
 			xa = x.keySet().toArray();
 			ya = y.keySet().toArray();
 
-			totalColumnCount = xa.length + 1;
+			setTotalColumnCount(xa.length + 1);
 
 			//perform any required output initialization
 			init();
@@ -1900,7 +1914,7 @@ public abstract class StandardOutput {
 			xa = x.toArray();
 			ya = y.toArray();
 
-			totalColumnCount = xa.length + 1;
+			setTotalColumnCount(xa.length + 1);
 
 			//perform any required output initialization
 			init();

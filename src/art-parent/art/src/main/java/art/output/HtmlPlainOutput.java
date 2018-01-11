@@ -35,6 +35,7 @@ import org.owasp.encoder.Encode;
 public class HtmlPlainOutput extends StandardOutput {
 
 	private final boolean fileOutput;
+	private int localRowCount;
 
 	public HtmlPlainOutput(boolean fileOutput) {
 		this.fileOutput = fileOutput;
@@ -50,6 +51,8 @@ public class HtmlPlainOutput extends StandardOutput {
 			out.println("</head>");
 			out.println("<body>");
 		}
+
+		localRowCount = 0;
 
 		//https://www.campaignmonitor.com/css/
 		out.println("<style>"
@@ -187,7 +190,7 @@ public class HtmlPlainOutput extends StandardOutput {
 
 		out.println("<td style='text-align: left'>" + escapedFormattedValue + "</td>");
 	}
-	
+
 	@Override
 	public void addCellImage(byte[] binaryData) {
 		if (binaryData == null) {
@@ -200,7 +203,8 @@ public class HtmlPlainOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		if (rowCount > 1) {
+		localRowCount++;
+		if (localRowCount > 1) {
 			//close previous row
 			out.println("</tr>");
 		}

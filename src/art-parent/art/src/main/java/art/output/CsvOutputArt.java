@@ -44,6 +44,7 @@ public class CsvOutputArt extends StandardOutput {
 	private final CsvOutputArtOptions options;
 	private int currentColumnIndex = 1;
 	private ZipType zipType = ZipType.None;
+	private int localRowCount;
 
 	public CsvOutputArt(CsvOutputArtOptions options, ZipType zipType) {
 		Objects.requireNonNull(options, "options must not be null");
@@ -61,6 +62,7 @@ public class CsvOutputArt extends StandardOutput {
 		fout = null;
 		sb = null;
 		currentColumnIndex = 1;
+		localRowCount=0;
 	}
 
 	@Override
@@ -123,11 +125,13 @@ public class CsvOutputArt extends StandardOutput {
 
 	@Override
 	public void newRow() {
+		localRowCount++;
+		
 		sb.append("\n");
 
 		currentColumnIndex = 1;// reset column index
 
-		if ((rowCount * totalColumnCount) > FLUSH_SIZE) {
+		if ((localRowCount * totalColumnCount) > FLUSH_SIZE) {
 			try {
 				String tmpstr = sb.toString();
 				byte[] buf = tmpstr.getBytes("UTF-8");

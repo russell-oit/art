@@ -19,6 +19,8 @@ package art.reportengine;
 
 import art.output.StandardOutput;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import net.sf.reportengine.Report;
@@ -99,6 +101,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 			}
 		} else if (StringUtils.equals(templateName, "startReport.ftl")) {
 			so.init();
+			so.addTitle();
 			so.initializeNumberFormatters();
 		}
 	}
@@ -126,7 +129,11 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		}
 	}
 
-	public void generateReportEngineOutput(ResultSet rs) {
+	public void generateReportEngineOutput(ResultSet rs) throws SQLException {
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnCount = rsmd.getColumnCount();
+		so.setTotalColumnCount(columnCount);
+
 		JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(rs);
 		ObjectFlatTableBuilder flatTableBuilder = new ObjectFlatTableBuilder(rsInput);
 		rsInput.open();

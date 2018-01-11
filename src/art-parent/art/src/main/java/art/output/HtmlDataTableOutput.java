@@ -33,7 +33,7 @@ import org.owasp.encoder.Encode;
 public class HtmlDataTableOutput extends StandardOutput {
 
 	private String tableId;
-	private int localRowCount;
+	private int localRowCount; //use local variable for reportengine output
 
 	@Override
 	public void init() {
