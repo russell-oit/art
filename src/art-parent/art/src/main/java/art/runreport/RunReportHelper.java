@@ -579,6 +579,7 @@ public class RunReportHelper {
 		//is scroll insensitive much slower than forward only?
 		int resultSetType;
 		if (reportType.isChart() || reportType.isXDocReport()
+				|| reportType.isReportEngine()
 				|| reportType == ReportType.Group
 				|| reportType == ReportType.JasperReportsArt
 				|| reportType == ReportType.JxlsArt

@@ -67,6 +67,8 @@ import art.output.XmlOutput;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportengine.GeneralOutputFormat;
+import art.reportengine.ReportEngineOutput;
 import art.reportoptions.C3Options;
 import art.reportoptions.ChartJsOptions;
 import art.reportoptions.CsvOutputArtOptions;
@@ -1395,6 +1397,38 @@ public class ReportOutputGenerator {
 				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
+			} else if (reportType.isReportEngine()) {
+				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
+
+				standardOutput.setWriter(writer);
+				standardOutput.setFullOutputFileName(fullOutputFilename);
+				standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
+				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
+				standardOutput.setLocale(locale);
+				standardOutput.setReportName(report.getLocalizedName(locale));
+				standardOutput.setMessageSource(messageSource);
+				standardOutput.setIsJob(isJob);
+				standardOutput.setPdfPageNumbers(pdfPageNumbers);
+				standardOutput.setReport(report);
+
+				if (request != null) {
+					standardOutput.setContextPath(contextPath);
+
+					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+						standardOutput.setAjax(true);
+					}
+				}
+
+				//generate output
+				rs = reportRunner.getResultSet();
+
+				ReportEngineOutput reportEngineOutput = new ReportEngineOutput(standardOutput);
+				reportEngineOutput.generateReportEngineOutput(rs);
+
+				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
+					displayFileLink(fileName);
+				}
+				rowsRetrieved = getResultSetRowCount(rs);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

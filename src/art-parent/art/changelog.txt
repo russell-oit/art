@@ -1,5 +1,6 @@
 ART 3.3
 * Allow sending of email if there is an error with a particular job
+* Added ReportEngine report types
 
 ART 3.2
 * Added Velocity report type

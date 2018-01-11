@@ -918,5 +918,10 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.reportengine</groupId>
+			<artifactId>reportengine</artifactId>
+			<version>0.13.2</version>
+		</dependency>
 	</dependencies>
 </project>

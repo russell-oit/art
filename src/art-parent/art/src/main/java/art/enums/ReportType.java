@@ -51,7 +51,8 @@ public enum ReportType {
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
 	C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
 	Leaflet(146), OpenLayers(147),
-	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157);
+	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157),
+	ReportEngine(158);
 
 	private final int value;
 
@@ -98,6 +99,20 @@ public enum ReportType {
 				return false;
 			default:
 				return true;
+		}
+	}
+	
+	/**
+	 * Returns <code>true</code> if this is a reportengine report
+	 *
+	 * @return <code>true</code> if this is a reportengine report
+	 */
+	public boolean isReportEngine() {
+		switch (this) {
+			case ReportEngine:
+				return true;
+			default:
+				return false;
 		}
 	}
 
@@ -697,6 +712,8 @@ public enum ReportType {
 				return "OrgChart: List";
 			case OrgChartAjax:
 				return "OrgChart: Ajax";
+			case ReportEngine:
+				return "ReportEngine";
 			default:
 				return this.name();
 		}

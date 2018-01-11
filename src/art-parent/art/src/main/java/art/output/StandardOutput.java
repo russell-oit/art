@@ -324,7 +324,7 @@ public abstract class StandardOutput {
 	/**
 	 * Performs any initialization required by the output generator
 	 */
-	protected void init() {
+	public void init() {
 
 	}
 
@@ -347,7 +347,7 @@ public abstract class StandardOutput {
 	/**
 	 * Performs initialization required before outputting the header
 	 */
-	protected void beginHeader() {
+	public void beginHeader() {
 
 	}
 
@@ -356,7 +356,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	protected abstract void addHeaderCell(String value);
+	public abstract void addHeaderCell(String value);
 
 	/**
 	 * Outputs a value to the header whose text is left aligned
@@ -380,14 +380,14 @@ public abstract class StandardOutput {
 	/**
 	 * Performs any cleanup after outputting of the header
 	 */
-	protected void endHeader() {
+	public void endHeader() {
 
 	}
 
 	/**
 	 * Performs any initialization before resultset output begins
 	 */
-	protected void beginRows() {
+	public void beginRows() {
 
 	}
 
@@ -396,7 +396,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	protected abstract void addCellString(String value);
+	public abstract void addCellString(String value);
 
 	/**
 	 * For html output, the implementing class should perform escaping on the
@@ -413,7 +413,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	protected abstract void addCellNumeric(Double value);
+	public abstract void addCellNumeric(Double value);
 
 	/**
 	 * Outputs numeric value to the current row
@@ -431,7 +431,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	protected abstract void addCellDate(Date value);
+	public abstract void addCellDate(Date value);
 
 	/**
 	 * Outputs a date value to the current row
@@ -456,19 +456,19 @@ public abstract class StandardOutput {
 	/**
 	 * Closes the current row and opens a new one.
 	 */
-	protected abstract void newRow();
+	public abstract void newRow();
 
 	/**
 	 * Closes the current row
 	 */
-	protected void endRow() {
+	public void endRow() {
 
 	}
 
 	/**
 	 * Finalizes data output
 	 */
-	protected void endRows() {
+	public void endRows() {
 
 	}
 
@@ -509,7 +509,7 @@ public abstract class StandardOutput {
 	/**
 	 * Closes report output. Any final cleanup should be done here.
 	 */
-	protected abstract void endOutput();
+	public abstract void endOutput();
 
 	/**
 	 * Formats a numberic value for display
@@ -722,6 +722,8 @@ public abstract class StandardOutput {
 				for (int i = 0; i < totalColumnCount; i++) {
 					addCellString("...");
 				}
+				
+				endRows();
 
 				endOutput();
 
@@ -829,7 +831,7 @@ public abstract class StandardOutput {
 	private void finalizeOutput(List<String> hiddenColumns, ResultSetMetaData rsmd,
 			int drilldownCount, List<String> totalColumns) throws SQLException {
 
-		if (rowCount > 1) {
+		if (rowCount > 0) {
 			endRow();
 		}
 
@@ -1157,7 +1159,7 @@ public abstract class StandardOutput {
 	/**
 	 * Initializes actual and sort number formatters
 	 */
-	private void initializeNumberFormatters() {
+	public void initializeNumberFormatters() {
 		//initialize number formatters
 		actualNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
 		actualNumberFormatter.applyPattern("#,##0.#");
