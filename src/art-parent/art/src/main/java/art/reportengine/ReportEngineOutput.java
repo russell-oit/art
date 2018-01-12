@@ -18,7 +18,9 @@
 package art.reportengine;
 
 import art.enums.ReportEngineCalculator;
+import art.enums.SortOrder;
 import art.output.StandardOutput;
+import art.reportoptions.ReportEngineDataColumn;
 import art.reportoptions.ReportEngineGroupColumn;
 import art.reportoptions.ReportEngineOptions;
 import art.utils.ArtUtils;
@@ -29,8 +31,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 import net.sf.reportengine.Report;
 import net.sf.reportengine.ReportBuilder;
 import net.sf.reportengine.components.CellProps;
@@ -167,7 +167,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		rsInput.open();
 
 		List<ReportEngineGroupColumn> groupColumns = reportEngineOptions.getGroupColumns();
-		List<Map<String, ReportEngineCalculator>> calculators = reportEngineOptions.getCalculators();
+		List<ReportEngineDataColumn> dataColumns = reportEngineOptions.getDataColumns();
 
 		List<ColumnMetadata> columnMetadata = rsInput.getColumnMetadata();
 		for (int i = 0; i < columnMetadata.size(); i++) {
@@ -180,13 +180,33 @@ public class ReportEngineOutput extends AbstractReportOutput {
 				for (ReportEngineGroupColumn groupColumn : groupColumns) {
 					String id = groupColumn.getId();
 					if (StringUtils.equalsIgnoreCase(columnLabel, id)
-							|| StringUtils.equals(String.valueOf(i), id)) {
+							|| StringUtils.equals(String.valueOf(i + 1), id)) {
 						isGroupColumn = true;
 						DefaultGroupColumn.Builder groupColumnBuilder = new DefaultGroupColumn.Builder(i);
 						groupColumnBuilder.header(columnLabel);
 						Integer level = groupColumn.getLevel();
 						if (level != null) {
 							groupColumnBuilder.level(level);
+						}
+						if (groupColumn.isShowDuplicateValues()) {
+							groupColumnBuilder.showDuplicateValues();
+						}
+						SortOrder sortOrder = groupColumn.getSortOrder();
+						if (sortOrder != null) {
+							switch (sortOrder) {
+								case Asc:
+									groupColumnBuilder.sortAsc();
+									break;
+								case Desc:
+									groupColumnBuilder.sortDesc();
+									break;
+								default:
+								//do nothing
+							}
+						}
+						String valuesFormatter = groupColumn.getValuesFormatter();
+						if (StringUtils.isNotBlank(valuesFormatter)) {
+							groupColumnBuilder.valuesFormatter(valuesFormatter);
 						}
 						flatTableBuilder.addGroupColumn(groupColumnBuilder.build());
 						break;
@@ -197,49 +217,98 @@ public class ReportEngineOutput extends AbstractReportOutput {
 			if (!isGroupColumn) {
 				DefaultDataColumn.Builder dataColumnBuilder = new DefaultDataColumn.Builder(i);
 				dataColumnBuilder.header(columnLabel);
-				if (CollectionUtils.isNotEmpty(calculators)) {
-					for (Map<String, ReportEngineCalculator> calculatorDefinition : calculators) {
-						// Get the first entry that the iterator returns
-						Entry<String, ReportEngineCalculator> entry = calculatorDefinition.entrySet().iterator().next();
-						String id = entry.getKey();
-						ReportEngineCalculator reportEngineCalculator = entry.getValue();
-
-						if ((StringUtils.equalsIgnoreCase(columnLabel, id)
-								|| StringUtils.equals(String.valueOf(i), id))
-								&& reportEngineCalculator != null) {
-							switch (reportEngineCalculator) {
-								case SUM:
-									String totalString = messageSource.getMessage("reportengine.text.total", null, locale);
-									dataColumnBuilder.useCalculator(new SumGroupCalculator(totalString));
-									break;
-								case COUNT:
-									String countString = messageSource.getMessage("reportengine.text.count", null, locale);
-									dataColumnBuilder.useCalculator(new CountGroupCalculator(countString));
-									break;
-								case AVG:
-									String avgString = messageSource.getMessage("reportengine.text.average", null, locale);
-									dataColumnBuilder.useCalculator(new AvgGroupCalculator(avgString));
-									break;
-								case MIN:
-									String minString = messageSource.getMessage("reportengine.text.minimum", null, locale);
-									dataColumnBuilder.useCalculator(new MinGroupCalculator(minString));
-									break;
-								case MAX:
-									String maxString = messageSource.getMessage("reportengine.text.maximum", null, locale);
-									dataColumnBuilder.useCalculator(new MaxGroupCalculator(maxString));
-									break;
-								case FIRST:
-									String firstString = messageSource.getMessage("reportengine.text.first", null, locale);
-									dataColumnBuilder.useCalculator(new FirstGroupCalculator<>(firstString));
-									break;
-								case LAST:
-									String lastString = messageSource.getMessage("reportengine.text.last", null, locale);
-									dataColumnBuilder.useCalculator(new LastGroupCalculator<>(lastString));
-									break;
-								default:
-								//do nothing
+				if (CollectionUtils.isNotEmpty(dataColumns)) {
+					for (ReportEngineDataColumn dataColumn : dataColumns) {
+						String id = dataColumn.getId();
+						if (StringUtils.equalsIgnoreCase(columnLabel, id)
+								|| StringUtils.equals(String.valueOf(i + 1), id)) {
+							ReportEngineCalculator calculator = dataColumn.getCalculator();
+							if (calculator != null) {
+								String calculatorFormatter = dataColumn.getCalculatorFormatter();
+								switch (calculator) {
+									case SUM:
+										String totalString = messageSource.getMessage("reportengine.text.total", null, locale);
+										if (StringUtils.isBlank(calculatorFormatter)) {
+											dataColumnBuilder.useCalculator(new SumGroupCalculator(totalString));
+										} else {
+											dataColumnBuilder.useCalculator(new SumGroupCalculator(totalString), calculatorFormatter);
+										}
+										break;
+									case COUNT:
+										String countString = messageSource.getMessage("reportengine.text.count", null, locale);
+										if (StringUtils.isBlank(calculatorFormatter)) {
+											dataColumnBuilder.useCalculator(new CountGroupCalculator(countString));
+										} else {
+											dataColumnBuilder.useCalculator(new CountGroupCalculator(countString), calculatorFormatter);
+										}
+										break;
+									case AVG:
+										String avgString = messageSource.getMessage("reportengine.text.average", null, locale);
+										if (StringUtils.isBlank(calculatorFormatter)) {
+											dataColumnBuilder.useCalculator(new AvgGroupCalculator(avgString));
+										} else {
+											dataColumnBuilder.useCalculator(new AvgGroupCalculator(avgString), calculatorFormatter);
+										}
+										break;
+									case MIN:
+										String minString = messageSource.getMessage("reportengine.text.minimum", null, locale);
+										if (StringUtils.isBlank(calculatorFormatter)) {
+											dataColumnBuilder.useCalculator(new MinGroupCalculator(minString));
+										} else {
+											dataColumnBuilder.useCalculator(new MinGroupCalculator(minString), calculatorFormatter);
+										}
+										break;
+									case MAX:
+										String maxString = messageSource.getMessage("reportengine.text.maximum", null, locale);
+										if (StringUtils.isBlank(calculatorFormatter)) {
+											dataColumnBuilder.useCalculator(new MaxGroupCalculator(maxString));
+										} else {
+											dataColumnBuilder.useCalculator(new MaxGroupCalculator(maxString), calculatorFormatter);
+										}
+										break;
+									case FIRST:
+										String firstString = messageSource.getMessage("reportengine.text.first", null, locale);
+										if (StringUtils.isBlank(calculatorFormatter)) {
+											dataColumnBuilder.useCalculator(new FirstGroupCalculator<>(firstString));
+										} else {
+											dataColumnBuilder.useCalculator(new FirstGroupCalculator<>(firstString), calculatorFormatter);
+										}
+										break;
+									case LAST:
+										String lastString = messageSource.getMessage("reportengine.text.last", null, locale);
+										if (StringUtils.isBlank(calculatorFormatter)) {
+											dataColumnBuilder.useCalculator(new LastGroupCalculator<>(lastString));
+										} else {
+											dataColumnBuilder.useCalculator(new LastGroupCalculator<>(lastString), calculatorFormatter);
+										}
+										break;
+									default:
+									//do nothing
+								}
 							}
-							break;
+							SortOrder sortOrder = dataColumn.getSortOrder();
+							if (sortOrder != null) {
+								Integer sortOrderLevel = dataColumn.getSortOrderLevel();
+								switch (sortOrder) {
+									case Asc:
+										if (sortOrderLevel == null) {
+											dataColumnBuilder.sortAsc();
+										} else {
+											dataColumnBuilder.sortAsc(sortOrderLevel);
+										}
+										break;
+									case Desc:
+										if (sortOrderLevel == null) {
+											dataColumnBuilder.sortDesc();
+										} else {
+											dataColumnBuilder.sortDesc(sortOrderLevel);
+										}
+										break;
+									default:
+									//do nothing
+								}
+							}
+							break; //break from for loop
 						}
 					}
 				}

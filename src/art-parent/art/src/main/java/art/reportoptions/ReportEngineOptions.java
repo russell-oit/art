@@ -17,10 +17,8 @@
  */
 package art.reportoptions;
 
-import art.enums.ReportEngineCalculator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Options for reportengine reports
@@ -36,7 +34,7 @@ public class ReportEngineOptions {
 	private List<ReportEngineGroupColumn> groupColumns;
 	private Boolean showTotals;
 	private Boolean showGrandTotal;
-	private List<Map<String, ReportEngineCalculator>> calculators;
+	private List<ReportEngineDataColumn> dataColumns;
 
 	/**
 	 * @return the sortValues
@@ -123,17 +121,17 @@ public class ReportEngineOptions {
 	}
 
 	/**
-	 * @return the calculators
+	 * @return the dataColumns
 	 */
-	public List<Map<String, ReportEngineCalculator>> getCalculators() {
-		return calculators;
+	public List<ReportEngineDataColumn> getDataColumns() {
+		return dataColumns;
 	}
 
 	/**
-	 * @param calculators the calculators to set
+	 * @param dataColumns the dataColumns to set
 	 */
-	public void setCalculators(List<Map<String, ReportEngineCalculator>> calculators) {
-		this.calculators = calculators;
+	public void setDataColumns(List<ReportEngineDataColumn> dataColumns) {
+		this.dataColumns = dataColumns;
 	}
 	
 }

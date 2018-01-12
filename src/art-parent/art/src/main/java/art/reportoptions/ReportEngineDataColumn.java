@@ -17,20 +17,21 @@
  */
 package art.reportoptions;
 
+import art.enums.ReportEngineCalculator;
 import art.enums.SortOrder;
 
 /**
- * ReportEngine options group column definition
+ * Reportengine options data column definition
  * 
  * @author Timothy Anyona
  */
-public class ReportEngineGroupColumn {
+public class ReportEngineDataColumn {
 	
 	private String id;
-	private Integer level;
-	private boolean showDuplicateValues;
+	private ReportEngineCalculator calculator;
+	private String calculatorFormatter;
 	private SortOrder sortOrder;
-	private String valuesFormatter;
+	private Integer sortOrderLevel;
 
 	/**
 	 * @return the id
@@ -47,31 +48,31 @@ public class ReportEngineGroupColumn {
 	}
 
 	/**
-	 * @return the level
+	 * @return the calculator
 	 */
-	public Integer getLevel() {
-		return level;
+	public ReportEngineCalculator getCalculator() {
+		return calculator;
 	}
 
 	/**
-	 * @param level the level to set
+	 * @param calculator the calculator to set
 	 */
-	public void setLevel(Integer level) {
-		this.level = level;
+	public void setCalculator(ReportEngineCalculator calculator) {
+		this.calculator = calculator;
 	}
 
 	/**
-	 * @return the showDuplicateValues
+	 * @return the calculatorFormatter
 	 */
-	public boolean isShowDuplicateValues() {
-		return showDuplicateValues;
+	public String getCalculatorFormatter() {
+		return calculatorFormatter;
 	}
 
 	/**
-	 * @param showDuplicateValues the showDuplicateValues to set
+	 * @param calculatorFormatter the calculatorFormatter to set
 	 */
-	public void setShowDuplicateValues(boolean showDuplicateValues) {
-		this.showDuplicateValues = showDuplicateValues;
+	public void setCalculatorFormatter(String calculatorFormatter) {
+		this.calculatorFormatter = calculatorFormatter;
 	}
 
 	/**
@@ -89,17 +90,17 @@ public class ReportEngineGroupColumn {
 	}
 
 	/**
-	 * @return the valuesFormatter
+	 * @return the sortOrderLevel
 	 */
-	public String getValuesFormatter() {
-		return valuesFormatter;
+	public Integer getSortOrderLevel() {
+		return sortOrderLevel;
 	}
 
 	/**
-	 * @param valuesFormatter the valuesFormatter to set
+	 * @param sortOrderLevel the sortOrderLevel to set
 	 */
-	public void setValuesFormatter(String valuesFormatter) {
-		this.valuesFormatter = valuesFormatter;
+	public void setSortOrderLevel(Integer sortOrderLevel) {
+		this.sortOrderLevel = sortOrderLevel;
 	}
 	
 }
