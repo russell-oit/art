@@ -2191,7 +2191,7 @@ public class ReportJob implements org.quartz.Job {
 
 			//jobs don't show record count so generally no need for scrollable resultsets
 			int resultSetType;
-			if (reportType.isChart() || reportType.isReportEngine()) {
+			if (reportType.isChart()) {
 				//need scrollable resultset for charts for show data option
 				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 			} else {

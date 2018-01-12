@@ -1427,7 +1427,6 @@ public class ReportOutputGenerator {
 				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
 					displayFileLink(fileName);
 				}
-				rowsRetrieved = getResultSetRowCount(rs);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
