@@ -1175,16 +1175,22 @@ public abstract class StandardOutput {
 	 */
 	public void initializeNumberFormatters() {
 		//initialize number formatters
+		final int OPTIONAL_DECIMAL_COUNT = 10;
+		String optionalDecimals = StringUtils.repeat("#", OPTIONAL_DECIMAL_COUNT);
+		String pattern;
 		actualNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
-		actualNumberFormatter.applyPattern("#,##0.#");
+		pattern = "#,##0." + optionalDecimals;
+		actualNumberFormatter.applyPattern(pattern);
 
 		plainNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
-		plainNumberFormatter.applyPattern("#.#");
+		pattern = "#." + optionalDecimals;
+		plainNumberFormatter.applyPattern(pattern);
 
 		//specifically use english locale for sorting e.g.
 		//in case user locale uses dot as thousands separator e.g. italian, german
 		sortNumberFormatter = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
-		sortNumberFormatter.applyPattern("#.#");
+		pattern = "#." + optionalDecimals;
+		sortNumberFormatter.applyPattern(pattern);
 		//set minimum digits to ensure all numbers are pre-padded with zeros,
 		//so that sorting works correctly
 		sortNumberFormatter.setMinimumIntegerDigits(20);
