@@ -18,13 +18,18 @@
 package art.reportengine;
 
 import art.enums.ReportEngineCalculator;
+import art.enums.ReportType;
 import art.enums.SortOrder;
 import art.output.StandardOutput;
 import art.reportoptions.ReportEngineDataColumn;
 import art.reportoptions.ReportEngineGroupColumn;
 import art.reportoptions.ReportEngineOptions;
+import art.servlets.Config;
 import art.utils.ArtUtils;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -36,6 +41,7 @@ import net.sf.reportengine.Report;
 import net.sf.reportengine.ReportBuilder;
 import net.sf.reportengine.components.CellProps;
 import net.sf.reportengine.components.FlatTable;
+import net.sf.reportengine.components.FlatTableBuilder;
 import net.sf.reportengine.components.ParagraphProps;
 import net.sf.reportengine.components.PivotTable;
 import net.sf.reportengine.components.PivotTableBuilder;
@@ -56,10 +62,14 @@ import net.sf.reportengine.core.steps.ColumnHeaderOutputInitStep;
 import net.sf.reportengine.core.steps.DataRowsOutputStep;
 import net.sf.reportengine.in.ColumnMetadata;
 import net.sf.reportengine.in.JdbcResultsetTableInput;
+import net.sf.reportengine.in.TableInput;
+import net.sf.reportengine.in.TextTableInput;
 import net.sf.reportengine.out.AbstractReportOutput;
 import net.sf.reportengine.out.OutputFormat;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 
 /**
@@ -68,6 +78,8 @@ import org.springframework.context.MessageSource;
  * @author Timothy Anyona
  */
 public class ReportEngineOutput extends AbstractReportOutput {
+
+	private static final Logger logger = LoggerFactory.getLogger(ReportEngineOutput.class);
 
 	private StandardOutput so;
 	private int bodyCount = 0;
@@ -152,10 +164,10 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		}
 	}
 
-	public void generateTabularOutput(ResultSet rs) throws SQLException, IOException {
-		ResultSetMetaData rsmd = rs.getMetaData();
-		int columnCount = rsmd.getColumnCount();
-		so.setTotalColumnCount(columnCount);
+	public void generateTabularOutput(ResultSet rs, ReportType reportType)
+			throws SQLException, IOException {
+
+		Objects.requireNonNull(reportType, "reportType must not be null");
 
 		MessageSource messageSource = so.getMessageSource();
 		Locale locale = so.getLocale();
@@ -169,71 +181,181 @@ public class ReportEngineOutput extends AbstractReportOutput {
 			reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
 		}
 
-		JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(rs);
-		ObjectFlatTableBuilder flatTableBuilder = new ObjectFlatTableBuilder(rsInput);
-		rsInput.open();
-
 		List<ReportEngineGroupColumn> groupColumns = reportEngineOptions.getGroupColumns();
 		List<ReportEngineDataColumn> dataColumns = reportEngineOptions.getDataColumns();
 
-		List<ColumnMetadata> columnMetadata = rsInput.getColumnMetadata();
-		for (int i = 0; i < columnMetadata.size(); i++) {
-			ColumnMetadata column = columnMetadata.get(i);
-			String columnLabel = column.getColumnLabel();
+		if (reportType == ReportType.ReportEngine) {
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			so.setTotalColumnCount(columnCount);
 
-			boolean isGroupColumn = false;
+			JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(rs);
+			ObjectFlatTableBuilder flatTableBuilder = new ObjectFlatTableBuilder(rsInput);
+			rsInput.open();
 
-			if (CollectionUtils.isNotEmpty(groupColumns)) {
-				for (ReportEngineGroupColumn groupColumn : groupColumns) {
-					String id = groupColumn.getId();
-					if (StringUtils.equalsIgnoreCase(columnLabel, id)
-							|| StringUtils.equals(String.valueOf(i + 1), id)) {
-						isGroupColumn = true;
-						DefaultGroupColumn.Builder groupColumnBuilder = new DefaultGroupColumn.Builder(i);
-						groupColumnBuilder.header(columnLabel);
-						prepareGroupColumnBuilder(groupColumnBuilder, groupColumn);
-						flatTableBuilder.addGroupColumn(groupColumnBuilder.build());
-						break;
-					}
-				}
-			}
+			List<ColumnMetadata> columnMetadata = rsInput.getColumnMetadata();
+			for (int i = 0; i < columnMetadata.size(); i++) {
+				ColumnMetadata column = columnMetadata.get(i);
+				String columnLabel = column.getColumnLabel();
 
-			if (!isGroupColumn) {
-				DefaultDataColumn.Builder dataColumnBuilder = new DefaultDataColumn.Builder(i);
-				dataColumnBuilder.header(columnLabel);
-				if (CollectionUtils.isNotEmpty(dataColumns)) {
-					for (ReportEngineDataColumn dataColumn : dataColumns) {
-						String id = dataColumn.getId();
+				boolean isGroupColumn = false;
+
+				if (CollectionUtils.isNotEmpty(groupColumns)) {
+					for (ReportEngineGroupColumn groupColumn : groupColumns) {
+						String id = groupColumn.getId();
 						if (StringUtils.equalsIgnoreCase(columnLabel, id)
 								|| StringUtils.equals(String.valueOf(i + 1), id)) {
-							prepareDataColumnBuilder(dataColumnBuilder, dataColumn, messageSource, locale);
+							isGroupColumn = true;
+							DefaultGroupColumn.Builder groupColumnBuilder = new DefaultGroupColumn.Builder(i);
+							groupColumnBuilder.header(columnLabel);
+							prepareGroupColumnBuilder(groupColumnBuilder, groupColumn);
+							flatTableBuilder.addGroupColumn(groupColumnBuilder.build());
 							break;
 						}
 					}
 				}
-				flatTableBuilder.addDataColumn(dataColumnBuilder.build());
+
+				if (!isGroupColumn) {
+					DefaultDataColumn.Builder dataColumnBuilder = new DefaultDataColumn.Builder(i);
+					dataColumnBuilder.header(columnLabel);
+					if (CollectionUtils.isNotEmpty(dataColumns)) {
+						for (ReportEngineDataColumn dataColumn : dataColumns) {
+							String id = dataColumn.getId();
+							if (StringUtils.equalsIgnoreCase(columnLabel, id)
+									|| StringUtils.equals(String.valueOf(i + 1), id)) {
+								prepareDataColumnBuilder(dataColumnBuilder, dataColumn, messageSource, locale);
+								break;
+							}
+						}
+					}
+					flatTableBuilder.addDataColumn(dataColumnBuilder.build());
+				}
+			}
+
+			if (reportEngineOptions.isSortValues()) {
+				flatTableBuilder.sortValues();
+			}
+			Boolean showTotals = reportEngineOptions.getShowTotals();
+			if (showTotals != null) {
+				flatTableBuilder.showTotals(showTotals);
+			}
+			Boolean showGrandTotal = reportEngineOptions.getShowGrandTotal();
+			if (showGrandTotal != null) {
+				flatTableBuilder.showGrandTotal(showGrandTotal);
+			}
+
+			FlatTable flatTable = flatTableBuilder.build();
+			Report report = new ReportBuilder(this)
+					.add(flatTable)
+					.build();
+
+			//report execution    
+			report.execute();
+		} else if (reportType == ReportType.ReportEngineFile) {
+			if (CollectionUtils.isEmpty(dataColumns)) {
+				throw new IllegalStateException("dataColumns not specified");
+			}
+			int columnCount = dataColumns.size();
+			if (CollectionUtils.isNotEmpty(groupColumns)) {
+				columnCount += groupColumns.size();
+			}
+			so.setTotalColumnCount(columnCount);
+
+			TableInput tableInput;
+			String separator = reportEngineOptions.getSeparator();
+			boolean firstLineIsHeader = reportEngineOptions.isFirstLineIsHeader();
+			String urlString = reportEngineOptions.getUrl();
+			InputStreamReader reader = null;
+			try {
+				if (StringUtils.isBlank(urlString)) {
+					String templateFileName = artReport.getTemplate();
+					String templatesPath = Config.getTemplatesPath();
+					String fullTemplateFileName = templatesPath + templateFileName;
+
+					logger.debug("templateFileName='{}'", templateFileName);
+
+					//need to explicitly check if template file is empty string
+					//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+					if (StringUtils.isBlank(templateFileName)) {
+						throw new IllegalArgumentException("Data file not specified");
+					}
+
+					File templateFile = new File(fullTemplateFileName);
+					if (!templateFile.exists()) {
+						throw new IllegalStateException("Data file not found: " + templateFileName);
+					}
+
+					String encoding = "UTF-8";
+					tableInput = new TextTableInput(fullTemplateFileName, separator, encoding, firstLineIsHeader);
+				} else {
+					URL url = new URL(urlString);
+					reader = new InputStreamReader(url.openStream());
+					tableInput = new TextTableInput(reader, separator, firstLineIsHeader);
+				}
+
+				FlatTableBuilder flatTableBuilder = new FlatTableBuilder(tableInput);
+
+				if (CollectionUtils.isNotEmpty(groupColumns)) {
+					for (int i = 0; i < groupColumns.size(); i++) {
+						ReportEngineGroupColumn groupColumn = groupColumns.get(i);
+						int finalIndex;
+						Integer index = groupColumn.getIndex();
+						if (index == null) {
+							finalIndex = i;
+						} else {
+							finalIndex = index;
+						}
+						DefaultGroupColumn.Builder groupColumnBuilder = new DefaultGroupColumn.Builder(finalIndex);
+						groupColumnBuilder.header(groupColumn.getId());
+						prepareGroupColumnBuilder(groupColumnBuilder, groupColumn);
+						flatTableBuilder.addGroupColumn(groupColumnBuilder.build());
+					}
+				}
+
+				for (int i = 0; i < dataColumns.size(); i++) {
+					ReportEngineDataColumn dataColumn = dataColumns.get(i);
+					int finalIndex;
+					Integer index = dataColumn.getIndex();
+					if (index == null) {
+						finalIndex = i;
+					} else {
+						finalIndex = index;
+					}
+					DefaultDataColumn.Builder dataColumnBuilder = new DefaultDataColumn.Builder(finalIndex);
+					dataColumnBuilder.header(dataColumn.getId());
+					prepareDataColumnBuilder(dataColumnBuilder, dataColumn, messageSource, locale);
+					flatTableBuilder.addDataColumn(dataColumnBuilder.build());
+				}
+
+				if (reportEngineOptions.isSortValues()) {
+					flatTableBuilder.sortValues();
+				}
+				Boolean showTotals = reportEngineOptions.getShowTotals();
+				if (showTotals != null) {
+					flatTableBuilder.showTotals(showTotals);
+				}
+				Boolean showGrandTotal = reportEngineOptions.getShowGrandTotal();
+				if (showGrandTotal != null) {
+					flatTableBuilder.showGrandTotal(showGrandTotal);
+				}
+
+				FlatTable flatTable = flatTableBuilder.build();
+				Report report = new ReportBuilder(this)
+						.add(flatTable)
+						.build();
+
+				//report execution    
+				report.execute();
+			} finally {
+				if (reader != null) {
+					try {
+						reader.close();
+					} catch (IOException ex) {
+						logger.error("Error", ex);
+					}
+				}
 			}
 		}
-
-		if (reportEngineOptions.isSortValues()) {
-			flatTableBuilder.sortValues();
-		}
-		Boolean showTotals = reportEngineOptions.getShowTotals();
-		if (showTotals != null) {
-			flatTableBuilder.showTotals(showTotals);
-		}
-		Boolean showGrandTotal = reportEngineOptions.getShowGrandTotal();
-		if (showGrandTotal != null) {
-			flatTableBuilder.showGrandTotal(showGrandTotal);
-		}
-
-		FlatTable flatTable = flatTableBuilder.build();
-		Report report = new ReportBuilder(this)
-				.add(flatTable)
-				.build();
-
-		//report execution    
-		report.execute();
 	}
 
 	public void generatePivotOutput(ResultSet rs) throws SQLException, IOException {
@@ -448,6 +570,11 @@ public class ReportEngineOutput extends AbstractReportOutput {
 				default:
 					break;
 			}
+		}
+
+		String valuesFormatter = dataColumn.getValuesFormatter();
+		if (StringUtils.isNotBlank(valuesFormatter)) {
+			dataColumnBuilder.valuesFormatter(valuesFormatter);
 		}
 	}
 

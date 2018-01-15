@@ -1435,7 +1435,7 @@ public class ReportOutputGenerator {
 				if (reportEngineOptions.isPivot()) {
 					reportEngineOutput.generatePivotOutput(rs);
 				} else {
-					reportEngineOutput.generateTabularOutput(rs);
+					reportEngineOutput.generateTabularOutput(rs, reportType);
 				}
 
 				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {

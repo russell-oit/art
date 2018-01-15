@@ -22,15 +22,15 @@ import java.util.List;
 
 /**
  * Options for reportengine reports
- * 
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReportEngineOptions {
-	
+
 	private boolean sortValues;
 	private String url;
-	private String separator;
+	private String separator = ",";
 	private List<ReportEngineGroupColumn> groupColumns;
 	private Boolean showTotals;
 	private Boolean showGrandTotal;
@@ -38,6 +38,8 @@ public class ReportEngineOptions {
 	private boolean pivot;
 	private List<String> pivotHeaderRows;
 	private ReportEngineDataColumn pivotData;
+	private boolean firstLineIsHeader = true;
+	private int columnCount;
 
 	/**
 	 * @return the sortValues
@@ -178,5 +180,33 @@ public class ReportEngineOptions {
 	public void setPivotData(ReportEngineDataColumn pivotData) {
 		this.pivotData = pivotData;
 	}
-	
+
+	/**
+	 * @return the firstLineIsHeader
+	 */
+	public boolean isFirstLineIsHeader() {
+		return firstLineIsHeader;
+	}
+
+	/**
+	 * @param firstLineIsHeader the firstLineIsHeader to set
+	 */
+	public void setFirstLineIsHeader(boolean firstLineIsHeader) {
+		this.firstLineIsHeader = firstLineIsHeader;
+	}
+
+	/**
+	 * @return the columnCount
+	 */
+	public int getColumnCount() {
+		return columnCount;
+	}
+
+	/**
+	 * @param columnCount the columnCount to set
+	 */
+	public void setColumnCount(int columnCount) {
+		this.columnCount = columnCount;
+	}
+
 }

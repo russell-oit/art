@@ -903,6 +903,7 @@ public class ReportRunner {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case ReportEngineFile:
 				return;
 			default:
 			//do nothing

@@ -343,6 +343,7 @@ Edit report page
 						case 140: //datatables csv server
 						case 145: //datamaps file
 						case 150: //saiku connection
+						case 159: //reportengine file
 							$("#reportSourceDiv").hide();
 							break;
 						default:
@@ -391,6 +392,7 @@ Edit report page
 					case 140: //datatables csv server
 					case 145: //datamaps file
 					case 150: //saiku connection
+					case 159: //reportengine file
 						$("#reportSourceLabel").hide();
 						break;
 					default:
@@ -450,6 +452,7 @@ Edit report page
 					case 155: //org chart json
 					case 156: //org chart list
 					case 157: //org chart ajax
+					case 159: //reportengine file
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -473,6 +476,7 @@ Edit report page
 					case 155: //org chart json
 					case 156: //org chart list
 					case 157: //org chart ajax
+					case 159: //reportengine file
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -516,6 +520,7 @@ Edit report page
 					case 155: //org chart json
 					case 156: //org chart list
 					case 157: //org chart ajax
+					case 159: //reportengine file
 						$("#templateDiv").show();
 						break;
 					default:
@@ -586,6 +591,7 @@ Edit report page
 					case 155: //org chart json
 					case 156: //org chart list
 					case 157: //org chart ajax
+					case 159: //reportengine file
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -709,6 +715,7 @@ Edit report page
 					case 155: //org chart json
 					case 156: //org chart list
 					case 157: //org chart ajax
+					case 159: //reportengine file
 						$("#fetchSizeDiv").hide();
 						break;
 					default:

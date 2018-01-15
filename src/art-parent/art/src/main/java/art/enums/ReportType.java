@@ -52,7 +52,7 @@ public enum ReportType {
 	C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
 	Leaflet(146), OpenLayers(147),
 	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157),
-	ReportEngine(158);
+	ReportEngine(158), ReportEngineFile(159);
 
 	private final int value;
 
@@ -110,6 +110,7 @@ public enum ReportType {
 	public boolean isReportEngine() {
 		switch (this) {
 			case ReportEngine:
+			case ReportEngineFile:
 				return true;
 			default:
 				return false;
@@ -714,6 +715,8 @@ public enum ReportType {
 				return "OrgChart: Ajax";
 			case ReportEngine:
 				return "ReportEngine";
+			case ReportEngineFile:
+				return "ReportEngine: File";
 			default:
 				return this.name();
 		}

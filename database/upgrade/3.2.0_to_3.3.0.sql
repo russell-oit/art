@@ -16,3 +16,4 @@ ALTER TABLE ART_JOBS ADD ERROR_EMAIL_TO VARCHAR(500);
 
 -- add reference records for new report types
 INSERT INTO ART_REPORT_TYPES VALUES (158,'ReportEngine');
+INSERT INTO ART_REPORT_TYPES VALUES (159,'ReportEngine: File');

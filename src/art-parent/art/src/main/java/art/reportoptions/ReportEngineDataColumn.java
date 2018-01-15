@@ -32,6 +32,8 @@ public class ReportEngineDataColumn {
 	private String calculatorFormatter;
 	private SortOrder sortOrder;
 	private Integer sortOrderLevel;
+	private String valuesFormatter;
+	private Integer index;
 
 	/**
 	 * @return the id
@@ -101,6 +103,34 @@ public class ReportEngineDataColumn {
 	 */
 	public void setSortOrderLevel(Integer sortOrderLevel) {
 		this.sortOrderLevel = sortOrderLevel;
+	}
+
+	/**
+	 * @return the valuesFormatter
+	 */
+	public String getValuesFormatter() {
+		return valuesFormatter;
+	}
+
+	/**
+	 * @param valuesFormatter the valuesFormatter to set
+	 */
+	public void setValuesFormatter(String valuesFormatter) {
+		this.valuesFormatter = valuesFormatter;
+	}
+
+	/**
+	 * @return the index
+	 */
+	public Integer getIndex() {
+		return index;
+	}
+
+	/**
+	 * @param index the index to set
+	 */
+	public void setIndex(Integer index) {
+		this.index = index;
 	}
 	
 }

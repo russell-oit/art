@@ -31,6 +31,7 @@ public class ReportEngineGroupColumn {
 	private boolean showDuplicateValues;
 	private SortOrder sortOrder;
 	private String valuesFormatter;
+	private Integer index;
 
 	/**
 	 * @return the id
@@ -100,6 +101,20 @@ public class ReportEngineGroupColumn {
 	 */
 	public void setValuesFormatter(String valuesFormatter) {
 		this.valuesFormatter = valuesFormatter;
+	}
+
+	/**
+	 * @return the index
+	 */
+	public Integer getIndex() {
+		return index;
+	}
+
+	/**
+	 * @param index the index to set
+	 */
+	public void setIndex(Integer index) {
+		this.index = index;
 	}
 	
 }
