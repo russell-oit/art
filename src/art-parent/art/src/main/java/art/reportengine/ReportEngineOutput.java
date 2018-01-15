@@ -31,17 +31,23 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import net.sf.reportengine.Report;
 import net.sf.reportengine.ReportBuilder;
 import net.sf.reportengine.components.CellProps;
 import net.sf.reportengine.components.FlatTable;
 import net.sf.reportengine.components.ParagraphProps;
+import net.sf.reportengine.components.PivotTable;
+import net.sf.reportengine.components.PivotTableBuilder;
 import net.sf.reportengine.components.RowProps;
 import net.sf.reportengine.config.DefaultDataColumn;
 import net.sf.reportengine.config.DefaultGroupColumn;
+import net.sf.reportengine.config.DefaultPivotData;
+import net.sf.reportengine.config.DefaultPivotHeaderRow;
 import net.sf.reportengine.core.calc.AvgGroupCalculator;
 import net.sf.reportengine.core.calc.CountGroupCalculator;
 import net.sf.reportengine.core.calc.FirstGroupCalculator;
+import net.sf.reportengine.core.calc.GroupCalculator;
 import net.sf.reportengine.core.calc.LastGroupCalculator;
 import net.sf.reportengine.core.calc.MaxGroupCalculator;
 import net.sf.reportengine.core.calc.MinGroupCalculator;
@@ -145,7 +151,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		}
 	}
 
-	public void generateReportEngineOutput(ResultSet rs) throws SQLException, IOException {
+	public void generateTabularOutput(ResultSet rs) throws SQLException, IOException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 		so.setTotalColumnCount(columnCount);
@@ -335,6 +341,220 @@ public class ReportEngineOutput extends AbstractReportOutput {
 
 		//report execution    
 		report.execute();
+	}
+
+	public void generatePivotOutput(ResultSet rs) throws SQLException, IOException {
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnCount = rsmd.getColumnCount();
+		so.setTotalColumnCount(columnCount);
+
+		MessageSource messageSource = so.getMessageSource();
+		Locale locale = so.getLocale();
+
+		art.report.Report artReport = so.getReport();
+		String options = artReport.getOptions();
+		ReportEngineOptions reportEngineOptions;
+		if (StringUtils.isBlank(options)) {
+			reportEngineOptions = new ReportEngineOptions();
+		} else {
+			reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
+		}
+
+		JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(rs);
+		PivotTableBuilder pivotTableBuilder = new PivotTableBuilder(rsInput);
+		rsInput.open();
+
+		List<ReportEngineGroupColumn> groupColumns = reportEngineOptions.getGroupColumns();
+		List<ReportEngineDataColumn> dataColumns = reportEngineOptions.getDataColumns();
+		List<String> pivotHeaderRows = reportEngineOptions.getPivotHeaderRows();
+		ReportEngineDataColumn pivotData = reportEngineOptions.getPivotData();
+
+		Objects.requireNonNull(pivotHeaderRows, "pivotHeaderRows must not be null");
+		Objects.requireNonNull(pivotData, "pivotData must not be null");
+
+		List<ColumnMetadata> columnMetadata = rsInput.getColumnMetadata();
+		for (int i = 0; i < columnMetadata.size(); i++) {
+			ColumnMetadata column = columnMetadata.get(i);
+			String columnLabel = column.getColumnLabel();
+
+			boolean isGroupColumn = false;
+			boolean isHeaderRow = false;
+			boolean isPivotData = false;
+
+			if (CollectionUtils.isNotEmpty(groupColumns)) {
+				for (ReportEngineGroupColumn groupColumn : groupColumns) {
+					String id = groupColumn.getId();
+					if (StringUtils.equalsIgnoreCase(columnLabel, id)
+							|| StringUtils.equals(String.valueOf(i + 1), id)) {
+						isGroupColumn = true;
+						DefaultGroupColumn.Builder groupColumnBuilder = new DefaultGroupColumn.Builder(i);
+						groupColumnBuilder.header(columnLabel);
+						Integer level = groupColumn.getLevel();
+						if (level != null) {
+							groupColumnBuilder.level(level);
+						}
+						if (groupColumn.isShowDuplicateValues()) {
+							groupColumnBuilder.showDuplicateValues();
+						}
+						SortOrder sortOrder = groupColumn.getSortOrder();
+						if (sortOrder != null) {
+							switch (sortOrder) {
+								case Asc:
+									groupColumnBuilder.sortAsc();
+									break;
+								case Desc:
+									groupColumnBuilder.sortDesc();
+									break;
+								default:
+									break;
+							}
+						}
+						String valuesFormatter = groupColumn.getValuesFormatter();
+						if (StringUtils.isNotBlank(valuesFormatter)) {
+							groupColumnBuilder.valuesFormatter(valuesFormatter);
+						}
+						pivotTableBuilder.addGroupColumn(groupColumnBuilder.build());
+						break;
+					}
+				}
+			}
+
+			for (String headerRow : pivotHeaderRows) {
+				if (StringUtils.equalsIgnoreCase(columnLabel, headerRow)
+						|| StringUtils.equals(String.valueOf(i + 1), headerRow)) {
+					isHeaderRow = true;
+					pivotTableBuilder.addHeaderRow(new DefaultPivotHeaderRow(i));
+					break;
+				}
+			}
+
+			String pivotDataColumnId = pivotData.getId();
+			if (StringUtils.equalsIgnoreCase(columnLabel, pivotDataColumnId)
+					|| StringUtils.equals(String.valueOf(i + 1), pivotDataColumnId)) {
+				isPivotData = true;
+				DefaultPivotData.Builder pivotDataBuilder = new DefaultPivotData.Builder(i);
+				GroupCalculator groupCalculator = getGroupCalculator(pivotData, messageSource, locale);
+				if (groupCalculator != null) {
+					String calculatorFormatter = pivotData.getCalculatorFormatter();
+					if (StringUtils.isBlank(calculatorFormatter)) {
+						pivotDataBuilder.useCalculator(groupCalculator);
+					} else {
+						pivotDataBuilder.useCalculator(groupCalculator, calculatorFormatter);
+					}
+				}
+				pivotTableBuilder.pivotData(pivotDataBuilder.build());
+			}
+
+			if (!isGroupColumn && !isHeaderRow && !isPivotData) {
+				DefaultDataColumn.Builder dataColumnBuilder = new DefaultDataColumn.Builder(i);
+				dataColumnBuilder.header(columnLabel);
+				if (CollectionUtils.isNotEmpty(dataColumns)) {
+					for (ReportEngineDataColumn dataColumn : dataColumns) {
+						String id = dataColumn.getId();
+						if (StringUtils.equalsIgnoreCase(columnLabel, id)
+								|| StringUtils.equals(String.valueOf(i + 1), id)) {
+							GroupCalculator groupCalculator = getGroupCalculator(dataColumn, messageSource, locale);
+							if (groupCalculator != null) {
+								String calculatorFormatter = dataColumn.getCalculatorFormatter();
+								if (StringUtils.isBlank(calculatorFormatter)) {
+									dataColumnBuilder.useCalculator(groupCalculator);
+								} else {
+									dataColumnBuilder.useCalculator(groupCalculator, calculatorFormatter);
+								}
+							}
+
+							SortOrder sortOrder = dataColumn.getSortOrder();
+							if (sortOrder != null) {
+								Integer sortOrderLevel = dataColumn.getSortOrderLevel();
+								switch (sortOrder) {
+									case Asc:
+										if (sortOrderLevel == null) {
+											dataColumnBuilder.sortAsc();
+										} else {
+											dataColumnBuilder.sortAsc(sortOrderLevel);
+										}
+										break;
+									case Desc:
+										if (sortOrderLevel == null) {
+											dataColumnBuilder.sortDesc();
+										} else {
+											dataColumnBuilder.sortDesc(sortOrderLevel);
+										}
+										break;
+									default:
+										break;
+								}
+							}
+							break;
+						}
+					}
+				}
+				pivotTableBuilder.addDataColumn(dataColumnBuilder.build());
+			}
+		}
+
+		if (reportEngineOptions.isSortValues()) {
+			pivotTableBuilder.sortValues();
+		}
+		Boolean showTotals = reportEngineOptions.getShowTotals();
+		if (showTotals != null) {
+			pivotTableBuilder.showTotals(showTotals);
+		}
+		Boolean showGrandTotal = reportEngineOptions.getShowGrandTotal();
+		if (showGrandTotal != null) {
+			pivotTableBuilder.showGrandTotal(showGrandTotal);
+		}
+
+		PivotTable pivotTable = pivotTableBuilder.build();
+		Report report = new ReportBuilder(this)
+				.add(pivotTable)
+				.build();
+
+		//report execution    
+		report.execute();
+	}
+
+	public GroupCalculator getGroupCalculator(ReportEngineDataColumn dataColumn,
+			MessageSource messageSource, Locale locale) {
+
+		GroupCalculator groupCalculator = null;
+		ReportEngineCalculator calculator = dataColumn.getCalculator();
+		if (calculator != null) {
+			switch (calculator) {
+				case SUM:
+					String totalString = messageSource.getMessage("reportengine.text.total", null, locale);
+					groupCalculator = new SumGroupCalculator(totalString);
+					break;
+				case COUNT:
+					String countString = messageSource.getMessage("reportengine.text.count", null, locale);
+					groupCalculator = new CountGroupCalculator(countString);
+					break;
+				case AVG:
+					String avgString = messageSource.getMessage("reportengine.text.average", null, locale);
+					groupCalculator = new AvgGroupCalculator(avgString);
+					break;
+				case MIN:
+					String minString = messageSource.getMessage("reportengine.text.minimum", null, locale);
+					groupCalculator = new MinGroupCalculator(minString);
+					break;
+				case MAX:
+					String maxString = messageSource.getMessage("reportengine.text.maximum", null, locale);
+					groupCalculator = new MaxGroupCalculator(maxString);
+					break;
+				case FIRST:
+					String firstString = messageSource.getMessage("reportengine.text.first", null, locale);
+					groupCalculator = new FirstGroupCalculator<>(firstString);
+					break;
+				case LAST:
+					String lastString = messageSource.getMessage("reportengine.text.last", null, locale);
+					groupCalculator = new LastGroupCalculator<>(lastString);
+					break;
+				default:
+					break;
+			}
+		}
+
+		return groupCalculator;
 	}
 
 }

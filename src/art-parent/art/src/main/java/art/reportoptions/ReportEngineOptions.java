@@ -35,6 +35,9 @@ public class ReportEngineOptions {
 	private Boolean showTotals;
 	private Boolean showGrandTotal;
 	private List<ReportEngineDataColumn> dataColumns;
+	private boolean pivot;
+	private List<String> pivotHeaderRows;
+	private ReportEngineDataColumn pivotData;
 
 	/**
 	 * @return the sortValues
@@ -132,6 +135,48 @@ public class ReportEngineOptions {
 	 */
 	public void setDataColumns(List<ReportEngineDataColumn> dataColumns) {
 		this.dataColumns = dataColumns;
+	}
+
+	/**
+	 * @return the pivot
+	 */
+	public boolean isPivot() {
+		return pivot;
+	}
+
+	/**
+	 * @param pivot the pivot to set
+	 */
+	public void setPivot(boolean pivot) {
+		this.pivot = pivot;
+	}
+
+	/**
+	 * @return the pivotHeaderRows
+	 */
+	public List<String> getPivotHeaderRows() {
+		return pivotHeaderRows;
+	}
+
+	/**
+	 * @param pivotHeaderRows the pivotHeaderRows to set
+	 */
+	public void setPivotHeaderRows(List<String> pivotHeaderRows) {
+		this.pivotHeaderRows = pivotHeaderRows;
+	}
+
+	/**
+	 * @return the pivotData
+	 */
+	public ReportEngineDataColumn getPivotData() {
+		return pivotData;
+	}
+
+	/**
+	 * @param pivotData the pivotData to set
+	 */
+	public void setPivotData(ReportEngineDataColumn pivotData) {
+		this.pivotData = pivotData;
 	}
 	
 }

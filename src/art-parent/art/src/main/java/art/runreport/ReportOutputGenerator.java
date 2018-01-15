@@ -78,6 +78,7 @@ import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JFreeChartOptions;
 import art.reportoptions.MongoDbOptions;
 import art.reportoptions.OrgChartOptions;
+import art.reportoptions.ReportEngineOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -1422,7 +1423,20 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				ReportEngineOutput reportEngineOutput = new ReportEngineOutput(standardOutput);
-				reportEngineOutput.generateReportEngineOutput(rs);
+
+				String options = report.getOptions();
+				ReportEngineOptions reportEngineOptions;
+				if (StringUtils.isBlank(options)) {
+					reportEngineOptions = new ReportEngineOptions();
+				} else {
+					reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
+				}
+
+				if (reportEngineOptions.isPivot()) {
+					reportEngineOutput.generatePivotOutput(rs);
+				} else {
+					reportEngineOutput.generateTabularOutput(rs);
+				}
 
 				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
 					displayFileLink(fileName);
