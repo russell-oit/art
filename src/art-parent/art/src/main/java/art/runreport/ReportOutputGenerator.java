@@ -1433,7 +1433,7 @@ public class ReportOutputGenerator {
 				}
 
 				if (reportEngineOptions.isPivot()) {
-					reportEngineOutput.generatePivotOutput(rs);
+					reportEngineOutput.generatePivotOutput(rs, reportType);
 				} else {
 					reportEngineOutput.generateTabularOutput(rs, reportType);
 				}

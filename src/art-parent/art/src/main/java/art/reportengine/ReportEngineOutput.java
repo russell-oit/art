@@ -164,6 +164,15 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		}
 	}
 
+	/**
+	 * Generates tabular output
+	 *
+	 * @param rs the resultset that contains the data to output. May be null for
+	 * reportengine file report type
+	 * @param reportType the report type
+	 * @throws SQLException
+	 * @throws IOException
+	 */
 	public void generateTabularOutput(ResultSet rs, ReportType reportType)
 			throws SQLException, IOException {
 
@@ -358,10 +367,17 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		}
 	}
 
-	public void generatePivotOutput(ResultSet rs) throws SQLException, IOException {
-		ResultSetMetaData rsmd = rs.getMetaData();
-		int columnCount = rsmd.getColumnCount();
-		so.setTotalColumnCount(columnCount);
+	/**
+	 * Generates pivot output
+	 *
+	 * @param rs the resultset that contains the data. May be null for
+	 * reportengine file report type
+	 * @param reportType the report type
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	public void generatePivotOutput(ResultSet rs, ReportType reportType)
+			throws SQLException, IOException {
 
 		MessageSource messageSource = so.getMessageSource();
 		Locale locale = so.getLocale();
@@ -375,56 +391,205 @@ public class ReportEngineOutput extends AbstractReportOutput {
 			reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
 		}
 
-		JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(rs);
-		PivotTableBuilder pivotTableBuilder = new PivotTableBuilder(rsInput);
-		rsInput.open();
-
 		List<ReportEngineGroupColumn> groupColumns = reportEngineOptions.getGroupColumns();
 		List<ReportEngineDataColumn> dataColumns = reportEngineOptions.getDataColumns();
 		List<String> pivotHeaderRows = reportEngineOptions.getPivotHeaderRows();
 		ReportEngineDataColumn pivotData = reportEngineOptions.getPivotData();
+		int optionsColumnCount = reportEngineOptions.getColumnCount();
 
 		Objects.requireNonNull(pivotHeaderRows, "pivotHeaderRows must not be null");
 		Objects.requireNonNull(pivotData, "pivotData must not be null");
 
-		List<ColumnMetadata> columnMetadata = rsInput.getColumnMetadata();
-		for (int i = 0; i < columnMetadata.size(); i++) {
-			ColumnMetadata column = columnMetadata.get(i);
-			String columnLabel = column.getColumnLabel();
+		if (reportType == ReportType.ReportEngine) {
+			int columnCount;
+			if (optionsColumnCount > 0) {
+				columnCount = optionsColumnCount;
+			} else {
+				ResultSetMetaData rsmd = rs.getMetaData();
+				columnCount = rsmd.getColumnCount();
+			}
+			so.setTotalColumnCount(columnCount);
 
-			boolean isGroupColumn = false;
-			boolean isHeaderRow = false;
-			boolean isPivotData = false;
+			JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(rs);
+			PivotTableBuilder pivotTableBuilder = new PivotTableBuilder(rsInput);
+			rsInput.open();
 
-			if (CollectionUtils.isNotEmpty(groupColumns)) {
-				for (ReportEngineGroupColumn groupColumn : groupColumns) {
-					String id = groupColumn.getId();
-					if (StringUtils.equalsIgnoreCase(columnLabel, id)
-							|| StringUtils.equals(String.valueOf(i + 1), id)) {
-						isGroupColumn = true;
-						DefaultGroupColumn.Builder groupColumnBuilder = new DefaultGroupColumn.Builder(i);
-						groupColumnBuilder.header(columnLabel);
-						prepareGroupColumnBuilder(groupColumnBuilder, groupColumn);
-						pivotTableBuilder.addGroupColumn(groupColumnBuilder.build());
+			List<ColumnMetadata> columnMetadata = rsInput.getColumnMetadata();
+			for (int i = 0; i < columnMetadata.size(); i++) {
+				ColumnMetadata column = columnMetadata.get(i);
+				String columnLabel = column.getColumnLabel();
+
+				boolean isGroupColumn = false;
+				boolean isHeaderRow = false;
+				boolean isPivotData = false;
+
+				if (CollectionUtils.isNotEmpty(groupColumns)) {
+					for (ReportEngineGroupColumn groupColumn : groupColumns) {
+						String id = groupColumn.getId();
+						if (StringUtils.equalsIgnoreCase(columnLabel, id)
+								|| StringUtils.equals(String.valueOf(i + 1), id)) {
+							isGroupColumn = true;
+							DefaultGroupColumn.Builder groupColumnBuilder = new DefaultGroupColumn.Builder(i);
+							groupColumnBuilder.header(columnLabel);
+							prepareGroupColumnBuilder(groupColumnBuilder, groupColumn);
+							pivotTableBuilder.addGroupColumn(groupColumnBuilder.build());
+							break;
+						}
+					}
+				}
+
+				for (String headerRow : pivotHeaderRows) {
+					if (StringUtils.equalsIgnoreCase(columnLabel, headerRow)
+							|| StringUtils.equals(String.valueOf(i + 1), headerRow)) {
+						isHeaderRow = true;
+						pivotTableBuilder.addHeaderRow(new DefaultPivotHeaderRow(i));
 						break;
 					}
 				}
-			}
 
-			for (String headerRow : pivotHeaderRows) {
-				if (StringUtils.equalsIgnoreCase(columnLabel, headerRow)
-						|| StringUtils.equals(String.valueOf(i + 1), headerRow)) {
-					isHeaderRow = true;
-					pivotTableBuilder.addHeaderRow(new DefaultPivotHeaderRow(i));
-					break;
+				String pivotDataColumnId = pivotData.getId();
+				if (StringUtils.equalsIgnoreCase(columnLabel, pivotDataColumnId)
+						|| StringUtils.equals(String.valueOf(i + 1), pivotDataColumnId)) {
+					isPivotData = true;
+					DefaultPivotData.Builder pivotDataBuilder = new DefaultPivotData.Builder(i);
+					GroupCalculator groupCalculator = getGroupCalculator(pivotData, messageSource, locale);
+					if (groupCalculator != null) {
+						String calculatorFormatter = pivotData.getCalculatorFormatter();
+						if (StringUtils.isBlank(calculatorFormatter)) {
+							pivotDataBuilder.useCalculator(groupCalculator);
+						} else {
+							pivotDataBuilder.useCalculator(groupCalculator, calculatorFormatter);
+						}
+					}
+					pivotTableBuilder.pivotData(pivotDataBuilder.build());
+				}
+
+				if (!isGroupColumn && !isHeaderRow && !isPivotData) {
+					DefaultDataColumn.Builder dataColumnBuilder = new DefaultDataColumn.Builder(i);
+					dataColumnBuilder.header(columnLabel);
+					if (CollectionUtils.isNotEmpty(dataColumns)) {
+						for (ReportEngineDataColumn dataColumn : dataColumns) {
+							String id = dataColumn.getId();
+							if (StringUtils.equalsIgnoreCase(columnLabel, id)
+									|| StringUtils.equals(String.valueOf(i + 1), id)) {
+								prepareDataColumnBuilder(dataColumnBuilder, dataColumn, messageSource, locale);
+								break;
+							}
+						}
+					}
+					pivotTableBuilder.addDataColumn(dataColumnBuilder.build());
 				}
 			}
 
-			String pivotDataColumnId = pivotData.getId();
-			if (StringUtils.equalsIgnoreCase(columnLabel, pivotDataColumnId)
-					|| StringUtils.equals(String.valueOf(i + 1), pivotDataColumnId)) {
-				isPivotData = true;
-				DefaultPivotData.Builder pivotDataBuilder = new DefaultPivotData.Builder(i);
+			if (reportEngineOptions.isSortValues()) {
+				pivotTableBuilder.sortValues();
+			}
+			Boolean showTotals = reportEngineOptions.getShowTotals();
+			if (showTotals != null) {
+				pivotTableBuilder.showTotals(showTotals);
+			}
+			Boolean showGrandTotal = reportEngineOptions.getShowGrandTotal();
+			if (showGrandTotal != null) {
+				pivotTableBuilder.showGrandTotal(showGrandTotal);
+			}
+
+			PivotTable pivotTable = pivotTableBuilder.build();
+			Report report = new ReportBuilder(this)
+					.add(pivotTable)
+					.build();
+
+			//report execution    
+			report.execute();
+		} else if (reportType == ReportType.ReportEngineFile) {
+			if (CollectionUtils.isEmpty(dataColumns)) {
+				throw new IllegalStateException("dataColumns not specified");
+			}
+
+			int columnCount;
+			if (optionsColumnCount > 0) {
+				columnCount = optionsColumnCount;
+			} else {
+				columnCount = dataColumns.size();
+				if (CollectionUtils.isNotEmpty(groupColumns)) {
+					columnCount += groupColumns.size();
+				}
+			}
+			so.setTotalColumnCount(columnCount);
+
+			TableInput tableInput;
+			String separator = reportEngineOptions.getSeparator();
+			boolean firstLineIsHeader = reportEngineOptions.isFirstLineIsHeader();
+			String urlString = reportEngineOptions.getUrl();
+			InputStreamReader reader = null;
+			try {
+				if (StringUtils.isBlank(urlString)) {
+					String templateFileName = artReport.getTemplate();
+					String templatesPath = Config.getTemplatesPath();
+					String fullTemplateFileName = templatesPath + templateFileName;
+
+					logger.debug("templateFileName='{}'", templateFileName);
+
+					//need to explicitly check if template file is empty string
+					//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+					if (StringUtils.isBlank(templateFileName)) {
+						throw new IllegalArgumentException("Data file not specified");
+					}
+
+					File templateFile = new File(fullTemplateFileName);
+					if (!templateFile.exists()) {
+						throw new IllegalStateException("Data file not found: " + templateFileName);
+					}
+
+					String encoding = "UTF-8";
+					tableInput = new TextTableInput(fullTemplateFileName, separator, encoding, firstLineIsHeader);
+				} else {
+					URL url = new URL(urlString);
+					reader = new InputStreamReader(url.openStream());
+					tableInput = new TextTableInput(reader, separator, firstLineIsHeader);
+				}
+
+				PivotTableBuilder pivotTableBuilder = new PivotTableBuilder(tableInput);
+
+				if (CollectionUtils.isNotEmpty(groupColumns)) {
+					for (int i = 0; i < groupColumns.size(); i++) {
+						ReportEngineGroupColumn groupColumn = groupColumns.get(i);
+						int finalIndex;
+						Integer index = groupColumn.getIndex();
+						if (index == null) {
+							finalIndex = i;
+						} else {
+							finalIndex = index;
+						}
+						DefaultGroupColumn.Builder groupColumnBuilder = new DefaultGroupColumn.Builder(finalIndex);
+						groupColumnBuilder.header(groupColumn.getId());
+						prepareGroupColumnBuilder(groupColumnBuilder, groupColumn);
+						pivotTableBuilder.addGroupColumn(groupColumnBuilder.build());
+					}
+				}
+
+				for (int i = 0; i < dataColumns.size(); i++) {
+					ReportEngineDataColumn dataColumn = dataColumns.get(i);
+					int finalIndex;
+					Integer index = dataColumn.getIndex();
+					if (index == null) {
+						finalIndex = i;
+					} else {
+						finalIndex = index;
+					}
+					DefaultDataColumn.Builder dataColumnBuilder = new DefaultDataColumn.Builder(finalIndex);
+					dataColumnBuilder.header(dataColumn.getId());
+					prepareDataColumnBuilder(dataColumnBuilder, dataColumn, messageSource, locale);
+					pivotTableBuilder.addDataColumn(dataColumnBuilder.build());
+				}
+
+				for (String headerRow : pivotHeaderRows) {
+					int index = Integer.parseInt(headerRow);
+					pivotTableBuilder.addHeaderRow(new DefaultPivotHeaderRow(index));
+				}
+
+				String pivotDataColumnId = pivotData.getId();
+				int pivotDataIndex = Integer.parseInt(pivotDataColumnId);
+				DefaultPivotData.Builder pivotDataBuilder = new DefaultPivotData.Builder(pivotDataIndex);
 				GroupCalculator groupCalculator = getGroupCalculator(pivotData, messageSource, locale);
 				if (groupCalculator != null) {
 					String calculatorFormatter = pivotData.getCalculatorFormatter();
@@ -435,44 +600,36 @@ public class ReportEngineOutput extends AbstractReportOutput {
 					}
 				}
 				pivotTableBuilder.pivotData(pivotDataBuilder.build());
-			}
 
-			if (!isGroupColumn && !isHeaderRow && !isPivotData) {
-				DefaultDataColumn.Builder dataColumnBuilder = new DefaultDataColumn.Builder(i);
-				dataColumnBuilder.header(columnLabel);
-				if (CollectionUtils.isNotEmpty(dataColumns)) {
-					for (ReportEngineDataColumn dataColumn : dataColumns) {
-						String id = dataColumn.getId();
-						if (StringUtils.equalsIgnoreCase(columnLabel, id)
-								|| StringUtils.equals(String.valueOf(i + 1), id)) {
-							prepareDataColumnBuilder(dataColumnBuilder, dataColumn, messageSource, locale);
-							break;
-						}
+				if (reportEngineOptions.isSortValues()) {
+					pivotTableBuilder.sortValues();
+				}
+				Boolean showTotals = reportEngineOptions.getShowTotals();
+				if (showTotals != null) {
+					pivotTableBuilder.showTotals(showTotals);
+				}
+				Boolean showGrandTotal = reportEngineOptions.getShowGrandTotal();
+				if (showGrandTotal != null) {
+					pivotTableBuilder.showGrandTotal(showGrandTotal);
+				}
+
+				PivotTable pivotTable = pivotTableBuilder.build();
+				Report report = new ReportBuilder(this)
+						.add(pivotTable)
+						.build();
+
+				//report execution    
+				report.execute();
+			} finally {
+				if (reader != null) {
+					try {
+						reader.close();
+					} catch (IOException ex) {
+						logger.error("Error", ex);
 					}
 				}
-				pivotTableBuilder.addDataColumn(dataColumnBuilder.build());
 			}
 		}
-
-		if (reportEngineOptions.isSortValues()) {
-			pivotTableBuilder.sortValues();
-		}
-		Boolean showTotals = reportEngineOptions.getShowTotals();
-		if (showTotals != null) {
-			pivotTableBuilder.showTotals(showTotals);
-		}
-		Boolean showGrandTotal = reportEngineOptions.getShowGrandTotal();
-		if (showGrandTotal != null) {
-			pivotTableBuilder.showGrandTotal(showGrandTotal);
-		}
-
-		PivotTable pivotTable = pivotTableBuilder.build();
-		Report report = new ReportBuilder(this)
-				.add(pivotTable)
-				.build();
-
-		//report execution    
-		report.execute();
 	}
 
 	/**
