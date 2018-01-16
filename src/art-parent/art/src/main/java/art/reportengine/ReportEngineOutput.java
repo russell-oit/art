@@ -461,6 +461,12 @@ public class ReportEngineOutput extends AbstractReportOutput {
 							pivotDataBuilder.useCalculator(groupCalculator, calculatorFormatter);
 						}
 					}
+
+					String valuesFormatter = pivotData.getValuesFormatter();
+					if (StringUtils.isNotBlank(valuesFormatter)) {
+						pivotDataBuilder.valuesFormatter(valuesFormatter);
+					}
+
 					pivotTableBuilder.pivotData(pivotDataBuilder.build());
 				}
 
@@ -599,6 +605,12 @@ public class ReportEngineOutput extends AbstractReportOutput {
 						pivotDataBuilder.useCalculator(groupCalculator, calculatorFormatter);
 					}
 				}
+
+				String valuesFormatter = pivotData.getValuesFormatter();
+				if (StringUtils.isNotBlank(valuesFormatter)) {
+					pivotDataBuilder.valuesFormatter(valuesFormatter);
+				}
+
 				pivotTableBuilder.pivotData(pivotDataBuilder.build());
 
 				if (reportEngineOptions.isSortValues()) {
