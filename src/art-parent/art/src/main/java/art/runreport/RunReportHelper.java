@@ -258,6 +258,7 @@ public class RunReportHelper {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case ReportEngineFile:
 				enableShowSql = false;
 				enableShowSelectedParameters = false;
 				break;

@@ -430,6 +430,25 @@ Edit report page
 				var reportSourceLabel = "${reportSourceText} " + reportSourceType;
 				$("#reportSourceLabel").html(reportSourceLabel);
 
+				//show/hide source report id
+				switch (reportTypeId) {
+					case 115: //jasper template
+					case 117: //jxls template
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
+					case 137: //dygraphs csv server
+					case 139: //datatables csv local
+					case 140: //datatables csv server
+					case 145: //datamaps file
+					case 150: //saiku connection
+					case 159: //reportengine file
+						$("#sourceReportIdDiv").hide();
+						break;
+					default:
+						$("#sourceReportIdDiv").show();
+				}
+
 				//show/hide use rules
 				switch (reportTypeId) {
 					case 110: //dashboard
@@ -690,6 +709,21 @@ Edit report page
 						$("#tabularFields").hide();
 				}
 
+				//show/hide omit title row
+				switch (reportTypeId) {
+					case 0: //tabular
+					case 103: //tabular html
+					case 148: //tabular heatmap
+					case 101: //crosstab
+					case 102: //crosstab html
+					case 158: //reportengine
+					case 159: //reportengine file
+						$("#omitTitleRowDiv").show();
+						break;
+					default:
+						$("#omitTitleRowDiv").hide();
+				}
+
 				//show/hide fetch size
 				switch (reportTypeId) {
 					case 100: //update
@@ -768,6 +802,8 @@ Edit report page
 					case 126: //xdocreport odt velocity
 					case 117: //jxls template
 					case 118: //jxls art
+					case 158: //reportengine
+					case 159: //reportengine file
 						$("#openPasswordDiv").show();
 						$("#modifyPasswordDiv").show();
 						break;
@@ -801,6 +837,8 @@ Edit report page
 					case 128: //xdocreport pptx velocity
 					case 152: //csv
 					case 141: //fixed width
+					case 158: //reportengine
+					case 159: //reportengine file
 						$("#encryptorDiv").show();
 						break;
 					default:
@@ -1058,18 +1096,19 @@ Edit report page
 					</div>
 				</div>
 
-				<fieldset id="tabularFields">
-					<div class="form-group">
-						<label class="control-label col-md-4" for="omitTitleRow">
-							<spring:message code="reports.label.omitTitleRow"/>
-						</label>
-						<div class="col-md-8">
-							<div class="checkbox">
-								<form:checkbox path="omitTitleRow" id="omitTitleRow" class="switch-yes-no"/>
-							</div>
-							<form:errors path="omitTitleRow" cssClass="error"/>
+				<div id="omitTitleRowDiv" class="form-group">
+					<label class="control-label col-md-4" for="omitTitleRow">
+						<spring:message code="reports.label.omitTitleRow"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="omitTitleRow" id="omitTitleRow" class="switch-yes-no"/>
 						</div>
+						<form:errors path="omitTitleRow" cssClass="error"/>
 					</div>
+				</div>
+
+				<fieldset id="tabularFields">
 					<div class="form-group">
 						<label class="col-md-4 control-label " for="hiddenColumns">
 							<spring:message code="reports.label.hiddenColumns"/>
@@ -1505,7 +1544,7 @@ Edit report page
 					</div>
 				</fieldset>
 
-				<div class="form-group">
+				<div id="sourceReportIdDiv" class="form-group">
 					<label class="control-label col-md-4" for="sourceReportId">
 						<spring:message code="reports.label.sourceReport"/>
 					</label>
