@@ -68,6 +68,36 @@ public class JxlsOutput {
 
 	private ResultSet resultSet;
 	private Locale locale;
+	private String dynamicOpenPassword;
+	private String dynamicModifyPassword;
+
+	/**
+	 * @return the dynamicModifyPassword
+	 */
+	public String getDynamicModifyPassword() {
+		return dynamicModifyPassword;
+	}
+
+	/**
+	 * @param dynamicModifyPassword the dynamicModifyPassword to set
+	 */
+	public void setDynamicModifyPassword(String dynamicModifyPassword) {
+		this.dynamicModifyPassword = dynamicModifyPassword;
+	}
+
+	/**
+	 * @return the dynamicOpenPassword
+	 */
+	public String getDynamicOpenPassword() {
+		return dynamicOpenPassword;
+	}
+
+	/**
+	 * @param dynamicOpenPassword the dynamicOpenPassword to set
+	 */
+	public void setDynamicOpenPassword(String dynamicOpenPassword) {
+		this.dynamicOpenPassword = dynamicOpenPassword;
+	}
 
 	/**
 	 * @return the locale
@@ -187,7 +217,14 @@ public class JxlsOutput {
 			String extension = FilenameUtils.getExtension(templateFileName);
 			if (!StringUtils.equalsIgnoreCase(extension, "xls")) {
 				//set modify password
-				String modifyPassword = report.getModifyPassword();
+				String modifyPassword;
+				String reportModifyPassword = report.getModifyPassword();
+				if (StringUtils.isEmpty(reportModifyPassword)) {
+					modifyPassword = getDynamicModifyPassword();
+				} else {
+					modifyPassword = reportModifyPassword;
+				}
+
 				if (StringUtils.isNotEmpty(modifyPassword)) {
 					//https://poi.apache.org/spreadsheet/quick-guide.html#ReadWriteWorkbook
 					//https://stackoverflow.com/questions/17556108/open-existing-xls-in-apache-poi
@@ -207,7 +244,14 @@ public class JxlsOutput {
 				}
 
 				//set open password
-				String openPassword = report.getOpenPassword();
+				String openPassword;
+				String reportOpenPassword = report.getOpenPassword();
+				if (StringUtils.isEmpty(reportOpenPassword)) {
+					openPassword = getDynamicOpenPassword();
+				} else {
+					openPassword = reportOpenPassword;
+				}
+
 				if (StringUtils.isNotEmpty(openPassword)) {
 					PoiUtils.addOpenPassword(openPassword, outputFileName);
 				}

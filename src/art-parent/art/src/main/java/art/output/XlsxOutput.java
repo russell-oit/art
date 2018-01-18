@@ -278,8 +278,16 @@ public class XlsxOutput extends StandardOutput {
 		try {
 
 			//set modify password
-			if (StringUtils.isNotEmpty(report.getModifyPassword())) {
-				sheet.protectSheet(report.getModifyPassword());
+			String modifyPassword;
+			String reportModifyPassword = report.getModifyPassword();
+			if (StringUtils.isEmpty(reportModifyPassword)) {
+				modifyPassword = dynamicModifyPassword;
+			} else {
+				modifyPassword = reportModifyPassword;
+			}
+
+			if (StringUtils.isNotEmpty(modifyPassword)) {
+				sheet.protectSheet(modifyPassword);
 			}
 
 			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
@@ -290,7 +298,14 @@ public class XlsxOutput extends StandardOutput {
 			wb.dispose();
 
 			//set open password
-			String openPassword = report.getOpenPassword();
+			String openPassword;
+			String reportOpenPassword = report.getOpenPassword();
+			if (StringUtils.isEmpty(reportOpenPassword)) {
+				openPassword = dynamicOpenPassword;
+			} else {
+				openPassword = reportOpenPassword;
+			}
+
 			if (StringUtils.isNotEmpty(openPassword)) {
 				PoiUtils.addOpenPassword(openPassword, fullOutputFileName);
 			}

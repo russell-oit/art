@@ -169,7 +169,9 @@ public class DashboardController {
 				String fileName = baseFileName + "." + extension;
 				String outputFileName = exportPath + fileName;
 
-				PdfDashboard.generatePdf(paramProcessorResult, report, sessionUser, locale, outputFileName, messageSource);
+				String dynamicOpenPassword = null;
+				String dynamicModifyPassword = null;
+				PdfDashboard.generatePdf(paramProcessorResult, report, sessionUser, locale, outputFileName, messageSource, dynamicOpenPassword, dynamicModifyPassword);
 
 				request.setAttribute("reportFormat", "pdf");
 				request.setAttribute("fileName", fileName);

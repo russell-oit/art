@@ -76,7 +76,8 @@ public class PdfDashboard {
 
 	public static void generatePdf(ParameterProcessorResult paramProcessorResult,
 			Report dashboardReport, User user, Locale locale, String outputFileName,
-			MessageSource messageSource) throws Exception {
+			MessageSource messageSource, String dynamicOpenPassword,
+			String dynamicModifyPassword) throws Exception {
 
 		logger.debug("Entering generatePdf: dashboardReport={}, user={}, locale={}, outputFileName='{}'",
 				dashboardReport, user, locale, outputFileName);
@@ -207,7 +208,7 @@ public class PdfDashboard {
 				mergeFiles(reportFileNames, outputFileName);
 
 				PdfHelper pdfHelper = new PdfHelper();
-				pdfHelper.addProtections(dashboardReport, outputFileName);
+				pdfHelper.addProtections(dashboardReport, outputFileName, dynamicOpenPassword, dynamicModifyPassword);
 
 				//encrypt file if applicable
 				dashboardReport.encryptFile(outputFileName);

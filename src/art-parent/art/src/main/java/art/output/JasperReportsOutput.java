@@ -77,6 +77,36 @@ public class JasperReportsOutput {
 
 	private final List<String> completedSubReports = new ArrayList<>(); //used with recursive compileReport call
 	private ResultSet resultSet;
+	private String dynamicOpenPassword;
+	private String dynamicModifyPassword;
+
+	/**
+	 * @return the dynamicOpenPassword
+	 */
+	public String getDynamicOpenPassword() {
+		return dynamicOpenPassword;
+	}
+
+	/**
+	 * @param dynamicOpenPassword the dynamicOpenPassword to set
+	 */
+	public void setDynamicOpenPassword(String dynamicOpenPassword) {
+		this.dynamicOpenPassword = dynamicOpenPassword;
+	}
+
+	/**
+	 * @return the dynamicModifyPassword
+	 */
+	public String getDynamicModifyPassword() {
+		return dynamicModifyPassword;
+	}
+
+	/**
+	 * @param dynamicModifyPassword the dynamicModifyPassword to set
+	 */
+	public void setDynamicModifyPassword(String dynamicModifyPassword) {
+		this.dynamicModifyPassword = dynamicModifyPassword;
+	}
 
 	/**
 	 * @param resultSet the resultSet to set
@@ -192,7 +222,7 @@ public class JasperReportsOutput {
 					pdfExporter.exportReport();
 
 					PdfHelper pdfHelper = new PdfHelper();
-					pdfHelper.addProtections(report, outputFileName);
+					pdfHelper.addProtections(report, outputFileName, dynamicOpenPassword, dynamicModifyPassword);
 					break;
 				case html:
 					HtmlExporter htmlExporter = new HtmlExporter();

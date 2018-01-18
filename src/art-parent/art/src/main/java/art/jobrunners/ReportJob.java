@@ -121,6 +121,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
@@ -2166,12 +2167,13 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			reportRunner = prepareReportRunner(user);
 
+			Map<String, String> recipientColumns = null;
 			if (recipientFilterPresent) {
 				//enable report data to be filtered/different for each recipient
 				reportRunner.setRecipientFilterPresent(recipientFilterPresent);
 				for (Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 					//map should only have one value if filter present
-					Map<String, String> recipientColumns = entry.getValue();
+					recipientColumns = entry.getValue();
 					reportRunner.setRecipientColumn(recipientColumns.get(ArtUtils.RECIPIENT_COLUMN));
 					reportRunner.setRecipientId(recipientColumns.get(ArtUtils.RECIPIENT_ID));
 					reportRunner.setRecipientIdType(recipientColumns.get(ArtUtils.RECIPIENT_ID_TYPE));
@@ -2252,7 +2254,7 @@ public class ReportJob implements org.quartz.Job {
 
 				if (generateOutput) {
 					//generate output
-					String outputFileName = generateOutputFile(reportRunner, paramProcessorResult, user);
+					String outputFileName = generateOutputFile(reportRunner, paramProcessorResult, user, recipientColumns);
 
 					if (jobType == JobType.Print) {
 						printFile(outputFileName);
@@ -2440,11 +2442,14 @@ public class ReportJob implements org.quartz.Job {
 	 * @param reportRunner the report runner to use
 	 * @param paramProcessorResult the parameter processor result
 	 * @param user the user under whose permission the report is run
+	 * @param recipientColumns dynamic recipient columns for individual dynamic
+	 * recipient reports
 	 * @return the full path to the output file used
 	 * @throws Exception
 	 */
 	private String generateOutputFile(ReportRunner reportRunner,
-			ParameterProcessorResult paramProcessorResult, User user) throws Exception {
+			ParameterProcessorResult paramProcessorResult, User user,
+			Map<String, String> recipientColumns) throws Exception {
 
 		logger.debug("Entering generateOutputFile: user={}", user);
 
@@ -2509,8 +2514,17 @@ public class ReportJob implements org.quartz.Job {
 
 		String outputFileName = exportPath + fileName;
 
+		String dynamicOpenPassword = null;
+		String dynamicModifyPassword = null;
+		final String DYNAMIC_OPEN_PASSWORD_COLUMN_NAME = "open_password";
+		final String DYNAMIC_MODIFY_PASSWORD_COLUMN_NAME = "modify_password";
+		if (MapUtils.isNotEmpty(recipientColumns)) {
+			dynamicOpenPassword = recipientColumns.get(DYNAMIC_OPEN_PASSWORD_COLUMN_NAME);
+			dynamicModifyPassword = recipientColumns.get(DYNAMIC_MODIFY_PASSWORD_COLUMN_NAME);
+		}
+
 		if (reportType.isDashboard()) {
-			PdfDashboard.generatePdf(paramProcessorResult, report, user, locale, outputFileName, messageSource);
+			PdfDashboard.generatePdf(paramProcessorResult, report, user, locale, outputFileName, messageSource, dynamicOpenPassword, dynamicModifyPassword);
 		} else {
 			//create html file to output to as required
 			FileOutputStream fos = null;
@@ -2524,8 +2538,9 @@ public class ReportJob implements org.quartz.Job {
 
 			//generate output
 			ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
-
 			reportOutputGenerator.setIsJob(true);
+			reportOutputGenerator.setDynamicOpenPassword(dynamicOpenPassword);
+			reportOutputGenerator.setDynamicModifyPassword(dynamicModifyPassword);
 
 			try {
 				reportOutputGenerator.generateOutput(report, reportRunner,

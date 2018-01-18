@@ -559,13 +559,16 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 * @param report the report for the chart
 	 * @param pdfPageNumbers whether page numbers should be included in pdf
 	 * output
+	 * @param dynamicOpenPassword dynamic open password, for pdf output
+	 * @param dynamicModifyPassword dynamic modify password, for pdf output
 	 * @throws IOException
 	 * @throws DatasetProduceException
 	 * @throws ChartValidationException
 	 * @throws PostProcessingException
 	 */
 	public void generateFile(ReportFormat reportFormat, String outputFileName,
-			RowSetDynaClass data, Report report, boolean pdfPageNumbers)
+			RowSetDynaClass data, Report report, boolean pdfPageNumbers,
+			String dynamicOpenPassword, String dynamicModifyPassword)
 			throws IOException, DatasetProduceException, ChartValidationException,
 			PostProcessingException {
 
@@ -584,7 +587,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			case pdf:
 				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList, report, pdfPageNumbers);
 				PdfHelper pdfHelper = new PdfHelper();
-				pdfHelper.addProtections(report, outputFileName);
+				pdfHelper.addProtections(report, outputFileName, dynamicOpenPassword, dynamicModifyPassword);
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported report format: " + reportFormat);

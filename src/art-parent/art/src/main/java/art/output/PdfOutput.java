@@ -325,7 +325,7 @@ public class PdfOutput extends StandardOutput {
 				document.close();
 
 				PdfHelper pdfHelper = new PdfHelper();
-				pdfHelper.addProtections(report, fullOutputFileName);
+				pdfHelper.addProtections(report, fullOutputFileName, dynamicOpenPassword, dynamicModifyPassword);
 			}
 		} catch (DocumentException | IOException ex) {
 			throw new RuntimeException(ex);

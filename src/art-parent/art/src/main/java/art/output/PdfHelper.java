@@ -135,9 +135,12 @@ public class PdfHelper {
 	 * @param report the report object for the report associated with the file.
 	 * The repot object contains pdf options e.g. whether one can print
 	 * @param fullOutputFileName the full file path to the pdf file
+	 * @param dynamicOpenPassword dynamic open password
+	 * @param dynamicModifyPassword dynamic modify password
 	 * @throws java.io.IOException
 	 */
-	public void addProtections(Report report, String fullOutputFileName) throws IOException {
+	public void addProtections(Report report, String fullOutputFileName,
+			String dynamicOpenPassword, String dynamicModifyPassword) throws IOException {
 		//https://www.tutorialspoint.com/pdfbox/
 		//https://self-learning-java-tutorial.blogspot.co.ke/2016/03/pdfbox-encrypt-password-protect-pdf.html
 		//https://pdfbox.apache.org/2.0/cookbook/encryption.html
@@ -149,12 +152,26 @@ public class PdfHelper {
 			return;
 		}
 
-		String userPassword = report.getOpenPassword();
+		String userPassword;
+		String reportOpenPassword = report.getOpenPassword();
+		if (StringUtils.isEmpty(reportOpenPassword)) {
+			userPassword = dynamicOpenPassword;
+		} else {
+			userPassword = reportOpenPassword;
+		}
+
 		if (userPassword == null) {
 			userPassword = "";
 		}
 
-		String ownerPassword = report.getModifyPassword();
+		String ownerPassword;
+		String reportModifyPassword = report.getModifyPassword();
+		if (StringUtils.isEmpty(reportModifyPassword)) {
+			ownerPassword = dynamicModifyPassword;
+		} else {
+			ownerPassword = reportModifyPassword;
+		}
+
 		if (ownerPassword == null) {
 			ownerPassword = "";
 		}

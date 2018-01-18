@@ -141,6 +141,36 @@ public class ReportOutputGenerator {
 	private DrilldownService drilldownService;
 	private boolean isJob = false;
 	private boolean pdfPageNumbers = true;
+	private String dynamicOpenPassword;
+	private String dynamicModifyPassword;
+
+	/**
+	 * @return the dynamicOpenPassword
+	 */
+	public String getDynamicOpenPassword() {
+		return dynamicOpenPassword;
+	}
+
+	/**
+	 * @param dynamicOpenPassword the dynamicOpenPassword to set
+	 */
+	public void setDynamicOpenPassword(String dynamicOpenPassword) {
+		this.dynamicOpenPassword = dynamicOpenPassword;
+	}
+
+	/**
+	 * @return the dynamicModifyPassword
+	 */
+	public String getDynamicModifyPassword() {
+		return dynamicModifyPassword;
+	}
+
+	/**
+	 * @param dynamicModifyPassword the dynamicModifyPassword to set
+	 */
+	public void setDynamicModifyPassword(String dynamicModifyPassword) {
+		this.dynamicModifyPassword = dynamicModifyPassword;
+	}
 
 	/**
 	 * @return the pdfPageNumbers
@@ -299,15 +329,19 @@ public class ReportOutputGenerator {
 			if (reportType.isJasperReports() || reportType.isJxls()) {
 				if (reportType.isJasperReports()) {
 					JasperReportsOutput jrOutput = new JasperReportsOutput();
+					jrOutput.setDynamicOpenPassword(dynamicOpenPassword);
+					jrOutput.setDynamicModifyPassword(dynamicModifyPassword);
 					if (reportType == ReportType.JasperReportsArt) {
 						rs = reportRunner.getResultSet();
 						jrOutput.setResultSet(rs);
 					}
-
+					
 					jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
 				} else if (reportType.isJxls()) {
 					JxlsOutput jxlsOutput = new JxlsOutput();
 					jxlsOutput.setLocale(locale);
+					jxlsOutput.setDynamicOpenPassword(dynamicOpenPassword);
+					jxlsOutput.setDynamicModifyPassword(dynamicModifyPassword);
 					if (reportType == ReportType.JxlsArt) {
 						rs = reportRunner.getResultSet();
 						jxlsOutput.setResultSet(rs);
@@ -407,7 +441,7 @@ public class ReportOutputGenerator {
 				}
 
 				if (isJob) {
-					chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers);
+					chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword);
 				} else {
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
@@ -425,7 +459,7 @@ public class ReportOutputGenerator {
 							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
 						}
 					} else {
-						chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers);
+						chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword);
 						displayFileLink(fileName);
 					}
 					rowsRetrieved = getResultSetRowCount(rs);
@@ -463,6 +497,8 @@ public class ReportOutputGenerator {
 				standardOutput.setIsJob(isJob);
 				standardOutput.setPdfPageNumbers(pdfPageNumbers);
 				standardOutput.setReport(report);
+				standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
+				standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
 
 				if (request != null) {
 					standardOutput.setContextPath(contextPath);
@@ -1410,6 +1446,8 @@ public class ReportOutputGenerator {
 				standardOutput.setIsJob(isJob);
 				standardOutput.setPdfPageNumbers(pdfPageNumbers);
 				standardOutput.setReport(report);
+				standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
+				standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
 
 				if (request != null) {
 					standardOutput.setContextPath(contextPath);

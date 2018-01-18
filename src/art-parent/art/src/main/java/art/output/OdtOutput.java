@@ -187,7 +187,7 @@ public class OdtOutput extends StandardOutput {
 	@Override
 	public void addCellImage(byte[] binaryData) {
 		outputCellText("");
-				
+
 		//cell.setImage() or Image.newImage() doesn't release handle to image file
 //		if (binaryData == null) {
 //			outputCellText("");
@@ -242,7 +242,14 @@ public class OdtOutput extends StandardOutput {
 		try {
 			if (document != null) {
 				//set open password
-				String openPassword = report.getOpenPassword();
+				String openPassword;
+				String reportOpenPassword = report.getOpenPassword();
+				if (StringUtils.isEmpty(reportOpenPassword)) {
+					openPassword = dynamicOpenPassword;
+				} else {
+					openPassword = reportOpenPassword;
+				}
+
 				if (StringUtils.isNotEmpty(openPassword)) {
 					document.setPassword(openPassword);
 				}
