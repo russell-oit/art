@@ -40,7 +40,6 @@ import art.output.FixedWidthOutput;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.GroupHtmlOutput;
-import art.output.GroupOutput;
 import art.output.GroupXlsxOutput;
 import art.output.HtmlDataTableOutput;
 import art.output.HtmlFancyOutput;
@@ -335,7 +334,7 @@ public class ReportOutputGenerator {
 						rs = reportRunner.getResultSet();
 						jrOutput.setResultSet(rs);
 					}
-					
+
 					jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
 				} else if (reportType.isJxls()) {
 					JxlsOutput jxlsOutput = new JxlsOutput();
@@ -367,27 +366,21 @@ public class ReportOutputGenerator {
 					splitColumn = report.getGroupColumn();
 				}
 
-				GroupOutput groupOutput;
 				switch (reportFormat) {
 					case html:
-						groupOutput = new GroupHtmlOutput();
-						groupOutput.setWriter(writer);
-						groupOutput.setContextPath(contextPath);
+						GroupHtmlOutput groupHtmlOutput = new GroupHtmlOutput();
+						rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
 						break;
 					case xlsx:
-						groupOutput = new GroupXlsxOutput();
-						groupOutput.setReportName(report.getLocalizedName(locale));
-						groupOutput.setFullOutputFileName(fullOutputFilename);
-						groupOutput.setReport(report);
+						GroupXlsxOutput groupXlsxOutput = new GroupXlsxOutput();
+						String reportName = report.getLocalizedName(locale);
+						rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
+						if (!isJob) {
+							displayFileLink(fileName);
+						}
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
-				}
-
-				rowsRetrieved = groupOutput.generateGroupReport(rs, splitColumn);
-
-				if (!isJob && reportFormat == ReportFormat.xlsx) {
-					displayFileLink(fileName);
 				}
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
