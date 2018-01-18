@@ -452,6 +452,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 						|| StringUtils.equals(String.valueOf(i + 1), pivotDataColumnId)) {
 					isPivotData = true;
 					DefaultPivotData.Builder pivotDataBuilder = new DefaultPivotData.Builder(i);
+					@SuppressWarnings("rawtypes")
 					GroupCalculator groupCalculator = getGroupCalculator(pivotData, messageSource, locale);
 					if (groupCalculator != null) {
 						String calculatorFormatter = pivotData.getCalculatorFormatter();
@@ -596,6 +597,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 				String pivotDataColumnId = pivotData.getId();
 				int pivotDataIndex = Integer.parseInt(pivotDataColumnId);
 				DefaultPivotData.Builder pivotDataBuilder = new DefaultPivotData.Builder(pivotDataIndex);
+				@SuppressWarnings("rawtypes")
 				GroupCalculator groupCalculator = getGroupCalculator(pivotData, messageSource, locale);
 				if (groupCalculator != null) {
 					String calculatorFormatter = pivotData.getCalculatorFormatter();
@@ -653,6 +655,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 	 * @param locale the locale
 	 * @return a group calculator, null if none is defined
 	 */
+	@SuppressWarnings("rawtypes")
 	public GroupCalculator getGroupCalculator(ReportEngineDataColumn dataColumn,
 			MessageSource messageSource, Locale locale) {
 
@@ -708,6 +711,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 	public void prepareDataColumnBuilder(DefaultDataColumn.Builder dataColumnBuilder,
 			ReportEngineDataColumn dataColumn, MessageSource messageSource, Locale locale) {
 
+		@SuppressWarnings("rawtypes")
 		GroupCalculator groupCalculator = getGroupCalculator(dataColumn, messageSource, locale);
 		if (groupCalculator != null) {
 			String calculatorFormatter = dataColumn.getCalculatorFormatter();
