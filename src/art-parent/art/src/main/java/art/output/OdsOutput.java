@@ -245,13 +245,7 @@ public class OdsOutput extends StandardOutput {
 		try {
 			if (document != null) {
 				//set open password
-				String openPassword;
-				String reportOpenPassword = report.getOpenPassword();
-				if (StringUtils.isEmpty(reportOpenPassword)) {
-					openPassword = dynamicOpenPassword;
-				} else {
-					openPassword = reportOpenPassword;
-				}
+				String openPassword = getEffectiveOpenPassword();
 
 				if (StringUtils.isNotEmpty(openPassword)) {
 					document.setPassword(openPassword);

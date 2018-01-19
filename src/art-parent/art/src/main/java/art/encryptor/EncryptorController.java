@@ -58,7 +58,7 @@ public class EncryptorController {
 
 	@Autowired
 	private EncryptorService encryptorService;
-	
+
 	@Autowired
 	private ReportService reportService;
 
@@ -345,6 +345,63 @@ public class EncryptorController {
 		String encryptedSigningKeyPassphrase = AesEncryptor.encrypt(newSigningKeyPassphrase);
 		encryptor.setOpenPgpSigningKeyPassphrase(encryptedSigningKeyPassphrase);
 
+		//set open password
+		boolean useCurrentOpenPassword = false;
+		String newOpenPassword = encryptor.getOpenPassword();
+
+		if (encryptor.isUseNoneOpenPassword()) {
+			newOpenPassword = null;
+		} else if (StringUtils.isEmpty(newOpenPassword) && StringUtils.equals(action, "edit")) {
+			//password field blank. use current password
+			useCurrentOpenPassword = true;
+		}
+
+		if (useCurrentOpenPassword) {
+			//password field blank. use current password
+			Encryptor currentEncryptor = encryptorService.getEncryptor(encryptor.getEncryptorId());
+			if (currentEncryptor == null) {
+				return "page.message.cannotUseCurrentPassword";
+			} else {
+				newOpenPassword = currentEncryptor.getOpenPassword();
+			}
+		}
+
+		//encrypt new password
+		if (StringUtils.equals(newOpenPassword, "")) {
+			//if password set as empty string, there is no way to specify empty string as password for xlsx workbooks
+			newOpenPassword = null;
+		}
+		String encryptedOpenPassword = AesEncryptor.encrypt(newOpenPassword);
+		encryptor.setOpenPassword(encryptedOpenPassword);
+
+		//set modify password
+		boolean useCurrentModifyPassword = false;
+		String newModifyPassword = encryptor.getModifyPassword();
+
+		if (encryptor.isUseNoneModifyPassword()) {
+			newModifyPassword = null;
+		} else if (StringUtils.isEmpty(newModifyPassword) && StringUtils.equals(action, "edit")) {
+			//password field blank. use current password
+			useCurrentModifyPassword = true;
+		}
+
+		if (useCurrentModifyPassword) {
+			//password field blank. use current password
+			Encryptor currentEncryptor = encryptorService.getEncryptor(encryptor.getEncryptorId());
+			if (currentEncryptor == null) {
+				return "page.message.cannotUseCurrentPassword";
+			} else {
+				newModifyPassword = currentEncryptor.getModifyPassword();
+			}
+		}
+
+		//encrypt new password
+		if (StringUtils.equals(newModifyPassword, "")) {
+			newModifyPassword = null;
+		}
+		String encryptedModifyPassword = AesEncryptor.encrypt(newModifyPassword);
+		encryptor.setModifyPassword(encryptedModifyPassword);
+
 		return null;
 	}
 
@@ -476,7 +533,7 @@ public class EncryptorController {
 
 		return null;
 	}
-	
+
 	@RequestMapping(value = "/reportsWithEncryptor", method = RequestMethod.GET)
 	public String showReportsWithEncryptor(@RequestParam("encryptorId") Integer encryptorId, Model model) {
 		logger.debug("Entering showReportsWithEncryptor: encryptorId={}", encryptorId);

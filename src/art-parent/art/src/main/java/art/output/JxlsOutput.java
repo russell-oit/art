@@ -198,9 +198,9 @@ public class JxlsOutput {
 				templateResultOptions = ArtUtils.jsonToObject(options, TemplateResultOptions.class);
 			}
 
+			RunReportHelper runReportHelper = new RunReportHelper();
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
-				RunReportHelper runReportHelper = new RunReportHelper();
 				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
 				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn, templateResultOptions);
 				context.putVar("jdbc", jdbcHelper);
@@ -217,13 +217,7 @@ public class JxlsOutput {
 			String extension = FilenameUtils.getExtension(templateFileName);
 			if (!StringUtils.equalsIgnoreCase(extension, "xls")) {
 				//set modify password
-				String modifyPassword;
-				String reportModifyPassword = report.getModifyPassword();
-				if (StringUtils.isEmpty(reportModifyPassword)) {
-					modifyPassword = getDynamicModifyPassword();
-				} else {
-					modifyPassword = reportModifyPassword;
-				}
+				String modifyPassword = runReportHelper.getEffectiveModifyPassword(report, dynamicModifyPassword);
 
 				if (StringUtils.isNotEmpty(modifyPassword)) {
 					//https://poi.apache.org/spreadsheet/quick-guide.html#ReadWriteWorkbook
@@ -244,13 +238,7 @@ public class JxlsOutput {
 				}
 
 				//set open password
-				String openPassword;
-				String reportOpenPassword = report.getOpenPassword();
-				if (StringUtils.isEmpty(reportOpenPassword)) {
-					openPassword = getDynamicOpenPassword();
-				} else {
-					openPassword = reportOpenPassword;
-				}
+				String openPassword = runReportHelper.getEffectiveOpenPassword(report, dynamicOpenPassword);
 
 				if (StringUtils.isNotEmpty(openPassword)) {
 					PoiUtils.addOpenPassword(openPassword, outputFileName);

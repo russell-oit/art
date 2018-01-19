@@ -94,6 +94,8 @@ public class EncryptorService {
 			encryptor.setOpenPgpPublicKeyString(rs.getString("OPENPGP_PUBLIC_KEY_STRING"));
 			encryptor.setOpenPgpSigningKeyFile(rs.getString("OPENPGP_SIGNING_KEY_FILE"));
 			encryptor.setOpenPgpSigningKeyPassphrase(rs.getString("OPENPGP_SIGNING_KEY_PASSPHRASE"));
+			encryptor.setOpenPassword(rs.getString("OPEN_PASSWORD"));
+			encryptor.setModifyPassword(rs.getString("MODIFY_PASSWORD"));
 			encryptor.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			encryptor.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			encryptor.setCreatedBy(rs.getString("CREATED_BY"));
@@ -107,6 +109,14 @@ public class EncryptorService {
 			String openPgpSigningKeyPassphrase = encryptor.getOpenPgpSigningKeyPassphrase();
 			openPgpSigningKeyPassphrase = AesEncryptor.decrypt(openPgpSigningKeyPassphrase);
 			encryptor.setOpenPgpSigningKeyPassphrase(openPgpSigningKeyPassphrase);
+
+			String openPassword = encryptor.getOpenPassword();
+			openPassword = AesEncryptor.decrypt(openPassword);
+			encryptor.setOpenPassword(openPassword);
+
+			String modifyPassword = encryptor.getModifyPassword();
+			modifyPassword = AesEncryptor.decrypt(modifyPassword);
+			encryptor.setModifyPassword(modifyPassword);
 
 			return type.cast(encryptor);
 		}
@@ -268,9 +278,10 @@ public class EncryptorService {
 					+ " (ENCRYPTOR_ID, NAME, DESCRIPTION, ACTIVE, ENCRYPTOR_TYPE,"
 					+ " AESCRYPT_PASSWORD, OPENPGP_PUBLIC_KEY_FILE,"
 					+ " OPENPGP_PUBLIC_KEY_STRING, OPENPGP_SIGNING_KEY_FILE,"
-					+ " OPENPGP_SIGNING_KEY_PASSPHRASE,"
+					+ " OPENPGP_SIGNING_KEY_PASSPHRASE, OPEN_PASSWORD,"
+					+ " MODIFY_PASSWORD,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -283,6 +294,8 @@ public class EncryptorService {
 				encryptor.getOpenPgpPublicKeyString(),
 				encryptor.getOpenPgpSigningKeyFile(),
 				encryptor.getOpenPgpSigningKeyPassphrase(),
+				encryptor.getOpenPassword(),
+				encryptor.getModifyPassword(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -293,6 +306,7 @@ public class EncryptorService {
 					+ " ACTIVE=?, ENCRYPTOR_TYPE=?, AESCRYPT_PASSWORD=?,"
 					+ " OPENPGP_PUBLIC_KEY_FILE=?, OPENPGP_PUBLIC_KEY_STRING=?,"
 					+ " OPENPGP_SIGNING_KEY_FILE=?, OPENPGP_SIGNING_KEY_PASSPHRASE=?,"
+					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE ENCRYPTOR_ID=?";
 
@@ -306,6 +320,8 @@ public class EncryptorService {
 				encryptor.getOpenPgpPublicKeyString(),
 				encryptor.getOpenPgpSigningKeyFile(),
 				encryptor.getOpenPgpSigningKeyPassphrase(),
+				encryptor.getOpenPassword(),
+				encryptor.getModifyPassword(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				encryptor.getEncryptorId()

@@ -19,6 +19,7 @@ package art.output;
 
 import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
+import art.runreport.RunReportHelper;
 import art.utils.ArtUtils;
 import java.io.*;
 import java.security.GeneralSecurityException;
@@ -276,15 +277,9 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void endOutput() {
 		try {
-
 			//set modify password
-			String modifyPassword;
-			String reportModifyPassword = report.getModifyPassword();
-			if (StringUtils.isEmpty(reportModifyPassword)) {
-				modifyPassword = dynamicModifyPassword;
-			} else {
-				modifyPassword = reportModifyPassword;
-			}
+			RunReportHelper runReportHelper = new RunReportHelper();
+			String modifyPassword = runReportHelper.getEffectiveModifyPassword(report, dynamicModifyPassword);
 
 			if (StringUtils.isNotEmpty(modifyPassword)) {
 				sheet.protectSheet(modifyPassword);
@@ -298,13 +293,7 @@ public class XlsxOutput extends StandardOutput {
 			wb.dispose();
 
 			//set open password
-			String openPassword;
-			String reportOpenPassword = report.getOpenPassword();
-			if (StringUtils.isEmpty(reportOpenPassword)) {
-				openPassword = dynamicOpenPassword;
-			} else {
-				openPassword = reportOpenPassword;
-			}
+			String openPassword = getEffectiveOpenPassword();
 
 			if (StringUtils.isNotEmpty(openPassword)) {
 				PoiUtils.addOpenPassword(openPassword, fullOutputFileName);

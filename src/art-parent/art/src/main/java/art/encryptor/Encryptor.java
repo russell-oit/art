@@ -43,6 +43,66 @@ public class Encryptor implements Serializable {
 	private String openPgpPublicKeyString;
 	private String openPgpSigningKeyFile;
 	private String openPgpSigningKeyPassphrase;
+	private String openPassword;
+	private String modifyPassword;
+	private boolean useNoneOpenPassword; //only for use with ui
+	private boolean useNoneModifyPassword; //only for use with ui
+
+	/**
+	 * @return the openPassword
+	 */
+	public String getOpenPassword() {
+		return openPassword;
+	}
+
+	/**
+	 * @param openPassword the openPassword to set
+	 */
+	public void setOpenPassword(String openPassword) {
+		this.openPassword = openPassword;
+	}
+
+	/**
+	 * @return the modifyPassword
+	 */
+	public String getModifyPassword() {
+		return modifyPassword;
+	}
+
+	/**
+	 * @param modifyPassword the modifyPassword to set
+	 */
+	public void setModifyPassword(String modifyPassword) {
+		this.modifyPassword = modifyPassword;
+	}
+
+	/**
+	 * @return the useNoneOpenPassword
+	 */
+	public boolean isUseNoneOpenPassword() {
+		return useNoneOpenPassword;
+	}
+
+	/**
+	 * @param useNoneOpenPassword the useNoneOpenPassword to set
+	 */
+	public void setUseNoneOpenPassword(boolean useNoneOpenPassword) {
+		this.useNoneOpenPassword = useNoneOpenPassword;
+	}
+
+	/**
+	 * @return the useNoneModifyPassword
+	 */
+	public boolean isUseNoneModifyPassword() {
+		return useNoneModifyPassword;
+	}
+
+	/**
+	 * @param useNoneModifyPassword the useNoneModifyPassword to set
+	 */
+	public void setUseNoneModifyPassword(boolean useNoneModifyPassword) {
+		this.useNoneModifyPassword = useNoneModifyPassword;
+	}
 
 	/**
 	 * @return the openPgpPublicKeyFile

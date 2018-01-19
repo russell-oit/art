@@ -18,6 +18,7 @@
 package art.output;
 
 import art.report.Report;
+import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -196,14 +197,10 @@ public class GroupXlsxOutput {
 	private void endOutput() {
 		try {
 			if (fout != null) {
+				RunReportHelper runReportHelper = new RunReportHelper();
+
 				//set modify password
-				String modifyPassword;
-				String reportModifyPassword = report.getModifyPassword();
-				if (StringUtils.isEmpty(reportModifyPassword)) {
-					modifyPassword = dynamicModifyPassword;
-				} else {
-					modifyPassword = reportModifyPassword;
-				}
+				String modifyPassword = runReportHelper.getEffectiveModifyPassword(report, dynamicModifyPassword);
 
 				if (sheet != null && StringUtils.isNotEmpty(modifyPassword)) {
 					sheet.protectSheet(modifyPassword);
@@ -215,13 +212,7 @@ public class GroupXlsxOutput {
 				fout.close();
 
 				//set open password
-				String openPassword;
-				String reportOpenPassword = report.getOpenPassword();
-				if (StringUtils.isEmpty(reportOpenPassword)) {
-					openPassword = dynamicOpenPassword;
-				} else {
-					openPassword = reportOpenPassword;
-				}
+				String openPassword = runReportHelper.getEffectiveOpenPassword(report, dynamicOpenPassword);
 
 				if (StringUtils.isNotEmpty(openPassword)) {
 					PoiUtils.addOpenPassword(openPassword, fullOutputFileName);

@@ -20,6 +20,7 @@ package art.output;
 import art.enums.PageOrientation;
 import art.report.Report;
 import art.reportoptions.PdfOptions;
+import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.Document;
@@ -152,29 +153,9 @@ public class PdfHelper {
 			return;
 		}
 
-		String userPassword;
-		String reportOpenPassword = report.getOpenPassword();
-		if (StringUtils.isEmpty(reportOpenPassword)) {
-			userPassword = dynamicOpenPassword;
-		} else {
-			userPassword = reportOpenPassword;
-		}
-
-		if (userPassword == null) {
-			userPassword = "";
-		}
-
-		String ownerPassword;
-		String reportModifyPassword = report.getModifyPassword();
-		if (StringUtils.isEmpty(reportModifyPassword)) {
-			ownerPassword = dynamicModifyPassword;
-		} else {
-			ownerPassword = reportModifyPassword;
-		}
-
-		if (ownerPassword == null) {
-			ownerPassword = "";
-		}
+		RunReportHelper runReportHelper = new RunReportHelper();
+		String userPassword = runReportHelper.getEffectiveOpenPassword(report, dynamicOpenPassword);
+		String ownerPassword = runReportHelper.getEffectiveModifyPassword(report, dynamicModifyPassword);
 
 		String options = report.getOptions();
 		PdfOptions pdfOptions;
@@ -185,7 +166,7 @@ public class PdfHelper {
 			pdfOptions = mapper.readValue(options, PdfOptions.class);
 		}
 
-		if (StringUtils.equals(userPassword, "") && StringUtils.equals(ownerPassword, "")
+		if (StringUtils.isEmpty(userPassword) && StringUtils.isEmpty(ownerPassword)
 				&& pdfOptions.isPdfCanPrint() && pdfOptions.isPdfCanCopyContent()
 				&& pdfOptions.isPdfCanModify()) {
 			//nothing to secure
@@ -201,6 +182,14 @@ public class PdfHelper {
 
 			// Owner password (to open the file with all permissions)
 			// User password (to open the file but with restricted permissions)
+			if (userPassword == null) {
+				userPassword = "";
+			}
+
+			if (ownerPassword == null) {
+				ownerPassword = "";
+			}
+
 			StandardProtectionPolicy spp = new StandardProtectionPolicy(ownerPassword, userPassword, ap);
 			int keyLength = pdfOptions.getKeyLength();
 			spp.setEncryptionKeyLength(keyLength);

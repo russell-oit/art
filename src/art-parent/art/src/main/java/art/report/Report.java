@@ -1068,7 +1068,7 @@ public class Report implements Serializable {
 				encryptFileOpenPgp(finalFileName);
 				break;
 			default:
-			//do nothing
+				break;
 		}
 	}
 

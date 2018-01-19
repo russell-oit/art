@@ -30,6 +30,7 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
 import art.reportoptions.StandardOutputOptions;
+import art.runreport.RunReportHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
@@ -2244,5 +2245,15 @@ public abstract class StandardOutput {
 		}
 
 		return localizedColumnNames;
+	}
+	
+	/**
+	 * Returns the open password to use for a report's output file
+	 * 
+	 * @return the open password to use for a report's output file
+	 */
+	protected String getEffectiveOpenPassword() {
+		RunReportHelper runReportHelper= new RunReportHelper();
+		return runReportHelper.getEffectiveOpenPassword(report, dynamicOpenPassword);
 	}
 }

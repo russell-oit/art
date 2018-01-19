@@ -4,6 +4,7 @@
 -- update database version
 -- add job error notification to column
 -- add reference records for new report types
+-- add fields for password encryptor type
 
 -- ------------------------------------------------
 
@@ -17,3 +18,7 @@ ALTER TABLE ART_JOBS ADD ERROR_EMAIL_TO VARCHAR(500);
 -- add reference records for new report types
 INSERT INTO ART_REPORT_TYPES VALUES (158,'ReportEngine');
 INSERT INTO ART_REPORT_TYPES VALUES (159,'ReportEngine: File');
+
+-- add fields for password encryptor type
+ALTER TABLE ART_ENCRYPTORS ADD OPEN_PASSWORD VARCHAR(200);
+ALTER TABLE ART_ENCRYPTORS ADD MODIFY_PASSWORD VARCHAR(200);
