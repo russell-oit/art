@@ -4,6 +4,7 @@ ART 3.3
 * Fix for double values only showing one decimal value by default
 * Allow dynamic recipient query to specify file open or modify password
 * Added password encryptor
+* Fix for multiple c3.js reports within a dashboad not displaying correctly
 
 ART 3.2
 * Added Velocity report type

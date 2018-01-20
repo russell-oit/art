@@ -9,7 +9,7 @@
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<div id="chart">
+<div id="${chartId}">
 
 </div>
 
@@ -26,7 +26,7 @@
 	};
 
 	var options = {
-		bindto: '#chart',
+		bindto: '#${chartId}',
 		data: data
 	};
 </script>

@@ -115,6 +115,7 @@ import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -912,6 +913,8 @@ public class ReportOutputGenerator {
 					}
 				}
 
+				String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("chartId", chartId);
 				request.setAttribute("templateFileName", templateFileName);
 				request.setAttribute("data", jsonData);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
