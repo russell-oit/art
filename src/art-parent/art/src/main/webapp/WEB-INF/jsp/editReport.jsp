@@ -443,6 +443,13 @@ Edit report page
 					case 145: //datamaps file
 					case 150: //saiku connection
 					case 159: //reportengine file
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 156: //org chart list
+					case 149: //saiku report
+					case 155: //org chart json
+					case 151: //mongodb
+					case 111: //text
 						$("#sourceReportIdDiv").hide();
 						break;
 					default:
