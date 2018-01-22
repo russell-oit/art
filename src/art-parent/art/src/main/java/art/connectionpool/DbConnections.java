@@ -53,6 +53,7 @@ public class DbConnections {
 
 	private static Map<Integer, ConnectionPool> connectionPoolMap;
 	private static Map<Integer, MongoClient> mongodbConnections;
+	private static final int ART_DATABASE2_DATASOURCE_ID = -2;
 
 	/**
 	 * Creates connections to all report databases. Connections are pooled.
@@ -78,6 +79,12 @@ public class DbConnections {
 
 		//create connection pool for the art database
 		createConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
+
+		//create second art database connection pool - for use with autoCommit(false) connections
+		artDbConfig.setName("ART Database 2");
+		artDbConfig.setDatasourceId(ART_DATABASE2_DATASOURCE_ID);
+		createConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
+
 		//create connection pools for report databases
 		createJdbcDatasourceConnectionPools(maxPoolSize, connectionPoolLibrary);
 		createMongodbDatasourceConnectionPools();
@@ -144,9 +151,10 @@ public class DbConnections {
 	 * @param datasourceInfo the datasource details
 	 * @param maxPoolSize the maximum pool size
 	 * @param connectionPoolLibrary the connection pool library
+	 * @param autoCommit the auto commit setting for the connection
 	 */
-	public static void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
-			ConnectionPoolLibrary connectionPoolLibrary) {
+	public static void createConnectionPool(DatasourceInfo datasourceInfo,
+			int maxPoolSize, ConnectionPoolLibrary connectionPoolLibrary) {
 
 		logger.debug("Entering createConnectionPool");
 
@@ -261,6 +269,20 @@ public class DbConnections {
 		logger.debug("Entering getArtDbConnection");
 
 		return getConnection(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
+	}
+
+	/**
+	 * Returns the second connection to ART database, with auto commit off
+	 *
+	 * @return the second connection to the ART database, with auto commit off
+	 * @throws java.sql.SQLException
+	 */
+	public static Connection getArtDb2Connection() throws SQLException {
+		logger.debug("Entering getArtDb2Connection");
+
+		Connection conn = getConnection(ART_DATABASE2_DATASOURCE_ID);
+		conn.setAutoCommit(false);
+		return conn;
 	}
 
 	/**

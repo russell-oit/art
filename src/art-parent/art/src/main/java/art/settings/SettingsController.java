@@ -153,13 +153,7 @@ public class SettingsController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			settingsService.updateSettings(settings, sessionUser);
-
-			session.setAttribute("administratorEmail", settings.getAdministratorEmail());
-			session.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
-
-			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
-			servletContext.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
+			settingsService.updateSettings(settings, sessionUser,session, servletContext);
 
 			Config.loadSettings();
 

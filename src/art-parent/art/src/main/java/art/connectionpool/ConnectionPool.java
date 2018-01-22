@@ -76,7 +76,7 @@ public abstract class ConnectionPool {
 	}
 
 	protected abstract DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize);
-
+	
 	public void close() {
 		logger.debug("Entering close");
 

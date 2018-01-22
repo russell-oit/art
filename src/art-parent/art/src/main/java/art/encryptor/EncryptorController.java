@@ -263,11 +263,9 @@ public class EncryptorController {
 	}
 
 	/**
-	 * Prepares model data and returns jsp file to display
+	 * Returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @return
+	 * @return the jsp file to display
 	 */
 	private String showEditEncryptors() {
 		logger.debug("Entering showEditEncryptors");

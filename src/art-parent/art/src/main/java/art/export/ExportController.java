@@ -88,6 +88,30 @@ public class ExportController {
 		serveFile(fullFilename, request, response);
 	}
 
+	@GetMapping("/export/records/{filename:.+}")
+	public void serveRecordsExportFile(@PathVariable("filename") String filename,
+			HttpServletRequest request, HttpServletResponse response,
+			HttpSession session) {
+
+		logger.debug("Entering serveRecordsExportFile: filename='{}'", filename);
+
+		try {
+			//only allow senior admins and above to view records export files
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			if (sessionUser.getAccessLevel().getValue() < AccessLevel.SeniorAdmin.getValue()) {
+				request.getRequestDispatcher("/accessDenied").forward(request, response);
+				return;
+			}
+		} catch (ServletException | IOException ex) {
+			logger.error("Error", ex);
+			return;
+		}
+
+		String recordsExportPath = Config.getRecordsExportPath();
+		String fullFilename = recordsExportPath + filename;
+		serveFile(fullFilename, request, response);
+	}
+
 	@GetMapping("/export/reports/{filename:.+}")
 	public void serveReportFile(@PathVariable("filename") String filename,
 			HttpServletRequest request, HttpServletResponse response,

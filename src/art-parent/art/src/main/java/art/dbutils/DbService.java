@@ -18,6 +18,7 @@
 package art.dbutils;
 
 import art.connectionpool.DbConnections;
+import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -47,6 +48,20 @@ public class DbService {
 	public int update(String sql, Object... params) throws SQLException {
 		QueryRunner run = new QueryRunner(DbConnections.getArtDbDataSource());
 		return run.update(sql, params);
+	}
+
+	/**
+	 * Executes an INSERT, UPDATE or DELETE query against a database
+	 *
+	 * @param conn the connection to the database
+	 * @param sql the sql to execute
+	 * @param params the parameters to use
+	 * @return number of records affected
+	 * @throws SQLException
+	 */
+	public int update(Connection conn, String sql, Object... params) throws SQLException {
+		QueryRunner run = new QueryRunner();
+		return run.update(conn, sql, params);
 	}
 
 	/**
