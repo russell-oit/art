@@ -19,6 +19,7 @@ package art.cache;
 
 import art.enums.CacheType;
 import art.utils.AjaxResponse;
+import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,12 +54,12 @@ public class CacheController {
 
 	@RequestMapping(value = "/clearAllCaches", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse clearAllCaches() {
+	AjaxResponse clearAllCaches(HttpSession session) {
 		logger.debug("Entering clearAllCaches");
 
 		AjaxResponse response = new AjaxResponse();
 
-		cacheHelper.clearAll();
+		cacheHelper.clearAll(session);
 
 		response.setSuccess(true);
 
@@ -67,7 +68,7 @@ public class CacheController {
 
 	@RequestMapping(value = "/clearCache", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse clearCache(@RequestParam("id") String id) {
+	AjaxResponse clearCache(@RequestParam("id") String id, HttpSession session) {
 		logger.debug("Entering clearCache: id='{}'", id);
 
 		AjaxResponse response = new AjaxResponse();
@@ -123,6 +124,9 @@ public class CacheController {
 					break;
 				case SmtpServers:
 					cacheHelper.clearSmtpServers();
+					break;
+				case Settings:
+					cacheHelper.clearSettings(session);
 					break;
 				default:
 					message = "Clear cache not available: " + id;

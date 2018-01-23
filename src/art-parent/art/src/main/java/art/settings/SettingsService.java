@@ -17,7 +17,6 @@
  */
 package art.settings;
 
-import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.encryption.AesEncryptor;
@@ -31,8 +30,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -175,17 +172,13 @@ public class SettingsService {
 	 *
 	 * @param settings the updated settings
 	 * @param actionUser the user performing the action
-	 * @param session the http session
-	 * @param servletContext the servlet context
 	 * @throws SQLException
 	 */
-	public void updateSettings(Settings settings, User actionUser,
-			HttpSession session, ServletContext servletContext) throws SQLException {
-
+	public void updateSettings(Settings settings, User actionUser) throws SQLException {
 		logger.debug("Entering updateSettings: actionUser={}", actionUser);
 
-		boolean autoCommit = true;
-		updateSettings(settings, actionUser, autoCommit, session, servletContext);
+		Connection conn = null;
+		updateSettings(settings, actionUser, conn);
 	}
 
 	/**
@@ -193,16 +186,14 @@ public class SettingsService {
 	 *
 	 * @param settings the settings to import
 	 * @param actionUser the user performing the action
-	 * @param session the http session
-	 * @param servletContext the servlet context
+	 * @param conn the connection to use. it will by closed by the method
 	 * @throws SQLException
 	 */
-	public void importSettings(Settings settings, User actionUser,
-			HttpSession session, ServletContext servletContext) throws SQLException {
+	public void importSettings(Settings settings, User actionUser, Connection conn)
+			throws SQLException {
+		
 		logger.debug("Entering importSettings: actionUser={}", actionUser);
-
-		boolean autoCommit = false;
-		updateSettings(settings, actionUser, autoCommit, session, servletContext);
+		updateSettings(settings, actionUser, conn);
 	}
 
 	/**
@@ -210,24 +201,26 @@ public class SettingsService {
 	 *
 	 * @param settings the updated settings
 	 * @param actionUser the user performing the action
-	 * @param autoCommit the auto commit mode to use
+	 * @param conn the connection to use. it will by closed by the method. if
+	 * null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void updateSettings(Settings settings, User actionUser, boolean autoCommit,
-			HttpSession session, ServletContext servletContext) throws SQLException {
+	private void updateSettings(Settings settings, User actionUser, Connection conn)
+			throws SQLException {
 
-		logger.debug("Entering updateSettings: actionUser={}, autoCommit={}", actionUser, autoCommit);
+		logger.debug("Entering updateSettings: actionUser={}, autoCommit={}", actionUser);
 
 		String sql;
-		Connection conn = null;
+		boolean originalAutoCommit = false;
 
 		try {
-			if (!autoCommit) {
-				conn = DbConnections.getArtDb2Connection();
+			if (conn != null) {
+				originalAutoCommit = conn.getAutoCommit();
+				conn.setAutoCommit(false);
 			}
 
 			sql = "DELETE FROM ART_SETTINGS";
-			if (autoCommit) {
+			if (conn == null) {
 				dbService.update(sql);
 			} else {
 				dbService.update(conn, sql);
@@ -323,7 +316,7 @@ public class SettingsService {
 			};
 
 			int affectedRows;
-			if (autoCommit) {
+			if (conn == null) {
 				affectedRows = dbService.update(sql, values);
 			} else {
 				affectedRows = dbService.update(conn, sql, values);
@@ -338,16 +331,6 @@ public class SettingsService {
 			if (conn != null) {
 				conn.commit();
 			}
-
-			if (session != null) {
-				session.setAttribute("administratorEmail", settings.getAdministratorEmail());
-				session.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
-			}
-
-			if (servletContext != null) {
-				String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
-				servletContext.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
-			}
 		} catch (SQLException ex) {
 			if (conn != null) {
 				conn.rollback();
@@ -355,7 +338,10 @@ public class SettingsService {
 
 			throw ex;
 		} finally {
-			DatabaseUtils.close(conn);
+			if (conn != null) {
+				conn.setAutoCommit(originalAutoCommit);
+				DatabaseUtils.close(conn);
+			}
 		}
 	}
 

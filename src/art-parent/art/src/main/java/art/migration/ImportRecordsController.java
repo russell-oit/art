@@ -17,14 +17,17 @@
  */
 package art.migration;
 
+import art.connectionpool.DbConnections;
 import art.enums.MigrationRecordType;
 import art.servlets.Config;
 import art.settings.Settings;
+import art.settings.SettingsHelper;
 import art.settings.SettingsService;
 import art.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -60,7 +63,7 @@ public class ImportRecordsController {
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
 		logger.debug("Entering showImportRecords: type='{}'", type);
-		
+
 		ImportRecords importRecords = new ImportRecords();
 		importRecords.setRecordType(MigrationRecordType.toEnum(type));
 
@@ -75,7 +78,7 @@ public class ImportRecordsController {
 			HttpSession session, @RequestParam("importFile") MultipartFile importFile) {
 
 		logger.debug("Entering processImportRecords");
-		
+
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
@@ -109,16 +112,16 @@ public class ImportRecordsController {
 
 	/**
 	 * Imports application settings
-	 * 
+	 *
 	 * @param file the import file
 	 * @param sessionUser the session user
 	 * @param session the http session
 	 * @throws IOException
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	private void importSettings(MultipartFile file, User sessionUser,
 			HttpSession session) throws IOException, SQLException {
-		
+
 		logger.debug("Entering importSettings: sessionUser={}", sessionUser);
 
 		String artTempPath = Config.getArtTempPath();
@@ -129,8 +132,10 @@ public class ImportRecordsController {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			Settings settings = mapper.readValue(destinationFile, Settings.class);
-			settingsService.importSettings(settings, sessionUser, session, servletContext);
-			Config.loadSettings();
+			Connection conn = DbConnections.getArtDb2Connection();
+			settingsService.importSettings(settings, sessionUser, conn);
+			SettingsHelper settingsHelper=new SettingsHelper();
+			settingsHelper.refreshSettings(settings, session, servletContext);
 		} finally {
 			destinationFile.delete();
 		}

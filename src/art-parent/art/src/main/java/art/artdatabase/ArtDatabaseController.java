@@ -134,7 +134,7 @@ public class ArtDatabaseController {
 			return "artDatabase";
 		}
 
-		cacheHelper.clearAll();
+		cacheHelper.clearAll(session);
 
 		//set password field as appropriate
 		String newPassword = artDatabase.getPassword();

@@ -17,16 +17,21 @@
  */
 package art.migration;
 
+import art.connectionpool.DbConnections;
+import art.datasource.Datasource;
 import art.datasource.DatasourceService;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
 import art.servlets.Config;
 import art.settings.Settings;
 import art.settings.SettingsService;
+import art.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +63,7 @@ public class ExportRecordsController {
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type) {
 		logger.debug("Entering showExportRecords: type='{}'", type);
-		
+
 		ExportRecords exportRecords = new ExportRecords();
 		exportRecords.setRecordType(MigrationRecordType.toEnum(type));
 
@@ -69,10 +74,11 @@ public class ExportRecordsController {
 
 	@PostMapping("/exportRecords")
 	public String processExportRecords(@Valid ExportRecords exportRecords,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
 
 		logger.debug("Entering processExportRecords");
-		
+
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
@@ -95,9 +101,11 @@ public class ExportRecordsController {
 			String recordsExportPath = Config.getRecordsExportPath();
 			String exportFilePath = recordsExportPath + exportFileName;
 
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
 			switch (recordType) {
 				case Settings:
-					exportSettings(exportRecords, exportFilePath);
+					exportSettings(exportRecords, exportFilePath, sessionUser);
 					break;
 				default:
 					break;
@@ -119,15 +127,16 @@ public class ExportRecordsController {
 
 	/**
 	 * Exports application settings
-	 * 
+	 *
 	 * @param exportRecords the export records object
 	 * @param exportFilePath the export file name to use
+	 * @param sessionUser the session user
 	 * @throws SQLException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	private void exportSettings(ExportRecords exportRecords, String exportFilePath)
-			throws SQLException, IOException {
-		
+	private void exportSettings(ExportRecords exportRecords, String exportFilePath,
+			User sessionUser) throws SQLException, IOException {
+
 		logger.debug("Entering exportSettings: exportFilepath='{}'", exportFilePath);
 
 		Settings settings = settingsService.getSettings();
@@ -139,6 +148,9 @@ public class ExportRecordsController {
 				mapper.writerWithDefaultPrettyPrinter().writeValue(exportFile, settings);
 				break;
 			case Datasource:
+				Datasource datasource = exportRecords.getDatasource();
+				Connection conn = DbConnections.getConnection(datasource.getDatasourceId());
+				settingsService.importSettings(settings, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -159,7 +171,7 @@ public class ExportRecordsController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-		
+
 		return "exportRecords";
 	}
 
