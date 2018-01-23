@@ -152,7 +152,7 @@ public class XDocReportOutput {
 			//check if template file exists
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + templateFileName);
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 			}
 
 			//load doc

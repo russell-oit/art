@@ -48,8 +48,8 @@ public class Mondrian4XmlaServlet extends DynamicDatasourceXmlaServlet {
 
 	@Override
 	protected String makeDataSourcesUrl(ServletConfig servletConfig) {
-		String datasourcesFile = Config.getTemplatesPath() + "datasources.xml";
-		File file = new File(datasourcesFile);
+		String datasourcesFilePath = Config.getTemplatesPath() + "datasources.xml";
+		File file = new File(datasourcesFilePath);
 
 		String finalUrl = null;
 
@@ -61,7 +61,7 @@ public class Mondrian4XmlaServlet extends DynamicDatasourceXmlaServlet {
 				logger.error("Error", ex);
 			}
 		} else {
-			logger.warn("datasources.xml file not found");
+			logger.warn("File not found: '{}'", datasourcesFilePath);
 		}
 
 		return finalUrl;

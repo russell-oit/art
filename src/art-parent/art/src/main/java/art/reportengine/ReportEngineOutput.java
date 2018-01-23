@@ -291,7 +291,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + templateFileName);
+						throw new IllegalStateException("Data file not found: " + fullTemplateFileName);
 					}
 
 					String encoding = "UTF-8";
@@ -544,7 +544,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + templateFileName);
+						throw new IllegalStateException("Data file not found: " + fullTemplateFileName);
 					}
 
 					String encoding = "UTF-8";

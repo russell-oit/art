@@ -602,7 +602,7 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
 				request.setAttribute("templateFileName", templateFileName);
@@ -636,7 +636,7 @@ public class ReportOutputGenerator {
 				if (StringUtils.isNotBlank(templateFileName)) {
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + templateFileName);
+						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 					}
 					request.setAttribute("templateFileName", templateFileName);
 				}
@@ -664,7 +664,7 @@ public class ReportOutputGenerator {
 
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 
 					request.setAttribute("dataFileName", dataFileName);
@@ -730,7 +730,7 @@ public class ReportOutputGenerator {
 				if (StringUtils.isNotBlank(templateFileName)) {
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + templateFileName);
+						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 					}
 					request.setAttribute("templateFileName", templateFileName);
 				}
@@ -758,7 +758,7 @@ public class ReportOutputGenerator {
 
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 
 					request.setAttribute("dataFileName", dataFileName);
@@ -794,7 +794,7 @@ public class ReportOutputGenerator {
 				if (StringUtils.isNotBlank(templateFileName)) {
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + templateFileName);
+						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 					}
 					request.setAttribute("templateFileName", templateFileName);
 				}
@@ -828,7 +828,7 @@ public class ReportOutputGenerator {
 
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 
 					request.setAttribute("dataFileName", dataFileName);
@@ -888,7 +888,7 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
 				String optionsString = report.getOptions();
@@ -906,7 +906,7 @@ public class ReportOutputGenerator {
 
 						File cssFile = new File(fullCssFileName);
 						if (!cssFile.exists()) {
-							throw new IllegalStateException("Css file not found: " + cssFileName);
+							throw new IllegalStateException("Css file not found: " + fullCssFileName);
 						}
 
 						request.setAttribute("cssFileName", cssFileName);
@@ -945,7 +945,7 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
 				ChartJsOptions options;
@@ -993,7 +993,7 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
 				DatamapsOptions options;
@@ -1014,7 +1014,7 @@ public class ReportOutputGenerator {
 				String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
 				File datamapsJsFile = new File(fullDatamapsJsFileName);
 				if (!datamapsJsFile.exists()) {
-					throw new IllegalStateException("Datamaps js file not found: " + datamapsJsFileName);
+					throw new IllegalStateException("Datamaps js file not found: " + fullDatamapsJsFileName);
 				}
 
 				String dataFileName = options.getDataFile();
@@ -1022,7 +1022,7 @@ public class ReportOutputGenerator {
 					String fullDataFileName = jsTemplatesPath + dataFileName;
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 				}
 
@@ -1032,7 +1032,7 @@ public class ReportOutputGenerator {
 
 					File mapFile = new File(fullMapFileName);
 					if (!mapFile.exists()) {
-						throw new IllegalStateException("Map file not found: " + mapFileName);
+						throw new IllegalStateException("Map file not found: " + fullMapFileName);
 					}
 				}
 
@@ -1042,7 +1042,7 @@ public class ReportOutputGenerator {
 
 					File cssFile = new File(fullCssFileName);
 					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + cssFileName);
+						throw new IllegalStateException("Css file not found: " + fullCssFileName);
 					}
 				}
 
@@ -1076,7 +1076,7 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
 				WebMapOptions options;
@@ -1094,7 +1094,7 @@ public class ReportOutputGenerator {
 
 					File cssFile = new File(fullCssFileName);
 					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + cssFileName);
+						throw new IllegalStateException("Css file not found: " + fullCssFileName);
 					}
 				}
 
@@ -1103,7 +1103,7 @@ public class ReportOutputGenerator {
 					String fullDataFileName = jsTemplatesPath + dataFileName;
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 				}
 
@@ -1114,7 +1114,7 @@ public class ReportOutputGenerator {
 							String fullJsFileName = jsTemplatesPath + jsFileName;
 							File jsFile = new File(fullJsFileName);
 							if (!jsFile.exists()) {
-								throw new IllegalStateException("Js file not found: " + jsFileName);
+								throw new IllegalStateException("Js file not found: " + fullJsFileName);
 							}
 						}
 					}
@@ -1127,7 +1127,7 @@ public class ReportOutputGenerator {
 							String fullListCssFileName = jsTemplatesPath + listCssFileName;
 							File listCssFile = new File(fullListCssFileName);
 							if (!listCssFile.exists()) {
-								throw new IllegalStateException("Css file not found: " + listCssFileName);
+								throw new IllegalStateException("Css file not found: " + fullListCssFileName);
 							}
 						}
 					}
@@ -1406,7 +1406,7 @@ public class ReportOutputGenerator {
 
 					File cssFile = new File(fullCssFileName);
 					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + cssFileName);
+						throw new IllegalStateException("Css file not found: " + fullCssFileName);
 					}
 				}
 
@@ -1418,7 +1418,7 @@ public class ReportOutputGenerator {
 					String fullTemplateFileName = jsTemplatesPath + templateFileName;
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + templateFileName);
+						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 					}
 				}
 
