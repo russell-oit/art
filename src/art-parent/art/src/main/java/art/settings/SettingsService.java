@@ -142,13 +142,7 @@ public class SettingsService {
 			settings.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt passwords
-			String smtpPassword = settings.getSmtpPassword();
-			smtpPassword = AesEncryptor.decrypt(smtpPassword);
-			settings.setSmtpPassword(smtpPassword);
-
-			String ldapBindPassword = settings.getLdapBindPassword();
-			ldapBindPassword = AesEncryptor.decrypt(ldapBindPassword);
-			settings.setLdapBindPassword(ldapBindPassword);
+			settings.decryptPasswords();
 
 			return type.cast(settings);
 		}

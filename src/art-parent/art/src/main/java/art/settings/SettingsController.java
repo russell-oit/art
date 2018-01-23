@@ -142,14 +142,7 @@ public class SettingsController {
 		settings.setLdapBindPassword(newLdapBindPassword);
 
 		//encrypt password fields
-		String clearTextSmtpPassword = settings.getSmtpPassword();
-		String clearTextLdapBindPassword = settings.getLdapBindPassword();
-
-		String encryptedSmtpPassword = AesEncryptor.encrypt(clearTextSmtpPassword);
-		String encryptedLdapBindPassword = AesEncryptor.encrypt(clearTextLdapBindPassword);
-
-		settings.setSmtpPassword(encryptedSmtpPassword);
-		settings.setLdapBindPassword(encryptedLdapBindPassword);
+		settings.encryptPasswords();
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");

@@ -140,6 +140,7 @@ public class ExportRecordsController {
 		logger.debug("Entering exportSettings: exportFilepath='{}'", exportFilePath);
 
 		Settings settings = settingsService.getSettings();
+		settings.encryptPasswords();
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
