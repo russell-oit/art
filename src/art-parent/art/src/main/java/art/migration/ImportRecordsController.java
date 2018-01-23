@@ -132,6 +132,9 @@ public class ImportRecordsController {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			Settings settings = mapper.readValue(destinationFile, Settings.class);
+			if (settings.isClearTextPasswords()) {
+				settings.encryptPasswords();
+			}
 			Connection conn = DbConnections.getArtDbConnection();
 			settingsService.importSettings(settings, sessionUser, conn);
 			SettingsHelper settingsHelper = new SettingsHelper();

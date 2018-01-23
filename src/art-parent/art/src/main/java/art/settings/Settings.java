@@ -99,6 +99,21 @@ public class Settings implements Serializable {
 	private int passwordMinUppercase;
 	private int passwordMinNumeric;
 	private int passwordMinSpecial;
+	private boolean clearTextPasswords; //used to enable import with passwords specified in clear text
+
+	/**
+	 * @return the clearTextPasswords
+	 */
+	public boolean isClearTextPasswords() {
+		return clearTextPasswords;
+	}
+
+	/**
+	 * @param clearTextPasswords the clearTextPasswords to set
+	 */
+	public void setClearTextPasswords(boolean clearTextPasswords) {
+		this.clearTextPasswords = clearTextPasswords;
+	}
 
 	/**
 	 * @return the updateDate
