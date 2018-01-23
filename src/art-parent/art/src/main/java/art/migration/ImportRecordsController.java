@@ -132,9 +132,9 @@ public class ImportRecordsController {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			Settings settings = mapper.readValue(destinationFile, Settings.class);
-			Connection conn = DbConnections.getArtDb2Connection();
+			Connection conn = DbConnections.getArtDbConnection();
 			settingsService.importSettings(settings, sessionUser, conn);
-			SettingsHelper settingsHelper=new SettingsHelper();
+			SettingsHelper settingsHelper = new SettingsHelper();
 			settingsHelper.refreshSettings(settings, session, servletContext);
 		} finally {
 			destinationFile.delete();
