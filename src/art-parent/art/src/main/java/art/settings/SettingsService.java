@@ -19,7 +19,6 @@ package art.settings;
 
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
-import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
@@ -189,7 +188,7 @@ public class SettingsService {
 		logger.debug("Entering importSettings: actionUser={}", actionUser);
 		updateSettings(settings, actionUser, conn);
 	}
-
+	
 	/**
 	 * Updates system settings
 	 *
@@ -202,10 +201,10 @@ public class SettingsService {
 	private void updateSettings(Settings settings, User actionUser, Connection conn)
 			throws SQLException {
 
-		logger.debug("Entering updateSettings: actionUser={}, autoCommit={}", actionUser);
+		logger.debug("Entering updateSettings: actionUser={}", actionUser);
 
 		String sql;
-		boolean originalAutoCommit = false;
+		boolean originalAutoCommit = true;
 
 		try {
 			if (conn != null) {

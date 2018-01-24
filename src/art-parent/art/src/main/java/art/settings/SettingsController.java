@@ -18,7 +18,6 @@
 package art.settings;
 
 import art.datasource.DatasourceService;
-import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;

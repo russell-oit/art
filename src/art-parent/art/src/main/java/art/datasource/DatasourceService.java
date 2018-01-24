@@ -23,6 +23,7 @@ import art.enums.AccessLevel;
 import art.enums.DatasourceType;
 import art.user.User;
 import art.utils.ActionResult;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +78,26 @@ public class DatasourceService {
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
+
+	/**
+	 * Returns datasources with given ids
+	 *
+	 * @param ids comma separated string of the datasource ids to retrieve
+	 * @return datasources with given ids
+	 * @throws SQLException
+	 */
+	public List<Datasource> getDatasources(String ids) throws SQLException {
+		logger.debug("Entering getDatasources: ids='{}'", ids);
+
+		Object[] idsArray = StringUtils.split(ids, ",");
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
+		return dbService.query(sql, h, idsArray);
+	}
+
 	/**
 	 * Returns active jdbc datasources
 	 *
@@ -87,7 +107,7 @@ public class DatasourceService {
 	@Cacheable("datasources")
 	public List<Datasource> getActiveJdbcDatasources() throws SQLException {
 		logger.debug("Entering getActiveJdbcDatasources");
-		
+
 		String sql = SQL_SELECT_ALL + " WHERE ACTIVE=1 AND DATASOURCE_TYPE=?";
 
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
@@ -198,6 +218,7 @@ public class DatasourceService {
 	 *
 	 * @param datasource the datasource to add
 	 * @param actionUser the user who is performing the add
+	 * @param conn the connection to use. If null, the art database will be used
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -233,6 +254,43 @@ public class DatasourceService {
 	}
 
 	/**
+	 * Imports datasource records
+	 *
+	 * @param datasources the list of datasources to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use. it will by closed by the method
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "datasources", allEntries = true)
+	public void importDatasources(List<Datasource> datasources, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importDatasources: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Datasource datasource : datasources) {
+				id++;
+				saveDatasource(datasource, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+			DatabaseUtils.close(conn);
+		}
+	}
+
+	/**
 	 * Saves a datasource
 	 *
 	 * @param datasource the datasource to save
@@ -243,6 +301,23 @@ public class DatasourceService {
 	 */
 	private void saveDatasource(Datasource datasource, Integer newRecordId,
 			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveDatasource(datasource, newRecordId, actionUser, conn);
+	}
+
+	/**
+	 * Saves a datasource
+	 *
+	 * @param datasource the datasource to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @param conn the connection to use. If null, the art database will be used
+	 * @throws SQLException
+	 */
+	private void saveDatasource(Datasource datasource, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveDatasource: datasource={}, "
 				+ " actionUser={}, newRecordId={}",
@@ -280,7 +355,11 @@ public class DatasourceService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, DATASOURCE_TYPE=?,"
 					+ " JNDI=?, DRIVER=?, URL=?, USERNAME=?, PASSWORD=?, PASSWORD_ALGORITHM=?,"
@@ -305,7 +384,11 @@ public class DatasourceService {
 				datasource.getDatasourceId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		logger.debug("affectedRows={}", affectedRows);

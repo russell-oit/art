@@ -17,15 +17,12 @@
  */
 package art.datasource;
 
-import art.encryption.AesEncryptor;
-import art.encryption.DesEncryptor;
 import art.enums.DatasourceType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.dbutils.BasicRowProcessor;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Maps resultset to a Datasource object. Use public class in its own file for
@@ -67,17 +64,7 @@ public class DatasourceMapper extends BasicRowProcessor {
 		datasource.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 		//decrypt password
-		String password = datasource.getPassword();
-		String passwordAlgorithm = datasource.getPasswordAlgorithm();
-		if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "art")) {
-			if (StringUtils.startsWith(password, "o:")) {
-				password = DesEncryptor.decrypt(password.substring(2));
-				datasource.setPassword(password);
-			}
-		} else if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "aes")) {
-			password = AesEncryptor.decrypt(password);
-			datasource.setPassword(password);
-		}
+		datasource.decryptPassword();
 
 		return type.cast(datasource);
 	}

@@ -81,6 +81,25 @@ public class DbService {
 	}
 
 	/**
+	 * Executes a SELECT query against a database and returns an appropriate,
+	 * populated object
+	 *
+	 * @param <T> the type of object that the handler returns
+	 * @param conn the connection to the database
+	 * @param sql the sql to execute
+	 * @param rsh the handler that converts the results into an object
+	 * @param params the parameters to use
+	 * @return the object returned by the handler
+	 * @throws SQLException
+	 */
+	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh,
+			Object... params) throws SQLException {
+
+		QueryRunner run = new QueryRunner();
+		return run.query(conn, sql, rsh, params);
+	}
+
+	/**
 	 * Executes a batch of INSERT, UPDATE, or DELETE queries against the art
 	 * database
 	 *
@@ -96,7 +115,7 @@ public class DbService {
 	}
 
 	/**
-	 * Returns the max record id for a table
+	 * Returns the max record id for a table in the art database
 	 *
 	 * @param sql the sql to get the current max id for the table
 	 * @param params query parameters
@@ -104,10 +123,29 @@ public class DbService {
 	 * @throws SQLException
 	 */
 	public int getMaxRecordId(String sql, Object... params) throws SQLException {
+		Connection conn = null;
+		return getMaxRecordId(conn, sql, params);
+	}
+
+	/**
+	 * Returns the max record id for a table in a given database
+	 *
+	 * @param conn the connection to the database
+	 * @param sql the sql to get the current max id for the table
+	 * @param params query parameters
+	 * @return the max record id
+	 * @throws SQLException
+	 */
+	public int getMaxRecordId(Connection conn, String sql, Object... params) throws SQLException {
 		//use Number rather than Integer because oracle returns a java.math.BigDecimal object
 		//oracle doesn't have an "INTEGER" data type. When INTEGER is specified, it's stored as NUMBER(38,0)
 		ResultSetHandler<Number> h = new ScalarHandler<>();
-		Number maxIdNumber = query(sql, h, params);
+		Number maxIdNumber;
+		if (conn == null) {
+			maxIdNumber = query(sql, h, params);
+		} else {
+			maxIdNumber = query(conn, sql, h, params);
+		}
 		logger.debug("maxIdNumber={}", maxIdNumber);
 
 		int maxIdInt;
