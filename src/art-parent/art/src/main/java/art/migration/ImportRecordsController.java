@@ -17,6 +17,7 @@
  */
 package art.migration;
 
+import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
@@ -185,6 +186,14 @@ public class ImportRecordsController {
 		}
 
 		datasourceService.importDatasources(datasources, sessionUser, conn);
+
+		ArtDatabase artDbConfig = Config.getArtDbConfig();
+		for (Datasource datasource : datasources) {
+			if (datasource.isActive()) {
+				datasource.decryptPassword();
+				DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			}
+		}
 	}
 
 }

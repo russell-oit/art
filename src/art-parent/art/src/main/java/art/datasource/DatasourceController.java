@@ -239,8 +239,7 @@ public class DatasourceController {
 			}
 
 			try {
-				String clearTextPassword = AesEncryptor.decrypt(datasource.getPassword());
-				datasource.setPassword(clearTextPassword);
+				datasource.decryptPassword();
 				updateConnectionPool(datasource);
 			} catch (Exception ex) {
 				logger.error("Error", ex);
