@@ -52,8 +52,8 @@ CREATE TABLE ART_CUSTOM_UPGRADES
 -- ACCESS_LEVEL: 0 = normal user, 5 = normal user who can schedule jobs
 -- 10 = junior admin, 30 = mid admin, 40 = standard admin, 80 = senior admin
 -- 100 = super admin
--- ACTIVE: boolean value. 0=false, 1=true
--- CAN_CHANGE_PASSWORD: boolean value. 0=false, 1=true
+-- ACTIVE: boolean. 0=false, 1=true
+-- CAN_CHANGE_PASSWORD: boolean
 
 CREATE TABLE ART_USERS
 (
@@ -129,8 +129,8 @@ CREATE TABLE ART_USER_GROUP_ASSIGNMENT
 -- ART_DATABASES
 -- Stores Target Database definitions
 
--- ACTIVE: boolean. 0=false, 1=true
--- JNDI: boolean. 0=false, 1=true
+-- ACTIVE: boolean
+-- JNDI: boolean
 
 CREATE TABLE ART_DATABASES
 (
@@ -159,9 +159,8 @@ CREATE TABLE ART_DATABASES
 -- ART_QUERIES
 -- Stores query definitions 
 
--- USES_RULES: boolean. 0=false, 1=true
--- PARAMETERS_IN_OUTPUT: boolean. 0=false, 1=true. indicates whether
--- selected report parameters will be shown in the report output
+-- USES_RULES: boolean
+-- PARAMETERS_IN_OUTPUT: boolean
 -- ACTIVE: boolean
 -- HIDDEN: boolean
 -- OMIT_TITLE_ROW: boolean

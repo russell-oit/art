@@ -654,14 +654,12 @@ public class ReportService {
 
 		Integer reportGroupId = 0; //field no longer used but can't be null
 
-		Integer datasourceId;
-		if (report.getDatasource() == null) {
-			datasourceId = 0;
-		} else {
+		Integer datasourceId = null;
+		if (report.getDatasource() != null) {
 			datasourceId = report.getDatasource().getDatasourceId();
-		}
-		if (datasourceId == 0) {
-			datasourceId = null;
+			if (datasourceId == 0) {
+				datasourceId = null;
+			}
 		}
 
 		Integer encryptorId;
