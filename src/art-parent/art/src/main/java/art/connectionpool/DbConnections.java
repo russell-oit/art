@@ -145,7 +145,6 @@ public class DbConnections {
 	 * @param datasourceInfo the datasource details
 	 * @param maxPoolSize the maximum pool size
 	 * @param connectionPoolLibrary the connection pool library
-	 * @param autoCommit the auto commit setting for the connection
 	 */
 	public static void createConnectionPool(DatasourceInfo datasourceInfo,
 			int maxPoolSize, ConnectionPoolLibrary connectionPoolLibrary) {

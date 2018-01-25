@@ -130,7 +130,8 @@ public class DbService {
 	/**
 	 * Returns the max record id for a table in a given database
 	 *
-	 * @param conn the connection to the database
+	 * @param conn the connection to the database. if null the art database is
+	 * used
 	 * @param sql the sql to get the current max id for the table
 	 * @param params query parameters
 	 * @return the max record id
@@ -165,7 +166,7 @@ public class DbService {
 	}
 
 	/**
-	 * Returns a new record id for a table
+	 * Returns a new record id for a table in the art database
 	 *
 	 * @param sql the sql query to get the current max id for the table
 	 * @param params parameters to be used in the query

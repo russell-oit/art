@@ -218,7 +218,6 @@ public class DatasourceService {
 	 *
 	 * @param datasource the datasource to add
 	 * @param actionUser the user who is performing the add
-	 * @param conn the connection to use. If null, the art database will be used
 	 * @return new record id
 	 * @throws SQLException
 	 */
