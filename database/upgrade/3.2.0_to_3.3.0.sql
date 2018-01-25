@@ -5,6 +5,7 @@
 -- add job error notification to column
 -- add reference records for new report types
 -- add fields for password encryptor type
+-- rename art queries database_id field
 
 -- ------------------------------------------------
 
@@ -22,3 +23,9 @@ INSERT INTO ART_REPORT_TYPES VALUES (159,'ReportEngine: File');
 -- add fields for password encryptor type
 ALTER TABLE ART_ENCRYPTORS ADD OPEN_PASSWORD VARCHAR(200);
 ALTER TABLE ART_ENCRYPTORS ADD MODIFY_PASSWORD VARCHAR(200);
+
+-- rename art queries database_id field
+ALTER TABLE ART_QUERIES ADD DATASOURCE_ID INTEGER;
+UPDATE ART_QUERIES SET DATASOURCE_ID=DATABASE_ID;
+ALTER TABLE ART_QUERIES DROP COLUMN DATABASE_ID;
+UPDATE ART_QUERIES SET DATASOURCE_ID=NULL WHERE DATASOURCE_ID=0;

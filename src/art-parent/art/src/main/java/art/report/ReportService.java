@@ -158,7 +158,7 @@ public class ReportService {
 			report.setCreatedBy(rs.getString("CREATED_BY"));
 			report.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
+			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATASOURCE_ID"));
 			report.setDatasource(datasource);
 
 			Encryptor encryptor = encryptorService.getEncryptor(rs.getInt("ENCRYPTOR_ID"));
@@ -654,12 +654,14 @@ public class ReportService {
 
 		Integer reportGroupId = 0; //field no longer used but can't be null
 
-		//set values for possibly null property objects
 		Integer datasourceId;
 		if (report.getDatasource() == null) {
 			datasourceId = 0;
 		} else {
 			datasourceId = report.getDatasource().getDatasourceId();
+		}
+		if (datasourceId == 0) {
+			datasourceId = null;
 		}
 
 		Integer encryptorId;
@@ -687,7 +689,7 @@ public class ReportService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
-					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_RULES,"
+					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATASOURCE_ID, CONTACT_PERSON, USES_RULES,"
 					+ " ACTIVE, HIDDEN, REPORT_SOURCE, PARAMETERS_IN_OUTPUT,"
 					+ " X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
@@ -749,7 +751,7 @@ public class ReportService {
 		} else {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 					+ " DESCRIPTION=?, QUERY_TYPE=?, GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
-					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
+					+ " DATASOURCE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
 					+ " HIDDEN=?, REPORT_SOURCE=?, PARAMETERS_IN_OUTPUT=?,"
 					+ " X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
@@ -1358,7 +1360,7 @@ public class ReportService {
 		logger.debug("Entering getReportsWithDatasource: datasourceId={}", datasourceId);
 
 		String sql = SQL_SELECT_ALL
-				+ " WHERE DATABASE_ID=?";
+				+ " WHERE DATASOURCE_ID=?";
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, datasourceId);
@@ -1380,7 +1382,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, encryptorId);
 	}
-	
+
 	/**
 	 * Returns reports are in a given report group
 	 *
