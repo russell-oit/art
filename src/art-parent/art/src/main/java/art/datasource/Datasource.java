@@ -35,10 +35,10 @@ public class Datasource extends DatasourceInfo implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Parsed
 	private boolean active;
-	@Format(formats = {"yyyy-MM-dd HH:mm:ss.SSS"})
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
 	@Parsed
 	private Date creationDate;
-	@Format(formats = {"yyyy-MM-dd HH:mm:ss.SSS"})
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
 	@Parsed
 	private Date updateDate;
 	@Parsed

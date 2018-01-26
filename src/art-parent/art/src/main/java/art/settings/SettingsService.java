@@ -184,18 +184,17 @@ public class SettingsService {
 	 */
 	public void importSettings(Settings settings, User actionUser, Connection conn)
 			throws SQLException {
-		
+
 		logger.debug("Entering importSettings: actionUser={}", actionUser);
 		updateSettings(settings, actionUser, conn);
 	}
-	
+
 	/**
 	 * Updates system settings
 	 *
 	 * @param settings the updated settings
 	 * @param actionUser the user performing the action
-	 * @param conn the connection to use. it will by closed by the method. if
-	 * null, the art database will be used
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
 	private void updateSettings(Settings settings, User actionUser, Connection conn)
@@ -333,7 +332,6 @@ public class SettingsService {
 		} finally {
 			if (conn != null) {
 				conn.setAutoCommit(originalAutoCommit);
-				DatabaseUtils.close(conn);
 			}
 		}
 	}

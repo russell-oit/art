@@ -28,7 +28,7 @@ import java.util.List;
  */
 public enum MigrationRecordType {
 	
-	Settings("Settings"), Datasources("Datasources");
+	Settings("Settings"), Datasources("Datasources"), Destinations("Destinations");
 	
 	private final String value;
 

@@ -20,6 +20,9 @@ package art.migration;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
+import art.dbutils.DatabaseUtils;
+import art.destination.Destination;
+import art.destination.DestinationService;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
 import art.servlets.Config;
@@ -63,6 +66,9 @@ public class ExportRecordsController {
 	@Autowired
 	private DatasourceService datasourceService;
 
+	@Autowired
+	private DestinationService destinationService;
+
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
 			@RequestParam(value = "ids", required = false) String ids) {
@@ -99,11 +105,8 @@ public class ExportRecordsController {
 				case Settings:
 					extension = ".json";
 					break;
-				case Datasources:
-					extension = ".csv";
-					break;
 				default:
-					extension = ".zip";
+					extension = ".csv";
 			}
 
 			String exportFileName = baseExportFilename + extension;
@@ -114,14 +117,32 @@ public class ExportRecordsController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			switch (recordType) {
-				case Settings:
-					exportSettings(exportRecords, exportFile, sessionUser);
-					break;
-				case Datasources:
-					exportDatasources(exportRecords, exportFile, sessionUser);
-				default:
-					break;
+			CsvWriterSettings writerSettings = new CsvWriterSettings();
+			writerSettings.setHeaderWritingEnabled(true);
+			CsvRoutines csvRoutines = new CsvRoutines(writerSettings);
+
+			Connection conn = null;
+			if (exportRecords.getLocation() == MigrationLocation.Datasource) {
+				Datasource datasource = exportRecords.getDatasource();
+				conn = DbConnections.getConnection(datasource.getDatasourceId());
+			}
+
+			try {
+				switch (recordType) {
+					case Settings:
+						exportSettings(exportRecords, exportFile, sessionUser, conn);
+						break;
+					case Datasources:
+						exportDatasources(exportRecords, exportFile, sessionUser, csvRoutines, conn);
+						break;
+					case Destinations:
+						exportDestinations(exportRecords, exportFile, sessionUser, csvRoutines, conn);
+						break;
+					default:
+						break;
+				}
+			} finally {
+				DatabaseUtils.close(conn);
 			}
 
 			if (exportRecords.getLocation() == MigrationLocation.File) {
@@ -144,17 +165,18 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
+	 * @param conn the connection to use for datasource export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private void exportSettings(ExportRecords exportRecords, File file,
-			User sessionUser) throws SQLException, IOException {
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportSettings");
 
 		Settings settings = settingsService.getSettings();
 		settings.encryptPasswords();
-		
+
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
@@ -162,8 +184,6 @@ public class ExportRecordsController {
 				mapper.writerWithDefaultPrettyPrinter().writeValue(file, settings);
 				break;
 			case Datasource:
-				Datasource datasource = exportRecords.getDatasource();
-				Connection conn = DbConnections.getConnection(datasource.getDatasourceId());
 				settingsService.importSettings(settings, sessionUser, conn);
 				break;
 			default:
@@ -177,13 +197,16 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private void exportDatasources(ExportRecords exportRecords, File file,
-			User sessionUser) throws SQLException, IOException {
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
 
-		logger.debug("Entering exportSettings");
+		logger.debug("Entering exportDatasources");
 
 		String ids = exportRecords.getIds();
 		List<Datasource> datasources = datasourceService.getDatasources(ids);
@@ -194,15 +217,46 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				CsvWriterSettings writerSettings = new CsvWriterSettings();
-				writerSettings.setHeaderWritingEnabled(true);
-				CsvRoutines csvRoutines = new CsvRoutines(writerSettings);
 				csvRoutines.writeAll(datasources, Datasource.class, file);
 				break;
 			case Datasource:
-				Datasource datasource = exportRecords.getDatasource();
-				Connection conn = DbConnections.getConnection(datasource.getDatasourceId());
 				datasourceService.importDatasources(datasources, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+	}
+
+	/**
+	 * Exports destination records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportDestinations(ExportRecords exportRecords, File file,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportDestinations");
+
+		String ids = exportRecords.getIds();
+		List<Destination> destinations = destinationService.getDestinations(ids);
+		for (Destination destination : destinations) {
+			destination.encryptPassword();
+		}
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				csvRoutines.writeAll(destinations, Destination.class, file);
+				break;
+			case Datasource:
+				destinationService.importDestinations(destinations, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

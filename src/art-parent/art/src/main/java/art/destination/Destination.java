@@ -17,7 +17,10 @@
  */
 package art.destination;
 
+import art.encryption.AesEncryptor;
 import art.enums.DestinationType;
+import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -29,25 +32,61 @@ import java.util.Date;
 public class Destination implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int destinationId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
+	@Parsed
 	private boolean active = true;
+	@Parsed
 	private DestinationType destinationType;
+	@Parsed
 	private String server;
+	@Parsed
 	private int port;
+	@Parsed
 	private String user;
+	@Parsed
 	private String password;
+	@Parsed
 	private String path;
+	@Parsed
 	private String options;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date creationDate;
+	@Parsed
 	private String createdBy;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date updateDate;
+	@Parsed
 	private String updatedBy;
 	private boolean useBlankPassword; //only used for user interface logic
+	@Parsed
 	private String domain;
+	@Parsed
 	private String subDirectory;
+	@Parsed
 	private boolean createDirectories;
+	@Parsed
+	private boolean clearTextPassword;
+
+	/**
+	 * @return the clearTextPassword
+	 */
+	public boolean isClearTextPassword() {
+		return clearTextPassword;
+	}
+
+	/**
+	 * @param clearTextPassword the clearTextPassword to set
+	 */
+	public void setClearTextPassword(boolean clearTextPassword) {
+		this.clearTextPassword = clearTextPassword;
+	}
 
 	/**
 	 * @return the createDirectories
@@ -344,5 +383,19 @@ public class Destination implements Serializable {
 	public String toString() {
 		return "Destination{" + "name=" + name + '}';
 	}
-	
+
+	/**
+	 * Decrypts the password field
+	 */
+	public void decryptPassword() {
+		password = AesEncryptor.decrypt(password);
+	}
+
+	/**
+	 * Encrypts the password field
+	 */
+	public void encryptPassword() {
+		password = AesEncryptor.encrypt(password);
+	}
+
 }

@@ -257,7 +257,7 @@ public class DatasourceService {
 	 *
 	 * @param datasources the list of datasources to import
 	 * @param actionUser the user who is performing the import
-	 * @param conn the connection to use. it will by closed by the method
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
@@ -285,7 +285,6 @@ public class DatasourceService {
 			throw ex;
 		} finally {
 			conn.setAutoCommit(originalAutoCommit);
-			DatabaseUtils.close(conn);
 		}
 	}
 
@@ -319,8 +318,7 @@ public class DatasourceService {
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveDatasource: datasource={}, "
-				+ " actionUser={}, newRecordId={}",
-				datasource, actionUser, newRecordId);
+				+ " actionUser={}, newRecordId={}", datasource, actionUser, newRecordId);
 
 		int affectedRows;
 		boolean newRecord = false;

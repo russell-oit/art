@@ -21,6 +21,9 @@ import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
+import art.dbutils.DatabaseUtils;
+import art.destination.Destination;
+import art.destination.DestinationService;
 import art.enums.MigrationRecordType;
 import art.servlets.Config;
 import art.settings.Settings;
@@ -69,6 +72,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private DatasourceService datasourceService;
+	
+	@Autowired
+	private DestinationService destinationService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -107,6 +113,14 @@ public class ImportRecordsController {
 			File tempFile = new File(tempFilename);
 			importFile.transferTo(tempFile);
 
+			CsvWriterSettings writerSettings = new CsvWriterSettings();
+			writerSettings.setHeaderWritingEnabled(true);
+
+			CsvParserSettings parserSettings = new CsvParserSettings();
+			parserSettings.setLineSeparatorDetectionEnabled(true);
+
+			CsvRoutines csvRoutines = new CsvRoutines(parserSettings, writerSettings);
+			
 			Connection conn = DbConnections.getArtDbConnection();
 
 			try {
@@ -115,12 +129,16 @@ public class ImportRecordsController {
 						importSettings(tempFile, sessionUser, conn, session);
 						break;
 					case Datasources:
-						importDatasources(tempFile, sessionUser, conn);
+						importDatasources(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case Destinations:
+						importDestinations(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
 				}
 			} finally {
+				DatabaseUtils.close(conn);
 				tempFile.delete();
 			}
 
@@ -154,7 +172,9 @@ public class ImportRecordsController {
 		if (settings.isClearTextPasswords()) {
 			settings.encryptPasswords();
 		}
+		
 		settingsService.importSettings(settings, sessionUser, conn);
+		
 		SettingsHelper settingsHelper = new SettingsHelper();
 		settingsHelper.refreshSettings(settings, session, servletContext);
 	}
@@ -165,18 +185,14 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
 	 * @throws SQLException
 	 */
-	private void importDatasources(File file, User sessionUser, Connection conn) throws SQLException {
+	private void importDatasources(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+		
 		logger.debug("Entering importDatasources: sessionUser={}", sessionUser);
 
-		CsvWriterSettings writerSettings = new CsvWriterSettings();
-		writerSettings.setHeaderWritingEnabled(true);
-
-		CsvParserSettings parserSettings = new CsvParserSettings();
-		parserSettings.setLineSeparatorDetectionEnabled(true);
-
-		CsvRoutines csvRoutines = new CsvRoutines(parserSettings, writerSettings);
 		List<Datasource> datasources = csvRoutines.parseAll(Datasource.class, file);
 
 		for (Datasource datasource : datasources) {
@@ -194,6 +210,31 @@ public class ImportRecordsController {
 				DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 			}
 		}
+	}
+	
+	/**
+	 * Imports destination records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importDestinations(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+		
+		logger.debug("Entering importDestinations: sessionUser={}", sessionUser);
+
+		List<Destination> destinations = csvRoutines.parseAll(Destination.class, file);
+
+		for (Destination destination : destinations) {
+			if (destination.isClearTextPassword()) {
+				destination.encryptPassword();
+			}
+		}
+
+		destinationService.importDestinations(destinations, sessionUser, conn);
 	}
 
 }
