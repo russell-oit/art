@@ -19,10 +19,10 @@ package art.encryptor;
 
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
-import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
 import art.user.User;
 import art.utils.ActionResult;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -102,21 +102,7 @@ public class EncryptorService {
 			encryptor.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt passwords
-			String aesCryptPassword = encryptor.getAesCryptPassword();
-			aesCryptPassword = AesEncryptor.decrypt(aesCryptPassword);
-			encryptor.setAesCryptPassword(aesCryptPassword);
-
-			String openPgpSigningKeyPassphrase = encryptor.getOpenPgpSigningKeyPassphrase();
-			openPgpSigningKeyPassphrase = AesEncryptor.decrypt(openPgpSigningKeyPassphrase);
-			encryptor.setOpenPgpSigningKeyPassphrase(openPgpSigningKeyPassphrase);
-
-			String openPassword = encryptor.getOpenPassword();
-			openPassword = AesEncryptor.decrypt(openPassword);
-			encryptor.setOpenPassword(openPassword);
-
-			String modifyPassword = encryptor.getModifyPassword();
-			modifyPassword = AesEncryptor.decrypt(modifyPassword);
-			encryptor.setModifyPassword(modifyPassword);
+			encryptor.decryptPasswords();
 
 			return type.cast(encryptor);
 		}
@@ -134,6 +120,25 @@ public class EncryptorService {
 
 		ResultSetHandler<List<Encryptor>> h = new BeanListHandler<>(Encryptor.class, new EncryptorMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns encryptors with given ids
+	 *
+	 * @param ids comma separated string of the encryptor ids to retrieve
+	 * @return encryptors with given ids
+	 * @throws SQLException
+	 */
+	public List<Encryptor> getEncryptors(String ids) throws SQLException {
+		logger.debug("Entering getEncryptors: ids='{}'", ids);
+
+		Object[] idsArray = StringUtils.split(ids, ",");
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Encryptor>> h = new BeanListHandler<>(Encryptor.class, new EncryptorMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -254,17 +259,72 @@ public class EncryptorService {
 	}
 
 	/**
+	 * Imports encryptor records
+	 *
+	 * @param encryptors the list of encryptors to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "encryptors", allEntries = true)
+	public void importEncryptors(List<Encryptor> encryptors, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importEncryptors: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Encryptor encryptor : encryptors) {
+				id++;
+				saveEncryptor(encryptor, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves an encryptor
+	 *
+	 * @param encryptor the encryptor to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveEncryptor(Encryptor encryptor, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveEncryptor(encryptor, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves an encryptor
 	 *
 	 * @param encryptor the encryptor
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. If null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveEncryptor(Encryptor encryptor, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveEncryptor: encryptor={}, newRecordId={}, actionUser={}",
-				encryptor, newRecordId, actionUser);
+	private void saveEncryptor(Encryptor encryptor, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveEncryptor: encryptor={}, newRecordId={},"
+				+ " actionUser={}", encryptor, newRecordId, actionUser);
 
 		int affectedRows;
 
@@ -300,7 +360,11 @@ public class EncryptorService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_ENCRYPTORS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, ENCRYPTOR_TYPE=?, AESCRYPT_PASSWORD=?,"
@@ -327,7 +391,11 @@ public class EncryptorService {
 				encryptor.getEncryptorId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

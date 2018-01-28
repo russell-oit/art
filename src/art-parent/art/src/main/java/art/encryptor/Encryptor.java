@@ -17,7 +17,10 @@
  */
 package art.encryptor;
 
+import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
+import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -29,24 +32,58 @@ import java.util.Date;
 public class Encryptor implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int encryptorId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
+	@Parsed
 	private boolean active = true;
+	@Parsed
 	private EncryptorType encryptorType = EncryptorType.AESCrypt;
+	@Parsed
 	private String aesCryptPassword;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date creationDate;
+	@Parsed
 	private String createdBy;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date updateDate;
+	@Parsed
 	private String updatedBy;
+	@Parsed
 	private String openPgpPublicKeyFile;
+	@Parsed
 	private String openPgpPublicKeyString;
+	@Parsed
 	private String openPgpSigningKeyFile;
+	@Parsed
 	private String openPgpSigningKeyPassphrase;
+	@Parsed
 	private String openPassword;
+	@Parsed
 	private String modifyPassword;
 	private boolean useNoneOpenPassword; //only for use with ui
 	private boolean useNoneModifyPassword; //only for use with ui
+	@Parsed
+	private boolean clearTextPasswords;
+
+	/**
+	 * @return the clearTextPasswords
+	 */
+	public boolean isClearTextPasswords() {
+		return clearTextPasswords;
+	}
+
+	/**
+	 * @param clearTextPasswords the clearTextPasswords to set
+	 */
+	public void setClearTextPasswords(boolean clearTextPasswords) {
+		this.clearTextPasswords = clearTextPasswords;
+	}
 
 	/**
 	 * @return the openPassword
@@ -328,6 +365,26 @@ public class Encryptor implements Serializable {
 	@Override
 	public String toString() {
 		return "Encryptor{" + "name=" + name + '}';
+	}
+
+	/**
+	 * Decrypts password fields
+	 */
+	public void decryptPasswords() {
+		aesCryptPassword = AesEncryptor.decrypt(aesCryptPassword);
+		openPgpSigningKeyPassphrase = AesEncryptor.decrypt(openPgpSigningKeyPassphrase);
+		openPassword = AesEncryptor.decrypt(openPassword);
+		modifyPassword = AesEncryptor.decrypt(modifyPassword);
+	}
+	
+	/**
+	 * Encrypts password fields
+	 */
+	public void encryptPasswords(){
+		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword);
+		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase);
+		openPassword = AesEncryptor.encrypt(openPassword);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword);
 	}
 
 }

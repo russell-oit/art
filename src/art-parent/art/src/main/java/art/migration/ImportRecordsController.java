@@ -24,6 +24,8 @@ import art.datasource.DatasourceService;
 import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
 import art.destination.DestinationService;
+import art.encryptor.Encryptor;
+import art.encryptor.EncryptorService;
 import art.enums.MigrationRecordType;
 import art.servlets.Config;
 import art.settings.Settings;
@@ -72,9 +74,12 @@ public class ImportRecordsController {
 
 	@Autowired
 	private DatasourceService datasourceService;
-	
+
 	@Autowired
 	private DestinationService destinationService;
+	
+	@Autowired
+	private EncryptorService encryptorService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -120,7 +125,7 @@ public class ImportRecordsController {
 			parserSettings.setLineSeparatorDetectionEnabled(true);
 
 			CsvRoutines csvRoutines = new CsvRoutines(parserSettings, writerSettings);
-			
+
 			Connection conn = DbConnections.getArtDbConnection();
 
 			try {
@@ -133,6 +138,9 @@ public class ImportRecordsController {
 						break;
 					case Destinations:
 						importDestinations(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case Encryptors:
+						importEncryptors(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -172,9 +180,9 @@ public class ImportRecordsController {
 		if (settings.isClearTextPasswords()) {
 			settings.encryptPasswords();
 		}
-		
+
 		settingsService.importSettings(settings, sessionUser, conn);
-		
+
 		SettingsHelper settingsHelper = new SettingsHelper();
 		settingsHelper.refreshSettings(settings, session, servletContext);
 	}
@@ -190,7 +198,7 @@ public class ImportRecordsController {
 	 */
 	private void importDatasources(File file, User sessionUser, Connection conn,
 			CsvRoutines csvRoutines) throws SQLException {
-		
+
 		logger.debug("Entering importDatasources: sessionUser={}", sessionUser);
 
 		List<Datasource> datasources = csvRoutines.parseAll(Datasource.class, file);
@@ -211,7 +219,7 @@ public class ImportRecordsController {
 			}
 		}
 	}
-	
+
 	/**
 	 * Imports destination records
 	 *
@@ -223,7 +231,7 @@ public class ImportRecordsController {
 	 */
 	private void importDestinations(File file, User sessionUser, Connection conn,
 			CsvRoutines csvRoutines) throws SQLException {
-		
+
 		logger.debug("Entering importDestinations: sessionUser={}", sessionUser);
 
 		List<Destination> destinations = csvRoutines.parseAll(Destination.class, file);
@@ -235,6 +243,31 @@ public class ImportRecordsController {
 		}
 
 		destinationService.importDestinations(destinations, sessionUser, conn);
+	}
+
+	/**
+	 * Imports encryptor records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importEncryptors(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+
+		logger.debug("Entering importEncryptors: sessionUser={}", sessionUser);
+
+		List<Encryptor> encryptors = csvRoutines.parseAll(Encryptor.class, file);
+
+		for (Encryptor encryptor : encryptors) {
+			if (encryptor.isClearTextPasswords()) {
+				encryptor.encryptPasswords();
+			}
+		}
+
+		encryptorService.importEncryptors(encryptors, sessionUser, conn);
 	}
 
 }

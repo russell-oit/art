@@ -23,6 +23,8 @@ import art.datasource.DatasourceService;
 import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
 import art.destination.DestinationService;
+import art.encryptor.Encryptor;
+import art.encryptor.EncryptorService;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
 import art.servlets.Config;
@@ -68,6 +70,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private DestinationService destinationService;
+	
+	@Autowired
+	private EncryptorService encryptorService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -137,6 +142,9 @@ public class ExportRecordsController {
 						break;
 					case Destinations:
 						exportDestinations(exportRecords, exportFile, sessionUser, csvRoutines, conn);
+						break;
+					case Encryptors:
+						exportEncryptors(exportRecords, exportFile, sessionUser, csvRoutines, conn);
 						break;
 					default:
 						break;
@@ -257,6 +265,42 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				destinationService.importDestinations(destinations, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+	}
+
+	/**
+	 * Exports encryptor records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportEncryptors(ExportRecords exportRecords, File file,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportEncryptors");
+
+		String ids = exportRecords.getIds();
+		List<Encryptor> encryptors = encryptorService.getEncryptors(ids);
+		for (Encryptor encryptor : encryptors) {
+			encryptor.encryptPasswords();
+		}
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				csvRoutines.writeAll(encryptors, Encryptor.class, file);
+				break;
+			case Datasource:
+				encryptorService.importEncryptors(encryptors, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
