@@ -133,7 +133,7 @@ public class EncryptorService {
 	public List<Encryptor> getEncryptors(String ids) throws SQLException {
 		logger.debug("Entering getEncryptors: ids='{}'", ids);
 
-		Object[] idsArray = StringUtils.split(ids, ",");
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";

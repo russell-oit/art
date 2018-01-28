@@ -21,6 +21,7 @@ import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -119,7 +120,7 @@ public class HolidayService {
 	public List<Holiday> getHolidays(String ids) throws SQLException {
 		logger.debug("Entering getHolidays: ids='{}'", ids);
 
-		Object[] idsArray = StringUtils.split(ids, ",");
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE HOLIDAY_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";

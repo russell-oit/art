@@ -90,7 +90,7 @@ public class DatasourceService {
 	public List<Datasource> getDatasources(String ids) throws SQLException {
 		logger.debug("Entering getDatasources: ids='{}'", ids);
 
-		Object[] idsArray = StringUtils.split(ids, ",");
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";

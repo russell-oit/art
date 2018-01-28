@@ -136,7 +136,7 @@ public class DestinationService {
 	public List<Destination> getDestinations(String ids) throws SQLException {
 		logger.debug("Entering getDestinations: ids='{}'", ids);
 
-		Object[] idsArray = StringUtils.split(ids, ",");
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE DESTINATION_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";

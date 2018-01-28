@@ -80,7 +80,7 @@ public class ExportRecordsController {
 
 	@Autowired
 	private HolidayService holidayService;
-	
+
 	@Autowired
 	private ReportGroupService reportGroupService;
 
@@ -357,24 +357,6 @@ public class ExportRecordsController {
 	}
 
 	/**
-	 * Prepares model data and returns the jsp file to display
-	 *
-	 * @param model the model object
-	 * @return the jsp file to display
-	 */
-	private String showEditExportRecords(Model model) {
-		try {
-			model.addAttribute("datasources", datasourceService.getActiveJdbcDatasources());
-			model.addAttribute("locations", MigrationLocation.list());
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return "exportRecords";
-	}
-
-	/**
 	 * Exports report group records
 	 *
 	 * @param exportRecords the export records object
@@ -405,6 +387,24 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
+	}
+
+	/**
+	 * Prepares model data and returns the jsp file to display
+	 *
+	 * @param model the model object
+	 * @return the jsp file to display
+	 */
+	private String showEditExportRecords(Model model) {
+		try {
+			model.addAttribute("datasources", datasourceService.getActiveJdbcDatasources());
+			model.addAttribute("locations", MigrationLocation.list());
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "exportRecords";
 	}
 
 }
