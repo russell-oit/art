@@ -15,7 +15,7 @@
 
 <spring:message code="page.title.exportRecords" var="exportRecordsText"/>
 <c:set var="panelTitle">
-	${exportRecordsText} - ${exportRecords.recordType.value}
+	${exportRecordsText} - <spring:message code="${exportRecords.recordType.localizedDescription}"/>
 </c:set>
 <c:set var="pageTitle">
 	${panelTitle}

@@ -165,7 +165,7 @@ public class ReportGroupService {
 	 * Returns report groups with given ids
 	 *
 	 * @param ids comma separated string of the report group ids to retrieve
-	 * @return reportGroups with given ids
+	 * @return report groups with given ids
 	 * @throws SQLException
 	 */
 	public List<ReportGroup> getReportGroups(String ids) throws SQLException {

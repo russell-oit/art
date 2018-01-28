@@ -29,7 +29,8 @@ import java.util.List;
 public enum MigrationRecordType {
 	
 	Settings("Settings"), Datasources("Datasources"), Destinations("Destinations"),
-	Encryptors("Encryptors"), Holidays("Holidays"), ReportGroups("ReportGroups");
+	Encryptors("Encryptors"), Holidays("Holidays"), ReportGroups("ReportGroups"),
+	SmtpServers("SmtpServers");
 	
 	private final String value;
 

@@ -34,6 +34,8 @@ import art.reportgroup.ReportGroupService;
 import art.servlets.Config;
 import art.settings.Settings;
 import art.settings.SettingsService;
+import art.smtpserver.SmtpServer;
+import art.smtpserver.SmtpServerService;
 import art.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.csv.CsvRoutines;
@@ -83,6 +85,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private ReportGroupService reportGroupService;
+
+	@Autowired
+	private SmtpServerService smtpServerService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -162,6 +167,9 @@ public class ExportRecordsController {
 					case ReportGroups:
 						exportReportGroups(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
+					case SmtpServers:
+						exportSmtpServers(exportRecords, file, sessionUser, csvRoutines, conn);
+						break;
 					default:
 						break;
 				}
@@ -181,6 +189,24 @@ public class ExportRecordsController {
 		}
 
 		return showEditExportRecords(model);
+	}
+
+	/**
+	 * Prepares model data and returns the jsp file to display
+	 *
+	 * @param model the model object
+	 * @return the jsp file to display
+	 */
+	private String showEditExportRecords(Model model) {
+		try {
+			model.addAttribute("datasources", datasourceService.getActiveJdbcDatasources());
+			model.addAttribute("locations", MigrationLocation.list());
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "exportRecords";
 	}
 
 	/**
@@ -390,21 +416,39 @@ public class ExportRecordsController {
 	}
 
 	/**
-	 * Prepares model data and returns the jsp file to display
+	 * Exports smtp server records
 	 *
-	 * @param model the model object
-	 * @return the jsp file to display
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
 	 */
-	private String showEditExportRecords(Model model) {
-		try {
-			model.addAttribute("datasources", datasourceService.getActiveJdbcDatasources());
-			model.addAttribute("locations", MigrationLocation.list());
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
+	private void exportSmtpServers(ExportRecords exportRecords, File file,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportSmtpServers");
+
+		String ids = exportRecords.getIds();
+		List<SmtpServer> smtpServers = smtpServerService.getSmtpServers(ids);
+		for (SmtpServer smtpServer : smtpServers) {
+			smtpServer.encryptPassword();
 		}
 
-		return "exportRecords";
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				csvRoutines.writeAll(smtpServers, SmtpServer.class, file);
+				break;
+			case Datasource:
+				smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
 	}
 
 }

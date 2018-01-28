@@ -35,6 +35,8 @@ import art.servlets.Config;
 import art.settings.Settings;
 import art.settings.SettingsHelper;
 import art.settings.SettingsService;
+import art.smtpserver.SmtpServer;
+import art.smtpserver.SmtpServerService;
 import art.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.csv.CsvParserSettings;
@@ -90,6 +92,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private ReportGroupService reportGroupService;
+
+	@Autowired
+	private SmtpServerService smtpServerService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -157,6 +162,9 @@ public class ImportRecordsController {
 						break;
 					case ReportGroups:
 						importReportGroups(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case SmtpServers:
+						importSmtpServers(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -320,6 +328,31 @@ public class ImportRecordsController {
 
 		List<ReportGroup> reportGroups = csvRoutines.parseAll(ReportGroup.class, file);
 		reportGroupService.importReportGroups(reportGroups, sessionUser, conn);
+	}
+
+	/**
+	 * Imports smtp server records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importSmtpServers(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+
+		logger.debug("Entering importSmtpServers: sessionUser={}", sessionUser);
+
+		List<SmtpServer> smtpServers = csvRoutines.parseAll(SmtpServer.class, file);
+
+		for (SmtpServer smtpServer : smtpServers) {
+			if (smtpServer.isClearTextPassword()) {
+				smtpServer.encryptPassword();
+			}
+		}
+
+		smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);
 	}
 
 }
