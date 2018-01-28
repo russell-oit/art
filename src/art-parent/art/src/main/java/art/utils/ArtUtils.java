@@ -559,4 +559,36 @@ public class ArtUtils {
 		return formattedNumber;
 	}
 
+	/**
+	 * Converts a string of comma separated integer values to an object list
+	 *
+	 * @param ids the string of comma separated values to convert
+	 * @return an object list containing Integer values
+	 */
+	public static List<Object> idsToObjectList(String ids) {
+		List<Object> idsList = new ArrayList<>();
+
+		if (StringUtils.isNotBlank(ids)) {
+			String[] idsArrayString = StringUtils.split(ids, ",");
+			for (String idString : idsArrayString) {
+				Integer idInteger = Integer.valueOf(idString.trim());
+				idsList.add(idInteger);
+			}
+		}
+
+		return idsList;
+	}
+
+	/**
+	 * Converts a string of comma separated integer values to an object array
+	 *
+	 * @param ids the string of comma separated values to convert
+	 * @return an object array containing Integer values
+	 */
+	public static Object[] idsToObjectArray(String ids) {
+		List<Object> idsList = idsToObjectList(ids);
+		Object[] idsArray = idsList.toArray(new Object[idsList.size()]);
+		return idsArray;
+	}
+
 }

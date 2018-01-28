@@ -29,6 +29,8 @@ import art.encryptor.EncryptorService;
 import art.enums.MigrationRecordType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
+import art.reportgroup.ReportGroup;
+import art.reportgroup.ReportGroupService;
 import art.servlets.Config;
 import art.settings.Settings;
 import art.settings.SettingsHelper;
@@ -85,6 +87,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private HolidayService holidayService;
+
+	@Autowired
+	private ReportGroupService reportGroupService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -149,6 +154,9 @@ public class ImportRecordsController {
 						break;
 					case Holidays:
 						importHolidays(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case ReportGroups:
+						importReportGroups(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -294,6 +302,24 @@ public class ImportRecordsController {
 
 		List<Holiday> holidays = csvRoutines.parseAll(Holiday.class, file);
 		holidayService.importHolidays(holidays, sessionUser, conn);
+	}
+
+	/**
+	 * Imports report group records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importReportGroups(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+
+		logger.debug("Entering importReportGroups: sessionUser={}", sessionUser);
+
+		List<ReportGroup> reportGroups = csvRoutines.parseAll(ReportGroup.class, file);
+		reportGroupService.importReportGroups(reportGroups, sessionUser, conn);
 	}
 
 }

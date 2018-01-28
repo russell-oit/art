@@ -323,7 +323,7 @@ public class DestinationService {
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
-	 * @param conn the connection to use. If null, the art database will be used
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
 	private void saveDestination(Destination destination, Integer newRecordId,

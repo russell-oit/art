@@ -22,6 +22,8 @@ import art.dbutils.DatabaseUtils;
 import art.enums.AccessLevel;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -160,6 +162,25 @@ public class ReportGroupService {
 	}
 
 	/**
+	 * Returns report groups with given ids
+	 *
+	 * @param ids comma separated string of the report group ids to retrieve
+	 * @return reportGroups with given ids
+	 * @throws SQLException
+	 */
+	public List<ReportGroup> getReportGroups(String ids) throws SQLException {
+		logger.debug("Entering getReportGroups: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE QUERY_GROUP_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<ReportGroup>> h = new BeanListHandler<>(ReportGroup.class, new ReportGroupMapper());
+		return dbService.query(sql, h, idsArray);
+	}
+
+	/**
 	 * Returns report groups that an admin can use, according to his access
 	 * level
 	 *
@@ -253,8 +274,8 @@ public class ReportGroupService {
 	 * Deletes multiple report groups
 	 *
 	 * @param ids the ids of the report groups to delete
-	 * @return ActionResult. if not successful, data contains details of the report
-	 * groups that were not deleted
+	 * @return ActionResult. if not successful, data contains details of the
+	 * report groups that were not deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true)
@@ -320,17 +341,72 @@ public class ReportGroupService {
 	}
 
 	/**
+	 * Imports report group records
+	 *
+	 * @param reportGroups the list of report groups to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reportGroups", allEntries = true)
+	public void importReportGroups(List<ReportGroup> reportGroups, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importReportGroups: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (ReportGroup reportGroup : reportGroups) {
+				id++;
+				saveReportGroup(reportGroup, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a report group
+	 *
+	 * @param reportGroup the report group to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveReportGroup(ReportGroup reportGroup, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveReportGroup(reportGroup, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a report group
 	 *
 	 * @param group the report group
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveReportGroup(ReportGroup group, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveReportGroup: group={}, newRecordId={}, actionUser={}",
-				group, newRecordId, actionUser);
+	private void saveReportGroup(ReportGroup group, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveReportGroup: group={}, newRecordId={},"
+				+ "actionUser={}", group, newRecordId, actionUser);
 
 		int affectedRows;
 
@@ -352,7 +428,11 @@ public class ReportGroupService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_QUERY_GROUPS SET NAME=?, DESCRIPTION=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
@@ -366,7 +446,11 @@ public class ReportGroupService {
 				group.getReportGroupId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

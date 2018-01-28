@@ -17,6 +17,8 @@
  */
 package art.reportgroup;
 
+import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.text.Collator;
 import java.util.Comparator;
@@ -30,12 +32,21 @@ import java.util.Date;
 public class ReportGroup implements Serializable, Comparable<ReportGroup> {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int reportGroupId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date creationDate;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date updateDate;
+	@Parsed
 	private String createdBy;
+	@Parsed
 	private String updatedBy;
 
 	/**
