@@ -18,6 +18,8 @@
 package art.usergroup;
 
 import art.reportgroup.ReportGroup;
+import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -32,14 +34,24 @@ public class UserGroup implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	// Properties --------------------------------------------------------------
+	@Parsed
 	private int userGroupId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
 	private ReportGroup defaultReportGroup;
+	@Parsed
 	private String startReport;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date creationDate;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date updateDate;
+	@Parsed
 	private String createdBy;
+	@Parsed
 	private String updatedBy;
 
 	// Getters/setters ---------------------------------------------------------

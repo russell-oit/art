@@ -38,6 +38,8 @@ import art.settings.SettingsService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
+import art.usergroup.UserGroup;
+import art.usergroup.UserGroupService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvRoutines;
@@ -95,6 +97,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private SmtpServerService smtpServerService;
+
+	@Autowired
+	private UserGroupService userGroupService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -165,6 +170,9 @@ public class ImportRecordsController {
 						break;
 					case SmtpServers:
 						importSmtpServers(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case UserGroups:
+						importUserGroups(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -353,6 +361,24 @@ public class ImportRecordsController {
 		}
 
 		smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);
+	}
+
+	/**
+	 * Imports user group records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importUserGroups(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+
+		logger.debug("Entering importUserGroups: sessionUser={}", sessionUser);
+
+		List<UserGroup> userGroups = csvRoutines.parseAll(UserGroup.class, file);
+		userGroupService.importUserGroups(userGroups, sessionUser, conn);
 	}
 
 }

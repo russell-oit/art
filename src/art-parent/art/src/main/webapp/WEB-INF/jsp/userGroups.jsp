@@ -107,6 +107,19 @@ Display user groups
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
+				
+				$('#exportRecords').click(function () {
+					var selectedRows = table.rows({selected: true});
+					var data = selectedRows.data();
+					if (data.length > 0) {
+						var ids = $.map(data, function (item) {
+							return item[1];
+						});
+						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=UserGroups&ids=' + ids;
+					} else {
+						bootbox.alert("${selectRecordsText}");
+					}
+				});
 
 			}); //end document ready
 		</script>
@@ -132,15 +145,25 @@ Display user groups
 		<div id="ajaxResponse">
 		</div>
 
-		<div id="headerActions" class="dtHeader">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/addUserGroup">
-				<i class="fa fa-plus"></i>
-				<spring:message code="page.action.add"/>
-			</a>
-			<button type="button" id="deleteRecords" class="btn btn-default">
-				<i class="fa fa-trash-o"></i>
-				<spring:message code="page.action.delete"/>
-			</button>
+		<div class="dtHeader">
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/addUserGroup">
+					<i class="fa fa-plus"></i>
+					<spring:message code="page.action.add"/>
+				</a>
+				<button type="button" id="deleteRecords" class="btn btn-default">
+					<i class="fa fa-trash-o"></i>
+					<spring:message code="page.action.delete"/>
+				</button>
+			</div>
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=UserGroups">
+					<spring:message code="page.text.import"/>
+				</a>
+				<button type="button" id="exportRecords" class="btn btn-default">
+					<spring:message code="page.text.export"/>
+				</button>
+			</div>
 		</div>
 
 		<table id="userGroups" class="table table-bordered table-striped table-condensed">

@@ -23,6 +23,8 @@ import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -112,6 +114,25 @@ public class UserGroupService {
 
 		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns user groups with given ids
+	 *
+	 * @param ids comma separated string of the user group ids to retrieve
+	 * @return user groups with given ids
+	 * @throws SQLException
+	 */
+	public List<UserGroup> getUserGroups(String ids) throws SQLException {
+		logger.debug("Entering getUserGroups: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE USER_GROUP_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<>(UserGroup.class, new UserGroupService.UserGroupMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -272,24 +293,80 @@ public class UserGroupService {
 	}
 
 	/**
+	 * Imports user group records
+	 *
+	 * @param userGroups the list of user groups to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "userGroups", allEntries = true)
+	public void importUserGroups(List<UserGroup> userGroups, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importUserGroups: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (UserGroup userGroup : userGroups) {
+				id++;
+				saveUserGroup(userGroup, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a user group
+	 *
+	 * @param userGroup the user group to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveUserGroup(UserGroup userGroup, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveUserGroup(userGroup, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a user group
 	 *
 	 * @param group the user group
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveUserGroup(UserGroup group, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveUserGroup: group={}, newRecordId={}, actionUser={}",
-				group, newRecordId, actionUser);
+	private void saveUserGroup(UserGroup group, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveUserGroup: group={}, newRecordId={},"
+				+ " actionUser={}", group, newRecordId, actionUser);
 
 		//set values for possibly null property objects
-		int defaultReportGroupId;
-		if (group.getDefaultReportGroup() == null) {
-			defaultReportGroupId = 0;
-		} else {
+		Integer defaultReportGroupId = null;
+		if (group.getDefaultReportGroup() != null) {
 			defaultReportGroupId = group.getDefaultReportGroup().getReportGroupId();
+			if (defaultReportGroupId == 0) {
+				defaultReportGroupId = null;
+			}
 		}
 
 		int affectedRows;
@@ -315,7 +392,11 @@ public class UserGroupService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_USER_GROUPS SET NAME=?, DESCRIPTION=?,"
 					+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?, UPDATED_BY=?"
@@ -331,7 +412,11 @@ public class UserGroupService {
 				group.getUserGroupId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

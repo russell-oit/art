@@ -37,6 +37,8 @@ import art.settings.SettingsService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
+import art.usergroup.UserGroup;
+import art.usergroup.UserGroupService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.csv.CsvRoutines;
 import com.univocity.parsers.csv.CsvWriterSettings;
@@ -88,6 +90,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private SmtpServerService smtpServerService;
+
+	@Autowired
+	private UserGroupService userGroupService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -169,6 +174,9 @@ public class ExportRecordsController {
 						break;
 					case SmtpServers:
 						exportSmtpServers(exportRecords, file, sessionUser, csvRoutines, conn);
+						break;
+					case UserGroups:
+						exportUserGroups(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					default:
 						break;
@@ -445,6 +453,39 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+	}
+
+	/**
+	 * Exports user group records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportUserGroups(ExportRecords exportRecords, File file,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportUserGroups");
+
+		String ids = exportRecords.getIds();
+		List<UserGroup> userGroups = userGroupService.getUserGroups(ids);
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				csvRoutines.writeAll(userGroups, UserGroup.class, file);
+				break;
+			case Datasource:
+				userGroupService.importUserGroups(userGroups, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

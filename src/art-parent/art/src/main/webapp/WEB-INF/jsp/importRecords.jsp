@@ -15,7 +15,7 @@
 
 <spring:message code="page.title.importRecords" var="importRecordsText"/>
 <c:set var="panelTitle">
-	${importRecordsText} - ${importRecords.recordType.value}
+	${importRecordsText} - <spring:message code="${importRecords.recordType.localizedDescription}"/>
 </c:set>
 <c:set var="pageTitle">
 	${panelTitle}
