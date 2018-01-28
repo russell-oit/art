@@ -22,6 +22,7 @@ import art.dbutils.DbService;
 import art.encryption.AesEncryptor;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -340,16 +341,16 @@ public class SmtpServerService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleSmtpServerEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleSmtpServerEdit.getIds());
 		if (!multipleSmtpServerEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_SMTP_SERVERS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE SMTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE SMTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleSmtpServerEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 

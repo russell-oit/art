@@ -23,6 +23,7 @@ import art.enums.AccessLevel;
 import art.enums.DatasourceType;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -466,16 +467,16 @@ public class DatasourceService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleDatasourceEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleDatasourceEdit.getIds());
 		if (!multipleDatasourceEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_DATABASES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleDatasourceEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 

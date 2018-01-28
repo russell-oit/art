@@ -22,6 +22,7 @@ import art.dbutils.DbService;
 import art.enums.DestinationType;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -456,16 +457,16 @@ public class DestinationService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleDestinationEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleDestinationEdit.getIds());
 		if (!multipleDestinationEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_DESTINATIONS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE DESTINATION_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE DESTINATION_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleDestinationEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 

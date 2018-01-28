@@ -25,6 +25,7 @@ import art.reportgroup.ReportGroupService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -386,16 +387,16 @@ public class UserService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleUserEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleUserEdit.getIds());
 		if (!multipleUserEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_USERS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleUserEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -403,13 +404,13 @@ public class UserService {
 		}
 		if (!multipleUserEdit.isCanChangePasswordUnchanged()) {
 			sql = "UPDATE ART_USERS SET CAN_CHANGE_PASSWORD=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsList.length) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleUserEdit.isCanChangePassword()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(Arrays.asList(idsList));
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -417,13 +418,13 @@ public class UserService {
 		}
 		if (!multipleUserEdit.isAccessLevelUnchanged()) {
 			sql = "UPDATE ART_USERS SET ACCESS_LEVEL=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsList.length) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(multipleUserEdit.getAccessLevel().getValue());
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(Arrays.asList(idsList));
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
