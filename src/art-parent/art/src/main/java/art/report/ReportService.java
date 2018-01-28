@@ -853,13 +853,13 @@ public class ReportService {
 		}
 		if (!multipleReportEdit.isHiddenUnchanged()) {
 			sql = "UPDATE ART_QUERIES SET HIDDEN=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.length) + ")";
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isHidden()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(idsList));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -867,13 +867,13 @@ public class ReportService {
 		}
 		if (!multipleReportEdit.isContactPersonUnchanged()) {
 			sql = "UPDATE ART_QUERIES SET CONTACT_PERSON=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.length) + ")";
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(multipleReportEdit.getContactPerson());
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(idsList));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -881,13 +881,13 @@ public class ReportService {
 		}
 		if (!multipleReportEdit.isOmitTitleRowUnchanged()) {
 			sql = "UPDATE ART_QUERIES SET OMIT_TITLE_ROW=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.length) + ")";
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isOmitTitleRow()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(idsList));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
