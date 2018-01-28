@@ -27,6 +27,8 @@ import art.destination.DestinationService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.MigrationRecordType;
+import art.holiday.Holiday;
+import art.holiday.HolidayService;
 import art.servlets.Config;
 import art.settings.Settings;
 import art.settings.SettingsHelper;
@@ -77,9 +79,12 @@ public class ImportRecordsController {
 
 	@Autowired
 	private DestinationService destinationService;
-	
+
 	@Autowired
 	private EncryptorService encryptorService;
+
+	@Autowired
+	private HolidayService holidayService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -141,6 +146,9 @@ public class ImportRecordsController {
 						break;
 					case Encryptors:
 						importEncryptors(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case Holidays:
+						importHolidays(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -268,6 +276,24 @@ public class ImportRecordsController {
 		}
 
 		encryptorService.importEncryptors(encryptors, sessionUser, conn);
+	}
+
+	/**
+	 * Imports holiday records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importHolidays(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+
+		logger.debug("Entering importHolidays: sessionUser={}", sessionUser);
+
+		List<Holiday> holidays = csvRoutines.parseAll(Holiday.class, file);
+		holidayService.importHolidays(holidays, sessionUser, conn);
 	}
 
 }

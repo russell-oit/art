@@ -27,6 +27,8 @@ import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
+import art.holiday.Holiday;
+import art.holiday.HolidayService;
 import art.servlets.Config;
 import art.settings.Settings;
 import art.settings.SettingsService;
@@ -70,9 +72,12 @@ public class ExportRecordsController {
 
 	@Autowired
 	private DestinationService destinationService;
-	
+
 	@Autowired
 	private EncryptorService encryptorService;
+	
+	@Autowired
+	private HolidayService holidayService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -118,7 +123,7 @@ public class ExportRecordsController {
 			String recordsExportPath = Config.getRecordsExportPath();
 			String exportFilePath = recordsExportPath + exportFileName;
 
-			File exportFile = new File(exportFilePath);
+			File file = new File(exportFilePath);
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -135,16 +140,19 @@ public class ExportRecordsController {
 			try {
 				switch (recordType) {
 					case Settings:
-						exportSettings(exportRecords, exportFile, sessionUser, conn);
+						exportSettings(exportRecords, file, sessionUser, conn);
 						break;
 					case Datasources:
-						exportDatasources(exportRecords, exportFile, sessionUser, csvRoutines, conn);
+						exportDatasources(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Destinations:
-						exportDestinations(exportRecords, exportFile, sessionUser, csvRoutines, conn);
+						exportDestinations(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Encryptors:
-						exportEncryptors(exportRecords, exportFile, sessionUser, csvRoutines, conn);
+						exportEncryptors(exportRecords, file, sessionUser, csvRoutines, conn);
+						break;
+					case Holidays:
+						exportHolidays(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					default:
 						break;
@@ -301,6 +309,39 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				encryptorService.importEncryptors(encryptors, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+	}
+
+	/**
+	 * Exports holiday records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportHolidays(ExportRecords exportRecords, File file,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportHolidays");
+
+		String ids = exportRecords.getIds();
+		List<Holiday> holidays = holidayService.getHolidays(ids);
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				csvRoutines.writeAll(holidays, Holiday.class, file);
+				break;
+			case Datasource:
+				holidayService.importHolidays(holidays, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

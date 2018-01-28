@@ -29,7 +29,7 @@ import java.util.List;
 public enum MigrationRecordType {
 	
 	Settings("Settings"), Datasources("Datasources"), Destinations("Destinations"),
-	Encryptors("Encryptors");
+	Encryptors("Encryptors"), Holidays("Holidays");
 	
 	private final String value;
 
