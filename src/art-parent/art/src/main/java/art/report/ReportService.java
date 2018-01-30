@@ -550,9 +550,12 @@ public class ReportService {
 
 		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
-
+		
 		//delete drilldown queries
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
 
 		//lastly, delete query
