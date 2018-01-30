@@ -364,11 +364,17 @@ public class ParameterService {
 			dataType = parameter.getDataType().getValue();
 		}
 
-		Integer defaultValueReportId;
-		if (parameter.getDefaultValueReport() == null) {
-			defaultValueReportId = 0;
-		} else {
+		Integer defaultValueReportId = null;
+		if (parameter.getDefaultValueReport() != null) {
 			defaultValueReportId = parameter.getDefaultValueReport().getReportId();
+			if (defaultValueReportId == 0) {
+				defaultValueReportId = null;
+			}
+		}
+
+		Integer lovReportId = parameter.getLovReportId();
+		if (lovReportId == 0) {
+			lovReportId = null;
 		}
 
 		int affectedRows;
@@ -400,7 +406,7 @@ public class ParameterService {
 				BooleanUtils.toInteger(parameter.isHidden()),
 				BooleanUtils.toInteger(parameter.isShared()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
-				parameter.getLovReportId(),
+				lovReportId,
 				BooleanUtils.toInteger(parameter.isUseRulesInLov()),
 				parameter.getDrilldownColumnIndex(),
 				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),
@@ -435,7 +441,7 @@ public class ParameterService {
 				BooleanUtils.toInteger(parameter.isHidden()),
 				BooleanUtils.toInteger(parameter.isShared()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
-				parameter.getLovReportId(),
+				lovReportId,
 				BooleanUtils.toInteger(parameter.isUseRulesInLov()),
 				parameter.getDrilldownColumnIndex(),
 				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),

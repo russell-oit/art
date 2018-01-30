@@ -661,11 +661,12 @@ public class ReportService {
 			}
 		}
 
-		Integer encryptorId;
-		if (report.getEncryptor() == null) {
-			encryptorId = 0;
-		} else {
+		Integer encryptorId = null;
+		if (report.getEncryptor() != null) {
 			encryptorId = report.getEncryptor().getEncryptorId();
+			if (encryptorId == 0) {
+				encryptorId = null;
+			}
 		}
 
 		Integer reportTypeId;

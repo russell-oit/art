@@ -262,6 +262,9 @@ public class UserService {
 
 		sql = "DELETE FROM ART_JOB_ARCHIVES WHERE USER_ID=?";
 		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_LOGGED_IN_USERS WHERE USER_ID=?";
+		dbService.update(sql, id);
 
 		//lastly, delete user
 		sql = "DELETE FROM ART_USERS WHERE USER_ID=?";
@@ -453,11 +456,12 @@ public class UserService {
 			accessLevel = user.getAccessLevel().getValue();
 		}
 
-		int defaultReportGroupId;
-		if (user.getDefaultReportGroup() == null) {
-			defaultReportGroupId = 0;
-		} else {
+		Integer defaultReportGroupId = null;
+		if (user.getDefaultReportGroup() != null) {
 			defaultReportGroupId = user.getDefaultReportGroup().getReportGroupId();
+			if (defaultReportGroupId == 0) {
+				defaultReportGroupId = null;
+			}
 		}
 
 		int affectedRows;

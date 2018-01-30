@@ -240,7 +240,7 @@ public class JobService {
 
 		Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
 		job.setSchedule(schedule);
-		
+
 		SmtpServer smtpServer = smtpServerService.getSmtpServer(rs.getInt("SMTP_SERVER_ID"));
 		job.setSmtpServer(smtpServer);
 
@@ -421,15 +421,20 @@ public class JobService {
 			reportId = job.getReport().getReportId();
 		}
 
-		Integer userId; //database column doesn't allow null
+		Integer userId;
 		String username;
 		if (job.getUser() == null) {
 			logger.warn("User not defined. Defaulting to 0");
-			userId = 0;
+			userId = null;
 			username = "";
 		} else {
 			userId = job.getUser().getUserId();
 			username = job.getUser().getUsername();
+		}
+
+		Integer recipientsReportId = job.getRecipientsReportId();
+		if (recipientsReportId == 0) {
+			recipientsReportId = null;
 		}
 
 		Integer ftpServerId;
@@ -439,18 +444,20 @@ public class JobService {
 			ftpServerId = job.getFtpServer().getFtpServerId();
 		}
 
-		Integer scheduleId;
-		if (job.getSchedule() == null) {
-			scheduleId = 0;
-		} else {
+		Integer scheduleId = null;
+		if (job.getSchedule() != null) {
 			scheduleId = job.getSchedule().getScheduleId();
+			if (scheduleId == 0) {
+				scheduleId = null;
+			}
 		}
-		
-		Integer smtpServerId;
-		if (job.getSmtpServer() == null) {
-			smtpServerId = 0;
-		} else {
+
+		Integer smtpServerId = null;
+		if (job.getSmtpServer() != null) {
 			smtpServerId = job.getSmtpServer().getSmtpServerId();
+			if (smtpServerId == 0) {
+				smtpServerId = null;
+			}
 		}
 
 		String migratedToQuartz = "X";
@@ -508,7 +515,7 @@ public class JobService {
 				BooleanUtils.toInteger(job.isEnableAudit()),
 				BooleanUtils.toInteger(job.isAllowSharing()),
 				BooleanUtils.toInteger(job.isAllowSplitting()),
-				job.getRecipientsReportId(),
+				recipientsReportId,
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getFixedFileName(),
@@ -576,7 +583,7 @@ public class JobService {
 				BooleanUtils.toInteger(job.isEnableAudit()),
 				BooleanUtils.toInteger(job.isAllowSharing()),
 				BooleanUtils.toInteger(job.isAllowSplitting()),
-				job.getRecipientsReportId(),
+				recipientsReportId,
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getFixedFileName(),
@@ -1137,7 +1144,7 @@ public class JobService {
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h, scheduleId);
 	}
-	
+
 	/**
 	 * Returns jobs that use a given smtp server
 	 *
