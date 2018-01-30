@@ -5,7 +5,7 @@ ART 3.3
 * Allow dynamic recipient query to specify file open or modify password
 * Added password encryptor
 * Fix for multiple c3.js reports within a dashboad not displaying correctly
-* Allow import/export of application settings, datasources
+* Allow import/export of repository artefacts
 
 ART 3.2
 * Added Velocity report type
