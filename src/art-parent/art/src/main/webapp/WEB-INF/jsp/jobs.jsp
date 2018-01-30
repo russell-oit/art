@@ -381,7 +381,7 @@ Display user jobs and jobs configuration
 			<tbody>
 				<c:forEach var="job" items="${jobs}">
 					<tr data-id="${job.jobId}" 
-						data-name="${encode:forHtmlAttribute(job.name)}">
+						data-name="${encode:forHtmlAttribute(job.name)} (${job.jobId})">
 
 						<td></td>
 						<td>${job.jobId}</td>

@@ -158,7 +158,7 @@ Display parameters
 			<tbody>
 				<c:forEach var="parameter" items="${parameters}">
 					<tr data-id="${parameter.parameterId}" 
-						data-name="${encode:forHtmlAttribute(parameter.name)}">
+						data-name="${encode:forHtmlAttribute(parameter.name)} (${parameter.parameterId})">
 
 						<td></td>
 						<td>${parameter.parameterId}</td>
