@@ -17,8 +17,10 @@
  */
 package art.usergroup;
 
+import art.migration.PrefixTransformer;
 import art.reportgroup.ReportGroup;
 import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -40,7 +42,6 @@ public class UserGroup implements Serializable {
 	private String name;
 	@Parsed
 	private String description;
-	private ReportGroup defaultReportGroup;
 	@Parsed
 	private String startReport;
 	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
@@ -53,6 +54,8 @@ public class UserGroup implements Serializable {
 	private String createdBy;
 	@Parsed
 	private String updatedBy;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "DRG")
+	private ReportGroup defaultReportGroup;
 
 	// Getters/setters ---------------------------------------------------------
 	/**

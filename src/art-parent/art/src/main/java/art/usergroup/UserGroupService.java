@@ -317,6 +317,13 @@ public class UserGroupService {
 
 			for (UserGroup userGroup : userGroups) {
 				id++;
+				ReportGroup defaultReportGroup = userGroup.getDefaultReportGroup();
+				if (defaultReportGroup != null && StringUtils.isNotBlank(defaultReportGroup.getName())) {
+					boolean commit = false;
+					List<ReportGroup> reportGroupList = new ArrayList<>();
+					reportGroupList.add(defaultReportGroup);
+					reportGroupService.importReportGroups(reportGroupList, actionUser, conn, commit);
+				}
 				saveUserGroup(userGroup, id, actionUser, conn);
 			}
 			conn.commit();
