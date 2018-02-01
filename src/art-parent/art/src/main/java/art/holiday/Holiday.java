@@ -31,6 +31,8 @@ public class Holiday implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	@Parsed
+	private int parentId; //used for import/export of linked records e.g. schedules
+	@Parsed
 	private int holidayId;
 	@Parsed
 	private String name;
@@ -48,6 +50,20 @@ public class Holiday implements Serializable {
 	private Date updateDate;
 	@Parsed
 	private String updatedBy;
+
+	/**
+	 * @return the parentId
+	 */
+	public int getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 
 	/**
 	 * @return the holidayId

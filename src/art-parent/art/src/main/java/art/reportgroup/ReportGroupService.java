@@ -352,25 +352,7 @@ public class ReportGroupService {
 	public void importReportGroups(List<ReportGroup> reportGroups, User actionUser,
 			Connection conn) throws SQLException {
 
-		boolean commit = true;
-		importReportGroups(reportGroups, actionUser, conn, commit);
-
-	}
-
-	/**
-	 * Imports report group records
-	 *
-	 * @param reportGroups the list of report groups to import
-	 * @param actionUser the user who is performing the import
-	 * @param conn the connection to use
-	 * @param commit whether to commit after successful import
-	 * @throws SQLException
-	 */
-	@CacheEvict(value = "reportGroups", allEntries = true)
-	public void importReportGroups(List<ReportGroup> reportGroups, User actionUser,
-			Connection conn, boolean commit) throws SQLException {
-
-		logger.debug("Entering importReportGroups: actionUser={}, commit={}", actionUser, commit);
+		logger.debug("Entering importReportGroups: actionUser={}", actionUser);
 
 		boolean originalAutoCommit = true;
 
@@ -379,29 +361,19 @@ public class ReportGroupService {
 			int id = dbService.getMaxRecordId(conn, sql);
 
 			originalAutoCommit = conn.getAutoCommit();
-
-			if (commit) {
-				conn.setAutoCommit(false);
-			}
+			conn.setAutoCommit(false);
 
 			for (ReportGroup reportGroup : reportGroups) {
 				id++;
 				saveReportGroup(reportGroup, id, actionUser, conn);
 			}
 
-			if (commit) {
-				conn.commit();
-			}
+			conn.commit();
 		} catch (SQLException ex) {
-			if (commit) {
-				conn.rollback();
-			}
-
+			conn.rollback();
 			throw ex;
 		} finally {
-			if (commit) {
-				conn.setAutoCommit(originalAutoCommit);
-			}
+			conn.setAutoCommit(originalAutoCommit);
 		}
 	}
 
@@ -431,7 +403,8 @@ public class ReportGroupService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveReportGroup(ReportGroup group, Integer newRecordId,
+	@CacheEvict(value = "reportGroups", allEntries = true)
+	public void saveReportGroup(ReportGroup group, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveReportGroup: group={}, newRecordId={},"

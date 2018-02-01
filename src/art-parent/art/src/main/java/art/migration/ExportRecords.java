@@ -30,6 +30,10 @@ import java.io.Serializable;
 public class ExportRecords implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String EMBEDDED_SCHEDULES_FILENAME = "art-export-Schedules.csv";
+	public static final String EMBEDDED_HOLIDAYS_FILENAME = "art-export-Holidays.csv";
+
 	private MigrationRecordType recordType;
 	private String ids;
 	private MigrationLocation location = MigrationLocation.File;

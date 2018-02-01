@@ -54,7 +54,7 @@ public class UserGroup implements Serializable {
 	private String createdBy;
 	@Parsed
 	private String updatedBy;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "DRG")
+	@Nested(headerTransformer = PrefixTransformer.class, args = "drg")
 	private ReportGroup defaultReportGroup;
 
 	// Getters/setters ---------------------------------------------------------

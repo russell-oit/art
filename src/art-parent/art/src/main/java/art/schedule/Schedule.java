@@ -18,6 +18,8 @@
 package art.schedule;
 
 import art.holiday.Holiday;
+import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -30,21 +32,39 @@ import java.util.List;
 public class Schedule implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private String second;
-	private String minute;
-	private String hour;
-	private String day;
-	private String month;
-	private String weekday;
-	private String year;
-	private String name;
+	@Parsed
 	private int scheduleId;
-	private Date creationDate;
-	private Date updateDate;
+	@Parsed
+	private String name;
+	@Parsed
 	private String description;
+	@Parsed
+	private String second;
+	@Parsed
+	private String minute;
+	@Parsed
+	private String hour;
+	@Parsed
+	private String day;
+	@Parsed
+	private String month;
+	@Parsed
+	private String weekday;
+	@Parsed
+	private String year;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
+	private Date creationDate;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
+	private Date updateDate;
+	@Parsed
 	private String createdBy;
+	@Parsed
 	private String updatedBy;
+	@Parsed
 	private String extraSchedules;
+	@Parsed
 	private String holidays;
 	private List<Holiday> sharedHolidays;
 

@@ -314,7 +314,8 @@ public class HolidayService {
 	 * @param conn the connection to use. If null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveHoliday(Holiday holiday, Integer newRecordId,
+	@CacheEvict(value = "holidays", allEntries = true)
+	public void saveHoliday(Holiday holiday, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveHoliday: holiday={}, newRecordId={},"

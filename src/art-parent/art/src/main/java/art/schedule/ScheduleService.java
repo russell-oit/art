@@ -21,13 +21,17 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
+import art.scheduleholiday.ScheduleHolidayService;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -53,16 +57,21 @@ public class ScheduleService {
 
 	private final DbService dbService;
 	private final HolidayService holidayService;
+	private final ScheduleHolidayService scheduleHolidayService;
 
 	@Autowired
-	public ScheduleService(DbService dbService, HolidayService holidayService) {
+	public ScheduleService(DbService dbService, HolidayService holidayService,
+			ScheduleHolidayService scheduleHolidayService) {
+
 		this.dbService = dbService;
 		this.holidayService = holidayService;
+		this.scheduleHolidayService = scheduleHolidayService;
 	}
 
 	public ScheduleService() {
 		dbService = new DbService();
 		holidayService = new HolidayService();
+		scheduleHolidayService = new ScheduleHolidayService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOB_SCHEDULES AJS";
@@ -121,6 +130,25 @@ public class ScheduleService {
 
 		ResultSetHandler<List<Schedule>> h = new BeanListHandler<>(Schedule.class, new ScheduleMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns schedules with given ids
+	 *
+	 * @param ids comma separated string of the schedule ids to retrieve
+	 * @return schedules with given ids
+	 * @throws SQLException
+	 */
+	public List<Schedule> getSchedules(String ids) throws SQLException {
+		logger.debug("Entering getSchedules: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE SCHEDULE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Schedule>> h = new BeanListHandler<>(Schedule.class, new ScheduleMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -241,17 +269,83 @@ public class ScheduleService {
 	}
 
 	/**
+	 * Imports schedule records
+	 *
+	 * @param schedules the list of schedules to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "schedules", allEntries = true)
+	public void importSchedules(List<Schedule> schedules, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importSchedules: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(SCHEDULE_ID) FROM ART_JOB_SCHEDULES";
+			int scheduleId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(HOLIDAY_ID) FROM ART_HOLIDAYS";
+			int holidayId = dbService.getNewRecordId(sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Schedule schedule : schedules) {
+				scheduleId++;
+				List<Holiday> sharedHolidays = schedule.getSharedHolidays();
+				if (CollectionUtils.isNotEmpty(sharedHolidays)) {
+					for (Holiday holiday : sharedHolidays) {
+						holidayId++;
+						holidayService.saveHoliday(holiday, holidayId, actionUser, conn);
+					}
+				}
+				saveSchedule(schedule, scheduleId, actionUser, conn);
+				scheduleHolidayService.recreateScheduleHolidays(schedule);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a schedule
+	 *
+	 * @param schedule the schedule to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveSchedule(Schedule schedule, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveSchedule(schedule, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a schedule
 	 *
 	 * @param schedule the schedule to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveSchedule(Schedule schedule, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveSchedule: schedule={}, newRecordId={}, actionUser={}",
-				schedule, newRecordId, actionUser);
+	private void saveSchedule(Schedule schedule, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveSchedule: schedule={}, newRecordId={},"
+				+ " actionUser={}", schedule, newRecordId, actionUser);
 
 		int affectedRows;
 		boolean newRecord = false;
@@ -285,7 +379,11 @@ public class ScheduleService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_NAME=?, DESCRIPTION=?,"
 					+ " JOB_SECOND=?, JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_MONTH=?,"
@@ -310,7 +408,11 @@ public class ScheduleService {
 				schedule.getScheduleId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {
@@ -351,7 +453,7 @@ public class ScheduleService {
 
 		return jobs;
 	}
-	
+
 	/**
 	 * Returns schedules that use a given holiday
 	 *

@@ -31,6 +31,8 @@ import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.schedule.Schedule;
+import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.settings.Settings;
 import art.settings.SettingsHelper;
@@ -40,6 +42,7 @@ import art.smtpserver.SmtpServerService;
 import art.user.User;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
+import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvRoutines;
@@ -48,10 +51,15 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +108,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private UserGroupService userGroupService;
+
+	@Autowired
+	private ScheduleService scheduleService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -173,6 +184,9 @@ public class ImportRecordsController {
 						break;
 					case UserGroups:
 						importUserGroups(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case Schedules:
+						importSchedules(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -379,6 +393,67 @@ public class ImportRecordsController {
 
 		List<UserGroup> userGroups = csvRoutines.parseAll(UserGroup.class, file);
 		userGroupService.importUserGroups(userGroups, sessionUser, conn);
+	}
+
+	/**
+	 * Imports schedule records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importSchedules(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException, IOException {
+
+		logger.debug("Entering importSchedules: sessionUser={}", sessionUser);
+
+		List<Schedule> schedules;
+		String extension = FilenameUtils.getExtension(file.getName());
+		if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+			schedules = csvRoutines.parseAll(Schedule.class, file);
+		} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+			String artTempPath = Config.getArtTempPath();
+			ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+			String schedulesFileName = artTempPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
+			File schedulesFile = new File(schedulesFileName);
+			if (schedulesFile.exists()) {
+				schedules = csvRoutines.parseAll(Schedule.class, schedulesFile);
+			} else {
+				throw new IllegalStateException("File not found: " + schedulesFileName);
+			}
+			
+			String holidaysFileName = artTempPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
+			File holidaysFile = new File(holidaysFileName);
+			if (holidaysFile.exists()) {
+				List<Holiday> holidays = csvRoutines.parseAll(Holiday.class, holidaysFile);
+				Map<Integer, Schedule> schedulesMap = new HashMap<>();
+				for (Schedule schedule : schedules) {
+					schedulesMap.put(schedule.getScheduleId(), schedule);
+				}
+				for (Holiday holiday : holidays) {
+					int parentId = holiday.getParentId();
+					Schedule schedule = schedulesMap.get(parentId);
+					if (schedule == null) {
+						throw new IllegalStateException("Schedule not found. Parent Id = " + parentId);
+					} else {
+						List<Holiday> sharedHolidays = schedule.getSharedHolidays();
+						if (sharedHolidays == null) {
+							sharedHolidays = new ArrayList<>();
+						}
+						sharedHolidays.add(holiday);
+						schedule.setSharedHolidays(sharedHolidays);
+					}
+				}
+			}
+			schedulesFile.delete();
+			holidaysFile.delete();
+		} else {
+			throw new IllegalArgumentException("Unexpected file extension: " + extension);
+		}
+
+		scheduleService.importSchedules(schedules, sessionUser, conn);
 	}
 
 }

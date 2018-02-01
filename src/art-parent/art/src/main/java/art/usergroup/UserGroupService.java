@@ -310,21 +310,22 @@ public class UserGroupService {
 
 		try {
 			String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-			int id = dbService.getMaxRecordId(conn, sql);
+			int userGroupId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
+			int reportGroupId = dbService.getMaxRecordId(conn, sql);
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (UserGroup userGroup : userGroups) {
-				id++;
+				userGroupId++;
 				ReportGroup defaultReportGroup = userGroup.getDefaultReportGroup();
 				if (defaultReportGroup != null && StringUtils.isNotBlank(defaultReportGroup.getName())) {
-					boolean commit = false;
-					List<ReportGroup> reportGroupList = new ArrayList<>();
-					reportGroupList.add(defaultReportGroup);
-					reportGroupService.importReportGroups(reportGroupList, actionUser, conn, commit);
+					reportGroupId++;
+					reportGroupService.saveReportGroup(defaultReportGroup, reportGroupId, actionUser, conn);
 				}
-				saveUserGroup(userGroup, id, actionUser, conn);
+				saveUserGroup(userGroup, userGroupId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

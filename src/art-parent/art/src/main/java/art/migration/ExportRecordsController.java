@@ -31,6 +31,8 @@ import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.schedule.Schedule;
+import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.settings.Settings;
 import art.settings.SettingsService;
@@ -39,6 +41,7 @@ import art.smtpserver.SmtpServerService;
 import art.user.User;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
+import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.csv.CsvRoutines;
 import com.univocity.parsers.csv.CsvWriterSettings;
@@ -46,9 +49,12 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +99,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private UserGroupService userGroupService;
+
+	@Autowired
+	private ScheduleService scheduleService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -177,6 +186,10 @@ public class ExportRecordsController {
 						break;
 					case UserGroups:
 						exportUserGroups(exportRecords, file, sessionUser, csvRoutines, conn);
+						break;
+					case Schedules:
+						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn);
+						exportFileName = FilenameUtils.getName(exportFilePath);
 						break;
 					default:
 						break;
@@ -490,6 +503,71 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
+	}
+
+	/**
+	 * Exports schedule records
+	 *
+	 * @param exportRecords the export records object
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @return the export file path for file export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private String exportSchedules(ExportRecords exportRecords,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportSchedules");
+
+		String exportFilePath = null;
+
+		String ids = exportRecords.getIds();
+		List<Schedule> schedules = scheduleService.getSchedules(ids);
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				String recordsExportPath = Config.getRecordsExportPath();
+				String schedulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
+				File schedulesFile = new File(schedulesFilePath);
+				csvRoutines.writeAll(schedules, Schedule.class, schedulesFile);
+				List<Holiday> holidays = new ArrayList<>();
+				for (Schedule schedule : schedules) {
+					List<Holiday> sharedHolidays = schedule.getSharedHolidays();
+					for (Holiday holiday : sharedHolidays) {
+						holiday.setParentId(schedule.getScheduleId());
+						holidays.add(holiday);
+					}
+				}
+				if (CollectionUtils.isNotEmpty(holidays)) {
+					String holidaysFilePath = recordsExportPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
+					File holidaysFile = new File(holidaysFilePath);
+
+					CsvWriterSettings writerSettings = new CsvWriterSettings();
+					writerSettings.setHeaderWritingEnabled(true);
+					CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+					csvRoutines2.writeAll(holidays, Holiday.class, holidaysFile);
+
+					exportFilePath = recordsExportPath + "art-export-Schedules.zip";
+					ArtUtils.zipFiles(exportFilePath, schedulesFilePath, holidaysFilePath);
+					schedulesFile.delete();
+					holidaysFile.delete();
+				} else {
+					exportFilePath = schedulesFilePath;
+				}
+				break;
+			case Datasource:
+				scheduleService.importSchedules(schedules, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+
+		return exportFilePath;
+
 	}
 
 }
