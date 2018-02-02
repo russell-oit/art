@@ -294,13 +294,18 @@ public class ScheduleService {
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
+			List<String> addedHolidayNames = new ArrayList<>();
 			for (Schedule schedule : schedules) {
 				scheduleId++;
 				List<Holiday> sharedHolidays = schedule.getSharedHolidays();
 				if (CollectionUtils.isNotEmpty(sharedHolidays)) {
 					for (Holiday holiday : sharedHolidays) {
-						holidayId++;
-						holidayService.saveHoliday(holiday, holidayId, actionUser, conn);
+						String holidayName = holiday.getName();
+						if (!addedHolidayNames.contains(holidayName)) {
+							addedHolidayNames.add(holidayName);
+							holidayId++;
+							holidayService.saveHoliday(holiday, holidayId, actionUser, conn);
+						}
 					}
 				}
 				saveSchedule(schedule, scheduleId, actionUser, conn);
