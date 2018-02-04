@@ -266,6 +266,25 @@ public class JobService {
 	}
 
 	/**
+	 * Returns jobs with given ids
+	 *
+	 * @param ids comma separated string of the job ids to retrieve
+	 * @return jobs with given ids
+	 * @throws SQLException
+	 */
+	public List<Job> getJobs(String ids) throws SQLException {
+		logger.debug("Entering getJobs: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE JOB_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, idsArray);
+	}
+
+	/**
 	 * Returns a job with the given id
 	 *
 	 * @param id the job id
@@ -402,16 +421,72 @@ public class JobService {
 	}
 
 	/**
+	 * Imports job records
+	 *
+	 * @param jobs the list of jobs to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "jobs", allEntries = true)
+	public void importJobs(List<Job> jobs, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importJobs: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(JOB_ID) FROM ART_JOBS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Job job : jobs) {
+				id++;
+				saveJob(job, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a job
+	 *
+	 * @param job the job to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveJob(Job job, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveJob(job, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a job
 	 *
 	 * @param job the job to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveJob(Job job, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveJob: job={}, newRecordId={}, actionUser={}", job, newRecordId, actionUser);
+	private void saveJob(Job job, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+		
+		logger.debug("Entering saveJob: job={}, newRecordId={}, actionUser={}",
+				job, newRecordId, actionUser);
 
 		Integer reportId; //database column doesn't allow null
 		if (job.getReport() == null) {
@@ -534,7 +609,11 @@ public class JobService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_JOBS SET JOB_NAME=?, QUERY_ID=?,"
 					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
@@ -603,7 +682,11 @@ public class JobService {
 				job.getJobId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

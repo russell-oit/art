@@ -21,10 +21,14 @@ import art.destination.Destination;
 import art.enums.JobType;
 import art.ftpserver.FtpServer;
 import art.holiday.Holiday;
+import art.migration.PrefixTransformer;
 import art.report.Report;
 import art.schedule.Schedule;
 import art.smtpserver.SmtpServer;
 import art.user.User;
+import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Nested;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -37,67 +41,123 @@ import java.util.List;
 public class Job implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int jobId;
+	@Parsed
 	private String name;
+	@Parsed
 	private JobType jobType;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	protected Date lastEndDate;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date lastStartDate;
+	@Parsed
 	protected String lastRunDetails;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date nextRunDate;
+	@Parsed
 	protected String lastFileName;
 	protected String sharedLastFileName;
 	protected String sharedLastRunDetails;
 	private Date sharedLastStartDate;
 	protected Date sharedLastEndDate;
+	@Parsed
 	private String outputFormat;
+	@Parsed
 	private String mailTo;
-	private String mailMessage;
-	private String mailSubject;
-	private String cachedTableName;
-	private String scheduleSecond;
-	private String scheduleMinute;
-	private String scheduleHour;
-	private String scheduleDay;
-	private String scheduleMonth;
-	private String scheduleWeekday;
-	private String scheduleYear;
-	private Date creationDate;
-	private Date updateDate;
-	private Report report;
-	private User user;
-	private String createdBy;
-	private String updatedBy;
-	private boolean active;
-	private int recipientsReportId;
-	private boolean allowSharing;
-	private boolean allowSplitting;
-	private boolean enableAudit;
+	@Parsed
 	private String mailCc;
+	@Parsed
 	private String mailBcc;
-	private int runsToArchive;
+	@Parsed
 	private String mailFrom;
+	@Parsed
+	private String mailMessage;
+	@Parsed
+	private String mailSubject;
+	@Parsed
+	private String cachedTableName;
+	@Parsed
+	private String scheduleSecond;
+	@Parsed
+	private String scheduleMinute;
+	@Parsed
+	private String scheduleHour;
+	@Parsed
+	private String scheduleDay;
+	@Parsed
+	private String scheduleMonth;
+	@Parsed
+	private String scheduleWeekday;
+	@Parsed
+	private String scheduleYear;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
+	private Date creationDate;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
+	private Date updateDate;
+	@Parsed
+	private String createdBy;
+	@Parsed
+	private String updatedBy;
+	@Parsed
+	private boolean active;
+	@Parsed
+	private int recipientsReportId;
+	@Parsed
+	private boolean allowSharing;
+	@Parsed
+	private boolean allowSplitting;
+	@Parsed
+	private boolean enableAudit;
+	@Parsed
+	private int runsToArchive;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date startDate;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date endDate;
 	private String startDateString;
 	private String endDateString;
 	private String lastRunMessage;
 	private String lastEndDateString;
 	private String nextRunDateString;
+	@Parsed
 	private int cachedDatasourceId;
+	@Parsed
 	private String batchFile;
 	private FtpServer ftpServer;
+	@Parsed
 	private String fixedFileName;
+	@Parsed
 	private String emailTemplate;
+	@Parsed
 	private String extraSchedules;
+	@Parsed
 	private String holidays;
+	@Parsed
 	private String quartzCalendarNames;
-	private Schedule schedule;
 	private List<Holiday> sharedHolidays;
 	private List<Destination> destinations;
+	@Parsed
 	private String subDirectory;
-	private SmtpServer smtpServer;
+	@Parsed
 	private String options;
+	@Parsed
 	private String errorNotificationTo;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "report")
+	private Report report;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "user")
+	private User user;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "schedule")
+	private Schedule schedule;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "smtpServer")
+	private SmtpServer smtpServer;
 
 	/**
 	 * @return the errorNotificationTo

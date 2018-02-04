@@ -31,7 +31,7 @@ public enum MigrationRecordType {
 	Settings("Settings"), Datasources("Datasources"), Destinations("Destinations"),
 	Encryptors("Encryptors"), Holidays("Holidays"), ReportGroups("ReportGroups"),
 	SmtpServers("SmtpServers"), UserGroups("UserGroups"), Schedules("Schedules"),
-	Users("Users"), Rules("Rules"), Parameters("Parameters");
+	Users("Users"), Rules("Rules"), Parameters("Parameters"), Jobs("Jobs");
 	
 	private final String value;
 
