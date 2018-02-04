@@ -25,8 +25,10 @@ import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -144,6 +146,25 @@ public class ParameterService {
 
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns parameters with given ids
+	 *
+	 * @param ids comma separated string of the parameter ids to retrieve
+	 * @return parameters with given ids
+	 * @throws SQLException
+	 */
+	public List<Parameter> getParameters(String ids) throws SQLException {
+		logger.debug("Entering getParameters: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE PARAMETER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -335,17 +356,72 @@ public class ParameterService {
 	}
 
 	/**
+	 * Imports parameter records
+	 *
+	 * @param parameters the list of parameters to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void importParameters(List<Parameter> parameters, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importParameters: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Parameter parameter : parameters) {
+				id++;
+				saveParameter(parameter, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a parameter
+	 *
+	 * @param parameter the parameter to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveParameter(Parameter parameter, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveParameter(parameter, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a parameter
 	 *
 	 * @param parameter the parameter to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveParameter(Parameter parameter, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveParameter: parameter={}, newRecordId={}, actionUser={}",
-				parameter, newRecordId, actionUser);
+	private void saveParameter(Parameter parameter, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveParameter: parameter={}, newRecordId={},"
+				+ " actionUser={}", parameter, newRecordId, actionUser);
 
 		//set values for possibly null property objects
 		String parameterType;
@@ -418,7 +494,11 @@ public class ParameterService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
 					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
@@ -454,7 +534,11 @@ public class ParameterService {
 				parameter.getParameterId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

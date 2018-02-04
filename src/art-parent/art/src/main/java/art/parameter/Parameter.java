@@ -21,6 +21,8 @@ import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.report.Report;
 import art.utils.ArtUtils;
+import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -38,30 +40,52 @@ import org.apache.commons.lang3.StringUtils;
 public class Parameter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int parameterId;
+	@Parsed
 	private String name;
+	@Parsed
+	private String description;
+	@Parsed
 	private ParameterType parameterType;
+	@Parsed
 	private String label;
+	@Parsed
 	private String helpText;
+	@Parsed
+	private String placeholderText;
+	@Parsed
 	private ParameterDataType dataType;
+	@Parsed
 	private String defaultValue;
+	@Parsed
 	private boolean hidden;
+	@Parsed
 	private boolean useLov;
 	private int lovReportId;
 	private boolean useRulesInLov;
+	@Parsed
 	private int drilldownColumnIndex;
 	private boolean useDirectSubstitution;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date creationDate;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date updateDate;
-	private String description;
+	@Parsed
 	private String createdBy;
+	@Parsed
 	private String updatedBy;
 	private Report defaultValueReport;
+	@Parsed
 	private boolean shared;
+	@Parsed
 	private String options;
+	@Parsed
 	private String dateFormat;
 	private ParameterOptions parameterOptions;
-	private String placeholderText;
+	@Parsed
 	private boolean useDefaultValueInJobs;
 
 	/**

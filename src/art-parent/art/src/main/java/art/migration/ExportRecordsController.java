@@ -29,6 +29,8 @@ import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
+import art.parameter.Parameter;
+import art.parameter.ParameterService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.rule.Rule;
@@ -111,6 +113,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private RuleService ruleService;
+	
+	@Autowired
+	private ParameterService parameterService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -205,6 +210,9 @@ public class ExportRecordsController {
 						break;
 					case Rules:
 						exportRules(exportRecords, file, sessionUser, csvRoutines, conn);
+						break;
+					case Parameters:
+						exportParameters(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					default:
 						break;
@@ -644,6 +652,39 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				ruleService.importRules(rules, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+	}
+	
+		/**
+	 * Exports parameter records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportParameters(ExportRecords exportRecords, File file,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportParameters");
+
+		String ids = exportRecords.getIds();
+		List<Parameter> parameters = parameterService.getParameters(ids);
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				csvRoutines.writeAll(parameters, Parameter.class, file);
+				break;
+			case Datasource:
+				parameterService.importParameters(parameters, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

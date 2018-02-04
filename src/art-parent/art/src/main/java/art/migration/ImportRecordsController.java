@@ -29,6 +29,8 @@ import art.encryptor.EncryptorService;
 import art.enums.MigrationRecordType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
+import art.parameter.Parameter;
+import art.parameter.ParameterService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.rule.Rule;
@@ -120,6 +122,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private RuleService ruleService;
+	
+	@Autowired
+	private ParameterService parameterService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -202,6 +207,9 @@ public class ImportRecordsController {
 						break;
 					case Rules:
 						importRules(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case Parameters:
+						importParameters(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -512,6 +520,24 @@ public class ImportRecordsController {
 
 		List<Rule> rules = csvRoutines.parseAll(Rule.class, file);
 		ruleService.importRules(rules, sessionUser, conn);
+	}
+	
+		/**
+	 * Imports parameter records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importParameters(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+
+		logger.debug("Entering importParameters: sessionUser={}", sessionUser);
+
+		List<Parameter> parameters = csvRoutines.parseAll(Parameter.class, file);
+		parameterService.importParameters(parameters, sessionUser, conn);
 	}
 
 }
