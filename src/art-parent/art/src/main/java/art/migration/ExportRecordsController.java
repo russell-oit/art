@@ -31,6 +31,8 @@ import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.rule.Rule;
+import art.rule.RuleService;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
@@ -106,6 +108,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private RuleService ruleService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -197,6 +202,9 @@ public class ExportRecordsController {
 						break;
 					case Users:
 						exportUsers(exportRecords, file, sessionUser, csvRoutines, conn);
+						break;
+					case Rules:
+						exportRules(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					default:
 						break;
@@ -603,6 +611,39 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				userService.importUsers(users, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+	}
+
+	/**
+	 * Exports rule records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportRules(ExportRecords exportRecords, File file,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportRules");
+
+		String ids = exportRecords.getIds();
+		List<Rule> rules = ruleService.getRules(ids);
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				csvRoutines.writeAll(rules, Rule.class, file);
+				break;
+			case Datasource:
+				ruleService.importRules(rules, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

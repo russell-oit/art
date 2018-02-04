@@ -31,6 +31,8 @@ import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.rule.Rule;
+import art.rule.RuleService;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
@@ -116,6 +118,9 @@ public class ImportRecordsController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private RuleService ruleService;
+
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
 		logger.debug("Entering showImportRecords: type='{}'", type);
@@ -194,6 +199,9 @@ public class ImportRecordsController {
 						break;
 					case Users:
 						importUsers(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case Rules:
+						importRules(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -486,6 +494,24 @@ public class ImportRecordsController {
 		}
 
 		userService.importUsers(users, sessionUser, conn);
+	}
+
+	/**
+	 * Imports rule records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importRules(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+
+		logger.debug("Entering importRules: sessionUser={}", sessionUser);
+
+		List<Rule> rules = csvRoutines.parseAll(Rule.class, file);
+		ruleService.importRules(rules, sessionUser, conn);
 	}
 
 }
