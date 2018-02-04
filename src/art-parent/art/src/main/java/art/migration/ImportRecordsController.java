@@ -33,6 +33,8 @@ import art.job.Job;
 import art.job.JobService;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
+import art.report.Report;
+import art.report.ReportService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.rule.Rule;
@@ -130,6 +132,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private JobService jobService;
+	
+	@Autowired
+	private ReportService reportService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -218,6 +223,9 @@ public class ImportRecordsController {
 						break;
 					case Jobs:
 						importJobs(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case Reports:
+						importReports(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -564,6 +572,31 @@ public class ImportRecordsController {
 
 		List<Job> jobs = csvRoutines.parseAll(Job.class, file);
 		jobService.importJobs(jobs, sessionUser, conn);
+	}
+	
+		/**
+	 * Imports report records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importReports(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+
+		logger.debug("Entering importReports: sessionUser={}", sessionUser);
+
+		List<Report> reports = csvRoutines.parseAll(Report.class, file);
+
+		for (Report report : reports) {
+			if (report.isClearTextPasswords()) {
+				report.encryptPasswords();
+			}
+		}
+
+		reportService.importReports(reports, sessionUser, conn);
 	}
 
 }

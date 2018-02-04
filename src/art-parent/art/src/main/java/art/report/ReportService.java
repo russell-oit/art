@@ -22,7 +22,6 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.connectionpool.DbConnections;
 import art.datasource.DatasourceService;
-import art.encryption.AesEncryptor;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.AccessLevel;
@@ -167,11 +166,7 @@ public class ReportService {
 			report.setReportGroups(reportGroups);
 
 			//decrypt open and modify passwords
-			String clearTextOpenPassword = AesEncryptor.decrypt(report.getOpenPassword());
-			report.setOpenPassword(clearTextOpenPassword);
-
-			String clearTextModifypassword = AesEncryptor.decrypt(report.getModifyPassword());
-			report.setModifyPassword(clearTextModifypassword);
+			report.decryptPasswords();
 
 			setChartOptions(report);
 
@@ -355,6 +350,25 @@ public class ReportService {
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns reports with given ids
+	 *
+	 * @param ids comma separated string of the report ids to retrieve
+	 * @return reports with given ids
+	 * @throws SQLException
+	 */
+	public List<Report> getReports(String ids) throws SQLException {
+		logger.debug("Entering getReports: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -550,11 +564,11 @@ public class ReportService {
 
 		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
-		
+
 		//delete drilldown queries
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
 
@@ -642,17 +656,72 @@ public class ReportService {
 	}
 
 	/**
+	 * Imports report records
+	 *
+	 * @param reports the list of reports to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public void importReports(List<Report> reports, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importReports: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Report report : reports) {
+				id++;
+				saveReport(report, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a report
+	 *
+	 * @param report the report to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveReport(Report report, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveReport(report, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a report
 	 *
 	 * @param report the report to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveReport(Report report, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveReport: report={}, newRecordId={}, actionUser={}",
-				report, newRecordId, actionUser);
+	private void saveReport(Report report, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveReport: report={}, newRecordId={},"
+				+ " actionUser={}", report, newRecordId, actionUser);
 
 		Integer reportGroupId = 0; //field no longer used but can't be null
 
@@ -748,7 +817,11 @@ public class ReportService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 					+ " DESCRIPTION=?, QUERY_TYPE=?, GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
@@ -811,7 +884,11 @@ public class ReportService {
 				report.getReportId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

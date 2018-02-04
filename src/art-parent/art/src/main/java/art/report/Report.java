@@ -26,11 +26,16 @@ import art.reportgroup.ReportGroup;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.Reporti18nOptions;
 import art.encryption.AESCrypt;
+import art.encryption.AesEncryptor;
+import art.migration.PrefixTransformer;
 import art.reportoptions.CloneOptions;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Nested;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -61,59 +66,120 @@ public class Report implements Serializable {
 	private static final Logger logger = LoggerFactory.getLogger(Report.class);
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int reportId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String shortDescription;
+	@Parsed
 	private String description;
 	private int reportTypeId;
-	private Datasource datasource;
+	@Parsed
 	private String contactPerson;
+	@Parsed
 	private boolean usesRules;
+	@Parsed
 	private boolean parametersInOutput;
+	@Parsed
 	private String xAxisLabel;
+	@Parsed
 	private String yAxisLabel;
+	@Parsed
 	private String chartOptionsSetting;
+	@Parsed
 	private String template;
+	@Parsed
 	private int displayResultset;
+	@Parsed
 	private String xmlaDatasource;
+	@Parsed
 	private String xmlaCatalog;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date creationDate;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date updateDate;
+	@Parsed
 	private String reportSource;
 	private boolean useBlankXmlaPassword;
 	private ChartOptions chartOptions;
 	private String reportSourceHtml; //used with text reports
+	@Parsed
 	private String createdBy;
+	@Parsed
 	private String updatedBy;
+	@Parsed
 	private ReportType reportType;
+	@Parsed
 	private int groupColumn;
+	@Parsed
 	private boolean active = true;
+	@Parsed
 	private boolean hidden;
+	@Parsed
 	private String defaultReportFormat;
+	@Parsed
 	private String secondaryCharts;
+	@Parsed
 	private String hiddenColumns;
+	@Parsed
 	private String totalColumns;
+	@Parsed
 	private String dateFormat;
+	@Parsed
 	private String numberFormat;
+	@Parsed
 	private String columnFormats;
+	@Parsed
 	private String locale;
+	@Parsed
 	private String nullNumberDisplay;
+	@Parsed
 	private String nullStringDisplay;
+	@Parsed
 	private int fetchSize;
+	@Parsed
 	private String options;
+	@Parsed
 	private PageOrientation pageOrientation = PageOrientation.Portrait;
+	@Parsed
 	private boolean omitTitleRow;
+	@Parsed
 	private boolean lovUseDynamicDatasource;
 	private GeneralReportOptions generalOptions;
+	@Parsed
 	private String openPassword;
+	@Parsed
 	private String modifyPassword;
 	private boolean useNoneOpenPassword; //only for use with ui
 	private boolean useNoneModifyPassword; //only for use with ui
-	private Encryptor encryptor;
 	private Report sourceReport;
+	@Parsed
 	private int sourceReportId;
 	private CloneOptions cloneOptions;
 	private List<ReportGroup> reportGroups;
+	@Parsed
+	private boolean clearTextPasswords;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
+	private Datasource datasource;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
+	private Encryptor encryptor;
+
+	/**
+	 * @return the clearTextPasswords
+	 */
+	public boolean isClearTextPasswords() {
+		return clearTextPasswords;
+	}
+
+	/**
+	 * @param clearTextPasswords the clearTextPasswords to set
+	 */
+	public void setClearTextPasswords(boolean clearTextPasswords) {
+		this.clearTextPasswords = clearTextPasswords;
+	}
 
 	/**
 	 * @return the reportGroups
@@ -1169,6 +1235,22 @@ public class Report implements Serializable {
 		}
 
 		return namesString;
+	}
+
+	/**
+	 * Decrypts password fields
+	 */
+	public void decryptPasswords() {
+		openPassword = AesEncryptor.decrypt(openPassword);
+		modifyPassword = AesEncryptor.decrypt(modifyPassword);
+	}
+	
+	/**
+	 * Encrypts password fields
+	 */
+	public void encryptPasswords(){
+		openPassword = AesEncryptor.encrypt(openPassword);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword);
 	}
 
 }

@@ -33,6 +33,8 @@ import art.job.Job;
 import art.job.JobService;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
+import art.report.Report;
+import art.report.ReportService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.rule.Rule;
@@ -121,6 +123,9 @@ public class ExportRecordsController {
 	
 	@Autowired
 	private JobService jobService;
+	
+	@Autowired
+	private ReportService reportService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -221,6 +226,9 @@ public class ExportRecordsController {
 						break;
 					case Jobs:
 						exportJobs(exportRecords, file, sessionUser, csvRoutines, conn);
+						break;
+					case Reports:
+						exportReports(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					default:
 						break;
@@ -726,6 +734,42 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				jobService.importJobs(jobs, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+	}
+	
+		/**
+	 * Exports report records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportReports(ExportRecords exportRecords, File file,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportReports");
+
+		String ids = exportRecords.getIds();
+		List<Report> reports = reportService.getReports(ids);
+		for (Report report : reports) {
+			report.encryptPasswords();
+		}
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				csvRoutines.writeAll(reports, Report.class, file);
+				break;
+			case Datasource:
+				reportService.importReports(reports, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
