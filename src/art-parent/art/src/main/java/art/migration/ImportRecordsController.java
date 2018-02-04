@@ -40,6 +40,7 @@ import art.settings.SettingsService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
+import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
@@ -111,6 +112,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private ScheduleService scheduleService;
+
+	@Autowired
+	private UserService userService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -187,6 +191,9 @@ public class ImportRecordsController {
 						break;
 					case Schedules:
 						importSchedules(tempFile, sessionUser, conn, csvRoutines);
+						break;
+					case Users:
+						importUsers(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					default:
 						break;
@@ -423,7 +430,7 @@ public class ImportRecordsController {
 			} else {
 				throw new IllegalStateException("File not found: " + schedulesFileName);
 			}
-			
+
 			String holidaysFileName = artTempPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
 			File holidaysFile = new File(holidaysFileName);
 			if (holidaysFile.exists()) {
@@ -454,6 +461,31 @@ public class ImportRecordsController {
 		}
 
 		scheduleService.importSchedules(schedules, sessionUser, conn);
+	}
+
+	/**
+	 * Imports user records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @throws SQLException
+	 */
+	private void importUsers(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines) throws SQLException {
+
+		logger.debug("Entering importUsers: sessionUser={}", sessionUser);
+
+		List<User> users = csvRoutines.parseAll(User.class, file);
+
+		for (User user : users) {
+			if (user.isClearTextPassword()) {
+				user.encryptPassword();
+			}
+		}
+
+		userService.importUsers(users, sessionUser, conn);
 	}
 
 }

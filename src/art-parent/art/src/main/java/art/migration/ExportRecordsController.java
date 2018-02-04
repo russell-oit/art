@@ -39,6 +39,7 @@ import art.settings.SettingsService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
+import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
@@ -102,6 +103,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private ScheduleService scheduleService;
+
+	@Autowired
+	private UserService userService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -190,6 +194,9 @@ public class ExportRecordsController {
 					case Schedules:
 						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn);
 						exportFileName = FilenameUtils.getName(exportFilePath);
+						break;
+					case Users:
+						exportUsers(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					default:
 						break;
@@ -567,7 +574,39 @@ public class ExportRecordsController {
 		}
 
 		return exportFilePath;
+	}
 
+	/**
+	 * Exports user records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportUsers(ExportRecords exportRecords, File file,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportUsers");
+
+		String ids = exportRecords.getIds();
+		List<User> users = userService.getUsers(ids);
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				csvRoutines.writeAll(users, User.class, file);
+				break;
+			case Datasource:
+				userService.importUsers(users, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
 	}
 
 }

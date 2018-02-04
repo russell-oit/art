@@ -26,6 +26,7 @@ import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ActionResult;
 import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -131,6 +132,25 @@ public class UserService {
 
 		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns users with given ids
+	 *
+	 * @param ids comma separated string of the user ids to retrieve
+	 * @return users with given ids
+	 * @throws SQLException
+	 */
+	public List<User> getUsers(String ids) throws SQLException {
+		logger.debug("Entering getUsers: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -262,7 +282,7 @@ public class UserService {
 
 		sql = "DELETE FROM ART_JOB_ARCHIVES WHERE USER_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_LOGGED_IN_USERS WHERE USER_ID=?";
 		dbService.update(sql, id);
 
@@ -435,15 +455,68 @@ public class UserService {
 	}
 
 	/**
+	 * Imports user records
+	 *
+	 * @param users the list of users to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "users", allEntries = true)
+	public void importUsers(List<User> users, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importUsers: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (User user : users) {
+				id++;
+				saveUser(user, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a user
+	 *
+	 * @param user the user to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveUser(User user, Integer newRecordId, User actionUser) throws SQLException {
+		Connection conn = null;
+		saveUser(user, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a user
 	 *
 	 * @param user the user to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveUser(User user, Integer newRecordId, User actionUser) throws SQLException {
+	private void saveUser(User user, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+		
 		logger.debug("Entering saveUser: user={}, newRecordId={}, actionUser={}",
 				user, newRecordId, actionUser);
 
@@ -494,7 +567,11 @@ public class UserService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 					+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
@@ -518,7 +595,11 @@ public class UserService {
 				user.getUserId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

@@ -17,10 +17,15 @@
  */
 package art.user;
 
+import art.encryption.PasswordUtils;
 import art.enums.AccessLevel;
+import art.migration.PrefixTransformer;
 import art.reportgroup.ReportGroup;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
+import com.univocity.parsers.annotations.Format;
+import com.univocity.parsers.annotations.Nested;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -34,26 +39,59 @@ import org.apache.commons.lang3.StringUtils;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private String username;
-	private AccessLevel accessLevel;
-	private String email;
-	private String fullName;
-	private String password;
-	private ReportGroup defaultReportGroup;
-	private String passwordAlgorithm;
-	private String startReport; //can contain only report id or report id with parameters e.g. 1?p-param1=value
-	private boolean active = true;
+	@Parsed
 	private int userId;
+	@Parsed
+	private String username;
+	@Parsed
+	private AccessLevel accessLevel;
+	@Parsed
+	private String email;
+	@Parsed
+	private String fullName;
+	@Parsed
+	private String password;
+	@Parsed
+	private String passwordAlgorithm;
+	@Parsed
+	private String startReport; //can contain only report id or report id with parameters e.g. 1?p-param1=value
+	@Parsed
+	private boolean active = true;
+	@Parsed
 	private boolean canChangePassword = true;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date creationDate;
+	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Parsed
 	private Date updateDate;
 	private List<UserGroup> userGroups;
 	private String effectiveStartReport;
 	private ReportGroup effectiveDefaultReportGroup;
 	private boolean useBlankPassword; //only used for user interface logic
+	@Parsed
 	private String createdBy;
+	@Parsed
 	private String updatedBy;
 	private boolean generateAndSend; //only used for user interface logic
+	@Parsed
+	private boolean clearTextPassword; //used to allow import with clear text passwords
+	@Nested(headerTransformer = PrefixTransformer.class, args = "drg")
+	private ReportGroup defaultReportGroup;
+
+	/**
+	 * @return the clearTextPassword
+	 */
+	public boolean isClearTextPassword() {
+		return clearTextPassword;
+	}
+
+	/**
+	 * @param clearTextPassword the clearTextPassword to set
+	 */
+	public void setClearTextPassword(boolean clearTextPassword) {
+		this.clearTextPassword = clearTextPassword;
+	}
 
 	/**
 	 * @return the generateAndSend
@@ -431,7 +469,7 @@ public class User implements Serializable {
 	public String toString() {
 		return "User{" + "username=" + username + '}';
 	}
-	
+
 	/**
 	 * Determine if this is an admin user
 	 *
@@ -456,6 +494,14 @@ public class User implements Serializable {
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * Encrypts the password field
+	 */
+	public void encryptPassword() {
+		password = PasswordUtils.HashPasswordBcrypt(password);
+		passwordAlgorithm = "bcrypt";
 	}
 
 }
