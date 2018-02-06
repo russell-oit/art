@@ -18,7 +18,6 @@
 package art.smtpserver;
 
 import art.encryption.AesEncryptor;
-import com.univocity.parsers.annotations.Format;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -54,15 +53,9 @@ public class SmtpServer implements Serializable {
 	private boolean useBlankPassword; //only used for username interface logic
 	@Parsed
 	private String from;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date creationDate;
-	@Parsed
 	private String createdBy;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date updateDate;
-	@Parsed
 	private String updatedBy;
 	@Parsed
 	private boolean clearTextPassword;

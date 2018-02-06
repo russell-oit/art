@@ -17,7 +17,6 @@
  */
 package art.holiday;
 
-import com.univocity.parsers.annotations.Format;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -40,15 +39,9 @@ public class Holiday implements Serializable {
 	private String description;
 	@Parsed
 	private String definition;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date creationDate;
-	@Parsed
 	private String createdBy;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date updateDate;
-	@Parsed
 	private String updatedBy;
 
 	/**

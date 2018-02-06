@@ -33,7 +33,6 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.univocity.parsers.annotations.Format;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.File;
@@ -95,20 +94,14 @@ public class Report implements Serializable {
 	private String xmlaDatasource;
 	@Parsed
 	private String xmlaCatalog;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date creationDate;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date updateDate;
 	@Parsed
 	private String reportSource;
 	private boolean useBlankXmlaPassword;
 	private ChartOptions chartOptions;
 	private String reportSourceHtml; //used with text reports
-	@Parsed
 	private String createdBy;
-	@Parsed
 	private String updatedBy;
 	@Parsed
 	private ReportType reportType;

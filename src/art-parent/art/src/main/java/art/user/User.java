@@ -23,7 +23,6 @@ import art.migration.PrefixTransformer;
 import art.reportgroup.ReportGroup;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
-import com.univocity.parsers.annotations.Format;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
@@ -59,19 +58,13 @@ public class User implements Serializable {
 	private boolean active = true;
 	@Parsed
 	private boolean canChangePassword = true;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date creationDate;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date updateDate;
 	private List<UserGroup> userGroups;
 	private String effectiveStartReport;
 	private ReportGroup effectiveDefaultReportGroup;
 	private boolean useBlankPassword; //only used for user interface logic
-	@Parsed
 	private String createdBy;
-	@Parsed
 	private String updatedBy;
 	private boolean generateAndSend; //only used for user interface logic
 	@Parsed

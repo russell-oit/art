@@ -6,6 +6,7 @@ ART 3.3
 * Added password encryptor
 * Fix for multiple c3.js reports within a dashboad not displaying correctly
 * Allow import/export of repository artefacts
+* Fix for inability to enter chained depends values more than 2 characters
 
 ART 3.2
 * Added Velocity report type

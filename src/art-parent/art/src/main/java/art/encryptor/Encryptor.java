@@ -19,7 +19,6 @@ package art.encryptor;
 
 import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
-import com.univocity.parsers.annotations.Format;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -44,15 +43,9 @@ public class Encryptor implements Serializable {
 	private EncryptorType encryptorType = EncryptorType.AESCrypt;
 	@Parsed
 	private String aesCryptPassword;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date creationDate;
-	@Parsed
 	private String createdBy;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date updateDate;
-	@Parsed
 	private String updatedBy;
 	@Parsed
 	private String openPgpPublicKeyFile;

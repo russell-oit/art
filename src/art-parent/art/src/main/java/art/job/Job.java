@@ -47,18 +47,10 @@ public class Job implements Serializable {
 	private String name;
 	@Parsed
 	private JobType jobType;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	protected Date lastEndDate;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date lastStartDate;
-	@Parsed
 	protected String lastRunDetails;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date nextRunDate;
-	@Parsed
 	protected String lastFileName;
 	protected String sharedLastFileName;
 	protected String sharedLastRunDetails;
@@ -94,15 +86,9 @@ public class Job implements Serializable {
 	private String scheduleWeekday;
 	@Parsed
 	private String scheduleYear;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date creationDate;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date updateDate;
-	@Parsed
 	private String createdBy;
-	@Parsed
 	private String updatedBy;
 	@Parsed
 	private boolean active;
@@ -116,10 +102,10 @@ public class Job implements Serializable {
 	private boolean enableAudit;
 	@Parsed
 	private int runsToArchive;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Format(formats = "yyyy-MM-dd")
 	@Parsed
 	private Date startDate;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Format(formats = "yyyy-MM-dd")
 	@Parsed
 	private Date endDate;
 	private String startDateString;

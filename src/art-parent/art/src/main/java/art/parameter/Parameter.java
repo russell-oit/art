@@ -21,7 +21,6 @@ import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.report.Report;
 import art.utils.ArtUtils;
-import com.univocity.parsers.annotations.Format;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.IOException;
 import java.io.Serializable;
@@ -67,15 +66,9 @@ public class Parameter implements Serializable {
 	@Parsed
 	private int drilldownColumnIndex;
 	private boolean useDirectSubstitution;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date creationDate;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date updateDate;
-	@Parsed
 	private String createdBy;
-	@Parsed
 	private String updatedBy;
 	private Report defaultValueReport;
 	@Parsed

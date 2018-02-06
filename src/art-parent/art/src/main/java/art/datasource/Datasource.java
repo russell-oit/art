@@ -19,7 +19,6 @@ package art.datasource;
 
 import art.encryption.AesEncryptor;
 import art.encryption.DesEncryptor;
-import com.univocity.parsers.annotations.Format;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -35,17 +34,11 @@ public class Datasource extends DatasourceInfo implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Parsed
 	private boolean active;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date creationDate;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date updateDate;
 	@Parsed
 	private String description;
-	@Parsed
 	private String createdBy;
-	@Parsed
 	private String updatedBy;
 	@Parsed
 	private boolean clearTextPassword;

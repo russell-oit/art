@@ -18,7 +18,6 @@
 package art.schedule;
 
 import art.holiday.Holiday;
-import com.univocity.parsers.annotations.Format;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -52,15 +51,9 @@ public class Schedule implements Serializable {
 	private String weekday;
 	@Parsed
 	private String year;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date creationDate;
-	@Format(formats = "yyyy-MM-dd HH:mm:ss.SSS")
-	@Parsed
 	private Date updateDate;
-	@Parsed
 	private String createdBy;
-	@Parsed
 	private String updatedBy;
 	@Parsed
 	private String extraSchedules;
