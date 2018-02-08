@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
@@ -294,22 +295,30 @@ public class ScheduleService {
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
-			List<String> addedHolidayNames = new ArrayList<>();
+			Map<String, Holiday> addedHolidays = new HashMap<>();
 			for (Schedule schedule : schedules) {
 				scheduleId++;
 				List<Holiday> sharedHolidays = schedule.getSharedHolidays();
 				if (CollectionUtils.isNotEmpty(sharedHolidays)) {
+					List<Holiday> newSharedHolidays = new ArrayList<>();
 					for (Holiday holiday : sharedHolidays) {
 						String holidayName = holiday.getName();
 						Holiday existingHoliday = holidayService.getHoliday(holidayName);
 						if (existingHoliday == null) {
-							if (!addedHolidayNames.contains(holidayName)) {
-								addedHolidayNames.add(holidayName);
+							Holiday addedHoliday = addedHolidays.get(holidayName);
+							if (addedHoliday == null) {
 								holidayId++;
 								holidayService.saveHoliday(holiday, holidayId, actionUser, conn);
+								addedHolidays.put(holidayName, holiday);
+								newSharedHolidays.add(holiday);
+							} else {
+								newSharedHolidays.add(addedHoliday);
 							}
+						} else {
+							newSharedHolidays.add(existingHoliday);
 						}
 					}
+					schedule.setSharedHolidays(newSharedHolidays);
 				}
 				saveSchedule(schedule, scheduleId, actionUser, conn);
 				scheduleHolidayService.recreateScheduleHolidays(schedule);

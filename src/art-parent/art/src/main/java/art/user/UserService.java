@@ -490,7 +490,7 @@ public class UserService {
 			conn.setAutoCommit(false);
 
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
-			List<String> addedUserGroupNames = new ArrayList<>();
+			Map<String, UserGroup> addedUserGroups = new HashMap<>();
 			for (User user : users) {
 				userId++;
 
@@ -518,6 +518,7 @@ public class UserService {
 
 				List<UserGroup> userGroups = user.getUserGroups();
 				if (CollectionUtils.isNotEmpty(userGroups)) {
+					List<UserGroup> newUserGroups = new ArrayList<>();
 					for (UserGroup userGroup : userGroups) {
 						ReportGroup userGroupDefaultReportGroup = userGroup.getDefaultReportGroup();
 						if (userGroupDefaultReportGroup != null) {
@@ -544,13 +545,20 @@ public class UserService {
 						String userGroupName = userGroup.getName();
 						UserGroup existingUserGroup = userGroupService.getUserGroup(userGroupName);
 						if (existingUserGroup == null) {
-							if (!addedUserGroupNames.contains(userGroupName)) {
-								addedUserGroupNames.add(userGroupName);
+							UserGroup addedUserGroup = addedUserGroups.get(userGroupName);
+							if (addedUserGroup == null) {
 								userGroupId++;
 								userGroupService.saveUserGroup(userGroup, userGroupId, actionUser, conn);
+								addedUserGroups.put(userGroupName, userGroup);
+								newUserGroups.add(userGroup);
+							} else {
+								newUserGroups.add(addedUserGroup);
 							}
+						} else {
+							newUserGroups.add(existingUserGroup);
 						}
 					}
+					user.setUserGroups(newUserGroups);
 				}
 				saveUser(user, userId, actionUser, conn);
 				userGroupMembershipService2.recreateUserGroupMemberships(user);
