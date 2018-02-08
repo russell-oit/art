@@ -146,6 +146,22 @@ public class HolidayService {
 	}
 
 	/**
+	 * Returns a holiday
+	 *
+	 * @param name the holiday name
+	 * @return holiday if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("holidays")
+	public Holiday getHoliday(String name) throws SQLException {
+		logger.debug("Entering getHoliday: name='{}'", name);
+
+		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
+		ResultSetHandler<Holiday> h = new BeanHandler<>(Holiday.class, new HolidayMapper());
+		return dbService.query(sql, h, name);
+	}
+
+	/**
 	 * Deletes a holiday
 	 *
 	 * @param id the holiday id

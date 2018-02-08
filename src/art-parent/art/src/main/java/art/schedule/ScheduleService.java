@@ -301,10 +301,13 @@ public class ScheduleService {
 				if (CollectionUtils.isNotEmpty(sharedHolidays)) {
 					for (Holiday holiday : sharedHolidays) {
 						String holidayName = holiday.getName();
-						if (!addedHolidayNames.contains(holidayName)) {
-							addedHolidayNames.add(holidayName);
-							holidayId++;
-							holidayService.saveHoliday(holiday, holidayId, actionUser, conn);
+						Holiday existingHoliday = holidayService.getHoliday(holidayName);
+						if (existingHoliday == null) {
+							if (!addedHolidayNames.contains(holidayName)) {
+								addedHolidayNames.add(holidayName);
+								holidayId++;
+								holidayService.saveHoliday(holiday, holidayId, actionUser, conn);
+							}
 						}
 					}
 				}
