@@ -322,8 +322,13 @@ public class UserGroupService {
 				userGroupId++;
 				ReportGroup defaultReportGroup = userGroup.getDefaultReportGroup();
 				if (defaultReportGroup != null && StringUtils.isNotBlank(defaultReportGroup.getName())) {
-					reportGroupId++;
-					reportGroupService.saveReportGroup(defaultReportGroup, reportGroupId, actionUser, conn);
+					ReportGroup existingReportGroup = reportGroupService.getReportGroup(defaultReportGroup.getName());
+					if (existingReportGroup == null) {
+						reportGroupId++;
+						reportGroupService.saveReportGroup(defaultReportGroup, reportGroupId, actionUser, conn);
+					} else {
+						userGroup.setDefaultReportGroup(existingReportGroup);
+					}
 				}
 				saveUserGroup(userGroup, userGroupId, actionUser, conn);
 			}

@@ -229,6 +229,22 @@ public class ReportGroupService {
 	}
 
 	/**
+	 * Returns a report group
+	 *
+	 * @param name the report group name
+	 * @return report group if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("reportGroups")
+	public ReportGroup getReportGroup(String name) throws SQLException {
+		logger.debug("Entering getReportGroup: name='{}'", name);
+
+		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
+		ResultSetHandler<ReportGroup> h = new BeanHandler<>(ReportGroup.class, new ReportGroupMapper());
+		return dbService.query(sql, h, name);
+	}
+
+	/**
 	 * Deletes a report group
 	 *
 	 * @param id the report group id
