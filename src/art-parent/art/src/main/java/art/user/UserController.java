@@ -23,7 +23,7 @@ import art.mail.Mailer;
 import art.reportgroup.ReportGroupService;
 import art.servlets.Config;
 import art.usergroup.UserGroupService;
-import art.usergroupmembership.UserGroupMembershipService;
+import art.usergroupmembership.UserGroupMembershipService2;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtHelper;
@@ -73,7 +73,7 @@ public class UserController {
 	private ReportGroupService reportGroupService;
 
 	@Autowired
-	private UserGroupMembershipService userGroupMembershipService;
+	private UserGroupMembershipService2 userGroupMembershipService2;
 
 	@Autowired
 	private TemplateEngine emailTemplateEngine;
@@ -333,7 +333,7 @@ public class UserController {
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			try {
-				saveUserGroups(user);
+				userGroupMembershipService2.recreateUserGroupMemberships(user);
 
 				if (user.isGenerateAndSend()) {
 					boolean newAccount;
@@ -357,17 +357,6 @@ public class UserController {
 		}
 
 		return showEditUser(action, model, session);
-	}
-
-	/**
-	 * Save user groups for the given user
-	 *
-	 * @param user the user
-	 * @throws SQLException
-	 */
-	private void saveUserGroups(User user) throws SQLException {
-		userGroupMembershipService.deleteAllUserGroupMembershipsForUser(user.getUserId());
-		userGroupMembershipService.addUserGroupMemberships(user, user.getUserGroups());
 	}
 
 	@RequestMapping(value = "/saveUsers", method = RequestMethod.POST)
@@ -396,7 +385,7 @@ public class UserController {
 						int id = Integer.parseInt(idString);
 						User user = userService.getUser(id);
 						user.setUserGroups(multipleUserEdit.getUserGroups());
-						saveUserGroups(user);
+						userGroupMembershipService2.recreateUserGroupMemberships(user);
 					}
 				} catch (SQLException | RuntimeException ex) {
 					logger.error("Error", ex);

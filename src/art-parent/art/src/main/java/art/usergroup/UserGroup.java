@@ -36,6 +36,8 @@ public class UserGroup implements Serializable {
 
 	// Properties --------------------------------------------------------------
 	@Parsed
+	private int parentId; //used for import/export of linked records e.g. users
+	@Parsed
 	private int userGroupId;
 	@Parsed
 	private String name;
@@ -49,6 +51,20 @@ public class UserGroup implements Serializable {
 	private String updatedBy;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "drg")
 	private ReportGroup defaultReportGroup;
+
+	/**
+	 * @return the parentId
+	 */
+	public int getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 
 	// Getters/setters ---------------------------------------------------------
 	/**

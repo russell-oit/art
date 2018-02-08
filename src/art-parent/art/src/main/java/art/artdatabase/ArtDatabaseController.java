@@ -134,8 +134,6 @@ public class ArtDatabaseController {
 			return "artDatabase";
 		}
 
-		cacheHelper.clearAll(session);
-
 		//set password field as appropriate
 		String newPassword = artDatabase.getPassword();
 		if (artDatabase.isUseBlankPassword()) {
@@ -240,6 +238,8 @@ public class ArtDatabaseController {
 			Config.saveArtDatabaseConfiguration(artDatabase);
 
 			Config.initializeArtDatabase();
+			
+			cacheHelper.clearAll(session);
 
 			//refresh session user credentials as per new database
 			boolean initialSetup = BooleanUtils.toBoolean((String) session.getAttribute("initialSetup"));

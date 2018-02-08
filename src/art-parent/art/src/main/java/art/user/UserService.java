@@ -24,14 +24,17 @@ import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
+import art.usergroupmembership.UserGroupMembershipService2;
 import art.utils.ActionResult;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -62,20 +65,24 @@ public class UserService {
 	private final DbService dbService;
 	private final UserGroupService userGroupService;
 	private final ReportGroupService reportGroupService;
+	private final UserGroupMembershipService2 userGroupMembershipService2;
 
 	@Autowired
 	public UserService(DbService dbService, UserGroupService userGroupService,
-			ReportGroupService reportGroupService) {
+			ReportGroupService reportGroupService,
+			UserGroupMembershipService2 userGroupMembershipService2) {
 
 		this.dbService = dbService;
 		this.userGroupService = userGroupService;
 		this.reportGroupService = reportGroupService;
+		this.userGroupMembershipService2 = userGroupMembershipService2;
 	}
 
 	public UserService() {
 		dbService = new DbService();
 		userGroupService = new UserGroupService();
 		reportGroupService = new ReportGroupService();
+		userGroupMembershipService2 = new UserGroupMembershipService2();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
@@ -115,6 +122,9 @@ public class UserService {
 
 			ReportGroup defaultReportGroup = reportGroupService.getReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 			user.setDefaultReportGroup(defaultReportGroup);
+
+			List<UserGroup> userGroups = userGroupService.getUserGroupsForUser(user.getUserId());
+			user.setUserGroups(userGroups);
 
 			return type.cast(user);
 		}
@@ -179,10 +189,10 @@ public class UserService {
 	public User getUser(int id) throws SQLException {
 		logger.debug("Entering getUser: id={}", id);
 
-		String sql = SQL_SELECT_ALL + " WHERE USER_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE USER_ID=?";
 		ResultSetHandler<User> h = new BeanHandler<>(User.class, new UserMapper());
 		User user = dbService.query(sql, h, id);
-		populateUserGroups(user);
+		setEffectiveValues(user);
 		return user;
 	}
 
@@ -197,20 +207,19 @@ public class UserService {
 	public User getUser(String username) throws SQLException {
 		logger.debug("Entering getUser: username='{}'", username);
 
-		String sql = SQL_SELECT_ALL + " WHERE USERNAME = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE USERNAME=?";
 		ResultSetHandler<User> h = new BeanHandler<>(User.class, new UserMapper());
 		User user = dbService.query(sql, h, username);
-		populateUserGroups(user);
+		setEffectiveValues(user);
 		return user;
 	}
 
 	/**
-	 * Populates a user's user groups and sets properties whose values may come
-	 * from user groups
+	 * Sets properties whose values may come from user groups
 	 *
 	 * @param user the user
 	 */
-	private void populateUserGroups(User user) throws SQLException {
+	private void setEffectiveValues(User user) throws SQLException {
 		if (user == null) {
 			return;
 		}
@@ -218,8 +227,7 @@ public class UserService {
 		ReportGroup effectiveDefaultReportGroup = user.getDefaultReportGroup();
 		String effectiveStartReport = user.getStartReport();
 
-		List<UserGroup> groups = userGroupService.getUserGroupsForUser(user.getUserId());
-
+		List<UserGroup> groups = user.getUserGroups();
 		for (UserGroup group : groups) {
 			if (effectiveDefaultReportGroup == null) {
 				effectiveDefaultReportGroup = group.getDefaultReportGroup();
@@ -231,8 +239,6 @@ public class UserService {
 
 		user.setEffectiveDefaultReportGroup(effectiveDefaultReportGroup);
 		user.setEffectiveStartReport(effectiveStartReport);
-
-		user.setUserGroups(groups);
 	}
 
 	/**
@@ -473,26 +479,81 @@ public class UserService {
 		try {
 			String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
 			int userId = dbService.getMaxRecordId(conn, sql);
-			
+
 			sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
 			int reportGroupId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
+			int userGroupId = dbService.getNewRecordId(sql);
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
+			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
+			List<String> addedUserGroupNames = new ArrayList<>();
 			for (User user : users) {
 				userId++;
-				ReportGroup defaultReportGroup = user.getDefaultReportGroup();
-				if (defaultReportGroup != null && StringUtils.isNotBlank(defaultReportGroup.getName())) {
-					ReportGroup existingReportGroup = reportGroupService.getReportGroup(defaultReportGroup.getName());
-					if (existingReportGroup == null) {
-						reportGroupId++;
-						reportGroupService.saveReportGroup(defaultReportGroup, reportGroupId, actionUser, conn);
+
+				ReportGroup userDefaultReportGroup = user.getDefaultReportGroup();
+				if (userDefaultReportGroup != null) {
+					String reportGroupName = userDefaultReportGroup.getName();
+					if (StringUtils.isBlank(reportGroupName)) {
+						user.setDefaultReportGroup(null);
 					} else {
-						user.setDefaultReportGroup(existingReportGroup);
+						ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+						if (existingReportGroup == null) {
+							ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+							if (addedReportGroup == null) {
+								reportGroupId++;
+								reportGroupService.saveReportGroup(userDefaultReportGroup, reportGroupId, actionUser, conn);
+								addedReportGroups.put(reportGroupName, userDefaultReportGroup);
+							} else {
+								user.setDefaultReportGroup(addedReportGroup);
+							}
+						} else {
+							user.setDefaultReportGroup(existingReportGroup);
+						}
+					}
+				}
+
+				List<UserGroup> userGroups = user.getUserGroups();
+				if (CollectionUtils.isNotEmpty(userGroups)) {
+					for (UserGroup userGroup : userGroups) {
+						ReportGroup userGroupDefaultReportGroup = userGroup.getDefaultReportGroup();
+						if (userGroupDefaultReportGroup != null) {
+							String reportGroupName = userGroupDefaultReportGroup.getName();
+							if (StringUtils.isBlank(reportGroupName)) {
+								userGroup.setDefaultReportGroup(null);
+							} else {
+								ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+								if (existingReportGroup == null) {
+									ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+									if (addedReportGroup == null) {
+										reportGroupId++;
+										reportGroupService.saveReportGroup(userGroupDefaultReportGroup, reportGroupId, actionUser, conn);
+										addedReportGroups.put(reportGroupName, userGroupDefaultReportGroup);
+									} else {
+										userGroup.setDefaultReportGroup(addedReportGroup);
+									}
+								} else {
+									userGroup.setDefaultReportGroup(existingReportGroup);
+								}
+							}
+						}
+
+						String userGroupName = userGroup.getName();
+						UserGroup existingUserGroup = userGroupService.getUserGroup(userGroupName);
+						if (existingUserGroup == null) {
+							if (!addedUserGroupNames.contains(userGroupName)) {
+								addedUserGroupNames.add(userGroupName);
+								userGroupId++;
+								userGroupService.saveUserGroup(userGroup, userGroupId, actionUser, conn);
+							}
+						}
 					}
 				}
 				saveUser(user, userId, actionUser, conn);
+				userGroupMembershipService2.recreateUserGroupMemberships(user);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
@@ -529,7 +590,7 @@ public class UserService {
 	 */
 	private void saveUser(User user, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
-		
+
 		logger.debug("Entering saveUser: user={}, newRecordId={}, actionUser={}",
 				user, newRecordId, actionUser);
 

@@ -28,7 +28,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -149,6 +151,22 @@ public class UserGroupService {
 		String sql = SQL_SELECT_ALL + " WHERE USER_GROUP_ID=?";
 		ResultSetHandler<UserGroup> h = new BeanHandler<>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Returns the user group with the given name
+	 *
+	 * @param name the user group name
+	 * @return the user group if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("userGroups")
+	public UserGroup getUserGroup(String name) throws SQLException {
+		logger.debug("Entering getUserGroup: name='{}'", name);
+
+		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
+		ResultSetHandler<UserGroup> h = new BeanHandler<>(UserGroup.class, new UserGroupMapper());
+		return dbService.query(sql, h, name);
 	}
 
 	/**
@@ -318,16 +336,28 @@ public class UserGroupService {
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
+			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
 			for (UserGroup userGroup : userGroups) {
 				userGroupId++;
 				ReportGroup defaultReportGroup = userGroup.getDefaultReportGroup();
-				if (defaultReportGroup != null && StringUtils.isNotBlank(defaultReportGroup.getName())) {
-					ReportGroup existingReportGroup = reportGroupService.getReportGroup(defaultReportGroup.getName());
-					if (existingReportGroup == null) {
-						reportGroupId++;
-						reportGroupService.saveReportGroup(defaultReportGroup, reportGroupId, actionUser, conn);
+				if (defaultReportGroup != null) {
+					String reportGroupName = defaultReportGroup.getName();
+					if (StringUtils.isBlank(reportGroupName)) {
+						userGroup.setDefaultReportGroup(null);
 					} else {
-						userGroup.setDefaultReportGroup(existingReportGroup);
+						ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+						if (existingReportGroup == null) {
+							ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+							if (addedReportGroup == null) {
+								reportGroupId++;
+								reportGroupService.saveReportGroup(defaultReportGroup, reportGroupId, actionUser, conn);
+								addedReportGroups.put(reportGroupName, defaultReportGroup);
+							} else {
+								userGroup.setDefaultReportGroup(addedReportGroup);
+							}
+						} else {
+							userGroup.setDefaultReportGroup(existingReportGroup);
+						}
 					}
 				}
 				saveUserGroup(userGroup, userGroupId, actionUser, conn);
@@ -344,17 +374,17 @@ public class UserGroupService {
 	/**
 	 * Saves a user group
 	 *
-	 * @param userGroup the user group to save
+	 * @param group the user group to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the save
 	 * @throws SQLException
 	 */
-	private void saveUserGroup(UserGroup userGroup, Integer newRecordId,
+	private void saveUserGroup(UserGroup group, Integer newRecordId,
 			User actionUser) throws SQLException {
 
 		Connection conn = null;
-		saveUserGroup(userGroup, newRecordId, actionUser, conn);
+		saveUserGroup(group, newRecordId, actionUser, conn);
 	}
 
 	/**
@@ -367,7 +397,8 @@ public class UserGroupService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveUserGroup(UserGroup group, Integer newRecordId,
+	@CacheEvict(value = "userGroups", allEntries = true)
+	public void saveUserGroup(UserGroup group, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveUserGroup: group={}, newRecordId={},"

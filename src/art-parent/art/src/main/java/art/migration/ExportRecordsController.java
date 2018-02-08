@@ -213,10 +213,9 @@ public class ExportRecordsController {
 						break;
 					case Schedules:
 						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn);
-						exportFileName = FilenameUtils.getName(exportFilePath);
 						break;
 					case Users:
-						exportUsers(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportFilePath = exportUsers(exportRecords, sessionUser, csvRoutines, conn);
 						break;
 					case Rules:
 						exportRules(exportRecords, file, sessionUser, csvRoutines, conn);
@@ -238,6 +237,7 @@ public class ExportRecordsController {
 			}
 
 			if (exportRecords.getLocation() == MigrationLocation.File) {
+				exportFileName = FilenameUtils.getName(exportFilePath);
 				redirectAttributes.addFlashAttribute("exportFileName", exportFileName);
 			}
 
@@ -612,18 +612,20 @@ public class ExportRecordsController {
 	 * Exports user records
 	 *
 	 * @param exportRecords the export records object
-	 * @param file the export file to use
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
+	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void exportUsers(ExportRecords exportRecords, File file,
+	private String exportUsers(ExportRecords exportRecords,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportUsers");
+		
+		String exportFilePath = null;
 
 		String ids = exportRecords.getIds();
 		List<User> users = userService.getUsers(ids);
@@ -631,7 +633,34 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(users, User.class, file);
+				String recordsExportPath = Config.getRecordsExportPath();
+				String usersFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERS_FILENAME;
+				File usersFile = new File(usersFilePath);
+				csvRoutines.writeAll(users, User.class, usersFile);
+				List<UserGroup> allUserGroups = new ArrayList<>();
+				for (User user : users) {
+					List<UserGroup> userGroups = user.getUserGroups();
+					for (UserGroup userGroup : userGroups) {
+						userGroup.setParentId(user.getUserId());
+						allUserGroups.add(userGroup);
+					}
+				}
+				if (CollectionUtils.isNotEmpty(allUserGroups)) {
+					String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
+					File userGroupsFile = new File(userGroupsFilePath);
+
+					CsvWriterSettings writerSettings = new CsvWriterSettings();
+					writerSettings.setHeaderWritingEnabled(true);
+					CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+					csvRoutines2.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
+
+					exportFilePath = recordsExportPath + "art-export-Users.zip";
+					ArtUtils.zipFiles(exportFilePath, usersFilePath, userGroupsFilePath);
+					usersFile.delete();
+					userGroupsFile.delete();
+				} else {
+					exportFilePath = usersFilePath;
+				}
 				break;
 			case Datasource:
 				userService.importUsers(users, sessionUser, conn);
@@ -639,6 +668,8 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
+		
+		return exportFilePath;
 	}
 
 	/**

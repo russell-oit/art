@@ -18,24 +18,18 @@
 package art.usergroupmembership;
 
 import art.dbutils.DbService;
-import art.user.User;
 import art.user.UserService;
-import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
@@ -124,119 +118,4 @@ public class UserGroupMembershipService {
 		return dbService.query(sql, h, userGroupId);
 	}
 
-	/**
-	 * Deletes a user group membership
-	 *
-	 * @param userId the user id
-	 * @param userGroupId the user group id
-	 * @throws SQLException
-	 */
-	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
-	public void deleteUserGroupMembership(int userId, int userGroupId) throws SQLException {
-		logger.debug("Entering deleteUserGroupMembership: userId={}, userGroupId={}",
-				userId, userGroupId);
-
-		String sql;
-
-		sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=? AND USER_GROUP_ID=?";
-		dbService.update(sql, userId, userGroupId);
-	}
-
-	/**
-	 * Delete all user group memberships for the given user
-	 *
-	 * @param userId the user id
-	 * @throws SQLException
-	 */
-	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
-	public void deleteAllUserGroupMembershipsForUser(int userId) throws SQLException {
-		logger.debug("Entering deleteAllUserGroupMembershipsForUser: userId={}", userId);
-
-		String sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
-		dbService.update(sql, userId);
-	}
-
-	/**
-	 * Adds user group memberships for the given user
-	 *
-	 * @param user the user, not null
-	 * @param userGroups the user groups
-	 * @throws SQLException
-	 */
-	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
-	public void addUserGroupMemberships(User user, List<UserGroup> userGroups) throws SQLException {
-		Objects.requireNonNull(user, "user must not be null");
-
-		if (CollectionUtils.isEmpty(userGroups)) {
-			return;
-		}
-
-		List<Integer> userGroupIds = new ArrayList<>();
-		for (UserGroup userGroup : userGroups) {
-			userGroupIds.add(userGroup.getUserGroupId());
-		}
-		String[] users = {user.getUserId() + "-" + user.getUsername()};
-		String action = "add";
-		updateUserGroupMembership(action, users, userGroupIds.toArray(new Integer[0]));
-	}
-
-	/**
-	 * Adds or removes user group memberships
-	 *
-	 * @param action "add" or "remove". anything else will be treated as remove
-	 * @param users user identifiers in the format user id-username
-	 * @param userGroups user group ids
-	 * @throws SQLException
-	 */
-	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
-	public void updateUserGroupMembership(String action, String[] users, Integer[] userGroups) throws SQLException {
-		logger.debug("Entering updateUserGroupMemberships: action='{}'", action);
-
-		logger.debug("(users == null) = {}", users == null);
-		logger.debug("(userGroups == null) = {}", userGroups == null);
-		if (users == null || userGroups == null) {
-			logger.warn("Update not performed. users or userGroups is null.");
-			return;
-		}
-
-		boolean add;
-		if (StringUtils.equalsIgnoreCase(action, "add")) {
-			add = true;
-		} else {
-			add = false;
-		}
-
-		String sql;
-
-		if (add) {
-			sql = "INSERT INTO ART_USER_GROUP_ASSIGNMENT (USER_ID, USERNAME, USER_GROUP_ID) VALUES (?, ?, ?)";
-		} else {
-			sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=? AND USERNAME=? AND USER_GROUP_ID=?";
-		}
-
-		String sqlTest = "UPDATE ART_USER_GROUP_ASSIGNMENT SET USER_ID=? WHERE USER_ID=? AND USERNAME=? AND USER_GROUP_ID=?";
-		int affectedRows;
-		boolean updateRight;
-
-		for (String user : users) {
-			Integer userId = Integer.valueOf(StringUtils.substringBefore(user, "-"));
-			//username won't be needed once user id columns completely replace username in foreign keys
-			String username = StringUtils.substringAfter(user, "-");
-
-			for (Integer userGroupId : userGroups) {
-				updateRight = true;
-				if (add) {
-					//test if record exists. to avoid integrity constraint error
-					affectedRows = dbService.update(sqlTest, userId, userId, username, userGroupId);
-					if (affectedRows > 0) {
-						//record exists. don't attempt a reinsert.
-						updateRight = false;
-					}
-				}
-				if (updateRight) {
-					dbService.update(sql, userId, username, userGroupId);
-				}
-			}
-		}
-	}
 }
