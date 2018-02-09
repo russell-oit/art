@@ -44,6 +44,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -673,14 +674,67 @@ public class ReportService {
 
 		try {
 			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
-			int id = dbService.getMaxRecordId(conn, sql);
+			int reportId = dbService.getMaxRecordId(conn, sql);
+			
+			sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
+			int datasourceId = dbService.getMaxRecordId(conn, sql);
+			
+			sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
+			int encryptorId = dbService.getMaxRecordId(conn, sql);
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
+			Map<String, Datasource> addedDatasources=new HashMap<>();
+			Map<String, Encryptor> addedEncryptors=new HashMap<>();
 			for (Report report : reports) {
-				id++;
-				saveReport(report, id, actionUser, conn);
+				reportId++;
+				
+				Datasource datasource = report.getDatasource();
+				if (datasource != null) {
+					String datasourceName = datasource.getName();
+					if (StringUtils.isBlank(datasourceName)) {
+						report.setDatasource(null);
+					} else {
+						Datasource existingDatasource = datasourceService.getDatasource(datasourceName);
+						if (existingDatasource == null) {
+							Datasource addedDatasource = addedDatasources.get(datasourceName);
+							if (addedDatasource == null) {
+								datasourceId++;
+								datasourceService.saveDatasource(datasource, datasourceId, actionUser, conn);
+								addedDatasources.put(datasourceName, datasource);
+							} else {
+								report.setDatasource(addedDatasource);
+							}
+						} else {
+							report.setDatasource(existingDatasource);
+						}
+					}
+				}
+				
+				Encryptor encryptor = report.getEncryptor();
+				if (encryptor != null) {
+					String encryptorName = encryptor.getName();
+					if (StringUtils.isBlank(encryptorName)) {
+						report.setEncryptor(null);
+					} else {
+						Encryptor existingEncryptor = encryptorService.getEncryptor(encryptorName);
+						if (existingEncryptor == null) {
+							Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
+							if (addedEncryptor == null) {
+								encryptorId++;
+								encryptorService.saveEncryptor(encryptor, encryptorId, actionUser, conn);
+								addedEncryptors.put(encryptorName, encryptor);
+							} else {
+								report.setEncryptor(addedEncryptor);
+							}
+						} else {
+							report.setEncryptor(existingEncryptor);
+						}
+					}
+				}
+				
+				saveReport(report, reportId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

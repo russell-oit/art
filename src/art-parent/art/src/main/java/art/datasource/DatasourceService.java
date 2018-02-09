@@ -148,6 +148,22 @@ public class DatasourceService {
 	}
 
 	/**
+	 * Returns a datasource with the given name
+	 *
+	 * @param name the datasource name
+	 * @return the datasource found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("datasources")
+	public Datasource getDatasource(String name) throws SQLException {
+		logger.debug("Entering getDatasource: name='{}'", name);
+
+		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
+		ResultSetHandler<Datasource> h = new BeanHandler<>(Datasource.class, new DatasourceMapper());
+		return dbService.query(sql, h, name);
+	}
+
+	/**
 	 * Deletes a datasource
 	 *
 	 * @param id the datasource id
@@ -314,7 +330,8 @@ public class DatasourceService {
 	 * @param conn the connection to use. If null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveDatasource(Datasource datasource, Integer newRecordId,
+	@CacheEvict(value = "datasources", allEntries = true)
+	public void saveDatasource(Datasource datasource, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveDatasource: datasource={}, "

@@ -158,6 +158,22 @@ public class EncryptorService {
 	}
 
 	/**
+	 * Returns the encryptor with the given name
+	 *
+	 * @param name the encryptor name
+	 * @return the encryptor if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("encryptors")
+	public Encryptor getEncryptor(String name) throws SQLException {
+		logger.debug("Entering getEncryptor: name='{}'", name);
+
+		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
+		ResultSetHandler<Encryptor> h = new BeanHandler<>(Encryptor.class, new EncryptorMapper());
+		return dbService.query(sql, h, name);
+	}
+
+	/**
 	 * Deletes the encryptor with the given id
 	 *
 	 * @param id the encryptor id
@@ -320,7 +336,8 @@ public class EncryptorService {
 	 * @param conn the connection to use. If null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveEncryptor(Encryptor encryptor, Integer newRecordId,
+	@CacheEvict(value = "encryptors", allEntries = true)
+	public void saveEncryptor(Encryptor encryptor, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveEncryptor: encryptor={}, newRecordId={},"
