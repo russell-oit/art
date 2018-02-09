@@ -271,19 +271,6 @@ Display user jobs and jobs configuration
 					}
 				});
 
-				$('#exportRecords').click(function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Jobs&ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
-
 				$('#runSingle').click(function () {
 					var item = $(this);
 					var recordName = escapeHtmlContent(item.data("name"));
@@ -364,24 +351,14 @@ Display user jobs and jobs configuration
 		<c:choose>
 			<c:when test="${action == 'config'}">
 				<div style="margin-bottom: 10px;">
-					<div class="btn-group">
-						<button type="button" id="editRecords" class="btn btn-default">
-							<i class="fa fa-pencil-square-o"></i>
-							<spring:message code="page.action.edit"/>
-						</button>
-						<button type="button" id="deleteRecords" class="btn btn-default">
-							<i class="fa fa-trash-o"></i>
-							<spring:message code="page.action.delete"/>
-						</button>
-					</div>
-					<div class="btn-group">
-						<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Jobs">
-							<spring:message code="page.text.import"/>
-						</a>
-						<button type="button" id="exportRecords" class="btn btn-default">
-							<spring:message code="page.text.export"/>
-						</button>
-					</div>
+					<button type="button" id="editRecords" class="btn btn-default">
+						<i class="fa fa-pencil-square-o"></i>
+						<spring:message code="page.action.edit"/>
+					</button>
+					<button type="button" id="deleteRecords" class="btn btn-default">
+						<i class="fa fa-trash-o"></i>
+						<spring:message code="page.action.delete"/>
+					</button>
 				</div>
 			</c:when>
 		</c:choose>
