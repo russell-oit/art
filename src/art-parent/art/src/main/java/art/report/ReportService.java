@@ -30,6 +30,7 @@ import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.reportoptions.CloneOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
@@ -48,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -77,15 +79,18 @@ public class ReportService {
 	private final DatasourceService datasourceService;
 	private final ReportGroupService reportGroupService;
 	private final EncryptorService encryptorService;
+	private final ReportGroupMembershipService2 reportGroupMembershipService2;
 
 	@Autowired
 	public ReportService(DbService dbService, DatasourceService datasourceService,
-			ReportGroupService reportGroupService, EncryptorService encryptorService) {
+			ReportGroupService reportGroupService, EncryptorService encryptorService,
+			ReportGroupMembershipService2 reportGroupMembershipService2) {
 
 		this.dbService = dbService;
 		this.datasourceService = datasourceService;
 		this.reportGroupService = reportGroupService;
 		this.encryptorService = encryptorService;
+		this.reportGroupMembershipService2 = reportGroupMembershipService2;
 	}
 
 	public ReportService() {
@@ -93,6 +98,7 @@ public class ReportService {
 		datasourceService = new DatasourceService();
 		reportGroupService = new ReportGroupService();
 		encryptorService = new EncryptorService();
+		reportGroupMembershipService2 = new ReportGroupMembershipService2();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERIES AQ";
@@ -675,21 +681,25 @@ public class ReportService {
 		try {
 			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
 			int reportId = dbService.getMaxRecordId(conn, sql);
-			
+
 			sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
 			int datasourceId = dbService.getMaxRecordId(conn, sql);
-			
+
 			sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
 			int encryptorId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
+			int reportGroupId = dbService.getMaxRecordId(conn, sql);
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
-			Map<String, Datasource> addedDatasources=new HashMap<>();
-			Map<String, Encryptor> addedEncryptors=new HashMap<>();
+			Map<String, Datasource> addedDatasources = new HashMap<>();
+			Map<String, Encryptor> addedEncryptors = new HashMap<>();
+			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
 			for (Report report : reports) {
 				reportId++;
-				
+
 				Datasource datasource = report.getDatasource();
 				if (datasource != null) {
 					String datasourceName = datasource.getName();
@@ -711,7 +721,7 @@ public class ReportService {
 						}
 					}
 				}
-				
+
 				Encryptor encryptor = report.getEncryptor();
 				if (encryptor != null) {
 					String encryptorName = encryptor.getName();
@@ -733,8 +743,32 @@ public class ReportService {
 						}
 					}
 				}
-				
+
+				List<ReportGroup> reportGroups = report.getReportGroups();
+				if (CollectionUtils.isNotEmpty(reportGroups)) {
+					List<ReportGroup> newReportGroups = new ArrayList<>();
+					for (ReportGroup reportGroup : reportGroups) {
+						String reportGroupName = reportGroup.getName();
+						ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+						if (existingReportGroup == null) {
+							ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+							if (addedReportGroup == null) {
+								reportGroupId++;
+								reportGroupService.saveReportGroup(reportGroup, reportGroupId, actionUser, conn);
+								addedReportGroups.put(reportGroupName, reportGroup);
+								newReportGroups.add(reportGroup);
+							} else {
+								newReportGroups.add(addedReportGroup);
+							}
+						} else {
+							newReportGroups.add(existingReportGroup);
+						}
+					}
+					report.setReportGroups(newReportGroups);
+				}
+
 				saveReport(report, reportId, actionUser, conn);
+				reportGroupMembershipService2.recreateReportGroupMemberships(report);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

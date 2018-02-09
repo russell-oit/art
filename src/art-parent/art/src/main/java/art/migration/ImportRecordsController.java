@@ -626,11 +626,53 @@ public class ImportRecordsController {
 	 * @throws SQLException
 	 */
 	private void importReports(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
+			CsvRoutines csvRoutines) throws SQLException, IOException {
 
 		logger.debug("Entering importReports: sessionUser={}", sessionUser);
 
-		List<Report> reports = csvRoutines.parseAll(Report.class, file);
+		List<Report> reports;
+		String extension = FilenameUtils.getExtension(file.getName());
+		if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+			reports = csvRoutines.parseAll(Report.class, file);
+		} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+			String artTempPath = Config.getArtTempPath();
+			ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+			String reportsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
+			File reportsFile = new File(reportsFileName);
+			if (reportsFile.exists()) {
+				reports = csvRoutines.parseAll(Report.class, reportsFile);
+			} else {
+				throw new IllegalStateException("File not found: " + reportsFileName);
+			}
+
+			String reportGroupsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
+			File reportGroupsFile = new File(reportGroupsFileName);
+			if (reportGroupsFile.exists()) {
+				List<ReportGroup> allReportGroups = csvRoutines.parseAll(ReportGroup.class, reportGroupsFile);
+				Map<Integer, Report> reportsMap = new HashMap<>();
+				for (Report report : reports) {
+					reportsMap.put(report.getReportId(), report);
+				}
+				for (ReportGroup reportGroup : allReportGroups) {
+					int parentId = reportGroup.getParentId();
+					Report report = reportsMap.get(parentId);
+					if (report == null) {
+						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+					} else {
+						List<ReportGroup> reportGroups = report.getReportGroups();
+						if (reportGroups == null) {
+							reportGroups = new ArrayList<>();
+						}
+						reportGroups.add(reportGroup);
+						report.setReportGroups(reportGroups);
+					}
+				}
+			}
+			reportsFile.delete();
+			reportGroupsFile.delete();
+		} else {
+			throw new IllegalArgumentException("Unexpected file extension: " + extension);
+		}
 
 		for (Report report : reports) {
 			if (report.isClearTextPasswords()) {

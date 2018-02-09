@@ -35,6 +35,8 @@ public class ExportRecords implements Serializable {
 	public static final String EMBEDDED_HOLIDAYS_FILENAME = "art-export-Holidays.csv";
 	public static final String EMBEDDED_USERS_FILENAME = "art-export-Users.csv";
 	public static final String EMBEDDED_USERGROUPS_FILENAME = "art-export-UserGroups.csv";
+	public static final String EMBEDDED_REPORTS_FILENAME = "art-export-Reports.csv";
+	public static final String EMBEDDED_REPORTGROUPS_FILENAME = "art-export-ReportGroups.csv";
 
 	private MigrationRecordType recordType;
 	private String ids;

@@ -304,7 +304,7 @@ INSERT INTO ART_REPORT_TYPES VALUES (-17,'Chart: Stacked Horizontal Bar 2D');
 
 
 -- ART_QUERY_GROUPS
--- Stores name and description of query groups
+-- Stores name and description of report groups
 
 CREATE TABLE ART_QUERY_GROUPS
 (

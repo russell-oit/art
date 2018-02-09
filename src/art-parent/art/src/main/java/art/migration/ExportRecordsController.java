@@ -117,13 +117,13 @@ public class ExportRecordsController {
 
 	@Autowired
 	private RuleService ruleService;
-	
+
 	@Autowired
 	private ParameterService parameterService;
-	
+
 	@Autowired
 	private JobService jobService;
-	
+
 	@Autowired
 	private ReportService reportService;
 
@@ -227,7 +227,7 @@ public class ExportRecordsController {
 						exportJobs(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Reports:
-						exportReports(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportFilePath = exportReports(exportRecords, sessionUser, csvRoutines, conn);
 						break;
 					default:
 						break;
@@ -624,7 +624,7 @@ public class ExportRecordsController {
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportUsers");
-		
+
 		String exportFilePath = null;
 
 		String ids = exportRecords.getIds();
@@ -668,7 +668,7 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
-		
+
 		return exportFilePath;
 	}
 
@@ -704,8 +704,8 @@ public class ExportRecordsController {
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
 	}
-	
-		/**
+
+	/**
 	 * Exports parameter records
 	 *
 	 * @param exportRecords the export records object
@@ -737,8 +737,8 @@ public class ExportRecordsController {
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
 	}
-	
-		/**
+
+	/**
 	 * Exports job records
 	 *
 	 * @param exportRecords the export records object
@@ -770,23 +770,25 @@ public class ExportRecordsController {
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
 	}
-	
-		/**
+
+	/**
 	 * Exports report records
 	 *
 	 * @param exportRecords the export records object
-	 * @param file the export file to use
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
+	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void exportReports(ExportRecords exportRecords, File file,
+	private String exportReports(ExportRecords exportRecords,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportReports");
+
+		String exportFilePath = null;
 
 		String ids = exportRecords.getIds();
 		List<Report> reports = reportService.getReports(ids);
@@ -797,7 +799,34 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(reports, Report.class, file);
+				String recordsExportPath = Config.getRecordsExportPath();
+				String reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
+				File reportsFile = new File(reportsFilePath);
+				csvRoutines.writeAll(reports, Report.class, reportsFile);
+				List<ReportGroup> allReportGroups = new ArrayList<>();
+				for (Report report : reports) {
+					List<ReportGroup> reportGroups = report.getReportGroups();
+					for (ReportGroup reportGroup : reportGroups) {
+						reportGroup.setParentId(report.getReportId());
+						allReportGroups.add(reportGroup);
+					}
+				}
+				if (CollectionUtils.isNotEmpty(allReportGroups)) {
+					String reportGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
+					File reportGroupsFile = new File(reportGroupsFilePath);
+
+					CsvWriterSettings writerSettings = new CsvWriterSettings();
+					writerSettings.setHeaderWritingEnabled(true);
+					CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+					csvRoutines2.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
+
+					exportFilePath = recordsExportPath + "art-export-Reports.zip";
+					ArtUtils.zipFiles(exportFilePath, reportsFilePath, reportGroupsFilePath);
+					reportsFile.delete();
+					reportGroupsFile.delete();
+				} else {
+					exportFilePath = reportsFilePath;
+				}
 				break;
 			case Datasource:
 				reportService.importReports(reports, sessionUser, conn);
@@ -805,6 +834,8 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
+
+		return exportFilePath;
 	}
 
 }
