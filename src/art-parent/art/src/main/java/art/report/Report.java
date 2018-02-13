@@ -29,6 +29,7 @@ import art.encryption.AESCrypt;
 import art.encryption.AesEncryptor;
 import art.migration.PrefixTransformer;
 import art.reportoptions.CloneOptions;
+import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
@@ -159,6 +160,21 @@ public class Report implements Serializable {
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
 	private Encryptor encryptor;
+	private List<ReportParameter> reportParams; //used in import/export
+
+	/**
+	 * @return the reportParams
+	 */
+	public List<ReportParameter> getReportParams() {
+		return reportParams;
+	}
+
+	/**
+	 * @param reportParams the reportParams to set
+	 */
+	public void setReportParams(List<ReportParameter> reportParams) {
+		this.reportParams = reportParams;
+	}
 
 	/**
 	 * @return the clearTextPasswords
@@ -1237,11 +1253,11 @@ public class Report implements Serializable {
 		openPassword = AesEncryptor.decrypt(openPassword);
 		modifyPassword = AesEncryptor.decrypt(modifyPassword);
 	}
-	
+
 	/**
 	 * Encrypts password fields
 	 */
-	public void encryptPasswords(){
+	public void encryptPasswords() {
 		openPassword = AesEncryptor.encrypt(openPassword);
 		modifyPassword = AesEncryptor.encrypt(modifyPassword);
 	}

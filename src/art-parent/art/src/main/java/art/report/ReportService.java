@@ -667,7 +667,8 @@ public class ReportService {
 	 *
 	 * @param reports the list of reports to import
 	 * @param actionUser the user who is performing the import
-	 * @param conn the connection to use
+	 * @param conn the connection to use. if autocommit is false, no commit is
+	 * performed
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
@@ -676,106 +677,93 @@ public class ReportService {
 
 		logger.debug("Entering importReports: actionUser={}", actionUser);
 
-		boolean originalAutoCommit = true;
+		String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
+		int reportId = dbService.getMaxRecordId(conn, sql);
 
-		try {
-			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
-			int reportId = dbService.getMaxRecordId(conn, sql);
+		sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
+		int datasourceId = dbService.getMaxRecordId(conn, sql);
 
-			sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
-			int datasourceId = dbService.getMaxRecordId(conn, sql);
+		sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
+		int encryptorId = dbService.getMaxRecordId(conn, sql);
 
-			sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
-			int encryptorId = dbService.getMaxRecordId(conn, sql);
+		sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
+		int reportGroupId = dbService.getMaxRecordId(conn, sql);
 
-			sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
-			int reportGroupId = dbService.getMaxRecordId(conn, sql);
+		Map<String, Datasource> addedDatasources = new HashMap<>();
+		Map<String, Encryptor> addedEncryptors = new HashMap<>();
+		Map<String, ReportGroup> addedReportGroups = new HashMap<>();
+		for (Report report : reports) {
+			reportId++;
 
-			originalAutoCommit = conn.getAutoCommit();
-			conn.setAutoCommit(false);
-
-			Map<String, Datasource> addedDatasources = new HashMap<>();
-			Map<String, Encryptor> addedEncryptors = new HashMap<>();
-			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
-			for (Report report : reports) {
-				reportId++;
-
-				Datasource datasource = report.getDatasource();
-				if (datasource != null) {
-					String datasourceName = datasource.getName();
-					if (StringUtils.isBlank(datasourceName)) {
-						report.setDatasource(null);
+			Datasource datasource = report.getDatasource();
+			if (datasource != null) {
+				String datasourceName = datasource.getName();
+				if (StringUtils.isBlank(datasourceName)) {
+					report.setDatasource(null);
+				} else {
+					Datasource existingDatasource = datasourceService.getDatasource(datasourceName);
+					if (existingDatasource == null) {
+						Datasource addedDatasource = addedDatasources.get(datasourceName);
+						if (addedDatasource == null) {
+							datasourceId++;
+							datasourceService.saveDatasource(datasource, datasourceId, actionUser, conn);
+							addedDatasources.put(datasourceName, datasource);
+						} else {
+							report.setDatasource(addedDatasource);
+						}
 					} else {
-						Datasource existingDatasource = datasourceService.getDatasource(datasourceName);
-						if (existingDatasource == null) {
-							Datasource addedDatasource = addedDatasources.get(datasourceName);
-							if (addedDatasource == null) {
-								datasourceId++;
-								datasourceService.saveDatasource(datasource, datasourceId, actionUser, conn);
-								addedDatasources.put(datasourceName, datasource);
-							} else {
-								report.setDatasource(addedDatasource);
-							}
-						} else {
-							report.setDatasource(existingDatasource);
-						}
+						report.setDatasource(existingDatasource);
 					}
 				}
-
-				Encryptor encryptor = report.getEncryptor();
-				if (encryptor != null) {
-					String encryptorName = encryptor.getName();
-					if (StringUtils.isBlank(encryptorName)) {
-						report.setEncryptor(null);
-					} else {
-						Encryptor existingEncryptor = encryptorService.getEncryptor(encryptorName);
-						if (existingEncryptor == null) {
-							Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
-							if (addedEncryptor == null) {
-								encryptorId++;
-								encryptorService.saveEncryptor(encryptor, encryptorId, actionUser, conn);
-								addedEncryptors.put(encryptorName, encryptor);
-							} else {
-								report.setEncryptor(addedEncryptor);
-							}
-						} else {
-							report.setEncryptor(existingEncryptor);
-						}
-					}
-				}
-
-				List<ReportGroup> reportGroups = report.getReportGroups();
-				if (CollectionUtils.isNotEmpty(reportGroups)) {
-					List<ReportGroup> newReportGroups = new ArrayList<>();
-					for (ReportGroup reportGroup : reportGroups) {
-						String reportGroupName = reportGroup.getName();
-						ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
-						if (existingReportGroup == null) {
-							ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
-							if (addedReportGroup == null) {
-								reportGroupId++;
-								reportGroupService.saveReportGroup(reportGroup, reportGroupId, actionUser, conn);
-								addedReportGroups.put(reportGroupName, reportGroup);
-								newReportGroups.add(reportGroup);
-							} else {
-								newReportGroups.add(addedReportGroup);
-							}
-						} else {
-							newReportGroups.add(existingReportGroup);
-						}
-					}
-					report.setReportGroups(newReportGroups);
-				}
-
-				saveReport(report, reportId, actionUser, conn);
-				reportGroupMembershipService2.recreateReportGroupMemberships(report);
 			}
-			conn.commit();
-		} catch (SQLException ex) {
-			conn.rollback();
-			throw ex;
-		} finally {
-			conn.setAutoCommit(originalAutoCommit);
+
+			Encryptor encryptor = report.getEncryptor();
+			if (encryptor != null) {
+				String encryptorName = encryptor.getName();
+				if (StringUtils.isBlank(encryptorName)) {
+					report.setEncryptor(null);
+				} else {
+					Encryptor existingEncryptor = encryptorService.getEncryptor(encryptorName);
+					if (existingEncryptor == null) {
+						Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
+						if (addedEncryptor == null) {
+							encryptorId++;
+							encryptorService.saveEncryptor(encryptor, encryptorId, actionUser, conn);
+							addedEncryptors.put(encryptorName, encryptor);
+						} else {
+							report.setEncryptor(addedEncryptor);
+						}
+					} else {
+						report.setEncryptor(existingEncryptor);
+					}
+				}
+			}
+
+			List<ReportGroup> reportGroups = report.getReportGroups();
+			if (CollectionUtils.isNotEmpty(reportGroups)) {
+				List<ReportGroup> newReportGroups = new ArrayList<>();
+				for (ReportGroup reportGroup : reportGroups) {
+					String reportGroupName = reportGroup.getName();
+					ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+					if (existingReportGroup == null) {
+						ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+						if (addedReportGroup == null) {
+							reportGroupId++;
+							reportGroupService.saveReportGroup(reportGroup, reportGroupId, actionUser, conn);
+							addedReportGroups.put(reportGroupName, reportGroup);
+							newReportGroups.add(reportGroup);
+						} else {
+							newReportGroups.add(addedReportGroup);
+						}
+					} else {
+						newReportGroups.add(existingReportGroup);
+					}
+				}
+				report.setReportGroups(newReportGroups);
+			}
+
+			saveReport(report, reportId, actionUser, conn);
+			reportGroupMembershipService2.recreateReportGroupMemberships(report);
 		}
 	}
 

@@ -417,7 +417,8 @@ public class ParameterService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveParameter(Parameter parameter, Integer newRecordId,
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void saveParameter(Parameter parameter, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveParameter: parameter={}, newRecordId={},"

@@ -35,8 +35,11 @@ import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.Report;
 import art.report.ReportService;
+import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterService;
 import art.rule.Rule;
 import art.rule.RuleService;
 import art.schedule.Schedule;
@@ -126,6 +129,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private ReportService reportService;
+
+	@Autowired
+	private ReportParameterService reportParameterService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -803,6 +809,7 @@ public class ExportRecordsController {
 				String reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
 				File reportsFile = new File(reportsFilePath);
 				csvRoutines.writeAll(reports, Report.class, reportsFile);
+
 				List<ReportGroup> allReportGroups = new ArrayList<>();
 				for (Report report : reports) {
 					List<ReportGroup> reportGroups = report.getReportGroups();
@@ -811,25 +818,54 @@ public class ExportRecordsController {
 						allReportGroups.add(reportGroup);
 					}
 				}
-				if (CollectionUtils.isNotEmpty(allReportGroups)) {
+
+				List<ReportParameter> allReportParams = new ArrayList<>();
+				for (Report report : reports) {
+					List<ReportParameter> reportParams = reportParameterService.getReportParameters(report.getReportId());
+					for (ReportParameter reportParam : reportParams) {
+						reportParam.setParentId(report.getReportId());
+						allReportParams.add(reportParam);
+					}
+				}
+
+				if (CollectionUtils.isNotEmpty(allReportGroups) || CollectionUtils.isNotEmpty(allReportParams)) {
+					List<String> filesToZip = new ArrayList<>();
+					filesToZip.add(reportsFilePath);
+
 					String reportGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
 					File reportGroupsFile = new File(reportGroupsFilePath);
 
-					CsvWriterSettings writerSettings = new CsvWriterSettings();
-					writerSettings.setHeaderWritingEnabled(true);
-					CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-					csvRoutines2.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
+					String reportParamsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME;
+					File reportParamsFile = new File(reportParamsFilePath);
+
+					if (CollectionUtils.isNotEmpty(allReportGroups)) {
+						CsvWriterSettings writerSettings = new CsvWriterSettings();
+						writerSettings.setHeaderWritingEnabled(true);
+						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+						csvRoutines2.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
+						filesToZip.add(reportGroupsFilePath);
+					}
+
+					if (CollectionUtils.isNotEmpty(allReportParams)) {
+						CsvWriterSettings writerSettings = new CsvWriterSettings();
+						writerSettings.setHeaderWritingEnabled(true);
+						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+						csvRoutines2.writeAll(allReportParams, ReportParameter.class, reportParamsFile);
+						filesToZip.add(reportParamsFilePath);
+					}
 
 					exportFilePath = recordsExportPath + "art-export-Reports.zip";
-					ArtUtils.zipFiles(exportFilePath, reportsFilePath, reportGroupsFilePath);
+					ArtUtils.zipFiles(exportFilePath, filesToZip);
 					reportsFile.delete();
 					reportGroupsFile.delete();
+					reportParamsFile.delete();
 				} else {
 					exportFilePath = reportsFilePath;
 				}
 				break;
 			case Datasource:
-				reportService.importReports(reports, sessionUser, conn);
+				ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
+				reportServiceHelper.importReports(reports, sessionUser, conn, reportService, reportParameterService);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

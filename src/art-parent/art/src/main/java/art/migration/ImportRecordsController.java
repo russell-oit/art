@@ -35,8 +35,11 @@ import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.Report;
 import art.report.ReportService;
+import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterService;
 import art.rule.Rule;
 import art.rule.RuleService;
 import art.schedule.Schedule;
@@ -135,6 +138,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private ReportService reportService;
+
+	@Autowired
+	private ReportParameterService reportParameterService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -645,14 +651,15 @@ public class ImportRecordsController {
 				throw new IllegalStateException("File not found: " + reportsFileName);
 			}
 
+			Map<Integer, Report> reportsMap = new HashMap<>();
+			for (Report report : reports) {
+				reportsMap.put(report.getReportId(), report);
+			}
+
 			String reportGroupsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
 			File reportGroupsFile = new File(reportGroupsFileName);
 			if (reportGroupsFile.exists()) {
 				List<ReportGroup> allReportGroups = csvRoutines.parseAll(ReportGroup.class, reportGroupsFile);
-				Map<Integer, Report> reportsMap = new HashMap<>();
-				for (Report report : reports) {
-					reportsMap.put(report.getReportId(), report);
-				}
 				for (ReportGroup reportGroup : allReportGroups) {
 					int parentId = reportGroup.getParentId();
 					Report report = reportsMap.get(parentId);
@@ -668,8 +675,30 @@ public class ImportRecordsController {
 					}
 				}
 			}
+
+			String reportParamsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME;
+			File reportParamsFile = new File(reportParamsFileName);
+			if (reportParamsFile.exists()) {
+				List<ReportParameter> allReportParams = csvRoutines.parseAll(ReportParameter.class, reportParamsFile);
+				for (ReportParameter reportParam : allReportParams) {
+					int parentId = reportParam.getParentId();
+					Report report = reportsMap.get(parentId);
+					if (report == null) {
+						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+					} else {
+						List<ReportParameter> reportParams = report.getReportParams();
+						if (reportParams == null) {
+							reportParams = new ArrayList<>();
+						}
+						reportParams.add(reportParam);
+						report.setReportParams(reportParams);
+					}
+				}
+			}
+			
 			reportsFile.delete();
 			reportGroupsFile.delete();
+			reportParamsFile.delete();
 		} else {
 			throw new IllegalArgumentException("Unexpected file extension: " + extension);
 		}
@@ -680,7 +709,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		reportService.importReports(reports, sessionUser, conn);
+		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
+		reportServiceHelper.importReports(reports, sessionUser, conn, reportService, reportParameterService);
 	}
 
 }
