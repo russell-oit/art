@@ -19,6 +19,7 @@ package art.reportparameter;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.migration.PrefixTransformer;
 import art.parameter.Parameter;
 import art.report.Report;
 import art.utils.ArtUtils;
@@ -62,7 +63,7 @@ public class ReportParameter implements Serializable {
 	private boolean chainedParent;
 	private Map<String, String> lovValuesAsString;
 	private Map<String, String> defaultValueLovValues;
-	@Nested
+	@Nested(headerTransformer = PrefixTransformer.class, args = "parameter")
 	private Parameter parameter;
 
 	/**

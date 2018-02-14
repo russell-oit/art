@@ -34,12 +34,10 @@ import art.job.JobService;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.Report;
-import art.report.ReportService;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.reportparameter.ReportParameter;
-import art.reportparameter.ReportParameterService;
 import art.rule.Rule;
 import art.rule.RuleService;
 import art.schedule.Schedule;
@@ -135,12 +133,6 @@ public class ImportRecordsController {
 
 	@Autowired
 	private JobService jobService;
-
-	@Autowired
-	private ReportService reportService;
-
-	@Autowired
-	private ReportParameterService reportParameterService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -695,7 +687,7 @@ public class ImportRecordsController {
 					}
 				}
 			}
-			
+
 			reportsFile.delete();
 			reportGroupsFile.delete();
 			reportParamsFile.delete();
@@ -710,7 +702,7 @@ public class ImportRecordsController {
 		}
 
 		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
-		reportServiceHelper.importReports(reports, sessionUser, conn, reportService, reportParameterService);
+		reportServiceHelper.importReports(reports, sessionUser, conn);
 	}
 
 }

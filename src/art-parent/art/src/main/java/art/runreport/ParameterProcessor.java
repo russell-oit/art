@@ -209,8 +209,6 @@ public class ParameterProcessor {
 	 * @throws SQLException
 	 */
 	private void setLovValues(Map<String, ReportParameter> reportParamsMap) throws SQLException {
-		ReportService reportService = new ReportService();
-
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			ReportParameter reportParam = entry.getValue();
 			Parameter param = reportParam.getParameter();
@@ -221,8 +219,7 @@ public class ParameterProcessor {
 				if (!reportParam.isChained()) {
 					ReportRunner lovReportRunner = new ReportRunner();
 					try {
-						int lovReportId = param.getLovReportId();
-						Report lovReport = reportService.getReport(lovReportId);
+						Report lovReport = param.getLovReport();
 						lovReportRunner.setUser(user);
 						lovReportRunner.setReport(lovReport);
 						lovReportRunner.setReportParamsMap(reportParamsMap);
@@ -359,9 +356,7 @@ public class ParameterProcessor {
 					if (param.isUseLov()) {
 						ReportRunner lovReportRunner = new ReportRunner();
 						try {
-							int lovReportId = param.getLovReportId();
-							ReportService reportService = new ReportService();
-							Report lovReport = reportService.getReport(lovReportId);
+							Report lovReport = param.getLovReport();
 							lovReportRunner.setUser(user);
 							lovReportRunner.setReport(lovReport);
 							lovReportRunner.setReportParamsMap(reportParamsMap);
@@ -409,7 +404,7 @@ public class ParameterProcessor {
 				} else {
 					actualValueString = passedValues[0];
 				}
-				
+
 				logger.debug("actualValueString = '{}'", actualValueString);
 
 				//convert string value to appropriate object

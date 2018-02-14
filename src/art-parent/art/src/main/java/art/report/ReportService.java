@@ -793,7 +793,8 @@ public class ReportService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveReport(Report report, Integer newRecordId,
+	@CacheEvict(value = "reports", allEntries = true)
+	public void saveReport(Report report, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveReport: report={}, newRecordId={},"

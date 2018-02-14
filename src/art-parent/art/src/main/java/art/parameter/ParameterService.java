@@ -23,6 +23,7 @@ import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.report.Report;
 import art.report.ReportService;
+import art.report.ReportServiceHelper;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.ArtUtils;
@@ -103,7 +104,6 @@ public class ParameterService {
 			parameter.setHidden(rs.getBoolean("HIDDEN"));
 			parameter.setShared(rs.getBoolean("SHARED"));
 			parameter.setUseLov(rs.getBoolean("USE_LOV"));
-			parameter.setLovReportId(rs.getInt("LOV_REPORT_ID"));
 			parameter.setUseRulesInLov(rs.getBoolean("USE_RULES_IN_LOV"));
 			parameter.setDrilldownColumnIndex(rs.getInt("DRILLDOWN_COLUMN_INDEX"));
 			parameter.setUseDirectSubstitution(rs.getBoolean("USE_DIRECT_SUBSTITUTION"));
@@ -118,6 +118,9 @@ public class ParameterService {
 
 			Report defaultValueReport = reportService.getReport(rs.getInt("DEFAULT_VALUE_REPORT_ID"));
 			parameter.setDefaultValueReport(defaultValueReport);
+
+			Report lovReport = reportService.getReport(rs.getInt("LOV_REPORT_ID"));
+			parameter.setLovReport(lovReport);
 
 			String options = parameter.getOptions();
 			if (StringUtils.isNotBlank(options)) {
@@ -378,6 +381,22 @@ public class ParameterService {
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
+			List<Report> reports = new ArrayList<>();
+			for (Parameter parameter : parameters) {
+				Report defaultValueReport = parameter.getDefaultValueReport();
+				if (defaultValueReport != null) {
+					reports.add(defaultValueReport);
+				}
+				Report lovReport = parameter.getLovReport();
+				if (lovReport != null) {
+					reports.add(lovReport);
+				}
+			}
+
+			ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
+			boolean commitReports = false;
+			reportServiceHelper.importReports(reports, actionUser, conn, commitReports);
+
 			for (Parameter parameter : parameters) {
 				id++;
 				saveParameter(parameter, id, actionUser, conn);
@@ -449,9 +468,12 @@ public class ParameterService {
 			}
 		}
 
-		Integer lovReportId = parameter.getLovReportId();
-		if (lovReportId == 0) {
-			lovReportId = null;
+		Integer lovReportId = null;
+		if (parameter.getLovReport() != null) {
+			lovReportId = parameter.getLovReport().getReportId();
+			if (lovReportId == 0) {
+				lovReportId = null;
+			}
 		}
 
 		int affectedRows;

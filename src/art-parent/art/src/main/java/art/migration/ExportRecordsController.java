@@ -865,7 +865,7 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
-				reportServiceHelper.importReports(reports, sessionUser, conn, reportService, reportParameterService);
+				reportServiceHelper.importReports(reports, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
