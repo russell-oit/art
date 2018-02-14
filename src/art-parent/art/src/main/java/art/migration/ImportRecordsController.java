@@ -18,6 +18,7 @@
 package art.migration;
 
 import art.artdatabase.ArtDatabase;
+import art.cache.CacheHelper;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
@@ -133,6 +134,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private JobService jobService;
+	
+	@Autowired
+	private CacheHelper cacheHelper;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -703,6 +707,7 @@ public class ImportRecordsController {
 
 		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
 		reportServiceHelper.importReports(reports, sessionUser, conn);
+		cacheHelper.clearReports();
 	}
 
 }

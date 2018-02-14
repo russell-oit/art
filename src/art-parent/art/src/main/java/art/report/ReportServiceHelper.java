@@ -69,6 +69,7 @@ public class ReportServiceHelper {
 	 * @param reports the list of reports to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param commit whether to perform a commit after a successful import
 	 * @throws SQLException
 	 */
 	public void importReports(List<Report> reports, User actionUser,
