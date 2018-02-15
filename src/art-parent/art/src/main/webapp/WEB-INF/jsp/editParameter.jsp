@@ -331,7 +331,7 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="lovReportId">
+					<label class="col-md-4 control-label " for="lovReport.reportId">
 						<spring:message code="parameters.label.lovReport"/>
 					</label>
 					<div class="col-md-8">

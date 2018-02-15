@@ -708,6 +708,7 @@ public class ImportRecordsController {
 		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
 		reportServiceHelper.importReports(reports, sessionUser, conn);
 		cacheHelper.clearReports();
+		cacheHelper.clearParameters();
 	}
 
 }

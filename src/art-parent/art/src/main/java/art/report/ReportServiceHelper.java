@@ -22,6 +22,8 @@ import art.datasource.DatasourceService;
 import art.dbutils.DbService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
+import art.parameter.Parameter;
+import art.parameter.ParameterService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.reportgroupmembership.ReportGroupMembershipService2;
@@ -90,6 +92,7 @@ public class ReportServiceHelper {
 			EncryptorService encryptorService = new EncryptorService();
 			ReportGroupService reportGroupService = new ReportGroupService();
 			ReportGroupMembershipService2 reportGroupMembershipService2 = new ReportGroupMembershipService2();
+			ParameterService parameterService = new ParameterService();
 
 			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
 			int reportId = dbService.getMaxRecordId(conn, sql);
@@ -107,6 +110,24 @@ public class ReportServiceHelper {
 			Map<String, Encryptor> addedEncryptors = new HashMap<>();
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
 			Map<String, Report> addedReports = new HashMap<>();
+
+			List<Report> parameterReports = new ArrayList<>();
+			for (Report report : reports) {
+				List<Parameter> parameters = parameterService.getReportParameters(report.getReportId());
+				for (Parameter parameter : parameters) {
+					Report defaultValueReport = parameter.getDefaultValueReport();
+					if (defaultValueReport != null) {
+						parameterReports.add(defaultValueReport);
+					}
+					Report lovReport = parameter.getLovReport();
+					if (lovReport != null) {
+						parameterReports.add(lovReport);
+					}
+				}
+			}
+
+			reports.addAll(parameterReports);
+
 			for (Report report : reports) {
 				String reportName = report.getName();
 				if (StringUtils.isNotBlank(reportName)) {
