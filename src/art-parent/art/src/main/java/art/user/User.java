@@ -69,7 +69,7 @@ public class User implements Serializable {
 	private boolean generateAndSend; //only used for user interface logic
 	@Parsed
 	private boolean clearTextPassword; //used to allow import with clear text passwords
-	@Nested(headerTransformer = PrefixTransformer.class, args = "drg")
+	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
 
 	/**

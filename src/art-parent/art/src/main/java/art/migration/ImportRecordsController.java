@@ -39,8 +39,11 @@ import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.reportparameter.ReportParameter;
+import art.reportrule.ReportRule;
 import art.rule.Rule;
 import art.rule.RuleService;
+import art.ruleValue.UserGroupRuleValue;
+import art.ruleValue.UserRuleValue;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
@@ -134,7 +137,7 @@ public class ImportRecordsController {
 
 	@Autowired
 	private JobService jobService;
-	
+
 	@Autowired
 	private CacheHelper cacheHelper;
 
@@ -692,9 +695,72 @@ public class ImportRecordsController {
 				}
 			}
 
+			String userRuleValuesFileName = artTempPath + ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME;
+			File userRuleValuesFile = new File(userRuleValuesFileName);
+			if (userRuleValuesFile.exists()) {
+				List<UserRuleValue> allUserRuleValues = csvRoutines.parseAll(UserRuleValue.class, userRuleValuesFile);
+				for (UserRuleValue userRuleValue : allUserRuleValues) {
+					int parentId = userRuleValue.getParentId();
+					Report report = reportsMap.get(parentId);
+					if (report == null) {
+						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+					} else {
+						List<UserRuleValue> userRuleValues = report.getUserRuleValues();
+						if (userRuleValues == null) {
+							userRuleValues = new ArrayList<>();
+						}
+						userRuleValues.add(userRuleValue);
+						report.setUserRuleValues(userRuleValues);
+					}
+				}
+			}
+
+			String userGroupRuleValuesFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME;
+			File userGroupRuleValuesFile = new File(userGroupRuleValuesFileName);
+			if (userGroupRuleValuesFile.exists()) {
+				List<UserGroupRuleValue> allUserGroupRuleValues = csvRoutines.parseAll(UserGroupRuleValue.class, userGroupRuleValuesFile);
+				for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
+					int parentId = userGroupRuleValue.getParentId();
+					Report report = reportsMap.get(parentId);
+					if (report == null) {
+						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+					} else {
+						List<UserGroupRuleValue> userGroupRuleValues = report.getUserGroupRuleValues();
+						if (userGroupRuleValues == null) {
+							userGroupRuleValues = new ArrayList<>();
+						}
+						userGroupRuleValues.add(userGroupRuleValue);
+						report.setUserGroupRuleValues(userGroupRuleValues);
+					}
+				}
+			}
+			
+			String reportRulesFileName = artTempPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
+			File reportRulesFile = new File(reportRulesFileName);
+			if (reportRulesFile.exists()) {
+				List<ReportRule> allReportRules = csvRoutines.parseAll(ReportRule.class, reportRulesFile);
+				for (ReportRule reportRule : allReportRules) {
+					int parentId = reportRule.getParentId();
+					Report report = reportsMap.get(parentId);
+					if (report == null) {
+						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+					} else {
+						List<ReportRule> reportRules = report.getReportRules();
+						if (reportRules == null) {
+							reportRules = new ArrayList<>();
+						}
+						reportRules.add(reportRule);
+						report.setReportRules(reportRules);
+					}
+				}
+			}
+
 			reportsFile.delete();
 			reportGroupsFile.delete();
 			reportParamsFile.delete();
+			userRuleValuesFile.delete();
+			userGroupRuleValuesFile.delete();
+			reportRulesFile.delete();
 		} else {
 			throw new IllegalArgumentException("Unexpected file extension: " + extension);
 		}
@@ -708,7 +774,13 @@ public class ImportRecordsController {
 		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
 		reportServiceHelper.importReports(reports, sessionUser, conn);
 		cacheHelper.clearReports();
+		cacheHelper.clearReportGroups();
+		cacheHelper.clearDatasources();
+		cacheHelper.clearEncryptors();
 		cacheHelper.clearParameters();
+		cacheHelper.clearRules();
+		cacheHelper.clearUsers();
+		cacheHelper.clearUserGroups();
 	}
 
 }

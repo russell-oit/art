@@ -17,8 +17,11 @@
  */
 package art.ruleValue;
 
+import art.migration.PrefixTransformer;
 import art.rule.Rule;
 import art.user.User;
+import com.univocity.parsers.annotations.Nested;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -30,10 +33,31 @@ import java.util.Objects;
 public class UserRuleValue implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private User user;
-	private Rule rule;
-	private String ruleValue;
+
+	@Parsed
+	private int parentId; //used for import/export of linked records e.g. reports
+	@Parsed
 	private String ruleValueKey;
+	@Parsed
+	private String ruleValue;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "rule")
+	private Rule rule;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "user")
+	private User user;
+
+	/**
+	 * @return the parentId
+	 */
+	public int getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 
 	/**
 	 * @return the ruleValueKey

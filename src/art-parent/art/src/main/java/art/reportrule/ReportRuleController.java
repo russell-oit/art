@@ -167,7 +167,8 @@ public class ReportRuleController {
 
 		try {
 			if (StringUtils.equals(action, "add")) {
-				reportRuleService.addReportRule(reportRule, reportId);
+				reportRule.setReportId(reportId);
+				reportRuleService.addReportRule(reportRule);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
 				reportRuleService.updateReportRule(reportRule);

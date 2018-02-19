@@ -28,6 +28,7 @@ import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.reportparameter.ReportParameterService;
+import art.ruleValue.RuleValueService;
 import art.user.User;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -93,6 +94,7 @@ public class ReportServiceHelper {
 			ReportGroupService reportGroupService = new ReportGroupService();
 			ReportGroupMembershipService2 reportGroupMembershipService2 = new ReportGroupMembershipService2();
 			ParameterService parameterService = new ParameterService();
+			RuleValueService ruleValueService = new RuleValueService();
 
 			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
 			int reportId = dbService.getMaxRecordId(conn, sql);
@@ -217,6 +219,7 @@ public class ReportServiceHelper {
 			}
 
 			reportParameterService.importReportParameters(reports, actionUser, conn);
+			ruleValueService.importRuleValues(reports, actionUser, conn);
 
 			if (commit) {
 				conn.commit();

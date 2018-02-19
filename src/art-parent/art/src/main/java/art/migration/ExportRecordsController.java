@@ -40,8 +40,13 @@ import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
+import art.reportrule.ReportRule;
+import art.reportrule.ReportRuleService;
 import art.rule.Rule;
 import art.rule.RuleService;
+import art.ruleValue.RuleValueService;
+import art.ruleValue.UserGroupRuleValue;
+import art.ruleValue.UserRuleValue;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
@@ -132,6 +137,12 @@ public class ExportRecordsController {
 
 	@Autowired
 	private ReportParameterService reportParameterService;
+
+	@Autowired
+	private RuleValueService ruleValueService;
+
+	@Autowired
+	private ReportRuleService reportRuleService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -811,24 +822,49 @@ public class ExportRecordsController {
 				csvRoutines.writeAll(reports, Report.class, reportsFile);
 
 				List<ReportGroup> allReportGroups = new ArrayList<>();
+				List<ReportParameter> allReportParams = new ArrayList<>();
+				List<UserRuleValue> allUserRuleValues = new ArrayList<>();
+				List<UserGroupRuleValue> allUserGroupRuleValues = new ArrayList<>();
+				List<ReportRule> allReportRules = new ArrayList<>();
 				for (Report report : reports) {
+					int reportId = report.getReportId();
+
 					List<ReportGroup> reportGroups = report.getReportGroups();
 					for (ReportGroup reportGroup : reportGroups) {
-						reportGroup.setParentId(report.getReportId());
+						reportGroup.setParentId(reportId);
 						allReportGroups.add(reportGroup);
 					}
-				}
 
-				List<ReportParameter> allReportParams = new ArrayList<>();
-				for (Report report : reports) {
-					List<ReportParameter> reportParams = reportParameterService.getReportParameters(report.getReportId());
+					List<ReportParameter> reportParams = reportParameterService.getReportParameters(reportId);
 					for (ReportParameter reportParam : reportParams) {
-						reportParam.setParentId(report.getReportId());
+						reportParam.setParentId(reportId);
 						allReportParams.add(reportParam);
+					}
+
+					List<UserRuleValue> userRuleValues = ruleValueService.getReportUserRuleValues(reportId);
+					for (UserRuleValue userRuleValue : userRuleValues) {
+						userRuleValue.setParentId(reportId);
+						allUserRuleValues.add(userRuleValue);
+					}
+
+					List<UserGroupRuleValue> userGroupRuleValues = ruleValueService.getReportUserGroupRuleValues(reportId);
+					for (UserGroupRuleValue userGroupRuleValue : userGroupRuleValues) {
+						userGroupRuleValue.setParentId(reportId);
+						allUserGroupRuleValues.add(userGroupRuleValue);
+					}
+
+					List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+					for (ReportRule reportRule : reportRules) {
+						reportRule.setParentId(reportId);
+						allReportRules.add(reportRule);
 					}
 				}
 
-				if (CollectionUtils.isNotEmpty(allReportGroups) || CollectionUtils.isNotEmpty(allReportParams)) {
+				if (CollectionUtils.isNotEmpty(allReportGroups)
+						|| CollectionUtils.isNotEmpty(allReportParams)
+						|| CollectionUtils.isNotEmpty(allUserRuleValues)
+						|| CollectionUtils.isNotEmpty(allUserGroupRuleValues)
+						|| CollectionUtils.isNotEmpty(allReportRules)) {
 					List<String> filesToZip = new ArrayList<>();
 					filesToZip.add(reportsFilePath);
 
@@ -837,6 +873,15 @@ public class ExportRecordsController {
 
 					String reportParamsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME;
 					File reportParamsFile = new File(reportParamsFilePath);
+
+					String userRuleValuesFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME;
+					File userRuleValuesFile = new File(userRuleValuesFilePath);
+
+					String userGroupRuleValuesFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME;
+					File userGroupRuleValuesFile = new File(userGroupRuleValuesFilePath);
+
+					String reportRulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
+					File reportRulesFile = new File(reportRulesFilePath);
 
 					if (CollectionUtils.isNotEmpty(allReportGroups)) {
 						CsvWriterSettings writerSettings = new CsvWriterSettings();
@@ -854,11 +899,38 @@ public class ExportRecordsController {
 						filesToZip.add(reportParamsFilePath);
 					}
 
+					if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
+						CsvWriterSettings writerSettings = new CsvWriterSettings();
+						writerSettings.setHeaderWritingEnabled(true);
+						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+						csvRoutines2.writeAll(allUserRuleValues, UserRuleValue.class, userRuleValuesFile);
+						filesToZip.add(userRuleValuesFilePath);
+					}
+
+					if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
+						CsvWriterSettings writerSettings = new CsvWriterSettings();
+						writerSettings.setHeaderWritingEnabled(true);
+						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+						csvRoutines2.writeAll(allUserGroupRuleValues, UserGroupRuleValue.class, userGroupRuleValuesFile);
+						filesToZip.add(userGroupRuleValuesFilePath);
+					}
+
+					if (CollectionUtils.isNotEmpty(allReportRules)) {
+						CsvWriterSettings writerSettings = new CsvWriterSettings();
+						writerSettings.setHeaderWritingEnabled(true);
+						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+						csvRoutines2.writeAll(allReportRules, ReportRule.class, reportRulesFile);
+						filesToZip.add(reportRulesFilePath);
+					}
+
 					exportFilePath = recordsExportPath + "art-export-Reports.zip";
 					ArtUtils.zipFiles(exportFilePath, filesToZip);
 					reportsFile.delete();
 					reportGroupsFile.delete();
 					reportParamsFile.delete();
+					userRuleValuesFile.delete();
+					userGroupRuleValuesFile.delete();
+					reportRulesFile.delete();
 				} else {
 					exportFilePath = reportsFilePath;
 				}

@@ -30,6 +30,9 @@ import art.encryption.AesEncryptor;
 import art.migration.PrefixTransformer;
 import art.reportoptions.CloneOptions;
 import art.reportparameter.ReportParameter;
+import art.reportrule.ReportRule;
+import art.ruleValue.UserGroupRuleValue;
+import art.ruleValue.UserRuleValue;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
@@ -160,7 +163,52 @@ public class Report implements Serializable {
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
 	private Encryptor encryptor;
-	private List<ReportParameter> reportParams; //used in import/export
+	private List<ReportParameter> reportParams; //used for import/export
+	private List<UserRuleValue> userRuleValues; //used for import/export
+	private List<UserGroupRuleValue> userGroupRuleValues; //used for import/export
+	private List<ReportRule> reportRules; //used for import/export
+
+	/**
+	 * @return the reportRules
+	 */
+	public List<ReportRule> getReportRules() {
+		return reportRules;
+	}
+
+	/**
+	 * @param reportRules the reportRules to set
+	 */
+	public void setReportRules(List<ReportRule> reportRules) {
+		this.reportRules = reportRules;
+	}
+
+	/**
+	 * @return the userRuleValues
+	 */
+	public List<UserRuleValue> getUserRuleValues() {
+		return userRuleValues;
+	}
+
+	/**
+	 * @param userRuleValues the userRuleValues to set
+	 */
+	public void setUserRuleValues(List<UserRuleValue> userRuleValues) {
+		this.userRuleValues = userRuleValues;
+	}
+
+	/**
+	 * @return the userGroupRuleValues
+	 */
+	public List<UserGroupRuleValue> getUserGroupRuleValues() {
+		return userGroupRuleValues;
+	}
+
+	/**
+	 * @param userGroupRuleValues the userGroupRuleValues to set
+	 */
+	public void setUserGroupRuleValues(List<UserGroupRuleValue> userGroupRuleValues) {
+		this.userGroupRuleValues = userGroupRuleValues;
+	}
 
 	/**
 	 * @return the reportParams

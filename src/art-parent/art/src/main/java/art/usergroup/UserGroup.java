@@ -49,7 +49,7 @@ public class UserGroup implements Serializable {
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "drg")
+	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
 
 	/**

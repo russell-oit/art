@@ -21,6 +21,7 @@ import art.destination.StringToDestination;
 import art.holiday.StringToHoliday;
 import art.report.StringToReport;
 import art.reportgroup.StringToReportGroup;
+import art.rule.StringToRule;
 import art.schedule.StringToSchedule;
 import art.usergroup.StringToUserGroup;
 import art.utils.StringToDouble;
@@ -66,10 +67,10 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToUserGroup stringToUserGroup;
-	
+
 	@Autowired
 	private StringToHoliday stringToHoliday;
-	
+
 	@Autowired
 	private StringToReportGroup stringToReportGroup;
 
@@ -78,13 +79,16 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToDouble stringToDouble;
-	
+
 	@Autowired
 	private StringToSchedule stringToSchedule;
-	
+
 	@Autowired
 	private StringToDestination stringToDestination;
-	
+
+	@Autowired
+	private StringToRule stringToRule;
+
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
 
@@ -195,6 +199,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addConverter(stringToSchedule);
 		registry.addConverter(stringToHoliday);
 		registry.addConverter(stringToDestination);
+		registry.addConverter(stringToRule);
 	}
 
 	@Bean

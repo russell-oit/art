@@ -1,8 +1,8 @@
 /*
  * ART. A Reporting Tool.
- * Copyright (C) 2017 Enrico Liboni <eliboni@users.sf.net>
+ * Copyright (C) 2018 Enrico Liboni <eliboni@users.sf.net>
  *
- * This program is free software: you can redistribute it and/or modify
+ * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -13,9 +13,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.destination;
+package art.rule;
 
 import java.sql.SQLException;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -26,29 +26,29 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 /**
- * Spring converter for string (destination id) to destination object
+ * Spring converter for string (rule id) to rule object
  *
  * @author Timothy Anyona
  */
 @Component
-public class StringToDestination implements Converter<String, Destination> {
+public class StringToRule implements Converter<String, Rule> {
 
-	private static final Logger logger = LoggerFactory.getLogger(StringToDestination.class);
+	private static final Logger logger = LoggerFactory.getLogger(StringToRule.class);
 
 	@Autowired
-	private DestinationService destinationService;
+	private RuleService ruleService;
 
 	@Override
-	public Destination convert(String s) {
+	public Rule convert(String s) {
 		int id = NumberUtils.toInt(s);
 
-		Destination destination = null;
+		Rule rule = null;
 		try {
-			destination = destinationService.getDestination(id);
+			rule = ruleService.getRule(id);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
 
-		return destination;
+		return rule;
 	}
 }

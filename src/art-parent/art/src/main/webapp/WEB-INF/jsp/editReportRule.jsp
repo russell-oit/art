@@ -107,16 +107,14 @@ Edit report rule page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="rule.ruleId">
+					<label class="col-md-4 control-label " for="rule">
 						<spring:message code="page.text.rule"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="rule.ruleId" class="form-control selectpicker">
-							<c:forEach var="rule" items="${rules}">
-								<form:option value="${rule.ruleId}">${rule.name}</form:option>
-							</c:forEach>
+						<form:select path="rule" class="form-control selectpicker">
+							<form:options items="${rules}" itemLabel="name" itemValue="ruleId"/>
 						</form:select>
-						<form:errors path="rule.ruleId" cssClass="error"/>
+						<form:errors path="rule" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

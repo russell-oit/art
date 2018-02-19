@@ -484,7 +484,7 @@ public class UserService {
 			int reportGroupId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-			int userGroupId = dbService.getNewRecordId(sql);
+			int userGroupId = dbService.getMaxRecordId(sql);
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
@@ -596,7 +596,8 @@ public class UserService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveUser(User user, Integer newRecordId,
+	@CacheEvict(value = "users", allEntries = true)
+	public void saveUser(User user, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveUser: user={}, newRecordId={}, actionUser={}",

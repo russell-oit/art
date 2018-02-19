@@ -357,7 +357,7 @@ public class ReportParameterService {
 		}
 
 		sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
-		int reportParamId = dbService.getNewRecordId(sql);
+		int reportParamId = dbService.getMaxRecordId(sql);
 
 		for (Report report : reports) {
 			List<ReportParameter> reportParams = report.getReportParams();

@@ -290,7 +290,7 @@ public class ScheduleService {
 			int scheduleId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(HOLIDAY_ID) FROM ART_HOLIDAYS";
-			int holidayId = dbService.getNewRecordId(sql);
+			int holidayId = dbService.getMaxRecordId(sql);
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);

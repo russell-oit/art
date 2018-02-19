@@ -109,8 +109,8 @@ public class RuleService {
 		ResultSetHandler<List<Rule>> h = new BeanListHandler<>(Rule.class, new RuleMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
-		/**
+
+	/**
 	 * Returns rules with given ids
 	 *
 	 * @param ids comma separated string of the rule ids to retrieve
@@ -143,6 +143,22 @@ public class RuleService {
 		String sql = SQL_SELECT_ALL + " WHERE RULE_ID=?";
 		ResultSetHandler<Rule> h = new BeanHandler<>(Rule.class, new RuleMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Returns a rule
+	 *
+	 * @param name the rule name
+	 * @return rule if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("rules")
+	public Rule getRule(String name) throws SQLException {
+		logger.debug("Entering getRule: name='{}'", name);
+
+		String sql = SQL_SELECT_ALL + " WHERE RULE_NAME=?";
+		ResultSetHandler<Rule> h = new BeanHandler<>(Rule.class, new RuleMapper());
+		return dbService.query(sql, h, name);
 	}
 
 	/**
@@ -272,8 +288,8 @@ public class RuleService {
 		Integer newRecordId = null;
 		saveRule(rule, newRecordId, actionUser);
 	}
-	
-		/**
+
+	/**
 	 * Imports rule records
 	 *
 	 * @param rules the list of rules to import
@@ -335,9 +351,10 @@ public class RuleService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveRule(Rule rule, Integer newRecordId,
+	@CacheEvict(value = "rules", allEntries = true)
+	public void saveRule(Rule rule, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
-		
+
 		logger.debug("Entering saveRule: rule={}, newRecordId={},actionUser={}",
 				rule, newRecordId, actionUser);
 
@@ -351,12 +368,12 @@ public class RuleService {
 		}
 
 		int affectedRows;
-		
+
 		boolean newRecord = false;
 		if (newRecordId != null) {
 			newRecord = true;
 		}
-		
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_RULES"
 					+ " (RULE_ID, RULE_NAME, DESCRIPTION, DATA_TYPE,"
@@ -397,7 +414,7 @@ public class RuleService {
 				affectedRows = dbService.update(conn, sql, values);
 			}
 		}
-		
+
 		if (newRecordId != null) {
 			rule.setRuleId(newRecordId);
 		}
