@@ -17,8 +17,11 @@
  */
 package art.accessright;
 
+import art.migration.PrefixTransformer;
 import art.report.Report;
 import art.user.User;
+import com.univocity.parsers.annotations.Nested;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 
 /**
@@ -29,8 +32,26 @@ import java.io.Serializable;
 public class UserReportRight implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	@Parsed
+	private int parentId; //used for import/export of linked records e.g. reports
+	@Nested(headerTransformer = PrefixTransformer.class, args = "user")
 	private User user;
 	private Report report;
+
+	/**
+	 * @return the parentId
+	 */
+	public int getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 
 	/**
 	 * @return the user

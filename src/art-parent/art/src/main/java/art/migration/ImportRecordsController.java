@@ -17,6 +17,8 @@
  */
 package art.migration;
 
+import art.accessright.UserGroupReportRight;
+import art.accessright.UserReportRight;
 import art.artdatabase.ArtDatabase;
 import art.cache.CacheHelper;
 import art.connectionpool.DbConnections;
@@ -734,7 +736,7 @@ public class ImportRecordsController {
 					}
 				}
 			}
-			
+
 			String reportRulesFileName = artTempPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
 			File reportRulesFile = new File(reportRulesFileName);
 			if (reportRulesFile.exists()) {
@@ -755,12 +757,54 @@ public class ImportRecordsController {
 				}
 			}
 
+			String userReportRightsFileName = artTempPath + ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME;
+			File userReportRightsFile = new File(userReportRightsFileName);
+			if (userReportRightsFile.exists()) {
+				List<UserReportRight> allUserReportRights = csvRoutines.parseAll(UserReportRight.class, userReportRightsFile);
+				for (UserReportRight userReportRight : allUserReportRights) {
+					int parentId = userReportRight.getParentId();
+					Report report = reportsMap.get(parentId);
+					if (report == null) {
+						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+					} else {
+						List<UserReportRight> userReportRights = report.getUserReportRights();
+						if (userReportRights == null) {
+							userReportRights = new ArrayList<>();
+						}
+						userReportRights.add(userReportRight);
+						report.setUserReportRights(userReportRights);
+					}
+				}
+			}
+
+			String userGroupReportRightsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME;
+			File userGroupReportRightsFile = new File(userGroupReportRightsFileName);
+			if (userGroupReportRightsFile.exists()) {
+				List<UserGroupReportRight> allUserGroupReportRights = csvRoutines.parseAll(UserGroupReportRight.class, userGroupReportRightsFile);
+				for (UserGroupReportRight userGroupReportRight : allUserGroupReportRights) {
+					int parentId = userGroupReportRight.getParentId();
+					Report report = reportsMap.get(parentId);
+					if (report == null) {
+						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+					} else {
+						List<UserGroupReportRight> userGroupReportRights = report.getUserGroupReportRights();
+						if (userGroupReportRights == null) {
+							userGroupReportRights = new ArrayList<>();
+						}
+						userGroupReportRights.add(userGroupReportRight);
+						report.setUserGroupReportRights(userGroupReportRights);
+					}
+				}
+			}
+
 			reportsFile.delete();
 			reportGroupsFile.delete();
 			reportParamsFile.delete();
 			userRuleValuesFile.delete();
 			userGroupRuleValuesFile.delete();
 			reportRulesFile.delete();
+			userReportRightsFile.delete();
+			userGroupReportRightsFile.delete();
 		} else {
 			throw new IllegalArgumentException("Unexpected file extension: " + extension);
 		}

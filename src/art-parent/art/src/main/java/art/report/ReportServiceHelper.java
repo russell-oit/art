@@ -17,6 +17,9 @@
  */
 package art.report;
 
+import art.accessright.AccessRightService;
+import art.accessright.UserGroupReportRight;
+import art.accessright.UserReportRight;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
 import art.dbutils.DbService;
@@ -28,8 +31,17 @@ import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.reportparameter.ReportParameterService;
+import art.reportrule.ReportRule;
+import art.reportrule.ReportRuleService;
+import art.rule.Rule;
+import art.rule.RuleService;
 import art.ruleValue.RuleValueService;
+import art.ruleValue.UserGroupRuleValue;
+import art.ruleValue.UserRuleValue;
 import art.user.User;
+import art.user.UserService;
+import art.usergroup.UserGroup;
+import art.usergroup.UserGroupService;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -95,6 +107,11 @@ public class ReportServiceHelper {
 			ReportGroupMembershipService2 reportGroupMembershipService2 = new ReportGroupMembershipService2();
 			ParameterService parameterService = new ParameterService();
 			RuleValueService ruleValueService = new RuleValueService();
+			RuleService ruleService = new RuleService();
+			UserService userService = new UserService();
+			UserGroupService userGroupService = new UserGroupService();
+			ReportRuleService reportRuleService = new ReportRuleService();
+			AccessRightService accessRightService = new AccessRightService();
 
 			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
 			int reportId = dbService.getMaxRecordId(conn, sql);
@@ -219,7 +236,221 @@ public class ReportServiceHelper {
 			}
 
 			reportParameterService.importReportParameters(reports, actionUser, conn);
-			ruleValueService.importRuleValues(reports, actionUser, conn);
+
+			sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
+			int ruleId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(USER_ID) FROM ART_USERS";
+			int userId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
+			int userGroupId = dbService.getMaxRecordId(sql);
+
+			sql = "SELECT MAX(QUERY_RULE_ID) FROM ART_QUERY_RULES";
+			int reportRuleId = dbService.getMaxRecordId(sql);
+
+			List<UserRuleValue> allUserRuleValues = new ArrayList<>();
+			List<UserGroupRuleValue> allUserGroupRuleValues = new ArrayList<>();
+			List<ReportRule> allReportRules = new ArrayList<>();
+			List<UserReportRight> allUserReportRights = new ArrayList<>();
+			List<UserGroupReportRight> allUserGroupReportRights = new ArrayList<>();
+			for (Report report : reports) {
+				List<UserRuleValue> userRuleValues = report.getUserRuleValues();
+				if (CollectionUtils.isNotEmpty(userRuleValues)) {
+					allUserRuleValues.addAll(userRuleValues);
+				}
+
+				List<UserGroupRuleValue> userGroupRuleValues = report.getUserGroupRuleValues();
+				if (CollectionUtils.isNotEmpty(userGroupRuleValues)) {
+					allUserGroupRuleValues.addAll(userGroupRuleValues);
+				}
+
+				List<ReportRule> reportRules = report.getReportRules();
+				if (CollectionUtils.isNotEmpty(reportRules)) {
+					for (ReportRule reportRule : reportRules) {
+						reportRule.setReportId(report.getReportId());
+						allReportRules.add(reportRule);
+					}
+				}
+
+				List<UserReportRight> userReportRights = report.getUserReportRights();
+				if (CollectionUtils.isNotEmpty(userReportRights)) {
+					for (UserReportRight userReportRight : userReportRights) {
+						userReportRight.setReport(report);
+						allUserReportRights.add(userReportRight);
+					}
+				}
+
+				List<UserGroupReportRight> userGroupReportRights = report.getUserGroupReportRights();
+				if (CollectionUtils.isNotEmpty(userGroupReportRights)) {
+					for (UserGroupReportRight userGroupReportRight : userGroupReportRights) {
+						userGroupReportRight.setReport(report);
+						allUserGroupReportRights.add(userGroupReportRight);
+					}
+				}
+			}
+
+			List<Rule> allRules = new ArrayList<>();
+			for (UserRuleValue userRuleValue : allUserRuleValues) {
+				Rule rule = userRuleValue.getRule();
+				allRules.add(rule);
+			}
+
+			for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
+				Rule rule = userGroupRuleValue.getRule();
+				allRules.add(rule);
+			}
+
+			for (ReportRule reportRule : allReportRules) {
+				Rule rule = reportRule.getRule();
+				allRules.add(rule);
+			}
+
+			Map<String, Rule> addedRules = new HashMap<>();
+			for (Rule rule : allRules) {
+				String ruleName = rule.getName();
+				Rule existingRule = ruleService.getRule(ruleName);
+				if (existingRule == null) {
+					Rule addedRule = addedRules.get(ruleName);
+					if (addedRule == null) {
+						ruleId++;
+						ruleService.saveRule(rule, ruleId, actionUser, conn);
+						addedRules.put(ruleName, rule);
+					} else {
+						rule.setRuleId(addedRule.getRuleId());
+					}
+				} else {
+					rule.setRuleId(existingRule.getRuleId());
+				}
+			}
+
+			List<User> allUsers = new ArrayList<>();
+			for (UserRuleValue userRuleValue : allUserRuleValues) {
+				User user = userRuleValue.getUser();
+				allUsers.add(user);
+			}
+
+			for (UserReportRight userReportRight : allUserReportRights) {
+				User user = userReportRight.getUser();
+				allUsers.add(user);
+			}
+
+			Map<String, User> addedUsers = new HashMap<>();
+			for (User user : allUsers) {
+				String username = user.getUsername();
+				User existingUser = userService.getUser(username);
+				if (existingUser == null) {
+					User addedUser = addedUsers.get(username);
+					if (addedUser == null) {
+						userId++;
+						userService.saveUser(user, userId, actionUser, conn);
+						addedUsers.put(username, user);
+					} else {
+						user.setUserId(addedUser.getUserId());
+					}
+				} else {
+					user.setUserId(existingUser.getUserId());
+				}
+			}
+
+			List<UserGroup> allUserGroups = new ArrayList<>();
+			for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
+				UserGroup userGroup = userGroupRuleValue.getUserGroup();
+				allUserGroups.add(userGroup);
+			}
+
+			for (UserGroupReportRight userGroupReportRight : allUserGroupReportRights) {
+				UserGroup userGroup = userGroupReportRight.getUserGroup();
+				allUserGroups.add(userGroup);
+			}
+
+			Map<String, UserGroup> addedUserGroups = new HashMap<>();
+			for (UserGroup userGroup : allUserGroups) {
+				String userGroupName = userGroup.getName();
+				UserGroup existingUserGroup = userGroupService.getUserGroup(userGroupName);
+				if (existingUserGroup == null) {
+					UserGroup addedUserGroup = addedUserGroups.get(userGroupName);
+					if (addedUserGroup == null) {
+						userGroupId++;
+						userGroupService.saveUserGroup(userGroup, userGroupId, actionUser, conn);
+						addedUserGroups.put(userGroupName, userGroup);
+					} else {
+						userGroup.setUserGroupId(addedUserGroup.getUserGroupId());
+					}
+				} else {
+					userGroup.setUserGroupId(existingUserGroup.getUserGroupId());
+				}
+			}
+
+			Map<String, ReportRule> addedReportRules = new HashMap<>();
+			for (ReportRule reportRule : allReportRules) {
+				int tempReportId = reportRule.getReportId();
+				int tempRuleId = reportRule.getRule().getRuleId();
+				String reportRuleKey = tempReportId + "-" + tempRuleId;
+				ReportRule existingReportRule = reportRuleService.getReportRule(tempReportId, tempRuleId);
+				if (existingReportRule == null) {
+					ReportRule addedReportRule = addedReportRules.get(reportRuleKey);
+					if (addedReportRule == null) {
+						reportRuleId++;
+						reportRuleService.saveReportRule(reportRule, reportRuleId, conn);
+						addedReportRules.put(reportRuleKey, reportRule);
+					} else {
+						reportRule.setReportRuleId(addedReportRule.getReportRuleId());
+					}
+				} else {
+					reportRule.setReportRuleId(existingReportRule.getReportRuleId());
+				}
+			}
+
+			for (UserRuleValue userRuleValue : allUserRuleValues) {
+				User user = userRuleValue.getUser();
+				String userKey = user.getUserId() + "-" + user.getUsername();
+				Rule rule = userRuleValue.getRule();
+				String ruleKey = rule.getRuleId() + "-" + rule.getName();
+				String ruleValue = userRuleValue.getRuleValue();
+				String users[] = {userKey};
+				Integer[] userGroups = null;
+				ruleValueService.addRuleValue(users, userGroups, ruleKey, ruleValue, conn);
+			}
+
+			for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
+				UserGroup userGroup = userGroupRuleValue.getUserGroup();
+				Integer tempUserGroupId = userGroup.getUserGroupId();
+				Rule rule = userGroupRuleValue.getRule();
+				String ruleKey = rule.getRuleId() + "-" + rule.getName();
+				String ruleValue = userGroupRuleValue.getRuleValue();
+				String users[] = null;
+				Integer[] userGroups = {tempUserGroupId};
+				ruleValueService.addRuleValue(users, userGroups, ruleKey, ruleValue, conn);
+			}
+
+			for (UserReportRight userReportRight : allUserReportRights) {
+				User user = userReportRight.getUser();
+				String userKey = user.getUserId() + "-" + user.getUsername();
+				Report report = userReportRight.getReport();
+				int tempReportId = report.getReportId();
+				String action = "grant";
+				String users[] = {userKey};
+				Integer[] userGroups = null;
+				Integer[] tempReports = {tempReportId};
+				Integer[] reportGroups = null;
+				Integer[] jobs = null;
+				accessRightService.updateAccessRights(action, users, userGroups, tempReports, reportGroups, jobs);
+			}
+
+			for (UserGroupReportRight userGroupReportRight : allUserGroupReportRights) {
+				UserGroup userGroup = userGroupReportRight.getUserGroup();
+				Integer tempUserGroupId = userGroup.getUserGroupId();
+				Report report = userGroupReportRight.getReport();
+				int tempReportId = report.getReportId();
+				String action = "grant";
+				String users[] = null;
+				Integer[] userGroups = {tempUserGroupId};
+				Integer[] tempReports = {tempReportId};
+				Integer[] reportGroups = null;
+				Integer[] jobs = null;
+				accessRightService.updateAccessRights(action, users, userGroups, tempReports, reportGroups, jobs);
+			}
 
 			if (commit) {
 				conn.commit();

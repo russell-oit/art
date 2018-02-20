@@ -41,6 +41,8 @@ public class ExportRecords implements Serializable {
 	public static final String EMBEDDED_USERRULEVALUES_FILENAME = "art-export-UserRuleValues.csv";
 	public static final String EMBEDDED_USERGROUPRULEVALUES_FILENAME = "art-export-UserGroupRuleValues.csv";
 	public static final String EMBEDDED_REPORTRULES_FILENAME = "art-export-ReportRules.csv";
+	public static final String EMBEDDED_USERREPORTRIGHTS_FILENAME = "art-export-UserReportRights.csv";
+	public static final String EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME = "art-export_UserGroupReportRights.csv";
 
 	private MigrationRecordType recordType;
 	private String ids;

@@ -18,9 +18,6 @@
 package art.ruleValue;
 
 import art.dbutils.DbService;
-import art.report.Report;
-import art.reportrule.ReportRule;
-import art.reportrule.ReportRuleService;
 import art.rule.Rule;
 import art.rule.RuleService;
 import art.user.User;
@@ -33,11 +30,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -64,18 +58,15 @@ public class RuleValueService {
 	private final UserService userService;
 	private final RuleService ruleService;
 	private final UserGroupService userGroupService;
-	private final ReportRuleService reportRuleService;
 
 	@Autowired
 	public RuleValueService(DbService dbService, UserService userService,
-			RuleService ruleService, UserGroupService userGroupService,
-			ReportRuleService reportRuleService) {
+			RuleService ruleService, UserGroupService userGroupService) {
 
 		this.dbService = dbService;
 		this.userService = userService;
 		this.ruleService = ruleService;
 		this.userGroupService = userGroupService;
-		this.reportRuleService = reportRuleService;
 	}
 
 	public RuleValueService() {
@@ -83,7 +74,6 @@ public class RuleValueService {
 		userService = new UserService();
 		ruleService = new RuleService();
 		userGroupService = new UserGroupService();
-		reportRuleService = new ReportRuleService();
 	}
 
 	private final String SQL_SELECT_ALL_USER_RULE_VALUES = "SELECT * FROM ART_USER_RULES AUR";
@@ -465,185 +455,6 @@ public class RuleValueService {
 			finalValues.add(ruleId);
 
 			dbService.update(finalSql, finalValues.toArray());
-		}
-	}
-
-	/**
-	 * Imports rule value records
-	 *
-	 * @param reports the list of reports containing the records to import
-	 * @param actionUser the user who is performing the import
-	 * @param conn the connection to use
-	 * @throws SQLException
-	 */
-	public void importRuleValues(List<Report> reports, User actionUser,
-			Connection conn) throws SQLException {
-
-		logger.debug("Entering importRuleValues: actionUser={}", actionUser);
-
-		String sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
-		int ruleId = dbService.getMaxRecordId(conn, sql);
-
-		sql = "SELECT MAX(USER_ID) FROM ART_USERS";
-		int userId = dbService.getMaxRecordId(conn, sql);
-
-		sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-		int userGroupId = dbService.getMaxRecordId(sql);
-
-		sql = "SELECT MAX(QUERY_RULE_ID) FROM ART_QUERY_RULES";
-		int reportRuleId = dbService.getMaxRecordId(sql);
-
-		List<UserRuleValue> allUserRuleValues = new ArrayList<>();
-		List<UserGroupRuleValue> allUserGroupRuleValues = new ArrayList<>();
-		List<ReportRule> allReportRules = new ArrayList<>();
-		for (Report report : reports) {
-			List<UserRuleValue> userRuleValues = report.getUserRuleValues();
-			if (CollectionUtils.isNotEmpty(userRuleValues)) {
-				allUserRuleValues.addAll(userRuleValues);
-			}
-
-			List<UserGroupRuleValue> userGroupRuleValues = report.getUserGroupRuleValues();
-			if (CollectionUtils.isNotEmpty(userGroupRuleValues)) {
-				allUserGroupRuleValues.addAll(userGroupRuleValues);
-			}
-
-			List<ReportRule> reportRules = report.getReportRules();
-			if (CollectionUtils.isNotEmpty(reportRules)) {
-				for (ReportRule reportRule : reportRules) {
-					reportRule.setReportId(report.getReportId());
-					allReportRules.add(reportRule);
-				}
-			}
-		}
-
-		List<Rule> allRules = new ArrayList<>();
-		if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
-			for (UserRuleValue userRuleValue : allUserRuleValues) {
-				Rule rule = userRuleValue.getRule();
-				allRules.add(rule);
-			}
-		}
-
-		if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
-			for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
-				Rule rule = userGroupRuleValue.getRule();
-				allRules.add(rule);
-			}
-		}
-
-		if (CollectionUtils.isNotEmpty(allReportRules)) {
-			for (ReportRule reportRule : allReportRules) {
-				Rule rule = reportRule.getRule();
-				allRules.add(rule);
-			}
-		}
-
-		Map<String, Rule> addedRules = new HashMap<>();
-		for (Rule rule : allRules) {
-			String ruleName = rule.getName();
-			Rule existingRule = ruleService.getRule(ruleName);
-			if (existingRule == null) {
-				Rule addedRule = addedRules.get(ruleName);
-				if (addedRule == null) {
-					ruleId++;
-					ruleService.saveRule(rule, ruleId, actionUser, conn);
-					addedRules.put(ruleName, rule);
-				} else {
-					rule.setRuleId(addedRule.getRuleId());
-				}
-			} else {
-				rule.setRuleId(existingRule.getRuleId());
-			}
-		}
-
-		if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
-			Map<String, User> addedUsers = new HashMap<>();
-			for (UserRuleValue userRuleValue : allUserRuleValues) {
-				User user = userRuleValue.getUser();
-				String username = user.getUsername();
-				User existingUser = userService.getUser(username);
-				if (existingUser == null) {
-					User addedUser = addedUsers.get(username);
-					if (addedUser == null) {
-						userId++;
-						userService.saveUser(user, userId, actionUser, conn);
-						addedUsers.put(username, user);
-					} else {
-						user.setUserId(addedUser.getUserId());
-					}
-				} else {
-					user.setUserId(existingUser.getUserId());
-				}
-			}
-		}
-
-		if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
-			Map<String, UserGroup> addedUserGroups = new HashMap<>();
-			for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
-				UserGroup userGroup = userGroupRuleValue.getUserGroup();
-				String userGroupName = userGroup.getName();
-				UserGroup existingUserGroup = userGroupService.getUserGroup(userGroupName);
-				if (existingUserGroup == null) {
-					UserGroup addedUserGroup = addedUserGroups.get(userGroupName);
-					if (addedUserGroup == null) {
-						userGroupId++;
-						userGroupService.saveUserGroup(userGroup, userGroupId, actionUser, conn);
-						addedUserGroups.put(userGroupName, userGroup);
-					} else {
-						userGroup.setUserGroupId(addedUserGroup.getUserGroupId());
-					}
-				} else {
-					userGroup.setUserGroupId(existingUserGroup.getUserGroupId());
-				}
-			}
-		}
-
-		if (CollectionUtils.isNotEmpty(allReportRules)) {
-			Map<String, ReportRule> addedReportRules = new HashMap<>();
-			for (ReportRule reportRule : allReportRules) {
-				int reportId = reportRule.getReportId();
-				int tempRuleId = reportRule.getRule().getRuleId();
-				String reportRuleKey = reportId + "-" + tempRuleId;
-				ReportRule existingReportRule = reportRuleService.getReportRule(reportId, tempRuleId);
-				if (existingReportRule == null) {
-					ReportRule addedReportRule = addedReportRules.get(reportRuleKey);
-					if (addedReportRule == null) {
-						reportRuleId++;
-						reportRuleService.saveReportRule(reportRule, reportRuleId, conn);
-						addedReportRules.put(reportRuleKey, reportRule);
-					} else {
-						reportRule.setReportRuleId(addedReportRule.getReportRuleId());
-					}
-				} else {
-					reportRule.setReportRuleId(existingReportRule.getReportRuleId());
-				}
-			}
-		}
-
-		if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
-			for (UserRuleValue userRuleValue : allUserRuleValues) {
-				User user = userRuleValue.getUser();
-				String userKey = user.getUserId() + "-" + user.getUsername();
-				Rule rule = userRuleValue.getRule();
-				String ruleKey = rule.getRuleId() + "-" + rule.getName();
-				String ruleValue = userRuleValue.getRuleValue();
-				String users[] = {userKey};
-				Integer[] userGroups = null;
-				addRuleValue(users, userGroups, ruleKey, ruleValue, conn);
-			}
-		}
-
-		if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
-			for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
-				UserGroup userGroup = userGroupRuleValue.getUserGroup();
-				Integer tempUserGroupId = userGroup.getUserGroupId();
-				Rule rule = userGroupRuleValue.getRule();
-				String ruleKey = rule.getRuleId() + "-" + rule.getName();
-				String ruleValue = userGroupRuleValue.getRuleValue();
-				String users[] = null;
-				Integer[] userGroups = {tempUserGroupId};
-				addRuleValue(users, userGroups, ruleKey, ruleValue, conn);
-			}
 		}
 	}
 

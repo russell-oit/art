@@ -17,6 +17,8 @@
  */
 package art.report;
 
+import art.accessright.UserGroupReportRight;
+import art.accessright.UserReportRight;
 import art.datasource.Datasource;
 import art.encryptor.Encryptor;
 import art.enums.EncryptorType;
@@ -163,10 +165,40 @@ public class Report implements Serializable {
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
 	private Encryptor encryptor;
-	private List<ReportParameter> reportParams; //used for import/export
-	private List<UserRuleValue> userRuleValues; //used for import/export
-	private List<UserGroupRuleValue> userGroupRuleValues; //used for import/export
-	private List<ReportRule> reportRules; //used for import/export
+	private List<ReportParameter> reportParams; //used in import/export
+	private List<UserRuleValue> userRuleValues; //used in import/export
+	private List<UserGroupRuleValue> userGroupRuleValues; //used in import/export
+	private List<ReportRule> reportRules; //used in import/export
+	private List<UserReportRight> userReportRights; //used in import/export
+	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
+
+	/**
+	 * @return the userReportRights
+	 */
+	public List<UserReportRight> getUserReportRights() {
+		return userReportRights;
+	}
+
+	/**
+	 * @param userReportRights the userReportRights to set
+	 */
+	public void setUserReportRights(List<UserReportRight> userReportRights) {
+		this.userReportRights = userReportRights;
+	}
+
+	/**
+	 * @return the userGroupReportRights
+	 */
+	public List<UserGroupReportRight> getUserGroupReportRights() {
+		return userGroupReportRights;
+	}
+
+	/**
+	 * @param userGroupReportRights the userGroupReportRights to set
+	 */
+	public void setUserGroupReportRights(List<UserGroupReportRight> userGroupReportRights) {
+		this.userGroupReportRights = userGroupReportRights;
+	}
 
 	/**
 	 * @return the reportRules

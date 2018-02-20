@@ -17,6 +17,9 @@
  */
 package art.migration;
 
+import art.accessright.AccessRightService;
+import art.accessright.UserGroupReportRight;
+import art.accessright.UserReportRight;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
@@ -143,6 +146,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private ReportRuleService reportRuleService;
+
+	@Autowired
+	private AccessRightService accessRightService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -826,6 +832,8 @@ public class ExportRecordsController {
 				List<UserRuleValue> allUserRuleValues = new ArrayList<>();
 				List<UserGroupRuleValue> allUserGroupRuleValues = new ArrayList<>();
 				List<ReportRule> allReportRules = new ArrayList<>();
+				List<UserReportRight> allUserReportRights = new ArrayList<>();
+				List<UserGroupReportRight> allUserGroupReportRights = new ArrayList<>();
 				for (Report report : reports) {
 					int reportId = report.getReportId();
 
@@ -858,13 +866,27 @@ public class ExportRecordsController {
 						reportRule.setParentId(reportId);
 						allReportRules.add(reportRule);
 					}
+
+					List<UserReportRight> userReportRights = accessRightService.getUserReportRightsForReport(reportId);
+					for (UserReportRight userReportRight : userReportRights) {
+						userReportRight.setParentId(reportId);
+						allUserReportRights.add(userReportRight);
+					}
+
+					List<UserGroupReportRight> userGroupReportRights = accessRightService.getUserGroupReportRightsForReport(reportId);
+					for (UserGroupReportRight userGroupReportRight : userGroupReportRights) {
+						userGroupReportRight.setParentId(reportId);
+						allUserGroupReportRights.add(userGroupReportRight);
+					}
 				}
 
 				if (CollectionUtils.isNotEmpty(allReportGroups)
 						|| CollectionUtils.isNotEmpty(allReportParams)
 						|| CollectionUtils.isNotEmpty(allUserRuleValues)
 						|| CollectionUtils.isNotEmpty(allUserGroupRuleValues)
-						|| CollectionUtils.isNotEmpty(allReportRules)) {
+						|| CollectionUtils.isNotEmpty(allReportRules)
+						|| CollectionUtils.isNotEmpty(allUserReportRights)
+						|| CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
 					List<String> filesToZip = new ArrayList<>();
 					filesToZip.add(reportsFilePath);
 
@@ -882,6 +904,12 @@ public class ExportRecordsController {
 
 					String reportRulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
 					File reportRulesFile = new File(reportRulesFilePath);
+					
+					String userReportRightsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME;
+					File userReportRightsFile = new File(userReportRightsFilePath);
+					
+					String userGroupReportRightsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME;
+					File userGroupReportRightsFile = new File(userGroupReportRightsFilePath);
 
 					if (CollectionUtils.isNotEmpty(allReportGroups)) {
 						CsvWriterSettings writerSettings = new CsvWriterSettings();
@@ -922,6 +950,22 @@ public class ExportRecordsController {
 						csvRoutines2.writeAll(allReportRules, ReportRule.class, reportRulesFile);
 						filesToZip.add(reportRulesFilePath);
 					}
+					
+					if (CollectionUtils.isNotEmpty(allUserReportRights)) {
+						CsvWriterSettings writerSettings = new CsvWriterSettings();
+						writerSettings.setHeaderWritingEnabled(true);
+						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+						csvRoutines2.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
+						filesToZip.add(userReportRightsFilePath);
+					}
+					
+					if (CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
+						CsvWriterSettings writerSettings = new CsvWriterSettings();
+						writerSettings.setHeaderWritingEnabled(true);
+						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+						csvRoutines2.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
+						filesToZip.add(userGroupReportRightsFilePath);
+					}
 
 					exportFilePath = recordsExportPath + "art-export-Reports.zip";
 					ArtUtils.zipFiles(exportFilePath, filesToZip);
@@ -931,6 +975,8 @@ public class ExportRecordsController {
 					userRuleValuesFile.delete();
 					userGroupRuleValuesFile.delete();
 					reportRulesFile.delete();
+					userReportRightsFile.delete();
+					userGroupReportRightsFile.delete();
 				} else {
 					exportFilePath = reportsFilePath;
 				}
