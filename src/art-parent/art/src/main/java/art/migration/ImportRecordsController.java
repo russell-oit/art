@@ -27,6 +27,7 @@ import art.datasource.DatasourceService;
 import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
 import art.destination.DestinationService;
+import art.drilldown.Drilldown;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.MigrationRecordType;
@@ -797,6 +798,52 @@ public class ImportRecordsController {
 				}
 			}
 
+			String drilldownsFileName = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME;
+			File drilldownsFile = new File(drilldownsFileName);
+			String drilldownReportParamsFileName = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME;
+			File drilldownReportParamsFile = new File(drilldownReportParamsFileName);
+			if (drilldownsFile.exists()) {
+				List<Drilldown> allDrilldowns = csvRoutines.parseAll(Drilldown.class, drilldownsFile);
+				for (Drilldown drilldown : allDrilldowns) {
+					int parentId = drilldown.getParentId();
+					Report report = reportsMap.get(parentId);
+					if (report == null) {
+						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+					} else {
+						List<Drilldown> drilldowns = report.getDrilldowns();
+						if (drilldowns == null) {
+							drilldowns = new ArrayList<>();
+						}
+						drilldowns.add(drilldown);
+						report.setDrilldowns(drilldowns);
+					}
+				}
+
+				if (drilldownReportParamsFile.exists()) {
+					Map<Integer, Report> drilldownReportsMap = new HashMap<>();
+					for (Drilldown drilldown : allDrilldowns) {
+						Report drilldownReport = drilldown.getDrilldownReport();
+						drilldownReportsMap.put(drilldownReport.getReportId(), drilldownReport);
+					}
+
+					List<ReportParameter> allDrilldownReportParams = csvRoutines.parseAll(ReportParameter.class, drilldownReportParamsFile);
+					for (ReportParameter drilldownReportParam : allDrilldownReportParams) {
+						int parentId = drilldownReportParam.getParentId();
+						Report drilldownReport = drilldownReportsMap.get(parentId);
+						if (drilldownReport == null) {
+							throw new IllegalStateException("Drilldown report not found. Parent Id = " + parentId);
+						} else {
+							List<ReportParameter> reportParams = drilldownReport.getReportParams();
+							if (reportParams == null) {
+								reportParams = new ArrayList<>();
+							}
+							reportParams.add(drilldownReportParam);
+							drilldownReport.setReportParams(reportParams);
+						}
+					}
+				}
+			}
+
 			reportsFile.delete();
 			reportGroupsFile.delete();
 			reportParamsFile.delete();
@@ -805,6 +852,8 @@ public class ImportRecordsController {
 			reportRulesFile.delete();
 			userReportRightsFile.delete();
 			userGroupReportRightsFile.delete();
+			drilldownsFile.delete();
+			drilldownReportParamsFile.delete();
 		} else {
 			throw new IllegalArgumentException("Unexpected file extension: " + extension);
 		}

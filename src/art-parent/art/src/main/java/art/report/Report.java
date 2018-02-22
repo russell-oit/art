@@ -20,6 +20,7 @@ package art.report;
 import art.accessright.UserGroupReportRight;
 import art.accessright.UserReportRight;
 import art.datasource.Datasource;
+import art.drilldown.Drilldown;
 import art.encryptor.Encryptor;
 import art.enums.EncryptorType;
 import art.enums.PageOrientation;
@@ -171,6 +172,21 @@ public class Report implements Serializable {
 	private List<ReportRule> reportRules; //used in import/export
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
+	private List<Drilldown> drilldowns; //used in import/export
+
+	/**
+	 * @return the drilldowns
+	 */
+	public List<Drilldown> getDrilldowns() {
+		return drilldowns;
+	}
+
+	/**
+	 * @param drilldowns the drilldowns to set
+	 */
+	public void setDrilldowns(List<Drilldown> drilldowns) {
+		this.drilldowns = drilldowns;
+	}
 
 	/**
 	 * @return the userReportRights

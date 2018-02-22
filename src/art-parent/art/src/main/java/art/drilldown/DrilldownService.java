@@ -19,6 +19,8 @@ package art.drilldown;
 
 import art.dbutils.DbService;
 import art.report.Report;
+import art.report.ReportService;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Provides methods for retrieveing, adding, updating and deleting drilldowns
+ * Provides methods for retrieving, adding, updating and deleting drilldowns
  *
  * @author Timothy Anyona
  */
@@ -45,21 +47,20 @@ public class DrilldownService {
 	private static final Logger logger = LoggerFactory.getLogger(DrilldownService.class);
 
 	private final DbService dbService;
+	private final ReportService reportService;
 
 	@Autowired
-	public DrilldownService(DbService dbService) {
+	public DrilldownService(DbService dbService, ReportService reportService) {
 		this.dbService = dbService;
+		this.reportService = reportService;
 	}
 
 	public DrilldownService() {
 		dbService = new DbService();
+		reportService = new ReportService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT ADQ.*,"
-			+ " AQ.NAME AS DRILLDOWN_REPORT_NAME"
-			+ " FROM ART_DRILLDOWN_QUERIES ADQ"
-			+ " INNER JOIN ART_QUERIES AQ ON"
-			+ " ADQ.DRILLDOWN_QUERY_ID=AQ.QUERY_ID";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_DRILLDOWN_QUERIES ADQ";
 
 	/**
 	 * Maps a resultset to an object
@@ -88,9 +89,7 @@ public class DrilldownService {
 
 			drilldown.setParentReportId(rs.getInt("QUERY_ID"));
 
-			Report drilldownReport = new Report();
-			drilldownReport.setReportId(rs.getInt("DRILLDOWN_QUERY_ID"));
-			drilldownReport.setName(rs.getString("DRILLDOWN_REPORT_NAME"));
+			Report drilldownReport = reportService.getReport(rs.getInt("DRILLDOWN_QUERY_ID"));
 			drilldown.setDrilldownReport(drilldownReport);
 
 			return type.cast(drilldown);
@@ -179,12 +178,10 @@ public class DrilldownService {
 				+ " WHERE QUERY_ID=?";
 		int newPosition = dbService.getNewRecordId(sql, parentReportId);
 
-		drilldown.setDrilldownId(newId);
 		drilldown.setPosition(newPosition);
 		drilldown.setParentReportId(parentReportId);
 
-		boolean newRecord = true;
-		saveDrilldown(drilldown, newRecord);
+		saveDrilldown(drilldown, newId);
 
 		return newId;
 	}
@@ -198,21 +195,69 @@ public class DrilldownService {
 	public void updateDrilldown(Drilldown drilldown) throws SQLException {
 		logger.debug("Entering updateDrilldown: drilldown={}", drilldown);
 
-		boolean newRecord = false;
-		saveDrilldown(drilldown, newRecord);
+		Integer newRecordId = null;
+		saveDrilldown(drilldown, newRecordId);
+	}
+
+	/**
+	 * Imports drilldown records
+	 *
+	 * @param drilldowns the drilldowns to import
+	 * @param conn the connection to use. if autocommit is false, no commit is
+	 * performed
+	 * @throws SQLException
+	 */
+	public void importDrilldowns(List<Drilldown> drilldowns, Connection conn) throws SQLException {
+		logger.debug("Entering importDrilldowns");
+
+		if (drilldowns == null) {
+			return;
+		}
+
+		String sql = "SELECT MAX(DRILLDOWN_ID) FROM ART_DRILLDOWN_QUERIES";
+		int drilldownId = dbService.getMaxRecordId(sql);
+
+		for (Drilldown drilldown : drilldowns) {
+			drilldownId++;
+			saveDrilldown(drilldown, drilldownId, conn);
+		}
 	}
 
 	/**
 	 * Saves a drilldown
 	 *
 	 * @param drilldown the drilldown to save
-	 * @param newRecord whether this is a new drilldown
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
 	 * @throws SQLException
 	 */
-	private void saveDrilldown(Drilldown drilldown, boolean newRecord) throws SQLException {
-		logger.debug("Entering saveDrilldown: drilldown={}, newRecord={}", drilldown, newRecord);
+	private void saveDrilldown(Drilldown drilldown, Integer newRecordId) throws SQLException {
+		Connection conn = null;
+		saveDrilldown(drilldown, newRecordId, conn);
+
+	}
+
+	/**
+	 * Saves a drilldown
+	 *
+	 * @param drilldown the drilldown to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param conn the connection to use. if null, the art database will be used
+	 * @throws SQLException
+	 */
+	private void saveDrilldown(Drilldown drilldown, Integer newRecordId,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering saveDrilldown: drilldown={}, newRecordId={}", drilldown, newRecordId);
 
 		int affectedRows;
+
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_DRILLDOWN_QUERIES"
 					+ " (DRILLDOWN_ID, QUERY_ID, DRILLDOWN_QUERY_ID, DRILLDOWN_QUERY_POSITION,"
@@ -230,7 +275,11 @@ public class DrilldownService {
 				BooleanUtils.toInteger(drilldown.isOpenInNewWindow())
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_DRILLDOWN_QUERIES SET QUERY_ID=?, DRILLDOWN_QUERY_ID=?,"
 					+ " DRILLDOWN_QUERY_POSITION=?, DRILLDOWN_TITLE=?, DRILLDOWN_TEXT=?,"
@@ -248,7 +297,15 @@ public class DrilldownService {
 				drilldown.getDrilldownId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
+		}
+
+		if (newRecordId != null) {
+			drilldown.setDrilldownId(newRecordId);
 		}
 
 		logger.debug("affectedRows={}", affectedRows);

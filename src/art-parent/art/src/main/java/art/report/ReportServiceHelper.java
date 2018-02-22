@@ -23,6 +23,8 @@ import art.accessright.UserReportRight;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
 import art.dbutils.DbService;
+import art.drilldown.Drilldown;
+import art.drilldown.DrilldownService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.parameter.Parameter;
@@ -112,6 +114,7 @@ public class ReportServiceHelper {
 			UserGroupService userGroupService = new UserGroupService();
 			ReportRuleService reportRuleService = new ReportRuleService();
 			AccessRightService accessRightService = new AccessRightService();
+			DrilldownService drilldownService = new DrilldownService();
 
 			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
 			int reportId = dbService.getMaxRecordId(conn, sql);
@@ -144,8 +147,19 @@ public class ReportServiceHelper {
 					}
 				}
 			}
-
 			reports.addAll(parameterReports);
+
+			List<Report> drilldownReports = new ArrayList<>();
+			for (Report report : reports) {
+				List<Drilldown> drilldowns = report.getDrilldowns();
+				if (CollectionUtils.isNotEmpty(drilldowns)) {
+					for (Drilldown drilldown : drilldowns) {
+						Report drilldownReport = drilldown.getDrilldownReport();
+						drilldownReports.add(drilldownReport);
+					}
+				}
+			}
+			reports.addAll(drilldownReports);
 
 			for (Report report : reports) {
 				String reportName = report.getName();
@@ -236,6 +250,19 @@ public class ReportServiceHelper {
 			}
 
 			reportParameterService.importReportParameters(reports, actionUser, conn);
+
+			List<Drilldown> allDrilldowns = new ArrayList<>();
+			for (Report report : reports) {
+				int tempReportId = report.getReportId();
+				List<Drilldown> drilldowns = report.getDrilldowns();
+				if (CollectionUtils.isNotEmpty(drilldowns)) {
+					for (Drilldown drilldown : drilldowns) {
+						drilldown.setParentReportId(tempReportId);
+					}
+					allDrilldowns.addAll(drilldowns);
+				}
+			}
+			drilldownService.importDrilldowns(allDrilldowns, conn);
 
 			sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
 			int ruleId = dbService.getMaxRecordId(conn, sql);

@@ -26,6 +26,8 @@ import art.datasource.DatasourceService;
 import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
 import art.destination.DestinationService;
+import art.drilldown.Drilldown;
+import art.drilldown.DrilldownService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.MigrationLocation;
@@ -149,6 +151,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private AccessRightService accessRightService;
+
+	@Autowired
+	private DrilldownService drilldownService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -834,6 +839,7 @@ public class ExportRecordsController {
 				List<ReportRule> allReportRules = new ArrayList<>();
 				List<UserReportRight> allUserReportRights = new ArrayList<>();
 				List<UserGroupReportRight> allUserGroupReportRights = new ArrayList<>();
+				List<Drilldown> allDrilldowns = new ArrayList<>();
 				for (Report report : reports) {
 					int reportId = report.getReportId();
 
@@ -878,6 +884,12 @@ public class ExportRecordsController {
 						userGroupReportRight.setParentId(reportId);
 						allUserGroupReportRights.add(userGroupReportRight);
 					}
+
+					List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+					for (Drilldown drilldown : drilldowns) {
+						drilldown.setParentId(reportId);
+						allDrilldowns.add(drilldown);
+					}
 				}
 
 				if (CollectionUtils.isNotEmpty(allReportGroups)
@@ -886,7 +898,8 @@ public class ExportRecordsController {
 						|| CollectionUtils.isNotEmpty(allUserGroupRuleValues)
 						|| CollectionUtils.isNotEmpty(allReportRules)
 						|| CollectionUtils.isNotEmpty(allUserReportRights)
-						|| CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
+						|| CollectionUtils.isNotEmpty(allUserGroupReportRights)
+						|| CollectionUtils.isNotEmpty(allDrilldowns)) {
 					List<String> filesToZip = new ArrayList<>();
 					filesToZip.add(reportsFilePath);
 
@@ -904,12 +917,18 @@ public class ExportRecordsController {
 
 					String reportRulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
 					File reportRulesFile = new File(reportRulesFilePath);
-					
+
 					String userReportRightsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME;
 					File userReportRightsFile = new File(userReportRightsFilePath);
-					
+
 					String userGroupReportRightsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME;
 					File userGroupReportRightsFile = new File(userGroupReportRightsFilePath);
+
+					String drilldownsFilePath = recordsExportPath + ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME;
+					File drilldownsFile = new File(drilldownsFilePath);
+
+					String drilldownReportParamsFilePath = recordsExportPath + ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME;
+					File drilldownReportParamsFile = new File(drilldownReportParamsFilePath);
 
 					if (CollectionUtils.isNotEmpty(allReportGroups)) {
 						CsvWriterSettings writerSettings = new CsvWriterSettings();
@@ -950,7 +969,7 @@ public class ExportRecordsController {
 						csvRoutines2.writeAll(allReportRules, ReportRule.class, reportRulesFile);
 						filesToZip.add(reportRulesFilePath);
 					}
-					
+
 					if (CollectionUtils.isNotEmpty(allUserReportRights)) {
 						CsvWriterSettings writerSettings = new CsvWriterSettings();
 						writerSettings.setHeaderWritingEnabled(true);
@@ -958,13 +977,40 @@ public class ExportRecordsController {
 						csvRoutines2.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
 						filesToZip.add(userReportRightsFilePath);
 					}
-					
+
 					if (CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
 						CsvWriterSettings writerSettings = new CsvWriterSettings();
 						writerSettings.setHeaderWritingEnabled(true);
 						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
 						csvRoutines2.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
 						filesToZip.add(userGroupReportRightsFilePath);
+					}
+
+					if (CollectionUtils.isNotEmpty(allDrilldowns)) {
+						CsvWriterSettings writerSettings = new CsvWriterSettings();
+						writerSettings.setHeaderWritingEnabled(true);
+						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
+						csvRoutines2.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
+						filesToZip.add(drilldownsFilePath);
+
+						List<ReportParameter> allDrilldownReportParams = new ArrayList<>();
+						for (Drilldown drilldown : allDrilldowns) {
+							Report drilldownReport = drilldown.getDrilldownReport();
+							int drilldownReportId = drilldownReport.getReportId();
+							List<ReportParameter> drilldownReportParams = reportParameterService.getReportParameters(drilldownReportId);
+							for (ReportParameter drilldownReportParam : drilldownReportParams) {
+								drilldownReportParam.setParentId(drilldownReportId);
+								allDrilldownReportParams.add(drilldownReportParam);
+							}
+						}
+
+						if (CollectionUtils.isNotEmpty(allDrilldownReportParams)) {
+							CsvWriterSettings writerSettings2 = new CsvWriterSettings();
+							writerSettings2.setHeaderWritingEnabled(true);
+							CsvRoutines csvRoutines3 = new CsvRoutines(writerSettings2);
+							csvRoutines3.writeAll(allDrilldownReportParams, ReportParameter.class, drilldownReportParamsFile);
+							filesToZip.add(drilldownReportParamsFilePath);
+						}
 					}
 
 					exportFilePath = recordsExportPath + "art-export-Reports.zip";
@@ -977,6 +1023,8 @@ public class ExportRecordsController {
 					reportRulesFile.delete();
 					userReportRightsFile.delete();
 					userGroupReportRightsFile.delete();
+					drilldownsFile.delete();
+					drilldownReportParamsFile.delete();
 				} else {
 					exportFilePath = reportsFilePath;
 				}
