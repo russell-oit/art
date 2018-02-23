@@ -824,6 +824,86 @@ public class ExportRecordsController {
 			report.encryptPasswords();
 		}
 
+		List<ReportGroup> allReportGroups = new ArrayList<>();
+		List<ReportParameter> allReportParams = new ArrayList<>();
+		List<UserRuleValue> allUserRuleValues = new ArrayList<>();
+		List<UserGroupRuleValue> allUserGroupRuleValues = new ArrayList<>();
+		List<ReportRule> allReportRules = new ArrayList<>();
+		List<UserReportRight> allUserReportRights = new ArrayList<>();
+		List<UserGroupReportRight> allUserGroupReportRights = new ArrayList<>();
+		List<Drilldown> allDrilldowns = new ArrayList<>();
+		for (Report report : reports) {
+			int reportId = report.getReportId();
+
+			List<ReportGroup> reportGroups = report.getReportGroups();
+			for (ReportGroup reportGroup : reportGroups) {
+				reportGroup.setParentId(reportId);
+				allReportGroups.add(reportGroup);
+			}
+
+			List<ReportParameter> reportParams = reportParameterService.getReportParameters(reportId);
+			report.setReportParams(reportParams);
+			for (ReportParameter reportParam : reportParams) {
+				reportParam.setParentId(reportId);
+				allReportParams.add(reportParam);
+			}
+
+			List<UserRuleValue> userRuleValues = ruleValueService.getReportUserRuleValues(reportId);
+			report.setUserRuleValues(userRuleValues);
+			for (UserRuleValue userRuleValue : userRuleValues) {
+				userRuleValue.setParentId(reportId);
+				allUserRuleValues.add(userRuleValue);
+			}
+
+			List<UserGroupRuleValue> userGroupRuleValues = ruleValueService.getReportUserGroupRuleValues(reportId);
+			report.setUserGroupRuleValues(userGroupRuleValues);
+			for (UserGroupRuleValue userGroupRuleValue : userGroupRuleValues) {
+				userGroupRuleValue.setParentId(reportId);
+				allUserGroupRuleValues.add(userGroupRuleValue);
+			}
+
+			List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+			report.setReportRules(reportRules);
+			for (ReportRule reportRule : reportRules) {
+				reportRule.setParentId(reportId);
+				allReportRules.add(reportRule);
+			}
+
+			List<UserReportRight> userReportRights = accessRightService.getUserReportRightsForReport(reportId);
+			report.setUserReportRights(userReportRights);
+			for (UserReportRight userReportRight : userReportRights) {
+				userReportRight.setParentId(reportId);
+				allUserReportRights.add(userReportRight);
+			}
+
+			List<UserGroupReportRight> userGroupReportRights = accessRightService.getUserGroupReportRightsForReport(reportId);
+			report.setUserGroupReportRights(userGroupReportRights);
+			for (UserGroupReportRight userGroupReportRight : userGroupReportRights) {
+				userGroupReportRight.setParentId(reportId);
+				allUserGroupReportRights.add(userGroupReportRight);
+			}
+
+			List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+			report.setDrilldowns(drilldowns);
+			for (Drilldown drilldown : drilldowns) {
+				drilldown.setParentId(reportId);
+				allDrilldowns.add(drilldown);
+			}
+		}
+
+		List<ReportParameter> allDrilldownReportParams = new ArrayList<>();
+		if (CollectionUtils.isNotEmpty(allDrilldowns)) {
+			for (Drilldown drilldown : allDrilldowns) {
+				Report drilldownReport = drilldown.getDrilldownReport();
+				int drilldownReportId = drilldownReport.getReportId();
+				List<ReportParameter> drilldownReportParams = reportParameterService.getReportParameters(drilldownReportId);
+				for (ReportParameter drilldownReportParam : drilldownReportParams) {
+					drilldownReportParam.setParentId(drilldownReportId);
+					allDrilldownReportParams.add(drilldownReportParam);
+				}
+			}
+		}
+
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
@@ -831,66 +911,6 @@ public class ExportRecordsController {
 				String reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
 				File reportsFile = new File(reportsFilePath);
 				csvRoutines.writeAll(reports, Report.class, reportsFile);
-
-				List<ReportGroup> allReportGroups = new ArrayList<>();
-				List<ReportParameter> allReportParams = new ArrayList<>();
-				List<UserRuleValue> allUserRuleValues = new ArrayList<>();
-				List<UserGroupRuleValue> allUserGroupRuleValues = new ArrayList<>();
-				List<ReportRule> allReportRules = new ArrayList<>();
-				List<UserReportRight> allUserReportRights = new ArrayList<>();
-				List<UserGroupReportRight> allUserGroupReportRights = new ArrayList<>();
-				List<Drilldown> allDrilldowns = new ArrayList<>();
-				for (Report report : reports) {
-					int reportId = report.getReportId();
-
-					List<ReportGroup> reportGroups = report.getReportGroups();
-					for (ReportGroup reportGroup : reportGroups) {
-						reportGroup.setParentId(reportId);
-						allReportGroups.add(reportGroup);
-					}
-
-					List<ReportParameter> reportParams = reportParameterService.getReportParameters(reportId);
-					for (ReportParameter reportParam : reportParams) {
-						reportParam.setParentId(reportId);
-						allReportParams.add(reportParam);
-					}
-
-					List<UserRuleValue> userRuleValues = ruleValueService.getReportUserRuleValues(reportId);
-					for (UserRuleValue userRuleValue : userRuleValues) {
-						userRuleValue.setParentId(reportId);
-						allUserRuleValues.add(userRuleValue);
-					}
-
-					List<UserGroupRuleValue> userGroupRuleValues = ruleValueService.getReportUserGroupRuleValues(reportId);
-					for (UserGroupRuleValue userGroupRuleValue : userGroupRuleValues) {
-						userGroupRuleValue.setParentId(reportId);
-						allUserGroupRuleValues.add(userGroupRuleValue);
-					}
-
-					List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
-					for (ReportRule reportRule : reportRules) {
-						reportRule.setParentId(reportId);
-						allReportRules.add(reportRule);
-					}
-
-					List<UserReportRight> userReportRights = accessRightService.getUserReportRightsForReport(reportId);
-					for (UserReportRight userReportRight : userReportRights) {
-						userReportRight.setParentId(reportId);
-						allUserReportRights.add(userReportRight);
-					}
-
-					List<UserGroupReportRight> userGroupReportRights = accessRightService.getUserGroupReportRightsForReport(reportId);
-					for (UserGroupReportRight userGroupReportRight : userGroupReportRights) {
-						userGroupReportRight.setParentId(reportId);
-						allUserGroupReportRights.add(userGroupReportRight);
-					}
-
-					List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
-					for (Drilldown drilldown : drilldowns) {
-						drilldown.setParentId(reportId);
-						allDrilldowns.add(drilldown);
-					}
-				}
 
 				if (CollectionUtils.isNotEmpty(allReportGroups)
 						|| CollectionUtils.isNotEmpty(allReportParams)
@@ -992,17 +1012,6 @@ public class ExportRecordsController {
 						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
 						csvRoutines2.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
 						filesToZip.add(drilldownsFilePath);
-
-						List<ReportParameter> allDrilldownReportParams = new ArrayList<>();
-						for (Drilldown drilldown : allDrilldowns) {
-							Report drilldownReport = drilldown.getDrilldownReport();
-							int drilldownReportId = drilldownReport.getReportId();
-							List<ReportParameter> drilldownReportParams = reportParameterService.getReportParameters(drilldownReportId);
-							for (ReportParameter drilldownReportParam : drilldownReportParams) {
-								drilldownReportParam.setParentId(drilldownReportId);
-								allDrilldownReportParams.add(drilldownReportParam);
-							}
-						}
 
 						if (CollectionUtils.isNotEmpty(allDrilldownReportParams)) {
 							CsvWriterSettings writerSettings2 = new CsvWriterSettings();
