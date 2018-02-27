@@ -840,9 +840,13 @@ public class ReportOutputGenerator {
 					request.setAttribute("dataFileName", dataFileName);
 				}
 
+				String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
+				String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
 				String languageTag = locale.toLanguageTag();
-				request.setAttribute("languageTag", languageTag);
 				String localeString = locale.toString();
+				request.setAttribute("outputDivId", outputDivId);
+				request.setAttribute("tableId", tableId);
+				request.setAttribute("languageTag", languageTag);
 				request.setAttribute("locale", localeString);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 			} else if (reportType == ReportType.FixedWidth) {
