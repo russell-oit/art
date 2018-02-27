@@ -1058,6 +1058,8 @@ public class ReportOutputGenerator {
 					}
 				}
 
+				String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("containerId", containerId);
 				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
