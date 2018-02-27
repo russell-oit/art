@@ -605,6 +605,8 @@ public class ReportOutputGenerator {
 					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
+				String outputDivId = "reactPivotOutput-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("outputDivId", outputDivId);
 				request.setAttribute("templateFileName", templateFileName);
 				request.setAttribute("rows", jsonData);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);

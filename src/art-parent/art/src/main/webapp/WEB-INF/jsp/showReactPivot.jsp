@@ -7,7 +7,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
-<div id="reactPivotOutput">
+<div id="${outputDivId}">
 
 </div>
 <br>
@@ -29,5 +29,5 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
 
 <script type="text/javascript">
-	ReactPivot(document.getElementById('reactPivotOutput'), options);
+	ReactPivot(document.getElementById('${outputDivId}'), options);
 </script>
