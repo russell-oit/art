@@ -8,7 +8,7 @@
 <%@page trimDirectiveWhitespaces="true" %>
 
 
-<canvas id="chart" width="${options.width}" height="${options.height}">
+<canvas id="${chartId}" width="${options.width}" height="${options.height}">
 
 </canvas>
 
@@ -27,6 +27,6 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
 
 <script type="text/javascript">
-	var ctx = $("#chart");
+	var ctx = $("#${chartId}");
 	new Chart(ctx,config);
 </script>

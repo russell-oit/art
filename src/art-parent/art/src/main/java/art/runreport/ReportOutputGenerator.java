@@ -967,6 +967,8 @@ public class ReportOutputGenerator {
 					options = mapper.readValue(optionsString, ChartJsOptions.class);
 				}
 
+				String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("chartId", chartId);
 				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
 				request.setAttribute("data", jsonData);
