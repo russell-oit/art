@@ -4,7 +4,7 @@ ART 3.3
 * Fix for double values only showing one decimal value by default
 * Allow dynamic recipient query to specify file open or modify password
 * Added password encryptor
-* Fix for multiple c3.js, pivottable.js, reactpivot, dygraphs, datatables, chart.js, datamaps, leaflet, openlayers, orgchart reports within a dashboad not displaying correctly
+* Fix for multiple c3.js, pivottable.js, reactpivot, dygraphs, datatables, chart.js, datamaps, leaflet, openlayers, orgchart reports within a dashboad not displaying correctly. Leaflet and OpenLayers template files will require replacing the 'map' element id with the variable mapId.
 * Allow import/export of repository artefacts
 * Fix for inability to enter chained depends values more than 2 characters
 
