@@ -15,7 +15,7 @@
 <table style="margin: 0px auto;">
 	<tr>
 		<td>
-			<div id="dygraphsOutput">
+			<div id="${outputDivId}">
 
 			</div>
 		</td>
@@ -38,7 +38,7 @@
 <c:choose>
 	<c:when test="${reportType == 'Dygraphs'}">
 		<script type="text/javascript">
-	new Dygraph(document.getElementById("dygraphsOutput"), '${csvData}', options);
+	new Dygraph(document.getElementById("${outputDivId}"), '${csvData}', options);
 		</script>
 	</c:when>
 	<c:when test="${reportType == 'DygraphsCsvLocal'}">
@@ -59,7 +59,7 @@
 		</p>
 		<script type="text/javascript">
 			var showDygraphs = function (file) {
-				$("#dygraphsOutput").html("<p align='center' style='color:grey;'>(processing...)</p>");
+				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(processing...)</p>");
 				//https://www.html5rocks.com/en/tutorials/file/dndfiles/
 				//https://www.nczonline.net/blog/2012/05/15/working-with-files-in-javascript-part-2/
 				//https://www.sitepoint.com/html5-file-drag-drop-read-analyze-upload-progress-bars/
@@ -68,7 +68,7 @@
 					var contents = event.target.result;
 					//csv file should not have quotes
 					//https://stackoverflow.com/questions/14708486/csv-cannot-display-two-axis-in-dygraphs-without-hardcoding
-					new Dygraph(document.getElementById("dygraphsOutput"), contents, options);
+					new Dygraph(document.getElementById("${outputDivId}"), contents, options);
 				};
 
 				reader.onerror = function (event) {
@@ -115,7 +115,7 @@
 	<c:when test="${reportType == 'DygraphsCsvServer'}">
 		<script type="text/javascript">
 			var dataFile = '${pageContext.request.contextPath}/js-templates/${dataFileName}';
-				new Dygraph(document.getElementById("dygraphsOutput"), dataFile, options);
+				new Dygraph(document.getElementById("${outputDivId}"), dataFile, options);
 		</script>
 	</c:when>
 </c:choose>

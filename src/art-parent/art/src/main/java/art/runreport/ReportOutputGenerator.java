@@ -768,6 +768,8 @@ public class ReportOutputGenerator {
 					request.setAttribute("dataFileName", dataFileName);
 				}
 
+				String outputDivId = "dygraphsOutput-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("outputDivId", outputDivId);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
 			} else if (reportType.isDataTables()) {
 				if (isJob) {
