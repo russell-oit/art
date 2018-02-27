@@ -23,7 +23,7 @@
   });
 
   var map = new ol.Map({
-	target: document.getElementById('map'),
+	target: document.getElementById(mapId),
 	layers: [
 	  new ol.layer.Tile({
 		source: new ol.source.OSM()
