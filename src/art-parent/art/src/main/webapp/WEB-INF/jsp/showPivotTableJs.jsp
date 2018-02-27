@@ -10,7 +10,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<div id="pivotTableJsOutput">
+<div id="${outputDivId}">
 
 </div>
 
@@ -69,7 +69,7 @@
 			bootbox.alert(e);
 		},
 		complete: function (parsed) {
-			$("#pivotTableJsOutput").pivotUI(parsed.data, options, overwrite, locale);
+			$("#${outputDivId}").pivotUI(parsed.data, options, overwrite, locale);
 		}
 	};
 </script>
@@ -88,7 +88,7 @@
 <c:choose>
 	<c:when test="${reportType == 'PivotTableJs'}">
 		<script type="text/javascript">
-	$("#pivotTableJsOutput").pivotUI(${input}, options, overwrite, locale);
+	$("#${outputDivId}").pivotUI(${input}, options, overwrite, locale);
 		</script>
 	</c:when>
 	<c:when test="${reportType == 'PivotTableJsCsvLocal'}">
@@ -109,7 +109,7 @@
 		</p>
 		<script type="text/javascript">
 			var parseAndPivot = function (f) {
-				$("#pivotTableJsOutput").html("<p align='center' style='color:grey;'>(processing...)</p>");
+				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(processing...)</p>");
 				Papa.parse(f, csvConfig);
 			};
 

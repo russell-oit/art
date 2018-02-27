@@ -685,6 +685,8 @@ public class ReportOutputGenerator {
 					request.setAttribute("locale", localeString);
 				}
 
+				String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("outputDivId", outputDivId);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
 			} else if (reportType.isDygraphs()) {
 				if (isJob) {
