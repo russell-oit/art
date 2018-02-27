@@ -10,7 +10,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 
-<div id="map" style="height: ${options.height}">
+<div id="${mapId}" style="height: ${options.height}">
 
 </div>
 
@@ -41,6 +41,7 @@
 	//https://stackoverflow.com/questions/24315801/how-to-add-markers-with-openlayers-3
 	//https://gis.stackexchange.com/questions/191505/openlayer-3-popup-on-marker-mouseover
 	//https://gis.stackexchange.com/questions/188865/error-with-popup-overlay-in-openlayers-3
+	mapId = '${mapId}';
 	var jsonData = ${data};
 	var markerUrl = "${pageContext.request.contextPath}/js/leaflet-1.0.3/images/marker-icon.png";
 
