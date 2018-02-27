@@ -1147,6 +1147,8 @@ public class ReportOutputGenerator {
 					}
 				}
 
+				String mapId = "map-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("mapId", mapId);
 				request.setAttribute("options", options);
 				request.setAttribute("data", jsonData);
 				request.setAttribute("templateFileName", templateFileName);
