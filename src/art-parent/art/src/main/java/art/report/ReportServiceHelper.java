@@ -20,6 +20,8 @@ package art.report;
 import art.accessright.AccessRightService;
 import art.accessright.UserGroupReportRight;
 import art.accessright.UserReportRight;
+import art.artdatabase.ArtDatabase;
+import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
 import art.dbutils.DbService;
@@ -40,6 +42,7 @@ import art.rule.RuleService;
 import art.ruleValue.RuleValueService;
 import art.ruleValue.UserGroupRuleValue;
 import art.ruleValue.UserRuleValue;
+import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
 import art.usergroup.UserGroup;
@@ -50,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -246,6 +250,14 @@ public class ReportServiceHelper {
 					} else {
 						report.setReportId(existingReport.getReportId());
 					}
+				}
+			}
+
+			ArtDatabase artDbConfig = Config.getArtDbConfig();
+			for (Datasource datasource : addedDatasources.values()) {
+				if (datasource.isActive()) {
+					datasource.decryptPassword();
+					DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 				}
 			}
 
