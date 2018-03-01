@@ -603,7 +603,8 @@ public class ImportRecordsController {
 		logger.debug("Entering importParameters: sessionUser={}", sessionUser);
 
 		List<Parameter> parameters = csvRoutines.parseAll(Parameter.class, file);
-		parameterService.importParameters(parameters, sessionUser, conn);
+		boolean local = true;
+		parameterService.importParameters(parameters, sessionUser, conn, local);
 	}
 
 	/**
@@ -865,7 +866,8 @@ public class ImportRecordsController {
 		}
 
 		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
-		reportServiceHelper.importReports(reports, sessionUser, conn);
+		boolean local = true;
+		reportServiceHelper.importReports(reports, sessionUser, conn, local);
 		cacheHelper.clearReports();
 		cacheHelper.clearReportGroups();
 		cacheHelper.clearDatasources();

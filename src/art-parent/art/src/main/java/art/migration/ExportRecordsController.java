@@ -759,7 +759,8 @@ public class ExportRecordsController {
 				csvRoutines.writeAll(parameters, Parameter.class, file);
 				break;
 			case Datasource:
-				parameterService.importParameters(parameters, sessionUser, conn);
+				boolean local = false;
+				parameterService.importParameters(parameters, sessionUser, conn, local);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -1040,7 +1041,8 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
-				reportServiceHelper.importReports(reports, sessionUser, conn);
+				boolean local = false;
+				reportServiceHelper.importReports(reports, sessionUser, conn, local);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

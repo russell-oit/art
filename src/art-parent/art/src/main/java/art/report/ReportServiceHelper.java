@@ -75,13 +75,14 @@ public class ReportServiceHelper {
 	 * @param reports the list of reports to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param local whether the import is to the local/current art instance
 	 * @throws SQLException
 	 */
 	public void importReports(List<Report> reports, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean local) throws SQLException {
 
 		boolean commit = true;
-		importReports(reports, actionUser, conn, commit);
+		importReports(reports, actionUser, conn, local, commit);
 	}
 
 	/**
@@ -90,13 +91,15 @@ public class ReportServiceHelper {
 	 * @param reports the list of reports to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param local whether the import is to the local/current art instance
 	 * @param commit whether to perform a commit after a successful import
 	 * @throws SQLException
 	 */
 	public void importReports(List<Report> reports, User actionUser,
-			Connection conn, boolean commit) throws SQLException {
+			Connection conn, boolean local, boolean commit) throws SQLException {
 
-		logger.debug("Entering importReports: actionUser={}", actionUser);
+		logger.debug("Entering importReports: actionUser={}, local={},"
+				+ " commit={}", actionUser, local, commit);
 
 		boolean originalAutoCommit = true;
 
@@ -253,11 +256,13 @@ public class ReportServiceHelper {
 				}
 			}
 
-			ArtDatabase artDbConfig = Config.getArtDbConfig();
-			for (Datasource datasource : addedDatasources.values()) {
-				if (datasource.isActive()) {
-					datasource.decryptPassword();
-					DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			if (local) {
+				ArtDatabase artDbConfig = Config.getArtDbConfig();
+				for (Datasource datasource : addedDatasources.values()) {
+					if (datasource.isActive()) {
+						datasource.decryptPassword();
+						DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+					}
 				}
 			}
 

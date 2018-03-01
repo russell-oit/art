@@ -364,13 +364,15 @@ public class ParameterService {
 	 * @param parameters the list of parameters to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param local whether the import is to the local/current art instance
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
 	public void importParameters(List<Parameter> parameters, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean local) throws SQLException {
 
-		logger.debug("Entering importParameters: actionUser={}", actionUser);
+		logger.debug("Entering importParameters: actionUser={}, local={}",
+				actionUser, local);
 
 		boolean originalAutoCommit = true;
 
@@ -395,7 +397,7 @@ public class ParameterService {
 
 			ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
 			boolean commitReports = false;
-			reportServiceHelper.importReports(reports, actionUser, conn, commitReports);
+			reportServiceHelper.importReports(reports, actionUser, conn, local, commitReports);
 
 			for (Parameter parameter : parameters) {
 				id++;
