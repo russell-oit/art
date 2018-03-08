@@ -313,6 +313,9 @@ public class ExportRecordsController {
 		logger.debug("Entering exportSettings");
 
 		Settings settings = settingsService.getSettings();
+		if (settings == null) {
+			throw new IllegalStateException("No settings to export");
+		}
 		settings.encryptPasswords();
 
 		MigrationLocation location = exportRecords.getLocation();

@@ -104,8 +104,10 @@ public class CacheHelper {
 
 		try {
 			Settings settings = settingsService.getSettings();
-			SettingsHelper settingsHelper = new SettingsHelper();
-			settingsHelper.refreshSettings(settings, session, servletContext);
+			if (settings != null) {
+				SettingsHelper settingsHelper = new SettingsHelper();
+				settingsHelper.refreshSettings(settings, session, servletContext);
+			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
@@ -217,7 +219,7 @@ public class CacheHelper {
 
 	/**
 	 * Clears all caches
-	 * 
+	 *
 	 * @param session the http session
 	 */
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
