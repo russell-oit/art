@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.2"> 
+  <meta name="version" content="3.3"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -120,6 +120,8 @@
          <li><a href="#orgchart-json">OrgChart: JSON</a></li> 
          <li><a href="#orgchart-list">OrgChart: List</a></li> 
          <li><a href="#orgchart-ajax">OrgChart: Ajax</a></li> 
+         <li><a href="#reportengine">ReportEngine</a></li> 
+         <li><a href="#reportengine-file">ReportEngine: File</a></li> 
          <li><a href="#mongodb">MongoDB</a></li> 
         </ol></li> 
        <li><a href="#general-report-options">General Report Options</a> 
@@ -2130,6 +2132,89 @@ FROM mytable
      <p>Displays an organisation chart using data from a html unordered list definition specified in the report source section. The same options applicable with the <strong>OrgChart: Database</strong> report type are also applicable. The demo database contains a sample report of this type.</p> 
      <h3 id="orgchart-ajax">OrgChart: Ajax</h3> 
      <p>Displays an organisation chart using data from a url specified in the report source section. The same options applicable with the <strong>OrgChart: Database</strong> report type are also applicable.</p> 
+     <h3 id="reportengine">ReportEngine</h3> 
+     <p>Generates tabular or pivot table output using data from a database. It uses the <a class="" href="http://reportengine.sourceforge.net/">ReportEngine</a> library. A number of options can be specified in the <strong>Options</strong> field.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>groupColumns</strong></td> 
+        <td>Object[]</td> 
+        <td></td> 
+        <td>An array of group column definition objects. Each object has the following properties. <strong>id</strong> - a string for the column index or name of the group column, <strong>showDuplicateValues</strong> - a boolean for whether duplicate values should be displayed, <strong>index</strong> - an integer for the column index when used with the <strong>ReportEngine: File</strong> report type.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showTotals</strong></td> 
+        <td>Boolean</td> 
+        <td></td> 
+        <td>Whether sub-totals should be displayed when using group columns</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showGrandTotal</strong></td> 
+        <td>Boolean</td> 
+        <td></td> 
+        <td>Whether the grand-total should be displayed when using group columns</td> 
+       </tr> 
+       <tr> 
+        <td><strong>sortValues</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether values are already sorted in the input data. When using group columns, the data must be sorted. If it doesn't come in as sorted, you can set this property to <strong>true</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dataColumns</strong></td> 
+        <td>Object[]</td> 
+        <td></td> 
+        <td>An array of data column definition objects. Each object has the following properties. <strong>id</strong> - a string for the column index or name of the data column, <strong>calculator</strong> - a string representing a calculator to use if a group column is in use. The string would be one of the following (case sensitive). <strong>SUM</strong>, <strong>COUNT</strong>, <strong>AVG</strong>, <strong>MIN</strong>, <strong>MAX</strong>, <strong>FIRST</strong>, <strong>LAST</strong>. <strong>calculatorFormatter</strong> - a string to determine how the calculator value should be displayed. This would be according to Java <strong>String.format()</strong> syntax e.g. "%,.2f"</td> 
+       </tr> 
+       <tr> 
+        <td><strong>pivot</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether to output the data as a pivot table</td> 
+       </tr> 
+       <tr> 
+        <td><strong>pivotHeaderRows</strong></td> 
+        <td>String[]</td> 
+        <td></td> 
+        <td>For pivot table output, column index or column names of columns to be used as pivot table header rows. For <strong>ReportEngine: File</strong> report types, this must be column indices.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>pivotData</strong></td> 
+        <td>data column object</td> 
+        <td></td> 
+        <td>For pivot table output, the definition of the column that will provide the data for the pivot table</td> 
+       </tr> 
+       <tr> 
+        <td><strong>separator</strong></td> 
+        <td>String</td> 
+        <td>,</td> 
+        <td>For <strong>ReportEngine: File</strong> report types, the field separator used within the file</td> 
+       </tr> 
+       <tr> 
+        <td><strong>firstLineIsHeader</strong></td> 
+        <td>Boolean</td> 
+        <td>true</td> 
+        <td>For <strong>ReportEngine: File</strong> report types, whether the first line in the file is a header row</td> 
+       </tr> 
+       <tr> 
+        <td><strong>url</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>For <strong>ReportEngine: File</strong> report types, if the data is coming from a url, the url to the data file</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <p>A note that pivot table output may not display correctly with pdf, docx, odt report formats.</p> 
+     <h3 id="reportengine-file">ReportEngine: File</h3> 
+     <p>Generates tabular or pivot table output using data from a file. It uses the <a class="" href="http://reportengine.sourceforge.net/">ReportEngine</a> library. A number of options can be specified in the <strong>Options</strong> field, with the available options being similar to those available for the <strong>ReportEngine</strong> report type.</p> 
      <h3 id="mongodb">MongoDB</h3> 
      <p>Allows you to query a MongoDB database. To use it, first create a datasource of type <strong>MongoDB</strong>. Set the URL as appropriate. Next, create the report, setting the report <strong>Type</strong> as <strong>MongoDB</strong> and selecting the mongodb datasource in the <strong>Datasource</strong> field. In the report source field, enter the groovy script that will be used to retrieve data from the mongodb database. The syntax of querying can either be that of the <a class="" href="https://mongodb.github.io/mongo-java-driver/" rel="nofollow">MongoDB Java Driver</a>, the <a class="" href="http://jongo.org/" rel="nofollow">Jongo</a> library or the <a class="" href="https://mongodb.github.io/morphia/" rel="nofollow">Morphia</a> library. ART passes a MongoClient connection object to the groovy script with the variable name <strong>mongoClient</strong>. This is the variable that is to be used as the connection to the mongodb server. ART also passes any report parameters specified using the parameter name as the variable name.</p> 
      <p>If it is required to display the returned results in a table, the groovy script must return a <code>List</code> of objects that are to be displayed. Also, the groovy script is run through a sandbox and only classes contained in the <strong>WEB-INF\groovy-whitelist.txt</strong> file will be allowed to be used within the script. If you use a class that is not contained in the whitelist, a <strong>SecurityException</strong> error will occur when you run the report. If you get such an error, add the class mentioned to the whitelist and run the report again.</p> 
@@ -3423,7 +3508,7 @@ WHERE CITY_ID = #cityId#
        </tr> 
        <tr> 
         <td><strong>Encryptor Type</strong></td> 
-        <td>Specifies the type of encryption to be used. The <strong>AES Crypt</strong> type will produce files that can be decrypted using the <a class="" href="https://www.aescrypt.com/" rel="nofollow">AES Crypt</a> program. This encryptor uses 256-bit keys therefore you must install JCE Unlimited Strength Jurisdiction Policy files in your JVM in order to use it. The <strong>OpenPGP</strong> type will produce files that can be decrypted using any OpenPGP-compliant program.</td> 
+        <td>Specifies the type of encryption to be used. The <strong>AES Crypt</strong> type will produce files that can be decrypted using the <a class="" href="https://www.aescrypt.com/" rel="nofollow">AES Crypt</a> program. This encryptor uses 256-bit keys therefore you must install JCE Unlimited Strength Jurisdiction Policy files in your JVM in order to use it. The <strong>OpenPGP</strong> type will produce files that can be decrypted using any OpenPGP-compliant program. <strong>Password</strong> encryptors are used to specify open and modify passwords for xlsx and pdf output.</td> 
        </tr> 
        <tr> 
         <td><strong>AES Crypt Password</strong></td> 
@@ -3444,6 +3529,14 @@ WHERE CITY_ID = #cityId#
        <tr> 
         <td><strong>OpenPGP Signing Key Passphrase</strong></td> 
         <td>For OpenPGP encryptors, if a signing key is used, the passphrase for that key.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Open Password</strong></td> 
+        <td>For Password encryptors, the file open password to be used with xlsx, pdf, docx, odt, ods output</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Modify Password</strong></td> 
+        <td>For Password encryptors, the file edit password to be used with xlsx and pdf output</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -4458,6 +4551,10 @@ WHERE {#!saleTypes#}
         <td>Shared holidays configured from the <strong>Configure | Holidays</strong> menu that should be applied for this job.</td> 
        </tr> 
        <tr> 
+        <td><strong>Error Notification</strong></td> 
+        <td>An email address that should be notified if an error occurrs while running the job. Multiple email addresses can be specified separated by commas. The "From" email address will be that which is set in the <strong>Settings</strong> page under the <strong>Error Notification</strong> section. The SMTP server used is that configured in the Settings page.</td> 
+       </tr> 
+       <tr> 
         <td><strong>Options</strong></td> 
         <td>Any optional job options, specified in JSON format</td> 
        </tr> 
@@ -4998,7 +5095,7 @@ WHERE {#!saleTypes#}
      <p>Each person in the dynamic recipients report list will get a personalized email with the column labels substituted with his values.</p> 
      <h2 id="dynamic-recipients-filtering">Dynamic Recipients + Filtering</h2> 
      <p>If you want the recipients to get different data, you will define a dynamic recipients report where the first column contains the recipient email addresses, any additional columns with personalization information if you want, and 2 other special, hard coded columns named <strong>recipient_column</strong> and <strong>recipient_id</strong>. These will be used to filter the data query. i.e. WHERE <code>&lt;recipient_column&gt;</code> = <code>&lt;recipient_id&gt;</code>. The main, data query will also need to have a special, hard coded label, <strong>#recipient#</strong>, in the where clause.</p> 
-     <p>In addition, if the values in the <strong>recipient_id</strong> column are numbers, include an additional hard coded column named <strong>recipient_id_type</strong>, with the value of this column being the string "<strong>number</strong>".</p> 
+     <p>If the values in the <strong>recipient_id</strong> column are numbers, include an additional hard coded column named <strong>recipient_id_type</strong>, with the value of this column being the string "<strong>number</strong>". You can include columns named <strong>open_password</strong> and <strong>modify_password</strong> to contain dynamic passwords that should be used for the dynamic output if using xlsx or pdf report formats.</p> 
      <p>Example:<br> If we want to email users only transactions that they created, our data query can be something like</p> 
      <div class="codehilite"> 
       <pre><span></span>    SELECT *
@@ -5024,7 +5121,7 @@ WHERE {#!saleTypes#}
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>With the personalization and filtering options, you can include columns with the name <strong>email_cc</strong> or <strong>email_bcc</strong> to specify email addresses that should be included in the cc or bcc fields of the email sent.</li> 
-      <li>Email address columns can have multiple email addresses separated by <code>;</code></li> 
+      <li>Email address columns can have multiple email addresses separated by <code>,</code></li> 
      </ul> 
     </div> 
    </div> 
