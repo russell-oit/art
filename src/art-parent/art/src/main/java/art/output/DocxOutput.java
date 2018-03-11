@@ -291,7 +291,8 @@ public class DocxOutput extends StandardOutput {
 			}
 
 			//set open password
-			String openPassword = report.getOpenPassword();
+			String openPassword = getEffectiveOpenPassword();
+
 			if (StringUtils.isNotEmpty(openPassword)) {
 				PoiUtils.addOpenPassword(openPassword, fullOutputFileName);
 			}

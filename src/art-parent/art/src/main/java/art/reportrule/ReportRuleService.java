@@ -23,6 +23,7 @@ import art.report.ReportService;
 import art.reportoptions.CloneOptions;
 import art.rule.Rule;
 import art.rule.RuleService;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -159,6 +160,24 @@ public class ReportRuleService {
 		ResultSetHandler<ReportRule> h = new BeanHandler<>(ReportRule.class, new ReportRuleMapper());
 		return dbService.query(sql, h, id);
 	}
+	
+		/**
+	 * Returns a report rule
+	 *
+	 * @param reportId the report id
+	 * @param ruleId the rule id
+	 * @return report rule if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("rules")
+	public ReportRule getReportRule(int reportId, int ruleId) throws SQLException {
+		logger.debug("Entering getReportRule: reportId={}, ruleId={}",
+				reportId, ruleId);
+
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=? AND RULE_ID=?";
+		ResultSetHandler<ReportRule> h = new BeanHandler<>(ReportRule.class, new ReportRuleMapper());
+		return dbService.query(sql, h, reportId, ruleId);
+	}
 
 	/**
 	 * Deletes a report rule
@@ -198,33 +217,18 @@ public class ReportRuleService {
 	 * Adds a new report rule to the database
 	 *
 	 * @param reportRule the report rule
-	 * @param reportId the report id
 	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "rules", allEntries = true)
-	public synchronized int addReportRule(ReportRule reportRule, int reportId) throws SQLException {
+	public synchronized int addReportRule(ReportRule reportRule) throws SQLException {
 		logger.debug("Entering addReportRule: reportRule={}", reportRule);
 
 		//generate new id
 		String sql = "SELECT MAX(QUERY_RULE_ID) FROM ART_QUERY_RULES";
 		int newId = dbService.getNewRecordId(sql);
 
-		sql = "INSERT INTO ART_QUERY_RULES"
-				+ " (QUERY_RULE_ID, QUERY_ID, RULE_ID, RULE_NAME, FIELD_NAME)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
-
-		int ruleId = reportRule.getRule().getRuleId();
-
-		Object[] values = {
-			newId,
-			reportRule.getReportId(),
-			ruleId,
-			ruleService.getRuleName(ruleId), //remove once rule_name is removed
-			reportRule.getReportColumn()
-		};
-
-		dbService.update(sql, values);
+		saveReportRule(reportRule, newId);
 
 		return newId;
 	}
@@ -239,20 +243,93 @@ public class ReportRuleService {
 	public void updateReportRule(ReportRule reportRule) throws SQLException {
 		logger.debug("Entering updateReportRule: reportRule={}", reportRule);
 
-		String sql = "UPDATE ART_QUERY_RULES SET QUERY_ID=?, RULE_ID=?,"
-				+ " RULE_NAME=?, FIELD_NAME=?"
-				+ " WHERE QUERY_RULE_ID=?";
+		Integer newRecordId = null;
+		saveReportRule(reportRule, newRecordId);
+	}
 
-		int ruleId = reportRule.getRule().getRuleId();
+	/**
+	 * Saves a report rule
+	 *
+	 * @param reportRule the report rule to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @throws SQLException
+	 */
+	public void saveReportRule(ReportRule reportRule, Integer newRecordId) throws SQLException {
+		Connection conn = null;
+		saveReportRule(reportRule, newRecordId, conn);
+	}
 
-		Object[] values = {
-			reportRule.getReportId(),
-			ruleId,
-			ruleService.getRuleName(ruleId),
-			reportRule.getReportColumn(),
-			reportRule.getReportRuleId()
-		};
+	/**
+	 * Saves a report rule
+	 *
+	 * @param reportRule the report rule to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param conn the connection to use. if null, the art database will be used
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "rules", allEntries = true)
+	public void saveReportRule(ReportRule reportRule, Integer newRecordId,
+			Connection conn) throws SQLException {
 
-		dbService.update(sql, values);
+		logger.debug("Entering saveReportRule: reportRule={}, newRecordId={}",
+				reportRule, newRecordId);
+
+		int affectedRows;
+
+		boolean newRecord = false;
+		if (newRecordId != null) {
+			newRecord = true;
+		}
+
+		if (newRecord) {
+			String sql = "INSERT INTO ART_QUERY_RULES"
+					+ " (QUERY_RULE_ID, QUERY_ID, RULE_ID, RULE_NAME, FIELD_NAME)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
+
+			Object[] values = {
+				newRecordId,
+				reportRule.getReportId(),
+				reportRule.getRule().getRuleId(),
+				reportRule.getRule().getName(), //remove once rule_name is removed
+				reportRule.getReportColumn()
+			};
+
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
+		} else {
+			String sql = "UPDATE ART_QUERY_RULES SET QUERY_ID=?, RULE_ID=?,"
+					+ " RULE_NAME=?, FIELD_NAME=?"
+					+ " WHERE QUERY_RULE_ID=?";
+
+			Object[] values = {
+				reportRule.getReportId(),
+				reportRule.getRule().getRuleId(),
+				reportRule.getRule().getName(), //remove once rule_name is removed
+				reportRule.getReportColumn(),
+				reportRule.getReportRuleId()
+			};
+
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
+		}
+
+		if (newRecordId != null) {
+			reportRule.setReportRuleId(newRecordId);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, reportRule={}",
+					affectedRows, newRecord, reportRule);
+		}
 	}
 }

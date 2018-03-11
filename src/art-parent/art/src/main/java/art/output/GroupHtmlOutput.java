@@ -18,135 +18,151 @@
 package art.output;
 
 import art.servlets.Config;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 /**
  * Generates group html reports
- * 
+ *
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class GroupHtmlOutput extends GroupOutput {
-	
+public class GroupHtmlOutput {
+
+	private PrintWriter out;
+	private String contextPath;
 	private final StringBuilder mainHeader = new StringBuilder();
 	private final StringBuilder subHeader = new StringBuilder();
-	
+
 	public void init() {
 		//include required css and javascript files
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/groupHtmlOutput.css'>");
 	}
 
-
 	/**
 	 * Outputs the report header
-	 * 
+	 *
 	 * @param width the header width as a percentage
 	 */
-    private void header(int width) {
-        out.println("<div align='center'>");
-        out.println("<table border='0' width='" + width + "%'>");
-    }
+	private void header(int width) {
+		out.println("<div align='center'>");
+		out.println("<table border='0' width='" + width + "%'>");
+	}
 
 	/**
 	 * Outputs a value to the main header
-	 * 
+	 *
 	 * @param value the value to output
 	 */
-    private void addCellToMainHeader(String value) {
-        mainHeader.append("<td>");
-        mainHeader.append(value);
-        mainHeader.append("</td>");
-    }
+	private void addCellToMainHeader(String value) {
+		mainHeader.append("<td>");
+		mainHeader.append(value);
+		mainHeader.append("</td>");
+	}
 
 	/**
 	 * Outputs a value to the sub header
-	 * 
+	 *
 	 * @param value the value to output
 	 */
-    private void addCellToSubHeader(String value) {
-        subHeader.append("<td>");
-        subHeader.append(value);
-        subHeader.append("</td>");
-    }
+	private void addCellToSubHeader(String value) {
+		subHeader.append("<td>");
+		subHeader.append(value);
+		subHeader.append("</td>");
+	}
 
 	/**
 	 * Outputs the main header
 	 */
-    private void printMainHeader() {
-        beginLines();
-        out.println(mainHeader.toString());
-        endLines();
-    }
+	private void printMainHeader() {
+		beginLines();
+		out.println(mainHeader.toString());
+		endLines();
+	}
 
 	/**
 	 * Outputs the sub header
 	 */
-    private void printSubHeader() {
-        beginLines();
-        out.println(subHeader.toString());
-        endLines();
-    }
-	
+	private void printSubHeader() {
+		beginLines();
+		out.println(subHeader.toString());
+		endLines();
+	}
+
 	/**
 	 * Outputs a group separator
 	 */
-	private void separator(){
+	private void separator() {
 		out.println("<br><hr style='width:90%; height:1px'><br>");
 	}
 
 	/**
 	 * Outputs a data value
-	 * 
+	 *
 	 * @param value the value to output
 	 */
-    private void addCellToLine(String value) {
-        out.println("<td class='data'>" + value + "</td>");
-    }
+	private void addCellToLine(String value) {
+		out.println("<td class='data'>" + value + "</td>");
+	}
 
 	/**
 	 * Outputs a data value
-	 * 
+	 *
 	 * @param value the value to output
-	 * @param numOfCells 
+	 * @param numOfCells
 	 */
-    private void addErrorCell(String value, int numOfCells) {
-        out.println("<td colspan='" + numOfCells + "' class='qeattr' align='left'>" + value + "</td>");
-    }
+	private void addErrorCell(String value, int numOfCells) {
+		out.println("<td colspan='" + numOfCells + "' class='qeattr' align='left'>" + value + "</td>");
+	}
 
 	/**
 	 * Performs initialization in readiness for data output
 	 */
-    private void beginLines() {
-        out.println("<tr>");
-    }
+	private void beginLines() {
+		out.println("<tr>");
+	}
 
 	/**
 	 * Finalizes data output
 	 */
-    private void endLines() {
-        out.println("</tr>");
-    }
+	private void endLines() {
+		out.println("</tr>");
+	}
 
 	/**
 	 * Creates a new row
 	 */
-    private void newLine() {
-        out.println("</tr><tr>");
-    }
+	private void newLine() {
+		out.println("</tr><tr>");
+	}
 
 	/**
 	 * Finalizes report
 	 */
-    private void footer() {
-        out.println("</table></div>");
-    }
-	
-	@Override
-	public int generateGroupReport(ResultSet rs, int splitCol) throws SQLException {
+	private void footer() {
+		out.println("</table></div>");
+	}
+
+	/**
+	 * Generates group output
+	 * 
+	 * @param rs the resultset to use. Needs to be a scrollable.
+	 * @param splitColumn the group column
+	 * @param writer the writer to use
+	 * @param contextPath the application context path
+	 * @return number of rows output
+	 * @throws SQLException 
+	 */
+	public int generateReport(ResultSet rs, int splitColumn, PrintWriter writer,
+			String contextPath) throws SQLException {
+
+		out = writer;
+		this.contextPath = contextPath;
+
 		ResultSetMetaData rsmd = rs.getMetaData();
-		
+
 		int colCount = rsmd.getColumnCount();
 		int i;
 		int counter = 0;
@@ -169,11 +185,10 @@ public class GroupHtmlOutput extends GroupOutput {
 		 *
 		 * etc...
 		 */
-		
 		init();
-		
+
 		// Build main header HTML
-		for (i = 0; i < (splitCol); i++) {
+		for (i = 0; i < (splitColumn); i++) {
 			tmpstr = rsmd.getColumnLabel(i + 1);
 			addCellToMainHeader(tmpstr);
 		}
@@ -198,11 +213,11 @@ public class GroupHtmlOutput extends GroupOutput {
 			cmpStr = new StringBuffer();
 
 			// Output Main Data (only one row, obviously)
-			for (i = 0; i < splitCol; i++) {
+			for (i = 0; i < splitColumn; i++) {
 				addCellToLine(rs.getString(i + 1));
 				cmpStr.append(rs.getString(i + 1));
 			}
-			
+
 			endLines();
 			footer();
 
@@ -223,7 +238,7 @@ public class GroupHtmlOutput extends GroupOutput {
 					counter++;
 					tmpCmpStr = new StringBuffer();
 
-					for (i = 0; i < splitCol; i++) {
+					for (i = 0; i < splitColumn; i++) {
 						tmpCmpStr.append(rs.getString(i + 1));
 					}
 

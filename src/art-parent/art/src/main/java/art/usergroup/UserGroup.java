@@ -17,7 +17,10 @@
  */
 package art.usergroup;
 
+import art.migration.PrefixTransformer;
 import art.reportgroup.ReportGroup;
+import com.univocity.parsers.annotations.Nested;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -32,15 +35,36 @@ public class UserGroup implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	// Properties --------------------------------------------------------------
+	@Parsed
+	private int parentId; //used for import/export of linked records e.g. users
+	@Parsed
 	private int userGroupId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
-	private ReportGroup defaultReportGroup;
+	@Parsed
 	private String startReport;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
+	private ReportGroup defaultReportGroup;
+
+	/**
+	 * @return the parentId
+	 */
+	public int getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 
 	// Getters/setters ---------------------------------------------------------
 	/**

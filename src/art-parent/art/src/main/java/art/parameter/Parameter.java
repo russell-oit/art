@@ -19,8 +19,11 @@ package art.parameter;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.migration.PrefixTransformer;
 import art.report.Report;
 import art.utils.ArtUtils;
+import com.univocity.parsers.annotations.Nested;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -38,31 +41,63 @@ import org.apache.commons.lang3.StringUtils;
 public class Parameter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int parameterId;
+	@Parsed
 	private String name;
+	@Parsed
+	private String description;
+	@Parsed
 	private ParameterType parameterType;
+	@Parsed
 	private String label;
+	@Parsed
 	private String helpText;
+	@Parsed
+	private String placeholderText;
+	@Parsed
 	private ParameterDataType dataType;
+	@Parsed
 	private String defaultValue;
+	@Parsed
 	private boolean hidden;
+	@Parsed
 	private boolean useLov;
-	private int lovReportId;
 	private boolean useRulesInLov;
+	@Parsed
 	private int drilldownColumnIndex;
 	private boolean useDirectSubstitution;
 	private Date creationDate;
 	private Date updateDate;
-	private String description;
 	private String createdBy;
 	private String updatedBy;
-	private Report defaultValueReport;
+	@Parsed
 	private boolean shared;
+	@Parsed
 	private String options;
+	@Parsed
 	private String dateFormat;
 	private ParameterOptions parameterOptions;
-	private String placeholderText;
+	@Parsed
 	private boolean useDefaultValueInJobs;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultValueReport")
+	private Report defaultValueReport;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "lovReport")
+	private Report lovReport;
+
+	/**
+	 * @return the lovReport
+	 */
+	public Report getLovReport() {
+		return lovReport;
+	}
+
+	/**
+	 * @param lovReport the lovReport to set
+	 */
+	public void setLovReport(Report lovReport) {
+		this.lovReport = lovReport;
+	}
 
 	/**
 	 * @return the useDefaultValueInJobs
@@ -332,20 +367,6 @@ public class Parameter implements Serializable {
 	 */
 	public void setUseLov(boolean useLov) {
 		this.useLov = useLov;
-	}
-
-	/**
-	 * @return the lovReportId
-	 */
-	public int getLovReportId() {
-		return lovReportId;
-	}
-
-	/**
-	 * @param lovReportId the lovReportId to set
-	 */
-	public void setLovReportId(int lovReportId) {
-		this.lovReportId = lovReportId;
 	}
 
 	/**

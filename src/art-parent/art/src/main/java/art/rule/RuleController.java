@@ -193,8 +193,7 @@ public class RuleController {
 					ReportRule reportRule = new ReportRule();
 					reportRule.setRule(rule);
 					reportRule.setReportId(reportId);
-					reportRule.setReportColumn(""); //null not allowed
-					reportRuleService.addReportRule(reportRule, reportId);
+					reportRuleService.addReportRule(reportRule);
 				}
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {

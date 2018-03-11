@@ -19,6 +19,7 @@ package art.datasource;
 
 import art.enums.DatasourceType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.univocity.parsers.annotations.Parsed;
 
 /**
  * Represents details common to report datasources and art database
@@ -28,18 +29,29 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public abstract class DatasourceInfo {
 
+	@Parsed
 	private int datasourceId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String driver;
+	@Parsed
 	private String url;
+	@Parsed
 	private String username;
-	private String password;
+	@Parsed
+	protected String password;
 	@JsonIgnore
 	private boolean useBlankPassword; //only used for user interface logic
+	@Parsed
 	private String testSql;
+	@Parsed
 	private int connectionPoolTimeoutMins;
+	@Parsed
 	private boolean jndi;
-	private String passwordAlgorithm;
+	@Parsed
+	protected String passwordAlgorithm;
+	@Parsed
 	private DatasourceType datasourceType;
 
 	/**

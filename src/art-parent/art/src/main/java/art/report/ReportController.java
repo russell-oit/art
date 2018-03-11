@@ -25,7 +25,7 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.mail.Mailer;
 import art.reportgroup.ReportGroupService;
-import art.reportgroupmembership.ReportGroupMembershipService;
+import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
@@ -86,7 +86,7 @@ public class ReportController {
 	private DatasourceService datasourceService;
 
 	@Autowired
-	private ReportGroupMembershipService reportGroupMembershipService;
+	private ReportGroupMembershipService2 reportGroupMembershipService2;
 
 	@Autowired
 	private EncryptorService encryptorService;
@@ -332,7 +332,7 @@ public class ReportController {
 			redirectAttributes.addFlashAttribute("record", report);
 
 			try {
-				saveReportGroups(report);
+				reportGroupMembershipService2.recreateReportGroupMemberships(report);
 			} catch (SQLException | RuntimeException ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
@@ -372,7 +372,7 @@ public class ReportController {
 						int id = Integer.parseInt(idString);
 						Report report = reportService.getReport(id);
 						report.setReportGroups(multipleReportEdit.getReportGroups());
-						saveReportGroups(report);
+						reportGroupMembershipService2.recreateReportGroupMemberships(report);
 					}
 				} catch (SQLException | RuntimeException ex) {
 					logger.error("Error", ex);
@@ -927,17 +927,6 @@ public class ReportController {
 		report.setModifyPassword(encryptedModifyPassword);
 
 		return null;
-	}
-
-	/**
-	 * Save report groups for the given report
-	 *
-	 * @param report the report
-	 * @throws SQLException
-	 */
-	private void saveReportGroups(Report report) throws SQLException {
-		reportGroupMembershipService.deleteAllReportGroupMembershipsForReport(report.getReportId());
-		reportGroupMembershipService.addReportGroupMemberships(report, report.getReportGroups());
 	}
 
 	@RequestMapping(value = "/parameterReports", method = RequestMethod.GET)

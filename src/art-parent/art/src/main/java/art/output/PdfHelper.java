@@ -20,6 +20,7 @@ package art.output;
 import art.enums.PageOrientation;
 import art.report.Report;
 import art.reportoptions.PdfOptions;
+import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.Document;
@@ -135,9 +136,12 @@ public class PdfHelper {
 	 * @param report the report object for the report associated with the file.
 	 * The repot object contains pdf options e.g. whether one can print
 	 * @param fullOutputFileName the full file path to the pdf file
+	 * @param dynamicOpenPassword dynamic open password
+	 * @param dynamicModifyPassword dynamic modify password
 	 * @throws java.io.IOException
 	 */
-	public void addProtections(Report report, String fullOutputFileName) throws IOException {
+	public void addProtections(Report report, String fullOutputFileName,
+			String dynamicOpenPassword, String dynamicModifyPassword) throws IOException {
 		//https://www.tutorialspoint.com/pdfbox/
 		//https://self-learning-java-tutorial.blogspot.co.ke/2016/03/pdfbox-encrypt-password-protect-pdf.html
 		//https://pdfbox.apache.org/2.0/cookbook/encryption.html
@@ -149,15 +153,9 @@ public class PdfHelper {
 			return;
 		}
 
-		String userPassword = report.getOpenPassword();
-		if (userPassword == null) {
-			userPassword = "";
-		}
-
-		String ownerPassword = report.getModifyPassword();
-		if (ownerPassword == null) {
-			ownerPassword = "";
-		}
+		RunReportHelper runReportHelper = new RunReportHelper();
+		String userPassword = runReportHelper.getEffectiveOpenPassword(report, dynamicOpenPassword);
+		String ownerPassword = runReportHelper.getEffectiveModifyPassword(report, dynamicModifyPassword);
 
 		String options = report.getOptions();
 		PdfOptions pdfOptions;
@@ -168,7 +166,7 @@ public class PdfHelper {
 			pdfOptions = mapper.readValue(options, PdfOptions.class);
 		}
 
-		if (StringUtils.equals(userPassword, "") && StringUtils.equals(ownerPassword, "")
+		if (StringUtils.isEmpty(userPassword) && StringUtils.isEmpty(ownerPassword)
 				&& pdfOptions.isPdfCanPrint() && pdfOptions.isPdfCanCopyContent()
 				&& pdfOptions.isPdfCanModify()) {
 			//nothing to secure
@@ -184,6 +182,14 @@ public class PdfHelper {
 
 			// Owner password (to open the file with all permissions)
 			// User password (to open the file but with restricted permissions)
+			if (userPassword == null) {
+				userPassword = "";
+			}
+
+			if (ownerPassword == null) {
+				ownerPassword = "";
+			}
+
 			StandardProtectionPolicy spp = new StandardProtectionPolicy(ownerPassword, userPassword, ap);
 			int keyLength = pdfOptions.getKeyLength();
 			spp.setEncryptionKeyLength(keyLength);

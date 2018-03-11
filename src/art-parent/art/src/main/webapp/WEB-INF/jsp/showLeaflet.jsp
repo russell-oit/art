@@ -10,7 +10,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 
-<div id="map" style="height: ${options.height}">
+<div id="${mapId}" style="height: ${options.height}">
 
 </div>
 
@@ -41,6 +41,7 @@
 	//https://cimbura.com/2016/05/02/anatomy-web-map/
 	//https://en.wikipedia.org/wiki/Web_mapping
 	//https://en.wikipedia.org/wiki/Tiled_web_map
+	mapId = '${mapId}';
 	var jsonData = ${data};
 
 	var dataFileUrl = null;

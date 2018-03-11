@@ -46,7 +46,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -224,6 +223,7 @@ public class JobService {
 		job.setHolidays(rs.getString("HOLIDAYS"));
 		job.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
 		job.setOptions(rs.getString("JOB_OPTIONS"));
+		job.setErrorNotificationTo(rs.getString("ERROR_EMAIL_TO"));
 		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		job.setCreatedBy(rs.getString("CREATED_BY"));
@@ -240,7 +240,7 @@ public class JobService {
 
 		Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
 		job.setSchedule(schedule);
-		
+
 		SmtpServer smtpServer = smtpServerService.getSmtpServer(rs.getInt("SMTP_SERVER_ID"));
 		job.setSmtpServer(smtpServer);
 
@@ -263,6 +263,25 @@ public class JobService {
 
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns jobs with given ids
+	 *
+	 * @param ids comma separated string of the job ids to retrieve
+	 * @return jobs with given ids
+	 * @throws SQLException
+	 */
+	public List<Job> getJobs(String ids) throws SQLException {
+		logger.debug("Entering getJobs: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE JOB_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -402,16 +421,72 @@ public class JobService {
 	}
 
 	/**
+	 * Imports job records
+	 *
+	 * @param jobs the list of jobs to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "jobs", allEntries = true)
+	public void importJobs(List<Job> jobs, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importJobs: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(JOB_ID) FROM ART_JOBS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Job job : jobs) {
+				id++;
+				saveJob(job, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a job
+	 *
+	 * @param job the job to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveJob(Job job, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveJob(job, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a job
 	 *
 	 * @param job the job to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveJob(Job job, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveJob: job={}, newRecordId={}, actionUser={}", job, newRecordId, actionUser);
+	private void saveJob(Job job, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+		
+		logger.debug("Entering saveJob: job={}, newRecordId={}, actionUser={}",
+				job, newRecordId, actionUser);
 
 		Integer reportId; //database column doesn't allow null
 		if (job.getReport() == null) {
@@ -421,15 +496,20 @@ public class JobService {
 			reportId = job.getReport().getReportId();
 		}
 
-		Integer userId; //database column doesn't allow null
+		Integer userId;
 		String username;
 		if (job.getUser() == null) {
 			logger.warn("User not defined. Defaulting to 0");
-			userId = 0;
+			userId = null;
 			username = "";
 		} else {
 			userId = job.getUser().getUserId();
 			username = job.getUser().getUsername();
+		}
+
+		Integer recipientsReportId = job.getRecipientsReportId();
+		if (recipientsReportId == 0) {
+			recipientsReportId = null;
 		}
 
 		Integer ftpServerId;
@@ -439,18 +519,20 @@ public class JobService {
 			ftpServerId = job.getFtpServer().getFtpServerId();
 		}
 
-		Integer scheduleId;
-		if (job.getSchedule() == null) {
-			scheduleId = 0;
-		} else {
+		Integer scheduleId = null;
+		if (job.getSchedule() != null) {
 			scheduleId = job.getSchedule().getScheduleId();
+			if (scheduleId == 0) {
+				scheduleId = null;
+			}
 		}
-		
-		Integer smtpServerId;
-		if (job.getSmtpServer() == null) {
-			smtpServerId = 0;
-		} else {
+
+		Integer smtpServerId = null;
+		if (job.getSmtpServer() != null) {
 			smtpServerId = job.getSmtpServer().getSmtpServerId();
+			if (smtpServerId == 0) {
+				smtpServerId = null;
+			}
 		}
 
 		String migratedToQuartz = "X";
@@ -474,9 +556,9 @@ public class JobService {
 					+ " FIXED_FILE_NAME, SUB_DIRECTORY, BATCH_FILE,"
 					+ " FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
-					+ " SCHEDULE_ID, SMTP_SERVER_ID, JOB_OPTIONS,"
+					+ " SCHEDULE_ID, SMTP_SERVER_ID, JOB_OPTIONS, ERROR_EMAIL_TO,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 45) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 46) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -508,7 +590,7 @@ public class JobService {
 				BooleanUtils.toInteger(job.isEnableAudit()),
 				BooleanUtils.toInteger(job.isAllowSharing()),
 				BooleanUtils.toInteger(job.isAllowSplitting()),
-				job.getRecipientsReportId(),
+				recipientsReportId,
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getFixedFileName(),
@@ -522,11 +604,16 @@ public class JobService {
 				scheduleId,
 				smtpServerId,
 				job.getOptions(),
+				job.getErrorNotificationTo(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_JOBS SET JOB_NAME=?, QUERY_ID=?,"
 					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
@@ -542,7 +629,7 @@ public class JobService {
 					+ " BATCH_FILE=?, FTP_SERVER_ID=?,"
 					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?, SMTP_SERVER_ID=?,"
-					+ " JOB_OPTIONS=?,"
+					+ " JOB_OPTIONS=?, ERROR_EMAIL_TO=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -575,7 +662,7 @@ public class JobService {
 				BooleanUtils.toInteger(job.isEnableAudit()),
 				BooleanUtils.toInteger(job.isAllowSharing()),
 				BooleanUtils.toInteger(job.isAllowSplitting()),
-				job.getRecipientsReportId(),
+				recipientsReportId,
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getFixedFileName(),
@@ -589,12 +676,17 @@ public class JobService {
 				scheduleId,
 				smtpServerId,
 				job.getOptions(),
+				job.getErrorNotificationTo(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {
@@ -622,16 +714,16 @@ public class JobService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleJobEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleJobEdit.getIds());
 		if (!multipleJobEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_JOBS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE JOB_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE JOB_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleJobEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -1135,7 +1227,7 @@ public class JobService {
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h, scheduleId);
 	}
-	
+
 	/**
 	 * Returns jobs that use a given smtp server
 	 *

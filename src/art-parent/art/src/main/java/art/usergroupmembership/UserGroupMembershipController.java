@@ -45,6 +45,9 @@ public class UserGroupMembershipController {
 
 	@Autowired
 	private UserGroupMembershipService userGroupMembershipService;
+	
+	@Autowired
+	private UserGroupMembershipService2 userGroupMembershipService2;
 
 	@Autowired
 	private UserService userService;
@@ -115,7 +118,7 @@ public class UserGroupMembershipController {
 		logger.debug("userGroupId={}", userGroupId);
 
 		try {
-			userGroupMembershipService.deleteUserGroupMembership(userId, userGroupId);
+			userGroupMembershipService2.deleteUserGroupMembership(userId, userGroupId);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -138,7 +141,7 @@ public class UserGroupMembershipController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			userGroupMembershipService.updateUserGroupMembership(action, users, userGroups);
+			userGroupMembershipService2.updateUserGroupMembership(action, users, userGroups);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

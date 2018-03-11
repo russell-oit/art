@@ -33,9 +33,12 @@ import org.owasp.encoder.Encode;
 public class HtmlDataTableOutput extends StandardOutput {
 
 	private String tableId;
+	private int localRowCount; //use local variable for reportengine output
 
 	@Override
 	public void init() {
+		localRowCount = 0;
+
 		//include required css and javascript files
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlDataTableOutput.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
@@ -230,7 +233,8 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		if (rowCount > 1) {
+		localRowCount++;
+		if (localRowCount > 1) {
 			//close previous row
 			out.println("</tr>");
 		}

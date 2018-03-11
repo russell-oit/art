@@ -22,12 +22,28 @@ Page to display success message
 			<div class="row">
 				<div class="col-md-6 col-md-offset-3">
 					<div class="alert alert-success text-center">
-						<spring:message code="${message}"/>
+						<p>
+							<spring:message code="${message}"/>
+						</p>
+						<c:if test="${not empty exportFileName}">
+							<div style="text-align: center">
+								<a type="application/octet-stream" href="${pageContext.request.contextPath}/export/records/${encode:forUriComponent(exportFileName)}">
+									<spring:message code="page.link.download"/>
+								</a>
+							</div>
+
+							<c:set var="reportFileName" value="${exportFileName}" scope="session"/>
+
+							<script type="text/javascript">
+								var url = "${pageContext.request.contextPath}/export/records/${encode:forJavaScript(encode:forUriComponent(exportFileName))}";
+									window.open(url);
+							</script>
+						</c:if>
 					</div>
 				</div>
 			</div>
 		</c:if>
-		
+
 		<c:if test="${error != null}">
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>

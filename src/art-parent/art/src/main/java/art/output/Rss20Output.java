@@ -42,12 +42,13 @@ public class Rss20Output extends StandardOutput {
 
 	private int columnIndex = 0; // current column
 	private String[] columnNames;
+	private int localRowCount;
 
 	//rfc822 (2822) date
 	//dates should not be localized. must use english locale.
 	//https://validator.w3.org/feed/docs/error/InvalidRFC2822Date.html
 	private final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-	
+
 	@Override
 	public String getContentType() {
 		return "application/xml"; // mime type (use "text/html" for html)
@@ -66,6 +67,7 @@ public class Rss20Output extends StandardOutput {
 	private void resetVariables() {
 		columnIndex = 0;
 		columnNames = null;
+		localRowCount = 0;
 	}
 
 	@Override
@@ -146,9 +148,10 @@ public class Rss20Output extends StandardOutput {
 
 	@Override
 	public void newRow() {
+		localRowCount++;
 		columnIndex = 0; // reset column index
 
-		if (rowCount > 1) {
+		if (localRowCount > 1) {
 			//close previous row
 			out.println("</item>\n");
 		}
@@ -161,7 +164,7 @@ public class Rss20Output extends StandardOutput {
 	public void endRow() {
 		out.println("</item>");
 	}
-	
+
 	@Override
 	public void endOutput() {
 		out.println("</channel>");

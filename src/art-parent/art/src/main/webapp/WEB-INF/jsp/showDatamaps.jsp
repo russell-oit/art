@@ -10,7 +10,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 
-<div id="container" style="position: relative; width: ${options.width}; height: ${options.height}; margin: 0 auto;">
+<div id="${containerId}" style="position: relative; width: ${options.width}; height: ${options.height}; margin: 0 auto;">
 
 </div>
 
@@ -71,7 +71,7 @@
 	</c:if>
 
 			var options = {
-				element: document.getElementById('container'),
+				element: document.getElementById('${containerId}'),
 				dataUrl: dataUrl,
 				dataType: dataType,
 				geographyConfig: geographyConfig

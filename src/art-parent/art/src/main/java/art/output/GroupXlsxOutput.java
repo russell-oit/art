@@ -17,6 +17,8 @@
  */
 package art.output;
 
+import art.report.Report;
+import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,7 +48,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author Timothy Anyona
  */
-public class GroupXlsxOutput extends GroupOutput {
+public class GroupXlsxOutput {
 
 	private FileOutputStream fout;
 	private XSSFWorkbook wb;
@@ -59,6 +61,39 @@ public class GroupXlsxOutput extends GroupOutput {
 	private XSSFCellStyle summaryStyle;
 	private int currentRow;
 	private int cellNumber;
+	private String fullOutputFileName;
+	private String reportName;
+	private Report report;
+	private String dynamicOpenPassword;
+	private String dynamicModifyPassword;
+
+	/**
+	 * @return the dynamicOpenPassword
+	 */
+	public String getDynamicOpenPassword() {
+		return dynamicOpenPassword;
+	}
+
+	/**
+	 * @param dynamicOpenPassword the dynamicOpenPassword to set
+	 */
+	public void setDynamicOpenPassword(String dynamicOpenPassword) {
+		this.dynamicOpenPassword = dynamicOpenPassword;
+	}
+
+	/**
+	 * @return the dynamicModifyPassword
+	 */
+	public String getDynamicModifyPassword() {
+		return dynamicModifyPassword;
+	}
+
+	/**
+	 * @param dynamicModifyPassword the dynamicModifyPassword to set
+	 */
+	public void setDynamicModifyPassword(String dynamicModifyPassword) {
+		this.dynamicModifyPassword = dynamicModifyPassword;
+	}
 
 	/**
 	 * Performs initialization in preparation for the output
@@ -162,9 +197,13 @@ public class GroupXlsxOutput extends GroupOutput {
 	private void endOutput() {
 		try {
 			if (fout != null) {
+				RunReportHelper runReportHelper = new RunReportHelper();
+
 				//set modify password
-				if (sheet != null && StringUtils.isNotEmpty(report.getModifyPassword())) {
-					sheet.protectSheet(report.getModifyPassword());
+				String modifyPassword = runReportHelper.getEffectiveModifyPassword(report, dynamicModifyPassword);
+
+				if (sheet != null && StringUtils.isNotEmpty(modifyPassword)) {
+					sheet.protectSheet(modifyPassword);
 				}
 
 				if (wb != null) {
@@ -173,7 +212,8 @@ public class GroupXlsxOutput extends GroupOutput {
 				fout.close();
 
 				//set open password
-				String openPassword = report.getOpenPassword();
+				String openPassword = runReportHelper.getEffectiveOpenPassword(report, dynamicOpenPassword);
+
 				if (StringUtils.isNotEmpty(openPassword)) {
 					PoiUtils.addOpenPassword(openPassword, fullOutputFileName);
 				}
@@ -195,8 +235,24 @@ public class GroupXlsxOutput extends GroupOutput {
 		cell.setCellStyle(headerStyle);
 	}
 
-	@Override
-	public int generateGroupReport(ResultSet rs, int splitColumn) throws SQLException {
+	/**
+	 * Generates group output
+	 *
+	 * @param rs the resultset to use. Needs to be a scrollable.
+	 * @param splitColumn the group column
+	 * @param report the report object
+	 * @param reportName the report name to use
+	 * @param fullOutputFileName the output file name
+	 * @return number of rows output
+	 * @throws SQLException
+	 */
+	public int generateReport(ResultSet rs, int splitColumn, Report report,
+			String reportName, String fullOutputFileName) throws SQLException {
+
+		this.report = report;
+		this.reportName = reportName;
+		this.fullOutputFileName = fullOutputFileName;
+
 		ResultSetMetaData rsmd = rs.getMetaData();
 
 		int i;

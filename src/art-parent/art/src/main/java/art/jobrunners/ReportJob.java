@@ -121,6 +121,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
@@ -318,13 +319,59 @@ public class ReportJob implements org.quartz.Job {
 		afterCompletion();
 		cacheHelper.clearJobs();
 
+		sendErrorNotification();
+
 		long runEndTimeMillis = System.currentTimeMillis();
 
 		//https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/time/DurationFormatUtils.html
 		String durationFormat = "m':'s':'S";
 		String duration = DurationFormatUtils.formatPeriod(runStartTimeMillis, runEndTimeMillis, durationFormat);
 		progressLogger.info("Completed. Time taken - {}", duration);
-		progressFileAppender.stop();
+		progressLogger.detachAndStopAllAppenders();
+		progressLogger.setLevel(Level.OFF);
+	}
+
+	/**
+	 * Sends an email to configured email addresses if there was an error while
+	 * running the job
+	 *
+	 */
+	private void sendErrorNotification() {
+		String errorNotificationTo = job.getErrorNotificationTo();
+		if (StringUtils.isBlank(errorNotificationTo)) {
+			return;
+		}
+
+		if (StringUtils.startsWith(runDetails, "<b>Error:</b>")) {
+			if (!Config.getCustomSettings().isEnableEmailing()) {
+				logger.info("Emailing disabled. Job Id {}", jobId);
+			} else {
+				ArtHelper artHelper = new ArtHelper();
+				Mailer mailer = artHelper.getMailer();
+				mailer.setDebug(logger.isDebugEnabled());
+
+				String[] emailsArray = separateEmails(errorNotificationTo);
+				String subject = "ART [Error]: " + job.getName() + " (" + jobId + ")";
+
+				mailer.setTo(emailsArray);
+				mailer.setFrom(Config.getSettings().getErrorNotificationFrom());
+				mailer.setSubject(subject);
+
+				try {
+					Context ctx = new Context(locale);
+					ctx.setVariable("error", runDetails);
+					ctx.setVariable("job", job);
+
+					String emailTemplateName = "jobErrorEmail";
+					String message = emailTemplateEngine.process(emailTemplateName, ctx);
+					mailer.setMessage(message);
+
+					mailer.send();
+				} catch (IOException | MessagingException | RuntimeException ex) {
+					logError(ex);
+				}
+			}
+		}
 	}
 
 	/**
@@ -336,7 +383,8 @@ public class ReportJob implements org.quartz.Job {
 	private void jobLogAndClose(String message) {
 		runDetails = message;
 		progressLogger.info(runDetails);
-		progressFileAppender.stop();
+		progressLogger.detachAndStopAllAppenders();
+		progressLogger.setLevel(Level.OFF);
 		updateIncompleteRun();
 	}
 
@@ -356,7 +404,7 @@ public class ReportJob implements org.quartz.Job {
 
 		progressFileAppender = new FileAppender<>();
 		progressFileAppender.setContext(loggerContext);
-		progressFileAppender.setName("jobLog");
+		progressFileAppender.setName("jobLogAppender" + jobId);
 		progressFileAppender.setFile(progressLogFilename);
 		progressFileAppender.setAppend(false);
 
@@ -368,7 +416,7 @@ public class ReportJob implements org.quartz.Job {
 		progressFileAppender.setEncoder(encoder);
 		progressFileAppender.start();
 
-		progressLogger = loggerContext.getLogger("jobLog");
+		progressLogger = loggerContext.getLogger("jobLog" + jobId);
 		progressLogger.setLevel(Level.INFO);
 
 		// Don't inherit root appender
@@ -1525,18 +1573,24 @@ public class ReportJob implements org.quartz.Job {
 		//create output
 		Writer writer = new StringWriter();
 
-		if (reportType == ReportType.FreeMarker) {
-			FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
-			freemarkerOutput.setLocale(locale);
-			freemarkerOutput.generateOutput(report, writer, data);
-		} else if (reportType == ReportType.Thymeleaf) {
-			ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
-			thymeleafOutput.setLocale(locale);
-			thymeleafOutput.generateOutput(report, writer, data);
-		} else if (reportType == ReportType.Velocity) {
-			VelocityOutput velocityOutput = new VelocityOutput();
-			velocityOutput.setLocale(locale);
-			velocityOutput.generateOutput(report, writer, data);
+		switch (reportType) {
+			case FreeMarker:
+				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+				freemarkerOutput.setLocale(locale);
+				freemarkerOutput.generateOutput(report, writer, data);
+				break;
+			case Thymeleaf:
+				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+				thymeleafOutput.setLocale(locale);
+				thymeleafOutput.generateOutput(report, writer, data);
+				break;
+			case Velocity:
+				VelocityOutput velocityOutput = new VelocityOutput();
+				velocityOutput.setLocale(locale);
+				velocityOutput.generateOutput(report, writer, data);
+				break;
+			default:
+				break;
 		}
 
 		String finalMessage = writer.toString();
@@ -2113,12 +2167,13 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			reportRunner = prepareReportRunner(user);
 
+			Map<String, String> recipientColumns = null;
 			if (recipientFilterPresent) {
 				//enable report data to be filtered/different for each recipient
 				reportRunner.setRecipientFilterPresent(recipientFilterPresent);
 				for (Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 					//map should only have one value if filter present
-					Map<String, String> recipientColumns = entry.getValue();
+					recipientColumns = entry.getValue();
 					reportRunner.setRecipientColumn(recipientColumns.get(ArtUtils.RECIPIENT_COLUMN));
 					reportRunner.setRecipientId(recipientColumns.get(ArtUtils.RECIPIENT_ID));
 					reportRunner.setRecipientIdType(recipientColumns.get(ArtUtils.RECIPIENT_ID_TYPE));
@@ -2138,7 +2193,7 @@ public class ReportJob implements org.quartz.Job {
 
 			//jobs don't show record count so generally no need for scrollable resultsets
 			int resultSetType;
-			if (reportType.isChart()) {
+			if (reportType.isChart() || reportType.isReportEngine()) {
 				//need scrollable resultset for charts for show data option
 				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 			} else {
@@ -2199,7 +2254,7 @@ public class ReportJob implements org.quartz.Job {
 
 				if (generateOutput) {
 					//generate output
-					String outputFileName = generateOutputFile(reportRunner, paramProcessorResult, user);
+					String outputFileName = generateOutputFile(reportRunner, paramProcessorResult, user, recipientColumns);
 
 					if (jobType == JobType.Print) {
 						printFile(outputFileName);
@@ -2387,11 +2442,14 @@ public class ReportJob implements org.quartz.Job {
 	 * @param reportRunner the report runner to use
 	 * @param paramProcessorResult the parameter processor result
 	 * @param user the user under whose permission the report is run
+	 * @param recipientColumns dynamic recipient columns for individual dynamic
+	 * recipient reports
 	 * @return the full path to the output file used
 	 * @throws Exception
 	 */
 	private String generateOutputFile(ReportRunner reportRunner,
-			ParameterProcessorResult paramProcessorResult, User user) throws Exception {
+			ParameterProcessorResult paramProcessorResult, User user,
+			Map<String, String> recipientColumns) throws Exception {
 
 		logger.debug("Entering generateOutputFile: user={}", user);
 
@@ -2456,8 +2514,17 @@ public class ReportJob implements org.quartz.Job {
 
 		String outputFileName = exportPath + fileName;
 
+		String dynamicOpenPassword = null;
+		String dynamicModifyPassword = null;
+		final String DYNAMIC_OPEN_PASSWORD_COLUMN_NAME = "open_password";
+		final String DYNAMIC_MODIFY_PASSWORD_COLUMN_NAME = "modify_password";
+		if (MapUtils.isNotEmpty(recipientColumns)) {
+			dynamicOpenPassword = recipientColumns.get(DYNAMIC_OPEN_PASSWORD_COLUMN_NAME);
+			dynamicModifyPassword = recipientColumns.get(DYNAMIC_MODIFY_PASSWORD_COLUMN_NAME);
+		}
+
 		if (reportType.isDashboard()) {
-			PdfDashboard.generatePdf(paramProcessorResult, report, user, locale, outputFileName, messageSource);
+			PdfDashboard.generatePdf(paramProcessorResult, report, user, locale, outputFileName, messageSource, dynamicOpenPassword, dynamicModifyPassword);
 		} else {
 			//create html file to output to as required
 			FileOutputStream fos = null;
@@ -2471,8 +2538,9 @@ public class ReportJob implements org.quartz.Job {
 
 			//generate output
 			ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
-
 			reportOutputGenerator.setIsJob(true);
+			reportOutputGenerator.setDynamicOpenPassword(dynamicOpenPassword);
+			reportOutputGenerator.setDynamicModifyPassword(dynamicModifyPassword);
 
 			try {
 				reportOutputGenerator.generateOutput(report, reportRunner,

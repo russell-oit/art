@@ -44,6 +44,7 @@ public class TsvOutput extends StandardOutput {
 	private StringBuilder sb;
 	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
 	private ZipType zipType = ZipType.None;
+	private int localRowCount;
 	
 	public TsvOutput(){
 		
@@ -63,6 +64,7 @@ public class TsvOutput extends StandardOutput {
 		zout = null;
 		gzout = null;
 		sb = null;
+		localRowCount=0;
 	}
 
 	@Override
@@ -153,8 +155,11 @@ public class TsvOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
+		localRowCount++;
+		
 		sb.append("\n");
-		if ((rowCount * totalColumnCount) > FLUSH_SIZE) {
+		
+		if ((localRowCount * totalColumnCount) > FLUSH_SIZE) {
 			try {
 				String tmpstr = sb.toString();
 				byte[] buf = tmpstr.getBytes("UTF-8");

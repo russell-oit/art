@@ -30,9 +30,12 @@ import org.owasp.encoder.Encode;
 public class HtmlGridOutput extends StandardOutput {
 
 	private String tableId;
+	private int localRowCount;
 
 	@Override
 	public void init() {
+		localRowCount = 0;
+
 		//include required css and javascript files
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlGridOutput.css'>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/sorttable.js'></script>");
@@ -149,7 +152,7 @@ public class HtmlGridOutput extends StandardOutput {
 		out.println("<td style='text-align: left' sorttable_customkey='"
 				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
-	
+
 	@Override
 	public void addCellImage(byte[] binaryData) {
 		if (binaryData == null) {
@@ -162,7 +165,8 @@ public class HtmlGridOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		if (rowCount > 1) {
+		localRowCount++;
+		if (localRowCount > 1) {
 			//close previous row
 			out.println("</tr>");
 		}

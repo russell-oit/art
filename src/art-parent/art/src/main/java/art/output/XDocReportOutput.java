@@ -65,6 +65,36 @@ public class XDocReportOutput {
 	private static final Logger logger = LoggerFactory.getLogger(XDocReportOutput.class);
 
 	private Locale locale;
+	private String dynamicOpenPassword;
+	private String dynamicModifyPassword;
+
+	/**
+	 * @return the dynamicOpenPassword
+	 */
+	public String getDynamicOpenPassword() {
+		return dynamicOpenPassword;
+	}
+
+	/**
+	 * @param dynamicOpenPassword the dynamicOpenPassword to set
+	 */
+	public void setDynamicOpenPassword(String dynamicOpenPassword) {
+		this.dynamicOpenPassword = dynamicOpenPassword;
+	}
+
+	/**
+	 * @return the dynamicModifyPassword
+	 */
+	public String getDynamicModifyPassword() {
+		return dynamicModifyPassword;
+	}
+
+	/**
+	 * @param dynamicModifyPassword the dynamicModifyPassword to set
+	 */
+	public void setDynamicModifyPassword(String dynamicModifyPassword) {
+		this.dynamicModifyPassword = dynamicModifyPassword;
+	}
 
 	/**
 	 * @return the locale
@@ -122,7 +152,7 @@ public class XDocReportOutput {
 			//check if template file exists
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + templateFileName);
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 			}
 
 			//load doc
@@ -233,7 +263,7 @@ public class XDocReportOutput {
 
 			if (reportFormat == ReportFormat.pdf) {
 				PdfHelper pdfHelper = new PdfHelper();
-				pdfHelper.addProtections(report, outputFileName);
+				pdfHelper.addProtections(report, outputFileName, dynamicOpenPassword, dynamicModifyPassword);
 			}
 
 		} finally {

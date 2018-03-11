@@ -242,7 +242,7 @@
 						}
 					});
 				});
-				
+
 				var optionsEditor = ace.edit("optionsEditor");
 				optionsEditor.$blockScrolling = Infinity;
 				optionsEditor.getSession().setMode("ace/mode/json");
@@ -1070,9 +1070,17 @@
 						</div>
 					</div>
 				</fieldset>
-						
+
 				<hr>
-						
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="errorNotificationTo">
+						<spring:message code="settings.text.errorNotification"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="errorNotificationTo" maxlength="500" class="form-control"/>
+						<form:errors path="errorNotificationTo" cssClass="error"/>
+					</div>
+				</div>
 				<div class="form-group">
 					<label class="control-label col-md-12" style="text-align: center" for="options">
 						<spring:message code="page.label.options"/>

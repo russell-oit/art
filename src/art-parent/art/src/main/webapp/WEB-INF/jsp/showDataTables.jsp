@@ -12,8 +12,8 @@
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
-<div id="dataTablesOutput">
-	<table id="tableData" class="table table-bordered table-striped table-condensed">
+<div id="${outputDivId}">
+	<table id="${tableId}" class="table table-bordered table-striped table-condensed">
 
 	</table>
 </div>
@@ -189,7 +189,7 @@
 	}
 
 	function createColumnFilters(table) {
-		var tbl = $('#tableData');
+		var tbl = $('#${tableId}');
 		var headingRow = tbl.find('thead tr:first');
 		//https://stackoverflow.com/questions/34609173/datatables-1-10-column-count
 		var colCount = table.columns().header().length;
@@ -253,10 +253,10 @@
 			//https://stackoverflow.com/questions/32911546/how-to-recreate-a-table-with-jquery-datatables
 			//https://stackoverflow.com/questions/24452270/how-to-reinitialize-datatable-in-ajax
 			//https://datatables.net/manual/tech-notes/3
-			var tbl = $('#tableData');
+			var tbl = $('#${tableId}');
 
-			if ($.fn.DataTable.isDataTable("#tableData")) {
-				$('#tableData').DataTable().destroy();
+			if ($.fn.DataTable.isDataTable("#${tableId}")) {
+				$('#${tableId}').DataTable().destroy();
 				tbl.empty();
 			}
 
@@ -325,7 +325,7 @@
 
 		<script type="text/javascript">
 			$(document).ready(function () {
-				var tbl = $('#tableData');
+				var tbl = $('#${tableId}');
 				tbl.dataTable(options);
 			});
 		</script>

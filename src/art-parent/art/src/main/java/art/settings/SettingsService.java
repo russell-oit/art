@@ -19,12 +19,12 @@ package art.settings;
 
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
-import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.LoggerLevel;
 import art.user.User;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -141,13 +141,7 @@ public class SettingsService {
 			settings.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt passwords
-			String smtpPassword = settings.getSmtpPassword();
-			smtpPassword = AesEncryptor.decrypt(smtpPassword);
-			settings.setSmtpPassword(smtpPassword);
-
-			String ldapBindPassword = settings.getLdapBindPassword();
-			ldapBindPassword = AesEncryptor.decrypt(ldapBindPassword);
-			settings.setLdapBindPassword(ldapBindPassword);
+			settings.decryptPasswords();
 
 			return type.cast(settings);
 		}
@@ -176,106 +170,169 @@ public class SettingsService {
 	public void updateSettings(Settings settings, User actionUser) throws SQLException {
 		logger.debug("Entering updateSettings: actionUser={}", actionUser);
 
+		Connection conn = null;
+		updateSettings(settings, actionUser, conn);
+	}
+
+	/**
+	 * Imports system settings
+	 *
+	 * @param settings the settings to import
+	 * @param actionUser the user performing the action
+	 * @param conn the connection to use. it will by closed by the method
+	 * @throws SQLException
+	 */
+	public void importSettings(Settings settings, User actionUser, Connection conn)
+			throws SQLException {
+
+		logger.debug("Entering importSettings: actionUser={}", actionUser);
+		updateSettings(settings, actionUser, conn);
+	}
+
+	/**
+	 * Updates system settings
+	 *
+	 * @param settings the updated settings
+	 * @param actionUser the user performing the action
+	 * @param conn the connection to use. if null, the art database will be used
+	 * @throws SQLException
+	 */
+	private void updateSettings(Settings settings, User actionUser, Connection conn)
+			throws SQLException {
+
+		logger.debug("Entering updateSettings: actionUser={}", actionUser);
+
 		String sql;
+		boolean originalAutoCommit = true;
 
-		sql = "DELETE FROM ART_SETTINGS";
-		dbService.update(sql);
+		try {
+			if (conn != null) {
+				originalAutoCommit = conn.getAutoCommit();
+				conn.setAutoCommit(false);
+			}
 
-		setSettingsDefaults(settings);
+			sql = "DELETE FROM ART_SETTINGS";
+			if (conn == null) {
+				dbService.update(sql);
+			} else {
+				dbService.update(conn, sql);
+			}
 
-		sql = "INSERT INTO ART_SETTINGS"
-				+ " (SMTP_SERVER, SMTP_PORT, SMTP_USE_STARTTLS,"
-				+ " USE_SMTP_AUTHENTICATION, SMTP_USERNAME, SMTP_PASSWORD,"
-				+ " SMTP_FROM, ART_AUTHENTICATION_METHOD, WINDOWS_DOMAIN_CONTROLLER,"
-				+ " ALLOWED_WINDOWS_DOMAINS, DB_AUTHENTICATION_DRIVER,"
-				+ " DB_AUTHENTICATION_URL, LDAP_SERVER, LDAP_PORT,"
-				+ " LDAP_ENCRYPTION_METHOD, LDAP_URL, LDAP_BASE_DN,"
-				+ " USE_LDAP_ANONYMOUS_BIND, LDAP_BIND_DN, LDAP_BIND_PASSWORD,"
-				+ " LDAP_USER_ID_ATTRIBUTE, LDAP_AUTHENTICATION_METHOD,"
-				+ " LDAP_REALM, CAS_LOGOUT_URL, MAX_ROWS_DEFAULT,"
-				+ " MAX_ROWS_SPECIFIC, PDF_FONT_NAME, PDF_FONT_FILE,"
-				+ " PDF_FONT_DIRECTORY, PDF_FONT_ENCODING, PDF_FONT_EMBEDDED,"
-				+ " ADMIN_EMAIL, APP_DATE_FORMAT, APP_TIME_FORMAT, REPORT_FORMATS,"
-				+ " MAX_RUNNING_REPORTS, HEADER_IN_PUBLIC_SESSION,"
-				+ " MONDRIAN_CACHE_EXPIRY, SCHEDULING_ENABLED, RSS_LINK,"
-				+ " MAX_FILE_UPLOAD_SIZE, ART_BASE_URL, SYSTEM_LOCALE,"
-				+ " LOGS_DATASOURCE_ID, ERROR_EMAIL_TO, ERROR_EMAIL_FROM,"
-				+ " ERROR_EMAIL_SUBJECT_PATTERN, ERROR_EMAIL_LEVEL,"
-				+ " ERROR_EMAIL_LOGGER, ERROR_EMAIL_SUPPRESS_AFTER,"
-				+ " ERROR_EMAIL_EXPIRE_AFTER, ERROR_EMAIL_DIGEST_FREQUENCY,"
-				+ " PASSWORD_MIN_LENGTH, PASSWORD_MIN_LOWERCASE, PASSWORD_MIN_UPPERCASE,"
-				+ " PASSWORD_MIN_NUMERIC, PASSWORD_MIN_SPECIAL,"
-				+ " UPDATE_DATE, UPDATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 59) + ")";
+			setSettingsDefaults(settings);
 
-		Object[] values = {
-			settings.getSmtpServer(),
-			settings.getSmtpPort(),
-			BooleanUtils.toInteger(settings.isSmtpUseStartTls()),
-			BooleanUtils.toInteger(settings.isUseSmtpAuthentication()),
-			settings.getSmtpUsername(),
-			settings.getSmtpPassword(),
-			settings.getSmtpFrom(),
-			settings.getArtAuthenticationMethod().getValue(),
-			settings.getWindowsDomainController(),
-			settings.getAllowedWindowsDomains(),
-			settings.getDatabaseAuthenticationDriver(),
-			settings.getDatabaseAuthenticationUrl(),
-			settings.getLdapServer(),
-			settings.getLdapPort(),
-			settings.getLdapConnectionEncryptionMethod().getValue(),
-			settings.getLdapUrl(),
-			settings.getLdapBaseDn(),
-			BooleanUtils.toInteger(settings.isUseLdapAnonymousBind()),
-			settings.getLdapBindDn(),
-			settings.getLdapBindPassword(),
-			settings.getLdapUserIdAttribute(),
-			settings.getLdapAuthenticationMethod().getValue(),
-			settings.getLdapRealm(),
-			settings.getCasLogoutUrl(),
-			settings.getMaxRowsDefault(),
-			settings.getMaxRowsSpecific(),
-			settings.getPdfFontName(),
-			settings.getPdfFontFile(),
-			settings.getPdfFontDirectory(),
-			settings.getPdfFontEncoding(),
-			BooleanUtils.toInteger(settings.isPdfFontEmbedded()),
-			settings.getAdministratorEmail(),
-			settings.getDateFormat(),
-			settings.getTimeFormat(),
-			settings.getReportFormats(),
-			settings.getMaxRunningReports(),
-			BooleanUtils.toInteger(settings.isShowHeaderInPublicUserSession()),
-			settings.getMondrianCacheExpiryPeriod(),
-			BooleanUtils.toInteger(settings.isSchedulingEnabled()),
-			settings.getRssLink(),
-			settings.getMaxFileUploadSizeMB(),
-			settings.getArtBaseUrl(),
-			settings.getSystemLocale(),
-			settings.getLogsDatasourceId(),
-			settings.getErrorNotificationTo(),
-			settings.getErrorNotificationFrom(),
-			settings.getErrorNotificationSubjectPattern(),
-			settings.getErrorNotificatonLevel().getValue(),
-			settings.getErrorNotificationLogger(),
-			settings.getErrorNotificationSuppressAfter(),
-			settings.getErrorNotificationExpireAfter(),
-			settings.getErrorNotificationDigestFrequency(),
-			settings.getPasswordMinLength(),
-			settings.getPasswordMinLowercase(),
-			settings.getPasswordMinUppercase(),
-			settings.getPasswordMinNumeric(),
-			settings.getPasswordMinSpecial(),
-			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
-			actionUser.getUsername()
-		};
+			sql = "INSERT INTO ART_SETTINGS"
+					+ " (SMTP_SERVER, SMTP_PORT, SMTP_USE_STARTTLS,"
+					+ " USE_SMTP_AUTHENTICATION, SMTP_USERNAME, SMTP_PASSWORD,"
+					+ " SMTP_FROM, ART_AUTHENTICATION_METHOD, WINDOWS_DOMAIN_CONTROLLER,"
+					+ " ALLOWED_WINDOWS_DOMAINS, DB_AUTHENTICATION_DRIVER,"
+					+ " DB_AUTHENTICATION_URL, LDAP_SERVER, LDAP_PORT,"
+					+ " LDAP_ENCRYPTION_METHOD, LDAP_URL, LDAP_BASE_DN,"
+					+ " USE_LDAP_ANONYMOUS_BIND, LDAP_BIND_DN, LDAP_BIND_PASSWORD,"
+					+ " LDAP_USER_ID_ATTRIBUTE, LDAP_AUTHENTICATION_METHOD,"
+					+ " LDAP_REALM, CAS_LOGOUT_URL, MAX_ROWS_DEFAULT,"
+					+ " MAX_ROWS_SPECIFIC, PDF_FONT_NAME, PDF_FONT_FILE,"
+					+ " PDF_FONT_DIRECTORY, PDF_FONT_ENCODING, PDF_FONT_EMBEDDED,"
+					+ " ADMIN_EMAIL, APP_DATE_FORMAT, APP_TIME_FORMAT, REPORT_FORMATS,"
+					+ " MAX_RUNNING_REPORTS, HEADER_IN_PUBLIC_SESSION,"
+					+ " MONDRIAN_CACHE_EXPIRY, SCHEDULING_ENABLED, RSS_LINK,"
+					+ " MAX_FILE_UPLOAD_SIZE, ART_BASE_URL, SYSTEM_LOCALE,"
+					+ " LOGS_DATASOURCE_ID, ERROR_EMAIL_TO, ERROR_EMAIL_FROM,"
+					+ " ERROR_EMAIL_SUBJECT_PATTERN, ERROR_EMAIL_LEVEL,"
+					+ " ERROR_EMAIL_LOGGER, ERROR_EMAIL_SUPPRESS_AFTER,"
+					+ " ERROR_EMAIL_EXPIRE_AFTER, ERROR_EMAIL_DIGEST_FREQUENCY,"
+					+ " PASSWORD_MIN_LENGTH, PASSWORD_MIN_LOWERCASE, PASSWORD_MIN_UPPERCASE,"
+					+ " PASSWORD_MIN_NUMERIC, PASSWORD_MIN_SPECIAL,"
+					+ " UPDATE_DATE, UPDATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 59) + ")";
 
-		int affectedRows = dbService.update(sql, values);
+			Object[] values = {
+				settings.getSmtpServer(),
+				settings.getSmtpPort(),
+				BooleanUtils.toInteger(settings.isSmtpUseStartTls()),
+				BooleanUtils.toInteger(settings.isUseSmtpAuthentication()),
+				settings.getSmtpUsername(),
+				settings.getSmtpPassword(),
+				settings.getSmtpFrom(),
+				settings.getArtAuthenticationMethod().getValue(),
+				settings.getWindowsDomainController(),
+				settings.getAllowedWindowsDomains(),
+				settings.getDatabaseAuthenticationDriver(),
+				settings.getDatabaseAuthenticationUrl(),
+				settings.getLdapServer(),
+				settings.getLdapPort(),
+				settings.getLdapConnectionEncryptionMethod().getValue(),
+				settings.getLdapUrl(),
+				settings.getLdapBaseDn(),
+				BooleanUtils.toInteger(settings.isUseLdapAnonymousBind()),
+				settings.getLdapBindDn(),
+				settings.getLdapBindPassword(),
+				settings.getLdapUserIdAttribute(),
+				settings.getLdapAuthenticationMethod().getValue(),
+				settings.getLdapRealm(),
+				settings.getCasLogoutUrl(),
+				settings.getMaxRowsDefault(),
+				settings.getMaxRowsSpecific(),
+				settings.getPdfFontName(),
+				settings.getPdfFontFile(),
+				settings.getPdfFontDirectory(),
+				settings.getPdfFontEncoding(),
+				BooleanUtils.toInteger(settings.isPdfFontEmbedded()),
+				settings.getAdministratorEmail(),
+				settings.getDateFormat(),
+				settings.getTimeFormat(),
+				settings.getReportFormats(),
+				settings.getMaxRunningReports(),
+				BooleanUtils.toInteger(settings.isShowHeaderInPublicUserSession()),
+				settings.getMondrianCacheExpiryPeriod(),
+				BooleanUtils.toInteger(settings.isSchedulingEnabled()),
+				settings.getRssLink(),
+				settings.getMaxFileUploadSizeMB(),
+				settings.getArtBaseUrl(),
+				settings.getSystemLocale(),
+				settings.getLogsDatasourceId(),
+				settings.getErrorNotificationTo(),
+				settings.getErrorNotificationFrom(),
+				settings.getErrorNotificationSubjectPattern(),
+				settings.getErrorNotificatonLevel().getValue(),
+				settings.getErrorNotificationLogger(),
+				settings.getErrorNotificationSuppressAfter(),
+				settings.getErrorNotificationExpireAfter(),
+				settings.getErrorNotificationDigestFrequency(),
+				settings.getPasswordMinLength(),
+				settings.getPasswordMinLowercase(),
+				settings.getPasswordMinUppercase(),
+				settings.getPasswordMinNumeric(),
+				settings.getPasswordMinSpecial(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+				actionUser.getUsername()
+			};
 
-		logger.debug("affectedRows={}", affectedRows);
+			int affectedRows;
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 
-		if (affectedRows != 1) {
-			logger.warn("Problem with save. affectedRows={}", affectedRows);
+			logger.debug("affectedRows={}", affectedRows);
+
+			if (affectedRows != 1) {
+				logger.warn("Problem with save. affectedRows={}", affectedRows);
+			}
+
+			if (conn != null) {
+				conn.commit();
+			}
+		} catch (SQLException ex) {
+			if (conn != null) {
+				conn.rollback();
+			}
+
+			throw ex;
+		} finally {
+			if (conn != null) {
+				conn.setAutoCommit(originalAutoCommit);
+			}
 		}
 	}
 

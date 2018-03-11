@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>Title</title>
+		<meta charset="UTF-8"/>
+	</head>
+	<body>
+		<p th:text="#{email.message.jobErrorOccurred} + ${'.'}">An error occurred while running a job.</p>
+		<p>
+			<b th:text="#{jobs.text.jobName} + ${':'}">Job Name:</b> <th:block th:utext="${job.name}">Some job</th:block> <br/>
+			<b th:text="#{jobs.text.jobId} + ${':'}">Job ID:</b> <th:block th:utext="${job.jobId}">12</th:block> <br/>
+			<th:block th:utext="${error}"><b>Error:</b> Error details</th:block>
+		</p>
+	</body>
+</html>

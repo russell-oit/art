@@ -22,6 +22,8 @@ import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -109,6 +111,25 @@ public class RuleService {
 	}
 
 	/**
+	 * Returns rules with given ids
+	 *
+	 * @param ids comma separated string of the rule ids to retrieve
+	 * @return rules with given ids
+	 * @throws SQLException
+	 */
+	public List<Rule> getRules(String ids) throws SQLException {
+		logger.debug("Entering getRules: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE RULE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Rule>> h = new BeanListHandler<>(Rule.class, new RuleMapper());
+		return dbService.query(sql, h, idsArray);
+	}
+
+	/**
 	 * Returns a rule
 	 *
 	 * @param id the rule id
@@ -122,6 +143,22 @@ public class RuleService {
 		String sql = SQL_SELECT_ALL + " WHERE RULE_ID=?";
 		ResultSetHandler<Rule> h = new BeanHandler<>(Rule.class, new RuleMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Returns a rule
+	 *
+	 * @param name the rule name
+	 * @return rule if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("rules")
+	public Rule getRule(String name) throws SQLException {
+		logger.debug("Entering getRule: name='{}'", name);
+
+		String sql = SQL_SELECT_ALL + " WHERE RULE_NAME=?";
+		ResultSetHandler<Rule> h = new BeanHandler<>(Rule.class, new RuleMapper());
+		return dbService.query(sql, h, name);
 	}
 
 	/**
@@ -253,15 +290,71 @@ public class RuleService {
 	}
 
 	/**
+	 * Imports rule records
+	 *
+	 * @param rules the list of rules to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "rules", allEntries = true)
+	public void importRules(List<Rule> rules, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importRules: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Rule rule : rules) {
+				id++;
+				saveRule(rule, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a rule
+	 *
+	 * @param rule the rule to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveRule(Rule rule, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveRule(rule, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a rule
 	 *
 	 * @param rule the rule to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveRule(Rule rule, Integer newRecordId, User actionUser) throws SQLException {
+	@CacheEvict(value = "rules", allEntries = true)
+	public void saveRule(Rule rule, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
 		logger.debug("Entering saveRule: rule={}, newRecordId={},actionUser={}",
 				rule, newRecordId, actionUser);
 
@@ -275,12 +368,12 @@ public class RuleService {
 		}
 
 		int affectedRows;
-		
+
 		boolean newRecord = false;
 		if (newRecordId != null) {
 			newRecord = true;
 		}
-		
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_RULES"
 					+ " (RULE_ID, RULE_NAME, DESCRIPTION, DATA_TYPE,"
@@ -296,7 +389,11 @@ public class RuleService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_RULES SET RULE_NAME=?, DESCRIPTION=?,"
 					+ " DATA_TYPE=?, UPDATE_DATE=?, UPDATED_BY=?"
@@ -311,9 +408,13 @@ public class RuleService {
 				rule.getRuleId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
-		
+
 		if (newRecordId != null) {
 			rule.setRuleId(newRecordId);
 		}

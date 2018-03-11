@@ -22,7 +22,6 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.connectionpool.DbConnections;
 import art.datasource.DatasourceService;
-import art.encryption.AesEncryptor;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.AccessLevel;
@@ -31,6 +30,7 @@ import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.reportoptions.CloneOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
@@ -45,10 +45,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -78,15 +79,18 @@ public class ReportService {
 	private final DatasourceService datasourceService;
 	private final ReportGroupService reportGroupService;
 	private final EncryptorService encryptorService;
+	private final ReportGroupMembershipService2 reportGroupMembershipService2;
 
 	@Autowired
 	public ReportService(DbService dbService, DatasourceService datasourceService,
-			ReportGroupService reportGroupService, EncryptorService encryptorService) {
+			ReportGroupService reportGroupService, EncryptorService encryptorService,
+			ReportGroupMembershipService2 reportGroupMembershipService2) {
 
 		this.dbService = dbService;
 		this.datasourceService = datasourceService;
 		this.reportGroupService = reportGroupService;
 		this.encryptorService = encryptorService;
+		this.reportGroupMembershipService2 = reportGroupMembershipService2;
 	}
 
 	public ReportService() {
@@ -94,6 +98,7 @@ public class ReportService {
 		datasourceService = new DatasourceService();
 		reportGroupService = new ReportGroupService();
 		encryptorService = new EncryptorService();
+		reportGroupMembershipService2 = new ReportGroupMembershipService2();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERIES AQ";
@@ -158,7 +163,7 @@ public class ReportService {
 			report.setCreatedBy(rs.getString("CREATED_BY"));
 			report.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
+			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATASOURCE_ID"));
 			report.setDatasource(datasource);
 
 			Encryptor encryptor = encryptorService.getEncryptor(rs.getInt("ENCRYPTOR_ID"));
@@ -168,11 +173,7 @@ public class ReportService {
 			report.setReportGroups(reportGroups);
 
 			//decrypt open and modify passwords
-			String clearTextOpenPassword = AesEncryptor.decrypt(report.getOpenPassword());
-			report.setOpenPassword(clearTextOpenPassword);
-
-			String clearTextModifypassword = AesEncryptor.decrypt(report.getModifyPassword());
-			report.setModifyPassword(clearTextModifypassword);
+			report.decryptPasswords();
 
 			setChartOptions(report);
 
@@ -356,6 +357,25 @@ public class ReportService {
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns reports with given ids
+	 *
+	 * @param ids comma separated string of the report ids to retrieve
+	 * @return reports with given ids
+	 * @throws SQLException
+	 */
+	public List<Report> getReports(String ids) throws SQLException {
+		logger.debug("Entering getReports: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -556,6 +576,9 @@ public class ReportService {
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
+		sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
+		dbService.update(sql, id);
+
 		//lastly, delete query
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID=?";
 		int affectedRows = dbService.update(sql, id);
@@ -640,33 +663,159 @@ public class ReportService {
 	}
 
 	/**
+	 * Imports report records
+	 *
+	 * @param reports the list of reports to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use. if autocommit is false, no commit is
+	 * performed
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public void importReports(List<Report> reports, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importReports: actionUser={}", actionUser);
+
+		String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
+		int reportId = dbService.getMaxRecordId(conn, sql);
+
+		sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
+		int datasourceId = dbService.getMaxRecordId(conn, sql);
+
+		sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
+		int encryptorId = dbService.getMaxRecordId(conn, sql);
+
+		sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
+		int reportGroupId = dbService.getMaxRecordId(conn, sql);
+
+		Map<String, Datasource> addedDatasources = new HashMap<>();
+		Map<String, Encryptor> addedEncryptors = new HashMap<>();
+		Map<String, ReportGroup> addedReportGroups = new HashMap<>();
+		for (Report report : reports) {
+			reportId++;
+
+			Datasource datasource = report.getDatasource();
+			if (datasource != null) {
+				String datasourceName = datasource.getName();
+				if (StringUtils.isBlank(datasourceName)) {
+					report.setDatasource(null);
+				} else {
+					Datasource existingDatasource = datasourceService.getDatasource(datasourceName);
+					if (existingDatasource == null) {
+						Datasource addedDatasource = addedDatasources.get(datasourceName);
+						if (addedDatasource == null) {
+							datasourceId++;
+							datasourceService.saveDatasource(datasource, datasourceId, actionUser, conn);
+							addedDatasources.put(datasourceName, datasource);
+						} else {
+							report.setDatasource(addedDatasource);
+						}
+					} else {
+						report.setDatasource(existingDatasource);
+					}
+				}
+			}
+
+			Encryptor encryptor = report.getEncryptor();
+			if (encryptor != null) {
+				String encryptorName = encryptor.getName();
+				if (StringUtils.isBlank(encryptorName)) {
+					report.setEncryptor(null);
+				} else {
+					Encryptor existingEncryptor = encryptorService.getEncryptor(encryptorName);
+					if (existingEncryptor == null) {
+						Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
+						if (addedEncryptor == null) {
+							encryptorId++;
+							encryptorService.saveEncryptor(encryptor, encryptorId, actionUser, conn);
+							addedEncryptors.put(encryptorName, encryptor);
+						} else {
+							report.setEncryptor(addedEncryptor);
+						}
+					} else {
+						report.setEncryptor(existingEncryptor);
+					}
+				}
+			}
+
+			List<ReportGroup> reportGroups = report.getReportGroups();
+			if (CollectionUtils.isNotEmpty(reportGroups)) {
+				List<ReportGroup> newReportGroups = new ArrayList<>();
+				for (ReportGroup reportGroup : reportGroups) {
+					String reportGroupName = reportGroup.getName();
+					ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+					if (existingReportGroup == null) {
+						ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+						if (addedReportGroup == null) {
+							reportGroupId++;
+							reportGroupService.saveReportGroup(reportGroup, reportGroupId, actionUser, conn);
+							addedReportGroups.put(reportGroupName, reportGroup);
+							newReportGroups.add(reportGroup);
+						} else {
+							newReportGroups.add(addedReportGroup);
+						}
+					} else {
+						newReportGroups.add(existingReportGroup);
+					}
+				}
+				report.setReportGroups(newReportGroups);
+			}
+
+			saveReport(report, reportId, actionUser, conn);
+			reportGroupMembershipService2.recreateReportGroupMemberships(report);
+		}
+	}
+
+	/**
+	 * Saves a report
+	 *
+	 * @param report the report to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveReport(Report report, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveReport(report, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a report
 	 *
 	 * @param report the report to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveReport(Report report, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveReport: report={}, newRecordId={}, actionUser={}",
-				report, newRecordId, actionUser);
+	@CacheEvict(value = "reports", allEntries = true)
+	public void saveReport(Report report, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveReport: report={}, newRecordId={},"
+				+ " actionUser={}", report, newRecordId, actionUser);
 
 		Integer reportGroupId = 0; //field no longer used but can't be null
 
-		//set values for possibly null property objects
-		Integer datasourceId;
-		if (report.getDatasource() == null) {
-			datasourceId = 0;
-		} else {
+		Integer datasourceId = null;
+		if (report.getDatasource() != null) {
 			datasourceId = report.getDatasource().getDatasourceId();
+			if (datasourceId == 0) {
+				datasourceId = null;
+			}
 		}
 
-		Integer encryptorId;
-		if (report.getEncryptor() == null) {
-			encryptorId = 0;
-		} else {
+		Integer encryptorId = null;
+		if (report.getEncryptor() != null) {
 			encryptorId = report.getEncryptor().getEncryptorId();
+			if (encryptorId == 0) {
+				encryptorId = null;
+			}
 		}
 
 		Integer reportTypeId;
@@ -687,7 +836,7 @@ public class ReportService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
-					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_RULES,"
+					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATASOURCE_ID, CONTACT_PERSON, USES_RULES,"
 					+ " ACTIVE, HIDDEN, REPORT_SOURCE, PARAMETERS_IN_OUTPUT,"
 					+ " X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
@@ -745,11 +894,15 @@ public class ReportService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 					+ " DESCRIPTION=?, QUERY_TYPE=?, GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
-					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
+					+ " DATASOURCE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
 					+ " HIDDEN=?, REPORT_SOURCE=?, PARAMETERS_IN_OUTPUT=?,"
 					+ " X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
@@ -808,7 +961,11 @@ public class ReportService {
 				report.getReportId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {
@@ -836,16 +993,16 @@ public class ReportService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleReportEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleReportEdit.getIds());
 		if (!multipleReportEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_QUERIES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -853,13 +1010,13 @@ public class ReportService {
 		}
 		if (!multipleReportEdit.isHiddenUnchanged()) {
 			sql = "UPDATE ART_QUERIES SET HIDDEN=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isHidden()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -867,13 +1024,13 @@ public class ReportService {
 		}
 		if (!multipleReportEdit.isContactPersonUnchanged()) {
 			sql = "UPDATE ART_QUERIES SET CONTACT_PERSON=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(multipleReportEdit.getContactPerson());
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -881,13 +1038,13 @@ public class ReportService {
 		}
 		if (!multipleReportEdit.isOmitTitleRowUnchanged()) {
 			sql = "UPDATE ART_QUERIES SET OMIT_TITLE_ROW=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isOmitTitleRow()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -1358,7 +1515,7 @@ public class ReportService {
 		logger.debug("Entering getReportsWithDatasource: datasourceId={}", datasourceId);
 
 		String sql = SQL_SELECT_ALL
-				+ " WHERE DATABASE_ID=?";
+				+ " WHERE DATASOURCE_ID=?";
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, datasourceId);
@@ -1380,7 +1537,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, encryptorId);
 	}
-	
+
 	/**
 	 * Returns reports are in a given report group
 	 *

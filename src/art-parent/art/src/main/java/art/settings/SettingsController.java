@@ -18,7 +18,6 @@
 package art.settings;
 
 import art.datasource.DatasourceService;
-import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
@@ -142,26 +141,14 @@ public class SettingsController {
 		settings.setLdapBindPassword(newLdapBindPassword);
 
 		//encrypt password fields
-		String clearTextSmtpPassword = settings.getSmtpPassword();
-		String clearTextLdapBindPassword = settings.getLdapBindPassword();
-
-		String encryptedSmtpPassword = AesEncryptor.encrypt(clearTextSmtpPassword);
-		String encryptedLdapBindPassword = AesEncryptor.encrypt(clearTextLdapBindPassword);
-
-		settings.setSmtpPassword(encryptedSmtpPassword);
-		settings.setLdapBindPassword(encryptedLdapBindPassword);
+		settings.encryptPasswords();
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			settingsService.updateSettings(settings, sessionUser);
-
-			session.setAttribute("administratorEmail", settings.getAdministratorEmail());
-			session.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
-
-			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
-			servletContext.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
-
-			Config.loadSettings();
+			
+			SettingsHelper settingsHelper = new SettingsHelper();
+			settingsHelper.refreshSettings(settings, session, servletContext);
 
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");

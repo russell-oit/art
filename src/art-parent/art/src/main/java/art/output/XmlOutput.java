@@ -32,6 +32,8 @@ import org.owasp.encoder.Encode;
  * @author Timothy Anyona
  */
 public class XmlOutput extends StandardOutput {
+	
+	private int localRowCount;
 
 	@Override
 	public String getContentType() {
@@ -45,6 +47,8 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void init() {
+		localRowCount=0;
+		
 		out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		outputDtd();
 		out.println("<table>");
@@ -165,7 +169,9 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		if (rowCount > 1) {
+		localRowCount++;
+		
+		if (localRowCount > 1) {
 			//close previous row
 			out.println("</row>");
 		}
@@ -186,7 +192,7 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void endOutput() {
-		out.println("<totalrows>" + rowCount + "</totalrows>");
+		out.println("<totalrows>" + localRowCount + "</totalrows>");
 		out.println("</table>");
 	}
 }

@@ -106,6 +106,19 @@
 					}
 				});
 
+				$('#exportRecords').click(function () {
+					var selectedRows = table.rows({selected: true});
+					var data = selectedRows.data();
+					if (data.length > 0) {
+						var ids = $.map(data, function (item) {
+							return item[1];
+						});
+						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Holidays&ids=' + ids;
+					} else {
+						bootbox.alert("${selectRecordsText}");
+					}
+				});
+
 			}); //end document ready
 		</script>
 	</jsp:attribute>
@@ -131,14 +144,24 @@
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/addHoliday">
-				<i class="fa fa-plus"></i>
-				<spring:message code="page.action.add"/>
-			</a>
-			<button type="button" id="deleteRecords" class="btn btn-default">
-				<i class="fa fa-trash-o"></i>
-				<spring:message code="page.action.delete"/>
-			</button>
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/addHoliday">
+					<i class="fa fa-plus"></i>
+					<spring:message code="page.action.add"/>
+				</a>
+				<button type="button" id="deleteRecords" class="btn btn-default">
+					<i class="fa fa-trash-o"></i>
+					<spring:message code="page.action.delete"/>
+				</button>
+			</div>
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Holidays">
+					<spring:message code="page.text.import"/>
+				</a>
+				<button type="button" id="exportRecords" class="btn btn-default">
+					<spring:message code="page.text.export"/>
+				</button>
+			</div>
 		</div>
 
 		<table id="holidays" class="table table-bordered table-striped table-condensed">

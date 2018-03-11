@@ -17,7 +17,10 @@
  */
 package art.reportrule;
 
+import art.migration.PrefixTransformer;
 import art.rule.Rule;
+import com.univocity.parsers.annotations.Nested;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 
 /**
@@ -28,10 +31,31 @@ import java.io.Serializable;
 public class ReportRule implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	@Parsed
+	private int parentId; //used for import/export of linked records e.g. reports
+	@Parsed
 	private int reportRuleId;
+	@Parsed
 	private int reportId;
-	private Rule rule;
+	@Parsed
 	private String reportColumn;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "rule")
+	private Rule rule;
+
+	/**
+	 * @return the parentId
+	 */
+	public int getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 
 	/**
 	 * @return the reportRuleId

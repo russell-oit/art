@@ -17,6 +17,8 @@
  */
 package art.smtpserver;
 
+import art.encryption.AesEncryptor;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -28,22 +30,49 @@ import java.util.Date;
 public class SmtpServer implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int smtpServerId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
+	@Parsed
 	private boolean active = true;
+	@Parsed
 	private String server;
+	@Parsed
 	private int port = 25;
+	@Parsed
 	private boolean useStartTls;
+	@Parsed
 	private boolean useSmtpAuthentication;
+	@Parsed
 	private String username;
+	@Parsed
 	private String password;
 	private boolean useBlankPassword; //only used for username interface logic
+	@Parsed
 	private String from;
 	private Date creationDate;
 	private String createdBy;
 	private Date updateDate;
 	private String updatedBy;
+	@Parsed
+	private boolean clearTextPassword;
+
+	/**
+	 * @return the clearTextPassword
+	 */
+	public boolean isClearTextPassword() {
+		return clearTextPassword;
+	}
+
+	/**
+	 * @param clearTextPassword the clearTextPassword to set
+	 */
+	public void setClearTextPassword(boolean clearTextPassword) {
+		this.clearTextPassword = clearTextPassword;
+	}
 
 	/**
 	 * @return the smtpServerId
@@ -297,6 +326,20 @@ public class SmtpServer implements Serializable {
 	@Override
 	public String toString() {
 		return "SmtpServer{" + "name=" + name + '}';
+	}
+
+	/**
+	 * Decrypts the password field
+	 */
+	public void decryptPassword() {
+		password = AesEncryptor.decrypt(password);
+	}
+	
+	/**
+	 * Encrypts the password field
+	 */
+	public void encryptPassword(){
+		password = AesEncryptor.encrypt(password);
 	}
 
 }

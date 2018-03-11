@@ -17,6 +17,7 @@
  */
 package art.settings;
 
+import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
@@ -98,6 +99,21 @@ public class Settings implements Serializable {
 	private int passwordMinUppercase;
 	private int passwordMinNumeric;
 	private int passwordMinSpecial;
+	private boolean clearTextPasswords; //used to enable import with passwords specified in clear text
+
+	/**
+	 * @return the clearTextPasswords
+	 */
+	public boolean isClearTextPasswords() {
+		return clearTextPasswords;
+	}
+
+	/**
+	 * @param clearTextPasswords the clearTextPasswords to set
+	 */
+	public void setClearTextPasswords(boolean clearTextPasswords) {
+		this.clearTextPasswords = clearTextPasswords;
+	}
 
 	/**
 	 * @return the updateDate
@@ -972,7 +988,8 @@ public class Settings implements Serializable {
 	}
 
 	/**
-	 * @param errorNotificationSubjectPattern the errorNotificationSubjectPattern to set
+	 * @param errorNotificationSubjectPattern the
+	 * errorNotificationSubjectPattern to set
 	 */
 	public void setErrorNotificationSubjectPattern(String errorNotificationSubjectPattern) {
 		this.errorNotificationSubjectPattern = errorNotificationSubjectPattern;
@@ -1014,7 +1031,8 @@ public class Settings implements Serializable {
 	}
 
 	/**
-	 * @param errorNotificationSuppressAfter the errorNotificationSuppressAfter to set
+	 * @param errorNotificationSuppressAfter the errorNotificationSuppressAfter
+	 * to set
 	 */
 	public void setErrorNotificationSuppressAfter(String errorNotificationSuppressAfter) {
 		this.errorNotificationSuppressAfter = errorNotificationSuppressAfter;
@@ -1028,7 +1046,8 @@ public class Settings implements Serializable {
 	}
 
 	/**
-	 * @param errorNotificationExpireAfter the errorNotificationExpireAfter to set
+	 * @param errorNotificationExpireAfter the errorNotificationExpireAfter to
+	 * set
 	 */
 	public void setErrorNotificationExpireAfter(String errorNotificationExpireAfter) {
 		this.errorNotificationExpireAfter = errorNotificationExpireAfter;
@@ -1042,7 +1061,8 @@ public class Settings implements Serializable {
 	}
 
 	/**
-	 * @param errorNotificationDigestFrequency the errorNotificationDigestFrequency to set
+	 * @param errorNotificationDigestFrequency the
+	 * errorNotificationDigestFrequency to set
 	 */
 	public void setErrorNotificationDigestFrequency(String errorNotificationDigestFrequency) {
 		this.errorNotificationDigestFrequency = errorNotificationDigestFrequency;
@@ -1116,5 +1136,21 @@ public class Settings implements Serializable {
 	 */
 	public void setPasswordMinSpecial(int passwordMinSpecial) {
 		this.passwordMinSpecial = passwordMinSpecial;
+	}
+
+	/**
+	 * Decrypt password fields
+	 */
+	public void decryptPasswords() {
+		smtpPassword = AesEncryptor.decrypt(smtpPassword);
+		ldapBindPassword = AesEncryptor.decrypt(ldapBindPassword);
+	}
+	
+	/**
+	 * Encrypt password fields
+	 */
+	public void encryptPasswords(){
+		smtpPassword = AesEncryptor.encrypt(smtpPassword);
+		ldapBindPassword = AesEncryptor.encrypt(ldapBindPassword);
 	}
 }

@@ -722,6 +722,8 @@ public class Config extends HttpServlet {
 		makeDirectory(getJobsExportPath());
 		makeDirectory(getReportsExportPath());
 		makeDirectory(getBatchPath());
+		makeDirectory(getJobLogsPath());
+		makeDirectory(getRecordsExportPath());
 	}
 
 	/**
@@ -828,6 +830,15 @@ public class Config extends HttpServlet {
 	 */
 	public static String getReportsExportPath() {
 		return exportPath + "reports" + File.separator;
+	}
+	
+	/**
+	 * Returns the full path to the records export directory
+	 *
+	 * @return full path to the records export directory
+	 */
+	public static String getRecordsExportPath() {
+		return exportPath + "records" + File.separator;
 	}
 
 	/**

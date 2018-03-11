@@ -32,7 +32,7 @@ public enum CacheType {
 	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources"),
 	Schedules("Schedules"), Jobs("Jobs"), Rules("Rules"), Parameters("Parameters"),
 	Encryptors("Encryptors"), Holidays("Holidays"), Destinations("Destinations"),
-	SmtpServers("SmtpServers");
+	SmtpServers("SmtpServers"), Settings("Settings");
 	
 	private final String value;
 

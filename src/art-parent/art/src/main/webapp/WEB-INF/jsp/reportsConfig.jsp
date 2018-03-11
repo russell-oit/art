@@ -31,7 +31,7 @@ Reports configuration page
 <spring:message code="reports.text.selectValue" var="selectValueText"/>
 
 <t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
-	
+
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.css"/>
 	</jsp:attribute>
@@ -67,7 +67,7 @@ Reports configuration page
 						);
 
 				var table = oTable.api();
-				
+
 				//add thead row with yadcf filters
 				var headingRow = tbl.find('thead tr:first');
 				var visibleColCount = 7;
@@ -77,7 +77,7 @@ Reports configuration page
 				}
 				var filterRow = '<tr>' + cols + '</tr>';
 				headingRow.after(filterRow);
-				
+
 				yadcf.init(table,
 						[
 							{
@@ -143,6 +143,19 @@ Reports configuration page
 							return item[1];
 						});
 						window.location.href = '${pageContext.request.contextPath}/editReports?ids=' + ids;
+					} else {
+						bootbox.alert("${selectRecordsText}");
+					}
+				});
+				
+				$('#exportRecords').click(function () {
+					var selectedRows = table.rows({selected: true});
+					var data = selectedRows.data();
+					if (data.length > 0) {
+						var ids = $.map(data, function (item) {
+							return item[1];
+						});
+						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Reports&ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
@@ -216,18 +229,28 @@ Reports configuration page
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/addReport">
-				<i class="fa fa-plus"></i>
-				<spring:message code="page.action.add"/>
-			</a>
-			<button type="button" id="editRecords" class="btn btn-default">
-				<i class="fa fa-pencil-square-o"></i>
-				<spring:message code="page.action.edit"/>
-			</button>
-			<button type="button" id="deleteRecords" class="btn btn-default">
-				<i class="fa fa-trash-o"></i>
-				<spring:message code="page.action.delete"/>
-			</button>
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/addReport">
+					<i class="fa fa-plus"></i>
+					<spring:message code="page.action.add"/>
+				</a>
+				<button type="button" id="editRecords" class="btn btn-default">
+					<i class="fa fa-pencil-square-o"></i>
+					<spring:message code="page.action.edit"/>
+				</button>
+				<button type="button" id="deleteRecords" class="btn btn-default">
+					<i class="fa fa-trash-o"></i>
+					<spring:message code="page.action.delete"/>
+				</button>
+			</div>
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Reports">
+					<spring:message code="page.text.import"/>
+				</a>
+				<button type="button" id="exportRecords" class="btn btn-default">
+					<spring:message code="page.text.export"/>
+				</button>
+			</div>
 		</div>
 
 		<table id="reports" class="table table-bordered table-striped table-condensed">

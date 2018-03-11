@@ -30,6 +30,7 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
 import art.reportoptions.StandardOutputOptions;
+import art.runreport.RunReportHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
@@ -101,6 +102,50 @@ public abstract class StandardOutput {
 	protected Report report;
 	protected boolean pdfPageNumbers = true;
 	protected boolean ajax;
+	protected String dynamicOpenPassword;
+	protected String dynamicModifyPassword;
+
+	/**
+	 * @return the dynamicOpenPassword
+	 */
+	public String getDynamicOpenPassword() {
+		return dynamicOpenPassword;
+	}
+
+	/**
+	 * @param dynamicOpenPassword the dynamicOpenPassword to set
+	 */
+	public void setDynamicOpenPassword(String dynamicOpenPassword) {
+		this.dynamicOpenPassword = dynamicOpenPassword;
+	}
+
+	/**
+	 * @return the dynamicModifyPassword
+	 */
+	public String getDynamicModifyPassword() {
+		return dynamicModifyPassword;
+	}
+
+	/**
+	 * @param dynamicModifyPassword the dynamicModifyPassword to set
+	 */
+	public void setDynamicModifyPassword(String dynamicModifyPassword) {
+		this.dynamicModifyPassword = dynamicModifyPassword;
+	}
+
+	/**
+	 * @return the totalColumnCount
+	 */
+	public int getTotalColumnCount() {
+		return totalColumnCount;
+	}
+
+	/**
+	 * @param totalColumnCount the totalColumnCount to set
+	 */
+	public void setTotalColumnCount(int totalColumnCount) {
+		this.totalColumnCount = totalColumnCount;
+	}
 
 	/**
 	 * @return the ajax
@@ -324,14 +369,14 @@ public abstract class StandardOutput {
 	/**
 	 * Performs any initialization required by the output generator
 	 */
-	protected void init() {
+	public void init() {
 
 	}
 
 	/**
 	 * Outputs the report title
 	 */
-	protected void addTitle() {
+	public void addTitle() {
 
 	}
 
@@ -347,7 +392,7 @@ public abstract class StandardOutput {
 	/**
 	 * Performs initialization required before outputting the header
 	 */
-	protected void beginHeader() {
+	public void beginHeader() {
 
 	}
 
@@ -356,7 +401,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	protected abstract void addHeaderCell(String value);
+	public abstract void addHeaderCell(String value);
 
 	/**
 	 * Outputs a value to the header whose text is left aligned
@@ -380,14 +425,14 @@ public abstract class StandardOutput {
 	/**
 	 * Performs any cleanup after outputting of the header
 	 */
-	protected void endHeader() {
+	public void endHeader() {
 
 	}
 
 	/**
 	 * Performs any initialization before resultset output begins
 	 */
-	protected void beginRows() {
+	public void beginRows() {
 
 	}
 
@@ -396,7 +441,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	protected abstract void addCellString(String value);
+	public abstract void addCellString(String value);
 
 	/**
 	 * For html output, the implementing class should perform escaping on the
@@ -413,7 +458,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	protected abstract void addCellNumeric(Double value);
+	public abstract void addCellNumeric(Double value);
 
 	/**
 	 * Outputs numeric value to the current row
@@ -431,7 +476,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	protected abstract void addCellDate(Date value);
+	public abstract void addCellDate(Date value);
 
 	/**
 	 * Outputs a date value to the current row
@@ -456,19 +501,19 @@ public abstract class StandardOutput {
 	/**
 	 * Closes the current row and opens a new one.
 	 */
-	protected abstract void newRow();
+	public abstract void newRow();
 
 	/**
 	 * Closes the current row
 	 */
-	protected void endRow() {
+	public void endRow() {
 
 	}
 
 	/**
 	 * Finalizes data output
 	 */
-	protected void endRows() {
+	public void endRows() {
 
 	}
 
@@ -509,7 +554,7 @@ public abstract class StandardOutput {
 	/**
 	 * Closes report output. Any final cleanup should be done here.
 	 */
-	protected abstract void endOutput();
+	public abstract void endOutput();
 
 	/**
 	 * Formats a numberic value for display
@@ -636,7 +681,7 @@ public abstract class StandardOutput {
 			drilldownCount = drilldowns.size();
 		}
 
-		totalColumnCount = resultSetColumnCount + drilldownCount;
+		setTotalColumnCount(resultSetColumnCount + drilldownCount);
 
 		List<String> hiddenColumns = getHiddenColumnsList(report);
 
@@ -645,7 +690,7 @@ public abstract class StandardOutput {
 			hiddenColumnCount = hiddenColumns.size();
 		}
 
-		totalColumnCount = totalColumnCount - hiddenColumnCount;
+		setTotalColumnCount(totalColumnCount - hiddenColumnCount);
 
 		//perform any required output initialization
 		init();
@@ -722,6 +767,8 @@ public abstract class StandardOutput {
 				for (int i = 0; i < totalColumnCount; i++) {
 					addCellString("...");
 				}
+				
+				endRows();
 
 				endOutput();
 
@@ -829,7 +876,7 @@ public abstract class StandardOutput {
 	private void finalizeOutput(List<String> hiddenColumns, ResultSetMetaData rsmd,
 			int drilldownCount, List<String> totalColumns) throws SQLException {
 
-		if (rowCount > 1) {
+		if (rowCount > 0) {
 			endRow();
 		}
 
@@ -972,7 +1019,7 @@ public abstract class StandardOutput {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		resultSetColumnCount = rsmd.getColumnCount();
 
-		totalColumnCount = resultSetColumnCount;
+		setTotalColumnCount(resultSetColumnCount);
 
 		List<String> hiddenColumns = getHiddenColumnsList(report);
 
@@ -981,7 +1028,7 @@ public abstract class StandardOutput {
 			hiddenColumnCount = hiddenColumns.size();
 		}
 
-		totalColumnCount = totalColumnCount - hiddenColumnCount;
+		setTotalColumnCount(totalColumnCount - hiddenColumnCount);
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
 		Map<Integer, ColumnTypeDefinition> columnTypes = getColumnTypes(rsmd);
@@ -1157,18 +1204,24 @@ public abstract class StandardOutput {
 	/**
 	 * Initializes actual and sort number formatters
 	 */
-	private void initializeNumberFormatters() {
+	public void initializeNumberFormatters() {
 		//initialize number formatters
+		final int OPTIONAL_DECIMAL_COUNT = 10;
+		String optionalDecimals = StringUtils.repeat("#", OPTIONAL_DECIMAL_COUNT);
+		String pattern;
 		actualNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
-		actualNumberFormatter.applyPattern("#,##0.#");
+		pattern = "#,##0." + optionalDecimals;
+		actualNumberFormatter.applyPattern(pattern);
 
 		plainNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
-		plainNumberFormatter.applyPattern("#.#");
+		pattern = "#." + optionalDecimals;
+		plainNumberFormatter.applyPattern(pattern);
 
 		//specifically use english locale for sorting e.g.
 		//in case user locale uses dot as thousands separator e.g. italian, german
 		sortNumberFormatter = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
-		sortNumberFormatter.applyPattern("#.#");
+		pattern = "#." + optionalDecimals;
+		sortNumberFormatter.applyPattern(pattern);
 		//set minimum digits to ensure all numbers are pre-padded with zeros,
 		//so that sorting works correctly
 		sortNumberFormatter.setMinimumIntegerDigits(20);
@@ -1827,7 +1880,7 @@ public abstract class StandardOutput {
 			xa = x.keySet().toArray();
 			ya = y.keySet().toArray();
 
-			totalColumnCount = xa.length + 1;
+			setTotalColumnCount(xa.length + 1);
 
 			//perform any required output initialization
 			init();
@@ -1898,7 +1951,7 @@ public abstract class StandardOutput {
 			xa = x.toArray();
 			ya = y.toArray();
 
-			totalColumnCount = xa.length + 1;
+			setTotalColumnCount(xa.length + 1);
 
 			//perform any required output initialization
 			init();
@@ -2192,5 +2245,15 @@ public abstract class StandardOutput {
 		}
 
 		return localizedColumnNames;
+	}
+	
+	/**
+	 * Returns the open password to use for a report's output file
+	 * 
+	 * @return the open password to use for a report's output file
+	 */
+	protected String getEffectiveOpenPassword() {
+		RunReportHelper runReportHelper= new RunReportHelper();
+		return runReportHelper.getEffectiveOpenPassword(report, dynamicOpenPassword);
 	}
 }

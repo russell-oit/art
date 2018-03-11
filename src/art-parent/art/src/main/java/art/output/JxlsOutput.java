@@ -68,6 +68,36 @@ public class JxlsOutput {
 
 	private ResultSet resultSet;
 	private Locale locale;
+	private String dynamicOpenPassword;
+	private String dynamicModifyPassword;
+
+	/**
+	 * @return the dynamicModifyPassword
+	 */
+	public String getDynamicModifyPassword() {
+		return dynamicModifyPassword;
+	}
+
+	/**
+	 * @param dynamicModifyPassword the dynamicModifyPassword to set
+	 */
+	public void setDynamicModifyPassword(String dynamicModifyPassword) {
+		this.dynamicModifyPassword = dynamicModifyPassword;
+	}
+
+	/**
+	 * @return the dynamicOpenPassword
+	 */
+	public String getDynamicOpenPassword() {
+		return dynamicOpenPassword;
+	}
+
+	/**
+	 * @param dynamicOpenPassword the dynamicOpenPassword to set
+	 */
+	public void setDynamicOpenPassword(String dynamicOpenPassword) {
+		this.dynamicOpenPassword = dynamicOpenPassword;
+	}
 
 	/**
 	 * @return the locale
@@ -127,7 +157,7 @@ public class JxlsOutput {
 
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + templateFileName);
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 			}
 
 			//set objects to be passed to jxls
@@ -157,7 +187,7 @@ public class JxlsOutput {
 			if (StringUtils.isNotBlank(areaConfigFilename)) {
 				File areaConfigFile = new File(fullAreaConfigFilename);
 				if (!areaConfigFile.exists()) {
-					throw new IllegalStateException("Area config file not found: " + areaConfigFilename);
+					throw new IllegalStateException("Area config file not found: " + fullAreaConfigFilename);
 				}
 			}
 
@@ -168,9 +198,9 @@ public class JxlsOutput {
 				templateResultOptions = ArtUtils.jsonToObject(options, TemplateResultOptions.class);
 			}
 
+			RunReportHelper runReportHelper = new RunReportHelper();
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
-				RunReportHelper runReportHelper = new RunReportHelper();
 				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
 				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn, templateResultOptions);
 				context.putVar("jdbc", jdbcHelper);
@@ -187,7 +217,8 @@ public class JxlsOutput {
 			String extension = FilenameUtils.getExtension(templateFileName);
 			if (!StringUtils.equalsIgnoreCase(extension, "xls")) {
 				//set modify password
-				String modifyPassword = report.getModifyPassword();
+				String modifyPassword = runReportHelper.getEffectiveModifyPassword(report, dynamicModifyPassword);
+
 				if (StringUtils.isNotEmpty(modifyPassword)) {
 					//https://poi.apache.org/spreadsheet/quick-guide.html#ReadWriteWorkbook
 					//https://stackoverflow.com/questions/17556108/open-existing-xls-in-apache-poi
@@ -207,7 +238,8 @@ public class JxlsOutput {
 				}
 
 				//set open password
-				String openPassword = report.getOpenPassword();
+				String openPassword = runReportHelper.getEffectiveOpenPassword(report, dynamicOpenPassword);
+
 				if (StringUtils.isNotEmpty(openPassword)) {
 					PoiUtils.addOpenPassword(openPassword, outputFileName);
 				}

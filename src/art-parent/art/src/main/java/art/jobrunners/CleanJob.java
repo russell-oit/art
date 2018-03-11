@@ -46,8 +46,9 @@ public class CleanJob implements org.quartz.Job {
 	public void execute(JobExecutionContext jec) throws JobExecutionException {
 		logger.debug("Entering execute");
 
-		// Delete old files in the reports export directory
+		//Delete old files in export directories
 		cleanDirectory(Config.getReportsExportPath());
+		cleanDirectory(Config.getRecordsExportPath());
 
 		//clear mondrian cache
 		clearMondrianCache();
@@ -88,6 +89,7 @@ public class CleanJob implements org.quartz.Job {
 		validExtensions.add("gpg");
 		validExtensions.add("png");
 		validExtensions.add("xlsm");
+		validExtensions.add("json");
 
 		for (File file : files) {
 			// Delete the file if it is older than DELETE_FILES_MINUTES

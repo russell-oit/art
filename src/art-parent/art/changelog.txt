@@ -1,3 +1,13 @@
+ART 3.3
+* Allow sending of email if there is an error with a particular job
+* Added ReportEngine report types
+* Fix for double values only showing one decimal value by default
+* Allow dynamic recipient query to specify file open or modify password
+* Added password encryptor
+* Fix for multiple c3.js, pivottable.js, reactpivot, dygraphs, datatables, chart.js, datamaps, leaflet, openlayers, orgchart reports within a dashboad not displaying correctly. Leaflet and OpenLayers template files will require replacing the 'map' element id with the variable mapId.
+* Allow import/export of repository artefacts
+* Fix for inability to enter chained depends values more than 2 characters
+
 ART 3.2
 * Added Velocity report type
 * Added OrgChart report types
@@ -11,7 +21,7 @@ ART 3.2
 * Allow application logs to be written to a database
 * Added context path variable for freemarker and thymleaf output
 * Added useLowerCaseProperties option for template reports
-* Allow for testing of ftp, sftp, network share, s3 and azure connections
+* Allow for testing of ftp, sftp, network share connections
 * Allow for email notification on application errors
 * Allow for specifying of password policy for internal authentication passwords
 * Allow jxls reports to use open and modify passwords

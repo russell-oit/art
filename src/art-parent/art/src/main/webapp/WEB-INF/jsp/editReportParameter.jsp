@@ -125,7 +125,7 @@
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="chainedParents" class="form-control"/>
+							<form:input path="chainedParents" maxlength="200" class="form-control"/>
 							<spring:message code="parameters.help.chainedParents" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -143,7 +143,7 @@
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="chainedDepends" maxlength="2" class="form-control"/>
+							<form:input path="chainedDepends" maxlength="200" class="form-control"/>
 							<spring:message code="parameters.help.chainedDepends" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"

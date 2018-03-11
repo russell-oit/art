@@ -21,6 +21,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.awt.Color;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -32,6 +35,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -41,6 +45,9 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -557,6 +564,107 @@ public class ArtUtils {
 
 		String formattedNumber = df.format(number);
 		return formattedNumber;
+	}
+
+	/**
+	 * Converts a string of comma separated integer values to an object list
+	 *
+	 * @param ids the string of comma separated values to convert
+	 * @return an object list containing Integer values
+	 */
+	public static List<Object> idsToObjectList(String ids) {
+		List<Object> idsList = new ArrayList<>();
+
+		if (StringUtils.isNotBlank(ids)) {
+			String[] idsArrayString = StringUtils.split(ids, ",");
+			for (String idString : idsArrayString) {
+				Integer idInteger = Integer.valueOf(idString.trim());
+				idsList.add(idInteger);
+			}
+		}
+
+		return idsList;
+	}
+
+	/**
+	 * Converts a string of comma separated integer values to an object array
+	 *
+	 * @param ids the string of comma separated values to convert
+	 * @return an object array containing Integer values
+	 */
+	public static Object[] idsToObjectArray(String ids) {
+		List<Object> idsList = idsToObjectList(ids);
+		Object[] idsArray = idsList.toArray(new Object[idsList.size()]);
+		return idsArray;
+	}
+
+	/**
+	 * Zips multiple files
+	 *
+	 * @param outputFileName the full file name of the zip file to generate
+	 * @param inputFileNames the full file name of the files to zip
+	 * @throws IOException
+	 */
+	public static void zipFiles(String outputFileName, String... inputFileNames) throws IOException {
+		List<String> inputFileNamesList = Arrays.asList(inputFileNames);
+		zipFiles(outputFileName, inputFileNamesList);
+	}
+
+	/**
+	 * Zips multiple files
+	 *
+	 * @param outputFileName the full file name of the zip file to generate
+	 * @param inputFileNames the full file name of the files to zip
+	 * @throws IOException
+	 */
+	public static void zipFiles(String outputFileName, List<String> inputFileNames) throws IOException {
+		//http://www.baeldung.com/java-compress-and-uncompress
+		//https://www.mkyong.com/java/how-to-compress-files-in-zip-format/
+		try (FileOutputStream fos = new FileOutputStream(outputFileName);
+				ZipOutputStream zos = new ZipOutputStream(fos)) {
+			for (String inputFileName : inputFileNames) {
+				File fileToZip = new File(inputFileName);
+				try (FileInputStream fis = new FileInputStream(fileToZip)) {
+					ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+					zos.putNextEntry(zipEntry);
+
+					byte[] bytes = new byte[1024];
+					int length;
+					while ((length = fis.read(bytes)) >= 0) {
+						zos.write(bytes, 0, length);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Unzips a file to a designated location
+	 *
+	 * @param zipFileName the full file name of the file to unzip
+	 * @param destinationDirectory the location to unzip to
+	 * @throws IOException
+	 */
+	public static void unzipFile(String zipFileName, String destinationDirectory) throws IOException {
+		//http://www.baeldung.com/java-compress-and-uncompress
+		byte[] buffer = new byte[1024];
+		try (FileInputStream fis = new FileInputStream(zipFileName);
+				ZipInputStream zis = new ZipInputStream(fis)) {
+			ZipEntry zipEntry = zis.getNextEntry();
+			while (zipEntry != null) {
+				String fileName = zipEntry.getName();
+				String filePath = destinationDirectory + fileName;
+				File newFile = new File(filePath);
+				try (FileOutputStream fos = new FileOutputStream(newFile)) {
+					int len;
+					while ((len = zis.read(buffer)) > 0) {
+						fos.write(buffer, 0, len);
+					}
+				}
+				zipEntry = zis.getNextEntry();
+			}
+			zis.closeEntry();
+		}
 	}
 
 }

@@ -18,6 +18,7 @@
 package art.rule;
 
 import art.enums.ParameterDataType;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -29,11 +30,15 @@ import java.util.Date;
 public class Rule implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int ruleId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
 	private Date creationDate;
 	private Date updateDate;
+	@Parsed
 	private ParameterDataType dataType;
 	private String createdBy;
 	private String updatedBy;

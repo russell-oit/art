@@ -17,6 +17,7 @@
  */
 package art.reportgroup;
 
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.text.Collator;
 import java.util.Comparator;
@@ -30,13 +31,32 @@ import java.util.Date;
 public class ReportGroup implements Serializable, Comparable<ReportGroup> {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
+	private int parentId; //used for import/export of linked records e.g. reports
+	@Parsed
 	private int reportGroupId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
+
+	/**
+	 * @return the parentId
+	 */
+	public int getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 
 	/**
 	 * @return the createdBy

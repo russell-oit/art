@@ -17,6 +17,7 @@
  */
 package art.holiday;
 
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -28,14 +29,34 @@ import java.util.Date;
 public class Holiday implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+	@Parsed
+	private int parentId; //used for import/export of linked records e.g. schedules
+	@Parsed
 	private int holidayId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
+	@Parsed
 	private String definition;
 	private Date creationDate;
 	private String createdBy;
 	private Date updateDate;
 	private String updatedBy;
+
+	/**
+	 * @return the parentId
+	 */
+	public int getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 
 	/**
 	 * @return the holidayId

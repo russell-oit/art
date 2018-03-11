@@ -42,9 +42,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class ReportGroupMembershipController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportGroupMembershipController.class);
-
+	
 	@Autowired
 	private ReportGroupMembershipService reportGroupMembershipService;
+
+	@Autowired
+	private ReportGroupMembershipService2 reportGroupMembershipService2;
 
 	@Autowired
 	private ReportService reportService;
@@ -98,7 +101,7 @@ public class ReportGroupMembershipController {
 		logger.debug("reportGroupId={}", reportGroupId);
 
 		try {
-			reportGroupMembershipService.deleteReportGroupMembership(reportId, reportGroupId);
+			reportGroupMembershipService2.deleteReportGroupMembership(reportId, reportGroupId);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -121,7 +124,7 @@ public class ReportGroupMembershipController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			reportGroupMembershipService.updateReportGroupMembership(action, reports, reportGroups);
+			reportGroupMembershipService2.updateReportGroupMembership(action, reports, reportGroups);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

@@ -17,7 +17,10 @@
  */
 package art.report;
 
+import art.accessright.UserGroupReportRight;
+import art.accessright.UserReportRight;
 import art.datasource.Datasource;
+import art.drilldown.Drilldown;
 import art.encryptor.Encryptor;
 import art.enums.EncryptorType;
 import art.enums.PageOrientation;
@@ -26,11 +29,19 @@ import art.reportgroup.ReportGroup;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.Reporti18nOptions;
 import art.encryption.AESCrypt;
+import art.encryption.AesEncryptor;
+import art.migration.PrefixTransformer;
 import art.reportoptions.CloneOptions;
+import art.reportparameter.ReportParameter;
+import art.reportrule.ReportRule;
+import art.ruleValue.UserGroupRuleValue;
+import art.ruleValue.UserRuleValue;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.univocity.parsers.annotations.Nested;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -61,59 +72,219 @@ public class Report implements Serializable {
 	private static final Logger logger = LoggerFactory.getLogger(Report.class);
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int reportId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String shortDescription;
+	@Parsed
 	private String description;
 	private int reportTypeId;
-	private Datasource datasource;
+	@Parsed
 	private String contactPerson;
+	@Parsed
 	private boolean usesRules;
+	@Parsed
 	private boolean parametersInOutput;
+	@Parsed
 	private String xAxisLabel;
+	@Parsed
 	private String yAxisLabel;
+	@Parsed
 	private String chartOptionsSetting;
+	@Parsed
 	private String template;
+	@Parsed
 	private int displayResultset;
+	@Parsed
 	private String xmlaDatasource;
+	@Parsed
 	private String xmlaCatalog;
 	private Date creationDate;
 	private Date updateDate;
+	@Parsed
 	private String reportSource;
 	private boolean useBlankXmlaPassword;
 	private ChartOptions chartOptions;
 	private String reportSourceHtml; //used with text reports
 	private String createdBy;
 	private String updatedBy;
+	@Parsed
 	private ReportType reportType;
+	@Parsed
 	private int groupColumn;
+	@Parsed
 	private boolean active = true;
+	@Parsed
 	private boolean hidden;
+	@Parsed
 	private String defaultReportFormat;
+	@Parsed
 	private String secondaryCharts;
+	@Parsed
 	private String hiddenColumns;
+	@Parsed
 	private String totalColumns;
+	@Parsed
 	private String dateFormat;
+	@Parsed
 	private String numberFormat;
+	@Parsed
 	private String columnFormats;
+	@Parsed
 	private String locale;
+	@Parsed
 	private String nullNumberDisplay;
+	@Parsed
 	private String nullStringDisplay;
+	@Parsed
 	private int fetchSize;
+	@Parsed
 	private String options;
+	@Parsed
 	private PageOrientation pageOrientation = PageOrientation.Portrait;
+	@Parsed
 	private boolean omitTitleRow;
+	@Parsed
 	private boolean lovUseDynamicDatasource;
 	private GeneralReportOptions generalOptions;
+	@Parsed
 	private String openPassword;
+	@Parsed
 	private String modifyPassword;
 	private boolean useNoneOpenPassword; //only for use with ui
 	private boolean useNoneModifyPassword; //only for use with ui
-	private Encryptor encryptor;
 	private Report sourceReport;
+	@Parsed
 	private int sourceReportId;
 	private CloneOptions cloneOptions;
 	private List<ReportGroup> reportGroups;
+	@Parsed
+	private boolean clearTextPasswords;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
+	private Datasource datasource;
+	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
+	private Encryptor encryptor;
+	private List<ReportParameter> reportParams; //used in import/export
+	private List<UserRuleValue> userRuleValues; //used in import/export
+	private List<UserGroupRuleValue> userGroupRuleValues; //used in import/export
+	private List<ReportRule> reportRules; //used in import/export
+	private List<UserReportRight> userReportRights; //used in import/export
+	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
+	private List<Drilldown> drilldowns; //used in import/export
+
+	/**
+	 * @return the drilldowns
+	 */
+	public List<Drilldown> getDrilldowns() {
+		return drilldowns;
+	}
+
+	/**
+	 * @param drilldowns the drilldowns to set
+	 */
+	public void setDrilldowns(List<Drilldown> drilldowns) {
+		this.drilldowns = drilldowns;
+	}
+
+	/**
+	 * @return the userReportRights
+	 */
+	public List<UserReportRight> getUserReportRights() {
+		return userReportRights;
+	}
+
+	/**
+	 * @param userReportRights the userReportRights to set
+	 */
+	public void setUserReportRights(List<UserReportRight> userReportRights) {
+		this.userReportRights = userReportRights;
+	}
+
+	/**
+	 * @return the userGroupReportRights
+	 */
+	public List<UserGroupReportRight> getUserGroupReportRights() {
+		return userGroupReportRights;
+	}
+
+	/**
+	 * @param userGroupReportRights the userGroupReportRights to set
+	 */
+	public void setUserGroupReportRights(List<UserGroupReportRight> userGroupReportRights) {
+		this.userGroupReportRights = userGroupReportRights;
+	}
+
+	/**
+	 * @return the reportRules
+	 */
+	public List<ReportRule> getReportRules() {
+		return reportRules;
+	}
+
+	/**
+	 * @param reportRules the reportRules to set
+	 */
+	public void setReportRules(List<ReportRule> reportRules) {
+		this.reportRules = reportRules;
+	}
+
+	/**
+	 * @return the userRuleValues
+	 */
+	public List<UserRuleValue> getUserRuleValues() {
+		return userRuleValues;
+	}
+
+	/**
+	 * @param userRuleValues the userRuleValues to set
+	 */
+	public void setUserRuleValues(List<UserRuleValue> userRuleValues) {
+		this.userRuleValues = userRuleValues;
+	}
+
+	/**
+	 * @return the userGroupRuleValues
+	 */
+	public List<UserGroupRuleValue> getUserGroupRuleValues() {
+		return userGroupRuleValues;
+	}
+
+	/**
+	 * @param userGroupRuleValues the userGroupRuleValues to set
+	 */
+	public void setUserGroupRuleValues(List<UserGroupRuleValue> userGroupRuleValues) {
+		this.userGroupRuleValues = userGroupRuleValues;
+	}
+
+	/**
+	 * @return the reportParams
+	 */
+	public List<ReportParameter> getReportParams() {
+		return reportParams;
+	}
+
+	/**
+	 * @param reportParams the reportParams to set
+	 */
+	public void setReportParams(List<ReportParameter> reportParams) {
+		this.reportParams = reportParams;
+	}
+
+	/**
+	 * @return the clearTextPasswords
+	 */
+	public boolean isClearTextPasswords() {
+		return clearTextPasswords;
+	}
+
+	/**
+	 * @param clearTextPasswords the clearTextPasswords to set
+	 */
+	public void setClearTextPasswords(boolean clearTextPasswords) {
+		this.clearTextPasswords = clearTextPasswords;
+	}
 
 	/**
 	 * @return the reportGroups
@@ -1068,7 +1239,7 @@ public class Report implements Serializable {
 				encryptFileOpenPgp(finalFileName);
 				break;
 			default:
-			//do nothing
+				break;
 		}
 	}
 
@@ -1169,6 +1340,22 @@ public class Report implements Serializable {
 		}
 
 		return namesString;
+	}
+
+	/**
+	 * Decrypts password fields
+	 */
+	public void decryptPasswords() {
+		openPassword = AesEncryptor.decrypt(openPassword);
+		modifyPassword = AesEncryptor.decrypt(modifyPassword);
+	}
+
+	/**
+	 * Encrypts password fields
+	 */
+	public void encryptPasswords() {
+		openPassword = AesEncryptor.encrypt(openPassword);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword);
 	}
 
 }

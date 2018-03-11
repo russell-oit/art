@@ -78,6 +78,7 @@ public class DbConnections {
 
 		//create connection pool for the art database
 		createConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
+
 		//create connection pools for report databases
 		createJdbcDatasourceConnectionPools(maxPoolSize, connectionPoolLibrary);
 		createMongodbDatasourceConnectionPools();
@@ -145,8 +146,8 @@ public class DbConnections {
 	 * @param maxPoolSize the maximum pool size
 	 * @param connectionPoolLibrary the connection pool library
 	 */
-	public static void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
-			ConnectionPoolLibrary connectionPoolLibrary) {
+	public static void createConnectionPool(DatasourceInfo datasourceInfo,
+			int maxPoolSize, ConnectionPoolLibrary connectionPoolLibrary) {
 
 		logger.debug("Entering createConnectionPool");
 

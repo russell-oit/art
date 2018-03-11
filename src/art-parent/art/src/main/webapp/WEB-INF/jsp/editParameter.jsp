@@ -331,16 +331,16 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="lovReportId">
+					<label class="col-md-4 control-label " for="lovReport.reportId">
 						<spring:message code="parameters.label.lovReport"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="lovReportId" class="form-control selectpicker">
+						<form:select path="lovReport.reportId" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
 								<option data-divider="true"></option>
 							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
 						</form:select>
-						<form:errors path="lovReportId" cssClass="error"/>
+						<form:errors path="lovReport.reportId" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

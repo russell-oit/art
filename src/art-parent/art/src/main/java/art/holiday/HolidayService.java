@@ -21,6 +21,8 @@ import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -109,6 +111,25 @@ public class HolidayService {
 	}
 
 	/**
+	 * Returns holidays with given ids
+	 *
+	 * @param ids comma separated string of the holiday ids to retrieve
+	 * @return holidays with given ids
+	 * @throws SQLException
+	 */
+	public List<Holiday> getHolidays(String ids) throws SQLException {
+		logger.debug("Entering getHolidays: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE HOLIDAY_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Holiday>> h = new BeanListHandler<>(Holiday.class, new HolidayMapper());
+		return dbService.query(sql, h, idsArray);
+	}
+
+	/**
 	 * Returns a holiday
 	 *
 	 * @param id the holiday id
@@ -122,6 +143,22 @@ public class HolidayService {
 		String sql = SQL_SELECT_ALL + " WHERE HOLIDAY_ID=?";
 		ResultSetHandler<Holiday> h = new BeanHandler<>(Holiday.class, new HolidayMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Returns a holiday
+	 *
+	 * @param name the holiday name
+	 * @return holiday if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("holidays")
+	public Holiday getHoliday(String name) throws SQLException {
+		logger.debug("Entering getHoliday: name='{}'", name);
+
+		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
+		ResultSetHandler<Holiday> h = new BeanHandler<>(Holiday.class, new HolidayMapper());
+		return dbService.query(sql, h, name);
 	}
 
 	/**
@@ -232,17 +269,73 @@ public class HolidayService {
 	}
 
 	/**
+	 * Imports holiday records
+	 *
+	 * @param holidays the list of holidays to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "holidays", allEntries = true)
+	public void importHolidays(List<Holiday> holidays, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importHolidays: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(HOLIDAY_ID) FROM ART_HOLIDAYS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Holiday holiday : holidays) {
+				id++;
+				saveHoliday(holiday, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a holiday
+	 *
+	 * @param holiday the holiday to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveHoliday(Holiday holiday, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveHoliday(holiday, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a holiday
 	 *
 	 * @param holiday the holiday to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. If null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveHoliday(Holiday holiday, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveHoliday: holiday={}, newRecordId={}, actionUser={}",
-				holiday, newRecordId, actionUser);
+	@CacheEvict(value = "holidays", allEntries = true)
+	public void saveHoliday(Holiday holiday, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveHoliday: holiday={}, newRecordId={},"
+				+ " actionUser={}", holiday, newRecordId, actionUser);
 
 		int affectedRows;
 		boolean newRecord = false;
@@ -265,7 +358,11 @@ public class HolidayService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_HOLIDAYS SET NAME=?, DESCRIPTION=?,"
 					+ " HOLIDAY_DEFINITION=?,"
@@ -281,7 +378,11 @@ public class HolidayService {
 				holiday.getHolidayId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

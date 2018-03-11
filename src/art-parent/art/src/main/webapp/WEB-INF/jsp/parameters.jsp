@@ -33,7 +33,7 @@ Display parameters
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="parameters"]').parent().addClass('active');
 
@@ -58,7 +58,7 @@ Display parameters
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
 						"${linkedReportsExistText}" //linkedRecordsExistText
 						);
-				
+
 				var table = oTable.api();
 
 				$('#deleteRecords').click(function () {
@@ -106,7 +106,19 @@ Display parameters
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-
+				
+				$('#exportRecords').click(function () {
+					var selectedRows = table.rows({selected: true});
+					var data = selectedRows.data();
+					if (data.length > 0) {
+						var ids = $.map(data, function (item) {
+							return item[1];
+						});
+						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Parameters&ids=' + ids;
+					} else {
+						bootbox.alert("${selectRecordsText}");
+					}
+				});
 
 			}); //end document ready
 		</script>
@@ -133,14 +145,24 @@ Display parameters
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/addParameter">
-				<i class="fa fa-plus"></i>
-				<spring:message code="page.action.add"/>
-			</a>
-			<button type="button" id="deleteRecords" class="btn btn-default">
-				<i class="fa fa-trash-o"></i>
-				<spring:message code="page.action.delete"/>
-			</button>
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/addParameter">
+					<i class="fa fa-plus"></i>
+					<spring:message code="page.action.add"/>
+				</a>
+				<button type="button" id="deleteRecords" class="btn btn-default">
+					<i class="fa fa-trash-o"></i>
+					<spring:message code="page.action.delete"/>
+				</button>
+			</div>
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Parameters">
+					<spring:message code="page.text.import"/>
+				</a>
+				<button type="button" id="exportRecords" class="btn btn-default">
+					<spring:message code="page.text.export"/>
+				</button>
+			</div>
 		</div>
 
 		<table id="parameters" class="table table-bordered table-striped table-condensed">
@@ -158,7 +180,7 @@ Display parameters
 			<tbody>
 				<c:forEach var="parameter" items="${parameters}">
 					<tr data-id="${parameter.parameterId}" 
-						data-name="${encode:forHtmlAttribute(parameter.name)}">
+						data-name="${encode:forHtmlAttribute(parameter.name)} (${parameter.parameterId})">
 
 						<td></td>
 						<td>${parameter.parameterId}</td>

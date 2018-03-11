@@ -10,7 +10,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 
-<div id="chart-container" style="text-align: center"></div>
+<div id="${containerId}" style="text-align: center"></div>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/OrgChart-2.0.10/css/jquery.orgchart.min.css">
@@ -117,7 +117,7 @@
 </c:if>
 
 <script>
-	$('#chart-container').orgchart(orgChartSettings);
+	$('#${containerId}').orgchart(orgChartSettings);
 </script>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">

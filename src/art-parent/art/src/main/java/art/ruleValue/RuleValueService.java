@@ -25,16 +25,19 @@ import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,8 +76,8 @@ public class RuleValueService {
 		userGroupService = new UserGroupService();
 	}
 
-	private final String SQL_SELECT_ALL_USER_RULE_VALUES = "SELECT * FROM ART_USER_RULES";
-	private final String SQL_SELECT_ALL_USER_GROUP_RULE_VALUES = "SELECT * FROM ART_USER_GROUP_RULES";
+	private final String SQL_SELECT_ALL_USER_RULE_VALUES = "SELECT * FROM ART_USER_RULES AUR";
+	private final String SQL_SELECT_ALL_USER_GROUP_RULE_VALUES = "SELECT * FROM ART_USER_GROUP_RULES AUGR";
 
 	/**
 	 * Maps a resultset to an object
@@ -152,6 +155,25 @@ public class RuleValueService {
 	}
 
 	/**
+	 * Returns user rule values for a report
+	 *
+	 * @param reportId the report's id
+	 * @return user rule values for the report
+	 * @throws SQLException
+	 */
+	public List<UserRuleValue> getReportUserRuleValues(int reportId) throws SQLException {
+		logger.debug("Entering getReportUserRuleValues: reportId={}", reportId);
+
+		String sql = "SELECT AUR.* FROM ART_USER_RULES AUR"
+				+ " INNER JOIN ART_QUERY_RULES AQR"
+				+ " ON AUR.RULE_ID=AQR.RULE_ID"
+				+ " WHERE AQR.QUERY_ID=?";
+
+		ResultSetHandler<List<UserRuleValue>> h = new BeanListHandler<>(UserRuleValue.class, new UserRuleValueMapper());
+		return dbService.query(sql, h, reportId);
+	}
+
+	/**
 	 * Returns a user rule value
 	 *
 	 * @param id the rule value key
@@ -164,6 +186,56 @@ public class RuleValueService {
 		String sql = SQL_SELECT_ALL_USER_RULE_VALUES + " WHERE RULE_VALUE_KEY=?";
 		ResultSetHandler<UserRuleValue> h = new BeanHandler<>(UserRuleValue.class, new UserRuleValueMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Returns <code>true</code> if a user rule value exists
+	 *
+	 * @param userId the user id
+	 * @param ruleId the rule id
+	 * @param ruleValue the rule value
+	 * @return <code>true</code> if the user rule value exists
+	 * @throws SQLException
+	 */
+	public boolean userRuleValueExists(int userId, int ruleId,
+			String ruleValue) throws SQLException {
+		Connection conn = null;
+		return userRuleValueExists(userId, ruleId, ruleValue, conn);
+
+	}
+
+	/**
+	 * Returns <code>true</code> if a user rule value exists
+	 *
+	 * @param userId the user id
+	 * @param ruleId the rule id
+	 * @param ruleValue the rule value
+	 * @param conn the connection to use. if null, the art database will be used
+	 * @return <code>true</code> if the user rule value exists
+	 * @throws SQLException
+	 */
+	public boolean userRuleValueExists(int userId, int ruleId,
+			String ruleValue, Connection conn) throws SQLException {
+
+		logger.debug("Entering userRuleValueExists: userId={}, ruleId={},"
+				+ " ruleValue='{}'", userId, ruleId, ruleValue);
+
+		String sql = "SELECT COUNT(*) FROM ART_USER_RULES"
+				+ " WHERE USER_ID=? AND RULE_ID=? AND RULE_VALUE=?";
+
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCountNumber;
+		if (conn == null) {
+			recordCountNumber = dbService.query(sql, h, userId, ruleId, ruleValue);
+		} else {
+			recordCountNumber = dbService.query(conn, sql, h, userId, ruleId, ruleValue);
+		}
+
+		if (recordCountNumber == null || recordCountNumber.longValue() == 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
@@ -196,6 +268,25 @@ public class RuleValueService {
 	}
 
 	/**
+	 * Returns user group rule values for a report
+	 *
+	 * @param reportId the report's id
+	 * @return user group rule values for the report
+	 * @throws SQLException
+	 */
+	public List<UserGroupRuleValue> getReportUserGroupRuleValues(int reportId) throws SQLException {
+		logger.debug("Entering getReportUserGroupRuleValues: reportId={}", reportId);
+
+		String sql = "SELECT AUGR.* FROM ART_USER_GROUP_RULES AUGR"
+				+ " INNER JOIN ART_QUERY_RULES AQR"
+				+ " ON AUGR.RULE_ID=AQR.RULE_ID"
+				+ " WHERE AQR.QUERY_ID=?";
+
+		ResultSetHandler<List<UserGroupRuleValue>> h = new BeanListHandler<>(UserGroupRuleValue.class, new UserGroupRuleValueMapper());
+		return dbService.query(sql, h, reportId);
+	}
+
+	/**
 	 * Returns a user group rule value
 	 *
 	 * @param id the rule value key
@@ -208,6 +299,55 @@ public class RuleValueService {
 		String sql = SQL_SELECT_ALL_USER_GROUP_RULE_VALUES + " WHERE RULE_VALUE_KEY=?";
 		ResultSetHandler<UserGroupRuleValue> h = new BeanHandler<>(UserGroupRuleValue.class, new UserGroupRuleValueMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Returns <code>true</code> if a user group rule value exists
+	 *
+	 * @param userGroupId the user group id
+	 * @param ruleId the rule id
+	 * @param ruleValue the rule value
+	 * @return <code>true</code> if the user group rule value exists
+	 * @throws SQLException
+	 */
+	public boolean userGroupRuleValueExists(int userGroupId, int ruleId,
+			String ruleValue) throws SQLException {
+		Connection conn = null;
+		return userGroupRuleValueExists(userGroupId, ruleId, ruleValue, conn);
+	}
+
+	/**
+	 * Returns <code>true</code> if a user group rule value exists
+	 *
+	 * @param userGroupId the user group id
+	 * @param ruleId the rule id
+	 * @param ruleValue the rule value
+	 * @param conn the connection to use. if null, the art database will be used
+	 * @return <code>true</code> if the user group rule value exists
+	 * @throws SQLException
+	 */
+	public boolean userGroupRuleValueExists(int userGroupId, int ruleId,
+			String ruleValue, Connection conn) throws SQLException {
+
+		logger.debug("Entering userGroupRuleValueExists: userGroupId={}, ruleId={},"
+				+ " ruleValue='{}'", userGroupId, ruleId, ruleValue);
+
+		String sql = "SELECT COUNT(*) FROM ART_USER_GROUP_RULES"
+				+ " WHERE USER_GROUP_ID=? AND RULE_ID=? AND RULE_VALUE=?";
+
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCountNumber;
+		if (conn == null) {
+			recordCountNumber = dbService.query(sql, h, userGroupId, ruleId, ruleValue);
+		} else {
+			recordCountNumber = dbService.query(conn, sql, h, userGroupId, ruleId, ruleValue);
+		}
+
+		if (recordCountNumber == null || recordCountNumber.longValue() == 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
@@ -323,20 +463,34 @@ public class RuleValueService {
 	 *
 	 * @param users user identifiers in the format user id-username
 	 * @param userGroups user group ids
-	 * @param ruleKey the rule key
+	 * @param ruleKey the rule identifier in the format rule id-rule name
 	 * @param ruleValue the rule value
 	 * @throws SQLException
 	 */
 	public void addRuleValue(String[] users, Integer[] userGroups,
 			String ruleKey, String ruleValue) throws SQLException {
 
-		logger.debug("Entering addRuleValue: ruleId='{}', ruleValue='{}'",
+		Connection conn = null;
+		addRuleValue(users, userGroups, ruleKey, ruleValue, conn);
+	}
+
+	/**
+	 * Adds a rule value for users or user groups
+	 *
+	 * @param users user identifiers in the format user id-username
+	 * @param userGroups user group ids
+	 * @param ruleKey the rule identifier in the format rule id-rule name
+	 * @param ruleValue the rule value
+	 * @param conn the connection to use. if null, the art database will be used
+	 * @throws SQLException
+	 */
+	public void addRuleValue(String[] users, Integer[] userGroups,
+			String ruleKey, String ruleValue, Connection conn) throws SQLException {
+
+		logger.debug("Entering addRuleValue: ruleKey='{}', ruleValue='{}'",
 				ruleKey, ruleValue);
 
-		if (ruleKey == null) {
-			logger.warn("Cannot add rule value. Rule not specified");
-			return;
-		}
+		Objects.requireNonNull(ruleKey, "ruleKey must not be null");
 
 		Integer ruleId = Integer.valueOf(StringUtils.substringBefore(ruleKey, "-"));
 		//rule name won't be needed once rule id columns completely replace rule name in foreign keys
@@ -353,8 +507,17 @@ public class RuleValueService {
 				//username won't be needed once user id columns completely replace username in foreign keys
 				String username = StringUtils.substringAfter(user, "-");
 
-				dbService.update(sql, ArtUtils.getUniqueId(), userId, username,
-						ruleId, ruleName, ruleValue);
+				if (conn == null) {
+					if (!userRuleValueExists(userId, ruleId, ruleValue)) {
+						dbService.update(sql, ArtUtils.getUniqueId(), userId, username,
+								ruleId, ruleName, ruleValue);
+					}
+				} else {
+					if (!userRuleValueExists(userId, ruleId, ruleValue, conn)) {
+						dbService.update(conn, sql, ArtUtils.getUniqueId(), userId, username,
+								ruleId, ruleName, ruleValue);
+					}
+				}
 			}
 		}
 
@@ -365,8 +528,17 @@ public class RuleValueService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
 
 			for (Integer userGroupId : userGroups) {
-				dbService.update(sql, ArtUtils.getUniqueId(), userGroupId,
-						ruleId, ruleName, ruleValue);
+				if (conn == null) {
+					if (!userGroupRuleValueExists(userGroupId, ruleId, ruleValue)) {
+						dbService.update(sql, ArtUtils.getUniqueId(), userGroupId,
+								ruleId, ruleName, ruleValue);
+					}
+				} else {
+					if (!userGroupRuleValueExists(userGroupId, ruleId, ruleValue, conn)) {
+						dbService.update(conn, sql, ArtUtils.getUniqueId(), userGroupId,
+								ruleId, ruleName, ruleValue);
+					}
+				}
 			}
 		}
 	}

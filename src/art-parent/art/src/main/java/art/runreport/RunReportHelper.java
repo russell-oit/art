@@ -19,7 +19,9 @@ package art.runreport;
 
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
+import art.encryptor.Encryptor;
 import art.enums.AccessLevel;
+import art.enums.EncryptorType;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.report.ChartOptions;
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -258,6 +261,7 @@ public class RunReportHelper {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case ReportEngineFile:
 				enableShowSql = false;
 				enableShowSelectedParameters = false;
 				break;
@@ -579,6 +583,7 @@ public class RunReportHelper {
 		//is scroll insensitive much slower than forward only?
 		int resultSetType;
 		if (reportType.isChart() || reportType.isXDocReport()
+				|| reportType.isReportEngine()
 				|| reportType == ReportType.Group
 				|| reportType == ReportType.JasperReportsArt
 				|| reportType == ReportType.JxlsArt
@@ -630,6 +635,70 @@ public class RunReportHelper {
 		}
 
 		return reportParams;
+	}
+
+	/**
+	 * Returns the open password to use for a report's output file
+	 *
+	 * @param report the report
+	 * @param dynamicOpenPassword the dynamic open password
+	 * @return the open password to use for a report's output file
+	 */
+	public String getEffectiveOpenPassword(Report report, String dynamicOpenPassword) {
+		Objects.requireNonNull(report, "report must not be null");
+
+		String openPassword = null;
+		String reportOpenPassword = report.getOpenPassword();
+		String encryptorOpenPassword = null;
+		Encryptor encryptor = report.getEncryptor();
+		if (encryptor != null && encryptor.isActive()
+				&& encryptor.getEncryptorType() == EncryptorType.Password) {
+			encryptorOpenPassword = encryptor.getOpenPassword();
+		}
+
+		if (StringUtils.isNotEmpty(reportOpenPassword)) {
+			openPassword = reportOpenPassword;
+		}
+		if (StringUtils.isNotEmpty(encryptorOpenPassword)) {
+			openPassword = encryptorOpenPassword;
+		}
+		if (StringUtils.isNotEmpty(dynamicOpenPassword)) {
+			openPassword = dynamicOpenPassword;
+		}
+
+		return openPassword;
+	}
+
+	/**
+	 * Returns the modify password to use for a report's output file
+	 *
+	 * @param report the report
+	 * @param dynamicModifyPassword the dynamic modify password
+	 * @return the modify password to use for a report's output file
+	 */
+	public String getEffectiveModifyPassword(Report report, String dynamicModifyPassword) {
+		Objects.requireNonNull(report, "report must not be null");
+
+		String modifyPassword = null;
+		String reportModifyPassword = report.getModifyPassword();
+		String encryptorModifyPassword = null;
+		Encryptor encryptor = report.getEncryptor();
+		if (encryptor != null && encryptor.isActive()
+				&& encryptor.getEncryptorType() == EncryptorType.Password) {
+			encryptorModifyPassword = encryptor.getModifyPassword();
+		}
+
+		if (StringUtils.isNotEmpty(reportModifyPassword)) {
+			modifyPassword = reportModifyPassword;
+		}
+		if (StringUtils.isNotEmpty(encryptorModifyPassword)) {
+			modifyPassword = encryptorModifyPassword;
+		}
+		if (StringUtils.isNotEmpty(dynamicModifyPassword)) {
+			modifyPassword = dynamicModifyPassword;
+		}
+
+		return modifyPassword;
 	}
 
 }

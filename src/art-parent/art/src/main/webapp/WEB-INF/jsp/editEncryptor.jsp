@@ -95,12 +95,25 @@
 			function toggleVisibleFields() {
 				var encryptorType = $('#encryptorType option:selected').val();
 
-				if (encryptorType === 'AESCrypt') {
-					$("#aesCryptFields").show();
-					$("#openPgpFields").hide();
-				} else if (encryptorType === 'OpenPGP') {
-					$("#aesCryptFields").hide();
-					$("#openPgpFields").show();
+				//https://stackoverflow.com/questions/14910760/switch-case-as-string
+				switch (encryptorType) {
+					case 'AESCrypt':
+						$("#aesCryptFields").show();
+						$("#openPgpFields").hide();
+						$("#passwordEncryptorFields").hide();
+						break;
+					case 'OpenPGP':
+						$("#aesCryptFields").hide();
+						$("#openPgpFields").show();
+						$("#passwordEncryptorFields").hide();
+						break;
+					case 'Password':
+						$("#aesCryptFields").hide();
+						$("#openPgpFields").hide();
+						$("#passwordEncryptorFields").show();
+						break;
+					default:
+						break;
 				}
 			}
 		</script>
@@ -264,6 +277,43 @@
 						<div class="col-md-8">
 							<form:password path="openPgpSigningKeyPassphrase" autocomplete="off" maxlength="1000" class="form-control" />
 							<form:errors path="openPgpSigningKeyPassphrase" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset id="passwordEncryptorFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="openPassword">
+							<spring:message code="reports.label.openPassword"/>
+						</label>
+						<div class="col-md-8">
+							<div>
+								<form:password path="openPassword" autocomplete="off" maxlength="100" class="form-control"/>
+							</div>
+							<div>
+								<label class="checkbox-inline">
+									<form:checkbox path="useNoneOpenPassword" id="useNoneOpenPassword"/>
+									<spring:message code="reports.checkbox.none"/>
+								</label>
+							</div>
+							<form:errors path="openPassword" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="modifyPassword">
+							<spring:message code="reports.label.modifyPassword"/>
+						</label>
+						<div class="col-md-8">
+							<div>
+								<form:password path="modifyPassword" autocomplete="off" maxlength="100" class="form-control"/>
+							</div>
+							<div>
+								<label class="checkbox-inline">
+									<form:checkbox path="useNoneModifyPassword" id="useNoneModifyPassword"/>
+									<spring:message code="reports.checkbox.none"/>
+								</label>
+							</div>
+							<form:errors path="modifyPassword" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

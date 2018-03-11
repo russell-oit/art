@@ -18,15 +18,22 @@
 package art.cache;
 
 import art.servlets.Config;
+import art.settings.Settings;
+import art.settings.SettingsHelper;
+import art.settings.SettingsService;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import net.sf.mondrianart.mondrian.olap.CacheControl;
 import net.sf.mondrianart.mondrian.rolap.RolapSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +46,12 @@ import org.springframework.stereotype.Component;
 public class CacheHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(CacheHelper.class);
+
+	@Autowired
+	private ServletContext servletContext;
+
+	@Autowired
+	private SettingsService settingsService;
 
 	/**
 	 * Clears mondrian caches used by jpivot
@@ -62,7 +75,6 @@ public class CacheHelper {
 		} catch (IOException ex) {
 			logger.error("Error", ex);
 		} finally {
-			//Close the BufferedWriter
 			try {
 				if (out != null) {
 					out.flush();
@@ -73,13 +85,32 @@ public class CacheHelper {
 			}
 		}
 	}
-	
+
 	/**
 	 * Clears mondrian caches used in saiku connections
 	 */
-	public void clearSaiku(){
+	public void clearSaiku() {
 		logger.debug("Entering clearSaiku");
 		Config.refreshSaikuConnections();
+	}
+
+	/**
+	 * Refreshes application settings
+	 *
+	 * @param session the http session
+	 */
+	public void clearSettings(HttpSession session) {
+		logger.debug("Entering clearSettings");
+
+		try {
+			Settings settings = settingsService.getSettings();
+			if (settings != null) {
+				SettingsHelper settingsHelper = new SettingsHelper();
+				settingsHelper.refreshSettings(settings, session, servletContext);
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 	}
 
 	/**
@@ -153,7 +184,7 @@ public class CacheHelper {
 	public void clearParameters() {
 		logger.debug("Entering clearParameters");
 	}
-	
+
 	/**
 	 * Clears the encryptors cache
 	 */
@@ -161,7 +192,7 @@ public class CacheHelper {
 	public void clearEncryptors() {
 		logger.debug("Entering clearEncryptors");
 	}
-	
+
 	/**
 	 * Clears the holidays cache
 	 */
@@ -169,7 +200,7 @@ public class CacheHelper {
 	public void clearHolidays() {
 		logger.debug("Entering clearHolidays");
 	}
-	
+
 	/**
 	 * Clears the destinations cache
 	 */
@@ -177,7 +208,7 @@ public class CacheHelper {
 	public void clearDestinations() {
 		logger.debug("Entering clearDestinations");
 	}
-	
+
 	/**
 	 * Clears the smtp servers cache
 	 */
@@ -185,18 +216,21 @@ public class CacheHelper {
 	public void clearSmtpServers() {
 		logger.debug("Entering clearSmtpServers");
 	}
-	
+
 	/**
 	 * Clears all caches
+	 *
+	 * @param session the http session
 	 */
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
 		"datasources", "schedules", "jobs", "rules", "parameters",
 		"encryptors", "holidays", "destinations", "smtpServers"}, allEntries = true)
-	public void clearAll() {
+	public void clearAll(HttpSession session) {
 		logger.debug("Entering clearAll");
-		
+
 		clearJPivot();
 		clearSaiku();
+		clearSettings(session);
 	}
 
 }

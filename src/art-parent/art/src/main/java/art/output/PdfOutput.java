@@ -39,6 +39,7 @@ public class PdfOutput extends StandardOutput {
 	private PdfPCell cell;
 	private FontSelector fsBody; //fonts to use for document body
 	private FontSelector fsHeading; //fonts to use for document title and column headings
+	private int localRowCount;
 
 	/**
 	 * Resets global variables in readiness for output generation. Especially
@@ -51,6 +52,7 @@ public class PdfOutput extends StandardOutput {
 		cell = null;
 		fsBody = null;
 		fsHeading = null;
+		localRowCount = 0;
 	}
 
 	@Override
@@ -271,8 +273,9 @@ public class PdfOutput extends StandardOutput {
 	@Override
 	public void newRow() {
 		// split table in smaller pieces in order to save memory:
-		// fragment size should come from Config servlet, web.xml or properties		
-		if (rowCount % 500 == 500 - 1) {
+		// fragment size should come from Config servlet, web.xml or properties
+		localRowCount++;
+		if (localRowCount % 500 == 500 - 1) {
 			try {
 				document.add(table);
 				table.deleteBodyRows();
@@ -322,7 +325,7 @@ public class PdfOutput extends StandardOutput {
 				document.close();
 
 				PdfHelper pdfHelper = new PdfHelper();
-				pdfHelper.addProtections(report, fullOutputFileName);
+				pdfHelper.addProtections(report, fullOutputFileName, dynamicOpenPassword, dynamicModifyPassword);
 			}
 		} catch (DocumentException | IOException ex) {
 			throw new RuntimeException(ex);

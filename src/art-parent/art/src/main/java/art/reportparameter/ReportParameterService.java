@@ -18,10 +18,13 @@
 package art.reportparameter;
 
 import art.dbutils.DbService;
+import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.CloneOptions;
+import art.user.User;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -317,6 +321,57 @@ public class ReportParameterService {
 	}
 
 	/**
+	 * Imports report parameter records
+	 *
+	 * @param reports the list of reports to import containing report parameter
+	 * definitions
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use. if autocommit is false, no commit is
+	 * performed
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void importReportParameters(List<Report> reports,
+			User actionUser, Connection conn) throws SQLException {
+
+		String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
+		int parameterId = dbService.getMaxRecordId(conn, sql);
+
+		Map<Integer, Parameter> addedParameters = new HashMap<>();
+		for (Report report : reports) {
+			List<ReportParameter> reportParams = report.getReportParams();
+			if (CollectionUtils.isNotEmpty(reportParams)) {
+				for (ReportParameter reportParam : reportParams) {
+					Parameter parameter = reportParam.getParameter();
+					Parameter addedParameter = addedParameters.get(parameter.getParameterId());
+					if (addedParameter == null) {
+						parameterId++;
+						int oldParameterId = parameter.getParameterId();
+						parameterService.saveParameter(parameter, parameterId, actionUser, conn);
+						addedParameters.put(oldParameterId, parameter);
+					} else {
+						parameter.setParameterId(addedParameter.getParameterId());
+					}
+				}
+			}
+		}
+
+		sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
+		int reportParamId = dbService.getMaxRecordId(sql);
+
+		for (Report report : reports) {
+			List<ReportParameter> reportParams = report.getReportParams();
+			if (CollectionUtils.isNotEmpty(reportParams)) {
+				for (ReportParameter reportParam : reportParams) {
+					reportParamId++;
+					reportParam.setReport(report);
+					saveReportParameter(reportParam, reportParamId, conn);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Saves a report parameter
 	 *
 	 * @param reportParam the report parameter
@@ -324,7 +379,25 @@ public class ReportParameterService {
 	 * record
 	 * @throws SQLException
 	 */
-	private void saveReportParameter(ReportParameter reportParam, Integer newRecordId) throws SQLException {
+	private void saveReportParameter(ReportParameter reportParam,
+			Integer newRecordId) throws SQLException {
+
+		Connection conn = null;
+		saveReportParameter(reportParam, newRecordId, conn);
+	}
+
+	/**
+	 * Saves a report parameter
+	 *
+	 * @param reportParam the report parameter
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param conn the connection to use. if null, the art database will be used
+	 * @throws SQLException
+	 */
+	private void saveReportParameter(ReportParameter reportParam,
+			Integer newRecordId, Connection conn) throws SQLException {
+
 		logger.debug("Entering saveReportParameter: reportParam={}, newRecordId={}",
 				reportParam, newRecordId);
 
@@ -350,7 +423,11 @@ public class ReportParameterService {
 				reportParam.getChainedDepends()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_REPORT_PARAMETERS SET PARAMETER_ID=?,"
 					+ " PARAMETER_POSITION=?, CHAINED_PARENTS=?, CHAINED_DEPENDS=?"
@@ -364,7 +441,11 @@ public class ReportParameterService {
 				reportParam.getReportParameterId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

@@ -64,7 +64,6 @@ public class ScheduleHolidayService {
 		logger.debug("Entering recreateScheduleHolidays: schedule={}", schedule);
 
 		int scheduleId = schedule.getScheduleId();
-		
 		deleteAllScheduleHolidaysForSchedule(scheduleId);
 		addScheduleHolidays(scheduleId, schedule.getSharedHolidays());
 	}

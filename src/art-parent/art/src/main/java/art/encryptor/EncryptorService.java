@@ -19,14 +19,14 @@ package art.encryptor;
 
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
-import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -94,19 +94,15 @@ public class EncryptorService {
 			encryptor.setOpenPgpPublicKeyString(rs.getString("OPENPGP_PUBLIC_KEY_STRING"));
 			encryptor.setOpenPgpSigningKeyFile(rs.getString("OPENPGP_SIGNING_KEY_FILE"));
 			encryptor.setOpenPgpSigningKeyPassphrase(rs.getString("OPENPGP_SIGNING_KEY_PASSPHRASE"));
+			encryptor.setOpenPassword(rs.getString("OPEN_PASSWORD"));
+			encryptor.setModifyPassword(rs.getString("MODIFY_PASSWORD"));
 			encryptor.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			encryptor.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			encryptor.setCreatedBy(rs.getString("CREATED_BY"));
 			encryptor.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt passwords
-			String aesCryptPassword = encryptor.getAesCryptPassword();
-			aesCryptPassword = AesEncryptor.decrypt(aesCryptPassword);
-			encryptor.setAesCryptPassword(aesCryptPassword);
-
-			String openPgpSigningKeyPassphrase = encryptor.getOpenPgpSigningKeyPassphrase();
-			openPgpSigningKeyPassphrase = AesEncryptor.decrypt(openPgpSigningKeyPassphrase);
-			encryptor.setOpenPgpSigningKeyPassphrase(openPgpSigningKeyPassphrase);
+			encryptor.decryptPasswords();
 
 			return type.cast(encryptor);
 		}
@@ -127,6 +123,25 @@ public class EncryptorService {
 	}
 
 	/**
+	 * Returns encryptors with given ids
+	 *
+	 * @param ids comma separated string of the encryptor ids to retrieve
+	 * @return encryptors with given ids
+	 * @throws SQLException
+	 */
+	public List<Encryptor> getEncryptors(String ids) throws SQLException {
+		logger.debug("Entering getEncryptors: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Encryptor>> h = new BeanListHandler<>(Encryptor.class, new EncryptorMapper());
+		return dbService.query(sql, h, idsArray);
+	}
+
+	/**
 	 * Returns the encryptor with the given id
 	 *
 	 * @param id the encryptor id
@@ -140,6 +155,22 @@ public class EncryptorService {
 		String sql = SQL_SELECT_ALL + " WHERE ENCRYPTOR_ID=?";
 		ResultSetHandler<Encryptor> h = new BeanHandler<>(Encryptor.class, new EncryptorMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Returns the encryptor with the given name
+	 *
+	 * @param name the encryptor name
+	 * @return the encryptor if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("encryptors")
+	public Encryptor getEncryptor(String name) throws SQLException {
+		logger.debug("Entering getEncryptor: name='{}'", name);
+
+		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
+		ResultSetHandler<Encryptor> h = new BeanHandler<>(Encryptor.class, new EncryptorMapper());
+		return dbService.query(sql, h, name);
 	}
 
 	/**
@@ -244,17 +275,73 @@ public class EncryptorService {
 	}
 
 	/**
+	 * Imports encryptor records
+	 *
+	 * @param encryptors the list of encryptors to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "encryptors", allEntries = true)
+	public void importEncryptors(List<Encryptor> encryptors, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importEncryptors: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Encryptor encryptor : encryptors) {
+				id++;
+				saveEncryptor(encryptor, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves an encryptor
+	 *
+	 * @param encryptor the encryptor to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveEncryptor(Encryptor encryptor, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveEncryptor(encryptor, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves an encryptor
 	 *
 	 * @param encryptor the encryptor
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. If null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveEncryptor(Encryptor encryptor, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveEncryptor: encryptor={}, newRecordId={}, actionUser={}",
-				encryptor, newRecordId, actionUser);
+	@CacheEvict(value = "encryptors", allEntries = true)
+	public void saveEncryptor(Encryptor encryptor, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveEncryptor: encryptor={}, newRecordId={},"
+				+ " actionUser={}", encryptor, newRecordId, actionUser);
 
 		int affectedRows;
 
@@ -268,9 +355,10 @@ public class EncryptorService {
 					+ " (ENCRYPTOR_ID, NAME, DESCRIPTION, ACTIVE, ENCRYPTOR_TYPE,"
 					+ " AESCRYPT_PASSWORD, OPENPGP_PUBLIC_KEY_FILE,"
 					+ " OPENPGP_PUBLIC_KEY_STRING, OPENPGP_SIGNING_KEY_FILE,"
-					+ " OPENPGP_SIGNING_KEY_PASSPHRASE,"
+					+ " OPENPGP_SIGNING_KEY_PASSPHRASE, OPEN_PASSWORD,"
+					+ " MODIFY_PASSWORD,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -283,16 +371,23 @@ public class EncryptorService {
 				encryptor.getOpenPgpPublicKeyString(),
 				encryptor.getOpenPgpSigningKeyFile(),
 				encryptor.getOpenPgpSigningKeyPassphrase(),
+				encryptor.getOpenPassword(),
+				encryptor.getModifyPassword(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_ENCRYPTORS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, ENCRYPTOR_TYPE=?, AESCRYPT_PASSWORD=?,"
 					+ " OPENPGP_PUBLIC_KEY_FILE=?, OPENPGP_PUBLIC_KEY_STRING=?,"
 					+ " OPENPGP_SIGNING_KEY_FILE=?, OPENPGP_SIGNING_KEY_PASSPHRASE=?,"
+					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE ENCRYPTOR_ID=?";
 
@@ -306,12 +401,18 @@ public class EncryptorService {
 				encryptor.getOpenPgpPublicKeyString(),
 				encryptor.getOpenPgpSigningKeyFile(),
 				encryptor.getOpenPgpSigningKeyPassphrase(),
+				encryptor.getOpenPassword(),
+				encryptor.getModifyPassword(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				encryptor.getEncryptorId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {
@@ -342,16 +443,16 @@ public class EncryptorService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleEncryptorEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleEncryptorEdit.getIds());
 		if (!multipleEncryptorEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_ENCRYPTORS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleEncryptorEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 

@@ -23,10 +23,13 @@ import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.report.Report;
 import art.report.ReportService;
+import art.report.ReportServiceHelper;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -101,7 +104,6 @@ public class ParameterService {
 			parameter.setHidden(rs.getBoolean("HIDDEN"));
 			parameter.setShared(rs.getBoolean("SHARED"));
 			parameter.setUseLov(rs.getBoolean("USE_LOV"));
-			parameter.setLovReportId(rs.getInt("LOV_REPORT_ID"));
 			parameter.setUseRulesInLov(rs.getBoolean("USE_RULES_IN_LOV"));
 			parameter.setDrilldownColumnIndex(rs.getInt("DRILLDOWN_COLUMN_INDEX"));
 			parameter.setUseDirectSubstitution(rs.getBoolean("USE_DIRECT_SUBSTITUTION"));
@@ -116,6 +118,9 @@ public class ParameterService {
 
 			Report defaultValueReport = reportService.getReport(rs.getInt("DEFAULT_VALUE_REPORT_ID"));
 			parameter.setDefaultValueReport(defaultValueReport);
+
+			Report lovReport = reportService.getReport(rs.getInt("LOV_REPORT_ID"));
+			parameter.setLovReport(lovReport);
 
 			String options = parameter.getOptions();
 			if (StringUtils.isNotBlank(options)) {
@@ -144,6 +149,25 @@ public class ParameterService {
 
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns parameters with given ids
+	 *
+	 * @param ids comma separated string of the parameter ids to retrieve
+	 * @return parameters with given ids
+	 * @throws SQLException
+	 */
+	public List<Parameter> getParameters(String ids) throws SQLException {
+		logger.debug("Entering getParameters: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE PARAMETER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -335,17 +359,91 @@ public class ParameterService {
 	}
 
 	/**
+	 * Imports parameter records
+	 *
+	 * @param parameters the list of parameters to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @param local whether the import is to the local/current art instance
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void importParameters(List<Parameter> parameters, User actionUser,
+			Connection conn, boolean local) throws SQLException {
+
+		logger.debug("Entering importParameters: actionUser={}, local={}",
+				actionUser, local);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			List<Report> reports = new ArrayList<>();
+			for (Parameter parameter : parameters) {
+				Report defaultValueReport = parameter.getDefaultValueReport();
+				if (defaultValueReport != null) {
+					reports.add(defaultValueReport);
+				}
+				Report lovReport = parameter.getLovReport();
+				if (lovReport != null) {
+					reports.add(lovReport);
+				}
+			}
+
+			ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
+			boolean commitReports = false;
+			reportServiceHelper.importReports(reports, actionUser, conn, local, commitReports);
+
+			for (Parameter parameter : parameters) {
+				id++;
+				saveParameter(parameter, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a parameter
+	 *
+	 * @param parameter the parameter to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveParameter(Parameter parameter, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveParameter(parameter, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a parameter
 	 *
 	 * @param parameter the parameter to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveParameter(Parameter parameter, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveParameter: parameter={}, newRecordId={}, actionUser={}",
-				parameter, newRecordId, actionUser);
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void saveParameter(Parameter parameter, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveParameter: parameter={}, newRecordId={},"
+				+ " actionUser={}", parameter, newRecordId, actionUser);
 
 		//set values for possibly null property objects
 		String parameterType;
@@ -364,11 +462,20 @@ public class ParameterService {
 			dataType = parameter.getDataType().getValue();
 		}
 
-		Integer defaultValueReportId;
-		if (parameter.getDefaultValueReport() == null) {
-			defaultValueReportId = 0;
-		} else {
+		Integer defaultValueReportId = null;
+		if (parameter.getDefaultValueReport() != null) {
 			defaultValueReportId = parameter.getDefaultValueReport().getReportId();
+			if (defaultValueReportId == 0) {
+				defaultValueReportId = null;
+			}
+		}
+
+		Integer lovReportId = null;
+		if (parameter.getLovReport() != null) {
+			lovReportId = parameter.getLovReport().getReportId();
+			if (lovReportId == 0) {
+				lovReportId = null;
+			}
 		}
 
 		int affectedRows;
@@ -400,7 +507,7 @@ public class ParameterService {
 				BooleanUtils.toInteger(parameter.isHidden()),
 				BooleanUtils.toInteger(parameter.isShared()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
-				parameter.getLovReportId(),
+				lovReportId,
 				BooleanUtils.toInteger(parameter.isUseRulesInLov()),
 				parameter.getDrilldownColumnIndex(),
 				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),
@@ -412,7 +519,11 @@ public class ParameterService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
 					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
@@ -435,7 +546,7 @@ public class ParameterService {
 				BooleanUtils.toInteger(parameter.isHidden()),
 				BooleanUtils.toInteger(parameter.isShared()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
-				parameter.getLovReportId(),
+				lovReportId,
 				BooleanUtils.toInteger(parameter.isUseRulesInLov()),
 				parameter.getDrilldownColumnIndex(),
 				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),
@@ -448,7 +559,11 @@ public class ParameterService {
 				parameter.getParameterId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

@@ -40,7 +40,6 @@ import art.output.FixedWidthOutput;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.GroupHtmlOutput;
-import art.output.GroupOutput;
 import art.output.GroupXlsxOutput;
 import art.output.HtmlDataTableOutput;
 import art.output.HtmlFancyOutput;
@@ -67,6 +66,7 @@ import art.output.XmlOutput;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportengine.ReportEngineOutput;
 import art.reportoptions.C3Options;
 import art.reportoptions.ChartJsOptions;
 import art.reportoptions.CsvOutputArtOptions;
@@ -77,6 +77,7 @@ import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JFreeChartOptions;
 import art.reportoptions.MongoDbOptions;
 import art.reportoptions.OrgChartOptions;
+import art.reportoptions.ReportEngineOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -114,6 +115,7 @@ import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -139,6 +141,36 @@ public class ReportOutputGenerator {
 	private DrilldownService drilldownService;
 	private boolean isJob = false;
 	private boolean pdfPageNumbers = true;
+	private String dynamicOpenPassword;
+	private String dynamicModifyPassword;
+
+	/**
+	 * @return the dynamicOpenPassword
+	 */
+	public String getDynamicOpenPassword() {
+		return dynamicOpenPassword;
+	}
+
+	/**
+	 * @param dynamicOpenPassword the dynamicOpenPassword to set
+	 */
+	public void setDynamicOpenPassword(String dynamicOpenPassword) {
+		this.dynamicOpenPassword = dynamicOpenPassword;
+	}
+
+	/**
+	 * @return the dynamicModifyPassword
+	 */
+	public String getDynamicModifyPassword() {
+		return dynamicModifyPassword;
+	}
+
+	/**
+	 * @param dynamicModifyPassword the dynamicModifyPassword to set
+	 */
+	public void setDynamicModifyPassword(String dynamicModifyPassword) {
+		this.dynamicModifyPassword = dynamicModifyPassword;
+	}
 
 	/**
 	 * @return the pdfPageNumbers
@@ -297,6 +329,8 @@ public class ReportOutputGenerator {
 			if (reportType.isJasperReports() || reportType.isJxls()) {
 				if (reportType.isJasperReports()) {
 					JasperReportsOutput jrOutput = new JasperReportsOutput();
+					jrOutput.setDynamicOpenPassword(dynamicOpenPassword);
+					jrOutput.setDynamicModifyPassword(dynamicModifyPassword);
 					if (reportType == ReportType.JasperReportsArt) {
 						rs = reportRunner.getResultSet();
 						jrOutput.setResultSet(rs);
@@ -306,6 +340,8 @@ public class ReportOutputGenerator {
 				} else if (reportType.isJxls()) {
 					JxlsOutput jxlsOutput = new JxlsOutput();
 					jxlsOutput.setLocale(locale);
+					jxlsOutput.setDynamicOpenPassword(dynamicOpenPassword);
+					jxlsOutput.setDynamicModifyPassword(dynamicModifyPassword);
 					if (reportType == ReportType.JxlsArt) {
 						rs = reportRunner.getResultSet();
 						jxlsOutput.setResultSet(rs);
@@ -331,27 +367,21 @@ public class ReportOutputGenerator {
 					splitColumn = report.getGroupColumn();
 				}
 
-				GroupOutput groupOutput;
 				switch (reportFormat) {
 					case html:
-						groupOutput = new GroupHtmlOutput();
-						groupOutput.setWriter(writer);
-						groupOutput.setContextPath(contextPath);
+						GroupHtmlOutput groupHtmlOutput = new GroupHtmlOutput();
+						rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
 						break;
 					case xlsx:
-						groupOutput = new GroupXlsxOutput();
-						groupOutput.setReportName(report.getLocalizedName(locale));
-						groupOutput.setFullOutputFileName(fullOutputFilename);
-						groupOutput.setReport(report);
+						GroupXlsxOutput groupXlsxOutput = new GroupXlsxOutput();
+						String reportName = report.getLocalizedName(locale);
+						rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
+						if (!isJob) {
+							displayFileLink(fileName);
+						}
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
-				}
-
-				rowsRetrieved = groupOutput.generateGroupReport(rs, splitColumn);
-
-				if (!isJob && reportFormat == ReportFormat.xlsx) {
-					displayFileLink(fileName);
 				}
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
@@ -405,7 +435,7 @@ public class ReportOutputGenerator {
 				}
 
 				if (isJob) {
-					chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers);
+					chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword);
 				} else {
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
@@ -423,7 +453,7 @@ public class ReportOutputGenerator {
 							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
 						}
 					} else {
-						chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers);
+						chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword);
 						displayFileLink(fileName);
 					}
 					rowsRetrieved = getResultSetRowCount(rs);
@@ -461,6 +491,8 @@ public class ReportOutputGenerator {
 				standardOutput.setIsJob(isJob);
 				standardOutput.setPdfPageNumbers(pdfPageNumbers);
 				standardOutput.setReport(report);
+				standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
+				standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
 
 				if (request != null) {
 					standardOutput.setContextPath(contextPath);
@@ -570,9 +602,11 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
+				String outputDivId = "reactPivotOutput-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("outputDivId", outputDivId);
 				request.setAttribute("templateFileName", templateFileName);
 				request.setAttribute("rows", jsonData);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
@@ -604,7 +638,7 @@ public class ReportOutputGenerator {
 				if (StringUtils.isNotBlank(templateFileName)) {
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + templateFileName);
+						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 					}
 					request.setAttribute("templateFileName", templateFileName);
 				}
@@ -632,7 +666,7 @@ public class ReportOutputGenerator {
 
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 
 					request.setAttribute("dataFileName", dataFileName);
@@ -653,6 +687,8 @@ public class ReportOutputGenerator {
 					request.setAttribute("locale", localeString);
 				}
 
+				String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("outputDivId", outputDivId);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
 			} else if (reportType.isDygraphs()) {
 				if (isJob) {
@@ -698,7 +734,7 @@ public class ReportOutputGenerator {
 				if (StringUtils.isNotBlank(templateFileName)) {
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + templateFileName);
+						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 					}
 					request.setAttribute("templateFileName", templateFileName);
 				}
@@ -726,12 +762,14 @@ public class ReportOutputGenerator {
 
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 
 					request.setAttribute("dataFileName", dataFileName);
 				}
 
+				String outputDivId = "dygraphsOutput-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("outputDivId", outputDivId);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
 			} else if (reportType.isDataTables()) {
 				if (isJob) {
@@ -762,7 +800,7 @@ public class ReportOutputGenerator {
 				if (StringUtils.isNotBlank(templateFileName)) {
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + templateFileName);
+						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 					}
 					request.setAttribute("templateFileName", templateFileName);
 				}
@@ -796,15 +834,19 @@ public class ReportOutputGenerator {
 
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 
 					request.setAttribute("dataFileName", dataFileName);
 				}
 
+				String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
+				String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
 				String languageTag = locale.toLanguageTag();
-				request.setAttribute("languageTag", languageTag);
 				String localeString = locale.toString();
+				request.setAttribute("outputDivId", outputDivId);
+				request.setAttribute("tableId", tableId);
+				request.setAttribute("languageTag", languageTag);
 				request.setAttribute("locale", localeString);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 			} else if (reportType == ReportType.FixedWidth) {
@@ -856,7 +898,7 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
 				String optionsString = report.getOptions();
@@ -874,13 +916,15 @@ public class ReportOutputGenerator {
 
 						File cssFile = new File(fullCssFileName);
 						if (!cssFile.exists()) {
-							throw new IllegalStateException("Css file not found: " + cssFileName);
+							throw new IllegalStateException("Css file not found: " + fullCssFileName);
 						}
 
 						request.setAttribute("cssFileName", cssFileName);
 					}
 				}
 
+				String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("chartId", chartId);
 				request.setAttribute("templateFileName", templateFileName);
 				request.setAttribute("data", jsonData);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
@@ -911,7 +955,7 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
 				ChartJsOptions options;
@@ -923,6 +967,8 @@ public class ReportOutputGenerator {
 					options = mapper.readValue(optionsString, ChartJsOptions.class);
 				}
 
+				String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("chartId", chartId);
 				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
 				request.setAttribute("data", jsonData);
@@ -959,7 +1005,7 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
 				DatamapsOptions options;
@@ -980,7 +1026,7 @@ public class ReportOutputGenerator {
 				String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
 				File datamapsJsFile = new File(fullDatamapsJsFileName);
 				if (!datamapsJsFile.exists()) {
-					throw new IllegalStateException("Datamaps js file not found: " + datamapsJsFileName);
+					throw new IllegalStateException("Datamaps js file not found: " + fullDatamapsJsFileName);
 				}
 
 				String dataFileName = options.getDataFile();
@@ -988,7 +1034,7 @@ public class ReportOutputGenerator {
 					String fullDataFileName = jsTemplatesPath + dataFileName;
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 				}
 
@@ -998,7 +1044,7 @@ public class ReportOutputGenerator {
 
 					File mapFile = new File(fullMapFileName);
 					if (!mapFile.exists()) {
-						throw new IllegalStateException("Map file not found: " + mapFileName);
+						throw new IllegalStateException("Map file not found: " + fullMapFileName);
 					}
 				}
 
@@ -1008,10 +1054,12 @@ public class ReportOutputGenerator {
 
 					File cssFile = new File(fullCssFileName);
 					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + cssFileName);
+						throw new IllegalStateException("Css file not found: " + fullCssFileName);
 					}
 				}
 
+				String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("containerId", containerId);
 				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
@@ -1042,7 +1090,7 @@ public class ReportOutputGenerator {
 
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + templateFileName);
+					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 				}
 
 				WebMapOptions options;
@@ -1060,7 +1108,7 @@ public class ReportOutputGenerator {
 
 					File cssFile = new File(fullCssFileName);
 					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + cssFileName);
+						throw new IllegalStateException("Css file not found: " + fullCssFileName);
 					}
 				}
 
@@ -1069,7 +1117,7 @@ public class ReportOutputGenerator {
 					String fullDataFileName = jsTemplatesPath + dataFileName;
 					File dataFile = new File(fullDataFileName);
 					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + dataFileName);
+						throw new IllegalStateException("Data file not found: " + fullDataFileName);
 					}
 				}
 
@@ -1080,7 +1128,7 @@ public class ReportOutputGenerator {
 							String fullJsFileName = jsTemplatesPath + jsFileName;
 							File jsFile = new File(fullJsFileName);
 							if (!jsFile.exists()) {
-								throw new IllegalStateException("Js file not found: " + jsFileName);
+								throw new IllegalStateException("Js file not found: " + fullJsFileName);
 							}
 						}
 					}
@@ -1093,12 +1141,14 @@ public class ReportOutputGenerator {
 							String fullListCssFileName = jsTemplatesPath + listCssFileName;
 							File listCssFile = new File(fullListCssFileName);
 							if (!listCssFile.exists()) {
-								throw new IllegalStateException("Css file not found: " + listCssFileName);
+								throw new IllegalStateException("Css file not found: " + fullListCssFileName);
 							}
 						}
 					}
 				}
 
+				String mapId = "map-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("mapId", mapId);
 				request.setAttribute("options", options);
 				request.setAttribute("data", jsonData);
 				request.setAttribute("templateFileName", templateFileName);
@@ -1372,7 +1422,7 @@ public class ReportOutputGenerator {
 
 					File cssFile = new File(fullCssFileName);
 					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + cssFileName);
+						throw new IllegalStateException("Css file not found: " + fullCssFileName);
 					}
 				}
 
@@ -1384,17 +1434,64 @@ public class ReportOutputGenerator {
 					String fullTemplateFileName = jsTemplatesPath + templateFileName;
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + templateFileName);
+						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 					}
 				}
 
 				String optionsJson = ArtUtils.objectToJson(options);
 				optionsJson = Encode.forJavaScript(optionsJson);
-
+				String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("containerId", containerId);
 				request.setAttribute("optionsJson", optionsJson);
 				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
+			} else if (reportType.isReportEngine()) {
+				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
+
+				standardOutput.setWriter(writer);
+				standardOutput.setFullOutputFileName(fullOutputFilename);
+				standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
+				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
+				standardOutput.setLocale(locale);
+				standardOutput.setReportName(report.getLocalizedName(locale));
+				standardOutput.setMessageSource(messageSource);
+				standardOutput.setIsJob(isJob);
+				standardOutput.setPdfPageNumbers(pdfPageNumbers);
+				standardOutput.setReport(report);
+				standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
+				standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
+
+				if (request != null) {
+					standardOutput.setContextPath(contextPath);
+
+					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+						standardOutput.setAjax(true);
+					}
+				}
+
+				//generate output
+				rs = reportRunner.getResultSet();
+
+				ReportEngineOutput reportEngineOutput = new ReportEngineOutput(standardOutput);
+
+				String options = report.getOptions();
+				ReportEngineOptions reportEngineOptions;
+				if (StringUtils.isBlank(options)) {
+					reportEngineOptions = new ReportEngineOptions();
+				} else {
+					reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
+				}
+
+				if (reportEngineOptions.isPivot()) {
+					reportEngineOutput.generatePivotOutput(rs, reportType);
+				} else {
+					reportEngineOutput.generateTabularOutput(rs, reportType);
+				}
+
+				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
+					displayFileLink(fileName);
+				}
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

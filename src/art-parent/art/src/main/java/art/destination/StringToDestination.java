@@ -51,5 +51,4 @@ public class StringToDestination implements Converter<String, Destination> {
 
 		return destination;
 	}
-
 }

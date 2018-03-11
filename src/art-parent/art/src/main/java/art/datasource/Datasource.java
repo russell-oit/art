@@ -17,8 +17,12 @@
  */
 package art.datasource;
 
+import art.encryption.AesEncryptor;
+import art.encryption.DesEncryptor;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents a datasource
@@ -28,12 +32,30 @@ import java.util.Date;
 public class Datasource extends DatasourceInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private boolean active;
 	private Date creationDate;
 	private Date updateDate;
+	@Parsed
 	private String description;
 	private String createdBy;
 	private String updatedBy;
+	@Parsed
+	private boolean clearTextPassword;
+
+	/**
+	 * @return the clearTextPassword
+	 */
+	public boolean isClearTextPassword() {
+		return clearTextPassword;
+	}
+
+	/**
+	 * @param clearTextPassword the clearTextPassword to set
+	 */
+	public void setClearTextPassword(boolean clearTextPassword) {
+		this.clearTextPassword = clearTextPassword;
+	}
 
 	/**
 	 * @return the createdBy
@@ -148,5 +170,26 @@ public class Datasource extends DatasourceInfo implements Serializable {
 	@Override
 	public String toString() {
 		return "Datasource{" + "name=" + getName() + '}';
+	}
+
+	/**
+	 * Decrypts the password field
+	 */
+	public void decryptPassword() {
+		if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "art")) {
+			if (StringUtils.startsWith(password, "o:")) {
+				password = DesEncryptor.decrypt(password.substring(2));
+			}
+		} else if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "aes")) {
+			password = AesEncryptor.decrypt(password);
+		}
+	}
+
+	/**
+	 * Encrypts the password field
+	 */
+	public void encryptPassword() {
+		password = AesEncryptor.encrypt(password);
+		passwordAlgorithm = "AES";
 	}
 }

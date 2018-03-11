@@ -523,6 +523,11 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.endsWith(page, "Records")) {
+			//senior admins and above
+			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+				authorised = true;
+			}
 		}
 
 		return authorised;

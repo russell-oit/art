@@ -24,13 +24,17 @@ import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
+import art.usergroupmembership.UserGroupMembershipService2;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -61,20 +65,24 @@ public class UserService {
 	private final DbService dbService;
 	private final UserGroupService userGroupService;
 	private final ReportGroupService reportGroupService;
+	private final UserGroupMembershipService2 userGroupMembershipService2;
 
 	@Autowired
 	public UserService(DbService dbService, UserGroupService userGroupService,
-			ReportGroupService reportGroupService) {
+			ReportGroupService reportGroupService,
+			UserGroupMembershipService2 userGroupMembershipService2) {
 
 		this.dbService = dbService;
 		this.userGroupService = userGroupService;
 		this.reportGroupService = reportGroupService;
+		this.userGroupMembershipService2 = userGroupMembershipService2;
 	}
 
 	public UserService() {
 		dbService = new DbService();
 		userGroupService = new UserGroupService();
 		reportGroupService = new ReportGroupService();
+		userGroupMembershipService2 = new UserGroupMembershipService2();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
@@ -115,6 +123,9 @@ public class UserService {
 			ReportGroup defaultReportGroup = reportGroupService.getReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 			user.setDefaultReportGroup(defaultReportGroup);
 
+			List<UserGroup> userGroups = userGroupService.getUserGroupsForUser(user.getUserId());
+			user.setUserGroups(userGroups);
+
 			return type.cast(user);
 		}
 	}
@@ -131,6 +142,25 @@ public class UserService {
 
 		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns users with given ids
+	 *
+	 * @param ids comma separated string of the user ids to retrieve
+	 * @return users with given ids
+	 * @throws SQLException
+	 */
+	public List<User> getUsers(String ids) throws SQLException {
+		logger.debug("Entering getUsers: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -159,10 +189,10 @@ public class UserService {
 	public User getUser(int id) throws SQLException {
 		logger.debug("Entering getUser: id={}", id);
 
-		String sql = SQL_SELECT_ALL + " WHERE USER_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE USER_ID=?";
 		ResultSetHandler<User> h = new BeanHandler<>(User.class, new UserMapper());
 		User user = dbService.query(sql, h, id);
-		populateUserGroups(user);
+		setEffectiveValues(user);
 		return user;
 	}
 
@@ -177,20 +207,19 @@ public class UserService {
 	public User getUser(String username) throws SQLException {
 		logger.debug("Entering getUser: username='{}'", username);
 
-		String sql = SQL_SELECT_ALL + " WHERE USERNAME = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE USERNAME=?";
 		ResultSetHandler<User> h = new BeanHandler<>(User.class, new UserMapper());
 		User user = dbService.query(sql, h, username);
-		populateUserGroups(user);
+		setEffectiveValues(user);
 		return user;
 	}
 
 	/**
-	 * Populates a user's user groups and sets properties whose values may come
-	 * from user groups
+	 * Sets properties whose values may come from user groups
 	 *
 	 * @param user the user
 	 */
-	private void populateUserGroups(User user) throws SQLException {
+	private void setEffectiveValues(User user) throws SQLException {
 		if (user == null) {
 			return;
 		}
@@ -198,8 +227,7 @@ public class UserService {
 		ReportGroup effectiveDefaultReportGroup = user.getDefaultReportGroup();
 		String effectiveStartReport = user.getStartReport();
 
-		List<UserGroup> groups = userGroupService.getUserGroupsForUser(user.getUserId());
-
+		List<UserGroup> groups = user.getUserGroups();
 		for (UserGroup group : groups) {
 			if (effectiveDefaultReportGroup == null) {
 				effectiveDefaultReportGroup = group.getDefaultReportGroup();
@@ -211,8 +239,6 @@ public class UserService {
 
 		user.setEffectiveDefaultReportGroup(effectiveDefaultReportGroup);
 		user.setEffectiveStartReport(effectiveStartReport);
-
-		user.setUserGroups(groups);
 	}
 
 	/**
@@ -261,6 +287,9 @@ public class UserService {
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_JOB_ARCHIVES WHERE USER_ID=?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_LOGGED_IN_USERS WHERE USER_ID=?";
 		dbService.update(sql, id);
 
 		//lastly, delete user
@@ -386,16 +415,16 @@ public class UserService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleUserEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleUserEdit.getIds());
 		if (!multipleUserEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_USERS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleUserEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -403,13 +432,13 @@ public class UserService {
 		}
 		if (!multipleUserEdit.isCanChangePasswordUnchanged()) {
 			sql = "UPDATE ART_USERS SET CAN_CHANGE_PASSWORD=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleUserEdit.isCanChangePassword()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
@@ -417,17 +446,129 @@ public class UserService {
 		}
 		if (!multipleUserEdit.isAccessLevelUnchanged()) {
 			sql = "UPDATE ART_USERS SET ACCESS_LEVEL=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(multipleUserEdit.getAccessLevel().getValue());
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
 			dbService.update(sql, valuesArray);
+		}
+	}
+
+	/**
+	 * Imports user records
+	 *
+	 * @param users the list of users to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "users", allEntries = true)
+	public void importUsers(List<User> users, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importUsers: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
+			int userId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
+			int reportGroupId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
+			int userGroupId = dbService.getMaxRecordId(sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
+			Map<String, UserGroup> addedUserGroups = new HashMap<>();
+			for (User user : users) {
+				userId++;
+
+				ReportGroup userDefaultReportGroup = user.getDefaultReportGroup();
+				if (userDefaultReportGroup != null) {
+					String reportGroupName = userDefaultReportGroup.getName();
+					if (StringUtils.isBlank(reportGroupName)) {
+						user.setDefaultReportGroup(null);
+					} else {
+						ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+						if (existingReportGroup == null) {
+							ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+							if (addedReportGroup == null) {
+								reportGroupId++;
+								reportGroupService.saveReportGroup(userDefaultReportGroup, reportGroupId, actionUser, conn);
+								addedReportGroups.put(reportGroupName, userDefaultReportGroup);
+							} else {
+								user.setDefaultReportGroup(addedReportGroup);
+							}
+						} else {
+							user.setDefaultReportGroup(existingReportGroup);
+						}
+					}
+				}
+
+				List<UserGroup> userGroups = user.getUserGroups();
+				if (CollectionUtils.isNotEmpty(userGroups)) {
+					List<UserGroup> newUserGroups = new ArrayList<>();
+					for (UserGroup userGroup : userGroups) {
+						ReportGroup userGroupDefaultReportGroup = userGroup.getDefaultReportGroup();
+						if (userGroupDefaultReportGroup != null) {
+							String reportGroupName = userGroupDefaultReportGroup.getName();
+							if (StringUtils.isBlank(reportGroupName)) {
+								userGroup.setDefaultReportGroup(null);
+							} else {
+								ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+								if (existingReportGroup == null) {
+									ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+									if (addedReportGroup == null) {
+										reportGroupId++;
+										reportGroupService.saveReportGroup(userGroupDefaultReportGroup, reportGroupId, actionUser, conn);
+										addedReportGroups.put(reportGroupName, userGroupDefaultReportGroup);
+									} else {
+										userGroup.setDefaultReportGroup(addedReportGroup);
+									}
+								} else {
+									userGroup.setDefaultReportGroup(existingReportGroup);
+								}
+							}
+						}
+
+						String userGroupName = userGroup.getName();
+						UserGroup existingUserGroup = userGroupService.getUserGroup(userGroupName);
+						if (existingUserGroup == null) {
+							UserGroup addedUserGroup = addedUserGroups.get(userGroupName);
+							if (addedUserGroup == null) {
+								userGroupId++;
+								userGroupService.saveUserGroup(userGroup, userGroupId, actionUser, conn);
+								addedUserGroups.put(userGroupName, userGroup);
+								newUserGroups.add(userGroup);
+							} else {
+								newUserGroups.add(addedUserGroup);
+							}
+						} else {
+							newUserGroups.add(existingUserGroup);
+						}
+					}
+					user.setUserGroups(newUserGroups);
+				}
+				saveUser(user, userId, actionUser, conn);
+				userGroupMembershipService2.recreateUserGroupMemberships(user);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
 		}
 	}
 
@@ -437,10 +578,28 @@ public class UserService {
 	 * @param user the user to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
-	 * @param actionUser the user who is performing the action
+	 * @param actionUser the user who is performing the save
 	 * @throws SQLException
 	 */
 	private void saveUser(User user, Integer newRecordId, User actionUser) throws SQLException {
+		Connection conn = null;
+		saveUser(user, newRecordId, actionUser, conn);
+	}
+
+	/**
+	 * Saves a user
+	 *
+	 * @param user the user to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "users", allEntries = true)
+	public void saveUser(User user, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
 		logger.debug("Entering saveUser: user={}, newRecordId={}, actionUser={}",
 				user, newRecordId, actionUser);
 
@@ -453,11 +612,12 @@ public class UserService {
 			accessLevel = user.getAccessLevel().getValue();
 		}
 
-		int defaultReportGroupId;
-		if (user.getDefaultReportGroup() == null) {
-			defaultReportGroupId = 0;
-		} else {
+		Integer defaultReportGroupId = null;
+		if (user.getDefaultReportGroup() != null) {
 			defaultReportGroupId = user.getDefaultReportGroup().getReportGroupId();
+			if (defaultReportGroupId == 0) {
+				defaultReportGroupId = null;
+			}
 		}
 
 		int affectedRows;
@@ -490,7 +650,11 @@ public class UserService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 					+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
@@ -514,7 +678,11 @@ public class UserService {
 				user.getUserId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {

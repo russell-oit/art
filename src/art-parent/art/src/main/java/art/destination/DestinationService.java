@@ -19,14 +19,14 @@ package art.destination;
 
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
-import art.encryption.AesEncryptor;
 import art.enums.DestinationType;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
@@ -105,9 +105,7 @@ public class DestinationService {
 			destination.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt password
-			String password = destination.getPassword();
-			password = AesEncryptor.decrypt(password);
-			destination.setPassword(password);
+			destination.decryptPassword();
 
 			return type.cast(destination);
 		}
@@ -125,6 +123,25 @@ public class DestinationService {
 
 		ResultSetHandler<List<Destination>> h = new BeanListHandler<>(Destination.class, new DestinationMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns destinations with given ids
+	 *
+	 * @param ids comma separated string of the destination ids to retrieve
+	 * @return destinations with given ids
+	 * @throws SQLException
+	 */
+	public List<Destination> getDestinations(String ids) throws SQLException {
+		logger.debug("Entering getDestinations: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE DESTINATION_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<Destination>> h = new BeanListHandler<>(Destination.class, new DestinationMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -248,17 +265,72 @@ public class DestinationService {
 	}
 
 	/**
+	 * Imports destination records
+	 *
+	 * @param destinations the list of destinations to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "destinations", allEntries = true)
+	public void importDestinations(List<Destination> destinations, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importDestinations: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(DESTINATION_ID) FROM ART_DESTINATIONS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (Destination destination : destinations) {
+				id++;
+				saveDestination(destination, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves a destination
+	 *
+	 * @param destination the destination to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveDestination(Destination destination, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveDestination(destination, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves a destination
 	 *
 	 * @param destination the destination to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveDestination(Destination destination, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveDestination: destination={}, newRecordId={}, actionUser={}",
-				destination, newRecordId, actionUser);
+	private void saveDestination(Destination destination, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+
+		logger.debug("Entering saveDestination: destination={}, newRecordId={},"
+				+ " actionUser={}", destination, newRecordId, actionUser);
 
 		int affectedRows;
 		boolean newRecord = false;
@@ -295,7 +367,11 @@ public class DestinationService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_DESTINATIONS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, DESTINATION_TYPE=?, SERVER=?, PORT=?,"
@@ -324,7 +400,11 @@ public class DestinationService {
 				destination.getDestinationId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {
@@ -376,16 +456,16 @@ public class DestinationService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleDestinationEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleDestinationEdit.getIds());
 		if (!multipleDestinationEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_DESTINATIONS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE DESTINATION_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE DESTINATION_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleDestinationEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 

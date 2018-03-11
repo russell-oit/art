@@ -19,13 +19,13 @@ package art.smtpserver;
 
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
-import art.encryption.AesEncryptor;
 import art.user.User;
 import art.utils.ActionResult;
+import art.utils.ArtUtils;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
@@ -101,9 +101,7 @@ public class SmtpServerService {
 			smtpServer.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt password
-			String password = smtpServer.getPassword();
-			password = AesEncryptor.decrypt(password);
-			smtpServer.setPassword(password);
+			smtpServer.decryptPassword();
 
 			return type.cast(smtpServer);
 		}
@@ -121,6 +119,25 @@ public class SmtpServerService {
 
 		ResultSetHandler<List<SmtpServer>> h = new BeanListHandler<>(SmtpServer.class, new SmtpServerMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns smtp servers with given ids
+	 *
+	 * @param ids comma separated string of the smtp server ids to retrieve
+	 * @return smtp servers with given ids
+	 * @throws SQLException
+	 */
+	public List<SmtpServer> getSmtpServers(String ids) throws SQLException {
+		logger.debug("Entering getSmtpServers: ids='{}'", ids);
+
+		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE SMTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
+
+		ResultSetHandler<List<SmtpServer>> h = new BeanListHandler<>(SmtpServer.class, new SmtpServerMapper());
+		return dbService.query(sql, h, idsArray);
 	}
 
 	/**
@@ -174,8 +191,8 @@ public class SmtpServerService {
 	 * Deletes multiple smtp servers
 	 *
 	 * @param ids the ids of smtp servers to delete
-	 * @return ActionResult. if not successful, data contains details of
-	 * smtp servers which weren't deleted
+	 * @return ActionResult. if not successful, data contains details of smtp
+	 * servers which weren't deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "smtpServers", allEntries = true)
@@ -241,17 +258,71 @@ public class SmtpServerService {
 	}
 
 	/**
+	 * Imports smtp server records
+	 *
+	 * @param smtpServers the list of smtp servers to import
+	 * @param actionUser the user who is performing the import
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "smtpServers", allEntries = true)
+	public void importSmtpServers(List<SmtpServer> smtpServers, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering importSmtpServers: actionUser={}", actionUser);
+
+		boolean originalAutoCommit = true;
+
+		try {
+			String sql = "SELECT MAX(SMTP_SERVER_ID) FROM ART_SMTP_SERVERS";
+			int id = dbService.getMaxRecordId(conn, sql);
+
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			for (SmtpServer smtpServer : smtpServers) {
+				id++;
+				saveSmtpServer(smtpServer, id, actionUser, conn);
+			}
+			conn.commit();
+		} catch (SQLException ex) {
+			conn.rollback();
+			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Saves an smtp server
+	 *
+	 * @param smtpServer the smtp server to save
+	 * @param newRecordId id of the new record or null if editing an existing
+	 * record
+	 * @param actionUser the user who is performing the save
+	 * @throws SQLException
+	 */
+	private void saveSmtpServer(SmtpServer smtpServer, Integer newRecordId,
+			User actionUser) throws SQLException {
+
+		Connection conn = null;
+		saveSmtpServer(smtpServer, newRecordId, actionUser, conn);
+	}
+
+	/**
 	 * Saves an smtp server
 	 *
 	 * @param smtpServer the smtp server
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
 	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveSmtpServer(SmtpServer smtpServer, Integer newRecordId, User actionUser) throws SQLException {
-		logger.debug("Entering saveSmtpServer: smtpServer={}, newRecordId={}, actionUser={}",
-				smtpServer, newRecordId, actionUser);
+	private void saveSmtpServer(SmtpServer smtpServer, Integer newRecordId,
+			User actionUser, Connection conn) throws SQLException {
+		logger.debug("Entering saveSmtpServer: smtpServer={}, newRecordId={},"
+				+ " actionUser={}", smtpServer, newRecordId, actionUser);
 
 		int affectedRows;
 
@@ -284,7 +355,11 @@ public class SmtpServerService {
 				actionUser.getUsername()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		} else {
 			String sql = "UPDATE ART_SMTP_SERVERS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, SERVER=?, PORT=?, USE_STARTTLS=?,"
@@ -309,7 +384,11 @@ public class SmtpServerService {
 				smtpServer.getSmtpServerId()
 			};
 
-			affectedRows = dbService.update(sql, values);
+			if (conn == null) {
+				affectedRows = dbService.update(sql, values);
+			} else {
+				affectedRows = dbService.update(conn, sql, values);
+			}
 		}
 
 		if (newRecordId != null) {
@@ -340,23 +419,23 @@ public class SmtpServerService {
 
 		String sql;
 
-		String[] ids = StringUtils.split(multipleSmtpServerEdit.getIds(), ",");
+		List<Object> idsList = ArtUtils.idsToObjectList(multipleSmtpServerEdit.getIds());
 		if (!multipleSmtpServerEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_SMTP_SERVERS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE SMTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+					+ " WHERE SMTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleSmtpServerEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(Arrays.asList(ids));
+			valuesList.addAll(idsList);
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
 			dbService.update(sql, valuesArray);
 		}
 	}
-	
+
 	/**
 	 * Returns details of jobs that use a given smtp server
 	 *

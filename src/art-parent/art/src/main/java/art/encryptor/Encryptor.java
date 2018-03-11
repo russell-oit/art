@@ -17,7 +17,9 @@
  */
 package art.encryptor;
 
+import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
+import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -29,20 +31,108 @@ import java.util.Date;
 public class Encryptor implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
 	private int encryptorId;
+	@Parsed
 	private String name;
+	@Parsed
 	private String description;
+	@Parsed
 	private boolean active = true;
+	@Parsed
 	private EncryptorType encryptorType = EncryptorType.AESCrypt;
+	@Parsed
 	private String aesCryptPassword;
 	private Date creationDate;
 	private String createdBy;
 	private Date updateDate;
 	private String updatedBy;
+	@Parsed
 	private String openPgpPublicKeyFile;
+	@Parsed
 	private String openPgpPublicKeyString;
+	@Parsed
 	private String openPgpSigningKeyFile;
+	@Parsed
 	private String openPgpSigningKeyPassphrase;
+	@Parsed
+	private String openPassword;
+	@Parsed
+	private String modifyPassword;
+	private boolean useNoneOpenPassword; //only for use with ui
+	private boolean useNoneModifyPassword; //only for use with ui
+	@Parsed
+	private boolean clearTextPasswords;
+
+	/**
+	 * @return the clearTextPasswords
+	 */
+	public boolean isClearTextPasswords() {
+		return clearTextPasswords;
+	}
+
+	/**
+	 * @param clearTextPasswords the clearTextPasswords to set
+	 */
+	public void setClearTextPasswords(boolean clearTextPasswords) {
+		this.clearTextPasswords = clearTextPasswords;
+	}
+
+	/**
+	 * @return the openPassword
+	 */
+	public String getOpenPassword() {
+		return openPassword;
+	}
+
+	/**
+	 * @param openPassword the openPassword to set
+	 */
+	public void setOpenPassword(String openPassword) {
+		this.openPassword = openPassword;
+	}
+
+	/**
+	 * @return the modifyPassword
+	 */
+	public String getModifyPassword() {
+		return modifyPassword;
+	}
+
+	/**
+	 * @param modifyPassword the modifyPassword to set
+	 */
+	public void setModifyPassword(String modifyPassword) {
+		this.modifyPassword = modifyPassword;
+	}
+
+	/**
+	 * @return the useNoneOpenPassword
+	 */
+	public boolean isUseNoneOpenPassword() {
+		return useNoneOpenPassword;
+	}
+
+	/**
+	 * @param useNoneOpenPassword the useNoneOpenPassword to set
+	 */
+	public void setUseNoneOpenPassword(boolean useNoneOpenPassword) {
+		this.useNoneOpenPassword = useNoneOpenPassword;
+	}
+
+	/**
+	 * @return the useNoneModifyPassword
+	 */
+	public boolean isUseNoneModifyPassword() {
+		return useNoneModifyPassword;
+	}
+
+	/**
+	 * @param useNoneModifyPassword the useNoneModifyPassword to set
+	 */
+	public void setUseNoneModifyPassword(boolean useNoneModifyPassword) {
+		this.useNoneModifyPassword = useNoneModifyPassword;
+	}
 
 	/**
 	 * @return the openPgpPublicKeyFile
@@ -268,6 +358,26 @@ public class Encryptor implements Serializable {
 	@Override
 	public String toString() {
 		return "Encryptor{" + "name=" + name + '}';
+	}
+
+	/**
+	 * Decrypts password fields
+	 */
+	public void decryptPasswords() {
+		aesCryptPassword = AesEncryptor.decrypt(aesCryptPassword);
+		openPgpSigningKeyPassphrase = AesEncryptor.decrypt(openPgpSigningKeyPassphrase);
+		openPassword = AesEncryptor.decrypt(openPassword);
+		modifyPassword = AesEncryptor.decrypt(modifyPassword);
+	}
+	
+	/**
+	 * Encrypts password fields
+	 */
+	public void encryptPasswords(){
+		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword);
+		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase);
+		openPassword = AesEncryptor.encrypt(openPassword);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword);
 	}
 
 }
