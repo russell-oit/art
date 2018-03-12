@@ -643,9 +643,13 @@ public class ArtUtils {
 	 *
 	 * @param zipFileName the full file name of the file to unzip
 	 * @param destinationDirectory the location to unzip to
+	 * @return file names of files contained in the zip file
 	 * @throws IOException
 	 */
-	public static void unzipFile(String zipFileName, String destinationDirectory) throws IOException {
+	public static List<String> unzipFile(String zipFileName,
+			String destinationDirectory) throws IOException {
+
+		List<String> fileNames = new ArrayList<>();
 		//http://www.baeldung.com/java-compress-and-uncompress
 		byte[] buffer = new byte[1024];
 		try (FileInputStream fis = new FileInputStream(zipFileName);
@@ -653,6 +657,7 @@ public class ArtUtils {
 			ZipEntry zipEntry = zis.getNextEntry();
 			while (zipEntry != null) {
 				String fileName = zipEntry.getName();
+				fileNames.add(fileName);
 				String filePath = destinationDirectory + fileName;
 				File newFile = new File(filePath);
 				try (FileOutputStream fos = new FileOutputStream(newFile)) {
@@ -665,6 +670,8 @@ public class ArtUtils {
 			}
 			zis.closeEntry();
 		}
+
+		return fileNames;
 	}
 
 }

@@ -625,36 +625,14 @@ public class ReportController {
 		validExtensions.add("json"); //for datamaps optional data file
 
 		//save file
-		String templatesPath;
 		ReportType reportType = ReportType.toEnum(reportTypeId);
-		switch (reportType) {
-			case ReactPivot:
-			case PivotTableJs:
-			case PivotTableJsCsvLocal:
-			case PivotTableJsCsvServer: //can specify .js template and .csv data file
-			case Dygraphs:
-			case DygraphsCsvLocal:
-			case DygraphsCsvServer:
-			case DataTables:
-			case DataTablesCsvLocal:
-			case DataTablesCsvServer:
-			case C3:
-			case ChartJs:
-			case Datamaps:
-			case DatamapsFile:
-			case Leaflet:
-			case OpenLayers:
-			case OrgChartDatabase:
-			case OrgChartJson:
-			case OrgChartList:
-			case OrgChartAjax:
-				templatesPath = Config.getJsTemplatesPath();
-				break;
-			case JPivotMondrian:
-				templatesPath = Config.getDefaultTemplatesPath();
-				break;
-			default:
-				templatesPath = Config.getTemplatesPath();
+		String templatesPath;
+		if (reportType.isUseJsTemplatesPath()) {
+			templatesPath = Config.getJsTemplatesPath();
+		} else if (reportType == ReportType.JPivotMondrian) {
+			templatesPath = Config.getDefaultTemplatesPath();
+		} else {
+			templatesPath = Config.getTemplatesPath();
 		}
 
 		UploadHelper uploadHelper = new UploadHelper();

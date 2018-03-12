@@ -32,6 +32,7 @@ import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
+import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.job.Job;
@@ -77,6 +78,7 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -916,6 +918,31 @@ public class ExportRecordsController {
 				File reportsFile = new File(reportsFilePath);
 				csvRoutines.writeAll(reports, Report.class, reportsFile);
 
+				List<String> filesToZip = new ArrayList<>();
+				for (Report report : reports) {
+					ReportType reportType = report.getReportType();
+					if (reportType == null) {
+						logger.warn("reportType is null. Report={}", report);
+					} else {
+						String template = report.getTemplate();
+						if (StringUtils.isNotBlank(template)) {
+							String templatesPath;
+							if (reportType.isUseJsTemplatesPath()) {
+								templatesPath = Config.getJsTemplatesPath();
+							} else if (reportType == ReportType.JPivotMondrian) {
+								templatesPath = Config.getDefaultTemplatesPath();
+							} else {
+								templatesPath = Config.getTemplatesPath();
+							}
+							String templateFilePath = templatesPath + template;
+							File templateFile = new File(templateFilePath);
+							if (templateFile.exists() && !filesToZip.contains(templateFilePath)) {
+								filesToZip.add(templateFilePath);
+							}
+						}
+					}
+				}
+
 				if (CollectionUtils.isNotEmpty(allReportGroups)
 						|| CollectionUtils.isNotEmpty(allReportParams)
 						|| CollectionUtils.isNotEmpty(allUserRuleValues)
@@ -923,8 +950,8 @@ public class ExportRecordsController {
 						|| CollectionUtils.isNotEmpty(allReportRules)
 						|| CollectionUtils.isNotEmpty(allUserReportRights)
 						|| CollectionUtils.isNotEmpty(allUserGroupReportRights)
-						|| CollectionUtils.isNotEmpty(allDrilldowns)) {
-					List<String> filesToZip = new ArrayList<>();
+						|| CollectionUtils.isNotEmpty(allDrilldowns)
+						|| CollectionUtils.isNotEmpty(filesToZip)) {
 					filesToZip.add(reportsFilePath);
 
 					String reportGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;

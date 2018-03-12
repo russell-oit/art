@@ -31,6 +31,7 @@ import art.drilldown.Drilldown;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.MigrationRecordType;
+import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.job.Job;
@@ -75,6 +76,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -840,6 +842,33 @@ public class ImportRecordsController {
 							}
 							reportParams.add(drilldownReportParam);
 							drilldownReport.setReportParams(reportParams);
+						}
+					}
+				}
+			}
+
+			for (Report report : reports) {
+				ReportType reportType = report.getReportType();
+				if (reportType == null) {
+					logger.warn("reportType is null. Report={}", report);
+				} else {
+					String template = report.getTemplate();
+					if (StringUtils.isNotBlank(template)) {
+						String templateFilePath = artTempPath + template;
+						File templateFile = new File(templateFilePath);
+						if (templateFile.exists()) {
+							String templatesPath;
+							if (reportType.isUseJsTemplatesPath()) {
+								templatesPath = Config.getJsTemplatesPath();
+							} else if (reportType == ReportType.JPivotMondrian) {
+								templatesPath = Config.getDefaultTemplatesPath();
+							} else {
+								templatesPath = Config.getTemplatesPath();
+							}
+							String destinationFilePath = templatesPath + template;
+							File destinationFile = new File(destinationFilePath);
+							FileUtils.copyFile(templateFile, destinationFile);
+							templateFile.delete();
 						}
 					}
 				}
