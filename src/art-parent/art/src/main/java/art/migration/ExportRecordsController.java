@@ -44,6 +44,7 @@ import art.report.ReportService;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.JxlsOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.reportrule.ReportRule;
@@ -938,6 +939,27 @@ public class ExportRecordsController {
 							File templateFile = new File(templateFilePath);
 							if (templateFile.exists() && !filesToZip.contains(templateFilePath)) {
 								filesToZip.add(templateFilePath);
+							}
+						}
+
+						String options = report.getOptions();
+						if (StringUtils.isNotBlank(options)) {
+							switch (reportType) {
+								case JxlsArt:
+								case JxlsTemplate:
+									JxlsOptions jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
+									String areaConfigFilename = jxlsOptions.getAreaConfigFile();
+									if (StringUtils.isNotBlank(areaConfigFilename)) {
+										String templatesPath = Config.getTemplatesPath();
+										String fullAreaConfigFilename = templatesPath + areaConfigFilename;
+										File areaConfigFile = new File(fullAreaConfigFilename);
+										if (areaConfigFile.exists() && !filesToZip.contains(fullAreaConfigFilename)) {
+											filesToZip.add(fullAreaConfigFilename);
+										}
+									}
+									break;
+								default:
+									break;
 							}
 						}
 					}

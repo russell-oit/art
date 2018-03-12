@@ -42,6 +42,7 @@ import art.report.Report;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.JxlsOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
 import art.rule.Rule;
@@ -869,6 +870,30 @@ public class ImportRecordsController {
 							File destinationFile = new File(destinationFilePath);
 							FileUtils.copyFile(templateFile, destinationFile);
 							templateFile.delete();
+						}
+					}
+
+					String options = report.getOptions();
+					if (StringUtils.isNotBlank(options)) {
+						switch (reportType) {
+							case JxlsArt:
+							case JxlsTemplate:
+								JxlsOptions jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
+								String areaConfigFilename = jxlsOptions.getAreaConfigFile();
+								if (StringUtils.isNotBlank(areaConfigFilename)) {
+									String fullAreaConfigFilename = artTempPath + areaConfigFilename;
+									File areaConfigFile = new File(fullAreaConfigFilename);
+									if (areaConfigFile.exists()) {
+										String templatesPath = Config.getTemplatesPath();
+										String destinationFilePath = templatesPath + areaConfigFilename;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(areaConfigFile, destinationFile);
+										areaConfigFile.delete();
+									}
+								}
+								break;
+							default:
+								break;
 						}
 					}
 				}

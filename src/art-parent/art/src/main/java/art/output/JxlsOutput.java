@@ -129,6 +129,7 @@ public class JxlsOutput {
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 * @throws org.apache.poi.openxml4j.exceptions.InvalidFormatException
+	 * @throws java.security.GeneralSecurityException
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
 			String outputFileName)
@@ -182,9 +183,10 @@ public class JxlsOutput {
 			}
 
 			String areaConfigFilename = jxlsOptions.getAreaConfigFile();
-			String fullAreaConfigFilename = templatesPath + areaConfigFilename;
+			String fullAreaConfigFilename = null;
 
 			if (StringUtils.isNotBlank(areaConfigFilename)) {
+				fullAreaConfigFilename = templatesPath + areaConfigFilename;
 				File areaConfigFile = new File(fullAreaConfigFilename);
 				if (!areaConfigFile.exists()) {
 					throw new IllegalStateException("Area config file not found: " + fullAreaConfigFilename);
@@ -212,7 +214,7 @@ public class JxlsOutput {
 				context.putVar("results", rsdc.getRows());
 			}
 
-			process(fullTemplateFileName, outputFileName, areaConfigFilename, context, fullAreaConfigFilename, jxlsOptions);
+			process(fullTemplateFileName, outputFileName, context, fullAreaConfigFilename, jxlsOptions);
 
 			String extension = FilenameUtils.getExtension(templateFileName);
 			if (!StringUtils.equalsIgnoreCase(extension, "xls")) {
@@ -254,20 +256,19 @@ public class JxlsOutput {
 	 *
 	 * @param fullTemplateFileName the path of the template file
 	 * @param outputFileName the path of the output file
-	 * @param areaConfigFilename the xml area config file name. null if not
-	 * using xml config
 	 * @param context the context
-	 * @param fullAreaConfigFilename the full path of the area config file
+	 * @param fullAreaConfigFilename the full path of the area config file. null
+	 * if not using xml config
 	 * @param options jxls options
 	 * @throws IOException
 	 */
 	private void process(String fullTemplateFileName, String outputFileName,
-			String areaConfigFilename, Context context, String fullAreaConfigFilename,
+			Context context, String fullAreaConfigFilename,
 			JxlsOptions options) throws IOException {
 
 		try (InputStream is = new FileInputStream(fullTemplateFileName)) {
 			try (OutputStream os = new FileOutputStream(outputFileName)) {
-				if (StringUtils.isBlank(areaConfigFilename)) {
+				if (StringUtils.isBlank(fullAreaConfigFilename)) {
 					//http://jxls.sourceforge.net/samples/multi_sheet_markup_demo.html
 					JxlsHelper jxlsHelper = JxlsHelper.getInstance();
 					if (options.isUseStandardFormulaProcessor()) {
