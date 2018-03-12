@@ -289,7 +289,7 @@ public class Config extends HttpServlet {
 
 	/**
 	 * Returns a descriptive string for a time zone, including its GMT offset
-	 * 
+	 *
 	 * @param timeZone the time zone
 	 * @return a descriptive string for a time zone, including its GMT offset
 	 */
@@ -299,27 +299,9 @@ public class Config extends HttpServlet {
 		return description;
 	}
 
-	private static String getTimeZoneDescription2(TimeZone tz) {
-		//https://www.mkyong.com/java/java-display-list-of-timezone-with-gmt/
-		long hours = TimeUnit.MILLISECONDS.toHours(tz.getRawOffset());
-		long minutes = TimeUnit.MILLISECONDS.toMinutes(tz.getRawOffset())
-				- TimeUnit.HOURS.toMinutes(hours);
-		// avoid -4:-30 issue
-		minutes = Math.abs(minutes);
-
-		String result;
-		if (hours > 0) {
-			result = String.format("(GMT+%d:%02d) %s", hours, minutes, tz.getID());
-		} else {
-			result = String.format("(GMT%d:%02d) %s", hours, minutes, tz.getID());
-		}
-
-		return result;
-	}
-
 	/**
 	 * Returns the time zone offset string to use
-	 * 
+	 *
 	 * @param rawOffset the raw offset
 	 * @return the time zone offset string to use
 	 */
