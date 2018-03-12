@@ -51,6 +51,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -58,14 +59,12 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import org.quartz.JobDetail;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
 import org.quartz.impl.calendar.CronCalendar;
 import org.quartz.impl.triggers.AbstractTrigger;
@@ -193,6 +192,7 @@ public class JobService {
 		job.setScheduleMonth(rs.getString("JOB_MONTH"));
 		job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
 		job.setScheduleYear(rs.getString("JOB_YEAR"));
+		job.setScheduleTimeZone(rs.getString("TIME_ZONE"));
 		job.setMailTo(rs.getString("MAIL_TOS"));
 		job.setMailFrom(rs.getString("MAIL_FROM"));
 		job.setMailCc(rs.getString("MAIL_CC"));
@@ -484,7 +484,7 @@ public class JobService {
 	 */
 	private void saveJob(Job job, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
-		
+
 		logger.debug("Entering saveJob: job={}, newRecordId={}, actionUser={}",
 				job, newRecordId, actionUser);
 
@@ -548,8 +548,9 @@ public class JobService {
 			String sql = "INSERT INTO ART_JOBS"
 					+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME,"
 					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_SECOND, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
-					+ " JOB_MONTH, JOB_WEEKDAY, JOB_YEAR, MAIL_TOS, MAIL_FROM, MAIL_CC,"
-					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_DATASOURCE_ID, CACHED_TABLE_NAME,"
+					+ " JOB_MONTH, JOB_WEEKDAY, JOB_YEAR, TIME_ZONE,"
+					+ " MAIL_TOS, MAIL_FROM, MAIL_CC, MAIL_BCC,"
+					+ " SUBJECT, MESSAGE, CACHED_DATASOURCE_ID, CACHED_TABLE_NAME,"
 					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
@@ -558,7 +559,7 @@ public class JobService {
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
 					+ " SCHEDULE_ID, SMTP_SERVER_ID, JOB_OPTIONS, ERROR_EMAIL_TO,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 46) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 47) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -575,6 +576,7 @@ public class JobService {
 				job.getScheduleMonth(),
 				job.getScheduleWeekday(),
 				job.getScheduleYear(),
+				job.getScheduleTimeZone(),
 				job.getMailTo(),
 				job.getMailFrom(),
 				job.getMailCc(),
@@ -618,8 +620,8 @@ public class JobService {
 			String sql = "UPDATE ART_JOBS SET JOB_NAME=?, QUERY_ID=?,"
 					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
 					+ " JOB_SECOND=?, JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?,"
-					+ " JOB_MONTH=?, JOB_WEEKDAY=?, JOB_YEAR=?, MAIL_TOS=?,"
-					+ " MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
+					+ " JOB_MONTH=?, JOB_WEEKDAY=?, JOB_YEAR=?, TIME_ZONE=?,"
+					+ " MAIL_TOS=?, MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
 					+ " SUBJECT=?, MESSAGE=?, CACHED_DATASOURCE_ID=?, CACHED_TABLE_NAME=?,"
 					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
 					+ " ACTIVE=?, ENABLE_AUDIT=?,"
@@ -647,6 +649,7 @@ public class JobService {
 				job.getScheduleMonth(),
 				job.getScheduleWeekday(),
 				job.getScheduleYear(),
+				job.getScheduleTimeZone(),
 				job.getMailTo(),
 				job.getMailFrom(),
 				job.getMailCc(),
@@ -911,8 +914,26 @@ public class JobService {
 		//job must have been saved in order to use job id for job, trigger and calendar names
 		int jobId = job.getJobId();
 
+		String timeZoneId;
+		Schedule schedule = job.getSchedule();
+		if (schedule == null) {
+			timeZoneId = job.getScheduleTimeZone();
+		} else {
+			timeZoneId = schedule.getTimeZone();
+		}
+
+		TimeZone timeZone;
+		if (StringUtils.isBlank(timeZoneId)) {
+			timeZone = TimeZone.getDefault();
+		} else {
+			timeZone = TimeZone.getTimeZone(timeZoneId);
+		}
+		
+		logger.debug("timeZoneId='{}'. Job Id {}", timeZoneId, job.getJobId());
+		logger.debug("timeZone={}. Job Id {}", timeZone, job.getJobId());
+
 		//get applicable holidays
-		List<org.quartz.Calendar> calendars = processHolidays(job);
+		List<org.quartz.Calendar> calendars = processHolidays(job, timeZone);
 		String globalCalendarName = "calendar" + jobId;
 		org.quartz.Calendar globalCalendar = null;
 		List<String> calendarNames = new ArrayList<>();
@@ -930,7 +951,7 @@ public class JobService {
 			scheduler.addCalendar(calendarName, calendar, replace, updateTriggers);
 		}
 
-		Set<Trigger> triggers = processTriggers(job, globalCalendar);
+		Set<Trigger> triggers = processTriggers(job, globalCalendar, timeZone);
 
 		//get earliest next fire time from all available triggers
 		//https://stackoverflow.com/questions/39791318/how-to-get-the-earliest-date-of-a-list-in-java
@@ -966,11 +987,12 @@ public class JobService {
 	 *
 	 * @param job the art job
 	 * @param globalCalendar the global calendar to apply to triggers
+	 * @param timeZone the time zone to use for the triggers
 	 * @return the list of triggers to use for the job
 	 * @throws ParseException
 	 */
-	private Set<Trigger> processTriggers(Job job, org.quartz.Calendar globalCalendar)
-			throws ParseException {
+	private Set<Trigger> processTriggers(Job job, org.quartz.Calendar globalCalendar,
+			TimeZone timeZone) throws ParseException {
 
 		Set<Trigger> triggers = new HashSet<>();
 
@@ -993,12 +1015,12 @@ public class JobService {
 		}
 
 		//create trigger that defines the main schedule for the job
-		CronTriggerImpl mainTrigger = (CronTriggerImpl) newTrigger()
-				.withIdentity(triggerKey(mainTriggerName, ArtUtils.TRIGGER_GROUP))
-				.withSchedule(cronSchedule(cronString))
-				.startAt(job.getStartDate())
-				.endAt(job.getEndDate())
-				.build();
+		CronTriggerImpl mainTrigger = new CronTriggerImpl();
+		mainTrigger.setKey(triggerKey(mainTriggerName, ArtUtils.TRIGGER_GROUP));
+		mainTrigger.setCronExpression(cronString);
+		mainTrigger.setStartTime(job.getStartDate());
+		mainTrigger.setEndTime(job.getEndDate());
+		mainTrigger.setTimeZone(timeZone);
 
 		if (globalCalendar != null) {
 			mainTrigger.setCalendarName(globalCalendar.getDescription());
@@ -1038,12 +1060,15 @@ public class JobService {
 				for (String value : values) {
 					index++;
 					String extraTriggerName = mainTriggerName + "-" + index;
+
 					CronTriggerImpl extraTrigger = new CronTriggerImpl();
 					extraTrigger.setKey(triggerKey(extraTriggerName, ArtUtils.TRIGGER_GROUP));
 					String finalCronString = CronStringHelper.processDynamicTime(value);
 					extraTrigger.setCronExpression(finalCronString);
 					extraTrigger.setStartTime(job.getStartDate());
 					extraTrigger.setEndTime(job.getEndDate());
+					extraTrigger.setTimeZone(timeZone);
+
 					if (globalCalendar != null) {
 						extraTrigger.setCalendarName(globalCalendar.getDescription());
 					}
@@ -1082,10 +1107,13 @@ public class JobService {
 	 * Process holiday definitions
 	 *
 	 * @param job the art job
+	 * @param timeZone the time zone to use
 	 * @return the list of calendars representing configured holidays
 	 * @throws ParseException
 	 */
-	private List<org.quartz.Calendar> processHolidays(Job job) throws ParseException {
+	private List<org.quartz.Calendar> processHolidays(Job job, TimeZone timeZone)
+			throws ParseException {
+
 		List<org.quartz.Calendar> calendars = new ArrayList<>();
 
 		String holidays;
@@ -1096,7 +1124,7 @@ public class JobService {
 			holidays = schedule.getHolidays();
 		}
 
-		List<org.quartz.Calendar> mainCalendars = processHolidayString(holidays);
+		List<org.quartz.Calendar> mainCalendars = processHolidayString(holidays, timeZone);
 
 		List<org.quartz.Calendar> nonLabelledCalendars = new ArrayList<>();
 		for (org.quartz.Calendar calendar : mainCalendars) {
@@ -1116,7 +1144,7 @@ public class JobService {
 
 		if (CollectionUtils.isNotEmpty(sharedHolidays)) {
 			for (Holiday holiday : sharedHolidays) {
-				List<org.quartz.Calendar> sharedCalendars = processHolidayString(holiday.getDefinition());
+				List<org.quartz.Calendar> sharedCalendars = processHolidayString(holiday.getDefinition(), timeZone);
 				for (org.quartz.Calendar calendar : sharedCalendars) {
 					if (StringUtils.isBlank(calendar.getDescription())) {
 						nonLabelledCalendars.add(calendar);
@@ -1139,10 +1167,13 @@ public class JobService {
 	 * Processes a string containing holiday definitions
 	 *
 	 * @param holidays the string containing holiday definitions
+	 * @param timeZone the time zone to use
 	 * @return a list of calendars representing the holiday definitions
 	 * @throws ParseException
 	 */
-	private List<org.quartz.Calendar> processHolidayString(String holidays) throws ParseException {
+	private List<org.quartz.Calendar> processHolidayString(String holidays,
+			TimeZone timeZone) throws ParseException {
+
 		List<org.quartz.Calendar> calendars = new ArrayList<>();
 
 		if (StringUtils.isNotBlank(holidays)) {
@@ -1173,6 +1204,7 @@ public class JobService {
 				List<org.quartz.Calendar> cronCalendars = new ArrayList<>();
 				for (String value : values) {
 					CronCalendar calendar = new CronCalendar(value);
+					calendar.setTimeZone(timeZone);
 					cronCalendars.add(calendar);
 				}
 				if (CollectionUtils.isNotEmpty(cronCalendars)) {

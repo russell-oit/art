@@ -51,6 +51,8 @@ public class Schedule implements Serializable {
 	private String weekday;
 	@Parsed
 	private String year;
+	@Parsed
+	private String timeZone;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
@@ -60,6 +62,20 @@ public class Schedule implements Serializable {
 	@Parsed
 	private String holidays;
 	private List<Holiday> sharedHolidays;
+
+	/**
+	 * @return the timeZone
+	 */
+	public String getTimeZone() {
+		return timeZone;
+	}
+
+	/**
+	 * @param timeZone the timeZone to set
+	 */
+	public void setTimeZone(String timeZone) {
+		this.timeZone = timeZone;
+	}
 
 	/**
 	 * @return the year

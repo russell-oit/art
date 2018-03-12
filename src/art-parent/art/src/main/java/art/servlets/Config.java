@@ -57,11 +57,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
@@ -118,6 +120,8 @@ public class Config extends HttpServlet {
 	private static TemplateEngine thymeleafReportTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
 	private static VelocityEngine velocityEngine;
+	private static String serverTimeZoneDescription;
+	private static final Map<String, String> timeZones = new LinkedHashMap<>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -139,7 +143,7 @@ public class Config extends HttpServlet {
 
 		//close database connections
 		DbConnections.closeAllConnections();
-		
+
 		//prevent tomcat warning concerning mysql cleanup thread
 		//https://www.ralph-schuster.eu/2014/07/09/solution-to-tomcat-cant-stop-an-abandoned-connection-cleanup-thread/
 		//https://stackoverflow.com/questions/25699985/the-web-application-appears-to-have-started-a-thread-named-abandoned-connect
@@ -259,11 +263,94 @@ public class Config extends HttpServlet {
 
 		loadLanguages();
 
+		setTimeZoneDetails();
+
 		//initialize datasources
 		initializeArtDatabase();
 
 		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
 		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
+	}
+
+	/**
+	 * Sets time zone variables
+	 */
+	private static void setTimeZoneDetails() {
+		TimeZone serverTimeZone = TimeZone.getDefault();
+		serverTimeZoneDescription = getTimeZoneDescription(serverTimeZone);
+
+		String[] timeZoneIds = TimeZone.getAvailableIDs();
+		for (String timeZoneId : timeZoneIds) {
+			TimeZone timeZone = TimeZone.getTimeZone(timeZoneId);
+			String timeZoneDescription = getTimeZoneDescription(timeZone);
+			timeZones.put(timeZoneId, timeZoneDescription);
+		}
+	}
+
+	/**
+	 * Returns a descriptive string for a time zone, including its GMT offset
+	 * 
+	 * @param timeZone the time zone
+	 * @return a descriptive string for a time zone, including its GMT offset
+	 */
+	private static String getTimeZoneDescription(TimeZone timeZone) {
+		String offset = getTimeZoneOffset(timeZone.getRawOffset());
+		String description = String.format("%s (GMT%s) ", timeZone.getID(), offset);
+		return description;
+	}
+
+	private static String getTimeZoneDescription2(TimeZone tz) {
+		//https://www.mkyong.com/java/java-display-list-of-timezone-with-gmt/
+		long hours = TimeUnit.MILLISECONDS.toHours(tz.getRawOffset());
+		long minutes = TimeUnit.MILLISECONDS.toMinutes(tz.getRawOffset())
+				- TimeUnit.HOURS.toMinutes(hours);
+		// avoid -4:-30 issue
+		minutes = Math.abs(minutes);
+
+		String result;
+		if (hours > 0) {
+			result = String.format("(GMT+%d:%02d) %s", hours, minutes, tz.getID());
+		} else {
+			result = String.format("(GMT%d:%02d) %s", hours, minutes, tz.getID());
+		}
+
+		return result;
+	}
+
+	/**
+	 * Returns the time zone offset string to use
+	 * 
+	 * @param rawOffset the raw offset
+	 * @return the time zone offset string to use
+	 */
+	private static String getTimeZoneOffset(int rawOffset) {
+		//http://www.baeldung.com/java-time-zones
+		if (rawOffset == 0) {
+			return "+00:00";
+		}
+		long hours = TimeUnit.MILLISECONDS.toHours(rawOffset);
+		long minutes = TimeUnit.MILLISECONDS.toMinutes(rawOffset);
+		minutes = Math.abs(minutes - TimeUnit.HOURS.toMinutes(hours));
+
+		return String.format("%+03d:%02d", hours, Math.abs(minutes));
+	}
+
+	/**
+	 * Returns the ids and descriptions of time zones available in the jvm
+	 *
+	 * @return the ids and descriptions of time zones available in the jvm
+	 */
+	public static Map<String, String> getTimeZones() {
+		return timeZones;
+	}
+
+	/**
+	 * Returns the server time zone description
+	 *
+	 * @return the server time zone description
+	 */
+	public static String getServerTimeZoneDescription() {
+		return serverTimeZoneDescription;
 	}
 
 	/**
@@ -831,7 +918,7 @@ public class Config extends HttpServlet {
 	public static String getReportsExportPath() {
 		return exportPath + "reports" + File.separator;
 	}
-	
+
 	/**
 	 * Returns the full path to the records export directory
 	 *

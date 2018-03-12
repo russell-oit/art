@@ -61,6 +61,7 @@ Edit schedule page
 			function updateClock()
 			{
 				var currentTimeString = currentServerDate().format("YYYY-MM-DD HH:mm:ss");
+				currentTimeString += '   ${encode:forJavaScript(serverTimeZoneDescription)}';
 				$("#clock").val(currentTimeString);
 			}
 		</script>
@@ -228,7 +229,6 @@ Edit schedule page
 				<hr>
 				<div class="form-group">
 					<label class="control-label col-md-4" for="clock">
-
 					</label>
 					<div class="col-md-8">
 						<input type="text" id="clock" readonly class="form-control"/>
@@ -295,6 +295,19 @@ Edit schedule page
 					<div class="col-md-8">
 						<form:input path="year" maxlength="100" class="form-control"/>
 						<form:errors path="year" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="timeZone">
+						<spring:message code="page.label.timeZone"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="timeZone" class="form-control selectpicker">
+							<form:option value="${encode:forHtmlAttribute(serverTimeZone)}">${encode:forHtmlContent(serverTimeZoneDescription)}</form:option>
+								<option data-divider="true"></option>
+							<form:options items="${timeZones}"/>
+						</form:select>
+						<form:errors path="timeZone" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

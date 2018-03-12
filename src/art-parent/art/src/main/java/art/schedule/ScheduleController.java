@@ -21,6 +21,7 @@ import art.holiday.HolidayService;
 import art.job.JobService;
 import art.jobrunners.UpdateQuartzSchedulesJob;
 import art.scheduleholiday.ScheduleHolidayService;
+import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
@@ -33,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -77,7 +79,7 @@ public class ScheduleController {
 
 	@Autowired
 	private HolidayService holidayService;
-	
+
 	@Autowired
 	private JobService jobService;
 
@@ -107,7 +109,7 @@ public class ScheduleController {
 
 		try {
 			ActionResult deleteResult = scheduleService.deleteSchedule(id);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -133,7 +135,7 @@ public class ScheduleController {
 
 		try {
 			ActionResult deleteResult = scheduleService.deleteSchedules(ids);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -316,6 +318,9 @@ public class ScheduleController {
 
 		model.addAttribute("action", action);
 		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
+		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
+		model.addAttribute("serverTimeZone", TimeZone.getDefault().getID());
+		model.addAttribute("timeZones", Config.getTimeZones());
 
 		return "editSchedule";
 	}
@@ -363,7 +368,7 @@ public class ScheduleController {
 
 		return response;
 	}
-	
+
 	@RequestMapping(value = "/jobsWithSchedule", method = RequestMethod.GET)
 	public String showJobsWithSchedule(@RequestParam("scheduleId") Integer scheduleId, Model model) {
 		logger.debug("Entering showJobsWithSchedule: scheduleId={}", scheduleId);

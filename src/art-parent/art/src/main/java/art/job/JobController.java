@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -147,6 +148,7 @@ public class JobController {
 		}
 
 		model.addAttribute("action", "jobs");
+		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
 
 		return "jobs";
 	}
@@ -164,6 +166,7 @@ public class JobController {
 		}
 
 		model.addAttribute("action", "config");
+		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
 
 		return "jobs";
 	}
@@ -711,6 +714,9 @@ public class JobController {
 		}
 
 		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
+		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
+		model.addAttribute("serverTimeZone", TimeZone.getDefault().getID());
+		model.addAttribute("timeZones", Config.getTimeZones());
 
 		return "editJob";
 	}

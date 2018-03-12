@@ -103,6 +103,7 @@
 			function updateClock()
 			{
 				var currentTimeString = currentServerDate().format("YYYY-MM-DD HH:mm:ss");
+				currentTimeString += '   ${encode:forJavaScript(serverTimeZoneDescription)}';
 				$("#clock").val(currentTimeString);
 			}
 		</script>
@@ -285,6 +286,7 @@
 									$('#scheduleYear').val(schedule.year);
 									$('#extraSchedules').val(schedule.extraSchedules);
 									$('#holidays').val(schedule.holidays);
+									$('#scheduleTimeZone').selectpicker('val', schedule.timeZone);
 
 									//https://silviomoreto.github.io/bootstrap-select/methods/
 									//https://stackoverflow.com/questions/19543285/use-jquery-each-to-iterate-through-object
@@ -987,6 +989,19 @@
 						<div class="col-md-8">
 							<form:input path="scheduleYear" maxlength="100" class="form-control"/>
 							<form:errors path="scheduleYear" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="scheduleTimeZone">
+							<spring:message code="page.label.timeZone"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="scheduleTimeZone" class="form-control selectpicker">
+								<form:option value="${encode:forHtmlAttribute(serverTimeZone)}">${encode:forHtmlContent(serverTimeZoneDescription)}</form:option>
+									<option data-divider="true"></option>
+								<form:options items="${timeZones}"/>
+							</form:select>
+							<form:errors path="scheduleTimeZone" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
