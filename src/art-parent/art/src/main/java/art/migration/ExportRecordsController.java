@@ -623,12 +623,7 @@ public class ExportRecordsController {
 				if (CollectionUtils.isNotEmpty(holidays)) {
 					String holidaysFilePath = recordsExportPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
 					File holidaysFile = new File(holidaysFilePath);
-
-					CsvWriterSettings writerSettings = new CsvWriterSettings();
-					writerSettings.setHeaderWritingEnabled(true);
-					CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-					csvRoutines2.writeAll(holidays, Holiday.class, holidaysFile);
-
+					csvRoutines.writeAll(holidays, Holiday.class, holidaysFile);
 					exportFilePath = recordsExportPath + "art-export-Schedules.zip";
 					ArtUtils.zipFiles(exportFilePath, schedulesFilePath, holidaysFilePath);
 					schedulesFile.delete();
@@ -687,12 +682,7 @@ public class ExportRecordsController {
 				if (CollectionUtils.isNotEmpty(allUserGroups)) {
 					String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 					File userGroupsFile = new File(userGroupsFilePath);
-
-					CsvWriterSettings writerSettings = new CsvWriterSettings();
-					writerSettings.setHeaderWritingEnabled(true);
-					CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-					csvRoutines2.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
-
+					csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
 					exportFilePath = recordsExportPath + "art-export-Users.zip";
 					ArtUtils.zipFiles(exportFilePath, usersFilePath, userGroupsFilePath);
 					usersFile.delete();
@@ -1141,73 +1131,46 @@ public class ExportRecordsController {
 					File drilldownReportParamsFile = new File(drilldownReportParamsFilePath);
 
 					if (CollectionUtils.isNotEmpty(allReportGroups)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
+						csvRoutines.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
 						filesToZip.add(reportGroupsFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allReportParams)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allReportParams, ReportParameter.class, reportParamsFile);
+						csvRoutines.writeAll(allReportParams, ReportParameter.class, reportParamsFile);
 						filesToZip.add(reportParamsFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allUserRuleValues, UserRuleValue.class, userRuleValuesFile);
+						csvRoutines.writeAll(allUserRuleValues, UserRuleValue.class, userRuleValuesFile);
 						filesToZip.add(userRuleValuesFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allUserGroupRuleValues, UserGroupRuleValue.class, userGroupRuleValuesFile);
+						csvRoutines.writeAll(allUserGroupRuleValues, UserGroupRuleValue.class, userGroupRuleValuesFile);
 						filesToZip.add(userGroupRuleValuesFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allReportRules)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allReportRules, ReportRule.class, reportRulesFile);
+						csvRoutines.writeAll(allReportRules, ReportRule.class, reportRulesFile);
 						filesToZip.add(reportRulesFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allUserReportRights)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
+						csvRoutines.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
 						filesToZip.add(userReportRightsFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
+						csvRoutines.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
 						filesToZip.add(userGroupReportRightsFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allDrilldowns)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
+						csvRoutines.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
 						filesToZip.add(drilldownsFilePath);
 
 						if (CollectionUtils.isNotEmpty(allDrilldownReportParams)) {
-							CsvWriterSettings writerSettings2 = new CsvWriterSettings();
-							writerSettings2.setHeaderWritingEnabled(true);
-							CsvRoutines csvRoutines3 = new CsvRoutines(writerSettings2);
-							csvRoutines3.writeAll(allDrilldownReportParams, ReportParameter.class, drilldownReportParamsFile);
+							csvRoutines.writeAll(allDrilldownReportParams, ReportParameter.class, drilldownReportParamsFile);
 							filesToZip.add(drilldownReportParamsFilePath);
 						}
 					}

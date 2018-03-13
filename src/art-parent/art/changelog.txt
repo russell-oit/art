@@ -1,6 +1,7 @@
 ART 3.4
 * Allow jobs to define the time zone in which the schedule will run
 * Include template file in report export/import
+* Updated univocity-parsers
 
 ART 3.3
 * Allow sending of email if there is an error with a particular job
