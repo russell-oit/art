@@ -44,6 +44,7 @@ import art.report.ReportService;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.CsvServerOptions;
 import art.reportoptions.JxlsOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
@@ -955,6 +956,18 @@ public class ExportRecordsController {
 										File areaConfigFile = new File(fullAreaConfigFilename);
 										if (areaConfigFile.exists() && !filesToZip.contains(fullAreaConfigFilename)) {
 											filesToZip.add(fullAreaConfigFilename);
+										}
+									}
+									break;
+								case PivotTableJsCsvServer:
+									CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
+									String dataFileName = csvServerOptions.getDataFile();
+									if (StringUtils.isNotBlank(dataFileName)) {
+										String jsTemplatesPath = Config.getJsTemplatesPath();
+										String fullDataFileName = jsTemplatesPath + dataFileName;
+										File dataFile = new File(fullDataFileName);
+										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
+											filesToZip.add(fullDataFileName);
 										}
 									}
 									break;

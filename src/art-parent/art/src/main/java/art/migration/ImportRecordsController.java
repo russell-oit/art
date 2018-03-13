@@ -42,6 +42,7 @@ import art.report.Report;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.CsvServerOptions;
 import art.reportoptions.JxlsOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
@@ -889,6 +890,21 @@ public class ImportRecordsController {
 										File destinationFile = new File(destinationFilePath);
 										FileUtils.copyFile(areaConfigFile, destinationFile);
 										areaConfigFile.delete();
+									}
+								}
+								break;
+							case PivotTableJsCsvServer:
+								CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
+								String dataFileName = csvServerOptions.getDataFile();
+								if (StringUtils.isNotBlank(dataFileName)) {
+									String fullDataFileName = artTempPath + dataFileName;
+									File dataFile = new File(fullDataFileName);
+									if (dataFile.exists()) {
+										String jsTemplatesPath = Config.getJsTemplatesPath();
+										String destinationFilePath = jsTemplatesPath + dataFileName;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(dataFile, destinationFile);
+										dataFile.delete();
 									}
 								}
 								break;
