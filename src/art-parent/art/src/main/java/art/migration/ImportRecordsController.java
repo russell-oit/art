@@ -42,8 +42,12 @@ import art.report.Report;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.C3Options;
 import art.reportoptions.CsvServerOptions;
+import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JxlsOptions;
+import art.reportoptions.OrgChartOptions;
+import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
 import art.rule.Rule;
@@ -78,6 +82,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -894,6 +899,8 @@ public class ImportRecordsController {
 								}
 								break;
 							case PivotTableJsCsvServer:
+							case DygraphsCsvServer:
+							case DataTablesCsvServer:
 								CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
 								String dataFileName = csvServerOptions.getDataFile();
 								if (StringUtils.isNotBlank(dataFileName)) {
@@ -905,6 +912,154 @@ public class ImportRecordsController {
 										File destinationFile = new File(destinationFilePath);
 										FileUtils.copyFile(dataFile, destinationFile);
 										dataFile.delete();
+									}
+								}
+								break;
+							case C3:
+								C3Options c3Options = ArtUtils.jsonToObject(options, C3Options.class);
+								String cssFileName = c3Options.getCssFile();
+								if (StringUtils.isNotBlank(cssFileName)) {
+									String fullCssFileName = artTempPath + cssFileName;
+									File cssFile = new File(fullCssFileName);
+									if (cssFile.exists()) {
+										String jsTemplatesPath = Config.getJsTemplatesPath();
+										String destinationFilePath = jsTemplatesPath + cssFileName;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(cssFile, destinationFile);
+										cssFile.delete();
+									}
+								}
+								break;
+							case Datamaps:
+							case DatamapsFile:
+								DatamapsOptions datamapsOptions = ArtUtils.jsonToObject(options, DatamapsOptions.class);
+								String jsTemplatesPath = Config.getJsTemplatesPath();
+
+								String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
+								if (StringUtils.isNotBlank(datamapsJsFileName)) {
+									String fullDatamapsJsFileName = artTempPath + datamapsJsFileName;
+									File datamapsJsFile = new File(fullDatamapsJsFileName);
+									if (datamapsJsFile.exists()) {
+										String destinationFilePath = jsTemplatesPath + datamapsJsFileName;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(datamapsJsFile, destinationFile);
+										datamapsJsFile.delete();
+									}
+								}
+
+								dataFileName = datamapsOptions.getDataFile();
+								if (StringUtils.isNotBlank(dataFileName)) {
+									String fullDataFileName = artTempPath + dataFileName;
+									File dataFile = new File(fullDataFileName);
+									if (dataFile.exists()) {
+										String destinationFilePath = jsTemplatesPath + dataFileName;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(dataFile, destinationFile);
+										dataFile.delete();
+									}
+								}
+
+								String mapFileName = datamapsOptions.getMapFile();
+								if (StringUtils.isNotBlank(mapFileName)) {
+									String fullMapFileName = artTempPath + mapFileName;
+									File mapFile = new File(fullMapFileName);
+									if (mapFile.exists()) {
+										String destinationFilePath = jsTemplatesPath + mapFileName;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(mapFile, destinationFile);
+										mapFile.delete();
+									}
+								}
+
+								cssFileName = datamapsOptions.getCssFile();
+								if (StringUtils.isNotBlank(cssFileName)) {
+									String fullCssFileName = artTempPath + cssFileName;
+									File cssFile = new File(fullCssFileName);
+									if (cssFile.exists()) {
+										String destinationFilePath = jsTemplatesPath + cssFileName;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(cssFile, destinationFile);
+										cssFile.delete();
+									}
+								}
+								break;
+							case Leaflet:
+							case OpenLayers:
+								WebMapOptions webMapOptions = ArtUtils.jsonToObject(options, WebMapOptions.class);
+								jsTemplatesPath = Config.getJsTemplatesPath();
+
+								cssFileName = webMapOptions.getCssFile();
+								if (StringUtils.isNotBlank(cssFileName)) {
+									String fullCssFileName = artTempPath + cssFileName;
+									File cssFile = new File(fullCssFileName);
+									if (cssFile.exists()) {
+										String destinationFilePath = jsTemplatesPath + cssFileName;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(cssFile, destinationFile);
+										cssFile.delete();
+									}
+								}
+
+								dataFileName = webMapOptions.getDataFile();
+								if (StringUtils.isNotBlank(dataFileName)) {
+									String fullDataFileName = artTempPath + dataFileName;
+									File dataFile = new File(fullDataFileName);
+									if (dataFile.exists()) {
+										String destinationFilePath = jsTemplatesPath + dataFileName;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(dataFile, destinationFile);
+										dataFile.delete();
+									}
+								}
+
+								List<String> jsFileNames = webMapOptions.getJsFiles();
+								if (CollectionUtils.isNotEmpty(jsFileNames)) {
+									for (String jsFileName : jsFileNames) {
+										if (StringUtils.isNotBlank(jsFileName)) {
+											String fullJsFileName = artTempPath + jsFileName;
+											File jsFile = new File(fullJsFileName);
+											if (jsFile.exists()) {
+												String destinationFilePath = jsTemplatesPath + jsFileName;
+												File destinationFile = new File(destinationFilePath);
+												FileUtils.copyFile(jsFile, destinationFile);
+												jsFile.delete();
+											}
+										}
+									}
+								}
+
+								List<String> cssFileNames = webMapOptions.getCssFiles();
+								if (CollectionUtils.isNotEmpty(cssFileNames)) {
+									for (String listCssFileName : cssFileNames) {
+										if (StringUtils.isNotBlank(listCssFileName)) {
+											String fullListCssFileName = artTempPath + listCssFileName;
+											File listCssFile = new File(fullListCssFileName);
+											if (listCssFile.exists()) {
+												String destinationFilePath = jsTemplatesPath + listCssFileName;
+												File destinationFile = new File(destinationFilePath);
+												FileUtils.copyFile(listCssFile, destinationFile);
+												listCssFile.delete();
+											}
+										}
+									}
+								}
+								break;
+							case OrgChartDatabase:
+							case OrgChartJson:
+							case OrgChartList:
+							case OrgChartAjax:
+								OrgChartOptions orgChartOptions = ArtUtils.jsonToObject(options, OrgChartOptions.class);
+								jsTemplatesPath = Config.getJsTemplatesPath();
+
+								cssFileName = orgChartOptions.getCssFile();
+								if (StringUtils.isNotBlank(cssFileName)) {
+									String fullCssFileName = artTempPath + cssFileName;
+									File cssFile = new File(fullCssFileName);
+									if (cssFile.exists()) {
+										String destinationFilePath = jsTemplatesPath + cssFileName;
+										File destinationFile = new File(destinationFilePath);
+										FileUtils.copyFile(cssFile, destinationFile);
+										cssFile.delete();
 									}
 								}
 								break;

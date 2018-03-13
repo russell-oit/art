@@ -44,8 +44,12 @@ import art.report.ReportService;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.C3Options;
 import art.reportoptions.CsvServerOptions;
+import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JxlsOptions;
+import art.reportoptions.OrgChartOptions;
+import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.reportrule.ReportRule;
@@ -960,6 +964,8 @@ public class ExportRecordsController {
 									}
 									break;
 								case PivotTableJsCsvServer:
+								case DygraphsCsvServer:
+								case DataTablesCsvServer:
 									CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
 									String dataFileName = csvServerOptions.getDataFile();
 									if (StringUtils.isNotBlank(dataFileName)) {
@@ -968,6 +974,124 @@ public class ExportRecordsController {
 										File dataFile = new File(fullDataFileName);
 										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
 											filesToZip.add(fullDataFileName);
+										}
+									}
+									break;
+								case C3:
+									C3Options c3Options = ArtUtils.jsonToObject(options, C3Options.class);
+									String cssFileName = c3Options.getCssFile();
+									if (StringUtils.isNotBlank(cssFileName)) {
+										String jsTemplatesPath = Config.getJsTemplatesPath();
+										String fullCssFileName = jsTemplatesPath + cssFileName;
+										File cssFile = new File(fullCssFileName);
+										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+											filesToZip.add(fullCssFileName);
+										}
+									}
+									break;
+								case Datamaps:
+								case DatamapsFile:
+									DatamapsOptions datamapsOptions = ArtUtils.jsonToObject(options, DatamapsOptions.class);
+									String jsTemplatesPath = Config.getJsTemplatesPath();
+
+									String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
+									if (StringUtils.isNotBlank(datamapsJsFileName)) {
+										String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
+										File datamapsJsFile = new File(fullDatamapsJsFileName);
+										if (datamapsJsFile.exists() && !filesToZip.contains(fullDatamapsJsFileName)) {
+											filesToZip.add(fullDatamapsJsFileName);
+										}
+									}
+
+									dataFileName = datamapsOptions.getDataFile();
+									if (StringUtils.isNotBlank(dataFileName)) {
+										String fullDataFileName = jsTemplatesPath + dataFileName;
+										File dataFile = new File(fullDataFileName);
+										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
+											filesToZip.add(fullDataFileName);
+										}
+									}
+
+									String mapFileName = datamapsOptions.getMapFile();
+									if (StringUtils.isNotBlank(mapFileName)) {
+										String fullMapFileName = jsTemplatesPath + mapFileName;
+										File mapFile = new File(fullMapFileName);
+										if (mapFile.exists() && !filesToZip.contains(fullMapFileName)) {
+											filesToZip.add(fullMapFileName);
+										}
+									}
+
+									cssFileName = datamapsOptions.getCssFile();
+									if (StringUtils.isNotBlank(cssFileName)) {
+										String fullCssFileName = jsTemplatesPath + cssFileName;
+										File cssFile = new File(fullCssFileName);
+										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+											filesToZip.add(fullCssFileName);
+										}
+									}
+									break;
+								case Leaflet:
+								case OpenLayers:
+									WebMapOptions webMapOptions = ArtUtils.jsonToObject(options, WebMapOptions.class);
+									jsTemplatesPath = Config.getJsTemplatesPath();
+
+									cssFileName = webMapOptions.getCssFile();
+									if (StringUtils.isNotBlank(cssFileName)) {
+										String fullCssFileName = jsTemplatesPath + cssFileName;
+										File cssFile = new File(fullCssFileName);
+										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+											filesToZip.add(fullCssFileName);
+										}
+									}
+
+									dataFileName = webMapOptions.getDataFile();
+									if (StringUtils.isNotBlank(dataFileName)) {
+										String fullDataFileName = jsTemplatesPath + dataFileName;
+										File dataFile = new File(fullDataFileName);
+										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
+											filesToZip.add(fullDataFileName);
+										}
+									}
+
+									List<String> jsFileNames = webMapOptions.getJsFiles();
+									if (CollectionUtils.isNotEmpty(jsFileNames)) {
+										for (String jsFileName : jsFileNames) {
+											if (StringUtils.isNotBlank(jsFileName)) {
+												String fullJsFileName = jsTemplatesPath + jsFileName;
+												File jsFile = new File(fullJsFileName);
+												if (jsFile.exists() && !filesToZip.contains(fullJsFileName)) {
+													filesToZip.add(fullJsFileName);
+												}
+											}
+										}
+									}
+
+									List<String> cssFileNames = webMapOptions.getCssFiles();
+									if (CollectionUtils.isNotEmpty(cssFileNames)) {
+										for (String listCssFileName : cssFileNames) {
+											if (StringUtils.isNotBlank(listCssFileName)) {
+												String fullListCssFileName = jsTemplatesPath + listCssFileName;
+												File listCssFile = new File(fullListCssFileName);
+												if (listCssFile.exists() && !filesToZip.contains(fullListCssFileName)) {
+													filesToZip.add(fullListCssFileName);
+												}
+											}
+										}
+									}
+									break;
+								case OrgChartDatabase:
+								case OrgChartJson:
+								case OrgChartList:
+								case OrgChartAjax:
+									OrgChartOptions orgChartOptions = ArtUtils.jsonToObject(options, OrgChartOptions.class);
+									jsTemplatesPath = Config.getJsTemplatesPath();
+
+									cssFileName = orgChartOptions.getCssFile();
+									if (StringUtils.isNotBlank(cssFileName)) {
+										String fullCssFileName = jsTemplatesPath + cssFileName;
+										File cssFile = new File(fullCssFileName);
+										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+											filesToZip.add(fullCssFileName);
 										}
 									}
 									break;
