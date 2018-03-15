@@ -1,6 +1,7 @@
 ART 3.4
 * Allow jobs to define the time zone in which the schedule will run
 * Include template file in report export/import
+* Provide a REST API for dealing with users. This is experimental and subject to change.
 * Updated univocity-parsers
 
 ART 3.3

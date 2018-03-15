@@ -52,6 +52,7 @@ public class InternalLogin {
 
 		try {
 			User user = userService.getUser(username);
+			result.setUser(user);
 
 			if (user == null) {
 				//user doesn't exist
@@ -111,9 +112,9 @@ public class InternalLogin {
 	private static void createBcryptPassword(String password, User user, UserService userService)
 			throws SQLException {
 		
+		String bcryptAlgorithm = "bcrypt";
 		String bcryptPassword = PasswordUtils.HashPasswordBcrypt(password);
 		user.setPassword(bcryptPassword);
-		String bcryptAlgorithm = "bcrypt";
 		user.setPasswordAlgorithm(bcryptAlgorithm);
 		userService.updatePassword(user.getUserId(), bcryptPassword, bcryptAlgorithm, user);
 	}

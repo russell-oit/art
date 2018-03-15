@@ -112,6 +112,13 @@ public class CacheHelper {
 			logger.error("Error", ex);
 		}
 	}
+	
+	/**
+	 * Refreshes custom settings
+	 */
+	public void clearCustomSettings(){
+		Config.loadCustomSettings(servletContext);
+	}
 
 	/**
 	 * Clears reports cache
@@ -231,6 +238,7 @@ public class CacheHelper {
 		clearJPivot();
 		clearSaiku();
 		clearSettings(session);
+		clearCustomSettings();
 	}
 
 }

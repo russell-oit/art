@@ -128,6 +128,9 @@ public class CacheController {
 				case Settings:
 					cacheHelper.clearSettings(session);
 					break;
+				case CustomSettings:
+					cacheHelper.clearCustomSettings();
+					break;
 				default:
 					message = "Clear cache not available: " + id;
 			}

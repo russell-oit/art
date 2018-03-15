@@ -207,7 +207,7 @@ public class Config extends HttpServlet {
 		//set application path
 		appPath = ctx.getRealPath("/");
 
-		if (!StringUtils.right(appPath, 1).equals(File.separator)) {
+		if (!StringUtils.endsWith(appPath, File.separator)) {
 			appPath = appPath + File.separator;
 		}
 
@@ -215,45 +215,7 @@ public class Config extends HttpServlet {
 		webinfPath = appPath + "WEB-INF" + File.separator;
 
 		//load custom settings
-		loadCustomSettings();
-
-		//set show errors custom setting
-		ctx.setAttribute("showErrors", customSettings.isShowErrors());
-
-		//set work directory base path
-		workDirectoryPath = webinfPath + "work" + File.separator; //default work directory
-
-		String customWorkDirectory = customSettings.getWorkDirectory();
-		if (StringUtils.isNotBlank(customWorkDirectory)) {
-			//custom work directory defined
-			workDirectoryPath = customWorkDirectory;
-			if (!StringUtils.right(workDirectoryPath, 1).equals(File.separator)) {
-				workDirectoryPath = workDirectoryPath + File.separator;
-			}
-
-			logger.info("Using custom work directory: '{}'", workDirectoryPath);
-		}
-
-		//set export path
-		exportPath = workDirectoryPath + "export" + File.separator; //default
-
-		//set custom export path
-		String customExportDirectory = customSettings.getExportDirectory();
-		if (StringUtils.isNotBlank(customExportDirectory)) {
-			//custom export directory defined
-			exportPath = customExportDirectory;
-			if (!StringUtils.right(exportPath, 1).equals(File.separator)) {
-				exportPath = exportPath + File.separator;
-			}
-
-			logger.info("Using custom export directory: '{}'", exportPath);
-		}
-
-		//set art-database file path
-		artDatabaseFilePath = workDirectoryPath + "art-database.json";
-
-		//ensure work directories exist
-		createWorkDirectories();
+		loadCustomSettings(ctx);
 
 		createFreemarkerConfiguration();
 
@@ -750,7 +712,7 @@ public class Config extends HttpServlet {
 	/**
 	 * Loads custom settings
 	 */
-	private static void loadCustomSettings() {
+	public static void loadCustomSettings(ServletContext ctx) {
 		CustomSettings newCustomSettings = null;
 
 		try {
@@ -771,6 +733,44 @@ public class Config extends HttpServlet {
 
 		customSettings = null;
 		customSettings = newCustomSettings;
+
+		//set show errors custom setting
+		ctx.setAttribute("showErrors", customSettings.isShowErrors());
+
+		//set work directory base path
+		workDirectoryPath = webinfPath + "work" + File.separator; //default work directory
+
+		String customWorkDirectory = customSettings.getWorkDirectory();
+		if (StringUtils.isNotBlank(customWorkDirectory)) {
+			//custom work directory defined
+			workDirectoryPath = customWorkDirectory;
+			if (!StringUtils.endsWith(workDirectoryPath, File.separator)) {
+				workDirectoryPath = workDirectoryPath + File.separator;
+			}
+
+			logger.info("Using custom work directory: '{}'", workDirectoryPath);
+		}
+
+		//set export path
+		exportPath = workDirectoryPath + "export" + File.separator; //default
+
+		//set custom export path
+		String customExportDirectory = customSettings.getExportDirectory();
+		if (StringUtils.isNotBlank(customExportDirectory)) {
+			//custom export directory defined
+			exportPath = customExportDirectory;
+			if (!StringUtils.endsWith(exportPath, File.separator)) {
+				exportPath = exportPath + File.separator;
+			}
+
+			logger.info("Using custom export directory: '{}'", exportPath);
+		}
+
+		//set art-database file path
+		artDatabaseFilePath = workDirectoryPath + "art-database.json";
+
+		//ensure work directories exist
+		createWorkDirectories();
 	}
 
 	/**
@@ -785,7 +785,7 @@ public class Config extends HttpServlet {
 	/**
 	 * Creates work directories
 	 */
-	private void createWorkDirectories() {
+	private static void createWorkDirectories() {
 		makeDirectory(getTemplatesPath());
 		makeDirectory(getArtTempPath());
 		makeDirectory(getJobsExportPath());
@@ -800,7 +800,7 @@ public class Config extends HttpServlet {
 	 *
 	 * @param directoryPath the directory path to create
 	 */
-	private void makeDirectory(String directoryPath) {
+	private static void makeDirectory(String directoryPath) {
 		if (directoryPath == null) {
 			return;
 		}

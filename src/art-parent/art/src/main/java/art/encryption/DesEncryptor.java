@@ -64,7 +64,7 @@ public class DesEncryptor {
 			Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
 			pbeCipher.init(Cipher.ENCRYPT_MODE, getKey(key), getParamSpec());
 			// Encode the string into bytes using utf-8
-			byte[] utf8 = cleartext.getBytes("UTF8");
+			byte[] utf8 = cleartext.getBytes("UTF-8");
 			// Encrypt
 			byte[] enc = pbeCipher.doFinal(utf8);
 			// Encode bytes to base64 to get a string
@@ -105,7 +105,7 @@ public class DesEncryptor {
 			// Decrypt
 			byte[] utf8 = pbeCipher.doFinal(dec);
 			// Decode using utf-8
-			return new String(utf8, "UTF8");
+			return new String(utf8, "UTF-8");
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}

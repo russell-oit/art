@@ -116,8 +116,8 @@ public class ArtUtils {
 	 * @return
 	 */
 	public static long getRandomNumber(long minimum, long maximum) {
-		Random rn = new Random();
-		long randomNum = minimum + (long) (rn.nextDouble() * (maximum - minimum));
+		Random random = new Random();
+		long randomNum = minimum + (long) (random.nextDouble() * (maximum - minimum));
 		return randomNum;
 	}
 
@@ -129,9 +129,9 @@ public class ArtUtils {
 	 * @return
 	 */
 	public static int getRandomNumber(int minimum, int maximum) {
-		Random rn = new Random();
+		Random random = new Random();
 		int range = maximum - minimum + 1;
-		int randomNum = rn.nextInt(range) + minimum;
+		int randomNum = random.nextInt(range) + minimum;
 		return randomNum;
 	}
 

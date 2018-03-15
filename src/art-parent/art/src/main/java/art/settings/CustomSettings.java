@@ -35,6 +35,21 @@ public class CustomSettings {
 	private boolean checkExportFileAccess; //whether export files should be checked for user access before being accessed
 	private boolean enableGroovySandbox = true; //whether to apply the groovy sandbox when running groovy scripts
 	private boolean enableEmailing = true; //whether sending of emails is enabled
+	private String jwtSecret;
+
+	/**
+	 * @return the jwtSecret
+	 */
+	public String getJwtSecret() {
+		return jwtSecret;
+	}
+
+	/**
+	 * @param jwtSecret the jwtSecret to set
+	 */
+	public void setJwtSecret(String jwtSecret) {
+		this.jwtSecret = jwtSecret;
+	}
 
 	/**
 	 * @return the checkExportFileAccess

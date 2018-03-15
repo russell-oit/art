@@ -138,6 +138,7 @@ public class SettingsService {
 			settings.setPasswordMinNumeric(rs.getInt("PASSWORD_MIN_NUMERIC"));
 			settings.setPasswordMinSpecial(rs.getInt("PASSWORD_MIN_SPECIAL"));
 			settings.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			settings.setJwtTokenExpiryMins(rs.getInt("JWT_TOKEN_EXPIRY"));
 			settings.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt passwords
@@ -241,9 +242,9 @@ public class SettingsService {
 					+ " ERROR_EMAIL_LOGGER, ERROR_EMAIL_SUPPRESS_AFTER,"
 					+ " ERROR_EMAIL_EXPIRE_AFTER, ERROR_EMAIL_DIGEST_FREQUENCY,"
 					+ " PASSWORD_MIN_LENGTH, PASSWORD_MIN_LOWERCASE, PASSWORD_MIN_UPPERCASE,"
-					+ " PASSWORD_MIN_NUMERIC, PASSWORD_MIN_SPECIAL,"
+					+ " PASSWORD_MIN_NUMERIC, PASSWORD_MIN_SPECIAL, JWT_TOKEN_EXPIRY,"
 					+ " UPDATE_DATE, UPDATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 59) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 60) + ")";
 
 			Object[] values = {
 				settings.getSmtpServer(),
@@ -303,6 +304,7 @@ public class SettingsService {
 				settings.getPasswordMinUppercase(),
 				settings.getPasswordMinNumeric(),
 				settings.getPasswordMinSpecial(),
+				settings.getJwtTokenExpiryMins(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};

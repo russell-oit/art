@@ -37,9 +37,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.http.MediaType;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -91,7 +94,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
-
+	
 	private ApplicationContext applicationContext;
 
 	@Override
@@ -107,6 +110,11 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		//https://github.com/arey/spring-javaconfig-sample/blob/master/src/main/java/com/javaetmoi/sample/config/WebMvcConfig.java
 		//don't include/show model attributes in url (request) when using redirect:
 		requestMappingHandlerAdapter.setIgnoreDefaultModelOnRedirect(true);
+	}
+
+	@Override
+	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+		configurer.defaultContentType(MediaType.APPLICATION_JSON_UTF8);
 	}
 
 	@Override
@@ -151,6 +159,16 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		resolver.setCacheable(false);
 		return resolver;
 	}
+	
+	@Bean
+	public HandlerInterceptor authorizationInterceptor(){
+		return new AuthorizationInterceptor();
+	}
+	
+	@Bean
+	public HandlerInterceptor apiInterceptor(){
+		return new ApiInterceptor();
+	}
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
@@ -161,15 +179,16 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addInterceptor(localeChangeInterceptor);
 		registry.addInterceptor(mdcInterceptor);
 
-		AuthorizationInterceptor authorizationInterceptor = new AuthorizationInterceptor();
-		authorizationInterceptor.setApplicationContext(applicationContext);
-
 		//https://ant.apache.org/manual/dirtasks.html#patterns
 		//https://opensourceforgeeks.blogspot.co.ke/2016/01/difference-between-and-in-spring-mvc.html
-		registry.addInterceptor(authorizationInterceptor)
+		registry.addInterceptor(authorizationInterceptor())
 				.addPathPatterns("/**")
-				.excludePathPatterns("/login", "/logout", "/accessDenied", "/customAuthentication",
+				.excludePathPatterns("/login", "/logout", "/accessDenied",
+						"/customAuthentication", "/api/**",
 						"/error", "/error-404", "/error-405", "/error-400", "/error-500");
+		
+		registry.addInterceptor(apiInterceptor())
+				.addPathPatterns("/api/**");
 	}
 
 	@Bean
