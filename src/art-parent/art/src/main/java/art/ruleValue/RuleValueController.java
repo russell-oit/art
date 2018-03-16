@@ -20,7 +20,7 @@ package art.ruleValue;
 import art.rule.RuleService;
 import art.user.UserService;
 import art.usergroup.UserGroupService;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;

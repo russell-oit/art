@@ -20,7 +20,7 @@ package art.adminright;
 import art.datasource.DatasourceService;
 import art.reportgroup.ReportGroupService;
 import art.user.UserService;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import java.sql.SQLException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;

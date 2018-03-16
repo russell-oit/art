@@ -42,7 +42,7 @@ import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.CronStringHelper;
 import art.utils.ExpressionHelper;

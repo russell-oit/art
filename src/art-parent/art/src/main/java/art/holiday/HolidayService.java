@@ -20,7 +20,7 @@ package art.holiday;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.user.User;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;

@@ -15,15 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.common;
+package art.general;
 
+import art.utils.ArtUtils;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -39,6 +47,29 @@ public class ErrorController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ErrorController.class);
 
+	@ModelAttribute
+	public void addStatusCodeAndUri(HttpServletRequest request, Model model) {
+		//http://www.baeldung.com/spring-mvc-and-the-modelattribute-annotation
+		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
+		String requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
+		model.addAttribute("requestUri", requestUri);
+		
+		boolean isApi = false;
+		try {
+			URI uri = new URI(requestUri);
+			String path = uri.getPath();
+			String contextPath = request.getContextPath();
+			String pathMinusContext = StringUtils.substringAfter(path, contextPath);
+			
+			if (StringUtils.startsWith(pathMinusContext, "/api/")) {
+				isApi = true;
+			}
+		} catch (URISyntaxException ex) {
+			logger.error("Error", ex);
+		}
+		model.addAttribute("isApi", isApi);
+	}
+
 	@RequestMapping(value = "/error")
 	public String showError(HttpServletRequest request, Model model) {
 		//https://stackoverflow.com/questions/3553294/ideal-error-page-for-java-ee-app
@@ -50,7 +81,7 @@ public class ErrorController {
 
 		Throwable exception = (Throwable) request.getAttribute("javax.servlet.error.exception");
 		logger.error("Error", exception);
-		
+
 		String errorDetails;
 
 		if (exception != null) {
@@ -70,7 +101,7 @@ public class ErrorController {
 			errorDetails = "No error information available";
 		}
 		model.addAttribute("errorDetails", errorDetails);
-		
+
 		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-inline";
@@ -80,11 +111,25 @@ public class ErrorController {
 	}
 
 	@RequestMapping(value = "/error-404")
-	public String showError404(HttpServletRequest request, Model model) {
-		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
-		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
+	public String showError404(HttpServletRequest request, HttpServletResponse response,
+			@ModelAttribute("statusCode") Integer statusCode,
+			@ModelAttribute("requestUri") String requestUri,
+			@ModelAttribute("isApi") Boolean isApi) {
 
-		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+		if (isApi) {
+			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setHttpStatus(statusCode);
+			apiResponse.setMessage("Page not found");
+
+			try {
+				String jsonString = ArtUtils.objectToJson(apiResponse);
+				response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+				response.getWriter().write(jsonString);
+			} catch (IOException ex) {
+				logger.error("Error", ex);
+			}
+			return null;
+		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-404-inline";
 		} else {

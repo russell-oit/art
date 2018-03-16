@@ -20,7 +20,7 @@ package art.connection;
 import art.connectionpool.DbConnections;
 import art.enums.ConnectionPoolLibrary;
 import art.servlets.Config;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;

@@ -19,7 +19,7 @@ package art.logger;
 
 import art.enums.LoggerLevel;
 import art.servlets.Config;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;

@@ -25,7 +25,7 @@ import art.report.Report;
 import art.report.ReportService;
 import art.report.ReportServiceHelper;
 import art.user.User;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

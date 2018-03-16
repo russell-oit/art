@@ -21,7 +21,7 @@ import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.Report;
 import art.report.ReportService;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;

@@ -15,33 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.common;
+package art.general;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
 /**
- * Controller for simple pages that don't have much logic
+ * Spring converter for string to double. To override the default converter
+ * which throws an exception with an empty string. This converter converts an
+ * empty string to 0.
  *
  * @author Timothy Anyona
  */
-@Controller
-public class CommonController {
+@Component
+public class StringToDouble implements Converter<String, Double> {
 
-	@RequestMapping(value = "/accessDenied", method = {RequestMethod.GET, RequestMethod.POST})
-	public String showAccessDenied() {
-		return "accessDenied";
+	@Override
+	public Double convert(String s) {
+		return NumberUtils.toDouble(s);
 	}
-
-	@RequestMapping(value = "/success", method = RequestMethod.GET)
-	public String showSuccess() {
-		return "success";
-	}
-
-	@RequestMapping(value = "/reportError", method = RequestMethod.GET)
-	public String showReportError() {
-		return "reportError";
-	}
-	
 }

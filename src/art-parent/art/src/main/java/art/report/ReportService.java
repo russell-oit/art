@@ -34,7 +34,7 @@ import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.reportoptions.CloneOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;

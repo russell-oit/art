@@ -100,7 +100,7 @@ public class Settings implements Serializable {
 	private int passwordMinNumeric;
 	private int passwordMinSpecial;
 	private boolean clearTextPasswords; //used to enable import with passwords specified in clear text
-	private int jwtTokenExpiryMins = 120;
+	private int jwtTokenExpiryMins = 60;
 
 	/**
 	 * @return the jwtTokenExpiryMins

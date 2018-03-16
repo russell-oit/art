@@ -17,7 +17,7 @@
  */
 package art.user;
 
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.http.HttpSession;

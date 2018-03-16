@@ -20,7 +20,7 @@ package art.ftpserver;
 import art.encryption.AesEncryptor;
 import art.enums.FtpConnectionType;
 import art.user.User;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;

@@ -25,7 +25,7 @@ import art.reportgroup.ReportGroupService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.usergroupmembership.UserGroupMembershipService2;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;

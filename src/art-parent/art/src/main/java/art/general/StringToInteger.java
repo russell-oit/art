@@ -15,24 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.utils;
+package art.general;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 /**
- * Spring converter for string to double. To override the default converter
+ * Spring converter for string to integer. To override the default converter
  * which throws an exception with an empty string. This converter converts an
  * empty string to 0.
  *
  * @author Timothy Anyona
  */
 @Component
-public class StringToDouble implements Converter<String, Double> {
+public class StringToInteger implements Converter<String, Integer> {
 
+	//for default converter, see http://docs.spring.io/spring/docs/3.0.0.RC2/reference/html/ch05s05.html
 	@Override
-	public Double convert(String s) {
-		return NumberUtils.toDouble(s);
+	public Integer convert(String s) {
+		return NumberUtils.toInt(s);
 	}
 }

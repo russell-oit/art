@@ -23,7 +23,7 @@ import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.scheduleholiday.ScheduleHolidayService;
 import art.user.User;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;

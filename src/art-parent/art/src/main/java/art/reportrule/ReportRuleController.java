@@ -20,7 +20,7 @@ package art.reportrule;
 import art.report.Report;
 import art.rule.RuleService;
 import art.report.ReportService;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Locale;

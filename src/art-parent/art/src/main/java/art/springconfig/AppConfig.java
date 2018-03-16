@@ -24,7 +24,7 @@ import art.reportgroup.StringToReportGroup;
 import art.rule.StringToRule;
 import art.schedule.StringToSchedule;
 import art.usergroup.StringToUserGroup;
-import art.utils.StringToDouble;
+import art.general.StringToDouble;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.LocaleUtils;

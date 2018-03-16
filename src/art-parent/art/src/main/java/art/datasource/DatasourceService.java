@@ -22,7 +22,7 @@ import art.dbutils.DatabaseUtils;
 import art.enums.AccessLevel;
 import art.enums.DatasourceType;
 import art.user.User;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
