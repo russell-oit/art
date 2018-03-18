@@ -18,9 +18,12 @@
 package art.login;
 
 import art.enums.AccessLevel;
+import art.enums.ApiStatus;
 import art.general.ApiResponse;
+import art.general.JwtResponseData;
 import art.servlets.Config;
 import art.user.User;
+import art.utils.ApiHelper;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -49,7 +52,7 @@ public class LoginRestController {
 	private static final Logger logger = LoggerFactory.getLogger(LoginRestController.class);
 
 	@PostMapping
-	public ResponseEntity<ApiResponse> login(@RequestParam("username") String username,
+	public ResponseEntity<?> login(@RequestParam("username") String username,
 			@RequestParam("password") String password) {
 
 		try {
@@ -60,16 +63,17 @@ public class LoginRestController {
 				if (loginResult.isAuthenticated()
 						&& user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
 					String jwt = generateToken(username, jwtSecret);
-					ApiResponse apiResponse = new ApiResponse();
-					apiResponse.setMessage(jwt);
-					return ResponseEntity.ok(apiResponse);
+
+					JwtResponseData jwtResponseData = new JwtResponseData();
+					jwtResponseData.setAccessToken(jwt);
+					return ApiHelper.getOkResponseEntity(jwtResponseData);
 				}
 			}
 
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+			return ApiHelper.getUnauthorizedResponseEntity();
 		} catch (UnsupportedEncodingException | RuntimeException ex) {
 			logger.error("Error", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			return ApiHelper.getErrorResponseEntity(ex);
 		}
 	}
 
@@ -84,13 +88,15 @@ public class LoginRestController {
 	private String generateToken(String username, String secret) throws UnsupportedEncodingException {
 		//https://stormpath.com/blog/beginners-guide-jwts-in-java
 		//https://stormpath.com/blog/jwt-java-create-verify
+		Date now = new Date();
 		JwtBuilder builder = Jwts.builder()
 				.setSubject(username)
+				.setIssuedAt(now)
 				.signWith(SignatureAlgorithm.HS256, secret.getBytes("UTF-8"));
 
 		int tokenExpiryMins = Config.getSettings().getJwtTokenExpiryMins();
 		if (tokenExpiryMins > 0) {
-			builder.setExpiration(DateUtils.addMinutes(new Date(), tokenExpiryMins));
+			builder.setExpiration(DateUtils.addMinutes(now, tokenExpiryMins));
 		}
 		String jwt = builder.compact();
 		return jwt;

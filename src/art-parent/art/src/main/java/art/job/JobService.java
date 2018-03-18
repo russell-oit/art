@@ -490,7 +490,6 @@ public class JobService {
 
 		Integer reportId; //database column doesn't allow null
 		if (job.getReport() == null) {
-			logger.warn("Report not defined. Defaulting to 0");
 			reportId = 0;
 		} else {
 			reportId = job.getReport().getReportId();
@@ -499,7 +498,6 @@ public class JobService {
 		Integer userId;
 		String username;
 		if (job.getUser() == null) {
-			logger.warn("User not defined. Defaulting to 0");
 			userId = null;
 			username = "";
 		} else {

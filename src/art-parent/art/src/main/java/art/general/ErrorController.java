@@ -17,8 +17,8 @@
  */
 package art.general;
 
+import art.enums.ApiStatus;
 import art.utils.ApiHelper;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.servlet.ServletException;
@@ -60,6 +60,12 @@ public class ErrorController {
 		model.addAttribute("requestUri", requestUri);
 		model.addAttribute("errorMessage", errorMessage);
 
+		ApiResponse apiResponse = new ApiResponse();
+		apiResponse.setHttpStatus(statusCode);
+		apiResponse.setArtStatus(ApiStatus.ERROR);
+
+		model.addAttribute("apiResponse", apiResponse);
+
 		boolean isApi = false;
 		try {
 			URI uri = new URI(requestUri);
@@ -78,7 +84,8 @@ public class ErrorController {
 
 	@RequestMapping(value = "/error")
 	public String showError(HttpServletRequest request, Model model,
-			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi) {
+			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi,
+			@ModelAttribute("apiResponse") ApiResponse apiResponse) {
 
 		//https://stackoverflow.com/questions/3553294/ideal-error-page-for-java-ee-app
 		//http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
@@ -107,6 +114,7 @@ public class ErrorController {
 		model.addAttribute("errorDetails", errorDetails);
 
 		if (isApi) {
+			ApiHelper.outputApiResponse(apiResponse, response);
 			return null;
 		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
@@ -118,9 +126,12 @@ public class ErrorController {
 
 	@RequestMapping(value = "/error-404")
 	public String showError404(HttpServletRequest request,
-			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi) {
+			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi,
+			@ModelAttribute("apiResponse") ApiResponse apiResponse) {
 
 		if (isApi) {
+			apiResponse.setMessage("Page not found");
+			ApiHelper.outputApiResponse(apiResponse, response);
 			return null;
 		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
@@ -133,17 +144,12 @@ public class ErrorController {
 	@RequestMapping(value = "/error-400")
 	public String showError400(HttpServletRequest request, Model model,
 			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi,
-			@ModelAttribute("errorMessage") String errorMessage) {
+			@ModelAttribute("errorMessage") String errorMessage,
+			@ModelAttribute("apiResponse") ApiResponse apiResponse) {
 
 		if (isApi) {
-			ApiResponse apiResponse = new ApiResponse();
 			apiResponse.setMessage(errorMessage);
-
-			try {
-				ApiHelper.outputApiResponse(apiResponse, response);
-			} catch (IOException ex) {
-				logger.error("Error", ex);
-			}
+			ApiHelper.outputApiResponse(apiResponse, response);
 			return null;
 		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
@@ -156,17 +162,12 @@ public class ErrorController {
 	@RequestMapping(value = "/error-405")
 	public String showError405(HttpServletRequest request, Model model,
 			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi,
-			@ModelAttribute("errorMessage") String errorMessage) {
+			@ModelAttribute("errorMessage") String errorMessage,
+			@ModelAttribute("apiResponse") ApiResponse apiResponse) {
 
 		if (isApi) {
-			ApiResponse apiResponse = new ApiResponse();
 			apiResponse.setMessage(errorMessage);
-
-			try {
-				ApiHelper.outputApiResponse(apiResponse, response);
-			} catch (IOException ex) {
-				logger.error("Error", ex);
-			}
+			ApiHelper.outputApiResponse(apiResponse, response);
 			return null;
 		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
@@ -178,9 +179,11 @@ public class ErrorController {
 
 	@RequestMapping(value = "/error-500")
 	public String showError500(HttpServletRequest request, Model model,
-			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi) {
+			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi,
+			@ModelAttribute("apiResponse") ApiResponse apiResponse) {
 
 		if (isApi) {
+			ApiHelper.outputApiResponse(apiResponse, response);
 			return null;
 		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details

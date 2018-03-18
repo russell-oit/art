@@ -26,6 +26,7 @@ import art.enums.ApiStatus;
  */
 public class ApiResponse {
 
+	private int httpStatus;
 	private ApiStatus artStatus;
 	private String message;
 	private Object data;
@@ -70,6 +71,20 @@ public class ApiResponse {
 	 */
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	/**
+	 * @return the httpStatus
+	 */
+	public int getHttpStatus() {
+		return httpStatus;
+	}
+
+	/**
+	 * @param httpStatus the httpStatus to set
+	 */
+	public void setHttpStatus(int httpStatus) {
+		this.httpStatus = httpStatus;
 	}
 
 }

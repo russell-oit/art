@@ -448,7 +448,6 @@ public class ParameterService {
 		//set values for possibly null property objects
 		String parameterType;
 		if (parameter.getParameterType() == null) {
-			logger.warn("Parameter type not defined. Defaulting to null");
 			parameterType = null;
 		} else {
 			parameterType = parameter.getParameterType().getValue();
@@ -456,7 +455,6 @@ public class ParameterService {
 
 		String dataType;
 		if (parameter.getDataType() == null) {
-			logger.warn("Data type not defined. Defaulting to null");
 			dataType = null;
 		} else {
 			dataType = parameter.getDataType().getValue();

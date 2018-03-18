@@ -15,15 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.enums;
+package art.general;
 
 /**
- * Represents the status of an api call
- *
+ * Response data when returning jwt credentials
+ * 
  * @author Timothy Anyona
  */
-public enum ApiStatus {
+public class JwtResponseData {
+	
+	private String accessToken;
 
-	OK, ERROR, AUTHORIZATION_REQUIRED, UNAUTHORIZED, RECORD_NOT_FOUND,
-	LINKED_RECORDS_EXIST, RECORD_CREATED, RECORD_EXISTS;
+	/**
+	 * @return the accessToken
+	 */
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	/**
+	 * @param accessToken the accessToken to set
+	 */
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+	
 }

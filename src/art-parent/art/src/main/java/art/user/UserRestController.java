@@ -17,16 +17,16 @@
  */
 package art.user;
 
-import art.enums.ApiStatus;
 import art.general.ActionResult;
 import art.general.ApiResponse;
+import art.utils.ApiHelper;
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,7 +55,7 @@ public class UserRestController {
 	private UserService userService;
 
 	@GetMapping
-	public ResponseEntity<List<User>> getUsers(
+	public ResponseEntity<?> getUsers(
 			@RequestParam(value = "active", required = false) Boolean active) {
 
 		logger.debug("Entering getUsers: active={}", active);
@@ -67,10 +67,10 @@ public class UserRestController {
 			} else {
 				users = userService.getAllUsers();
 			}
-			return ResponseEntity.ok(users);
+			return ApiHelper.getOkResponseEntity(users);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			return ApiHelper.getErrorResponseEntity(ex);
 		}
 	}
 
@@ -81,15 +81,13 @@ public class UserRestController {
 		try {
 			User user = userService.getUser(id);
 			if (user == null) {
-				ApiResponse apiResponse = new ApiResponse();
-				apiResponse.setArtStatus(ApiStatus.RECORD_NOT_FOUND);
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+				return ApiHelper.getNotFoundResponseEntity();
 			} else {
-				return ResponseEntity.ok(user);
+				return ApiHelper.getOkResponseEntity(user);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			return ApiHelper.getErrorResponseEntity(ex);
 		}
 	}
 
@@ -100,59 +98,60 @@ public class UserRestController {
 		try {
 			User user = userService.getUser(username);
 			if (user == null) {
-				ApiResponse apiResponse = new ApiResponse();
-				apiResponse.setArtStatus(ApiStatus.RECORD_NOT_FOUND);
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+				return ApiHelper.getNotFoundResponseEntity();
 			} else {
-				return ResponseEntity.ok(user);
+				return ApiHelper.getOkResponseEntity(user);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			return ApiHelper.getErrorResponseEntity(ex);
 		}
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApiResponse> deleteUser(@PathVariable("id") Integer id) throws SQLException {
+	public ResponseEntity<?> deleteUser(@PathVariable("id") Integer id) {
 		logger.debug("Entering deleteUser: id={}", id);
 
 		try {
 			ActionResult result = userService.deleteUser(id);
 			if (result.isSuccess()) {
-				return ResponseEntity.noContent().build();
+				return ApiHelper.getOkResponseEntity();
 			} else {
-				ApiResponse apiResponse = new ApiResponse();
-				apiResponse.setArtStatus(ApiStatus.LINKED_RECORDS_EXIST);
-				apiResponse.setMessage("User not deleted because linked jobs exist");
-				apiResponse.setData(result.getData());
-				return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
+				return ApiHelper.getLinkedRecordsExistResponseEntity(result.getData());
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			return ApiHelper.getErrorResponseEntity(ex);
 		}
 	}
 
 	@PostMapping
-	public ResponseEntity<?> addUser(@RequestBody User user, HttpSession session,
+	public ResponseEntity<ApiResponse> addUser(@RequestBody User user, HttpSession session,
 			UriComponentsBuilder b) {
 
 		logger.debug("Entering addUser");
 
 		try {
+			String username = user.getUsername();
+			if (userService.userExists(username)) {
+				String message = "A user with the given username exists";
+				return ApiHelper.getRecordExistsResponseEntity(message);
+			}
+
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			int newId = userService.addUser(user, sessionUser);
 
 			UriComponents uriComponents = b.path("/api/users/{id}").buildAndExpand(newId);
-			return ResponseEntity.created(uriComponents.toUri()).build();
+			URI uri = uriComponents.toUri();
+			return ApiHelper.getCreatedResponseEntity(uri);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			return ApiHelper.getErrorResponseEntity(ex);
 		}
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> updateUser(@PathVariable("id") Integer id,
+	public ResponseEntity<?> updateUser(@PathVariable("id") Integer id,
 			@RequestBody User user, HttpSession session) {
 
 		logger.debug("Entering updateUser: id={}", id);
@@ -161,38 +160,38 @@ public class UserRestController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			user.setUserId(id);
 			userService.updateUser(user, sessionUser);
-			return ResponseEntity.noContent().build();
+			return ApiHelper.getOkResponseEntity();
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			return ApiHelper.getErrorResponseEntity(ex);
 		}
 	}
 
 	@PostMapping("/{id}/disable")
-	public ResponseEntity<Void> disableUser(@PathVariable("id") Integer id, HttpSession session) {
+	public ResponseEntity<?> disableUser(@PathVariable("id") Integer id, HttpSession session) {
 		logger.debug("Entering disableUser: id={}", id);
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			userService.disableUser(id, sessionUser);
-			return ResponseEntity.noContent().build();
+			return ApiHelper.getOkResponseEntity();
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			return ApiHelper.getErrorResponseEntity(ex);
 		}
 	}
 
 	@PostMapping("/{id}/enable")
-	public ResponseEntity<Void> enableUser(@PathVariable("id") Integer id, HttpSession session) {
+	public ResponseEntity<?> enableUser(@PathVariable("id") Integer id, HttpSession session) {
 		logger.debug("Entering disableUser: id={}", id);
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			userService.enableUser(id, sessionUser);
-			return ResponseEntity.noContent().build();
+			return ApiHelper.getOkResponseEntity();
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			return ApiHelper.getErrorResponseEntity(ex);
 		}
 	}
 

@@ -69,6 +69,7 @@ public class ApiInterceptor extends HandlerInterceptorAdapter {
 			page = StringUtils.substringBefore(page, ";"); //;jsessionid may be included at the end of the url. may also be in caps? i.e. ;JSESSIONID ?
 
 			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setHttpStatus(HttpStatus.UNAUTHORIZED.value());
 			apiResponse.setArtStatus(ApiStatus.UNAUTHORIZED);
 			apiResponse.setMessage("Unauthorized");
 
@@ -128,6 +129,11 @@ public class ApiInterceptor extends HandlerInterceptorAdapter {
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			apiResponse.setArtStatus(ApiStatus.ERROR);
+			ApiHelper.outputApiResponse(apiResponse, response);
 			return false;
 		}
 	}

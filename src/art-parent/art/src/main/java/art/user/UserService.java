@@ -40,6 +40,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -652,7 +653,6 @@ public class UserService {
 		//set values for possibly null property objects
 		int accessLevel;
 		if (user.getAccessLevel() == null) {
-			logger.warn("Access level not defined. Defaulting to 0");
 			accessLevel = 0;
 		} else {
 			accessLevel = user.getAccessLevel().getValue();
@@ -793,7 +793,7 @@ public class UserService {
 
 		dbService.update(sql, values);
 	}
-	
+
 	/**
 	 * Disables a user
 	 *
@@ -816,5 +816,29 @@ public class UserService {
 		};
 
 		dbService.update(sql, values);
+	}
+
+	/**
+	 * Returns <code>true</code> if a user with the given username exists
+	 *
+	 * @param username the username
+	 * @return <code>true</code> if the user exists
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public boolean userExists(String username) throws SQLException {
+		logger.debug("Entering userExists: username='{}'", username);
+
+		String sql = "SELECT COUNT(*) FROM ART_USERS"
+				+ " WHERE USERNAME=?";
+
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCount = dbService.query(sql, h, username);
+
+		if (recordCount == null || recordCount.longValue() == 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

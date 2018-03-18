@@ -820,7 +820,6 @@ public class ReportService {
 
 		Integer reportTypeId;
 		if (report.getReportType() == null) {
-			logger.warn("Report type not defined. Defaulting to 0");
 			reportTypeId = 0;
 		} else {
 			reportTypeId = report.getReportType().getValue();

@@ -361,7 +361,6 @@ public class RuleService {
 		//set values for possibly null property objects
 		String dataType;
 		if (rule.getDataType() == null) {
-			logger.warn("Data type not defined. Defaulting to varchar");
 			dataType = ParameterDataType.Varchar.getValue();
 		} else {
 			dataType = rule.getDataType().getValue();
