@@ -17,42 +17,44 @@
  */
 package art.general;
 
+import art.enums.ApiStatus;
+
 /**
  * Represents an api response
- * 
+ *
  * @author Timothy Anyona
  */
 public class ApiResponse {
-	
-	private int httpStatus;
-	private String artStatus;
+
+	private ApiStatus artStatus;
 	private String message;
+	private Object data;
 
 	/**
-	 * @return the httpStatus
+	 * @return the data
 	 */
-	public int getHttpStatus() {
-		return httpStatus;
+	public Object getData() {
+		return data;
 	}
 
 	/**
-	 * @param httpStatus the httpStatus to set
+	 * @param data the data to set
 	 */
-	public void setHttpStatus(int httpStatus) {
-		this.httpStatus = httpStatus;
+	public void setData(Object data) {
+		this.data = data;
 	}
 
 	/**
 	 * @return the artStatus
 	 */
-	public String getArtStatus() {
+	public ApiStatus getArtStatus() {
 		return artStatus;
 	}
 
 	/**
 	 * @param artStatus the artStatus to set
 	 */
-	public void setArtStatus(String artStatus) {
+	public void setArtStatus(ApiStatus artStatus) {
 		this.artStatus = artStatus;
 	}
 
@@ -69,5 +71,5 @@ public class ApiResponse {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
+
 }

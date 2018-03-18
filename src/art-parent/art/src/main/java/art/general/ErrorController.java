@@ -17,7 +17,7 @@
  */
 package art.general;
 
-import art.utils.ArtUtils;
+import art.utils.ApiHelper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -50,18 +49,25 @@ public class ErrorController {
 	@ModelAttribute
 	public void addStatusCodeAndUri(HttpServletRequest request, Model model) {
 		//http://www.baeldung.com/spring-mvc-and-the-modelattribute-annotation
-		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
+		Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
 		String requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
+		String errorMessage = (String) request.getAttribute("javax.servlet.error.message");
+		if (errorMessage == null) {
+			errorMessage = "";
+		}
+
+		model.addAttribute("statusCode", statusCode);
 		model.addAttribute("requestUri", requestUri);
-		
+		model.addAttribute("errorMessage", errorMessage);
+
 		boolean isApi = false;
 		try {
 			URI uri = new URI(requestUri);
 			String path = uri.getPath();
 			String contextPath = request.getContextPath();
 			String pathMinusContext = StringUtils.substringAfter(path, contextPath);
-			
-			if (StringUtils.startsWith(pathMinusContext, "/api/")) {
+
+			if (StringUtils.startsWith(pathMinusContext, "/api")) {
 				isApi = true;
 			}
 		} catch (URISyntaxException ex) {
@@ -71,15 +77,13 @@ public class ErrorController {
 	}
 
 	@RequestMapping(value = "/error")
-	public String showError(HttpServletRequest request, Model model) {
+	public String showError(HttpServletRequest request, Model model,
+			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi) {
+
 		//https://stackoverflow.com/questions/3553294/ideal-error-page-for-java-ee-app
 		//http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
-		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
-		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
-		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
-		model.addAttribute("exception", request.getAttribute("javax.servlet.error.exception"));
-
 		Throwable exception = (Throwable) request.getAttribute("javax.servlet.error.exception");
+		model.addAttribute("exception", exception);
 		logger.error("Error", exception);
 
 		String errorDetails;
@@ -102,7 +106,9 @@ public class ErrorController {
 		}
 		model.addAttribute("errorDetails", errorDetails);
 
-		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+		if (isApi) {
+			return null;
+		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-inline";
 		} else {
@@ -111,23 +117,10 @@ public class ErrorController {
 	}
 
 	@RequestMapping(value = "/error-404")
-	public String showError404(HttpServletRequest request, HttpServletResponse response,
-			@ModelAttribute("statusCode") Integer statusCode,
-			@ModelAttribute("requestUri") String requestUri,
-			@ModelAttribute("isApi") Boolean isApi) {
+	public String showError404(HttpServletRequest request,
+			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi) {
 
 		if (isApi) {
-			ApiResponse apiResponse = new ApiResponse();
-			apiResponse.setHttpStatus(statusCode);
-			apiResponse.setMessage("Page not found");
-
-			try {
-				String jsonString = ArtUtils.objectToJson(apiResponse);
-				response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-				response.getWriter().write(jsonString);
-			} catch (IOException ex) {
-				logger.error("Error", ex);
-			}
 			return null;
 		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
@@ -138,12 +131,21 @@ public class ErrorController {
 	}
 
 	@RequestMapping(value = "/error-400")
-	public String showError400(HttpServletRequest request, Model model) {
-		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
-		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
-		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
+	public String showError400(HttpServletRequest request, Model model,
+			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi,
+			@ModelAttribute("errorMessage") String errorMessage) {
 
-		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+		if (isApi) {
+			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setMessage(errorMessage);
+
+			try {
+				ApiHelper.outputApiResponse(apiResponse, response);
+			} catch (IOException ex) {
+				logger.error("Error", ex);
+			}
+			return null;
+		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-400-inline";
 		} else {
@@ -152,12 +154,21 @@ public class ErrorController {
 	}
 
 	@RequestMapping(value = "/error-405")
-	public String showError405(HttpServletRequest request, Model model) {
-		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
-		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
-		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
+	public String showError405(HttpServletRequest request, Model model,
+			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi,
+			@ModelAttribute("errorMessage") String errorMessage) {
 
-		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+		if (isApi) {
+			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setMessage(errorMessage);
+
+			try {
+				ApiHelper.outputApiResponse(apiResponse, response);
+			} catch (IOException ex) {
+				logger.error("Error", ex);
+			}
+			return null;
+		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-405-inline";
 		} else {
@@ -166,12 +177,12 @@ public class ErrorController {
 	}
 
 	@RequestMapping(value = "/error-500")
-	public String showError500(HttpServletRequest request, Model model) {
-		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
-		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
-		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
+	public String showError500(HttpServletRequest request, Model model,
+			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi) {
 
-		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+		if (isApi) {
+			return null;
+		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-500-inline";
 		} else {

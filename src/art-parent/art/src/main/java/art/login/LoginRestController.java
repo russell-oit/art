@@ -18,6 +18,7 @@
 package art.login;
 
 import art.enums.AccessLevel;
+import art.general.ApiResponse;
 import art.servlets.Config;
 import art.user.User;
 import io.jsonwebtoken.JwtBuilder;
@@ -30,7 +31,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,11 +45,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/login")
 public class LoginRestController {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(LoginRestController.class);
 
 	@PostMapping
-	public ResponseEntity<String> login(@RequestParam("username") String username,
+	public ResponseEntity<ApiResponse> login(@RequestParam("username") String username,
 			@RequestParam("password") String password) {
 
 		try {
@@ -60,12 +60,12 @@ public class LoginRestController {
 				if (loginResult.isAuthenticated()
 						&& user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
 					String jwt = generateToken(username, jwtSecret);
-					return ResponseEntity.ok()
-							.contentType(MediaType.TEXT_PLAIN)
-							.body(jwt);
+					ApiResponse apiResponse = new ApiResponse();
+					apiResponse.setMessage(jwt);
+					return ResponseEntity.ok(apiResponse);
 				}
 			}
-			
+
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		} catch (UnsupportedEncodingException | RuntimeException ex) {
 			logger.error("Error", ex);

@@ -1,10 +1,10 @@
 {
 	"showErrors" : true,
 	"enableDirectParameterSubstitution" : true,
-	"exportDirectory" : null,
-	"workDirectory" : null,
+	"exportDirectory" : "",
+	"workDirectory" : "",
 	"checkExportFileAccess" : false,
 	"enableGroovySandbox": true,
 	"enableEmailing": true,
-	"jwtSecret": null
+	"jwtSecret": ""
 }

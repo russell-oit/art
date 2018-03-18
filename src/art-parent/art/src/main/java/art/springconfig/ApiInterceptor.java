@@ -18,11 +18,14 @@
 package art.springconfig;
 
 import art.enums.AccessLevel;
+import art.enums.ApiStatus;
+import art.general.ApiResponse;
 import art.login.InternalLogin;
 import art.login.LoginResult;
 import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
+import art.utils.ApiHelper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -37,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
@@ -66,14 +68,17 @@ public class ApiInterceptor extends HandlerInterceptorAdapter {
 			String page = path.substring(path.lastIndexOf('/') + 1);
 			page = StringUtils.substringBefore(page, ";"); //;jsessionid may be included at the end of the url. may also be in caps? i.e. ;JSESSIONID ?
 
-			String message = "Unauthorized";
+			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setArtStatus(ApiStatus.UNAUTHORIZED);
+			apiResponse.setMessage("Unauthorized");
 
 			if (StringUtils.equals(page, "login")) {
 				return true;
 			} else {
 				String header = request.getHeader("Authorization");
 				if (header == null) {
-					message = "Authorization required";
+					apiResponse.setArtStatus(ApiStatus.AUTHORIZATION_REQUIRED);
+					apiResponse.setMessage("Authorization required");
 				} else {
 					final String BASIC_AUTH_PREFIX = "Basic ";
 					final String BEARER_AUTH_PREFIX = "Bearer ";
@@ -118,10 +123,8 @@ public class ApiInterceptor extends HandlerInterceptorAdapter {
 			}
 
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-			response.getWriter().write(message);
+			ApiHelper.outputApiResponse(apiResponse, response);
 			return false;
-			
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
