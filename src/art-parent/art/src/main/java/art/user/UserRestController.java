@@ -163,8 +163,12 @@ public class UserRestController {
 		logger.debug("Entering updateUser: id={}", id);
 
 		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
 			user.setUserId(id);
+			if(user.isClearTextPassword()){
+				user.encryptPassword();
+			}
+			
+			User sessionUser = (User) session.getAttribute("sessionUser");
 			userService.updateUser(user, sessionUser);
 			return ApiHelper.getOkResponseEntity();
 		} catch (SQLException | RuntimeException ex) {
