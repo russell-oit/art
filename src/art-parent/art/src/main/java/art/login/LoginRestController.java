@@ -18,8 +18,6 @@
 package art.login;
 
 import art.enums.AccessLevel;
-import art.enums.ApiStatus;
-import art.general.ApiResponse;
 import art.general.JwtResponseData;
 import art.servlets.Config;
 import art.user.User;
@@ -33,7 +31,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

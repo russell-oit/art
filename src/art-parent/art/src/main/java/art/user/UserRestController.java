@@ -24,6 +24,7 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,8 +134,13 @@ public class UserRestController {
 
 		try {
 			String username = user.getUsername();
+			if (StringUtils.isBlank(username)) {
+				String message = "username field not provided or blank";
+				return ApiHelper.getInvalidValueResponseEntity(message);
+			}
+
 			if (userService.userExists(username)) {
-				String message = "A user with the given username exists";
+				String message = "A user with the given username already exists";
 				return ApiHelper.getRecordExistsResponseEntity(message);
 			}
 

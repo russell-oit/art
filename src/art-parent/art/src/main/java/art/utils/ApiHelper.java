@@ -19,7 +19,6 @@ package art.utils;
 
 import art.enums.ApiStatus;
 import art.general.ApiResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.net.URI;
 import javax.servlet.http.HttpServletResponse;
@@ -187,7 +186,7 @@ public class ApiHelper {
 	public static ResponseEntity<ApiResponse> getCreatedResponseEntity(URI uri) {
 		ApiResponse apiResponse = new ApiResponse();
 		apiResponse.setHttpStatus(HttpStatus.CREATED.value());
-		apiResponse.setArtStatus(ApiStatus.RECORD_CREATED);
+		apiResponse.setArtStatus(ApiStatus.OK);
 		return ResponseEntity.created(uri).body(apiResponse);
 	}
 
@@ -215,6 +214,22 @@ public class ApiHelper {
 		apiResponse.setArtStatus(ApiStatus.RECORD_EXISTS);
 		apiResponse.setMessage(message);
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
+	}
+	
+	/**
+	 * Returns a response entity object to use with an invalid value response
+	 *
+	 * @param message the message to include in the response
+	 * @return the response entity object
+	 */
+	public static ResponseEntity<ApiResponse> getInvalidValueResponseEntity(
+			String message) {
+		
+		ApiResponse apiResponse = new ApiResponse();
+		apiResponse.setHttpStatus(HttpStatus.BAD_REQUEST.value());
+		apiResponse.setArtStatus(ApiStatus.INVALID_VALUE);
+		apiResponse.setMessage(message);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
 	}
 
 }
