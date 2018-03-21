@@ -229,13 +229,13 @@ public class ParameterProcessor {
 	private void setPassedParameterValues(Map<String, String[]> passedValuesMap,
 			Map<String, ReportParameter> reportParamsMap, int userId, Report report) throws SQLException {
 
-		logger.debug("Entering setPassedParameterValues");
-		
-		if(report.isParametersInOutput()){
-			passedValuesMap.put("showSelectedParameters", new String[]{"true"});
-		}
+		logger.debug("Entering setPassedParameterValues: userId={}, report={}", userId, report);
 
 		if (useSavedValues) {
+			if (report.isParametersInOutput()) {
+				passedValuesMap.put("showSelectedParameters", new String[]{"true"});
+			}
+
 			SavedParameterService savedParameterService = new SavedParameterService();
 			Map<String, String[]> savedParamValues = savedParameterService.getSavedParameterValues(userId, report.getReportId());
 			if (MapUtils.isNotEmpty(savedParamValues)) {
