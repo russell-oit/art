@@ -578,10 +578,14 @@ public class ReportService {
 
 		sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_SAVED_PARAMETERS WHERE REPORT_ID=?";
+		dbService.update(sql, id);
 
 		//lastly, delete query
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID=?";
 		int affectedRows = dbService.update(sql, id);
+		
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {

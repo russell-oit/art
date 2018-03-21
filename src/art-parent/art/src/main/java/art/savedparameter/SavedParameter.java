@@ -1,8 +1,8 @@
 /*
  * ART. A Reporting Tool.
- * Copyright (C) 2017 Enrico Liboni <eliboni@users.sf.net>
+ * Copyright (C) 2018 Enrico Liboni <eliboni@users.sf.net>
  *
- * This program is free software: you can redistribute it and/or modify
+ * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -13,53 +13,51 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.jobparameter;
+package art.savedparameter;
 
-import art.enums.ParameterType;
 import java.io.Serializable;
 
 /**
- * Represents a job parameter
+ * Represents a saved parameter
  * 
  * @author Timothy Anyona
  */
-public class JobParameter implements Serializable {
+public class SavedParameter implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private int jobId;
+	private int userId;
+	private int reportId;
 	private String name;
 	private String value;
-	private ParameterType parameterType;
-	private String paramTypeString;
 
 	/**
-	 * @return the paramTypeString
+	 * @return the userId
 	 */
-	public String getParamTypeString() {
-		return paramTypeString;
+	public int getUserId() {
+		return userId;
 	}
 
 	/**
-	 * @param paramTypeString the paramTypeString to set
+	 * @param userId the userId to set
 	 */
-	public void setParamTypeString(String paramTypeString) {
-		this.paramTypeString = paramTypeString;
+	public void setUserId(int userId) {
+		this.userId = userId;
 	}
 
 	/**
-	 * @return the jobId
+	 * @return the reportId
 	 */
-	public int getJobId() {
-		return jobId;
+	public int getReportId() {
+		return reportId;
 	}
 
 	/**
-	 * @param jobId the jobId to set
+	 * @param reportId the reportId to set
 	 */
-	public void setJobId(int jobId) {
-		this.jobId = jobId;
+	public void setReportId(int reportId) {
+		this.reportId = reportId;
 	}
 
 	/**
@@ -88,19 +86,5 @@ public class JobParameter implements Serializable {
 	 */
 	public void setValue(String value) {
 		this.value = value;
-	}
-
-	/**
-	 * @return the parameterType
-	 */
-	public ParameterType getParameterType() {
-		return parameterType;
-	}
-
-	/**
-	 * @param parameterType the parameterType to set
-	 */
-	public void setParameterType(ParameterType parameterType) {
-		this.parameterType = parameterType;
 	}
 }

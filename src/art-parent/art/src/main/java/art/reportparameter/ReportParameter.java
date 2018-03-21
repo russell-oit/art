@@ -428,7 +428,7 @@ public class ReportParameter implements Serializable {
 			if (parameterDataType.isDate()) {
 				returnValue = parameter.getDateString(value, locale);
 			} else if (parameterDataType.isNumeric()) {
-				String[] passedValues = getPassedParameterValues();
+				String[] passedValues = passedParameterValues;
 				String defaultValue = parameter.getLocalizedDefaultValue(locale);
 				Report defaultValueReport = parameter.getDefaultValueReport();
 

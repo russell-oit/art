@@ -312,6 +312,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				|| StringUtils.equals(page, "archives")
 				|| StringUtils.equals(page, "emailReport")
 				|| StringUtils.equals(page, "saiku3")
+				|| StringUtils.equals(page, "saveParameterSelection")
+				|| StringUtils.equals(page, "clearSavedParameterSelection")
 				|| StringUtils.equals(page, "getLovValues")) {
 			//everyone can access
 			//NOTE: "everyone" doesn't include when accessing as the art database user

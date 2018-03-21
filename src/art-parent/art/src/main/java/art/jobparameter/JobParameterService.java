@@ -132,11 +132,7 @@ public class JobParameterService {
 
 		String sql = "DELETE FROM ART_JOBS_PARAMETERS WHERE JOB_ID=?";
 
-		Object[] values = {
-			jobId
-		};
-
-		dbService.update(sql, values);
+		dbService.update(sql, jobId);
 	}
 
 	/**

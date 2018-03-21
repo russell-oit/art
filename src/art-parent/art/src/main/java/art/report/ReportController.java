@@ -31,7 +31,10 @@ import art.servlets.Config;
 import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
+import art.savedparameter.SavedParameter;
+import art.savedparameter.SavedParameterService;
 import art.utils.ArtHelper;
+import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
 import java.io.IOException;
@@ -93,6 +96,9 @@ public class ReportController {
 
 	@Autowired
 	private MessageSource messageSource;
+
+	@Autowired
+	private SavedParameterService savedParameterService;
 
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
@@ -404,6 +410,7 @@ public class ReportController {
 				mailFrom, mailTo, mailCc, mailBcc, mailSubject);
 
 		AjaxResponse response = new AjaxResponse();
+
 		String fileNotSentMessage = messageSource.getMessage("reports.message.fileNotSent", null, locale);
 		response.setSuccess(false);
 		response.setErrorMessage(fileNotSentMessage);
@@ -492,6 +499,132 @@ public class ReportController {
 		}
 
 		response.setSuccess(true);
+
+		return response;
+	}
+
+	@PostMapping("/saveParameterSelection")
+	public @ResponseBody
+	AjaxResponse saveParameterSelection(HttpServletRequest request,
+			HttpSession session) {
+
+		logger.debug("Entering saveParameterSelection");
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			int userId = sessionUser.getUserId();
+			int reportId = Integer.parseInt(request.getParameter("reportId"));
+
+			Map<String, String[]> passedValues = new HashMap<>();
+
+			List<String> nonBooleanParams = new ArrayList<>();
+			nonBooleanParams.add("chartWidth");
+			nonBooleanParams.add("chartHeight");
+
+			Map<String, String[]> requestParameters = request.getParameterMap();
+			for (Map.Entry<String, String[]> entry : requestParameters.entrySet()) {
+				String htmlParamName = entry.getKey();
+				logger.debug("htmlParamName='{}'", htmlParamName);
+
+				if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)
+						|| ArtUtils.containsIgnoreCase(nonBooleanParams, htmlParamName)) {
+					String[] paramValues = entry.getValue();
+					passedValues.put(htmlParamName, paramValues);
+				}
+			}
+
+			savedParameterService.deleteSavedParameters(userId, reportId);
+
+			SavedParameter savedParam = new SavedParameter();
+			savedParam.setUserId(userId);
+			savedParam.setReportId(reportId);
+
+			//add report parameters
+			for (Map.Entry<String, String[]> entry : passedValues.entrySet()) {
+				String name = entry.getKey();
+				String[] values = entry.getValue();
+				for (String value : values) {
+					savedParam.setName(name);
+					savedParam.setValue(value);
+					savedParameterService.addSavedParameter(savedParam);
+				}
+			}
+
+			//add report options
+			String showSelectedParametersValue = request.getParameter("showSelectedParameters");
+			if (showSelectedParametersValue != null) {
+				savedParam.setName("showSelectedParameters");
+				savedParam.setValue("true");
+				savedParameterService.addSavedParameter(savedParam);
+			}
+			String swapAxesValue = request.getParameter("swapAxes");
+			if (swapAxesValue != null) {
+				savedParam.setName("swapAxes");
+				savedParam.setValue("true");
+				savedParameterService.addSavedParameter(savedParam);
+			}
+			String showSqlValue = request.getParameter("showSql");
+			if (showSqlValue != null) {
+				savedParam.setName("showSql");
+				savedParam.setValue("true");
+				savedParameterService.addSavedParameter(savedParam);
+			}
+
+			//add boolean chart options
+			String showLegendValue = request.getParameter("showLegend");
+			if (showLegendValue != null) {
+				savedParam.setName("showLegend");
+				savedParam.setValue("true");
+				savedParameterService.addSavedParameter(savedParam);
+			}
+			String showLabelsValue = request.getParameter("showLabels");
+			if (showLabelsValue != null) {
+				savedParam.setName("showLabels");
+				savedParam.setValue("true");
+				savedParameterService.addSavedParameter(savedParam);
+			}
+			String showDataValue = request.getParameter("showData");
+			if (showDataValue != null) {
+				savedParam.setName("showData");
+				savedParam.setValue("true");
+				savedParameterService.addSavedParameter(savedParam);
+			}
+			String showPointsValue = request.getParameter("showPoints");
+			if (showPointsValue != null) {
+				savedParam.setName("showPoints");
+				savedParam.setValue("true");
+				savedParameterService.addSavedParameter(savedParam);
+			}
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@PostMapping("/clearSavedParameterSelection")
+	public @ResponseBody
+	AjaxResponse clearSavedParameterSelection(HttpSession session,
+			@RequestParam("reportId") Integer reportId) {
+
+		logger.debug("Entering clearSavedParameterSelection");
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			int userId = sessionUser.getUserId();
+			
+			savedParameterService.deleteSavedParameters(userId, reportId);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
 
 		return response;
 	}

@@ -23,11 +23,14 @@ import art.encryptor.Encryptor;
 import art.enums.AccessLevel;
 import art.enums.EncryptorType;
 import art.enums.ParameterDataType;
+import art.enums.ParameterType;
 import art.enums.ReportType;
+import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
+import art.savedparameter.SavedParameterService;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
@@ -48,6 +51,7 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -161,6 +165,7 @@ public class RunReportHelper {
 
 		//prepare report parameters
 		ParameterProcessor paramProcessor = new ParameterProcessor();
+		paramProcessor.setUseSavedValues(true);
 		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
@@ -172,11 +177,11 @@ public class RunReportHelper {
 		ChartOptions effectiveChartOptions = reportOutputGenerator.getEffectiveChartOptions(report, parameterChartOptions);
 		request.setAttribute("chartOptions", effectiveChartOptions);
 
-		ReportType reportType = report.getReportType();
-
 		//create map in order to display parameters by position
 		Map<Integer, ReportParameter> reportParams = getSelectParameters(report, reportParamsList);
 		request.setAttribute("reportParams", reportParams);
+
+		ReportType reportType = report.getReportType();
 
 		boolean enableReportFormats;
 		switch (reportType) {

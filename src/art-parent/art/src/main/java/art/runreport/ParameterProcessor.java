@@ -25,6 +25,7 @@ import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
+import art.savedparameter.SavedParameterService;
 import art.user.User;
 import art.utils.ArtUtils;
 import art.utils.ExpressionHelper;
@@ -44,6 +45,7 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +65,24 @@ public class ParameterProcessor {
 	private boolean valuesAsIs;
 	private User user;
 	private Boolean isJob = false;
+	private boolean useSavedValues;
 
 	public ParameterProcessor() {
 		locale = Locale.getDefault();
+	}
+
+	/**
+	 * @return the useSavedValues
+	 */
+	public boolean isUseSavedValues() {
+		return useSavedValues;
+	}
+
+	/**
+	 * @param useSavedValues the useSavedValues to set
+	 */
+	public void setUseSavedValues(boolean useSavedValues) {
+		this.useSavedValues = useSavedValues;
 	}
 
 	/**
@@ -176,9 +193,8 @@ public class ParameterProcessor {
 			reportParamsMap.put(reportParam.getParameter().getName(), reportParam);
 		}
 
-		setPassedParameterValues(passedValuesMap, reportParamsMap);
+		setPassedParameterValues(passedValuesMap, reportParamsMap, user.getUserId(), report);
 
-		//set actual values to be used when running the query
 		setActualParameterValues(reportParamsList);
 
 		handleAllValues(reportParamsMap);
@@ -203,90 +219,30 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Populates lov values for all lov parameters
-	 *
-	 * @param reportParamsMap the report parameters
-	 * @throws SQLException
-	 */
-	private void setLovValues(Map<String, ReportParameter> reportParamsMap) throws SQLException {
-		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
-			ReportParameter reportParam = entry.getValue();
-			Parameter param = reportParam.getParameter();
-			if (param.isUseLov()) {
-				//get applicable lov values.
-				//don't run chained parameters. their values will be
-				//loaded dynamically depending on parent and depends paremeter values
-				if (!reportParam.isChained()) {
-					ReportRunner lovReportRunner = new ReportRunner();
-					try {
-						Report lovReport = param.getLovReport();
-						lovReportRunner.setUser(user);
-						lovReportRunner.setReport(lovReport);
-						lovReportRunner.setReportParamsMap(reportParamsMap);
-						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
-						reportParam.setLovValues(lovValues);
-						Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
-						reportParam.setLovValuesAsString(lovValuesAsString);
-					} finally {
-						lovReportRunner.close();
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Populates default values for parameters which use a default value report
-	 *
-	 * @param reportParamsMap the report parameters
-	 * @param user the user under whose permission the report is being run
-	 * @throws SQLException
-	 */
-	private void setDefaultValueLovValues(Map<String, ReportParameter> reportParamsMap)
-			throws SQLException {
-
-		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
-			ReportParameter reportParam = entry.getValue();
-			Parameter param = reportParam.getParameter();
-			Report defaultValueReport = param.getDefaultValueReport();
-
-			if (defaultValueReport != null) {
-				ReportRunner defaultValueLovReportRunner = new ReportRunner();
-				try {
-					defaultValueLovReportRunner.setUser(user);
-					defaultValueLovReportRunner.setReport(defaultValueReport);
-					defaultValueLovReportRunner.setReportParamsMap(reportParamsMap);
-
-					Map<Object, String> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
-					if (reportParam.getPassedParameterValues() == null
-							|| (isJob && param.isUseDefaultValueInJobs())) {
-						if (param.getParameterType() == ParameterType.SingleValue) {
-							List<Object> values = new ArrayList<>(lovValues.keySet());
-							reportParam.setActualParameterValues(values);
-						} else {
-							reportParam.getActualParameterValues().addAll(lovValues.keySet());
-						}
-					}
-
-					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
-					reportParam.setDefaultValueLovValues(lovValuesAsString);
-				} finally {
-					defaultValueLovReportRunner.close();
-				}
-			}
-		}
-	}
-
-	/**
 	 * Populates the passed values property of the report parameters
 	 *
 	 * @param passedValuesMap the passed values
 	 * @param reportParamsMap the report parameters
+	 * @param userId the id of the user who is running the report
+	 * @param report the report being run
 	 */
 	private void setPassedParameterValues(Map<String, String[]> passedValuesMap,
-			Map<String, ReportParameter> reportParamsMap) {
+			Map<String, ReportParameter> reportParamsMap, int userId, Report report) throws SQLException {
 
 		logger.debug("Entering setPassedParameterValues");
+		
+		if(report.isParametersInOutput()){
+			passedValuesMap.put("showSelectedParameters", new String[]{"true"});
+		}
+
+		if (useSavedValues) {
+			SavedParameterService savedParameterService = new SavedParameterService();
+			Map<String, String[]> savedParamValues = savedParameterService.getSavedParameterValues(userId, report.getReportId());
+			if (MapUtils.isNotEmpty(savedParamValues)) {
+				//https://stackoverflow.com/questions/40480/is-java-pass-by-reference-or-pass-by-value?noredirect=1&lq=1
+				passedValuesMap.putAll(savedParamValues);
+			}
+		}
 
 		//process report parameters
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
@@ -325,52 +281,6 @@ public class ParameterProcessor {
 					} else {
 						reportParam.setPassedParameterValues(paramValues);
 					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Processes final report parameters where "All" is selected for multi-value
-	 * parameters
-	 *
-	 * @param reportParamsMap the report parameters
-	 * @throws SQLException
-	 * @throws ParseException
-	 */
-	private void handleAllValues(Map<String, ReportParameter> reportParamsMap)
-			throws SQLException, ParseException {
-
-		logger.debug("Entering handleAllValues");
-
-		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
-			ReportParameter reportParam = entry.getValue();
-			Parameter param = reportParam.getParameter();
-
-			if (param.getParameterType() == ParameterType.MultiValue) {
-				List<Object> actualValuesList = reportParam.getActualParameterValues();
-
-				if (CollectionUtils.isEmpty(actualValuesList)) {
-					//get all lov values that apply for the user
-					List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
-					if (param.isUseLov()) {
-						ReportRunner lovReportRunner = new ReportRunner();
-						try {
-							Report lovReport = param.getLovReport();
-							lovReportRunner.setUser(user);
-							lovReportRunner.setReport(lovReport);
-							lovReportRunner.setReportParamsMap(reportParamsMap);
-							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
-
-							for (Entry<Object, String> entry2 : lovValues.entrySet()) {
-								Object actualValue = entry2.getKey();
-								actualValues.add(actualValue);
-							}
-						} finally {
-							lovReportRunner.close();
-						}
-					}
-					reportParam.setActualParameterValues(actualValues);
 				}
 			}
 		}
@@ -448,7 +358,7 @@ public class ParameterProcessor {
 	 * @return an object of the appropriate type
 	 * @throws ParseException
 	 */
-	private Object convertParameterStringValueToObject(String value, Parameter param)
+	public Object convertParameterStringValueToObject(String value, Parameter param)
 			throws ParseException {
 
 		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
@@ -691,4 +601,126 @@ public class ParameterProcessor {
 			}
 		}
 	}
+
+	/**
+	 * Populates lov values for all lov parameters
+	 *
+	 * @param reportParamsMap the report parameters
+	 * @throws SQLException
+	 */
+	private void setLovValues(Map<String, ReportParameter> reportParamsMap) throws SQLException {
+		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+			ReportParameter reportParam = entry.getValue();
+			Parameter param = reportParam.getParameter();
+			if (param.isUseLov()) {
+				//get applicable lov values.
+				//don't run chained parameters. their values will be
+				//loaded dynamically depending on parent and depends paremeter values
+				if (!reportParam.isChained()) {
+					ReportRunner lovReportRunner = new ReportRunner();
+					try {
+						Report lovReport = param.getLovReport();
+						lovReportRunner.setUser(user);
+						lovReportRunner.setReport(lovReport);
+						lovReportRunner.setReportParamsMap(reportParamsMap);
+						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
+						reportParam.setLovValues(lovValues);
+						Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
+						reportParam.setLovValuesAsString(lovValuesAsString);
+					} finally {
+						lovReportRunner.close();
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Populates default values for parameters which use a default value report
+	 *
+	 * @param reportParamsMap the report parameters
+	 * @param user the user under whose permission the report is being run
+	 * @throws SQLException
+	 */
+	private void setDefaultValueLovValues(Map<String, ReportParameter> reportParamsMap)
+			throws SQLException {
+
+		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+			ReportParameter reportParam = entry.getValue();
+			Parameter param = reportParam.getParameter();
+			Report defaultValueReport = param.getDefaultValueReport();
+
+			if (defaultValueReport != null) {
+				ReportRunner defaultValueLovReportRunner = new ReportRunner();
+				try {
+					defaultValueLovReportRunner.setUser(user);
+					defaultValueLovReportRunner.setReport(defaultValueReport);
+					defaultValueLovReportRunner.setReportParamsMap(reportParamsMap);
+
+					Map<Object, String> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
+					if (reportParam.getPassedParameterValues() == null
+							|| (isJob && param.isUseDefaultValueInJobs())) {
+						if (param.getParameterType() == ParameterType.SingleValue) {
+							List<Object> values = new ArrayList<>(lovValues.keySet());
+							reportParam.setActualParameterValues(values);
+						} else {
+							reportParam.getActualParameterValues().addAll(lovValues.keySet());
+						}
+					}
+
+					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
+					reportParam.setDefaultValueLovValues(lovValuesAsString);
+				} finally {
+					defaultValueLovReportRunner.close();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Processes final report parameters where "All" is selected for multi-value
+	 * parameters
+	 *
+	 * @param reportParamsMap the report parameters
+	 * @throws SQLException
+	 * @throws ParseException
+	 */
+	private void handleAllValues(Map<String, ReportParameter> reportParamsMap)
+			throws SQLException, ParseException {
+
+		logger.debug("Entering handleAllValues");
+
+		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+			ReportParameter reportParam = entry.getValue();
+			Parameter param = reportParam.getParameter();
+
+			if (param.getParameterType() == ParameterType.MultiValue) {
+				List<Object> actualValuesList = reportParam.getActualParameterValues();
+
+				if (CollectionUtils.isEmpty(actualValuesList)) {
+					//get all lov values that apply for the user
+					List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
+					if (param.isUseLov()) {
+						ReportRunner lovReportRunner = new ReportRunner();
+						try {
+							Report lovReport = param.getLovReport();
+							lovReportRunner.setUser(user);
+							lovReportRunner.setReport(lovReport);
+							lovReportRunner.setReportParamsMap(reportParamsMap);
+							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
+
+							for (Entry<Object, String> entry2 : lovValues.entrySet()) {
+								Object actualValue = entry2.getKey();
+								actualValues.add(actualValue);
+							}
+						} finally {
+							lovReportRunner.close();
+						}
+					}
+					reportParam.setActualParameterValues(actualValues);
+				}
+			}
+		}
+	}
+
 }
