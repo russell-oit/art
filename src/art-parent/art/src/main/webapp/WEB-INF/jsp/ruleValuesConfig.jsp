@@ -138,6 +138,7 @@ Configure rule value
 
 	<jsp:body>
 		<form class="form-horizontal" method="POST" action="">
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 			<fieldset>
 				<c:if test="${error != null}">
 					<div class="alert alert-danger alert-dismissable">

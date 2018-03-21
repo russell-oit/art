@@ -26,7 +26,10 @@ bootstrap js, jquery js, datatables css, datatables js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
-		
+
+		<meta name="_csrf" content="${_csrf.token}"/>
+		<meta name="_csrf_header" content="${_csrf.headerName}"/>
+
 		<jsp:invoke fragment="headContent"/>
 	</jsp:attribute>
 
@@ -47,6 +50,12 @@ bootstrap js, jquery js, datatables css, datatables js
 				$('#spinner').show();
 			}).ajaxStop(function () {
 				$('#spinner').hide();
+			});
+			
+			var token = $("meta[name='_csrf']").attr("content");
+			var header = $("meta[name='_csrf_header']").attr("content");
+			$(document).ajaxSend(function (e, xhr, options) {
+				xhr.setRequestHeader(header, token);
 			});
 		</script>
 

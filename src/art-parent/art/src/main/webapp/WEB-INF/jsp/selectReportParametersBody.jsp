@@ -279,6 +279,7 @@ Display section to allow selecting of report parameters and initiate running of 
 					<spring:url var="formUrl" value="/runReport"/>
 					<form id="parametersForm" class="form-horizontal" method="POST" action="${formUrl}">
 						<fieldset>
+							<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 							<input type="hidden" name="reportId" value="${report.reportId}">
 							<input type="hidden" name="showInline" id="showInline" value="true">
 							<input type="hidden" name="nextPage" id="nextPage" value="jobs">
@@ -403,6 +404,7 @@ Display section to allow selecting of report parameters and initiate running of 
 		<div class="modal-content">
 
 			<form id="emailReportForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/emailReport">
+				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 				<!-- Modal Header -->
 				<div class="modal-header">
 					<button type="button" class="close" 

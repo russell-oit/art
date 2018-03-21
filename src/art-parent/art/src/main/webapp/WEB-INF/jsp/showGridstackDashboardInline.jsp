@@ -186,14 +186,14 @@
 			var src = $(this).attr('src'); //this.src gives full url i.e. http://... while $(this).attr('src') gives relative url i.e. contextpath/...
 			var mimimizeUrl = "${pageContext.request.contextPath}/images/minimize.png";
 			var maximizeUrl = "${pageContext.request.contextPath}/images/maximize.png";
-			
+
 			if (src === mimimizeUrl) {
 				$(contentDivId).hide();
 				$(this).attr('src', maximizeUrl);
 			} else {
 				$(contentDivId).show();
 				$(this).attr('src', mimimizeUrl);
-				
+
 				//refresh item contents every time it's maximized/shown
 				var baseUrl = parentDiv.data("base-url");
 				var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
@@ -264,5 +264,11 @@
 	//https://blogs.msdn.microsoft.com/ukadc/2010/02/12/handling-errors-with-jquery-load/
 	$(document).ajaxError(function (event, xhr, options) {
 		ajaxErrorHandler(xhr);
+	});
+
+	var token = $("meta[name='_csrf']").attr("content");
+	var header = $("meta[name='_csrf_header']").attr("content");
+	$(document).ajaxSend(function (e, xhr, options) {
+		xhr.setRequestHeader(header, token);
 	});
 </script>

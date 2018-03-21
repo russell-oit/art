@@ -48,6 +48,7 @@ Login page
 			<div class="well col-md-6 col-md-offset-3 spacer60">
 				<spring:url var="formUrl" value="/login"/>
 				<form class="form-horizontal" method="POST" action="${formUrl}">
+					<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 					<fieldset>
 						<legend class="text-center">ART</legend>
 						<div class="form-group">

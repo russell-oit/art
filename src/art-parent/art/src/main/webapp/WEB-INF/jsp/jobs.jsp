@@ -498,6 +498,7 @@ Display user jobs and jobs configuration
 					<!-- Modal Body -->
 					<div class="modal-body">
 						<form id="runLaterForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/runLaterJob">
+							<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 							<input type="hidden" id="runLaterJobId" name="runLaterJobId"/>
 							<div class="form-group">
 								<label class="control-label col-md-4" for="runLaterJobName">

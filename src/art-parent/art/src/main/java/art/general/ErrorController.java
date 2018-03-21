@@ -177,6 +177,24 @@ public class ErrorController {
 		}
 	}
 
+	@RequestMapping(value = "/error-403")
+	public String showError403(HttpServletRequest request, Model model,
+			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi,
+			@ModelAttribute("errorMessage") String errorMessage,
+			@ModelAttribute("apiResponse") ApiResponse apiResponse) {
+
+		if (isApi) {
+			apiResponse.setMessage(errorMessage);
+			ApiHelper.outputApiResponse(apiResponse, response);
+			return null;
+		} else if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+			//don't return whole html page for ajax calls. Only error details
+			return "error-403-inline";
+		} else {
+			return "error-403";
+		}
+	}
+
 	@RequestMapping(value = "/error-500")
 	public String showError500(HttpServletRequest request, Model model,
 			HttpServletResponse response, @ModelAttribute("isApi") Boolean isApi,
