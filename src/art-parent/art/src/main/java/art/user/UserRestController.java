@@ -144,6 +144,10 @@ public class UserRestController {
 				return ApiHelper.getRecordExistsResponseEntity(message);
 			}
 
+			if (user.isClearTextPassword()) {
+				user.encryptPassword();
+			}
+
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			int newId = userService.addUser(user, sessionUser);
 
@@ -164,10 +168,10 @@ public class UserRestController {
 
 		try {
 			user.setUserId(id);
-			if(user.isClearTextPassword()){
+			if (user.isClearTextPassword()) {
 				user.encryptPassword();
 			}
-			
+
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			userService.updateUser(user, sessionUser);
 			return ApiHelper.getOkResponseEntity();
