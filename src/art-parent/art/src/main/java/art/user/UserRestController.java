@@ -118,7 +118,8 @@ public class UserRestController {
 			if (result.isSuccess()) {
 				return ApiHelper.getOkResponseEntity();
 			} else {
-				return ApiHelper.getLinkedRecordsExistResponseEntity(result.getData());
+				String message = "User not deleted because linked jobs exist";
+				return ApiHelper.getLinkedRecordsExistResponseEntity(message, result.getData());
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -153,7 +154,7 @@ public class UserRestController {
 
 			UriComponents uriComponents = b.path("/api/users/{id}").buildAndExpand(newId);
 			URI uri = uriComponents.toUri();
-			return ApiHelper.getCreatedResponseEntity(uri);
+			return ApiHelper.getCreatedResponseEntity(uri, user);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			return ApiHelper.getErrorResponseEntity(ex);
@@ -174,7 +175,7 @@ public class UserRestController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			userService.updateUser(user, sessionUser);
-			return ApiHelper.getOkResponseEntity();
+			return ApiHelper.getOkResponseEntity(user);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			return ApiHelper.getErrorResponseEntity(ex);

@@ -184,9 +184,24 @@ public class ApiHelper {
 	 * @return the response entity object
 	 */
 	public static ResponseEntity<ApiResponse> getCreatedResponseEntity(URI uri) {
+		Object data = null;
+		return getCreatedResponseEntity(uri, data);
+	}
+
+	/**
+	 * Returns a response entity object to use with a record created response
+	 *
+	 * @param uri the uri of the new record
+	 * @param data the data to include in the response
+	 * @return the response entity object
+	 */
+	public static ResponseEntity<ApiResponse> getCreatedResponseEntity(URI uri,
+			Object data) {
+
 		ApiResponse apiResponse = new ApiResponse();
 		apiResponse.setHttpStatus(HttpStatus.CREATED.value());
 		apiResponse.setArtStatus(ApiStatus.OK);
+		apiResponse.setData(data);
 		return ResponseEntity.created(uri).body(apiResponse);
 	}
 
@@ -215,7 +230,7 @@ public class ApiHelper {
 		apiResponse.setMessage(message);
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
 	}
-	
+
 	/**
 	 * Returns a response entity object to use with an invalid value response
 	 *
@@ -224,7 +239,7 @@ public class ApiHelper {
 	 */
 	public static ResponseEntity<ApiResponse> getInvalidValueResponseEntity(
 			String message) {
-		
+
 		ApiResponse apiResponse = new ApiResponse();
 		apiResponse.setHttpStatus(HttpStatus.BAD_REQUEST.value());
 		apiResponse.setArtStatus(ApiStatus.INVALID_VALUE);
