@@ -37,8 +37,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		//https://stackoverflow.com/questions/28209344/using-just-spring-security-csrf-feature
 		//https://github.com/spring-projects/spring-mvc-showcase/commit/361adc124c05a8187b84f25e8a57550bb7d9f8e4
+		//https://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html#csrf-include-csrf-token
+		//https://stackoverflow.com/questions/22524470/spring-security-3-2-csrf-disable-for-specfic-urls
+		//https://stackoverflow.com/questions/32698808/how-to-ignore-spring-security-csrf-for-specific-urls-in-spring-boot-project
 		http
-				.csrf().ignoringAntMatchers("/saiku", "/saiku2/**", "/saiku3", "/api/**")
+				.csrf().ignoringAntMatchers("/saiku2/**", "/api/**")
 				.and()
 				.authorizeRequests()
 				.anyRequest().permitAll();
@@ -48,6 +51,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public HttpFirewall httpFirewall() {
 		//https://stackoverflow.com/questions/48580584/stricthttpfirewall-in-spring-security-4-2-vs-spring-mvc-matrixvariable
 		//https://stackoverflow.com/questions/48453980/spring-5-0-3-requestrejectedexception-the-request-was-rejected-because-the-url
+		//https://stackoverflow.com/questions/44673490/how-to-prevent-the-jsessionid-showing-in-the-url
+		//https://stackoverflow.com/questions/29692353/how-to-prevent-adding-jsessionid-at-the-end-of-redirected-url
+		//https://stackoverflow.com/questions/962729/is-it-possible-to-disable-jsessionid-in-tomcat-servlet
+		//https://fralef.me/tomcat-disable-jsessionid-in-url.html
 		StrictHttpFirewall firewall = new StrictHttpFirewall();
 		firewall.setAllowSemicolon(true);
 		return firewall;
