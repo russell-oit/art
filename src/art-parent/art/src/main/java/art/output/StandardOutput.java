@@ -866,7 +866,7 @@ public abstract class StandardOutput {
 					columnTypes.put(columnCount, columnTypeDefinition);
 				}
 			} else {
-				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getSimpleName());
+				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
 			}
 		}
 
@@ -1721,7 +1721,7 @@ public abstract class StandardOutput {
 				Map<String, Object> rowMap = (Map<String, Object>) row;
 				value = rowMap.get(columnName);
 			} else {
-				throw new IllegalArgumentException("Unexpected row data type: " + row.getClass().getSimpleName());
+				throw new IllegalArgumentException("Unexpected row data type: " + row.getClass().getCanonicalName());
 			}
 
 			switch (columnType) {

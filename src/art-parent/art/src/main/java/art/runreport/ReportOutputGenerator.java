@@ -384,7 +384,11 @@ public class ReportOutputGenerator {
 				switch (reportFormat) {
 					case html:
 						GroupHtmlOutput groupHtmlOutput = new GroupHtmlOutput();
-						rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
+						if (groovyData == null) {
+							rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
+						} else {
+							rowsRetrieved = groupHtmlOutput.generateReport(groovyData, splitColumn, writer, contextPath);
+						}
 						break;
 					case xlsx:
 						GroupXlsxOutput groupXlsxOutput = new GroupXlsxOutput();

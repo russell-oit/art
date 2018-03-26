@@ -236,7 +236,7 @@ public class JasperReportsOutput {
 								finalData.add(rowMap);
 							}
 						} else {
-							throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getSimpleName());
+							throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
 						}
 					}
 

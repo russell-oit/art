@@ -18,10 +18,19 @@
 package art.output;
 
 import art.servlets.Config;
+import groovy.sql.GroovyRowResult;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates group html reports
@@ -30,6 +39,8 @@ import java.sql.SQLException;
  * @author Timothy Anyona
  */
 public class GroupHtmlOutput {
+
+	private static final Logger logger = LoggerFactory.getLogger(GroupHtmlOutput.class);
 
 	private PrintWriter out;
 	private String contextPath;
@@ -104,7 +115,7 @@ public class GroupHtmlOutput {
 	 * @param value the value to output
 	 */
 	private void addCellToLine(String value) {
-		out.println("<td class='data'>" + value + "</td>");
+		out.println("<td class='groupData'>" + value + "</td>");
 	}
 
 	/**
@@ -114,7 +125,7 @@ public class GroupHtmlOutput {
 	 * @param numOfCells
 	 */
 	private void addErrorCell(String value, int numOfCells) {
-		out.println("<td colspan='" + numOfCells + "' class='qeattr' align='left'>" + value + "</td>");
+		out.println("<td colspan='" + numOfCells + "' class='groupError' align='left'>" + value + "</td>");
 	}
 
 	/**
@@ -147,28 +158,27 @@ public class GroupHtmlOutput {
 
 	/**
 	 * Generates group output
-	 * 
-	 * @param rs the resultset to use. Needs to be a scrollable.
+	 *
+	 * @param rs the resultset to use. Needs to be a scrollable. Must not be
+	 * null.
 	 * @param splitColumn the group column
-	 * @param writer the writer to use
+	 * @param writer the writer to use. Must not be null.
 	 * @param contextPath the application context path
 	 * @return number of rows output
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public int generateReport(ResultSet rs, int splitColumn, PrintWriter writer,
 			String contextPath) throws SQLException {
 
+		logger.debug("Entering generateReport: splitColumn={}, contextPath='{}'",
+				splitColumn, contextPath);
+
+		Objects.requireNonNull(rs, "rs must not be null");
+		Objects.requireNonNull(writer, "writer must not be null");
+		Objects.requireNonNull(contextPath, "contextPath must not be null");
+
 		out = writer;
 		this.contextPath = contextPath;
-
-		ResultSetMetaData rsmd = rs.getMetaData();
-
-		int colCount = rsmd.getColumnCount();
-		int i;
-		int counter = 0;
-		String tmpstr;
-		StringBuffer cmpStr; // temporary string used to compare values
-		StringBuffer tmpCmpStr; // temporary string used to compare values
 
 		// Report, is intended to be something like that:
 		/*
@@ -187,6 +197,12 @@ public class GroupHtmlOutput {
 		 */
 		init();
 
+		ResultSetMetaData rsmd = rs.getMetaData();
+
+		int colCount = rsmd.getColumnCount();
+		int i;
+		String tmpstr;
+
 		// Build main header HTML
 		for (i = 0; i < (splitColumn); i++) {
 			tmpstr = rsmd.getColumnLabel(i + 1);
@@ -201,6 +217,10 @@ public class GroupHtmlOutput {
 		}
 
 		int maxRows = Config.getMaxRows("html");
+
+		int counter = 0;
+		StringBuffer cmpStr; // temporary string used to compare values
+		StringBuffer tmpCmpStr; // temporary string used to compare values
 
 		while (rs.next() && counter < maxRows) {
 			// Separators
@@ -271,5 +291,185 @@ public class GroupHtmlOutput {
 		footer();
 
 		return counter + 1; // number of rows
+	}
+
+	/**
+	 * Generates group output
+	 *
+	 * @param data the data to use
+	 * @param splitColumn the group column
+	 * @param writer the writer to use
+	 * @param contextPath the application context path
+	 * @return number of rows output
+	 * @throws SQLException
+	 */
+	public int generateReport(Object data, int splitColumn, PrintWriter writer,
+			String contextPath) throws SQLException {
+
+		logger.debug("Entering generateReport: splitColumn={}, contextPath='{}'",
+				splitColumn, contextPath);
+
+		Objects.requireNonNull(data, "data must not be null");
+		Objects.requireNonNull(writer, "writer must not be null");
+		Objects.requireNonNull(contextPath, "contextPath must not be null");
+
+		out = writer;
+		this.contextPath = contextPath;
+
+		@SuppressWarnings("unchecked")
+		List<? extends Object> dataList = (List<? extends Object>) data;
+		int rowCount = dataList.size();
+
+		int colCount = 0;
+		List<String> columnNames = new ArrayList<>();
+		if (CollectionUtils.isNotEmpty(dataList)) {
+			Object sample = dataList.get(0);
+			if (sample instanceof GroovyRowResult) {
+				GroovyRowResult sampleResult = (GroovyRowResult) sample;
+				colCount = sampleResult.size();
+				@SuppressWarnings("rawtypes")
+				Set colNames = sampleResult.keySet();
+				@SuppressWarnings("unchecked")
+				List<String> tempColumnNames = new ArrayList<>(colNames);
+				columnNames.addAll(tempColumnNames);
+			} else if (sample instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> sampleRow = (Map<String, Object>) sample;
+				colCount = sampleRow.size();
+				columnNames.addAll(sampleRow.keySet());
+			} else {
+				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
+			}
+		}
+
+		// Report, is intended to be something like that:
+		/*
+		 * ------------------------------------- | Attr1 | Attr2 | Attr3 | //
+		 * Main header ------------------------------------- | Value1 | Value2 |
+		 * Value3 | // Main Data -------------------------------------
+		 *
+		 * -----------------------------... | SubAttr1 | Subattr2 |... // Sub
+		 * Header -----------------------------... | SubValue1.1 | SubValue1.2
+		 * |... // Sub Data -----------------------------... | SubValue2.1 |
+		 * SubValue2.2 |... -----------------------------...
+		 * ................................ ................................
+		 * ................................
+		 *
+		 * etc...
+		 */
+		init();
+
+		int i;
+		String tmpstr;
+
+		// Build main header HTML
+		for (i = 0; i < (splitColumn); i++) {
+			tmpstr = columnNames.get(i);
+			addCellToMainHeader(tmpstr);
+		}
+		// Now the header is completed
+
+		// Build the Sub Header
+		for (; i < colCount; i++) {
+			tmpstr = columnNames.get(i);
+			addCellToSubHeader(tmpstr);
+		}
+
+		int maxRows = Config.getMaxRows("html");
+
+		int counter = 0;
+		StringBuffer cmpStr; // temporary string used to compare values
+		StringBuffer tmpCmpStr; // temporary string used to compare values
+		int currentRow = -1;
+		Map row;
+		while ((currentRow < rowCount) && (counter < maxRows)) {
+			currentRow++;
+			row = (Map) dataList.get(currentRow);
+			// Separators
+			separator();
+
+			// Output Main Header and Main Data
+			header(90);
+			printMainHeader();
+			beginLines();
+			cmpStr = new StringBuffer();
+
+			// Output Main Data (only one row, obviously)
+			for (i = 0; i < splitColumn; i++) {
+				String stringValue = getStringMapValue(row, i, columnNames);
+				addCellToLine(stringValue);
+				cmpStr.append(stringValue);
+			}
+
+			endLines();
+			footer();
+
+			// Output Sub Header and Sub Data
+			header(80);
+			printSubHeader();
+			beginLines();
+
+			// Output Sub Data (first line)
+			for (; i < colCount; i++) {
+				addCellToLine(getStringMapValue(row, i, columnNames));
+			}
+
+			boolean currentMain = true;
+			while (currentMain && counter < maxRows) {  // next line
+				// Get Main Data in order to compare it
+				currentRow++;
+				if (currentRow < rowCount) {
+					row = (Map) dataList.get(currentRow);
+					counter++;
+					tmpCmpStr = new StringBuffer();
+
+					for (i = 0; i < splitColumn; i++) {
+						tmpCmpStr.append(getStringMapValue(row, i, columnNames));
+					}
+
+					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) { // same Main
+						newLine();
+						// Add data lines
+						for (; i < colCount; i++) {
+							addCellToLine(getStringMapValue(row, i, columnNames));
+						}
+					} else {
+						endLines();
+						footer();
+						currentMain = false;
+						currentRow--;
+					}
+				} else {
+					currentMain = false;
+					// The outer and inner while will exit
+				}
+			}
+		}
+
+		if (!(counter < maxRows)) {
+			newLine();
+			addErrorCell("<b>Too many rows (>" + maxRows
+					+ "). Data not completed. Please narrow your search.</b>", colCount);
+		}
+
+		endLines();
+		footer();
+
+		return counter + 1; // number of rows
+	}
+
+	/**
+	 * Returns the string value for a given map index
+	 * 
+	 * @param map the map
+	 * @param index the index
+	 * @param columnNames the column names or map keys
+	 * @return 
+	 */
+	private String getStringMapValue(Map map, int index, List<String> columnNames) {
+		String columnName = columnNames.get(index);
+		Object columnValue = map.get(columnName);
+		String stringValue = String.valueOf(columnValue);
+		return stringValue;
 	}
 }
