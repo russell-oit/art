@@ -333,7 +333,9 @@ public class ReportOutputGenerator {
 					jrOutput.setDynamicModifyPassword(dynamicModifyPassword);
 					if (reportType == ReportType.JasperReportsArt) {
 						rs = reportRunner.getResultSet();
+						Object groovyData = reportRunner.getGroovyData();
 						jrOutput.setResultSet(rs);
+						jrOutput.setData(groovyData);
 					}
 
 					jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);

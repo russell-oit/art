@@ -851,7 +851,9 @@ public abstract class StandardOutput {
 				resultSetColumnCount = sampleRow.size();
 				columnNames.addAll(sampleRow.keySet());
 				int columnCount = 0;
-				for (Object columnValue : sampleRow.values()) {
+				for (int i = 1; i <= resultSetColumnCount; i++) {
+					String columnName = columnNames.get(i - 1);
+					Object columnValue = sampleRow.get(columnName);
 					columnCount++;
 					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
 					if (columnValue instanceof Number) {
