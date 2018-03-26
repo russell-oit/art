@@ -17,13 +17,21 @@
  */
 package art.springconfig;
 
+import javax.servlet.ServletContext;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+import org.springframework.web.multipart.support.MultipartFilter;
 
 /**
  * Registers the springSecurityFilterChain filter
- * 
+ *
  * @author Timothy Anyona
  */
 public class SecurityInitializer extends AbstractSecurityWebApplicationInitializer {
-	//do nothing
+
+	@Override
+	protected void beforeSpringSecurityFilterChain(ServletContext servletContext) {
+		//https://victommasi.wordpress.com/2016/12/20/how-to-handle-multpart-file-upload-with-spring-security-csrf-protection-no-xml/
+		//https://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html#csrf-multipart
+		insertFilters(servletContext, new MultipartFilter());
+	}
 }

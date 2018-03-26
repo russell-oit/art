@@ -216,6 +216,34 @@ public class DbConnections {
 	}
 
 	/**
+	 * Returns a connection pool for the given datasource
+	 *
+	 * @param datasourceName the datasource name
+	 * @return a connection pool for the given datasource
+	 */
+	private static ConnectionPool getConnectionPool(String datasourceName) {
+		logger.debug("Entering getConnectionPool: datasourceName='{}'", datasourceName);
+
+		if (connectionPoolMap == null) {
+			throw new IllegalStateException("connectionPoolMap is null");
+		}
+
+		ConnectionPool connectionPool = null;
+		for (ConnectionPool pool : connectionPoolMap.values()) {
+			if (StringUtils.equalsIgnoreCase(pool.getName(), datasourceName)) {
+				connectionPool = pool;
+				break;
+			}
+		}
+
+		if (connectionPool == null) {
+			throw new RuntimeException("Connection pool doesn't exist for datasource: " + datasourceName);
+		} else {
+			return connectionPool;
+		}
+	}
+
+	/**
 	 * Returns a javax.sql.DataSource for the given art datasource
 	 *
 	 * @param datasourceId the art datasource id
@@ -225,6 +253,18 @@ public class DbConnections {
 		logger.debug("Entering getDataSource: datasourceId={}", datasourceId);
 
 		return getConnectionPool(datasourceId).getPool();
+	}
+	
+	/**
+	 * Returns a javax.sql.DataSource for the given art datasource
+	 *
+	 * @param datasourceName the art datasource name
+	 * @return a javax.sql.DataSource for the given art datasource
+	 */
+	public static DataSource getDataSource(String datasourceName) {
+		logger.debug("Entering getDataSource: datasourceName='{}'", datasourceName);
+
+		return getConnectionPool(datasourceName).getPool();
 	}
 
 	/**
@@ -253,18 +293,6 @@ public class DbConnections {
 	}
 
 	/**
-	 * Returns a connection to ART database
-	 *
-	 * @return a connection to the ART database
-	 * @throws java.sql.SQLException
-	 */
-	public static Connection getArtDbConnection() throws SQLException {
-		logger.debug("Entering getArtDbConnection");
-
-		return getConnection(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
-	}
-
-	/**
 	 * Returns a database connection from the connection pool for the datasource
 	 * with the given name
 	 *
@@ -275,15 +303,19 @@ public class DbConnections {
 	public static Connection getConnection(String datasourceName) throws SQLException {
 		logger.debug("Entering getConnection: datasourceName='{}'", datasourceName);
 
-		Connection conn = null;
+		return getDataSource(datasourceName).getConnection();
+	}
 
-		for (ConnectionPool pool : connectionPoolMap.values()) {
-			if (StringUtils.equalsIgnoreCase(pool.getName(), datasourceName)) {
-				conn = pool.getConnection();
-			}
-		}
+	/**
+	 * Returns a connection to ART database
+	 *
+	 * @return a connection to the ART database
+	 * @throws java.sql.SQLException
+	 */
+	public static Connection getArtDbConnection() throws SQLException {
+		logger.debug("Entering getArtDbConnection");
 
-		return conn;
+		return getConnection(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 	}
 
 	/**

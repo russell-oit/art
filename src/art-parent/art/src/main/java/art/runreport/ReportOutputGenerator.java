@@ -504,6 +504,7 @@ public class ReportOutputGenerator {
 
 				//generate output
 				rs = reportRunner.getResultSet();
+				Object groovyData = reportRunner.getGroovyData();
 
 				StandardOutputResult standardOutputResult;
 				if (reportType.isCrosstab()) {
@@ -523,7 +524,11 @@ public class ReportOutputGenerator {
 						standardOutput.setRequestBaseUrl(requestBaseUrl);
 					}
 
-					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
+					if (groovyData == null) {
+						standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
+					} else {
+						standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
+					}
 				}
 
 				if (standardOutputResult.isSuccess()) {

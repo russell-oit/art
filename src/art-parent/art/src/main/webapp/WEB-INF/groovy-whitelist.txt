@@ -28,6 +28,10 @@ org.mongodb.morphia.DatastoreImpl
 org.mongodb.morphia.Key
 org.mongodb.morphia.query.QueryImpl
 
+#classes used with custom groovy result
+com.zaxxer.hikari.pool.HikariProxyConnection
+groovy.sql.Sql
+
 #other classes
 java.util.ArrayList
 java.util.LinkedHashMap

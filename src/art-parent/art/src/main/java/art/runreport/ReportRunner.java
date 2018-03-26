@@ -39,6 +39,7 @@ import art.utils.GroovySandbox;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
 import groovy.lang.Binding;
+import groovy.lang.GString;
 import groovy.lang.GroovyShell;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -97,9 +98,24 @@ public class ReportRunner {
 	private User user;
 	private boolean postgreSqlFetchSizeApplied;
 	private final String QUESTION_PLACEHOLDER = "[ART_QUESTION_MARK_PLACEHOLDER]";
+	private Object groovyData;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the groovyData
+	 */
+	public Object getGroovyData() {
+		return groovyData;
+	}
+
+	/**
+	 * @param groovyData the groovyData to set
+	 */
+	public void setGroovyData(Object groovyData) {
+		this.groovyData = groovyData;
 	}
 
 	/**
@@ -369,8 +385,13 @@ public class ReportRunner {
 				}
 			}
 
+			groovyData = null;
 			if (result != null) {
-				querySql = String.valueOf(result);
+				if (result instanceof String || result instanceof GString) {
+					querySql = String.valueOf(result);
+				} else {
+					groovyData = result;
+				}
 			}
 
 			//update sb with new sql
@@ -907,6 +928,10 @@ public class ReportRunner {
 				return;
 			default:
 			//do nothing
+		}
+
+		if (groovyData != null) {
+			return;
 		}
 
 		//use dynamic datasource if so configured

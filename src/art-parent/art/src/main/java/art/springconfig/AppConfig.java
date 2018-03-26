@@ -38,9 +38,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.csrf.CsrfFilter;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
-import org.springframework.security.web.servlet.support.csrf.CsrfRequestDataValueProcessor;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
@@ -190,7 +187,8 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 				.addPathPatterns("/**")
 				.excludePathPatterns("/login", "/logout", "/accessDenied",
 						"/customAuthentication", "/api/**",
-						"/error", "/error-404", "/error-405", "/error-400", "/error-500");
+						"/error", "/error-404", "/error-405", "/error-400",
+						"/error-403", "/error-500");
 		
 		registry.addInterceptor(apiInterceptor())
 				.addPathPatterns("/api/**");
@@ -227,7 +225,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	}
 
 	@Bean
-	public CommonsMultipartResolver multipartResolver() {
+	public CommonsMultipartResolver filterMultipartResolver() {
 		return new CommonsMultipartResolver();
 	}
 
