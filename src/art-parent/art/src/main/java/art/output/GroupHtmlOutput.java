@@ -381,10 +381,12 @@ public class GroupHtmlOutput {
 		StringBuffer cmpStr; // temporary string used to compare values
 		StringBuffer tmpCmpStr; // temporary string used to compare values
 		int currentRow = -1;
-		Map row;
+		
 		while ((currentRow < rowCount) && (counter < maxRows)) {
 			currentRow++;
-			row = (Map) dataList.get(currentRow);
+			
+			@SuppressWarnings("rawtypes")
+			Map row = (Map) dataList.get(currentRow);
 			// Separators
 			separator();
 
@@ -419,19 +421,20 @@ public class GroupHtmlOutput {
 				// Get Main Data in order to compare it
 				currentRow++;
 				if (currentRow < rowCount) {
-					row = (Map) dataList.get(currentRow);
+					@SuppressWarnings("rawtypes")
+					Map row2 = (Map) dataList.get(currentRow);
 					counter++;
 					tmpCmpStr = new StringBuffer();
 
 					for (i = 0; i < splitColumn; i++) {
-						tmpCmpStr.append(getStringMapValue(row, i, columnNames));
+						tmpCmpStr.append(getStringMapValue(row2, i, columnNames));
 					}
 
 					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) { // same Main
 						newLine();
 						// Add data lines
 						for (; i < colCount; i++) {
-							addCellToLine(getStringMapValue(row, i, columnNames));
+							addCellToLine(getStringMapValue(row2, i, columnNames));
 						}
 					} else {
 						endLines();
@@ -466,6 +469,7 @@ public class GroupHtmlOutput {
 	 * @param columnNames the column names or map keys
 	 * @return 
 	 */
+	@SuppressWarnings("rawtypes")
 	private String getStringMapValue(Map map, int index, List<String> columnNames) {
 		String columnName = columnNames.get(index);
 		Object columnValue = map.get(columnName);

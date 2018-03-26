@@ -72,6 +72,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.app.VelocityEngine;
+import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.logging.slf4j.SLF4JLoggerImplFactory;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import org.quartz.CronTrigger;
 import static org.quartz.JobBuilder.newJob;
@@ -196,6 +198,9 @@ public class Config extends HttpServlet {
 	 */
 	private void ConfigInit() {
 		logger.debug("Entering ConfigInit");
+		
+		//http://nesbot.com/2011/11/28/play-2-morphia-logging-error
+		MorphiaLoggerFactory.registerLogger(SLF4JLoggerImplFactory.class);
 
 		ServletContext ctx = getServletConfig().getServletContext();
 
