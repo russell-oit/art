@@ -325,6 +325,14 @@ public class ReportOutputGenerator {
 			int reportId = report.getReportId();
 			ReportType reportType = report.getReportType();
 
+			Object groovyData = reportRunner.getGroovyData();
+			Integer groovyDataSize = null;
+			if (groovyData != null) {
+				@SuppressWarnings("unchecked")
+				List<? extends Object> dataList = (List<? extends Object>) groovyData;
+				groovyDataSize = dataList.size();
+			}
+
 			//generate report output
 			if (reportType.isJasperReports() || reportType.isJxls()) {
 				if (reportType.isJasperReports()) {
@@ -333,7 +341,6 @@ public class ReportOutputGenerator {
 					jrOutput.setDynamicModifyPassword(dynamicModifyPassword);
 					if (reportType == ReportType.JasperReportsArt) {
 						rs = reportRunner.getResultSet();
-						Object groovyData = reportRunner.getGroovyData();
 						jrOutput.setResultSet(rs);
 						jrOutput.setData(groovyData);
 					}
@@ -347,12 +354,17 @@ public class ReportOutputGenerator {
 					if (reportType == ReportType.JxlsArt) {
 						rs = reportRunner.getResultSet();
 						jxlsOutput.setResultSet(rs);
+						jxlsOutput.setData(groovyData);
 					}
 
 					jxlsOutput.generateReport(report, applicableReportParamsList, fullOutputFilename);
 				}
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 
 				if (!isJob) {
 					displayFileLink(fileName);
@@ -506,7 +518,6 @@ public class ReportOutputGenerator {
 
 				//generate output
 				rs = reportRunner.getResultSet();
-				Object groovyData = reportRunner.getGroovyData();
 
 				StandardOutputResult standardOutputResult;
 				if (reportType.isCrosstab()) {

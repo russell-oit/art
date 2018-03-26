@@ -70,6 +70,21 @@ public class JxlsOutput {
 	private Locale locale;
 	private String dynamicOpenPassword;
 	private String dynamicModifyPassword;
+	private Object data;
+
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
 
 	/**
 	 * @return the dynamicModifyPassword
@@ -207,11 +222,14 @@ public class JxlsOutput {
 				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn, templateResultOptions);
 				context.putVar("jdbc", jdbcHelper);
 			} else {
-				//use recordset based on art query
-				boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
-				boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
-				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
-				context.putVar("results", rsdc.getRows());
+				if (data == null) {
+					boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
+					boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
+					RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
+					context.putVar("results", rsdc.getRows());
+				} else {
+					context.putVar("results", data);
+				}
 			}
 
 			process(fullTemplateFileName, outputFileName, context, fullAreaConfigFilename, jxlsOptions);
