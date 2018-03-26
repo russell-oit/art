@@ -845,6 +845,26 @@ public abstract class StandardOutput {
 					}
 					columnTypes.put(i, columnTypeDefinition);
 				}
+			} else if (sample instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> sampleRow = (Map<String, Object>) sample;
+				resultSetColumnCount = sampleRow.size();
+				columnNames.addAll(sampleRow.keySet());
+				int columnCount = 0;
+				for (Object columnValue : sampleRow.values()) {
+					columnCount++;
+					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
+					if (columnValue instanceof Number) {
+						columnTypeDefinition.setColumnType(ColumnType.Numeric);
+					} else if (columnValue instanceof Date) {
+						columnTypeDefinition.setColumnType(ColumnType.Date);
+					} else {
+						columnTypeDefinition.setColumnType(ColumnType.String);
+					}
+					columnTypes.put(columnCount, columnTypeDefinition);
+				}
+			} else {
+				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getSimpleName());
 			}
 		}
 
