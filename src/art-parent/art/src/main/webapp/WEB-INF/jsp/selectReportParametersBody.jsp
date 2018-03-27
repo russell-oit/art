@@ -357,9 +357,9 @@ Display section to allow selecting of report parameters and initiate running of 
 										</div>
 									</div>
 								</div>
+								<hr>
 							</c:if>
 
-							<hr>
 							<div class="form-group">
 								<div class="col-md-12">
 									<div id="actionsDiv" style="text-align: center">

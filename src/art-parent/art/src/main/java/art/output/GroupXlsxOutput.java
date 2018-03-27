@@ -18,9 +18,9 @@
 package art.output;
 
 import art.report.Report;
+import art.runreport.GroovyDataDetails;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
-import groovy.sql.GroovyRowResult;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -29,12 +29,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -289,7 +284,7 @@ public class GroupXlsxOutput {
 		int maxRows = Config.getMaxRows("xlsx");
 
 		int firstRow = 0;
-		int lastRow = 0;
+		int lastRow;
 
 		int counter = 0;
 		StringBuilder cmpStr = null; // temporary string used to compare values
@@ -383,10 +378,6 @@ public class GroupXlsxOutput {
 					+ "). Data not completed. Please narrow your search.");
 		}
 
-		for (i = 0; i < colCount; i++) {
-			sheet.autoSizeColumn(i);
-		}
-
 		endOutput();
 
 		return counter + 1; // number of rows
@@ -418,39 +409,11 @@ public class GroupXlsxOutput {
 		this.reportName = reportName;
 		this.fullOutputFileName = fullOutputFileName;
 
-		@SuppressWarnings("unchecked")
-		List<? extends Object> dataList = (List<? extends Object>) data;
-		int rowCount = dataList.size();
-
-		int colCount = 0;
-		List<String> columnNames = new ArrayList<>();
-		if (CollectionUtils.isNotEmpty(dataList)) {
-			Object sample = dataList.get(0);
-			if (sample instanceof GroovyRowResult) {
-				GroovyRowResult sampleResult = (GroovyRowResult) sample;
-				colCount = sampleResult.size();
-				@SuppressWarnings("rawtypes")
-				Set colNames = sampleResult.keySet();
-				@SuppressWarnings("unchecked")
-				List<String> tempColumnNames = new ArrayList<>(colNames);
-				columnNames.addAll(tempColumnNames);
-			} else if (sample instanceof DynaBean) {
-				DynaBean sampleBean = (DynaBean) sample;
-				DynaProperty[] columns = sampleBean.getDynaClass().getDynaProperties();
-				colCount = columns.length;
-				for (DynaProperty column : columns) {
-					String columnName = column.getName();
-					columnNames.add(columnName);
-				}
-			} else if (sample instanceof Map) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> sampleRow = (Map<String, Object>) sample;
-				colCount = sampleRow.size();
-				columnNames.addAll(sampleRow.keySet());
-			} else {
-				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
-			}
-		}
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data);
+		int rowCount = dataDetails.getRowCount();
+		int colCount = dataDetails.getColCount();
+		List<String> columnNames = dataDetails.getColumnNames();
+		List<? extends Object> dataList = dataDetails.getDataList();
 
 		int i;
 
@@ -466,15 +429,16 @@ public class GroupXlsxOutput {
 		int maxRows = Config.getMaxRows("xlsx");
 
 		int firstRow = 0;
-		int lastRow = 0;
+		int lastRow;
 
 		int counter = 0;
 		StringBuilder cmpStr = null; // temporary string used to compare values
 		StringBuilder tmpCmpStr; // temporary string used to compare values
 		String summaryText = null;
-		int currentRow = -1;
-		while ((currentRow < rowCount) && (counter < maxRows)) {
-			currentRow++;
+
+		int rowIndex = -1;
+		while ((rowIndex < rowCount) && (counter < maxRows)) {
+			rowIndex++;
 
 			newLine();
 
@@ -483,11 +447,11 @@ public class GroupXlsxOutput {
 			cmpStr = new StringBuilder();
 			List<String> summaryValues = new ArrayList<>();
 
-			Object dataRow = dataList.get(currentRow);
+			Object dataRow = dataList.get(rowIndex);
 
 			// Output Main Data (only one row, obviously)
 			for (i = 0; i < splitColumn; i++) {
-				String value = getStringRowValue(dataRow, i, columnNames);
+				String value = RunReportHelper.getStringRowValue(dataRow, i, columnNames);
 
 				addCell(value);
 				cmpStr.append(value);
@@ -497,24 +461,24 @@ public class GroupXlsxOutput {
 
 			summaryText = StringUtils.join(summaryValues, "-");
 
-			firstRow = currentRow;
+			firstRow = rowIndex;
 
 			// Output Sub Data (first line)
 			for (; i < colCount; i++) {
-				addCell(getStringRowValue(dataRow, i, columnNames));
+				addCell(RunReportHelper.getStringRowValue(dataRow, i, columnNames));
 			}
 
 			boolean currentMain = true;
 			while (currentMain && counter < maxRows) {  // next line
 				// Get Main Data in order to compare it
-				currentRow++;
-				if (currentRow < rowCount) {
-					Object dataRow2 = dataList.get(currentRow);
+				rowIndex++;
+				if (rowIndex < rowCount) {
+					Object dataRow2 = dataList.get(rowIndex);
 					counter++;
 					tmpCmpStr = new StringBuilder();
 
 					for (i = 0; i < splitColumn; i++) {
-						tmpCmpStr.append(getStringRowValue(dataRow2, i, columnNames));
+						tmpCmpStr.append(RunReportHelper.getStringRowValue(dataRow2, i, columnNames));
 					}
 
 					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) {
@@ -522,13 +486,13 @@ public class GroupXlsxOutput {
 						// Add data lines
 						newLine();
 						for (i = 0; i < colCount; i++) {
-							addCell(getStringRowValue(dataRow2, i, columnNames));
+							addCell(RunReportHelper.getStringRowValue(dataRow2, i, columnNames));
 						}
 					} else {
 						//row has different main from previous row
 						//create a grouping
 						//http://www.mysamplecode.com/2011/10/apache-poi-excel-row-group-collapse.html
-						lastRow = currentRow;
+						lastRow = rowIndex;
 						sheet.groupRow(firstRow - 1, lastRow - 1);
 						sheet.setRowGroupCollapsed(firstRow - 1, true);
 
@@ -539,7 +503,7 @@ public class GroupXlsxOutput {
 						addSummaryCellNumeric(summaryRowCount);
 
 						currentMain = false;
-						currentRow--;
+						rowIndex--;
 					}
 				} else {
 					currentMain = false;
@@ -549,7 +513,7 @@ public class GroupXlsxOutput {
 		}
 
 		if (cmpStr != null) {
-			lastRow = currentRow;
+			lastRow = rowIndex;
 			sheet.groupRow(firstRow - 1, lastRow - 1);
 			sheet.setRowGroupCollapsed(firstRow - 1, true);
 
@@ -573,31 +537,6 @@ public class GroupXlsxOutput {
 		endOutput();
 
 		return counter + 1; // number of rows
-	}
-
-	/**
-	 * Returns the string value for a given data index
-	 *
-	 * @param row the object representing a row of data
-	 * @param index the index
-	 * @param columnNames the column names
-	 * @return the string value for a given data index
-	 */
-	private String getStringRowValue(Object row, int index, List<String> columnNames) {
-		Object columnValue;
-		String columnName = columnNames.get(index);
-		if (row instanceof DynaBean) {
-			DynaBean rowBean = (DynaBean) row;
-			columnValue = rowBean.get(columnName);
-		} else if (row instanceof Map) {
-			@SuppressWarnings("rawtypes")
-			Map rowMap = (Map) row;
-			columnValue = rowMap.get(columnName);
-		} else {
-			throw new IllegalArgumentException("Unexpected data type: " + row.getClass().getCanonicalName());
-		}
-
-		return String.valueOf(columnValue);
 	}
 
 }

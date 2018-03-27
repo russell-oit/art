@@ -27,6 +27,8 @@ import art.reportoptions.JFreeChartOptions;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
+import art.runreport.GroovyDataDetails;
+import art.runreport.RunReportHelper;
 import net.sf.cewolfart.ChartPostProcessor;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
@@ -103,6 +105,9 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private List<Chart> secondaryCharts;
 	protected boolean swapAxes;
 	protected JFreeChartOptions extraOptions;
+	protected int rowCount;
+	protected int colCount;
+	protected List<String> columnNames;
 
 	/**
 	 * @return the extraOptions
@@ -336,6 +341,16 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	protected abstract void fillDataset(ResultSet rs) throws SQLException;
 
 	/**
+	 * Generates the chart dataset based on the given data
+	 *
+	 * @param data the data to use
+	 * @throws SQLException
+	 */
+	protected void fillDataset(List<? extends Object> data) throws SQLException {
+
+	}
+
+	/**
 	 * Generates the chart dataset based on the given resultset
 	 *
 	 * @param rs the resultset to use
@@ -348,12 +363,43 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 		logger.debug("Entering prepareDataset");
 
+		Objects.requireNonNull(rs, "rs must not be null");
+
 		this.reportParamsList = reportParamsList;
 
 		prepareDrilldownDetails(drilldown);
 		prepareHyperLinkDetails(rs);
 
 		fillDataset(rs);
+	}
+
+	/**
+	 * Generates the chart dataset based on the given data
+	 *
+	 * @param data the data to use
+	 * @param drilldown the drilldown to use, if any
+	 * @param reportParamsList the report parameters to use
+	 * @throws SQLException
+	 */
+	public void prepareDataset(Object data, Drilldown drilldown,
+			List<ReportParameter> reportParamsList) throws SQLException {
+
+		logger.debug("Entering prepareDataset");
+
+		Objects.requireNonNull(data, "data must not be null");
+
+		this.reportParamsList = reportParamsList;
+
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data);
+		rowCount = dataDetails.getRowCount();
+		colCount = dataDetails.getColCount();
+		columnNames = dataDetails.getColumnNames();
+		List<? extends Object> dataList = dataDetails.getDataList();
+
+		prepareDrilldownDetails(drilldown);
+		prepareDataHyperLinkDetails();
+
+		fillDataset(dataList);
 	}
 
 	private void prepareDrilldownDetails(Drilldown drilldown) throws SQLException {
@@ -375,6 +421,20 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		int columnCount = rsmd.getColumnCount();
 		String lastColumnName = rsmd.getColumnLabel(columnCount);
 		String secondColumnName = rsmd.getColumnLabel(2);
+
+		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)
+				|| StringUtils.equals(secondColumnName, HYPERLINKS_COLUMN_NAME)) {
+			setHasHyperLinks(true);
+			setHyperLinks(new HashMap<String, String>());
+		}
+
+	}
+
+	private void prepareDataHyperLinkDetails() throws SQLException {
+		logger.debug("Entering prepareDataHyperLinkDetails");
+
+		String lastColumnName = columnNames.get(colCount - 1);
+		String secondColumnName = columnNames.get(1);
 
 		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)
 				|| StringUtils.equals(secondColumnName, HYPERLINKS_COLUMN_NAME)) {
@@ -622,9 +682,16 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	}
 
 	protected void addHyperLink(ResultSet rs, String key) throws SQLException {
-		if (isHasHyperLinks()) {
+		if (hasHyperLinks) {
 			String hyperLink = rs.getString(HYPERLINKS_COLUMN_NAME);
-			getHyperLinks().put(key, hyperLink);
+			hyperLinks.put(key, hyperLink);
+		}
+	}
+
+	protected void addHyperLink(Object row, String key) throws SQLException {
+		if (hasHyperLinks) {
+			String hyperLink = RunReportHelper.getStringRowValue(row, HYPERLINKS_COLUMN_NAME);
+			hyperLinks.put(key, hyperLink);
 		}
 	}
 
@@ -681,10 +748,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	private void applySeriesColors(JFreeChart chart) {
 		logger.debug("Entering applySeriesColors");
-
-		if (extraOptions == null) {
-			return;
-		}
 
 		if (MapUtils.isEmpty(extraOptions.getSeriesColors())) {
 			return;

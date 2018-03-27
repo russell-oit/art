@@ -17,20 +17,15 @@
  */
 package art.output;
 
+import art.runreport.GroovyDataDetails;
+import art.runreport.RunReportHelper;
 import art.servlets.Config;
-import groovy.sql.GroovyRowResult;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -318,40 +313,6 @@ public class GroupHtmlOutput {
 		out = writer;
 		this.contextPath = contextPath;
 
-		@SuppressWarnings("unchecked")
-		List<? extends Object> dataList = (List<? extends Object>) data;
-		int rowCount = dataList.size();
-
-		int colCount = 0;
-		List<String> columnNames = new ArrayList<>();
-		if (CollectionUtils.isNotEmpty(dataList)) {
-			Object sample = dataList.get(0);
-			if (sample instanceof GroovyRowResult) {
-				GroovyRowResult sampleResult = (GroovyRowResult) sample;
-				colCount = sampleResult.size();
-				@SuppressWarnings("rawtypes")
-				Set colNames = sampleResult.keySet();
-				@SuppressWarnings("unchecked")
-				List<String> tempColumnNames = new ArrayList<>(colNames);
-				columnNames.addAll(tempColumnNames);
-			} else if (sample instanceof DynaBean) {
-				DynaBean sampleBean = (DynaBean) sample;
-				DynaProperty[] columns = sampleBean.getDynaClass().getDynaProperties();
-				colCount = columns.length;
-				for (DynaProperty column : columns) {
-					String columnName = column.getName();
-					columnNames.add(columnName);
-				}
-			} else if (sample instanceof Map) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> sampleRow = (Map<String, Object>) sample;
-				colCount = sampleRow.size();
-				columnNames.addAll(sampleRow.keySet());
-			} else {
-				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
-			}
-		}
-
 		// Report, is intended to be something like that:
 		/*
 		 * ------------------------------------- | Attr1 | Attr2 | Attr3 | //
@@ -367,6 +328,12 @@ public class GroupHtmlOutput {
 		 *
 		 * etc...
 		 */
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data);
+		int rowCount = dataDetails.getRowCount();
+		int colCount = dataDetails.getColCount();
+		List<String> columnNames = dataDetails.getColumnNames();
+		List<? extends Object> dataList = dataDetails.getDataList();
+
 		init();
 
 		int i;
@@ -406,7 +373,7 @@ public class GroupHtmlOutput {
 
 			// Output Main Data (only one row, obviously)
 			for (i = 0; i < splitColumn; i++) {
-				String stringValue = getStringRowValue(row, i, columnNames);
+				String stringValue = RunReportHelper.getStringRowValue(row, i, columnNames);
 				addCellToLine(stringValue);
 				cmpStr.append(stringValue);
 			}
@@ -421,7 +388,7 @@ public class GroupHtmlOutput {
 
 			// Output Sub Data (first line)
 			for (; i < colCount; i++) {
-				addCellToLine(getStringRowValue(row, i, columnNames));
+				addCellToLine(RunReportHelper.getStringRowValue(row, i, columnNames));
 			}
 
 			boolean currentMain = true;
@@ -434,14 +401,14 @@ public class GroupHtmlOutput {
 					tmpCmpStr = new StringBuffer();
 
 					for (i = 0; i < splitColumn; i++) {
-						tmpCmpStr.append(getStringRowValue(row2, i, columnNames));
+						tmpCmpStr.append(RunReportHelper.getStringRowValue(row2, i, columnNames));
 					}
 
 					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) { // same Main
 						newLine();
 						// Add data lines
 						for (; i < colCount; i++) {
-							addCellToLine(getStringRowValue(row2, i, columnNames));
+							addCellToLine(RunReportHelper.getStringRowValue(row2, i, columnNames));
 						}
 					} else {
 						endLines();
@@ -466,31 +433,6 @@ public class GroupHtmlOutput {
 		footer();
 
 		return counter + 1; // number of rows
-	}
-
-	/**
-	 * Returns the string value for a given data index
-	 *
-	 * @param row the object representing a row of data
-	 * @param index the index
-	 * @param columnNames the column names
-	 * @return the string value for a given data index
-	 */
-	private String getStringRowValue(Object row, int index, List<String> columnNames) {
-		Object columnValue;
-		String columnName = columnNames.get(index);
-		if (row instanceof DynaBean) {
-			DynaBean rowBean = (DynaBean) row;
-			columnValue = rowBean.get(columnName);
-		} else if (row instanceof Map) {
-			@SuppressWarnings("rawtypes")
-			Map rowMap = (Map) row;
-			columnValue = rowMap.get(columnName);
-		} else {
-			throw new IllegalArgumentException("Unexpected data type: " + row.getClass().getCanonicalName());
-		}
-
-		return String.valueOf(columnValue);
 	}
 
 }

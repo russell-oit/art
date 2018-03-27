@@ -31,6 +31,7 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
+import groovy.sql.GroovyRowResult;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -44,9 +45,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -700,6 +704,137 @@ public class RunReportHelper {
 		}
 
 		return modifyPassword;
+	}
+
+	/**
+	 * Returns attributes of data used in report generation
+	 *
+	 * @param data the data
+	 * @return data attributes
+	 */
+	public static GroovyDataDetails getGroovyDataDetails(Object data) {
+		Objects.requireNonNull(data, "data must not be null");
+
+		@SuppressWarnings("unchecked")
+		List<? extends Object> dataList = (List<? extends Object>) data;
+		int rowCount = dataList.size();
+
+		int colCount = 0;
+		List<String> columnNames = new ArrayList<>();
+		if (CollectionUtils.isNotEmpty(dataList)) {
+			Object sample = dataList.get(0);
+			if (sample instanceof GroovyRowResult) {
+				GroovyRowResult sampleResult = (GroovyRowResult) sample;
+				colCount = sampleResult.size();
+				@SuppressWarnings("rawtypes")
+				Set colNames = sampleResult.keySet();
+				@SuppressWarnings("unchecked")
+				List<String> tempColumnNames = new ArrayList<>(colNames);
+				columnNames.addAll(tempColumnNames);
+			} else if (sample instanceof DynaBean) {
+				DynaBean sampleBean = (DynaBean) sample;
+				DynaProperty[] columns = sampleBean.getDynaClass().getDynaProperties();
+				colCount = columns.length;
+				for (DynaProperty column : columns) {
+					String columnName = column.getName();
+					columnNames.add(columnName);
+				}
+			} else if (sample instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> sampleRow = (Map<String, Object>) sample;
+				colCount = sampleRow.size();
+				columnNames.addAll(sampleRow.keySet());
+			} else {
+				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
+			}
+		}
+
+		GroovyDataDetails details = new GroovyDataDetails();
+
+		details.setRowCount(rowCount);
+		details.setColCount(colCount);
+		details.setColumnNames(columnNames);
+		details.setDataList(dataList);
+
+		return details;
+	}
+
+	/**
+	 * Returns the string value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param index the index
+	 * @param columnNames the column names
+	 * @return the string value for a given data index
+	 */
+	public static String getStringRowValue(Object row, int index, List<String> columnNames) {
+		Object columnValue = getRowValue(row, index, columnNames);
+		return String.valueOf(columnValue);
+	}
+	
+	/**
+	 * Returns the string value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param columnName the column name
+	 * @return the string value for a given data index
+	 */
+	public static String getStringRowValue(Object row, String columnName) {
+		Object columnValue = getRowValue(row, columnName);
+		return String.valueOf(columnValue);
+	}
+
+	/**
+	 * Returns the double value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param index the index
+	 * @param columnNames the column names
+	 * @return the double value for a given data index
+	 */
+	public static double getDoubleRowValue(Object row, int index, List<String> columnNames) {
+		Object columnValue = getRowValue(row, index, columnNames);
+		if (columnValue == null) {
+			return 0D;
+		} else {
+			return ((Number) columnValue).doubleValue();
+		}
+	}
+
+	/**
+	 * Returns the value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param index the zero-based index
+	 * @param columnNames the column names
+	 * @return the value for a given data index
+	 */
+	public static Object getRowValue(Object row, int index, List<String> columnNames) {
+		String columnName = columnNames.get(index);
+		return getRowValue(row, columnName);
+	}
+	
+	/**
+	 * Returns the value for a given data column
+	 *
+	 * @param row the object representing a row of data
+	 * @param columnName the column name
+	 * @return the value for a given data column
+	 */
+	public static Object getRowValue(Object row, String columnName) {
+		Object columnValue;
+		if (row instanceof DynaBean) {
+			DynaBean rowBean = (DynaBean) row;
+			columnValue = rowBean.get(columnName);
+		} else if (row instanceof Map) {
+			@SuppressWarnings("rawtypes")
+			Map rowMap = (Map) row;
+			columnValue = rowMap.get(columnName);
+		} else {
+			throw new IllegalArgumentException("Unexpected data type: " + row.getClass().getCanonicalName());
+		}
+
+		return columnValue;
 	}
 
 }

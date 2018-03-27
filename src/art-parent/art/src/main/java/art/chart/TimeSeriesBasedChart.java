@@ -262,7 +262,7 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		postProcessChart(chart);
 
 		//set custom date format if applicable
-		if (extraOptions != null && StringUtils.isNotBlank(extraOptions.getDateFormat())) {
+		if (StringUtils.isNotBlank(extraOptions.getDateFormat())) {
 			XYPlot plot = (XYPlot) chart.getPlot();
 			DateAxis axis = (DateAxis) plot.getDomainAxis();
 			axis.setDateFormatOverride(new SimpleDateFormat(extraOptions.getDateFormat(), locale));

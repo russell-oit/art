@@ -412,7 +412,7 @@ public class ReportOutputGenerator {
 				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
 				boolean swapAxes = reportOptions.isSwapAxes();
-				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes);
+				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, groovyData);
 
 				//store data for potential use in html and pdf output
 				RowSetDynaClass data = null;
@@ -446,8 +446,9 @@ public class ReportOutputGenerator {
 						try {
 							secondaryReportRunner.execute();
 							secondaryResultSet = secondaryReportRunner.getResultSet();
+							Object secondaryGroovyData = secondaryReportRunner.getGroovyData();
 							swapAxes = false;
-							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes);
+							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, secondaryGroovyData);
 							secondaryCharts.add(secondaryChart);
 						} finally {
 							DatabaseUtils.close(secondaryResultSet);
@@ -479,7 +480,12 @@ public class ReportOutputGenerator {
 						chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword);
 						displayFileLink(fileName);
 					}
-					rowsRetrieved = getResultSetRowCount(rs);
+
+					if (groovyDataSize == null) {
+						rowsRetrieved = getResultSetRowCount(rs);
+					} else {
+						rowsRetrieved = groovyDataSize;
+					}
 				}
 			} else if (reportType.isStandardOutput() && reportFormat.isJson()) {
 				rs = reportRunner.getResultSet();
@@ -1543,13 +1549,14 @@ public class ReportOutputGenerator {
 	 * @param reportParamsMap the report parameters map
 	 * @param reportParamsList the report parameters list
 	 * @param swapAxes whether to swap the values of the x and y axes
+	 * @param groovyData data to use for the chart, if not using a resultset
 	 * @return the prepared chart
 	 * @throws SQLException
 	 */
 	private Chart prepareChart(Report report, ReportFormat reportFormat, Locale locale,
 			ResultSet rs, ChartOptions parameterChartOptions,
 			Map<String, ReportParameter> reportParamsMap,
-			List<ReportParameter> reportParamsList, boolean swapAxes)
+			List<ReportParameter> reportParamsList, boolean swapAxes, Object groovyData)
 			throws SQLException, IOException {
 
 		ReportType reportType = report.getReportType();
@@ -1570,11 +1577,14 @@ public class ReportOutputGenerator {
 		chart.setSwapAxes(swapAxes);
 
 		String optionsString = report.getOptions();
-		if (StringUtils.isNotBlank(optionsString)) {
+		JFreeChartOptions options;
+		if (StringUtils.isBlank(optionsString)) {
+			options = new JFreeChartOptions();
+		} else {
 			ObjectMapper mapper = new ObjectMapper();
-			JFreeChartOptions options = mapper.readValue(optionsString, JFreeChartOptions.class);
-			chart.setExtraOptions(options);
+			options = mapper.readValue(optionsString, JFreeChartOptions.class);
 		}
+		chart.setExtraOptions(options);
 
 		Drilldown drilldown = null;
 		if (reportFormat == ReportFormat.html) {
@@ -1585,7 +1595,11 @@ public class ReportOutputGenerator {
 			}
 		}
 
-		chart.prepareDataset(rs, drilldown, reportParamsList);
+		if (groovyData == null) {
+			chart.prepareDataset(rs, drilldown, reportParamsList);
+		} else {
+			chart.prepareDataset(groovyData, drilldown, reportParamsList);
+		}
 
 		return chart;
 	}
