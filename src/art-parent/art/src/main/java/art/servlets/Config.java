@@ -200,6 +200,7 @@ public class Config extends HttpServlet {
 		logger.debug("Entering ConfigInit");
 		
 		//http://nesbot.com/2011/11/28/play-2-morphia-logging-error
+		//https://stackoverflow.com/questions/5115635/morphia-logging-over-log4j-in-spring
 		MorphiaLoggerFactory.registerLogger(SLF4JLoggerImplFactory.class);
 
 		ServletContext ctx = getServletConfig().getServletContext();

@@ -63,6 +63,8 @@ import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
 import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -226,6 +228,24 @@ public class JasperReportsOutput {
 								Map<String, Object> rowMap = new LinkedHashMap<>();
 								for (Object columnName : rowResult.keySet()) {
 									rowMap.put(String.valueOf(columnName), rowResult.get(columnName));
+								}
+								finalData.add(rowMap);
+							}
+						} else if (sample instanceof DynaBean) {
+							List<String> columnNames = null;
+							for (Object row : dataList) {
+								DynaBean rowBean = (DynaBean) row;
+								if (columnNames == null) {
+									columnNames = new ArrayList<>();
+									DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
+									for (DynaProperty column : columns) {
+										String columnName = column.getName();
+										columnNames.add(columnName);
+									}
+								}
+								Map<String, Object> rowMap = new LinkedHashMap<>();
+								for (String columnName : columnNames) {
+									rowMap.put(columnName, rowBean.get(columnName));
 								}
 								finalData.add(rowMap);
 							}

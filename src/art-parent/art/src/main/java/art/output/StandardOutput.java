@@ -61,6 +61,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
@@ -845,16 +847,19 @@ public abstract class StandardOutput {
 					}
 					columnTypes.put(i, columnTypeDefinition);
 				}
-			} else if (sample instanceof Map) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> sampleRow = (Map<String, Object>) sample;
-				resultSetColumnCount = sampleRow.size();
-				columnNames.addAll(sampleRow.keySet());
-				int columnCount = 0;
+			} else if (sample instanceof DynaBean) {
+				DynaBean sampleBean = (DynaBean) sample;
+				DynaProperty[] columns = sampleBean.getDynaClass().getDynaProperties();
+				resultSetColumnCount = columns.length;
+				for (int i = 0; i < resultSetColumnCount; i++) {
+					String columnName = columns[i].getName();
+					columnNames.add(columnName);
+				}
+				int columnIndex = 0;
 				for (int i = 1; i <= resultSetColumnCount; i++) {
 					String columnName = columnNames.get(i - 1);
-					Object columnValue = sampleRow.get(columnName);
-					columnCount++;
+					Object columnValue = sampleBean.get(columnName);
+					columnIndex++;
 					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
 					if (columnValue instanceof Number) {
 						columnTypeDefinition.setColumnType(ColumnType.Numeric);
@@ -863,7 +868,27 @@ public abstract class StandardOutput {
 					} else {
 						columnTypeDefinition.setColumnType(ColumnType.String);
 					}
-					columnTypes.put(columnCount, columnTypeDefinition);
+					columnTypes.put(columnIndex, columnTypeDefinition);
+				}
+			} else if (sample instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> sampleRow = (Map<String, Object>) sample;
+				resultSetColumnCount = sampleRow.size();
+				columnNames.addAll(sampleRow.keySet());
+				int columnIndex = 0;
+				for (int i = 1; i <= resultSetColumnCount; i++) {
+					String columnName = columnNames.get(i - 1);
+					Object columnValue = sampleRow.get(columnName);
+					columnIndex++;
+					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
+					if (columnValue instanceof Number) {
+						columnTypeDefinition.setColumnType(ColumnType.Numeric);
+					} else if (columnValue instanceof Date) {
+						columnTypeDefinition.setColumnType(ColumnType.Date);
+					} else {
+						columnTypeDefinition.setColumnType(ColumnType.String);
+					}
+					columnTypes.put(columnIndex, columnTypeDefinition);
 				}
 			} else {
 				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
@@ -1716,6 +1741,9 @@ public abstract class StandardOutput {
 			if (row instanceof GroovyRowResult) {
 				GroovyRowResult rowResult = (GroovyRowResult) row;
 				value = rowResult.get(columnName);
+			} else if (row instanceof DynaBean) {
+				DynaBean rowBean = (DynaBean) row;
+				value = rowBean.get(columnName);
 			} else if (row instanceof Map) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> rowMap = (Map<String, Object>) row;

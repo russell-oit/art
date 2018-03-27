@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -332,6 +334,13 @@ public class GroupHtmlOutput {
 				@SuppressWarnings("unchecked")
 				List<String> tempColumnNames = new ArrayList<>(colNames);
 				columnNames.addAll(tempColumnNames);
+			} else if (sample instanceof DynaBean) {
+				DynaBean sampleBean = (DynaBean) sample;
+				DynaProperty[] columns = sampleBean.getDynaClass().getDynaProperties();
+				for (DynaProperty column : columns) {
+					String columnName = column.getName();
+					columnNames.add(columnName);
+				}
 			} else if (sample instanceof Map) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> sampleRow = (Map<String, Object>) sample;
@@ -381,12 +390,11 @@ public class GroupHtmlOutput {
 		StringBuffer cmpStr; // temporary string used to compare values
 		StringBuffer tmpCmpStr; // temporary string used to compare values
 		int currentRow = -1;
-		
+
 		while ((currentRow < rowCount) && (counter < maxRows)) {
 			currentRow++;
-			
-			@SuppressWarnings("rawtypes")
-			Map row = (Map) dataList.get(currentRow);
+
+			Object row = dataList.get(currentRow);
 			// Separators
 			separator();
 
@@ -398,7 +406,7 @@ public class GroupHtmlOutput {
 
 			// Output Main Data (only one row, obviously)
 			for (i = 0; i < splitColumn; i++) {
-				String stringValue = getStringMapValue(row, i, columnNames);
+				String stringValue = getStringRowValue(row, i, columnNames);
 				addCellToLine(stringValue);
 				cmpStr.append(stringValue);
 			}
@@ -413,7 +421,7 @@ public class GroupHtmlOutput {
 
 			// Output Sub Data (first line)
 			for (; i < colCount; i++) {
-				addCellToLine(getStringMapValue(row, i, columnNames));
+				addCellToLine(getStringRowValue(row, i, columnNames));
 			}
 
 			boolean currentMain = true;
@@ -421,20 +429,19 @@ public class GroupHtmlOutput {
 				// Get Main Data in order to compare it
 				currentRow++;
 				if (currentRow < rowCount) {
-					@SuppressWarnings("rawtypes")
-					Map row2 = (Map) dataList.get(currentRow);
+					Object row2 = dataList.get(currentRow);
 					counter++;
 					tmpCmpStr = new StringBuffer();
 
 					for (i = 0; i < splitColumn; i++) {
-						tmpCmpStr.append(getStringMapValue(row2, i, columnNames));
+						tmpCmpStr.append(getStringRowValue(row2, i, columnNames));
 					}
 
 					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) { // same Main
 						newLine();
 						// Add data lines
 						for (; i < colCount; i++) {
-							addCellToLine(getStringMapValue(row2, i, columnNames));
+							addCellToLine(getStringRowValue(row2, i, columnNames));
 						}
 					} else {
 						endLines();
@@ -462,18 +469,28 @@ public class GroupHtmlOutput {
 	}
 
 	/**
-	 * Returns the string value for a given map index
-	 * 
-	 * @param map the map
+	 * Returns the string value for a given data index
+	 *
+	 * @param row the object representing a row of data
 	 * @param index the index
-	 * @param columnNames the column names or map keys
-	 * @return 
+	 * @param columnNames the column names
+	 * @return the string value for a given data index
 	 */
-	@SuppressWarnings("rawtypes")
-	private String getStringMapValue(Map map, int index, List<String> columnNames) {
+	private String getStringRowValue(Object row, int index, List<String> columnNames) {
+		Object columnValue;
 		String columnName = columnNames.get(index);
-		Object columnValue = map.get(columnName);
-		String stringValue = String.valueOf(columnValue);
-		return stringValue;
+		if (row instanceof DynaBean) {
+			DynaBean rowBean = (DynaBean) row;
+			columnValue = rowBean.get(columnName);
+		} else if (row instanceof Map) {
+			@SuppressWarnings("rawtypes")
+			Map rowMap = (Map) row;
+			columnValue = rowMap.get(columnName);
+		} else {
+			throw new IllegalArgumentException("Unexpected data type: " + row.getClass().getCanonicalName());
+		}
+
+		return String.valueOf(columnValue);
 	}
+
 }

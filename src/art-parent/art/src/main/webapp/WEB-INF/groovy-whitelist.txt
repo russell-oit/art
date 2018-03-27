@@ -30,6 +30,8 @@ org.mongodb.morphia.query.QueryImpl
 
 #classes used with custom groovy result
 com.zaxxer.hikari.pool.HikariProxyConnection
+com.zaxxer.hikari.pool.HikariProxyStatement
+com.zaxxer.hikari.pool.HikariProxyResultSet
 groovy.sql.Sql
 
 #other classes
