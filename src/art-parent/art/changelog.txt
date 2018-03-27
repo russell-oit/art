@@ -4,6 +4,7 @@ ART 3.4
 * Provide a REST API for dealing with users. This is experimental and subject to change.
 * Allow users to save parameter selections
 * Allow use of GroovyRowResult data with "usesGroovy" queries
+* Updated French translation (thanks to Pierre Blanchou)
 * Updated univocity-parsers, spring
 
 ART 3.3
