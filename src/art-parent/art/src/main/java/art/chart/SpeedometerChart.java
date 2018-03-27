@@ -17,14 +17,17 @@
  */
 package art.chart;
 
+import art.runreport.RunReportHelper;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.MeterInterval;
@@ -34,7 +37,7 @@ import org.jfree.data.general.DefaultValueDataset;
 
 /**
  * Provides methods for working with speedometer charts
- * 
+ *
  * @author Timothy Anyona
  */
 public class SpeedometerChart extends Chart {
@@ -59,10 +62,9 @@ public class SpeedometerChart extends Chart {
 		Objects.requireNonNull(rs, "rs must not be null");
 
 		DefaultValueDataset dataset = new DefaultValueDataset();
-		
+
 		//resultset structure
 		//dataValue, minValue, maxValue, unitsDescription [, ranges]
-		
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 
@@ -78,6 +80,63 @@ public class SpeedometerChart extends Chart {
 				rangeCount = 0;
 				for (int i = 5; i <= columnCount; i++) {
 					String rangeSpec = rs.getString(i);
+					String[] rangeDetails = StringUtils.split(rangeSpec, ":");
+					if (rangeDetails != null && rangeDetails.length == 3) {
+						rangeCount++;
+						String valuePart = rangeDetails[0];
+						double rangeValue;
+						if (valuePart.contains("%")) {
+							rangeValue = Double.parseDouble(valuePart.replace("%", ""));
+							rangeValue = minValue + (maxValue - minValue) * rangeValue / 100.0;
+						} else {
+							rangeValue = Double.parseDouble(valuePart);
+						}
+
+						rangeValues.put(rangeCount, rangeValue);
+						rangeColors.put(rangeCount, StringUtils.trim(rangeDetails[1]));
+						rangeDescriptions.put(rangeCount, StringUtils.trim(rangeDetails[2]));
+					}
+				}
+
+				//build chart ranges
+				double rangeMin;
+				double rangeMax;
+				for (int i = 1; i <= rangeCount; i++) {
+					if (i == 1) {
+						rangeMin = minValue;
+						rangeMax = rangeValues.get(i);
+					} else {
+						rangeMin = rangeValues.get(i - 1);
+						rangeMax = rangeValues.get(i);
+					}
+					Range range = new Range(rangeMin, rangeMax);
+					rangeRanges.put(i, range);
+				}
+			}
+		}
+
+		setDataset(dataset);
+	}
+
+	@Override
+	public void fillDataset(List<? extends Object> data) {
+		Objects.requireNonNull(data, "data must not be null");
+
+		DefaultValueDataset dataset = new DefaultValueDataset();
+
+		if (CollectionUtils.isNotEmpty(data)) {
+			Object row = data.get(0);
+			dataset.setValue(RunReportHelper.getDoubleRowValue(row, 1 - 1, columnNames));
+
+			minValue = RunReportHelper.getDoubleRowValue(row, 2 - 1, columnNames);
+			maxValue = RunReportHelper.getDoubleRowValue(row, 3 - 1, columnNames);
+			unitsDescription = RunReportHelper.getStringRowValue(row, 4 - 1, columnNames);
+
+			if (colCount > 4) {
+				//ranges have been specified
+				rangeCount = 0;
+				for (int i = 5; i <= colCount; i++) {
+					String rangeSpec = RunReportHelper.getStringRowValue(row, i - 1, columnNames);
 					String[] rangeDetails = StringUtils.split(rangeSpec, ":");
 					if (rangeDetails != null && rangeDetails.length == 3) {
 						rangeCount++;

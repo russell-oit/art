@@ -344,11 +344,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 * Generates the chart dataset based on the given data
 	 *
 	 * @param data the data to use
-	 * @throws SQLException
 	 */
-	protected void fillDataset(List<? extends Object> data) throws SQLException {
-
-	}
+	protected abstract void fillDataset(List<? extends Object> data);
 
 	/**
 	 * Generates the chart dataset based on the given resultset
@@ -614,26 +611,30 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 *
 	 * @param reportFormat the report format. Either png or pdf
 	 * @param outputFileName the full path of the file name to use
-	 * @param data for pdf format, if it is required to show the chart data
-	 * together with the image. Null if show data is not required.
+	 * @param dynaData resultset data to be displayed with the chart image. Null
+	 * if show data is not required.
 	 * @param report the report for the chart
 	 * @param pdfPageNumbers whether page numbers should be included in pdf
 	 * output
 	 * @param dynamicOpenPassword dynamic open password, for pdf output
 	 * @param dynamicModifyPassword dynamic modify password, for pdf output
+	 * @param showListData whether to show the non-resultset data
+	 * @param listData the non-resultset data
 	 * @throws IOException
 	 * @throws DatasetProduceException
 	 * @throws ChartValidationException
 	 * @throws PostProcessingException
 	 */
 	public void generateFile(ReportFormat reportFormat, String outputFileName,
-			RowSetDynaClass data, Report report, boolean pdfPageNumbers,
-			String dynamicOpenPassword, String dynamicModifyPassword)
-			throws IOException, DatasetProduceException, ChartValidationException,
-			PostProcessingException {
+			RowSetDynaClass dynaData, Report report, boolean pdfPageNumbers,
+			String dynamicOpenPassword, String dynamicModifyPassword,
+			boolean showListData, Object listData)
+			throws IOException, DatasetProduceException,
+			ChartValidationException, PostProcessingException {
 
 		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}', "
-				+ "report={}, pdfPageNumbers={}", reportFormat, outputFileName, report, pdfPageNumbers);
+				+ "report={}, pdfPageNumbers={}, showListData={}", reportFormat,
+				outputFileName, report, pdfPageNumbers, showListData);
 
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
@@ -645,7 +646,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, chartOptions.getWidth(), chartOptions.getHeight());
 				break;
 			case pdf:
-				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList, report, pdfPageNumbers);
+				PdfChart.generatePdf(chart, outputFileName, title, dynaData, reportParamsList, report, pdfPageNumbers, showListData, listData);
 				PdfHelper pdfHelper = new PdfHelper();
 				pdfHelper.addProtections(report, outputFileName, dynamicOpenPassword, dynamicModifyPassword);
 				break;
@@ -688,7 +689,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		}
 	}
 
-	protected void addHyperLink(Object row, String key) throws SQLException {
+	protected void addHyperLink(Object row, String key) {
 		if (hasHyperLinks) {
 			String hyperLink = RunReportHelper.getStringRowValue(row, HYPERLINKS_COLUMN_NAME);
 			hyperLinks.put(key, hyperLink);

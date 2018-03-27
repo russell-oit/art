@@ -103,6 +103,7 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 		}
 
 		boolean optionsDynamicSeries = extraOptions.isDynamicSeries();
+
 		ResultSetMetaData rsmd = rs.getMetaData();
 		boolean columnDynamicSeries = false;
 		String secondColumnClassName = rsmd.getColumnClassName(2 + hop);
@@ -158,7 +159,7 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 	}
 
 	@Override
-	protected void fillDataset(List<? extends Object> data) throws SQLException {
+	protected void fillDataset(List<? extends Object> data) {
 		logger.debug("Entering fillDataset");
 
 		Objects.requireNonNull(data, "data must not be null");
@@ -206,9 +207,9 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 				addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
 			} else {
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
-					int columnIndex = seriesIndex + 2 + hop - 1; //start from column 2
-					String seriesName = columnNames.get(columnIndex);
-					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex, columnNames);
+					int columnIndex = seriesIndex + 2 + hop; //start from column 2
+					String seriesName = columnNames.get(columnIndex - 1);
+					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex - 1, columnNames);
 					addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
 				}
 			}
@@ -218,9 +219,9 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 	}
 
 	/**
-	 * Adds data from the resultset to the dataset object
+	 * Adds data to the dataset object
 	 *
-	 * @param rs the sesultset to use
+	 * @param rs the resultset with the current row of data
 	 * @param dataset the dataset to populate
 	 * @param seriesIndex the series index
 	 * @param yValue the y value
@@ -254,7 +255,7 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 	}
 
 	/**
-	 * Adds data from to the dataset object
+	 * Adds data to the dataset object
 	 *
 	 * @param row the current row of data
 	 * @param dataset the dataset to populate
@@ -265,7 +266,7 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 	 * @throws SQLException
 	 */
 	private void addData(Object row, DefaultCategoryDataset dataset,
-			int seriesIndex, double yValue, String categoryName, String seriesName) throws SQLException {
+			int seriesIndex, double yValue, String categoryName, String seriesName) {
 
 		//add dataset value
 		if (swapAxes) {

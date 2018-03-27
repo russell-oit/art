@@ -18,6 +18,7 @@
 package art.chart;
 
 import art.enums.ReportType;
+import art.runreport.RunReportHelper;
 import net.sf.cewolfart.links.XYItemLinkGenerator;
 import net.sf.cewolfart.tooltips.XYToolTipGenerator;
 import java.sql.ResultSet;
@@ -27,6 +28,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
@@ -89,12 +91,17 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			hop = 1;
 		}
 
-		//use single report type for date and time series?
-		//use different report type or a report option or first column name to indicate static/dynamic series?
+		boolean optionsDynamicSeries = extraOptions.isDynamicSeries();
+
 		ResultSetMetaData rsmd = rs.getMetaData();
-		boolean dynamicSeries = false;
+		boolean columnDynamicSeries = false;
 		String secondColumnClassName = rsmd.getColumnClassName(2 + hop);
 		if (StringUtils.equals(secondColumnClassName, "java.lang.String")) {
+			columnDynamicSeries = true;
+		}
+
+		boolean dynamicSeries = false;
+		if (optionsDynamicSeries || columnDynamicSeries) {
 			dynamicSeries = true;
 		}
 
@@ -116,10 +123,9 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			}
 		}
 
-		int rowCount = 0;
-
+		int recordCount = 0;
 		while (rs.next()) {
-			rowCount++;
+			recordCount++;
 
 			Date date;
 			switch (reportType) {
@@ -162,7 +168,7 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 
 				addData(rs, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
 			} else {
-				int itemIndex = rowCount - 1; //-1 to get zero-based index
+				int itemIndex = recordCount - 1; //-1 to get zero-based index
 
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
@@ -181,10 +187,110 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		setDataset(dataset);
 	}
 
+	@Override
+	public void fillDataset(List<? extends Object> data) {
+		logger.debug("Entering fillDataset");
+
+		Objects.requireNonNull(data, "data must not be null");
+
+		TimeSeriesCollection dataset = new TimeSeriesCollection();
+
+		//resultset structure
+		//static series: date [, link], series 1 value [, series 2 value, ...]
+		//dynamic series: date [, link], seriesName, value
+		int hop = 0;
+		if (isHasHyperLinks()) {
+			hop = 1;
+		}
+
+		boolean dynamicSeries = extraOptions.isDynamicSeries();
+
+		int seriesCount; //start series index at 0 as generateLink() uses zero-based indices to idenfity series
+		Map<Integer, TimeSeries> finalSeries = new HashMap<>(); //<series index, series>
+		Map<String, Integer> seriesIndices = new HashMap<>(); //<series name, series index>
+		Map<String, Integer> itemIndices = new HashMap<>(); //<series name, max item index>
+
+		if (dynamicSeries) {
+			seriesCount = 0;
+		} else {
+			//series values start from column 2. column 1 has the xValue (date)
+			seriesCount = colCount - 1 - hop; //1 for xValue column
+
+			for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
+				int columnIndex = seriesIndex + 2 + hop; //start from column 2
+				String seriesName = columnNames.get(columnIndex - 1);
+				finalSeries.put(seriesIndex, new TimeSeries(seriesName));
+			}
+		}
+
+		int recordCount = 0;
+		for (Object row : data) {
+			recordCount++;
+
+			Date date;
+			switch (reportType) {
+				case TimeSeriesChart:
+					date = RunReportHelper.getDateTimeRowValue(row, 1 - 1, columnNames);
+					break;
+				case DateSeriesChart:
+					date = RunReportHelper.getDateRowValue(row, 1 - 1, columnNames);
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected report type: " + reportType);
+			}
+
+			if (dynamicSeries) {
+				//series name is the contents of the second column
+				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop - 1, columnNames);
+				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop - 1, columnNames);
+
+				//set series name
+				int seriesIndex;
+				if (seriesIndices.containsKey(seriesName)) {
+					seriesIndex = seriesIndices.get(seriesName);
+				} else {
+					seriesIndex = seriesCount;
+					seriesIndices.put(seriesName, seriesIndex);
+					finalSeries.put(seriesIndex, new TimeSeries(seriesName));
+					seriesCount++;
+				}
+
+				//set item index
+				int itemIndex;
+				if (itemIndices.containsKey(seriesName)) {
+					int maxItemIndex = itemIndices.get(seriesName);
+					itemIndex = maxItemIndex + 1;
+				} else {
+					//first item in this series. use zero-based indices
+					itemIndex = 0;
+				}
+				itemIndices.put(seriesName, itemIndex);
+
+				addData(row, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
+			} else {
+				int itemIndex = recordCount - 1; //-1 to get zero-based index
+
+				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
+					int columnIndex = seriesIndex + 2 + hop; //start from column 2
+					String seriesName = columnNames.get(columnIndex - 1);
+					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex - 1, columnNames);
+					addData(row, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
+				}
+			}
+		}
+
+		//add series to dataset
+		for (TimeSeries series : finalSeries.values()) {
+			dataset.addSeries(series);
+		}
+
+		setDataset(dataset);
+	}
+
 	/**
-	 * Adds data from the resultset to the dataset
+	 * Adds data to the dataset
 	 *
-	 * @param rs the resultset to use
+	 * @param rs the resultset with the current row of data
 	 * @param finalSeries the dataset to populate
 	 * @param seriesIndex the series index
 	 * @param itemIndex the item index
@@ -215,6 +321,48 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 
 		//add hyperlink if required
 		addHyperLink(rs, linkId);
+
+		//add drilldown link if required
+		//drill down on col 1 = y value (data value)
+		//drill down on col 2 = x value (date)
+		//drill down on col 3 = series name
+		addDrilldownLink(linkId, yValue, date, seriesName);
+	}
+
+	/**
+	 * Adds data to the dataset
+	 *
+	 * @param row the current row of data
+	 * @param finalSeries the dataset to populate
+	 * @param seriesIndex the series index
+	 * @param itemIndex the item index
+	 * @param yValue the y value
+	 * @param date the date
+	 * @param seriesName the series name
+	 * @throws SQLException
+	 */
+	private void addData(Object row, Map<Integer, TimeSeries> finalSeries,
+			int seriesIndex, int itemIndex, double yValue, Date date, String seriesName) {
+
+		//add dataset value
+		switch (reportType) {
+			case TimeSeriesChart:
+				finalSeries.get(seriesIndex).add(new Millisecond(date), yValue);
+				break;
+			case DateSeriesChart:
+				finalSeries.get(seriesIndex).add(new Day(date), yValue);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected report type: " + reportType);
+		}
+
+		//use series index and item index to identify url in hashmap
+		//to ensure correct link will be returned by the generatelink() method. 
+		//use series index instead of name because the generateLink() method uses series indices
+		String linkId = String.valueOf(seriesIndex) + String.valueOf(itemIndex);
+
+		//add hyperlink if required
+		addHyperLink(row, linkId);
 
 		//add drilldown link if required
 		//drill down on col 1 = y value (data value)

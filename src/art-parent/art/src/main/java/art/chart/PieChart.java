@@ -18,11 +18,13 @@
 package art.chart;
 
 import art.enums.ReportType;
+import art.runreport.RunReportHelper;
 import net.sf.cewolfart.links.PieSectionLinkGenerator;
 import net.sf.cewolfart.tooltips.PieToolTipGenerator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Objects;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
@@ -61,14 +63,13 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 	@Override
 	public void fillDataset(ResultSet rs) throws SQLException {
 		logger.debug("Entering fillDataset");
-		
+
 		Objects.requireNonNull(rs, "rs must not be null");
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
 
 		//resultset structure
 		//category, value [, link]
-		
 		while (rs.next()) {
 			String category = rs.getString(1);
 			double value = rs.getDouble(2);
@@ -80,6 +81,37 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 
 			//add hyperlink if required
 			addHyperLink(rs, linkId);
+
+			//add drilldown link if required
+			//drill down on col 1 = data value
+			//drill down on col 2 = category
+			addDrilldownLink(linkId, value, category);
+		}
+
+		setDataset(dataset);
+	}
+
+	@Override
+	public void fillDataset(List<? extends Object> data) {
+		logger.debug("Entering fillDataset");
+
+		Objects.requireNonNull(data, "data must not be null");
+
+		DefaultPieDataset dataset = new DefaultPieDataset();
+
+		//resultset structure
+		//category, value [, link]
+		for (Object row : data) {
+			String category = RunReportHelper.getStringRowValue(row, 1 - 1, columnNames);
+			double value = RunReportHelper.getDoubleRowValue(row, 2 - 1, columnNames);
+
+			//add dataset value
+			dataset.setValue(category, value);
+
+			String linkId = category;
+
+			//add hyperlink if required
+			addHyperLink(row, linkId);
 
 			//add drilldown link if required
 			//drill down on col 1 = data value

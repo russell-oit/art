@@ -378,6 +378,10 @@ public class ArtUtils {
 	 * @return the same date with time as zero
 	 */
 	public static Date zeroTime(Date date) {
+		if (date == null) {
+			return null;
+		}
+
 		//https://stackoverflow.com/questions/17821601/set-time-to-000000
 		//https://stackoverflow.com/questions/20414343/how-to-set-time-of-java-util-date-instance-to-000000
 		Calendar cal = Calendar.getInstance();

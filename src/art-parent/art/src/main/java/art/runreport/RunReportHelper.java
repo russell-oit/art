@@ -760,6 +760,35 @@ public class RunReportHelper {
 	}
 
 	/**
+	 * Returns the date time value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param index the index
+	 * @param columnNames the column names
+	 * @return the date time value for a given data index
+	 */
+	public static Date getDateTimeRowValue(Object row, int index, List<String> columnNames) {
+		Object columnValue = getRowValue(row, index, columnNames);
+		Date dateValue = (Date) columnValue;
+		return dateValue;
+	}
+	
+	/**
+	 * Returns the date value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param index the index
+	 * @param columnNames the column names
+	 * @return the date value for a given data index
+	 */
+	public static Date getDateRowValue(Object row, int index, List<String> columnNames) {
+		Object columnValue = getRowValue(row, index, columnNames);
+		Date dateValue = (Date) columnValue;
+		Date zeroTimeDate = ArtUtils.zeroTime(dateValue);
+		return zeroTimeDate;
+	}
+
+	/**
 	 * Returns the string value for a given data index
 	 *
 	 * @param row the object representing a row of data
@@ -771,7 +800,7 @@ public class RunReportHelper {
 		Object columnValue = getRowValue(row, index, columnNames);
 		return String.valueOf(columnValue);
 	}
-	
+
 	/**
 	 * Returns the string value for a given data index
 	 *
@@ -794,11 +823,14 @@ public class RunReportHelper {
 	 */
 	public static double getDoubleRowValue(Object row, int index, List<String> columnNames) {
 		Object columnValue = getRowValue(row, index, columnNames);
+		double doubleValue;
 		if (columnValue == null) {
-			return 0D;
+			doubleValue = 0D;
 		} else {
-			return ((Number) columnValue).doubleValue();
+			doubleValue = ((Number) columnValue).doubleValue();
 		}
+
+		return doubleValue;
 	}
 
 	/**
@@ -813,7 +845,7 @@ public class RunReportHelper {
 		String columnName = columnNames.get(index);
 		return getRowValue(row, columnName);
 	}
-	
+
 	/**
 	 * Returns the value for a given data column
 	 *

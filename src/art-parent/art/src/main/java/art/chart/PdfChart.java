@@ -21,6 +21,8 @@ import art.output.PdfHelper;
 import art.output.PdfOutput;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
+import art.runreport.GroovyDataDetails;
+import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
@@ -29,6 +31,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Objects;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
@@ -54,19 +57,22 @@ public class PdfChart {
 	 * @param chart the chart object, not null
 	 * @param filename the full file path to use, not null
 	 * @param title the chart title, or null, or blank
-	 * @param data the data to be displayed with the chart image, or null
+	 * @param dynaData the resultset data to be displayed with the chart image
 	 * @param reportParamsList the report parameters to be displayed, or null or
 	 * empty
 	 * @param report the report for the chart, not null
 	 * @param pdfPageNumbers whether page numbers should be included in pdf
-	 * output
+	 * @param showListData whether to show the non-resultset data
+	 * @param listData the non-resultset data output
 	 */
 	public static void generatePdf(JFreeChart chart, String filename, String title,
-			RowSetDynaClass data, java.util.List<ReportParameter> reportParamsList,
-			Report report, boolean pdfPageNumbers) {
+			RowSetDynaClass dynaData, java.util.List<ReportParameter> reportParamsList,
+			Report report, boolean pdfPageNumbers, boolean showListData,
+			Object listData) {
 
 		logger.debug("Entering generatePdf: filename='{}', title='{}', report={}, "
-				+ "pdfPageNumbers={}", filename, title, report, pdfPageNumbers);
+				+ "pdfPageNumbers={}, showListData={}", filename, title, report,
+				pdfPageNumbers, showListData);
 
 		Objects.requireNonNull(chart, "chart must not be null");
 		Objects.requireNonNull(filename, "filename must not be null");
@@ -149,44 +155,57 @@ public class PdfChart {
 			document.add(chartImage);
 
 			//display chart data below chart if so required
-			if (data != null) {
-				java.util.List<DynaBean> rows = data.getRows();
-				DynaProperty[] dynaProperties = null;
-				String columnName;
-				String columnValue;
-				int columns = 0; //column count
+			if (dynaData != null || (showListData && listData != null)) {
+				java.util.List<String> columnNames;
+				java.util.List<? extends Object> dataList = null;
+				if (dynaData != null) {
+					columnNames = new ArrayList<>();
+					DynaProperty[] columns = dynaData.getDynaProperties();
+					for (DynaProperty column : columns) {
+						String columnName = column.getName();
+						columnNames.add(columnName);
+					}
+				} else {
+					GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(listData);
+					columnNames = dataDetails.getColumnNames();
+					dataList = dataDetails.getDataList();
+				}
 
-				PdfPTable table = null;
-				PdfPCell cell;
+				PdfPTable table = new PdfPTable(columnNames.size());
+				table.getDefaultCell().setBorder(0);
+				table.setHeaderRows(1);
 
-				for (int i = 0; i < rows.size(); i++) {
-					DynaBean row = rows.get(i);
-					if (i == 0) {
-						//output column headings
-						dynaProperties = row.getDynaClass().getDynaProperties();
-						columns = dynaProperties.length;
-						table = new PdfPTable(columns);
-						table.getDefaultCell().setBorder(0);
-						table.setHeaderRows(1);
-						for (int j = 0; j < columns; j++) {
-							columnName = dynaProperties[j].getName();
-							cell = new PdfPCell(new Paragraph(fsHeading.process(columnName + "")));
-							cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+				//output column headings
+				for (String columnName : columnNames) {
+					PdfPCell cell = new PdfPCell(new Paragraph(fsHeading.process(columnName + "")));
+					cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+					cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+					cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
+					cell.setGrayFill(PdfHelper.HEADER_GRAY);
+					table.addCell(cell);
+				}
+
+				//output data values
+				if (dynaData != null) {
+					java.util.List<DynaBean> rows = dynaData.getRows();
+					for (DynaBean row : rows) {
+						for (String columnName : columnNames) {
+							String columnValue = String.valueOf(row.get(columnName));
+							PdfPCell cell = new PdfPCell(new Paragraph(fsBody.process(columnValue + ""))); //add empty string to prevent NPE if value is null
 							cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
 							cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
-							cell.setGrayFill(PdfHelper.HEADER_GRAY);
 							table.addCell(cell);
 						}
 					}
-
-					//output data values
-					for (int k = 0; k < columns; k++) {
-						columnName = dynaProperties[k].getName();
-						columnValue = String.valueOf(row.get(columnName));
-						cell = new PdfPCell(new Paragraph(fsBody.process(columnValue + ""))); //add empty string to prevent NPE if value is null
-						cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
-						cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
-						table.addCell(cell);
+				} else if (dataList != null) {
+					for (Object row : dataList) {
+						for (String columnName : columnNames) {
+							String columnValue = RunReportHelper.getStringRowValue(row, columnName);
+							PdfPCell cell = new PdfPCell(new Paragraph(fsBody.process(columnValue + ""))); //add empty string to prevent NPE if value is null
+							cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+							cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
+							table.addCell(cell);
+						}
 					}
 				}
 

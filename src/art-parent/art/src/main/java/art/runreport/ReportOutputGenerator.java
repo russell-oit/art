@@ -414,20 +414,6 @@ public class ReportOutputGenerator {
 				boolean swapAxes = reportOptions.isSwapAxes();
 				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, groovyData);
 
-				//store data for potential use in html and pdf output
-				RowSetDynaClass data = null;
-				if (parameterChartOptions.getShowData()
-						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
-					int rsType = rs.getType();
-					if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
-						rs.beforeFirst();
-						boolean useLowerCaseProperties = false;
-						boolean useColumnLabels = true;
-						data = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
-					}
-
-				}
-
 				//add secondary charts
 				String secondaryChartSetting = report.getSecondaryCharts();
 				secondaryChartSetting = StringUtils.deleteWhitespace(secondaryChartSetting);
@@ -458,8 +444,35 @@ public class ReportOutputGenerator {
 					chart.setSecondaryCharts(secondaryCharts);
 				}
 
+				//store data for potential use in html and pdf output
+				RowSetDynaClass dynaData = null;
+				List<String> dataColumnNames = null;
+				boolean showGroovyData = false;
+				if (parameterChartOptions.getShowData()
+						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
+					if (groovyData == null) {
+						int rsType = rs.getType();
+						if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
+							rs.beforeFirst();
+							boolean useLowerCaseProperties = false;
+							boolean useColumnLabels = true;
+							dynaData = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
+							DynaProperty[] columns = dynaData.getDynaProperties();
+							dataColumnNames = new ArrayList<>();
+							for (DynaProperty column : columns) {
+								String columnName = column.getName();
+								dataColumnNames.add(columnName);
+							}
+						}
+					} else {
+						GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData);
+						dataColumnNames = dataDetails.getColumnNames();
+						showGroovyData = true;
+					}
+				}
+
 				if (isJob) {
-					chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword);
+					chart.generateFile(reportFormat, fullOutputFilename, dynaData, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, showGroovyData, groovyData);
 				} else {
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
@@ -469,15 +482,18 @@ public class ReportOutputGenerator {
 
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
 
-						if (data != null) {
-							List<DynaBean> dataRows = data.getRows();
-							DynaProperty[] columns = data.getDynaProperties();
-							request.setAttribute("columns", columns);
-							request.setAttribute("dataRows", dataRows);
+						if (dataColumnNames != null) {
+							request.setAttribute("columnNames", dataColumnNames);
+							if (dynaData != null) {
+								List<DynaBean> dataRows = dynaData.getRows();
+								request.setAttribute("data", dataRows);
+							} else {
+								request.setAttribute("data", groovyData);
+							}
 							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
 						}
 					} else {
-						chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword);
+						chart.generateFile(reportFormat, fullOutputFilename, dynaData, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, showGroovyData, groovyData);
 						displayFileLink(fileName);
 					}
 
