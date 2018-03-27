@@ -337,6 +337,7 @@ public class GroupHtmlOutput {
 			} else if (sample instanceof DynaBean) {
 				DynaBean sampleBean = (DynaBean) sample;
 				DynaProperty[] columns = sampleBean.getDynaClass().getDynaProperties();
+				colCount = columns.length;
 				for (DynaProperty column : columns) {
 					String columnName = column.getName();
 					columnNames.add(columnName);
@@ -390,7 +391,6 @@ public class GroupHtmlOutput {
 		StringBuffer cmpStr; // temporary string used to compare values
 		StringBuffer tmpCmpStr; // temporary string used to compare values
 		int currentRow = -1;
-
 		while ((currentRow < rowCount) && (counter < maxRows)) {
 			currentRow++;
 

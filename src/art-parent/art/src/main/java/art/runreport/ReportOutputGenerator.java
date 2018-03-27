@@ -393,7 +393,12 @@ public class ReportOutputGenerator {
 					case xlsx:
 						GroupXlsxOutput groupXlsxOutput = new GroupXlsxOutput();
 						String reportName = report.getLocalizedName(locale);
-						rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
+						if (groovyData == null) {
+							rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
+						} else {
+							rowsRetrieved = groupXlsxOutput.generateReport(groovyData, splitColumn, report, reportName, fullOutputFilename);
+						}
+
 						if (!isJob) {
 							displayFileLink(fileName);
 						}
