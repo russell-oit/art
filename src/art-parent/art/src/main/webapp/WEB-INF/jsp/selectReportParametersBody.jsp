@@ -343,7 +343,7 @@ Display section to allow selecting of report parameters and initiate running of 
 								</c:if>
 							</div>
 
-							<c:if test="${not empty reportParams}">
+							<c:if test="${report.reportType.isChart() || not empty reportParams}">
 								<hr>
 								<div class="form-group">
 									<div class="col-md-12">
