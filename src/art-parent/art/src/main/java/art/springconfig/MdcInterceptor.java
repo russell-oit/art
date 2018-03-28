@@ -40,15 +40,14 @@ public class MdcInterceptor extends HandlerInterceptorAdapter {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
 			Object handler) throws Exception {
 
-		HttpSession session = request.getSession();
-
-		User user = (User) session.getAttribute("sessionUser");
-
-		String username;
-		if (user == null) {
-			username = "";
-		} else {
-			username = user.getUsername();
+		//https://stackoverflow.com/questions/26343666/spring-java-lang-illegalstateexception-cannot-create-a-session-after-the-respon
+		String username = "";
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			User user = (User) session.getAttribute("sessionUser");
+			if (user != null) {
+				username = user.getUsername();
+			}
 		}
 
 		MDC.put("user", username);
@@ -68,7 +67,7 @@ public class MdcInterceptor extends HandlerInterceptorAdapter {
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
 			Object handler, Exception ex) throws Exception {
-		
+
 		//everything added to mdc should be removed here
 		MDC.remove("user");
 		MDC.remove("remoteAddr");
