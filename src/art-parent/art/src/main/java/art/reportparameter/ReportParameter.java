@@ -628,43 +628,50 @@ public class ReportParameter implements Serializable {
 		switch (parameterType) {
 			case SingleValue:
 				//compare lov value to actual parameter value - default value or passed value
-				String htmlValue = getHtmlValue();
-				if (StringUtils.equalsIgnoreCase(htmlValue, lovValue)) {
-					return true;
-				}
+				if (passedParameterValues == null) {
+					String defaultValue = parameter.getDefaultValue();
+					if (StringUtils.equalsIgnoreCase(defaultValue, lovValue)) {
+						return true;
+					}
 
-				if (MapUtils.isNotEmpty(defaultValueLovValues)) {
-					for (String value : defaultValueLovValues.keySet()) {
-						if (StringUtils.equalsIgnoreCase(value, lovValue)) {
-							return true;
+					if (MapUtils.isNotEmpty(defaultValueLovValues)) {
+						for (String value : defaultValueLovValues.keySet()) {
+							if (StringUtils.equalsIgnoreCase(value, lovValue)) {
+								return true;
+							}
 						}
+					}
+				} else {
+					String htmlValue = getHtmlValue();
+					if (StringUtils.equalsIgnoreCase(htmlValue, lovValue)) {
+						return true;
 					}
 				}
 
 				return false;
 			case MultiValue:
 				//compare lov value to default values or passed values
-				String defaultValueSetting = parameter.getDefaultValue();
-				if (StringUtils.isNotEmpty(defaultValueSetting)) {
-					String defaultValues[] = defaultValueSetting.split("\\r?\\n");
-					for (String defaultValue : defaultValues) {
-						if (StringUtils.equalsIgnoreCase(defaultValue, lovValue)) {
-							return true;
+				if (passedParameterValues == null) {
+					String defaultValueSetting = parameter.getDefaultValue();
+					if (StringUtils.isNotEmpty(defaultValueSetting)) {
+						String defaultValues[] = defaultValueSetting.split("\\r?\\n");
+						for (String defaultValue : defaultValues) {
+							if (StringUtils.equalsIgnoreCase(defaultValue, lovValue)) {
+								return true;
+							}
 						}
 					}
-				}
 
-				if (passedParameterValues != null) {
+					if (MapUtils.isNotEmpty(defaultValueLovValues)) {
+						for (String value : defaultValueLovValues.keySet()) {
+							if (StringUtils.equalsIgnoreCase(value, lovValue)) {
+								return true;
+							}
+						}
+					}
+				} else {
 					for (String passedValue : passedParameterValues) {
 						if (StringUtils.equalsIgnoreCase(passedValue, lovValue)) {
-							return true;
-						}
-					}
-				}
-
-				if (MapUtils.isNotEmpty(defaultValueLovValues)) {
-					for (String value : defaultValueLovValues.keySet()) {
-						if (StringUtils.equalsIgnoreCase(value, lovValue)) {
 							return true;
 						}
 					}
