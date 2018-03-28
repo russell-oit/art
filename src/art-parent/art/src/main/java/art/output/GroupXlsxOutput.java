@@ -393,9 +393,10 @@ public class GroupXlsxOutput {
 	 * @param fullOutputFileName the output file name
 	 * @return number of rows output
 	 * @throws SQLException
+	 * @throws java.io.IOException
 	 */
 	public int generateReport(Object data, int splitColumn, Report report,
-			String reportName, String fullOutputFileName) throws SQLException {
+			String reportName, String fullOutputFileName) throws SQLException, IOException {
 
 		logger.debug("Entering generateReport: splitColumn={}, report={},"
 				+ " reportName='{}', fullOutputFileName='{}'", splitColumn,

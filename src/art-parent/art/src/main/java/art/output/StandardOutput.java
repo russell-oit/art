@@ -30,6 +30,7 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
 import art.reportoptions.StandardOutputOptions;
+import art.runreport.GroovyDataDetails;
 import art.runreport.RunReportHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
@@ -58,11 +59,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
@@ -820,80 +819,11 @@ public abstract class StandardOutput {
 
 		initializeNumberFormatters();
 
-		@SuppressWarnings("unchecked")
-		List<? extends Object> dataList = (List<? extends Object>) data;
-
-		List<String> columnNames = new ArrayList<>();
-		Map<Integer, ColumnTypeDefinition> columnTypes = new HashMap<>();
-		if (CollectionUtils.isNotEmpty(dataList)) {
-			Object sample = dataList.get(0);
-			if (sample instanceof GroovyRowResult) {
-				GroovyRowResult sampleResult = (GroovyRowResult) sample;
-				resultSetColumnCount = sampleResult.size();
-				@SuppressWarnings("rawtypes")
-				Set colNames = sampleResult.keySet();
-				@SuppressWarnings("unchecked")
-				List<String> tempColumnNames = new ArrayList<>(colNames);
-				columnNames.addAll(tempColumnNames);
-				for (int i = 1; i <= resultSetColumnCount; i++) {
-					Object columnValue = sampleResult.getAt(i - 1);
-					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
-					if (columnValue instanceof Number) {
-						columnTypeDefinition.setColumnType(ColumnType.Numeric);
-					} else if (columnValue instanceof Date) {
-						columnTypeDefinition.setColumnType(ColumnType.Date);
-					} else {
-						columnTypeDefinition.setColumnType(ColumnType.String);
-					}
-					columnTypes.put(i, columnTypeDefinition);
-				}
-			} else if (sample instanceof DynaBean) {
-				DynaBean sampleBean = (DynaBean) sample;
-				DynaProperty[] columns = sampleBean.getDynaClass().getDynaProperties();
-				resultSetColumnCount = columns.length;
-				for (int i = 0; i < resultSetColumnCount; i++) {
-					String columnName = columns[i].getName();
-					columnNames.add(columnName);
-				}
-				int columnIndex = 0;
-				for (int i = 1; i <= resultSetColumnCount; i++) {
-					String columnName = columnNames.get(i - 1);
-					Object columnValue = sampleBean.get(columnName);
-					columnIndex++;
-					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
-					if (columnValue instanceof Number) {
-						columnTypeDefinition.setColumnType(ColumnType.Numeric);
-					} else if (columnValue instanceof Date) {
-						columnTypeDefinition.setColumnType(ColumnType.Date);
-					} else {
-						columnTypeDefinition.setColumnType(ColumnType.String);
-					}
-					columnTypes.put(columnIndex, columnTypeDefinition);
-				}
-			} else if (sample instanceof Map) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> sampleRow = (Map<String, Object>) sample;
-				resultSetColumnCount = sampleRow.size();
-				columnNames.addAll(sampleRow.keySet());
-				int columnIndex = 0;
-				for (int i = 1; i <= resultSetColumnCount; i++) {
-					String columnName = columnNames.get(i - 1);
-					Object columnValue = sampleRow.get(columnName);
-					columnIndex++;
-					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
-					if (columnValue instanceof Number) {
-						columnTypeDefinition.setColumnType(ColumnType.Numeric);
-					} else if (columnValue instanceof Date) {
-						columnTypeDefinition.setColumnType(ColumnType.Date);
-					} else {
-						columnTypeDefinition.setColumnType(ColumnType.String);
-					}
-					columnTypes.put(columnIndex, columnTypeDefinition);
-				}
-			} else {
-				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
-			}
-		}
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
+		resultSetColumnCount = dataDetails.getColCount();
+		List<String> columnNames = dataDetails.getColumnNames();
+		List<? extends Object> dataList = dataDetails.getDataList();
+		Map<Integer, ColumnTypeDefinition> columnTypes = dataDetails.getColumnTypes();
 
 		int drilldownCount = 0;
 		if (drilldowns != null) {

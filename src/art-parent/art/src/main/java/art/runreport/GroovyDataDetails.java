@@ -17,7 +17,9 @@
  */
 package art.runreport;
 
+import art.output.ColumnTypeDefinition;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents attributes of data used for report generation, when using groovy
@@ -31,7 +33,8 @@ public class GroovyDataDetails {
 	private int colCount;
 	private List<String> columnNames;
 	private List<? extends Object> dataList;
-
+	private Map<Integer, ColumnTypeDefinition> columnTypes;
+	
 	/**
 	 * @return the rowCount
 	 */
@@ -87,4 +90,19 @@ public class GroovyDataDetails {
 	public void setDataList(List<? extends Object> dataList) {
 		this.dataList = dataList;
 	}
+
+	/**
+	 * @return the columnTypes
+	 */
+	public Map<Integer, ColumnTypeDefinition> getColumnTypes() {
+		return columnTypes;
+	}
+
+	/**
+	 * @param columnTypes the columnTypes to set
+	 */
+	public void setColumnTypes(Map<Integer, ColumnTypeDefinition> columnTypes) {
+		this.columnTypes = columnTypes;
+	}
+
 }

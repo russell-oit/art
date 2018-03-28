@@ -21,16 +21,20 @@ import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.encryptor.Encryptor;
 import art.enums.AccessLevel;
+import art.enums.ColumnType;
 import art.enums.EncryptorType;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
+import art.output.ColumnTypeDefinition;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.GroovyOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.sql.GroovyRowResult;
 import java.io.IOException;
 import java.sql.Connection;
@@ -40,6 +44,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -711,41 +716,145 @@ public class RunReportHelper {
 	 *
 	 * @param data the data
 	 * @return data attributes
+	 * @throws java.io.IOException
 	 */
-	public static GroovyDataDetails getGroovyDataDetails(Object data) {
+	public static GroovyDataDetails getGroovyDataDetails(Object data) throws IOException {
+		Report report = null;
+		return getGroovyDataDetails(data, report);
+	}
+
+	/**
+	 * Returns attributes of data used in report generation
+	 *
+	 * @param data the data
+	 * @param report the report
+	 * @return data attributes
+	 * @throws java.io.IOException
+	 */
+	public static GroovyDataDetails getGroovyDataDetails(Object data, Report report) throws IOException {
 		Objects.requireNonNull(data, "data must not be null");
 
 		@SuppressWarnings("unchecked")
 		List<? extends Object> dataList = (List<? extends Object>) data;
 		int rowCount = dataList.size();
 
+		List<String> optionsColumnNames = null;
+		List<Map<String, String>> columnDataTypes = null;
+		if (report != null) {
+			String options = report.getOptions();
+			if (StringUtils.isNotBlank(options)) {
+				ObjectMapper mapper = new ObjectMapper();
+				GroovyOptions groovyOptions = mapper.readValue(options, GroovyOptions.class);
+				optionsColumnNames = groovyOptions.getColumns();
+				columnDataTypes = groovyOptions.getColumnDataTypes();
+			}
+		}
+
 		int colCount = 0;
-		List<String> columnNames = new ArrayList<>();
+		List<String> dataColumnNames = new ArrayList<>();
+		Map<Integer, ColumnTypeDefinition> columnTypes = new HashMap<>();
 		if (CollectionUtils.isNotEmpty(dataList)) {
 			Object sample = dataList.get(0);
 			if (sample instanceof GroovyRowResult) {
 				GroovyRowResult sampleResult = (GroovyRowResult) sample;
 				colCount = sampleResult.size();
+
 				@SuppressWarnings("rawtypes")
 				Set colNames = sampleResult.keySet();
 				@SuppressWarnings("unchecked")
 				List<String> tempColumnNames = new ArrayList<>(colNames);
-				columnNames.addAll(tempColumnNames);
+				dataColumnNames.addAll(tempColumnNames);
+
+				for (int i = 1; i <= colCount; i++) {
+					Object columnValue = sampleResult.getAt(i - 1);
+					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
+					if (columnValue instanceof Number) {
+						columnTypeDefinition.setColumnType(ColumnType.Numeric);
+					} else if (columnValue instanceof Date) {
+						columnTypeDefinition.setColumnType(ColumnType.Date);
+					} else {
+						columnTypeDefinition.setColumnType(ColumnType.String);
+					}
+					columnTypes.put(i, columnTypeDefinition);
+				}
 			} else if (sample instanceof DynaBean) {
 				DynaBean sampleBean = (DynaBean) sample;
 				DynaProperty[] columns = sampleBean.getDynaClass().getDynaProperties();
 				colCount = columns.length;
+
 				for (DynaProperty column : columns) {
 					String columnName = column.getName();
-					columnNames.add(columnName);
+					dataColumnNames.add(columnName);
+				}
+
+				for (int i = 1; i <= colCount; i++) {
+					String columnName = dataColumnNames.get(i - 1);
+					Object columnValue = sampleBean.get(columnName);
+					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
+					if (columnValue instanceof Number) {
+						columnTypeDefinition.setColumnType(ColumnType.Numeric);
+					} else if (columnValue instanceof Date) {
+						columnTypeDefinition.setColumnType(ColumnType.Date);
+					} else {
+						columnTypeDefinition.setColumnType(ColumnType.String);
+					}
+					columnTypes.put(i, columnTypeDefinition);
 				}
 			} else if (sample instanceof Map) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> sampleRow = (Map<String, Object>) sample;
 				colCount = sampleRow.size();
-				columnNames.addAll(sampleRow.keySet());
+				dataColumnNames.addAll(sampleRow.keySet());
+
+				for (int i = 1; i <= colCount; i++) {
+					String columnName = dataColumnNames.get(i - 1);
+					Object columnValue = sampleRow.get(columnName);
+					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
+					if (columnValue instanceof Number) {
+						columnTypeDefinition.setColumnType(ColumnType.Numeric);
+					} else if (columnValue instanceof Date) {
+						columnTypeDefinition.setColumnType(ColumnType.Date);
+					} else {
+						columnTypeDefinition.setColumnType(ColumnType.String);
+					}
+					columnTypes.put(i, columnTypeDefinition);
+				}
 			} else {
 				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
+			}
+		}
+
+		List<String> columnNames = new ArrayList<>();
+		if (CollectionUtils.isEmpty(optionsColumnNames)) {
+			columnNames.addAll(dataColumnNames);
+		} else {
+			columnNames.addAll(optionsColumnNames);
+		}
+
+		if (CollectionUtils.isNotEmpty(columnDataTypes)) {
+			for (int i = 1; i <= columnNames.size(); i++) {
+				String dataColumnName = columnNames.get(i - 1);
+				for (Map<String, String> columnDataTypeDefinition : columnDataTypes) {
+					Entry<String, String> entry = columnDataTypeDefinition.entrySet().iterator().next();
+					String columnName = entry.getKey();
+					String dataType = entry.getValue();
+					if (StringUtils.equalsIgnoreCase(columnName, dataColumnName)
+							|| StringUtils.equals(columnName, String.valueOf(i))) {
+						ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
+						columnTypeDefinition.setColumnType(ColumnType.toEnum(dataType));
+						columnTypes.put(i, columnTypeDefinition);
+						break;
+					}
+				}
+			}
+		}
+
+		for (int i = 1; i <= columnNames.size(); i++) {
+			ColumnTypeDefinition columnTypeDefinition = columnTypes.get(i);
+			if (columnTypeDefinition == null) {
+				columnTypeDefinition = new ColumnTypeDefinition();
+				columnTypeDefinition.setColumnType(ColumnType.String);
+				columnTypes.put(i, columnTypeDefinition);
 			}
 		}
 
@@ -755,6 +864,7 @@ public class RunReportHelper {
 		details.setColCount(colCount);
 		details.setColumnNames(columnNames);
 		details.setDataList(dataList);
+		details.setColumnTypes(columnTypes);
 
 		return details;
 	}
@@ -772,7 +882,7 @@ public class RunReportHelper {
 		Date dateValue = (Date) columnValue;
 		return dateValue;
 	}
-	
+
 	/**
 	 * Returns the date value for a given data index
 	 *

@@ -31,6 +31,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 import org.apache.commons.beanutils.DynaBean;
@@ -64,11 +65,12 @@ public class PdfChart {
 	 * @param pdfPageNumbers whether page numbers should be included in pdf
 	 * @param showListData whether to show the non-resultset data
 	 * @param listData the non-resultset data output
+	 * @throws java.io.IOException
 	 */
 	public static void generatePdf(JFreeChart chart, String filename, String title,
 			RowSetDynaClass dynaData, java.util.List<ReportParameter> reportParamsList,
 			Report report, boolean pdfPageNumbers, boolean showListData,
-			Object listData) {
+			Object listData) throws IOException {
 
 		logger.debug("Entering generatePdf: filename='{}', title='{}', report={}, "
 				+ "pdfPageNumbers={}, showListData={}", filename, title, report,

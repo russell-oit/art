@@ -379,7 +379,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 * @throws SQLException
 	 */
 	public void prepareDataset(Object data, Drilldown drilldown,
-			List<ReportParameter> reportParamsList) throws SQLException {
+			List<ReportParameter> reportParamsList) throws SQLException, IOException {
 
 		logger.debug("Entering prepareDataset");
 
