@@ -241,6 +241,10 @@ public class ParameterProcessor {
 			if (MapUtils.isNotEmpty(savedParamValues)) {
 				//https://stackoverflow.com/questions/40480/is-java-pass-by-reference-or-pass-by-value?noredirect=1&lq=1
 				passedValuesMap.putAll(savedParamValues);
+				String[] showSelectedParametersSetting = savedParamValues.get("showSelectedParameters");
+				if (showSelectedParametersSetting == null) {
+					passedValuesMap.remove("showSelectedParameters");
+				}
 			}
 		}
 
