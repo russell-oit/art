@@ -1013,8 +1013,8 @@ public class RunReportHelper {
 	 * @param data the data
 	 * @return the data as a list of maps
 	 */
-	public static List<Map<String, Object>> getMapListData(Object data) {
-		List<Map<String, Object>> finalData = new ArrayList<>();
+	public static List<Map<String, ?>> getMapListData(Object data) {
+		List<Map<String, ?>> finalData = new ArrayList<>();
 		
 		@SuppressWarnings("unchecked")
 		List<? extends Object> dataList = (List<? extends Object>) data;

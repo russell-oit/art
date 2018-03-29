@@ -118,7 +118,7 @@ public class JsonOutput {
 					columnType = "datetime";
 					break;
 				default:
-					columnType = "unhandled";
+					columnType = "string";
 			}
 
 			column.setType(columnType);
@@ -186,7 +186,7 @@ public class JsonOutput {
 		int rowCount = dataDetails.getRowCount();
 		List<ResultSetColumn> columns = dataDetails.getResultSetColumns();
 
-		List<Map<String, Object>> rows = RunReportHelper.getMapListData(data);
+		List<Map<String, ?>> rows = RunReportHelper.getMapListData(data);
 
 		ObjectMapper mapper = new ObjectMapper();
 		//https://egkatzioura.wordpress.com/2013/01/22/spring-jackson-and-date-serialization/

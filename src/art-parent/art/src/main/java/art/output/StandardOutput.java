@@ -801,7 +801,7 @@ public abstract class StandardOutput {
 	 * @return StandardOutputResult. if successful, rowCount contains the number
 	 * of rows in the resultset. if not, message contains the i18n message
 	 * indicating the problem
-	 * @throws SQLException
+	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 */
 	public StandardOutputResult generateTabularOutput(Object data,
@@ -964,11 +964,10 @@ public abstract class StandardOutput {
 	 * @param columnNames the column names
 	 * @param columnTypes the column types
 	 * @throws IllegalStateException
-	 * @throws SQLException
 	 */
 	private void initializeColumnFormatters(Report report, List<String> columnNames,
 			Map<Integer, ColumnTypeDefinition> columnTypes)
-			throws IllegalStateException, SQLException {
+			throws IllegalStateException {
 
 		Locale columnFormatLocale;
 		String reportLocale = report.getLocale();
@@ -1057,10 +1056,9 @@ public abstract class StandardOutput {
 	 * @param columnNames the column names
 	 * @param drilldownCount the number of drilldowns in use
 	 * @param totalColumns the list of columns to be totalled
-	 * @throws SQLException
 	 */
 	private void finalizeOutput(List<String> hiddenColumns, List<String> columnNames,
-			int drilldownCount, List<String> totalColumns) throws SQLException {
+			int drilldownCount, List<String> totalColumns) {
 
 		if (rowCount > 0) {
 			endRow();
@@ -1084,10 +1082,9 @@ public abstract class StandardOutput {
 	 * @param columnNames the column names
 	 * @param drilldownCount the number of drilldowns being displayed
 	 * @param totalColumns the list of columns to be totalled
-	 * @throws SQLException
 	 */
 	private void outputTotals(List<String> hiddenColumns, List<String> columnNames,
-			int drilldownCount, List<String> totalColumns) throws SQLException {
+			int drilldownCount, List<String> totalColumns) {
 
 		beginTotalRow();
 
@@ -1550,10 +1547,9 @@ public abstract class StandardOutput {
 	 * @param columnName the column name
 	 * @return <code>true</code> if the resultset column with the given index
 	 * should be included in the output
-	 * @throws SQLException
 	 */
 	private boolean shouldOutputColumn(int columnIndex, List<String> hiddenColumns,
-			String columnName) throws SQLException {
+			String columnName) {
 
 		if (hiddenColumns == null || hiddenColumns.isEmpty()) {
 			return true;
@@ -1612,10 +1608,9 @@ public abstract class StandardOutput {
 	 * @param columnName the columnName
 	 * @return <code>true</code> if the resultset column with the given index
 	 * should be totalled
-	 * @throws SQLException
 	 */
 	private boolean shouldTotalColumn(int columnIndex, List<String> totalColumns,
-			String columnName) throws SQLException {
+			String columnName) {
 
 		if (totalColumns == null || totalColumns.isEmpty()) {
 			return false;
@@ -1644,12 +1639,12 @@ public abstract class StandardOutput {
 	 * @param nullStringDisplay the string to display for null string values
 	 * @param reportFormat the report format being used
 	 * @return data for the output row
-	 * @throws SQLException
+	 * @throws IOException
 	 */
 	private List<Object> outputDataColumns(Map<Integer, ColumnTypeDefinition> columnTypes,
 			Object row, List<String> columnNames,
 			List<String> hiddenColumns, String nullNumberDisplay,
-			String nullStringDisplay, ReportFormat reportFormat) throws SQLException, IOException {
+			String nullStringDisplay, ReportFormat reportFormat) throws IOException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
@@ -2145,6 +2140,10 @@ public abstract class StandardOutput {
 		logger.debug("Entering generateCrosstabOutput: reportFormat={},"
 				+ " report={}", reportFormat, report);
 
+		Objects.requireNonNull(rs, "rs must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		Objects.requireNonNull(report, "report must not be null");
+
 		/*
 		 * input
 		 */ /*
@@ -2369,6 +2368,228 @@ public abstract class StandardOutput {
 
 		result.setSuccess(true);
 		result.setRowCount(rowCount);
+
+		return result;
+	}
+
+	/**
+	 * Generates crosstab output
+	 *
+	 * @param data the data to use
+	 * @param reportFormat the report format to use
+	 * @param report the report that is being run
+	 * @return output result
+	 * @throws java.io.IOException
+	 */
+	public StandardOutputResult generateCrosstabOutput(Object data,
+			ReportFormat reportFormat, Report report) throws IOException {
+
+		logger.debug("Entering generateCrosstabOutput: reportFormat={},"
+				+ " report={}", reportFormat, report);
+
+		Objects.requireNonNull(data, "data must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		Objects.requireNonNull(report, "report must not be null");
+
+		this.report = report;
+
+		StandardOutputResult result = new StandardOutputResult();
+
+		initializeNumberFormatters();
+
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
+		resultSetColumnCount = dataDetails.getColCount();
+		List<String> columnNames = dataDetails.getColumnNames();
+		List<? extends Object> dataList = dataDetails.getDataList();
+		Map<Integer, ColumnTypeDefinition> columnTypes = dataDetails.getColumnTypes();
+
+		if (resultSetColumnCount != 3 && resultSetColumnCount != 5) {
+			result.setMessage("reports.message.invalidCrosstab");
+			return result;
+		}
+
+		int maxRows = Config.getMaxRows(reportFormat.getValue());
+
+		initializeColumnFormatters(report, columnNames, columnTypes);
+
+		// Check the data type of the value (last column)
+		ColumnTypeDefinition valueColumnTypeDefinition = columnTypes.get(resultSetColumnCount);
+
+		String nullNumberDisplay = report.getNullNumberDisplay();
+		if (nullNumberDisplay == null) {
+			nullNumberDisplay = "";
+		}
+
+		String nullStringDisplay = report.getNullStringDisplay();
+		if (nullStringDisplay == null) {
+			nullStringDisplay = "";
+		}
+
+		boolean alternateSort;
+
+		if (resultSetColumnCount > 3) {
+			alternateSort = true;
+		} else {
+			alternateSort = false;
+		}
+
+		List<String> localizedColumnNames = getLocalizedColumnNames(columnNames, report);
+
+		HashMap<String, Object> values = new HashMap<>();
+		Object[] xa;
+		Object[] ya;
+		if (alternateSort) { // name1, altSort1, name2, altSort2, value
+			TreeMap<Object, Object> x = new TreeMap<>(); // allows a sorted toArray (or Iterator())
+			TreeMap<Object, Object> y = new TreeMap<>();
+
+			// Scroll resultset and feed data structures
+			// to read it as a crosstab (pivot)
+			for (Object row : dataList) {
+				Object DyVal = RunReportHelper.getRowValue(row, 1 - 1, columnNames);
+				Object Dy = RunReportHelper.getRowValue(row, 2 - 1, columnNames);
+				Object DxVal = RunReportHelper.getRowValue(row, 3 - 1, columnNames);
+				Object Dx = RunReportHelper.getRowValue(row, 4 - 1, columnNames);
+				x.put(Dx, DxVal);
+				y.put(Dy, DyVal);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, row, 5 - 1, columnNames);
+			}
+
+			xa = x.keySet().toArray();
+			ya = y.keySet().toArray();
+
+			setTotalColumnCount(xa.length + 1);
+
+			//perform any required output initialization
+			init();
+
+			addTitle();
+
+			if (showSelectedParameters) {
+				addSelectedParameters(reportParamsList);
+			}
+
+			//begin header output
+			beginHeader();
+
+			addHeaderCell(localizedColumnNames.get(5) + " (" + localizedColumnNames.get(1) + " / " + localizedColumnNames.get(3) + ")");
+			int i, j;
+			for (i = 0; i < xa.length; i++) {
+				addHeaderCell(x.get(xa[i]).toString());
+			}
+			endHeader();
+			beginRows();
+
+			//  _ Jan Feb Mar
+			for (j = 0; j < ya.length; j++) {
+				rowCount++;
+
+				newRow();
+
+				if (rowCount % 2 == 0) {
+					evenRow = true;
+				} else {
+					evenRow = false;
+				}
+
+				if (rowCount > maxRows) {
+					//row limit exceeded
+					for (int k = 0; k < totalColumnCount; k++) {
+						addCellString("...");
+					}
+
+					endOutput();
+
+					result.setMessage("runReport.message.tooManyRows");
+					result.setTooManyRows(true);
+					return result;
+				} else {
+					Object Dy = ya[j];
+					addHeaderCellAlignLeft(y.get(Dy).toString(), String.valueOf(Dy)); //column 1 data displayed as a header
+					for (i = 0; i < xa.length; i++) {
+						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
+						outputCrosstabValue(value, valueColumnTypeDefinition, nullNumberDisplay, nullStringDisplay);
+					}
+				}
+			}
+		} else {
+			TreeSet<Object> x = new TreeSet<>(); // allows a sorted toArray (or Iterator())
+			TreeSet<Object> y = new TreeSet<>();
+
+			// Scroll resultset and feed data structures
+			// to read it as a crosstab (pivot)
+			for (Object row : dataList) {
+				Object Dy = RunReportHelper.getRowValue(row, 1 - 1, columnNames);
+				Object Dx = RunReportHelper.getRowValue(row, 2 - 1, columnNames);
+				x.add(Dx);
+				y.add(Dy);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, row, 3 - 1, columnNames);
+			}
+
+			xa = x.toArray();
+			ya = y.toArray();
+
+			setTotalColumnCount(xa.length + 1);
+
+			//perform any required output initialization
+			init();
+
+			addTitle();
+
+			if (showSelectedParameters) {
+				addSelectedParameters(reportParamsList);
+			}
+
+			//begin header output
+			beginHeader();
+			addHeaderCell(localizedColumnNames.get(3) + " (" + localizedColumnNames.get(1) + " / " + localizedColumnNames.get(2) + ")");
+			int i, j;
+			for (i = 0; i < xa.length; i++) {
+				addHeaderCell(xa[i].toString());
+			}
+
+			endHeader();
+			beginRows();
+
+			//  _ Jan Feb Mar
+			for (j = 0; j < ya.length; j++) {
+				rowCount++;
+
+				newRow();
+
+				if (rowCount % 2 == 0) {
+					evenRow = true;
+				} else {
+					evenRow = false;
+				}
+
+				if (rowCount > maxRows) {
+					//row limit exceeded
+					for (int k = 0; k < totalColumnCount; k++) {
+						addCellString("...");
+					}
+
+					endOutput();
+
+					result.setMessage("runReport.message.tooManyRows");
+					result.setTooManyRows(true);
+					return result;
+				} else {
+					Object Dy = ya[j];
+					//o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
+					addHeaderCellAlignLeft(Dy.toString()); //column 1 data displayed as a header
+					for (i = 0; i < xa.length; i++) {
+						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
+						outputCrosstabValue(value, valueColumnTypeDefinition, nullNumberDisplay, nullStringDisplay);
+					}
+				}
+			}
+		}
+
+		endOutput();
+
+		result.setSuccess(true);
+		result.setRowCount(rowCount);
+
 		return result;
 	}
 
@@ -2378,8 +2599,8 @@ public abstract class StandardOutput {
 	 *
 	 * @param key
 	 * @param values
-	 * @param rs
-	 * @param columnIndex
+	 * @param rs the resultset at the row with the value to extract
+	 * @param columnIndex the one-based column index
 	 * @param columnTypeDefinition
 	 * @throws SQLException
 	 */
@@ -2388,6 +2609,24 @@ public abstract class StandardOutput {
 			throws SQLException {
 
 		Object value = getColumnValue(rs, columnIndex, columnTypeDefinition);
+		values.put(key, value);
+	}
+
+	/**
+	 * Stores the right object type in the Hashmap used by
+	 * generateCrosstabOutput to cache sorted values
+	 *
+	 * @param key
+	 * @param values
+	 * @param row the current row of data
+	 * @param columnIndex the zero-based column index
+	 * @param columnNames the column names
+	 * @throws SQLException
+	 */
+	private void addValue(String key, Map<String, Object> values,
+			Object row, int columnIndex, List<String> columnNames) {
+
+		Object value = RunReportHelper.getRowValue(row, columnIndex, columnNames);
 		values.put(key, value);
 	}
 
@@ -2487,7 +2726,7 @@ public abstract class StandardOutput {
 				if (value == null) {
 					numericValue = null;
 				} else {
-					numericValue = (Double) value;
+					numericValue = ((Number) value).doubleValue();
 				}
 
 				if (numericValue == null) {
@@ -2562,10 +2801,9 @@ public abstract class StandardOutput {
 	 * @param rsmd the resultset metadata object for the data result set
 	 * @param report the report being run
 	 * @return the localized column names to use
-	 * @throws SQLException
 	 */
 	private List<String> getLocalizedColumnNames(List<String> columnNames,
-			Report report) throws SQLException {
+			Report report) {
 
 		//set defaults
 		//add dummy item in index 0. to allow retrieving of column names using 1-based index like with rsmd
