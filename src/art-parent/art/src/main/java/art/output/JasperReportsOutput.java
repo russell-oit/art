@@ -27,7 +27,6 @@ import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import com.jaspersoft.mongodb.connection.MongoDbConnection;
-import groovy.sql.GroovyRowResult;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,7 +35,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -63,9 +61,6 @@ import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
 import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
-import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -216,50 +211,7 @@ public class JasperReportsOutput {
 				if (data == null) {
 					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, new JRResultSetDataSource(resultSet));
 				} else {
-					List<Map<String, ?>> finalData = new ArrayList<>();
-					@SuppressWarnings("unchecked")
-					List<? extends Object> dataList = (List<? extends Object>) data;
-					if (CollectionUtils.isNotEmpty(dataList)) {
-						Object sample = dataList.get(0);
-						if (sample instanceof GroovyRowResult) {
-							for (Object row : dataList) {
-								//https://6by9.wordpress.com/2012/10/13/groovyrowresult-as-a-hashmap/
-								GroovyRowResult rowResult = (GroovyRowResult) row;
-								Map<String, Object> rowMap = new LinkedHashMap<>();
-								for (Object columnName : rowResult.keySet()) {
-									rowMap.put(String.valueOf(columnName), rowResult.get(columnName));
-								}
-								finalData.add(rowMap);
-							}
-						} else if (sample instanceof DynaBean) {
-							List<String> columnNames = null;
-							for (Object row : dataList) {
-								DynaBean rowBean = (DynaBean) row;
-								if (columnNames == null) {
-									columnNames = new ArrayList<>();
-									DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
-									for (DynaProperty column : columns) {
-										String columnName = column.getName();
-										columnNames.add(columnName);
-									}
-								}
-								Map<String, Object> rowMap = new LinkedHashMap<>();
-								for (String columnName : columnNames) {
-									rowMap.put(columnName, rowBean.get(columnName));
-								}
-								finalData.add(rowMap);
-							}
-						} else if (sample instanceof Map) {
-							for (Object row : dataList) {
-								@SuppressWarnings("unchecked")
-								Map<String, Object> rowMap = (Map<String, Object>) row;
-								finalData.add(rowMap);
-							}
-						} else {
-							throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
-						}
-					}
-
+					List<Map<String, ?>> finalData = RunReportHelper.getMapListData(data);
 					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, new JRMapCollectionDataSource(finalData));
 				}
 			}

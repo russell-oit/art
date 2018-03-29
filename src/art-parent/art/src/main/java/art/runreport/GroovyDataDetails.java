@@ -18,6 +18,7 @@
 package art.runreport;
 
 import art.output.ColumnTypeDefinition;
+import art.output.ResultSetColumn;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ public class GroovyDataDetails {
 	private List<String> columnNames;
 	private List<? extends Object> dataList;
 	private Map<Integer, ColumnTypeDefinition> columnTypes;
+	private List<ResultSetColumn> resultSetColumns;
 	
 	/**
 	 * @return the rowCount
@@ -103,6 +105,20 @@ public class GroovyDataDetails {
 	 */
 	public void setColumnTypes(Map<Integer, ColumnTypeDefinition> columnTypes) {
 		this.columnTypes = columnTypes;
+	}
+
+	/**
+	 * @return the resultSetColumns
+	 */
+	public List<ResultSetColumn> getResultSetColumns() {
+		return resultSetColumns;
+	}
+
+	/**
+	 * @param resultSetColumns the resultSetColumns to set
+	 */
+	public void setResultSetColumns(List<ResultSetColumn> resultSetColumns) {
+		this.resultSetColumns = resultSetColumns;
 	}
 
 }

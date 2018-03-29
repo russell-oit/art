@@ -508,9 +508,14 @@ public class ReportOutputGenerator {
 
 				JsonOutput jsonOutput = new JsonOutput();
 				jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
-				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
-				String jsonString = jsonOutputResult.getJsonData();
 
+				JsonOutputResult jsonOutputResult;
+				if (groovyData == null) {
+					jsonOutputResult = jsonOutput.generateOutput(rs);
+				} else {
+					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+				}
+				String jsonString = jsonOutputResult.getJsonData();
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				switch (reportFormat) {

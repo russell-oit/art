@@ -26,6 +26,7 @@ import art.enums.EncryptorType;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.output.ColumnTypeDefinition;
+import art.output.ResultSetColumn;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -858,6 +860,31 @@ public class RunReportHelper {
 			}
 		}
 
+		List<ResultSetColumn> resultSetColumns = new ArrayList<>();
+		for (int i = 1; i <= columnNames.size(); i++) {
+			String columnName = columnNames.get(i - 1);
+			ColumnTypeDefinition columnTypeDefinition = columnTypes.get(i);
+			ColumnType columnType = columnTypeDefinition.getColumnType();
+
+			String resultSetColumnType;
+			switch (columnType) {
+				case Numeric:
+					resultSetColumnType = "numeric";
+					break;
+				case Date:
+					resultSetColumnType = "datetime";
+					break;
+				default:
+					resultSetColumnType = "string";
+			}
+
+			ResultSetColumn resultSetColumn = new ResultSetColumn();
+			resultSetColumn.setName(columnName);
+			resultSetColumn.setType(resultSetColumnType);
+
+			resultSetColumns.add(resultSetColumn);
+		}
+
 		GroovyDataDetails details = new GroovyDataDetails();
 
 		details.setRowCount(rowCount);
@@ -865,6 +892,7 @@ public class RunReportHelper {
 		details.setColumnNames(columnNames);
 		details.setDataList(dataList);
 		details.setColumnTypes(columnTypes);
+		details.setResultSetColumns(resultSetColumns);
 
 		return details;
 	}
@@ -977,6 +1005,61 @@ public class RunReportHelper {
 		}
 
 		return columnValue;
+	}
+
+	/**
+	 * Returns data used in report generation as a list of maps
+	 * 
+	 * @param data the data
+	 * @return the data as a list of maps
+	 */
+	public static List<Map<String, Object>> getMapListData(Object data) {
+		List<Map<String, Object>> finalData = new ArrayList<>();
+		
+		@SuppressWarnings("unchecked")
+		List<? extends Object> dataList = (List<? extends Object>) data;
+		if (CollectionUtils.isNotEmpty(dataList)) {
+			Object sample = dataList.get(0);
+			if (sample instanceof GroovyRowResult) {
+				for (Object row : dataList) {
+					//https://6by9.wordpress.com/2012/10/13/groovyrowresult-as-a-hashmap/
+					GroovyRowResult rowResult = (GroovyRowResult) row;
+					Map<String, Object> rowMap = new LinkedHashMap<>();
+					for (Object columnName : rowResult.keySet()) {
+						rowMap.put(String.valueOf(columnName), rowResult.get(columnName));
+					}
+					finalData.add(rowMap);
+				}
+			} else if (sample instanceof DynaBean) {
+				List<String> columnNames = null;
+				for (Object row : dataList) {
+					DynaBean rowBean = (DynaBean) row;
+					if (columnNames == null) {
+						columnNames = new ArrayList<>();
+						DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
+						for (DynaProperty column : columns) {
+							String columnName = column.getName();
+							columnNames.add(columnName);
+						}
+					}
+					Map<String, Object> rowMap = new LinkedHashMap<>();
+					for (String columnName : columnNames) {
+						rowMap.put(columnName, rowBean.get(columnName));
+					}
+					finalData.add(rowMap);
+				}
+			} else if (sample instanceof Map) {
+				for (Object row : dataList) {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> rowMap = (Map<String, Object>) row;
+					finalData.add(rowMap);
+				}
+			} else {
+				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
+			}
+		}
+		
+		return finalData;
 	}
 
 }

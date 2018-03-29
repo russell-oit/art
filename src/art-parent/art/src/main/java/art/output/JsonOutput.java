@@ -17,10 +17,14 @@
  */
 package art.output;
 
+import art.report.Report;
+import art.runreport.GroovyDataDetails;
+import art.runreport.RunReportHelper;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -77,8 +81,6 @@ public class JsonOutput {
 
 		JsonOutputResult result = new JsonOutputResult();
 
-		//https://stackoverflow.com/questions/18960446/how-to-convert-a-java-resultset-into-json
-		List<Map<String, Object>> rows = new ArrayList<>();
 		List<ResultSetColumn> columns = new ArrayList<>();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
@@ -126,13 +128,16 @@ public class JsonOutput {
 
 		result.setColumns(columns);
 
+		//https://stackoverflow.com/questions/18960446/how-to-convert-a-java-resultset-into-json
+		List<Map<String, Object>> rows = new ArrayList<>();
+
 		int rowCount = 0;
 		while (rs.next()) {
 			rowCount++;
 			Map<String, Object> row = new LinkedHashMap<>();
 			for (int i = 1; i <= columnCount; ++i) {
 				String columnName = rsmd.getColumnLabel(i);
-				Object columnData = rs.getObject(i);;
+				Object columnData = rs.getObject(i);
 				row.put(columnName, columnData);
 			}
 			rows.add(row);
@@ -155,7 +160,52 @@ public class JsonOutput {
 		result.setRowCount(rowCount);
 
 		return result;
+	}
 
+	/**
+	 * Returns report data in json representation. Result in the jsonString
+	 * property is like: [{"ID":"1","NAME":"Tom","AGE":"24"},
+	 * {"ID":"2","NAME":"Bob","AGE":"26"}]
+	 *
+	 * @param data the data to use
+	 * @param report the report being run
+	 * @return an object containing the json string representation of the data
+	 * and the number of rows in the resultset
+	 * @throws JsonProcessingException
+	 */
+	public JsonOutputResult generateOutput(Object data, Report report)
+			throws JsonProcessingException, IOException {
+
+		logger.debug("Entering generateOutput");
+
+		Objects.requireNonNull(data, "data must not be null");
+
+		JsonOutputResult result = new JsonOutputResult();
+
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
+		int rowCount = dataDetails.getRowCount();
+		List<ResultSetColumn> columns = dataDetails.getResultSetColumns();
+
+		List<Map<String, Object>> rows = RunReportHelper.getMapListData(data);
+
+		ObjectMapper mapper = new ObjectMapper();
+		//https://egkatzioura.wordpress.com/2013/01/22/spring-jackson-and-date-serialization/
+		//http://wiki.fasterxml.com/JacksonFAQDateHandling
+		SimpleDateFormat df = new SimpleDateFormat(ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT);
+		mapper.setDateFormat(df);
+		String jsonString;
+		if (prettyPrint) {
+			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+			jsonString = mapper.writeValueAsString(rows);
+		} else {
+			jsonString = mapper.writeValueAsString(rows);
+		}
+
+		result.setJsonData(jsonString);
+		result.setRowCount(rowCount);
+		result.setColumns(columns);
+
+		return result;
 	}
 
 }
