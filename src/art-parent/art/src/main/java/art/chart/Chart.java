@@ -377,6 +377,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 * @param drilldown the drilldown to use, if any
 	 * @param reportParamsList the report parameters to use
 	 * @throws SQLException
+	 * @throws java.io.IOException
 	 */
 	public void prepareDataset(Object data, Drilldown drilldown,
 			List<ReportParameter> reportParamsList) throws SQLException, IOException {

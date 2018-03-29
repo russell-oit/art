@@ -46,7 +46,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -926,7 +925,7 @@ public class JobService {
 		} else {
 			timeZone = TimeZone.getTimeZone(timeZoneId);
 		}
-		
+
 		logger.debug("timeZoneId='{}'. Job Id {}", timeZoneId, job.getJobId());
 		logger.debug("timeZone={}. Job Id {}", timeZone, job.getJobId());
 
@@ -950,17 +949,11 @@ public class JobService {
 		}
 
 		Set<Trigger> triggers = processTriggers(job, globalCalendar, timeZone);
-
-		//get earliest next fire time from all available triggers
-		//https://stackoverflow.com/questions/39791318/how-to-get-the-earliest-date-of-a-list-in-java
-		List<Date> nextFireTimes = new ArrayList<>();
-		Date now = new Date();
-		for (Trigger trigger : triggers) {
-			Date nextRunDate = trigger.getFireTimeAfter(now);
-			nextFireTimes.add(nextRunDate);
-		}
-		Date nextFireTime = Collections.min(nextFireTimes);
-		job.setNextRunDate(nextFireTime);
+		
+		//get earliest next run date from all available triggers
+		List<Trigger> triggersList = new ArrayList<>(triggers);
+		Date nextRunDate = JobUtils.getNextFireTime(triggersList, scheduler);
+		job.setNextRunDate(nextRunDate);
 
 		String quartzCalendarNames = StringUtils.join(calendarNames, ",");
 		job.setQuartzCalendarNames(quartzCalendarNames);

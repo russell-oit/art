@@ -5,6 +5,7 @@ ART 3.4
 * Allow users to save parameter selections
 * Allow use of GroovyRowResult data with "usesGroovy" queries
 * Updated French translation (thanks to Pierre Blanchou)
+* Have job next run date consider holidays
 * Updated univocity-parsers, spring
 
 ART 3.3
