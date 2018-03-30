@@ -1671,7 +1671,7 @@ public abstract class StandardOutput {
 				value = rowBean.get(columnName);
 			} else if (row instanceof Map) {
 				@SuppressWarnings("unchecked")
-				Map<String, Object> rowMap = (Map<String, Object>) row;
+				Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
 				value = rowMap.get(columnName);
 			} else {
 				throw new IllegalArgumentException("Unexpected row data type: " + row.getClass().getCanonicalName());

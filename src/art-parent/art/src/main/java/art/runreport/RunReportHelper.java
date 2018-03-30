@@ -804,7 +804,7 @@ public class RunReportHelper {
 				}
 			} else if (sample instanceof Map) {
 				@SuppressWarnings("unchecked")
-				Map<String, Object> sampleRow = (Map<String, Object>) sample;
+				Map<String, ? extends Object> sampleRow = (Map<String, ? extends Object>) sample;
 				colCount = sampleRow.size();
 				dataColumnNames.addAll(sampleRow.keySet());
 
@@ -1009,13 +1009,13 @@ public class RunReportHelper {
 
 	/**
 	 * Returns data used in report generation as a list of maps
-	 * 
+	 *
 	 * @param data the data
 	 * @return the data as a list of maps
 	 */
 	public static List<Map<String, ?>> getMapListData(Object data) {
 		List<Map<String, ?>> finalData = new ArrayList<>();
-		
+
 		@SuppressWarnings("unchecked")
 		List<? extends Object> dataList = (List<? extends Object>) data;
 		if (CollectionUtils.isNotEmpty(dataList)) {
@@ -1051,14 +1051,14 @@ public class RunReportHelper {
 			} else if (sample instanceof Map) {
 				for (Object row : dataList) {
 					@SuppressWarnings("unchecked")
-					Map<String, Object> rowMap = (Map<String, Object>) row;
+					Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
 					finalData.add(rowMap);
 				}
 			} else {
 				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
 			}
 		}
-		
+
 		return finalData;
 	}
 
