@@ -53,6 +53,36 @@ public class VelocityOutput {
 
 	private String contextPath;
 	private Locale locale;
+	private ResultSet resultSet;
+	private Object data;
+
+	/**
+	 * @return the resultSet
+	 */
+	public ResultSet getResultSet() {
+		return resultSet;
+	}
+
+	/**
+	 * @param resultSet the resultSet to set
+	 */
+	public void setResultSet(ResultSet resultSet) {
+		this.resultSet = resultSet;
+	}
+
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
 
 	/**
 	 * @return the locale
@@ -87,15 +117,12 @@ public class VelocityOutput {
 	 *
 	 * @param report the report to use, not null
 	 * @param writer the writer to output to, not null
-	 * @param rs the resultset containing report data, not null
 	 * @param reportParams the report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 */
-	public void generateOutput(Report report, Writer writer, ResultSet rs,
+	public void generateOutput(Report report, Writer writer,
 			List<ReportParameter> reportParams) throws SQLException, IOException {
-
-		Objects.requireNonNull(rs, "resultset must not be null");
 
 		//set variables to be passed to velocity
 		Map<String, Object> variables = new HashMap<>();
@@ -119,10 +146,14 @@ public class VelocityOutput {
 		}
 
 		//pass report data
-		boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
-		boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
-		RowSetDynaClass rsdc = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
-		variables.put("results", rsdc.getRows());
+		if (data == null) {
+			boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
+			boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
+			RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
+			variables.put("results", rsdc.getRows());
+		} else {
+			variables.put("results", data);
+		}
 
 		generateOutput(report, writer, variables);
 	}
@@ -132,31 +163,31 @@ public class VelocityOutput {
 	 *
 	 * @param report the report to use, not null
 	 * @param writer the writer to output to, not null
-	 * @param data the data to be passed to the template
+	 * @param variables the data to be passed to the template
 	 * @throws java.io.IOException
 	 */
 	public void generateOutput(Report report, Writer writer,
-			Map<String, Object> data) throws IOException {
+			Map<String, Object> variables) throws IOException {
 
 		logger.debug("Entering generateOutput: report={}", report);
 
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(writer, "writer must not be null");
 
-		if (data == null) {
-			data = new HashMap<>();
+		if (variables == null) {
+			variables = new HashMap<>();
 		}
 
-		data.put("contextPath", contextPath);
+		variables.put("contextPath", contextPath);
 		String artBaseUrl = Config.getSettings().getArtBaseUrl();
-		data.put("artBaseUrl", artBaseUrl);
-		data.put("locale", locale);
+		variables.put("artBaseUrl", artBaseUrl);
+		variables.put("locale", locale);
 
 		NumberTool numberTool = new NumberTool();
-		data.put("numberTool", numberTool);
+		variables.put("numberTool", numberTool);
 
 		DateTool dateTool = new DateTool();
-		data.put("dateTool", dateTool);
+		variables.put("dateTool", dateTool);
 
 		String templateFileName = report.getTemplate();
 		String templatesPath = Config.getTemplatesPath();
@@ -177,7 +208,7 @@ public class VelocityOutput {
 		}
 
 		//create output
-		VelocityContext ctx = new VelocityContext(data);
+		VelocityContext ctx = new VelocityContext(variables);
 
 		VelocityEngine velocityEngine = Config.getVelocityEngine();
 		Template template = velocityEngine.getTemplate(fullTemplateFileName, "UTF-8");

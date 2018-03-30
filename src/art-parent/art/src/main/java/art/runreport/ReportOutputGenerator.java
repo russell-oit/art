@@ -630,9 +630,15 @@ public class ReportOutputGenerator {
 				VelocityOutput velocityOutput = new VelocityOutput();
 				velocityOutput.setContextPath(contextPath);
 				velocityOutput.setLocale(locale);
-				velocityOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+				velocityOutput.setResultSet(rs);
+				velocityOutput.setData(groovyData);
+				velocityOutput.generateOutput(report, writer, applicableReportParamsList);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 			} else if (reportType.isXDocReport()) {
 				rs = reportRunner.getResultSet();
 
