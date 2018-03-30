@@ -163,13 +163,13 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 		Map<String, Integer> itemIndices = new HashMap<>(); //<series name, max item index>
 
 		for (Object row : data) {
-			double xValue = RunReportHelper.getDoubleRowValue(row, 1 - 1, columnNames);
-			double yValue = RunReportHelper.getDoubleRowValue(row, 2 - 1, columnNames);
+			double xValue = RunReportHelper.getDoubleRowValue(row, 1, columnNames);
+			double yValue = RunReportHelper.getDoubleRowValue(row, 2, columnNames);
 
 			String seriesName;
 			if (dynamicSeries) {
 				//series name is the contents of the third column
-				seriesName = RunReportHelper.getStringRowValue(row, 3 - 1, columnNames);
+				seriesName = RunReportHelper.getStringRowValue(row, 3, columnNames);
 			} else {
 				//currently only one series supported
 				//series name is the column alias of the second column

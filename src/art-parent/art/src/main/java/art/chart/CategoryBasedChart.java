@@ -187,12 +187,12 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 		}
 
 		for (Object row : data) {
-			String categoryName = RunReportHelper.getStringRowValue(row, 1 - 1, columnNames);
+			String categoryName = RunReportHelper.getStringRowValue(row, 1, columnNames);
 
 			if (dynamicSeries) {
 				//series name is the contents of the second column
-				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop - 1, columnNames);
-				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop - 1, columnNames);
+				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop, columnNames);
+				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop, columnNames);
 
 				//set series index
 				int seriesIndex;
@@ -209,7 +209,7 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
 					String seriesName = columnNames.get(columnIndex - 1);
-					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex - 1, columnNames);
+					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex, columnNames);
 					addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
 				}
 			}

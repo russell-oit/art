@@ -230,10 +230,10 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			Date date;
 			switch (reportType) {
 				case TimeSeriesChart:
-					date = RunReportHelper.getDateTimeRowValue(row, 1 - 1, columnNames);
+					date = RunReportHelper.getDateTimeRowValue(row, 1, columnNames);
 					break;
 				case DateSeriesChart:
-					date = RunReportHelper.getDateRowValue(row, 1 - 1, columnNames);
+					date = RunReportHelper.getDateRowValue(row, 1, columnNames);
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected report type: " + reportType);
@@ -241,8 +241,8 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 
 			if (dynamicSeries) {
 				//series name is the contents of the second column
-				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop - 1, columnNames);
-				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop - 1, columnNames);
+				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop, columnNames);
+				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop, columnNames);
 
 				//set series name
 				int seriesIndex;
@@ -273,7 +273,7 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
 					String seriesName = columnNames.get(columnIndex - 1);
-					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex - 1, columnNames);
+					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex, columnNames);
 					addData(row, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
 				}
 			}

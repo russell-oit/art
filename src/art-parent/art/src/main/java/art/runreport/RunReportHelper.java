@@ -901,7 +901,7 @@ public class RunReportHelper {
 	 * Returns the date time value for a given data index
 	 *
 	 * @param row the object representing a row of data
-	 * @param index the index
+	 * @param index the one-based index
 	 * @param columnNames the column names
 	 * @return the date time value for a given data index
 	 */
@@ -915,7 +915,7 @@ public class RunReportHelper {
 	 * Returns the date value for a given data index
 	 *
 	 * @param row the object representing a row of data
-	 * @param index the index
+	 * @param index the one-based index
 	 * @param columnNames the column names
 	 * @return the date value for a given data index
 	 */
@@ -930,7 +930,7 @@ public class RunReportHelper {
 	 * Returns the string value for a given data index
 	 *
 	 * @param row the object representing a row of data
-	 * @param index the index
+	 * @param index the one-based index
 	 * @param columnNames the column names
 	 * @return the string value for a given data index
 	 */
@@ -955,7 +955,7 @@ public class RunReportHelper {
 	 * Returns the double value for a given data index
 	 *
 	 * @param row the object representing a row of data
-	 * @param index the index
+	 * @param index the one-based index
 	 * @param columnNames the column names
 	 * @return the double value for a given data index
 	 */
@@ -975,12 +975,12 @@ public class RunReportHelper {
 	 * Returns the value for a given data index
 	 *
 	 * @param row the object representing a row of data
-	 * @param index the zero-based index
+	 * @param index the one-based index
 	 * @param columnNames the column names
 	 * @return the value for a given data index
 	 */
 	public static Object getRowValue(Object row, int index, List<String> columnNames) {
-		String columnName = columnNames.get(index);
+		String columnName = columnNames.get(index - 1);
 		return getRowValue(row, columnName);
 	}
 

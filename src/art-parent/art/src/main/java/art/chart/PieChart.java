@@ -102,8 +102,8 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 		//resultset structure
 		//category, value [, link]
 		for (Object row : data) {
-			String category = RunReportHelper.getStringRowValue(row, 1 - 1, columnNames);
-			double value = RunReportHelper.getDoubleRowValue(row, 2 - 1, columnNames);
+			String category = RunReportHelper.getStringRowValue(row, 1, columnNames);
+			double value = RunReportHelper.getDoubleRowValue(row, 2, columnNames);
 
 			//add dataset value
 			dataset.setValue(category, value);

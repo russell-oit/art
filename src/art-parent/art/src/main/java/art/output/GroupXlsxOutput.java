@@ -452,7 +452,7 @@ public class GroupXlsxOutput {
 
 			// Output Main Data (only one row, obviously)
 			for (i = 0; i < splitColumn; i++) {
-				String value = RunReportHelper.getStringRowValue(dataRow, i, columnNames);
+				String value = RunReportHelper.getStringRowValue(dataRow, i + 1, columnNames);
 
 				addCell(value);
 				cmpStr.append(value);
@@ -466,7 +466,7 @@ public class GroupXlsxOutput {
 
 			// Output Sub Data (first line)
 			for (; i < colCount; i++) {
-				addCell(RunReportHelper.getStringRowValue(dataRow, i, columnNames));
+				addCell(RunReportHelper.getStringRowValue(dataRow, i + 1, columnNames));
 			}
 
 			boolean currentMain = true;
@@ -479,7 +479,7 @@ public class GroupXlsxOutput {
 					tmpCmpStr = new StringBuilder();
 
 					for (i = 0; i < splitColumn; i++) {
-						tmpCmpStr.append(RunReportHelper.getStringRowValue(dataRow2, i, columnNames));
+						tmpCmpStr.append(RunReportHelper.getStringRowValue(dataRow2, i + 1, columnNames));
 					}
 
 					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) {
@@ -487,7 +487,7 @@ public class GroupXlsxOutput {
 						// Add data lines
 						newLine();
 						for (i = 0; i < colCount; i++) {
-							addCell(RunReportHelper.getStringRowValue(dataRow2, i, columnNames));
+							addCell(RunReportHelper.getStringRowValue(dataRow2, i + 1, columnNames));
 						}
 					} else {
 						//row has different main from previous row

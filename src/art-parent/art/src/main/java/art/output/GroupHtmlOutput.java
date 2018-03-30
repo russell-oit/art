@@ -375,7 +375,7 @@ public class GroupHtmlOutput {
 
 			// Output Main Data (only one row, obviously)
 			for (i = 0; i < splitColumn; i++) {
-				String stringValue = RunReportHelper.getStringRowValue(row, i, columnNames);
+				String stringValue = RunReportHelper.getStringRowValue(row, i + 1, columnNames);
 				addCellToLine(stringValue);
 				cmpStr.append(stringValue);
 			}
@@ -390,7 +390,7 @@ public class GroupHtmlOutput {
 
 			// Output Sub Data (first line)
 			for (; i < colCount; i++) {
-				addCellToLine(RunReportHelper.getStringRowValue(row, i, columnNames));
+				addCellToLine(RunReportHelper.getStringRowValue(row, i + 1, columnNames));
 			}
 
 			boolean currentMain = true;
@@ -403,14 +403,14 @@ public class GroupHtmlOutput {
 					tmpCmpStr = new StringBuffer();
 
 					for (i = 0; i < splitColumn; i++) {
-						tmpCmpStr.append(RunReportHelper.getStringRowValue(row2, i, columnNames));
+						tmpCmpStr.append(RunReportHelper.getStringRowValue(row2, i + 1, columnNames));
 					}
 
 					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) { // same Main
 						newLine();
 						// Add data lines
 						for (; i < colCount; i++) {
-							addCellToLine(RunReportHelper.getStringRowValue(row2, i, columnNames));
+							addCellToLine(RunReportHelper.getStringRowValue(row2, i + 1, columnNames));
 						}
 					} else {
 						endLines();

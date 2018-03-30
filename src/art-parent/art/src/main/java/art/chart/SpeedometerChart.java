@@ -126,17 +126,17 @@ public class SpeedometerChart extends Chart {
 
 		if (CollectionUtils.isNotEmpty(data)) {
 			Object row = data.get(0);
-			dataset.setValue(RunReportHelper.getDoubleRowValue(row, 1 - 1, columnNames));
+			dataset.setValue(RunReportHelper.getDoubleRowValue(row, 1, columnNames));
 
-			minValue = RunReportHelper.getDoubleRowValue(row, 2 - 1, columnNames);
-			maxValue = RunReportHelper.getDoubleRowValue(row, 3 - 1, columnNames);
-			unitsDescription = RunReportHelper.getStringRowValue(row, 4 - 1, columnNames);
+			minValue = RunReportHelper.getDoubleRowValue(row, 2, columnNames);
+			maxValue = RunReportHelper.getDoubleRowValue(row, 3, columnNames);
+			unitsDescription = RunReportHelper.getStringRowValue(row, 4, columnNames);
 
 			if (colCount > 4) {
 				//ranges have been specified
 				rangeCount = 0;
 				for (int i = 5; i <= colCount; i++) {
-					String rangeSpec = RunReportHelper.getStringRowValue(row, i - 1, columnNames);
+					String rangeSpec = RunReportHelper.getStringRowValue(row, i, columnNames);
 					String[] rangeDetails = StringUtils.split(rangeSpec, ":");
 					if (rangeDetails != null && rangeDetails.length == 3) {
 						rangeCount++;

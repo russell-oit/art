@@ -2445,13 +2445,13 @@ public abstract class StandardOutput {
 			// Scroll resultset and feed data structures
 			// to read it as a crosstab (pivot)
 			for (Object row : dataList) {
-				Object DyVal = RunReportHelper.getRowValue(row, 1 - 1, columnNames);
-				Object Dy = RunReportHelper.getRowValue(row, 2 - 1, columnNames);
-				Object DxVal = RunReportHelper.getRowValue(row, 3 - 1, columnNames);
-				Object Dx = RunReportHelper.getRowValue(row, 4 - 1, columnNames);
+				Object DyVal = RunReportHelper.getRowValue(row, 1, columnNames);
+				Object Dy = RunReportHelper.getRowValue(row, 2, columnNames);
+				Object DxVal = RunReportHelper.getRowValue(row, 3, columnNames);
+				Object Dx = RunReportHelper.getRowValue(row, 4, columnNames);
 				x.put(Dx, DxVal);
 				y.put(Dy, DyVal);
-				addValue(Dy.toString() + "-" + Dx.toString(), values, row, 5 - 1, columnNames);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, row, 5, columnNames);
 			}
 
 			xa = x.keySet().toArray();
@@ -2518,11 +2518,11 @@ public abstract class StandardOutput {
 			// Scroll resultset and feed data structures
 			// to read it as a crosstab (pivot)
 			for (Object row : dataList) {
-				Object Dy = RunReportHelper.getRowValue(row, 1 - 1, columnNames);
-				Object Dx = RunReportHelper.getRowValue(row, 2 - 1, columnNames);
+				Object Dy = RunReportHelper.getRowValue(row, 1, columnNames);
+				Object Dx = RunReportHelper.getRowValue(row, 2, columnNames);
 				x.add(Dx);
 				y.add(Dy);
-				addValue(Dy.toString() + "-" + Dx.toString(), values, row, 3 - 1, columnNames);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, row, 3, columnNames);
 			}
 
 			xa = x.toArray();
@@ -2619,7 +2619,7 @@ public abstract class StandardOutput {
 	 * @param key
 	 * @param values
 	 * @param row the current row of data
-	 * @param columnIndex the zero-based column index
+	 * @param columnIndex the one-based column index
 	 * @param columnNames the column names
 	 * @throws SQLException
 	 */

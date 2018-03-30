@@ -188,16 +188,16 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 		for (Object row : data) {
 			recordCount++;
 
-			double xValue = RunReportHelper.getDoubleRowValue(row, 1 - 1, columnNames);
-			double yValue = RunReportHelper.getDoubleRowValue(row, 2 - 1, columnNames);
-			double actualZValue = RunReportHelper.getDoubleRowValue(row, 3 - 1, columnNames);
+			double xValue = RunReportHelper.getDoubleRowValue(row, 1, columnNames);
+			double yValue = RunReportHelper.getDoubleRowValue(row, 2, columnNames);
+			double actualZValue = RunReportHelper.getDoubleRowValue(row, 3, columnNames);
 
 			double zValue;
 			if (reportType == ReportType.BubbleChart && colCount >= 4) {
 				//use normalized z value to plot
 				//bubble value normalized to the y axis values so that bubbles aren't too large,
 				//in case z value is much larger than y value
-				zValue = RunReportHelper.getDoubleRowValue(row, 4 - 1, columnNames);
+				zValue = RunReportHelper.getDoubleRowValue(row, 4, columnNames);
 			} else {
 				//use actual z value to plot
 				zValue = actualZValue;
@@ -211,7 +211,7 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 			// set heat map options
 			if (reportType == ReportType.HeatmapChart && recordCount == 1) {
 				for (int i = 4; i <= colCount; i++) {
-					String optionSpec = RunReportHelper.getStringRowValue(row, i - 1, columnNames);
+					String optionSpec = RunReportHelper.getStringRowValue(row, i, columnNames);
 					if (optionSpec != null) {
 						String[] optionDetails = StringUtils.split(optionSpec, "=");
 						if (optionDetails.length == 2) {
