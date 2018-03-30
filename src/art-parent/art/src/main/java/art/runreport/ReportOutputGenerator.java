@@ -600,9 +600,15 @@ public class ReportOutputGenerator {
 				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
 				freemarkerOutput.setContextPath(contextPath);
 				freemarkerOutput.setLocale(locale);
-				freemarkerOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+				freemarkerOutput.setResultSet(rs);
+				freemarkerOutput.setData(groovyData);
+				freemarkerOutput.generateOutput(report, writer, applicableReportParamsList);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 			} else if (reportType == ReportType.Thymeleaf) {
 				rs = reportRunner.getResultSet();
 

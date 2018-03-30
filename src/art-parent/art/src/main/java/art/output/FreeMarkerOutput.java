@@ -51,6 +51,36 @@ public class FreeMarkerOutput {
 
 	private String contextPath;
 	private Locale locale;
+	private ResultSet resultSet;
+	private Object data;
+
+	/**
+	 * @return the resultSet
+	 */
+	public ResultSet getResultSet() {
+		return resultSet;
+	}
+
+	/**
+	 * @param resultSet the resultSet to set
+	 */
+	public void setResultSet(ResultSet resultSet) {
+		this.resultSet = resultSet;
+	}
+
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
 
 	/**
 	 * @return the locale
@@ -85,29 +115,26 @@ public class FreeMarkerOutput {
 	 *
 	 * @param report the report to use, not null
 	 * @param writer the writer to output to, not null
-	 * @param rs the resultset containing report data, not null
 	 * @param reportParams the report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 * @throws freemarker.template.TemplateException
 	 */
-	public void generateOutput(Report report, Writer writer, ResultSet rs,
+	public void generateOutput(Report report, Writer writer,
 			List<ReportParameter> reportParams)
 			throws SQLException, IOException, TemplateException {
 
-		Objects.requireNonNull(rs, "rs must not be null");
-
 		//set objects to be passed to freemarker
-		Map<String, Object> data = new HashMap<>();
+		Map<String, Object> variables = new HashMap<>();
 
 		//pass report parameters
 		if (reportParams != null) {
 			for (ReportParameter reportParam : reportParams) {
 				String paramName = reportParam.getParameter().getName();
-				data.put(paramName, reportParam);
+				variables.put(paramName, reportParam);
 			}
 
-			data.put("params", reportParams);
+			variables.put("params", reportParams);
 		}
 
 		TemplateResultOptions templateResultOptions;
@@ -119,12 +146,16 @@ public class FreeMarkerOutput {
 		}
 
 		//pass report data
-		boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
-		boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
-		RowSetDynaClass rsdc = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
-		data.put("results", rsdc.getRows());
+		if (data == null) {
+			boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
+			boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
+			RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
+			variables.put("results", rsdc.getRows());
+		} else {
+			variables.put("results", data);
+		}
 
-		generateOutput(report, writer, data);
+		generateOutput(report, writer, variables);
 	}
 
 	/**
@@ -132,11 +163,11 @@ public class FreeMarkerOutput {
 	 *
 	 * @param report the report to use, not null
 	 * @param writer the writer to output to, not null
-	 * @param data the objects to be passed to the template
+	 * @param variables the objects to be passed to the template
 	 * @throws java.io.IOException
 	 * @throws freemarker.template.TemplateException
 	 */
-	public void generateOutput(Report report, Writer writer, Map<String, Object> data)
+	public void generateOutput(Report report, Writer writer, Map<String, Object> variables)
 			throws IOException, TemplateException {
 
 		logger.debug("Entering generateOutput: report={}", report);
@@ -144,14 +175,14 @@ public class FreeMarkerOutput {
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(writer, "writer must not be null");
 
-		if (data == null) {
-			data = new HashMap<>();
+		if (variables == null) {
+			variables = new HashMap<>();
 		}
 
-		data.put("contextPath", contextPath);
+		variables.put("contextPath", contextPath);
 		String artBaseUrl = Config.getSettings().getArtBaseUrl();
-		data.put("artBaseUrl", artBaseUrl);
-		data.put("locale", locale);
+		variables.put("artBaseUrl", artBaseUrl);
+		variables.put("locale", locale);
 
 		String templateFileName = report.getTemplate();
 		String templatesPath = Config.getTemplatesPath();
@@ -175,7 +206,7 @@ public class FreeMarkerOutput {
 		Template template = cfg.getTemplate(templateFileName);
 
 		//create output
-		template.process(data, writer);
+		template.process(variables, writer);
 		writer.flush();
 	}
 }
