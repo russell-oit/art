@@ -47,9 +47,39 @@ import org.thymeleaf.context.Context;
 public class ThymeleafOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(ThymeleafOutput.class);
-	
+
 	private String contextPath;
 	private Locale locale;
+	private ResultSet resultSet;
+	private Object data;
+
+	/**
+	 * @return the resultSet
+	 */
+	public ResultSet getResultSet() {
+		return resultSet;
+	}
+
+	/**
+	 * @param resultSet the resultSet to set
+	 */
+	public void setResultSet(ResultSet resultSet) {
+		this.resultSet = resultSet;
+	}
+
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
 
 	/**
 	 * @return the locale
@@ -84,15 +114,12 @@ public class ThymeleafOutput {
 	 *
 	 * @param report the report to use, not null
 	 * @param writer the writer to output to, not null
-	 * @param rs the resultset containing report data, not null
 	 * @param reportParams the report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 */
-	public void generateOutput(Report report, Writer writer, ResultSet rs,
+	public void generateOutput(Report report, Writer writer,
 			List<ReportParameter> reportParams) throws SQLException, IOException {
-
-		Objects.requireNonNull(rs, "resultset must not be null");
 
 		//set variables to be passed to thymeleaf
 		Map<String, Object> variables = new HashMap<>();
@@ -106,7 +133,7 @@ public class ThymeleafOutput {
 
 			variables.put("params", reportParams);
 		}
-		
+
 		TemplateResultOptions templateResultOptions;
 		String options = report.getOptions();
 		if (StringUtils.isBlank(options)) {
@@ -116,15 +143,19 @@ public class ThymeleafOutput {
 		}
 
 		//pass report data
-		boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
-		boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
-		RowSetDynaClass rsdc = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
-		variables.put("results", rsdc.getRows());
+		if (data == null) {
+			boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
+			boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
+			RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
+			variables.put("results", rsdc.getRows());
+		} else {
+			variables.put("results", data);
+		}
 
 		generateOutput(report, writer, variables);
 	}
-	
-		/**
+
+	/**
 	 * Generates output, updating the writer with the final output
 	 *
 	 * @param report the report to use, not null
@@ -134,12 +165,12 @@ public class ThymeleafOutput {
 	 */
 	public void generateOutput(Report report, Writer writer,
 			Map<String, Object> variables) throws IOException {
-		
+
 		logger.debug("Entering generateOutput: report={}", report);
 
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(writer, "writer must not be null");
-		
+
 		if (variables == null) {
 			variables = new HashMap<>();
 		}
@@ -148,7 +179,7 @@ public class ThymeleafOutput {
 		String artBaseUrl = Config.getSettings().getArtBaseUrl();
 		variables.put("artBaseUrl", artBaseUrl);
 		variables.put("locale", locale);
-		
+
 		String templateFileName = report.getTemplate();
 		String templatesPath = Config.getTemplatesPath();
 		String fullTemplateFileName = templatesPath + templateFileName;
@@ -166,7 +197,7 @@ public class ThymeleafOutput {
 		if (!templateFile.exists()) {
 			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 		}
-		
+
 		//create output
 		Context ctx = new Context();
 		ctx.setVariables(variables);

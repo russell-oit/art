@@ -615,9 +615,15 @@ public class ReportOutputGenerator {
 				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
 				thymeleafOutput.setContextPath(contextPath);
 				thymeleafOutput.setLocale(locale);
-				thymeleafOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+				thymeleafOutput.setResultSet(rs);
+				thymeleafOutput.setData(groovyData);
+				thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 			} else if (reportType == ReportType.Velocity) {
 				rs = reportRunner.getResultSet();
 
