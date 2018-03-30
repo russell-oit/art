@@ -157,8 +157,12 @@ public class CsvOutputUnivocity {
 	private void generateOutput(Writer writer,
 			CsvOutputUnivocityOptions csvOptions, ReportFormat reportFormat,
 			String fullOutputFileName, Report report, Locale locale) throws IOException {
+		
+		logger.debug("Entering generateOutput: reportFormat={}, fullOutputFileName='{}',"
+				+ " report={}", reportFormat, fullOutputFileName, report);
 
 		Objects.requireNonNull(csvOptions, "csvOptions must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 
 		//https://stackoverflow.com/questions/37556698/mysql-dump-character-escaping-and-csv-read
 		//https://stackoverflow.com/a/36974864/3274227

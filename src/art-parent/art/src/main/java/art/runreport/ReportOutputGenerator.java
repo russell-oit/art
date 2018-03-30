@@ -953,9 +953,15 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
-				fixedWidthOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+				fixedWidthOutput.setResultSet(rs);
+				fixedWidthOutput.setData(groovyData);
+				fixedWidthOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 
 				if (!isJob && !reportFormat.isHtml()) {
 					displayFileLink(fileName);
