@@ -1498,9 +1498,13 @@ public class ReportOutputGenerator {
 						rs = reportRunner.getResultSet();
 
 						JsonOutput jsonOutput = new JsonOutput();
-						JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+						JsonOutputResult jsonOutputResult;
+						if (groovyData == null) {
+							jsonOutputResult = jsonOutput.generateOutput(rs);
+						} else {
+							jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+						}
 						jsonData = jsonOutputResult.getJsonData();
-
 						rowsRetrieved = jsonOutputResult.getRowCount();
 						break;
 					case OrgChartJson:
