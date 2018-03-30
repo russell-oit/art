@@ -872,9 +872,13 @@ public class ReportOutputGenerator {
 					rs = reportRunner.getResultSet();
 
 					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+					JsonOutputResult jsonOutputResult;
+					if (groovyData == null) {
+						jsonOutputResult = jsonOutput.generateOutput(rs);
+					} else {
+						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+					}
 					String jsonData = jsonOutputResult.getJsonData();
-
 					List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 					request.setAttribute("data", jsonData);
 					request.setAttribute("columns", columns);
