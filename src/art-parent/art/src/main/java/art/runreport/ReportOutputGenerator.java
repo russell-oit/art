@@ -802,11 +802,17 @@ public class ReportOutputGenerator {
 
 					String csvString;
 					try (StringWriter stringWriter = new StringWriter()) {
-						csvOutputUnivocity.generateOutput(rs, stringWriter, csvOptions, Locale.ENGLISH);
+						csvOutputUnivocity.setResultSet(rs);
+						csvOutputUnivocity.setData(groovyData);
+						csvOutputUnivocity.generateOutput(stringWriter, csvOptions, Locale.ENGLISH);
 						csvString = stringWriter.toString();
 					}
 
-					rowsRetrieved = getResultSetRowCount(rs);
+					if (groovyDataSize == null) {
+						rowsRetrieved = getResultSetRowCount(rs);
+					} else {
+						rowsRetrieved = groovyDataSize;
+					}
 
 					//need to escape string for javascript, otherwise you get Unterminated string literal error
 					//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
@@ -958,9 +964,15 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				CsvOutputUnivocity csvOutput = new CsvOutputUnivocity();
-				csvOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+				csvOutput.setResultSet(rs);
+				csvOutput.setData(groovyData);
+				csvOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 
 				if (!isJob && !reportFormat.isHtml()) {
 					displayFileLink(fileName);

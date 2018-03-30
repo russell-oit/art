@@ -20,11 +20,14 @@ package art.output;
 import art.enums.ReportFormat;
 import art.report.Report;
 import art.reportoptions.CsvOutputUnivocityOptions;
+import art.runreport.GroovyDataDetails;
+import art.runreport.RunReportHelper;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.common.processor.ObjectRowWriterProcessor;
 import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvRoutines;
+import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,7 +35,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -56,10 +62,40 @@ public class CsvOutputUnivocity {
 
 	private static final Logger logger = LoggerFactory.getLogger(CsvOutputUnivocity.class);
 
+	private ResultSet resultSet;
+	private Object data;
+
+	/**
+	 * @return the resultSet
+	 */
+	public ResultSet getResultSet() {
+		return resultSet;
+	}
+
+	/**
+	 * @param resultSet the resultSet to set
+	 */
+	public void setResultSet(ResultSet resultSet) {
+		this.resultSet = resultSet;
+	}
+
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
+
 	/**
 	 * Generates fixed width output for data in the given resultset
 	 *
-	 * @param rs the resultset that contains the data to output
 	 * @param writer the writer to output to. If html report format is required,
 	 * a writer must be supplied
 	 * @param report the report object for the report being run
@@ -68,7 +104,7 @@ public class CsvOutputUnivocity {
 	 * @param locale the locale that determines date format output
 	 * @throws java.io.IOException
 	 */
-	public void generateOutput(ResultSet rs, PrintWriter writer, Report report,
+	public void generateOutput(PrintWriter writer, Report report,
 			ReportFormat reportFormat, String fullOutputFileName,
 			Locale locale) throws IOException {
 
@@ -84,33 +120,31 @@ public class CsvOutputUnivocity {
 			csvOptions = mapper.readValue(options, CsvOutputUnivocityOptions.class);
 		}
 
-		generateOutput(rs, writer, csvOptions, reportFormat, fullOutputFileName, report, locale);
+		generateOutput(writer, csvOptions, reportFormat, fullOutputFileName, report, locale);
 	}
 
 	/**
 	 * Generates csv output for data in the given resultset
 	 *
-	 * @param rs the resultset that contains the data to output
 	 * @param writer the writer to output to
 	 * @param csvOptions the csv output options
 	 * @param locale the locale that determines date format output
 	 * @throws java.io.IOException
 	 */
-	public void generateOutput(ResultSet rs, Writer writer,
-			CsvOutputUnivocityOptions csvOptions, Locale locale) throws IOException {
+	public void generateOutput(Writer writer, CsvOutputUnivocityOptions csvOptions,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering generateOutput");
 
 		ReportFormat reportFormat = null;
 		String fullOutputFileName = null;
 		Report report = null;
-		generateOutput(rs, writer, csvOptions, reportFormat, fullOutputFileName, report, locale);
+		generateOutput(writer, csvOptions, reportFormat, fullOutputFileName, report, locale);
 	}
 
 	/**
 	 * Generates fixed width output for data in the given resultset
 	 *
-	 * @param rs the resultset that contains the data to output
 	 * @param writer the writer to output to. If html report format is required,
 	 * a writer must be supplied
 	 * @param csvOptions the csv options
@@ -120,11 +154,10 @@ public class CsvOutputUnivocity {
 	 * @param locale the locale that determines date format output
 	 * @throws java.io.IOException
 	 */
-	private void generateOutput(ResultSet rs, Writer writer,
+	private void generateOutput(Writer writer,
 			CsvOutputUnivocityOptions csvOptions, ReportFormat reportFormat,
 			String fullOutputFileName, Report report, Locale locale) throws IOException {
 
-		Objects.requireNonNull(rs, "rs must not be null");
 		Objects.requireNonNull(csvOptions, "csvOptions must not be null");
 
 		//https://stackoverflow.com/questions/37556698/mysql-dump-character-escaping-and-csv-read
@@ -151,17 +184,59 @@ public class CsvOutputUnivocity {
 		CsvRoutines csvRoutines = new CsvRoutines(csvWriterSettings);
 		csvRoutines.setKeepResourcesOpen(true);
 
+		List<List<Object>> listData = new ArrayList<>();
+		List<String> columnNames = null;
+		if (data != null) {
+			GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
+			columnNames = dataDetails.getColumnNames();
+			List<Map<String, ?>> mapListData = RunReportHelper.getMapListData(data);
+			for (Map<String, ?> row : mapListData) {
+				List<Object> rowData = new ArrayList<>();
+				for (Object value : row.values()) {
+					rowData.add(value);
+				}
+				listData.add(rowData);
+			}
+		}
+
 		if (writer instanceof StringWriter) {
-			csvRoutines.write(rs, writer);
+			if (data == null) {
+				csvRoutines.write(resultSet, writer);
+			} else {
+				//https://github.com/uniVocity/univocity-parsers/blob/master/src/test/java/com/univocity/parsers/examples/WriterExamples.java
+				//https://github.com/uniVocity/univocity-parsers/blob/master/src/main/java/com/univocity/parsers/common/routine/AbstractRoutines.java
+				//https://github.com/uniVocity/univocity-parsers/blob/master/src/main/java/com/univocity/parsers/common/AbstractWriter.java
+				CsvWriter csvWriter = new CsvWriter(writer, csvWriterSettings);
+				if (csvOptions.isIncludeHeaders()) {
+					csvWriter.writeHeaders(columnNames);
+				}
+				csvWriter.writeRows(listData);
+			}
 		} else {
 			if (reportFormat.isHtml()) {
 				writer.write("<pre>");
-				csvRoutines.write(rs, writer);
+				if (data == null) {
+					csvRoutines.write(resultSet, writer);
+				} else {
+					CsvWriter csvWriter = new CsvWriter(writer, csvWriterSettings);
+					if (csvOptions.isIncludeHeaders()) {
+						csvWriter.writeHeaders(columnNames);
+					}
+					csvWriter.writeRows(listData);
+				}
 				writer.write("</pre>");
 			} else {
 				try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 					if (reportFormat == ReportFormat.csv) {
-						csvRoutines.write(rs, fout);
+						if (data == null) {
+							csvRoutines.write(resultSet, fout);
+						} else {
+							CsvWriter csvWriter = new CsvWriter(fout, csvWriterSettings);
+							if (csvOptions.isIncludeHeaders()) {
+								csvWriter.writeHeaders(columnNames);
+							}
+							csvWriter.writeRows(listData);
+						}
 					} else if (reportFormat == ReportFormat.csvZip) {
 						String filename = FilenameUtils.getBaseName(fullOutputFileName);
 						FilenameHelper filenameHelper = new FilenameHelper();
@@ -170,13 +245,20 @@ public class CsvOutputUnivocity {
 						ZipEntry ze = new ZipEntry(zipEntryFilename);
 						try (ZipOutputStream zout = new ZipOutputStream(fout)) {
 							zout.putNextEntry(ze);
-							csvRoutines.write(rs, zout);
+							if (data == null) {
+								csvRoutines.write(resultSet, zout);
+							} else {
+								CsvWriter csvWriter = new CsvWriter(zout, csvWriterSettings);
+								if (csvOptions.isIncludeHeaders()) {
+									csvWriter.writeHeaders(columnNames);
+								}
+								csvWriter.writeRows(listData);
+							}
 						}
 					}
 				}
 			}
 		}
-
 	}
 
 }

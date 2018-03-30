@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
  * @author Timothy Anyona
  */
 public class PrefixTransformer extends HeaderTransformer {
+	//https://stackoverflow.com/questions/30527654/how-to-write-an-object-with-list-into-csv-file-using-univocity-writer
 
 	private final String prefix;
 
