@@ -644,9 +644,15 @@ public class ReportOutputGenerator {
 
 				XDocReportOutput xdocReportOutput = new XDocReportOutput();
 				xdocReportOutput.setLocale(locale);
-				xdocReportOutput.generateReport(report, applicableReportParamsList, rs, reportFormat, fullOutputFilename);
+				xdocReportOutput.setResultSet(rs);
+				xdocReportOutput.setData(groovyData);
+				xdocReportOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 
 				if (!isJob) {
 					displayFileLink(fileName);

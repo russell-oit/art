@@ -23,6 +23,7 @@ import art.enums.ReportType;
 import art.report.Report;
 import art.reportoptions.TemplateResultOptions;
 import art.reportparameter.ReportParameter;
+import art.runreport.GroovyDataDetails;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.utils.ArtUtils;
@@ -67,6 +68,36 @@ public class XDocReportOutput {
 	private Locale locale;
 	private String dynamicOpenPassword;
 	private String dynamicModifyPassword;
+	private ResultSet resultSet;
+	private Object data;
+
+	/**
+	 * @return the resultSet
+	 */
+	public ResultSet getResultSet() {
+		return resultSet;
+	}
+
+	/**
+	 * @param resultSet the resultSet to set
+	 */
+	public void setResultSet(ResultSet resultSet) {
+		this.resultSet = resultSet;
+	}
+
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
 
 	/**
 	 * @return the dynamicOpenPassword
@@ -115,7 +146,6 @@ public class XDocReportOutput {
 	 *
 	 * @param report the report to use, not null
 	 * @param reportParams the report parameters
-	 * @param resultSet the resultset containing report data
 	 * @param reportFormat the report format for the report
 	 * @param outputFileName the full output file name to use for the generated
 	 * report
@@ -124,7 +154,7 @@ public class XDocReportOutput {
 	 * @throws java.io.IOException
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
-			ResultSet resultSet, ReportFormat reportFormat, String outputFileName)
+			ReportFormat reportFormat, String outputFileName)
 			throws SQLException, XDocReportException, IOException {
 
 		logger.debug("Entering generateReport");
@@ -212,6 +242,16 @@ public class XDocReportOutput {
 				DynaProperty[] columns = rsdc.getDynaProperties();
 				for (DynaProperty column : columns) {
 					String metadataFieldName = "results." + column.getName();
+					metadata.addFieldAsList(metadataFieldName);
+				}
+				xdocReport.setFieldsMetadata(metadata);
+			} else if (data != null) {
+				context.put("results", data);
+				GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
+				List<String> columnNames = dataDetails.getColumnNames();
+				FieldsMetadata metadata = new FieldsMetadata();
+				for (String columnName : columnNames) {
+					String metadataFieldName = "results." + columnName;
 					metadata.addFieldAsList(metadataFieldName);
 				}
 				xdocReport.setFieldsMetadata(metadata);
