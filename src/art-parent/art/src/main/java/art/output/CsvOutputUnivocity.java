@@ -188,19 +188,12 @@ public class CsvOutputUnivocity {
 		CsvRoutines csvRoutines = new CsvRoutines(csvWriterSettings);
 		csvRoutines.setKeepResourcesOpen(true);
 
-		List<List<Object>> listData = new ArrayList<>();
+		List<List<Object>> listData = null;
 		List<String> columnNames = null;
 		if (data != null) {
 			GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
 			columnNames = dataDetails.getColumnNames();
-			List<Map<String, ?>> mapListData = RunReportHelper.getMapListData(data);
-			for (Map<String, ?> row : mapListData) {
-				List<Object> rowData = new ArrayList<>();
-				for (Object value : row.values()) {
-					rowData.add(value);
-				}
-				listData.add(rowData);
-			}
+			listData = RunReportHelper.getListData(data);
 		}
 
 		if (writer instanceof StringWriter) {

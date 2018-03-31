@@ -1606,6 +1606,8 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				ReportEngineOutput reportEngineOutput = new ReportEngineOutput(standardOutput);
+				reportEngineOutput.setResultSet(rs);
+				reportEngineOutput.setData(groovyData);
 
 				String options = report.getOptions();
 				ReportEngineOptions reportEngineOptions;
@@ -1616,9 +1618,9 @@ public class ReportOutputGenerator {
 				}
 
 				if (reportEngineOptions.isPivot()) {
-					reportEngineOutput.generatePivotOutput(rs, reportType);
+					reportEngineOutput.generatePivotOutput(reportType);
 				} else {
-					reportEngineOutput.generateTabularOutput(rs, reportType);
+					reportEngineOutput.generateTabularOutput(reportType);
 				}
 
 				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {

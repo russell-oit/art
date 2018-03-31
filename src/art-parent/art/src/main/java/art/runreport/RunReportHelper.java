@@ -1062,4 +1062,24 @@ public class RunReportHelper {
 		return finalData;
 	}
 
+	/**
+	 * Returns only the data component of data used for report generation
+	 * 
+	 * @param data the data used for report generation
+	 * @return the data component of the data used for report generation
+	 */
+	public static List<List<Object>> getListData(Object data) {
+		List<List<Object>> listData = new ArrayList<>();
+		List<Map<String, ?>> mapListData = getMapListData(data);
+		for (Map<String, ?> row : mapListData) {
+			List<Object> rowData = new ArrayList<>();
+			for (Object value : row.values()) {
+				rowData.add(value);
+			}
+			listData.add(rowData);
+		}
+		
+		return listData;
+	}
+
 }
