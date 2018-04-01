@@ -17,6 +17,7 @@ Display section to allow selecting of report parameters and initiate running of 
 <spring:message code="reports.message.fileSent" var="fileSentText"/>
 <spring:message code="reports.message.parametersSaved" var="parametersSavedText"/>
 <spring:message code="reports.message.parametersCleared" var="parametersClearedText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
@@ -70,27 +71,24 @@ Display section to allow selecting of report parameters and initiate running of 
 
 			$("#showInline").val("true");
 
-			var $form = $(this).closest('form');
-
 			//disable buttons
 			$('.action').prop('disabled', true);
 
-			var url = "${pageContext.request.contextPath}/runReport";
-
-			//https://www.w3schools.com/jquery/ajax_post.asp
-			$.post(url, $form.serialize(), function (data, status, xhr) {
-				$("#reportOutput").html(data);
-
-				if (status === "error") {
+			$.ajax({
+				type: "POST",
+				url: "${pageContext.request.contextPath}/runReport",
+				data: $('#parametersForm').serialize(),
+				success: function (data, status, xhr) {
+					$("#reportOutput").html(data);
+					$('.action').prop('disabled', false);
+				},
+				error: function (xhr, status, error) {
+					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 					bootbox.alert("<b>${errorOccurredText}</b><br>"
-							+ xhr.status + "<br>" + data);
+							+ xhr.status + "<br>" + xhr.responseText);
+					$('.action').prop('disabled', false);
 				}
-
-				//enable buttons
-				$('.action').prop('disabled', false);
-
 			});
-
 		});
 
 		$("#saveParameterSelection").click(function (e) {
