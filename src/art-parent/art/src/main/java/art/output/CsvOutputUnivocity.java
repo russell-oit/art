@@ -35,10 +35,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -157,7 +155,7 @@ public class CsvOutputUnivocity {
 	private void generateOutput(Writer writer,
 			CsvOutputUnivocityOptions csvOptions, ReportFormat reportFormat,
 			String fullOutputFileName, Report report, Locale locale) throws IOException {
-		
+
 		logger.debug("Entering generateOutput: reportFormat={}, fullOutputFileName='{}',"
 				+ " report={}", reportFormat, fullOutputFileName, report);
 
@@ -207,7 +205,9 @@ public class CsvOutputUnivocity {
 				if (csvOptions.isIncludeHeaders()) {
 					csvWriter.writeHeaders(columnNames);
 				}
-				csvWriter.writeRows(listData);
+				for (List<Object> row : listData) {
+					csvWriter.processRecord(row.toArray(new Object[0]));
+				}
 			}
 		} else {
 			if (reportFormat.isHtml()) {
@@ -219,7 +219,9 @@ public class CsvOutputUnivocity {
 					if (csvOptions.isIncludeHeaders()) {
 						csvWriter.writeHeaders(columnNames);
 					}
-					csvWriter.writeRows(listData);
+					for (List<Object> row : listData) {
+						csvWriter.processRecord(row.toArray(new Object[0]));
+					}
 				}
 				writer.write("</pre>");
 			} else {
@@ -232,7 +234,10 @@ public class CsvOutputUnivocity {
 							if (csvOptions.isIncludeHeaders()) {
 								csvWriter.writeHeaders(columnNames);
 							}
-							csvWriter.writeRows(listData);
+							for (List<Object> row : listData) {
+								csvWriter.processRecord(row.toArray(new Object[0]));
+							}
+							csvWriter.close();
 						}
 					} else if (reportFormat == ReportFormat.csvZip) {
 						String filename = FilenameUtils.getBaseName(fullOutputFileName);
@@ -249,7 +254,10 @@ public class CsvOutputUnivocity {
 								if (csvOptions.isIncludeHeaders()) {
 									csvWriter.writeHeaders(columnNames);
 								}
-								csvWriter.writeRows(listData);
+								for (List<Object> row : listData) {
+									csvWriter.processRecord(row.toArray(new Object[0]));
+								}
+								csvWriter.close();
 							}
 						}
 					}

@@ -19,6 +19,7 @@ package art.reportengine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import net.sf.reportengine.in.AbstractTableInput;
 import net.sf.reportengine.in.ColumnMetadata;
 import net.sf.reportengine.in.ColumnMetadataHolder;
@@ -38,6 +39,9 @@ public class ListTableInput extends AbstractTableInput implements ColumnMetadata
 	private int currentRow;
 
 	public ListTableInput(List<List<Object>> data, List<String> columnNames) {
+		Objects.requireNonNull(data, "data must not be null");
+		Objects.requireNonNull(columnNames, "columnNames must not be null");
+		
 		this.data = data;
 		rowCount = data.size();
 		for (String columnName : columnNames) {

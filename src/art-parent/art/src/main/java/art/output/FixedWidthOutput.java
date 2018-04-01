@@ -123,9 +123,6 @@ public class FixedWidthOutput {
 		ObjectMapper mapper = new ObjectMapper();
 		FixedWidthOptions fixedWidthOptions = mapper.readValue(options, FixedWidthOptions.class);
 
-		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
-		fixedWidthOptions.initializeProcessor(processor, locale);
-
 		FixedWidthFields fields;
 
 		List<Integer> fieldLengths = fixedWidthOptions.getFieldLengths();
@@ -271,6 +268,9 @@ public class FixedWidthOutput {
 
 		FixedWidthWriterSettings writerSettings = new FixedWidthWriterSettings(fields);
 
+		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
+		fixedWidthOptions.initializeProcessor(processor, locale);
+
 		writerSettings.setRowWriterProcessor(processor);
 		writerSettings.setHeaderWritingEnabled(fixedWidthOptions.isIncludeHeaders());
 		writerSettings.setUseDefaultPaddingForHeaders(fixedWidthOptions.isUseDefaultPaddingForHeaders());
@@ -300,10 +300,9 @@ public class FixedWidthOutput {
 				routines.write(resultSet, writer);
 			} else {
 				FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(writer, writerSettings);
-				if (fixedWidthOptions.isIncludeHeaders()) {
-					fixedWidthWriter.writeHeaders(dataColumnNames);
+				for (List<Object> row : listData) {
+					fixedWidthWriter.processRecord(row.toArray(new Object[0]));
 				}
-				fixedWidthWriter.writeRows(listData);
 			}
 			writer.println("</pre>");
 		} else {
@@ -313,10 +312,10 @@ public class FixedWidthOutput {
 						routines.write(resultSet, fout);
 					} else {
 						FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(fout, writerSettings);
-						if (fixedWidthOptions.isIncludeHeaders()) {
-							fixedWidthWriter.writeHeaders(dataColumnNames);
+						for (List<Object> row : listData) {
+							fixedWidthWriter.processRecord(row.toArray(new Object[0]));
 						}
-						fixedWidthWriter.writeRows(listData);
+						fixedWidthWriter.close();
 					}
 				} else if (reportFormat == ReportFormat.txtZip) {
 					String filename = FilenameUtils.getBaseName(fullOutputFileName);
@@ -327,10 +326,10 @@ public class FixedWidthOutput {
 							routines.write(resultSet, zout);
 						} else {
 							FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(zout, writerSettings);
-							if (fixedWidthOptions.isIncludeHeaders()) {
-								fixedWidthWriter.writeHeaders(dataColumnNames);
+							for (List<Object> row : listData) {
+								fixedWidthWriter.processRecord(row.toArray(new Object[0]));
 							}
-							fixedWidthWriter.writeRows(listData);
+							fixedWidthWriter.close();
 						}
 					}
 				}
