@@ -10,6 +10,8 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 
 <%-- https://www.versioneye.com/javascript/troolee:gridstack/0.2.5-dev --%>
@@ -263,7 +265,7 @@
 <script type="text/javascript">
 	//https://blogs.msdn.microsoft.com/ukadc/2010/02/12/handling-errors-with-jquery-load/
 	$(document).ajaxError(function (event, xhr, options) {
-		ajaxErrorHandler(xhr);
+		bootbox.alert("<b>${errorOccurredText}</b><br>" + xhr.responseText);
 	});
 
 	var token = $("meta[name='_csrf']").attr("content");
