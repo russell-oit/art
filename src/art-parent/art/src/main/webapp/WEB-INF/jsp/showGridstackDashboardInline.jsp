@@ -9,6 +9,7 @@
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
