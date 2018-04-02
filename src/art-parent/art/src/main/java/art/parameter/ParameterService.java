@@ -102,6 +102,7 @@ public class ParameterService {
 			parameter.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
 			parameter.setDefaultValue(rs.getString("DEFAULT_VALUE"));
 			parameter.setHidden(rs.getBoolean("HIDDEN"));
+			parameter.setFixedValue(rs.getBoolean("FIXED_VALUE"));
 			parameter.setShared(rs.getBoolean("SHARED"));
 			parameter.setUseLov(rs.getBoolean("USE_LOV"));
 			parameter.setUseRulesInLov(rs.getBoolean("USE_RULES_IN_LOV"));
@@ -181,6 +182,21 @@ public class ParameterService {
 		logger.debug("Entering getSharedParameters");
 
 		String sql = SQL_SELECT_ALL + " WHERE SHARED=1";
+		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
+		return dbService.query(sql, h);
+	}
+
+	/**
+	 * Returns fixed value parameters
+	 *
+	 * @return fixed value parameters
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public List<Parameter> getFixedValueParameters() throws SQLException {
+		logger.debug("Entering getFixedValueParameters");
+
+		String sql = SQL_SELECT_ALL + " WHERE FIXED_VALUE=1";
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
 		return dbService.query(sql, h);
 	}
@@ -279,11 +295,17 @@ public class ParameterService {
 		}
 
 		String sql;
-		
+
 		sql = "DELETE FROM ART_USER_PARAM_DEFAULTS WHERE PARAMETER_ID=?";
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_USER_GROUP_PARAM_DEFAULTS WHERE PARAMETER_ID=?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_USER_FIXED_PARAM_VAL WHERE PARAMETER_ID=?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_USER_GROUP_FIXED_PARAM_VAL WHERE PARAMETER_ID=?";
 		dbService.update(sql, id);
 
 		//finally delete parameter
@@ -492,11 +514,11 @@ public class ParameterService {
 			String sql = "INSERT INTO ART_PARAMETERS"
 					+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
 					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, DEFAULT_VALUE_REPORT_ID,"
-					+ " HIDDEN, SHARED, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
+					+ " HIDDEN, FIXED_VALUE, SHARED, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
 					+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION, PARAMETER_OPTIONS,"
 					+ " PARAMETER_DATE_FORMAT, PLACEHOLDER_TEXT, USE_DEFAULT_VALUE_IN_JOBS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 22) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 23) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -509,6 +531,7 @@ public class ParameterService {
 				parameter.getDefaultValue(),
 				defaultValueReportId,
 				BooleanUtils.toInteger(parameter.isHidden()),
+				BooleanUtils.toInteger(parameter.isFixedValue()),
 				BooleanUtils.toInteger(parameter.isShared()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
 				lovReportId,
@@ -531,7 +554,8 @@ public class ParameterService {
 		} else {
 			String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
 					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
-					+ " DEFAULT_VALUE_REPORT_ID=?, HIDDEN=?, SHARED=?, USE_LOV=?, LOV_REPORT_ID=?,"
+					+ " DEFAULT_VALUE_REPORT_ID=?, HIDDEN=?, FIXED_VALUE=?,"
+					+ " SHARED=?, USE_LOV=?, LOV_REPORT_ID=?,"
 					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
 					+ " PARAMETER_OPTIONS=?, PARAMETER_DATE_FORMAT=?, PLACEHOLDER_TEXT=?,"
 					+ " USE_DEFAULT_VALUE_IN_JOBS=?,"
@@ -548,6 +572,7 @@ public class ParameterService {
 				parameter.getDefaultValue(),
 				defaultValueReportId,
 				BooleanUtils.toInteger(parameter.isHidden()),
+				BooleanUtils.toInteger(parameter.isFixedValue()),
 				BooleanUtils.toInteger(parameter.isShared()),
 				BooleanUtils.toInteger(parameter.isUseLov()),
 				lovReportId,

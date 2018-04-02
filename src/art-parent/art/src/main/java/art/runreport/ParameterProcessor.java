@@ -19,6 +19,7 @@ package art.runreport;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.fixedparamvalue.FixedParamValueService;
 import art.paramdefault.ParamDefaultService;
 import art.parameter.Parameter;
 import art.report.ChartOptions;
@@ -245,7 +246,6 @@ public class ParameterProcessor {
 			}
 
 			SavedParameterService savedParameterService = new SavedParameterService();
-
 			int userId = user.getUserId();
 			Map<String, String[]> savedParamValues = savedParameterService.getSavedParameterValues(userId, report.getReportId());
 			if (MapUtils.isNotEmpty(savedParamValues)) {
@@ -256,6 +256,19 @@ public class ParameterProcessor {
 				if (showSelectedParametersSetting == null) {
 					passedValuesMap.remove("showSelectedParameters");
 				}
+			}
+		}
+
+		FixedParamValueService fixedParamValueService = new FixedParamValueService();
+		for (ReportParameter reportParam : reportParamsMap.values()) {
+			Parameter param = reportParam.getParameter();
+			int parameterId = param.getParameterId();
+			String paramName = param.getName();
+			String htmlParamName = ArtUtils.PARAM_PREFIX + paramName;
+			if (param.isFixedValue()) {
+				passedValuesMap.remove(htmlParamName);
+				Map<String, String[]> fixedParameterValues = fixedParamValueService.getFixedParameterValues(user, parameterId);
+				passedValuesMap.putAll(fixedParameterValues);
 			}
 		}
 

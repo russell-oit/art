@@ -233,6 +233,9 @@ public class UserGroupService {
 		
 		sql = "DELETE FROM ART_USER_GROUP_PARAM_DEFAULTS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_FIXED_PARAM_VAL WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
 
 		//finally delete user group
 		sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";

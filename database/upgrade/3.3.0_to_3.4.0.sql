@@ -6,6 +6,8 @@
 -- add jwt token expiry column
 -- create saved parameters table
 -- create param defaults tables
+-- add fixed value column to parameters table
+-- create fixed param values tables
 
 -- ------------------------------------------------
 
@@ -41,6 +43,27 @@ CREATE TABLE ART_USER_PARAM_DEFAULTS
 CREATE TABLE ART_USER_GROUP_PARAM_DEFAULTS
 (
 	PARAM_DEFAULT_KEY VARCHAR(50) NOT NULL,
+	USER_GROUP_ID INTEGER NOT NULL,
+	PARAMETER_ID INTEGER NOT NULL,
+	PARAM_VALUE VARCHAR(4000)
+);
+
+-- add fixed value column to parameters table
+ALTER TABLE ART_PARAMETERS ADD FIXED_VALUE INTEGER;
+UPDATE ART_PARAMETERS SET FIXED_VALUE=0;
+
+-- create fixed param values tables
+CREATE TABLE ART_USER_FIXED_PARAM_VAL
+(
+	FIXED_VALUE_KEY VARCHAR(50) NOT NULL,
+	USER_ID INTEGER NOT NULL,
+	PARAMETER_ID INTEGER NOT NULL,
+	PARAM_VALUE VARCHAR(4000)
+);
+
+CREATE TABLE ART_USER_GROUP_FIXED_PARAM_VAL
+(
+	FIXED_VALUE_KEY VARCHAR(50) NOT NULL,
 	USER_GROUP_ID INTEGER NOT NULL,
 	PARAMETER_ID INTEGER NOT NULL,
 	PARAM_VALUE VARCHAR(4000)

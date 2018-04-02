@@ -106,7 +106,7 @@ Display parameters
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 				$('#exportRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
@@ -235,6 +235,14 @@ Display parameters
 											<spring:message code="parameters.text.defaults"/>
 										</a>
 									</li>
+									<c:if test="${parameter.fixedValue}">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/parameterFixedParamValues?parameterId=${parameter.parameterId}">
+												<spring:message code="parameters.text.fixedValues"/>
+											</a>
+										</li>
+									</c:if>
 								</ul>
 							</div>
 						</td>

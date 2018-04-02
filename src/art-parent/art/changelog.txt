@@ -6,7 +6,8 @@ ART 3.4
 * Allow use of GroovyRowResult data with "usesGroovy" queries
 * Updated French translation (thanks to Pierre Blanchou)
 * Have job next run date consider holidays
-* Allow specifying of default values for users and user groups for parameters in the select report parameters page
+* Allow specifying of parameter default values for users and user groups
+* Allow parameters to use fixed values
 * Updated univocity-parsers, spring
 
 ART 3.3

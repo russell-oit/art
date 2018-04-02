@@ -27,6 +27,7 @@ import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.output.ColumnTypeDefinition;
 import art.output.ResultSetColumn;
+import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
@@ -189,6 +190,20 @@ public class RunReportHelper {
 		request.setAttribute("reportParams", reportParams);
 
 		ReportType reportType = report.getReportType();
+
+		boolean showSaveParameterSelection = false;
+		if (reportType.isChart()) {
+			showSaveParameterSelection = true;
+		} else {
+			for (ReportParameter reportParam : reportParamsList) {
+				Parameter param = reportParam.getParameter();
+				if (!param.isHidden() && !param.isFixedValue()) {
+					showSaveParameterSelection = true;
+					break;
+				}
+			}
+		}
+		request.setAttribute("showSaveParameterSelection", showSaveParameterSelection);
 
 		boolean enableReportFormats;
 		switch (reportType) {
@@ -1064,7 +1079,7 @@ public class RunReportHelper {
 
 	/**
 	 * Returns only the data component of data used for report generation
-	 * 
+	 *
 	 * @param data the data used for report generation
 	 * @return the data component of the data used for report generation
 	 */
@@ -1078,7 +1093,7 @@ public class RunReportHelper {
 			}
 			listData.add(rowData);
 		}
-		
+
 		return listData;
 	}
 
