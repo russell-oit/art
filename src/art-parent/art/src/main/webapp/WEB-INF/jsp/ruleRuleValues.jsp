@@ -16,7 +16,7 @@
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="ruleValues.message.valueRemoved" var="valueRemovedText"/>
+<spring:message code="page.message.valueRemoved" var="valueRemovedText"/>
 <spring:message code="page.action.remove" var="removeText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>

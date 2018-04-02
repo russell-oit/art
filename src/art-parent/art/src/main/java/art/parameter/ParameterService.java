@@ -279,6 +279,12 @@ public class ParameterService {
 		}
 
 		String sql;
+		
+		sql = "DELETE FROM ART_USER_PARAM_DEFAULTS WHERE PARAMETER_ID=?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_USER_GROUP_PARAM_DEFAULTS WHERE PARAMETER_ID=?";
+		dbService.update(sql, id);
 
 		//finally delete parameter
 		sql = "DELETE FROM ART_PARAMETERS WHERE PARAMETER_ID=?";

@@ -229,6 +229,12 @@ Display parameters
 											<spring:message code="page.text.usage"/>
 										</a>
 									</li>
+									<li>
+										<a 
+											href="${pageContext.request.contextPath}/parameterParamDefaults?parameterId=${parameter.parameterId}">
+											<spring:message code="parameters.text.defaults"/>
+										</a>
+									</li>
 								</ul>
 							</div>
 						</td>

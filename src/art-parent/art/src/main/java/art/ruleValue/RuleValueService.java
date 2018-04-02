@@ -224,14 +224,14 @@ public class RuleValueService {
 				+ " WHERE USER_ID=? AND RULE_ID=? AND RULE_VALUE=?";
 
 		ResultSetHandler<Number> h = new ScalarHandler<>();
-		Number recordCountNumber;
+		Number recordCount;
 		if (conn == null) {
-			recordCountNumber = dbService.query(sql, h, userId, ruleId, ruleValue);
+			recordCount = dbService.query(sql, h, userId, ruleId, ruleValue);
 		} else {
-			recordCountNumber = dbService.query(conn, sql, h, userId, ruleId, ruleValue);
+			recordCount = dbService.query(conn, sql, h, userId, ruleId, ruleValue);
 		}
 
-		if (recordCountNumber == null || recordCountNumber.longValue() == 0) {
+		if (recordCount == null || recordCount.longValue() == 0) {
 			return false;
 		} else {
 			return true;
@@ -336,14 +336,14 @@ public class RuleValueService {
 				+ " WHERE USER_GROUP_ID=? AND RULE_ID=? AND RULE_VALUE=?";
 
 		ResultSetHandler<Number> h = new ScalarHandler<>();
-		Number recordCountNumber;
+		Number recordCount;
 		if (conn == null) {
-			recordCountNumber = dbService.query(sql, h, userGroupId, ruleId, ruleValue);
+			recordCount = dbService.query(sql, h, userGroupId, ruleId, ruleValue);
 		} else {
-			recordCountNumber = dbService.query(conn, sql, h, userGroupId, ruleId, ruleValue);
+			recordCount = dbService.query(conn, sql, h, userGroupId, ruleId, ruleValue);
 		}
 
-		if (recordCountNumber == null || recordCountNumber.longValue() == 0) {
+		if (recordCount == null || recordCount.longValue() == 0) {
 			return false;
 		} else {
 			return true;
@@ -397,7 +397,7 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Deletes all user rule values
+	 * Deletes rule values for a given rule
 	 *
 	 * @param users user identifiers in the format user id-username
 	 * @param userGroups user group ids

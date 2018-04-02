@@ -1,9 +1,7 @@
 <%-- 
-    Document   : ruleValues
-    Created on : 19-May-2014, 11:28:15
+    Document   : parameterParamDefaults
+    Created on : 02-Apr-2018, 13:15:57
     Author     : Timothy Anyona
-
-Display rule values
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -14,7 +12,7 @@ Display rule values
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.ruleValues" var="pageTitle"/>
+<spring:message code="page.title.parameterParamDefaults" var="pageTitle"/>
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
@@ -23,7 +21,7 @@ Display rule values
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
@@ -32,9 +30,9 @@ Display rule values
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="ruleValuesConfig"]').parent().addClass('active');
+				$('a[href*="parameters"]').parent().addClass('active');
 
-				var tbl = $('#values');
+				var tbl = $('#defaults');
 				
 				var columnFilterRow = createColumnFilters(tbl);
 
@@ -79,7 +77,7 @@ Display rule values
 								$.ajax({
 									type: "POST",
 									dataType: "json",
-									url: "${pageContext.request.contextPath}/deleteRuleValue",
+									url: "${pageContext.request.contextPath}/deleteParamDefault",
 									data: {id: recordId},
 									success: function (response) {
 										if (response.success) {
@@ -95,7 +93,6 @@ Display rule values
 						} //end callback
 					}); //end bootbox confirm
 				});
-
 			});
 		</script>
 	</jsp:attribute>
@@ -119,32 +116,34 @@ Display rule values
 
 		<div id="ajaxResponse">
 		</div>
+		
+		<div class="text-center">
+			<b><spring:message code="page.text.parameter"/>:</b> ${encode:forHtmlContent(parameter.name)} (${parameter.parameterId})
+		</div>
 
-		<table id="values" class="table table-striped table-bordered">
+		<table id="defaults" class="table table-striped table-bordered">
 			<thead>
 				<tr>
 					<th><spring:message code="page.text.user"/></th>
 					<th><spring:message code="page.text.userGroup"/></th>
-					<th><spring:message code="page.text.rule"/></th>
 					<th><spring:message code="page.text.value"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="userRuleValue" items="${userRuleValues}">
-					<tr data-name="${encode:forHtmlAttribute(userRuleValue.user.username)} -
-						${encode:forHtmlAttribute(userRuleValue.rule.name)} -
-						${encode:forHtmlAttribute(userRuleValue.ruleValue)}"
-						data-id="userRuleValue~${encode:forHtmlAttribute(userRuleValue.ruleValueKey)}">
+				<c:forEach var="userParamDefault" items="${userParamDefaults}">
+					<tr data-name="${encode:forHtmlAttribute(userParamDefault.user.username)} -
+						${encode:forHtmlAttribute(userParamDefault.parameter.name)} (${userParamDefault.parameter.parameterId}) -
+						${encode:forHtmlAttribute(userParamDefault.value)}"
+						data-id="userParamDefault~${encode:forHtmlAttribute(userParamDefault.paramDefaultKey)}">
 
-						<td><encode:forHtmlContent value="${userRuleValue.user.username}"/></td>
+						<td><encode:forHtmlContent value="${userParamDefault.user.username}"/></td>
 						<td></td>
-						<td><encode:forHtmlContent value="${userRuleValue.rule.name}"/></td>
-						<td><encode:forHtmlContent value="${userRuleValue.ruleValue}"/></td>
+						<td><encode:forHtmlContent value="${userParamDefault.value}"/></td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/editUserRuleValue?id=${userRuleValue.ruleValueKey}">
+								   href="${pageContext.request.contextPath}/editUserParamDefault?id=${userParamDefault.paramDefaultKey}&returnParameterId=${parameter.parameterId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>
@@ -157,20 +156,19 @@ Display rule values
 					</tr>
 				</c:forEach>
 
-				<c:forEach var="userGroupRuleValue" items="${userGroupRuleValues}">
-					<tr data-name="${encode:forHtmlAttribute(userGroupRuleValue.userGroup.name)} -
-						${encode:forHtmlAttribute(userGroupRuleValue.rule.name)} - 
-						${encode:forHtmlAttribute(userGroupRuleValue.ruleValue)}"
-						data-id="userGroupRuleValue~${encode:forHtmlAttribute(userGroupRuleValue.ruleValueKey)}">
+				<c:forEach var="userGroupParamDefault" items="${userGroupParamDefaults}">
+					<tr data-name="${encode:forHtmlAttribute(userGroupParamDefault.userGroup.name)} -
+						${encode:forHtmlAttribute(userGroupParamDefault.parameter.name)} (${userGroupParamDefault.parameter.parameterId}) - 
+						${encode:forHtmlAttribute(userGroupParamDefault.value)}"
+						data-id="userGroupParamDefault~${encode:forHtmlAttribute(userGroupParamDefault.paramDefaultKey)}">
 
 						<td></td>
-						<td><encode:forHtmlContent value="${userGroupRuleValue.userGroup.name}"/></td>
-						<td><encode:forHtmlContent value="${userGroupRuleValue.rule.name}"/></td>
-						<td><encode:forHtmlContent value="${userGroupRuleValue.ruleValue}"/></td>
+						<td><encode:forHtmlContent value="${userGroupParamDefault.userGroup.name}"/></td>
+						<td><encode:forHtmlContent value="${userGroupParamDefault.value}"/></td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/editUserGroupRuleValue?id=${userGroupRuleValue.ruleValueKey}">
+								   href="${pageContext.request.contextPath}/editUserGroupParamDefault?id=${userGroupParamDefault.paramDefaultKey}&returnParameterId=${parameter.parameterId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

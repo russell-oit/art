@@ -1,9 +1,7 @@
 <%-- 
-    Document   : ruleValuesConfig
-    Created on : 19-May-2014, 15:46:14
+    Document   : paramDefaultsConfig
+    Created on : 01-Apr-2018, 19:47:56
     Author     : Timothy Anyona
-
-Configure rule value
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -14,7 +12,7 @@ Configure rule value
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.ruleValuesConfiguration" var="pageTitle"/>
+<spring:message code="page.title.paramDefaultsConfiguration" var="pageTitle"/>
 
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.valuesRemoved" var="valuesRemovedText"/>
@@ -38,48 +36,48 @@ Configure rule value
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
-		
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="ruleValuesConfig"]').parent().addClass('active');
-				
+				$('a[href*="paramDefaultsConfig"]').parent().addClass('active');
+
 				$('.multi-select').multiSelect({
 					selectableHeader: "<div>${availableText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
 					selectionHeader: "<div>${selectedText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
-					afterInit: function(ms) {
+					afterInit: function (ms) {
 						var that = this,
 								$selectableSearch = that.$selectableUl.prev(),
 								$selectionSearch = that.$selectionUl.prev(),
 								selectableSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selectable:not(.ms-selected)',
 								selectionSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selection.ms-selected';
 						that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-								.on('keydown', function(e) {
+								.on('keydown', function (e) {
 									if (e.which === 40) {
 										that.$selectableUl.focus();
 										return false;
 									}
 								});
 						that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
-								.on('keydown', function(e) {
+								.on('keydown', function (e) {
 									if (e.which === 40) {
 										that.$selectionUl.focus();
 										return false;
 									}
 								});
 					},
-					afterSelect: function() {
+					afterSelect: function () {
 						this.qs1.cache();
 						this.qs2.cache();
 					},
-					afterDeselect: function() {
+					afterDeselect: function () {
 						this.qs1.cache();
 						this.qs2.cache();
 					}
 				}); //end multiselect
-				
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
@@ -92,35 +90,35 @@ Configure rule value
 					delay: 100
 				});
 
-				$('#actionsDiv').on('click', '.updateValues', function() {
+				$('#actionsDiv').on('click', '.updateDefaults', function () {
 					var action = $(this).data('action');
 
 					var users = $('#users').val();
 					var userGroups = $('#userGroups').val();
-					var rule = $('#rule').val();
-					var ruleValue = $('#ruleValue').val();
-					
+					var parameter = $('#parameter').val();
+					var value = $('#value').val();
+
 					if (users === null && userGroups === null) {
 						bootbox.alert("${selectUserOrUserGroupText}");
 						return;
 					}
 
-					var valuesUpdatedMessage;
+					var defaultsUpdatedMessage;
 					if (action === 'add') {
-						valuesUpdatedMessage = "${valueAddedText}";
+						defaultsUpdatedMessage = "${valueAddedText}";
 					} else {
-						valuesUpdatedMessage = "${valuesRemovedText}";
+						defaultsUpdatedMessage = "${valuesRemovedText}";
 					}
 
 					$.ajax({
 						type: "POST",
 						dataType: "json",
-						url: "${pageContext.request.contextPath}/updateRuleValue",
+						url: "${pageContext.request.contextPath}/updateParamDefault",
 						data: {action: action, users: users, userGroups: userGroups,
-							rule: rule, ruleValue: ruleValue},
-						success: function(response) {
+							parameter: parameter, value: value},
+						success: function (response) {
 							if (response.success) {
-								notifyActionSuccess(valuesUpdatedMessage);
+								notifyActionSuccess(defaultsUpdatedMessage);
 							} else {
 								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
 							}
@@ -160,7 +158,7 @@ Configure rule value
 					<div class="col-md-9">
 						<select name="users" id="users" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="user" items="${users}">
-								<option value="${user.userId}-${encode:forHtmlAttribute(user.username)}">
+								<option value="${user.userId}">
 									<encode:forHtmlContent value="${user.username}"/>
 								</option>
 							</c:forEach>
@@ -186,39 +184,39 @@ Configure rule value
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="rule">
-						<spring:message code="page.text.rule"/>
+					<label class="control-label col-md-3" for="parameter">
+						<spring:message code="page.text.parameter"/>
 					</label>
 					<div class="col-md-9">
-						<select name="rule" id="rule" class="form-control selectpicker">
-							<c:forEach var="rule" items="${rules}">
-								<option value="${rule.ruleId}-${encode:forHtmlAttribute(rule.name)}">
-									<encode:forHtmlContent value="${rule.name}"/>
+						<select name="parameter" id="parameter" class="form-control selectpicker">
+							<c:forEach var="parameter" items="${parameters}">
+								<option value="${parameter.parameterId}">
+									${encode:forHtmlContent(parameter.name)} (${parameter.parameterId})
 								</option>
 							</c:forEach>
 						</select>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="ruleValue">
+					<label class="control-label col-md-3" for="value">
 						<spring:message code="page.text.value"/>
 					</label>
 					<div class="col-md-9">
-						<input type="text" name="ruleValue" id="ruleValue"
-							   maxlength="100" class="form-control">
+						<textarea rows="4" class="form-control"
+								  name="value" id="value"></textarea>
 					</div>
 				</div>
 				<div class="form-group">
 					<div class="col-md-12">
 						<div id="actionsDiv" class="pull-right">
 							<a class="btn btn-default" 
-							   href="${pageContext.request.contextPath}/ruleValues">
+							   href="${pageContext.request.contextPath}/paramDefaults">
 								<spring:message code="page.action.show"/>
 							</a>
-							<button type="button" class="btn btn-default updateValues" data-action="add">
+							<button type="button" class="btn btn-default updateDefaults" data-action="add">
 								<spring:message code="page.action.add"/>
 							</button>
-							<button type="button" class="btn btn-default updateValues" data-action="removeAll">
+							<button type="button" class="btn btn-default updateDefaults" data-action="removeAll">
 								<spring:message code="page.action.removeAll"/>
 							</button>
 						</div>

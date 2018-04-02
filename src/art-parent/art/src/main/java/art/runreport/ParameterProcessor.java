@@ -19,6 +19,7 @@ package art.runreport;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.paramdefault.ParamDefaultService;
 import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.report.Report;
@@ -193,7 +194,7 @@ public class ParameterProcessor {
 			reportParamsMap.put(reportParam.getParameter().getName(), reportParam);
 		}
 
-		setPassedParameterValues(passedValuesMap, reportParamsMap, user.getUserId(), report);
+		setPassedParameterValues(passedValuesMap, reportParamsMap, user, report);
 
 		setActualParameterValues(reportParamsList);
 
@@ -223,24 +224,34 @@ public class ParameterProcessor {
 	 *
 	 * @param passedValuesMap the passed values
 	 * @param reportParamsMap the report parameters
-	 * @param userId the id of the user who is running the report
+	 * @param user the user who is running the report
 	 * @param report the report being run
 	 */
 	private void setPassedParameterValues(Map<String, String[]> passedValuesMap,
-			Map<String, ReportParameter> reportParamsMap, int userId, Report report) throws SQLException {
+			Map<String, ReportParameter> reportParamsMap, User user, Report report) throws SQLException {
 
-		logger.debug("Entering setPassedParameterValues: userId={}, report={}", userId, report);
+		logger.debug("Entering setPassedParameterValues: user={}, report={}", user, report);
 
 		if (useSavedValues) {
 			if (report.isParametersInOutput()) {
 				passedValuesMap.put("showSelectedParameters", new String[]{"true"});
 			}
 
+			ParamDefaultService paramDefaultService = new ParamDefaultService();
+			for (ReportParameter reportParam : reportParamsMap.values()) {
+				int parameterId = reportParam.getParameter().getParameterId();
+				Map<String, String[]> parameterDefaultValues = paramDefaultService.getParameterDefaultValues(user, parameterId);
+				passedValuesMap.putAll(parameterDefaultValues);
+			}
+
 			SavedParameterService savedParameterService = new SavedParameterService();
+
+			int userId = user.getUserId();
 			Map<String, String[]> savedParamValues = savedParameterService.getSavedParameterValues(userId, report.getReportId());
 			if (MapUtils.isNotEmpty(savedParamValues)) {
 				//https://stackoverflow.com/questions/40480/is-java-pass-by-reference-or-pass-by-value?noredirect=1&lq=1
 				passedValuesMap.putAll(savedParamValues);
+
 				String[] showSelectedParametersSetting = savedParamValues.get("showSelectedParameters");
 				if (showSelectedParametersSetting == null) {
 					passedValuesMap.remove("showSelectedParameters");

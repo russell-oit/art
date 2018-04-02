@@ -150,6 +150,13 @@ Header that appears at the top of all pages, except the login and logs pages
 										</a>
 									</li>
 								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 30}">
+									<li>
+										<a href="${pageContext.request.contextPath}/paramDefaultsConfig">
+											<spring:message code="page.title.paramDefaults"/>
+										</a>
+									</li>
+								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 80}">
 									<li>
 										<a href="${pageContext.request.contextPath}/rules">

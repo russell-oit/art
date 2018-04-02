@@ -341,6 +341,9 @@ public class UserService {
 		
 		sql = "DELETE FROM ART_SAVED_PARAMETERS WHERE USER_ID=?";
 		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_PARAM_DEFAULTS WHERE USER_ID=?";
+		dbService.update(sql, id);
 
 		//lastly, delete user
 		sql = "DELETE FROM ART_USERS WHERE USER_ID=?";

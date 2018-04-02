@@ -491,6 +491,11 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.equals(page, "paramDefaults") || StringUtils.endsWith(page, "ParamDefault")
+				|| StringUtils.equals(page, "paramDefaultsConfig") || StringUtils.endsWith(page, "ParamDefaults")) {
+			if (accessLevel >= AccessLevel.MidAdmin.getValue()) {
+				authorised = true;
+			}
 		} else if (StringUtils.equals(page, "reportParameterConfig")
 				|| StringUtils.endsWith(page, "ReportParameter")
 				|| StringUtils.endsWith(page, "ReportParameters")) {
