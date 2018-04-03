@@ -281,20 +281,21 @@ public class DrilldownService {
 				affectedRows = dbService.update(conn, sql, values);
 			}
 		} else {
-			String sql = "UPDATE ART_DRILLDOWN_QUERIES SET QUERY_ID=?, DRILLDOWN_QUERY_ID=?,"
-					+ " DRILLDOWN_QUERY_POSITION=?, DRILLDOWN_TITLE=?, DRILLDOWN_TEXT=?,"
+			String sql = "UPDATE ART_DRILLDOWN_QUERIES SET DRILLDOWN_QUERY_ID=?,"
+					+ " DRILLDOWN_TITLE=?, DRILLDOWN_TEXT=?,"
 					+ " OUTPUT_FORMAT=?, OPEN_IN_NEW_WINDOW=?"
-					+ " WHERE DRILLDOWN_ID=?";
+					+ " WHERE DRILLDOWN_ID=?"
+					+ " AND QUERY_ID=? AND DRILLDOWN_QUERY_POSITION=?";
 
 			Object[] values = {
-				drilldown.getParentReportId(),
 				drilldown.getDrilldownReport().getReportId(),
-				drilldown.getPosition(),
 				drilldown.getHeaderText(),
 				drilldown.getLinkText(),
 				drilldown.getReportFormat(),
 				BooleanUtils.toInteger(drilldown.isOpenInNewWindow()),
-				drilldown.getDrilldownId()
+				drilldown.getDrilldownId(),
+				drilldown.getParentReportId(),
+				drilldown.getPosition()
 			};
 
 			if (conn == null) {
