@@ -339,7 +339,7 @@ Reports configuration page
 										<c:if test="${report.reportType.canSchedule()}">
 										<li>
 											<a 
-												href="${pageContext.request.contextPath}/addJob?reportId=${report.reportId}">
+												href="${pageContext.request.contextPath}/addJob?reportId=${report.reportId}&nextPage=jobsConfig">
 												<spring:message code="reports.action.schedule"/>
 											</a>
 										</li>
