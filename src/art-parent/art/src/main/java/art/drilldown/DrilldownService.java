@@ -285,7 +285,7 @@ public class DrilldownService {
 					+ " DRILLDOWN_TITLE=?, DRILLDOWN_TEXT=?,"
 					+ " OUTPUT_FORMAT=?, OPEN_IN_NEW_WINDOW=?"
 					+ " WHERE DRILLDOWN_ID=?"
-					+ " AND QUERY_ID=? AND DRILLDOWN_QUERY_POSITION=?";
+					+ " AND QUERY_ID=? AND DRILLDOWN_QUERY_POSITION=?"; //primary key was query_id and position
 
 			Object[] values = {
 				drilldown.getDrilldownReport().getReportId(),
