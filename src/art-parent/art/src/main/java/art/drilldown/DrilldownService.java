@@ -265,7 +265,7 @@ public class DrilldownService {
 					+ " VALUES(" + StringUtils.repeat("?", ",", 8) + ")";
 
 			Object[] values = {
-				drilldown.getDrilldownId(),
+				newRecordId,
 				drilldown.getParentReportId(),
 				drilldown.getDrilldownReport().getReportId(),
 				drilldown.getPosition(),
