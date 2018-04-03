@@ -430,7 +430,7 @@ public class DatasourceService {
 
 		String sql = "SELECT NAME"
 				+ " FROM ART_QUERIES"
-				+ " WHERE DATABASE_ID=?";
+				+ " WHERE DATASOURCE_ID=?";
 
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("NAME");
 		return dbService.query(sql, h, datasourceId);

@@ -342,7 +342,7 @@ public class ReportJob implements org.quartz.Job {
 				mailer.setDebug(logger.isDebugEnabled());
 
 				String[] emailsArray = separateEmails(errorNotificationTo);
-				String subject = "ART [Error]: " + job.getName() + " (" + jobId + ")";
+				String subject = "ART [Job Error]: " + job.getName() + " (" + jobId + ")";
 
 				mailer.setTo(emailsArray);
 				mailer.setFrom(Config.getSettings().getErrorNotificationFrom());
