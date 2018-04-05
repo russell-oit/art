@@ -806,9 +806,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 					switch (secondaryChart.getReportType()) {
 						case LineChart:
 							LineAndShapeRenderer lineAndShapeRenderer = new LineAndShapeRenderer();
-							if (showPoints) {
-								lineAndShapeRenderer.setBaseShapesVisible(true);
-							}
+							lineAndShapeRenderer.setBaseShapesVisible(showPoints);
 							categoryRenderer = lineAndShapeRenderer;
 							break;
 						default:
@@ -833,9 +831,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				ReportType secondaryReportType = secondaryChart.getReportType();
 				if (secondaryReportType.isXYPlotChart()) {
 					StandardXYItemRenderer standardXYItemRenderer = new StandardXYItemRenderer();
-					if (showPoints) {
-						standardXYItemRenderer.setBaseShapesVisible(true);
-					}
+					standardXYItemRenderer.setBaseShapesVisible(showPoints);
 					xyRenderer = standardXYItemRenderer;
 				} else {
 					throw new IllegalArgumentException("Invalid secondary chart: " + secondaryChart.getTitle());

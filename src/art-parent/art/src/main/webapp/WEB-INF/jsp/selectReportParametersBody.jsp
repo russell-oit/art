@@ -56,7 +56,10 @@ Display section to allow selecting of report parameters and initiate running of 
 					}
 				},
 				error: function (xhr, status, error) {
-					bootbox.alert("<b>${errorOccurredText}</b><br>" + xhr.responseText);
+					bootbox.alert({
+						title: '${errorOccurredText}',
+						message: xhr.responseText
+					});
 				}
 			});
 		});
@@ -86,7 +89,10 @@ Display section to allow selecting of report parameters and initiate running of 
 				},
 				error: function (xhr, status, error) {
 					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
-					bootbox.alert("<b>${errorOccurredText}</b><br>" + xhr.responseText);
+					bootbox.alert({
+						title: '${errorOccurredText}',
+						message: xhr.responseText
+					});
 					$('.action').prop('disabled', false);
 				}
 			});
@@ -109,7 +115,10 @@ Display section to allow selecting of report parameters and initiate running of 
 					}
 				},
 				error: function (xhr, status, error) {
-					bootbox.alert("<b>${errorOccurredText}</b><br>" + xhr.responseText);
+					bootbox.alert({
+						title: '${errorOccurredText}',
+						message: xhr.responseText
+					});
 				}
 			});
 		});
@@ -133,7 +142,10 @@ Display section to allow selecting of report parameters and initiate running of 
 					}
 				},
 				error: function (xhr, status, error) {
-					bootbox.alert("<b>${errorOccurredText}</b><br>" + xhr.responseText);
+					bootbox.alert({
+						title: '${errorOccurredText}',
+						message: xhr.responseText
+					});
 				}
 			});
 		});

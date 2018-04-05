@@ -8,6 +8,7 @@ ART 3.4
 * Have job next run date consider holidays
 * Allow specifying of parameter default values for users and user groups
 * Allow parameters to use fixed values
+* Fix for secondary charts not being used
 * Updated univocity-parsers, spring
 
 ART 3.3

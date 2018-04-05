@@ -137,6 +137,7 @@ public class ReportService {
 			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
 			report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));
 			report.setChartOptionsSetting(rs.getString("GRAPH_OPTIONS"));
+			report.setSecondaryCharts(rs.getString("SECONDARY_CHARTS"));
 			report.setTemplate(rs.getString("TEMPLATE"));
 			report.setDisplayResultset(rs.getInt("DISPLAY_RESULTSET"));
 			report.setXmlaDatasource(rs.getString("XMLA_DATASOURCE"));
