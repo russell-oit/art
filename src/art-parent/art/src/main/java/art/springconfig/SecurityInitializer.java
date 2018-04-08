@@ -19,6 +19,7 @@ package art.springconfig;
 
 import javax.servlet.ServletContext;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.multipart.support.MultipartFilter;
 
 /**
@@ -32,6 +33,13 @@ public class SecurityInitializer extends AbstractSecurityWebApplicationInitializ
 	protected void beforeSpringSecurityFilterChain(ServletContext servletContext) {
 		//https://victommasi.wordpress.com/2016/12/20/how-to-handle-multpart-file-upload-with-spring-security-csrf-protection-no-xml/
 		//https://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html#csrf-multipart
-		insertFilters(servletContext, new MultipartFilter());
+		//https://stackoverflow.com/questions/20863489/characterencodingfilter-dont-work-together-with-spring-security-3-2-0
+		//https://github.com/spring-projects/spring-security/issues/4334
+		//https://github.com/spring-projects/spring-boot/issues/1640
+		CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
+		characterEncodingFilter.setEncoding("UTF-8");
+		characterEncodingFilter.setForceEncoding(true);
+
+		insertFilters(servletContext, characterEncodingFilter, new MultipartFilter());
 	}
 }
