@@ -42,6 +42,7 @@ import groovy.lang.Binding;
 import groovy.lang.GString;
 import groovy.lang.GroovyShell;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -974,6 +975,14 @@ public class ReportRunner {
 
 		String querySql = querySb.toString();
 
+		DatabaseMetaData dmd = connQuery.getMetaData();
+		logger.debug("dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE) = {}", dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE));
+		if (!dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
+			if (reportType == ReportType.Group) {
+				throw new IllegalStateException("Database doesn't support scrollable resultsets. Group reports require a scrollable resultset.");
+			}
+			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+		}
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
 		if (applyFetchSize) {
