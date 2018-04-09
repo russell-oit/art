@@ -32,11 +32,8 @@ import java.awt.geom.Rectangle2D;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.JFreeChart;
 import org.slf4j.Logger;
@@ -58,23 +55,25 @@ public class PdfChart {
 	 * @param chart the chart object, not null
 	 * @param filename the full file path to use, not null
 	 * @param title the chart title, or null, or blank
-	 * @param dynaData the resultset data to be displayed with the chart image
 	 * @param reportParamsList the report parameters to be displayed, or null or
 	 * empty
 	 * @param report the report for the chart, not null
 	 * @param pdfPageNumbers whether page numbers should be included in pdf
-	 * @param showListData whether to show the non-resultset data
-	 * @param listData the non-resultset data output
+	 * @param groovyData the groovy data to be displayed with the chart image
+	 * @param resultSetColumnNames the resultset column names to be displayed
+	 * with the chart image
+	 * @param resultSetData the resultset data to be displayed with the chart
+	 * image
 	 * @throws java.io.IOException
 	 */
 	public static void generatePdf(JFreeChart chart, String filename, String title,
-			RowSetDynaClass dynaData, java.util.List<ReportParameter> reportParamsList,
-			Report report, boolean pdfPageNumbers, boolean showListData,
-			Object listData) throws IOException {
+			java.util.List<ReportParameter> reportParamsList,
+			Report report, boolean pdfPageNumbers, Object groovyData,
+			java.util.List<String> resultSetColumnNames,
+			java.util.List<Map<String, Object>> resultSetData) throws IOException {
 
 		logger.debug("Entering generatePdf: filename='{}', title='{}', report={}, "
-				+ "pdfPageNumbers={}, showListData={}", filename, title, report,
-				pdfPageNumbers, showListData);
+				+ "pdfPageNumbers={}", filename, title, report, pdfPageNumbers);
 
 		Objects.requireNonNull(chart, "chart must not be null");
 		Objects.requireNonNull(filename, "filename must not be null");
@@ -157,18 +156,13 @@ public class PdfChart {
 			document.add(chartImage);
 
 			//display chart data below chart if so required
-			if (dynaData != null || (showListData && listData != null)) {
+			if (resultSetColumnNames != null || groovyData != null) {
 				java.util.List<String> columnNames;
 				java.util.List<? extends Object> dataList = null;
-				if (dynaData != null) {
-					columnNames = new ArrayList<>();
-					DynaProperty[] columns = dynaData.getDynaProperties();
-					for (DynaProperty column : columns) {
-						String columnName = column.getName();
-						columnNames.add(columnName);
-					}
+				if (resultSetColumnNames != null) {
+					columnNames = resultSetColumnNames;
 				} else {
-					GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(listData);
+					GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
 					columnNames = dataDetails.getColumnNames();
 					dataList = dataDetails.getDataList();
 				}
@@ -188,9 +182,8 @@ public class PdfChart {
 				}
 
 				//output data values
-				if (dynaData != null) {
-					java.util.List<DynaBean> rows = dynaData.getRows();
-					for (DynaBean row : rows) {
+				if (resultSetData != null) {
+					for (Map<String, Object> row : resultSetData) {
 						for (String columnName : columnNames) {
 							String columnValue = String.valueOf(row.get(columnName));
 							PdfPCell cell = new PdfPCell(new Paragraph(fsBody.process(columnValue + ""))); //add empty string to prevent NPE if value is null

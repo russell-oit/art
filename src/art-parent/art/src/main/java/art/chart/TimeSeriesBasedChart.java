@@ -26,8 +26,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -123,17 +125,38 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			}
 		}
 
+		resultSetColumnNames = new ArrayList<>();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			resultSetColumnNames.add(columnName);
+		}
+
+		resultSetData = new ArrayList<>();
+
 		int recordCount = 0;
 		while (rs.next()) {
+			resultSetRecordCount++;
+
+			Map<String, Object> row = new LinkedHashMap<>();
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				Object data = rs.getObject(i);
+				row.put(columnName, data);
+			}
+
+			if (includeDataInOutput) {
+				resultSetData.add(row);
+			}
+
 			recordCount++;
 
 			Date date;
 			switch (reportType) {
 				case TimeSeriesChart:
-					date = rs.getTimestamp(1);
+					date = RunReportHelper.getDateTimeRowValue(row, 1, resultSetColumnNames);
 					break;
 				case DateSeriesChart:
-					date = rs.getDate(1);
+					date = RunReportHelper.getDateRowValue(row, 1, resultSetColumnNames);
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected report type: " + reportType);
@@ -141,8 +164,8 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 
 			if (dynamicSeries) {
 				//series name is the contents of the second column
-				String seriesName = rs.getString(2 + hop);
-				double yValue = rs.getDouble(3 + hop);
+				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop, resultSetColumnNames);
+				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop, resultSetColumnNames);
 
 				//set series name
 				int seriesIndex;
@@ -166,15 +189,15 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 				}
 				itemIndices.put(seriesName, itemIndex);
 
-				addData(rs, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
+				addData(row, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
 			} else {
 				int itemIndex = recordCount - 1; //-1 to get zero-based index
 
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
-					String seriesName = rsmd.getColumnLabel(columnIndex);
-					double yValue = rs.getDouble(columnIndex);
-					addData(rs, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
+					String seriesName = resultSetColumnNames.get(columnIndex - 1);
+					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex, resultSetColumnNames);
+					addData(row, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
 				}
 			}
 		}
@@ -285,48 +308,6 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		}
 
 		setDataset(dataset);
-	}
-
-	/**
-	 * Adds data to the dataset
-	 *
-	 * @param rs the resultset with the current row of data
-	 * @param finalSeries the dataset to populate
-	 * @param seriesIndex the series index
-	 * @param itemIndex the item index
-	 * @param yValue the y value
-	 * @param date the date
-	 * @param seriesName the series name
-	 * @throws SQLException
-	 */
-	private void addData(ResultSet rs, Map<Integer, TimeSeries> finalSeries,
-			int seriesIndex, int itemIndex, double yValue, Date date, String seriesName) throws SQLException {
-
-		//add dataset value
-		switch (reportType) {
-			case TimeSeriesChart:
-				finalSeries.get(seriesIndex).add(new Millisecond(date), yValue);
-				break;
-			case DateSeriesChart:
-				finalSeries.get(seriesIndex).add(new Day(date), yValue);
-				break;
-			default:
-				throw new IllegalArgumentException("Unexpected report type: " + reportType);
-		}
-
-		//use series index and item index to identify url in hashmap
-		//to ensure correct link will be returned by the generatelink() method. 
-		//use series index instead of name because the generateLink() method uses series indices
-		String linkId = String.valueOf(seriesIndex) + String.valueOf(itemIndex);
-
-		//add hyperlink if required
-		addHyperLink(rs, linkId);
-
-		//add drilldown link if required
-		//drill down on col 1 = y value (data value)
-		//drill down on col 2 = x value (date)
-		//drill down on col 3 = series name
-		addDrilldownLink(linkId, yValue, date, seriesName);
 	}
 
 	/**

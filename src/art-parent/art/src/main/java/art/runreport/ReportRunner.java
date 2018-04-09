@@ -975,6 +975,9 @@ public class ReportRunner {
 
 		String querySql = querySb.toString();
 
+		//https://stackoverflow.com/questions/45576157/does-resultset-returned-by-redshift-supports-resetting-iterator
+		//https://stackoverflow.com/questions/40496316/sqlfeaturenotsupportedexception-on-amazon-redshift
+		//http://www.java2s.com/Code/Java/Database-SQL-JDBC/DeterminingIfaDatabaseSupportsScrollableResultSets.htm
 		DatabaseMetaData dmd = connQuery.getMetaData();
 		logger.debug("dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE) = {}", dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE));
 		if (!dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
@@ -983,6 +986,7 @@ public class ReportRunner {
 			}
 			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 		}
+		
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
 		if (applyFetchSize) {

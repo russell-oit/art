@@ -22,9 +22,13 @@ import art.runreport.RunReportHelper;
 import net.sf.cewolfart.links.PieSectionLinkGenerator;
 import net.sf.cewolfart.tooltips.PieToolTipGenerator;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
@@ -68,24 +72,32 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
 
+		resultSetColumnNames = new ArrayList<>();
+		ResultSetMetaData rsmd = rs.getMetaData();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			resultSetColumnNames.add(columnName);
+		}
+
+		resultSetData = new ArrayList<>();
+
 		//resultset structure
 		//category, value [, link]
 		while (rs.next()) {
-			String category = rs.getString(1);
-			double value = rs.getDouble(2);
+			resultSetRecordCount++;
 
-			//add dataset value
-			dataset.setValue(category, value);
+			Map<String, Object> row = new LinkedHashMap<>();
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				Object data = rs.getObject(i);
+				row.put(columnName, data);
+			}
 
-			String linkId = category;
+			if (includeDataInOutput) {
+				resultSetData.add(row);
+			}
 
-			//add hyperlink if required
-			addHyperLink(rs, linkId);
-
-			//add drilldown link if required
-			//drill down on col 1 = data value
-			//drill down on col 2 = category
-			addDrilldownLink(linkId, value, category);
+			prepareRow(row, resultSetColumnNames, dataset);
 		}
 
 		setDataset(dataset);
@@ -102,24 +114,37 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 		//resultset structure
 		//category, value [, link]
 		for (Object row : data) {
-			String category = RunReportHelper.getStringRowValue(row, 1, columnNames);
-			double value = RunReportHelper.getDoubleRowValue(row, 2, columnNames);
-
-			//add dataset value
-			dataset.setValue(category, value);
-
-			String linkId = category;
-
-			//add hyperlink if required
-			addHyperLink(row, linkId);
-
-			//add drilldown link if required
-			//drill down on col 1 = data value
-			//drill down on col 2 = category
-			addDrilldownLink(linkId, value, category);
+			prepareRow(row, columnNames, dataset);
 		}
 
 		setDataset(dataset);
+	}
+
+	/**
+	 * Fills the dataset with a row of data
+	 *
+	 * @param row the row of data
+	 * @param dataColumnNames the data column names
+	 * @param dataset the dataset
+	 */
+	private void prepareRow(Object row, List<String> dataColumnNames,
+			DefaultPieDataset dataset) {
+
+		String category = RunReportHelper.getStringRowValue(row, 1, dataColumnNames);
+		double value = RunReportHelper.getDoubleRowValue(row, 2, dataColumnNames);
+
+		//add dataset value
+		dataset.setValue(category, value);
+
+		String linkId = category;
+
+		//add hyperlink if required
+		addHyperLink(row, linkId);
+
+		//add drilldown link if required
+		//drill down on col 1 = data value
+		//drill down on col 2 = category
+		addDrilldownLink(linkId, value, category);
 	}
 
 	@Override

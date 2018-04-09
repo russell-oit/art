@@ -609,7 +609,7 @@ public class RunReportHelper {
 	public int getResultSetType(ReportType reportType) {
 		//is scroll insensitive much slower than forward only?
 		int resultSetType;
-		if (reportType.isChart() || reportType.isXDocReport()
+		if (reportType.isXDocReport()
 				|| reportType.isReportEngine()
 				|| reportType == ReportType.Group
 				|| reportType == ReportType.JasperReportsArt
@@ -622,7 +622,6 @@ public class RunReportHelper {
 				|| reportType == ReportType.FixedWidth) {
 			//need scrollable resultset in order to display record count
 			//need scrollable resultset in order to generate group report
-			//need scrollable resultset for charts for show data option
 			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 		} else {
 			//report types will determine the record count e.g. for standard output reports

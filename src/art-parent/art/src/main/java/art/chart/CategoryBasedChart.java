@@ -25,7 +25,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -126,13 +128,34 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 			seriesCount = rsmd.getColumnCount() - 1 - hop; //1 for xValue column
 		}
 
+		resultSetColumnNames = new ArrayList<>();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			resultSetColumnNames.add(columnName);
+		}
+
+		resultSetData = new ArrayList<>();
+
 		while (rs.next()) {
-			String categoryName = rs.getString(1);
+			resultSetRecordCount++;
+
+			Map<String, Object> row = new LinkedHashMap<>();
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				Object data = rs.getObject(i);
+				row.put(columnName, data);
+			}
+			
+			if (includeDataInOutput) {
+				resultSetData.add(row);
+			}
+
+			String categoryName = RunReportHelper.getStringRowValue(row, 1, resultSetColumnNames);
 
 			if (dynamicSeries) {
 				//series name is the contents of the second column
-				String seriesName = rs.getString(2 + hop);
-				double yValue = rs.getDouble(3 + hop);
+				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop, resultSetColumnNames);
+				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop, resultSetColumnNames);
 
 				//set series index
 				int seriesIndex;
@@ -144,13 +167,13 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 					seriesCount++;
 				}
 
-				addData(rs, dataset, seriesIndex, yValue, categoryName, seriesName);
+				addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
 			} else {
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
-					String seriesName = rsmd.getColumnLabel(columnIndex);
-					double yValue = rs.getDouble(columnIndex);
-					addData(rs, dataset, seriesIndex, yValue, categoryName, seriesName);
+					String seriesName = resultSetColumnNames.get(columnIndex - 1);
+					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex, resultSetColumnNames);
+					addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
 				}
 			}
 		}
@@ -216,42 +239,6 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 		}
 
 		setDataset(dataset);
-	}
-
-	/**
-	 * Adds data to the dataset object
-	 *
-	 * @param rs the resultset with the current row of data
-	 * @param dataset the dataset to populate
-	 * @param seriesIndex the series index
-	 * @param yValue the y value
-	 * @param categoryName the category name
-	 * @param seriesName the series name
-	 * @throws SQLException
-	 */
-	private void addData(ResultSet rs, DefaultCategoryDataset dataset,
-			int seriesIndex, double yValue, String categoryName, String seriesName) throws SQLException {
-
-		//add dataset value
-		if (swapAxes) {
-			dataset.addValue(yValue, categoryName, seriesName);
-		} else {
-			dataset.addValue(yValue, seriesName, categoryName);
-		}
-
-		//use series index and category name to identify url in hashmap
-		//to ensure correct link will be returned by the generatelink() method. 
-		//use series index instead of name because the generateLink() method uses series indices
-		String linkId = String.valueOf(seriesIndex) + categoryName;
-
-		//add hyperlink if required
-		addHyperLink(rs, linkId);
-
-		//add drilldown link if required
-		//drill down on col 1 = y value (data value)
-		//drill down on col 2 = x value (category name)
-		//drill down on col 3 = series name
-		addDrilldownLink(linkId, yValue, categoryName, seriesName);
 	}
 
 	/**

@@ -24,7 +24,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -82,19 +84,40 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 		Map<String, Integer> seriesIndices = new HashMap<>(); //<series name, series index>
 		Map<String, Integer> itemIndices = new HashMap<>(); //<series name, max item index>
 
+		resultSetColumnNames = new ArrayList<>();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			resultSetColumnNames.add(columnName);
+		}
+
+		resultSetData = new ArrayList<>();
+
 		while (rs.next()) {
-			double xValue = rs.getDouble(1);
-			double yValue = rs.getDouble(2);
+			resultSetRecordCount++;
+
+			Map<String, Object> row = new LinkedHashMap<>();
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				Object data = rs.getObject(i);
+				row.put(columnName, data);
+			}
+
+			if (includeDataInOutput) {
+				resultSetData.add(row);
+			}
+
+			double xValue = RunReportHelper.getDoubleRowValue(row, 1, resultSetColumnNames);
+			double yValue = RunReportHelper.getDoubleRowValue(row, 2, resultSetColumnNames);
 
 			String seriesName;
 			if (dynamicSeries) {
 				//series name is the contents of the third column
-				seriesName = rs.getString(3);
+				seriesName = RunReportHelper.getStringRowValue(row, 3, resultSetColumnNames);
 			} else {
 				//currently only one series supported
 				//series name is the column alias of the second column
 				//can optimize static series values out of the loop
-				seriesName = rsmd.getColumnLabel(2);
+				seriesName = resultSetColumnNames.get(2 - 1);
 			}
 
 			//set series index
@@ -132,7 +155,7 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 			String linkId = String.valueOf(seriesIndex) + String.valueOf(itemIndex);
 
 			//add hyperlink if required
-			addHyperLink(rs, linkId);
+			addHyperLink(row, linkId);
 
 			//add drilldown link if required
 			//drill down on col 1 = y value

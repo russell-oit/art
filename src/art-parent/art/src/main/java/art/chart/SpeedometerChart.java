@@ -23,7 +23,9 @@ import java.awt.Color;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -68,51 +70,29 @@ public class SpeedometerChart extends Chart {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 
+		resultSetColumnNames = new ArrayList<>();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			resultSetColumnNames.add(columnName);
+		}
+
+		resultSetData = new ArrayList<>();
+
 		if (rs.next()) {
-			dataset.setValue(rs.getDouble(1));
+			resultSetRecordCount++;
 
-			minValue = rs.getDouble(2);
-			maxValue = rs.getDouble(3);
-			unitsDescription = rs.getString(4);
-
-			if (columnCount > 4) {
-				//ranges have been specified
-				rangeCount = 0;
-				for (int i = 5; i <= columnCount; i++) {
-					String rangeSpec = rs.getString(i);
-					String[] rangeDetails = StringUtils.split(rangeSpec, ":");
-					if (rangeDetails != null && rangeDetails.length == 3) {
-						rangeCount++;
-						String valuePart = rangeDetails[0];
-						double rangeValue;
-						if (valuePart.contains("%")) {
-							rangeValue = Double.parseDouble(valuePart.replace("%", ""));
-							rangeValue = minValue + (maxValue - minValue) * rangeValue / 100.0;
-						} else {
-							rangeValue = Double.parseDouble(valuePart);
-						}
-
-						rangeValues.put(rangeCount, rangeValue);
-						rangeColors.put(rangeCount, StringUtils.trim(rangeDetails[1]));
-						rangeDescriptions.put(rangeCount, StringUtils.trim(rangeDetails[2]));
-					}
-				}
-
-				//build chart ranges
-				double rangeMin;
-				double rangeMax;
-				for (int i = 1; i <= rangeCount; i++) {
-					if (i == 1) {
-						rangeMin = minValue;
-						rangeMax = rangeValues.get(i);
-					} else {
-						rangeMin = rangeValues.get(i - 1);
-						rangeMax = rangeValues.get(i);
-					}
-					Range range = new Range(rangeMin, rangeMax);
-					rangeRanges.put(i, range);
-				}
+			Map<String, Object> row = new LinkedHashMap<>();
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				Object data = rs.getObject(i);
+				row.put(columnName, data);
 			}
+
+			if (includeDataInOutput) {
+				resultSetData.add(row);
+			}
+
+			prepareRow(row, resultSetColumnNames, dataset, columnCount);
 		}
 
 		setDataset(dataset);
@@ -126,53 +106,67 @@ public class SpeedometerChart extends Chart {
 
 		if (CollectionUtils.isNotEmpty(data)) {
 			Object row = data.get(0);
-			dataset.setValue(RunReportHelper.getDoubleRowValue(row, 1, columnNames));
-
-			minValue = RunReportHelper.getDoubleRowValue(row, 2, columnNames);
-			maxValue = RunReportHelper.getDoubleRowValue(row, 3, columnNames);
-			unitsDescription = RunReportHelper.getStringRowValue(row, 4, columnNames);
-
-			if (colCount > 4) {
-				//ranges have been specified
-				rangeCount = 0;
-				for (int i = 5; i <= colCount; i++) {
-					String rangeSpec = RunReportHelper.getStringRowValue(row, i, columnNames);
-					String[] rangeDetails = StringUtils.split(rangeSpec, ":");
-					if (rangeDetails != null && rangeDetails.length == 3) {
-						rangeCount++;
-						String valuePart = rangeDetails[0];
-						double rangeValue;
-						if (valuePart.contains("%")) {
-							rangeValue = Double.parseDouble(valuePart.replace("%", ""));
-							rangeValue = minValue + (maxValue - minValue) * rangeValue / 100.0;
-						} else {
-							rangeValue = Double.parseDouble(valuePart);
-						}
-
-						rangeValues.put(rangeCount, rangeValue);
-						rangeColors.put(rangeCount, StringUtils.trim(rangeDetails[1]));
-						rangeDescriptions.put(rangeCount, StringUtils.trim(rangeDetails[2]));
-					}
-				}
-
-				//build chart ranges
-				double rangeMin;
-				double rangeMax;
-				for (int i = 1; i <= rangeCount; i++) {
-					if (i == 1) {
-						rangeMin = minValue;
-						rangeMax = rangeValues.get(i);
-					} else {
-						rangeMin = rangeValues.get(i - 1);
-						rangeMax = rangeValues.get(i);
-					}
-					Range range = new Range(rangeMin, rangeMax);
-					rangeRanges.put(i, range);
-				}
-			}
+			prepareRow(row, columnNames, dataset, colCount);
 		}
 
 		setDataset(dataset);
+	}
+
+	/**
+	 * Fills the dataset with a row of data
+	 *
+	 * @param row the row of data
+	 * @param dataColumnNames the data column names
+	 * @param dataset the dataset
+	 * @param dataColumnCount the column count
+	 */
+	private void prepareRow(Object row, List<String> dataColumnNames,
+			DefaultValueDataset dataset, int dataColumnCount) {
+
+		dataset.setValue(RunReportHelper.getDoubleRowValue(row, 1, dataColumnNames));
+
+		minValue = RunReportHelper.getDoubleRowValue(row, 2, dataColumnNames);
+		maxValue = RunReportHelper.getDoubleRowValue(row, 3, dataColumnNames);
+		unitsDescription = RunReportHelper.getStringRowValue(row, 4, dataColumnNames);
+
+		if (dataColumnCount > 4) {
+			//ranges have been specified
+			rangeCount = 0;
+			for (int i = 5; i <= dataColumnCount; i++) {
+				String rangeSpec = RunReportHelper.getStringRowValue(row, i, dataColumnNames);
+				String[] rangeDetails = StringUtils.split(rangeSpec, ":");
+				if (rangeDetails != null && rangeDetails.length == 3) {
+					rangeCount++;
+					String valuePart = rangeDetails[0];
+					double rangeValue;
+					if (valuePart.contains("%")) {
+						rangeValue = Double.parseDouble(valuePart.replace("%", ""));
+						rangeValue = minValue + (maxValue - minValue) * rangeValue / 100.0;
+					} else {
+						rangeValue = Double.parseDouble(valuePart);
+					}
+
+					rangeValues.put(rangeCount, rangeValue);
+					rangeColors.put(rangeCount, StringUtils.trim(rangeDetails[1]));
+					rangeDescriptions.put(rangeCount, StringUtils.trim(rangeDetails[2]));
+				}
+			}
+
+			//build chart ranges
+			double rangeMin;
+			double rangeMax;
+			for (int i = 1; i <= rangeCount; i++) {
+				if (i == 1) {
+					rangeMin = minValue;
+					rangeMax = rangeValues.get(i);
+				} else {
+					rangeMin = rangeValues.get(i - 1);
+					rangeMax = rangeValues.get(i);
+				}
+				Range range = new Range(rangeMin, rangeMax);
+				rangeRanges.put(i, range);
+			}
+		}
 	}
 
 	@Override

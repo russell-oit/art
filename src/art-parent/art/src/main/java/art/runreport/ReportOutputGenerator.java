@@ -110,9 +110,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -411,8 +408,14 @@ public class ReportOutputGenerator {
 
 				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
+				boolean showData = false;
+				if (parameterChartOptions.getShowData()
+						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
+					showData = true;
+				}
+
 				boolean swapAxes = reportOptions.isSwapAxes();
-				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, groovyData);
+				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, groovyData, showData);
 
 				//add secondary charts
 				String secondaryChartSetting = report.getSecondaryCharts();
@@ -434,7 +437,7 @@ public class ReportOutputGenerator {
 							secondaryResultSet = secondaryReportRunner.getResultSet();
 							Object secondaryGroovyData = secondaryReportRunner.getGroovyData();
 							swapAxes = false;
-							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, secondaryGroovyData);
+							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, secondaryGroovyData, showData);
 							secondaryCharts.add(secondaryChart);
 						} finally {
 							DatabaseUtils.close(secondaryResultSet);
@@ -445,34 +448,22 @@ public class ReportOutputGenerator {
 				}
 
 				//store data for potential use in html and pdf output
-				RowSetDynaClass dynaData = null;
 				List<String> dataColumnNames = null;
-				boolean showGroovyData = false;
-				if (parameterChartOptions.getShowData()
-						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
+				Object chartGroovyData = null;
+				boolean showResultSetData = false;
+				if (showData) {
 					if (groovyData == null) {
-						int rsType = rs.getType();
-						if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
-							rs.beforeFirst();
-							boolean useLowerCaseProperties = false;
-							boolean useColumnLabels = true;
-							dynaData = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
-							DynaProperty[] columns = dynaData.getDynaProperties();
-							dataColumnNames = new ArrayList<>();
-							for (DynaProperty column : columns) {
-								String columnName = column.getName();
-								dataColumnNames.add(columnName);
-							}
-						}
+						showResultSetData = true;
+						dataColumnNames = chart.getResultSetColumnNames();
 					} else {
-						GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData);
+						GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
 						dataColumnNames = dataDetails.getColumnNames();
-						showGroovyData = true;
+						chartGroovyData = groovyData;
 					}
 				}
 
 				if (isJob) {
-					chart.generateFile(reportFormat, fullOutputFilename, dynaData, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, showGroovyData, groovyData);
+					chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
 				} else {
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
@@ -484,21 +475,20 @@ public class ReportOutputGenerator {
 
 						if (dataColumnNames != null) {
 							request.setAttribute("columnNames", dataColumnNames);
-							if (dynaData != null) {
-								List<DynaBean> dataRows = dynaData.getRows();
-								request.setAttribute("data", dataRows);
+							if (groovyData == null) {
+								request.setAttribute("data", chart.getResultSetData());
 							} else {
 								request.setAttribute("data", groovyData);
 							}
 							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
 						}
 					} else {
-						chart.generateFile(reportFormat, fullOutputFilename, dynaData, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, showGroovyData, groovyData);
+						chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
 						displayFileLink(fileName);
 					}
 
 					if (groovyDataSize == null) {
-						rowsRetrieved = getResultSetRowCount(rs);
+						rowsRetrieved = chart.getResultSetRecordCount();
 					} else {
 						rowsRetrieved = groovyDataSize;
 					}
@@ -1651,13 +1641,16 @@ public class ReportOutputGenerator {
 	 * @param reportParamsList the report parameters list
 	 * @param swapAxes whether to swap the values of the x and y axes
 	 * @param groovyData data to use for the chart, if not using a resultset
+	 * @param includeDataInOutput whether resultset data should be included in
+	 * the output
 	 * @return the prepared chart
 	 * @throws SQLException
 	 */
 	private Chart prepareChart(Report report, ReportFormat reportFormat, Locale locale,
 			ResultSet rs, ChartOptions parameterChartOptions,
 			Map<String, ReportParameter> reportParamsMap,
-			List<ReportParameter> reportParamsList, boolean swapAxes, Object groovyData)
+			List<ReportParameter> reportParamsList, boolean swapAxes,
+			Object groovyData, boolean includeDataInOutput)
 			throws SQLException, IOException {
 
 		ReportType reportType = report.getReportType();
@@ -1676,6 +1669,7 @@ public class ReportOutputGenerator {
 		chart.setXAxisLabel(report.getxAxisLabel());
 		chart.setYAxisLabel(report.getyAxisLabel());
 		chart.setSwapAxes(swapAxes);
+		chart.setIncludeDataInOutput(includeDataInOutput);
 
 		String optionsString = report.getOptions();
 		JFreeChartOptions options;

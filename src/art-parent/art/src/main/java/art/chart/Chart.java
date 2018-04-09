@@ -52,7 +52,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import net.sf.cewolfart.cpp.SeriesPaintProcessor;
-import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartUtilities;
@@ -108,6 +107,66 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	protected int rowCount;
 	protected int colCount;
 	protected List<String> columnNames;
+	protected List<String> resultSetColumnNames;
+	protected List<Map<String, Object>> resultSetData;
+	protected int resultSetRecordCount;
+	protected boolean includeDataInOutput;
+
+	/**
+	 * @return the includeDataInOutput
+	 */
+	public boolean isIncludeDataInOutput() {
+		return includeDataInOutput;
+	}
+
+	/**
+	 * @param includeDataInOutput the includeDataInOutput to set
+	 */
+	public void setIncludeDataInOutput(boolean includeDataInOutput) {
+		this.includeDataInOutput = includeDataInOutput;
+	}
+
+	/**
+	 * @return the resultSetRecordCount
+	 */
+	public int getResultSetRecordCount() {
+		return resultSetRecordCount;
+	}
+
+	/**
+	 * @param resultSetRecordCount the resultSetRecordCount to set
+	 */
+	public void setResultSetRecordCount(int resultSetRecordCount) {
+		this.resultSetRecordCount = resultSetRecordCount;
+	}
+
+	/**
+	 * @return the resultSetColumnNames
+	 */
+	public List<String> getResultSetColumnNames() {
+		return resultSetColumnNames;
+	}
+
+	/**
+	 * @param resultSetColumnNames the resultSetColumnNames to set
+	 */
+	public void setResultSetColumnNames(List<String> resultSetColumnNames) {
+		this.resultSetColumnNames = resultSetColumnNames;
+	}
+
+	/**
+	 * @return the resultSetData
+	 */
+	public List<Map<String, Object>> getResultSetData() {
+		return resultSetData;
+	}
+
+	/**
+	 * @param resultSetData the resultSetData to set
+	 */
+	public void setResultSetData(List<Map<String, Object>> resultSetData) {
+		this.resultSetData = resultSetData;
+	}
 
 	/**
 	 * @return the extraOptions
@@ -612,30 +671,30 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 *
 	 * @param reportFormat the report format. Either png or pdf
 	 * @param outputFileName the full path of the file name to use
-	 * @param dynaData resultset data to be displayed with the chart image. Null
-	 * if show data is not required.
 	 * @param report the report for the chart
 	 * @param pdfPageNumbers whether page numbers should be included in pdf
 	 * output
 	 * @param dynamicOpenPassword dynamic open password, for pdf output
 	 * @param dynamicModifyPassword dynamic modify password, for pdf output
-	 * @param showListData whether to show the non-resultset data
-	 * @param listData the non-resultset data
+	 * @param groovyData the groovy data to be displayed with the chart. Null if
+	 * show data is not required.
+	 * @param showResultSetData whether resultset data should be displayed with
+	 * the chart
 	 * @throws IOException
 	 * @throws DatasetProduceException
 	 * @throws ChartValidationException
 	 * @throws PostProcessingException
 	 */
 	public void generateFile(ReportFormat reportFormat, String outputFileName,
-			RowSetDynaClass dynaData, Report report, boolean pdfPageNumbers,
+			Report report, boolean pdfPageNumbers,
 			String dynamicOpenPassword, String dynamicModifyPassword,
-			boolean showListData, Object listData)
+			Object groovyData, boolean showResultSetData)
 			throws IOException, DatasetProduceException,
 			ChartValidationException, PostProcessingException {
 
 		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}', "
-				+ "report={}, pdfPageNumbers={}, showListData={}", reportFormat,
-				outputFileName, report, pdfPageNumbers, showListData);
+				+ "report={}, pdfPageNumbers={}, showResultSetData={}", reportFormat,
+				outputFileName, report, pdfPageNumbers, showResultSetData);
 
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
@@ -647,7 +706,13 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, chartOptions.getWidth(), chartOptions.getHeight());
 				break;
 			case pdf:
-				PdfChart.generatePdf(chart, outputFileName, title, dynaData, reportParamsList, report, pdfPageNumbers, showListData, listData);
+				List<String> outputColumnNames = null;
+				List<Map<String, Object>> outputData = null;
+				if (showResultSetData) {
+					outputColumnNames = resultSetColumnNames;
+					outputData = resultSetData;
+				}
+				PdfChart.generatePdf(chart, outputFileName, title, reportParamsList, report, pdfPageNumbers, groovyData, outputColumnNames, outputData);
 				PdfHelper pdfHelper = new PdfHelper();
 				pdfHelper.addProtections(report, outputFileName, dynamicOpenPassword, dynamicModifyPassword);
 				break;
