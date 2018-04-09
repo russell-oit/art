@@ -9,6 +9,7 @@ ART 3.4
 * Allow specifying of parameter default values for users and user groups
 * Allow parameters to use fixed values
 * Fix for secondary charts not being used
+* Allow testing of report in edit report page
 * Updated univocity-parsers, spring
 
 ART 3.3

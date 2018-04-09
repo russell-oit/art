@@ -154,9 +154,11 @@ Edit schedule page
 	</jsp:attribute>
 
 	<jsp:attribute name="belowMainPanel">
-		<div class="col-md-6 col-md-offset-3">
-			<div class="alert alert-info">
-				<jsp:include page="/WEB-INF/jsp/scheduleNotes.jsp" />
+		<div class="row">
+			<div class="col-md-6 col-md-offset-3">
+				<div class="alert alert-info">
+					<jsp:include page="/WEB-INF/jsp/scheduleNotes.jsp" />
+				</div>
 			</div>
 		</div>
 	</jsp:attribute>

@@ -112,6 +112,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -409,7 +410,7 @@ public class ReportOutputGenerator {
 				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
 				boolean showData = false;
-				if (parameterChartOptions.getShowData()
+				if (BooleanUtils.isTrue(parameterChartOptions.getShowData())
 						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
 					showData = true;
 				}

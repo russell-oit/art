@@ -53,8 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Processes report parameters contained in http requests or maps and provides
- * their final values
+ * Processes report parameters contained in http requests or maps and
+ * provides their final values
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -63,14 +63,25 @@ public class ParameterProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(ParameterProcessor.class);
 
-	private Locale locale;
+	private Locale locale = Locale.getDefault();
 	private boolean valuesAsIs;
 	private User user;
 	private Boolean isJob = false;
 	private boolean useSavedValues;
+	private Report suppliedReport;
 
-	public ParameterProcessor() {
-		locale = Locale.getDefault();
+	/**
+	 * @return the suppliedReport
+	 */
+	public Report getSuppliedReport() {
+		return suppliedReport;
+	}
+
+	/**
+	 * @param suppliedReport the suppliedReport to set
+	 */
+	public void setSuppliedReport(Report suppliedReport) {
+		this.suppliedReport = suppliedReport;
 	}
 
 	/**
@@ -116,8 +127,8 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Processes a http request for running a report and fills objects with
-	 * parameter values to be used when running a report
+	 * Processes a http request for running a report and fills objects
+	 * with parameter values to be used when running a report
 	 *
 	 * @param request the http request
 	 * @param locale the locale being used
@@ -154,7 +165,8 @@ public class ParameterProcessor {
 	 * @param passedValuesMap the parameter values. key is html parameter name
 	 * e.g. p-due_date, value is string array with values
 	 * @param reportId the report id
-	 * @param user the user under whose permission the report is being run
+	 * @param user the user under whose permission the report is being
+	 * run
 	 * @param locale the locale being used
 	 * @return final report parameters
 	 * @throws java.sql.SQLException
@@ -174,7 +186,12 @@ public class ParameterProcessor {
 		//get list of all defined report parameters
 		ReportParameterService reportParameterService = new ReportParameterService();
 		ReportService reportService = new ReportService();
-		Report report = reportService.getReport(reportId);
+		Report report;
+		if (suppliedReport == null) {
+			report = reportService.getReport(reportId);
+		} else {
+			report = suppliedReport;
+		}
 		List<ReportParameter> reportParamsList;
 		if (report.getReportType().isDashboard()) {
 			List<Integer> reportIds = report.getDashboardReportIds();
@@ -187,7 +204,7 @@ public class ParameterProcessor {
 			}
 			reportParamsList = new ArrayList<>(cleanMap.values());
 		} else {
-			reportParamsList = reportParameterService.getEffectiveReportParameters(reportId);
+			reportParamsList = reportParameterService.getEffectiveReportParameters(report.getReportId());
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
@@ -315,7 +332,8 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Populates actual parameter values to be used for the report parameters
+	 * Populates actual parameter values to be used for the report
+	 * parameters
 	 *
 	 * @param reportParamsList the report parameters
 	 * @throws NumberFormatException
@@ -506,9 +524,10 @@ public class ParameterProcessor {
 	/**
 	 * Processes report options in a given set of parameters
 	 *
-	 * @param passedValuesMap the parameters that may contain some report
-	 * options
-	 * @return final report option values to use when running a report
+	 * @param passedValuesMap the parameters that may contain some
+	 * report options
+	 * @return final report option values to use when running a
+	 * report
 	 */
 	private ReportOptions processReportOptions(Map<String, String[]> passedValuesMap) {
 		logger.debug("Entering processReportOptions");
@@ -664,10 +683,12 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Populates default values for parameters which use a default value report
+	 * Populates default values for parameters which use a default value
+	 * report
 	 *
 	 * @param reportParamsMap the report parameters
-	 * @param user the user under whose permission the report is being run
+	 * @param user the user under whose permission the report is being
+	 * run
 	 * @throws SQLException
 	 */
 	private void setDefaultValueLovValues(Map<String, ReportParameter> reportParamsMap)
@@ -706,8 +727,8 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Processes final report parameters where "All" is selected for multi-value
-	 * parameters
+	 * Processes final report parameters where "All" is selected for
+	 * multi-value parameters
 	 *
 	 * @param reportParamsMap the report parameters
 	 * @throws SQLException

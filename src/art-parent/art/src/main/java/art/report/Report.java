@@ -162,6 +162,7 @@ public class Report implements Serializable {
 	private List<ReportGroup> reportGroups;
 	@Parsed
 	private boolean clearTextPasswords;
+	private Boolean dummyBoolean;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -173,6 +174,20 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
+
+	/**
+	 * @return the dummyBoolean
+	 */
+	public Boolean getDummyBoolean() {
+		return dummyBoolean;
+	}
+
+	/**
+	 * @param dummyBoolean the dummyBoolean to set
+	 */
+	public void setDummyBoolean(Boolean dummyBoolean) {
+		this.dummyBoolean = dummyBoolean;
+	}
 
 	/**
 	 * @return the drilldowns

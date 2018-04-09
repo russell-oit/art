@@ -48,6 +48,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
@@ -58,6 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -90,6 +92,8 @@ public class RunReportController {
 	//use post to allow for large parameter input and get to allow for direct url execution
 	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST})
 	public String runReport(@RequestParam("reportId") Integer reportId,
+			@ModelAttribute("report") Report testReport,
+			@RequestParam(value = "testData", required = false) Boolean testData,
 			HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, Model model, Locale locale,
 			RedirectAttributes redirectAttributes) throws IOException {
@@ -116,7 +120,19 @@ public class RunReportController {
 		String reportName = null;
 
 		try {
-			report = reportService.getReport(reportId);
+			if (testReport.getDummyBoolean() == null) {
+				report = reportService.getReport(reportId);
+			} else {
+				if (BooleanUtils.isTrue(testData)) {
+					testReport.setReportType(ReportType.Tabular);
+				} else {
+					testReport.setReportType(ReportType.toEnum(testReport.getReportTypeId()));
+					if (testReport.getReportType() == ReportType.Text) {
+						testReport.setReportSource(testReport.getReportSourceHtml());
+					}
+				}
+				report = testReport;
+			}
 
 			if (report == null) {
 				model.addAttribute("message", "reports.message.reportNotFound");
@@ -333,6 +349,7 @@ public class RunReportController {
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
+				paramProcessor.setSuppliedReport(report);
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
