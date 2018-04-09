@@ -535,7 +535,7 @@
 				</div>
 
 				<input type="hidden" name="action" value="${action}">
-				<input type="hidden" name="nextPage" value="${param.nextPage}">
+				<input type="hidden" name="nextPage" value="${encode:forHtmlAttribute(param.nextPage)}">
 
 				<form:hidden path="quartzCalendarNames" />
 
@@ -573,7 +573,9 @@
 							<spring:message code="jobs.label.owner"/>
 						</label>
 						<div class="col-sm-8">
-							<p class="form-control-static">${job.user.username}</p>
+							<p class="form-control-static">
+								${encode:forHtmlContent(job.user.username)}
+							</p>
 						</div>
 					</div>
 					<form:hidden path="user.userId" />
@@ -583,7 +585,11 @@
 							<spring:message code="page.text.report"/>
 						</label>
 						<div class="col-sm-8">
-							<p class="form-control-static">${job.report.getLocalizedName(pageContext.response.locale)}</p>
+							<p class="form-control-static">
+								<a href="${pageContext.request.contextPath}/editReport?id=${job.report.reportId}">
+									${encode:forHtmlContent(job.report.getLocalizedName(pageContext.response.locale))}
+								</a>
+							</p>
 						</div>
 					</div>
 					<form:hidden path="report.reportId" />
@@ -915,7 +921,7 @@
 									<option value="0">--</option>
 									<option data-divider="true"></option>
 									<c:forEach var="schedule" items="${schedules}">
-										<option value="${schedule.scheduleId}">${schedule.name}</option>
+										<option value="${schedule.scheduleId}">${encode:forHtmlContent(schedule.name)}</option>
 									</c:forEach>
 								</select>
 							</p>
@@ -997,7 +1003,7 @@
 						</label>
 						<div class="col-md-8">
 							<form:select path="scheduleTimeZone" class="form-control selectpicker">
-								<form:option value="${encode:forHtmlAttribute(serverTimeZone)}">${encode:forHtmlContent(serverTimeZoneDescription)}</form:option>
+								<form:option value="${serverTimeZone}">${serverTimeZoneDescription}</form:option>
 									<option data-divider="true"></option>
 								<form:options items="${timeZones}"/>
 							</form:select>
