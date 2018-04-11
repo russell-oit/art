@@ -212,6 +212,7 @@ public class Config extends HttpServlet {
 
 		//set application path
 		appPath = ctx.getRealPath("/");
+		logger.debug("appPath='{}'", appPath);
 
 		if (!StringUtils.endsWith(appPath, File.separator)) {
 			appPath = appPath + File.separator;
@@ -717,6 +718,8 @@ public class Config extends HttpServlet {
 
 	/**
 	 * Loads custom settings
+	 * 
+	 * @param ctx the servlet context
 	 */
 	public static void loadCustomSettings(ServletContext ctx) {
 		CustomSettings newCustomSettings = null;
