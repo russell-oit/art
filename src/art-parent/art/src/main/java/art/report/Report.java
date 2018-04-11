@@ -162,7 +162,7 @@ public class Report implements Serializable {
 	private List<ReportGroup> reportGroups;
 	@Parsed
 	private boolean clearTextPasswords;
-	private Boolean dummyBoolean;
+	private Boolean dummyBoolean; //used for the test report functionality
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")

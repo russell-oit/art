@@ -272,6 +272,7 @@ Edit report page
 					//disable buttons
 					$('.action').prop('disabled', true);
 
+					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
 					$.ajax({
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
