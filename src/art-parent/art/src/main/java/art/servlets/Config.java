@@ -410,7 +410,7 @@ public class Config extends HttpServlet {
 				logger.error("Error", ex);
 			}
 		} else {
-			logger.warn("File not found: {}", propertiesFilePath);
+			logger.warn("File not found: '{}'", propertiesFilePath);
 		}
 	}
 
