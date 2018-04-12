@@ -321,6 +321,16 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="control-label col-md-4" for="fixedValue">
+						<spring:message code="parameters.label.fixedValue"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="fixedValue" id="fixedValue" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="control-label col-md-4" for="useLov">
 						<spring:message code="parameters.label.useLov"/>
 					</label>

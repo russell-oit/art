@@ -848,6 +848,15 @@ Settings configuration page
 							<form:errors path="logsDatasourceId" cssClass="error"/>
 						</div>
 					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="jwtTokenExpiryMins">
+							<spring:message code="settings.label.jwtTokenExpiryMins"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="jwtTokenExpiryMins" maxlength="6" class="form-control"/>
+							<form:errors path="jwtTokenExpiryMins" cssClass="error"/>
+						</div>
+					</div>
 				</fieldset>
 
 				<fieldset>

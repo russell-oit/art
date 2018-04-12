@@ -60,9 +60,11 @@
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="belowMainPanel">
-		<div class="col-md-6 col-md-offset-3">
-			<div class="alert alert-info">
-				<jsp:include page="/WEB-INF/jsp/scheduleNotes.jsp" />
+		<div class="row">
+			<div class="col-md-6 col-md-offset-3">
+				<div class="alert alert-info">
+					<jsp:include page="/WEB-INF/jsp/scheduleNotes.jsp" />
+				</div>
 			</div>
 		</div>
 	</jsp:attribute>
@@ -103,6 +105,7 @@
 			function updateClock()
 			{
 				var currentTimeString = currentServerDate().format("YYYY-MM-DD HH:mm:ss");
+				currentTimeString += '   ${encode:forJavaScript(serverTimeZoneDescription)}';
 				$("#clock").val(currentTimeString);
 			}
 		</script>
@@ -285,6 +288,7 @@
 									$('#scheduleYear').val(schedule.year);
 									$('#extraSchedules').val(schedule.extraSchedules);
 									$('#holidays').val(schedule.holidays);
+									$('#scheduleTimeZone').selectpicker('val', schedule.timeZone);
 
 									//https://silviomoreto.github.io/bootstrap-select/methods/
 									//https://stackoverflow.com/questions/19543285/use-jquery-each-to-iterate-through-object
@@ -533,7 +537,7 @@
 				</div>
 
 				<input type="hidden" name="action" value="${action}">
-				<input type="hidden" name="nextPage" value="${param.nextPage}">
+				<input type="hidden" name="nextPage" value="${encode:forHtmlAttribute(param.nextPage)}">
 
 				<form:hidden path="quartzCalendarNames" />
 
@@ -571,7 +575,9 @@
 							<spring:message code="jobs.label.owner"/>
 						</label>
 						<div class="col-sm-8">
-							<p class="form-control-static">${job.user.username}</p>
+							<p class="form-control-static">
+								${encode:forHtmlContent(job.user.username)}
+							</p>
 						</div>
 					</div>
 					<form:hidden path="user.userId" />
@@ -581,7 +587,11 @@
 							<spring:message code="page.text.report"/>
 						</label>
 						<div class="col-sm-8">
-							<p class="form-control-static">${job.report.getLocalizedName(pageContext.response.locale)}</p>
+							<p class="form-control-static">
+								<a href="${pageContext.request.contextPath}/editReport?id=${job.report.reportId}">
+									${encode:forHtmlContent(job.report.getLocalizedName(pageContext.response.locale))}
+								</a>
+							</p>
 						</div>
 					</div>
 					<form:hidden path="report.reportId" />
@@ -913,7 +923,7 @@
 									<option value="0">--</option>
 									<option data-divider="true"></option>
 									<c:forEach var="schedule" items="${schedules}">
-										<option value="${schedule.scheduleId}">${schedule.name}</option>
+										<option value="${schedule.scheduleId}">${encode:forHtmlContent(schedule.name)}</option>
 									</c:forEach>
 								</select>
 							</p>
@@ -987,6 +997,19 @@
 						<div class="col-md-8">
 							<form:input path="scheduleYear" maxlength="100" class="form-control"/>
 							<form:errors path="scheduleYear" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="scheduleTimeZone">
+							<spring:message code="page.label.timeZone"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="scheduleTimeZone" class="form-control selectpicker">
+								<form:option value="${serverTimeZone}">${serverTimeZoneDescription}</form:option>
+									<option data-divider="true"></option>
+								<form:options items="${timeZones}"/>
+							</form:select>
+							<form:errors path="scheduleTimeZone" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">

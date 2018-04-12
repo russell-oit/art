@@ -57,11 +57,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
@@ -70,6 +72,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.app.VelocityEngine;
+import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.logging.slf4j.SLF4JLoggerImplFactory;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import org.quartz.CronTrigger;
 import static org.quartz.JobBuilder.newJob;
@@ -118,6 +122,8 @@ public class Config extends HttpServlet {
 	private static TemplateEngine thymeleafReportTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
 	private static VelocityEngine velocityEngine;
+	private static String serverTimeZoneDescription;
+	private static final Map<String, String> timeZones = new LinkedHashMap<>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -139,7 +145,7 @@ public class Config extends HttpServlet {
 
 		//close database connections
 		DbConnections.closeAllConnections();
-		
+
 		//prevent tomcat warning concerning mysql cleanup thread
 		//https://www.ralph-schuster.eu/2014/07/09/solution-to-tomcat-cant-stop-an-abandoned-connection-cleanup-thread/
 		//https://stackoverflow.com/questions/25699985/the-web-application-appears-to-have-started-a-thread-named-abandoned-connect
@@ -192,6 +198,10 @@ public class Config extends HttpServlet {
 	 */
 	private void ConfigInit() {
 		logger.debug("Entering ConfigInit");
+		
+		//http://nesbot.com/2011/11/28/play-2-morphia-logging-error
+		//https://stackoverflow.com/questions/5115635/morphia-logging-over-log4j-in-spring
+		MorphiaLoggerFactory.registerLogger(SLF4JLoggerImplFactory.class);
 
 		ServletContext ctx = getServletConfig().getServletContext();
 
@@ -202,54 +212,18 @@ public class Config extends HttpServlet {
 
 		//set application path
 		appPath = ctx.getRealPath("/");
+		logger.debug("appPath='{}'", appPath);
 
-		if (!StringUtils.right(appPath, 1).equals(File.separator)) {
+		if (!StringUtils.endsWith(appPath, File.separator)) {
 			appPath = appPath + File.separator;
 		}
 
 		//set web-inf path
 		webinfPath = appPath + "WEB-INF" + File.separator;
+		logger.debug("webinfPath='{}'", webinfPath);
 
 		//load custom settings
-		loadCustomSettings();
-
-		//set show errors custom setting
-		ctx.setAttribute("showErrors", customSettings.isShowErrors());
-
-		//set work directory base path
-		workDirectoryPath = webinfPath + "work" + File.separator; //default work directory
-
-		String customWorkDirectory = customSettings.getWorkDirectory();
-		if (StringUtils.isNotBlank(customWorkDirectory)) {
-			//custom work directory defined
-			workDirectoryPath = customWorkDirectory;
-			if (!StringUtils.right(workDirectoryPath, 1).equals(File.separator)) {
-				workDirectoryPath = workDirectoryPath + File.separator;
-			}
-
-			logger.info("Using custom work directory: '{}'", workDirectoryPath);
-		}
-
-		//set export path
-		exportPath = workDirectoryPath + "export" + File.separator; //default
-
-		//set custom export path
-		String customExportDirectory = customSettings.getExportDirectory();
-		if (StringUtils.isNotBlank(customExportDirectory)) {
-			//custom export directory defined
-			exportPath = customExportDirectory;
-			if (!StringUtils.right(exportPath, 1).equals(File.separator)) {
-				exportPath = exportPath + File.separator;
-			}
-
-			logger.info("Using custom export directory: '{}'", exportPath);
-		}
-
-		//set art-database file path
-		artDatabaseFilePath = workDirectoryPath + "art-database.json";
-
-		//ensure work directories exist
-		createWorkDirectories();
+		loadCustomSettings(ctx);
 
 		createFreemarkerConfiguration();
 
@@ -259,11 +233,76 @@ public class Config extends HttpServlet {
 
 		loadLanguages();
 
+		setTimeZoneDetails();
+
 		//initialize datasources
 		initializeArtDatabase();
 
 		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
 		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
+	}
+
+	/**
+	 * Sets time zone variables
+	 */
+	private static void setTimeZoneDetails() {
+		TimeZone serverTimeZone = TimeZone.getDefault();
+		serverTimeZoneDescription = getTimeZoneDescription(serverTimeZone);
+
+		String[] timeZoneIds = TimeZone.getAvailableIDs();
+		for (String timeZoneId : timeZoneIds) {
+			TimeZone timeZone = TimeZone.getTimeZone(timeZoneId);
+			String timeZoneDescription = getTimeZoneDescription(timeZone);
+			timeZones.put(timeZoneId, timeZoneDescription);
+		}
+	}
+
+	/**
+	 * Returns a descriptive string for a time zone, including its GMT offset
+	 *
+	 * @param timeZone the time zone
+	 * @return a descriptive string for a time zone, including its GMT offset
+	 */
+	private static String getTimeZoneDescription(TimeZone timeZone) {
+		String offset = getTimeZoneOffset(timeZone.getRawOffset());
+		String description = String.format("%s (GMT%s) ", timeZone.getID(), offset);
+		return description;
+	}
+
+	/**
+	 * Returns the time zone offset string to use
+	 *
+	 * @param rawOffset the raw offset
+	 * @return the time zone offset string to use
+	 */
+	private static String getTimeZoneOffset(int rawOffset) {
+		//http://www.baeldung.com/java-time-zones
+		if (rawOffset == 0) {
+			return "+00:00";
+		}
+		long hours = TimeUnit.MILLISECONDS.toHours(rawOffset);
+		long minutes = TimeUnit.MILLISECONDS.toMinutes(rawOffset);
+		minutes = Math.abs(minutes - TimeUnit.HOURS.toMinutes(hours));
+
+		return String.format("%+03d:%02d", hours, Math.abs(minutes));
+	}
+
+	/**
+	 * Returns the ids and descriptions of time zones available in the jvm
+	 *
+	 * @return the ids and descriptions of time zones available in the jvm
+	 */
+	public static Map<String, String> getTimeZones() {
+		return timeZones;
+	}
+
+	/**
+	 * Returns the server time zone description
+	 *
+	 * @return the server time zone description
+	 */
+	public static String getServerTimeZoneDescription() {
+		return serverTimeZoneDescription;
 	}
 
 	/**
@@ -371,7 +410,7 @@ public class Config extends HttpServlet {
 				logger.error("Error", ex);
 			}
 		} else {
-			logger.warn("File not found: {}", propertiesFilePath);
+			logger.warn("File not found: '{}'", propertiesFilePath);
 		}
 	}
 
@@ -486,7 +525,7 @@ public class Config extends HttpServlet {
 				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
 			} else {
-				logger.info("ART Database configuration file not found");
+				logger.info("ART Database configuration file not found: '{}'", artDatabaseFilePath);
 			}
 		} catch (IOException ex) {
 			logger.error("Error", ex);
@@ -680,12 +719,15 @@ public class Config extends HttpServlet {
 
 	/**
 	 * Loads custom settings
+	 * 
+	 * @param ctx the servlet context
 	 */
-	private static void loadCustomSettings() {
+	public static void loadCustomSettings(ServletContext ctx) {
 		CustomSettings newCustomSettings = null;
 
 		try {
 			String customSettingsFilePath = webinfPath + "art-custom-settings.json";
+			logger.debug("customSettingsFilePath='{}'", customSettingsFilePath);
 			File customSettingsFile = new File(customSettingsFilePath);
 			if (customSettingsFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
@@ -702,6 +744,49 @@ public class Config extends HttpServlet {
 
 		customSettings = null;
 		customSettings = newCustomSettings;
+
+		//set show errors custom setting
+		ctx.setAttribute("showErrors", customSettings.isShowErrors());
+
+		//set work directory base path
+		workDirectoryPath = webinfPath + "work" + File.separator; //default work directory
+		logger.debug("workDirectoryPath='{}'", workDirectoryPath);
+
+		String customWorkDirectory = customSettings.getWorkDirectory();
+		logger.debug("customWorkDirectory='{}'", customWorkDirectory);
+		if (StringUtils.isNotBlank(customWorkDirectory)) {
+			//custom work directory defined
+			workDirectoryPath = customWorkDirectory;
+			if (!StringUtils.endsWith(workDirectoryPath, File.separator)) {
+				workDirectoryPath = workDirectoryPath + File.separator;
+			}
+
+			logger.info("Using custom work directory: '{}'", workDirectoryPath);
+		}
+
+		//set export path
+		exportPath = workDirectoryPath + "export" + File.separator; //default
+		logger.debug("exportPath='{}'", exportPath);
+
+		//set custom export path
+		String customExportDirectory = customSettings.getExportDirectory();
+		logger.debug("customExportDirectory='{}'", customExportDirectory);
+		if (StringUtils.isNotBlank(customExportDirectory)) {
+			//custom export directory defined
+			exportPath = customExportDirectory;
+			if (!StringUtils.endsWith(exportPath, File.separator)) {
+				exportPath = exportPath + File.separator;
+			}
+
+			logger.info("Using custom export directory: '{}'", exportPath);
+		}
+
+		//set art-database file path
+		artDatabaseFilePath = workDirectoryPath + "art-database.json";
+		logger.debug("artDatabaseFilePath='{}'", artDatabaseFilePath);
+
+		//ensure work directories exist
+		createWorkDirectories();
 	}
 
 	/**
@@ -716,7 +801,7 @@ public class Config extends HttpServlet {
 	/**
 	 * Creates work directories
 	 */
-	private void createWorkDirectories() {
+	private static void createWorkDirectories() {
 		makeDirectory(getTemplatesPath());
 		makeDirectory(getArtTempPath());
 		makeDirectory(getJobsExportPath());
@@ -731,7 +816,7 @@ public class Config extends HttpServlet {
 	 *
 	 * @param directoryPath the directory path to create
 	 */
-	private void makeDirectory(String directoryPath) {
+	private static void makeDirectory(String directoryPath) {
 		if (directoryPath == null) {
 			return;
 		}
@@ -831,7 +916,7 @@ public class Config extends HttpServlet {
 	public static String getReportsExportPath() {
 		return exportPath + "reports" + File.separator;
 	}
-	
+
 	/**
 	 * Returns the full path to the records export directory
 	 *

@@ -42,7 +42,7 @@ import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.CronStringHelper;
 import art.utils.ExpressionHelper;
@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -127,7 +128,7 @@ public class JobController {
 
 	@Autowired
 	private JobDestinationService jobDestinationService;
-	
+
 	@Autowired
 	private SmtpServerService smtpServerService;
 
@@ -147,6 +148,7 @@ public class JobController {
 		}
 
 		model.addAttribute("action", "jobs");
+		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
 
 		return "jobs";
 	}
@@ -164,6 +166,7 @@ public class JobController {
 		}
 
 		model.addAttribute("action", "config");
+		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
 
 		return "jobs";
 	}
@@ -470,16 +473,17 @@ public class JobController {
 
 		jobParameterService.deleteJobParameters(jobId);
 
+		JobParameter jobParam = new JobParameter();
+		jobParam.setJobId(jobId);
+		jobParam.setParamTypeString("X");
+
 		//add report parameters
 		for (Entry<String, String[]> entry : passedValues.entrySet()) {
 			String name = entry.getKey();
 			String[] values = entry.getValue();
 			for (String value : values) {
-				JobParameter jobParam = new JobParameter();
-				jobParam.setJobId(jobId);
 				jobParam.setName(name);
 				jobParam.setValue(value);
-				jobParam.setParamTypeString("X");
 				jobParameterService.addJobParameter(jobParam);
 			}
 		}
@@ -487,58 +491,40 @@ public class JobController {
 		//add report options
 		String showSelectedParametersValue = request.getParameter("showSelectedParameters");
 		if (showSelectedParametersValue != null) {
-			JobParameter jobParam = new JobParameter();
-			jobParam.setJobId(jobId);
 			jobParam.setName("showSelectedParameters");
 			jobParam.setValue("true");
-			jobParam.setParamTypeString("X");
 			jobParameterService.addJobParameter(jobParam);
 		}
 		String swapAxesValue = request.getParameter("swapAxes");
 		if (swapAxesValue != null) {
-			JobParameter jobParam = new JobParameter();
-			jobParam.setJobId(jobId);
 			jobParam.setName("swapAxes");
 			jobParam.setValue("true");
-			jobParam.setParamTypeString("X");
 			jobParameterService.addJobParameter(jobParam);
 		}
 
 		//add boolean chart options
 		String showLegendValue = request.getParameter("showLegend");
 		if (showLegendValue != null) {
-			JobParameter jobParam = new JobParameter();
-			jobParam.setJobId(jobId);
 			jobParam.setName("showLegend");
 			jobParam.setValue("true");
-			jobParam.setParamTypeString("X");
 			jobParameterService.addJobParameter(jobParam);
 		}
 		String showLabelsValue = request.getParameter("showLabels");
 		if (showLabelsValue != null) {
-			JobParameter jobParam = new JobParameter();
-			jobParam.setJobId(jobId);
 			jobParam.setName("showLabels");
 			jobParam.setValue("true");
-			jobParam.setParamTypeString("X");
 			jobParameterService.addJobParameter(jobParam);
 		}
 		String showDataValue = request.getParameter("showData");
 		if (showDataValue != null) {
-			JobParameter jobParam = new JobParameter();
-			jobParam.setJobId(jobId);
 			jobParam.setName("showData");
 			jobParam.setValue("true");
-			jobParam.setParamTypeString("X");
 			jobParameterService.addJobParameter(jobParam);
 		}
 		String showPointsValue = request.getParameter("showPoints");
 		if (showPointsValue != null) {
-			JobParameter jobParam = new JobParameter();
-			jobParam.setJobId(jobId);
 			jobParam.setName("showPoints");
 			jobParam.setValue("true");
-			jobParam.setParamTypeString("X");
 			jobParameterService.addJobParameter(jobParam);
 		}
 	}
@@ -585,7 +571,7 @@ public class JobController {
 	 */
 	private void addParameters(Model model, ParameterProcessorResult paramProcessorResult,
 			Report report, HttpServletRequest request) {
-		
+
 		RunReportHelper runReportHelper = new RunReportHelper();
 
 		//create map in order to display parameters by position
@@ -711,6 +697,9 @@ public class JobController {
 		}
 
 		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
+		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
+		model.addAttribute("serverTimeZone", TimeZone.getDefault().getID());
+		model.addAttribute("timeZones", Config.getTimeZones());
 
 		return "editJob";
 	}

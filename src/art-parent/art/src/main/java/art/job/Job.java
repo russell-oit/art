@@ -86,6 +86,8 @@ public class Job implements Serializable {
 	private String scheduleWeekday;
 	@Parsed
 	private String scheduleYear;
+	@Parsed
+	private String scheduleTimeZone;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
@@ -144,6 +146,20 @@ public class Job implements Serializable {
 	private Schedule schedule;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "smtpServer")
 	private SmtpServer smtpServer;
+
+	/**
+	 * @return the scheduleTimeZone
+	 */
+	public String getScheduleTimeZone() {
+		return scheduleTimeZone;
+	}
+
+	/**
+	 * @param scheduleTimeZone the scheduleTimeZone to set
+	 */
+	public void setScheduleTimeZone(String scheduleTimeZone) {
+		this.scheduleTimeZone = scheduleTimeZone;
+	}
 
 	/**
 	 * @return the errorNotificationTo

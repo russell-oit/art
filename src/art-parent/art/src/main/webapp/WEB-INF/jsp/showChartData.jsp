@@ -15,8 +15,7 @@
 	<table style="width: 90%;" class="table table-bordered table-striped table-condensed">
 		<thead>
 			<tr>
-				<c:forEach var="column" items="${columns}">
-					<c:set var="columnName" value="${column.name}"/>
+				<c:forEach var="columnName" items="${columnNames}">
 					<th>
 						${encode:forHtmlContent(columnName)}
 					</th>
@@ -24,13 +23,11 @@
 			</tr>
 		</thead>
 		<tbody>
-			<c:forEach var="row" items="${dataRows}">
+			<c:forEach var="row" items="${data}">
 				<tr>
-					<c:forEach var="dynaProperties" items="${row.dynaClass.dynaProperties}">
-						<c:set var="columnName" value="${dynaProperties.name}"/>
-						<c:set var="columnValue" value="${row.get(columnName)}"/>
+					<c:forEach var="columnName" items="${columnNames}">
 						<td>
-							${encode:forHtmlContent(columnValue)}
+							${encode:forHtmlContent(row.get(columnName))}
 						</td>
 					</c:forEach>
 				</tr>

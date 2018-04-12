@@ -22,7 +22,7 @@ import art.dbutils.DatabaseUtils;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.user.User;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -229,6 +229,12 @@ public class UserGroupService {
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_USER_GROUP_JOBS WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_PARAM_DEFAULTS WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_FIXED_PARAM_VAL WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
 
 		//finally delete user group

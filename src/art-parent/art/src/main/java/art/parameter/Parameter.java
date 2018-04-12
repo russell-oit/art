@@ -62,6 +62,8 @@ public class Parameter implements Serializable {
 	@Parsed
 	private boolean hidden;
 	@Parsed
+	private boolean fixedValue;
+	@Parsed
 	private boolean useLov;
 	private boolean useRulesInLov;
 	@Parsed
@@ -84,6 +86,20 @@ public class Parameter implements Serializable {
 	private Report defaultValueReport;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "lovReport")
 	private Report lovReport;
+
+	/**
+	 * @return the fixedValue
+	 */
+	public boolean isFixedValue() {
+		return fixedValue;
+	}
+
+	/**
+	 * @param fixedValue the fixedValue to set
+	 */
+	public void setFixedValue(boolean fixedValue) {
+		this.fixedValue = fixedValue;
+	}
 
 	/**
 	 * @return the lovReport

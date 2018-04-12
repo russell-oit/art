@@ -17,6 +17,8 @@
  */
 package art.login;
 
+import art.user.User;
+
 /**
  * Represents results of a login attempt
  *
@@ -28,6 +30,21 @@ public class LoginResult {
 	private String message; //i18n message. for display
 	private String error; //exception details
 	private String details; //custom message. for logging
+	private User user;
+
+	/**
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
+	}
+
+	/**
+	 * @param user the user to set
+	 */
+	public void setUser(User user) {
+		this.user = user;
+	}
 
 	/**
 	 * Get the custom message for logging

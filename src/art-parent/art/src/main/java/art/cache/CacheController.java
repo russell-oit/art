@@ -18,7 +18,7 @@
 package art.cache;
 
 import art.enums.CacheType;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,6 +127,9 @@ public class CacheController {
 					break;
 				case Settings:
 					cacheHelper.clearSettings(session);
+					break;
+				case CustomSettings:
+					cacheHelper.clearCustomSettings();
 					break;
 				default:
 					message = "Clear cache not available: " + id;

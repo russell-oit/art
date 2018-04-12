@@ -25,4 +25,19 @@ package art.enums;
 public enum ColumnType {
 
 	Numeric, Date, Clob, String, Other, Binary;
+
+	/**
+	 * Converts a value to an enum. If the conversion fails, String is returned
+	 *
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value, String otherwise
+	 */
+	public static ColumnType toEnum(String value) {
+		for (ColumnType v : values()) {
+			if (v.toString().equalsIgnoreCase(value)) {
+				return v;
+			}
+		}
+		return String;
+	}
 }

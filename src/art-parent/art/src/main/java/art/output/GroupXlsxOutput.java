@@ -18,6 +18,7 @@
 package art.output;
 
 import art.report.Report;
+import art.runreport.GroovyDataDetails;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import java.io.FileOutputStream;
@@ -28,6 +29,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -42,6 +44,8 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates group xlsx output
@@ -49,6 +53,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * @author Timothy Anyona
  */
 public class GroupXlsxOutput {
+
+	private static final Logger logger = LoggerFactory.getLogger(GroupXlsxOutput.class);
 
 	private FileOutputStream fout;
 	private XSSFWorkbook wb;
@@ -249,6 +255,14 @@ public class GroupXlsxOutput {
 	public int generateReport(ResultSet rs, int splitColumn, Report report,
 			String reportName, String fullOutputFileName) throws SQLException {
 
+		logger.debug("Entering generateReport: splitColumn={}, report={},"
+				+ " reportName='{}', fullOutputFileName='{}'", splitColumn,
+				report, reportName, fullOutputFileName);
+
+		Objects.requireNonNull(rs, "rs must not be null");
+		Objects.requireNonNull(report, "report must not be null");
+		Objects.requireNonNull(fullOutputFileName, "fullOutputFileName must not be null");
+
 		this.report = report;
 		this.reportName = reportName;
 		this.fullOutputFileName = fullOutputFileName;
@@ -270,7 +284,7 @@ public class GroupXlsxOutput {
 		int maxRows = Config.getMaxRows("xlsx");
 
 		int firstRow = 0;
-		int lastRow = 0;
+		int lastRow;
 
 		int counter = 0;
 		StringBuilder cmpStr = null; // temporary string used to compare values
@@ -364,6 +378,159 @@ public class GroupXlsxOutput {
 					+ "). Data not completed. Please narrow your search.");
 		}
 
+		endOutput();
+
+		return counter + 1; // number of rows
+	}
+
+	/**
+	 * Generates group output
+	 *
+	 * @param data the data to use
+	 * @param splitColumn the group column
+	 * @param report the report object
+	 * @param reportName the report name to use
+	 * @param fullOutputFileName the output file name
+	 * @return number of rows output
+	 * @throws SQLException
+	 * @throws java.io.IOException
+	 */
+	public int generateReport(Object data, int splitColumn, Report report,
+			String reportName, String fullOutputFileName) throws SQLException, IOException {
+
+		logger.debug("Entering generateReport: splitColumn={}, report={},"
+				+ " reportName='{}', fullOutputFileName='{}'", splitColumn,
+				report, reportName, fullOutputFileName);
+
+		Objects.requireNonNull(data, "data must not be null");
+		Objects.requireNonNull(report, "report must not be null");
+		Objects.requireNonNull(fullOutputFileName, "fullOutputFileName must not be null");
+
+		this.report = report;
+		this.reportName = reportName;
+		this.fullOutputFileName = fullOutputFileName;
+
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data);
+		int rowCount = dataDetails.getRowCount();
+		int colCount = dataDetails.getColCount();
+		List<String> columnNames = dataDetails.getColumnNames();
+		List<? extends Object> dataList = dataDetails.getDataList();
+
+		int i;
+
+		init();
+
+		newLine();
+
+		//output header columns for the result set columns
+		for (i = 0; i < colCount; i++) {
+			addHeaderCell(columnNames.get(i));
+		}
+
+		int maxRows = Config.getMaxRows("xlsx");
+
+		int firstRow = 0;
+		int lastRow;
+
+		int counter = 0;
+		StringBuilder cmpStr = null; // temporary string used to compare values
+		StringBuilder tmpCmpStr; // temporary string used to compare values
+		String summaryText = null;
+
+		int rowIndex = -1;
+		while ((rowIndex < rowCount) && (counter < maxRows)) {
+			rowIndex++;
+
+			newLine();
+
+			beginLines();
+
+			cmpStr = new StringBuilder();
+			List<String> summaryValues = new ArrayList<>();
+
+			Object dataRow = dataList.get(rowIndex);
+
+			// Output Main Data (only one row, obviously)
+			for (i = 0; i < splitColumn; i++) {
+				String value = RunReportHelper.getStringRowValue(dataRow, i + 1, columnNames);
+
+				addCell(value);
+				cmpStr.append(value);
+
+				summaryValues.add(value);
+			}
+
+			summaryText = StringUtils.join(summaryValues, "-");
+
+			firstRow = rowIndex;
+
+			// Output Sub Data (first line)
+			for (; i < colCount; i++) {
+				addCell(RunReportHelper.getStringRowValue(dataRow, i + 1, columnNames));
+			}
+
+			boolean currentMain = true;
+			while (currentMain && counter < maxRows) {  // next line
+				// Get Main Data in order to compare it
+				rowIndex++;
+				if (rowIndex < rowCount) {
+					Object dataRow2 = dataList.get(rowIndex);
+					counter++;
+					tmpCmpStr = new StringBuilder();
+
+					for (i = 0; i < splitColumn; i++) {
+						tmpCmpStr.append(RunReportHelper.getStringRowValue(dataRow2, i + 1, columnNames));
+					}
+
+					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) {
+						//row has same main data as previous row
+						// Add data lines
+						newLine();
+						for (i = 0; i < colCount; i++) {
+							addCell(RunReportHelper.getStringRowValue(dataRow2, i + 1, columnNames));
+						}
+					} else {
+						//row has different main from previous row
+						//create a grouping
+						//http://www.mysamplecode.com/2011/10/apache-poi-excel-row-group-collapse.html
+						lastRow = rowIndex;
+						sheet.groupRow(firstRow - 1, lastRow - 1);
+						sheet.setRowGroupCollapsed(firstRow - 1, true);
+
+						newLine();
+						addSummaryCell(summaryText);
+
+						int summaryRowCount = (lastRow - firstRow) + 1;
+						addSummaryCellNumeric(summaryRowCount);
+
+						currentMain = false;
+						rowIndex--;
+					}
+				} else {
+					currentMain = false;
+					// The outer and inner while will exit
+				}
+			}
+		}
+
+		if (cmpStr != null) {
+			lastRow = rowIndex;
+			sheet.groupRow(firstRow - 1, lastRow - 1);
+			sheet.setRowGroupCollapsed(firstRow - 1, true);
+
+			newLine();
+			addSummaryCell(summaryText);
+
+			int summaryRowCount = (lastRow - firstRow) + 1;
+			addSummaryCellNumeric(summaryRowCount);
+		}
+
+		if (!(counter < maxRows)) {
+			newLine();
+			addCell("Too many rows (>" + maxRows
+					+ "). Data not completed. Please narrow your search.");
+		}
+
 		for (i = 0; i < colCount; i++) {
 			sheet.autoSizeColumn(i);
 		}
@@ -372,4 +539,5 @@ public class GroupXlsxOutput {
 
 		return counter + 1; // number of rows
 	}
+
 }

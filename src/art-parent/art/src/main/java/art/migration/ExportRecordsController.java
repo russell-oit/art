@@ -32,6 +32,7 @@ import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
+import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.job.Job;
@@ -43,6 +44,12 @@ import art.report.ReportService;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
+import art.reportoptions.C3Options;
+import art.reportoptions.CsvServerOptions;
+import art.reportoptions.DatamapsOptions;
+import art.reportoptions.JxlsOptions;
+import art.reportoptions.OrgChartOptions;
+import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.reportrule.ReportRule;
@@ -77,6 +84,7 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -615,12 +623,7 @@ public class ExportRecordsController {
 				if (CollectionUtils.isNotEmpty(holidays)) {
 					String holidaysFilePath = recordsExportPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
 					File holidaysFile = new File(holidaysFilePath);
-
-					CsvWriterSettings writerSettings = new CsvWriterSettings();
-					writerSettings.setHeaderWritingEnabled(true);
-					CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-					csvRoutines2.writeAll(holidays, Holiday.class, holidaysFile);
-
+					csvRoutines.writeAll(holidays, Holiday.class, holidaysFile);
 					exportFilePath = recordsExportPath + "art-export-Schedules.zip";
 					ArtUtils.zipFiles(exportFilePath, schedulesFilePath, holidaysFilePath);
 					schedulesFile.delete();
@@ -679,12 +682,7 @@ public class ExportRecordsController {
 				if (CollectionUtils.isNotEmpty(allUserGroups)) {
 					String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 					File userGroupsFile = new File(userGroupsFilePath);
-
-					CsvWriterSettings writerSettings = new CsvWriterSettings();
-					writerSettings.setHeaderWritingEnabled(true);
-					CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-					csvRoutines2.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
-
+					csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
 					exportFilePath = recordsExportPath + "art-export-Users.zip";
 					ArtUtils.zipFiles(exportFilePath, usersFilePath, userGroupsFilePath);
 					usersFile.delete();
@@ -916,6 +914,184 @@ public class ExportRecordsController {
 				File reportsFile = new File(reportsFilePath);
 				csvRoutines.writeAll(reports, Report.class, reportsFile);
 
+				List<String> filesToZip = new ArrayList<>();
+				for (Report report : reports) {
+					ReportType reportType = report.getReportType();
+					if (reportType == null) {
+						logger.warn("reportType is null. Report={}", report);
+					} else {
+						String template = report.getTemplate();
+						if (StringUtils.isNotBlank(template)) {
+							String templatesPath;
+							if (reportType.isUseJsTemplatesPath()) {
+								templatesPath = Config.getJsTemplatesPath();
+							} else if (reportType == ReportType.JPivotMondrian) {
+								templatesPath = Config.getDefaultTemplatesPath();
+							} else {
+								templatesPath = Config.getTemplatesPath();
+							}
+							String templateFilePath = templatesPath + template;
+							File templateFile = new File(templateFilePath);
+							if (templateFile.exists() && !filesToZip.contains(templateFilePath)) {
+								filesToZip.add(templateFilePath);
+							}
+						}
+
+						String options = report.getOptions();
+						if (StringUtils.isNotBlank(options)) {
+							switch (reportType) {
+								case JxlsArt:
+								case JxlsTemplate:
+									JxlsOptions jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
+									String areaConfigFilename = jxlsOptions.getAreaConfigFile();
+									if (StringUtils.isNotBlank(areaConfigFilename)) {
+										String templatesPath = Config.getTemplatesPath();
+										String fullAreaConfigFilename = templatesPath + areaConfigFilename;
+										File areaConfigFile = new File(fullAreaConfigFilename);
+										if (areaConfigFile.exists() && !filesToZip.contains(fullAreaConfigFilename)) {
+											filesToZip.add(fullAreaConfigFilename);
+										}
+									}
+									break;
+								case PivotTableJsCsvServer:
+								case DygraphsCsvServer:
+								case DataTablesCsvServer:
+									CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
+									String dataFileName = csvServerOptions.getDataFile();
+									if (StringUtils.isNotBlank(dataFileName)) {
+										String jsTemplatesPath = Config.getJsTemplatesPath();
+										String fullDataFileName = jsTemplatesPath + dataFileName;
+										File dataFile = new File(fullDataFileName);
+										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
+											filesToZip.add(fullDataFileName);
+										}
+									}
+									break;
+								case C3:
+									C3Options c3Options = ArtUtils.jsonToObject(options, C3Options.class);
+									String cssFileName = c3Options.getCssFile();
+									if (StringUtils.isNotBlank(cssFileName)) {
+										String jsTemplatesPath = Config.getJsTemplatesPath();
+										String fullCssFileName = jsTemplatesPath + cssFileName;
+										File cssFile = new File(fullCssFileName);
+										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+											filesToZip.add(fullCssFileName);
+										}
+									}
+									break;
+								case Datamaps:
+								case DatamapsFile:
+									DatamapsOptions datamapsOptions = ArtUtils.jsonToObject(options, DatamapsOptions.class);
+									String jsTemplatesPath = Config.getJsTemplatesPath();
+
+									String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
+									if (StringUtils.isNotBlank(datamapsJsFileName)) {
+										String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
+										File datamapsJsFile = new File(fullDatamapsJsFileName);
+										if (datamapsJsFile.exists() && !filesToZip.contains(fullDatamapsJsFileName)) {
+											filesToZip.add(fullDatamapsJsFileName);
+										}
+									}
+
+									dataFileName = datamapsOptions.getDataFile();
+									if (StringUtils.isNotBlank(dataFileName)) {
+										String fullDataFileName = jsTemplatesPath + dataFileName;
+										File dataFile = new File(fullDataFileName);
+										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
+											filesToZip.add(fullDataFileName);
+										}
+									}
+
+									String mapFileName = datamapsOptions.getMapFile();
+									if (StringUtils.isNotBlank(mapFileName)) {
+										String fullMapFileName = jsTemplatesPath + mapFileName;
+										File mapFile = new File(fullMapFileName);
+										if (mapFile.exists() && !filesToZip.contains(fullMapFileName)) {
+											filesToZip.add(fullMapFileName);
+										}
+									}
+
+									cssFileName = datamapsOptions.getCssFile();
+									if (StringUtils.isNotBlank(cssFileName)) {
+										String fullCssFileName = jsTemplatesPath + cssFileName;
+										File cssFile = new File(fullCssFileName);
+										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+											filesToZip.add(fullCssFileName);
+										}
+									}
+									break;
+								case Leaflet:
+								case OpenLayers:
+									WebMapOptions webMapOptions = ArtUtils.jsonToObject(options, WebMapOptions.class);
+									jsTemplatesPath = Config.getJsTemplatesPath();
+
+									cssFileName = webMapOptions.getCssFile();
+									if (StringUtils.isNotBlank(cssFileName)) {
+										String fullCssFileName = jsTemplatesPath + cssFileName;
+										File cssFile = new File(fullCssFileName);
+										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+											filesToZip.add(fullCssFileName);
+										}
+									}
+
+									dataFileName = webMapOptions.getDataFile();
+									if (StringUtils.isNotBlank(dataFileName)) {
+										String fullDataFileName = jsTemplatesPath + dataFileName;
+										File dataFile = new File(fullDataFileName);
+										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
+											filesToZip.add(fullDataFileName);
+										}
+									}
+
+									List<String> jsFileNames = webMapOptions.getJsFiles();
+									if (CollectionUtils.isNotEmpty(jsFileNames)) {
+										for (String jsFileName : jsFileNames) {
+											if (StringUtils.isNotBlank(jsFileName)) {
+												String fullJsFileName = jsTemplatesPath + jsFileName;
+												File jsFile = new File(fullJsFileName);
+												if (jsFile.exists() && !filesToZip.contains(fullJsFileName)) {
+													filesToZip.add(fullJsFileName);
+												}
+											}
+										}
+									}
+
+									List<String> cssFileNames = webMapOptions.getCssFiles();
+									if (CollectionUtils.isNotEmpty(cssFileNames)) {
+										for (String listCssFileName : cssFileNames) {
+											if (StringUtils.isNotBlank(listCssFileName)) {
+												String fullListCssFileName = jsTemplatesPath + listCssFileName;
+												File listCssFile = new File(fullListCssFileName);
+												if (listCssFile.exists() && !filesToZip.contains(fullListCssFileName)) {
+													filesToZip.add(fullListCssFileName);
+												}
+											}
+										}
+									}
+									break;
+								case OrgChartDatabase:
+								case OrgChartJson:
+								case OrgChartList:
+								case OrgChartAjax:
+									OrgChartOptions orgChartOptions = ArtUtils.jsonToObject(options, OrgChartOptions.class);
+									jsTemplatesPath = Config.getJsTemplatesPath();
+
+									cssFileName = orgChartOptions.getCssFile();
+									if (StringUtils.isNotBlank(cssFileName)) {
+										String fullCssFileName = jsTemplatesPath + cssFileName;
+										File cssFile = new File(fullCssFileName);
+										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+											filesToZip.add(fullCssFileName);
+										}
+									}
+									break;
+								default:
+									break;
+							}
+						}
+					}
+				}
+
 				if (CollectionUtils.isNotEmpty(allReportGroups)
 						|| CollectionUtils.isNotEmpty(allReportParams)
 						|| CollectionUtils.isNotEmpty(allUserRuleValues)
@@ -923,8 +1099,8 @@ public class ExportRecordsController {
 						|| CollectionUtils.isNotEmpty(allReportRules)
 						|| CollectionUtils.isNotEmpty(allUserReportRights)
 						|| CollectionUtils.isNotEmpty(allUserGroupReportRights)
-						|| CollectionUtils.isNotEmpty(allDrilldowns)) {
-					List<String> filesToZip = new ArrayList<>();
+						|| CollectionUtils.isNotEmpty(allDrilldowns)
+						|| CollectionUtils.isNotEmpty(filesToZip)) {
 					filesToZip.add(reportsFilePath);
 
 					String reportGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
@@ -955,73 +1131,46 @@ public class ExportRecordsController {
 					File drilldownReportParamsFile = new File(drilldownReportParamsFilePath);
 
 					if (CollectionUtils.isNotEmpty(allReportGroups)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
+						csvRoutines.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
 						filesToZip.add(reportGroupsFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allReportParams)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allReportParams, ReportParameter.class, reportParamsFile);
+						csvRoutines.writeAll(allReportParams, ReportParameter.class, reportParamsFile);
 						filesToZip.add(reportParamsFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allUserRuleValues, UserRuleValue.class, userRuleValuesFile);
+						csvRoutines.writeAll(allUserRuleValues, UserRuleValue.class, userRuleValuesFile);
 						filesToZip.add(userRuleValuesFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allUserGroupRuleValues, UserGroupRuleValue.class, userGroupRuleValuesFile);
+						csvRoutines.writeAll(allUserGroupRuleValues, UserGroupRuleValue.class, userGroupRuleValuesFile);
 						filesToZip.add(userGroupRuleValuesFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allReportRules)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allReportRules, ReportRule.class, reportRulesFile);
+						csvRoutines.writeAll(allReportRules, ReportRule.class, reportRulesFile);
 						filesToZip.add(reportRulesFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allUserReportRights)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
+						csvRoutines.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
 						filesToZip.add(userReportRightsFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
+						csvRoutines.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
 						filesToZip.add(userGroupReportRightsFilePath);
 					}
 
 					if (CollectionUtils.isNotEmpty(allDrilldowns)) {
-						CsvWriterSettings writerSettings = new CsvWriterSettings();
-						writerSettings.setHeaderWritingEnabled(true);
-						CsvRoutines csvRoutines2 = new CsvRoutines(writerSettings);
-						csvRoutines2.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
+						csvRoutines.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
 						filesToZip.add(drilldownsFilePath);
 
 						if (CollectionUtils.isNotEmpty(allDrilldownReportParams)) {
-							CsvWriterSettings writerSettings2 = new CsvWriterSettings();
-							writerSettings2.setHeaderWritingEnabled(true);
-							CsvRoutines csvRoutines3 = new CsvRoutines(writerSettings2);
-							csvRoutines3.writeAll(allDrilldownReportParams, ReportParameter.class, drilldownReportParamsFile);
+							csvRoutines.writeAll(allDrilldownReportParams, ReportParameter.class, drilldownReportParamsFile);
 							filesToZip.add(drilldownReportParamsFilePath);
 						}
 					}

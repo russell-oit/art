@@ -36,6 +36,7 @@ Display a chart report
 	<cewolf:img 
 		chartid="${htmlElementId}" 
 		renderer="/cewolf" 
+		forceSessionId="false" 
 		width="${chart.chartOptions.width}" 
 		height="${chart.chartOptions.height}">
 

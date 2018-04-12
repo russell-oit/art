@@ -27,6 +27,8 @@ import art.reportoptions.JFreeChartOptions;
 import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
+import art.runreport.GroovyDataDetails;
+import art.runreport.RunReportHelper;
 import net.sf.cewolfart.ChartPostProcessor;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
@@ -50,7 +52,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import net.sf.cewolfart.cpp.SeriesPaintProcessor;
-import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartUtilities;
@@ -103,6 +104,69 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private List<Chart> secondaryCharts;
 	protected boolean swapAxes;
 	protected JFreeChartOptions extraOptions;
+	protected int rowCount;
+	protected int colCount;
+	protected List<String> columnNames;
+	protected List<String> resultSetColumnNames;
+	protected List<Map<String, Object>> resultSetData;
+	protected int resultSetRecordCount;
+	protected boolean includeDataInOutput;
+
+	/**
+	 * @return the includeDataInOutput
+	 */
+	public boolean isIncludeDataInOutput() {
+		return includeDataInOutput;
+	}
+
+	/**
+	 * @param includeDataInOutput the includeDataInOutput to set
+	 */
+	public void setIncludeDataInOutput(boolean includeDataInOutput) {
+		this.includeDataInOutput = includeDataInOutput;
+	}
+
+	/**
+	 * @return the resultSetRecordCount
+	 */
+	public int getResultSetRecordCount() {
+		return resultSetRecordCount;
+	}
+
+	/**
+	 * @param resultSetRecordCount the resultSetRecordCount to set
+	 */
+	public void setResultSetRecordCount(int resultSetRecordCount) {
+		this.resultSetRecordCount = resultSetRecordCount;
+	}
+
+	/**
+	 * @return the resultSetColumnNames
+	 */
+	public List<String> getResultSetColumnNames() {
+		return resultSetColumnNames;
+	}
+
+	/**
+	 * @param resultSetColumnNames the resultSetColumnNames to set
+	 */
+	public void setResultSetColumnNames(List<String> resultSetColumnNames) {
+		this.resultSetColumnNames = resultSetColumnNames;
+	}
+
+	/**
+	 * @return the resultSetData
+	 */
+	public List<Map<String, Object>> getResultSetData() {
+		return resultSetData;
+	}
+
+	/**
+	 * @param resultSetData the resultSetData to set
+	 */
+	public void setResultSetData(List<Map<String, Object>> resultSetData) {
+		this.resultSetData = resultSetData;
+	}
 
 	/**
 	 * @return the extraOptions
@@ -336,6 +400,13 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	protected abstract void fillDataset(ResultSet rs) throws SQLException;
 
 	/**
+	 * Generates the chart dataset based on the given data
+	 *
+	 * @param data the data to use
+	 */
+	protected abstract void fillDataset(List<? extends Object> data);
+
+	/**
 	 * Generates the chart dataset based on the given resultset
 	 *
 	 * @param rs the resultset to use
@@ -348,12 +419,44 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 		logger.debug("Entering prepareDataset");
 
+		Objects.requireNonNull(rs, "rs must not be null");
+
 		this.reportParamsList = reportParamsList;
 
 		prepareDrilldownDetails(drilldown);
 		prepareHyperLinkDetails(rs);
 
 		fillDataset(rs);
+	}
+
+	/**
+	 * Generates the chart dataset based on the given data
+	 *
+	 * @param data the data to use
+	 * @param drilldown the drilldown to use, if any
+	 * @param reportParamsList the report parameters to use
+	 * @throws SQLException
+	 * @throws java.io.IOException
+	 */
+	public void prepareDataset(Object data, Drilldown drilldown,
+			List<ReportParameter> reportParamsList) throws SQLException, IOException {
+
+		logger.debug("Entering prepareDataset");
+
+		Objects.requireNonNull(data, "data must not be null");
+
+		this.reportParamsList = reportParamsList;
+
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data);
+		rowCount = dataDetails.getRowCount();
+		colCount = dataDetails.getColCount();
+		columnNames = dataDetails.getColumnNames();
+		List<? extends Object> dataList = dataDetails.getDataList();
+
+		prepareDrilldownDetails(drilldown);
+		prepareDataHyperLinkDetails();
+
+		fillDataset(dataList);
 	}
 
 	private void prepareDrilldownDetails(Drilldown drilldown) throws SQLException {
@@ -375,6 +478,20 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		int columnCount = rsmd.getColumnCount();
 		String lastColumnName = rsmd.getColumnLabel(columnCount);
 		String secondColumnName = rsmd.getColumnLabel(2);
+
+		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)
+				|| StringUtils.equals(secondColumnName, HYPERLINKS_COLUMN_NAME)) {
+			setHasHyperLinks(true);
+			setHyperLinks(new HashMap<String, String>());
+		}
+
+	}
+
+	private void prepareDataHyperLinkDetails() throws SQLException {
+		logger.debug("Entering prepareDataHyperLinkDetails");
+
+		String lastColumnName = columnNames.get(colCount - 1);
+		String secondColumnName = columnNames.get(1);
 
 		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)
 				|| StringUtils.equals(secondColumnName, HYPERLINKS_COLUMN_NAME)) {
@@ -554,26 +671,30 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 *
 	 * @param reportFormat the report format. Either png or pdf
 	 * @param outputFileName the full path of the file name to use
-	 * @param data for pdf format, if it is required to show the chart data
-	 * together with the image. Null if show data is not required.
 	 * @param report the report for the chart
 	 * @param pdfPageNumbers whether page numbers should be included in pdf
 	 * output
 	 * @param dynamicOpenPassword dynamic open password, for pdf output
 	 * @param dynamicModifyPassword dynamic modify password, for pdf output
+	 * @param groovyData the groovy data to be displayed with the chart. Null if
+	 * show data is not required.
+	 * @param showResultSetData whether resultset data should be displayed with
+	 * the chart
 	 * @throws IOException
 	 * @throws DatasetProduceException
 	 * @throws ChartValidationException
 	 * @throws PostProcessingException
 	 */
 	public void generateFile(ReportFormat reportFormat, String outputFileName,
-			RowSetDynaClass data, Report report, boolean pdfPageNumbers,
-			String dynamicOpenPassword, String dynamicModifyPassword)
-			throws IOException, DatasetProduceException, ChartValidationException,
-			PostProcessingException {
+			Report report, boolean pdfPageNumbers,
+			String dynamicOpenPassword, String dynamicModifyPassword,
+			Object groovyData, boolean showResultSetData)
+			throws IOException, DatasetProduceException,
+			ChartValidationException, PostProcessingException {
 
 		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}', "
-				+ "report={}, pdfPageNumbers={}", reportFormat, outputFileName, report, pdfPageNumbers);
+				+ "report={}, pdfPageNumbers={}, showResultSetData={}", reportFormat,
+				outputFileName, report, pdfPageNumbers, showResultSetData);
 
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
@@ -585,7 +706,13 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, chartOptions.getWidth(), chartOptions.getHeight());
 				break;
 			case pdf:
-				PdfChart.generatePdf(chart, outputFileName, title, data, reportParamsList, report, pdfPageNumbers);
+				List<String> outputColumnNames = null;
+				List<Map<String, Object>> outputData = null;
+				if (showResultSetData) {
+					outputColumnNames = resultSetColumnNames;
+					outputData = resultSetData;
+				}
+				PdfChart.generatePdf(chart, outputFileName, title, reportParamsList, report, pdfPageNumbers, groovyData, outputColumnNames, outputData);
 				PdfHelper pdfHelper = new PdfHelper();
 				pdfHelper.addProtections(report, outputFileName, dynamicOpenPassword, dynamicModifyPassword);
 				break;
@@ -622,9 +749,16 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	}
 
 	protected void addHyperLink(ResultSet rs, String key) throws SQLException {
-		if (isHasHyperLinks()) {
+		if (hasHyperLinks) {
 			String hyperLink = rs.getString(HYPERLINKS_COLUMN_NAME);
-			getHyperLinks().put(key, hyperLink);
+			hyperLinks.put(key, hyperLink);
+		}
+	}
+
+	protected void addHyperLink(Object row, String key) {
+		if (hasHyperLinks) {
+			String hyperLink = RunReportHelper.getStringRowValue(row, HYPERLINKS_COLUMN_NAME);
+			hyperLinks.put(key, hyperLink);
 		}
 	}
 
@@ -682,10 +816,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private void applySeriesColors(JFreeChart chart) {
 		logger.debug("Entering applySeriesColors");
 
-		if (extraOptions == null) {
-			return;
-		}
-
 		if (MapUtils.isEmpty(extraOptions.getSeriesColors())) {
 			return;
 		}
@@ -741,9 +871,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 					switch (secondaryChart.getReportType()) {
 						case LineChart:
 							LineAndShapeRenderer lineAndShapeRenderer = new LineAndShapeRenderer();
-							if (showPoints) {
-								lineAndShapeRenderer.setBaseShapesVisible(true);
-							}
+							lineAndShapeRenderer.setBaseShapesVisible(showPoints);
 							categoryRenderer = lineAndShapeRenderer;
 							break;
 						default:
@@ -768,9 +896,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				ReportType secondaryReportType = secondaryChart.getReportType();
 				if (secondaryReportType.isXYPlotChart()) {
 					StandardXYItemRenderer standardXYItemRenderer = new StandardXYItemRenderer();
-					if (showPoints) {
-						standardXYItemRenderer.setBaseShapesVisible(true);
-					}
+					standardXYItemRenderer.setBaseShapesVisible(showPoints);
 					xyRenderer = standardXYItemRenderer;
 				} else {
 					throw new IllegalArgumentException("Invalid secondary chart: " + secondaryChart.getTitle());

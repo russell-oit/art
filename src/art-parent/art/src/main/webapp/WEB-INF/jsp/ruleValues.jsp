@@ -18,12 +18,12 @@ Display rule values
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="ruleValues.message.valueRemoved" var="valueRemovedText"/>
+<spring:message code="page.message.valueRemoved" var="valueRemovedText"/>
 <spring:message code="page.action.remove" var="removeText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>

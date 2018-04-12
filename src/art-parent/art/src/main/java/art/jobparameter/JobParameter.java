@@ -30,7 +30,7 @@ public class JobParameter implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private int jobId;
 	private String name;
-	private String Value;
+	private String value;
 	private ParameterType parameterType;
 	private String paramTypeString;
 
@@ -77,17 +77,17 @@ public class JobParameter implements Serializable {
 	}
 
 	/**
-	 * @return the Value
+	 * @return the value
 	 */
 	public String getValue() {
-		return Value;
+		return value;
 	}
 
 	/**
-	 * @param Value the Value to set
+	 * @param value the value to set
 	 */
-	public void setValue(String Value) {
-		this.Value = Value;
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 	/**

@@ -110,11 +110,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -325,6 +323,14 @@ public class ReportOutputGenerator {
 			int reportId = report.getReportId();
 			ReportType reportType = report.getReportType();
 
+			Object groovyData = reportRunner.getGroovyData();
+			Integer groovyDataSize = null;
+			if (groovyData != null) {
+				@SuppressWarnings("unchecked")
+				List<? extends Object> dataList = (List<? extends Object>) groovyData;
+				groovyDataSize = dataList.size();
+			}
+
 			//generate report output
 			if (reportType.isJasperReports() || reportType.isJxls()) {
 				if (reportType.isJasperReports()) {
@@ -334,6 +340,7 @@ public class ReportOutputGenerator {
 					if (reportType == ReportType.JasperReportsArt) {
 						rs = reportRunner.getResultSet();
 						jrOutput.setResultSet(rs);
+						jrOutput.setData(groovyData);
 					}
 
 					jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
@@ -345,12 +352,17 @@ public class ReportOutputGenerator {
 					if (reportType == ReportType.JxlsArt) {
 						rs = reportRunner.getResultSet();
 						jxlsOutput.setResultSet(rs);
+						jxlsOutput.setData(groovyData);
 					}
 
 					jxlsOutput.generateReport(report, applicableReportParamsList, fullOutputFilename);
 				}
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 
 				if (!isJob) {
 					displayFileLink(fileName);
@@ -370,12 +382,21 @@ public class ReportOutputGenerator {
 				switch (reportFormat) {
 					case html:
 						GroupHtmlOutput groupHtmlOutput = new GroupHtmlOutput();
-						rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
+						if (groovyData == null) {
+							rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
+						} else {
+							rowsRetrieved = groupHtmlOutput.generateReport(groovyData, splitColumn, writer, contextPath);
+						}
 						break;
 					case xlsx:
 						GroupXlsxOutput groupXlsxOutput = new GroupXlsxOutput();
 						String reportName = report.getLocalizedName(locale);
-						rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
+						if (groovyData == null) {
+							rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
+						} else {
+							rowsRetrieved = groupXlsxOutput.generateReport(groovyData, splitColumn, report, reportName, fullOutputFilename);
+						}
+
 						if (!isJob) {
 							displayFileLink(fileName);
 						}
@@ -388,22 +409,14 @@ public class ReportOutputGenerator {
 
 				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
-				boolean swapAxes = reportOptions.isSwapAxes();
-				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes);
-
-				//store data for potential use in html and pdf output
-				RowSetDynaClass data = null;
-				if (parameterChartOptions.getShowData()
+				boolean showData = false;
+				if (BooleanUtils.isTrue(parameterChartOptions.getShowData())
 						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
-					int rsType = rs.getType();
-					if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
-						rs.beforeFirst();
-						boolean useLowerCaseProperties = false;
-						boolean useColumnLabels = true;
-						data = new RowSetDynaClass(rs, useLowerCaseProperties, useColumnLabels);
-					}
-
+					showData = true;
 				}
+
+				boolean swapAxes = reportOptions.isSwapAxes();
+				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, groovyData, showData);
 
 				//add secondary charts
 				String secondaryChartSetting = report.getSecondaryCharts();
@@ -423,8 +436,9 @@ public class ReportOutputGenerator {
 						try {
 							secondaryReportRunner.execute();
 							secondaryResultSet = secondaryReportRunner.getResultSet();
+							Object secondaryGroovyData = secondaryReportRunner.getGroovyData();
 							swapAxes = false;
-							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes);
+							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, secondaryGroovyData, showData);
 							secondaryCharts.add(secondaryChart);
 						} finally {
 							DatabaseUtils.close(secondaryResultSet);
@@ -434,8 +448,23 @@ public class ReportOutputGenerator {
 					chart.setSecondaryCharts(secondaryCharts);
 				}
 
+				//store data for potential use in html and pdf output
+				List<String> dataColumnNames = null;
+				Object chartGroovyData = null;
+				boolean showResultSetData = false;
+				if (showData) {
+					if (groovyData == null) {
+						showResultSetData = true;
+						dataColumnNames = chart.getResultSetColumnNames();
+					} else {
+						GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
+						dataColumnNames = dataDetails.getColumnNames();
+						chartGroovyData = groovyData;
+					}
+				}
+
 				if (isJob) {
-					chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword);
+					chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
 				} else {
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
@@ -445,27 +474,39 @@ public class ReportOutputGenerator {
 
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
 
-						if (data != null) {
-							List<DynaBean> dataRows = data.getRows();
-							DynaProperty[] columns = data.getDynaProperties();
-							request.setAttribute("columns", columns);
-							request.setAttribute("dataRows", dataRows);
+						if (dataColumnNames != null) {
+							request.setAttribute("columnNames", dataColumnNames);
+							if (groovyData == null) {
+								request.setAttribute("data", chart.getResultSetData());
+							} else {
+								request.setAttribute("data", groovyData);
+							}
 							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
 						}
 					} else {
-						chart.generateFile(reportFormat, fullOutputFilename, data, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword);
+						chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
 						displayFileLink(fileName);
 					}
-					rowsRetrieved = getResultSetRowCount(rs);
+
+					if (groovyDataSize == null) {
+						rowsRetrieved = chart.getResultSetRecordCount();
+					} else {
+						rowsRetrieved = groovyDataSize;
+					}
 				}
 			} else if (reportType.isStandardOutput() && reportFormat.isJson()) {
 				rs = reportRunner.getResultSet();
 
 				JsonOutput jsonOutput = new JsonOutput();
 				jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
-				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
-				String jsonString = jsonOutputResult.getJsonData();
 
+				JsonOutputResult jsonOutputResult;
+				if (groovyData == null) {
+					jsonOutputResult = jsonOutput.generateOutput(rs);
+				} else {
+					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+				}
+				String jsonString = jsonOutputResult.getJsonData();
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				switch (reportFormat) {
@@ -507,7 +548,11 @@ public class ReportOutputGenerator {
 
 				StandardOutputResult standardOutputResult;
 				if (reportType.isCrosstab()) {
-					standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
+					if (groovyData == null) {
+						standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
+					} else {
+						standardOutputResult = standardOutput.generateCrosstabOutput(groovyData, reportFormat, report);
+					}
 				} else {
 					if (reportFormat.isHtml() && !isJob) {
 						//only drill down for html output. drill down query launched from hyperlink                                            
@@ -523,7 +568,11 @@ public class ReportOutputGenerator {
 						standardOutput.setRequestBaseUrl(requestBaseUrl);
 					}
 
-					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
+					if (groovyData == null) {
+						standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
+					} else {
+						standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
+					}
 				}
 
 				if (standardOutputResult.isSuccess()) {
@@ -542,35 +591,59 @@ public class ReportOutputGenerator {
 				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
 				freemarkerOutput.setContextPath(contextPath);
 				freemarkerOutput.setLocale(locale);
-				freemarkerOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+				freemarkerOutput.setResultSet(rs);
+				freemarkerOutput.setData(groovyData);
+				freemarkerOutput.generateOutput(report, writer, applicableReportParamsList);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 			} else if (reportType == ReportType.Thymeleaf) {
 				rs = reportRunner.getResultSet();
 
 				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
 				thymeleafOutput.setContextPath(contextPath);
 				thymeleafOutput.setLocale(locale);
-				thymeleafOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+				thymeleafOutput.setResultSet(rs);
+				thymeleafOutput.setData(groovyData);
+				thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 			} else if (reportType == ReportType.Velocity) {
 				rs = reportRunner.getResultSet();
 
 				VelocityOutput velocityOutput = new VelocityOutput();
 				velocityOutput.setContextPath(contextPath);
 				velocityOutput.setLocale(locale);
-				velocityOutput.generateOutput(report, writer, rs, applicableReportParamsList);
+				velocityOutput.setResultSet(rs);
+				velocityOutput.setData(groovyData);
+				velocityOutput.generateOutput(report, writer, applicableReportParamsList);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 			} else if (reportType.isXDocReport()) {
 				rs = reportRunner.getResultSet();
 
 				XDocReportOutput xdocReportOutput = new XDocReportOutput();
 				xdocReportOutput.setLocale(locale);
-				xdocReportOutput.generateReport(report, applicableReportParamsList, rs, reportFormat, fullOutputFilename);
+				xdocReportOutput.setResultSet(rs);
+				xdocReportOutput.setData(groovyData);
+				xdocReportOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 
 				if (!isJob) {
 					displayFileLink(fileName);
@@ -583,9 +656,13 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+				JsonOutputResult jsonOutputResult;
+				if (groovyData == null) {
+					jsonOutputResult = jsonOutput.generateOutput(rs);
+				} else {
+					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+				}
 				String jsonData = jsonOutputResult.getJsonData();
-
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -621,9 +698,13 @@ public class ReportOutputGenerator {
 					rs = reportRunner.getResultSet();
 
 					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+					JsonOutputResult jsonOutputResult;
+					if (groovyData == null) {
+						jsonOutputResult = jsonOutput.generateOutput(rs);
+					} else {
+						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+					}
 					String jsonData = jsonOutputResult.getJsonData();
-
 					rowsRetrieved = jsonOutputResult.getRowCount();
 					request.setAttribute("input", jsonData);
 				}
@@ -712,11 +793,17 @@ public class ReportOutputGenerator {
 
 					String csvString;
 					try (StringWriter stringWriter = new StringWriter()) {
-						csvOutputUnivocity.generateOutput(rs, stringWriter, csvOptions, Locale.ENGLISH);
+						csvOutputUnivocity.setResultSet(rs);
+						csvOutputUnivocity.setData(groovyData);
+						csvOutputUnivocity.generateOutput(stringWriter, csvOptions, Locale.ENGLISH);
 						csvString = stringWriter.toString();
 					}
 
-					rowsRetrieved = getResultSetRowCount(rs);
+					if (groovyDataSize == null) {
+						rowsRetrieved = getResultSetRowCount(rs);
+					} else {
+						rowsRetrieved = groovyDataSize;
+					}
 
 					//need to escape string for javascript, otherwise you get Unterminated string literal error
 					//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
@@ -782,9 +869,13 @@ public class ReportOutputGenerator {
 					rs = reportRunner.getResultSet();
 
 					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+					JsonOutputResult jsonOutputResult;
+					if (groovyData == null) {
+						jsonOutputResult = jsonOutput.generateOutput(rs);
+					} else {
+						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+					}
 					String jsonData = jsonOutputResult.getJsonData();
-
 					List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 					request.setAttribute("data", jsonData);
 					request.setAttribute("columns", columns);
@@ -853,9 +944,15 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
-				fixedWidthOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+				fixedWidthOutput.setResultSet(rs);
+				fixedWidthOutput.setData(groovyData);
+				fixedWidthOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 
 				if (!isJob && !reportFormat.isHtml()) {
 					displayFileLink(fileName);
@@ -864,9 +961,15 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				CsvOutputUnivocity csvOutput = new CsvOutputUnivocity();
-				csvOutput.generateOutput(rs, writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+				csvOutput.setResultSet(rs);
+				csvOutput.setData(groovyData);
+				csvOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
 
-				rowsRetrieved = getResultSetRowCount(rs);
+				if (groovyDataSize == null) {
+					rowsRetrieved = getResultSetRowCount(rs);
+				} else {
+					rowsRetrieved = groovyDataSize;
+				}
 
 				if (!isJob && !reportFormat.isHtml()) {
 					displayFileLink(fileName);
@@ -879,9 +982,13 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+				JsonOutputResult jsonOutputResult;
+				if (groovyData == null) {
+					jsonOutputResult = jsonOutput.generateOutput(rs);
+				} else {
+					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+				}
 				String jsonData = jsonOutputResult.getJsonData();
-
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -936,9 +1043,13 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+				JsonOutputResult jsonOutputResult;
+				if (groovyData == null) {
+					jsonOutputResult = jsonOutput.generateOutput(rs);
+				} else {
+					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+				}
 				String jsonData = jsonOutputResult.getJsonData();
-
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -984,9 +1095,13 @@ public class ReportOutputGenerator {
 					rs = reportRunner.getResultSet();
 
 					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+					JsonOutputResult jsonOutputResult;
+					if (groovyData == null) {
+						jsonOutputResult = jsonOutput.generateOutput(rs);
+					} else {
+						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+					}
 					String jsonData = jsonOutputResult.getJsonData();
-
 					rowsRetrieved = jsonOutputResult.getRowCount();
 					request.setAttribute("data", jsonData);
 				}
@@ -1071,9 +1186,13 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+				JsonOutputResult jsonOutputResult;
+				if (groovyData == null) {
+					jsonOutputResult = jsonOutput.generateOutput(rs);
+				} else {
+					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+				}
 				String jsonData = jsonOutputResult.getJsonData();
-
 				rowsRetrieved = jsonOutputResult.getRowCount();
 
 				String templateFileName = report.getTemplate();
@@ -1388,9 +1507,13 @@ public class ReportOutputGenerator {
 						rs = reportRunner.getResultSet();
 
 						JsonOutput jsonOutput = new JsonOutput();
-						JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+						JsonOutputResult jsonOutputResult;
+						if (groovyData == null) {
+							jsonOutputResult = jsonOutput.generateOutput(rs);
+						} else {
+							jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+						}
 						jsonData = jsonOutputResult.getJsonData();
-
 						rowsRetrieved = jsonOutputResult.getRowCount();
 						break;
 					case OrgChartJson:
@@ -1474,6 +1597,8 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 
 				ReportEngineOutput reportEngineOutput = new ReportEngineOutput(standardOutput);
+				reportEngineOutput.setResultSet(rs);
+				reportEngineOutput.setData(groovyData);
 
 				String options = report.getOptions();
 				ReportEngineOptions reportEngineOptions;
@@ -1484,9 +1609,9 @@ public class ReportOutputGenerator {
 				}
 
 				if (reportEngineOptions.isPivot()) {
-					reportEngineOutput.generatePivotOutput(rs, reportType);
+					reportEngineOutput.generatePivotOutput(reportType);
 				} else {
-					reportEngineOutput.generateTabularOutput(rs, reportType);
+					reportEngineOutput.generateTabularOutput(reportType);
 				}
 
 				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
@@ -1516,13 +1641,17 @@ public class ReportOutputGenerator {
 	 * @param reportParamsMap the report parameters map
 	 * @param reportParamsList the report parameters list
 	 * @param swapAxes whether to swap the values of the x and y axes
+	 * @param groovyData data to use for the chart, if not using a resultset
+	 * @param includeDataInOutput whether resultset data should be included in
+	 * the output
 	 * @return the prepared chart
 	 * @throws SQLException
 	 */
 	private Chart prepareChart(Report report, ReportFormat reportFormat, Locale locale,
 			ResultSet rs, ChartOptions parameterChartOptions,
 			Map<String, ReportParameter> reportParamsMap,
-			List<ReportParameter> reportParamsList, boolean swapAxes)
+			List<ReportParameter> reportParamsList, boolean swapAxes,
+			Object groovyData, boolean includeDataInOutput)
 			throws SQLException, IOException {
 
 		ReportType reportType = report.getReportType();
@@ -1541,13 +1670,17 @@ public class ReportOutputGenerator {
 		chart.setXAxisLabel(report.getxAxisLabel());
 		chart.setYAxisLabel(report.getyAxisLabel());
 		chart.setSwapAxes(swapAxes);
+		chart.setIncludeDataInOutput(includeDataInOutput);
 
 		String optionsString = report.getOptions();
-		if (StringUtils.isNotBlank(optionsString)) {
+		JFreeChartOptions options;
+		if (StringUtils.isBlank(optionsString)) {
+			options = new JFreeChartOptions();
+		} else {
 			ObjectMapper mapper = new ObjectMapper();
-			JFreeChartOptions options = mapper.readValue(optionsString, JFreeChartOptions.class);
-			chart.setExtraOptions(options);
+			options = mapper.readValue(optionsString, JFreeChartOptions.class);
 		}
+		chart.setExtraOptions(options);
 
 		Drilldown drilldown = null;
 		if (reportFormat == ReportFormat.html) {
@@ -1558,7 +1691,11 @@ public class ReportOutputGenerator {
 			}
 		}
 
-		chart.prepareDataset(rs, drilldown, reportParamsList);
+		if (groovyData == null) {
+			chart.prepareDataset(rs, drilldown, reportParamsList);
+		} else {
+			chart.prepareDataset(groovyData, drilldown, reportParamsList);
+		}
 
 		return chart;
 	}

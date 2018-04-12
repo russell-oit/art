@@ -39,8 +39,10 @@ import art.utils.GroovySandbox;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
 import groovy.lang.Binding;
+import groovy.lang.GString;
 import groovy.lang.GroovyShell;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -97,9 +99,24 @@ public class ReportRunner {
 	private User user;
 	private boolean postgreSqlFetchSizeApplied;
 	private final String QUESTION_PLACEHOLDER = "[ART_QUESTION_MARK_PLACEHOLDER]";
+	private Object groovyData;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the groovyData
+	 */
+	public Object getGroovyData() {
+		return groovyData;
+	}
+
+	/**
+	 * @param groovyData the groovyData to set
+	 */
+	public void setGroovyData(Object groovyData) {
+		this.groovyData = groovyData;
 	}
 
 	/**
@@ -369,8 +386,13 @@ public class ReportRunner {
 				}
 			}
 
+			groovyData = null;
 			if (result != null) {
-				querySql = String.valueOf(result);
+				if (result instanceof String || result instanceof GString) {
+					querySql = String.valueOf(result);
+				} else {
+					groovyData = result;
+				}
 			}
 
 			//update sb with new sql
@@ -909,6 +931,10 @@ public class ReportRunner {
 			//do nothing
 		}
 
+		if (groovyData != null) {
+			return;
+		}
+
 		//use dynamic datasource if so configured
 		if (reportType == ReportType.LovDynamic && !report.isLovUseDynamicDatasource()) {
 			Datasource reportDatasource = report.getDatasource();
@@ -949,6 +975,18 @@ public class ReportRunner {
 
 		String querySql = querySb.toString();
 
+		//https://stackoverflow.com/questions/45576157/does-resultset-returned-by-redshift-supports-resetting-iterator
+		//https://stackoverflow.com/questions/40496316/sqlfeaturenotsupportedexception-on-amazon-redshift
+		//http://www.java2s.com/Code/Java/Database-SQL-JDBC/DeterminingIfaDatabaseSupportsScrollableResultSets.htm
+		DatabaseMetaData dmd = connQuery.getMetaData();
+		logger.debug("dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE) = {}", dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE));
+		if (!dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
+			if (reportType == ReportType.Group) {
+				throw new IllegalStateException("Database doesn't support scrollable resultsets. Group reports require a scrollable resultset.");
+			}
+			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+		}
+		
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
 		if (applyFetchSize) {

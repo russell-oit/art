@@ -19,8 +19,8 @@ package art.reportgroup;
 
 import art.report.ReportService;
 import art.user.User;
-import art.utils.ActionResult;
-import art.utils.AjaxResponse;
+import art.general.ActionResult;
+import art.general.AjaxResponse;
 import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.http.HttpSession;

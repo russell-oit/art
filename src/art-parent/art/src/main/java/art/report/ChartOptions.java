@@ -30,7 +30,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 public class ChartOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private Boolean showLegend; //use object wrapper instead of primitive to differentiate 0 and "not set"
+	private Boolean showLegend; //use object wrapper instead of primitive to differentiate 0/false and "not set"
 	private Boolean showLabels;
 	private Boolean showPoints;
 	private Boolean showData;

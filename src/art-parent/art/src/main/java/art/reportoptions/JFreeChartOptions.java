@@ -33,6 +33,21 @@ public class JFreeChartOptions implements Serializable {
 
 	private Map<String, String> seriesColors;
 	private String dateFormat;
+	private boolean dynamicSeries;
+
+	/**
+	 * @return the dynamicSeries
+	 */
+	public boolean isDynamicSeries() {
+		return dynamicSeries;
+	}
+
+	/**
+	 * @param dynamicSeries the dynamicSeries to set
+	 */
+	public void setDynamicSeries(boolean dynamicSeries) {
+		this.dynamicSeries = dynamicSeries;
+	}
 
 	/**
 	 * @return the seriesColors

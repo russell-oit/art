@@ -61,6 +61,41 @@ public enum ReportType {
 	}
 
 	/**
+	 * Returns <code>true</code> if this report type stores templates in the
+	 * js-templates directory
+	 *
+	 * @return <code>true</code> if this report type stores templates in the
+	 * js-templates directory
+	 */
+	public boolean isUseJsTemplatesPath() {
+		switch (this) {
+			case ReactPivot:
+			case PivotTableJs:
+			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer: //can specify .js template and .csv data file
+			case Dygraphs:
+			case DygraphsCsvLocal:
+			case DygraphsCsvServer:
+			case DataTables:
+			case DataTablesCsvLocal:
+			case DataTablesCsvServer:
+			case C3:
+			case ChartJs:
+			case Datamaps:
+			case DatamapsFile:
+			case Leaflet:
+			case OpenLayers:
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
+			case OrgChartAjax:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
 	 * Returns <code>true</code> if this report type can be scheduled
 	 *
 	 * @return <code>true</code> if this report type can be scheduled
@@ -101,7 +136,7 @@ public enum ReportType {
 				return true;
 		}
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if this is a reportengine report
 	 *

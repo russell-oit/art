@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
 import net.sf.jasperreports.engine.export.HtmlExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
@@ -79,6 +80,21 @@ public class JasperReportsOutput {
 	private ResultSet resultSet;
 	private String dynamicOpenPassword;
 	private String dynamicModifyPassword;
+	private Object data;
+
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
 
 	/**
 	 * @return the dynamicOpenPassword
@@ -178,14 +194,8 @@ public class JasperReportsOutput {
 				// What kind of a datasource are we using?
 				Datasource ds = report.getDatasource();
 				if (ds.getDatasourceType() == DatasourceType.MongoDB) {
-					MongoDbConnection conn = null;
-					try {
-						conn = new MongoDbConnection(ds.getUrl(), ds.getUsername(), ds.getPassword());
+					try (MongoDbConnection conn = new MongoDbConnection(ds.getUrl(), ds.getUsername(), ds.getPassword())) {
 						jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, conn);
-					} finally {
-						if (conn != null) {
-							conn.close();
-						}
 					}
 				} else {
 					Connection conn = null;
@@ -198,8 +208,12 @@ public class JasperReportsOutput {
 					}
 				}
 			} else {
-				//use recordset from art query
-				jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, new JRResultSetDataSource(resultSet));
+				if (data == null) {
+					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, new JRResultSetDataSource(resultSet));
+				} else {
+					List<Map<String, ?>> finalData = RunReportHelper.getMapListData(data);
+					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, new JRMapCollectionDataSource(finalData));
+				}
 			}
 
 			//set virtualizer as read only to optimize performance

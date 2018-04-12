@@ -117,8 +117,9 @@ Page to allow manual clearing of caches
 			</thead>
 			<tbody>
 				<c:forEach var="cache" items="${caches}">
+					<spring:message code="${cache.localizedDescription}" var="localizedDescription"/> 
 					<tr data-id="${cache.value}"
-						data-name="${cache.value}">
+						data-name="${localizedDescription}">
 
 						<td><spring:message code="${cache.localizedDescription}"/></td>
 						<td>

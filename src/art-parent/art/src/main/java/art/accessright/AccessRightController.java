@@ -23,7 +23,7 @@ import art.reportgroup.ReportGroupService;
 import art.user.User;
 import art.user.UserService;
 import art.usergroup.UserGroupService;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import java.sql.SQLException;
 import java.util.Locale;
 import javax.servlet.http.HttpSession;

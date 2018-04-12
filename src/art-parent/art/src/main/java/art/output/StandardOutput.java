@@ -30,9 +30,11 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
 import art.reportoptions.StandardOutputOptions;
+import art.runreport.GroovyDataDetails;
 import art.runreport.RunReportHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
+import groovy.sql.GroovyRowResult;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,6 +61,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
@@ -767,7 +770,7 @@ public abstract class StandardOutput {
 				for (int i = 0; i < totalColumnCount; i++) {
 					addCellString("...");
 				}
-				
+
 				endRows();
 
 				endOutput();
@@ -790,6 +793,152 @@ public abstract class StandardOutput {
 	}
 
 	/**
+	 * Generates a tabular report
+	 *
+	 * @param data the data to use, not null.
+	 * @param reportFormat the report format to use, not null
+	 * @param report the report that is being run, not null
+	 * @return StandardOutputResult. if successful, rowCount contains the number
+	 * of rows in the resultset. if not, message contains the i18n message
+	 * indicating the problem
+	 * @throws java.sql.SQLException
+	 * @throws java.io.IOException
+	 */
+	public StandardOutputResult generateTabularOutput(Object data,
+			ReportFormat reportFormat, Report report) throws SQLException, IOException {
+
+		logger.debug("Entering generateTabularOutput");
+
+		Objects.requireNonNull(data, "data must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		Objects.requireNonNull(report, "report must not be null");
+
+		this.report = report;
+
+		StandardOutputResult result = new StandardOutputResult();
+
+		initializeNumberFormatters();
+
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
+		resultSetColumnCount = dataDetails.getColCount();
+		List<String> columnNames = dataDetails.getColumnNames();
+		List<? extends Object> dataList = dataDetails.getDataList();
+		Map<Integer, ColumnTypeDefinition> columnTypes = dataDetails.getColumnTypes();
+
+		int drilldownCount = 0;
+		if (drilldowns != null) {
+			drilldownCount = drilldowns.size();
+		}
+
+		setTotalColumnCount(resultSetColumnCount + drilldownCount);
+
+		List<String> hiddenColumns = getHiddenColumnsList(report);
+
+		int hiddenColumnCount = 0;
+		if (hiddenColumns != null) {
+			hiddenColumnCount = hiddenColumns.size();
+		}
+
+		setTotalColumnCount(totalColumnCount - hiddenColumnCount);
+
+		//perform any required output initialization
+		init();
+
+		addTitle();
+
+		if (showSelectedParameters) {
+			addSelectedParameters(reportParamsList);
+		}
+
+		//begin header output
+		beginHeader();
+
+		List<String> localizedColumnNames = getLocalizedColumnNames(columnNames, report);
+
+		//output header columns for the result set columns
+		for (int i = 1; i <= resultSetColumnCount; i++) {
+			String columnName = columnNames.get(i - 1);
+			if (shouldOutputColumn(i, hiddenColumns, columnName)) {
+				addHeaderCell(localizedColumnNames.get(i));
+			}
+		}
+
+		//output header columns for drill down reports
+		//only output drilldown columns for html reports
+		if (reportFormat.isHtml() && CollectionUtils.isNotEmpty(drilldowns)) {
+			for (Drilldown drilldown : drilldowns) {
+				String drilldownTitle = drilldown.getHeaderText();
+				if (drilldownTitle == null || drilldownTitle.trim().length() == 0) {
+					drilldownTitle = drilldown.getDrilldownReport().getLocalizedName(locale);
+				}
+				addHeaderCell(drilldownTitle);
+			}
+		}
+
+		//end header output
+		endHeader();
+
+		//begin data output
+		beginRows();
+
+		int maxRows = Config.getMaxRows(reportFormat.getValue());
+
+		initializeColumnFormatters(report, columnNames, columnTypes);
+
+		String nullNumberDisplay = report.getNullNumberDisplay();
+		if (nullNumberDisplay == null) {
+			nullNumberDisplay = "";
+		}
+
+		String nullStringDisplay = report.getNullStringDisplay();
+		if (nullStringDisplay == null) {
+			nullStringDisplay = "";
+		}
+
+		List<String> totalColumns = getTotalColumnsList(report);
+		if (!totalColumns.isEmpty()) {
+			columnTotals = new HashMap<>();
+		}
+
+		for (Object row : dataList) {
+			rowCount++;
+
+			newRow();
+
+			if (rowCount % 2 == 0) {
+				evenRow = true;
+			} else {
+				evenRow = false;
+			}
+
+			if (rowCount > maxRows) {
+				//row limit exceeded
+				for (int i = 0; i < totalColumnCount; i++) {
+					addCellString("...");
+				}
+
+				endRows();
+
+				endOutput();
+
+				result.setMessage("runReport.message.tooManyRows");
+				result.setTooManyRows(true);
+				return result;
+			} else {
+				List<Object> columnValues = outputDataColumns(columnTypes, row, columnNames, hiddenColumns, nullNumberDisplay, nullStringDisplay, reportFormat);
+				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
+			}
+		}
+
+		finalizeOutput(hiddenColumns, columnNames, drilldownCount, totalColumns);
+
+		result.setSuccess(true);
+		result.setRowCount(rowCount);
+
+		return result;
+	}
+
+	/**
 	 * Initialize date and number formatters to be used for formatting column
 	 * values
 	 *
@@ -800,7 +949,25 @@ public abstract class StandardOutput {
 	 * @throws SQLException
 	 */
 	private void initializeColumnFormatters(Report report, ResultSetMetaData rsmd,
-			Map<Integer, ColumnTypeDefinition> columnTypes) throws IllegalStateException, SQLException {
+			Map<Integer, ColumnTypeDefinition> columnTypes)
+			throws IllegalStateException, SQLException {
+
+		List<String> columnNames = getColumnNames(rsmd);
+		initializeColumnFormatters(report, columnNames, columnTypes);
+	}
+
+	/**
+	 * Initialize date and number formatters to be used for formatting column
+	 * values
+	 *
+	 * @param report the report being run
+	 * @param columnNames the column names
+	 * @param columnTypes the column types
+	 * @throws IllegalStateException
+	 */
+	private void initializeColumnFormatters(Report report, List<String> columnNames,
+			Map<Integer, ColumnTypeDefinition> columnTypes)
+			throws IllegalStateException {
 
 		Locale columnFormatLocale;
 		String reportLocale = report.getLocale();
@@ -836,8 +1003,10 @@ public abstract class StandardOutput {
 				columnFormatDetails.put(id, format);
 			}
 
+			List<String> columns = getOneBasedColumnNames(columnNames);
+
 			for (int i = 1; i <= resultSetColumnCount; i++) {
-				String columnName = rsmd.getColumnLabel(i);
+				String columnName = columns.get(i);
 				if (columnFormatIds.contains(String.valueOf(i))
 						|| (StringUtils.isNotBlank(columnName) && ArtUtils.containsIgnoreCase(columnFormatIds, columnName))) {
 					String format = columnFormatDetails.get(String.valueOf(i));
@@ -876,6 +1045,21 @@ public abstract class StandardOutput {
 	private void finalizeOutput(List<String> hiddenColumns, ResultSetMetaData rsmd,
 			int drilldownCount, List<String> totalColumns) throws SQLException {
 
+		List<String> columnNames = getColumnNames(rsmd);
+		finalizeOutput(hiddenColumns, columnNames, drilldownCount, totalColumns);
+	}
+
+	/**
+	 * Finalizes tabular output
+	 *
+	 * @param hiddenColumns the list of columns to be hidden
+	 * @param columnNames the column names
+	 * @param drilldownCount the number of drilldowns in use
+	 * @param totalColumns the list of columns to be totalled
+	 */
+	private void finalizeOutput(List<String> hiddenColumns, List<String> columnNames,
+			int drilldownCount, List<String> totalColumns) {
+
 		if (rowCount > 0) {
 			endRow();
 		}
@@ -884,7 +1068,7 @@ public abstract class StandardOutput {
 
 		//output total row
 		if (columnTotals != null) {
-			outputTotals(hiddenColumns, rsmd, drilldownCount, totalColumns);
+			outputTotals(hiddenColumns, columnNames, drilldownCount, totalColumns);
 		}
 
 		//end data output
@@ -895,23 +1079,25 @@ public abstract class StandardOutput {
 	 * Output totals
 	 *
 	 * @param hiddenColumns the list of columns to be hidden
-	 * @param rsmd the resultset metadata object
+	 * @param columnNames the column names
 	 * @param drilldownCount the number of drilldowns being displayed
 	 * @param totalColumns the list of columns to be totalled
-	 * @throws SQLException
 	 */
-	private void outputTotals(List<String> hiddenColumns, ResultSetMetaData rsmd,
-			int drilldownCount, List<String> totalColumns) throws SQLException {
+	private void outputTotals(List<String> hiddenColumns, List<String> columnNames,
+			int drilldownCount, List<String> totalColumns) {
 
 		beginTotalRow();
 
+		List<String> columns = getOneBasedColumnNames(columnNames);
+
 		for (int i = 1; i <= resultSetColumnCount; i++) {
-			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
+			String columnName = columns.get(i);
+			if (shouldOutputColumn(i, hiddenColumns, columnName)) {
 				Double columnTotal = columnTotals.get(i);
 				if (columnTotal == null) {
 					addCellString("");
 				} else {
-					if (shouldTotalColumn(i, totalColumns, rsmd)) {
+					if (shouldTotalColumn(i, totalColumns, columnName)) {
 						String sortValue = getNumericSortValue(columnTotal);
 						String columnFormattedValue = null;
 
@@ -1348,13 +1534,28 @@ public abstract class StandardOutput {
 	private boolean shouldOutputColumn(int columnIndex, List<String> hiddenColumns,
 			ResultSetMetaData rsmd) throws SQLException {
 
+		String columnName = rsmd.getColumnLabel(columnIndex);
+		return shouldOutputColumn(columnIndex, hiddenColumns, columnName);
+	}
+
+	/**
+	 * Returns <code>true</code> if the resultset column with the given index
+	 * should be included in the output
+	 *
+	 * @param columnIndex the column's index
+	 * @param hiddenColumns the list of columns to be hidden
+	 * @param columnName the column name
+	 * @return <code>true</code> if the resultset column with the given index
+	 * should be included in the output
+	 */
+	private boolean shouldOutputColumn(int columnIndex, List<String> hiddenColumns,
+			String columnName) {
+
 		if (hiddenColumns == null || hiddenColumns.isEmpty()) {
 			return true;
 		}
 
 		boolean displayColumn;
-
-		String columnName = rsmd.getColumnLabel(columnIndex);
 
 		if (hiddenColumns.contains(String.valueOf(columnIndex))
 				|| ArtUtils.containsIgnoreCase(hiddenColumns, columnName)) {
@@ -1404,21 +1605,18 @@ public abstract class StandardOutput {
 	 *
 	 * @param columnIndex the column's index
 	 * @param totalColumns the list of columns to be totalled
-	 * @param rsmd the resultset metadata object
+	 * @param columnName the columnName
 	 * @return <code>true</code> if the resultset column with the given index
 	 * should be totalled
-	 * @throws SQLException
 	 */
 	private boolean shouldTotalColumn(int columnIndex, List<String> totalColumns,
-			ResultSetMetaData rsmd) throws SQLException {
+			String columnName) {
 
 		if (totalColumns == null || totalColumns.isEmpty()) {
 			return false;
 		}
 
 		boolean totalColumn;
-
-		String columnName = rsmd.getColumnLabel(columnIndex);
 
 		if (totalColumns.contains(String.valueOf(columnIndex))
 				|| ArtUtils.containsIgnoreCase(totalColumns, columnName)) {
@@ -1428,6 +1626,160 @@ public abstract class StandardOutput {
 		}
 
 		return totalColumn;
+	}
+
+	/**
+	 * Outputs one row for the resultset data
+	 *
+	 * @param columnTypes the column types for the records
+	 * @param rs the resultset with the data to output
+	 * @param hiddenColumns column ids or column names of resultset columns that
+	 * should not be included in the output
+	 * @param nullNumberDisplay the string to display for null numeric values
+	 * @param nullStringDisplay the string to display for null string values
+	 * @param reportFormat the report format being used
+	 * @return data for the output row
+	 * @throws IOException
+	 */
+	private List<Object> outputDataColumns(Map<Integer, ColumnTypeDefinition> columnTypes,
+			Object row, List<String> columnNames,
+			List<String> hiddenColumns, String nullNumberDisplay,
+			String nullStringDisplay, ReportFormat reportFormat) throws IOException {
+		//save column values for use in drill down columns.
+		//for the jdbc-odbc bridge, you can only read
+		//column values ONCE and in the ORDER they appear in the select
+		List<Object> columnValues = new ArrayList<>();
+
+		List<String> columns = getOneBasedColumnNames(columnNames);
+
+		for (Entry<Integer, ColumnTypeDefinition> entry : columnTypes.entrySet()) {
+			int columnIndex = entry.getKey();
+			String columnName = columns.get(columnIndex);
+			if (!shouldOutputColumn(columnIndex, hiddenColumns, columnName)) {
+				continue;
+			}
+
+			ColumnTypeDefinition columnTypeDefinition = entry.getValue();
+			ColumnType columnType = columnTypeDefinition.getColumnType();
+
+			Object value;
+			if (row instanceof GroovyRowResult) {
+				GroovyRowResult rowResult = (GroovyRowResult) row;
+				value = rowResult.get(columnName);
+			} else if (row instanceof DynaBean) {
+				DynaBean rowBean = (DynaBean) row;
+				value = rowBean.get(columnName);
+			} else if (row instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
+				value = rowMap.get(columnName);
+			} else {
+				throw new IllegalArgumentException("Unexpected row data type: " + row.getClass().getCanonicalName());
+			}
+
+			switch (columnType) {
+				case Numeric:
+					Double numericValue;
+					if (value == null) {
+						numericValue = null;
+					} else {
+						numericValue = ((Number) value).doubleValue();
+					}
+
+					if (reportFormat.isUseColumnFormatting()) {
+						if (numericValue == null) {
+							String sortValue = "null";
+							addCellNumeric(numericValue, nullNumberDisplay, sortValue);
+						} else {
+							String sortValue = getNumericSortValue(numericValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								DecimalFormat columnFormatter = (DecimalFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(numericValue);
+								}
+							}
+
+							if (columnFormattedValue != null) {
+								addCellNumeric(numericValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalNumericFormatter != null) {
+									formattedValue = globalNumericFormatter.format(numericValue);
+								} else {
+									formattedValue = formatNumericValue(numericValue);
+								}
+
+								addCellNumeric(numericValue, formattedValue, sortValue);
+							}
+						}
+					} else {
+						addCellNumeric(numericValue);
+					}
+
+					if (columnTotals != null) {
+						Double currentValue;
+
+						if (value == null) {
+							currentValue = 0D;
+						} else {
+							currentValue = numericValue;
+						}
+
+						Double newTotal;
+						Double currentTotal = columnTotals.get(columnIndex);
+						if (currentTotal == null) {
+							newTotal = currentValue;
+						} else {
+							newTotal = currentTotal + currentValue;
+						}
+
+						columnTotals.put(columnIndex, newTotal);
+					}
+					break;
+				case Date:
+					Date dateValue = (Date) value;
+
+					if (reportFormat.isUseColumnFormatting()) {
+						if (dateValue == null) {
+							addCellDate(dateValue);
+						} else {
+							long sortValue = getDateSortValue(dateValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(dateValue);
+								}
+							}
+
+							if (columnFormattedValue != null) {
+								addCellDate(dateValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalDateFormatter != null) {
+									formattedValue = globalDateFormatter.format(dateValue);
+								} else {
+									formattedValue = Config.getDateDisplayString(dateValue);
+								}
+
+								addCellDate(dateValue, formattedValue, sortValue);
+							}
+						}
+					} else {
+						addCellDate(dateValue);
+					}
+					break;
+				default:
+					addString(value, nullStringDisplay);
+			}
+
+			columnValues.add(value);
+		}
+
+		return columnValues;
 	}
 
 	/**
@@ -1788,6 +2140,10 @@ public abstract class StandardOutput {
 		logger.debug("Entering generateCrosstabOutput: reportFormat={},"
 				+ " report={}", reportFormat, report);
 
+		Objects.requireNonNull(rs, "rs must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		Objects.requireNonNull(report, "report must not be null");
+
 		/*
 		 * input
 		 */ /*
@@ -2012,6 +2368,228 @@ public abstract class StandardOutput {
 
 		result.setSuccess(true);
 		result.setRowCount(rowCount);
+
+		return result;
+	}
+
+	/**
+	 * Generates crosstab output
+	 *
+	 * @param data the data to use
+	 * @param reportFormat the report format to use
+	 * @param report the report that is being run
+	 * @return output result
+	 * @throws java.io.IOException
+	 */
+	public StandardOutputResult generateCrosstabOutput(Object data,
+			ReportFormat reportFormat, Report report) throws IOException {
+
+		logger.debug("Entering generateCrosstabOutput: reportFormat={},"
+				+ " report={}", reportFormat, report);
+
+		Objects.requireNonNull(data, "data must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		Objects.requireNonNull(report, "report must not be null");
+
+		this.report = report;
+
+		StandardOutputResult result = new StandardOutputResult();
+
+		initializeNumberFormatters();
+
+		GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
+		resultSetColumnCount = dataDetails.getColCount();
+		List<String> columnNames = dataDetails.getColumnNames();
+		List<? extends Object> dataList = dataDetails.getDataList();
+		Map<Integer, ColumnTypeDefinition> columnTypes = dataDetails.getColumnTypes();
+
+		if (resultSetColumnCount != 3 && resultSetColumnCount != 5) {
+			result.setMessage("reports.message.invalidCrosstab");
+			return result;
+		}
+
+		int maxRows = Config.getMaxRows(reportFormat.getValue());
+
+		initializeColumnFormatters(report, columnNames, columnTypes);
+
+		// Check the data type of the value (last column)
+		ColumnTypeDefinition valueColumnTypeDefinition = columnTypes.get(resultSetColumnCount);
+
+		String nullNumberDisplay = report.getNullNumberDisplay();
+		if (nullNumberDisplay == null) {
+			nullNumberDisplay = "";
+		}
+
+		String nullStringDisplay = report.getNullStringDisplay();
+		if (nullStringDisplay == null) {
+			nullStringDisplay = "";
+		}
+
+		boolean alternateSort;
+
+		if (resultSetColumnCount > 3) {
+			alternateSort = true;
+		} else {
+			alternateSort = false;
+		}
+
+		List<String> localizedColumnNames = getLocalizedColumnNames(columnNames, report);
+
+		HashMap<String, Object> values = new HashMap<>();
+		Object[] xa;
+		Object[] ya;
+		if (alternateSort) { // name1, altSort1, name2, altSort2, value
+			TreeMap<Object, Object> x = new TreeMap<>(); // allows a sorted toArray (or Iterator())
+			TreeMap<Object, Object> y = new TreeMap<>();
+
+			// Scroll resultset and feed data structures
+			// to read it as a crosstab (pivot)
+			for (Object row : dataList) {
+				Object DyVal = RunReportHelper.getRowValue(row, 1, columnNames);
+				Object Dy = RunReportHelper.getRowValue(row, 2, columnNames);
+				Object DxVal = RunReportHelper.getRowValue(row, 3, columnNames);
+				Object Dx = RunReportHelper.getRowValue(row, 4, columnNames);
+				x.put(Dx, DxVal);
+				y.put(Dy, DyVal);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, row, 5, columnNames);
+			}
+
+			xa = x.keySet().toArray();
+			ya = y.keySet().toArray();
+
+			setTotalColumnCount(xa.length + 1);
+
+			//perform any required output initialization
+			init();
+
+			addTitle();
+
+			if (showSelectedParameters) {
+				addSelectedParameters(reportParamsList);
+			}
+
+			//begin header output
+			beginHeader();
+
+			addHeaderCell(localizedColumnNames.get(5) + " (" + localizedColumnNames.get(1) + " / " + localizedColumnNames.get(3) + ")");
+			int i, j;
+			for (i = 0; i < xa.length; i++) {
+				addHeaderCell(x.get(xa[i]).toString());
+			}
+			endHeader();
+			beginRows();
+
+			//  _ Jan Feb Mar
+			for (j = 0; j < ya.length; j++) {
+				rowCount++;
+
+				newRow();
+
+				if (rowCount % 2 == 0) {
+					evenRow = true;
+				} else {
+					evenRow = false;
+				}
+
+				if (rowCount > maxRows) {
+					//row limit exceeded
+					for (int k = 0; k < totalColumnCount; k++) {
+						addCellString("...");
+					}
+
+					endOutput();
+
+					result.setMessage("runReport.message.tooManyRows");
+					result.setTooManyRows(true);
+					return result;
+				} else {
+					Object Dy = ya[j];
+					addHeaderCellAlignLeft(y.get(Dy).toString(), String.valueOf(Dy)); //column 1 data displayed as a header
+					for (i = 0; i < xa.length; i++) {
+						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
+						outputCrosstabValue(value, valueColumnTypeDefinition, nullNumberDisplay, nullStringDisplay);
+					}
+				}
+			}
+		} else {
+			TreeSet<Object> x = new TreeSet<>(); // allows a sorted toArray (or Iterator())
+			TreeSet<Object> y = new TreeSet<>();
+
+			// Scroll resultset and feed data structures
+			// to read it as a crosstab (pivot)
+			for (Object row : dataList) {
+				Object Dy = RunReportHelper.getRowValue(row, 1, columnNames);
+				Object Dx = RunReportHelper.getRowValue(row, 2, columnNames);
+				x.add(Dx);
+				y.add(Dy);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, row, 3, columnNames);
+			}
+
+			xa = x.toArray();
+			ya = y.toArray();
+
+			setTotalColumnCount(xa.length + 1);
+
+			//perform any required output initialization
+			init();
+
+			addTitle();
+
+			if (showSelectedParameters) {
+				addSelectedParameters(reportParamsList);
+			}
+
+			//begin header output
+			beginHeader();
+			addHeaderCell(localizedColumnNames.get(3) + " (" + localizedColumnNames.get(1) + " / " + localizedColumnNames.get(2) + ")");
+			int i, j;
+			for (i = 0; i < xa.length; i++) {
+				addHeaderCell(xa[i].toString());
+			}
+
+			endHeader();
+			beginRows();
+
+			//  _ Jan Feb Mar
+			for (j = 0; j < ya.length; j++) {
+				rowCount++;
+
+				newRow();
+
+				if (rowCount % 2 == 0) {
+					evenRow = true;
+				} else {
+					evenRow = false;
+				}
+
+				if (rowCount > maxRows) {
+					//row limit exceeded
+					for (int k = 0; k < totalColumnCount; k++) {
+						addCellString("...");
+					}
+
+					endOutput();
+
+					result.setMessage("runReport.message.tooManyRows");
+					result.setTooManyRows(true);
+					return result;
+				} else {
+					Object Dy = ya[j];
+					//o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
+					addHeaderCellAlignLeft(Dy.toString()); //column 1 data displayed as a header
+					for (i = 0; i < xa.length; i++) {
+						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
+						outputCrosstabValue(value, valueColumnTypeDefinition, nullNumberDisplay, nullStringDisplay);
+					}
+				}
+			}
+		}
+
+		endOutput();
+
+		result.setSuccess(true);
+		result.setRowCount(rowCount);
+
 		return result;
 	}
 
@@ -2021,8 +2599,8 @@ public abstract class StandardOutput {
 	 *
 	 * @param key
 	 * @param values
-	 * @param rs
-	 * @param columnIndex
+	 * @param rs the resultset at the row with the value to extract
+	 * @param columnIndex the one-based column index
 	 * @param columnTypeDefinition
 	 * @throws SQLException
 	 */
@@ -2031,6 +2609,24 @@ public abstract class StandardOutput {
 			throws SQLException {
 
 		Object value = getColumnValue(rs, columnIndex, columnTypeDefinition);
+		values.put(key, value);
+	}
+
+	/**
+	 * Stores the right object type in the Hashmap used by
+	 * generateCrosstabOutput to cache sorted values
+	 *
+	 * @param key
+	 * @param values
+	 * @param row the current row of data
+	 * @param columnIndex the one-based column index
+	 * @param columnNames the column names
+	 * @throws SQLException
+	 */
+	private void addValue(String key, Map<String, Object> values,
+			Object row, int columnIndex, List<String> columnNames) {
+
+		Object value = RunReportHelper.getRowValue(row, columnIndex, columnNames);
 		values.put(key, value);
 	}
 
@@ -2130,7 +2726,7 @@ public abstract class StandardOutput {
 				if (value == null) {
 					numericValue = null;
 				} else {
-					numericValue = (Double) value;
+					numericValue = ((Number) value).doubleValue();
 				}
 
 				if (numericValue == null) {
@@ -2194,15 +2790,25 @@ public abstract class StandardOutput {
 	private List<String> getLocalizedColumnNames(ResultSetMetaData rsmd,
 			Report report) throws SQLException {
 
-		List<String> localizedColumnNames = new ArrayList<>();
+		List<String> columnNames = getColumnNames(rsmd);
+		return getLocalizedColumnNames(columnNames, report);
+	}
+
+	/**
+	 * Returns the column names to use in report output, considering the current
+	 * locale and report i18n options
+	 *
+	 * @param rsmd the resultset metadata object for the data result set
+	 * @param report the report being run
+	 * @return the localized column names to use
+	 */
+	private List<String> getLocalizedColumnNames(List<String> columnNames,
+			Report report) {
 
 		//set defaults
 		//add dummy item in index 0. to allow retrieving of column names using 1-based index like with rsmd
 		//without it, the index based add() or set() fails with an empty list
-		localizedColumnNames.add("dummy");
-		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-			localizedColumnNames.add(i, rsmd.getColumnLabel(i));
-		}
+		List<String> localizedColumnNames = getOneBasedColumnNames(columnNames);
 
 		//set localized column names if configured
 		GeneralReportOptions generalReportOptions = report.getGeneralOptions();
@@ -2246,14 +2852,47 @@ public abstract class StandardOutput {
 
 		return localizedColumnNames;
 	}
-	
+
 	/**
 	 * Returns the open password to use for a report's output file
-	 * 
+	 *
 	 * @return the open password to use for a report's output file
 	 */
 	protected String getEffectiveOpenPassword() {
-		RunReportHelper runReportHelper= new RunReportHelper();
+		RunReportHelper runReportHelper = new RunReportHelper();
 		return runReportHelper.getEffectiveOpenPassword(report, dynamicOpenPassword);
+	}
+
+	/**
+	 * Returns the column names for a resultset
+	 *
+	 * @param rsmd the resultset metadata object
+	 * @return the column names for a resultset
+	 * @throws SQLException
+	 */
+	private List<String> getColumnNames(ResultSetMetaData rsmd) throws SQLException {
+		List<String> columnNames = new ArrayList<>();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			columnNames.add(rsmd.getColumnLabel(i));
+		}
+
+		return columnNames;
+	}
+
+	/**
+	 * Returns column names where retrieval uses a 1-based index
+	 *
+	 * @param columnNames the original column names
+	 * @return column names where retrieval uses a 1-based index
+	 */
+	private List<String> getOneBasedColumnNames(List<String> columnNames) {
+		List<String> columns = new ArrayList<>();
+		columns.add("dummy");
+
+		for (String column : columnNames) {
+			columns.add(column);
+		}
+
+		return columns;
 	}
 }

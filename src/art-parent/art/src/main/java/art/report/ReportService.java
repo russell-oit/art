@@ -34,7 +34,7 @@ import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.reportoptions.CloneOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -137,6 +137,7 @@ public class ReportService {
 			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
 			report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));
 			report.setChartOptionsSetting(rs.getString("GRAPH_OPTIONS"));
+			report.setSecondaryCharts(rs.getString("SECONDARY_CHARTS"));
 			report.setTemplate(rs.getString("TEMPLATE"));
 			report.setDisplayResultset(rs.getInt("DISPLAY_RESULTSET"));
 			report.setXmlaDatasource(rs.getString("XMLA_DATASOURCE"));
@@ -578,10 +579,14 @@ public class ReportService {
 
 		sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_SAVED_PARAMETERS WHERE REPORT_ID=?";
+		dbService.update(sql, id);
 
 		//lastly, delete query
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID=?";
 		int affectedRows = dbService.update(sql, id);
+		
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
@@ -820,7 +825,6 @@ public class ReportService {
 
 		Integer reportTypeId;
 		if (report.getReportType() == null) {
-			logger.warn("Report type not defined. Defaulting to 0");
 			reportTypeId = 0;
 		} else {
 			reportTypeId = report.getReportType().getValue();

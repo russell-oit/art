@@ -25,7 +25,7 @@ import art.reportgroup.ReportGroupService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.usergroupmembership.UserGroupMembershipService2;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -40,6 +40,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -179,6 +180,52 @@ public class UserService {
 	}
 
 	/**
+	 * Returns active users
+	 *
+	 * @return active users
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public List<User> getActiveUsers() throws SQLException {
+		logger.debug("Entering getActiveUsers");
+
+		String sql = SQL_SELECT_ALL + " WHERE ACTIVE=1";
+		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
+		return dbService.query(sql, h);
+	}
+
+	/**
+	 * Returns disabled users
+	 *
+	 * @return disabled users
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public List<User> getDisabledUsers() throws SQLException {
+		logger.debug("Entering getDisabledUsers");
+
+		String sql = SQL_SELECT_ALL + " WHERE ACTIVE=0";
+		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
+		return dbService.query(sql, h);
+	}
+
+	/**
+	 * Returns either active or disabled users
+	 *
+	 * @param activeStatus whether to return active or disabled users
+	 * @return either active or disabled users
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public List<User> getUsersByActiveStatus(boolean activeStatus) throws SQLException {
+		logger.debug("Entering getUsersByActiveStatus: activeStatus={}", activeStatus);
+
+		String sql = SQL_SELECT_ALL + " WHERE ACTIVE=?";
+		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
+		return dbService.query(sql, h, BooleanUtils.toInteger(activeStatus));
+	}
+
+	/**
 	 * Returns a user
 	 *
 	 * @param id the user id
@@ -290,6 +337,15 @@ public class UserService {
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_LOGGED_IN_USERS WHERE USER_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_SAVED_PARAMETERS WHERE USER_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_PARAM_DEFAULTS WHERE USER_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_FIXED_PARAM_VAL WHERE USER_ID=?";
 		dbService.update(sql, id);
 
 		//lastly, delete user
@@ -606,7 +662,6 @@ public class UserService {
 		//set values for possibly null property objects
 		int accessLevel;
 		if (user.getAccessLevel() == null) {
-			logger.warn("Access level not defined. Defaulting to 0");
 			accessLevel = 0;
 		} else {
 			accessLevel = user.getAccessLevel().getValue();
@@ -722,5 +777,77 @@ public class UserService {
 		}
 
 		return jobs;
+	}
+
+	/**
+	 * Enables a user
+	 *
+	 * @param id the user id
+	 * @param actionUser the user who is performing the action
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "users", allEntries = true)
+	public void enableUser(int id, User actionUser) throws SQLException {
+		logger.debug("Entering enableUser: id={}, actionUser={}", id, actionUser);
+
+		String sql = "UPDATE ART_USERS SET ACTIVE=1,"
+				+ " UPDATE_DATE=?, UPDATED_BY=?"
+				+ " WHERE USER_ID=?";
+
+		Object[] values = {
+			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+			actionUser.getUsername(),
+			id
+		};
+
+		dbService.update(sql, values);
+	}
+
+	/**
+	 * Disables a user
+	 *
+	 * @param id the user id
+	 * @param actionUser the user who is performing the action
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "users", allEntries = true)
+	public void disableUser(int id, User actionUser) throws SQLException {
+		logger.debug("Entering disableUser: id={}, actionUser={}", id, actionUser);
+
+		String sql = "UPDATE ART_USERS SET ACTIVE=0,"
+				+ " UPDATE_DATE=?, UPDATED_BY=?"
+				+ " WHERE USER_ID=?";
+
+		Object[] values = {
+			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+			actionUser.getUsername(),
+			id
+		};
+
+		dbService.update(sql, values);
+	}
+
+	/**
+	 * Returns <code>true</code> if a user with the given username exists
+	 *
+	 * @param username the username
+	 * @return <code>true</code> if the user exists
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public boolean userExists(String username) throws SQLException {
+		logger.debug("Entering userExists: username='{}'", username);
+
+		String sql = "SELECT COUNT(*) FROM ART_USERS"
+				+ " WHERE USERNAME=?";
+
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCount = dbService.query(sql, h, username);
+
+		if (recordCount == null || recordCount.longValue() == 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

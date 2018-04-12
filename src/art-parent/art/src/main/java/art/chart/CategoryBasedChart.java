@@ -18,13 +18,17 @@
 package art.chart;
 
 import art.enums.ReportType;
+import art.runreport.RunReportHelper;
 import net.sf.cewolfart.links.CategoryItemLinkGenerator;
 import net.sf.cewolfart.tooltips.CategoryToolTipGenerator;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
@@ -100,11 +104,17 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 			hop = 1;
 		}
 
-		//use different report type or a report option or first column name to indicate static/dynamic series?
+		boolean optionsDynamicSeries = extraOptions.isDynamicSeries();
+
 		ResultSetMetaData rsmd = rs.getMetaData();
-		boolean dynamicSeries = false;
+		boolean columnDynamicSeries = false;
 		String secondColumnClassName = rsmd.getColumnClassName(2 + hop);
 		if (StringUtils.equals(secondColumnClassName, "java.lang.String")) {
+			columnDynamicSeries = true;
+		}
+
+		boolean dynamicSeries = false;
+		if (optionsDynamicSeries || columnDynamicSeries) {
 			dynamicSeries = true;
 		}
 
@@ -118,13 +128,34 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 			seriesCount = rsmd.getColumnCount() - 1 - hop; //1 for xValue column
 		}
 
+		resultSetColumnNames = new ArrayList<>();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			resultSetColumnNames.add(columnName);
+		}
+
+		resultSetData = new ArrayList<>();
+
 		while (rs.next()) {
-			String categoryName = rs.getString(1);
+			resultSetRecordCount++;
+
+			Map<String, Object> row = new LinkedHashMap<>();
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				Object data = rs.getObject(i);
+				row.put(columnName, data);
+			}
+			
+			if (includeDataInOutput) {
+				resultSetData.add(row);
+			}
+
+			String categoryName = RunReportHelper.getStringRowValue(row, 1, resultSetColumnNames);
 
 			if (dynamicSeries) {
 				//series name is the contents of the second column
-				String seriesName = rs.getString(2 + hop);
-				double yValue = rs.getDouble(3 + hop);
+				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop, resultSetColumnNames);
+				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop, resultSetColumnNames);
 
 				//set series index
 				int seriesIndex;
@@ -136,13 +167,73 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 					seriesCount++;
 				}
 
-				addData(rs, dataset, seriesIndex, yValue, categoryName, seriesName);
+				addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
 			} else {
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
-					String seriesName = rsmd.getColumnLabel(columnIndex);
-					double yValue = rs.getDouble(columnIndex);
-					addData(rs, dataset, seriesIndex, yValue, categoryName, seriesName);
+					String seriesName = resultSetColumnNames.get(columnIndex - 1);
+					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex, resultSetColumnNames);
+					addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
+				}
+			}
+		}
+
+		setDataset(dataset);
+	}
+
+	@Override
+	protected void fillDataset(List<? extends Object> data) {
+		logger.debug("Entering fillDataset");
+
+		Objects.requireNonNull(data, "data must not be null");
+
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+		//resultset structure
+		//static series: category name [, link], series 1 value [, series 2 value, ...]
+		//dynamic series: category name [, link], seriesName, value
+		int hop = 0;
+		if (isHasHyperLinks()) {
+			hop = 1;
+		}
+
+		boolean dynamicSeries = extraOptions.isDynamicSeries();
+
+		int seriesCount; //start series index at 0 as generateLink() uses zero-based indices to idenfity series
+		Map<String, Integer> seriesIndices = new HashMap<>(); //<series name, series index>
+
+		if (dynamicSeries) {
+			seriesCount = 0;
+		} else {
+			//series values start from column 2. column 1 has the xValue (category name)
+			seriesCount = colCount - 1 - hop; //1 for xValue column
+		}
+
+		for (Object row : data) {
+			String categoryName = RunReportHelper.getStringRowValue(row, 1, columnNames);
+
+			if (dynamicSeries) {
+				//series name is the contents of the second column
+				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop, columnNames);
+				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop, columnNames);
+
+				//set series index
+				int seriesIndex;
+				if (seriesIndices.containsKey(seriesName)) {
+					seriesIndex = seriesIndices.get(seriesName);
+				} else {
+					seriesIndex = seriesCount;
+					seriesIndices.put(seriesName, seriesIndex);
+					seriesCount++;
+				}
+
+				addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
+			} else {
+				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
+					int columnIndex = seriesIndex + 2 + hop; //start from column 2
+					String seriesName = columnNames.get(columnIndex - 1);
+					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex, columnNames);
+					addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
 				}
 			}
 		}
@@ -151,9 +242,9 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 	}
 
 	/**
-	 * Adds data from the resultset to the dataset object
+	 * Adds data to the dataset object
 	 *
-	 * @param rs the sesultset to use
+	 * @param row the current row of data
 	 * @param dataset the dataset to populate
 	 * @param seriesIndex the series index
 	 * @param yValue the y value
@@ -161,8 +252,8 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 	 * @param seriesName the series name
 	 * @throws SQLException
 	 */
-	private void addData(ResultSet rs, DefaultCategoryDataset dataset,
-			int seriesIndex, double yValue, String categoryName, String seriesName) throws SQLException {
+	private void addData(Object row, DefaultCategoryDataset dataset,
+			int seriesIndex, double yValue, String categoryName, String seriesName) {
 
 		//add dataset value
 		if (swapAxes) {
@@ -177,7 +268,7 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 		String linkId = String.valueOf(seriesIndex) + categoryName;
 
 		//add hyperlink if required
-		addHyperLink(rs, linkId);
+		addHyperLink(row, linkId);
 
 		//add drilldown link if required
 		//drill down on col 1 = y value (data value)

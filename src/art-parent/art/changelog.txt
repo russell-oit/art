@@ -1,3 +1,17 @@
+ART 3.4
+* Allow jobs to specify the time zone in which the schedule will run
+* Include template file in report export/import
+* Provide a REST API for dealing with users. This is experimental and subject to change.
+* Allow users to save parameter selections
+* Allow use of GroovyRowResult data with "usesGroovy" queries
+* Updated French translation (thanks to Pierre Blanchou)
+* Have job next run date consider holidays
+* Allow specifying of parameter default values for users and user groups
+* Allow parameters to use fixed values
+* Fix for secondary charts not being used
+* Allow testing of report in edit report page
+* Updated univocity-parsers, spring
+
 ART 3.3
 * Allow sending of email if there is an error with a particular job
 * Added ReportEngine report types

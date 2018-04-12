@@ -34,6 +34,7 @@ Display application language selection page
 
 	<jsp:body>
 		<form class="form-horizontal" method="POST" action="">
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 			<fieldset>
 				<div class="form-group">
 					<label class="col-md-2 control-label" for="lang">

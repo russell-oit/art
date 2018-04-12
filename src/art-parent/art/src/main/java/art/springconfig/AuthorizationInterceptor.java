@@ -35,10 +35,10 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -47,7 +47,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  *
  * @author Timothy Anyona
  */
-@Component
 public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 	//https://stackoverflow.com/questions/23349180/java-config-for-spring-interceptor-where-interceptor-is-using-autowired-spring-b
 	//https://stackoverflow.com/questions/20243130/mvc-java-config-handlerinterceptor-not-excluding-paths
@@ -60,15 +59,11 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 
+	@Autowired
 	private MessageSource messageSource;
 
+	@Autowired
 	private LocaleResolver localeResolver;
-
-	private ApplicationContext applicationContext;
-
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
@@ -179,10 +174,6 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			}
 		}
 
-		//autowiring in this class has problems.. 
-		messageSource = (MessageSource) applicationContext.getBean("messageSource");
-		localeResolver = (LocaleResolver) applicationContext.getBean("localeResolver");
-
 		//https://stackoverflow.com/questions/29902872/spring-how-to-get-the-actual-current-locale-like-it-works-for-messages
 		//https://stackoverflow.com/questions/10792551/how-to-obtain-a-current-user-locale-from-spring-without-passing-it-as-a-paramete
 		//https://stackoverflow.com/questions/24612568/localcontexthandler-usage
@@ -204,9 +195,9 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				//for saiku rest calls, don't return/display html page in response. just return error status code and message
 				//https://stackoverflow.com/questions/21417256/spring-4-api-request-authentication
 				//https://stackoverflow.com/questions/377644/jquery-ajax-error-handling-show-custom-exception-messages
-				response.setStatus(401); //HttpServletResponse.SC_UNAUTHORIZED
+				response.setStatus(HttpStatus.UNAUTHORIZED.value()); //HttpServletResponse.SC_UNAUTHORIZED (401)
 				String localizedMessage = messageSource.getMessage(message, null, locale);
-				response.setContentType(MediaType.TEXT_PLAIN.toString());
+				response.setContentType(MediaType.TEXT_PLAIN_VALUE);
 				response.getWriter().write(localizedMessage);
 				return false;
 			} else {
@@ -228,9 +219,9 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				} else {
 					message = "page.message.artDatabaseNotConfigured";
 					if (StringUtils.startsWith(pathMinusContext, "/saiku2")) {
-						response.setStatus(401); //HttpServletResponse.SC_UNAUTHORIZED
+						response.setStatus(HttpStatus.UNAUTHORIZED.value());
 						String localizedMessage = messageSource.getMessage(message, null, locale);
-						response.setContentType(MediaType.TEXT_PLAIN.toString());
+						response.setContentType(MediaType.TEXT_PLAIN_VALUE);
 						response.getWriter().write(localizedMessage);
 						return false;
 					} else {
@@ -245,9 +236,9 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		} else {
 			if (StringUtils.startsWith(pathMinusContext, "/saiku2")) {
 				message = "page.message.accessDenied";
-				response.setStatus(401); //HttpServletResponse.SC_UNAUTHORIZED
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 				String localizedMessage = messageSource.getMessage(message, null, locale);
-				response.setContentType(MediaType.TEXT_PLAIN.toString());
+				response.setContentType(MediaType.TEXT_PLAIN_VALUE);
 				response.getWriter().write(localizedMessage);
 				return false;
 			} else {
@@ -321,6 +312,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				|| StringUtils.equals(page, "archives")
 				|| StringUtils.equals(page, "emailReport")
 				|| StringUtils.equals(page, "saiku3")
+				|| StringUtils.equals(page, "saveParameterSelection")
+				|| StringUtils.equals(page, "clearSavedParameterSelection")
 				|| StringUtils.equals(page, "getLovValues")) {
 			//everyone can access
 			//NOTE: "everyone" doesn't include when accessing as the art database user
@@ -496,6 +489,16 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				|| StringUtils.equals(page, "ruleValuesConfig") || StringUtils.endsWith(page, "RuleValues")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "paramDefaults") || StringUtils.endsWith(page, "ParamDefault")
+				|| StringUtils.equals(page, "paramDefaultsConfig") || StringUtils.endsWith(page, "ParamDefaults")) {
+			if (accessLevel >= AccessLevel.MidAdmin.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "fixedParamValues") || StringUtils.endsWith(page, "FixedParamValue")
+				|| StringUtils.equals(page, "fixedParamValuesConfig") || StringUtils.endsWith(page, "FixedParamValues")) {
+			if (accessLevel >= AccessLevel.MidAdmin.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "reportParameterConfig")

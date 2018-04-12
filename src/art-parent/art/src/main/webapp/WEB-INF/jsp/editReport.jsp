@@ -54,6 +54,14 @@ Edit report page
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
+	<jsp:attribute name="belowMainPanel">
+		<div class="row">
+			<div class="col-md-12">
+				<div id="reportOutput"></div>
+			</div>
+		</div>
+	</jsp:attribute>
+
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
@@ -74,6 +82,8 @@ Edit report page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -233,6 +243,50 @@ Edit report page
 						});
 						return rows;
 					}
+				});
+
+				$("#testReport").click(function () {
+					//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
+					tinymce.triggerSave();
+
+					//disable buttons
+					$('.action').prop('disabled', true);
+
+					$.ajax({
+						type: "POST",
+						url: "${pageContext.request.contextPath}/runReport",
+						data: $('#fileupload').serialize(),
+						success: function (data, status, xhr) {
+							$("#reportOutput").html(data);
+							$('.action').prop('disabled', false);
+						},
+						error: function (xhr, status, error) {
+							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
+							bootbox.alert(xhr.responseText);
+							$('.action').prop('disabled', false);
+						}
+					});
+				});
+
+				$("#testReportData").click(function () {
+					//disable buttons
+					$('.action').prop('disabled', true);
+
+					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
+					$.ajax({
+						type: "POST",
+						url: "${pageContext.request.contextPath}/runReport",
+						data: $('#fileupload').serialize() + "&testData=true&reportFormat=htmlDataTable",
+						success: function (data, status, xhr) {
+							$("#reportOutput").html(data);
+							$('.action').prop('disabled', false);
+						},
+						error: function (xhr, status, error) {
+							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
+							bootbox.alert(xhr.responseText);
+							$('.action').prop('disabled', false);
+						}
+					});
 				});
 
 				//https://stackoverflow.com/questions/6440439/how-do-i-make-a-textarea-an-ace-editor
@@ -872,6 +926,7 @@ Edit report page
 	<jsp:body>
 		<spring:url var="formUrl" value="/saveReport"/>
 		<form:form id="fileupload" class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="report" enctype="multipart/form-data">
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -895,7 +950,9 @@ Edit report page
 					</div>
 				</c:if>
 
+				<input type="hidden" name="showInline" id="showInline" value="true">
 				<input type="hidden" name="action" value="${action}">
+				<form:hidden path="dummyBoolean" value="true"/>
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
@@ -905,7 +962,7 @@ Edit report page
 							<c:when test="${action == 'edit'}">
 								<form:input path="reportId" readonly="true" class="form-control"/>
 							</c:when>
-							<c:when test="${action == 'copy'}">
+							<c:when test="${action == 'copy' || action == 'add'}">
 								<form:hidden path="reportId"/>
 							</c:when>
 						</c:choose>
@@ -1592,9 +1649,17 @@ Edit report page
 				</div>
 				<div class="form-group">
 					<div class="col-md-12">
-						<button type="submit" class="btn btn-primary pull-right">
-							<spring:message code="page.button.save"/>
-						</button>
+						<span class="pull-right">
+							<button type="button" id="testReportData" class="btn btn-default action">
+								<spring:message code="reports.button.testData"/>
+							</button>
+							<button type="button" id="testReport" class="btn btn-default action">
+								<spring:message code="reports.button.test"/>
+							</button>
+							<button type="submit" class="btn btn-primary">
+								<spring:message code="page.button.save"/>
+							</button>
+						</span>
 					</div>
 				</div>
 			</fieldset>

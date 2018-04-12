@@ -27,7 +27,7 @@
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+	
     <title>ART - ${pageTitle}</title>
 
     <!--[if lt IE 9]><script type="text/javascript" src="${pageContext.request.contextPath}/saiku/js/svgweb/svg.js" data-path="js/svgweb/"></script><![endif]-->

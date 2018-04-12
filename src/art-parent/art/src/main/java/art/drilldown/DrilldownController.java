@@ -20,7 +20,7 @@ package art.drilldown;
 import art.enums.ReportFormat;
 import art.report.Report;
 import art.report.ReportService;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;

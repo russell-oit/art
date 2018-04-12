@@ -24,6 +24,8 @@ import art.output.StandardOutput;
 import art.reportoptions.ReportEngineDataColumn;
 import art.reportoptions.ReportEngineGroupColumn;
 import art.reportoptions.ReportEngineOptions;
+import art.runreport.GroovyDataDetails;
+import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import java.io.File;
@@ -83,6 +85,8 @@ public class ReportEngineOutput extends AbstractReportOutput {
 
 	private StandardOutput so;
 	private int bodyCount = 0;
+	private ResultSet resultSet;
+	private Object data;
 
 	public ReportEngineOutput(StandardOutput so) {
 		this(so, new GeneralOutputFormat());
@@ -92,6 +96,34 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		super(outputFormat);
 
 		this.so = so;
+	}
+
+	/**
+	 * @return the resultSet
+	 */
+	public ResultSet getResultSet() {
+		return resultSet;
+	}
+
+	/**
+	 * @param resultSet the resultSet to set
+	 */
+	public void setResultSet(ResultSet resultSet) {
+		this.resultSet = resultSet;
+	}
+
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
 	}
 
 	@Override
@@ -167,13 +199,11 @@ public class ReportEngineOutput extends AbstractReportOutput {
 	/**
 	 * Generates tabular output
 	 *
-	 * @param rs the resultset that contains the data to output. May be null for
-	 * reportengine file report type
 	 * @param reportType the report type
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	public void generateTabularOutput(ResultSet rs, ReportType reportType)
+	public void generateTabularOutput(ReportType reportType)
 			throws SQLException, IOException {
 
 		Objects.requireNonNull(reportType, "reportType must not be null");
@@ -194,15 +224,29 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		List<ReportEngineDataColumn> dataColumns = reportEngineOptions.getDataColumns();
 
 		if (reportType == ReportType.ReportEngine) {
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int columnCount = rsmd.getColumnCount();
+			List<ColumnMetadata> columnMetadata;
+			ObjectFlatTableBuilder flatTableBuilder;
+			int columnCount;
+			if (data == null) {
+				ResultSetMetaData rsmd = resultSet.getMetaData();
+				columnCount = rsmd.getColumnCount();
+
+				JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(resultSet);
+				flatTableBuilder = new ObjectFlatTableBuilder(rsInput);
+				rsInput.open();
+				columnMetadata = rsInput.getColumnMetadata();
+			} else {
+				GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, artReport);
+				columnCount = dataDetails.getColCount();
+				List<String> columnNames = dataDetails.getColumnNames();
+				List<List<Object>> listData = RunReportHelper.getListData(data);
+				ListTableInput listInput = new ListTableInput(listData, columnNames);
+				flatTableBuilder = new ObjectFlatTableBuilder(listInput);
+				listInput.open();
+				columnMetadata = listInput.getColumnMetadata();
+			}
 			so.setTotalColumnCount(columnCount);
 
-			JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(rs);
-			ObjectFlatTableBuilder flatTableBuilder = new ObjectFlatTableBuilder(rsInput);
-			rsInput.open();
-
-			List<ColumnMetadata> columnMetadata = rsInput.getColumnMetadata();
 			for (int i = 0; i < columnMetadata.size(); i++) {
 				ColumnMetadata column = columnMetadata.get(i);
 				String columnLabel = column.getColumnLabel();
@@ -370,13 +414,11 @@ public class ReportEngineOutput extends AbstractReportOutput {
 	/**
 	 * Generates pivot output
 	 *
-	 * @param rs the resultset that contains the data. May be null for
-	 * reportengine file report type
 	 * @param reportType the report type
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	public void generatePivotOutput(ResultSet rs, ReportType reportType)
+	public void generatePivotOutput(ReportType reportType)
 			throws SQLException, IOException {
 
 		MessageSource messageSource = so.getMessageSource();
@@ -401,20 +443,32 @@ public class ReportEngineOutput extends AbstractReportOutput {
 		Objects.requireNonNull(pivotData, "pivotData must not be null");
 
 		if (reportType == ReportType.ReportEngine) {
+			List<ColumnMetadata> columnMetadata;
+			PivotTableBuilder pivotTableBuilder;
 			int columnCount;
+			if (data == null) {
+				ResultSetMetaData rsmd = resultSet.getMetaData();
+				columnCount = rsmd.getColumnCount();
+				JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(resultSet);
+				pivotTableBuilder = new PivotTableBuilder(rsInput);
+				rsInput.open();
+				columnMetadata = rsInput.getColumnMetadata();
+			} else {
+				GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, artReport);
+				columnCount = dataDetails.getColCount();
+				List<String> columnNames = dataDetails.getColumnNames();
+				List<List<Object>> listData = RunReportHelper.getListData(data);
+				ListTableInput listInput = new ListTableInput(listData, columnNames);
+				pivotTableBuilder = new PivotTableBuilder(listInput);
+				listInput.open();
+				columnMetadata = listInput.getColumnMetadata();
+			}
+
 			if (optionsColumnCount > 0) {
 				columnCount = optionsColumnCount;
-			} else {
-				ResultSetMetaData rsmd = rs.getMetaData();
-				columnCount = rsmd.getColumnCount();
 			}
 			so.setTotalColumnCount(columnCount);
 
-			JdbcResultsetTableInput rsInput = new JdbcResultsetTableInput(rs);
-			PivotTableBuilder pivotTableBuilder = new PivotTableBuilder(rsInput);
-			rsInput.open();
-
-			List<ColumnMetadata> columnMetadata = rsInput.getColumnMetadata();
 			for (int i = 0; i < columnMetadata.size(); i++) {
 				ColumnMetadata column = columnMetadata.get(i);
 				String columnLabel = column.getColumnLabel();

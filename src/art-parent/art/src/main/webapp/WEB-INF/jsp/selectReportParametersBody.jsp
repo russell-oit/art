@@ -15,6 +15,9 @@ Display section to allow selecting of report parameters and initiate running of 
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="reports.message.fileSent" var="fileSentText"/>
+<spring:message code="reports.message.parametersSaved" var="parametersSavedText"/>
+<spring:message code="reports.message.parametersCleared" var="parametersClearedText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
@@ -52,7 +55,12 @@ Display section to allow selecting of report parameters and initiate running of 
 						$.notify(response.errorMessage, "error");
 					}
 				},
-				error: ajaxErrorHandler
+				error: function (xhr, status, error) {
+					bootbox.alert({
+						title: '${errorOccurredText}',
+						message: xhr.responseText
+					});
+				}
 			});
 		});
 
@@ -68,28 +76,80 @@ Display section to allow selecting of report parameters and initiate running of 
 
 			$("#showInline").val("true");
 
-			var $form = $(this).closest('form');
-
 			//disable buttons
 			$('.action').prop('disabled', true);
 
-			var url = "${pageContext.request.contextPath}/runReport";
-
-			//https://www.w3schools.com/jquery/ajax_post.asp
-			$.post(url, $form.serialize(), function (data, status, xhr) {
-				$("#reportOutput").html(data);
-
-				if (status === "error") {
-					bootbox.alert("<b>${errorOccurredText}</b><br>"
-							+ xhr.status + "<br>" + data);
+			$.ajax({
+				type: "POST",
+				url: "${pageContext.request.contextPath}/runReport",
+				data: $('#parametersForm').serialize(),
+				success: function (data, status, xhr) {
+					$("#reportOutput").html(data);
+					$('.action').prop('disabled', false);
+				},
+				error: function (xhr, status, error) {
+					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
+					bootbox.alert({
+						title: '${errorOccurredText}',
+						message: xhr.responseText
+					});
+					$('.action').prop('disabled', false);
 				}
-
-				//enable buttons
-				$('.action').prop('disabled', false);
-
 			});
-
 		});
+
+		$("#saveParameterSelection").click(function (e) {
+			e.preventDefault();
+
+			$.ajax({
+				type: 'POST',
+				url: '${pageContext.request.contextPath}/saveParameterSelection',
+				dataType: 'json',
+				data: $('#parametersForm').serialize(),
+				success: function (response)
+				{
+					if (response.success) {
+						$.notify("${parametersSavedText}", "success");
+					} else {
+						$.notify(response.errorMessage, "error");
+					}
+				},
+				error: function (xhr, status, error) {
+					bootbox.alert({
+						title: '${errorOccurredText}',
+						message: xhr.responseText
+					});
+				}
+			});
+		});
+
+		$("#clearSavedParameterSelection").click(function (e) {
+			e.preventDefault();
+
+			var reportId = parseInt($('input[name="reportId"]').val(), 10);
+
+			$.ajax({
+				type: 'POST',
+				url: '${pageContext.request.contextPath}/clearSavedParameterSelection',
+				dataType: 'json',
+				data: {reportId: reportId},
+				success: function (response)
+				{
+					if (response.success) {
+						$.notify("${parametersClearedText}", "success");
+					} else {
+						$.notify(response.errorMessage, "error");
+					}
+				},
+				error: function (xhr, status, error) {
+					bootbox.alert({
+						title: '${errorOccurredText}',
+						message: xhr.responseText
+					});
+				}
+			});
+		});
+
 
 		$("#reportFormat").change(function () {
 			toggleVisibleButtons();
@@ -234,6 +294,7 @@ Display section to allow selecting of report parameters and initiate running of 
 					<spring:url var="formUrl" value="/runReport"/>
 					<form id="parametersForm" class="form-horizontal" method="POST" action="${formUrl}">
 						<fieldset>
+							<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 							<input type="hidden" name="reportId" value="${report.reportId}">
 							<input type="hidden" name="showInline" id="showInline" value="true">
 							<input type="hidden" name="nextPage" id="nextPage" value="jobs">
@@ -273,7 +334,7 @@ Display section to allow selecting of report parameters and initiate running of 
 											<div class="checkbox">
 												<label>
 													<input type="checkbox" name="showSelectedParameters" id="showSelectedParameters"
-														   <c:if test="${report.parametersInOutput}">checked="checked"</c:if> value="">
+														   <c:if test="${reportOptions.showSelectedParameters}">checked="checked"</c:if> value="">
 													</label>
 												</div>
 											</div>
@@ -288,16 +349,34 @@ Display section to allow selecting of report parameters and initiate running of 
 										<div class="col-md-7">
 											<div class="checkbox">
 												<label>
-													<input type="checkbox" name="showSql" id="showSql" value="">
-												</label>
+													<input type="checkbox" name="showSql" id="showSql"
+														   <c:if test="${reportOptions.showSql}">checked="checked"</c:if> value="">
+													</label>
+												</div>
 											</div>
 										</div>
-									</div>
 								</c:if>
 							</div>
 
+							<c:if test="${showSaveParameterSelection}">
+								<hr>
+								<div class="form-group">
+									<div class="col-md-12">
+										<div style="text-align: center">
+											<button type="button" id="saveParameterSelection" class="btn btn-default action">
+												<spring:message code="reports.action.saveParameterSelection"/>
+											</button>
+											<button type="button" id="clearSavedParameterSelection" class="btn btn-default action">
+												<spring:message code="reports.action.clearSavedParameterSelection"/>
+											</button>
+										</div>
+									</div>
+								</div>
+								<hr>
+							</c:if>
+
 							<div class="form-group">
-								<div class="col-md-8 col-md-offset-2">
+								<div class="col-md-12">
 									<div id="actionsDiv" style="text-align: center">
 										<c:if test="${enableEmail}">
 											<button type="button" id="emailButton" class="btn btn-default action"
@@ -340,6 +419,7 @@ Display section to allow selecting of report parameters and initiate running of 
 		<div class="modal-content">
 
 			<form id="emailReportForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/emailReport">
+				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 				<!-- Modal Header -->
 				<div class="modal-header">
 					<button type="button" class="close" 

@@ -19,7 +19,7 @@ package art.usergroupmembership;
 
 import art.user.UserService;
 import art.usergroup.UserGroupService;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import java.sql.SQLException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;

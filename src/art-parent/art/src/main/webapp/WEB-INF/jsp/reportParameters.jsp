@@ -15,7 +15,7 @@
 <c:forEach var="reportParameter" items="${reportParams}">
 	<c:set var="reportParam" value="${reportParameter.value}" scope="request"/>
 
-	<c:if test="${!reportParam.parameter.hidden}">
+	<c:if test="${!reportParam.parameter.hidden && !reportParam.parameter.fixedValue}">
 		<div class="form-group">
 			<label class="control-label ${labelColClass}" for="${encode:forHtmlAttribute(reportParam.htmlElementName)}">
 				${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(pageContext.response.locale))}

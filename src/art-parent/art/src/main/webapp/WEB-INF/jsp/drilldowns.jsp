@@ -115,7 +115,8 @@ Display report drilldowns
 									data: {id: recordId},
 									success: function (response) {
 										if (response.success) {
-											notifyActionSuccess("${cacheClearedText}", recordName);
+											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
+											notifyActionSuccess("${recordDeletedText}", recordName);
 										} else {
 											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
 										}

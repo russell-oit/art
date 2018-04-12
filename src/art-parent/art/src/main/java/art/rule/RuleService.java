@@ -21,7 +21,7 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.user.User;
-import art.utils.ActionResult;
+import art.general.ActionResult;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -361,7 +361,6 @@ public class RuleService {
 		//set values for possibly null property objects
 		String dataType;
 		if (rule.getDataType() == null) {
-			logger.warn("Data type not defined. Defaulting to varchar");
 			dataType = ParameterDataType.Varchar.getValue();
 		} else {
 			dataType = rule.getDataType().getValue();

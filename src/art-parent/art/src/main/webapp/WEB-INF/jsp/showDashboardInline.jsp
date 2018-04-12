@@ -9,6 +9,9 @@
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 
@@ -234,6 +237,15 @@
 <script type="text/javascript">
 	//https://blogs.msdn.microsoft.com/ukadc/2010/02/12/handling-errors-with-jquery-load/
 	$(document).ajaxError(function (event, xhr, options) {
-		ajaxErrorHandler(xhr);
+		bootbox.alert({
+			title: '${errorOccurredText}',
+			message: xhr.responseText
+		});
+	});
+
+	var token = $("meta[name='_csrf']").attr("content");
+	var header = $("meta[name='_csrf_header']").attr("content");
+	$(document).ajaxSend(function (e, xhr, options) {
+		xhr.setRequestHeader(header, token);
 	});
 </script>

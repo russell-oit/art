@@ -17,13 +17,17 @@
  */
 package art.chart;
 
+import art.runreport.RunReportHelper;
 import net.sf.cewolfart.links.XYItemLinkGenerator;
 import net.sf.cewolfart.tooltips.XYToolTipGenerator;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.jfree.data.xy.XYDataset;
@@ -53,19 +57,26 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 		//resultset structure
 		//static series: xValue, yValue [, link]
 		//dynamic series: xValue, yValue, seriesName [, link]
+		boolean optionsDynamicSeries = extraOptions.isDynamicSeries();
+
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 
-		boolean dynamicSeries = false;
+		boolean columnDynamicSeries = false;
 		int dynamicSeriesColumnCount = 3; //xValue, yValue, seriesName
 		if (isHasHyperLinks()) {
 			if (columnCount == dynamicSeriesColumnCount + 1) { //+1 for hyperlink column
-				dynamicSeries = true;
+				columnDynamicSeries = true;
 			}
 		} else {
 			if (columnCount == dynamicSeriesColumnCount) {
-				dynamicSeries = true;
+				columnDynamicSeries = true;
 			}
+		}
+
+		boolean dynamicSeries = false;
+		if (optionsDynamicSeries || columnDynamicSeries) {
+			dynamicSeries = true;
 		}
 
 		int seriesCount = 0; //start series index at 0 as generateLink() uses zero-based indices to idenfity series
@@ -73,19 +84,40 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 		Map<String, Integer> seriesIndices = new HashMap<>(); //<series name, series index>
 		Map<String, Integer> itemIndices = new HashMap<>(); //<series name, max item index>
 
+		resultSetColumnNames = new ArrayList<>();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			resultSetColumnNames.add(columnName);
+		}
+
+		resultSetData = new ArrayList<>();
+
 		while (rs.next()) {
-			double xValue = rs.getDouble(1);
-			double yValue = rs.getDouble(2);
+			resultSetRecordCount++;
+
+			Map<String, Object> row = new LinkedHashMap<>();
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				Object data = rs.getObject(i);
+				row.put(columnName, data);
+			}
+
+			if (includeDataInOutput) {
+				resultSetData.add(row);
+			}
+
+			double xValue = RunReportHelper.getDoubleRowValue(row, 1, resultSetColumnNames);
+			double yValue = RunReportHelper.getDoubleRowValue(row, 2, resultSetColumnNames);
 
 			String seriesName;
 			if (dynamicSeries) {
 				//series name is the contents of the third column
-				seriesName = rs.getString(3);
+				seriesName = RunReportHelper.getStringRowValue(row, 3, resultSetColumnNames);
 			} else {
 				//currently only one series supported
 				//series name is the column alias of the second column
 				//can optimize static series values out of the loop
-				seriesName = rsmd.getColumnLabel(2);
+				seriesName = resultSetColumnNames.get(2 - 1);
 			}
 
 			//set series index
@@ -123,7 +155,87 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 			String linkId = String.valueOf(seriesIndex) + String.valueOf(itemIndex);
 
 			//add hyperlink if required
-			addHyperLink(rs, linkId);
+			addHyperLink(row, linkId);
+
+			//add drilldown link if required
+			//drill down on col 1 = y value
+			//drill down on col 2 = x value
+			//drill down on col 3 = series name
+			addDrilldownLink(linkId, yValue, xValue, seriesName);
+		}
+
+		//add series to dataset
+		for (XYSeries series : finalSeries.values()) {
+			dataset.addSeries(series);
+		}
+
+		setDataset(dataset);
+	}
+
+	@Override
+	public void fillDataset(List<? extends Object> data) {
+		Objects.requireNonNull(data, "data must not be null");
+
+		XYSeriesCollection dataset = new XYSeriesCollection();
+
+		boolean dynamicSeries = extraOptions.isDynamicSeries();
+
+		int seriesCount = 0; //start series index at 0 as generateLink() uses zero-based indices to idenfity series
+		Map<Integer, XYSeries> finalSeries = new HashMap<>(); //<series index, series>
+		Map<String, Integer> seriesIndices = new HashMap<>(); //<series name, series index>
+		Map<String, Integer> itemIndices = new HashMap<>(); //<series name, max item index>
+
+		for (Object row : data) {
+			double xValue = RunReportHelper.getDoubleRowValue(row, 1, columnNames);
+			double yValue = RunReportHelper.getDoubleRowValue(row, 2, columnNames);
+
+			String seriesName;
+			if (dynamicSeries) {
+				//series name is the contents of the third column
+				seriesName = RunReportHelper.getStringRowValue(row, 3, columnNames);
+			} else {
+				//currently only one series supported
+				//series name is the column alias of the second column
+				//can optimize static series values out of the loop
+				seriesName = columnNames.get(2 - 1);
+			}
+
+			//set series index
+			int seriesIndex;
+			if (seriesIndices.containsKey(seriesName)) {
+				seriesIndex = seriesIndices.get(seriesName);
+			} else {
+				seriesIndex = seriesCount;
+				seriesIndices.put(seriesName, seriesIndex);
+				finalSeries.put(seriesIndex, new XYSeries(seriesName));
+				seriesCount++;
+			}
+
+			//set item index
+			int itemIndex;
+			if (itemIndices.containsKey(seriesName)) {
+				int maxItemIndex = itemIndices.get(seriesName);
+				itemIndex = maxItemIndex + 1;
+			} else {
+				//first item in this series. use zero-based indices
+				itemIndex = 0;
+			}
+			itemIndices.put(seriesName, itemIndex);
+
+			//add dataset value
+			if (swapAxes) {
+				finalSeries.get(seriesIndex).add(yValue, xValue);
+			} else {
+				finalSeries.get(seriesIndex).add(xValue, yValue);
+			}
+
+			//use series index and item index to identify url in hashmap
+			//to ensure correct link will be returned by the generatelink() method. 
+			//use series index instead of name because the generateLink() method uses series indices
+			String linkId = String.valueOf(seriesIndex) + String.valueOf(itemIndex);
+
+			//add hyperlink if required
+			addHyperLink(row, linkId);
 
 			//add drilldown link if required
 			//drill down on col 1 = y value

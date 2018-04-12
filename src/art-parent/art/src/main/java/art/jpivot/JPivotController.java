@@ -44,6 +44,7 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -505,7 +506,7 @@ public class JPivotController {
 				String queryName = request.getParameter("newPivotName");
 				if (StringUtils.isBlank(queryName)) {
 					//no name provided for the new query. create a default name
-					queryName = report.getLocalizedName(locale) + "-2";
+					queryName = report.getLocalizedName(locale) + "-" + RandomStringUtils.randomAlphanumeric(2);
 				}
 				newReport.setName(queryName);
 
@@ -519,7 +520,7 @@ public class JPivotController {
 				reportService.addReport(newReport, sessionUser);
 
 				//give this user direct access to the view he has just created. so that he can update and overwrite it if desired
-				reportService.grantAccess(report, sessionUser);
+				reportService.grantAccess(newReport, sessionUser);
 
 				redirectAttributes.addFlashAttribute("message", "jpivot.message.reportAdded");
 				return "redirect:/success";

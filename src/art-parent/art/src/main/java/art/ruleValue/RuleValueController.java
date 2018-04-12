@@ -20,9 +20,8 @@ package art.ruleValue;
 import art.rule.RuleService;
 import art.user.UserService;
 import art.usergroup.UserGroupService;
-import art.utils.AjaxResponse;
+import art.general.AjaxResponse;
 import java.sql.SQLException;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -77,7 +76,7 @@ public class RuleValueController {
 	}
 
 	@RequestMapping(value = "/ruleValuesConfig", method = RequestMethod.GET)
-	public String showRuleValuesConfig(Model model, HttpSession session) {
+	public String showRuleValuesConfig(Model model) {
 		logger.debug("Entering showRuleValuesConfig");
 
 		try {
@@ -213,7 +212,6 @@ public class RuleValueController {
 			} else {
 				return "redirect:/ruleRuleValues?ruleId=" + returnRuleId;
 			}
-
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -259,7 +257,12 @@ public class RuleValueController {
 					+ value.getRule().getName() + " - " + value.getRuleValue();
 
 			redirectAttributes.addFlashAttribute("recordName", recordName);
-			return "redirect:/ruleValues";
+			
+			if (returnRuleId == null || returnRuleId == 0) {
+				return "redirect:/ruleValues";
+			} else {
+				return "redirect:/ruleRuleValues?ruleId=" + returnRuleId;
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -289,7 +292,7 @@ public class RuleValueController {
 	 *
 	 * @param model the model to use
 	 * @param returnRuleId the rule id to display in the ruleRuleValues page
-	 * after saving the user-rule value, null if not applicable
+	 * after saving the user group-rule value, null if not applicable
 	 * @return the jsp file to display
 	 */
 	private String showEditUserGroupRuleValue(Model model, Integer returnRuleId) {

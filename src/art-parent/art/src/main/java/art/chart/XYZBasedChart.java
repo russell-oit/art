@@ -18,6 +18,7 @@
 package art.chart;
 
 import art.enums.ReportType;
+import art.runreport.RunReportHelper;
 import art.utils.ArtUtils;
 import java.awt.Color;
 import net.sf.cewolfart.cpp.HeatmapEnhancer;
@@ -29,6 +30,7 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -94,66 +96,32 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 		int seriesIndex = 0; //zero-based series index. only one series is supported
 		int itemIndex = 0; //zero-based index for a particular item within a series
 
-		int rowCount = 0;
+		resultSetColumnNames = new ArrayList<>();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			resultSetColumnNames.add(columnName);
+		}
 
+		resultSetData = new ArrayList<>();
+
+		int recordCount = 0;
 		while (rs.next()) {
-			rowCount++;
+			resultSetRecordCount++;
 
-			double xValue = rs.getDouble(1);
-			double yValue = rs.getDouble(2);
-			double actualZValue = rs.getDouble(3);
-
-			double zValue;
-			if (reportType == ReportType.BubbleChart && columnCount >= 4) {
-				//use normalized z value to plot
-				//bubble value normalized to the y axis values so that bubbles aren't too large,
-				//in case z value is much larger than y value
-				zValue = rs.getDouble(4);
-			} else {
-				//use actual z value to plot
-				zValue = actualZValue;
+			Map<String, Object> row = new LinkedHashMap<>();
+			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				Object data = rs.getObject(i);
+				row.put(columnName, data);
 			}
 
-			// set values
-			xValuesList.add(xValue);
-			yValuesList.add(yValue);
-			zValuesList.add(zValue);
-
-			// set heat map options
-			if (reportType == ReportType.HeatmapChart && rowCount == 1) {
-				for (int i = 4; i <= columnCount; i++) {
-					String optionSpec = rs.getString(i);
-					if (optionSpec != null) {
-						String[] optionDetails = StringUtils.split(optionSpec, "=");
-						if (optionDetails.length == 2) {
-							heatmapOptions.put(optionDetails[0], optionDetails[1]);
-						}
-					}
-				}
-
-				// allow specifying only the upper colour, for 2 colour schemes. set lower colour to white
-				if (heatmapOptions.containsKey("upperColor") && !heatmapOptions.containsKey("lowerColor")) {
-					heatmapOptions.put("lowerColor", ArtUtils.WHITE_HEX_COLOR_CODE);
-				}
+			if (includeDataInOutput) {
+				resultSetData.add(row);
 			}
 
-			//use series index and item index to identify url in hashmap
-			//to ensure correct link will be returned by the generatelink() method. 
-			//use series index instead of name because the generateLink() method uses series indices
-			String linkId = String.valueOf(seriesIndex) + String.valueOf(itemIndex);
+			recordCount++;
 
-			//add actual z values
-			actualZValues.put(linkId, actualZValue);
-
-			//add hyperlink if required
-			addHyperLink(rs, linkId);
-
-			//add drilldown link if required
-			//drill down on col 1 = y value
-			//drill down on col 2 = x value
-			//drill down on col 3 = series name
-			//drill down on col 4 = actual z/bubble value
-			addDrilldownLink(linkId, yValue, xValue, seriesName, actualZValue);
+			prepareRow(row, resultSetColumnNames, columnCount, recordCount, xValuesList, yValuesList, zValuesList, seriesIndex, itemIndex, seriesName);
 
 			itemIndex++;
 		}
@@ -167,6 +135,117 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 		dataset.addSeries(seriesName, data);
 
 		setDataset(dataset);
+	}
+
+	@Override
+	protected void fillDataset(List<? extends Object> data) {
+		Objects.requireNonNull(data, "data must not be null");
+
+		DefaultXYZDataset dataset = new DefaultXYZDataset();
+
+		String seriesName = columnNames.get(2 - 1);
+
+		List<Double> xValuesList = new ArrayList<>();
+		List<Double> yValuesList = new ArrayList<>();
+		List<Double> zValuesList = new ArrayList<>();
+
+		int seriesIndex = 0; //zero-based series index. only one series is supported
+		int itemIndex = 0; //zero-based index for a particular item within a series
+
+		int recordCount = 0;
+		for (Object row : data) {
+			recordCount++;
+
+			prepareRow(row, columnNames, colCount, recordCount, xValuesList, yValuesList, zValuesList, seriesIndex, itemIndex, seriesName);
+
+			itemIndex++;
+		}
+
+		//add series to dataset
+		double[] xValuesArray = ArrayUtils.toPrimitive(xValuesList.toArray(new Double[xValuesList.size()]));
+		double[] yValuesArray = ArrayUtils.toPrimitive(yValuesList.toArray(new Double[yValuesList.size()]));
+		double[] zValuesArray = ArrayUtils.toPrimitive(zValuesList.toArray(new Double[zValuesList.size()]));
+		double[][] seriesData = new double[][]{xValuesArray, yValuesArray, zValuesArray};
+
+		dataset.addSeries(seriesName, seriesData);
+
+		setDataset(dataset);
+	}
+
+	/**
+	 * Prepares a row of data
+	 *
+	 * @param row the row of data
+	 * @param dataColumnNames the data column names
+	 * @param dataColumnCount the column count
+	 * @param recordCount the current record index
+	 * @param xValuesList the x values list
+	 * @param yValuesList the y values list
+	 * @param zValuesList the z values list
+	 * @param seriesIndex the seris index
+	 * @param itemIndex the item index
+	 * @param seriesName the series name
+	 */
+	private void prepareRow(Object row, List<String> dataColumnNames,
+			int dataColumnCount, int recordCount, List<Double> xValuesList,
+			List<Double> yValuesList, List<Double> zValuesList,
+			int seriesIndex, int itemIndex, String seriesName) {
+
+		double xValue = RunReportHelper.getDoubleRowValue(row, 1, dataColumnNames);
+		double yValue = RunReportHelper.getDoubleRowValue(row, 2, dataColumnNames);
+		double actualZValue = RunReportHelper.getDoubleRowValue(row, 3, dataColumnNames);
+
+		double zValue;
+		if (reportType == ReportType.BubbleChart && dataColumnCount >= 4) {
+			//use normalized z value to plot
+			//bubble value normalized to the y axis values so that bubbles aren't too large,
+			//in case z value is much larger than y value
+			zValue = RunReportHelper.getDoubleRowValue(row, 4, dataColumnNames);
+		} else {
+			//use actual z value to plot
+			zValue = actualZValue;
+		}
+
+		// set values
+		xValuesList.add(xValue);
+		yValuesList.add(yValue);
+		zValuesList.add(zValue);
+
+		// set heat map options
+		if (reportType == ReportType.HeatmapChart && recordCount == 1) {
+			for (int i = 4; i <= dataColumnCount; i++) {
+				String optionSpec = RunReportHelper.getStringRowValue(row, i, dataColumnNames);
+				if (optionSpec != null) {
+					String[] optionDetails = StringUtils.split(optionSpec, "=");
+					if (optionDetails.length == 2) {
+						heatmapOptions.put(optionDetails[0], optionDetails[1]);
+					}
+				}
+			}
+
+			// allow specifying only the upper colour, for 2 colour schemes. set lower colour to white
+			if (heatmapOptions.containsKey("upperColor") && !heatmapOptions.containsKey("lowerColor")) {
+				heatmapOptions.put("lowerColor", ArtUtils.WHITE_HEX_COLOR_CODE);
+			}
+		}
+
+		//use series index and item index to identify url in hashmap
+		//to ensure correct link will be returned by the generatelink() method. 
+		//use series index instead of name because the generateLink() method uses series indices
+		String linkId = String.valueOf(seriesIndex) + String.valueOf(itemIndex);
+
+		//add actual z values
+		actualZValues.put(linkId, actualZValue);
+
+		//add hyperlink if required
+		addHyperLink(row, linkId);
+
+		//add drilldown link if required
+		//drill down on col 1 = y value
+		//drill down on col 2 = x value
+		//drill down on col 3 = series name
+		//drill down on col 4 = actual z/bubble value
+		addDrilldownLink(linkId, yValue, xValue, seriesName, actualZValue);
 	}
 
 	@Override

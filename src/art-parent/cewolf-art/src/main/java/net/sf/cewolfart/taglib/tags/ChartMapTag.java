@@ -246,15 +246,17 @@ public class ChartMapTag extends CewolfTag {
 		} else if (linkGenerator instanceof CategoryItemLinkGenerator) {
 			if (ce instanceof CategoryItemEntity) {
 				CategoryItemEntity catEnt = (CategoryItemEntity) ce;
-				CategoryDataset cds = (CategoryDataset) dataset;
+//				CategoryDataset cds = (CategoryDataset) dataset;
+				CategoryDataset cds = ((CategoryItemEntity) ce).getDataset();
 				link = ((CategoryItemLinkGenerator) linkGenerator)
 						.generateLink(cds, cds.getRowIndex(catEnt.getRowKey()), catEnt.getColumnKey());
 			}
 		} else if (linkGenerator instanceof XYItemLinkGenerator) {
 			if (ce instanceof XYItemEntity) {
 				XYItemEntity xyEnt = (XYItemEntity) ce;
+				XYDataset ds = xyEnt.getDataset();
 				link = ((XYItemLinkGenerator) linkGenerator)
-						.generateLink(dataset, xyEnt.getSeriesIndex(), xyEnt.getItem());
+						.generateLink(ds, xyEnt.getSeriesIndex(), xyEnt.getItem());
 			} else {
 				// Note; there is a simple ChartEntity also passed since Jfreechart 1.0rc1, that is ignored
 				// System.out.println("ChartMapTag.generateLink: Link entity skipped, not XYItemEntity.class:" + ce);
@@ -262,8 +264,9 @@ public class ChartMapTag extends CewolfTag {
 		} else if (linkGenerator instanceof PieSectionLinkGenerator) {
 			if (ce instanceof PieSectionEntity) {
 				PieSectionEntity pieEnt = (PieSectionEntity) ce;
+				PieDataset ds = ((PieSectionEntity) ce).getDataset();
 				link = ((PieSectionLinkGenerator) linkGenerator)
-						.generateLink(dataset, pieEnt.getSectionKey());
+						.generateLink(ds, pieEnt.getSectionKey());
 			}
 		}
 		return link;
@@ -276,20 +279,23 @@ public class ChartMapTag extends CewolfTag {
 		} else if (toolTipGenerator instanceof CategoryToolTipGenerator) {
 			if (ce instanceof CategoryItemEntity) {
 				CategoryItemEntity catEnt = (CategoryItemEntity) ce;
-				CategoryDataset cds = (CategoryDataset) dataset;
+//				CategoryDataset cds = (CategoryDataset) dataset;
+				CategoryDataset cds = ((CategoryItemEntity) ce).getDataset();
 				tooltip = ((CategoryToolTipGenerator) toolTipGenerator)
 						.generateToolTip(cds, cds.getRowIndex(catEnt.getRowKey()), cds.getColumnIndex(catEnt.getColumnKey()));
 			}
 		} else if (toolTipGenerator instanceof XYToolTipGenerator) {
 			if (ce instanceof XYItemEntity) {
 				XYItemEntity xyEnt = (XYItemEntity) ce;
+				XYDataset ds = xyEnt.getDataset();
 				tooltip = ((XYToolTipGenerator) toolTipGenerator)
-						.generateToolTip((XYDataset) dataset, xyEnt.getSeriesIndex(), xyEnt.getItem());
+						.generateToolTip(ds, xyEnt.getSeriesIndex(), xyEnt.getItem());
 			}
 		} else if (toolTipGenerator instanceof PieToolTipGenerator) {
 			if (ce instanceof PieSectionEntity) {
 				PieSectionEntity pieEnt = (PieSectionEntity) ce;
-				PieDataset ds = (PieDataset) dataset;
+//				PieDataset ds = (PieDataset) dataset;
+				PieDataset ds = ((PieSectionEntity) ce).getDataset();
 				final int index = pieEnt.getSectionIndex();
 				tooltip = ((PieToolTipGenerator) toolTipGenerator)
 						.generateToolTip(ds, ds.getKey(index), index);

@@ -116,8 +116,8 @@ public class ArtUtils {
 	 * @return
 	 */
 	public static long getRandomNumber(long minimum, long maximum) {
-		Random rn = new Random();
-		long randomNum = minimum + (long) (rn.nextDouble() * (maximum - minimum));
+		Random random = new Random();
+		long randomNum = minimum + (long) (random.nextDouble() * (maximum - minimum));
 		return randomNum;
 	}
 
@@ -129,9 +129,9 @@ public class ArtUtils {
 	 * @return
 	 */
 	public static int getRandomNumber(int minimum, int maximum) {
-		Random rn = new Random();
+		Random random = new Random();
 		int range = maximum - minimum + 1;
-		int randomNum = rn.nextInt(range) + minimum;
+		int randomNum = random.nextInt(range) + minimum;
 		return randomNum;
 	}
 
@@ -378,6 +378,10 @@ public class ArtUtils {
 	 * @return the same date with time as zero
 	 */
 	public static Date zeroTime(Date date) {
+		if (date == null) {
+			return null;
+		}
+
 		//https://stackoverflow.com/questions/17821601/set-time-to-000000
 		//https://stackoverflow.com/questions/20414343/how-to-set-time-of-java-util-date-instance-to-000000
 		Calendar cal = Calendar.getInstance();
@@ -643,9 +647,13 @@ public class ArtUtils {
 	 *
 	 * @param zipFileName the full file name of the file to unzip
 	 * @param destinationDirectory the location to unzip to
+	 * @return file names of files contained in the zip file
 	 * @throws IOException
 	 */
-	public static void unzipFile(String zipFileName, String destinationDirectory) throws IOException {
+	public static List<String> unzipFile(String zipFileName,
+			String destinationDirectory) throws IOException {
+
+		List<String> fileNames = new ArrayList<>();
 		//http://www.baeldung.com/java-compress-and-uncompress
 		byte[] buffer = new byte[1024];
 		try (FileInputStream fis = new FileInputStream(zipFileName);
@@ -653,6 +661,7 @@ public class ArtUtils {
 			ZipEntry zipEntry = zis.getNextEntry();
 			while (zipEntry != null) {
 				String fileName = zipEntry.getName();
+				fileNames.add(fileName);
 				String filePath = destinationDirectory + fileName;
 				File newFile = new File(filePath);
 				try (FileOutputStream fos = new FileOutputStream(newFile)) {
@@ -665,6 +674,8 @@ public class ArtUtils {
 			}
 			zis.closeEntry();
 		}
+
+		return fileNames;
 	}
 
 }

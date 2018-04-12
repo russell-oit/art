@@ -17,8 +17,8 @@ Configure rule value
 <spring:message code="page.title.ruleValuesConfiguration" var="pageTitle"/>
 
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="ruleValues.message.valuesRemoved" var="valuesRemovedText"/>
-<spring:message code="ruleValues.message.valueAdded" var="valueAddedText"/>
+<spring:message code="page.message.valuesRemoved" var="valuesRemovedText"/>
+<spring:message code="page.message.valueAdded" var="valueAddedText"/>
 <spring:message code="page.message.selectUserOrUserGroup" var="selectUserOrUserGroupText"/>
 <spring:message code="page.text.available" var="availableText"/>
 <spring:message code="page.text.selected" var="selectedText"/>
@@ -138,6 +138,7 @@ Configure rule value
 
 	<jsp:body>
 		<form class="form-horizontal" method="POST" action="">
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 			<fieldset>
 				<c:if test="${error != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -204,7 +205,7 @@ Configure rule value
 					</label>
 					<div class="col-md-9">
 						<input type="text" name="ruleValue" id="ruleValue"
-							   maxlength="25" class="form-control">
+							   maxlength="100" class="form-control">
 					</div>
 				</div>
 				<div class="form-group">
@@ -218,7 +219,7 @@ Configure rule value
 								<spring:message code="page.action.add"/>
 							</button>
 							<button type="button" class="btn btn-default updateValues" data-action="removeAll">
-								<spring:message code="ruleValues.action.removeAll"/>
+								<spring:message code="page.action.removeAll"/>
 							</button>
 						</div>
 					</div>

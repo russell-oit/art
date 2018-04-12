@@ -60,6 +60,7 @@ Display user jobs and jobs configuration
 			function updateClock()
 			{
 				var currentTimeString = currentServerDate().format("YYYY-MM-DD HH:mm:ss");
+				currentTimeString += '   ${encode:forJavaScript(serverTimeZoneDescription)}';
 				$("#clock").val(currentTimeString);
 				$("#clock2").val(currentTimeString);
 			}
@@ -341,7 +342,7 @@ Display user jobs and jobs configuration
 		</div>
 
 		<div class="row">
-			<div class="col-md-2 col-md-offset-10">
+			<div class="col-md-4 col-md-offset-8">
 				<form>
 					<input type="text" id="clock2" readonly class="form-control"/>
 				</form>
@@ -497,6 +498,7 @@ Display user jobs and jobs configuration
 					<!-- Modal Body -->
 					<div class="modal-body">
 						<form id="runLaterForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/runLaterJob">
+							<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 							<input type="hidden" id="runLaterJobId" name="runLaterJobId"/>
 							<div class="form-group">
 								<label class="control-label col-md-4" for="runLaterJobName">

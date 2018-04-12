@@ -20,12 +20,15 @@ package art.output;
 import art.enums.ReportFormat;
 import art.report.Report;
 import art.reportoptions.FixedWidthOptions;
+import art.runreport.GroovyDataDetails;
+import art.runreport.RunReportHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.common.processor.ObjectRowWriterProcessor;
 import com.univocity.parsers.fixed.FieldAlignment;
 import com.univocity.parsers.fixed.FixedWidthFields;
 import com.univocity.parsers.fixed.FixedWidthFormat;
 import com.univocity.parsers.fixed.FixedWidthRoutines;
+import com.univocity.parsers.fixed.FixedWidthWriter;
 import com.univocity.parsers.fixed.FixedWidthWriterSettings;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,10 +62,40 @@ public class FixedWidthOutput {
 	//https://github.com/uniVocity/univocity-parsers/blob/master/src/test/java/com/univocity/parsers/examples/FixedWidthWriterExamples.java
 	private static final Logger logger = LoggerFactory.getLogger(FixedWidthOutput.class);
 
+	private ResultSet resultSet;
+	private Object data;
+
+	/**
+	 * @return the resultSet
+	 */
+	public ResultSet getResultSet() {
+		return resultSet;
+	}
+
+	/**
+	 * @param resultSet the resultSet to set
+	 */
+	public void setResultSet(ResultSet resultSet) {
+		this.resultSet = resultSet;
+	}
+
+	/**
+	 * @return the data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
+
 	/**
 	 * Generates fixed width output for data in the given resultset
 	 *
-	 * @param rs the resultset that contains the data to output
 	 * @param writer the writer to output to. If html report format is required,
 	 * a writer must be supplied
 	 * @param report the report object for the report being run
@@ -72,14 +105,13 @@ public class FixedWidthOutput {
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 */
-	public void generateOutput(ResultSet rs, PrintWriter writer, Report report,
+	public void generateOutput(PrintWriter writer, Report report,
 			ReportFormat reportFormat, String fullOutputFileName, Locale locale)
 			throws SQLException, IOException {
 
 		logger.debug("Entering generateOutput: report={}, reportFormat={},"
 				+ " fullOutputFileName='{}'", report, reportFormat, fullOutputFileName);
 
-		Objects.requireNonNull(rs, "rs must not be null");
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 
@@ -91,23 +123,43 @@ public class FixedWidthOutput {
 		ObjectMapper mapper = new ObjectMapper();
 		FixedWidthOptions fixedWidthOptions = mapper.readValue(options, FixedWidthOptions.class);
 
-		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
-		fixedWidthOptions.initializeProcessor(processor, locale);
-
 		FixedWidthFields fields;
 
 		List<Integer> fieldLengths = fixedWidthOptions.getFieldLengths();
 		List<Map<String, Integer>> fieldLengthsByName = fixedWidthOptions.getFieldLengthsByName();
 
-		ResultSetMetaData rsmd = rs.getMetaData();
+		ResultSetMetaData rsmd = null;
+
+		List<List<Object>> listData = new ArrayList<>();
+		List<String> dataColumnNames = null;
+		if (data == null) {
+			rsmd = resultSet.getMetaData();
+		} else {
+			GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
+			dataColumnNames = dataDetails.getColumnNames();
+			List<Map<String, ?>> mapListData = RunReportHelper.getMapListData(data);
+			for (Map<String, ?> row : mapListData) {
+				List<Object> rowData = new ArrayList<>();
+				for (Object value : row.values()) {
+					rowData.add(value);
+				}
+				listData.add(rowData);
+			}
+		}
 
 		if (CollectionUtils.isNotEmpty(fieldLengths)) {
 			//https://stackoverflow.com/questions/718554/how-to-convert-an-arraylist-containing-integers-to-primitive-int-array
 			int[] fieldLengthsArray = ArrayUtils.toPrimitive(fixedWidthOptions.getFieldLengths().toArray(new Integer[0]));
 
 			List<String> columnNames = new ArrayList<>();
-			for (int i = 1; i <= fieldLengthsArray.length; i++) {
-				columnNames.add(rsmd.getColumnLabel(i));
+			if (rsmd != null) {
+				for (int i = 1; i <= fieldLengthsArray.length; i++) {
+					columnNames.add(rsmd.getColumnLabel(i));
+				}
+			} else if (dataColumnNames != null) {
+				for (int i = 1; i <= fieldLengthsArray.length; i++) {
+					columnNames.add(dataColumnNames.get(i - 1));
+				}
 			}
 
 			String[] headers = columnNames.toArray(new String[0]);
@@ -116,17 +168,33 @@ public class FixedWidthOutput {
 		} else if (CollectionUtils.isNotEmpty(fieldLengthsByName)) {
 			fields = new FixedWidthFields();
 			//addField() will just add fields in the order added, which may not be the order in the resultset
-			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-				String columnName = rsmd.getColumnLabel(i);
-				for (Map<String, Integer> fieldLengthDefinition : fieldLengthsByName) {
-					//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
-					// Get the first entry that the iterator returns
-					Entry<String, Integer> entry = fieldLengthDefinition.entrySet().iterator().next();
-					String fieldName = entry.getKey();
-					Integer fieldLength = entry.getValue();
-					if (StringUtils.equalsIgnoreCase(columnName, fieldName)) {
-						fields.addField(fieldName, fieldLength);
-						break;
+			if (rsmd != null) {
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					String columnName = rsmd.getColumnLabel(i);
+					for (Map<String, Integer> fieldLengthDefinition : fieldLengthsByName) {
+						//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
+						// Get the first entry that the iterator returns
+						Entry<String, Integer> entry = fieldLengthDefinition.entrySet().iterator().next();
+						String fieldName = entry.getKey();
+						Integer fieldLength = entry.getValue();
+						if (StringUtils.equalsIgnoreCase(columnName, fieldName)) {
+							fields.addField(fieldName, fieldLength);
+							break;
+						}
+					}
+				}
+			} else if (dataColumnNames != null) {
+				for (String columnName : dataColumnNames) {
+					for (Map<String, Integer> fieldLengthDefinition : fieldLengthsByName) {
+						//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
+						// Get the first entry that the iterator returns
+						Entry<String, Integer> entry = fieldLengthDefinition.entrySet().iterator().next();
+						String fieldName = entry.getKey();
+						Integer fieldLength = entry.getValue();
+						if (StringUtils.equalsIgnoreCase(columnName, fieldName)) {
+							fields.addField(fieldName, fieldLength);
+							break;
+						}
 					}
 				}
 			}
@@ -200,6 +268,9 @@ public class FixedWidthOutput {
 
 		FixedWidthWriterSettings writerSettings = new FixedWidthWriterSettings(fields);
 
+		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
+		fixedWidthOptions.initializeProcessor(processor, locale);
+
 		writerSettings.setRowWriterProcessor(processor);
 		writerSettings.setHeaderWritingEnabled(fixedWidthOptions.isIncludeHeaders());
 		writerSettings.setUseDefaultPaddingForHeaders(fixedWidthOptions.isUseDefaultPaddingForHeaders());
@@ -225,18 +296,41 @@ public class FixedWidthOutput {
 
 		if (reportFormat.isHtml()) {
 			writer.println("<pre>");
-			routines.write(rs, writer);
+			if (data == null) {
+				routines.write(resultSet, writer);
+			} else {
+				FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(writer, writerSettings);
+				for (List<Object> row : listData) {
+					fixedWidthWriter.processRecord(row.toArray(new Object[0]));
+				}
+			}
 			writer.println("</pre>");
 		} else {
 			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 				if (reportFormat == ReportFormat.txt) {
-					routines.write(rs, fout);
+					if (data == null) {
+						routines.write(resultSet, fout);
+					} else {
+						FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(fout, writerSettings);
+						for (List<Object> row : listData) {
+							fixedWidthWriter.processRecord(row.toArray(new Object[0]));
+						}
+						fixedWidthWriter.close();
+					}
 				} else if (reportFormat == ReportFormat.txtZip) {
 					String filename = FilenameUtils.getBaseName(fullOutputFileName);
 					ZipEntry ze = new ZipEntry(filename + ".txt");
 					try (ZipOutputStream zout = new ZipOutputStream(fout)) {
 						zout.putNextEntry(ze);
-						routines.write(rs, zout);
+						if (data == null) {
+							routines.write(resultSet, zout);
+						} else {
+							FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(zout, writerSettings);
+							for (List<Object> row : listData) {
+								fixedWidthWriter.processRecord(row.toArray(new Object[0]));
+							}
+							fixedWidthWriter.close();
+						}
 					}
 				}
 			}

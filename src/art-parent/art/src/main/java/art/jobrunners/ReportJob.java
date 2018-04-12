@@ -34,6 +34,7 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.job.JobOptions;
 import art.job.JobService;
+import art.job.JobUtils;
 import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
 import art.output.FreeMarkerOutput;
@@ -109,7 +110,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -264,28 +264,19 @@ public class ReportJob implements org.quartz.Job {
 
 			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
 			boolean tempJob = dataMap.getBooleanValue("tempJob");
-			Date nextRunDate;
+			Date nextRunDate = null;
 			if (tempJob) {
 				//temp job. use existing next run date
 				nextRunDate = job.getNextRunDate();
 			} else {
 				//not a temp job. set new next run date
-				nextRunDate = context.getNextFireTime();
-
 				//get least next run date as job may have multiple triggers
 				try {
 					Scheduler scheduler = context.getScheduler();
 					JobDetail quartJob = context.getJobDetail();
 					@SuppressWarnings("unchecked")
 					List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(quartJob.getKey());
-					List<Date> nextRunDates = new ArrayList<>();
-					Date now = new Date();
-					nextRunDates.add(nextRunDate);
-					for (Trigger trigger : triggers) {
-						nextRunDate = trigger.getFireTimeAfter(now);
-						nextRunDates.add(nextRunDate);
-					}
-					nextRunDate = Collections.min(nextRunDates);
+					nextRunDate = JobUtils.getNextFireTime(triggers, scheduler);
 				} catch (SchedulerException ex) {
 					logError(ex);
 				}
@@ -351,7 +342,7 @@ public class ReportJob implements org.quartz.Job {
 				mailer.setDebug(logger.isDebugEnabled());
 
 				String[] emailsArray = separateEmails(errorNotificationTo);
-				String subject = "ART [Error]: " + job.getName() + " (" + jobId + ")";
+				String subject = "ART [Job Error]: " + job.getName() + " (" + jobId + ")";
 
 				mailer.setTo(emailsArray);
 				mailer.setFrom(Config.getSettings().getErrorNotificationFrom());
@@ -2193,8 +2184,7 @@ public class ReportJob implements org.quartz.Job {
 
 			//jobs don't show record count so generally no need for scrollable resultsets
 			int resultSetType;
-			if (reportType.isChart() || reportType.isReportEngine()) {
-				//need scrollable resultset for charts for show data option
+			if (reportType == ReportType.Group) {
 				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 			} else {
 				resultSetType = ResultSet.TYPE_FORWARD_ONLY;
