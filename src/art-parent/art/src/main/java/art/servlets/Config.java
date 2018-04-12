@@ -220,6 +220,7 @@ public class Config extends HttpServlet {
 
 		//set web-inf path
 		webinfPath = appPath + "WEB-INF" + File.separator;
+		logger.debug("webinfPath='{}'", webinfPath);
 
 		//load custom settings
 		loadCustomSettings(ctx);
@@ -524,7 +525,7 @@ public class Config extends HttpServlet {
 				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
 			} else {
-				logger.info("ART Database configuration file not found");
+				logger.info("ART Database configuration file not found: '{}'", artDatabaseFilePath);
 			}
 		} catch (IOException ex) {
 			logger.error("Error", ex);
@@ -726,6 +727,7 @@ public class Config extends HttpServlet {
 
 		try {
 			String customSettingsFilePath = webinfPath + "art-custom-settings.json";
+			logger.debug("customSettingsFilePath='{}'", customSettingsFilePath);
 			File customSettingsFile = new File(customSettingsFilePath);
 			if (customSettingsFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
@@ -748,8 +750,10 @@ public class Config extends HttpServlet {
 
 		//set work directory base path
 		workDirectoryPath = webinfPath + "work" + File.separator; //default work directory
+		logger.debug("workDirectoryPath='{}'", workDirectoryPath);
 
 		String customWorkDirectory = customSettings.getWorkDirectory();
+		logger.debug("customWorkDirectory='{}'", customWorkDirectory);
 		if (StringUtils.isNotBlank(customWorkDirectory)) {
 			//custom work directory defined
 			workDirectoryPath = customWorkDirectory;
@@ -762,9 +766,11 @@ public class Config extends HttpServlet {
 
 		//set export path
 		exportPath = workDirectoryPath + "export" + File.separator; //default
+		logger.debug("exportPath='{}'", exportPath);
 
 		//set custom export path
 		String customExportDirectory = customSettings.getExportDirectory();
+		logger.debug("customExportDirectory='{}'", customExportDirectory);
 		if (StringUtils.isNotBlank(customExportDirectory)) {
 			//custom export directory defined
 			exportPath = customExportDirectory;
@@ -777,6 +783,7 @@ public class Config extends HttpServlet {
 
 		//set art-database file path
 		artDatabaseFilePath = workDirectoryPath + "art-database.json";
+		logger.debug("artDatabaseFilePath='{}'", artDatabaseFilePath);
 
 		//ensure work directories exist
 		createWorkDirectories();
