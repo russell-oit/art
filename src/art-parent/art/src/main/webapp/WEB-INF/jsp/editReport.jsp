@@ -371,10 +371,27 @@ Edit report page
 					reportSource.val(groovyEditor.getSession().getValue());
 				});
 
+				$('#useGroovy').on('switchChange.bootstrapSwitch', function (event, state) {
+					toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
+				});
+
+				toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
 			});
 		</script>
 
 		<script type="text/javascript">
+			function toggleGroovyEditor(reportSource, groovyEditor, sqlEditor) {
+				if ($('#useGroovy').is(':checked')) {
+					groovyEditor.getSession().setValue(reportSource.val());
+					$("#sqlEditor").hide();
+					$("#groovyEditor").show();
+				} else {
+					sqlEditor.getSession().setValue(reportSource.val());
+					$("#sqlEditor").show();
+					$("#groovyEditor").hide();
+				}
+			}
+
 			function toggleVisibleFields() {
 				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
 
@@ -508,6 +525,31 @@ Edit report page
 						break;
 					default:
 						$("#sourceReportIdDiv").show();
+				}
+
+				//show/hide use groovy
+				switch (reportTypeId) {
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 156: //org chart list
+					case 149: //saiku report
+					case 155: //org chart json
+					case 151: //mongodb
+					case 115: //jasper template
+					case 117: //jxls template
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
+					case 137: //dygraphs csv server
+					case 139: //datatables csv local
+					case 140: //datatables csv server
+					case 145: //datamaps file
+					case 150: //saiku connection
+					case 159: //reportengine file
+						$("#useGroovyDiv").hide();
+						break;
+					default:
+						$("#useGroovyDiv").show();
 				}
 
 				//show/hide use rules
@@ -1615,6 +1657,17 @@ Edit report page
 					<div class="col-md-8">
 						<form:input path="sourceReportId" maxlength="10" class="form-control"/>
 						<form:errors path="sourceReportId" cssClass="error"/>
+					</div>
+				</div>
+				<div id="useGroovyDiv" class="form-group">
+					<label class="control-label col-md-4" for="useGroovy">
+						<spring:message code="reports.label.useGroovy"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="useGroovy" id="useGroovy" class="switch-yes-no"/>
+						</div>
+						<form:errors path="useGroovy" cssClass="error"/>
 					</div>
 				</div>
 

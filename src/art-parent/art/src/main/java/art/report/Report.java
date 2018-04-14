@@ -163,6 +163,8 @@ public class Report implements Serializable {
 	@Parsed
 	private boolean clearTextPasswords;
 	private Boolean dummyBoolean; //used for the test report functionality
+	@Parsed
+	private boolean useGroovy;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -174,6 +176,20 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
+
+	/**
+	 * @return the useGroovy
+	 */
+	public boolean isUseGroovy() {
+		return useGroovy;
+	}
+
+	/**
+	 * @param useGroovy the useGroovy to set
+	 */
+	public void setUseGroovy(boolean useGroovy) {
+		this.useGroovy = useGroovy;
+	}
 
 	/**
 	 * @return the dummyBoolean

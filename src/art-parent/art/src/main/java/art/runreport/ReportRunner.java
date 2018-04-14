@@ -357,7 +357,7 @@ public class ReportRunner {
 
 		GeneralReportOptions generalOptions = report.getGeneralOptions();
 
-		if (generalOptions != null && generalOptions.isUsesGroovy()) {
+		if (report.isUseGroovy() || (generalOptions != null && generalOptions.isUsesGroovy())) {
 			CompilerConfiguration cc = new CompilerConfiguration();
 			cc.addCompilationCustomizers(new SandboxTransformer());
 
