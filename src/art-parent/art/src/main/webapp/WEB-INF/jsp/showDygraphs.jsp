@@ -10,6 +10,8 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
+<spring:message code="pivotTableJs.text.processing" var="processingText"/>
+
 <%-- must use table to center chart --%>
 <%-- http://dygraphs.com/tutorial.html --%>
 <table style="margin: 0px auto;">
@@ -59,7 +61,7 @@
 		</p>
 		<script type="text/javascript">
 			var showDygraphs = function (file) {
-				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(processing...)</p>");
+				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(${processingText}...)</p>");
 				//https://www.html5rocks.com/en/tutorials/file/dndfiles/
 				//https://www.nczonline.net/blog/2012/05/15/working-with-files-in-javascript-part-2/
 				//https://www.sitepoint.com/html5-file-drag-drop-read-analyze-upload-progress-bars/

@@ -397,92 +397,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isPivotTableJs()) {
 				generatePivotTableJsOutput();
 			} else if (reportType.isDygraphs()) {
-				if (isJob) {
-					throw new IllegalStateException("Dygraphs report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				if (reportType == ReportType.Dygraphs) {
-					rs = reportRunner.getResultSet();
-
-					CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
-					//use appropriate date formats to ensure correct interpretation by browsers
-					//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
-					//http://dygraphs.com/date-formats.html
-					String dateFormat = "yyyy/MM/dd";
-					String dateTimeFormat = "yyyy/MM/dd HH:mm";
-					CsvOutputUnivocityOptions csvOptions = new CsvOutputUnivocityOptions();
-					csvOptions.setDateFormat(dateFormat);
-					csvOptions.setDateTimeFormat(dateTimeFormat);
-
-					String csvString;
-					try (StringWriter stringWriter = new StringWriter()) {
-						csvOutputUnivocity.setResultSet(rs);
-						csvOutputUnivocity.setData(groovyData);
-						csvOutputUnivocity.generateOutput(stringWriter, csvOptions, Locale.ENGLISH);
-						csvString = stringWriter.toString();
-					}
-
-					if (groovyDataSize == null) {
-						rowsRetrieved = getResultSetRowCount(rs);
-					} else {
-						rowsRetrieved = groovyDataSize;
-					}
-
-					//need to escape string for javascript, otherwise you get Unterminated string literal error
-					//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
-					String escapedCsvString = Encode.forJavaScript(csvString);
-					request.setAttribute("csvData", escapedCsvString);
-				}
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//template file not mandatory
-				if (StringUtils.isNotBlank(templateFileName)) {
-					File templateFile = new File(fullTemplateFileName);
-					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-					}
-					request.setAttribute("templateFileName", templateFileName);
-				}
-
-				if (reportType == ReportType.DygraphsCsvServer) {
-					String optionsString = report.getOptions();
-
-					if (StringUtils.isBlank(optionsString)) {
-						throw new IllegalArgumentException("Options not specified");
-					}
-
-					ObjectMapper mapper = new ObjectMapper();
-					CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
-					String dataFileName = options.getDataFile();
-
-					logger.debug("dataFileName='{}'", dataFileName);
-
-					//need to explicitly check if file name is empty string
-					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-					if (StringUtils.isBlank(dataFileName)) {
-						throw new IllegalArgumentException("Data file not specified");
-					}
-
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-
-					request.setAttribute("dataFileName", dataFileName);
-				}
-
-				String outputDivId = "dygraphsOutput-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("outputDivId", outputDivId);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
+				generateDygraphReport();
 			} else if (reportType.isDataTables()) {
 				if (isJob) {
 					throw new IllegalStateException("DataTables report types not supported for jobs");
@@ -1909,7 +1824,7 @@ public class ReportOutputGenerator {
 	 */
 	private void generateStandardReportJsonOutput() throws SQLException, IOException {
 		logger.debug("Entering generateStandardReportJsonOutput");
-		
+
 		rs = reportRunner.getResultSet();
 
 		JsonOutput jsonOutput = new JsonOutput();
@@ -2249,14 +2164,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates a react pivot report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateReactPivotReport() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateReactPivotReport");
-		
+
 		if (isJob) {
 			throw new IllegalStateException("ReactPivot report type not supported for jobs");
 		}
@@ -2296,6 +2211,104 @@ public class ReportOutputGenerator {
 		request.setAttribute("templateFileName", templateFileName);
 		request.setAttribute("rows", jsonData);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a dygraphs report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
+	private void generateDygraphReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateDygraphReport");
+		
+		if (isJob) {
+			throw new IllegalStateException("Dygraphs report types not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		if (reportType == ReportType.Dygraphs) {
+			rs = reportRunner.getResultSet();
+
+			CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
+			//use appropriate date formats to ensure correct interpretation by browsers
+			//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
+			//http://dygraphs.com/date-formats.html
+			String dateFormat = "yyyy/MM/dd";
+			String dateTimeFormat = "yyyy/MM/dd HH:mm";
+			CsvOutputUnivocityOptions csvOptions = new CsvOutputUnivocityOptions();
+			csvOptions.setDateFormat(dateFormat);
+			csvOptions.setDateTimeFormat(dateTimeFormat);
+
+			String csvString;
+			try (StringWriter stringWriter = new StringWriter()) {
+				csvOutputUnivocity.setResultSet(rs);
+				csvOutputUnivocity.setData(groovyData);
+				csvOutputUnivocity.generateOutput(stringWriter, csvOptions, Locale.ENGLISH);
+				csvString = stringWriter.toString();
+			}
+
+			if (groovyDataSize == null) {
+				rowsRetrieved = getResultSetRowCount(rs);
+			} else {
+				rowsRetrieved = groovyDataSize;
+			}
+
+			//need to escape string for javascript, otherwise you get Unterminated string literal error
+			//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
+			String escapedCsvString = Encode.forJavaScript(csvString);
+			request.setAttribute("csvData", escapedCsvString);
+		}
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//template file not mandatory
+		if (StringUtils.isNotBlank(templateFileName)) {
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+			request.setAttribute("templateFileName", templateFileName);
+		}
+
+		if (reportType == ReportType.DygraphsCsvServer) {
+			String optionsString = report.getOptions();
+
+			if (StringUtils.isBlank(optionsString)) {
+				throw new IllegalArgumentException("Options not specified");
+			}
+
+			ObjectMapper mapper = new ObjectMapper();
+			CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
+			String dataFileName = options.getDataFile();
+
+			logger.debug("dataFileName='{}'", dataFileName);
+
+			//need to explicitly check if file name is empty string
+			//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+			if (StringUtils.isBlank(dataFileName)) {
+				throw new IllegalArgumentException("Data file not specified");
+			}
+
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+
+			request.setAttribute("dataFileName", dataFileName);
+		}
+
+		String outputDivId = "dygraphsOutput-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("outputDivId", outputDivId);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
 	}
 
 }
