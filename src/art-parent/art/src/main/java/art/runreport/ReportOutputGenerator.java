@@ -388,20 +388,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.Thymeleaf) {
 				generateThymeleafReport();
 			} else if (reportType == ReportType.Velocity) {
-				rs = reportRunner.getResultSet();
-
-				VelocityOutput velocityOutput = new VelocityOutput();
-				velocityOutput.setContextPath(contextPath);
-				velocityOutput.setLocale(locale);
-				velocityOutput.setResultSet(rs);
-				velocityOutput.setData(groovyData);
-				velocityOutput.generateOutput(report, writer, applicableReportParamsList);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
+				generateVelocityReport();
 			} else if (reportType.isXDocReport()) {
 				rs = reportRunner.getResultSet();
 
@@ -2230,13 +2217,13 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates a thymeleaf report
-	 * 
+	 *
 	 * @throws SQLException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private void generateThymeleafReport() throws SQLException, IOException {
 		logger.debug("Entering generateThymeleafReport");
-		
+
 		rs = reportRunner.getResultSet();
 
 		ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
@@ -2245,6 +2232,31 @@ public class ReportOutputGenerator {
 		thymeleafOutput.setResultSet(rs);
 		thymeleafOutput.setData(groovyData);
 		thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+	}
+
+	/**
+	 * Generates a velocity report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException 
+	 */
+	private void generateVelocityReport() throws SQLException, IOException {
+		logger.debug("Entering generateVelocityReport");
+		
+		rs = reportRunner.getResultSet();
+
+		VelocityOutput velocityOutput = new VelocityOutput();
+		velocityOutput.setContextPath(contextPath);
+		velocityOutput.setLocale(locale);
+		velocityOutput.setResultSet(rs);
+		velocityOutput.setData(groovyData);
+		velocityOutput.generateOutput(report, writer, applicableReportParamsList);
 
 		if (groovyDataSize == null) {
 			rowsRetrieved = getResultSetRowCount(rs);
