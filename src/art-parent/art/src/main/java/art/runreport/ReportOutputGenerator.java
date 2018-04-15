@@ -411,109 +411,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isDatamaps()) {
 				generateDatamapReport();
 			} else if (reportType.isWebMap()) {
-				if (isJob) {
-					throw new IllegalStateException("Report type not supported for jobs: " + reportType);
-				}
-
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonData = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				WebMapOptions options;
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					options = new WebMapOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, WebMapOptions.class);
-				}
-
-				String cssFileName = options.getCssFile();
-				if (StringUtils.isNotBlank(cssFileName)) {
-					String fullCssFileName = jsTemplatesPath + cssFileName;
-
-					File cssFile = new File(fullCssFileName);
-					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + fullCssFileName);
-					}
-				}
-
-				String dataFileName = options.getDataFile();
-				if (StringUtils.isNotBlank(dataFileName)) {
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-				}
-
-				List<String> jsFileNames = options.getJsFiles();
-				if (CollectionUtils.isNotEmpty(jsFileNames)) {
-					for (String jsFileName : jsFileNames) {
-						if (StringUtils.isNotBlank(jsFileName)) {
-							String fullJsFileName = jsTemplatesPath + jsFileName;
-							File jsFile = new File(fullJsFileName);
-							if (!jsFile.exists()) {
-								throw new IllegalStateException("Js file not found: " + fullJsFileName);
-							}
-						}
-					}
-				}
-
-				List<String> cssFileNames = options.getCssFiles();
-				if (CollectionUtils.isNotEmpty(cssFileNames)) {
-					for (String listCssFileName : cssFileNames) {
-						if (StringUtils.isNotBlank(listCssFileName)) {
-							String fullListCssFileName = jsTemplatesPath + listCssFileName;
-							File listCssFile = new File(fullListCssFileName);
-							if (!listCssFile.exists()) {
-								throw new IllegalStateException("Css file not found: " + fullListCssFileName);
-							}
-						}
-					}
-				}
-
-				String mapId = "map-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("mapId", mapId);
-				request.setAttribute("options", options);
-				request.setAttribute("data", jsonData);
-				request.setAttribute("templateFileName", templateFileName);
-
-				switch (reportType) {
-					case Leaflet:
-						servletContext.getRequestDispatcher("/WEB-INF/jsp/showLeaflet.jsp").include(request, response);
-						break;
-					case OpenLayers:
-						servletContext.getRequestDispatcher("/WEB-INF/jsp/showOpenLayers.jsp").include(request, response);
-						break;
-					default:
-						throw new IllegalArgumentException("Unexpected report type: " + reportType);
-				}
+				generateWebMapReport();
 			} else if (reportType == ReportType.MongoDB) {
 				//https://learnxinyminutes.com/docs/groovy/
 				//http://groovy-lang.org/index.html
@@ -2289,14 +2187,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates a datamaps report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateDatamapReport() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateDatamapReport");
-		
+
 		if (isJob) {
 			throw new IllegalStateException("Datamaps report types not supported for jobs");
 		}
@@ -2314,6 +2212,7 @@ public class ReportOutputGenerator {
 				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
 			}
 			String jsonData = jsonOutputResult.getJsonData();
+			jsonData = Encode.forJavaScript(jsonData);
 			rowsRetrieved = jsonOutputResult.getRowCount();
 			request.setAttribute("data", jsonData);
 		}
@@ -2390,6 +2289,122 @@ public class ReportOutputGenerator {
 		request.setAttribute("options", options);
 		request.setAttribute("templateFileName", templateFileName);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a leaflet or open layers report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
+	private void generateWebMapReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateWebMapReport");
+		
+		if (isJob) {
+			throw new IllegalStateException("Report type not supported for jobs: " + reportType);
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		jsonData = Encode.forJavaScript(jsonData);
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		}
+
+		WebMapOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new WebMapOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, WebMapOptions.class);
+		}
+
+		String cssFileName = options.getCssFile();
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+			}
+		}
+
+		String dataFileName = options.getDataFile();
+		if (StringUtils.isNotBlank(dataFileName)) {
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+		}
+
+		List<String> jsFileNames = options.getJsFiles();
+		if (CollectionUtils.isNotEmpty(jsFileNames)) {
+			for (String jsFileName : jsFileNames) {
+				if (StringUtils.isNotBlank(jsFileName)) {
+					String fullJsFileName = jsTemplatesPath + jsFileName;
+					File jsFile = new File(fullJsFileName);
+					if (!jsFile.exists()) {
+						throw new IllegalStateException("Js file not found: " + fullJsFileName);
+					}
+				}
+			}
+		}
+
+		List<String> cssFileNames = options.getCssFiles();
+		if (CollectionUtils.isNotEmpty(cssFileNames)) {
+			for (String listCssFileName : cssFileNames) {
+				if (StringUtils.isNotBlank(listCssFileName)) {
+					String fullListCssFileName = jsTemplatesPath + listCssFileName;
+					File listCssFile = new File(fullListCssFileName);
+					if (!listCssFile.exists()) {
+						throw new IllegalStateException("Css file not found: " + fullListCssFileName);
+					}
+				}
+			}
+		}
+
+		String mapId = "map-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("mapId", mapId);
+		request.setAttribute("options", options);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("templateFileName", templateFileName);
+
+		switch (reportType) {
+			case Leaflet:
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showLeaflet.jsp").include(request, response);
+				break;
+			case OpenLayers:
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOpenLayers.jsp").include(request, response);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected report type: " + reportType);
+		}
 	}
 
 }

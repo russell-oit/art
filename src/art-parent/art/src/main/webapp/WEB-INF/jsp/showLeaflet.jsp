@@ -42,7 +42,8 @@
 	//https://en.wikipedia.org/wiki/Web_mapping
 	//https://en.wikipedia.org/wiki/Tiled_web_map
 	mapId = '${mapId}';
-	var jsonData = ${data};
+	var dataString = '${data}';
+	var jsonData = JSON.parse(dataString);
 
 	var dataFileUrl = null;
 	<c:if test="${not empty options.dataFile}">
