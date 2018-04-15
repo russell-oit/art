@@ -403,22 +403,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.FixedWidth) {
 				generateFixedWidthReport();
 			} else if (reportType == ReportType.CSV) {
-				rs = reportRunner.getResultSet();
-
-				CsvOutputUnivocity csvOutput = new CsvOutputUnivocity();
-				csvOutput.setResultSet(rs);
-				csvOutput.setData(groovyData);
-				csvOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
-
-				if (!isJob && !reportFormat.isHtml()) {
-					displayFileLink(fileName);
-				}
+				generateCsvReport();
 			} else if (reportType == ReportType.C3) {
 				if (isJob) {
 					throw new IllegalStateException("C3.js report type not supported for jobs");
@@ -2326,6 +2311,34 @@ public class ReportOutputGenerator {
 		fixedWidthOutput.setResultSet(rs);
 		fixedWidthOutput.setData(groovyData);
 		fixedWidthOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+
+		if (!isJob && !reportFormat.isHtml()) {
+			displayFileLink(fileName);
+		}
+	}
+
+	/**
+	 * Generates output for a csv report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
+	private void generateCsvReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateCsvReport");
+		
+		rs = reportRunner.getResultSet();
+
+		CsvOutputUnivocity csvOutput = new CsvOutputUnivocity();
+		csvOutput.setResultSet(rs);
+		csvOutput.setData(groovyData);
+		csvOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
 
 		if (groovyDataSize == null) {
 			rowsRetrieved = getResultSetRowCount(rs);
