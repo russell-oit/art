@@ -2019,9 +2019,27 @@ public class ReportOutputGenerator {
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
 	}
 
-	private void outputStandardReport(ReportOutputGeneratorResult outputResult) throws SQLException, IOException, ServletException {
+	/**
+	 * Generates standard output reports
+	 *
+	 * @param outputResult the output result object to update if there is a
+	 * problem
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void outputStandardReport(ReportOutputGeneratorResult outputResult)
+			throws SQLException, IOException, ServletException {
+
+		logger.debug("Entering outputStandardReport");
+
 		if (reportFormat.isJson()) {
 			outputStandardReportJsonOutput();
+		} else if (reportFormat == ReportFormat.pivotTableJs) {
+			ReportType originalReportType = reportType;
+			reportType = ReportType.PivotTableJs;
+			outputPivotTableJs();
+			reportType = originalReportType;
 		} else {
 			StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
 
@@ -2093,9 +2111,9 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates standard report json report format output
-	 * 
+	 *
 	 * @throws SQLException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private void outputStandardReportJsonOutput() throws SQLException, IOException {
 		rs = reportRunner.getResultSet();

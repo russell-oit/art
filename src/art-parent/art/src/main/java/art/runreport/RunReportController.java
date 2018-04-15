@@ -259,7 +259,8 @@ public class RunReportController {
 
 			boolean showReportHeaderAndFooter = true;
 
-			if (reportType.isStandardOutput() && !reportFormat.isJson()) {
+			if (reportType.isStandardOutput() && !reportFormat.isJson()
+					&& reportFormat != ReportFormat.pivotTableJs) {
 				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 				boolean isJob = false;
 				StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob, report);

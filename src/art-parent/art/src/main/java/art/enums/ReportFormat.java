@@ -33,7 +33,7 @@ public enum ReportFormat {
 	docx("docx"), odt("odt"), ods("ods"), pptx("pptx"), slk("slk"), slkZip("slkZip"),
 	tsv("tsv"), tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png"),
 	json("json"), jsonBrowser("jsonBrowser"), csv("csv"), csvZip("csvZip"),
-	txt("txt"), txtZip("txtZip");
+	txt("txt"), txtZip("txtZip"), pivotTableJs("pivotTableJs");
 
 	private final String value;
 

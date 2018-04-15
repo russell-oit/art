@@ -367,7 +367,7 @@ public class SettingsService {
 			settings.setTimeFormat("HH:mm:ss");
 		}
 		if (StringUtils.isBlank(settings.getReportFormats())) {
-			settings.setReportFormats("htmlDataTable,htmlGrid,xlsx,pdf,docx,htmlPlain");
+			settings.setReportFormats("htmlDataTable,htmlGrid,xlsx,pdf,docx,htmlPlain,pivotTableJs");
 		}
 		if (settings.getMaxRunningReports() <= 0) {
 			settings.setMaxRunningReports(1000);
