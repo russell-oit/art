@@ -1913,10 +1913,10 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates pivot table js output
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void outputPivotTableJs() throws SQLException, IOException, ServletException {
 		logger.debug("Entering outputPivotTableJs");
@@ -2010,8 +2010,8 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates standard output reports
 	 *
-	 * @param outputResult the output result object to update if there is a
-	 * problem
+	 * @param outputResult the output result object to update if there is an
+	 * error
 	 * @throws SQLException
 	 * @throws IOException
 	 * @throws ServletException
@@ -2029,71 +2029,88 @@ public class ReportOutputGenerator {
 			outputPivotTableJs();
 			reportType = originalReportType;
 		} else {
-			StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
+			generateStandardOutput(outputResult);
+		}
+	}
 
-			standardOutput.setWriter(writer);
-			standardOutput.setFullOutputFileName(fullOutputFilename);
-			standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
-			standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
-			standardOutput.setLocale(locale);
-			standardOutput.setReportName(report.getLocalizedName(locale));
-			standardOutput.setMessageSource(messageSource);
-			standardOutput.setIsJob(isJob);
-			standardOutput.setPdfPageNumbers(pdfPageNumbers);
-			standardOutput.setReport(report);
-			standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
-			standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
+	/**
+	 * Generates standard output
+	 *
+	 * @param outputResult the output result object to update if there is an
+	 * error
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateStandardOutput(ReportOutputGeneratorResult outputResult)
+			throws SQLException, IOException, ServletException {
 
+		logger.debug("Entering generateStandardOutput");
+
+		StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
+
+		standardOutput.setWriter(writer);
+		standardOutput.setFullOutputFileName(fullOutputFilename);
+		standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
+		standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
+		standardOutput.setLocale(locale);
+		standardOutput.setReportName(report.getLocalizedName(locale));
+		standardOutput.setMessageSource(messageSource);
+		standardOutput.setIsJob(isJob);
+		standardOutput.setPdfPageNumbers(pdfPageNumbers);
+		standardOutput.setReport(report);
+		standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
+		standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
+
+		if (request != null) {
+			standardOutput.setContextPath(contextPath);
+
+			if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+				standardOutput.setAjax(true);
+			}
+		}
+
+		//generate output
+		rs = reportRunner.getResultSet();
+
+		StandardOutputResult standardOutputResult;
+		if (reportType.isCrosstab()) {
+			if (groovyData == null) {
+				standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
+			} else {
+				standardOutputResult = standardOutput.generateCrosstabOutput(groovyData, reportFormat, report);
+			}
+		} else {
+			if (reportFormat.isHtml() && !isJob) {
+				//only drill down for html output. drill down query launched from hyperlink                                            
+				standardOutput.setDrilldowns(drilldownService.getDrilldowns(report.getReportId()));
+			}
+
+			//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
 			if (request != null) {
-				standardOutput.setContextPath(contextPath);
-
-				if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-					standardOutput.setAjax(true);
-				}
+				String requestBaseUrl = request.getScheme() + "://"
+						+ request.getServerName()
+						+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
+						+ request.getContextPath();
+				standardOutput.setRequestBaseUrl(requestBaseUrl);
 			}
 
-			//generate output
-			rs = reportRunner.getResultSet();
-
-			StandardOutputResult standardOutputResult;
-			if (reportType.isCrosstab()) {
-				if (groovyData == null) {
-					standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
-				} else {
-					standardOutputResult = standardOutput.generateCrosstabOutput(groovyData, reportFormat, report);
-				}
+			if (groovyData == null) {
+				standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
 			} else {
-				if (reportFormat.isHtml() && !isJob) {
-					//only drill down for html output. drill down query launched from hyperlink                                            
-					standardOutput.setDrilldowns(drilldownService.getDrilldowns(report.getReportId()));
-				}
+				standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
+			}
+		}
 
-				//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
-				if (request != null) {
-					String requestBaseUrl = request.getScheme() + "://"
-							+ request.getServerName()
-							+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
-							+ request.getContextPath();
-					standardOutput.setRequestBaseUrl(requestBaseUrl);
-				}
-
-				if (groovyData == null) {
-					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
-				} else {
-					standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
-				}
+		if (standardOutputResult.isSuccess()) {
+			if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
+				displayFileLink(fileName);
 			}
 
-			if (standardOutputResult.isSuccess()) {
-				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
-					displayFileLink(fileName);
-				}
-
-				rowsRetrieved = standardOutputResult.getRowCount();
-			} else {
-				outputResult.setSuccess(false);
-				outputResult.setMessage(standardOutputResult.getMessage());
-			}
+			rowsRetrieved = standardOutputResult.getRowCount();
+		} else {
+			outputResult.setSuccess(false);
+			outputResult.setMessage(standardOutputResult.getMessage());
 		}
 	}
 
@@ -2154,17 +2171,17 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates jxls output
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
 	 * @throws InvalidFormatException
-	 * @throws GeneralSecurityException 
+	 * @throws GeneralSecurityException
 	 */
 	private void generateJxlsReport() throws SQLException, IOException,
 			InvalidFormatException, GeneralSecurityException {
-		
+
 		logger.debug("Entering generateJxlsReport");
-		
+
 		JxlsOutput jxlsOutput = new JxlsOutput();
 		jxlsOutput.setLocale(locale);
 		jxlsOutput.setDynamicOpenPassword(dynamicOpenPassword);
