@@ -383,7 +383,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isChart()) {
 				generateChartReport();
 			} else if (reportType.isStandardOutput()) {
-				outputStandardReport(outputResult);
+				generateStandardReport(outputResult);
 			} else if (reportType == ReportType.FreeMarker) {
 				generateFreeMarkerOutput();
 			} else if (reportType == ReportType.Thymeleaf) {
@@ -393,46 +393,9 @@ public class ReportOutputGenerator {
 			} else if (reportType.isXDocReport()) {
 				generateXDocReport();
 			} else if (reportType == ReportType.ReactPivot) {
-				if (isJob) {
-					throw new IllegalStateException("ReactPivot report type not supported for jobs");
-				}
-
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonData = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				String outputDivId = "reactPivotOutput-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("outputDivId", outputDivId);
-				request.setAttribute("templateFileName", templateFileName);
-				request.setAttribute("rows", jsonData);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
+				generateReactPivotReport();
 			} else if (reportType.isPivotTableJs()) {
-				outputPivotTableJs();
+				generatePivotTableJsOutput();
 			} else if (reportType.isDygraphs()) {
 				if (isJob) {
 					throw new IllegalStateException("Dygraphs report types not supported for jobs");
@@ -1742,8 +1705,8 @@ public class ReportOutputGenerator {
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private void outputPivotTableJs() throws SQLException, IOException, ServletException {
-		logger.debug("Entering outputPivotTableJs");
+	private void generatePivotTableJsOutput() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generatePivotTableJsOutput");
 
 		if (isJob) {
 			throw new IllegalStateException("PivotTable.js output not supported for jobs");
@@ -1840,17 +1803,17 @@ public class ReportOutputGenerator {
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private void outputStandardReport(ReportOutputGeneratorResult outputResult)
+	private void generateStandardReport(ReportOutputGeneratorResult outputResult)
 			throws SQLException, IOException, ServletException {
 
-		logger.debug("Entering outputStandardReport");
+		logger.debug("Entering generateStandardReport");
 
 		if (reportFormat.isJson()) {
-			outputStandardReportJsonOutput();
+			generateStandardReportJsonOutput();
 		} else if (reportFormat == ReportFormat.pivotTableJs) {
 			ReportType originalReportType = reportType;
 			reportType = ReportType.PivotTableJs;
-			outputPivotTableJs();
+			generatePivotTableJsOutput();
 			reportType = originalReportType;
 		} else {
 			generateStandardOutput(outputResult);
@@ -1944,7 +1907,9 @@ public class ReportOutputGenerator {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void outputStandardReportJsonOutput() throws SQLException, IOException {
+	private void generateStandardReportJsonOutput() throws SQLException, IOException {
+		logger.debug("Entering generateStandardReportJsonOutput");
+		
 		rs = reportRunner.getResultSet();
 
 		JsonOutput jsonOutput = new JsonOutput();
@@ -2252,17 +2217,17 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates an xdocreport report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
 	 * @throws XDocReportException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateXDocReport() throws SQLException, IOException,
 			XDocReportException, ServletException {
-		
+
 		logger.debug("Entering generateXDocReport");
-		
+
 		rs = reportRunner.getResultSet();
 
 		XDocReportOutput xdocReportOutput = new XDocReportOutput();
@@ -2280,6 +2245,57 @@ public class ReportOutputGenerator {
 		if (!isJob) {
 			displayFileLink(fileName);
 		}
+	}
+
+	/**
+	 * Generates a react pivot report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
+	private void generateReactPivotReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateReactPivotReport");
+		
+		if (isJob) {
+			throw new IllegalStateException("ReactPivot report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		jsonData = Encode.forJavaScript(jsonData);
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		}
+
+		String outputDivId = "reactPivotOutput-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("outputDivId", outputDivId);
+		request.setAttribute("templateFileName", templateFileName);
+		request.setAttribute("rows", jsonData);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
 	}
 
 }

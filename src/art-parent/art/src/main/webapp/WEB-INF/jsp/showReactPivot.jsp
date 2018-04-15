@@ -18,8 +18,11 @@
 	//set default values. can be overridden in template file
 	//https://github.com/davidguttman/react-pivot
 	//https://github.com/davidguttman/react-pivot/blob/master/index.jsx
+	var rowsString = '${rows}';
+	var rows = JSON.parse(rowsString);
+
 	var options = {
-		rows: ${rows},
+		rows: rows,
 		dimensions: [],
 		reduce: function () {},
 		calculations: []
