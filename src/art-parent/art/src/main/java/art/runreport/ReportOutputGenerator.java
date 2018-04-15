@@ -169,6 +169,7 @@ public class ReportOutputGenerator {
 	private Map<String, ReportParameter> reportParamsMap;
 	private ChartOptions parameterChartOptions;
 	private User user;
+	private Locale reportOutputLocale;
 
 	/**
 	 * @return the dynamicOpenPassword
@@ -353,7 +354,6 @@ public class ReportOutputGenerator {
 				}
 			}
 
-			Locale reportOutputLocale;
 			String reportLocale = report.getLocale();
 			if (StringUtils.isBlank(reportLocale)) {
 				reportOutputLocale = locale;
@@ -401,22 +401,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isDataTables()) {
 				generateDataTablesOutput();
 			} else if (reportType == ReportType.FixedWidth) {
-				rs = reportRunner.getResultSet();
-
-				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
-				fixedWidthOutput.setResultSet(rs);
-				fixedWidthOutput.setData(groovyData);
-				fixedWidthOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
-
-				if (!isJob && !reportFormat.isHtml()) {
-					displayFileLink(fileName);
-				}
+				generateFixedWidthReport();
 			} else if (reportType == ReportType.CSV) {
 				rs = reportRunner.getResultSet();
 
@@ -2233,14 +2218,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates datatables reports
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateDataTablesOutput() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateDataTablesOutput");
-		
+
 		if (isJob) {
 			throw new IllegalStateException("DataTables report types not supported for jobs");
 		}
@@ -2323,6 +2308,34 @@ public class ReportOutputGenerator {
 		request.setAttribute("languageTag", languageTag);
 		request.setAttribute("locale", localeString);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a fixed width report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateFixedWidthReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateFixedWidthReport");
+
+		rs = reportRunner.getResultSet();
+
+		FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
+		fixedWidthOutput.setResultSet(rs);
+		fixedWidthOutput.setData(groovyData);
+		fixedWidthOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+
+		if (!isJob && !reportFormat.isHtml()) {
+			displayFileLink(fileName);
+		}
 	}
 
 }
