@@ -111,6 +111,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.sf.cewolfart.ChartValidationException;
+import net.sf.cewolfart.DatasetProduceException;
+import net.sf.cewolfart.PostProcessingException;
 import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -161,6 +164,9 @@ public class ReportOutputGenerator {
 	private String fileName;
 	private List<ReportParameter> applicableReportParamsList;
 	private ReportOptions reportOptions;
+	private Map<String, ReportParameter> reportParamsMap;
+	private ChartOptions parameterChartOptions;
+	private User user;
 
 	/**
 	 * @return the dynamicOpenPassword
@@ -316,6 +322,7 @@ public class ReportOutputGenerator {
 		this.fullOutputFilename = fullOutputFilename;
 		this.messageSource = messageSource;
 		this.reportFormat = reportFormat;
+		this.user = user;
 
 		groovyData = reportRunner.getGroovyData();
 		if (groovyData != null) {
@@ -331,10 +338,10 @@ public class ReportOutputGenerator {
 		fileName = FilenameUtils.getName(fullOutputFilename);
 
 		try {
-			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			reportParamsMap = paramProcessorResult.getReportParamsMap();
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 			reportOptions = paramProcessorResult.getReportOptions();
-			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
+			parameterChartOptions = paramProcessorResult.getChartOptions();
 
 			//for pdf dashboards, more parameters may be passed than are relevant for a report
 			applicableReportParamsList = new ArrayList<>();
@@ -372,95 +379,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.Group) {
 				generateGroupReport();
 			} else if (reportType.isChart()) {
-				rs = reportRunner.getResultSet();
-
-				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
-
-				boolean showData = false;
-				if (BooleanUtils.isTrue(parameterChartOptions.getShowData())
-						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
-					showData = true;
-				}
-
-				boolean swapAxes = reportOptions.isSwapAxes();
-				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, groovyData, showData);
-
-				//add secondary charts
-				String secondaryChartSetting = report.getSecondaryCharts();
-				secondaryChartSetting = StringUtils.deleteWhitespace(secondaryChartSetting);
-				String[] secondaryChartIds = StringUtils.split(secondaryChartSetting, ",");
-				if (secondaryChartIds != null) {
-					List<Chart> secondaryCharts = new ArrayList<>();
-					ReportService reportService = new ReportService();
-					for (String secondaryChartIdString : secondaryChartIds) {
-						int secondaryChartId = Integer.parseInt(secondaryChartIdString);
-						Report secondaryReport = reportService.getReport(secondaryChartId);
-						ReportRunner secondaryReportRunner = new ReportRunner();
-						secondaryReportRunner.setUser(user);
-						secondaryReportRunner.setReport(secondaryReport);
-						secondaryReportRunner.setReportParamsMap(reportParamsMap);
-						ResultSet secondaryResultSet = null;
-						try {
-							secondaryReportRunner.execute();
-							secondaryResultSet = secondaryReportRunner.getResultSet();
-							Object secondaryGroovyData = secondaryReportRunner.getGroovyData();
-							swapAxes = false;
-							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, secondaryGroovyData, showData);
-							secondaryCharts.add(secondaryChart);
-						} finally {
-							DatabaseUtils.close(secondaryResultSet);
-							secondaryReportRunner.close();
-						}
-					}
-					chart.setSecondaryCharts(secondaryCharts);
-				}
-
-				//store data for potential use in html and pdf output
-				List<String> dataColumnNames = null;
-				Object chartGroovyData = null;
-				boolean showResultSetData = false;
-				if (showData) {
-					if (groovyData == null) {
-						showResultSetData = true;
-						dataColumnNames = chart.getResultSetColumnNames();
-					} else {
-						GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
-						dataColumnNames = dataDetails.getColumnNames();
-						chartGroovyData = groovyData;
-					}
-				}
-
-				if (isJob) {
-					chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
-				} else {
-					if (reportFormat == ReportFormat.html) {
-						request.setAttribute("chart", chart);
-
-						String htmlElementId = "chart-" + report.getReportId();
-						request.setAttribute("htmlElementId", htmlElementId);
-
-						servletContext.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
-
-						if (dataColumnNames != null) {
-							request.setAttribute("columnNames", dataColumnNames);
-							if (groovyData == null) {
-								request.setAttribute("data", chart.getResultSetData());
-							} else {
-								request.setAttribute("data", groovyData);
-							}
-							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
-						}
-					} else {
-						chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
-						displayFileLink(fileName);
-					}
-
-					if (groovyDataSize == null) {
-						rowsRetrieved = chart.getResultSetRecordCount();
-					} else {
-						rowsRetrieved = groovyDataSize;
-					}
-				}
+				generateChartReport();
 			} else if (reportType.isStandardOutput()) {
 				outputStandardReport(outputResult);
 			} else if (reportType == ReportType.FreeMarker) {
@@ -1429,46 +1348,39 @@ public class ReportOutputGenerator {
 	 * Instantiates an appropriate chart object, sets some parameters and
 	 * prepares the chart dataset
 	 *
-	 * @param report the chart's report
-	 * @param reportFormat the report format to use
-	 * @param locale the locale to use
-	 * @param rs the resultset that has the chart data
-	 * @param parameterChartOptions the parameter chart options
-	 * @param reportParamsMap the report parameters map
-	 * @param reportParamsList the report parameters list
+	 * @param outputReport the chart's report
+	 * @param outputResultSet the resultset that has the chart data
 	 * @param swapAxes whether to swap the values of the x and y axes
-	 * @param groovyData data to use for the chart, if not using a resultset
+	 * @param outputGroovyData data to use for the chart, if not using a
+	 * resultset
 	 * @param includeDataInOutput whether resultset data should be included in
 	 * the output
 	 * @return the prepared chart
 	 * @throws SQLException
 	 */
-	private Chart prepareChart(Report report, ReportFormat reportFormat, Locale locale,
-			ResultSet rs, ChartOptions parameterChartOptions,
-			Map<String, ReportParameter> reportParamsMap,
-			List<ReportParameter> reportParamsList, boolean swapAxes,
-			Object groovyData, boolean includeDataInOutput)
+	private Chart prepareChart(Report outputReport, ResultSet outputResultSet,
+			boolean swapAxes, Object outputGroovyData, boolean includeDataInOutput)
 			throws SQLException, IOException {
 
-		ReportType reportType = report.getReportType();
-		Chart chart = getChartInstance(reportType);
+		ReportType outputReportType = outputReport.getReportType();
+		Chart chart = getChartInstance(outputReportType);
 
-		ChartOptions effectiveChartOptions = getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
+		ChartOptions effectiveChartOptions = getEffectiveChartOptions(outputReport, parameterChartOptions, reportFormat);
 
-		String shortDescription = report.getLocalizedShortDescription(locale);
+		String shortDescription = outputReport.getLocalizedShortDescription(locale);
 		RunReportHelper runReportHelper = new RunReportHelper();
 		shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
-		chart.setReportType(reportType);
+		chart.setReportType(outputReportType);
 		chart.setLocale(locale);
 		chart.setChartOptions(effectiveChartOptions);
 		chart.setTitle(shortDescription);
-		chart.setXAxisLabel(report.getxAxisLabel());
-		chart.setYAxisLabel(report.getyAxisLabel());
+		chart.setXAxisLabel(outputReport.getxAxisLabel());
+		chart.setYAxisLabel(outputReport.getyAxisLabel());
 		chart.setSwapAxes(swapAxes);
 		chart.setIncludeDataInOutput(includeDataInOutput);
 
-		String optionsString = report.getOptions();
+		String optionsString = outputReport.getOptions();
 		JFreeChartOptions options;
 		if (StringUtils.isBlank(optionsString)) {
 			options = new JFreeChartOptions();
@@ -1480,17 +1392,17 @@ public class ReportOutputGenerator {
 
 		Drilldown drilldown = null;
 		if (reportFormat == ReportFormat.html) {
-			int reportId = report.getReportId();
+			int reportId = outputReport.getReportId();
 			List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
 			if (!drilldowns.isEmpty()) {
 				drilldown = drilldowns.get(0);
 			}
 		}
 
-		if (groovyData == null) {
-			chart.prepareDataset(rs, drilldown, reportParamsList);
+		if (outputGroovyData == null) {
+			chart.prepareDataset(outputResultSet, drilldown, applicableReportParamsList);
 		} else {
-			chart.prepareDataset(groovyData, drilldown, reportParamsList);
+			chart.prepareDataset(outputGroovyData, drilldown, applicableReportParamsList);
 		}
 
 		return chart;
@@ -2205,6 +2117,113 @@ public class ReportOutputGenerator {
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
+		}
+	}
+
+	/**
+	 * Outputs a chart report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws DatasetProduceException
+	 * @throws ChartValidationException
+	 * @throws PostProcessingException
+	 * @throws ServletException
+	 */
+	private void generateChartReport() throws SQLException, IOException,
+			DatasetProduceException, ChartValidationException,
+			PostProcessingException, ServletException {
+
+		logger.debug("Entering generateStandardChart");
+
+		rs = reportRunner.getResultSet();
+
+		ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
+
+		boolean showData = false;
+		if (BooleanUtils.isTrue(parameterChartOptions.getShowData())
+				&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
+			showData = true;
+		}
+
+		boolean swapAxes = reportOptions.isSwapAxes();
+		Chart chart = prepareChart(report, rs, swapAxes, groovyData, showData);
+
+		//add secondary charts
+		String secondaryChartSetting = report.getSecondaryCharts();
+		secondaryChartSetting = StringUtils.deleteWhitespace(secondaryChartSetting);
+		String[] secondaryChartIds = StringUtils.split(secondaryChartSetting, ",");
+		if (secondaryChartIds != null) {
+			List<Chart> secondaryCharts = new ArrayList<>();
+			ReportService reportService = new ReportService();
+			for (String secondaryChartIdString : secondaryChartIds) {
+				int secondaryChartId = Integer.parseInt(secondaryChartIdString);
+				Report secondaryReport = reportService.getReport(secondaryChartId);
+				ReportRunner secondaryReportRunner = new ReportRunner();
+				secondaryReportRunner.setUser(user);
+				secondaryReportRunner.setReport(secondaryReport);
+				secondaryReportRunner.setReportParamsMap(reportParamsMap);
+				ResultSet secondaryResultSet = null;
+				try {
+					secondaryReportRunner.execute();
+					secondaryResultSet = secondaryReportRunner.getResultSet();
+					Object secondaryGroovyData = secondaryReportRunner.getGroovyData();
+					swapAxes = false;
+					Chart secondaryChart = prepareChart(secondaryReport, secondaryResultSet, swapAxes, secondaryGroovyData, showData);
+					secondaryCharts.add(secondaryChart);
+				} finally {
+					DatabaseUtils.close(secondaryResultSet);
+					secondaryReportRunner.close();
+				}
+			}
+			chart.setSecondaryCharts(secondaryCharts);
+		}
+
+		//store data for potential use in html and pdf output
+		List<String> dataColumnNames = null;
+		Object chartGroovyData = null;
+		boolean showResultSetData = false;
+		if (showData) {
+			if (groovyData == null) {
+				showResultSetData = true;
+				dataColumnNames = chart.getResultSetColumnNames();
+			} else {
+				GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
+				dataColumnNames = dataDetails.getColumnNames();
+				chartGroovyData = groovyData;
+			}
+		}
+
+		if (isJob) {
+			chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
+		} else {
+			if (reportFormat == ReportFormat.html) {
+				request.setAttribute("chart", chart);
+
+				String htmlElementId = "chart-" + report.getReportId();
+				request.setAttribute("htmlElementId", htmlElementId);
+
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
+
+				if (dataColumnNames != null) {
+					request.setAttribute("columnNames", dataColumnNames);
+					if (groovyData == null) {
+						request.setAttribute("data", chart.getResultSetData());
+					} else {
+						request.setAttribute("data", groovyData);
+					}
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
+				}
+			} else {
+				chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
+				displayFileLink(fileName);
+			}
+
+			if (groovyDataSize == null) {
+				rowsRetrieved = chart.getResultSetRecordCount();
+			} else {
+				rowsRetrieved = groovyDataSize;
+			}
 		}
 	}
 
