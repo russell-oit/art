@@ -405,66 +405,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.CSV) {
 				generateCsvReport();
 			} else if (reportType == ReportType.C3) {
-				if (isJob) {
-					throw new IllegalStateException("C3.js report type not supported for jobs");
-				}
-
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonData = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				String optionsString = report.getOptions();
-				if (StringUtils.isNotBlank(optionsString)) {
-					ObjectMapper mapper = new ObjectMapper();
-					C3Options options = mapper.readValue(optionsString, C3Options.class);
-					String cssFileName = options.getCssFile();
-
-					logger.debug("cssFileName='{}'", cssFileName);
-
-					//need to explicitly check if file name is empty string
-					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-					if (StringUtils.isNotBlank(cssFileName)) {
-						String fullCssFileName = jsTemplatesPath + cssFileName;
-
-						File cssFile = new File(fullCssFileName);
-						if (!cssFile.exists()) {
-							throw new IllegalStateException("Css file not found: " + fullCssFileName);
-						}
-
-						request.setAttribute("cssFileName", cssFileName);
-					}
-				}
-
-				String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("chartId", chartId);
-				request.setAttribute("templateFileName", templateFileName);
-				request.setAttribute("data", jsonData);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
+				generateC3Report();
 			} else if (reportType == ReportType.ChartJs) {
 				if (isJob) {
 					throw new IllegalStateException("Chart.js report type not supported for jobs");
@@ -2325,14 +2266,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates output for a csv report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateCsvReport() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateCsvReport");
-		
+
 		rs = reportRunner.getResultSet();
 
 		CsvOutputUnivocity csvOutput = new CsvOutputUnivocity();
@@ -2349,6 +2290,79 @@ public class ReportOutputGenerator {
 		if (!isJob && !reportFormat.isHtml()) {
 			displayFileLink(fileName);
 		}
+	}
+
+	/**
+	 * Generates a c3.js report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
+	private void generateC3Report() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateC3Report");
+		
+		if (isJob) {
+			throw new IllegalStateException("C3.js report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		jsonData = Encode.forJavaScript(jsonData);
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		}
+
+		String optionsString = report.getOptions();
+		if (StringUtils.isNotBlank(optionsString)) {
+			ObjectMapper mapper = new ObjectMapper();
+			C3Options options = mapper.readValue(optionsString, C3Options.class);
+			String cssFileName = options.getCssFile();
+
+			logger.debug("cssFileName='{}'", cssFileName);
+
+			//need to explicitly check if file name is empty string
+			//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+			if (StringUtils.isNotBlank(cssFileName)) {
+				String fullCssFileName = jsTemplatesPath + cssFileName;
+
+				File cssFile = new File(fullCssFileName);
+				if (!cssFile.exists()) {
+					throw new IllegalStateException("Css file not found: " + fullCssFileName);
+				}
+
+				request.setAttribute("cssFileName", cssFileName);
+			}
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("templateFileName", templateFileName);
+		request.setAttribute("data", jsonData);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
 	}
 
 }

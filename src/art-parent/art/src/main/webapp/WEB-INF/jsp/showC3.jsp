@@ -19,7 +19,8 @@
 
 
 <script type="text/javascript">
-	var jsonData = ${data};
+	var dataString = '${data}';
+	var jsonData = JSON.parse(dataString);
 	
 	var data = {
 		json: jsonData
