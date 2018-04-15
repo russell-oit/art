@@ -399,87 +399,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isDygraphs()) {
 				generateDygraphReport();
 			} else if (reportType.isDataTables()) {
-				if (isJob) {
-					throw new IllegalStateException("DataTables report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				if (reportType == ReportType.DataTables) {
-					rs = reportRunner.getResultSet();
-
-					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult;
-					if (groovyData == null) {
-						jsonOutputResult = jsonOutput.generateOutput(rs);
-					} else {
-						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-					}
-					String jsonData = jsonOutputResult.getJsonData();
-					List<ResultSetColumn> columns = jsonOutputResult.getColumns();
-					request.setAttribute("data", jsonData);
-					request.setAttribute("columns", columns);
-				}
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//template file not mandatory
-				if (StringUtils.isNotBlank(templateFileName)) {
-					File templateFile = new File(fullTemplateFileName);
-					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-					}
-					request.setAttribute("templateFileName", templateFileName);
-				}
-
-				String optionsString = report.getOptions();
-				DataTablesOptions options;
-				if (StringUtils.isBlank(optionsString)) {
-					options = new DataTablesOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, DataTablesOptions.class);
-				}
-				request.setAttribute("options", options);
-
-				if (reportType == ReportType.DataTablesCsvServer) {
-					if (StringUtils.isBlank(optionsString)) {
-						throw new IllegalArgumentException("Options not specified");
-					}
-
-					String dataFileName = options.getDataFile();
-
-					logger.debug("dataFileName='{}'", dataFileName);
-
-					//need to explicitly check if file name is empty string
-					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-					if (StringUtils.isBlank(dataFileName)) {
-						throw new IllegalArgumentException("Data file not specified");
-					}
-
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-
-					request.setAttribute("dataFileName", dataFileName);
-				}
-
-				String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
-				String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
-				String languageTag = locale.toLanguageTag();
-				String localeString = locale.toString();
-				request.setAttribute("outputDivId", outputDivId);
-				request.setAttribute("tableId", tableId);
-				request.setAttribute("languageTag", languageTag);
-				request.setAttribute("locale", localeString);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
+				generateDataTablesOutput();
 			} else if (reportType == ReportType.FixedWidth) {
 				rs = reportRunner.getResultSet();
 
@@ -2215,14 +2135,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates a dygraphs report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateDygraphReport() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateDygraphReport");
-		
+
 		if (isJob) {
 			throw new IllegalStateException("Dygraphs report types not supported for jobs");
 		}
@@ -2309,6 +2229,100 @@ public class ReportOutputGenerator {
 		String outputDivId = "dygraphsOutput-" + RandomStringUtils.randomAlphanumeric(5);
 		request.setAttribute("outputDivId", outputDivId);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates datatables reports
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
+	private void generateDataTablesOutput() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateDataTablesOutput");
+		
+		if (isJob) {
+			throw new IllegalStateException("DataTables report types not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		if (reportType == ReportType.DataTables) {
+			rs = reportRunner.getResultSet();
+
+			JsonOutput jsonOutput = new JsonOutput();
+			JsonOutputResult jsonOutputResult;
+			if (groovyData == null) {
+				jsonOutputResult = jsonOutput.generateOutput(rs);
+			} else {
+				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+			}
+			String jsonData = jsonOutputResult.getJsonData();
+			jsonData = Encode.forJavaScript(jsonData);
+			List<ResultSetColumn> columns = jsonOutputResult.getColumns();
+			request.setAttribute("data", jsonData);
+			request.setAttribute("columns", columns);
+		}
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//template file not mandatory
+		if (StringUtils.isNotBlank(templateFileName)) {
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+			request.setAttribute("templateFileName", templateFileName);
+		}
+
+		String optionsString = report.getOptions();
+		DataTablesOptions options;
+		if (StringUtils.isBlank(optionsString)) {
+			options = new DataTablesOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, DataTablesOptions.class);
+		}
+		request.setAttribute("options", options);
+
+		if (reportType == ReportType.DataTablesCsvServer) {
+			if (StringUtils.isBlank(optionsString)) {
+				throw new IllegalArgumentException("Options not specified");
+			}
+
+			String dataFileName = options.getDataFile();
+
+			logger.debug("dataFileName='{}'", dataFileName);
+
+			//need to explicitly check if file name is empty string
+			//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+			if (StringUtils.isBlank(dataFileName)) {
+				throw new IllegalArgumentException("Data file not specified");
+			}
+
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+
+			request.setAttribute("dataFileName", dataFileName);
+		}
+
+		String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
+		String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
+		String languageTag = locale.toLanguageTag();
+		String localeString = locale.toString();
+		request.setAttribute("outputDivId", outputDivId);
+		request.setAttribute("tableId", tableId);
+		request.setAttribute("languageTag", languageTag);
+		request.setAttribute("locale", localeString);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 	}
 
 }

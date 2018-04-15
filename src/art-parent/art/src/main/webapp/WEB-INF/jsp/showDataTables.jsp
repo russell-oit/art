@@ -317,8 +317,11 @@
 	columns.push(columnDef);
 			</c:forEach>
 
+	var dataString = '${data}';
+	var data = JSON.parse(dataString);
+	
 	$.extend(options, {
-		data: ${data},
+		data: data,
 		columns: columns
 	});
 		</script>
