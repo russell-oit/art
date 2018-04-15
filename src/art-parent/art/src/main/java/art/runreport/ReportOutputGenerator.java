@@ -2418,6 +2418,11 @@ public class ReportOutputGenerator {
 			reportEngineOutput.generateTabularOutput(reportType);
 		}
 
+		//can't get record count from resultset as reportengine closes the resultset after report generation
+		if (groovyDataSize != null) {
+			rowsRetrieved = groovyDataSize;
+		}
+
 		if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
 			displayFileLink(fileName);
 		}
