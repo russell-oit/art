@@ -92,12 +92,14 @@ import freemarker.template.TemplateException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -413,217 +415,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isWebMap()) {
 				generateWebMapReport();
 			} else if (reportType == ReportType.MongoDB) {
-				//https://learnxinyminutes.com/docs/groovy/
-				//http://groovy-lang.org/index.html
-				//http://docs.groovy-lang.org/next/html/documentation/
-				//https://www.tutorialspoint.com/mongodb/mongodb_java.htm
-				//https://avaldes.com/java-connecting-to-mongodb-3-2-examples/
-				//https://avaldes.com/mongodb-java-crud-operations-example-tutorial/
-				//http://www.mkyong.com/mongodb/java-mongodb-query-document/
-				//http://o7planning.org/en/10289/java-and-mongodb-tutorial
-				//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
-				//http://zetcode.com/db/mongodbjava/
-				//http://www.mastertheintegration.com/nosql-databases/mongodb/mongodb-java-driver-3-0-quick-reference.html
-				//https://mongodb.github.io/mongo-java-driver/3.4/driver/getting-started/quick-start/
-				//https://github.com/mongolab/mongodb-driver-examples/blob/master/java/JavaSimpleExample.java
-				//https://github.com/ihr/jongo-by-example/blob/master/src/test/java/org/ingini/mongodb/jongo/example/aggregation/TestAggregationFramework.java
-				//https://stackoverflow.com/questions/24370456/groovy-script-sandboxing-use-groovy-timecategory-syntax-from-java-as-string/24374237
-				//http://groovy-lang.org/integrating.html
-				//http://blog.xebia.com/jongo/
-				//http://ingini.org/2013/04/03/mongodb-with-jongo-sleeves-up/
-				//https://stackoverflow.com/questions/37155718/mapping-a-java-object-with-a-mongodb-document-using-jongo
-				//https://github.com/bguerout/jongo/issues/254
-				//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
-				//https://stackoverflow.com/questions/7567378/access-a-java-class-from-within-groovy
-				//https://stackoverflow.com/questions/4912400/what-packages-does-1-java-and-2-groovy-automatically-import
-				//https://www.spigotmc.org/wiki/mongodb-with-morphia/
-				//http://www.foobaracademy.com/morphia-hello-world-example/
-				//http://www.carfey.com/blog/using-mongodb-with-morphia/
-				//http://www.obsidianscheduler.com/blog/evolving-document-structures-with-morphia-and-mongodb/
-				//https://www.javacodegeeks.com/2011/11/using-mongodb-with-morphia.html
-				//http://javabeat.net/using-morphia-java-library-for-mongodb/
-				//http://www.scalabiliti.com/blog/mongodb_and_morphia_performance
-				//https://city81.blogspot.co.ke/2012/07/using-morphia-to-map-java-objects-in.html
-				//http://www.thejavageek.com/2015/08/24/save-entity-using-morphia/
-				//https://sleeplessinslc.blogspot.co.ke/2010/10/mongodb-with-morphia-example.html
-				//http://jameswilliams.be/blog/2010/05/05/Using-MongoDB-with-Morphia-and-Groovy.html
-				//https://mongodb.github.io/morphia/1.3/getting-started/quick-tour/
-				//https://github.com/mongodb/morphia/blob/1.3.x/morphia/src/examples/java/org/mongodb/morphia/example/QuickTour.java
-				//https://www.javacodegeeks.com/2015/09/mongodb-and-java-tutorial.html
-				//https://mdahlman.wordpress.com/2011/09/02/cool-reporting-on-mongodb/
-				//https://mdahlman.wordpress.com/2011/09/02/simple-reporting-on-mongodb/
-				CompilerConfiguration cc = new CompilerConfiguration();
-				cc.addCompilationCustomizers(new SandboxTransformer());
-
-				Map<String, Object> variables = new HashMap<>();
-				variables.putAll(reportParamsMap);
-
-				MongoClient mongoClient = null;
-				Datasource datasource = report.getDatasource();
-				if (datasource != null) {
-					mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
-				}
-				variables.put("mongoClient", mongoClient);
-
-				Binding binding = new Binding(variables);
-
-				GroovyShell shell = new GroovyShell(binding, cc);
-
-				GroovySandbox sandbox = null;
-				if (Config.getCustomSettings().isEnableGroovySandbox()) {
-					sandbox = new GroovySandbox();
-					sandbox.register();
-				}
-
-				//get report source with direct parameters, rules etc applied
-				String reportSource = reportRunner.getQuerySql();
-				Object result;
-				try {
-					result = shell.evaluate(reportSource);
-				} finally {
-					if (sandbox != null) {
-						sandbox.unregister();
-					}
-				}
-				if (result != null) {
-					if (result instanceof List) {
-						String optionsString = report.getOptions();
-						List<String> optionsColumnNames = null;
-						List<Map<String, String>> columnDataTypes = null;
-						MongoDbOptions options;
-						if (StringUtils.isBlank(optionsString)) {
-							options = new MongoDbOptions();
-						} else {
-							ObjectMapper mapper = new ObjectMapper();
-							options = mapper.readValue(optionsString, MongoDbOptions.class);
-							optionsColumnNames = options.getColumns();
-							columnDataTypes = options.getColumnDataTypes();
-						}
-
-						@SuppressWarnings("unchecked")
-						List<Object> resultList = (List<Object>) result;
-						List<ResultSetColumn> columns = new ArrayList<>();
-						String resultString = null;
-						if (!resultList.isEmpty()) {
-							if (CollectionUtils.isEmpty(optionsColumnNames)) {
-								Object sample = resultList.get(0);
-								//https://stackoverflow.com/questions/6133660/recursive-beanutils-describe
-								//https://www.leveluplunch.com/java/examples/convert-object-bean-properties-map-key-value/
-								//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
-								//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
-								//http://www.makeinjava.com/convert-list-objects-tofrom-json-java-jackson-objectmapper-example/
-								ObjectMapper mapper = new ObjectMapper();
-								@SuppressWarnings("unchecked")
-								Map<String, Object> map = mapper.convertValue(sample, Map.class);
-								for (Entry<String, Object> entry : map.entrySet()) {
-									String name = entry.getKey();
-									Object value = entry.getValue();
-									String type = "string";
-									if (value instanceof Number) {
-										type = "numeric";
-									}
-									ResultSetColumn column = new ResultSetColumn();
-									column.setName(name);
-									column.setType(type);
-									columns.add(column);
-								}
-							} else {
-								for (String columnName : optionsColumnNames) {
-									ResultSetColumn column = new ResultSetColumn();
-									column.setName(columnName);
-									column.setType("string");
-									columns.add(column);
-								}
-							}
-
-							if (CollectionUtils.isNotEmpty(columnDataTypes)) {
-								for (ResultSetColumn column : columns) {
-									String dataColumnName = column.getName();
-									for (Map<String, String> columnDataTypeDefinition : columnDataTypes) {
-										Entry<String, String> entry = columnDataTypeDefinition.entrySet().iterator().next();
-										String columnName = entry.getKey();
-										String dataType = entry.getValue();
-										if (StringUtils.equalsIgnoreCase(columnName, dataColumnName)) {
-											column.setType(dataType);
-											break;
-										}
-									}
-								}
-							}
-
-							List<String> finalColumnNames = new ArrayList<>();
-							for (ResultSetColumn column : columns) {
-								String columnName = column.getName();
-								finalColumnNames.add(columnName);
-							}
-
-							//_id is a complex object so we have to iterate and replace it with the toString() representation
-							//otherwise we would just call resultString = ArtUtils.objectToJson(resultList); directly and not have to create a new list
-							List<Map<String, Object>> finalResultList = new ArrayList<>();
-							for (Object object : resultList) {
-								Map<String, Object> row = new LinkedHashMap<>();
-								if (object instanceof Map) {
-									ObjectMapper mapper = new ObjectMapper();
-									@SuppressWarnings("unchecked")
-									Map<String, Object> map2 = mapper.convertValue(object, Map.class);
-									for (String columnName : finalColumnNames) {
-										Object value = map2.get(columnName);
-										Object finalValue;
-										if (value == null) {
-											finalValue = "";
-										} else if (value instanceof ObjectId) {
-											ObjectId objectId = (ObjectId) value;
-											finalValue = objectId.toString();
-										} else {
-											finalValue = value;
-										}
-										row.put(columnName, finalValue);
-									}
-								} else {
-									//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
-									Class<?> c = object.getClass();
-									BeanInfo beanInfo = Introspector.getBeanInfo(c, Object.class);
-									for (PropertyDescriptor propertyDesc : beanInfo.getPropertyDescriptors()) {
-										String propertyName = propertyDesc.getName();
-										if (StringUtils.equals(propertyName, "metaClass")) {
-											//don't include
-										} else {
-											if (ArtUtils.containsIgnoreCase(finalColumnNames, propertyName)) {
-												Object value = propertyDesc.getReadMethod().invoke(object);
-												Object finalValue;
-												if (value instanceof ObjectId) {
-													ObjectId objectId = (ObjectId) value;
-													finalValue = objectId.toString();
-												} else {
-													finalValue = value;
-												}
-												row.put(propertyName, finalValue);
-											}
-										}
-									}
-								}
-								finalResultList.add(row);
-							}
-
-							//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
-							//https://github.com/wnameless/json-flattener
-							resultString = ArtUtils.objectToJson(finalResultList);
-						}
-
-						request.setAttribute("data", resultString);
-						request.setAttribute("columns", columns);
-						request.setAttribute("reportType", reportType);
-						request.setAttribute("options", options);
-
-						String languageTag = locale.toLanguageTag();
-						request.setAttribute("languageTag", languageTag);
-						String localeString = locale.toString();
-						request.setAttribute("locale", localeString);
-						servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
-					} else {
-						writer.print(result);
-					}
-				}
+				generateMongoDbReport();
 			} else if (reportType.isOrgChart()) {
 				if (isJob) {
 					throw new IllegalStateException("OrgChart report types not supported for jobs");
@@ -2293,14 +2085,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates a leaflet or open layers report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateWebMapReport() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateWebMapReport");
-		
+
 		if (isJob) {
 			throw new IllegalStateException("Report type not supported for jobs: " + reportType);
 		}
@@ -2404,6 +2196,235 @@ public class ReportOutputGenerator {
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
+		}
+	}
+
+	/**
+	 * Generates a mongo db report
+	 * 
+	 * @throws IOException
+	 * @throws IntrospectionException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws ServletException 
+	 */
+	private void generateMongoDbReport() throws IOException, 
+			IntrospectionException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, ServletException {
+		
+		logger.debug("Entering generateMongoDbReport");
+		//https://learnxinyminutes.com/docs/groovy/
+		//http://groovy-lang.org/index.html
+		//http://docs.groovy-lang.org/next/html/documentation/
+		//https://www.tutorialspoint.com/mongodb/mongodb_java.htm
+		//https://avaldes.com/java-connecting-to-mongodb-3-2-examples/
+		//https://avaldes.com/mongodb-java-crud-operations-example-tutorial/
+		//http://www.mkyong.com/mongodb/java-mongodb-query-document/
+		//http://o7planning.org/en/10289/java-and-mongodb-tutorial
+		//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
+		//http://zetcode.com/db/mongodbjava/
+		//http://www.mastertheintegration.com/nosql-databases/mongodb/mongodb-java-driver-3-0-quick-reference.html
+		//https://mongodb.github.io/mongo-java-driver/3.4/driver/getting-started/quick-start/
+		//https://github.com/mongolab/mongodb-driver-examples/blob/master/java/JavaSimpleExample.java
+		//https://github.com/ihr/jongo-by-example/blob/master/src/test/java/org/ingini/mongodb/jongo/example/aggregation/TestAggregationFramework.java
+		//https://stackoverflow.com/questions/24370456/groovy-script-sandboxing-use-groovy-timecategory-syntax-from-java-as-string/24374237
+		//http://groovy-lang.org/integrating.html
+		//http://blog.xebia.com/jongo/
+		//http://ingini.org/2013/04/03/mongodb-with-jongo-sleeves-up/
+		//https://stackoverflow.com/questions/37155718/mapping-a-java-object-with-a-mongodb-document-using-jongo
+		//https://github.com/bguerout/jongo/issues/254
+		//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
+		//https://stackoverflow.com/questions/7567378/access-a-java-class-from-within-groovy
+		//https://stackoverflow.com/questions/4912400/what-packages-does-1-java-and-2-groovy-automatically-import
+		//https://www.spigotmc.org/wiki/mongodb-with-morphia/
+		//http://www.foobaracademy.com/morphia-hello-world-example/
+		//http://www.carfey.com/blog/using-mongodb-with-morphia/
+		//http://www.obsidianscheduler.com/blog/evolving-document-structures-with-morphia-and-mongodb/
+		//https://www.javacodegeeks.com/2011/11/using-mongodb-with-morphia.html
+		//http://javabeat.net/using-morphia-java-library-for-mongodb/
+		//http://www.scalabiliti.com/blog/mongodb_and_morphia_performance
+		//https://city81.blogspot.co.ke/2012/07/using-morphia-to-map-java-objects-in.html
+		//http://www.thejavageek.com/2015/08/24/save-entity-using-morphia/
+		//https://sleeplessinslc.blogspot.co.ke/2010/10/mongodb-with-morphia-example.html
+		//http://jameswilliams.be/blog/2010/05/05/Using-MongoDB-with-Morphia-and-Groovy.html
+		//https://mongodb.github.io/morphia/1.3/getting-started/quick-tour/
+		//https://github.com/mongodb/morphia/blob/1.3.x/morphia/src/examples/java/org/mongodb/morphia/example/QuickTour.java
+		//https://www.javacodegeeks.com/2015/09/mongodb-and-java-tutorial.html
+		//https://mdahlman.wordpress.com/2011/09/02/cool-reporting-on-mongodb/
+		//https://mdahlman.wordpress.com/2011/09/02/simple-reporting-on-mongodb/
+		CompilerConfiguration cc = new CompilerConfiguration();
+		cc.addCompilationCustomizers(new SandboxTransformer());
+
+		Map<String, Object> variables = new HashMap<>();
+		variables.putAll(reportParamsMap);
+
+		MongoClient mongoClient = null;
+		Datasource datasource = report.getDatasource();
+		if (datasource != null) {
+			mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
+		}
+		variables.put("mongoClient", mongoClient);
+
+		Binding binding = new Binding(variables);
+
+		GroovyShell shell = new GroovyShell(binding, cc);
+
+		GroovySandbox sandbox = null;
+		if (Config.getCustomSettings().isEnableGroovySandbox()) {
+			sandbox = new GroovySandbox();
+			sandbox.register();
+		}
+
+		//get report source with direct parameters, rules etc applied
+		String reportSource = reportRunner.getQuerySql();
+		Object result;
+		try {
+			result = shell.evaluate(reportSource);
+		} finally {
+			if (sandbox != null) {
+				sandbox.unregister();
+			}
+		}
+		if (result != null) {
+			if (result instanceof List) {
+				String optionsString = report.getOptions();
+				List<String> optionsColumnNames = null;
+				List<Map<String, String>> columnDataTypes = null;
+				MongoDbOptions options;
+				if (StringUtils.isBlank(optionsString)) {
+					options = new MongoDbOptions();
+				} else {
+					ObjectMapper mapper = new ObjectMapper();
+					options = mapper.readValue(optionsString, MongoDbOptions.class);
+					optionsColumnNames = options.getColumns();
+					columnDataTypes = options.getColumnDataTypes();
+				}
+
+				@SuppressWarnings("unchecked")
+				List<Object> resultList = (List<Object>) result;
+				List<ResultSetColumn> columns = new ArrayList<>();
+				String resultString = null;
+				if (!resultList.isEmpty()) {
+					if (CollectionUtils.isEmpty(optionsColumnNames)) {
+						Object sample = resultList.get(0);
+						//https://stackoverflow.com/questions/6133660/recursive-beanutils-describe
+						//https://www.leveluplunch.com/java/examples/convert-object-bean-properties-map-key-value/
+						//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
+						//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
+						//http://www.makeinjava.com/convert-list-objects-tofrom-json-java-jackson-objectmapper-example/
+						ObjectMapper mapper = new ObjectMapper();
+						@SuppressWarnings("unchecked")
+						Map<String, Object> map = mapper.convertValue(sample, Map.class);
+						for (Entry<String, Object> entry : map.entrySet()) {
+							String name = entry.getKey();
+							Object value = entry.getValue();
+							String type = "string";
+							if (value instanceof Number) {
+								type = "numeric";
+							}
+							ResultSetColumn column = new ResultSetColumn();
+							column.setName(name);
+							column.setType(type);
+							columns.add(column);
+						}
+					} else {
+						for (String columnName : optionsColumnNames) {
+							ResultSetColumn column = new ResultSetColumn();
+							column.setName(columnName);
+							column.setType("string");
+							columns.add(column);
+						}
+					}
+
+					if (CollectionUtils.isNotEmpty(columnDataTypes)) {
+						for (ResultSetColumn column : columns) {
+							String dataColumnName = column.getName();
+							for (Map<String, String> columnDataTypeDefinition : columnDataTypes) {
+								Entry<String, String> entry = columnDataTypeDefinition.entrySet().iterator().next();
+								String columnName = entry.getKey();
+								String dataType = entry.getValue();
+								if (StringUtils.equalsIgnoreCase(columnName, dataColumnName)) {
+									column.setType(dataType);
+									break;
+								}
+							}
+						}
+					}
+
+					List<String> finalColumnNames = new ArrayList<>();
+					for (ResultSetColumn column : columns) {
+						String columnName = column.getName();
+						finalColumnNames.add(columnName);
+					}
+
+					//_id is a complex object so we have to iterate and replace it with the toString() representation
+					//otherwise we would just call resultString = ArtUtils.objectToJson(resultList); directly and not have to create a new list
+					List<Map<String, Object>> finalResultList = new ArrayList<>();
+					for (Object object : resultList) {
+						Map<String, Object> row = new LinkedHashMap<>();
+						if (object instanceof Map) {
+							ObjectMapper mapper = new ObjectMapper();
+							@SuppressWarnings("unchecked")
+							Map<String, Object> map2 = mapper.convertValue(object, Map.class);
+							for (String columnName : finalColumnNames) {
+								Object value = map2.get(columnName);
+								Object finalValue;
+								if (value == null) {
+									finalValue = "";
+								} else if (value instanceof ObjectId) {
+									ObjectId objectId = (ObjectId) value;
+									finalValue = objectId.toString();
+								} else {
+									finalValue = value;
+								}
+								row.put(columnName, finalValue);
+							}
+						} else {
+							//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
+							Class<?> c = object.getClass();
+							BeanInfo beanInfo = Introspector.getBeanInfo(c, Object.class);
+							for (PropertyDescriptor propertyDesc : beanInfo.getPropertyDescriptors()) {
+								String propertyName = propertyDesc.getName();
+								if (StringUtils.equals(propertyName, "metaClass")) {
+									//don't include
+								} else {
+									if (ArtUtils.containsIgnoreCase(finalColumnNames, propertyName)) {
+										Object value = propertyDesc.getReadMethod().invoke(object);
+										Object finalValue;
+										if (value instanceof ObjectId) {
+											ObjectId objectId = (ObjectId) value;
+											finalValue = objectId.toString();
+										} else {
+											finalValue = value;
+										}
+										row.put(propertyName, finalValue);
+									}
+								}
+							}
+						}
+						finalResultList.add(row);
+					}
+
+					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
+					//https://github.com/wnameless/json-flattener
+					resultString = ArtUtils.objectToJson(finalResultList);
+					resultString = Encode.forJavaScript(resultString);
+				}
+
+				request.setAttribute("data", resultString);
+				request.setAttribute("columns", columns);
+				request.setAttribute("reportType", reportType);
+				request.setAttribute("options", options);
+
+				String languageTag = locale.toLanguageTag();
+				request.setAttribute("languageTag", languageTag);
+				String localeString = locale.toString();
+				request.setAttribute("locale", localeString);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
+			} else {
+				writer.print(result);
+			}
 		}
 	}
 
