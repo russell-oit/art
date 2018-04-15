@@ -386,20 +386,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.FreeMarker) {
 				generateFreeMarkerOutput();
 			} else if (reportType == ReportType.Thymeleaf) {
-				rs = reportRunner.getResultSet();
-
-				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
-				thymeleafOutput.setContextPath(contextPath);
-				thymeleafOutput.setLocale(locale);
-				thymeleafOutput.setResultSet(rs);
-				thymeleafOutput.setData(groovyData);
-				thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
+				generateThymeleafReport();
 			} else if (reportType == ReportType.Velocity) {
 				rs = reportRunner.getResultSet();
 
@@ -2216,15 +2203,15 @@ public class ReportOutputGenerator {
 	}
 
 	/**
-	 * Outputs a freemarker report
-	 * 
+	 * Generates output for a freemarker report
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws TemplateException 
+	 * @throws TemplateException
 	 */
 	private void generateFreeMarkerOutput() throws SQLException, IOException, TemplateException {
 		logger.debug("Entering generateFreeMarkerOutput");
-		
+
 		rs = reportRunner.getResultSet();
 
 		FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
@@ -2233,6 +2220,31 @@ public class ReportOutputGenerator {
 		freemarkerOutput.setResultSet(rs);
 		freemarkerOutput.setData(groovyData);
 		freemarkerOutput.generateOutput(report, writer, applicableReportParamsList);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+	}
+
+	/**
+	 * Generates a thymeleaf report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException 
+	 */
+	private void generateThymeleafReport() throws SQLException, IOException {
+		logger.debug("Entering generateThymeleafReport");
+		
+		rs = reportRunner.getResultSet();
+
+		ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+		thymeleafOutput.setContextPath(contextPath);
+		thymeleafOutput.setLocale(locale);
+		thymeleafOutput.setResultSet(rs);
+		thymeleafOutput.setData(groovyData);
+		thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
 
 		if (groovyDataSize == null) {
 			rowsRetrieved = getResultSetRowCount(rs);
