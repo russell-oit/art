@@ -381,14 +381,39 @@ Edit report page
 
 		<script type="text/javascript">
 			function toggleGroovyEditor(reportSource, groovyEditor, sqlEditor) {
-				if ($('#useGroovy').is(':checked')) {
-					groovyEditor.getSession().setValue(reportSource.val());
-					$("#sqlEditor").hide();
-					$("#groovyEditor").show();
-				} else {
-					sqlEditor.getSession().setValue(reportSource.val());
-					$("#sqlEditor").show();
-					$("#groovyEditor").hide();
+				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
+				switch (reportTypeId) {
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 156: //org chart list
+					case 149: //saiku report
+					case 155: //org chart json
+					case 151: //mongodb
+					case 115: //jasper template
+					case 117: //jxls template
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
+					case 137: //dygraphs csv server
+					case 139: //datatables csv local
+					case 140: //datatables csv server
+					case 145: //datamaps file
+					case 150: //saiku connection
+					case 159: //reportengine file
+						//do nothing
+						break;
+					default:
+						if ($('#useGroovy').is(':checked')) {
+							$("#reportSourceLabel").html("${reportSourceText} (Groovy)");
+							groovyEditor.getSession().setValue(reportSource.val());
+							$("#sqlEditor").hide();
+							$("#groovyEditor").show();
+						} else {
+							$("#reportSourceLabel").html("${reportSourceText} (SQL)");
+							sqlEditor.getSession().setValue(reportSource.val());
+							$("#sqlEditor").show();
+							$("#groovyEditor").hide();
+						}
 				}
 			}
 

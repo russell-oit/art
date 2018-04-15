@@ -2277,6 +2277,11 @@ public class ReportOutputGenerator {
 				request.setAttribute("reportType", reportType);
 				request.setAttribute("options", options);
 
+				String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
+				String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
+				request.setAttribute("outputDivId", outputDivId);
+				request.setAttribute("tableId", tableId);
+
 				String languageTag = locale.toLanguageTag();
 				request.setAttribute("languageTag", languageTag);
 				String localeString = locale.toString();

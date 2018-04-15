@@ -2,6 +2,7 @@ ART 3.5
 * Add field to indicate use of groovy instead of sql in report source
 * Added pivotTableJs as report format option for tabular reports
 * Updated chinese translation
+* Fix for mongodb reports showing blank
 
 ART 3.4
 * Allow jobs to specify the time zone in which the schedule will run
