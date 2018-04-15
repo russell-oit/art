@@ -87,6 +87,7 @@ import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
+import freemarker.template.TemplateException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.beans.BeanInfo;
@@ -383,20 +384,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isStandardOutput()) {
 				outputStandardReport(outputResult);
 			} else if (reportType == ReportType.FreeMarker) {
-				rs = reportRunner.getResultSet();
-
-				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
-				freemarkerOutput.setContextPath(contextPath);
-				freemarkerOutput.setLocale(locale);
-				freemarkerOutput.setResultSet(rs);
-				freemarkerOutput.setData(groovyData);
-				freemarkerOutput.generateOutput(report, writer, applicableReportParamsList);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
+				generateFreeMarkerOutput();
 			} else if (reportType == ReportType.Thymeleaf) {
 				rs = reportRunner.getResultSet();
 
@@ -2224,6 +2212,32 @@ public class ReportOutputGenerator {
 			} else {
 				rowsRetrieved = groovyDataSize;
 			}
+		}
+	}
+
+	/**
+	 * Outputs a freemarker report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws TemplateException 
+	 */
+	private void generateFreeMarkerOutput() throws SQLException, IOException, TemplateException {
+		logger.debug("Entering generateFreeMarkerOutput");
+		
+		rs = reportRunner.getResultSet();
+
+		FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+		freemarkerOutput.setContextPath(contextPath);
+		freemarkerOutput.setLocale(locale);
+		freemarkerOutput.setResultSet(rs);
+		freemarkerOutput.setData(groovyData);
+		freemarkerOutput.generateOutput(report, writer, applicableReportParamsList);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
 		}
 	}
 
