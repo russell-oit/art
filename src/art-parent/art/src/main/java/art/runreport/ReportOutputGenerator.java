@@ -407,54 +407,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.C3) {
 				generateC3Report();
 			} else if (reportType == ReportType.ChartJs) {
-				if (isJob) {
-					throw new IllegalStateException("Chart.js report type not supported for jobs");
-				}
-
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonData = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				ChartJsOptions options;
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					options = new ChartJsOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, ChartJsOptions.class);
-				}
-
-				String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("chartId", chartId);
-				request.setAttribute("options", options);
-				request.setAttribute("templateFileName", templateFileName);
-				request.setAttribute("data", jsonData);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartJs.jsp").include(request, response);
+				generateChartJsReport();
 			} else if (reportType.isDatamaps()) {
 				if (isJob) {
 					throw new IllegalStateException("Datamaps report types not supported for jobs");
@@ -2294,14 +2247,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates a c3.js report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateC3Report() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateC3Report");
-		
+
 		if (isJob) {
 			throw new IllegalStateException("C3.js report type not supported for jobs");
 		}
@@ -2363,6 +2316,67 @@ public class ReportOutputGenerator {
 		request.setAttribute("templateFileName", templateFileName);
 		request.setAttribute("data", jsonData);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
+	}
+
+	/**
+	 * Generate a chart.js report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
+	private void generateChartJsReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateChartJsReport");
+		
+		if (isJob) {
+			throw new IllegalStateException("Chart.js report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		jsonData = Encode.forJavaScript(jsonData);
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		}
+
+		ChartJsOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new ChartJsOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, ChartJsOptions.class);
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("options", options);
+		request.setAttribute("templateFileName", templateFileName);
+		request.setAttribute("data", jsonData);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartJs.jsp").include(request, response);
 	}
 
 }

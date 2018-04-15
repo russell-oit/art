@@ -20,7 +20,9 @@
 <script type="text/javascript">
 	//http://www.chartjs.org/docs/
 	//https://www.sitepoint.com/introduction-chart-js-2-0-six-examples/
-	var jsonData = ${data};
+	var dataString = '${data}';
+	var jsonData = JSON.parse(dataString);
+	
 	var config = {};
 </script>
 
