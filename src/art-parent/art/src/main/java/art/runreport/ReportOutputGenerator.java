@@ -409,99 +409,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.ChartJs) {
 				generateChartJsReport();
 			} else if (reportType.isDatamaps()) {
-				if (isJob) {
-					throw new IllegalStateException("Datamaps report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				if (reportType == ReportType.Datamaps) {
-					rs = reportRunner.getResultSet();
-
-					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult;
-					if (groovyData == null) {
-						jsonOutputResult = jsonOutput.generateOutput(rs);
-					} else {
-						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-					}
-					String jsonData = jsonOutputResult.getJsonData();
-					rowsRetrieved = jsonOutputResult.getRowCount();
-					request.setAttribute("data", jsonData);
-				}
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				DatamapsOptions options;
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					options = new DatamapsOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, DatamapsOptions.class);
-				}
-
-				String datamapsJsFileName = options.getDatamapsJsFile();
-
-				if (StringUtils.isBlank(datamapsJsFileName)) {
-					throw new IllegalArgumentException("Datamaps js file not specified");
-				}
-
-				String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
-				File datamapsJsFile = new File(fullDatamapsJsFileName);
-				if (!datamapsJsFile.exists()) {
-					throw new IllegalStateException("Datamaps js file not found: " + fullDatamapsJsFileName);
-				}
-
-				String dataFileName = options.getDataFile();
-				if (StringUtils.isNotBlank(dataFileName)) {
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-				}
-
-				String mapFileName = options.getMapFile();
-				if (StringUtils.isNotBlank(mapFileName)) {
-					String fullMapFileName = jsTemplatesPath + mapFileName;
-
-					File mapFile = new File(fullMapFileName);
-					if (!mapFile.exists()) {
-						throw new IllegalStateException("Map file not found: " + fullMapFileName);
-					}
-				}
-
-				String cssFileName = options.getCssFile();
-				if (StringUtils.isNotBlank(cssFileName)) {
-					String fullCssFileName = jsTemplatesPath + cssFileName;
-
-					File cssFile = new File(fullCssFileName);
-					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + fullCssFileName);
-					}
-				}
-
-				String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("containerId", containerId);
-				request.setAttribute("options", options);
-				request.setAttribute("templateFileName", templateFileName);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
+				generateDatamapReport();
 			} else if (reportType.isWebMap()) {
 				if (isJob) {
 					throw new IllegalStateException("Report type not supported for jobs: " + reportType);
@@ -2320,14 +2228,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generate a chart.js report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateChartJsReport() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateChartJsReport");
-		
+
 		if (isJob) {
 			throw new IllegalStateException("Chart.js report type not supported for jobs");
 		}
@@ -2377,6 +2285,111 @@ public class ReportOutputGenerator {
 		request.setAttribute("templateFileName", templateFileName);
 		request.setAttribute("data", jsonData);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartJs.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a datamaps report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
+	private void generateDatamapReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateDatamapReport");
+		
+		if (isJob) {
+			throw new IllegalStateException("Datamaps report types not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		if (reportType == ReportType.Datamaps) {
+			rs = reportRunner.getResultSet();
+
+			JsonOutput jsonOutput = new JsonOutput();
+			JsonOutputResult jsonOutputResult;
+			if (groovyData == null) {
+				jsonOutputResult = jsonOutput.generateOutput(rs);
+			} else {
+				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+			}
+			String jsonData = jsonOutputResult.getJsonData();
+			rowsRetrieved = jsonOutputResult.getRowCount();
+			request.setAttribute("data", jsonData);
+		}
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		}
+
+		DatamapsOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new DatamapsOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, DatamapsOptions.class);
+		}
+
+		String datamapsJsFileName = options.getDatamapsJsFile();
+
+		if (StringUtils.isBlank(datamapsJsFileName)) {
+			throw new IllegalArgumentException("Datamaps js file not specified");
+		}
+
+		String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
+		File datamapsJsFile = new File(fullDatamapsJsFileName);
+		if (!datamapsJsFile.exists()) {
+			throw new IllegalStateException("Datamaps js file not found: " + fullDatamapsJsFileName);
+		}
+
+		String dataFileName = options.getDataFile();
+		if (StringUtils.isNotBlank(dataFileName)) {
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+		}
+
+		String mapFileName = options.getMapFile();
+		if (StringUtils.isNotBlank(mapFileName)) {
+			String fullMapFileName = jsTemplatesPath + mapFileName;
+
+			File mapFile = new File(fullMapFileName);
+			if (!mapFile.exists()) {
+				throw new IllegalStateException("Map file not found: " + fullMapFileName);
+			}
+		}
+
+		String cssFileName = options.getCssFile();
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+			}
+		}
+
+		String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("containerId", containerId);
+		request.setAttribute("options", options);
+		request.setAttribute("templateFileName", templateFileName);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
 	}
 
 }

@@ -52,7 +52,8 @@
 	//https://github.com/markmarkoh/datamaps/blob/master/src/examples/highmaps_world.html
 
 	<c:if test="${not empty data}">
-		var jsonData = ${data};
+	var dataString = '${data}';
+	var jsonData = JSON.parse(dataString);
 	</c:if>
 
 	var dataUrl = null;
