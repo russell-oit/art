@@ -417,80 +417,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.MongoDB) {
 				generateMongoDbReport();
 			} else if (reportType.isOrgChart()) {
-				if (isJob) {
-					throw new IllegalStateException("OrgChart report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				String jsonData;
-				switch (reportType) {
-					case OrgChartDatabase:
-						rs = reportRunner.getResultSet();
-
-						JsonOutput jsonOutput = new JsonOutput();
-						JsonOutputResult jsonOutputResult;
-						if (groovyData == null) {
-							jsonOutputResult = jsonOutput.generateOutput(rs);
-						} else {
-							jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-						}
-						jsonData = jsonOutputResult.getJsonData();
-						rowsRetrieved = jsonOutputResult.getRowCount();
-						break;
-					case OrgChartJson:
-					case OrgChartList:
-					case OrgChartAjax:
-						jsonData = report.getReportSource();
-						break;
-					default:
-						throw new IllegalArgumentException("Unexpected OrgChart report type: " + reportType);
-				}
-
-				jsonData = Encode.forJavaScript(jsonData);
-				request.setAttribute("data", jsonData);
-
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-
-				OrgChartOptions options;
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					options = new OrgChartOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, OrgChartOptions.class);
-				}
-
-				String cssFileName = options.getCssFile();
-				if (StringUtils.isNotBlank(cssFileName)) {
-					String fullCssFileName = jsTemplatesPath + cssFileName;
-
-					File cssFile = new File(fullCssFileName);
-					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + fullCssFileName);
-					}
-				}
-
-				String templateFileName = report.getTemplate();
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				if (StringUtils.isNotBlank(templateFileName)) {
-					String fullTemplateFileName = jsTemplatesPath + templateFileName;
-					File templateFile = new File(fullTemplateFileName);
-					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-					}
-				}
-
-				String optionsJson = ArtUtils.objectToJson(options);
-				optionsJson = Encode.forJavaScript(optionsJson);
-				String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("containerId", containerId);
-				request.setAttribute("optionsJson", optionsJson);
-				request.setAttribute("options", options);
-				request.setAttribute("templateFileName", templateFileName);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
+				generateOrgChartReport();
 			} else if (reportType.isReportEngine()) {
 				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
 
@@ -2201,18 +2128,18 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates a mongo db report
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws IntrospectionException
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
 	 * @throws InvocationTargetException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
-	private void generateMongoDbReport() throws IOException, 
+	private void generateMongoDbReport() throws IOException,
 			IntrospectionException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, ServletException {
-		
+
 		logger.debug("Entering generateMongoDbReport");
 		//https://learnxinyminutes.com/docs/groovy/
 		//http://groovy-lang.org/index.html
@@ -2426,6 +2353,92 @@ public class ReportOutputGenerator {
 				writer.print(result);
 			}
 		}
+	}
+
+	/**
+	 * Generates an org chart report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
+	private void generateOrgChartReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateOrgChartReport");
+		
+		if (isJob) {
+			throw new IllegalStateException("OrgChart report types not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		String jsonData;
+		switch (reportType) {
+			case OrgChartDatabase:
+				rs = reportRunner.getResultSet();
+
+				JsonOutput jsonOutput = new JsonOutput();
+				JsonOutputResult jsonOutputResult;
+				if (groovyData == null) {
+					jsonOutputResult = jsonOutput.generateOutput(rs);
+				} else {
+					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+				}
+				jsonData = jsonOutputResult.getJsonData();
+				rowsRetrieved = jsonOutputResult.getRowCount();
+				break;
+			case OrgChartJson:
+			case OrgChartList:
+			case OrgChartAjax:
+				jsonData = report.getReportSource();
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected OrgChart report type: " + reportType);
+		}
+
+		jsonData = Encode.forJavaScript(jsonData);
+		request.setAttribute("data", jsonData);
+
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+
+		OrgChartOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new OrgChartOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, OrgChartOptions.class);
+		}
+
+		String cssFileName = options.getCssFile();
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+			}
+		}
+
+		String templateFileName = report.getTemplate();
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		if (StringUtils.isNotBlank(templateFileName)) {
+			String fullTemplateFileName = jsTemplatesPath + templateFileName;
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+		}
+
+		String optionsJson = ArtUtils.objectToJson(options);
+		optionsJson = Encode.forJavaScript(optionsJson);
+		String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("containerId", containerId);
+		request.setAttribute("optionsJson", optionsJson);
+		request.setAttribute("options", options);
+		request.setAttribute("templateFileName", templateFileName);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
 	}
 
 }
