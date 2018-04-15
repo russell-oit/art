@@ -141,6 +141,14 @@ public class ReportOutputGenerator {
 	private boolean pdfPageNumbers = true;
 	private String dynamicOpenPassword;
 	private String dynamicModifyPassword;
+	ResultSet rs;
+	Report report;
+	ReportType reportType;
+	ReportRunner reportRunner;
+	Object groovyData;
+	Integer groovyDataSize;
+	Integer rowsRetrieved;
+	Locale locale;
 
 	/**
 	 * @return the dynamicOpenPassword
@@ -278,17 +286,26 @@ public class ReportOutputGenerator {
 
 		logger.debug("Entering generateOutput");
 
-		ReportOutputGeneratorResult outputResult = new ReportOutputGeneratorResult();
-		outputResult.setSuccess(true);
-
-		ResultSet rs = null;
-		Integer rowsRetrieved = null;
-
 		if (!isJob) {
 			Objects.requireNonNull(request, "request must not be null");
 			Objects.requireNonNull(response, "response must not be null");
 			Objects.requireNonNull(servletContext, "servletContext must not be null");
 			Objects.requireNonNull(drilldownService, "drilldownService must not be null");
+		}
+
+		ReportOutputGeneratorResult outputResult = new ReportOutputGeneratorResult();
+		outputResult.setSuccess(true);
+
+		this.report = report;
+		reportType = report.getReportType();
+		this.reportRunner = reportRunner;
+		this.locale = locale;
+
+		groovyData = reportRunner.getGroovyData();
+		if (groovyData != null) {
+			@SuppressWarnings("unchecked")
+			List<? extends Object> dataList = (List<? extends Object>) groovyData;
+			groovyDataSize = dataList.size();
 		}
 
 		String contextPath = null;
@@ -321,15 +338,6 @@ public class ReportOutputGenerator {
 			}
 
 			int reportId = report.getReportId();
-			ReportType reportType = report.getReportType();
-
-			Object groovyData = reportRunner.getGroovyData();
-			Integer groovyDataSize = null;
-			if (groovyData != null) {
-				@SuppressWarnings("unchecked")
-				List<? extends Object> dataList = (List<? extends Object>) groovyData;
-				groovyDataSize = dataList.size();
-			}
 
 			//generate report output
 			if (reportType.isJasperReports() || reportType.isJxls()) {
@@ -688,89 +696,7 @@ public class ReportOutputGenerator {
 				request.setAttribute("rows", jsonData);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
 			} else if (reportType.isPivotTableJs()) {
-				if (isJob) {
-					throw new IllegalStateException("PivotTable.js report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				if (reportType == ReportType.PivotTableJs) {
-					rs = reportRunner.getResultSet();
-
-					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult;
-					if (groovyData == null) {
-						jsonOutputResult = jsonOutput.generateOutput(rs);
-					} else {
-						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-					}
-					String jsonData = jsonOutputResult.getJsonData();
-					rowsRetrieved = jsonOutputResult.getRowCount();
-					request.setAttribute("input", jsonData);
-				}
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//template file not mandatory
-				if (StringUtils.isNotBlank(templateFileName)) {
-					File templateFile = new File(fullTemplateFileName);
-					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-					}
-					request.setAttribute("templateFileName", templateFileName);
-				}
-
-				if (reportType == ReportType.PivotTableJsCsvServer) {
-					String optionsString = report.getOptions();
-
-					if (StringUtils.isBlank(optionsString)) {
-						throw new IllegalArgumentException("Options not specified");
-					}
-
-					ObjectMapper mapper = new ObjectMapper();
-					CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
-					String dataFileName = options.getDataFile();
-
-					logger.debug("dataFileName='{}'", dataFileName);
-
-					//need to explicitly check if file name is empty string
-					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-					if (StringUtils.isBlank(dataFileName)) {
-						throw new IllegalArgumentException("Data file not specified");
-					}
-
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-
-					request.setAttribute("dataFileName", dataFileName);
-				}
-
-				String localeString = locale.toString();
-
-				String languageFileName = "pivot." + localeString + ".js";
-
-				String languageFilePath = Config.getAppPath() + File.separator
-						+ "js" + File.separator
-						+ "pivottable-2.7.0" + File.separator
-						+ languageFileName;
-
-				File languageFile = new File(languageFilePath);
-
-				if (languageFile.exists()) {
-					request.setAttribute("locale", localeString);
-				}
-
-				String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("outputDivId", outputDivId);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
+				outputPivotTableJs();
 			} else if (reportType.isDygraphs()) {
 				if (isJob) {
 					throw new IllegalStateException("Dygraphs report types not supported for jobs");
@@ -2078,6 +2004,98 @@ public class ReportOutputGenerator {
 		}
 
 		return effectiveChartOptions;
+	}
+
+	/**
+	 * Generates pivot table js output
+	 */
+	private void outputPivotTableJs() throws SQLException, IOException, ServletException {
+		logger.debug("Entering outputPivotTableJs");
+		
+		if (isJob) {
+			throw new IllegalStateException("PivotTable.js output not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		if (reportType == ReportType.PivotTableJs) {
+			rs = reportRunner.getResultSet();
+
+			JsonOutput jsonOutput = new JsonOutput();
+			JsonOutputResult jsonOutputResult;
+			if (groovyData == null) {
+				jsonOutputResult = jsonOutput.generateOutput(rs);
+			} else {
+				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+			}
+			String jsonData = jsonOutputResult.getJsonData();
+			jsonData = Encode.forJavaScript(jsonData);
+			rowsRetrieved = jsonOutputResult.getRowCount();
+			request.setAttribute("input", jsonData);
+		}
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//template file not mandatory
+		if (StringUtils.isNotBlank(templateFileName)) {
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+			request.setAttribute("templateFileName", templateFileName);
+		}
+
+		if (reportType == ReportType.PivotTableJsCsvServer) {
+			String optionsString = report.getOptions();
+
+			if (StringUtils.isBlank(optionsString)) {
+				throw new IllegalArgumentException("Options not specified");
+			}
+
+			ObjectMapper mapper = new ObjectMapper();
+			CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
+			String dataFileName = options.getDataFile();
+
+			logger.debug("dataFileName='{}'", dataFileName);
+
+			//need to explicitly check if file name is empty string
+			//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+			if (StringUtils.isBlank(dataFileName)) {
+				throw new IllegalArgumentException("Data file not specified");
+			}
+
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+
+			request.setAttribute("dataFileName", dataFileName);
+		}
+
+		String localeString = locale.toString();
+
+		String languageFileName = "pivot." + localeString + ".js";
+
+		String languageFilePath = Config.getAppPath() + File.separator
+				+ "js" + File.separator
+				+ "pivottable-2.7.0" + File.separator
+				+ languageFileName;
+
+		File languageFile = new File(languageFilePath);
+
+		if (languageFile.exists()) {
+			request.setAttribute("locale", localeString);
+		}
+
+		String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("outputDivId", outputDivId);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
 	}
 
 }

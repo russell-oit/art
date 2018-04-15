@@ -10,6 +10,8 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
+<spring:message code="pivotTableJs.text.processing" var="processingText"/>
+
 <div id="${outputDivId}">
 
 </div>
@@ -50,7 +52,7 @@
 		renderers: renderers,
 		dataClass: $.pivotUtilities.SubtotalPivotData
 	};
-	
+
 	var overwrite = false;
 	var locale = 'en';
 
@@ -88,7 +90,9 @@
 <c:choose>
 	<c:when test="${reportType == 'PivotTableJs'}">
 		<script type="text/javascript">
-	$("#${outputDivId}").pivotUI(${input}, options, overwrite, locale);
+	var inputString = '${input}';
+	var input = JSON.parse(inputString);
+	$("#${outputDivId}").pivotUI(input, options, overwrite, locale);
 		</script>
 	</c:when>
 	<c:when test="${reportType == 'PivotTableJsCsvLocal'}">
@@ -109,7 +113,7 @@
 		</p>
 		<script type="text/javascript">
 			var parseAndPivot = function (f) {
-				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(processing...)</p>");
+				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(${processingText}...)</p>");
 				Papa.parse(f, csvConfig);
 			};
 
