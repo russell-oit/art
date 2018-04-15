@@ -512,31 +512,6 @@ public class ReportOutputGenerator {
 						rowsRetrieved = groovyDataSize;
 					}
 				}
-			} else if (reportType.isStandardOutput() && reportFormat.isJson()) {
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
-
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonString = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				switch (reportFormat) {
-					case jsonBrowser:
-						//https://stackoverflow.com/questions/14533530/how-to-show-pretty-print-json-string-in-a-jsp-page
-						writer.print("<pre>" + jsonString + "</pre>");
-						break;
-					default:
-						writer.print(jsonString);
-				}
-
-				writer.flush();
 			} else if (reportType.isStandardOutput()) {
 				outputStandardReport(outputResult);
 			} else if (reportType == ReportType.FreeMarker) {
@@ -2045,71 +2020,108 @@ public class ReportOutputGenerator {
 	}
 
 	private void outputStandardReport(ReportOutputGeneratorResult outputResult) throws SQLException, IOException, ServletException {
-		StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
+		if (reportFormat.isJson()) {
+			outputStandardReportJsonOutput();
+		} else {
+			StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
 
-		standardOutput.setWriter(writer);
-		standardOutput.setFullOutputFileName(fullOutputFilename);
-		standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
-		standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
-		standardOutput.setLocale(locale);
-		standardOutput.setReportName(report.getLocalizedName(locale));
-		standardOutput.setMessageSource(messageSource);
-		standardOutput.setIsJob(isJob);
-		standardOutput.setPdfPageNumbers(pdfPageNumbers);
-		standardOutput.setReport(report);
-		standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
-		standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
+			standardOutput.setWriter(writer);
+			standardOutput.setFullOutputFileName(fullOutputFilename);
+			standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
+			standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
+			standardOutput.setLocale(locale);
+			standardOutput.setReportName(report.getLocalizedName(locale));
+			standardOutput.setMessageSource(messageSource);
+			standardOutput.setIsJob(isJob);
+			standardOutput.setPdfPageNumbers(pdfPageNumbers);
+			standardOutput.setReport(report);
+			standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
+			standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
 
-		if (request != null) {
-			standardOutput.setContextPath(contextPath);
+			if (request != null) {
+				standardOutput.setContextPath(contextPath);
 
-			if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-				standardOutput.setAjax(true);
+				if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+					standardOutput.setAjax(true);
+				}
+			}
+
+			//generate output
+			rs = reportRunner.getResultSet();
+
+			StandardOutputResult standardOutputResult;
+			if (reportType.isCrosstab()) {
+				if (groovyData == null) {
+					standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
+				} else {
+					standardOutputResult = standardOutput.generateCrosstabOutput(groovyData, reportFormat, report);
+				}
+			} else {
+				if (reportFormat.isHtml() && !isJob) {
+					//only drill down for html output. drill down query launched from hyperlink                                            
+					standardOutput.setDrilldowns(drilldownService.getDrilldowns(report.getReportId()));
+				}
+
+				//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
+				if (request != null) {
+					String requestBaseUrl = request.getScheme() + "://"
+							+ request.getServerName()
+							+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
+							+ request.getContextPath();
+					standardOutput.setRequestBaseUrl(requestBaseUrl);
+				}
+
+				if (groovyData == null) {
+					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
+				} else {
+					standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
+				}
+			}
+
+			if (standardOutputResult.isSuccess()) {
+				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
+					displayFileLink(fileName);
+				}
+
+				rowsRetrieved = standardOutputResult.getRowCount();
+			} else {
+				outputResult.setSuccess(false);
+				outputResult.setMessage(standardOutputResult.getMessage());
 			}
 		}
+	}
 
-		//generate output
+	/**
+	 * Generates standard report json report format output
+	 * 
+	 * @throws SQLException
+	 * @throws IOException 
+	 */
+	private void outputStandardReportJsonOutput() throws SQLException, IOException {
 		rs = reportRunner.getResultSet();
 
-		StandardOutputResult standardOutputResult;
-		if (reportType.isCrosstab()) {
-			if (groovyData == null) {
-				standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
-			} else {
-				standardOutputResult = standardOutput.generateCrosstabOutput(groovyData, reportFormat, report);
-			}
+		JsonOutput jsonOutput = new JsonOutput();
+		jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
+
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
 		} else {
-			if (reportFormat.isHtml() && !isJob) {
-				//only drill down for html output. drill down query launched from hyperlink                                            
-				standardOutput.setDrilldowns(drilldownService.getDrilldowns(report.getReportId()));
-			}
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonString = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
 
-			//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
-			if (request != null) {
-				String requestBaseUrl = request.getScheme() + "://"
-						+ request.getServerName()
-						+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
-						+ request.getContextPath();
-				standardOutput.setRequestBaseUrl(requestBaseUrl);
-			}
-
-			if (groovyData == null) {
-				standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
-			} else {
-				standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
-			}
+		switch (reportFormat) {
+			case jsonBrowser:
+				//https://stackoverflow.com/questions/14533530/how-to-show-pretty-print-json-string-in-a-jsp-page
+				writer.print("<pre>" + jsonString + "</pre>");
+				break;
+			default:
+				writer.print(jsonString);
 		}
 
-		if (standardOutputResult.isSuccess()) {
-			if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
-				displayFileLink(fileName);
-			}
-
-			rowsRetrieved = standardOutputResult.getRowCount();
-		} else {
-			outputResult.setSuccess(false);
-			outputResult.setMessage(standardOutputResult.getMessage());
-		}
+		writer.flush();
 	}
 
 }
