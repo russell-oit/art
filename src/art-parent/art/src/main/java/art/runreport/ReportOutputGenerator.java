@@ -96,6 +96,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -116,6 +117,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bson.types.ObjectId;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
@@ -355,17 +357,7 @@ public class ReportOutputGenerator {
 				if (reportType.isJasperReports()) {
 					generateJasperReport();
 				} else if (reportType.isJxls()) {
-					JxlsOutput jxlsOutput = new JxlsOutput();
-					jxlsOutput.setLocale(locale);
-					jxlsOutput.setDynamicOpenPassword(dynamicOpenPassword);
-					jxlsOutput.setDynamicModifyPassword(dynamicModifyPassword);
-					if (reportType == ReportType.JxlsArt) {
-						rs = reportRunner.getResultSet();
-						jxlsOutput.setResultSet(rs);
-						jxlsOutput.setData(groovyData);
-					}
-
-					jxlsOutput.generateReport(report, applicableReportParamsList, fullOutputFilename);
+					generateJxlsOutput();
 				}
 
 				if (groovyDataSize == null) {
@@ -1921,6 +1913,10 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates pivot table js output
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException 
 	 */
 	private void outputPivotTableJs() throws SQLException, IOException, ServletException {
 		logger.debug("Entering outputPivotTableJs");
@@ -2136,14 +2132,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates a jasperreports report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws JRException 
+	 * @throws JRException
 	 */
 	private void generateJasperReport() throws SQLException, IOException, JRException {
 		logger.debug("Entering generateJasperReport");
-		
+
 		JasperReportsOutput jrOutput = new JasperReportsOutput();
 		jrOutput.setDynamicOpenPassword(dynamicOpenPassword);
 		jrOutput.setDynamicModifyPassword(dynamicModifyPassword);
@@ -2154,6 +2150,32 @@ public class ReportOutputGenerator {
 		}
 
 		jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
+	}
+
+	/**
+	 * Generates jxls output
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws InvalidFormatException
+	 * @throws GeneralSecurityException 
+	 */
+	private void generateJxlsReport() throws SQLException, IOException,
+			InvalidFormatException, GeneralSecurityException {
+		
+		logger.debug("Entering generateJxlsReport");
+		
+		JxlsOutput jxlsOutput = new JxlsOutput();
+		jxlsOutput.setLocale(locale);
+		jxlsOutput.setDynamicOpenPassword(dynamicOpenPassword);
+		jxlsOutput.setDynamicModifyPassword(dynamicModifyPassword);
+		if (reportType == ReportType.JxlsArt) {
+			rs = reportRunner.getResultSet();
+			jxlsOutput.setResultSet(rs);
+			jxlsOutput.setData(groovyData);
+		}
+
+		jxlsOutput.generateReport(report, applicableReportParamsList, fullOutputFilename);
 	}
 
 }
