@@ -710,8 +710,8 @@ public class ReportOutputGenerator {
 	 * @return the final chart options
 	 */
 	public ChartOptions getEffectiveChartOptions(Report report, ChartOptions parameterChartOptions) {
-		ReportFormat reportFormat = null;
-		return getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
+		ReportFormat localReportFormat = null;
+		return getEffectiveChartOptions(report, parameterChartOptions, localReportFormat);
 	}
 
 	/**
@@ -807,14 +807,14 @@ public class ReportOutputGenerator {
 		}
 
 		ArtHelper artHelper = new ArtHelper();
-		ReportType reportType = report.getReportType();
+		ReportType localReportType = report.getReportType();
 
 		Boolean showLegend = parameterChartOptions.getShowLegend();
 		if (showLegend == null) {
 			showLegend = reportChartOptions.getShowLegend();
 		}
 		if (showLegend == null) {
-			boolean defaultShowLegendOption = artHelper.getDefaultShowLegendOption(reportType);
+			boolean defaultShowLegendOption = artHelper.getDefaultShowLegendOption(localReportType);
 			effectiveChartOptions.setShowLegend(defaultShowLegendOption);
 		} else {
 			effectiveChartOptions.setShowLegend(showLegend);
@@ -825,7 +825,7 @@ public class ReportOutputGenerator {
 			showLabels = reportChartOptions.getShowLabels();
 		}
 		if (showLabels == null) {
-			boolean defaultShowLabelsOption = artHelper.getDefaultShowLabelsOption(reportType);
+			boolean defaultShowLabelsOption = artHelper.getDefaultShowLabelsOption(localReportType);
 			effectiveChartOptions.setShowLabels(defaultShowLabelsOption);
 		} else {
 			effectiveChartOptions.setShowLabels(showLabels);
@@ -861,7 +861,7 @@ public class ReportOutputGenerator {
 		}
 		labelFormat = effectiveChartOptions.getLabelFormat();
 		if (StringUtils.isBlank(labelFormat)) {
-			if (reportType == ReportType.Pie2DChart || reportType == ReportType.Pie3DChart) {
+			if (localReportType == ReportType.Pie2DChart || localReportType == ReportType.Pie3DChart) {
 				if (reportFormat == null || reportFormat == ReportFormat.html) {
 					labelFormat = "{0} ({2})";
 				} else {
