@@ -141,14 +141,23 @@ public class ReportOutputGenerator {
 	private boolean pdfPageNumbers = true;
 	private String dynamicOpenPassword;
 	private String dynamicModifyPassword;
-	ResultSet rs;
-	Report report;
-	ReportType reportType;
-	ReportRunner reportRunner;
-	Object groovyData;
-	Integer groovyDataSize;
-	Integer rowsRetrieved;
-	Locale locale;
+	//global variables
+	private ResultSet rs;
+	private Report report;
+	private ReportType reportType;
+	private ReportRunner reportRunner;
+	private Object groovyData;
+	private Integer groovyDataSize;
+	private Integer rowsRetrieved;
+	private Locale locale;
+	private PrintWriter writer;
+	private String fullOutputFilename;
+	private MessageSource messageSource;
+	private ReportFormat reportFormat;
+	private String contextPath;
+	private String fileName;
+	private List<ReportParameter> applicableReportParamsList;
+	private ReportOptions reportOptions;
 
 	/**
 	 * @return the dynamicOpenPassword
@@ -300,6 +309,10 @@ public class ReportOutputGenerator {
 		reportType = report.getReportType();
 		this.reportRunner = reportRunner;
 		this.locale = locale;
+		this.writer = writer;
+		this.fullOutputFilename = fullOutputFilename;
+		this.messageSource = messageSource;
+		this.reportFormat = reportFormat;
 
 		groovyData = reportRunner.getGroovyData();
 		if (groovyData != null) {
@@ -308,21 +321,20 @@ public class ReportOutputGenerator {
 			groovyDataSize = dataList.size();
 		}
 
-		String contextPath = null;
 		if (request != null) {
 			contextPath = request.getContextPath();
 		}
 
-		String fileName = FilenameUtils.getName(fullOutputFilename);
+		fileName = FilenameUtils.getName(fullOutputFilename);
 
 		try {
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
+			reportOptions = paramProcessorResult.getReportOptions();
 			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
 
 			//for pdf dashboards, more parameters may be passed than are relevant for a report
-			List<ReportParameter> applicableReportParamsList = new ArrayList<>();
+			applicableReportParamsList = new ArrayList<>();
 			for (ReportParameter reportParam : reportParamsList) {
 				if (report.getReportId() == reportParam.getReport().getReportId()) {
 					applicableReportParamsList.add(reportParam);
@@ -336,8 +348,6 @@ public class ReportOutputGenerator {
 			} else {
 				reportOutputLocale = ArtUtils.getLocaleFromString(reportLocale);
 			}
-
-			int reportId = report.getReportId();
 
 			//generate report output
 			if (reportType.isJasperReports() || reportType.isJxls()) {
@@ -477,7 +487,7 @@ public class ReportOutputGenerator {
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
 
-						String htmlElementId = "chart-" + reportId;
+						String htmlElementId = "chart-" + report.getReportId();
 						request.setAttribute("htmlElementId", htmlElementId);
 
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
@@ -528,71 +538,7 @@ public class ReportOutputGenerator {
 
 				writer.flush();
 			} else if (reportType.isStandardOutput()) {
-				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
-
-				standardOutput.setWriter(writer);
-				standardOutput.setFullOutputFileName(fullOutputFilename);
-				standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
-				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
-				standardOutput.setLocale(locale);
-				standardOutput.setReportName(report.getLocalizedName(locale));
-				standardOutput.setMessageSource(messageSource);
-				standardOutput.setIsJob(isJob);
-				standardOutput.setPdfPageNumbers(pdfPageNumbers);
-				standardOutput.setReport(report);
-				standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
-				standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
-
-				if (request != null) {
-					standardOutput.setContextPath(contextPath);
-
-					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-						standardOutput.setAjax(true);
-					}
-				}
-
-				//generate output
-				rs = reportRunner.getResultSet();
-
-				StandardOutputResult standardOutputResult;
-				if (reportType.isCrosstab()) {
-					if (groovyData == null) {
-						standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
-					} else {
-						standardOutputResult = standardOutput.generateCrosstabOutput(groovyData, reportFormat, report);
-					}
-				} else {
-					if (reportFormat.isHtml() && !isJob) {
-						//only drill down for html output. drill down query launched from hyperlink                                            
-						standardOutput.setDrilldowns(drilldownService.getDrilldowns(reportId));
-					}
-
-					//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
-					if (request != null) {
-						String requestBaseUrl = request.getScheme() + "://"
-								+ request.getServerName()
-								+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
-								+ request.getContextPath();
-						standardOutput.setRequestBaseUrl(requestBaseUrl);
-					}
-
-					if (groovyData == null) {
-						standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
-					} else {
-						standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
-					}
-				}
-
-				if (standardOutputResult.isSuccess()) {
-					if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
-						displayFileLink(fileName);
-					}
-
-					rowsRetrieved = standardOutputResult.getRowCount();
-				} else {
-					outputResult.setSuccess(false);
-					outputResult.setMessage(standardOutputResult.getMessage());
-				}
+				outputStandardReport(outputResult);
 			} else if (reportType == ReportType.FreeMarker) {
 				rs = reportRunner.getResultSet();
 
@@ -2011,7 +1957,7 @@ public class ReportOutputGenerator {
 	 */
 	private void outputPivotTableJs() throws SQLException, IOException, ServletException {
 		logger.debug("Entering outputPivotTableJs");
-		
+
 		if (isJob) {
 			throw new IllegalStateException("PivotTable.js output not supported for jobs");
 		}
@@ -2096,6 +2042,74 @@ public class ReportOutputGenerator {
 		String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);
 		request.setAttribute("outputDivId", outputDivId);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
+	}
+
+	private void outputStandardReport(ReportOutputGeneratorResult outputResult) throws SQLException, IOException, ServletException {
+		StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
+
+		standardOutput.setWriter(writer);
+		standardOutput.setFullOutputFileName(fullOutputFilename);
+		standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
+		standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
+		standardOutput.setLocale(locale);
+		standardOutput.setReportName(report.getLocalizedName(locale));
+		standardOutput.setMessageSource(messageSource);
+		standardOutput.setIsJob(isJob);
+		standardOutput.setPdfPageNumbers(pdfPageNumbers);
+		standardOutput.setReport(report);
+		standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
+		standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
+
+		if (request != null) {
+			standardOutput.setContextPath(contextPath);
+
+			if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+				standardOutput.setAjax(true);
+			}
+		}
+
+		//generate output
+		rs = reportRunner.getResultSet();
+
+		StandardOutputResult standardOutputResult;
+		if (reportType.isCrosstab()) {
+			if (groovyData == null) {
+				standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
+			} else {
+				standardOutputResult = standardOutput.generateCrosstabOutput(groovyData, reportFormat, report);
+			}
+		} else {
+			if (reportFormat.isHtml() && !isJob) {
+				//only drill down for html output. drill down query launched from hyperlink                                            
+				standardOutput.setDrilldowns(drilldownService.getDrilldowns(report.getReportId()));
+			}
+
+			//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
+			if (request != null) {
+				String requestBaseUrl = request.getScheme() + "://"
+						+ request.getServerName()
+						+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
+						+ request.getContextPath();
+				standardOutput.setRequestBaseUrl(requestBaseUrl);
+			}
+
+			if (groovyData == null) {
+				standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
+			} else {
+				standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
+			}
+		}
+
+		if (standardOutputResult.isSuccess()) {
+			if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
+				displayFileLink(fileName);
+			}
+
+			rowsRetrieved = standardOutputResult.getRowCount();
+		} else {
+			outputResult.setSuccess(false);
+			outputResult.setMessage(standardOutputResult.getMessage());
+		}
 	}
 
 }
