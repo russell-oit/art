@@ -667,6 +667,7 @@ public class JobController {
 		jobReportFormats.remove("htmlFancy");
 		jobReportFormats.remove("htmlGrid");
 		jobReportFormats.remove("htmlDataTable");
+		jobReportFormats.remove("pivotTableJs");
 
 		final String REPORT_FORMAT_PREFIX = "reports.format.";
 		for (String reportFormat : jobReportFormats) {
