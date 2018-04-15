@@ -87,6 +87,7 @@ import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
+import fr.opensagres.xdocreport.core.XDocReportException;
 import freemarker.template.TemplateException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -390,23 +391,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.Velocity) {
 				generateVelocityReport();
 			} else if (reportType.isXDocReport()) {
-				rs = reportRunner.getResultSet();
-
-				XDocReportOutput xdocReportOutput = new XDocReportOutput();
-				xdocReportOutput.setLocale(locale);
-				xdocReportOutput.setResultSet(rs);
-				xdocReportOutput.setData(groovyData);
-				xdocReportOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
-
-				if (!isJob) {
-					displayFileLink(fileName);
-				}
+				generateXDocReport();
 			} else if (reportType == ReportType.ReactPivot) {
 				if (isJob) {
 					throw new IllegalStateException("ReactPivot report type not supported for jobs");
@@ -2242,13 +2227,13 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates a velocity report
-	 * 
+	 *
 	 * @throws SQLException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private void generateVelocityReport() throws SQLException, IOException {
 		logger.debug("Entering generateVelocityReport");
-		
+
 		rs = reportRunner.getResultSet();
 
 		VelocityOutput velocityOutput = new VelocityOutput();
@@ -2262,6 +2247,38 @@ public class ReportOutputGenerator {
 			rowsRetrieved = getResultSetRowCount(rs);
 		} else {
 			rowsRetrieved = groovyDataSize;
+		}
+	}
+
+	/**
+	 * Generates an xdocreport report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws XDocReportException
+	 * @throws ServletException 
+	 */
+	private void generateXDocReport() throws SQLException, IOException,
+			XDocReportException, ServletException {
+		
+		logger.debug("Entering generateXDocReport");
+		
+		rs = reportRunner.getResultSet();
+
+		XDocReportOutput xdocReportOutput = new XDocReportOutput();
+		xdocReportOutput.setLocale(locale);
+		xdocReportOutput.setResultSet(rs);
+		xdocReportOutput.setData(groovyData);
+		xdocReportOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+
+		if (!isJob) {
+			displayFileLink(fileName);
 		}
 	}
 
