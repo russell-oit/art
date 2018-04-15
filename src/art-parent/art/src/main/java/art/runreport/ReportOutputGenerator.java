@@ -370,42 +370,7 @@ public class ReportOutputGenerator {
 					displayFileLink(fileName);
 				}
 			} else if (reportType == ReportType.Group) {
-				rs = reportRunner.getResultSet();
-
-				int splitColumnOption = reportOptions.getSplitColumn();
-				int splitColumn;
-				if (splitColumnOption > 0) {
-					//option has been specified. override report setting
-					splitColumn = splitColumnOption;
-				} else {
-					splitColumn = report.getGroupColumn();
-				}
-
-				switch (reportFormat) {
-					case html:
-						GroupHtmlOutput groupHtmlOutput = new GroupHtmlOutput();
-						if (groovyData == null) {
-							rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
-						} else {
-							rowsRetrieved = groupHtmlOutput.generateReport(groovyData, splitColumn, writer, contextPath);
-						}
-						break;
-					case xlsx:
-						GroupXlsxOutput groupXlsxOutput = new GroupXlsxOutput();
-						String reportName = report.getLocalizedName(locale);
-						if (groovyData == null) {
-							rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
-						} else {
-							rowsRetrieved = groupXlsxOutput.generateReport(groovyData, splitColumn, report, reportName, fullOutputFilename);
-						}
-
-						if (!isJob) {
-							displayFileLink(fileName);
-						}
-						break;
-					default:
-						throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
-				}
+				generateGroupReport();
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
 
@@ -2177,10 +2142,10 @@ public class ReportOutputGenerator {
 	 * @throws InvalidFormatException
 	 * @throws GeneralSecurityException
 	 */
-	private void generateJxlsReport() throws SQLException, IOException,
+	private void generateJxlsOutput() throws SQLException, IOException,
 			InvalidFormatException, GeneralSecurityException {
 
-		logger.debug("Entering generateJxlsReport");
+		logger.debug("Entering generateJxlsOutput");
 
 		JxlsOutput jxlsOutput = new JxlsOutput();
 		jxlsOutput.setLocale(locale);
@@ -2193,6 +2158,54 @@ public class ReportOutputGenerator {
 		}
 
 		jxlsOutput.generateReport(report, applicableReportParamsList, fullOutputFilename);
+	}
+
+	/**
+	 * Generates group output
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateGroupReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateGroupReport");
+
+		rs = reportRunner.getResultSet();
+
+		int splitColumnOption = reportOptions.getSplitColumn();
+		int splitColumn;
+		if (splitColumnOption > 0) {
+			//option has been specified. override report setting
+			splitColumn = splitColumnOption;
+		} else {
+			splitColumn = report.getGroupColumn();
+		}
+
+		switch (reportFormat) {
+			case html:
+				GroupHtmlOutput groupHtmlOutput = new GroupHtmlOutput();
+				if (groovyData == null) {
+					rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
+				} else {
+					rowsRetrieved = groupHtmlOutput.generateReport(groovyData, splitColumn, writer, contextPath);
+				}
+				break;
+			case xlsx:
+				GroupXlsxOutput groupXlsxOutput = new GroupXlsxOutput();
+				String reportName = report.getLocalizedName(locale);
+				if (groovyData == null) {
+					rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
+				} else {
+					rowsRetrieved = groupXlsxOutput.generateReport(groovyData, splitColumn, report, reportName, fullOutputFilename);
+				}
+
+				if (!isJob) {
+					displayFileLink(fileName);
+				}
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
+		}
 	}
 
 }
