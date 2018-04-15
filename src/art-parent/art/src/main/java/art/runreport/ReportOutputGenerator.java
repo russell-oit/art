@@ -1581,6 +1581,7 @@ public class ReportOutputGenerator {
 			}
 			String jsonData = jsonOutputResult.getJsonData();
 			jsonData = Encode.forJavaScript(jsonData);
+			rowsRetrieved = jsonOutputResult.getRowCount();
 			List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 			request.setAttribute("data", jsonData);
 			request.setAttribute("columns", columns);
@@ -1636,6 +1637,16 @@ public class ReportOutputGenerator {
 			request.setAttribute("dataFileName", dataFileName);
 		}
 
+		showDataTablesJsp();
+	}
+
+	/**
+	 * Shows the showDataTables.jsp page
+	 *
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void showDataTablesJsp() throws ServletException, IOException {
 		String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
 		String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
 		String languageTag = locale.toLanguageTag();
@@ -2165,7 +2176,9 @@ public class ReportOutputGenerator {
 				List<Object> resultList = (List<Object>) result;
 				List<ResultSetColumn> columns = new ArrayList<>();
 				String resultString = null;
-				if (!resultList.isEmpty()) {
+				if (resultList.isEmpty()) {
+					rowsRetrieved = 0;
+				} else {
 					if (CollectionUtils.isEmpty(optionsColumnNames)) {
 						Object sample = resultList.get(0);
 						//https://stackoverflow.com/questions/6133660/recursive-beanutils-describe
@@ -2266,6 +2279,8 @@ public class ReportOutputGenerator {
 						finalResultList.add(row);
 					}
 
+					rowsRetrieved = finalResultList.size();
+
 					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
 					//https://github.com/wnameless/json-flattener
 					resultString = ArtUtils.objectToJson(finalResultList);
@@ -2277,16 +2292,7 @@ public class ReportOutputGenerator {
 				request.setAttribute("reportType", reportType);
 				request.setAttribute("options", options);
 
-				String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
-				String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("outputDivId", outputDivId);
-				request.setAttribute("tableId", tableId);
-
-				String languageTag = locale.toLanguageTag();
-				request.setAttribute("languageTag", languageTag);
-				String localeString = locale.toString();
-				request.setAttribute("locale", localeString);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
+				showDataTablesJsp();
 			} else {
 				writer.print(result);
 			}
