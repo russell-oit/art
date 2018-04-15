@@ -110,6 +110,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -352,16 +353,7 @@ public class ReportOutputGenerator {
 			//generate report output
 			if (reportType.isJasperReports() || reportType.isJxls()) {
 				if (reportType.isJasperReports()) {
-					JasperReportsOutput jrOutput = new JasperReportsOutput();
-					jrOutput.setDynamicOpenPassword(dynamicOpenPassword);
-					jrOutput.setDynamicModifyPassword(dynamicModifyPassword);
-					if (reportType == ReportType.JasperReportsArt) {
-						rs = reportRunner.getResultSet();
-						jrOutput.setResultSet(rs);
-						jrOutput.setData(groovyData);
-					}
-
-					jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
+					generateJasperReport();
 				} else if (reportType.isJxls()) {
 					JxlsOutput jxlsOutput = new JxlsOutput();
 					jxlsOutput.setLocale(locale);
@@ -2140,6 +2132,28 @@ public class ReportOutputGenerator {
 		}
 
 		writer.flush();
+	}
+
+	/**
+	 * Generates a jasperreports report
+	 * 
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws JRException 
+	 */
+	private void generateJasperReport() throws SQLException, IOException, JRException {
+		logger.debug("Entering generateJasperReport");
+		
+		JasperReportsOutput jrOutput = new JasperReportsOutput();
+		jrOutput.setDynamicOpenPassword(dynamicOpenPassword);
+		jrOutput.setDynamicModifyPassword(dynamicModifyPassword);
+		if (reportType == ReportType.JasperReportsArt) {
+			rs = reportRunner.getResultSet();
+			jrOutput.setResultSet(rs);
+			jrOutput.setData(groovyData);
+		}
+
+		jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
 	}
 
 }
