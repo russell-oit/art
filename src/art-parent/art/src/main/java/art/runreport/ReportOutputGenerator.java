@@ -419,53 +419,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isOrgChart()) {
 				generateOrgChartReport();
 			} else if (reportType.isReportEngine()) {
-				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
-
-				standardOutput.setWriter(writer);
-				standardOutput.setFullOutputFileName(fullOutputFilename);
-				standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
-				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
-				standardOutput.setLocale(locale);
-				standardOutput.setReportName(report.getLocalizedName(locale));
-				standardOutput.setMessageSource(messageSource);
-				standardOutput.setIsJob(isJob);
-				standardOutput.setPdfPageNumbers(pdfPageNumbers);
-				standardOutput.setReport(report);
-				standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
-				standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
-
-				if (request != null) {
-					standardOutput.setContextPath(contextPath);
-
-					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-						standardOutput.setAjax(true);
-					}
-				}
-
-				//generate output
-				rs = reportRunner.getResultSet();
-
-				ReportEngineOutput reportEngineOutput = new ReportEngineOutput(standardOutput);
-				reportEngineOutput.setResultSet(rs);
-				reportEngineOutput.setData(groovyData);
-
-				String options = report.getOptions();
-				ReportEngineOptions reportEngineOptions;
-				if (StringUtils.isBlank(options)) {
-					reportEngineOptions = new ReportEngineOptions();
-				} else {
-					reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
-				}
-
-				if (reportEngineOptions.isPivot()) {
-					reportEngineOutput.generatePivotOutput(reportType);
-				} else {
-					reportEngineOutput.generateTabularOutput(reportType);
-				}
-
-				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
-					displayFileLink(fileName);
-				}
+				generateReportEngineReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
@@ -1058,28 +1012,7 @@ public class ReportOutputGenerator {
 
 		logger.debug("Entering generateStandardOutput");
 
-		StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
-
-		standardOutput.setWriter(writer);
-		standardOutput.setFullOutputFileName(fullOutputFilename);
-		standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
-		standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
-		standardOutput.setLocale(locale);
-		standardOutput.setReportName(report.getLocalizedName(locale));
-		standardOutput.setMessageSource(messageSource);
-		standardOutput.setIsJob(isJob);
-		standardOutput.setPdfPageNumbers(pdfPageNumbers);
-		standardOutput.setReport(report);
-		standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
-		standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
-
-		if (request != null) {
-			standardOutput.setContextPath(contextPath);
-
-			if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-				standardOutput.setAjax(true);
-			}
-		}
+		StandardOutput standardOutput = prepareStandardOutputInstance();
 
 		//generate output
 		rs = reportRunner.getResultSet();
@@ -2357,14 +2290,14 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates an org chart report
-	 * 
+	 *
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void generateOrgChartReport() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateOrgChartReport");
-		
+
 		if (isJob) {
 			throw new IllegalStateException("OrgChart report types not supported for jobs");
 		}
@@ -2439,6 +2372,78 @@ public class ReportOutputGenerator {
 		request.setAttribute("options", options);
 		request.setAttribute("templateFileName", templateFileName);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a report engine report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateReportEngineReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateReportEngineReport");
+
+		StandardOutput standardOutput = prepareStandardOutputInstance();
+
+		//generate output
+		rs = reportRunner.getResultSet();
+
+		ReportEngineOutput reportEngineOutput = new ReportEngineOutput(standardOutput);
+		reportEngineOutput.setResultSet(rs);
+		reportEngineOutput.setData(groovyData);
+
+		String options = report.getOptions();
+		ReportEngineOptions reportEngineOptions;
+		if (StringUtils.isBlank(options)) {
+			reportEngineOptions = new ReportEngineOptions();
+		} else {
+			reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
+		}
+
+		if (reportEngineOptions.isPivot()) {
+			reportEngineOutput.generatePivotOutput(reportType);
+		} else {
+			reportEngineOutput.generateTabularOutput(reportType);
+		}
+
+		if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
+			displayFileLink(fileName);
+		}
+	}
+
+	/**
+	 * Returns a standard output object to be used for report generation
+	 *
+	 * @return a standard output object to be used for report generation
+	 * @throws IOException
+	 * @throws IllegalArgumentException
+	 */
+	private StandardOutput prepareStandardOutputInstance() throws IOException, IllegalArgumentException {
+		StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
+
+		standardOutput.setWriter(writer);
+		standardOutput.setFullOutputFileName(fullOutputFilename);
+		standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
+		standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
+		standardOutput.setLocale(locale);
+		standardOutput.setReportName(report.getLocalizedName(locale));
+		standardOutput.setMessageSource(messageSource);
+		standardOutput.setIsJob(isJob);
+		standardOutput.setPdfPageNumbers(pdfPageNumbers);
+		standardOutput.setReport(report);
+		standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
+		standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
+
+		if (request != null) {
+			standardOutput.setContextPath(contextPath);
+
+			if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+				standardOutput.setAjax(true);
+			}
+		}
+
+		return standardOutput;
 	}
 
 }
