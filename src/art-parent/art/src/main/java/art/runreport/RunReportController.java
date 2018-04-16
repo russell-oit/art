@@ -172,6 +172,7 @@ public class RunReportController {
 			ReportType reportType = report.getReportType();
 
 			if (reportType.isDashboard()) {
+				//https://stackoverflow.com/questions/8585216/spring-forward-with-added-parameters
 				request.setAttribute("suppliedReport", report);
 				return "forward:/showDashboard";
 			} else if (reportType.isJPivot()) {

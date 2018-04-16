@@ -58,9 +58,11 @@
 		var chartObject = event.data.chartObject;
 		var newChartType = $('#select-${chartId} option:selected').val();
 		if (newChartType !== '--') {
+			//https://github.com/c3js/c3/issues/844
 			chartObject.transform(newChartType);
 		}
 	}
 
+	//https://api.jquery.com/on/
 	$("#select-${chartId}").on("change", {chartObject: chart}, changeChartType);
 </script>
