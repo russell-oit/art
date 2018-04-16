@@ -4,6 +4,8 @@ ART 3.5
 * Updated chinese translation
 * Fix for mongodb reports showing blank
 * Fix for dygraph database reports not working
+* Fix for test dashboard report not using updated source
+* Allow dynamic change of chart type for C3.js reports
 
 ART 3.4
 * Allow jobs to specify the time zone in which the schedule will run

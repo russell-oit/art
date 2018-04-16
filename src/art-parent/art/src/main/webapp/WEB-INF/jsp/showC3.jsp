@@ -8,6 +8,19 @@
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+
+<c:if test="${not empty chartTypes}">
+	<div class="row form-inline">
+		<select class="form-control pull-right" id="select-${chartId}">
+			<option value="--">--</option>
+			<c:forEach var="chartType" items="${chartTypes}">
+				<option value="${encode:forHtmlAttribute(chartType.c3Type)}"><spring:message code="${chartType.localizedDescription}"/></option>
+			</c:forEach>
+		</select>
+	</div>
+</c:if>
 
 <div id="${chartId}">
 
@@ -21,7 +34,7 @@
 <script type="text/javascript">
 	var dataString = '${data}';
 	var jsonData = JSON.parse(dataString);
-	
+
 	var data = {
 		json: jsonData
 	};
@@ -39,5 +52,15 @@
 </c:if>
 
 <script type="text/javascript">
-	c3.generate(options);
+	var chart = c3.generate(options);
+
+	function changeChartType(event) {
+		var chartObject = event.data.chartObject;
+		var newChartType = $('#select-${chartId} option:selected').val();
+		if (newChartType !== '--') {
+			chartObject.transform(newChartType);
+		}
+	}
+
+	$("#select-${chartId}").on("change", {chartObject: chart}, changeChartType);
 </script>

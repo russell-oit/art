@@ -18,6 +18,7 @@
 package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
 
 /**
  * Represents report options for c3.js reports
@@ -28,6 +29,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class C3Options {
 
 	private String cssFile;
+	private List<String> chartTypes;
+
+	/**
+	 * @return the chartTypes
+	 */
+	public List<String> getChartTypes() {
+		return chartTypes;
+	}
+
+	/**
+	 * @param chartTypes the chartTypes to set
+	 */
+	public void setChartTypes(List<String> chartTypes) {
+		this.chartTypes = chartTypes;
+	}
 
 	/**
 	 * @return the cssFile

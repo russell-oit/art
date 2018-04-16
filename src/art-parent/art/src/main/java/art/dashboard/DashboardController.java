@@ -125,8 +125,15 @@ public class DashboardController {
 		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
 		String startTimeString = df.format(new Date(startTime));
 
+		Report report;
+		
 		try {
-			Report report = reportService.getReport(reportId);
+			Report suppliedReport = (Report) request.getAttribute("suppliedReport");
+			if (suppliedReport == null) {
+				report = reportService.getReport(reportId);
+			} else {
+				report = suppliedReport;
+			}
 
 			if (report == null) {
 				model.addAttribute("message", "reports.message.reportNotFound");
@@ -141,7 +148,7 @@ public class DashboardController {
 					return errorPage;
 				}
 
-				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
+				if (!reportService.canUserRunReport(sessionUser.getUserId(), report.getReportId())) {
 					model.addAttribute("message", "reports.message.noPermission");
 					return errorPage;
 				}
@@ -220,7 +227,7 @@ public class DashboardController {
 			request.setAttribute("startTimeString", startTimeString);
 		}
 
-		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, "dashboard", reportParamsList);
+		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), report.getReportId() , totalTimeSeconds, fetchTimeSeconds, "dashboard", reportParamsList);
 
 		if (reportFormat == ReportFormat.pdf) {
 			if (showInline) {

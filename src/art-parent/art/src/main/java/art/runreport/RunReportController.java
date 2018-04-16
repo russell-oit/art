@@ -172,6 +172,7 @@ public class RunReportController {
 			ReportType reportType = report.getReportType();
 
 			if (reportType.isDashboard()) {
+				request.setAttribute("suppliedReport", report);
 				return "forward:/showDashboard";
 			} else if (reportType.isJPivot()) {
 				//setting model attributes won't include parameters in the redirect request because

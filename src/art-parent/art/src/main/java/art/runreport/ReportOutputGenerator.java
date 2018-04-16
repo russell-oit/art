@@ -30,6 +30,7 @@ import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
+import art.enums.C3ChartType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.enums.ZipType;
@@ -1763,6 +1764,7 @@ public class ReportOutputGenerator {
 			ObjectMapper mapper = new ObjectMapper();
 			C3Options options = mapper.readValue(optionsString, C3Options.class);
 			String cssFileName = options.getCssFile();
+			List<String> chartTypes = options.getChartTypes();
 
 			logger.debug("cssFileName='{}'", cssFileName);
 
@@ -1777,6 +1779,20 @@ public class ReportOutputGenerator {
 				}
 
 				request.setAttribute("cssFileName", cssFileName);
+			}
+
+			if (chartTypes != null) {
+				List<C3ChartType> c3ChartTypes;
+				if (ArtUtils.containsIgnoreCase(chartTypes, "all")) {
+					c3ChartTypes = C3ChartType.list();
+				} else {
+					c3ChartTypes = new ArrayList<>();
+					for (String chartType : chartTypes) {
+						C3ChartType c3ChartType = C3ChartType.toEnum(chartType);
+						c3ChartTypes.add(c3ChartType);
+					}
+				}
+				request.setAttribute("chartTypes", c3ChartTypes);
 			}
 		}
 
