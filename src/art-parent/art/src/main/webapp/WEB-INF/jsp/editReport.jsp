@@ -308,7 +308,7 @@ Edit report page
 				//https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
 				//https://ace.c9.io/demo/autoresize.html
 				//https://issues.jenkins-ci.org/browse/JENKINS-31585
-				sqlEditor.setOption("maxLines", 50);
+				sqlEditor.setOption("maxLines", 30);
 				sqlEditor.setOption("minLines", 10);
 
 				document.getElementById('sqlEditor').style.fontSize = '14px'; //default seems to be 12px
@@ -328,7 +328,7 @@ Edit report page
 				//https://github.com/ajaxorg/ace/commit/abb1e4703b737757e20d1e7040943ba4e2483007
 				//https://github.com/ajaxorg/ace/wiki/Configuring-Ace
 				xmlEditor.setOption("showLineNumbers", false);
-				xmlEditor.setOption("maxLines", 50);
+				xmlEditor.setOption("maxLines", 30);
 				xmlEditor.setOption("minLines", 10);
 
 				document.getElementById('xmlEditor').style.fontSize = '14px';
@@ -360,7 +360,7 @@ Edit report page
 				jsonEditor.setHighlightActiveLine(false);
 				jsonEditor.setShowPrintMargin(false);
 				jsonEditor.setOption("showLineNumbers", false);
-				jsonEditor.setOption("maxLines", 50);
+				jsonEditor.setOption("maxLines", 30);
 				jsonEditor.setOption("minLines", 10);
 				document.getElementById('jsonEditor').style.fontSize = '14px';
 
@@ -375,7 +375,7 @@ Edit report page
 				groovyEditor.setHighlightActiveLine(false);
 				groovyEditor.setShowPrintMargin(false);
 				groovyEditor.setOption("showLineNumbers", true);
-				groovyEditor.setOption("maxLines", 50);
+				groovyEditor.setOption("maxLines", 30);
 				groovyEditor.setOption("minLines", 10);
 				document.getElementById('groovyEditor').style.fontSize = '14px';
 
