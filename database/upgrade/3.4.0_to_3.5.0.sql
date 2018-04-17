@@ -4,6 +4,7 @@
 -- update database version
 -- add use groovy column
 -- update "null" column strings with proper NULL
+-- add template field to parameters table
 
 -- ------------------------------------------------
 
@@ -22,3 +23,6 @@ UPDATE ART_QUERIES SET Y_AXIS_LABEL = NULL WHERE Y_AXIS_LABEL='null';
 UPDATE ART_QUERIES SET TEMPLATE = NULL WHERE TEMPLATE='null';
 UPDATE ART_QUERIES SET XMLA_DATASOURCE = NULL WHERE XMLA_DATASOURCE='null';
 UPDATE ART_QUERIES SET XMLA_CATALOG = NULL WHERE XMLA_CATALOG='null';
+
+-- add template field to parameters table
+ALTER TABLE ART_PARAMETERS ADD TEMPLATE VARCHAR(100);

@@ -22,6 +22,7 @@ import art.enums.ParameterType;
 import art.migration.PrefixTransformer;
 import art.report.Report;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.IOException;
@@ -82,10 +83,26 @@ public class Parameter implements Serializable {
 	private ParameterOptions parameterOptions;
 	@Parsed
 	private boolean useDefaultValueInJobs;
+	@Parsed
+	private String template;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultValueReport")
 	private Report defaultValueReport;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "lovReport")
 	private Report lovReport;
+
+	/**
+	 * @return the template
+	 */
+	public String getTemplate() {
+		return template;
+	}
+
+	/**
+	 * @param template the template to set
+	 */
+	public void setTemplate(String template) {
+		this.template = template;
+	}
 
 	/**
 	 * @return the fixedValue
@@ -571,7 +588,7 @@ public class Parameter implements Serializable {
 		//https://stackoverflow.com/questions/9763619/does-el-support-overloaded-methods
 		String localizedLabel = null;
 
-		if (parameterOptions != null && locale != null) {
+		if (locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nLabelOptions = i18nOptions.getLabel();
@@ -598,7 +615,7 @@ public class Parameter implements Serializable {
 	public String getLocalizedHelpText(Locale locale) throws IOException {
 		String localizedHelpText = null;
 
-		if (parameterOptions != null && locale != null) {
+		if (locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nHelpTextOptions = i18nOptions.getHelpText();
@@ -625,7 +642,7 @@ public class Parameter implements Serializable {
 	public String getLocalizedDefaultValue(Locale locale) throws IOException {
 		String localizedDefaultValue = null;
 
-		if (parameterOptions != null && locale != null) {
+		if (locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nDefaultValueOptions = i18nOptions.getDefaultValue();
@@ -652,7 +669,7 @@ public class Parameter implements Serializable {
 	public String getLocalizedPlaceholderText(Locale locale) throws IOException {
 		String localizedPlaceholderText = null;
 
-		if (parameterOptions != null && locale != null) {
+		if (locale != null) {
 			Parameteri18nOptions i18nOptions = parameterOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nPlaceholderTextOptions = i18nOptions.getPlaceholderText();
@@ -678,6 +695,26 @@ public class Parameter implements Serializable {
 				return "number";
 			default:
 				return "text";
+		}
+	}
+
+	public String getDateRangeFromParameterJson() throws JsonProcessingException {
+		Map<String, String> fromParameter = parameterOptions.getDateRange().getFromParameter();
+		if (fromParameter == null) {
+			return null;
+		} else {
+			String json = ArtUtils.objectToJson(fromParameter);
+			return json;
+		}
+	}
+
+	public String getDateRangeToParameterJson() throws JsonProcessingException {
+		Map<String, String> toParameter = parameterOptions.getDateRange().getToParameter();
+		if (toParameter == null) {
+			return null;
+		} else {
+			String json = ArtUtils.objectToJson(toParameter);
+			return json;
 		}
 	}
 }

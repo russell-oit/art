@@ -6,6 +6,7 @@ ART 3.5
 * Fix for dygraph database reports not working
 * Fix for test dashboard report not using updated source
 * Allow dynamic change of chart type for C3.js reports
+* Added date range parameter type
 
 ART 3.4
 * Allow jobs to specify the time zone in which the schedule will run

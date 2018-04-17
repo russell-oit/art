@@ -25,7 +25,11 @@ import art.reportparameter.ReportParameterService;
 import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
+import art.report.UploadHelper;
+import art.servlets.Config;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -41,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -186,6 +191,7 @@ public class ParameterController {
 			@RequestParam("action") String action, @RequestParam("reportId") Integer reportId,
 			@RequestParam("returnReportId") Integer returnReportId,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam(value = "templateFile", required = false) MultipartFile templateFile,
 			HttpSession session) {
 
 		logger.debug("Entering saveParameter: parameter={}, action='{}',"
@@ -198,6 +204,14 @@ public class ParameterController {
 		}
 
 		try {
+			//save template file
+			String saveFileMessage = saveTemplateFile(templateFile, parameter);
+			logger.debug("saveFileMessage='{}'", saveFileMessage);
+			if (saveFileMessage != null) {
+				model.addAttribute("message", saveFileMessage);
+				return showEditParameter(action, model, reportId, returnReportId);
+			}
+			
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equalsAny(action, "add", "copy")) {
 				parameterService.addParameter(parameter, sessionUser);
@@ -227,7 +241,7 @@ public class ParameterController {
 			} else {
 				return "redirect:/reportParameterConfig?reportId=" + reportParameterConfigReportId;
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -286,5 +300,53 @@ public class ParameterController {
 		}
 
 		return "reportsForParameter";
+	}
+
+	/**
+	 * Saves a template file and updates the appropriate parameter property
+	 * with the file name
+	 *
+	 * @param file the file to save
+	 * @param parameter the parameter object to set
+	 * @return an i18n message string if there was a problem, otherwise null
+	 * @throws IOException
+	 */
+	private String saveTemplateFile(MultipartFile file, Parameter parameter)
+			throws IOException {
+
+		logger.debug("Entering saveTemplateFile: parameter={}", parameter);
+
+		logger.debug("file==null = {}", file == null);
+		if (file == null) {
+			return null;
+		}
+
+		logger.debug("file.isEmpty()={}", file.isEmpty());
+		if (file.isEmpty()) {
+			//can be empty if a file name is just typed
+			//or if upload a 0 byte file
+			//don't show message in case of file name being typed
+			return null;
+		}
+
+		//set allowed upload file types
+		List<String> validExtensions = new ArrayList<>();
+		validExtensions.add("js");
+
+		//save file
+		String templatesPath = Config.getJsTemplatesPath();
+		UploadHelper uploadHelper = new UploadHelper();
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+
+		if (message != null) {
+			return message;
+		}
+
+		if (parameter != null) {
+			String filename = file.getOriginalFilename();
+			parameter.setTemplate(filename);
+		}
+
+		return null;
 	}
 }

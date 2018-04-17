@@ -25,6 +25,7 @@ package art.parameter;
 public class ParameterOptions {
 	
 	private Parameteri18nOptions i18n;
+	private DateRangeOptions dateRange;
 
 	/**
 	 * @return the i18n
@@ -38,5 +39,19 @@ public class ParameterOptions {
 	 */
 	public void setI18n(Parameteri18nOptions i18n) {
 		this.i18n = i18n;
+	}
+
+	/**
+	 * @return the dateRange
+	 */
+	public DateRangeOptions getDateRange() {
+		return dateRange;
+	}
+
+	/**
+	 * @param dateRange the dateRange to set
+	 */
+	public void setDateRange(DateRangeOptions dateRange) {
+		this.dateRange = dateRange;
 	}
 }

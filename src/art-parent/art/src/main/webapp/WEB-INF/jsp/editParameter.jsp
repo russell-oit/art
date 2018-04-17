@@ -35,6 +35,8 @@ Edit parameter definition
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="reports.text.selectFile" var="selectFileText"/>
+<spring:message code="reports.text.change" var="changeText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -42,12 +44,14 @@ Edit parameter definition
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -103,6 +107,7 @@ Edit parameter definition
 			function toggleDateFormatVisible() {
 				var dataType = $('#dataType option:selected').val();
 
+				//show/hide date format field
 				switch (dataType) {
 					case "Date":
 					case "DateTime":
@@ -110,6 +115,15 @@ Edit parameter definition
 						break;
 					default:
 						$("#dateFormatDiv").hide();
+				}
+				
+				//show/hide template field
+				switch (dataType) {
+					case "DateRange":
+						$("#templateDiv").show();
+						break;
+					default:
+						$("#templateDiv").hide();
 				}
 			}
 		</script>
@@ -125,7 +139,7 @@ Edit parameter definition
 
 	<jsp:body>
 		<spring:url var="formUrl" value="/saveParameter"/>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="parameter">
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="parameter" enctype="multipart/form-data">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -266,6 +280,26 @@ Edit parameter definition
 					<div class="col-md-8">
 						<form:input path="dateFormat" maxlength="100" class="form-control"/>
 						<form:errors path="dateFormat" cssClass="error"/>
+					</div>
+				</div>
+				<div id="templateDiv" class="form-group">
+					<label class="control-label col-md-4" for="template">
+						<spring:message code="reports.label.template"/>
+					</label>
+					<div class="col-md-8">
+						<div>
+							<form:input path="template" maxlength="100" class="form-control"/>
+							<form:errors path="template" cssClass="error"/>
+						</div>
+						<div class="fileinput fileinput-new" data-provides="fileinput">
+							<span class="btn btn-default btn-file">
+								<span class="fileinput-new">${selectFileText}</span>
+								<span class="fileinput-exists">${changeText}</span>
+								<input type="file" name="templateFile">
+							</span>
+							<span class="fileinput-filename"></span>
+							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+						</div>
 					</div>
 				</div>
 				<div class="form-group">
