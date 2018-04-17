@@ -80,6 +80,7 @@
 	var lastYearText = '${lastYearText}';
 	var toText = '${toText}';
 
+	//https://stackoverflow.com/questions/9840512/get-dates-for-last-quarter-and-this-quarter-through-javascript
 	var ranges = {};
 	if (${reportParam.parameter.parameterOptions.dateRange.showRanges}) {
 		$.extend(ranges, {
