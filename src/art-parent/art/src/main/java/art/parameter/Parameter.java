@@ -707,13 +707,12 @@ public class Parameter implements Serializable {
 	 * @throws JsonProcessingException
 	 */
 	public String getDateRangeFromParameterJson() throws JsonProcessingException {
-		Map<String, String> fromParameter = parameterOptions.getDateRange().getFromParameter();
-		if (fromParameter == null) {
-			return null;
-		} else {
-			String json = ArtUtils.objectToJson(fromParameter);
-			return json;
+		String json = null;
+		DateRangeDestination fromParameter = parameterOptions.getDateRange().getFromParameter();
+		if (fromParameter != null) {
+			json = ArtUtils.objectToJson(fromParameter);
 		}
+		return json;
 	}
 
 	/**
@@ -725,28 +724,26 @@ public class Parameter implements Serializable {
 	 * @throws JsonProcessingException
 	 */
 	public String getDateRangeToParameterJson() throws JsonProcessingException {
-		Map<String, String> toParameter = parameterOptions.getDateRange().getToParameter();
-		if (toParameter == null) {
-			return null;
-		} else {
-			String json = ArtUtils.objectToJson(toParameter);
-			return json;
+		String json = null;
+		DateRangeDestination toParameter = parameterOptions.getDateRange().getToParameter();
+		if (toParameter != null) {
+			json = ArtUtils.objectToJson(toParameter);
 		}
+		return json;
 	}
 
 	/**
 	 * Returns the json string representation of the date range ranges option
-	 * 
+	 *
 	 * @return the json string representation of the date range ranges option
-	 * @throws JsonProcessingException 
+	 * @throws JsonProcessingException
 	 */
 	public String getDateRangeRangesJson() throws JsonProcessingException {
+		String json = null;
 		List<String> ranges = parameterOptions.getDateRange().getRanges();
-		if (ranges == null) {
-			return null;
-		} else {
-			String json = ArtUtils.objectToJson(ranges);
-			return json;
+		if (ranges != null) {
+			json = ArtUtils.objectToJson(ranges);
 		}
+		return json;
 	}
 }

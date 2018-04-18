@@ -20,7 +20,6 @@ package art.parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents options for date range parameters
@@ -29,8 +28,8 @@ import java.util.Map;
  */
 public class DateRangeOptions {
 
-	private Map<String, String> fromParameter;
-	private Map<String, String> toParameter;
+	private DateRangeDestination fromParameter;
+	private DateRangeDestination toParameter;
 	private String format = "MMMM dd, yyyy";
 	private String separator = " - ";
 	private String direction = "ltr";
@@ -53,35 +52,34 @@ public class DateRangeOptions {
 	private String buttonClasses = "btn btn-sm";
 	private String applyClass = "btn-success";
 	private String cancelClass = "btn-default";
-	private boolean showRanges = true;
 	//https://stackoverflow.com/questions/21696784/how-to-declare-an-arraylist-with-values/21696869#21696869
-	private List<String> ranges = new ArrayList<>(Arrays.asList("today", "yesterday", "last7Days", "last30Days", "thisMonth", "lastMonth"));
+	private List<String> ranges = new ArrayList<>(Arrays.asList("default"));
 
 	/**
 	 * @return the fromParameter
 	 */
-	public Map<String, String> getFromParameter() {
+	public DateRangeDestination getFromParameter() {
 		return fromParameter;
 	}
 
 	/**
 	 * @param fromParameter the fromParameter to set
 	 */
-	public void setFromParameter(Map<String, String> fromParameter) {
+	public void setFromParameter(DateRangeDestination fromParameter) {
 		this.fromParameter = fromParameter;
 	}
 
 	/**
 	 * @return the toParameter
 	 */
-	public Map<String, String> getToParameter() {
+	public DateRangeDestination getToParameter() {
 		return toParameter;
 	}
 
 	/**
 	 * @param toParameter the toParameter to set
 	 */
-	public void setToParameter(Map<String, String> toParameter) {
+	public void setToParameter(DateRangeDestination toParameter) {
 		this.toParameter = toParameter;
 	}
 
@@ -223,20 +221,6 @@ public class DateRangeOptions {
 	 */
 	public void setTimePickerSeconds(boolean timePickerSeconds) {
 		this.timePickerSeconds = timePickerSeconds;
-	}
-
-	/**
-	 * @return the showRanges
-	 */
-	public boolean isShowRanges() {
-		return showRanges;
-	}
-
-	/**
-	 * @param showRanges the showRanges to set
-	 */
-	public void setShowRanges(boolean showRanges) {
-		this.showRanges = showRanges;
 	}
 
 	/**

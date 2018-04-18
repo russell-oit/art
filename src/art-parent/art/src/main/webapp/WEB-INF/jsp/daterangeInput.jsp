@@ -90,10 +90,14 @@
 	var rangesJson = '${encode:forJavaScript(reportParam.parameter.dateRangeRangesJson)}';
 	if (rangesJson) {
 		var rangesArray = JSON.parse(rangesJson);
-		$.each(rangesArray, function(index, value){
+		//https://stackoverflow.com/questions/6116474/how-to-find-if-an-array-contains-a-specific-string-in-javascript-jquery
+		if ($.inArray('default', rangesArray) > -1) {
+			rangesArray = ["today", "yesterday", "last7Days", "last30Days", "thisMonth", "lastMonth"];
+		}
+		$.each(rangesArray, function (index, value) {
 			//https://stackoverflow.com/questions/14910760/switch-case-as-string
 			//https://api.jquery.com/jquery.each/
-			switch(value){
+			switch (value) {
 				case "today":
 					ranges[todayText] = [moment(), moment()];
 					break;
