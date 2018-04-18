@@ -27,6 +27,10 @@
 <spring:message code="daterangepicker.text.to" var="toText"/>
 <spring:message code="daterangepicker.text.thisWeek" var="thisWeekText"/>
 <spring:message code="daterangepicker.text.lastWeek" var="lastWeekText"/>
+<spring:message code="daterangepicker.text.yearToDate" var="yearToDateText"/>
+<spring:message code="daterangepicker.text.monthToDate" var="monthToDateText"/>
+<spring:message code="daterangepicker.text.quarterToDate" var="quarterToDateText"/>
+<spring:message code="daterangepicker.text.weekToDate" var="weekToDateText"/>
 
 <input type="text" class="form-control"
 	   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
@@ -83,6 +87,10 @@
 	var toText = '${toText}';
 	var thisWeekText = '${thisWeekText}';
 	var lastWeekText = '${lastWeekText}';
+	var yearToDateText = '${yearToDateText}';
+	var monthToDateText = '${monthToDateText}';
+	var quarterToDateText = '${quarterToDateText}';
+	var weekToDateText = '${weekToDateText}';
 
 	//https://stackoverflow.com/questions/9840512/get-dates-for-last-quarter-and-this-quarter-through-javascript
 	var ranges = {};
@@ -115,6 +123,36 @@
 					break;
 				case "lastMonth":
 					ranges[lastMonthText] = [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')];
+					break;
+				case "thisQuarter":
+					ranges[thisQuarterText] = [moment().startOf('quarter'), moment().endOf('quarter')];
+					break;
+				case "lastQuarter":
+					ranges[lastQuarterText] = [moment().subtract(1, 'quarter').startOf('quarter'), moment().subtract(1, 'quarter').endOf('quarter')];
+					break;
+				case "thisYear":
+					ranges[thisYearText] = [moment().startOf('year'), moment().endOf('year')];
+					break;
+				case "lastYear":
+					ranges[lastYearText] = [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')];
+					break;
+				case "thisWeek":
+					ranges[thisWeekText] = [moment().startOf('week'), moment().endOf('week')];
+					break;
+				case "lastWeek":
+					ranges[lastWeekText] = [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')];
+					break;
+				case "yearToDate":
+					ranges[yearToDateText] = [moment().startOf('year'), moment()];
+					break;
+				case "monthToDate":
+					ranges[monthToDateText] = [moment().startOf('month'), moment()];
+					break;
+				case "quarterToDate":
+					ranges[quarterToDateText] = [moment().startOf('quarter'), moment()];
+					break;
+				case "weekToDate":
+					ranges[weekToDateText] = [moment().startOf('week'), moment()];
 					break;
 				default:
 					break;
