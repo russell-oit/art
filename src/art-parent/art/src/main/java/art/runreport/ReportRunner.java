@@ -357,7 +357,7 @@ public class ReportRunner {
 
 		GeneralReportOptions generalOptions = report.getGeneralOptions();
 
-		if (report.isUseGroovy() || (generalOptions != null && generalOptions.isUsesGroovy())) {
+		if (report.isUseGroovy() || generalOptions.isUsesGroovy()) {
 			CompilerConfiguration cc = new CompilerConfiguration();
 			cc.addCompilationCustomizers(new SandboxTransformer());
 
@@ -986,7 +986,7 @@ public class ReportRunner {
 			}
 			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 		}
-		
+
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
 		if (applyFetchSize) {

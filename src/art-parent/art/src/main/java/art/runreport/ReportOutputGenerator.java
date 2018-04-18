@@ -33,6 +33,7 @@ import art.drilldown.DrilldownService;
 import art.enums.C3ChartType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.enums.SqlColumnType;
 import art.enums.ZipType;
 import art.output.CsvOutputArt;
 import art.output.CsvOutputUnivocity;
@@ -992,6 +993,8 @@ public class ReportOutputGenerator {
 			generateStandardReportJsonOutput();
 		} else if (reportFormat == ReportFormat.pivotTableJs) {
 			generatePivotTableJsOutput(ReportType.PivotTableJs);
+		} else if (reportFormat == ReportFormat.c3) {
+			generateStandardReportC3Output();
 		} else {
 			generateStandardOutput(outputResult);
 		}
@@ -1721,10 +1724,53 @@ public class ReportOutputGenerator {
 	 * @throws ServletException
 	 */
 	private void generateC3Report() throws SQLException, IOException, ServletException {
+		C3Options c3Options;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			c3Options = new C3Options();
+		} else {
+			c3Options = ArtUtils.jsonToObject(options, C3Options.class);
+		}
+
+		String reportTemplate = report.getTemplate();
+		String optionsTemplate = c3Options.getTemplate();
+
+		logger.debug("optionsTemplate='{}'", optionsTemplate);
+
+		if (StringUtils.isBlank(optionsTemplate)) {
+			c3Options.setTemplate(reportTemplate);
+		}
+
+		generateC3Report(c3Options);
+	}
+
+	/**
+	 * Generates c3.js output for a standard/tabular report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateStandardReportC3Output() throws SQLException, IOException, ServletException {
+		C3Options c3Options = report.getGeneralOptions().getC3();
+		generateC3Report(c3Options);
+	}
+
+	/**
+	 * Generates a c3.js report
+	 *
+	 * @param c3Options c3 options
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateC3Report(C3Options c3Options) throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateC3Report");
 
+		Objects.requireNonNull(c3Options, "c3Options must not be null");
+
 		if (isJob) {
-			throw new IllegalStateException("C3.js report type not supported for jobs");
+			throw new IllegalStateException("C3.js output not supported for jobs");
 		}
 
 		rs = reportRunner.getResultSet();
@@ -1739,65 +1785,86 @@ public class ReportOutputGenerator {
 		String jsonData = jsonOutputResult.getJsonData();
 		jsonData = Encode.forJavaScript(jsonData);
 		rowsRetrieved = jsonOutputResult.getRowCount();
+		List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 
-		String templateFileName = report.getTemplate();
+		List<String> value = c3Options.getValue();
+		if (CollectionUtils.isEmpty(value)) {
+			if (value == null) {
+				value = new ArrayList<>();
+			}
+			for (ResultSetColumn column : columns) {
+				if (column.getType() == SqlColumnType.Numeric) {
+					value.add(column.getName());
+				}
+			}
+		}
+		String valueJson = ArtUtils.objectToJson(value);
+		valueJson = Encode.forJavaScript(valueJson);
+		request.setAttribute("value", valueJson);
+
+		String x = c3Options.getX();
+		if (StringUtils.isBlank(x)) {
+			for (ResultSetColumn column : columns) {
+				if (column.getType() == SqlColumnType.String) {
+					x = column.getName();
+					break;
+				}
+			}
+		}
+		request.setAttribute("x", x);
+		
+		String templateFileName = c3Options.getTemplate();
 		String jsTemplatesPath = Config.getJsTemplatesPath();
-		String fullTemplateFileName = jsTemplatesPath + templateFileName;
 
 		logger.debug("templateFileName='{}'", templateFileName);
 
 		//need to explicitly check if template file is empty string
 		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-		if (StringUtils.isBlank(templateFileName)) {
-			throw new IllegalArgumentException("Template file not specified");
+		if (StringUtils.isNotBlank(templateFileName)) {
+			String fullTemplateFileName = jsTemplatesPath + templateFileName;
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
 		}
 
-		File templateFile = new File(fullTemplateFileName);
-		if (!templateFile.exists()) {
-			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		String cssFileName = c3Options.getCssFile();
+
+		logger.debug("cssFileName='{}'", cssFileName);
+
+		//need to explicitly check if file name is empty string
+		//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+			}
+
+			request.setAttribute("cssFileName", cssFileName);
 		}
 
-		String optionsString = report.getOptions();
-		if (StringUtils.isNotBlank(optionsString)) {
-			ObjectMapper mapper = new ObjectMapper();
-			C3Options options = mapper.readValue(optionsString, C3Options.class);
-			String cssFileName = options.getCssFile();
-			List<String> chartTypes = options.getChartTypes();
-
-			logger.debug("cssFileName='{}'", cssFileName);
-
-			//need to explicitly check if file name is empty string
-			//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-			if (StringUtils.isNotBlank(cssFileName)) {
-				String fullCssFileName = jsTemplatesPath + cssFileName;
-
-				File cssFile = new File(fullCssFileName);
-				if (!cssFile.exists()) {
-					throw new IllegalStateException("Css file not found: " + fullCssFileName);
+		List<String> chartTypes = c3Options.getChartTypes();
+		if (chartTypes != null) {
+			List<C3ChartType> c3ChartTypes;
+			if (ArtUtils.containsIgnoreCase(chartTypes, "all")) {
+				c3ChartTypes = C3ChartType.list();
+			} else {
+				c3ChartTypes = new ArrayList<>();
+				for (String chartType : chartTypes) {
+					C3ChartType c3ChartType = C3ChartType.toEnum(chartType);
+					c3ChartTypes.add(c3ChartType);
 				}
-
-				request.setAttribute("cssFileName", cssFileName);
 			}
-
-			if (chartTypes != null) {
-				List<C3ChartType> c3ChartTypes;
-				if (ArtUtils.containsIgnoreCase(chartTypes, "all")) {
-					c3ChartTypes = C3ChartType.list();
-				} else {
-					c3ChartTypes = new ArrayList<>();
-					for (String chartType : chartTypes) {
-						C3ChartType c3ChartType = C3ChartType.toEnum(chartType);
-						c3ChartTypes.add(c3ChartType);
-					}
-				}
-				request.setAttribute("chartTypes", c3ChartTypes);
-			}
+			request.setAttribute("chartTypes", c3ChartTypes);
 		}
 
 		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
 		request.setAttribute("chartId", chartId);
 		request.setAttribute("templateFileName", templateFileName);
 		request.setAttribute("data", jsonData);
+		request.setAttribute("options", c3Options);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
 	}
 
@@ -2206,9 +2273,11 @@ public class ReportOutputGenerator {
 						for (Entry<String, Object> entry : map.entrySet()) {
 							String name = entry.getKey();
 							Object value = entry.getValue();
-							String type = "string";
+							SqlColumnType type;
 							if (value instanceof Number) {
-								type = "numeric";
+								type = SqlColumnType.Numeric;
+							} else {
+								type = SqlColumnType.String;
 							}
 							ResultSetColumn column = new ResultSetColumn();
 							column.setName(name);
@@ -2219,7 +2288,7 @@ public class ReportOutputGenerator {
 						for (String columnName : optionsColumnNames) {
 							ResultSetColumn column = new ResultSetColumn();
 							column.setName(columnName);
-							column.setType("string");
+							column.setType(SqlColumnType.String);
 							columns.add(column);
 						}
 					}
@@ -2232,7 +2301,8 @@ public class ReportOutputGenerator {
 								String columnName = entry.getKey();
 								String dataType = entry.getValue();
 								if (StringUtils.equalsIgnoreCase(columnName, dataColumnName)) {
-									column.setType(dataType);
+									SqlColumnType columnType = SqlColumnType.toEnum(dataType);
+									column.setType(columnType);
 									break;
 								}
 							}

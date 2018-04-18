@@ -31,6 +31,7 @@ import art.reportoptions.Reporti18nOptions;
 import art.encryption.AESCrypt;
 import art.encryption.AesEncryptor;
 import art.migration.PrefixTransformer;
+import art.reportoptions.C3Options;
 import art.reportoptions.CloneOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -1158,7 +1160,7 @@ public class Report implements Serializable {
 	public String getLocalizedName(Locale locale) throws IOException {
 		String localizedName = null;
 
-		if (generalOptions != null && locale != null) {
+		if (locale != null) {
 			Reporti18nOptions i18nOptions = generalOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nNameOptions = i18nOptions.getName();
@@ -1184,7 +1186,7 @@ public class Report implements Serializable {
 	public String getLocalizedShortDescription(Locale locale) throws IOException {
 		String localizedShortDescription = null;
 
-		if (generalOptions != null && locale != null) {
+		if (locale != null) {
 			Reporti18nOptions i18nOptions = generalOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nShortDescriptionOptions = i18nOptions.getShortDescription();
@@ -1210,7 +1212,7 @@ public class Report implements Serializable {
 	public String getLocalizedDescription(Locale locale) throws IOException {
 		String localizedDescription = null;
 
-		if (generalOptions != null && locale != null) {
+		if (locale != null) {
 			Reporti18nOptions i18nOptions = generalOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nDescriptionOptions = i18nOptions.getDescription();
@@ -1231,9 +1233,20 @@ public class Report implements Serializable {
 	 * @throws java.io.IOException
 	 */
 	public void loadGeneralOptions() throws IOException {
-		if (StringUtils.isNotBlank(options)) {
+		C3Options defaultC3Options = new C3Options();
+		List<String> chartTypes = new ArrayList<>(Arrays.asList("all"));
+		defaultC3Options.setChartTypes(chartTypes);
+
+		if (StringUtils.isBlank(options)) {
+			generalOptions = new GeneralReportOptions();
+			generalOptions.setC3(defaultC3Options);
+		} else {
 			ObjectMapper mapper = new ObjectMapper();
 			generalOptions = mapper.readValue(options, GeneralReportOptions.class);
+			C3Options c3Options = generalOptions.getC3();
+			if (c3Options == null) {
+				generalOptions.setC3(defaultC3Options);
+			}
 		}
 	}
 

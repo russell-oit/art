@@ -39,13 +39,43 @@
 		json: jsonData
 	};
 
+	var keys = {};
+	var valueString = '${value}';
+	if (valueString) {
+		var value = JSON.parse(valueString);
+		keys.value = value;
+		var x = '${x}';
+		if (x) {
+			keys.x = x;
+		}
+		data.keys = keys;
+	}
+
+	var type = '${options.type}';
+	if (type) {
+		data.type = type;
+	}
+
 	var options = {
 		bindto: '#${chartId}',
 		data: data
 	};
+
+	if (x) {
+		//https://github.com/jonschlinkert/set-value
+		$.extend(options, {
+			axis: {
+				x: {
+					type: 'category'
+				}
+			}
+		});
+	}
 </script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+<c:if test="${not empty templateFileName}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+</c:if>
 
 <c:if test="${not empty cssFileName}">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${cssFileName}">

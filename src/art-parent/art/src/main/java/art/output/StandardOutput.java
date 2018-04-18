@@ -2812,39 +2812,37 @@ public abstract class StandardOutput {
 
 		//set localized column names if configured
 		GeneralReportOptions generalReportOptions = report.getGeneralOptions();
-		if (generalReportOptions != null) {
-			Reporti18nOptions i18nOptions = generalReportOptions.getI18n();
-			if (i18nOptions != null) {
-				List<Map<String, List<Map<String, String>>>> i18nColumnNamesSettings = i18nOptions.getColumnNames();
+		Reporti18nOptions i18nOptions = generalReportOptions.getI18n();
+		if (i18nOptions != null) {
+			List<Map<String, List<Map<String, String>>>> i18nColumnNamesSettings = i18nOptions.getColumnNames();
 
-				if (CollectionUtils.isNotEmpty(i18nColumnNamesSettings)) {
-					//use case insensitive map so that column names specified in i18n options are not case sensitive
-					Map<String, String> localizedColumnNamesMap = new CaseInsensitiveMap<>();
+			if (CollectionUtils.isNotEmpty(i18nColumnNamesSettings)) {
+				//use case insensitive map so that column names specified in i18n options are not case sensitive
+				Map<String, String> localizedColumnNamesMap = new CaseInsensitiveMap<>();
 
-					for (Map<String, List<Map<String, String>>> i18nColumnNameSetting : i18nColumnNamesSettings) {
-						//Get the first entry that the iterator returns
-						Entry<String, List<Map<String, String>>> entry = i18nColumnNameSetting.entrySet().iterator().next();
-						String i18nColumnName = entry.getKey();
-						List<Map<String, String>> i18nColumnNameOptions = entry.getValue();
-						String localizedColumnName = ArtUtils.getLocalizedValue(locale, i18nColumnNameOptions);
-						//https://stackoverflow.com/questions/15091148/hashmaps-and-null-values
-						localizedColumnNamesMap.put(i18nColumnName, localizedColumnName);
+				for (Map<String, List<Map<String, String>>> i18nColumnNameSetting : i18nColumnNamesSettings) {
+					//Get the first entry that the iterator returns
+					Entry<String, List<Map<String, String>>> entry = i18nColumnNameSetting.entrySet().iterator().next();
+					String i18nColumnName = entry.getKey();
+					List<Map<String, String>> i18nColumnNameOptions = entry.getValue();
+					String localizedColumnName = ArtUtils.getLocalizedValue(locale, i18nColumnNameOptions);
+					//https://stackoverflow.com/questions/15091148/hashmaps-and-null-values
+					localizedColumnNamesMap.put(i18nColumnName, localizedColumnName);
+				}
+
+				//set final column names
+				for (int i = 1; i < localizedColumnNames.size(); i++) {
+					String columnName = localizedColumnNames.get(i);
+					String columnIndexString = String.valueOf(i);
+					//try see if localized column index defined
+					String localizedColumnName = localizedColumnNamesMap.get(columnIndexString);
+					if (localizedColumnName == null) {
+						//try search using column name
+						localizedColumnName = localizedColumnNamesMap.get(columnName);
 					}
 
-					//set final column names
-					for (int i = 1; i < localizedColumnNames.size(); i++) {
-						String columnName = localizedColumnNames.get(i);
-						String columnIndexString = String.valueOf(i);
-						//try see if localized column index defined
-						String localizedColumnName = localizedColumnNamesMap.get(columnIndexString);
-						if (localizedColumnName == null) {
-							//try search using column name
-							localizedColumnName = localizedColumnNamesMap.get(columnName);
-						}
-
-						if (localizedColumnName != null) {
-							localizedColumnNames.set(i, localizedColumnName);
-						}
+					if (localizedColumnName != null) {
+						localizedColumnNames.set(i, localizedColumnName);
 					}
 				}
 			}

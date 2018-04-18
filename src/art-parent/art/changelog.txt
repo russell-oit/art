@@ -1,6 +1,6 @@
 ART 3.5
 * Add field to indicate use of groovy instead of sql in report source
-* Added pivotTableJs as report format option for tabular reports
+* Added pivotTableJs and c3 as report formats for tabular reports
 * Updated chinese translation
 * Fix for mongodb reports showing blank
 * Fix for dygraph database reports not working

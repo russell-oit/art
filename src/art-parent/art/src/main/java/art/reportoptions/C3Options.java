@@ -30,6 +30,66 @@ public class C3Options {
 
 	private String cssFile;
 	private List<String> chartTypes;
+	private String x;
+	private String type;
+	private List<String> value;
+	private String template;
+
+	/**
+	 * @return the x
+	 */
+	public String getX() {
+		return x;
+	}
+
+	/**
+	 * @param x the x to set
+	 */
+	public void setX(String x) {
+		this.x = x;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the value
+	 */
+	public List<String> getValue() {
+		return value;
+	}
+
+	/**
+	 * @param value the value to set
+	 */
+	public void setValue(List<String> value) {
+		this.value = value;
+	}
+
+	/**
+	 * @return the template
+	 */
+	public String getTemplate() {
+		return template;
+	}
+
+	/**
+	 * @param template the template to set
+	 */
+	public void setTemplate(String template) {
+		this.template = template;
+	}
 
 	/**
 	 * @return the chartTypes

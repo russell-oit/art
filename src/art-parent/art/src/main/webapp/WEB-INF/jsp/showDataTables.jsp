@@ -289,7 +289,7 @@
 		title: "${column.name}"
 	};
 	var columnType = '${column.type}';
-	if (columnType === 'numeric') {
+	if (columnType === 'Numeric') {
 		if (formatAllNumbers || formattedNumberColumns.indexOf(i) !== -1) {
 			//https://stackoverflow.com/questions/1184123/is-it-possible-to-add-dynamically-named-properties-to-javascript-object
 			columnDef["render"] = numberFormatter;
@@ -305,11 +305,11 @@
 				}
 			}
 		}
-	} else if (columnType === 'date') {
+	} else if (columnType === 'Date') {
 		if (inputDateFormat && outputDateFormat) {
 			columnDef["render"] = dateFormatter;
 		}
-	} else if (columnType === 'datetime') {
+	} else if (columnType === 'Timestamp') {
 		if (inputDateTimeFormat && outputDateTimeFormat) {
 			columnDef["render"] = datetimeFormatter;
 		}

@@ -33,12 +33,31 @@ public enum ReportFormat {
 	docx("docx"), odt("odt"), ods("ods"), pptx("pptx"), slk("slk"), slkZip("slkZip"),
 	tsv("tsv"), tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png"),
 	json("json"), jsonBrowser("jsonBrowser"), csv("csv"), csvZip("csvZip"),
-	txt("txt"), txtZip("txtZip"), pivotTableJs("pivotTableJs");
+	txt("txt"), txtZip("txtZip"), pivotTableJs("pivotTableJs"), c3("c3");
 
 	private final String value;
 
 	private ReportFormat(String value) {
 		this.value = value;
+	}
+
+	/**
+	 * Returns <code>true</code> if there is a standard output instance for this
+	 * report format
+	 *
+	 * @return <code>true</code> if there is a standard output instance for this
+	 * report format
+	 */
+	public boolean hasStandardOutputInstance() {
+		switch (this) {
+			case json:
+			case jsonBrowser:
+			case pivotTableJs:
+			case c3:
+				return false;
+			default:
+				return true;
+		}
 	}
 
 	/**

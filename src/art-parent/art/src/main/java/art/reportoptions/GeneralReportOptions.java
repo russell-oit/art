@@ -29,6 +29,21 @@ public class GeneralReportOptions {
 
 	private boolean usesGroovy;
 	private Reporti18nOptions i18n;
+	private C3Options c3;
+
+	/**
+	 * @return the c3
+	 */
+	public C3Options getC3() {
+		return c3;
+	}
+
+	/**
+	 * @param c3 the c3 to set
+	 */
+	public void setC3(C3Options c3) {
+		this.c3 = c3;
+	}
 
 	/**
 	 * @return the i18n

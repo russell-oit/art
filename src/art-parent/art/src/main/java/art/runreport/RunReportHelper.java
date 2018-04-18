@@ -25,6 +25,7 @@ import art.enums.ColumnType;
 import art.enums.EncryptorType;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
+import art.enums.SqlColumnType;
 import art.output.ColumnTypeDefinition;
 import art.output.ResultSetColumn;
 import art.parameter.Parameter;
@@ -879,16 +880,16 @@ public class RunReportHelper {
 			ColumnTypeDefinition columnTypeDefinition = columnTypes.get(i);
 			ColumnType columnType = columnTypeDefinition.getColumnType();
 
-			String resultSetColumnType;
+			SqlColumnType resultSetColumnType;
 			switch (columnType) {
 				case Numeric:
-					resultSetColumnType = "numeric";
+					resultSetColumnType = SqlColumnType.Numeric;
 					break;
 				case Date:
-					resultSetColumnType = "datetime";
+					resultSetColumnType = SqlColumnType.Timestamp;
 					break;
 				default:
-					resultSetColumnType = "string";
+					resultSetColumnType = SqlColumnType.String;
 			}
 
 			ResultSetColumn resultSetColumn = new ResultSetColumn();
