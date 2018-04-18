@@ -398,7 +398,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.ReactPivot) {
 				generateReactPivotReport();
 			} else if (reportType.isPivotTableJs()) {
-				generatePivotTableJsOutput();
+				generatePivotTableJsOutput(reportType);
 			} else if (reportType.isDygraphs()) {
 				generateDygraphReport();
 			} else if (reportType.isDataTables()) {
@@ -880,11 +880,12 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates pivot table js output
 	 *
+	 * @param reportType the report type for the output
 	 * @throws SQLException
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private void generatePivotTableJsOutput() throws SQLException, IOException, ServletException {
+	private void generatePivotTableJsOutput(ReportType reportType) throws SQLException, IOException, ServletException {
 		logger.debug("Entering generatePivotTableJsOutput");
 
 		if (isJob) {
@@ -990,10 +991,7 @@ public class ReportOutputGenerator {
 		if (reportFormat.isJson()) {
 			generateStandardReportJsonOutput();
 		} else if (reportFormat == ReportFormat.pivotTableJs) {
-			ReportType originalReportType = reportType;
-			reportType = ReportType.PivotTableJs;
-			generatePivotTableJsOutput();
-			reportType = originalReportType;
+			generatePivotTableJsOutput(ReportType.PivotTableJs);
 		} else {
 			generateStandardOutput(outputResult);
 		}
