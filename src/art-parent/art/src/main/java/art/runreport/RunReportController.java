@@ -131,6 +131,7 @@ public class RunReportController {
 						testReport.setReportSource(testReport.getReportSourceHtml());
 					}
 				}
+				testReport.loadGeneralOptions();
 				report = testReport;
 			}
 

@@ -51,6 +51,7 @@
 		data.keys = keys;
 	}
 
+	//https://datahero.com/blog/2015/03/31/line-bar-graph-use-chart/
 	var type = '${options.type}';
 	if (type) {
 		data.type = type;
