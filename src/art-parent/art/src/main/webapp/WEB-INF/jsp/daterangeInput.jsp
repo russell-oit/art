@@ -25,6 +25,8 @@
 <spring:message code="daterangepicker.text.thisYear" var="thisYearText"/>
 <spring:message code="daterangepicker.text.lastYear" var="lastYearText"/>
 <spring:message code="daterangepicker.text.to" var="toText"/>
+<spring:message code="daterangepicker.text.thisWeek" var="thisWeekText"/>
+<spring:message code="daterangepicker.text.lastWeek" var="lastWeekText"/>
 
 <input type="text" class="form-control"
 	   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
@@ -65,7 +67,7 @@
 		customRangeLabel: '${customRangeText}',
 		direction: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.direction)}',
 		separator: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.separator)}'
-		
+
 	};
 
 	var todayText = '${todayText}';
@@ -79,19 +81,43 @@
 	var thisYearText = '${thisYearText}';
 	var lastYearText = '${lastYearText}';
 	var toText = '${toText}';
+	var thisWeekText = '${thisWeekText}';
+	var lastWeekText = '${lastWeekText}';
 
 	//https://stackoverflow.com/questions/9840512/get-dates-for-last-quarter-and-this-quarter-through-javascript
 	var ranges = {};
-	if (${reportParam.parameter.parameterOptions.dateRange.showRanges}) {
-		$.extend(ranges, {
-			'${todayText}': [moment(), moment()],
-			'${yesterdayText}': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-			'${last7DaysText}': [moment().subtract(6, 'days'), moment()],
-			'${last30DaysText}': [moment().subtract(29, 'days'), moment()],
-			'${thisMonthText}': [moment().startOf('month'), moment().endOf('month')],
-			'${lastMonthText}': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+
+	var rangesJson = '${encode:forJavaScript(reportParam.parameter.dateRangeRangesJson)}';
+	if (rangesJson) {
+		var rangesArray = JSON.parse(rangesJson);
+		$.each(rangesArray, function(index, value){
+			//https://stackoverflow.com/questions/14910760/switch-case-as-string
+			//https://api.jquery.com/jquery.each/
+			switch(value){
+				case "today":
+					ranges[todayText] = [moment(), moment()];
+					break;
+				case "yesterday":
+					ranges[yesterdayText] = [moment().subtract(1, 'days'), moment().subtract(1, 'days')];
+					break;
+				case "last7Days":
+					ranges[last7DaysText] = [moment().subtract(6, 'days'), moment()];
+					break;
+				case "last30Days":
+					ranges[last30DaysText] = [moment().subtract(29, 'days'), moment()];
+					break;
+				case "thisMonth":
+					ranges[thisMonthText] = [moment().startOf('month'), moment().endOf('month')];
+					break;
+				case "lastMonth":
+					ranges[lastMonthText] = [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')];
+					break;
+				default:
+					break;
+			}
 		});
 	}
+
 
 	var overallOptions = {
 		locale: localeOptions,

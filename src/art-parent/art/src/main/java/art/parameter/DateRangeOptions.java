@@ -17,6 +17,9 @@
  */
 package art.parameter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,6 +54,8 @@ public class DateRangeOptions {
 	private String applyClass = "btn-success";
 	private String cancelClass = "btn-default";
 	private boolean showRanges = true;
+	//https://stackoverflow.com/questions/21696784/how-to-declare-an-arraylist-with-values/21696869#21696869
+	private List<String> ranges = new ArrayList<>(Arrays.asList("today", "yesterday", "last7Days", "last30Days", "thisMonth", "lastMonth"));
 
 	/**
 	 * @return the fromParameter
@@ -400,6 +405,20 @@ public class DateRangeOptions {
 	 */
 	public void setCancelClass(String cancelClass) {
 		this.cancelClass = cancelClass;
+	}
+
+	/**
+	 * @return the ranges
+	 */
+	public List<String> getRanges() {
+		return ranges;
+	}
+
+	/**
+	 * @param ranges the ranges to set
+	 */
+	public void setRanges(List<String> ranges) {
+		this.ranges = ranges;
 	}
 
 }

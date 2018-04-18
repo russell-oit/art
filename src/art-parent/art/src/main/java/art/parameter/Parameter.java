@@ -687,7 +687,7 @@ public class Parameter implements Serializable {
 	/**
 	 * Returns the html type attribute to use for text input
 	 *
-	 * @return
+	 * @return the html type attribute to use for text input
 	 */
 	public String getHtmlTextInputType() {
 		switch (dataType) {
@@ -698,6 +698,14 @@ public class Parameter implements Serializable {
 		}
 	}
 
+	/**
+	 * Returns the json string representation of the date range from parameter
+	 * option
+	 *
+	 * @return the json string representation of the date range from parameter
+	 * option
+	 * @throws JsonProcessingException
+	 */
 	public String getDateRangeFromParameterJson() throws JsonProcessingException {
 		Map<String, String> fromParameter = parameterOptions.getDateRange().getFromParameter();
 		if (fromParameter == null) {
@@ -708,12 +716,36 @@ public class Parameter implements Serializable {
 		}
 	}
 
+	/**
+	 * Returns the json string representation of the date range to parameter
+	 * option
+	 *
+	 * @return the json string representation of the date range to parameter
+	 * option
+	 * @throws JsonProcessingException
+	 */
 	public String getDateRangeToParameterJson() throws JsonProcessingException {
 		Map<String, String> toParameter = parameterOptions.getDateRange().getToParameter();
 		if (toParameter == null) {
 			return null;
 		} else {
 			String json = ArtUtils.objectToJson(toParameter);
+			return json;
+		}
+	}
+
+	/**
+	 * Returns the json string representation of the date range ranges option
+	 * 
+	 * @return the json string representation of the date range ranges option
+	 * @throws JsonProcessingException 
+	 */
+	public String getDateRangeRangesJson() throws JsonProcessingException {
+		List<String> ranges = parameterOptions.getDateRange().getRanges();
+		if (ranges == null) {
+			return null;
+		} else {
+			String json = ArtUtils.objectToJson(ranges);
 			return json;
 		}
 	}
