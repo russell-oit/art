@@ -1803,16 +1803,16 @@ public class ReportOutputGenerator {
 		request.setAttribute("value", valueJson);
 
 		String x = c3Options.getX();
-		if (StringUtils.isBlank(x)) {
+		if (x == null) {
 			for (ResultSetColumn column : columns) {
-				if (column.getType() == SqlColumnType.String) {
+				if (column.getType() != SqlColumnType.Numeric) {
 					x = column.getName();
 					break;
 				}
 			}
 		}
 		request.setAttribute("x", x);
-		
+
 		String templateFileName = c3Options.getTemplate();
 		String jsTemplatesPath = Config.getJsTemplatesPath();
 
