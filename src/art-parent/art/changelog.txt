@@ -8,6 +8,7 @@ ART 3.5
 * Allow dynamic change of chart type for C3.js reports
 * Added date range parameter type
 * Added Plotly.js report type
+* Fix for jobs select/deselect all in access rights config updating report groups
 
 ART 3.4
 * Allow jobs to specify the time zone in which the schedule will run
