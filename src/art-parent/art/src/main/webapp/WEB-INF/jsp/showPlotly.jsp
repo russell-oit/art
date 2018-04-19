@@ -27,7 +27,7 @@
 
 </div>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-basic.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-cartesian.min.js"></script>
 
 <c:if test="${not empty localeFileName}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/${localeFileName}"></script>
@@ -37,6 +37,11 @@
 <script>
 	//https://blog.sicara.com/compare-best-javascript-chart-libraries-2017-89fbe8cb112d
 	//https://plot.ly/javascript/line-and-scatter/#line-and-scatter-plot
+	//https://github.com/plotly/plotly.js/tree/master/dist
+	//https://github.com/plotly/plotly.js/issues/41
+	//https://code.tutsplus.com/tutorials/create-interactive-charts-using-plotlyjs-getting-started--cms-29029
+	//https://codeburst.io/notes-from-the-latest-plotly-js-release-b035a5b43e21
+	//http://terokarvinen.com/2016/simple-line-graph-with-plotly-js
 	var dataString = '${data}';
 	var data = JSON.parse(dataString);
 
@@ -56,6 +61,9 @@
 			allY[index] = [];
 		});
 
+		//https://medium.com/@vworri/use-plotly-in-javascript-to-creat-a-bar-graph-from-json-82d7220b463d
+		//https://github.com/plotly/plotly.js/issues/1104
+		//https://stackoverflow.com/questions/45931909/apply-json-data-to-barchart-plotly
 		data.forEach(function (val) {
 			allX.push(val[xColumn]);
 			yColumns.forEach(function (yCol, index) {
@@ -78,6 +86,10 @@
 	var layout = {};
 	//https://community.plot.ly/t/remove-options-from-the-hover-toolbar/130/4
 	//https://github.com/plotly/plotly.js/blob/master/src/components/modebar/buttons.js
+	//https://github.com/rwl/plotly/issues/6
+	//https://github.com/plotly/plotly.js/issues/316
+	//https://github.com/plotly/plotly.js/issues/185
+	//https://plot.ly/javascript/configuration-options/#always-display-the-modebar
 	var config = {
 		modeBarButtonsToRemove: ['sendDataToCloud'],
 		displaylogo: false
@@ -113,6 +125,8 @@
 				}
 			});
 			//https://plot.ly/javascript/plotlyjs-function-reference/#plotlyreact
+			//https://github.com/plotly/plotly.js/issues/1218
+			//https://github.com/plotly/plotly.js/issues/1850
 			Plotly.react('${chartId}', traces, layout, config);
 		}
 	}

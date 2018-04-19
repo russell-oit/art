@@ -35,6 +35,7 @@
 	var dataString = '${data}';
 	var jsonData = JSON.parse(dataString);
 
+	//https://github.com/c3js/c3/issues/236
 	var data = {
 		json: jsonData
 	};
