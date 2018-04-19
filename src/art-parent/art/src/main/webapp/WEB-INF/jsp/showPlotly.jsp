@@ -80,7 +80,10 @@
 				name: yColumns[index],
 				type: type,
 				mode: mode,
-				orientation: orientation
+				orientation: orientation,
+				values: rowYValue,
+				labels: allX,
+				hole: ${options.hole}
 			};
 
 			if (orientation === 'h' && type === 'bar') {
@@ -166,6 +169,9 @@
 						break;
 					case "bar":
 						trace.type = 'bar';
+						break;
+					case "pie":
+						trace.type = 'pie';
 						break;
 					default:
 						break;
