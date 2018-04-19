@@ -2648,6 +2648,37 @@ public class ReportOutputGenerator {
 		}
 		request.setAttribute("xColumn", xColumn);
 
+		List<String> chartTypes = plotlyOptions.getChartTypes();
+		if (chartTypes != null) {
+			List<C3ChartType> c3ChartTypes;
+			if (ArtUtils.containsIgnoreCase(chartTypes, "all")) {
+				c3ChartTypes = C3ChartType.getPlotlyChartTypes();
+			} else {
+				c3ChartTypes = new ArrayList<>();
+				for (String chartType : chartTypes) {
+					C3ChartType c3ChartType = C3ChartType.toEnum(chartType);
+					c3ChartTypes.add(c3ChartType);
+				}
+			}
+			request.setAttribute("chartTypes", c3ChartTypes);
+		}
+
+		String type = plotlyOptions.getType();
+		String mode = plotlyOptions.getMode();;
+		String typeOption = reportOptions.getPlotlyType();
+		if (StringUtils.isNotBlank(typeOption)) {
+			String[] typeAndMode = StringUtils.split(typeOption, "-");
+			type = typeAndMode[0];
+			if (typeAndMode.length > 1) {
+				mode = typeAndMode[1];
+			}
+		}
+
+		request.setAttribute("type", type);
+		request.setAttribute("mode", mode);
+		request.setAttribute("selectedChartType", typeOption);
+		request.setAttribute("reportId", report.getReportId());
+
 		String templateFileName = plotlyOptions.getTemplate();
 		String jsTemplatesPath = Config.getJsTemplatesPath();
 

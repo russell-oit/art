@@ -1241,6 +1241,7 @@ public class Report implements Serializable {
 		PlotlyOptions defaultPlotlyOptions = new PlotlyOptions();
 		defaultPlotlyOptions.setType("scatter");
 		defaultPlotlyOptions.setMode("lines+markers");
+		defaultPlotlyOptions.setChartTypes(chartTypes);
 
 		if (StringUtils.isBlank(options)) {
 			generalOptions = new GeneralReportOptions();

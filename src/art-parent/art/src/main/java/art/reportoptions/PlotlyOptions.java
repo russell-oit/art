@@ -34,6 +34,21 @@ public class PlotlyOptions {
 	private List<String> yColumns;
 	private String type;
 	private String mode;
+	private List<String> chartTypes;
+
+	/**
+	 * @return the chartTypes
+	 */
+	public List<String> getChartTypes() {
+		return chartTypes;
+	}
+
+	/**
+	 * @param chartTypes the chartTypes to set
+	 */
+	public void setChartTypes(List<String> chartTypes) {
+		this.chartTypes = chartTypes;
+	}
 
 	/**
 	 * @return the mode

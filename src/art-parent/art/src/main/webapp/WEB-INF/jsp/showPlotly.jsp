@@ -9,12 +9,25 @@
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+
+<c:if test="${not empty chartTypes}">
+	<div class="row form-inline" style="margin-bottom: 10px">
+		<select class="form-control pull-right" id="select-${chartId}">
+			<option value="--">--</option>
+			<c:forEach var="chartType" items="${chartTypes}">
+				<option value="${encode:forHtmlAttribute(chartType.plotlyType)}" ${selectedChartType == chartType.plotlyType ? "selected" : ""}><spring:message code="${chartType.localizedDescription}"/></option>
+			</c:forEach>
+		</select>
+	</div>
+</c:if>
 
 
 <div id="${chartId}">
 
 </div>
 
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-basic.min.js"></script>
 
 <c:if test="${not empty localeFileName}">
@@ -31,15 +44,15 @@
 	var traces = [];
 
 	var xColumn = '${xColumn}';
-	var type = '${options.type}';
-	var mode = '${options.mode}';
+	var type = '${type}';
+	var mode = '${mode}';
 	var yColumnsString = '${yColumns}';
 	var yColumns = JSON.parse(yColumnsString);
 
 	if (xColumn) {
 		var allX = [];
 		var allY = [];
-		
+
 		yColumns.forEach(function (yCol, index) {
 			allY[index] = [];
 		});
@@ -50,7 +63,7 @@
 				allY[index].push(val[yCol]);
 			});
 		});
-		
+
 		allY.forEach(function (rowYValue, index) {
 			var trace = {
 				x: allX,
@@ -78,4 +91,31 @@
 
 <script>
 	Plotly.newPlot('${chartId}', traces, layout, config);
+
+	function changeChartType(event) {
+		var newChartType = $('#select-${chartId} option:selected').val();
+		if (newChartType !== '--') {
+			$.ajax({
+				type: "POST",
+				url: "${pageContext.request.contextPath}/runReport",
+				data: {reportId: ${reportId}, plotlyType: newChartType,
+					reportFormat: 'plotly', showInline: true},
+				success: function (data, status, xhr) {
+					$("#reportOutput").html(data);
+				},
+				error: function (xhr, status, error) {
+					bootbox.alert(xhr.responseText);
+				}
+			});
+		}
+	}
+
+	//https://api.jquery.com/on/
+	$("#select-${chartId}").on("change", changeChartType);
+
+	var token = $("meta[name='_csrf']").attr("content");
+	var header = $("meta[name='_csrf_header']").attr("content");
+	$(document).ajaxSend(function (e, xhr, options) {
+		xhr.setRequestHeader(header, token);
+	});
 </script>

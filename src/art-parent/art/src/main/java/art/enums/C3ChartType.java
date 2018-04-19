@@ -55,6 +55,22 @@ public enum C3ChartType {
 	}
 
 	/**
+	 * Returns the plotly chart type string
+	 *
+	 * @return the plotly chart type string
+	 */
+	public String getPlotlyType() {
+		switch (this) {
+			case Line:
+				return "scatter-lines+markers";
+			case Scatter:
+				return "scatter-markers";
+			default:
+				return value;
+		}
+	}
+
+	/**
 	 * Returns this enum option's value
 	 *
 	 * @return this enum option's value
@@ -72,6 +88,20 @@ public enum C3ChartType {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
 		List<C3ChartType> items = new ArrayList<>();
 		items.addAll(Arrays.asList(values()));
+		return items;
+	}
+
+	/**
+	 * Returns chart types applicable for plotly charts
+	 * 
+	 * @return chart types applicable for plotly charts
+	 */
+	public static List<C3ChartType> getPlotlyChartTypes() {
+		List<C3ChartType> items = new ArrayList<>();
+		items.add(Line);
+		items.add(Bar);
+		items.add(Scatter);
+		items.add(Pie);
 		return items;
 	}
 
