@@ -28,12 +28,14 @@ import java.util.List;
  */
 public enum ReportFormat {
 
-	html("html"), htmlPlain("htmlPlain"), htmlFancy("htmlFancy"), htmlGrid("htmlGrid"),
-	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"), pdf("pdf"),
-	docx("docx"), odt("odt"), ods("ods"), pptx("pptx"), slk("slk"), slkZip("slkZip"),
-	tsv("tsv"), tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png"),
+	html("html"), htmlPlain("htmlPlain"), htmlFancy("htmlFancy"),
+	htmlGrid("htmlGrid"), htmlDataTable("htmlDataTable"), xls("xls"),
+	xlsZip("xlsZip"), xlsx("xlsx"), pdf("pdf"), docx("docx"), odt("odt"),
+	ods("ods"), pptx("pptx"), slk("slk"), slkZip("slkZip"), tsv("tsv"),
+	tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png"),
 	json("json"), jsonBrowser("jsonBrowser"), csv("csv"), csvZip("csvZip"),
-	txt("txt"), txtZip("txtZip"), pivotTableJs("pivotTableJs"), c3("c3");
+	txt("txt"), txtZip("txtZip"), pivotTableJs("pivotTableJs"), c3("c3"),
+	plotly("plotly");
 
 	private final String value;
 
@@ -54,6 +56,7 @@ public enum ReportFormat {
 			case jsonBrowser:
 			case pivotTableJs:
 			case c3:
+			case plotly:
 				return false;
 			default:
 				return true;

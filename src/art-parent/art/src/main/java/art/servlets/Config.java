@@ -988,6 +988,15 @@ public class Config extends HttpServlet {
 	public static String getAppPath() {
 		return appPath;
 	}
+	
+	/**
+	 * Returns the full path to the js directory
+	 *
+	 * @return full path to the js directory
+	 */
+	public static String getJsPath() {
+		return appPath + "js" + File.separator;
+	}
 
 	/**
 	 * Returns the full path to the js-templates directory

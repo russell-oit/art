@@ -669,6 +669,7 @@ public class JobController {
 		jobReportFormats.remove("htmlDataTable");
 		jobReportFormats.remove("pivotTableJs");
 		jobReportFormats.remove("c3");
+		jobReportFormats.remove("plotly");
 
 		final String REPORT_FORMAT_PREFIX = "reports.format.";
 		for (String reportFormat : jobReportFormats) {

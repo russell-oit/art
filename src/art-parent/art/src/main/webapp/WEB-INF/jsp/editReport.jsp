@@ -681,6 +681,7 @@ Edit report page
 					case 156: //org chart list
 					case 157: //org chart ajax
 					case 159: //reportengine file
+					case 160: //plotly
 						$("#templateDiv").show();
 						break;
 					default:
@@ -831,6 +832,7 @@ Edit report page
 					case 155: //org chart json
 					case 156: //org chart list
 					case 157: //org chart ajax
+					case 160: //plotly
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:

@@ -79,6 +79,7 @@ import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JFreeChartOptions;
 import art.reportoptions.MongoDbOptions;
 import art.reportoptions.OrgChartOptions;
+import art.reportoptions.PlotlyOptions;
 import art.reportoptions.ReportEngineOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
@@ -422,6 +423,8 @@ public class ReportOutputGenerator {
 				generateOrgChartReport();
 			} else if (reportType.isReportEngine()) {
 				generateReportEngineReport();
+			} else if (reportType == ReportType.Plotly) {
+				generatePlotlyReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
@@ -989,14 +992,22 @@ public class ReportOutputGenerator {
 
 		logger.debug("Entering generateStandardReport");
 
-		if (reportFormat.isJson()) {
-			generateStandardReportJsonOutput();
-		} else if (reportFormat == ReportFormat.pivotTableJs) {
-			generatePivotTableJsOutput(ReportType.PivotTableJs);
-		} else if (reportFormat == ReportFormat.c3) {
-			generateStandardReportC3Output();
-		} else {
-			generateStandardOutput(outputResult);
+		switch (reportFormat) {
+			case pivotTableJs:
+				generatePivotTableJsOutput(ReportType.PivotTableJs);
+				break;
+			case c3:
+				generateStandardReportC3Output();
+				break;
+			case plotly:
+				generateStandardReportPlotlyOutput();
+				break;
+			default:
+				if (reportFormat.isJson()) {
+					generateStandardReportJsonOutput();
+				} else {
+					generateStandardOutput(outputResult);
+				}
 		}
 	}
 
@@ -1788,10 +1799,8 @@ public class ReportOutputGenerator {
 		List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 
 		List<String> value = c3Options.getValue();
-		if (CollectionUtils.isEmpty(value)) {
-			if (value == null) {
-				value = new ArrayList<>();
-			}
+		if (value == null) {
+			value = new ArrayList<>();
 			for (ResultSetColumn column : columns) {
 				if (column.getType() == SqlColumnType.Numeric) {
 					value.add(column.getName());
@@ -1826,6 +1835,7 @@ public class ReportOutputGenerator {
 			if (!templateFile.exists()) {
 				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
 			}
+			request.setAttribute("templateFileName", templateFileName);
 		}
 
 		String cssFileName = c3Options.getCssFile();
@@ -1836,12 +1846,10 @@ public class ReportOutputGenerator {
 		//otherwise file.exists() will return true because fullDataFileName will just have the directory name
 		if (StringUtils.isNotBlank(cssFileName)) {
 			String fullCssFileName = jsTemplatesPath + cssFileName;
-
 			File cssFile = new File(fullCssFileName);
 			if (!cssFile.exists()) {
 				throw new IllegalStateException("Css file not found: " + fullCssFileName);
 			}
-
 			request.setAttribute("cssFileName", cssFileName);
 		}
 
@@ -1862,7 +1870,6 @@ public class ReportOutputGenerator {
 
 		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
 		request.setAttribute("chartId", chartId);
-		request.setAttribute("templateFileName", templateFileName);
 		request.setAttribute("data", jsonData);
 		request.setAttribute("options", c3Options);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
@@ -2544,6 +2551,139 @@ public class ReportOutputGenerator {
 		}
 
 		return standardOutput;
+	}
+
+	/**
+	 * Generates a plotly.js report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generatePlotlyReport() throws SQLException, IOException, ServletException {
+		PlotlyOptions plotlyOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			plotlyOptions = new PlotlyOptions();
+		} else {
+			plotlyOptions = ArtUtils.jsonToObject(options, PlotlyOptions.class);
+		}
+
+		String reportTemplate = report.getTemplate();
+		String optionsTemplate = plotlyOptions.getTemplate();
+
+		logger.debug("optionsTemplate='{}'", optionsTemplate);
+
+		if (StringUtils.isBlank(optionsTemplate)) {
+			plotlyOptions.setTemplate(reportTemplate);
+		}
+
+		generatePlotlyReport(plotlyOptions);
+	}
+
+	/**
+	 * Generates plotly.js output for a standard/tabular report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateStandardReportPlotlyOutput() throws SQLException, IOException, ServletException {
+		PlotlyOptions plotlyOptions = report.getGeneralOptions().getPlotly();
+		generatePlotlyReport(plotlyOptions);
+	}
+
+	/**
+	 * Generates a plotly.js report
+	 *
+	 * @param plotlyOptions the plotly options
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generatePlotlyReport(PlotlyOptions plotlyOptions) throws SQLException,
+			IOException, ServletException {
+
+		logger.debug("Entering generatePlotlyReport");
+
+		if (isJob) {
+			throw new IllegalStateException("Plotly.js report not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		jsonData = Encode.forJavaScript(jsonData);
+		rowsRetrieved = jsonOutputResult.getRowCount();
+		List<ResultSetColumn> columns = jsonOutputResult.getColumns();
+
+		List<String> yColumns = plotlyOptions.getyColumns();
+		if (yColumns == null) {
+			yColumns = new ArrayList<>();
+			for (ResultSetColumn column : columns) {
+				if (column.getType() == SqlColumnType.Numeric) {
+					yColumns.add(column.getName());
+				}
+			}
+		}
+		String yColumnsJson = ArtUtils.objectToJson(yColumns);
+		yColumnsJson = Encode.forJavaScript(yColumnsJson);
+		request.setAttribute("yColumns", yColumnsJson);
+
+		String xColumn = plotlyOptions.getxColumn();
+		if (xColumn == null) {
+			for (ResultSetColumn column : columns) {
+				if (column.getType() != SqlColumnType.Numeric) {
+					xColumn = column.getName();
+					break;
+				}
+			}
+		}
+		request.setAttribute("xColumn", xColumn);
+
+		String templateFileName = plotlyOptions.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isNotBlank(templateFileName)) {
+			String fullTemplateFileName = jsTemplatesPath + templateFileName;
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+			request.setAttribute("templateFileName", templateFileName);
+		}
+
+		String localeString = locale.toString();
+		localeString = StringUtils.lowerCase(localeString, Locale.ENGLISH);
+		localeString = StringUtils.replace(localeString, "_", "-");
+		String languageFileName = "plotly-locale-" + localeString + ".js";
+
+		String languageFilePath = Config.getJsPath()
+				+ "plotly.js-1.36.0" + File.separator
+				+ languageFileName;
+
+		File languageFile = new File(languageFilePath);
+
+		if (languageFile.exists()) {
+			request.setAttribute("localeFileName", languageFileName);
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("options", plotlyOptions);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPlotly.jsp").include(request, response);
 	}
 
 }

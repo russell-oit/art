@@ -5,6 +5,7 @@
 -- add use groovy column
 -- update "null" column strings with proper NULL
 -- add template field to parameters table
+-- add reference record for plotly.js report type
 
 -- ------------------------------------------------
 
@@ -26,3 +27,6 @@ UPDATE ART_QUERIES SET XMLA_CATALOG = NULL WHERE XMLA_CATALOG='null';
 
 -- add template field to parameters table
 ALTER TABLE ART_PARAMETERS ADD TEMPLATE VARCHAR(100);
+
+-- add reference record for plotly.js report type
+INSERT INTO ART_REPORT_TYPES VALUES (160,'Plotly.js');

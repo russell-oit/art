@@ -30,6 +30,21 @@ public class GeneralReportOptions {
 	private boolean usesGroovy;
 	private Reporti18nOptions i18n;
 	private C3Options c3;
+	private PlotlyOptions plotly;
+
+	/**
+	 * @return the plotly
+	 */
+	public PlotlyOptions getPlotly() {
+		return plotly;
+	}
+
+	/**
+	 * @param plotly the plotly to set
+	 */
+	public void setPlotly(PlotlyOptions plotly) {
+		this.plotly = plotly;
+	}
 
 	/**
 	 * @return the c3

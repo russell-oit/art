@@ -33,6 +33,7 @@ import art.encryption.AesEncryptor;
 import art.migration.PrefixTransformer;
 import art.reportoptions.C3Options;
 import art.reportoptions.CloneOptions;
+import art.reportoptions.PlotlyOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
 import art.ruleValue.UserGroupRuleValue;
@@ -1237,15 +1238,24 @@ public class Report implements Serializable {
 		List<String> chartTypes = new ArrayList<>(Arrays.asList("all"));
 		defaultC3Options.setChartTypes(chartTypes);
 
+		PlotlyOptions defaultPlotlyOptions = new PlotlyOptions();
+		defaultPlotlyOptions.setType("scatter");
+		defaultPlotlyOptions.setMode("lines+markers");
+
 		if (StringUtils.isBlank(options)) {
 			generalOptions = new GeneralReportOptions();
 			generalOptions.setC3(defaultC3Options);
+			generalOptions.setPlotly(defaultPlotlyOptions);
 		} else {
 			ObjectMapper mapper = new ObjectMapper();
 			generalOptions = mapper.readValue(options, GeneralReportOptions.class);
 			C3Options c3Options = generalOptions.getC3();
 			if (c3Options == null) {
 				generalOptions.setC3(defaultC3Options);
+			}
+			PlotlyOptions plotlyOptions = generalOptions.getPlotly();
+			if (plotlyOptions == null) {
+				generalOptions.setPlotly(defaultPlotlyOptions);
 			}
 		}
 	}

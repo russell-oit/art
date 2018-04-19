@@ -243,6 +243,7 @@ public class RunReportHelper {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case Plotly:
 				enableReportFormats = false;
 				break;
 			default:
@@ -355,6 +356,7 @@ public class RunReportHelper {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case Plotly:
 				enablePrint = false;
 				break;
 			default:
@@ -422,6 +424,7 @@ public class RunReportHelper {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case Plotly:
 				enableEmail = false;
 				break;
 			default:
