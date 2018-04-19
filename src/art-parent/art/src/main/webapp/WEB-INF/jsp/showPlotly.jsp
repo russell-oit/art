@@ -73,13 +73,21 @@
 		});
 
 		allY.forEach(function (rowYValue, index) {
+			var orientation = '${options.orientation}';
 			var trace = {
 				x: allX,
 				y: rowYValue,
 				name: yColumns[index],
 				type: type,
 				mode: mode,
+				orientation: orientation
 			};
+
+			if (orientation === 'h' && type === 'bar') {
+				trace.x = rowYValue;
+				trace.y = allX;
+			}
+
 			var textPosition = '${options.textPosition}';
 			var hoverInfo = '${options.hoverInfo}';
 			if (hoverInfo) {

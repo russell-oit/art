@@ -46,6 +46,7 @@ public class PlotlyOptions {
 	private String bundle;
 	private String textPosition;
 	private String hoverInfo;
+	private String orientation;
 
 	/**
 	 * @return the showLegend
@@ -297,6 +298,20 @@ public class PlotlyOptions {
 	 */
 	public void setHoverInfo(String hoverInfo) {
 		this.hoverInfo = hoverInfo;
+	}
+
+	/**
+	 * @return the orientation
+	 */
+	public String getOrientation() {
+		return orientation;
+	}
+
+	/**
+	 * @param orientation the orientation to set
+	 */
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
 	}
 
 }
