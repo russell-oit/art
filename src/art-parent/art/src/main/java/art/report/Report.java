@@ -1161,7 +1161,7 @@ public class Report implements Serializable {
 	public String getLocalizedName(Locale locale) throws IOException {
 		String localizedName = null;
 
-		if (locale != null) {
+		if (generalOptions != null && locale != null) {
 			Reporti18nOptions i18nOptions = generalOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nNameOptions = i18nOptions.getName();
@@ -1187,7 +1187,7 @@ public class Report implements Serializable {
 	public String getLocalizedShortDescription(Locale locale) throws IOException {
 		String localizedShortDescription = null;
 
-		if (locale != null) {
+		if (generalOptions != null && locale != null) {
 			Reporti18nOptions i18nOptions = generalOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nShortDescriptionOptions = i18nOptions.getShortDescription();
@@ -1213,7 +1213,7 @@ public class Report implements Serializable {
 	public String getLocalizedDescription(Locale locale) throws IOException {
 		String localizedDescription = null;
 
-		if (locale != null) {
+		if (generalOptions != null && locale != null) {
 			Reporti18nOptions i18nOptions = generalOptions.getI18n();
 			if (i18nOptions != null) {
 				List<Map<String, String>> i18nDescriptionOptions = i18nOptions.getDescription();

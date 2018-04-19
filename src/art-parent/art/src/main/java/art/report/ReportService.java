@@ -186,14 +186,14 @@ public class ReportService {
 					CloneOptions cloneOptions = mapper.readValue(options, CloneOptions.class);
 					report.setCloneOptions(cloneOptions);
 				} catch (IOException ex) {
-					throw new SQLException(ex);
+					logger.error("Error. Report Id {}", report.getReportId(), ex);
 				}
 			}
 
 			try {
 				report.loadGeneralOptions();
 			} catch (IOException ex) {
-				throw new SQLException(ex);
+				logger.error("Error. Report Id {}", report.getReportId(), ex);
 			}
 
 			return type.cast(report);

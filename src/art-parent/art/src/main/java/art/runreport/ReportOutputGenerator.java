@@ -2675,6 +2675,14 @@ public class ReportOutputGenerator {
 		request.setAttribute("type", type);
 		request.setAttribute("mode", mode);
 
+		String bundle = plotlyOptions.getBundle();
+		if (StringUtils.equalsIgnoreCase(bundle, "cartesian")) {
+			bundle = "cartesian";
+		} else {
+			bundle = "basic";
+		}
+		request.setAttribute("bundle", bundle);
+
 		String templateFileName = plotlyOptions.getTemplate();
 		String jsTemplatesPath = Config.getJsTemplatesPath();
 

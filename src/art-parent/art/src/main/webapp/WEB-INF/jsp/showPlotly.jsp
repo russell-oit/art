@@ -27,7 +27,7 @@
 
 </div>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-cartesian.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-${bundle}.min.js"></script>
 
 <c:if test="${not empty localeFileName}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/${localeFileName}"></script>
@@ -80,6 +80,23 @@
 				type: type,
 				mode: mode,
 			};
+			var textPosition = '${options.textPosition}';
+			var hoverInfo = '${options.hoverInfo}';
+			if (hoverInfo) {
+				trace.hoverinfo = hoverInfo;
+			}
+
+			if (${options.showText}) {
+				trace.text = rowYValue;
+				if (!textPosition) {
+					textPosition = "auto";
+				}
+				trace.textposition = textPosition;
+				if (!hoverInfo) {
+					hoverInfo = "y";
+				}
+				trace.hoverinfo = hoverInfo;
+			}
 			traces.push(trace);
 		});
 	}
@@ -93,8 +110,18 @@
 			title: '${options.yAxisTitle}'
 		},
 		showlegend: ${options.showLegend},
-		barmode : '${options.barmode}'
+		barmode: '${options.barmode}'
 	};
+
+	var height = ${options.height};
+	if (height > 0) {
+		layout.height = height;
+	}
+
+	var width = ${options.width};
+	if (width > 0) {
+		layout.width = width;
+	}
 
 	//https://community.plot.ly/t/remove-options-from-the-hover-toolbar/130/4
 	//https://github.com/plotly/plotly.js/blob/master/src/components/modebar/buttons.js

@@ -141,7 +141,7 @@ public class ParameterService {
 					}
 					parameter.setParameterOptions(parameterOptions);
 				} catch (IOException ex) {
-					throw new SQLException(ex);
+					logger.error("Error. Parameter Id {}", parameter.getParameterId(), ex);
 				}
 			}
 

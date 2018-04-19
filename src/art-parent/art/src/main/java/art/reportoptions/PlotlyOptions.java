@@ -39,6 +39,13 @@ public class PlotlyOptions {
 	private String xAxisTitle;
 	private String yAxisTitle;
 	private boolean showLegend = true;
+	private boolean showText;
+	private int height;
+	private int width;
+	private double hole;
+	private String bundle;
+	private String textPosition;
+	private String hoverInfo;
 
 	/**
 	 * @return the showLegend
@@ -192,6 +199,104 @@ public class PlotlyOptions {
 	 */
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	/**
+	 * @return the showText
+	 */
+	public boolean isShowText() {
+		return showText;
+	}
+
+	/**
+	 * @param showText the showText to set
+	 */
+	public void setShowText(boolean showText) {
+		this.showText = showText;
+	}
+
+	/**
+	 * @return the height
+	 */
+	public int getHeight() {
+		return height;
+	}
+
+	/**
+	 * @param height the height to set
+	 */
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	/**
+	 * @return the width
+	 */
+	public int getWidth() {
+		return width;
+	}
+
+	/**
+	 * @param width the width to set
+	 */
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	/**
+	 * @return the hole
+	 */
+	public double getHole() {
+		return hole;
+	}
+
+	/**
+	 * @param hole the hole to set
+	 */
+	public void setHole(double hole) {
+		this.hole = hole;
+	}
+
+	/**
+	 * @return the bundle
+	 */
+	public String getBundle() {
+		return bundle;
+	}
+
+	/**
+	 * @param bundle the bundle to set
+	 */
+	public void setBundle(String bundle) {
+		this.bundle = bundle;
+	}
+
+	/**
+	 * @return the textPosition
+	 */
+	public String getTextPosition() {
+		return textPosition;
+	}
+
+	/**
+	 * @param textPosition the textPosition to set
+	 */
+	public void setTextPosition(String textPosition) {
+		this.textPosition = textPosition;
+	}
+
+	/**
+	 * @return the hoverInfo
+	 */
+	public String getHoverInfo() {
+		return hoverInfo;
+	}
+
+	/**
+	 * @param hoverInfo the hoverInfo to set
+	 */
+	public void setHoverInfo(String hoverInfo) {
+		this.hoverInfo = hoverInfo;
 	}
 
 }
