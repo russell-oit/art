@@ -112,7 +112,8 @@
 						break;
 				}
 			});
-			Plotly.newPlot('${chartId}', traces, layout, config);
+			//https://plot.ly/javascript/plotlyjs-function-reference/#plotlyreact
+			Plotly.react('${chartId}', traces, layout, config);
 		}
 	}
 
