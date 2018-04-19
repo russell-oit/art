@@ -2667,17 +2667,13 @@ public class ReportOutputGenerator {
 		String mode = plotlyOptions.getMode();;
 		String typeOption = reportOptions.getPlotlyType();
 		if (StringUtils.isNotBlank(typeOption)) {
-			String[] typeAndMode = StringUtils.split(typeOption, "-");
-			type = typeAndMode[0];
-			if (typeAndMode.length > 1) {
-				mode = typeAndMode[1];
-			}
+			C3ChartType c3ChartType = C3ChartType.toEnum(typeOption);
+			type = c3ChartType.getPlotlyType();
+			mode = c3ChartType.getPlotlyMode();
 		}
 
 		request.setAttribute("type", type);
 		request.setAttribute("mode", mode);
-		request.setAttribute("selectedChartType", typeOption);
-		request.setAttribute("reportId", report.getReportId());
 
 		String templateFileName = plotlyOptions.getTemplate();
 		String jsTemplatesPath = Config.getJsTemplatesPath();

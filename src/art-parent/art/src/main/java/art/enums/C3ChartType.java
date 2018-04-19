@@ -62,9 +62,26 @@ public enum C3ChartType {
 	public String getPlotlyType() {
 		switch (this) {
 			case Line:
-				return "scatter-lines+markers";
 			case Scatter:
-				return "scatter-markers";
+				return "scatter";
+			case Bar:
+				return "bar";
+			default:
+				return value;
+		}
+	}
+
+	/**
+	 * Returns the plotly chart mode string
+	 *
+	 * @return the plotly chart mode string
+	 */
+	public String getPlotlyMode() {
+		switch (this) {
+			case Line:
+				return "lines+markers";
+			case Scatter:
+				return "markers";
 			default:
 				return value;
 		}
@@ -93,7 +110,7 @@ public enum C3ChartType {
 
 	/**
 	 * Returns chart types applicable for plotly charts
-	 * 
+	 *
 	 * @return chart types applicable for plotly charts
 	 */
 	public static List<C3ChartType> getPlotlyChartTypes() {

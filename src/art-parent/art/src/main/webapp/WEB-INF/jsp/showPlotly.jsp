@@ -16,7 +16,7 @@
 		<select class="form-control pull-right" id="select-${chartId}">
 			<option value="--">--</option>
 			<c:forEach var="chartType" items="${chartTypes}">
-				<option value="${encode:forHtmlAttribute(chartType.plotlyType)}" ${selectedChartType == chartType.plotlyType ? "selected" : ""}><spring:message code="${chartType.localizedDescription}"/></option>
+				<option value="${encode:forHtmlAttribute(chartType.value)}"><spring:message code="${chartType.localizedDescription}"/></option>
 			</c:forEach>
 		</select>
 	</div>
@@ -27,7 +27,6 @@
 
 </div>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-basic.min.js"></script>
 
 <c:if test="${not empty localeFileName}">
@@ -92,30 +91,31 @@
 <script>
 	Plotly.newPlot('${chartId}', traces, layout, config);
 
-	function changeChartType(event) {
+	function changeChartType() {
+		//https://stackoverflow.com/questions/39104292/best-way-of-create-delete-restyle-graph-dynamically-with-plotly-js
 		var newChartType = $('#select-${chartId} option:selected').val();
 		if (newChartType !== '--') {
-			$.ajax({
-				type: "POST",
-				url: "${pageContext.request.contextPath}/runReport",
-				data: {reportId: ${reportId}, plotlyType: newChartType,
-					reportFormat: 'plotly', showInline: true},
-				success: function (data, status, xhr) {
-					$("#reportOutput").html(data);
-				},
-				error: function (xhr, status, error) {
-					bootbox.alert(xhr.responseText);
+			traces.forEach(function (trace, index) {
+				switch (newChartType) {
+					case "line":
+						trace.type = 'scatter';
+						trace.mode = 'lines+markers';
+						break;
+					case "scatter":
+						trace.type = 'scatter';
+						trace.mode = 'markers';
+						break;
+					case "bar":
+						trace.type = 'bar';
+						break;
+					default:
+						break;
 				}
 			});
+			Plotly.newPlot('${chartId}', traces, layout, config);
 		}
 	}
 
 	//https://api.jquery.com/on/
 	$("#select-${chartId}").on("change", changeChartType);
-
-	var token = $("meta[name='_csrf']").attr("content");
-	var header = $("meta[name='_csrf_header']").attr("content");
-	$(document).ajaxSend(function (e, xhr, options) {
-		xhr.setRequestHeader(header, token);
-	});
 </script>
