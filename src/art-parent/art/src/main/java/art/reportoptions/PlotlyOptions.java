@@ -22,12 +22,12 @@ import java.util.List;
 
 /**
  * Represents options for plotly.js reports
- * 
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlotlyOptions {
-	
+
 	private String template;
 	private String barmode;
 	private String xColumn;
@@ -35,6 +35,66 @@ public class PlotlyOptions {
 	private String type;
 	private String mode;
 	private List<String> chartTypes;
+	private String title;
+	private String xAxisTitle;
+	private String yAxisTitle;
+	private boolean showLegend = true;
+
+	/**
+	 * @return the showLegend
+	 */
+	public boolean isShowLegend() {
+		return showLegend;
+	}
+
+	/**
+	 * @param showLegend the showLegend to set
+	 */
+	public void setShowLegend(boolean showLegend) {
+		this.showLegend = showLegend;
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	/**
+	 * @return the xAxisTitle
+	 */
+	public String getxAxisTitle() {
+		return xAxisTitle;
+	}
+
+	/**
+	 * @param xAxisTitle the xAxisTitle to set
+	 */
+	public void setxAxisTitle(String xAxisTitle) {
+		this.xAxisTitle = xAxisTitle;
+	}
+
+	/**
+	 * @return the yAxisTitle
+	 */
+	public String getyAxisTitle() {
+		return yAxisTitle;
+	}
+
+	/**
+	 * @param yAxisTitle the yAxisTitle to set
+	 */
+	public void setyAxisTitle(String yAxisTitle) {
+		this.yAxisTitle = yAxisTitle;
+	}
 
 	/**
 	 * @return the chartTypes
@@ -133,5 +193,5 @@ public class PlotlyOptions {
 	public void setType(String type) {
 		this.type = type;
 	}
-	
+
 }

@@ -42,6 +42,7 @@
 	//https://code.tutsplus.com/tutorials/create-interactive-charts-using-plotlyjs-getting-started--cms-29029
 	//https://codeburst.io/notes-from-the-latest-plotly-js-release-b035a5b43e21
 	//http://terokarvinen.com/2016/simple-line-graph-with-plotly-js
+	//https://plot.ly/javascript/line-charts/
 	var dataString = '${data}';
 	var data = JSON.parse(dataString);
 
@@ -83,7 +84,18 @@
 		});
 	}
 
-	var layout = {};
+	var layout = {
+		title: '${options.title}',
+		xaxis: {
+			title: '${options.xAxisTitle}'
+		},
+		yaxis: {
+			title: '${options.yAxisTitle}'
+		},
+		showlegend: ${options.showLegend},
+		barmode : '${options.barmode}'
+	};
+
 	//https://community.plot.ly/t/remove-options-from-the-hover-toolbar/130/4
 	//https://github.com/plotly/plotly.js/blob/master/src/components/modebar/buttons.js
 	//https://github.com/rwl/plotly/issues/6

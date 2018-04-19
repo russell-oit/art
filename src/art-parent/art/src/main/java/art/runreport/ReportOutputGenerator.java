@@ -2664,7 +2664,7 @@ public class ReportOutputGenerator {
 		}
 
 		String type = plotlyOptions.getType();
-		String mode = plotlyOptions.getMode();;
+		String mode = plotlyOptions.getMode();
 		String typeOption = reportOptions.getPlotlyType();
 		if (StringUtils.isNotBlank(typeOption)) {
 			C3ChartType c3ChartType = C3ChartType.toEnum(typeOption);
