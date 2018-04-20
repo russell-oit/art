@@ -49,6 +49,7 @@ public class PlotlyOptions implements Serializable {
 	private String textPosition;
 	private String hoverInfo;
 	private String orientation;
+	private String pieValueColumn;
 
 	/**
 	 * @return the showLegend
@@ -314,6 +315,20 @@ public class PlotlyOptions implements Serializable {
 	 */
 	public void setOrientation(String orientation) {
 		this.orientation = orientation;
+	}
+
+	/**
+	 * @return the pieValueColumn
+	 */
+	public String getPieValueColumn() {
+		return pieValueColumn;
+	}
+
+	/**
+	 * @param pieValueColumn the pieValueColumn to set
+	 */
+	public void setPieValueColumn(String pieValueColumn) {
+		this.pieValueColumn = pieValueColumn;
 	}
 
 }

@@ -54,10 +54,12 @@
 	var yColumnsString = '${yColumns}';
 	var yColumns = JSON.parse(yColumnsString);
 	var hole = ${options.hole};
+	var pieValueColumn = '${options.pieValueColumn}';
 
 	if (xColumn) {
 		var allX = [];
 		var allY = [];
+		var pieValues = [];
 
 		yColumns.forEach(function (yCol, index) {
 			allY[index] = [];
@@ -71,6 +73,9 @@
 			yColumns.forEach(function (yCol, index) {
 				allY[index].push(val[yCol]);
 			});
+			if (pieValueColumn) {
+				pieValues.push(val[pieValueColumn]);
+			}
 		});
 
 		allY.forEach(function (rowYValue, index) {
@@ -82,10 +87,16 @@
 				type: type,
 				mode: mode,
 				orientation: orientation,
-				values: rowYValue,
 				labels: allX,
 				hole: hole
 			};
+
+			if (pieValueColumn) {
+				trace.values = pieValues;
+				trace.name = pieValueColumn;
+			} else {
+				trace.values = rowYValue;
+			}
 
 			if (orientation === 'h' && type === 'bar') {
 				trace.x = rowYValue;
