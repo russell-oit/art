@@ -17,6 +17,7 @@
  */
 package art.reportoptions;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +26,9 @@ import java.util.Map;
  * 
  * @author Timothy Anyona
  */
-public class Reporti18nOptions {
+public class Reporti18nOptions implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private List<Map<String, String>> name;
 	private List<Map<String, String>> shortDescription;
 	private List<Map<String, String>> description;

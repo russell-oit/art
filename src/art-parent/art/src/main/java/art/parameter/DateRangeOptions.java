@@ -17,6 +17,7 @@
  */
 package art.parameter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,8 +27,9 @@ import java.util.List;
  *
  * @author Timothy Anyona
  */
-public class DateRangeOptions {
+public class DateRangeOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private DateRangeDestination fromParameter;
 	private DateRangeDestination toParameter;
 	private String format = "MMMM dd, yyyy";

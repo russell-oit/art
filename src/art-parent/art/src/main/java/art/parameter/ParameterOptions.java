@@ -17,13 +17,16 @@
  */
 package art.parameter;
 
+import java.io.Serializable;
+
 /**
  * Represents parameter options
  * 
  * @author Timothy Anyona
  */
-public class ParameterOptions {
+public class ParameterOptions implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private Parameteri18nOptions i18n;
 	private DateRangeOptions dateRange;
 

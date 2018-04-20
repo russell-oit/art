@@ -18,6 +18,7 @@
 package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 
 /**
  * Represents report options that can be used in a wide variety of report types
@@ -25,8 +26,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GeneralReportOptions {
+public class GeneralReportOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L; //need serializable for cewolf charts
 	private boolean usesGroovy;
 	private Reporti18nOptions i18n;
 	private C3Options c3;

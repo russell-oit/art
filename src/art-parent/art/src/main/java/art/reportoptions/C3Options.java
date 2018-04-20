@@ -18,6 +18,7 @@
 package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -26,8 +27,9 @@ import java.util.List;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class C3Options {
+public class C3Options implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String cssFile;
 	private List<String> chartTypes;
 	private String x;

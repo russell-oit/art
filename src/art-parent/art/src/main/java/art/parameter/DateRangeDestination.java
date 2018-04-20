@@ -17,13 +17,16 @@
  */
 package art.parameter;
 
+import java.io.Serializable;
+
 /**
  * Represents destination parameter details for date range parameters
  *
  * @author Timothy Anyona
  */
-public class DateRangeDestination {
+public class DateRangeDestination implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String name;
 	private String format = "yyyy-MM-dd";
 
