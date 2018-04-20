@@ -12,7 +12,7 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <c:if test="${not empty chartTypes}">
-	<div class="row form-inline" style="margin-bottom: 10px">
+	<div class="row form-inline" style="margin-bottom: 10px; margin-right: 1px">
 		<select class="form-control pull-right" id="select-${chartId}">
 			<option value="--">--</option>
 			<c:forEach var="chartType" items="${chartTypes}">
@@ -23,7 +23,7 @@
 </c:if>
 
 
-<div id="${chartId}">
+<div id="${chartId}" style="margin-right: 2px">
 
 </div>
 
