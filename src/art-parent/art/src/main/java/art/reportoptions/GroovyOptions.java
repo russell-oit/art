@@ -18,6 +18,7 @@
 package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +28,9 @@ import java.util.Map;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GroovyOptions {
+public class GroovyOptions implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private List<String> columns;
 	private List<Map<String, String>> columnDataTypes;
 

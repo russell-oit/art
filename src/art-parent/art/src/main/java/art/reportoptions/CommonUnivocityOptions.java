@@ -20,6 +20,7 @@ package art.reportoptions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.univocity.parsers.common.processor.ObjectRowWriterProcessor;
 import com.univocity.parsers.conversions.Conversions;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -33,8 +34,9 @@ import org.apache.commons.lang3.StringUtils;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CommonUnivocityOptions {
+public class CommonUnivocityOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String dateFormat;
 	private String dateTimeFormat;
 	private String numberFormat;

@@ -17,14 +17,17 @@
  */
 package art.destinationoptions;
 
+import java.io.Serializable;
+
 /**
  * Represents options for network share destinations
  *
  * @author Timothy Anyona
  */
-public class NetworkShareOptions {
+public class NetworkShareOptions implements Serializable {
 	//https://github.com/hierynomus/smbj/blob/master/src/main/java/com/hierynomus/smbj/SmbConfig.java
 
+	private static final long serialVersionUID = 1L;
 	private boolean anonymousUser;
 	private boolean guestUser;
 	private Long timeoutSeconds;

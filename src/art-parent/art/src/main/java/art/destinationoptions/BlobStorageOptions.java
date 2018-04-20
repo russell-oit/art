@@ -17,13 +17,16 @@
  */
 package art.destinationoptions;
 
+import java.io.Serializable;
+
 /**
  * Options for blob store destinations i.e. s3, azure
  *
  * @author Timothy Anyona
  */
-public class BlobStorageOptions {
+public class BlobStorageOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private boolean createContainer;
 	private String containerLocation;
 

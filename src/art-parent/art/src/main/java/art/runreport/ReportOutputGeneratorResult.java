@@ -17,12 +17,16 @@
  */
 package art.runreport;
 
+import java.io.Serializable;
+
 /**
  * Represents a report output generator result
  * 
  * @author Timothy Anyona
  */
-public class ReportOutputGeneratorResult {
+public class ReportOutputGeneratorResult implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private String message;
 	private boolean success;
 	private Integer rowCount;

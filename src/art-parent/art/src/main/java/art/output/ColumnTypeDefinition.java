@@ -18,14 +18,16 @@
 package art.output;
 
 import art.enums.ColumnType;
+import java.io.Serializable;
 
 /**
  * Represents a description of the column type of a resultset column
  * 
  * @author Timothy Anyona
  */
-public class ColumnTypeDefinition {
+public class ColumnTypeDefinition implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private ColumnType columnType;
 	private int sqlType;
 

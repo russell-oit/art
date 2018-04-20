@@ -18,6 +18,7 @@
 package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 
 /**
  * Represents report options for datamaps reports
@@ -25,8 +26,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DatamapsOptions {
+public class DatamapsOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String width = "500px";
 	private String height = "300px";
 	private String datamapsJsFile;

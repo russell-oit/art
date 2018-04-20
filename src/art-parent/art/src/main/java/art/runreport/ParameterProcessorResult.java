@@ -19,6 +19,7 @@ package art.runreport;
 
 import art.report.ChartOptions;
 import art.reportparameter.ReportParameter;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,9 @@ import java.util.Map;
  * 
  * @author Timothy Anyona
  */
-public class ParameterProcessorResult {
+public class ParameterProcessorResult implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private List<ReportParameter> reportParamsList;
 	private Map<String, ReportParameter> reportParamsMap;
 	private ReportOptions reportOptions;

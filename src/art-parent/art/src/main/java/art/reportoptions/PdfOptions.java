@@ -18,6 +18,7 @@
 package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 
 /**
  * Options for pdf output
@@ -25,8 +26,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PdfOptions {
+public class PdfOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private boolean pdfCanPrint = true;
 	private boolean pdfCanCopyContent = true;
 	private boolean pdfCanModify = true;

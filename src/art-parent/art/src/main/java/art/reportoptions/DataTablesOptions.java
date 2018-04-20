@@ -26,6 +26,7 @@ import art.utils.ArtUtils;
  */
 public class DataTablesOptions extends CsvServerOptions {
 
+	private static final long serialVersionUID = 1L;
 	private boolean showColumnFilters;
 	private String inputDateFormat = ArtUtils.ISO_DATE_FORMAT;
 	private String outputDateFormat = ""; //if blank, no formatting will be done

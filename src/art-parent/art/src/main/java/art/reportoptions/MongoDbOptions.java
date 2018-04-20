@@ -28,6 +28,7 @@ import java.util.Map;
  */
 public class MongoDbOptions extends DataTablesOptions {
 	
+	private static final long serialVersionUID = 1L;
 	private List<String> columns;
 	private List<Map<String, String>> columnDataTypes;
 	private ReportType reportType = ReportType.DataTables;
