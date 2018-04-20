@@ -345,7 +345,7 @@ Edit report page
 				optionsEditor.setShowPrintMargin(false);
 				optionsEditor.setOption("showLineNumbers", false);
 				optionsEditor.setOption("maxLines", 20);
-				optionsEditor.setOption("minLines", 5);
+				optionsEditor.setOption("minLines", 7);
 				document.getElementById('optionsEditor').style.fontSize = '14px';
 
 				var options = $('#options');

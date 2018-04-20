@@ -85,7 +85,7 @@ Edit parameter definition
 				jsonEditor.setShowPrintMargin(false);
 				jsonEditor.setOption("showLineNumbers", false);
 				jsonEditor.setOption("maxLines", 20);
-				jsonEditor.setOption("minLines", 5);
+				jsonEditor.setOption("minLines", 7);
 				document.getElementById('jsonEditor').style.fontSize = '14px';
 
 				var options = $('#options');
