@@ -62,10 +62,9 @@ public enum C3ChartType {
 	public String getPlotlyType() {
 		switch (this) {
 			case Line:
-			case Scatter:
 				return "scatter";
-			case Bar:
-				return "bar";
+			case Donut:
+				return "pie";
 			default:
 				return value;
 		}
@@ -83,7 +82,7 @@ public enum C3ChartType {
 			case Scatter:
 				return "markers";
 			default:
-				return value;
+				return "";
 		}
 	}
 
@@ -119,6 +118,7 @@ public enum C3ChartType {
 		items.add(Bar);
 		items.add(Scatter);
 		items.add(Pie);
+		items.add(Donut);
 		return items;
 	}
 

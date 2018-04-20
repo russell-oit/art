@@ -53,6 +53,7 @@
 	var mode = '${mode}';
 	var yColumnsString = '${yColumns}';
 	var yColumns = JSON.parse(yColumnsString);
+	var hole = ${options.hole};
 
 	if (xColumn) {
 		var allX = [];
@@ -83,7 +84,7 @@
 				orientation: orientation,
 				values: rowYValue,
 				labels: allX,
-				hole: ${options.hole}
+				hole: hole
 			};
 
 			if (orientation === 'h' && type === 'bar') {
@@ -172,6 +173,15 @@
 						break;
 					case "pie":
 						trace.type = 'pie';
+						trace.hole = 0.0;
+						break;
+					case "donut":
+						trace.type = 'pie';
+						if (hole <= 0) {
+							trace.hole = 0.4;
+						} else {
+							trace.hole = hole;
+						}
 						break;
 					default:
 						break;
