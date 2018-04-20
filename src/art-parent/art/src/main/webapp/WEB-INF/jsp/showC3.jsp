@@ -63,16 +63,29 @@
 		data: data
 	};
 
+	var axis = {};
 	if (x) {
 		//https://github.com/jonschlinkert/set-value
-		$.extend(options, {
-			axis: {
-				x: {
-					type: 'category'
-				}
+		$.extend(axis, {
+			x: {
+				type: 'category'
 			}
 		});
 	}
+	axis.rotated = ${options.rotatedAxis};
+	
+	options.axis = axis;
+
+	//http://c3js.org/reference.html
+	$.extend(options, {
+		legend: {
+			show: ${options.showLegend}
+		},
+		tooltip: {
+			show: ${options.showTooltip},
+			grouped: ${options.groupedTooltip}
+		}
+	});
 </script>
 
 <c:if test="${not empty templateFileName}">

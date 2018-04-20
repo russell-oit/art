@@ -36,6 +36,10 @@ public class C3Options implements Serializable {
 	private String type;
 	private List<String> value;
 	private String template;
+	private boolean groupedTooltip = true;
+	private boolean showLegend = true;
+	private boolean rotatedAxis;
+	private boolean showTooltip = true;
 
 	/**
 	 * @return the x
@@ -119,5 +123,61 @@ public class C3Options implements Serializable {
 	 */
 	public void setCssFile(String cssFile) {
 		this.cssFile = cssFile;
+	}
+
+	/**
+	 * @return the groupedTooltip
+	 */
+	public boolean isGroupedTooltip() {
+		return groupedTooltip;
+	}
+
+	/**
+	 * @param groupedTooltip the groupedTooltip to set
+	 */
+	public void setGroupedTooltip(boolean groupedTooltip) {
+		this.groupedTooltip = groupedTooltip;
+	}
+
+	/**
+	 * @return the showLegend
+	 */
+	public boolean isShowLegend() {
+		return showLegend;
+	}
+
+	/**
+	 * @param showLegend the showLegend to set
+	 */
+	public void setShowLegend(boolean showLegend) {
+		this.showLegend = showLegend;
+	}
+
+	/**
+	 * @return the rotatedAxis
+	 */
+	public boolean isRotatedAxis() {
+		return rotatedAxis;
+	}
+
+	/**
+	 * @param rotatedAxis the rotatedAxis to set
+	 */
+	public void setRotatedAxis(boolean rotatedAxis) {
+		this.rotatedAxis = rotatedAxis;
+	}
+
+	/**
+	 * @return the showTooltip
+	 */
+	public boolean isShowTooltip() {
+		return showTooltip;
+	}
+
+	/**
+	 * @param showTooltip the showTooltip to set
+	 */
+	public void setShowTooltip(boolean showTooltip) {
+		this.showTooltip = showTooltip;
 	}
 }
