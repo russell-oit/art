@@ -7,6 +7,8 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+
 <div id="${outputDivId}">
 
 </div>
@@ -18,7 +20,7 @@
 	//set default values. can be overridden in template file
 	//https://github.com/davidguttman/react-pivot
 	//https://github.com/davidguttman/react-pivot/blob/master/index.jsx
-	var rowsString = '${rows}';
+	var rowsString = '${encode:forJavaScript(rows)}';
 	var rows = JSON.parse(rowsString);
 
 	var options = {
@@ -29,7 +31,7 @@
 	};
 </script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>
 
 <script type="text/javascript">
 	ReactPivot(document.getElementById('${outputDivId}'), options);

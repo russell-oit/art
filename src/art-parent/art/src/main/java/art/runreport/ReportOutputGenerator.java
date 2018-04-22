@@ -131,7 +131,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bson.types.ObjectId;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
-import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -1440,7 +1439,6 @@ public class ReportOutputGenerator {
 			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
 		}
 		String jsonData = jsonOutputResult.getJsonData();
-		jsonData = Encode.forJavaScript(jsonData);
 		rowsRetrieved = jsonOutputResult.getRowCount();
 
 		String templateFileName = report.getTemplate();
