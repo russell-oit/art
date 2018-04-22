@@ -2064,7 +2064,6 @@ public class ReportOutputGenerator {
 			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
 		}
 		String jsonData = jsonOutputResult.getJsonData();
-		jsonData = Encode.forJavaScript(jsonData);
 		rowsRetrieved = jsonOutputResult.getRowCount();
 
 		String templateFileName = report.getTemplate();
