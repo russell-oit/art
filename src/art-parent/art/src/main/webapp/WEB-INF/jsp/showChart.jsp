@@ -16,14 +16,14 @@ Display a chart report
 
 <div align="center" style="width: 90%;">
 	<cewolf:chart 
-		id="${htmlElementId}" 
-		title="${chart.title}" 
-		type="${chart.type}" 
-		xaxislabel="${chart.xAxisLabel}" 
-		yaxislabel="${chart.yAxisLabel}"
+		id="${encode:forHtmlAttribute(htmlElementId)}" 
+		title="${encode:forHtmlAttribute(chart.title)}" 
+		type="${encode:forHtmlAttribute(chart.type)}" 
+		xaxislabel="${encode:forHtmlAttribute(chart.xAxisLabel)}" 
+		yaxislabel="${encode:forHtmlAttribute(chart.yAxisLabel)}"
 		showlegend="${chart.chartOptions.showLegend}">
 
-		<cewolf:colorpaint color="${chart.backgroundColor}"/>
+		<cewolf:colorpaint color="${encode:forHtmlAttribute(chart.backgroundColor)}"/>
 
 		<cewolf:data>
 			<cewolf:producer id="chart"/>
@@ -34,7 +34,7 @@ Display a chart report
 	</cewolf:chart>
 
 	<cewolf:img 
-		chartid="${htmlElementId}" 
+		chartid="${encode:forHtmlAttribute(htmlElementId)}" 
 		renderer="/cewolf" 
 		forceSessionId="false" 
 		width="${chart.chartOptions.width}" 
