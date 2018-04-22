@@ -272,7 +272,7 @@
 </script>
 
 <c:if test="${not empty templateFileName}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>
 </c:if>
 
 <c:choose>
