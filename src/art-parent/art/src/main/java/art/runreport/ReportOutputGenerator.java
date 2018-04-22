@@ -2426,7 +2426,6 @@ public class ReportOutputGenerator {
 				throw new IllegalArgumentException("Unexpected OrgChart report type: " + reportType);
 		}
 
-		jsonData = Encode.forJavaScript(jsonData);
 		request.setAttribute("data", jsonData);
 
 		String jsTemplatesPath = Config.getJsTemplatesPath();
@@ -2463,7 +2462,6 @@ public class ReportOutputGenerator {
 		}
 
 		String optionsJson = ArtUtils.objectToJson(options);
-		optionsJson = Encode.forJavaScript(optionsJson);
 		String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
 		request.setAttribute("containerId", containerId);
 		request.setAttribute("optionsJson", optionsJson);
