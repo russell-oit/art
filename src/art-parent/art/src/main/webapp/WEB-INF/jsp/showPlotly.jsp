@@ -43,18 +43,18 @@
 	//https://codeburst.io/notes-from-the-latest-plotly-js-release-b035a5b43e21
 	//http://terokarvinen.com/2016/simple-line-graph-with-plotly-js
 	//https://plot.ly/javascript/line-charts/
-	var dataString = '${data}';
+	var dataString = '${encode:forJavaScript(data)}';
 	var data = JSON.parse(dataString);
 
 	var traces = [];
 
-	var xColumn = '${xColumn}';
-	var type = '${type}';
-	var mode = '${mode}';
-	var yColumnsString = '${yColumns}';
+	var xColumn = '${encode:forJavaScript(xColumn)}';
+	var type = '${encode:forJavaScript(type)}';
+	var mode = '${encode:forJavaScript(mode)}';
+	var yColumnsString = '${encode:forJavaScript(yColumns)}';
 	var yColumns = JSON.parse(yColumnsString);
 	var hole = ${options.hole};
-	var pieValueColumn = '${options.pieValueColumn}';
+	var pieValueColumn = '${encode:forJavaScript(options.pieValueColumn)}';
 
 	if (xColumn) {
 		var allX = [];
@@ -103,8 +103,8 @@
 				trace.y = allX;
 			}
 
-			var textPosition = '${options.textPosition}';
-			var hoverInfo = '${options.hoverInfo}';
+			var textPosition = '${encode:forJavaScript(options.textPosition)}';
+			var hoverInfo = '${encode:forJavaScript(options.hoverInfo)}';
 			if (hoverInfo) {
 				trace.hoverinfo = hoverInfo;
 			}
@@ -125,15 +125,15 @@
 	}
 
 	var layout = {
-		title: '${options.title}',
+		title: '${encode:forJavaScript(options.title)}',
 		xaxis: {
-			title: '${options.xAxisTitle}'
+			title: '${encode:forJavaScript(options.xAxisTitle)}'
 		},
 		yaxis: {
-			title: '${options.yAxisTitle}'
+			title: '${encode:forJavaScript(options.yAxisTitle)}'
 		},
 		showlegend: ${options.showLegend},
-		barmode: '${options.barmode}'
+		barmode: '${encode:forJavaScript(options.barmode)}'
 	};
 
 	var height = ${options.height};
@@ -169,7 +169,7 @@
 		//https://stackoverflow.com/questions/39104292/best-way-of-create-delete-restyle-graph-dynamically-with-plotly-js
 		var newChartType = $('#select-${chartId} option:selected').val();
 		if (newChartType !== '--') {
-			traces.forEach(function (trace, index) {
+			traces.forEach(function (trace) {
 				switch (newChartType) {
 					case "line":
 						trace.type = 'scatter';

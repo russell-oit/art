@@ -2624,7 +2624,6 @@ public class ReportOutputGenerator {
 			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
 		}
 		String jsonData = jsonOutputResult.getJsonData();
-		jsonData = Encode.forJavaScript(jsonData);
 		rowsRetrieved = jsonOutputResult.getRowCount();
 		List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 
@@ -2638,7 +2637,6 @@ public class ReportOutputGenerator {
 			}
 		}
 		String yColumnsJson = ArtUtils.objectToJson(yColumns);
-		yColumnsJson = Encode.forJavaScript(yColumnsJson);
 		request.setAttribute("yColumns", yColumnsJson);
 
 		String xColumn = plotlyOptions.getxColumn();
