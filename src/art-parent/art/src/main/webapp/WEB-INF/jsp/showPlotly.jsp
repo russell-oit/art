@@ -45,9 +45,7 @@
 	//https://plot.ly/javascript/line-charts/
 	var dataString = '${encode:forJavaScript(data)}';
 	var data = JSON.parse(dataString);
-
 	var traces = [];
-
 	var xColumn = '${encode:forJavaScript(xColumn)}';
 	var type = '${encode:forJavaScript(type)}';
 	var mode = '${encode:forJavaScript(mode)}';
@@ -55,16 +53,13 @@
 	var yColumns = JSON.parse(yColumnsString);
 	var hole = ${options.hole};
 	var pieValueColumn = '${encode:forJavaScript(options.pieValueColumn)}';
-
 	if (xColumn) {
 		var allX = [];
 		var allY = [];
 		var pieValues = [];
-
 		yColumns.forEach(function (yCol, index) {
 			allY[index] = [];
 		});
-
 		//https://medium.com/@vworri/use-plotly-in-javascript-to-creat-a-bar-graph-from-json-82d7220b463d
 		//https://github.com/plotly/plotly.js/issues/1104
 		//https://stackoverflow.com/questions/45931909/apply-json-data-to-barchart-plotly
@@ -77,7 +72,6 @@
 				pieValues.push(val[pieValueColumn]);
 			}
 		});
-
 		allY.forEach(function (rowYValue, index) {
 			var orientation = '${options.orientation}';
 			var trace = {
@@ -90,13 +84,12 @@
 				labels: allX,
 				hole: hole
 			};
-
-			if (pieValueColumn) {
+			if (pieValueColumn && type === 'pie') {
 				trace.values = pieValues;
 				trace.name = pieValueColumn;
-			} else {
-				trace.values = rowYValue;
 			}
+			trace.nonPieName = yColumns[index];
+			trace.notPieValues = rowYValue;
 
 			if (orientation === 'h' && type === 'bar') {
 				trace.x = rowYValue;
@@ -135,7 +128,6 @@
 		showlegend: ${options.showLegend},
 		barmode: '${encode:forJavaScript(options.barmode)}'
 	};
-
 	var height = ${options.height};
 	if (height > 0) {
 		layout.height = height;
@@ -155,8 +147,7 @@
 	var config = {
 		modeBarButtonsToRemove: ['sendDataToCloud'],
 		displaylogo: false
-	};
-</script>
+	};</script>
 
 <c:if test="${not empty templateFileName}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>
@@ -164,7 +155,6 @@
 
 <script>
 	Plotly.newPlot('${chartId}', traces, layout, config);
-
 	function changeChartType() {
 		//https://stackoverflow.com/questions/39104292/best-way-of-create-delete-restyle-graph-dynamically-with-plotly-js
 		var newChartType = $('#select-${chartId} option:selected').val();
@@ -196,6 +186,13 @@
 						break;
 					default:
 						break;
+				}
+
+				if (pieValueColumn && (newChartType === 'pie' || newChartType === 'donut')) {
+					trace.values = pieValues;
+					trace.name = pieValueColumn;
+				} else {
+					trace.name = trace.nonPieName;
 				}
 			});
 			//https://plot.ly/javascript/plotlyjs-function-reference/#plotlyreact

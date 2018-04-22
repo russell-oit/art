@@ -1239,8 +1239,9 @@ public class Report implements Serializable {
 		defaultC3Options.setChartTypes(chartTypes);
 
 		PlotlyOptions defaultPlotlyOptions = new PlotlyOptions();
+		String defaultPlotlyMode = "lines+markers";
 		defaultPlotlyOptions.setType("scatter");
-		defaultPlotlyOptions.setMode("lines+markers");
+		defaultPlotlyOptions.setMode(defaultPlotlyMode);
 		defaultPlotlyOptions.setChartTypes(chartTypes);
 
 		if (StringUtils.isBlank(options)) {
@@ -1254,9 +1255,12 @@ public class Report implements Serializable {
 			if (c3Options == null) {
 				generalOptions.setC3(defaultC3Options);
 			}
+			
 			PlotlyOptions plotlyOptions = generalOptions.getPlotly();
 			if (plotlyOptions == null) {
 				generalOptions.setPlotly(defaultPlotlyOptions);
+			} else if (plotlyOptions.getMode() == null) {
+				plotlyOptions.setMode(defaultPlotlyMode);
 			}
 		}
 	}
