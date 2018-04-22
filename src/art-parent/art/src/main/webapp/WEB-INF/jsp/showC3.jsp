@@ -64,15 +64,36 @@
 	};
 
 	var axis = {};
+	var xAxis = {};
+	var yAxis = {};
+	
 	if (x) {
 		//https://github.com/jonschlinkert/set-value
+		xAxis.type = 'category';
 		$.extend(axis, {
 			x: {
 				type: 'category'
 			}
 		});
 	}
+	
+	var xAxisLabel = {};
+	var yAxisLabel = {};
+	
+	xAxisLabel.text = '${options.xAxisLabel}';
+	xAxisLabel.position = '${options.xAxisLabelPosition}';
+	
+	yAxisLabel.text = '${options.yAxisLabel}';
+	yAxisLabel.position = '${options.yAxisLabelPosition}';
+	
+	xAxis.label = xAxisLabel;
+	yAxis.label = yAxisLabel;
+	
+	axis.x = xAxis;
+	axis.y = yAxis;
+
 	axis.rotated = ${options.rotatedAxis};
+
 	options.axis = axis;
 
 	var width = ${options.width};

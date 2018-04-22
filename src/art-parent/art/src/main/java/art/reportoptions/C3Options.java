@@ -43,6 +43,10 @@ public class C3Options implements Serializable {
 	private String legendPosition;
 	private int width;
 	private int height;
+	private String xAxisLabel;
+	private String yAxisLabel;
+	private String xAxisLabelPosition;
+	private String yAxisLabelPosition;
 
 	/**
 	 * @return the x
@@ -224,5 +228,61 @@ public class C3Options implements Serializable {
 	 */
 	public void setHeight(int height) {
 		this.height = height;
+	}
+
+	/**
+	 * @return the xAxisLabel
+	 */
+	public String getxAxisLabel() {
+		return xAxisLabel;
+	}
+
+	/**
+	 * @param xAxisLabel the xAxisLabel to set
+	 */
+	public void setxAxisLabel(String xAxisLabel) {
+		this.xAxisLabel = xAxisLabel;
+	}
+
+	/**
+	 * @return the yAxisLabel
+	 */
+	public String getyAxisLabel() {
+		return yAxisLabel;
+	}
+
+	/**
+	 * @param yAxisLabel the yAxisLabel to set
+	 */
+	public void setyAxisLabel(String yAxisLabel) {
+		this.yAxisLabel = yAxisLabel;
+	}
+
+	/**
+	 * @return the xAxisLabelPosition
+	 */
+	public String getxAxisLabelPosition() {
+		return xAxisLabelPosition;
+	}
+
+	/**
+	 * @param xAxisLabelPosition the xAxisLabelPosition to set
+	 */
+	public void setxAxisLabelPosition(String xAxisLabelPosition) {
+		this.xAxisLabelPosition = xAxisLabelPosition;
+	}
+
+	/**
+	 * @return the yAxisLabelPosition
+	 */
+	public String getyAxisLabelPosition() {
+		return yAxisLabelPosition;
+	}
+
+	/**
+	 * @param yAxisLabelPosition the yAxisLabelPosition to set
+	 */
+	public void setyAxisLabelPosition(String yAxisLabelPosition) {
+		this.yAxisLabelPosition = yAxisLabelPosition;
 	}
 }
