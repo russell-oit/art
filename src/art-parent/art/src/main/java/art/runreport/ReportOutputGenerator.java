@@ -1511,10 +1511,7 @@ public class ReportOutputGenerator {
 				rowsRetrieved = groovyDataSize;
 			}
 
-			//need to escape string for javascript, otherwise you get Unterminated string literal error
-			//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
-			String escapedCsvString = Encode.forJavaScript(csvString);
-			request.setAttribute("csvData", escapedCsvString);
+			request.setAttribute("csvData", csvString);
 		}
 
 		String templateFileName = report.getTemplate();
