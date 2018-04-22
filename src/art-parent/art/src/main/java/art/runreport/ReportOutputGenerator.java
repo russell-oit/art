@@ -1820,6 +1820,12 @@ public class ReportOutputGenerator {
 		}
 		request.setAttribute("x", x);
 
+		List<List<String>> groups = c3Options.getGroups();
+		if (groups != null) {
+			String groupsJson = ArtUtils.objectToJson(groups);
+			request.setAttribute("groups", groupsJson);
+		}
+
 		String templateFileName = c3Options.getTemplate();
 		String jsTemplatesPath = Config.getJsTemplatesPath();
 

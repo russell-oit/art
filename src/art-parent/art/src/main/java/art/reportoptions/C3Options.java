@@ -47,6 +47,7 @@ public class C3Options implements Serializable {
 	private String yAxisLabel;
 	private String xAxisLabelPosition;
 	private String yAxisLabelPosition;
+	private List<List<String>> groups;
 
 	/**
 	 * @return the x
@@ -284,5 +285,19 @@ public class C3Options implements Serializable {
 	 */
 	public void setyAxisLabelPosition(String yAxisLabelPosition) {
 		this.yAxisLabelPosition = yAxisLabelPosition;
+	}
+
+	/**
+	 * @return the groups
+	 */
+	public List<List<String>> getGroups() {
+		return groups;
+	}
+
+	/**
+	 * @param groups the groups to set
+	 */
+	public void setGroups(List<List<String>> groups) {
+		this.groups = groups;
 	}
 }

@@ -58,6 +58,12 @@
 	if (type) {
 		data.type = type;
 	}
+	
+	var groupsString = '${encode:forJavaScript(groups)}';
+	if (groupsString) {
+		var groups = JSON.parse(groupsString);
+		data.groups = groups;
+	}
 
 	var options = {
 		bindto: '#${chartId}',
