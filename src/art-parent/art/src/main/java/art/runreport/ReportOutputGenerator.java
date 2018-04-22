@@ -1794,7 +1794,6 @@ public class ReportOutputGenerator {
 			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
 		}
 		String jsonData = jsonOutputResult.getJsonData();
-		jsonData = Encode.forJavaScript(jsonData);
 		rowsRetrieved = jsonOutputResult.getRowCount();
 		List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 
@@ -1808,7 +1807,6 @@ public class ReportOutputGenerator {
 			}
 		}
 		String valueJson = ArtUtils.objectToJson(value);
-		valueJson = Encode.forJavaScript(valueJson);
 		request.setAttribute("value", valueJson);
 
 		String x = c3Options.getX();
