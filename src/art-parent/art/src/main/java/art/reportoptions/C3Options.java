@@ -40,6 +40,7 @@ public class C3Options implements Serializable {
 	private boolean showLegend = true;
 	private boolean rotatedAxis;
 	private boolean showTooltip = true;
+	private String legendPosition;
 
 	/**
 	 * @return the x
@@ -179,5 +180,19 @@ public class C3Options implements Serializable {
 	 */
 	public void setShowTooltip(boolean showTooltip) {
 		this.showTooltip = showTooltip;
+	}
+
+	/**
+	 * @return the legendPosition
+	 */
+	public String getLegendPosition() {
+		return legendPosition;
+	}
+
+	/**
+	 * @param legendPosition the legendPosition to set
+	 */
+	public void setLegendPosition(String legendPosition) {
+		this.legendPosition = legendPosition;
 	}
 }

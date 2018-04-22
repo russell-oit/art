@@ -79,7 +79,8 @@
 	//http://c3js.org/reference.html
 	$.extend(options, {
 		legend: {
-			show: ${options.showLegend}
+			show: ${options.showLegend},
+			position: '${options.legendPosition}'
 		},
 		tooltip: {
 			show: ${options.showTooltip},
