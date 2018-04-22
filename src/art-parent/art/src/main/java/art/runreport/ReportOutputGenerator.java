@@ -1593,7 +1593,6 @@ public class ReportOutputGenerator {
 				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
 			}
 			String jsonData = jsonOutputResult.getJsonData();
-			jsonData = Encode.forJavaScript(jsonData);
 			rowsRetrieved = jsonOutputResult.getRowCount();
 			List<ResultSetColumn> columns = jsonOutputResult.getColumns();
 			request.setAttribute("data", jsonData);
@@ -2378,7 +2377,6 @@ public class ReportOutputGenerator {
 					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
 					//https://github.com/wnameless/json-flattener
 					resultString = ArtUtils.objectToJson(finalResultList);
-					resultString = Encode.forJavaScript(resultString);
 				}
 
 				request.setAttribute("data", resultString);

@@ -9,6 +9,7 @@
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
@@ -57,25 +58,25 @@
 	//https://stackoverflow.com/questions/35450227/how-to-parse-given-date-string-using-moment-js
 	//http://momentjs.com/docs/
 	var inputDateFormat = 'YYYY-MM-DD'; //moment format e.g. YYYY-MM-DD
-	var javaInputDateFormat = '${options.inputDateFormat}';
+	var javaInputDateFormat = '${encode:forJavaScript(options.inputDateFormat)}';
 	if (javaInputDateFormat) {
 		inputDateFormat = moment().toMomentFormatString(javaInputDateFormat);
 	}
 	
 	var outputDateFormat = ''; //moment format e.g. DD-MMM-YYYY
-	var javaOutputDateFormat = '${options.outputDateFormat}';
+	var javaOutputDateFormat = '${encode:forJavaScript(options.outputDateFormat)}';
 	if (javaOutputDateFormat) {
 		outputDateFormat = moment().toMomentFormatString(javaOutputDateFormat);
 	}
 
 	var inputDateTimeFormat = 'YYYY-MM-DD HH:mm:ss.SSS'; //moment format e.g. YYYY-MM-DD HH:mm:ss.SSS
-	var javaInputDateTimeFormat = '${options.inputDateTimeFormat}';
+	var javaInputDateTimeFormat = '${encode:forJavaScript(options.inputDateTimeFormat)}';
 	if (javaInputDateTimeFormat) {
 		inputDateTimeFormat = moment().toMomentFormatString(javaInputDateTimeFormat);
 	}
 	
 	var outputDateTimeFormat = ''; //moment format e.g. DD-MMM-YYYY HH:mm:ss
-	var javaOutputDateTimeFormat = '${options.outputDateTimeFormat}';
+	var javaOutputDateTimeFormat = '${encode:forJavaScript(options.outputDateTimeFormat)}';
 	if (javaOutputDateTimeFormat) {
 		outputDateTimeFormat = moment().toMomentFormatString(javaOutputDateTimeFormat);
 	}
@@ -211,7 +212,7 @@
 	}
 
 	var download;
-	var reportType = '${reportType}';
+	var reportType = '${encode:forJavaScript(reportType)}';
 	if (reportType === 'DataTablesCsvServer') {
 		download = true;
 	} else {
@@ -284,11 +285,12 @@
 	var i = 0;
 			<c:forEach var="column" items="${columns}">
 	i++;
+	var columnName = "${encode:forJavaScript(column.name)}";
 	var columnDef = {
-		data: "${column.name}",
-		title: "${column.name}"
+		data: columnName,
+		title: columnName
 	};
-	var columnType = '${column.type}';
+	var columnType = '${encode:forJavaScript(column.type)}';
 	if (columnType === 'Numeric') {
 		if (formatAllNumbers || formattedNumberColumns.indexOf(i) !== -1) {
 			//https://stackoverflow.com/questions/1184123/is-it-possible-to-add-dynamically-named-properties-to-javascript-object
@@ -317,7 +319,7 @@
 	columns.push(columnDef);
 			</c:forEach>
 
-	var dataString = '${data}';
+	var dataString = '${encode:forJavaScript(data)}';
 	var data = JSON.parse(dataString);
 	
 	$.extend(options, {
@@ -389,7 +391,7 @@
 	</c:when>
 	<c:when test="${reportType == 'DataTablesCsvServer'}">
 		<script type="text/javascript">
-			var dataFile = '${pageContext.request.contextPath}/js-templates/${dataFileName}';
+			var dataFile = '${pageContext.request.contextPath}/js-templates/${encode:forJavaScript(dataFileName)}';
 				Papa.parse(dataFile, csvConfig);
 		</script>
 	</c:when>
