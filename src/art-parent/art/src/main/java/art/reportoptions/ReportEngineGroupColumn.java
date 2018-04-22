@@ -18,14 +18,16 @@
 package art.reportoptions;
 
 import art.enums.SortOrder;
+import java.io.Serializable;
 
 /**
  * ReportEngine options group column definition
  * 
  * @author Timothy Anyona
  */
-public class ReportEngineGroupColumn {
+public class ReportEngineGroupColumn implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private String id;
 	private Integer level;
 	private boolean showDuplicateValues;

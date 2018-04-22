@@ -1,3 +1,15 @@
+ART 3.5
+* Add field to indicate use of groovy instead of sql in report source
+* Added pivotTableJs, c3 and plotly as report formats for tabular reports
+* Updated chinese translation
+* Fix for mongodb reports showing blank
+* Fix for dygraph database reports not working
+* Fix for test dashboard report not using updated source
+* Allow dynamic change of chart type for C3.js reports
+* Added date range parameter type
+* Added Plotly.js report type
+* Fix for jobs select/deselect all in access rights config updating report groups
+
 ART 3.4
 * Allow jobs to specify the time zone in which the schedule will run
 * Include template file in report export/import

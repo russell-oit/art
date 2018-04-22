@@ -25,6 +25,7 @@ import art.enums.ColumnType;
 import art.enums.EncryptorType;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
+import art.enums.SqlColumnType;
 import art.output.ColumnTypeDefinition;
 import art.output.ResultSetColumn;
 import art.parameter.Parameter;
@@ -242,6 +243,7 @@ public class RunReportHelper {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case Plotly:
 				enableReportFormats = false;
 				break;
 			default:
@@ -354,6 +356,7 @@ public class RunReportHelper {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case Plotly:
 				enablePrint = false;
 				break;
 			default:
@@ -421,6 +424,7 @@ public class RunReportHelper {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case Plotly:
 				enableEmail = false;
 				break;
 			default:
@@ -610,7 +614,6 @@ public class RunReportHelper {
 		//is scroll insensitive much slower than forward only?
 		int resultSetType;
 		if (reportType.isXDocReport()
-				|| reportType.isReportEngine()
 				|| reportType == ReportType.Group
 				|| reportType == ReportType.JasperReportsArt
 				|| reportType == ReportType.JxlsArt
@@ -880,16 +883,16 @@ public class RunReportHelper {
 			ColumnTypeDefinition columnTypeDefinition = columnTypes.get(i);
 			ColumnType columnType = columnTypeDefinition.getColumnType();
 
-			String resultSetColumnType;
+			SqlColumnType resultSetColumnType;
 			switch (columnType) {
 				case Numeric:
-					resultSetColumnType = "numeric";
+					resultSetColumnType = SqlColumnType.Numeric;
 					break;
 				case Date:
-					resultSetColumnType = "datetime";
+					resultSetColumnType = SqlColumnType.Timestamp;
 					break;
 				default:
-					resultSetColumnType = "string";
+					resultSetColumnType = SqlColumnType.String;
 			}
 
 			ResultSetColumn resultSetColumn = new ResultSetColumn();

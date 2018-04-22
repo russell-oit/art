@@ -27,6 +27,7 @@ import java.util.Map;
  */
 public class FixedWidthOptions extends CommonUnivocityOptions {
 
+	private static final long serialVersionUID = 1L;
 	private List<Integer> fieldLengths;
 	private char padding = ' ';
 	private boolean useDefaultPaddingForHeaders = true;

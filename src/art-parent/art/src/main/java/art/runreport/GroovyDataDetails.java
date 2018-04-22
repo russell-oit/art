@@ -19,6 +19,7 @@ package art.runreport;
 
 import art.output.ColumnTypeDefinition;
 import art.output.ResultSetColumn;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -28,8 +29,9 @@ import java.util.Map;
  *
  * @author Timothy Anyona
  */
-public class GroovyDataDetails {
+public class GroovyDataDetails implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private int rowCount;
 	private int colCount;
 	private List<String> columnNames;

@@ -305,6 +305,11 @@ Edit report page
 				//https://stackoverflow.com/questions/28283344/is-there-a-way-to-hide-the-line-numbers-in-ace-editor
 				//sqlEditor.renderer.setShowGutter(false);
 				sqlEditor.setOption("showLineNumbers", true);
+				//https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
+				//https://ace.c9.io/demo/autoresize.html
+				//https://issues.jenkins-ci.org/browse/JENKINS-31585
+				sqlEditor.setOption("maxLines", 30);
+				sqlEditor.setOption("minLines", 10);
 
 				document.getElementById('sqlEditor').style.fontSize = '14px'; //default seems to be 12px
 
@@ -323,6 +328,8 @@ Edit report page
 				//https://github.com/ajaxorg/ace/commit/abb1e4703b737757e20d1e7040943ba4e2483007
 				//https://github.com/ajaxorg/ace/wiki/Configuring-Ace
 				xmlEditor.setOption("showLineNumbers", false);
+				xmlEditor.setOption("maxLines", 30);
+				xmlEditor.setOption("minLines", 10);
 
 				document.getElementById('xmlEditor').style.fontSize = '14px';
 
@@ -337,6 +344,8 @@ Edit report page
 				optionsEditor.setHighlightActiveLine(false);
 				optionsEditor.setShowPrintMargin(false);
 				optionsEditor.setOption("showLineNumbers", false);
+				optionsEditor.setOption("maxLines", 20);
+				optionsEditor.setOption("minLines", 7);
 				document.getElementById('optionsEditor').style.fontSize = '14px';
 
 				var options = $('#options');
@@ -351,6 +360,8 @@ Edit report page
 				jsonEditor.setHighlightActiveLine(false);
 				jsonEditor.setShowPrintMargin(false);
 				jsonEditor.setOption("showLineNumbers", false);
+				jsonEditor.setOption("maxLines", 30);
+				jsonEditor.setOption("minLines", 10);
 				document.getElementById('jsonEditor').style.fontSize = '14px';
 
 				jsonEditor.getSession().setValue(reportSource.val());
@@ -364,6 +375,8 @@ Edit report page
 				groovyEditor.setHighlightActiveLine(false);
 				groovyEditor.setShowPrintMargin(false);
 				groovyEditor.setOption("showLineNumbers", true);
+				groovyEditor.setOption("maxLines", 30);
+				groovyEditor.setOption("minLines", 10);
 				document.getElementById('groovyEditor').style.fontSize = '14px';
 
 				groovyEditor.getSession().setValue(reportSource.val());
@@ -371,10 +384,52 @@ Edit report page
 					reportSource.val(groovyEditor.getSession().getValue());
 				});
 
+				$('#useGroovy').on('switchChange.bootstrapSwitch', function (event, state) {
+					toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
+				});
+
+				toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
 			});
 		</script>
 
 		<script type="text/javascript">
+			function toggleGroovyEditor(reportSource, groovyEditor, sqlEditor) {
+				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
+				switch (reportTypeId) {
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 156: //org chart list
+					case 149: //saiku report
+					case 155: //org chart json
+					case 151: //mongodb
+					case 115: //jasper template
+					case 117: //jxls template
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
+					case 137: //dygraphs csv server
+					case 139: //datatables csv local
+					case 140: //datatables csv server
+					case 145: //datamaps file
+					case 150: //saiku connection
+					case 159: //reportengine file
+						//do nothing
+						break;
+					default:
+						if ($('#useGroovy').is(':checked')) {
+							$("#reportSourceLabel").html("${reportSourceText} (Groovy)");
+							groovyEditor.getSession().setValue(reportSource.val());
+							$("#sqlEditor").hide();
+							$("#groovyEditor").show();
+						} else {
+							$("#reportSourceLabel").html("${reportSourceText} (SQL)");
+							sqlEditor.getSession().setValue(reportSource.val());
+							$("#sqlEditor").show();
+							$("#groovyEditor").hide();
+						}
+				}
+			}
+
 			function toggleVisibleFields() {
 				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
 
@@ -510,6 +565,31 @@ Edit report page
 						$("#sourceReportIdDiv").show();
 				}
 
+				//show/hide use groovy
+				switch (reportTypeId) {
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 156: //org chart list
+					case 149: //saiku report
+					case 155: //org chart json
+					case 151: //mongodb
+					case 115: //jasper template
+					case 117: //jxls template
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
+					case 137: //dygraphs csv server
+					case 139: //datatables csv local
+					case 140: //datatables csv server
+					case 145: //datamaps file
+					case 150: //saiku connection
+					case 159: //reportengine file
+						$("#useGroovyDiv").hide();
+						break;
+					default:
+						$("#useGroovyDiv").show();
+				}
+
 				//show/hide use rules
 				switch (reportTypeId) {
 					case 110: //dashboard
@@ -601,6 +681,7 @@ Edit report page
 					case 156: //org chart list
 					case 157: //org chart ajax
 					case 159: //reportengine file
+					case 160: //plotly
 						$("#templateDiv").show();
 						break;
 					default:
@@ -751,6 +832,7 @@ Edit report page
 					case 155: //org chart json
 					case 156: //org chart list
 					case 157: //org chart ajax
+					case 160: //plotly
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -1615,6 +1697,17 @@ Edit report page
 					<div class="col-md-8">
 						<form:input path="sourceReportId" maxlength="10" class="form-control"/>
 						<form:errors path="sourceReportId" cssClass="error"/>
+					</div>
+				</div>
+				<div id="useGroovyDiv" class="form-group">
+					<label class="control-label col-md-4" for="useGroovy">
+						<spring:message code="reports.label.useGroovy"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="useGroovy" id="useGroovy" class="switch-yes-no"/>
+						</div>
+						<form:errors path="useGroovy" cssClass="error"/>
 					</div>
 				</div>
 

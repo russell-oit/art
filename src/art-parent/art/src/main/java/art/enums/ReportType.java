@@ -49,7 +49,7 @@ public enum ReportType {
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17),
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
-	C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
+	C3(142), Plotly(160), ChartJs(143), Datamaps(144), DatamapsFile(145),
 	Leaflet(146), OpenLayers(147),
 	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157),
 	ReportEngine(158), ReportEngineFile(159);
@@ -89,6 +89,7 @@ public enum ReportType {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case Plotly:
 				return true;
 			default:
 				return false;
@@ -131,6 +132,7 @@ public enum ReportType {
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
+			case Plotly:
 				return false;
 			default:
 				return true;
@@ -752,6 +754,8 @@ public enum ReportType {
 				return "ReportEngine";
 			case ReportEngineFile:
 				return "ReportEngine: File";
+			case Plotly:
+				return "Plotly.js";
 			default:
 				return this.name();
 		}

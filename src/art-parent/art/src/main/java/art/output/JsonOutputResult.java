@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -24,8 +25,9 @@ import java.util.List;
  *
  * @author Timothy Anyona
  */
-public class JsonOutputResult {
+public class JsonOutputResult implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String jsonData;
 	private int rowCount;
 	private List<ResultSetColumn> columns;

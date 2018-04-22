@@ -24,6 +24,7 @@ package art.reportoptions;
  */
 public class CsvOutputUnivocityOptions extends CommonUnivocityOptions {
 	
+	private static final long serialVersionUID = 1L;
 	private char delimiter = ',';
 	private char quote = '"';
 	private boolean quoteAllFields;

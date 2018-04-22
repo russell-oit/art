@@ -18,6 +18,7 @@
 package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 
 /**
  * Options for column naming for template reports
@@ -25,8 +26,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TemplateResultOptions {
+public class TemplateResultOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private boolean useLowerCaseProperties = false;
 	private boolean useColumnLabels = true;
 

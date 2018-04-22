@@ -18,14 +18,16 @@
 package art.destinationoptions;
 
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import java.io.Serializable;
 
 /**
  * Options for amazon s3 - aws sdk destinations
  *
  * @author Timothy Anyona
  */
-public class S3AwsSdkOptions {
+public class S3AwsSdkOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String region;
 	private CannedAccessControlList cannedAcl;
 

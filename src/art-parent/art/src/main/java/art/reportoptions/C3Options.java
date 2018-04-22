@@ -18,6 +18,8 @@
 package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Represents report options for c3.js reports
@@ -25,9 +27,97 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class C3Options {
+public class C3Options implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String cssFile;
+	private List<String> chartTypes;
+	private String x;
+	private String type;
+	private List<String> value;
+	private String template;
+	private boolean groupedTooltip = true;
+	private boolean showLegend = true;
+	private boolean rotatedAxis;
+	private boolean showTooltip = true;
+	private String legendPosition;
+	private int width;
+	private int height;
+	private String xAxisLabel;
+	private String yAxisLabel;
+	private String xAxisLabelPosition;
+	private String yAxisLabelPosition;
+	private List<List<String>> groups;
+
+	/**
+	 * @return the x
+	 */
+	public String getX() {
+		return x;
+	}
+
+	/**
+	 * @param x the x to set
+	 */
+	public void setX(String x) {
+		this.x = x;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the value
+	 */
+	public List<String> getValue() {
+		return value;
+	}
+
+	/**
+	 * @param value the value to set
+	 */
+	public void setValue(List<String> value) {
+		this.value = value;
+	}
+
+	/**
+	 * @return the template
+	 */
+	public String getTemplate() {
+		return template;
+	}
+
+	/**
+	 * @param template the template to set
+	 */
+	public void setTemplate(String template) {
+		this.template = template;
+	}
+
+	/**
+	 * @return the chartTypes
+	 */
+	public List<String> getChartTypes() {
+		return chartTypes;
+	}
+
+	/**
+	 * @param chartTypes the chartTypes to set
+	 */
+	public void setChartTypes(List<String> chartTypes) {
+		this.chartTypes = chartTypes;
+	}
 
 	/**
 	 * @return the cssFile
@@ -41,5 +131,173 @@ public class C3Options {
 	 */
 	public void setCssFile(String cssFile) {
 		this.cssFile = cssFile;
+	}
+
+	/**
+	 * @return the groupedTooltip
+	 */
+	public boolean isGroupedTooltip() {
+		return groupedTooltip;
+	}
+
+	/**
+	 * @param groupedTooltip the groupedTooltip to set
+	 */
+	public void setGroupedTooltip(boolean groupedTooltip) {
+		this.groupedTooltip = groupedTooltip;
+	}
+
+	/**
+	 * @return the showLegend
+	 */
+	public boolean isShowLegend() {
+		return showLegend;
+	}
+
+	/**
+	 * @param showLegend the showLegend to set
+	 */
+	public void setShowLegend(boolean showLegend) {
+		this.showLegend = showLegend;
+	}
+
+	/**
+	 * @return the rotatedAxis
+	 */
+	public boolean isRotatedAxis() {
+		return rotatedAxis;
+	}
+
+	/**
+	 * @param rotatedAxis the rotatedAxis to set
+	 */
+	public void setRotatedAxis(boolean rotatedAxis) {
+		this.rotatedAxis = rotatedAxis;
+	}
+
+	/**
+	 * @return the showTooltip
+	 */
+	public boolean isShowTooltip() {
+		return showTooltip;
+	}
+
+	/**
+	 * @param showTooltip the showTooltip to set
+	 */
+	public void setShowTooltip(boolean showTooltip) {
+		this.showTooltip = showTooltip;
+	}
+
+	/**
+	 * @return the legendPosition
+	 */
+	public String getLegendPosition() {
+		return legendPosition;
+	}
+
+	/**
+	 * @param legendPosition the legendPosition to set
+	 */
+	public void setLegendPosition(String legendPosition) {
+		this.legendPosition = legendPosition;
+	}
+
+	/**
+	 * @return the width
+	 */
+	public int getWidth() {
+		return width;
+	}
+
+	/**
+	 * @param width the width to set
+	 */
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	/**
+	 * @return the height
+	 */
+	public int getHeight() {
+		return height;
+	}
+
+	/**
+	 * @param height the height to set
+	 */
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	/**
+	 * @return the xAxisLabel
+	 */
+	public String getxAxisLabel() {
+		return xAxisLabel;
+	}
+
+	/**
+	 * @param xAxisLabel the xAxisLabel to set
+	 */
+	public void setxAxisLabel(String xAxisLabel) {
+		this.xAxisLabel = xAxisLabel;
+	}
+
+	/**
+	 * @return the yAxisLabel
+	 */
+	public String getyAxisLabel() {
+		return yAxisLabel;
+	}
+
+	/**
+	 * @param yAxisLabel the yAxisLabel to set
+	 */
+	public void setyAxisLabel(String yAxisLabel) {
+		this.yAxisLabel = yAxisLabel;
+	}
+
+	/**
+	 * @return the xAxisLabelPosition
+	 */
+	public String getxAxisLabelPosition() {
+		return xAxisLabelPosition;
+	}
+
+	/**
+	 * @param xAxisLabelPosition the xAxisLabelPosition to set
+	 */
+	public void setxAxisLabelPosition(String xAxisLabelPosition) {
+		this.xAxisLabelPosition = xAxisLabelPosition;
+	}
+
+	/**
+	 * @return the yAxisLabelPosition
+	 */
+	public String getyAxisLabelPosition() {
+		return yAxisLabelPosition;
+	}
+
+	/**
+	 * @param yAxisLabelPosition the yAxisLabelPosition to set
+	 */
+	public void setyAxisLabelPosition(String yAxisLabelPosition) {
+		this.yAxisLabelPosition = yAxisLabelPosition;
+	}
+
+	/**
+	 * @return the groups
+	 */
+	public List<List<String>> getGroups() {
+		return groups;
+	}
+
+	/**
+	 * @param groups the groups to set
+	 */
+	public void setGroups(List<List<String>> groups) {
+		this.groups = groups;
 	}
 }

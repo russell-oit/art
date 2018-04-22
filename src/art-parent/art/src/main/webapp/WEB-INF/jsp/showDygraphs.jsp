@@ -9,6 +9,9 @@
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+
+<spring:message code="pivotTableJs.text.processing" var="processingText" javaScriptEscape="true"/>
 
 <%-- must use table to center chart --%>
 <%-- http://dygraphs.com/tutorial.html --%>
@@ -32,13 +35,13 @@
 </script>
 
 <c:if test="${not empty templateFileName}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>
 </c:if>
 
 <c:choose>
 	<c:when test="${reportType == 'Dygraphs'}">
 		<script type="text/javascript">
-	new Dygraph(document.getElementById("${outputDivId}"), '${csvData}', options);
+	new Dygraph(document.getElementById("${outputDivId}"), '${encode:forJavaScript(csvData)}', options);
 		</script>
 	</c:when>
 	<c:when test="${reportType == 'DygraphsCsvLocal'}">
@@ -59,7 +62,7 @@
 		</p>
 		<script type="text/javascript">
 			var showDygraphs = function (file) {
-				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(processing...)</p>");
+				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(${processingText}...)</p>");
 				//https://www.html5rocks.com/en/tutorials/file/dndfiles/
 				//https://www.nczonline.net/blog/2012/05/15/working-with-files-in-javascript-part-2/
 				//https://www.sitepoint.com/html5-file-drag-drop-read-analyze-upload-progress-bars/
@@ -114,7 +117,7 @@
 	</c:when>
 	<c:when test="${reportType == 'DygraphsCsvServer'}">
 		<script type="text/javascript">
-			var dataFile = '${pageContext.request.contextPath}/js-templates/${dataFileName}';
+			var dataFile = '${pageContext.request.contextPath}/js-templates/${encode:forJavaScript(dataFileName)}';
 				new Dygraph(document.getElementById("${outputDivId}"), dataFile, options);
 		</script>
 	</c:when>

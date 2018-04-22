@@ -19,14 +19,16 @@ package art.reportoptions;
 
 import art.enums.ReportEngineCalculator;
 import art.enums.SortOrder;
+import java.io.Serializable;
 
 /**
  * Reportengine options data column definition
  * 
  * @author Timothy Anyona
  */
-public class ReportEngineDataColumn {
+public class ReportEngineDataColumn implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private String id;
 	private ReportEngineCalculator calculator;
 	private String calculatorFormatter;

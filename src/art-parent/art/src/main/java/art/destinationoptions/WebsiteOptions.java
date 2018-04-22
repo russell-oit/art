@@ -17,6 +17,7 @@
  */
 package art.destinationoptions;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +26,9 @@ import java.util.Map;
  *
  * @author Timothy Anyona
  */
-public class WebsiteOptions {
+public class WebsiteOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String usernameField = "username";
 	private String passwordField = "password";
 	private String fileField = "file";

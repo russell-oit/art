@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.enums.SqlColumnType;
 import art.report.Report;
 import art.runreport.GroovyDataDetails;
 import art.runreport.RunReportHelper;
@@ -94,7 +95,7 @@ public class JsonOutput {
 
 			int sqlType = rsmd.getColumnType(i);
 
-			String columnType;
+			SqlColumnType columnType;
 
 			switch (sqlType) {
 				case Types.NUMERIC:
@@ -106,19 +107,23 @@ public class JsonOutput {
 				case Types.TINYINT:
 				case Types.SMALLINT:
 				case Types.BIGINT:
-					columnType = "numeric";
+					columnType = SqlColumnType.Numeric;
 					break;
 				case Types.DATE:
-					columnType = "date";
+					columnType = SqlColumnType.Date;
 					break;
 				case Types.TIME:
-					columnType = "time";
+					columnType = SqlColumnType.Time;
 					break;
 				case Types.TIMESTAMP:
-					columnType = "datetime";
+					columnType = SqlColumnType.Timestamp;
+					break;
+				case Types.CHAR:
+				case Types.VARCHAR:
+					columnType = SqlColumnType.String;
 					break;
 				default:
-					columnType = "string";
+					columnType = SqlColumnType.Unhandled;
 			}
 
 			column.setType(columnType);

@@ -8,6 +8,7 @@
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 
 <div id="${containerId}" style="position: relative; width: ${options.width}; height: ${options.height}; margin: 0 auto;">
@@ -16,10 +17,10 @@
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/d3-3.5.17/d3.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/topojson-2.2.0/topojson.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${options.datamapsJsFile}"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(options.datamapsJsFile)}"></script>
 
 <c:if test="${not empty options.cssFile}">
-	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${options.cssFile}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(options.cssFile)}">
 </c:if>
 
 <script>
@@ -52,19 +53,20 @@
 	//https://github.com/markmarkoh/datamaps/blob/master/src/examples/highmaps_world.html
 
 	<c:if test="${not empty data}">
-		var jsonData = ${data};
+	var dataString = '${encode:forJavaScript(data)}';
+	var jsonData = JSON.parse(dataString);
 	</c:if>
 
 	var dataUrl = null;
 	<c:if test="${not empty options.dataFile}">
-	dataUrl = "${pageContext.request.contextPath}/js-templates/${options.dataFile}";
+	dataUrl = "${pageContext.request.contextPath}/js-templates/${encode:forJavaScript(options.dataFile)}";
 	</c:if>
 
-		var dataType = '${options.dataType}';
+		var dataType = '${encode:forJavaScript(options.dataType)}';
 
 		var geographyConfig = {};
 	<c:if test="${not empty options.mapFile}">
-		var mapFileUrl = "${pageContext.request.contextPath}/js-templates/${options.mapFile}";
+		var mapFileUrl = "${pageContext.request.contextPath}/js-templates/${encode:forJavaScript(options.mapFile)}";
 			$.extend(geographyConfig, {
 				dataUrl: mapFileUrl
 			});
@@ -78,4 +80,4 @@
 			};
 </script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>

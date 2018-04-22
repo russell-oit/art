@@ -7,6 +7,8 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+
 
 <canvas id="${chartId}" width="${options.width}" height="${options.height}">
 
@@ -20,11 +22,12 @@
 <script type="text/javascript">
 	//http://www.chartjs.org/docs/
 	//https://www.sitepoint.com/introduction-chart-js-2-0-six-examples/
-	var jsonData = ${data};
+	var dataString = '${encode:forJavaScript(data)}';
+	var jsonData = JSON.parse(dataString);
 	var config = {};
 </script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>
 
 <script type="text/javascript">
 	var ctx = $("#${chartId}");

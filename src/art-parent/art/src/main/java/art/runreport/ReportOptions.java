@@ -32,6 +32,21 @@ public class ReportOptions implements Serializable {
 	private boolean showSql;
 	private boolean prettyPrint;
 	private boolean swapAxes;
+	private String plotlyType;
+
+	/**
+	 * @return the plotlyType
+	 */
+	public String getPlotlyType() {
+		return plotlyType;
+	}
+
+	/**
+	 * @param plotlyType the plotlyType to set
+	 */
+	public void setPlotlyType(String plotlyType) {
+		this.plotlyType = plotlyType;
+	}
 
 	/**
 	 * @return the prettyPrint

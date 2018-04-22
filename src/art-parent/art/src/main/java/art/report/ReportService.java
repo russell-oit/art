@@ -159,6 +159,7 @@ public class ReportService {
 			report.setOpenPassword(rs.getString("OPEN_PASSWORD"));
 			report.setModifyPassword(rs.getString("MODIFY_PASSWORD"));
 			report.setSourceReportId(rs.getInt("SOURCE_REPORT_ID"));
+			report.setUseGroovy(rs.getBoolean("USE_GROOVY"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -185,14 +186,14 @@ public class ReportService {
 					CloneOptions cloneOptions = mapper.readValue(options, CloneOptions.class);
 					report.setCloneOptions(cloneOptions);
 				} catch (IOException ex) {
-					throw new SQLException(ex);
+					logger.error("Error. Report Id {}", report.getReportId(), ex);
 				}
 			}
 
 			try {
 				report.loadGeneralOptions();
 			} catch (IOException ex) {
-				throw new SQLException(ex);
+				logger.error("Error. Report Id {}", report.getReportId(), ex);
 			}
 
 			return type.cast(report);
@@ -850,8 +851,9 @@ public class ReportService {
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
+					+ " USE_GROOVY,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 42) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 43) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -894,6 +896,7 @@ public class ReportService {
 				report.getModifyPassword(),
 				encryptorId,
 				report.getSourceReportId(),
+				BooleanUtils.toInteger(report.isUseGroovy()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -916,7 +919,7 @@ public class ReportService {
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
 					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
 					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
-					+ " SOURCE_REPORT_ID=?,"
+					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -960,6 +963,7 @@ public class ReportService {
 				report.getModifyPassword(),
 				encryptorId,
 				report.getSourceReportId(),
+				BooleanUtils.toInteger(report.isUseGroovy()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

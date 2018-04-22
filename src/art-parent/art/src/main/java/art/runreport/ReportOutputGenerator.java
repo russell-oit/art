@@ -30,8 +30,10 @@ import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
+import art.enums.C3ChartType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.enums.SqlColumnType;
 import art.enums.ZipType;
 import art.output.CsvOutputArt;
 import art.output.CsvOutputUnivocity;
@@ -77,6 +79,7 @@ import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JFreeChartOptions;
 import art.reportoptions.MongoDbOptions;
 import art.reportoptions.OrgChartOptions;
+import art.reportoptions.PlotlyOptions;
 import art.reportoptions.ReportEngineOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
@@ -87,15 +90,20 @@ import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
+import fr.opensagres.xdocreport.core.XDocReportException;
+import freemarker.template.TemplateException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -110,15 +118,19 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.sf.cewolfart.ChartValidationException;
+import net.sf.cewolfart.DatasetProduceException;
+import net.sf.cewolfart.PostProcessingException;
+import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bson.types.ObjectId;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
-import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -141,6 +153,27 @@ public class ReportOutputGenerator {
 	private boolean pdfPageNumbers = true;
 	private String dynamicOpenPassword;
 	private String dynamicModifyPassword;
+	//global variables
+	private ResultSet rs;
+	private Report report;
+	private ReportType reportType;
+	private ReportRunner reportRunner;
+	private Object groovyData;
+	private Integer groovyDataSize;
+	private Integer rowsRetrieved;
+	private Locale locale;
+	private PrintWriter writer;
+	private String fullOutputFilename;
+	private MessageSource messageSource;
+	private ReportFormat reportFormat;
+	private String contextPath;
+	private String fileName;
+	private List<ReportParameter> applicableReportParamsList;
+	private ReportOptions reportOptions;
+	private Map<String, ReportParameter> reportParamsMap;
+	private ChartOptions parameterChartOptions;
+	private User user;
+	private Locale reportOutputLocale;
 
 	/**
 	 * @return the dynamicOpenPassword
@@ -278,12 +311,6 @@ public class ReportOutputGenerator {
 
 		logger.debug("Entering generateOutput");
 
-		ReportOutputGeneratorResult outputResult = new ReportOutputGeneratorResult();
-		outputResult.setSuccess(true);
-
-		ResultSet rs = null;
-		Integer rowsRetrieved = null;
-
 		if (!isJob) {
 			Objects.requireNonNull(request, "request must not be null");
 			Objects.requireNonNull(response, "response must not be null");
@@ -291,28 +318,46 @@ public class ReportOutputGenerator {
 			Objects.requireNonNull(drilldownService, "drilldownService must not be null");
 		}
 
-		String contextPath = null;
+		ReportOutputGeneratorResult outputResult = new ReportOutputGeneratorResult();
+		outputResult.setSuccess(true);
+
+		this.report = report;
+		reportType = report.getReportType();
+		this.reportRunner = reportRunner;
+		this.locale = locale;
+		this.writer = writer;
+		this.fullOutputFilename = fullOutputFilename;
+		this.messageSource = messageSource;
+		this.reportFormat = reportFormat;
+		this.user = user;
+
+		groovyData = reportRunner.getGroovyData();
+		if (groovyData != null) {
+			@SuppressWarnings("unchecked")
+			List<? extends Object> dataList = (List<? extends Object>) groovyData;
+			groovyDataSize = dataList.size();
+		}
+
 		if (request != null) {
 			contextPath = request.getContextPath();
 		}
 
-		String fileName = FilenameUtils.getName(fullOutputFilename);
+		fileName = FilenameUtils.getName(fullOutputFilename);
 
 		try {
-			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			reportParamsMap = paramProcessorResult.getReportParamsMap();
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
+			reportOptions = paramProcessorResult.getReportOptions();
+			parameterChartOptions = paramProcessorResult.getChartOptions();
 
 			//for pdf dashboards, more parameters may be passed than are relevant for a report
-			List<ReportParameter> applicableReportParamsList = new ArrayList<>();
+			applicableReportParamsList = new ArrayList<>();
 			for (ReportParameter reportParam : reportParamsList) {
 				if (report.getReportId() == reportParam.getReport().getReportId()) {
 					applicableReportParamsList.add(reportParam);
 				}
 			}
 
-			Locale reportOutputLocale;
 			String reportLocale = report.getLocale();
 			if (StringUtils.isBlank(reportLocale)) {
 				reportOutputLocale = locale;
@@ -320,42 +365,12 @@ public class ReportOutputGenerator {
 				reportOutputLocale = ArtUtils.getLocaleFromString(reportLocale);
 			}
 
-			int reportId = report.getReportId();
-			ReportType reportType = report.getReportType();
-
-			Object groovyData = reportRunner.getGroovyData();
-			Integer groovyDataSize = null;
-			if (groovyData != null) {
-				@SuppressWarnings("unchecked")
-				List<? extends Object> dataList = (List<? extends Object>) groovyData;
-				groovyDataSize = dataList.size();
-			}
-
 			//generate report output
 			if (reportType.isJasperReports() || reportType.isJxls()) {
 				if (reportType.isJasperReports()) {
-					JasperReportsOutput jrOutput = new JasperReportsOutput();
-					jrOutput.setDynamicOpenPassword(dynamicOpenPassword);
-					jrOutput.setDynamicModifyPassword(dynamicModifyPassword);
-					if (reportType == ReportType.JasperReportsArt) {
-						rs = reportRunner.getResultSet();
-						jrOutput.setResultSet(rs);
-						jrOutput.setData(groovyData);
-					}
-
-					jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
+					generateJasperReport();
 				} else if (reportType.isJxls()) {
-					JxlsOutput jxlsOutput = new JxlsOutput();
-					jxlsOutput.setLocale(locale);
-					jxlsOutput.setDynamicOpenPassword(dynamicOpenPassword);
-					jxlsOutput.setDynamicModifyPassword(dynamicModifyPassword);
-					if (reportType == ReportType.JxlsArt) {
-						rs = reportRunner.getResultSet();
-						jxlsOutput.setResultSet(rs);
-						jxlsOutput.setData(groovyData);
-					}
-
-					jxlsOutput.generateReport(report, applicableReportParamsList, fullOutputFilename);
+					generateJxlsOutput();
 				}
 
 				if (groovyDataSize == null) {
@@ -368,1255 +383,47 @@ public class ReportOutputGenerator {
 					displayFileLink(fileName);
 				}
 			} else if (reportType == ReportType.Group) {
-				rs = reportRunner.getResultSet();
-
-				int splitColumnOption = reportOptions.getSplitColumn();
-				int splitColumn;
-				if (splitColumnOption > 0) {
-					//option has been specified. override report setting
-					splitColumn = splitColumnOption;
-				} else {
-					splitColumn = report.getGroupColumn();
-				}
-
-				switch (reportFormat) {
-					case html:
-						GroupHtmlOutput groupHtmlOutput = new GroupHtmlOutput();
-						if (groovyData == null) {
-							rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
-						} else {
-							rowsRetrieved = groupHtmlOutput.generateReport(groovyData, splitColumn, writer, contextPath);
-						}
-						break;
-					case xlsx:
-						GroupXlsxOutput groupXlsxOutput = new GroupXlsxOutput();
-						String reportName = report.getLocalizedName(locale);
-						if (groovyData == null) {
-							rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
-						} else {
-							rowsRetrieved = groupXlsxOutput.generateReport(groovyData, splitColumn, report, reportName, fullOutputFilename);
-						}
-
-						if (!isJob) {
-							displayFileLink(fileName);
-						}
-						break;
-					default:
-						throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
-				}
+				generateGroupReport();
 			} else if (reportType.isChart()) {
-				rs = reportRunner.getResultSet();
-
-				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
-
-				boolean showData = false;
-				if (BooleanUtils.isTrue(parameterChartOptions.getShowData())
-						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
-					showData = true;
-				}
-
-				boolean swapAxes = reportOptions.isSwapAxes();
-				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, groovyData, showData);
-
-				//add secondary charts
-				String secondaryChartSetting = report.getSecondaryCharts();
-				secondaryChartSetting = StringUtils.deleteWhitespace(secondaryChartSetting);
-				String[] secondaryChartIds = StringUtils.split(secondaryChartSetting, ",");
-				if (secondaryChartIds != null) {
-					List<Chart> secondaryCharts = new ArrayList<>();
-					ReportService reportService = new ReportService();
-					for (String secondaryChartIdString : secondaryChartIds) {
-						int secondaryChartId = Integer.parseInt(secondaryChartIdString);
-						Report secondaryReport = reportService.getReport(secondaryChartId);
-						ReportRunner secondaryReportRunner = new ReportRunner();
-						secondaryReportRunner.setUser(user);
-						secondaryReportRunner.setReport(secondaryReport);
-						secondaryReportRunner.setReportParamsMap(reportParamsMap);
-						ResultSet secondaryResultSet = null;
-						try {
-							secondaryReportRunner.execute();
-							secondaryResultSet = secondaryReportRunner.getResultSet();
-							Object secondaryGroovyData = secondaryReportRunner.getGroovyData();
-							swapAxes = false;
-							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, applicableReportParamsList, swapAxes, secondaryGroovyData, showData);
-							secondaryCharts.add(secondaryChart);
-						} finally {
-							DatabaseUtils.close(secondaryResultSet);
-							secondaryReportRunner.close();
-						}
-					}
-					chart.setSecondaryCharts(secondaryCharts);
-				}
-
-				//store data for potential use in html and pdf output
-				List<String> dataColumnNames = null;
-				Object chartGroovyData = null;
-				boolean showResultSetData = false;
-				if (showData) {
-					if (groovyData == null) {
-						showResultSetData = true;
-						dataColumnNames = chart.getResultSetColumnNames();
-					} else {
-						GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
-						dataColumnNames = dataDetails.getColumnNames();
-						chartGroovyData = groovyData;
-					}
-				}
-
-				if (isJob) {
-					chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
-				} else {
-					if (reportFormat == ReportFormat.html) {
-						request.setAttribute("chart", chart);
-
-						String htmlElementId = "chart-" + reportId;
-						request.setAttribute("htmlElementId", htmlElementId);
-
-						servletContext.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
-
-						if (dataColumnNames != null) {
-							request.setAttribute("columnNames", dataColumnNames);
-							if (groovyData == null) {
-								request.setAttribute("data", chart.getResultSetData());
-							} else {
-								request.setAttribute("data", groovyData);
-							}
-							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
-						}
-					} else {
-						chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
-						displayFileLink(fileName);
-					}
-
-					if (groovyDataSize == null) {
-						rowsRetrieved = chart.getResultSetRecordCount();
-					} else {
-						rowsRetrieved = groovyDataSize;
-					}
-				}
-			} else if (reportType.isStandardOutput() && reportFormat.isJson()) {
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
-
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonString = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				switch (reportFormat) {
-					case jsonBrowser:
-						//https://stackoverflow.com/questions/14533530/how-to-show-pretty-print-json-string-in-a-jsp-page
-						writer.print("<pre>" + jsonString + "</pre>");
-						break;
-					default:
-						writer.print(jsonString);
-				}
-
-				writer.flush();
+				generateChartReport();
 			} else if (reportType.isStandardOutput()) {
-				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
-
-				standardOutput.setWriter(writer);
-				standardOutput.setFullOutputFileName(fullOutputFilename);
-				standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
-				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
-				standardOutput.setLocale(locale);
-				standardOutput.setReportName(report.getLocalizedName(locale));
-				standardOutput.setMessageSource(messageSource);
-				standardOutput.setIsJob(isJob);
-				standardOutput.setPdfPageNumbers(pdfPageNumbers);
-				standardOutput.setReport(report);
-				standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
-				standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
-
-				if (request != null) {
-					standardOutput.setContextPath(contextPath);
-
-					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-						standardOutput.setAjax(true);
-					}
-				}
-
-				//generate output
-				rs = reportRunner.getResultSet();
-
-				StandardOutputResult standardOutputResult;
-				if (reportType.isCrosstab()) {
-					if (groovyData == null) {
-						standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
-					} else {
-						standardOutputResult = standardOutput.generateCrosstabOutput(groovyData, reportFormat, report);
-					}
-				} else {
-					if (reportFormat.isHtml() && !isJob) {
-						//only drill down for html output. drill down query launched from hyperlink                                            
-						standardOutput.setDrilldowns(drilldownService.getDrilldowns(reportId));
-					}
-
-					//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
-					if (request != null) {
-						String requestBaseUrl = request.getScheme() + "://"
-								+ request.getServerName()
-								+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
-								+ request.getContextPath();
-						standardOutput.setRequestBaseUrl(requestBaseUrl);
-					}
-
-					if (groovyData == null) {
-						standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
-					} else {
-						standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
-					}
-				}
-
-				if (standardOutputResult.isSuccess()) {
-					if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
-						displayFileLink(fileName);
-					}
-
-					rowsRetrieved = standardOutputResult.getRowCount();
-				} else {
-					outputResult.setSuccess(false);
-					outputResult.setMessage(standardOutputResult.getMessage());
-				}
+				generateStandardReport(outputResult);
 			} else if (reportType == ReportType.FreeMarker) {
-				rs = reportRunner.getResultSet();
-
-				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
-				freemarkerOutput.setContextPath(contextPath);
-				freemarkerOutput.setLocale(locale);
-				freemarkerOutput.setResultSet(rs);
-				freemarkerOutput.setData(groovyData);
-				freemarkerOutput.generateOutput(report, writer, applicableReportParamsList);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
+				generateFreeMarkerOutput();
 			} else if (reportType == ReportType.Thymeleaf) {
-				rs = reportRunner.getResultSet();
-
-				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
-				thymeleafOutput.setContextPath(contextPath);
-				thymeleafOutput.setLocale(locale);
-				thymeleafOutput.setResultSet(rs);
-				thymeleafOutput.setData(groovyData);
-				thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
+				generateThymeleafReport();
 			} else if (reportType == ReportType.Velocity) {
-				rs = reportRunner.getResultSet();
-
-				VelocityOutput velocityOutput = new VelocityOutput();
-				velocityOutput.setContextPath(contextPath);
-				velocityOutput.setLocale(locale);
-				velocityOutput.setResultSet(rs);
-				velocityOutput.setData(groovyData);
-				velocityOutput.generateOutput(report, writer, applicableReportParamsList);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
+				generateVelocityReport();
 			} else if (reportType.isXDocReport()) {
-				rs = reportRunner.getResultSet();
-
-				XDocReportOutput xdocReportOutput = new XDocReportOutput();
-				xdocReportOutput.setLocale(locale);
-				xdocReportOutput.setResultSet(rs);
-				xdocReportOutput.setData(groovyData);
-				xdocReportOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
-
-				if (!isJob) {
-					displayFileLink(fileName);
-				}
+				generateXDocReport();
 			} else if (reportType == ReportType.ReactPivot) {
-				if (isJob) {
-					throw new IllegalStateException("ReactPivot report type not supported for jobs");
-				}
-
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonData = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				String outputDivId = "reactPivotOutput-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("outputDivId", outputDivId);
-				request.setAttribute("templateFileName", templateFileName);
-				request.setAttribute("rows", jsonData);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
+				generateReactPivotReport();
 			} else if (reportType.isPivotTableJs()) {
-				if (isJob) {
-					throw new IllegalStateException("PivotTable.js report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				if (reportType == ReportType.PivotTableJs) {
-					rs = reportRunner.getResultSet();
-
-					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult;
-					if (groovyData == null) {
-						jsonOutputResult = jsonOutput.generateOutput(rs);
-					} else {
-						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-					}
-					String jsonData = jsonOutputResult.getJsonData();
-					rowsRetrieved = jsonOutputResult.getRowCount();
-					request.setAttribute("input", jsonData);
-				}
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//template file not mandatory
-				if (StringUtils.isNotBlank(templateFileName)) {
-					File templateFile = new File(fullTemplateFileName);
-					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-					}
-					request.setAttribute("templateFileName", templateFileName);
-				}
-
-				if (reportType == ReportType.PivotTableJsCsvServer) {
-					String optionsString = report.getOptions();
-
-					if (StringUtils.isBlank(optionsString)) {
-						throw new IllegalArgumentException("Options not specified");
-					}
-
-					ObjectMapper mapper = new ObjectMapper();
-					CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
-					String dataFileName = options.getDataFile();
-
-					logger.debug("dataFileName='{}'", dataFileName);
-
-					//need to explicitly check if file name is empty string
-					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-					if (StringUtils.isBlank(dataFileName)) {
-						throw new IllegalArgumentException("Data file not specified");
-					}
-
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-
-					request.setAttribute("dataFileName", dataFileName);
-				}
-
-				String localeString = locale.toString();
-
-				String languageFileName = "pivot." + localeString + ".js";
-
-				String languageFilePath = Config.getAppPath() + File.separator
-						+ "js" + File.separator
-						+ "pivottable-2.7.0" + File.separator
-						+ languageFileName;
-
-				File languageFile = new File(languageFilePath);
-
-				if (languageFile.exists()) {
-					request.setAttribute("locale", localeString);
-				}
-
-				String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("outputDivId", outputDivId);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
+				generatePivotTableJsOutput(reportType);
 			} else if (reportType.isDygraphs()) {
-				if (isJob) {
-					throw new IllegalStateException("Dygraphs report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				if (reportType == ReportType.Dygraphs) {
-					rs = reportRunner.getResultSet();
-
-					CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
-					//use appropriate date formats to ensure correct interpretation by browsers
-					//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
-					//http://dygraphs.com/date-formats.html
-					String dateFormat = "yyyy/MM/dd";
-					String dateTimeFormat = "yyyy/MM/dd HH:mm";
-					CsvOutputUnivocityOptions csvOptions = new CsvOutputUnivocityOptions();
-					csvOptions.setDateFormat(dateFormat);
-					csvOptions.setDateTimeFormat(dateTimeFormat);
-
-					String csvString;
-					try (StringWriter stringWriter = new StringWriter()) {
-						csvOutputUnivocity.setResultSet(rs);
-						csvOutputUnivocity.setData(groovyData);
-						csvOutputUnivocity.generateOutput(stringWriter, csvOptions, Locale.ENGLISH);
-						csvString = stringWriter.toString();
-					}
-
-					if (groovyDataSize == null) {
-						rowsRetrieved = getResultSetRowCount(rs);
-					} else {
-						rowsRetrieved = groovyDataSize;
-					}
-
-					//need to escape string for javascript, otherwise you get Unterminated string literal error
-					//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
-					String escapedCsvString = Encode.forJavaScript(csvString);
-					request.setAttribute("csvData", escapedCsvString);
-				}
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//template file not mandatory
-				if (StringUtils.isNotBlank(templateFileName)) {
-					File templateFile = new File(fullTemplateFileName);
-					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-					}
-					request.setAttribute("templateFileName", templateFileName);
-				}
-
-				if (reportType == ReportType.DygraphsCsvServer) {
-					String optionsString = report.getOptions();
-
-					if (StringUtils.isBlank(optionsString)) {
-						throw new IllegalArgumentException("Options not specified");
-					}
-
-					ObjectMapper mapper = new ObjectMapper();
-					CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
-					String dataFileName = options.getDataFile();
-
-					logger.debug("dataFileName='{}'", dataFileName);
-
-					//need to explicitly check if file name is empty string
-					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-					if (StringUtils.isBlank(dataFileName)) {
-						throw new IllegalArgumentException("Data file not specified");
-					}
-
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-
-					request.setAttribute("dataFileName", dataFileName);
-				}
-
-				String outputDivId = "dygraphsOutput-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("outputDivId", outputDivId);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
+				generateDygraphReport();
 			} else if (reportType.isDataTables()) {
-				if (isJob) {
-					throw new IllegalStateException("DataTables report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				if (reportType == ReportType.DataTables) {
-					rs = reportRunner.getResultSet();
-
-					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult;
-					if (groovyData == null) {
-						jsonOutputResult = jsonOutput.generateOutput(rs);
-					} else {
-						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-					}
-					String jsonData = jsonOutputResult.getJsonData();
-					List<ResultSetColumn> columns = jsonOutputResult.getColumns();
-					request.setAttribute("data", jsonData);
-					request.setAttribute("columns", columns);
-				}
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//template file not mandatory
-				if (StringUtils.isNotBlank(templateFileName)) {
-					File templateFile = new File(fullTemplateFileName);
-					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-					}
-					request.setAttribute("templateFileName", templateFileName);
-				}
-
-				String optionsString = report.getOptions();
-				DataTablesOptions options;
-				if (StringUtils.isBlank(optionsString)) {
-					options = new DataTablesOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, DataTablesOptions.class);
-				}
-				request.setAttribute("options", options);
-
-				if (reportType == ReportType.DataTablesCsvServer) {
-					if (StringUtils.isBlank(optionsString)) {
-						throw new IllegalArgumentException("Options not specified");
-					}
-
-					String dataFileName = options.getDataFile();
-
-					logger.debug("dataFileName='{}'", dataFileName);
-
-					//need to explicitly check if file name is empty string
-					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-					if (StringUtils.isBlank(dataFileName)) {
-						throw new IllegalArgumentException("Data file not specified");
-					}
-
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-
-					request.setAttribute("dataFileName", dataFileName);
-				}
-
-				String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
-				String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
-				String languageTag = locale.toLanguageTag();
-				String localeString = locale.toString();
-				request.setAttribute("outputDivId", outputDivId);
-				request.setAttribute("tableId", tableId);
-				request.setAttribute("languageTag", languageTag);
-				request.setAttribute("locale", localeString);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
+				generateDataTablesOutput();
 			} else if (reportType == ReportType.FixedWidth) {
-				rs = reportRunner.getResultSet();
-
-				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
-				fixedWidthOutput.setResultSet(rs);
-				fixedWidthOutput.setData(groovyData);
-				fixedWidthOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
-
-				if (!isJob && !reportFormat.isHtml()) {
-					displayFileLink(fileName);
-				}
+				generateFixedWidthReport();
 			} else if (reportType == ReportType.CSV) {
-				rs = reportRunner.getResultSet();
-
-				CsvOutputUnivocity csvOutput = new CsvOutputUnivocity();
-				csvOutput.setResultSet(rs);
-				csvOutput.setData(groovyData);
-				csvOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
-
-				if (groovyDataSize == null) {
-					rowsRetrieved = getResultSetRowCount(rs);
-				} else {
-					rowsRetrieved = groovyDataSize;
-				}
-
-				if (!isJob && !reportFormat.isHtml()) {
-					displayFileLink(fileName);
-				}
+				generateCsvReport();
 			} else if (reportType == ReportType.C3) {
-				if (isJob) {
-					throw new IllegalStateException("C3.js report type not supported for jobs");
-				}
-
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonData = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				String optionsString = report.getOptions();
-				if (StringUtils.isNotBlank(optionsString)) {
-					ObjectMapper mapper = new ObjectMapper();
-					C3Options options = mapper.readValue(optionsString, C3Options.class);
-					String cssFileName = options.getCssFile();
-
-					logger.debug("cssFileName='{}'", cssFileName);
-
-					//need to explicitly check if file name is empty string
-					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-					if (StringUtils.isNotBlank(cssFileName)) {
-						String fullCssFileName = jsTemplatesPath + cssFileName;
-
-						File cssFile = new File(fullCssFileName);
-						if (!cssFile.exists()) {
-							throw new IllegalStateException("Css file not found: " + fullCssFileName);
-						}
-
-						request.setAttribute("cssFileName", cssFileName);
-					}
-				}
-
-				String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("chartId", chartId);
-				request.setAttribute("templateFileName", templateFileName);
-				request.setAttribute("data", jsonData);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
+				generateC3Report();
 			} else if (reportType == ReportType.ChartJs) {
-				if (isJob) {
-					throw new IllegalStateException("Chart.js report type not supported for jobs");
-				}
-
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonData = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				ChartJsOptions options;
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					options = new ChartJsOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, ChartJsOptions.class);
-				}
-
-				String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("chartId", chartId);
-				request.setAttribute("options", options);
-				request.setAttribute("templateFileName", templateFileName);
-				request.setAttribute("data", jsonData);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartJs.jsp").include(request, response);
+				generateChartJsReport();
 			} else if (reportType.isDatamaps()) {
-				if (isJob) {
-					throw new IllegalStateException("Datamaps report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				if (reportType == ReportType.Datamaps) {
-					rs = reportRunner.getResultSet();
-
-					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult;
-					if (groovyData == null) {
-						jsonOutputResult = jsonOutput.generateOutput(rs);
-					} else {
-						jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-					}
-					String jsonData = jsonOutputResult.getJsonData();
-					rowsRetrieved = jsonOutputResult.getRowCount();
-					request.setAttribute("data", jsonData);
-				}
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				DatamapsOptions options;
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					options = new DatamapsOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, DatamapsOptions.class);
-				}
-
-				String datamapsJsFileName = options.getDatamapsJsFile();
-
-				if (StringUtils.isBlank(datamapsJsFileName)) {
-					throw new IllegalArgumentException("Datamaps js file not specified");
-				}
-
-				String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
-				File datamapsJsFile = new File(fullDatamapsJsFileName);
-				if (!datamapsJsFile.exists()) {
-					throw new IllegalStateException("Datamaps js file not found: " + fullDatamapsJsFileName);
-				}
-
-				String dataFileName = options.getDataFile();
-				if (StringUtils.isNotBlank(dataFileName)) {
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-				}
-
-				String mapFileName = options.getMapFile();
-				if (StringUtils.isNotBlank(mapFileName)) {
-					String fullMapFileName = jsTemplatesPath + mapFileName;
-
-					File mapFile = new File(fullMapFileName);
-					if (!mapFile.exists()) {
-						throw new IllegalStateException("Map file not found: " + fullMapFileName);
-					}
-				}
-
-				String cssFileName = options.getCssFile();
-				if (StringUtils.isNotBlank(cssFileName)) {
-					String fullCssFileName = jsTemplatesPath + cssFileName;
-
-					File cssFile = new File(fullCssFileName);
-					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + fullCssFileName);
-					}
-				}
-
-				String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("containerId", containerId);
-				request.setAttribute("options", options);
-				request.setAttribute("templateFileName", templateFileName);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
+				generateDatamapReport();
 			} else if (reportType.isWebMap()) {
-				if (isJob) {
-					throw new IllegalStateException("Report type not supported for jobs: " + reportType);
-				}
-
-				rs = reportRunner.getResultSet();
-
-				JsonOutput jsonOutput = new JsonOutput();
-				JsonOutputResult jsonOutputResult;
-				if (groovyData == null) {
-					jsonOutputResult = jsonOutput.generateOutput(rs);
-				} else {
-					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-				}
-				String jsonData = jsonOutputResult.getJsonData();
-				rowsRetrieved = jsonOutputResult.getRowCount();
-
-				String templateFileName = report.getTemplate();
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-				String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				//need to explicitly check if template file is empty string
-				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-				if (StringUtils.isBlank(templateFileName)) {
-					throw new IllegalArgumentException("Template file not specified");
-				}
-
-				File templateFile = new File(fullTemplateFileName);
-				if (!templateFile.exists()) {
-					throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-				}
-
-				WebMapOptions options;
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					options = new WebMapOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, WebMapOptions.class);
-				}
-
-				String cssFileName = options.getCssFile();
-				if (StringUtils.isNotBlank(cssFileName)) {
-					String fullCssFileName = jsTemplatesPath + cssFileName;
-
-					File cssFile = new File(fullCssFileName);
-					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + fullCssFileName);
-					}
-				}
-
-				String dataFileName = options.getDataFile();
-				if (StringUtils.isNotBlank(dataFileName)) {
-					String fullDataFileName = jsTemplatesPath + dataFileName;
-					File dataFile = new File(fullDataFileName);
-					if (!dataFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullDataFileName);
-					}
-				}
-
-				List<String> jsFileNames = options.getJsFiles();
-				if (CollectionUtils.isNotEmpty(jsFileNames)) {
-					for (String jsFileName : jsFileNames) {
-						if (StringUtils.isNotBlank(jsFileName)) {
-							String fullJsFileName = jsTemplatesPath + jsFileName;
-							File jsFile = new File(fullJsFileName);
-							if (!jsFile.exists()) {
-								throw new IllegalStateException("Js file not found: " + fullJsFileName);
-							}
-						}
-					}
-				}
-
-				List<String> cssFileNames = options.getCssFiles();
-				if (CollectionUtils.isNotEmpty(cssFileNames)) {
-					for (String listCssFileName : cssFileNames) {
-						if (StringUtils.isNotBlank(listCssFileName)) {
-							String fullListCssFileName = jsTemplatesPath + listCssFileName;
-							File listCssFile = new File(fullListCssFileName);
-							if (!listCssFile.exists()) {
-								throw new IllegalStateException("Css file not found: " + fullListCssFileName);
-							}
-						}
-					}
-				}
-
-				String mapId = "map-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("mapId", mapId);
-				request.setAttribute("options", options);
-				request.setAttribute("data", jsonData);
-				request.setAttribute("templateFileName", templateFileName);
-
-				switch (reportType) {
-					case Leaflet:
-						servletContext.getRequestDispatcher("/WEB-INF/jsp/showLeaflet.jsp").include(request, response);
-						break;
-					case OpenLayers:
-						servletContext.getRequestDispatcher("/WEB-INF/jsp/showOpenLayers.jsp").include(request, response);
-						break;
-					default:
-						throw new IllegalArgumentException("Unexpected report type: " + reportType);
-				}
+				generateWebMapReport();
 			} else if (reportType == ReportType.MongoDB) {
-				//https://learnxinyminutes.com/docs/groovy/
-				//http://groovy-lang.org/index.html
-				//http://docs.groovy-lang.org/next/html/documentation/
-				//https://www.tutorialspoint.com/mongodb/mongodb_java.htm
-				//https://avaldes.com/java-connecting-to-mongodb-3-2-examples/
-				//https://avaldes.com/mongodb-java-crud-operations-example-tutorial/
-				//http://www.mkyong.com/mongodb/java-mongodb-query-document/
-				//http://o7planning.org/en/10289/java-and-mongodb-tutorial
-				//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
-				//http://zetcode.com/db/mongodbjava/
-				//http://www.mastertheintegration.com/nosql-databases/mongodb/mongodb-java-driver-3-0-quick-reference.html
-				//https://mongodb.github.io/mongo-java-driver/3.4/driver/getting-started/quick-start/
-				//https://github.com/mongolab/mongodb-driver-examples/blob/master/java/JavaSimpleExample.java
-				//https://github.com/ihr/jongo-by-example/blob/master/src/test/java/org/ingini/mongodb/jongo/example/aggregation/TestAggregationFramework.java
-				//https://stackoverflow.com/questions/24370456/groovy-script-sandboxing-use-groovy-timecategory-syntax-from-java-as-string/24374237
-				//http://groovy-lang.org/integrating.html
-				//http://blog.xebia.com/jongo/
-				//http://ingini.org/2013/04/03/mongodb-with-jongo-sleeves-up/
-				//https://stackoverflow.com/questions/37155718/mapping-a-java-object-with-a-mongodb-document-using-jongo
-				//https://github.com/bguerout/jongo/issues/254
-				//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
-				//https://stackoverflow.com/questions/7567378/access-a-java-class-from-within-groovy
-				//https://stackoverflow.com/questions/4912400/what-packages-does-1-java-and-2-groovy-automatically-import
-				//https://www.spigotmc.org/wiki/mongodb-with-morphia/
-				//http://www.foobaracademy.com/morphia-hello-world-example/
-				//http://www.carfey.com/blog/using-mongodb-with-morphia/
-				//http://www.obsidianscheduler.com/blog/evolving-document-structures-with-morphia-and-mongodb/
-				//https://www.javacodegeeks.com/2011/11/using-mongodb-with-morphia.html
-				//http://javabeat.net/using-morphia-java-library-for-mongodb/
-				//http://www.scalabiliti.com/blog/mongodb_and_morphia_performance
-				//https://city81.blogspot.co.ke/2012/07/using-morphia-to-map-java-objects-in.html
-				//http://www.thejavageek.com/2015/08/24/save-entity-using-morphia/
-				//https://sleeplessinslc.blogspot.co.ke/2010/10/mongodb-with-morphia-example.html
-				//http://jameswilliams.be/blog/2010/05/05/Using-MongoDB-with-Morphia-and-Groovy.html
-				//https://mongodb.github.io/morphia/1.3/getting-started/quick-tour/
-				//https://github.com/mongodb/morphia/blob/1.3.x/morphia/src/examples/java/org/mongodb/morphia/example/QuickTour.java
-				//https://www.javacodegeeks.com/2015/09/mongodb-and-java-tutorial.html
-				//https://mdahlman.wordpress.com/2011/09/02/cool-reporting-on-mongodb/
-				//https://mdahlman.wordpress.com/2011/09/02/simple-reporting-on-mongodb/
-				CompilerConfiguration cc = new CompilerConfiguration();
-				cc.addCompilationCustomizers(new SandboxTransformer());
-
-				Map<String, Object> variables = new HashMap<>();
-				variables.putAll(reportParamsMap);
-
-				MongoClient mongoClient = null;
-				Datasource datasource = report.getDatasource();
-				if (datasource != null) {
-					mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
-				}
-				variables.put("mongoClient", mongoClient);
-
-				Binding binding = new Binding(variables);
-
-				GroovyShell shell = new GroovyShell(binding, cc);
-
-				GroovySandbox sandbox = null;
-				if (Config.getCustomSettings().isEnableGroovySandbox()) {
-					sandbox = new GroovySandbox();
-					sandbox.register();
-				}
-
-				//get report source with direct parameters, rules etc applied
-				String reportSource = reportRunner.getQuerySql();
-				Object result;
-				try {
-					result = shell.evaluate(reportSource);
-				} finally {
-					if (sandbox != null) {
-						sandbox.unregister();
-					}
-				}
-				if (result != null) {
-					if (result instanceof List) {
-						String optionsString = report.getOptions();
-						List<String> optionsColumnNames = null;
-						List<Map<String, String>> columnDataTypes = null;
-						MongoDbOptions options;
-						if (StringUtils.isBlank(optionsString)) {
-							options = new MongoDbOptions();
-						} else {
-							ObjectMapper mapper = new ObjectMapper();
-							options = mapper.readValue(optionsString, MongoDbOptions.class);
-							optionsColumnNames = options.getColumns();
-							columnDataTypes = options.getColumnDataTypes();
-						}
-
-						@SuppressWarnings("unchecked")
-						List<Object> resultList = (List<Object>) result;
-						List<ResultSetColumn> columns = new ArrayList<>();
-						String resultString = null;
-						if (!resultList.isEmpty()) {
-							if (CollectionUtils.isEmpty(optionsColumnNames)) {
-								Object sample = resultList.get(0);
-								//https://stackoverflow.com/questions/6133660/recursive-beanutils-describe
-								//https://www.leveluplunch.com/java/examples/convert-object-bean-properties-map-key-value/
-								//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
-								//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
-								//http://www.makeinjava.com/convert-list-objects-tofrom-json-java-jackson-objectmapper-example/
-								ObjectMapper mapper = new ObjectMapper();
-								@SuppressWarnings("unchecked")
-								Map<String, Object> map = mapper.convertValue(sample, Map.class);
-								for (Entry<String, Object> entry : map.entrySet()) {
-									String name = entry.getKey();
-									Object value = entry.getValue();
-									String type = "string";
-									if (value instanceof Number) {
-										type = "numeric";
-									}
-									ResultSetColumn column = new ResultSetColumn();
-									column.setName(name);
-									column.setType(type);
-									columns.add(column);
-								}
-							} else {
-								for (String columnName : optionsColumnNames) {
-									ResultSetColumn column = new ResultSetColumn();
-									column.setName(columnName);
-									column.setType("string");
-									columns.add(column);
-								}
-							}
-
-							if (CollectionUtils.isNotEmpty(columnDataTypes)) {
-								for (ResultSetColumn column : columns) {
-									String dataColumnName = column.getName();
-									for (Map<String, String> columnDataTypeDefinition : columnDataTypes) {
-										Entry<String, String> entry = columnDataTypeDefinition.entrySet().iterator().next();
-										String columnName = entry.getKey();
-										String dataType = entry.getValue();
-										if (StringUtils.equalsIgnoreCase(columnName, dataColumnName)) {
-											column.setType(dataType);
-											break;
-										}
-									}
-								}
-							}
-
-							List<String> finalColumnNames = new ArrayList<>();
-							for (ResultSetColumn column : columns) {
-								String columnName = column.getName();
-								finalColumnNames.add(columnName);
-							}
-
-							//_id is a complex object so we have to iterate and replace it with the toString() representation
-							//otherwise we would just call resultString = ArtUtils.objectToJson(resultList); directly and not have to create a new list
-							List<Map<String, Object>> finalResultList = new ArrayList<>();
-							for (Object object : resultList) {
-								Map<String, Object> row = new LinkedHashMap<>();
-								if (object instanceof Map) {
-									ObjectMapper mapper = new ObjectMapper();
-									@SuppressWarnings("unchecked")
-									Map<String, Object> map2 = mapper.convertValue(object, Map.class);
-									for (String columnName : finalColumnNames) {
-										Object value = map2.get(columnName);
-										Object finalValue;
-										if (value == null) {
-											finalValue = "";
-										} else if (value instanceof ObjectId) {
-											ObjectId objectId = (ObjectId) value;
-											finalValue = objectId.toString();
-										} else {
-											finalValue = value;
-										}
-										row.put(columnName, finalValue);
-									}
-								} else {
-									//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
-									Class<?> c = object.getClass();
-									BeanInfo beanInfo = Introspector.getBeanInfo(c, Object.class);
-									for (PropertyDescriptor propertyDesc : beanInfo.getPropertyDescriptors()) {
-										String propertyName = propertyDesc.getName();
-										if (StringUtils.equals(propertyName, "metaClass")) {
-											//don't include
-										} else {
-											if (ArtUtils.containsIgnoreCase(finalColumnNames, propertyName)) {
-												Object value = propertyDesc.getReadMethod().invoke(object);
-												Object finalValue;
-												if (value instanceof ObjectId) {
-													ObjectId objectId = (ObjectId) value;
-													finalValue = objectId.toString();
-												} else {
-													finalValue = value;
-												}
-												row.put(propertyName, finalValue);
-											}
-										}
-									}
-								}
-								finalResultList.add(row);
-							}
-
-							//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
-							//https://github.com/wnameless/json-flattener
-							resultString = ArtUtils.objectToJson(finalResultList);
-						}
-
-						request.setAttribute("data", resultString);
-						request.setAttribute("columns", columns);
-						request.setAttribute("reportType", reportType);
-						request.setAttribute("options", options);
-
-						String languageTag = locale.toLanguageTag();
-						request.setAttribute("languageTag", languageTag);
-						String localeString = locale.toString();
-						request.setAttribute("locale", localeString);
-						servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
-					} else {
-						writer.print(result);
-					}
-				}
+				generateMongoDbReport();
 			} else if (reportType.isOrgChart()) {
-				if (isJob) {
-					throw new IllegalStateException("OrgChart report types not supported for jobs");
-				}
-
-				request.setAttribute("reportType", reportType);
-
-				String jsonData;
-				switch (reportType) {
-					case OrgChartDatabase:
-						rs = reportRunner.getResultSet();
-
-						JsonOutput jsonOutput = new JsonOutput();
-						JsonOutputResult jsonOutputResult;
-						if (groovyData == null) {
-							jsonOutputResult = jsonOutput.generateOutput(rs);
-						} else {
-							jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
-						}
-						jsonData = jsonOutputResult.getJsonData();
-						rowsRetrieved = jsonOutputResult.getRowCount();
-						break;
-					case OrgChartJson:
-					case OrgChartList:
-					case OrgChartAjax:
-						jsonData = report.getReportSource();
-						break;
-					default:
-						throw new IllegalArgumentException("Unexpected OrgChart report type: " + reportType);
-				}
-
-				jsonData = Encode.forJavaScript(jsonData);
-				request.setAttribute("data", jsonData);
-
-				String jsTemplatesPath = Config.getJsTemplatesPath();
-
-				OrgChartOptions options;
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					options = new OrgChartOptions();
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, OrgChartOptions.class);
-				}
-
-				String cssFileName = options.getCssFile();
-				if (StringUtils.isNotBlank(cssFileName)) {
-					String fullCssFileName = jsTemplatesPath + cssFileName;
-
-					File cssFile = new File(fullCssFileName);
-					if (!cssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + fullCssFileName);
-					}
-				}
-
-				String templateFileName = report.getTemplate();
-
-				logger.debug("templateFileName='{}'", templateFileName);
-
-				if (StringUtils.isNotBlank(templateFileName)) {
-					String fullTemplateFileName = jsTemplatesPath + templateFileName;
-					File templateFile = new File(fullTemplateFileName);
-					if (!templateFile.exists()) {
-						throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
-					}
-				}
-
-				String optionsJson = ArtUtils.objectToJson(options);
-				optionsJson = Encode.forJavaScript(optionsJson);
-				String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
-				request.setAttribute("containerId", containerId);
-				request.setAttribute("optionsJson", optionsJson);
-				request.setAttribute("options", options);
-				request.setAttribute("templateFileName", templateFileName);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
+				generateOrgChartReport();
 			} else if (reportType.isReportEngine()) {
-				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
-
-				standardOutput.setWriter(writer);
-				standardOutput.setFullOutputFileName(fullOutputFilename);
-				standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
-				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
-				standardOutput.setLocale(locale);
-				standardOutput.setReportName(report.getLocalizedName(locale));
-				standardOutput.setMessageSource(messageSource);
-				standardOutput.setIsJob(isJob);
-				standardOutput.setPdfPageNumbers(pdfPageNumbers);
-				standardOutput.setReport(report);
-				standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
-				standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
-
-				if (request != null) {
-					standardOutput.setContextPath(contextPath);
-
-					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-						standardOutput.setAjax(true);
-					}
-				}
-
-				//generate output
-				rs = reportRunner.getResultSet();
-
-				ReportEngineOutput reportEngineOutput = new ReportEngineOutput(standardOutput);
-				reportEngineOutput.setResultSet(rs);
-				reportEngineOutput.setData(groovyData);
-
-				String options = report.getOptions();
-				ReportEngineOptions reportEngineOptions;
-				if (StringUtils.isBlank(options)) {
-					reportEngineOptions = new ReportEngineOptions();
-				} else {
-					reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
-				}
-
-				if (reportEngineOptions.isPivot()) {
-					reportEngineOutput.generatePivotOutput(reportType);
-				} else {
-					reportEngineOutput.generateTabularOutput(reportType);
-				}
-
-				if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
-					displayFileLink(fileName);
-				}
+				generateReportEngineReport();
+			} else if (reportType == ReportType.Plotly) {
+				generatePlotlyReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
@@ -1633,46 +440,39 @@ public class ReportOutputGenerator {
 	 * Instantiates an appropriate chart object, sets some parameters and
 	 * prepares the chart dataset
 	 *
-	 * @param report the chart's report
-	 * @param reportFormat the report format to use
-	 * @param locale the locale to use
-	 * @param rs the resultset that has the chart data
-	 * @param parameterChartOptions the parameter chart options
-	 * @param reportParamsMap the report parameters map
-	 * @param reportParamsList the report parameters list
+	 * @param outputReport the chart's report
+	 * @param outputResultSet the resultset that has the chart data
 	 * @param swapAxes whether to swap the values of the x and y axes
-	 * @param groovyData data to use for the chart, if not using a resultset
+	 * @param outputGroovyData data to use for the chart, if not using a
+	 * resultset
 	 * @param includeDataInOutput whether resultset data should be included in
 	 * the output
 	 * @return the prepared chart
 	 * @throws SQLException
 	 */
-	private Chart prepareChart(Report report, ReportFormat reportFormat, Locale locale,
-			ResultSet rs, ChartOptions parameterChartOptions,
-			Map<String, ReportParameter> reportParamsMap,
-			List<ReportParameter> reportParamsList, boolean swapAxes,
-			Object groovyData, boolean includeDataInOutput)
+	private Chart prepareChart(Report outputReport, ResultSet outputResultSet,
+			boolean swapAxes, Object outputGroovyData, boolean includeDataInOutput)
 			throws SQLException, IOException {
 
-		ReportType reportType = report.getReportType();
-		Chart chart = getChartInstance(reportType);
+		ReportType outputReportType = outputReport.getReportType();
+		Chart chart = getChartInstance(outputReportType);
 
-		ChartOptions effectiveChartOptions = getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
+		ChartOptions effectiveChartOptions = getEffectiveChartOptions(outputReport, parameterChartOptions, reportFormat);
 
-		String shortDescription = report.getLocalizedShortDescription(locale);
+		String shortDescription = outputReport.getLocalizedShortDescription(locale);
 		RunReportHelper runReportHelper = new RunReportHelper();
 		shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
-		chart.setReportType(reportType);
+		chart.setReportType(outputReportType);
 		chart.setLocale(locale);
 		chart.setChartOptions(effectiveChartOptions);
 		chart.setTitle(shortDescription);
-		chart.setXAxisLabel(report.getxAxisLabel());
-		chart.setYAxisLabel(report.getyAxisLabel());
+		chart.setXAxisLabel(outputReport.getxAxisLabel());
+		chart.setYAxisLabel(outputReport.getyAxisLabel());
 		chart.setSwapAxes(swapAxes);
 		chart.setIncludeDataInOutput(includeDataInOutput);
 
-		String optionsString = report.getOptions();
+		String optionsString = outputReport.getOptions();
 		JFreeChartOptions options;
 		if (StringUtils.isBlank(optionsString)) {
 			options = new JFreeChartOptions();
@@ -1684,17 +484,17 @@ public class ReportOutputGenerator {
 
 		Drilldown drilldown = null;
 		if (reportFormat == ReportFormat.html) {
-			int reportId = report.getReportId();
+			int reportId = outputReport.getReportId();
 			List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
 			if (!drilldowns.isEmpty()) {
 				drilldown = drilldowns.get(0);
 			}
 		}
 
-		if (groovyData == null) {
-			chart.prepareDataset(rs, drilldown, reportParamsList);
+		if (outputGroovyData == null) {
+			chart.prepareDataset(outputResultSet, drilldown, applicableReportParamsList);
 		} else {
-			chart.prepareDataset(groovyData, drilldown, reportParamsList);
+			chart.prepareDataset(outputGroovyData, drilldown, applicableReportParamsList);
 		}
 
 		return chart;
@@ -1914,8 +714,8 @@ public class ReportOutputGenerator {
 	 * @return the final chart options
 	 */
 	public ChartOptions getEffectiveChartOptions(Report report, ChartOptions parameterChartOptions) {
-		ReportFormat reportFormat = null;
-		return getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
+		ReportFormat localReportFormat = null;
+		return getEffectiveChartOptions(report, parameterChartOptions, localReportFormat);
 	}
 
 	/**
@@ -2011,14 +811,14 @@ public class ReportOutputGenerator {
 		}
 
 		ArtHelper artHelper = new ArtHelper();
-		ReportType reportType = report.getReportType();
+		ReportType localReportType = report.getReportType();
 
 		Boolean showLegend = parameterChartOptions.getShowLegend();
 		if (showLegend == null) {
 			showLegend = reportChartOptions.getShowLegend();
 		}
 		if (showLegend == null) {
-			boolean defaultShowLegendOption = artHelper.getDefaultShowLegendOption(reportType);
+			boolean defaultShowLegendOption = artHelper.getDefaultShowLegendOption(localReportType);
 			effectiveChartOptions.setShowLegend(defaultShowLegendOption);
 		} else {
 			effectiveChartOptions.setShowLegend(showLegend);
@@ -2029,7 +829,7 @@ public class ReportOutputGenerator {
 			showLabels = reportChartOptions.getShowLabels();
 		}
 		if (showLabels == null) {
-			boolean defaultShowLabelsOption = artHelper.getDefaultShowLabelsOption(reportType);
+			boolean defaultShowLabelsOption = artHelper.getDefaultShowLabelsOption(localReportType);
 			effectiveChartOptions.setShowLabels(defaultShowLabelsOption);
 		} else {
 			effectiveChartOptions.setShowLabels(showLabels);
@@ -2065,7 +865,7 @@ public class ReportOutputGenerator {
 		}
 		labelFormat = effectiveChartOptions.getLabelFormat();
 		if (StringUtils.isBlank(labelFormat)) {
-			if (reportType == ReportType.Pie2DChart || reportType == ReportType.Pie3DChart) {
+			if (localReportType == ReportType.Pie2DChart || localReportType == ReportType.Pie3DChart) {
 				if (reportFormat == null || reportFormat == ReportFormat.html) {
 					labelFormat = "{0} ({2})";
 				} else {
@@ -2078,6 +878,1836 @@ public class ReportOutputGenerator {
 		}
 
 		return effectiveChartOptions;
+	}
+
+	/**
+	 * Generates pivot table js output
+	 *
+	 * @param reportType the report type for the output
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generatePivotTableJsOutput(ReportType reportType) throws SQLException, IOException, ServletException {
+		logger.debug("Entering generatePivotTableJsOutput");
+
+		if (isJob) {
+			throw new IllegalStateException("PivotTable.js output not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		if (reportType == ReportType.PivotTableJs) {
+			rs = reportRunner.getResultSet();
+
+			JsonOutput jsonOutput = new JsonOutput();
+			JsonOutputResult jsonOutputResult;
+			if (groovyData == null) {
+				jsonOutputResult = jsonOutput.generateOutput(rs);
+			} else {
+				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+			}
+			String jsonData = jsonOutputResult.getJsonData();
+			rowsRetrieved = jsonOutputResult.getRowCount();
+			request.setAttribute("input", jsonData);
+		}
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//template file not mandatory
+		if (StringUtils.isNotBlank(templateFileName)) {
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+			request.setAttribute("templateFileName", templateFileName);
+		}
+
+		if (reportType == ReportType.PivotTableJsCsvServer) {
+			String optionsString = report.getOptions();
+
+			if (StringUtils.isBlank(optionsString)) {
+				throw new IllegalArgumentException("Options not specified");
+			}
+
+			ObjectMapper mapper = new ObjectMapper();
+			CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
+			String dataFileName = options.getDataFile();
+
+			logger.debug("dataFileName='{}'", dataFileName);
+
+			//need to explicitly check if file name is empty string
+			//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+			if (StringUtils.isBlank(dataFileName)) {
+				throw new IllegalArgumentException("Data file not specified");
+			}
+
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+
+			request.setAttribute("dataFileName", dataFileName);
+		}
+
+		String localeString = locale.toString();
+
+		String languageFileName = "pivot." + localeString + ".js";
+
+		String languageFilePath = Config.getAppPath() + File.separator
+				+ "js" + File.separator
+				+ "pivottable-2.7.0" + File.separator
+				+ languageFileName;
+
+		File languageFile = new File(languageFilePath);
+
+		if (languageFile.exists()) {
+			request.setAttribute("locale", localeString);
+		}
+
+		String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("outputDivId", outputDivId);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates standard output reports
+	 *
+	 * @param outputResult the output result object to update if there is an
+	 * error
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateStandardReport(ReportOutputGeneratorResult outputResult)
+			throws SQLException, IOException, ServletException {
+
+		logger.debug("Entering generateStandardReport");
+
+		switch (reportFormat) {
+			case pivotTableJs:
+				generatePivotTableJsOutput(ReportType.PivotTableJs);
+				break;
+			case c3:
+				generateStandardReportC3Output();
+				break;
+			case plotly:
+				generateStandardReportPlotlyOutput();
+				break;
+			default:
+				if (reportFormat.isJson()) {
+					generateStandardReportJsonOutput();
+				} else {
+					generateStandardOutput(outputResult);
+				}
+		}
+	}
+
+	/**
+	 * Generates standard output
+	 *
+	 * @param outputResult the output result object to update if there is an
+	 * error
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateStandardOutput(ReportOutputGeneratorResult outputResult)
+			throws SQLException, IOException, ServletException {
+
+		logger.debug("Entering generateStandardOutput");
+
+		StandardOutput standardOutput = prepareStandardOutputInstance();
+
+		//generate output
+		rs = reportRunner.getResultSet();
+
+		StandardOutputResult standardOutputResult;
+		if (reportType.isCrosstab()) {
+			if (groovyData == null) {
+				standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat, report);
+			} else {
+				standardOutputResult = standardOutput.generateCrosstabOutput(groovyData, reportFormat, report);
+			}
+		} else {
+			if (reportFormat.isHtml() && !isJob) {
+				//only drill down for html output. drill down query launched from hyperlink                                            
+				standardOutput.setDrilldowns(drilldownService.getDrilldowns(report.getReportId()));
+			}
+
+			//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
+			if (request != null) {
+				String requestBaseUrl = request.getScheme() + "://"
+						+ request.getServerName()
+						+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
+						+ request.getContextPath();
+				standardOutput.setRequestBaseUrl(requestBaseUrl);
+			}
+
+			if (groovyData == null) {
+				standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
+			} else {
+				standardOutputResult = standardOutput.generateTabularOutput(groovyData, reportFormat, report);
+			}
+		}
+
+		if (standardOutputResult.isSuccess()) {
+			if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
+				displayFileLink(fileName);
+			}
+
+			rowsRetrieved = standardOutputResult.getRowCount();
+		} else {
+			outputResult.setSuccess(false);
+			outputResult.setMessage(standardOutputResult.getMessage());
+		}
+	}
+
+	/**
+	 * Generates standard report json report format output
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void generateStandardReportJsonOutput() throws SQLException, IOException {
+		logger.debug("Entering generateStandardReportJsonOutput");
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
+
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonString = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		switch (reportFormat) {
+			case jsonBrowser:
+				//https://stackoverflow.com/questions/14533530/how-to-show-pretty-print-json-string-in-a-jsp-page
+				writer.print("<pre>" + jsonString + "</pre>");
+				break;
+			default:
+				writer.print(jsonString);
+		}
+
+		writer.flush();
+	}
+
+	/**
+	 * Generates a jasperreports report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	private void generateJasperReport() throws SQLException, IOException, JRException {
+		logger.debug("Entering generateJasperReport");
+
+		JasperReportsOutput jrOutput = new JasperReportsOutput();
+		jrOutput.setDynamicOpenPassword(dynamicOpenPassword);
+		jrOutput.setDynamicModifyPassword(dynamicModifyPassword);
+		if (reportType == ReportType.JasperReportsArt) {
+			rs = reportRunner.getResultSet();
+			jrOutput.setResultSet(rs);
+			jrOutput.setData(groovyData);
+		}
+
+		jrOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
+	}
+
+	/**
+	 * Generates jxls output
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws InvalidFormatException
+	 * @throws GeneralSecurityException
+	 */
+	private void generateJxlsOutput() throws SQLException, IOException,
+			InvalidFormatException, GeneralSecurityException {
+
+		logger.debug("Entering generateJxlsOutput");
+
+		JxlsOutput jxlsOutput = new JxlsOutput();
+		jxlsOutput.setLocale(locale);
+		jxlsOutput.setDynamicOpenPassword(dynamicOpenPassword);
+		jxlsOutput.setDynamicModifyPassword(dynamicModifyPassword);
+		if (reportType == ReportType.JxlsArt) {
+			rs = reportRunner.getResultSet();
+			jxlsOutput.setResultSet(rs);
+			jxlsOutput.setData(groovyData);
+		}
+
+		jxlsOutput.generateReport(report, applicableReportParamsList, fullOutputFilename);
+	}
+
+	/**
+	 * Generates group output
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateGroupReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateGroupReport");
+
+		rs = reportRunner.getResultSet();
+
+		int splitColumnOption = reportOptions.getSplitColumn();
+		int splitColumn;
+		if (splitColumnOption > 0) {
+			//option has been specified. override report setting
+			splitColumn = splitColumnOption;
+		} else {
+			splitColumn = report.getGroupColumn();
+		}
+
+		switch (reportFormat) {
+			case html:
+				GroupHtmlOutput groupHtmlOutput = new GroupHtmlOutput();
+				if (groovyData == null) {
+					rowsRetrieved = groupHtmlOutput.generateReport(rs, splitColumn, writer, contextPath);
+				} else {
+					rowsRetrieved = groupHtmlOutput.generateReport(groovyData, splitColumn, writer, contextPath);
+				}
+				break;
+			case xlsx:
+				GroupXlsxOutput groupXlsxOutput = new GroupXlsxOutput();
+				String reportName = report.getLocalizedName(locale);
+				if (groovyData == null) {
+					rowsRetrieved = groupXlsxOutput.generateReport(rs, splitColumn, report, reportName, fullOutputFilename);
+				} else {
+					rowsRetrieved = groupXlsxOutput.generateReport(groovyData, splitColumn, report, reportName, fullOutputFilename);
+				}
+
+				if (!isJob) {
+					displayFileLink(fileName);
+				}
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
+		}
+	}
+
+	/**
+	 * Outputs a chart report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws DatasetProduceException
+	 * @throws ChartValidationException
+	 * @throws PostProcessingException
+	 * @throws ServletException
+	 */
+	private void generateChartReport() throws SQLException, IOException,
+			DatasetProduceException, ChartValidationException,
+			PostProcessingException, ServletException {
+
+		logger.debug("Entering generateStandardChart");
+
+		rs = reportRunner.getResultSet();
+
+		ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
+
+		boolean showData = false;
+		if (BooleanUtils.isTrue(parameterChartOptions.getShowData())
+				&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
+			showData = true;
+		}
+
+		boolean swapAxes = reportOptions.isSwapAxes();
+		Chart chart = prepareChart(report, rs, swapAxes, groovyData, showData);
+
+		//add secondary charts
+		String secondaryChartSetting = report.getSecondaryCharts();
+		secondaryChartSetting = StringUtils.deleteWhitespace(secondaryChartSetting);
+		String[] secondaryChartIds = StringUtils.split(secondaryChartSetting, ",");
+		if (secondaryChartIds != null) {
+			List<Chart> secondaryCharts = new ArrayList<>();
+			ReportService reportService = new ReportService();
+			for (String secondaryChartIdString : secondaryChartIds) {
+				int secondaryChartId = Integer.parseInt(secondaryChartIdString);
+				Report secondaryReport = reportService.getReport(secondaryChartId);
+				ReportRunner secondaryReportRunner = new ReportRunner();
+				secondaryReportRunner.setUser(user);
+				secondaryReportRunner.setReport(secondaryReport);
+				secondaryReportRunner.setReportParamsMap(reportParamsMap);
+				ResultSet secondaryResultSet = null;
+				try {
+					secondaryReportRunner.execute();
+					secondaryResultSet = secondaryReportRunner.getResultSet();
+					Object secondaryGroovyData = secondaryReportRunner.getGroovyData();
+					swapAxes = false;
+					Chart secondaryChart = prepareChart(secondaryReport, secondaryResultSet, swapAxes, secondaryGroovyData, showData);
+					secondaryCharts.add(secondaryChart);
+				} finally {
+					DatabaseUtils.close(secondaryResultSet);
+					secondaryReportRunner.close();
+				}
+			}
+			chart.setSecondaryCharts(secondaryCharts);
+		}
+
+		//store data for potential use in html and pdf output
+		List<String> dataColumnNames = null;
+		Object chartGroovyData = null;
+		boolean showResultSetData = false;
+		if (showData) {
+			if (groovyData == null) {
+				showResultSetData = true;
+				dataColumnNames = chart.getResultSetColumnNames();
+			} else {
+				GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
+				dataColumnNames = dataDetails.getColumnNames();
+				chartGroovyData = groovyData;
+			}
+		}
+
+		if (isJob) {
+			chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
+		} else {
+			if (reportFormat == ReportFormat.html) {
+				request.setAttribute("chart", chart);
+
+				String htmlElementId = "chart-" + report.getReportId();
+				request.setAttribute("htmlElementId", htmlElementId);
+
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
+
+				if (dataColumnNames != null) {
+					request.setAttribute("columnNames", dataColumnNames);
+					if (groovyData == null) {
+						request.setAttribute("data", chart.getResultSetData());
+					} else {
+						request.setAttribute("data", groovyData);
+					}
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
+				}
+			} else {
+				chart.generateFile(reportFormat, fullOutputFilename, report, pdfPageNumbers, dynamicOpenPassword, dynamicModifyPassword, chartGroovyData, showResultSetData);
+				displayFileLink(fileName);
+			}
+
+			if (groovyDataSize == null) {
+				rowsRetrieved = chart.getResultSetRecordCount();
+			} else {
+				rowsRetrieved = groovyDataSize;
+			}
+		}
+	}
+
+	/**
+	 * Generates output for a freemarker report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws TemplateException
+	 */
+	private void generateFreeMarkerOutput() throws SQLException, IOException, TemplateException {
+		logger.debug("Entering generateFreeMarkerOutput");
+
+		rs = reportRunner.getResultSet();
+
+		FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
+		freemarkerOutput.setContextPath(contextPath);
+		freemarkerOutput.setLocale(locale);
+		freemarkerOutput.setResultSet(rs);
+		freemarkerOutput.setData(groovyData);
+		freemarkerOutput.generateOutput(report, writer, applicableReportParamsList);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+	}
+
+	/**
+	 * Generates a thymeleaf report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void generateThymeleafReport() throws SQLException, IOException {
+		logger.debug("Entering generateThymeleafReport");
+
+		rs = reportRunner.getResultSet();
+
+		ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+		thymeleafOutput.setContextPath(contextPath);
+		thymeleafOutput.setLocale(locale);
+		thymeleafOutput.setResultSet(rs);
+		thymeleafOutput.setData(groovyData);
+		thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+	}
+
+	/**
+	 * Generates a velocity report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void generateVelocityReport() throws SQLException, IOException {
+		logger.debug("Entering generateVelocityReport");
+
+		rs = reportRunner.getResultSet();
+
+		VelocityOutput velocityOutput = new VelocityOutput();
+		velocityOutput.setContextPath(contextPath);
+		velocityOutput.setLocale(locale);
+		velocityOutput.setResultSet(rs);
+		velocityOutput.setData(groovyData);
+		velocityOutput.generateOutput(report, writer, applicableReportParamsList);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+	}
+
+	/**
+	 * Generates an xdocreport report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws XDocReportException
+	 * @throws ServletException
+	 */
+	private void generateXDocReport() throws SQLException, IOException,
+			XDocReportException, ServletException {
+
+		logger.debug("Entering generateXDocReport");
+
+		rs = reportRunner.getResultSet();
+
+		XDocReportOutput xdocReportOutput = new XDocReportOutput();
+		xdocReportOutput.setLocale(locale);
+		xdocReportOutput.setResultSet(rs);
+		xdocReportOutput.setData(groovyData);
+		xdocReportOutput.generateReport(report, applicableReportParamsList, reportFormat, fullOutputFilename);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+
+		if (!isJob) {
+			displayFileLink(fileName);
+		}
+	}
+
+	/**
+	 * Generates a react pivot report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateReactPivotReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateReactPivotReport");
+
+		if (isJob) {
+			throw new IllegalStateException("ReactPivot report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		}
+
+		String outputDivId = "reactPivotOutput-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("outputDivId", outputDivId);
+		request.setAttribute("templateFileName", templateFileName);
+		request.setAttribute("rows", jsonData);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a dygraphs report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateDygraphReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateDygraphReport");
+
+		if (isJob) {
+			throw new IllegalStateException("Dygraphs report types not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		if (reportType == ReportType.Dygraphs) {
+			rs = reportRunner.getResultSet();
+
+			CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
+			//use appropriate date formats to ensure correct interpretation by browsers
+			//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
+			//http://dygraphs.com/date-formats.html
+			String dateFormat = "yyyy/MM/dd";
+			String dateTimeFormat = "yyyy/MM/dd HH:mm";
+			CsvOutputUnivocityOptions csvOptions = new CsvOutputUnivocityOptions();
+			csvOptions.setDateFormat(dateFormat);
+			csvOptions.setDateTimeFormat(dateTimeFormat);
+
+			String csvString;
+			try (StringWriter stringWriter = new StringWriter()) {
+				csvOutputUnivocity.setResultSet(rs);
+				csvOutputUnivocity.setData(groovyData);
+				csvOutputUnivocity.generateOutput(stringWriter, csvOptions, Locale.ENGLISH);
+				csvString = stringWriter.toString();
+			}
+
+			if (groovyDataSize == null) {
+				rowsRetrieved = getResultSetRowCount(rs);
+			} else {
+				rowsRetrieved = groovyDataSize;
+			}
+
+			request.setAttribute("csvData", csvString);
+		}
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//template file not mandatory
+		if (StringUtils.isNotBlank(templateFileName)) {
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+			request.setAttribute("templateFileName", templateFileName);
+		}
+
+		if (reportType == ReportType.DygraphsCsvServer) {
+			String optionsString = report.getOptions();
+
+			if (StringUtils.isBlank(optionsString)) {
+				throw new IllegalArgumentException("Options not specified");
+			}
+
+			ObjectMapper mapper = new ObjectMapper();
+			CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
+			String dataFileName = options.getDataFile();
+
+			logger.debug("dataFileName='{}'", dataFileName);
+
+			//need to explicitly check if file name is empty string
+			//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+			if (StringUtils.isBlank(dataFileName)) {
+				throw new IllegalArgumentException("Data file not specified");
+			}
+
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+
+			request.setAttribute("dataFileName", dataFileName);
+		}
+
+		String outputDivId = "dygraphsOutput-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("outputDivId", outputDivId);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates datatables reports
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateDataTablesOutput() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateDataTablesOutput");
+
+		if (isJob) {
+			throw new IllegalStateException("DataTables report types not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		if (reportType == ReportType.DataTables) {
+			rs = reportRunner.getResultSet();
+
+			JsonOutput jsonOutput = new JsonOutput();
+			JsonOutputResult jsonOutputResult;
+			if (groovyData == null) {
+				jsonOutputResult = jsonOutput.generateOutput(rs);
+			} else {
+				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+			}
+			String jsonData = jsonOutputResult.getJsonData();
+			rowsRetrieved = jsonOutputResult.getRowCount();
+			List<ResultSetColumn> columns = jsonOutputResult.getColumns();
+			request.setAttribute("data", jsonData);
+			request.setAttribute("columns", columns);
+		}
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//template file not mandatory
+		if (StringUtils.isNotBlank(templateFileName)) {
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+			request.setAttribute("templateFileName", templateFileName);
+		}
+
+		String optionsString = report.getOptions();
+		DataTablesOptions options;
+		if (StringUtils.isBlank(optionsString)) {
+			options = new DataTablesOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, DataTablesOptions.class);
+		}
+		request.setAttribute("options", options);
+
+		if (reportType == ReportType.DataTablesCsvServer) {
+			if (StringUtils.isBlank(optionsString)) {
+				throw new IllegalArgumentException("Options not specified");
+			}
+
+			String dataFileName = options.getDataFile();
+
+			logger.debug("dataFileName='{}'", dataFileName);
+
+			//need to explicitly check if file name is empty string
+			//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+			if (StringUtils.isBlank(dataFileName)) {
+				throw new IllegalArgumentException("Data file not specified");
+			}
+
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+
+			request.setAttribute("dataFileName", dataFileName);
+		}
+
+		showDataTablesJsp();
+	}
+
+	/**
+	 * Shows the showDataTables.jsp page
+	 *
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void showDataTablesJsp() throws ServletException, IOException {
+		String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
+		String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
+		String languageTag = locale.toLanguageTag();
+		String localeString = locale.toString();
+		request.setAttribute("outputDivId", outputDivId);
+		request.setAttribute("tableId", tableId);
+		request.setAttribute("languageTag", languageTag);
+		request.setAttribute("locale", localeString);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a fixed width report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateFixedWidthReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateFixedWidthReport");
+
+		rs = reportRunner.getResultSet();
+
+		FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
+		fixedWidthOutput.setResultSet(rs);
+		fixedWidthOutput.setData(groovyData);
+		fixedWidthOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+
+		if (!isJob && !reportFormat.isHtml()) {
+			displayFileLink(fileName);
+		}
+	}
+
+	/**
+	 * Generates output for a csv report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateCsvReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateCsvReport");
+
+		rs = reportRunner.getResultSet();
+
+		CsvOutputUnivocity csvOutput = new CsvOutputUnivocity();
+		csvOutput.setResultSet(rs);
+		csvOutput.setData(groovyData);
+		csvOutput.generateOutput(writer, report, reportFormat, fullOutputFilename, reportOutputLocale);
+
+		if (groovyDataSize == null) {
+			rowsRetrieved = getResultSetRowCount(rs);
+		} else {
+			rowsRetrieved = groovyDataSize;
+		}
+
+		if (!isJob && !reportFormat.isHtml()) {
+			displayFileLink(fileName);
+		}
+	}
+
+	/**
+	 * Generates a c3.js report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateC3Report() throws SQLException, IOException, ServletException {
+		C3Options c3Options;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			c3Options = new C3Options();
+		} else {
+			c3Options = ArtUtils.jsonToObject(options, C3Options.class);
+		}
+
+		String reportTemplate = report.getTemplate();
+		String optionsTemplate = c3Options.getTemplate();
+
+		logger.debug("optionsTemplate='{}'", optionsTemplate);
+
+		if (StringUtils.isBlank(optionsTemplate)) {
+			c3Options.setTemplate(reportTemplate);
+		}
+
+		generateC3Report(c3Options);
+	}
+
+	/**
+	 * Generates c3.js output for a standard/tabular report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateStandardReportC3Output() throws SQLException, IOException, ServletException {
+		C3Options c3Options = report.getGeneralOptions().getC3();
+		generateC3Report(c3Options);
+	}
+
+	/**
+	 * Generates a c3.js report
+	 *
+	 * @param c3Options c3 options
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateC3Report(C3Options c3Options) throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateC3Report");
+
+		Objects.requireNonNull(c3Options, "c3Options must not be null");
+
+		if (isJob) {
+			throw new IllegalStateException("C3.js output not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
+		List<ResultSetColumn> columns = jsonOutputResult.getColumns();
+
+		List<String> value = c3Options.getValue();
+		if (value == null) {
+			value = new ArrayList<>();
+			for (ResultSetColumn column : columns) {
+				if (column.getType() == SqlColumnType.Numeric) {
+					value.add(column.getName());
+				}
+			}
+		}
+		String valueJson = ArtUtils.objectToJson(value);
+		request.setAttribute("value", valueJson);
+
+		String x = c3Options.getX();
+		if (x == null) {
+			for (ResultSetColumn column : columns) {
+				if (column.getType() != SqlColumnType.Numeric) {
+					x = column.getName();
+					break;
+				}
+			}
+		}
+		request.setAttribute("x", x);
+
+		List<List<String>> groups = c3Options.getGroups();
+		if (groups != null) {
+			String groupsJson = ArtUtils.objectToJson(groups);
+			request.setAttribute("groups", groupsJson);
+		}
+
+		String templateFileName = c3Options.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isNotBlank(templateFileName)) {
+			String fullTemplateFileName = jsTemplatesPath + templateFileName;
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+			request.setAttribute("templateFileName", templateFileName);
+		}
+
+		String cssFileName = c3Options.getCssFile();
+
+		logger.debug("cssFileName='{}'", cssFileName);
+
+		//need to explicitly check if file name is empty string
+		//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+			}
+			request.setAttribute("cssFileName", cssFileName);
+		}
+
+		List<String> chartTypes = c3Options.getChartTypes();
+		if (chartTypes != null) {
+			List<C3ChartType> c3ChartTypes;
+			if (ArtUtils.containsIgnoreCase(chartTypes, "all")) {
+				c3ChartTypes = C3ChartType.list();
+			} else {
+				c3ChartTypes = new ArrayList<>();
+				for (String chartType : chartTypes) {
+					C3ChartType c3ChartType = C3ChartType.toEnum(chartType);
+					c3ChartTypes.add(c3ChartType);
+				}
+			}
+			request.setAttribute("chartTypes", c3ChartTypes);
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("options", c3Options);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
+	}
+
+	/**
+	 * Generate a chart.js report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateChartJsReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateChartJsReport");
+
+		if (isJob) {
+			throw new IllegalStateException("Chart.js report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		}
+
+		ChartJsOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new ChartJsOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, ChartJsOptions.class);
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("options", options);
+		request.setAttribute("templateFileName", templateFileName);
+		request.setAttribute("data", jsonData);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartJs.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a datamaps report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateDatamapReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateDatamapReport");
+
+		if (isJob) {
+			throw new IllegalStateException("Datamaps report types not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		if (reportType == ReportType.Datamaps) {
+			rs = reportRunner.getResultSet();
+
+			JsonOutput jsonOutput = new JsonOutput();
+			JsonOutputResult jsonOutputResult;
+			if (groovyData == null) {
+				jsonOutputResult = jsonOutput.generateOutput(rs);
+			} else {
+				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+			}
+			String jsonData = jsonOutputResult.getJsonData();
+			rowsRetrieved = jsonOutputResult.getRowCount();
+			request.setAttribute("data", jsonData);
+		}
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		}
+
+		DatamapsOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new DatamapsOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, DatamapsOptions.class);
+		}
+
+		String datamapsJsFileName = options.getDatamapsJsFile();
+
+		if (StringUtils.isBlank(datamapsJsFileName)) {
+			throw new IllegalArgumentException("Datamaps js file not specified");
+		}
+
+		String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
+		File datamapsJsFile = new File(fullDatamapsJsFileName);
+		if (!datamapsJsFile.exists()) {
+			throw new IllegalStateException("Datamaps js file not found: " + fullDatamapsJsFileName);
+		}
+
+		String dataFileName = options.getDataFile();
+		if (StringUtils.isNotBlank(dataFileName)) {
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+		}
+
+		String mapFileName = options.getMapFile();
+		if (StringUtils.isNotBlank(mapFileName)) {
+			String fullMapFileName = jsTemplatesPath + mapFileName;
+
+			File mapFile = new File(fullMapFileName);
+			if (!mapFile.exists()) {
+				throw new IllegalStateException("Map file not found: " + fullMapFileName);
+			}
+		}
+
+		String cssFileName = options.getCssFile();
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+			}
+		}
+
+		String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("containerId", containerId);
+		request.setAttribute("options", options);
+		request.setAttribute("templateFileName", templateFileName);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a leaflet or open layers report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateWebMapReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateWebMapReport");
+
+		if (isJob) {
+			throw new IllegalStateException("Report type not supported for jobs: " + reportType);
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+		}
+
+		WebMapOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new WebMapOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, WebMapOptions.class);
+		}
+
+		String cssFileName = options.getCssFile();
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+			}
+		}
+
+		String dataFileName = options.getDataFile();
+		if (StringUtils.isNotBlank(dataFileName)) {
+			String fullDataFileName = jsTemplatesPath + dataFileName;
+			File dataFile = new File(fullDataFileName);
+			if (!dataFile.exists()) {
+				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+			}
+		}
+
+		List<String> jsFileNames = options.getJsFiles();
+		if (CollectionUtils.isNotEmpty(jsFileNames)) {
+			for (String jsFileName : jsFileNames) {
+				if (StringUtils.isNotBlank(jsFileName)) {
+					String fullJsFileName = jsTemplatesPath + jsFileName;
+					File jsFile = new File(fullJsFileName);
+					if (!jsFile.exists()) {
+						throw new IllegalStateException("Js file not found: " + fullJsFileName);
+					}
+				}
+			}
+		}
+
+		List<String> cssFileNames = options.getCssFiles();
+		if (CollectionUtils.isNotEmpty(cssFileNames)) {
+			for (String listCssFileName : cssFileNames) {
+				if (StringUtils.isNotBlank(listCssFileName)) {
+					String fullListCssFileName = jsTemplatesPath + listCssFileName;
+					File listCssFile = new File(fullListCssFileName);
+					if (!listCssFile.exists()) {
+						throw new IllegalStateException("Css file not found: " + fullListCssFileName);
+					}
+				}
+			}
+		}
+
+		String mapId = "map-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("mapId", mapId);
+		request.setAttribute("options", options);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("templateFileName", templateFileName);
+
+		switch (reportType) {
+			case Leaflet:
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showLeaflet.jsp").include(request, response);
+				break;
+			case OpenLayers:
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showOpenLayers.jsp").include(request, response);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected report type: " + reportType);
+		}
+	}
+
+	/**
+	 * Generates a mongo db report
+	 *
+	 * @throws IOException
+	 * @throws IntrospectionException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws ServletException
+	 */
+	private void generateMongoDbReport() throws IOException,
+			IntrospectionException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, ServletException {
+
+		logger.debug("Entering generateMongoDbReport");
+		//https://learnxinyminutes.com/docs/groovy/
+		//http://groovy-lang.org/index.html
+		//http://docs.groovy-lang.org/next/html/documentation/
+		//https://www.tutorialspoint.com/mongodb/mongodb_java.htm
+		//https://avaldes.com/java-connecting-to-mongodb-3-2-examples/
+		//https://avaldes.com/mongodb-java-crud-operations-example-tutorial/
+		//http://www.mkyong.com/mongodb/java-mongodb-query-document/
+		//http://o7planning.org/en/10289/java-and-mongodb-tutorial
+		//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
+		//http://zetcode.com/db/mongodbjava/
+		//http://www.mastertheintegration.com/nosql-databases/mongodb/mongodb-java-driver-3-0-quick-reference.html
+		//https://mongodb.github.io/mongo-java-driver/3.4/driver/getting-started/quick-start/
+		//https://github.com/mongolab/mongodb-driver-examples/blob/master/java/JavaSimpleExample.java
+		//https://github.com/ihr/jongo-by-example/blob/master/src/test/java/org/ingini/mongodb/jongo/example/aggregation/TestAggregationFramework.java
+		//https://stackoverflow.com/questions/24370456/groovy-script-sandboxing-use-groovy-timecategory-syntax-from-java-as-string/24374237
+		//http://groovy-lang.org/integrating.html
+		//http://blog.xebia.com/jongo/
+		//http://ingini.org/2013/04/03/mongodb-with-jongo-sleeves-up/
+		//https://stackoverflow.com/questions/37155718/mapping-a-java-object-with-a-mongodb-document-using-jongo
+		//https://github.com/bguerout/jongo/issues/254
+		//http://www.developer.com/java/ent/using-mongodb-in-a-java-ee7-framework.html
+		//https://stackoverflow.com/questions/7567378/access-a-java-class-from-within-groovy
+		//https://stackoverflow.com/questions/4912400/what-packages-does-1-java-and-2-groovy-automatically-import
+		//https://www.spigotmc.org/wiki/mongodb-with-morphia/
+		//http://www.foobaracademy.com/morphia-hello-world-example/
+		//http://www.carfey.com/blog/using-mongodb-with-morphia/
+		//http://www.obsidianscheduler.com/blog/evolving-document-structures-with-morphia-and-mongodb/
+		//https://www.javacodegeeks.com/2011/11/using-mongodb-with-morphia.html
+		//http://javabeat.net/using-morphia-java-library-for-mongodb/
+		//http://www.scalabiliti.com/blog/mongodb_and_morphia_performance
+		//https://city81.blogspot.co.ke/2012/07/using-morphia-to-map-java-objects-in.html
+		//http://www.thejavageek.com/2015/08/24/save-entity-using-morphia/
+		//https://sleeplessinslc.blogspot.co.ke/2010/10/mongodb-with-morphia-example.html
+		//http://jameswilliams.be/blog/2010/05/05/Using-MongoDB-with-Morphia-and-Groovy.html
+		//https://mongodb.github.io/morphia/1.3/getting-started/quick-tour/
+		//https://github.com/mongodb/morphia/blob/1.3.x/morphia/src/examples/java/org/mongodb/morphia/example/QuickTour.java
+		//https://www.javacodegeeks.com/2015/09/mongodb-and-java-tutorial.html
+		//https://mdahlman.wordpress.com/2011/09/02/cool-reporting-on-mongodb/
+		//https://mdahlman.wordpress.com/2011/09/02/simple-reporting-on-mongodb/
+		CompilerConfiguration cc = new CompilerConfiguration();
+		cc.addCompilationCustomizers(new SandboxTransformer());
+
+		Map<String, Object> variables = new HashMap<>();
+		variables.putAll(reportParamsMap);
+
+		MongoClient mongoClient = null;
+		Datasource datasource = report.getDatasource();
+		if (datasource != null) {
+			mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
+		}
+		variables.put("mongoClient", mongoClient);
+
+		Binding binding = new Binding(variables);
+
+		GroovyShell shell = new GroovyShell(binding, cc);
+
+		GroovySandbox sandbox = null;
+		if (Config.getCustomSettings().isEnableGroovySandbox()) {
+			sandbox = new GroovySandbox();
+			sandbox.register();
+		}
+
+		//get report source with direct parameters, rules etc applied
+		String reportSource = reportRunner.getQuerySql();
+		Object result;
+		try {
+			result = shell.evaluate(reportSource);
+		} finally {
+			if (sandbox != null) {
+				sandbox.unregister();
+			}
+		}
+		if (result != null) {
+			if (result instanceof List) {
+				String optionsString = report.getOptions();
+				List<String> optionsColumnNames = null;
+				List<Map<String, String>> columnDataTypes = null;
+				MongoDbOptions options;
+				if (StringUtils.isBlank(optionsString)) {
+					options = new MongoDbOptions();
+				} else {
+					ObjectMapper mapper = new ObjectMapper();
+					options = mapper.readValue(optionsString, MongoDbOptions.class);
+					optionsColumnNames = options.getColumns();
+					columnDataTypes = options.getColumnDataTypes();
+				}
+
+				@SuppressWarnings("unchecked")
+				List<Object> resultList = (List<Object>) result;
+				List<ResultSetColumn> columns = new ArrayList<>();
+				String resultString = null;
+				if (resultList.isEmpty()) {
+					rowsRetrieved = 0;
+				} else {
+					if (CollectionUtils.isEmpty(optionsColumnNames)) {
+						Object sample = resultList.get(0);
+						//https://stackoverflow.com/questions/6133660/recursive-beanutils-describe
+						//https://www.leveluplunch.com/java/examples/convert-object-bean-properties-map-key-value/
+						//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
+						//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
+						//http://www.makeinjava.com/convert-list-objects-tofrom-json-java-jackson-objectmapper-example/
+						ObjectMapper mapper = new ObjectMapper();
+						@SuppressWarnings("unchecked")
+						Map<String, Object> map = mapper.convertValue(sample, Map.class);
+						for (Entry<String, Object> entry : map.entrySet()) {
+							String name = entry.getKey();
+							Object value = entry.getValue();
+							SqlColumnType type;
+							if (value instanceof Number) {
+								type = SqlColumnType.Numeric;
+							} else {
+								type = SqlColumnType.String;
+							}
+							ResultSetColumn column = new ResultSetColumn();
+							column.setName(name);
+							column.setType(type);
+							columns.add(column);
+						}
+					} else {
+						for (String columnName : optionsColumnNames) {
+							ResultSetColumn column = new ResultSetColumn();
+							column.setName(columnName);
+							column.setType(SqlColumnType.String);
+							columns.add(column);
+						}
+					}
+
+					if (CollectionUtils.isNotEmpty(columnDataTypes)) {
+						for (ResultSetColumn column : columns) {
+							String dataColumnName = column.getName();
+							for (Map<String, String> columnDataTypeDefinition : columnDataTypes) {
+								Entry<String, String> entry = columnDataTypeDefinition.entrySet().iterator().next();
+								String columnName = entry.getKey();
+								String dataType = entry.getValue();
+								if (StringUtils.equalsIgnoreCase(columnName, dataColumnName)) {
+									SqlColumnType columnType = SqlColumnType.toEnum(dataType);
+									column.setType(columnType);
+									break;
+								}
+							}
+						}
+					}
+
+					List<String> finalColumnNames = new ArrayList<>();
+					for (ResultSetColumn column : columns) {
+						String columnName = column.getName();
+						finalColumnNames.add(columnName);
+					}
+
+					//_id is a complex object so we have to iterate and replace it with the toString() representation
+					//otherwise we would just call resultString = ArtUtils.objectToJson(resultList); directly and not have to create a new list
+					List<Map<String, Object>> finalResultList = new ArrayList<>();
+					for (Object object : resultList) {
+						Map<String, Object> row = new LinkedHashMap<>();
+						if (object instanceof Map) {
+							ObjectMapper mapper = new ObjectMapper();
+							@SuppressWarnings("unchecked")
+							Map<String, Object> map2 = mapper.convertValue(object, Map.class);
+							for (String columnName : finalColumnNames) {
+								Object value = map2.get(columnName);
+								Object finalValue;
+								if (value == null) {
+									finalValue = "";
+								} else if (value instanceof ObjectId) {
+									ObjectId objectId = (ObjectId) value;
+									finalValue = objectId.toString();
+								} else {
+									finalValue = value;
+								}
+								row.put(columnName, finalValue);
+							}
+						} else {
+							//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
+							Class<?> c = object.getClass();
+							BeanInfo beanInfo = Introspector.getBeanInfo(c, Object.class);
+							for (PropertyDescriptor propertyDesc : beanInfo.getPropertyDescriptors()) {
+								String propertyName = propertyDesc.getName();
+								if (StringUtils.equals(propertyName, "metaClass")) {
+									//don't include
+								} else {
+									if (ArtUtils.containsIgnoreCase(finalColumnNames, propertyName)) {
+										Object value = propertyDesc.getReadMethod().invoke(object);
+										Object finalValue;
+										if (value instanceof ObjectId) {
+											ObjectId objectId = (ObjectId) value;
+											finalValue = objectId.toString();
+										} else {
+											finalValue = value;
+										}
+										row.put(propertyName, finalValue);
+									}
+								}
+							}
+						}
+						finalResultList.add(row);
+					}
+
+					rowsRetrieved = finalResultList.size();
+
+					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
+					//https://github.com/wnameless/json-flattener
+					resultString = ArtUtils.objectToJson(finalResultList);
+				}
+
+				request.setAttribute("data", resultString);
+				request.setAttribute("columns", columns);
+				request.setAttribute("reportType", reportType);
+				request.setAttribute("options", options);
+
+				showDataTablesJsp();
+			} else {
+				writer.print(result);
+			}
+		}
+	}
+
+	/**
+	 * Generates an org chart report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateOrgChartReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateOrgChartReport");
+
+		if (isJob) {
+			throw new IllegalStateException("OrgChart report types not supported for jobs");
+		}
+
+		request.setAttribute("reportType", reportType);
+
+		String jsonData;
+		switch (reportType) {
+			case OrgChartDatabase:
+				rs = reportRunner.getResultSet();
+
+				JsonOutput jsonOutput = new JsonOutput();
+				JsonOutputResult jsonOutputResult;
+				if (groovyData == null) {
+					jsonOutputResult = jsonOutput.generateOutput(rs);
+				} else {
+					jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+				}
+				jsonData = jsonOutputResult.getJsonData();
+				rowsRetrieved = jsonOutputResult.getRowCount();
+				break;
+			case OrgChartJson:
+			case OrgChartList:
+			case OrgChartAjax:
+				jsonData = report.getReportSource();
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected OrgChart report type: " + reportType);
+		}
+
+		request.setAttribute("data", jsonData);
+
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+
+		OrgChartOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new OrgChartOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, OrgChartOptions.class);
+		}
+
+		String cssFileName = options.getCssFile();
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+			}
+		}
+
+		String templateFileName = report.getTemplate();
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		if (StringUtils.isNotBlank(templateFileName)) {
+			String fullTemplateFileName = jsTemplatesPath + templateFileName;
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+		}
+
+		String optionsJson = ArtUtils.objectToJson(options);
+		String containerId = "container-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("containerId", containerId);
+		request.setAttribute("optionsJson", optionsJson);
+		request.setAttribute("options", options);
+		request.setAttribute("templateFileName", templateFileName);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showOrgChart.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a report engine report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateReportEngineReport() throws SQLException, IOException, ServletException {
+		logger.debug("Entering generateReportEngineReport");
+
+		StandardOutput standardOutput = prepareStandardOutputInstance();
+
+		//generate output
+		rs = reportRunner.getResultSet();
+
+		ReportEngineOutput reportEngineOutput = new ReportEngineOutput(standardOutput);
+		reportEngineOutput.setResultSet(rs);
+		reportEngineOutput.setData(groovyData);
+
+		String options = report.getOptions();
+		ReportEngineOptions reportEngineOptions;
+		if (StringUtils.isBlank(options)) {
+			reportEngineOptions = new ReportEngineOptions();
+		} else {
+			reportEngineOptions = ArtUtils.jsonToObject(options, ReportEngineOptions.class);
+		}
+
+		if (reportEngineOptions.isPivot()) {
+			reportEngineOutput.generatePivotOutput(reportType);
+		} else {
+			reportEngineOutput.generateTabularOutput(reportType);
+		}
+
+		//can't get record count from resultset as reportengine closes the resultset after report generation
+		if (groovyDataSize != null) {
+			rowsRetrieved = groovyDataSize;
+		}
+
+		if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
+			displayFileLink(fileName);
+		}
+	}
+
+	/**
+	 * Returns a standard output object to be used for report generation
+	 *
+	 * @return a standard output object to be used for report generation
+	 * @throws IOException
+	 * @throws IllegalArgumentException
+	 */
+	private StandardOutput prepareStandardOutputInstance() throws IOException, IllegalArgumentException {
+		StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
+
+		standardOutput.setWriter(writer);
+		standardOutput.setFullOutputFileName(fullOutputFilename);
+		standardOutput.setReportParamsList(applicableReportParamsList); //used to show selected parameters and drilldowns
+		standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
+		standardOutput.setLocale(locale);
+		standardOutput.setReportName(report.getLocalizedName(locale));
+		standardOutput.setMessageSource(messageSource);
+		standardOutput.setIsJob(isJob);
+		standardOutput.setPdfPageNumbers(pdfPageNumbers);
+		standardOutput.setReport(report);
+		standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
+		standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
+
+		if (request != null) {
+			standardOutput.setContextPath(contextPath);
+
+			if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+				standardOutput.setAjax(true);
+			}
+		}
+
+		return standardOutput;
+	}
+
+	/**
+	 * Generates a plotly.js report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generatePlotlyReport() throws SQLException, IOException, ServletException {
+		PlotlyOptions plotlyOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			plotlyOptions = new PlotlyOptions();
+		} else {
+			plotlyOptions = ArtUtils.jsonToObject(options, PlotlyOptions.class);
+		}
+
+		String reportTemplate = report.getTemplate();
+		String optionsTemplate = plotlyOptions.getTemplate();
+
+		logger.debug("optionsTemplate='{}'", optionsTemplate);
+
+		if (StringUtils.isBlank(optionsTemplate)) {
+			plotlyOptions.setTemplate(reportTemplate);
+		}
+
+		generatePlotlyReport(plotlyOptions);
+	}
+
+	/**
+	 * Generates plotly.js output for a standard/tabular report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateStandardReportPlotlyOutput() throws SQLException, IOException, ServletException {
+		PlotlyOptions plotlyOptions = report.getGeneralOptions().getPlotly();
+		generatePlotlyReport(plotlyOptions);
+	}
+
+	/**
+	 * Generates a plotly.js report
+	 *
+	 * @param plotlyOptions the plotly options
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generatePlotlyReport(PlotlyOptions plotlyOptions) throws SQLException,
+			IOException, ServletException {
+
+		logger.debug("Entering generatePlotlyReport");
+
+		if (isJob) {
+			throw new IllegalStateException("Plotly.js report not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
+		List<ResultSetColumn> columns = jsonOutputResult.getColumns();
+
+		List<String> yColumns = plotlyOptions.getyColumns();
+		if (yColumns == null) {
+			yColumns = new ArrayList<>();
+			for (ResultSetColumn column : columns) {
+				if (column.getType() == SqlColumnType.Numeric) {
+					yColumns.add(column.getName());
+				}
+			}
+		}
+		String yColumnsJson = ArtUtils.objectToJson(yColumns);
+		request.setAttribute("yColumns", yColumnsJson);
+
+		String xColumn = plotlyOptions.getxColumn();
+		if (xColumn == null) {
+			for (ResultSetColumn column : columns) {
+				if (column.getType() != SqlColumnType.Numeric) {
+					xColumn = column.getName();
+					break;
+				}
+			}
+		}
+		request.setAttribute("xColumn", xColumn);
+
+		List<String> chartTypes = plotlyOptions.getChartTypes();
+		if (chartTypes != null) {
+			List<C3ChartType> c3ChartTypes;
+			if (ArtUtils.containsIgnoreCase(chartTypes, "all")) {
+				c3ChartTypes = C3ChartType.getPlotlyChartTypes();
+			} else {
+				c3ChartTypes = new ArrayList<>();
+				for (String chartType : chartTypes) {
+					C3ChartType c3ChartType = C3ChartType.toEnum(chartType);
+					c3ChartTypes.add(c3ChartType);
+				}
+			}
+			request.setAttribute("chartTypes", c3ChartTypes);
+		}
+
+		String type = plotlyOptions.getType();
+		String mode = plotlyOptions.getMode();
+		String typeOption = reportOptions.getPlotlyType();
+		if (StringUtils.isNotBlank(typeOption)) {
+			C3ChartType c3ChartType = C3ChartType.toEnum(typeOption);
+			type = c3ChartType.getPlotlyType();
+			mode = c3ChartType.getPlotlyMode();
+		}
+
+		request.setAttribute("type", type);
+		request.setAttribute("mode", mode);
+
+		String bundle = plotlyOptions.getBundle();
+		if (StringUtils.equalsIgnoreCase(bundle, "cartesian")) {
+			bundle = "cartesian";
+		} else {
+			bundle = "basic";
+		}
+		request.setAttribute("bundle", bundle);
+
+		String templateFileName = plotlyOptions.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isNotBlank(templateFileName)) {
+			String fullTemplateFileName = jsTemplatesPath + templateFileName;
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			}
+			request.setAttribute("templateFileName", templateFileName);
+		}
+
+		String localeString = locale.toString();
+		localeString = StringUtils.lowerCase(localeString, Locale.ENGLISH);
+		localeString = StringUtils.replace(localeString, "_", "-");
+		String languageFileName = "plotly-locale-" + localeString + ".js";
+
+		String languageFilePath = Config.getJsPath()
+				+ "plotly.js-1.36.0" + File.separator
+				+ languageFileName;
+
+		File languageFile = new File(languageFilePath);
+
+		if (languageFile.exists()) {
+			request.setAttribute("localeFileName", languageFileName);
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("options", plotlyOptions);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPlotly.jsp").include(request, response);
 	}
 
 }

@@ -17,6 +17,7 @@
  */
 package art.parameter;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +26,9 @@ import java.util.Map;
  * 
  * @author Timothy Anyona
  */
-public class Parameteri18nOptions {
+public class Parameteri18nOptions implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private List<Map<String, String>> label;
 	private List<Map<String, String>> helpText;
 	private List<Map<String, String>> defaultValue;

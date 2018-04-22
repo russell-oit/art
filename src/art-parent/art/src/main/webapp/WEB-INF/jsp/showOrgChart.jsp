@@ -8,6 +8,7 @@
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 
 <div id="${containerId}" style="text-align: center"></div>
@@ -30,13 +31,13 @@
 </c:if>
 
 <c:if test="${not empty options.cssFile}">
-	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${options.cssFile}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(options.cssFile)}">
 </c:if>
 
 <script>
 	var datasource;
-	var dataString = '${data}';
-	var reportType = '${reportType}';
+	var dataString = '${encode:forJavaScript(data)}';
+	var reportType = '${encode:forJavaScript(reportType)}';
 
 	if (reportType === 'OrgChartDatabase') {
 		//http://www.orgchartcomponent.com/walkthrough/Article1/
@@ -86,7 +87,7 @@
 		//https://rawgit.com/dabeng/OrgChart/master/demo/ul-datasource.html
 		datasource = $($.parseHTML(dataString));
 	} else if (reportType === 'OrgChartAjax') {
-		datasource = '${data}';
+		datasource = dataString;
 	}
 
 	var orgChartSettings = {
@@ -100,7 +101,8 @@
 		}
 	};
 
-	var orgChartOptions = JSON.parse('${optionsJson}');
+	var optionsString = '${encode:forJavaScript(optionsJson)}';
+	var orgChartOptions = JSON.parse(optionsString);
 	$.extend(orgChartSettings, orgChartOptions);
 
 	var nodeContent = orgChartSettings.nodeContent;
@@ -113,7 +115,7 @@
 </script>
 
 <c:if test="${not empty templateFileName}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>
 </c:if>
 
 <script>

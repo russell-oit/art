@@ -31,7 +31,9 @@ import art.reportoptions.Reporti18nOptions;
 import art.encryption.AESCrypt;
 import art.encryption.AesEncryptor;
 import art.migration.PrefixTransformer;
+import art.reportoptions.C3Options;
 import art.reportoptions.CloneOptions;
+import art.reportoptions.PlotlyOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
 import art.ruleValue.UserGroupRuleValue;
@@ -47,6 +49,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -163,6 +166,8 @@ public class Report implements Serializable {
 	@Parsed
 	private boolean clearTextPasswords;
 	private Boolean dummyBoolean; //used for the test report functionality
+	@Parsed
+	private boolean useGroovy;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -174,6 +179,20 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
+
+	/**
+	 * @return the useGroovy
+	 */
+	public boolean isUseGroovy() {
+		return useGroovy;
+	}
+
+	/**
+	 * @param useGroovy the useGroovy to set
+	 */
+	public void setUseGroovy(boolean useGroovy) {
+		this.useGroovy = useGroovy;
+	}
 
 	/**
 	 * @return the dummyBoolean
@@ -1215,9 +1234,34 @@ public class Report implements Serializable {
 	 * @throws java.io.IOException
 	 */
 	public void loadGeneralOptions() throws IOException {
-		if (StringUtils.isNotBlank(options)) {
+		C3Options defaultC3Options = new C3Options();
+		List<String> chartTypes = new ArrayList<>(Arrays.asList("all"));
+		defaultC3Options.setChartTypes(chartTypes);
+
+		PlotlyOptions defaultPlotlyOptions = new PlotlyOptions();
+		String defaultPlotlyMode = "lines+markers";
+		defaultPlotlyOptions.setType("scatter");
+		defaultPlotlyOptions.setMode(defaultPlotlyMode);
+		defaultPlotlyOptions.setChartTypes(chartTypes);
+
+		if (StringUtils.isBlank(options)) {
+			generalOptions = new GeneralReportOptions();
+			generalOptions.setC3(defaultC3Options);
+			generalOptions.setPlotly(defaultPlotlyOptions);
+		} else {
 			ObjectMapper mapper = new ObjectMapper();
 			generalOptions = mapper.readValue(options, GeneralReportOptions.class);
+			C3Options c3Options = generalOptions.getC3();
+			if (c3Options == null) {
+				generalOptions.setC3(defaultC3Options);
+			}
+			
+			PlotlyOptions plotlyOptions = generalOptions.getPlotly();
+			if (plotlyOptions == null) {
+				generalOptions.setPlotly(defaultPlotlyOptions);
+			} else if (plotlyOptions.getMode() == null) {
+				plotlyOptions.setMode(defaultPlotlyMode);
+			}
 		}
 	}
 

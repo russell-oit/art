@@ -221,8 +221,8 @@ Access rights configuration
 								</option>
 							</c:forEach>
 						</select>
-						<a href="#" class="select-all" data-item="#reportGroups"><spring:message code="page.text.selectAll"/></a> / 
-						<a href="#" class="deselect-all" data-item="#reportGroups"><spring:message code="page.text.deselectAll"/></a>
+						<a href="#" class="select-all" data-item="#jobs"><spring:message code="page.text.selectAll"/></a> / 
+						<a href="#" class="deselect-all" data-item="#jobs"><spring:message code="page.text.deselectAll"/></a>
 					</div>
 				</div>
 				<div class="form-group">

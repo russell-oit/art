@@ -17,13 +17,16 @@
  */
 package art.destinationoptions;
 
+import java.io.Serializable;
+
 /**
  * Represents options for ftp destinations
  *
  * @author Timothy Anyona
  */
-public class FtpOptions {
+public class FtpOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private Long controlKeepAliveTimeoutSeconds;
 	private final Integer DEFAULT_CONNECT_TIMEOUT_SECONDS = 60;
 	private Integer connectTimeoutSeconds = DEFAULT_CONNECT_TIMEOUT_SECONDS;

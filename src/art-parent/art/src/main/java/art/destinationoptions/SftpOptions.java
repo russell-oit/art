@@ -17,13 +17,16 @@
  */
 package art.destinationoptions;
 
+import java.io.Serializable;
+
 /**
  * Represents options for sftp destinations
  *
  * @author Timothy Anyona
  */
-public class SftpOptions {
+public class SftpOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private Integer sessionConnectTimeoutSeconds;
 	private Integer channelConnectTimeoutSeconds;
 	private Integer serverAliveIntervalSeconds;

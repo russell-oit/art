@@ -9,6 +9,9 @@
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+
+<spring:message code="pivotTableJs.text.processing" var="processingText" javaScriptEscape="true"/>
 
 <div id="${outputDivId}">
 
@@ -50,12 +53,12 @@
 		renderers: renderers,
 		dataClass: $.pivotUtilities.SubtotalPivotData
 	};
-	
+
 	var overwrite = false;
 	var locale = 'en';
 
 	var download;
-	var reportType = '${reportType}';
+	var reportType = '${encode:forJavaScript(reportType)}';
 	if (reportType === 'PivotTableJsCsvServer') {
 		download = true;
 	} else {
@@ -75,7 +78,7 @@
 </script>
 
 <c:if test="${not empty templateFileName}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>
 </c:if>
 
 <c:if test="${not empty locale}">
@@ -88,7 +91,9 @@
 <c:choose>
 	<c:when test="${reportType == 'PivotTableJs'}">
 		<script type="text/javascript">
-	$("#${outputDivId}").pivotUI(${input}, options, overwrite, locale);
+	var inputString = '${encode:forJavaScript(input)}';
+	var input = JSON.parse(inputString);
+	$("#${outputDivId}").pivotUI(input, options, overwrite, locale);
 		</script>
 	</c:when>
 	<c:when test="${reportType == 'PivotTableJsCsvLocal'}">
@@ -109,7 +114,7 @@
 		</p>
 		<script type="text/javascript">
 			var parseAndPivot = function (f) {
-				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(processing...)</p>");
+				$("#${outputDivId}").html("<p align='center' style='color:grey;'>(${processingText}...)</p>");
 				Papa.parse(f, csvConfig);
 			};
 
@@ -150,7 +155,7 @@
 	<c:when test="${reportType == 'PivotTableJsCsvServer'}">
 		<script type="text/javascript">
 			//http://nicolas.kruchten.com/pivottable/examples/mps_csv.html
-			var dataFile = '${pageContext.request.contextPath}/js-templates/${dataFileName}';
+			var dataFile = '${pageContext.request.contextPath}/js-templates/${encode:forJavaScript(dataFileName)}';
 				Papa.parse(dataFile, csvConfig);
 		</script>
 	</c:when>

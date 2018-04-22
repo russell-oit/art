@@ -112,6 +112,7 @@ public class ParameterService {
 			parameter.setDateFormat(rs.getString("PARAMETER_DATE_FORMAT"));
 			parameter.setPlaceholderText(rs.getString("PLACEHOLDER_TEXT"));
 			parameter.setUseDefaultValueInJobs(rs.getBoolean("USE_DEFAULT_VALUE_IN_JOBS"));
+			parameter.setTemplate(rs.getString("TEMPLATE"));
 			parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			parameter.setCreatedBy(rs.getString("CREATED_BY"));
@@ -124,13 +125,23 @@ public class ParameterService {
 			parameter.setLovReport(lovReport);
 
 			String options = parameter.getOptions();
-			if (StringUtils.isNotBlank(options)) {
+			if (StringUtils.isBlank(options)) {
+				ParameterOptions parameterOptions = new ParameterOptions();
+				DateRangeOptions dateRangeOptions = new DateRangeOptions();
+				parameterOptions.setDateRange(dateRangeOptions);
+				parameter.setParameterOptions(parameterOptions);
+			} else {
 				ObjectMapper mapper = new ObjectMapper();
 				try {
 					ParameterOptions parameterOptions = mapper.readValue(options, ParameterOptions.class);
+					DateRangeOptions dateRangeOptions = parameterOptions.getDateRange();
+					if (dateRangeOptions == null) {
+						dateRangeOptions = new DateRangeOptions();
+						parameterOptions.setDateRange(dateRangeOptions);
+					}
 					parameter.setParameterOptions(parameterOptions);
 				} catch (IOException ex) {
-					throw new SQLException(ex);
+					logger.error("Error. Parameter Id {}", parameter.getParameterId(), ex);
 				}
 			}
 
@@ -517,8 +528,9 @@ public class ParameterService {
 					+ " HIDDEN, FIXED_VALUE, SHARED, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
 					+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION, PARAMETER_OPTIONS,"
 					+ " PARAMETER_DATE_FORMAT, PLACEHOLDER_TEXT, USE_DEFAULT_VALUE_IN_JOBS,"
+					+ " TEMPLATE,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 23) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 24) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -542,6 +554,7 @@ public class ParameterService {
 				parameter.getDateFormat(),
 				parameter.getPlaceholderText(),
 				BooleanUtils.toInteger(parameter.isUseDefaultValueInJobs()),
+				parameter.getTemplate(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -558,7 +571,7 @@ public class ParameterService {
 					+ " SHARED=?, USE_LOV=?, LOV_REPORT_ID=?,"
 					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
 					+ " PARAMETER_OPTIONS=?, PARAMETER_DATE_FORMAT=?, PLACEHOLDER_TEXT=?,"
-					+ " USE_DEFAULT_VALUE_IN_JOBS=?,"
+					+ " USE_DEFAULT_VALUE_IN_JOBS=?, TEMPLATE=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
 
@@ -583,6 +596,7 @@ public class ParameterService {
 				parameter.getDateFormat(),
 				parameter.getPlaceholderText(),
 				BooleanUtils.toInteger(parameter.isUseDefaultValueInJobs()),
+				parameter.getTemplate(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()

@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.enums.SqlColumnType;
 import java.io.Serializable;
 
 /**
@@ -28,7 +29,7 @@ public class ResultSetColumn implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String name;
-	private String type;
+	private SqlColumnType type;
 
 	/**
 	 * @return the name
@@ -47,14 +48,14 @@ public class ResultSetColumn implements Serializable {
 	/**
 	 * @return the type
 	 */
-	public String getType() {
+	public SqlColumnType getType() {
 		return type;
 	}
 
 	/**
 	 * @param type the type to set
 	 */
-	public void setType(String type) {
+	public void setType(SqlColumnType type) {
 		this.type = type;
 	}
 }

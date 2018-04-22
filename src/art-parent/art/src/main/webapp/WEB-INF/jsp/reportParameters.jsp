@@ -11,9 +11,15 @@
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
-
 <c:forEach var="reportParameter" items="${reportParams}">
 	<c:set var="reportParam" value="${reportParameter.value}" scope="request"/>
+
+	<c:if test="${reportParam.parameter.hidden}">
+		<input type="hidden"
+			   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
+			   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
+			   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(requestContext.locale))}">
+	</c:if>
 
 	<c:if test="${!reportParam.parameter.hidden && !reportParam.parameter.fixedValue}">
 		<div class="form-group">
@@ -49,6 +55,9 @@
 								</c:when>
 								<c:when test="${reportParam.parameter.dataType == 'DateTime'}">
 									<jsp:include page="datetimeInput.jsp" />
+								</c:when>
+								<c:when test="${reportParam.parameter.dataType == 'DateRange'}">
+									<jsp:include page="daterangeInput.jsp" />
 								</c:when>
 								<c:otherwise>
 									<jsp:include page="textInput.jsp"/>

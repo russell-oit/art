@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.4"> 
+  <meta name="version" content="3.5"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -109,6 +109,7 @@
          <li><a href="#fixed-width">Fixed Width</a></li> 
          <li><a href="#csv">CSV</a></li> 
          <li><a href="#c3js">C3.js</a></li> 
+         <li><a href="#plotlyjs">Plotly.js</a></li> 
          <li><a href="#chartjs">Chart.js</a></li> 
          <li><a href="#datamaps">Datamaps</a></li> 
          <li><a href="#datamaps-file">Datamaps: File</a></li> 
@@ -145,7 +146,11 @@
        <li><a href="#creating-a-new-parameter">Creating a new parameter</a></li> 
        <li><a href="#single-value-parameters">Single-Value Parameters</a></li> 
        <li><a href="#multi-value-parameters">Multi-Value Parameters</a></li> 
-       <li><a href="#parameter-options">Parameter Options</a></li> 
+       <li><a href="#parameter-options">Parameter Options</a> 
+        <ol> 
+         <li><a href="#i18n-options">i18n Options</a></li> 
+         <li><a href="#date-range-options">Date Range Options</a></li> 
+        </ol></li> 
       </ol></li> 
      <li><a href="#expressions">Expressions</a> 
       <ol> 
@@ -1320,6 +1325,10 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>A report ID of a report which should be used to provide the report source for this report</td> 
        </tr> 
        <tr> 
+        <td><strong>Use Groovy</strong></td> 
+        <td>Whether the report source is groovy rather than SQL</td> 
+       </tr> 
+       <tr> 
         <td><strong>Options</strong></td> 
         <td>Provides additional options depending on the report type. The options are specified in JSON format with different report types expecting different JSON specifications.</td> 
        </tr> 
@@ -1967,15 +1976,287 @@ FROM mytable
      </table> 
      <p>In addition to these properties, the following properties available with fixed width reports can also be used, having the same configuration and effect as in fixed width reports: <strong>includeHeaders</strong>, <strong>dateFormat</strong>, <strong>dateTimeFormat</strong>, <strong>numberFormat</strong>, <strong>fieldNumberFormats</strong>, <strong>fieldDateFormats</strong>.</p> 
      <h3 id="c3js">C3.js</h3> 
-     <p>Generates charts using the <a class="" href="http://c3js.org/" rel="nofollow">C3.js</a> library. A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. If you would like to use custom css, provide a json object in the <strong>Options</strong> field, setting the <strong>cssFile</strong> property to the file name of the css file to use. This file can be uploaded using the <strong>Add files</strong> option.</p> 
-     <div class="codehilite"> 
-      <pre><span></span>    {
-         "cssFile": "file_name.css"
-    }
-</pre> 
-     </div> 
+     <p>Generates charts using the <a class="" href="http://c3js.org/" rel="nofollow">C3.js</a> library. The demo database contains some sample reports of this type. A number of options can be specified in the <strong>Options</strong> field. Also, a javascript file containing chart configuration can be uploaded using the <strong>Template</strong> field.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>cssFile</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The file name of a css file to use to provide custom styling e.g. <code>mycss.css</code>. This file can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>chartTypes</strong></td> 
+        <td>String[]</td> 
+        <td></td> 
+        <td>Chart types that should be available for dynamic changing of the chart type. Possible values include <strong>line</strong>, <strong>spline</strong>, <strong>step</strong>, <strong>area</strong>, <strong>areaSpline</strong>, <strong>areaStep</strong>, <strong>bar</strong>, <strong>scatter</strong>, <strong>pie</strong>, <strong>donut</strong>, <strong>gauge</strong> or <strong>all</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>x</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>For bar and line charts, the column to use as the x-axis category</td> 
+       </tr> 
+       <tr> 
+        <td><strong>value</strong></td> 
+        <td>String[]</td> 
+        <td></td> 
+        <td>The columns to use for data values</td> 
+       </tr> 
+       <tr> 
+        <td><strong>type</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The initial chart type. Possible values include <strong>line</strong>, <strong>spline</strong>, <strong>step</strong>, <strong>area</strong>, <strong>area-spline</strong>, <strong>area-step</strong>, <strong>bar</strong>, <strong>scatter</strong>, <strong>pie</strong>, <strong>donut</strong>, <strong>gauge</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>template</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>An optional file name of a javascript file that contains chart configuration. If the file was selected using the <strong>Template</strong> field, this is not needed.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>groupedTooltip</strong></td> 
+        <td>Boolean</td> 
+        <td>true</td> 
+        <td>Whether to show grouped tooltips</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showLegend</strong></td> 
+        <td>Boolean</td> 
+        <td>true</td> 
+        <td>Whether to show the legend</td> 
+       </tr> 
+       <tr> 
+        <td><strong>rotatedAxis</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether the axis should be rotated. For bar charts, setting to <strong>true</strong> will result in a horizontal bar chart.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showTooltip</strong></td> 
+        <td>Boolean</td> 
+        <td>true</td> 
+        <td>Whether tooltips should be shown</td> 
+       </tr> 
+       <tr> 
+        <td><strong>legendPosition</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The legend position. One of <strong>bottom</strong>, <strong>right</strong>, <strong>inset</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>width</strong></td> 
+        <td>Integer</td> 
+        <td></td> 
+        <td>The width of the chart in pixels</td> 
+       </tr> 
+       <tr> 
+        <td><strong>height</strong></td> 
+        <td>Integer</td> 
+        <td></td> 
+        <td>The height of the chart in pixels</td> 
+       </tr> 
+       <tr> 
+        <td><strong>xAxisLabel</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The x axis label</td> 
+       </tr> 
+       <tr> 
+        <td><strong>yAxisLabel</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The y axis label</td> 
+       </tr> 
+       <tr> 
+        <td><strong>xAxisLabelPosition</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The x axis label position. See <a href="http://c3js.org/reference.html#axis-x-label" rel="nofollow">http://c3js.org/reference.html#axis-x-label</a></td> 
+       </tr> 
+       <tr> 
+        <td><strong>yAxisLabelPosition</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The y axis label position. See <a href="http://c3js.org/reference.html#axis-x-label" rel="nofollow">http://c3js.org/reference.html#axis-x-label</a></td> 
+       </tr> 
+       <tr> 
+        <td><strong>groups</strong></td> 
+        <td>String<code>[][]</code></td> 
+        <td></td> 
+        <td>Description of columns that should be grouped e.g. to get a stacked bar chart. See <a href="http://c3js.org/reference.html#data-groups" rel="nofollow">http://c3js.org/reference.html#data-groups</a></td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="plotlyjs">Plotly.js</h3> 
+     <p>Generates charts using the <a class="" href="https://plot.ly/javascript/" rel="nofollow">plotly.js</a> library. A number of options can be specified in the <strong>Options</strong> field. Also, a javascript file containing chart configuration can be uploaded using the <strong>Template</strong> field.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>template</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>An optional file name of a javascript file that contains chart configuration. If the file was selected using the <strong>Template</strong> field, this is not needed.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>barmode</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>Set to <strong>stack</strong> to get a stacked bar chart</td> 
+       </tr> 
+       <tr> 
+        <td><strong>xColumn</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The column to use as the x-axis category</td> 
+       </tr> 
+       <tr> 
+        <td><strong>yColumns</strong></td> 
+        <td>String[]</td> 
+        <td></td> 
+        <td>The columns to use for data values</td> 
+       </tr> 
+       <tr> 
+        <td><strong>type</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The plotly type e.g. pie, scatter, bar</td> 
+       </tr> 
+       <tr> 
+        <td><strong>mode</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The plotly mode e.g. lines, lines+markers</td> 
+       </tr> 
+       <tr> 
+        <td><strong>chartTypes</strong></td> 
+        <td>String[]</td> 
+        <td></td> 
+        <td>Chart types that should be available for dynamic changing of the chart type. Possible values include <strong>line</strong>, <strong>bar</strong>, <strong>scatter</strong>, <strong>pie</strong>, <strong>donut</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>title</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The chart title</td> 
+       </tr> 
+       <tr> 
+        <td><strong>xAxisTitle</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The x axis title</td> 
+       </tr> 
+       <tr> 
+        <td><strong>yAxisTitle</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>the y axis title</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showLegend</strong></td> 
+        <td>Boolean</td> 
+        <td>true</td> 
+        <td>Whether to show the legend</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showText</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>For bar charts, whether the values should be shown on the bars</td> 
+       </tr> 
+       <tr> 
+        <td><strong>textPosition</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>With <strong>showText</strong> as <strong>true</strong>, the position of the values. Sets the plotly <strong>textposition</strong> property.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>width</strong></td> 
+        <td>Integer</td> 
+        <td></td> 
+        <td>The width of the chart in pixels</td> 
+       </tr> 
+       <tr> 
+        <td><strong>height</strong></td> 
+        <td>Integer</td> 
+        <td></td> 
+        <td>The height of the chart in pixels</td> 
+       </tr> 
+       <tr> 
+        <td><strong>hole</strong></td> 
+        <td>Double (0.0 - 1.0)</td> 
+        <td></td> 
+        <td>For donut charts, the size of the hole in the middle of the chart</td> 
+       </tr> 
+       <tr> 
+        <td><strong>bundle</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>Use <strong>cartesian</strong> to use charts available in the cartesian bundle. See <a href="https://github.com/plotly/plotly.js/tree/master/dist" rel="nofollow">https://github.com/plotly/plotly.js/tree/master/dist</a></td> 
+       </tr> 
+       <tr> 
+        <td><strong>orientation</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>Use <strong>h</strong> to get horizontal bar charts</td> 
+       </tr> 
+       <tr> 
+        <td><strong>hoverInfo</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>Determines what is shown in tooltips. Sets the plotly <strong>hoverinfo</strong> property.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>pieValueColumn</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>For tabular reports, the column that should be used for pie chart values. If not specified, the last numeric column in the data will be used.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <h3 id="chartjs">Chart.js</h3> 
-     <p>Generates charts using the <a class="" href="http://www.chartjs.org/" rel="nofollow">Chart.js</a> library. A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. In the <strong>Options</strong> field, you can specify the <strong>width</strong> (integer - default = 300) or <strong>height</strong> (integer - default = 100) properties to define a custom width or height for the chart.</p> 
+     <p>Generates charts using the <a class="" href="http://www.chartjs.org/" rel="nofollow">Chart.js</a> library. A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. A number of options can be specified in the <strong>Options</strong> field.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>width</strong></td> 
+        <td>Integer</td> 
+        <td>300</td> 
+        <td>The width of the chart in pixels</td> 
+       </tr> 
+       <tr> 
+        <td><strong>height</strong></td> 
+        <td>Integer</td> 
+        <td>100</td> 
+        <td>The height of the chart in pixels</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <h3 id="datamaps">Datamaps</h3> 
      <p>Enables display of data on a map, using the <a class="" href="https://datamaps.github.io/" rel="nofollow">Datamaps</a> library, using data from a database. A javascript file containing the datamaps configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> 
      <table border="1"> 
@@ -2444,7 +2725,6 @@ FROM mytable
        <tr> 
         <th>Property</th> 
         <th>Data Type</th> 
-        <th>Default</th> 
         <th>Description</th> 
        </tr> 
       </thead> 
@@ -2452,14 +2732,17 @@ FROM mytable
        <tr> 
         <td><strong>i18n</strong></td> 
         <td>Object</td> 
-        <td></td> 
         <td>Allows for localization of some aspects of a report. It can have the properties <strong>name</strong>, <strong>shortDescription</strong>, <strong>description</strong>, with each property being an array of objects providing the locale and the appropriate localized string. e.g. <code>"i18n": { "name": [{"en, sw": "A report name"}, {"pt": "Another report name"}], "description": [{"lt": "Sample help text"}] }</code>. In addition, the <strong>i18n</strong> object can have a property named <strong>columnNames</strong> that enables localization of data output column names. This property also holds an array of objects defining the localized column names e.g. <code>"i18n": { "columnNames": [ {"col1": [{"lt": "Some name"}]}, {"2": [{"lt": "A name"}]} ]}</code>. You can specify a column name e.g. "col1" or a column index e.g. "2", the first column being index 1.</td> 
        </tr> 
        <tr> 
-        <td><strong>usesGroovy</strong></td> 
-        <td>Boolean</td> 
-        <td>false</td> 
-        <td>Whether the SQL source field is actually a groovy script. For MongoDB reports, this doesn't need to be set as MongoDB reports always use groovy in the source.</td> 
+        <td><strong>c3</strong></td> 
+        <td>Object</td> 
+        <td>Allows for custom configuration of C3 Chart output with tabular reports. The properties are same as those specified for the <strong>C3.js</strong> report type.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>plotly</strong></td> 
+        <td>Object</td> 
+        <td>Allows for custom configuration of Plotly Chart output with tabular reports. The properties are same as those specified for the <strong>Plotly.js</strong> report type.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -2782,7 +3065,7 @@ FROM mytable
        </div> </li> 
      </ul> 
      <h2 id="report-formats">Report Formats</h2> 
-     <p>When running reports interactively, or scheduling them for later execution, you can specify the format in which the results should be output. When running a report via url, you can specify the report format to be used using the <code>reportFormat</code> url parameter. Report format names are case sensitive. Some report formats are not available for certain types of reports.</p> 
+     <p>When running reports interactively, or scheduling them for later execution, you can specify the format in which the results should be output. When running a report via url, you can specify the report format to be used using the <strong>reportFormat</strong> url parameter. Report format names are case sensitive and some report formats are not available for certain types of reports.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -2927,6 +3210,21 @@ FROM mytable
         <td>File (txt)</td> 
         <td>For <strong>Fixed Width</strong> reports, creates a fixed-width text file, compressed using Zip.</td> 
        </tr> 
+       <tr> 
+        <td><strong>pivotTableJs</strong></td> 
+        <td>Browser (Pivot Table)</td> 
+        <td>For tabular reports, shows the results as a dynamic pivot table</td> 
+       </tr> 
+       <tr> 
+        <td><strong>c3</strong></td> 
+        <td>Browser (C3 Chart)</td> 
+        <td>For tabular reports, shows the data as a c3 chart</td> 
+       </tr> 
+       <tr> 
+        <td><strong>plotly</strong></td> 
+        <td>Browser (Plotly Chart)</td> 
+        <td>For tabular reports, shows the data as a plotly chart</td> 
+       </tr> 
       </tbody> 
      </table> 
      <p>You can configure which report formats are shown to users when running reports by modifying the <strong>Report Formats</strong> field in the <strong>Settings</strong> page.</p> 
@@ -2987,6 +3285,10 @@ FROM mytable
        <tr> 
         <td><strong>Date Format</strong></td> 
         <td>For <strong>Date</strong> and <strong>DateTime</strong> data types, the date format to use. Leave blank to use the default. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Template</strong></td> 
+        <td>For <strong>DateRange</strong> data types, an optional javascript file that can be used to customize the date range picker. You can override the <strong>overallOptions</strong>, <strong>ranges</strong> or <strong>localeOptions</strong> variables as per the <strong>WEB-INF\jsp\daterangeInput.jsp</strong> file.</td> 
        </tr> 
        <tr> 
         <td><strong>Default Value</strong></td> 
@@ -3133,6 +3435,8 @@ FROM mytable
      </ul> 
      <h2 id="parameter-options">Parameter Options</h2> 
      <p>When defining a parameter, a number of options can be specified in the <strong>Options</strong> field. These are defined in JSON format with the following possibilities.</p> 
+     <h3 id="i18n-options">i18n Options</h3> 
+     <p>Certain parameter fields can be localized by specifying an <strong>i18n</strong> object in the Options field with the following possible values.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -3143,9 +3447,87 @@ FROM mytable
       </thead> 
       <tbody> 
        <tr> 
-        <td><strong>i18n</strong></td> 
+        <td><strong>label</strong></td> 
+        <td>Object[]</td> 
+        <td>Localization for the parameter label. Each object has the language code as the key and the translation as the value. Multiple language codes can be specified separated by comma e.g. <code>{"label": [{"en, sw": "Test Label"}, {"pt": "Another Label"}]</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>helpText</strong></td> 
+        <td>Object[]</td> 
+        <td>Localization for the parameter help text. Similar format to label.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>defaultValue</strong></td> 
+        <td>Object[]</td> 
+        <td>Localization for the parameter default value. Similar format to label.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>placeholderText</strong></td> 
+        <td>Object[]</td> 
+        <td>Localization for the parameter placeholder text. Similar format to label.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <p>A sample <strong>i18n</strong> configuration may be <code>"i18n": { "label": [{"en, sw": "Test Label"}, {"pt": "Another Label"}], "helpText": [{"lt": "Sample help text"}] }</code></p> 
+     <h3 id="date-range-options">Date Range Options</h3> 
+     <p>For <strong>DateRange</strong> parameters, options can be specified in a <strong>dateRange</strong> object with the properties below. ART uses the <a class="" href="http://www.daterangepicker.com/" rel="nofollow">Date Range Picker</a> library to provide the date range picker.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default Value</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>fromParameter</strong></td> 
         <td>Object</td> 
-        <td>Allows for localization of parameter configurations. It can have the properties <strong>label</strong>, <strong>helpText</strong>, <strong>defaultValue</strong>, <strong>placeholderText</strong>, with each property being an array of objects providing the locale and the appropriate localized string. e.g. <code>"i18n": { "label": [{"en, sw": "Test Label"}, {"pt": "Another Label"}], "helpText": [{"lt": "Sample help text"}] }</code></td> 
+        <td></td> 
+        <td>A specification of the parameter that should get the "From" date of the date range. This object has two properties, <strong>name</strong> which specifies the parameter name and <strong>format</strong> which specifies the date format of the parameter. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a> and the default is <strong>yyyy-MM-dd</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>toParameter</strong></td> 
+        <td>Object</td> 
+        <td></td> 
+        <td>A specification of the parameter that should get the "To" date of the date range. Similar specification to <strong>fromParameter</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>format</strong></td> 
+        <td>String</td> 
+        <td>MMMM dd, yyyy</td> 
+        <td>The format of dates displayed in the date range picker text input. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>separator</strong></td> 
+        <td>String</td> 
+        <td>-</td> 
+        <td>String that separates the "from" and "to" dates in the date range picker text input</td> 
+       </tr> 
+       <tr> 
+        <td><strong>autoApply</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether to automatically apply a date range as soon as two dates are selected, or require the <strong>Apply</strong> button to be clicked</td> 
+       </tr> 
+       <tr> 
+        <td><strong>ranges</strong></td> 
+        <td>String[]</td> 
+        <td><code>["default"]</code></td> 
+        <td>Pre-defined, custom date ranges available for selection. Can be set to <strong>null</strong> if custom ranges are not required. Possible values include <strong>today</strong>, <strong>yesterday</strong>, <strong>last7Days</strong>, <strong>last30Days</strong>, <strong>thisMonth</strong>, <strong>lastMonth</strong>, <strong>thisQuarter</strong>, <strong>lastQuarter</strong>, <strong>thisYear</strong>, <strong>lastYear</strong>, <strong>thisWeek</strong>, <strong>lastWeek</strong>, <strong>yearToDate</strong>, <strong>monthToDate</strong>, <strong>quarterToDate</strong>, <strong>weekToDate</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>alwaysShowCalendars</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>When using custom ranges, whether the calendars are always displayed or only displayed after clicking on the <strong>Custom Range</strong> button.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>linkedCalendars</strong></td> 
+        <td>Boolean</td> 
+        <td>true</td> 
+        <td>When enabled, the two calendars displayed will always be for two sequential months (e.g. January and February), and both will be advanced when clicking the left or right arrows above the calendars. When disabled, the two calendars can be individually advanced and display any month/year.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -3180,17 +3562,11 @@ FROM mytable
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="dynamic-sql">Dynamic SQL</h1> 
-     <p>It is possible to create Dynamic SQL queries, allowing you to modify the structure of the query based on user parameters, possibly running different queries depending on the user input.</p> 
+     <p>It is possible to create dynamic SQL queries, allowing you to modify the structure of the query based on user parameters, possibly running different queries depending on the user input.</p> 
      <h2 id="using-groovy">Using Groovy</h2> 
-     <p>You can use <a class="" href="http://groovy-lang.org/" rel="nofollow">groovy</a> in the SQL source section to achieve dynamic sql. You need to define an option in the <strong>Options</strong> field of the report to specify that you are using groovy in the sql source. This option is named <strong>usesGroovy</strong> and needs to have the value <strong>true</strong> e.g.</p> 
-     <div class="codehilite"> 
-      <pre><span></span>{
-    "usesGroovy": true
-}
-</pre> 
-     </div> 
-     <p>The groovy script may return a string that has the sql to be executed. It may also return a java.util.List of Maps or a java.util.List of GroovyRowResult objects that represent the data to be output.</p> 
-     <p>The groovy code is run through a sandbox and depending on the code in the script, you may need to specify additional classes in the <strong>WEB-INF\groovy-whitelist.txt</strong> file. If you get a security exception when running the report, add the indicated class to the groovy whitelist file and run the report again. You can also disable the sandbox completely by modifying the <strong>WEB-INF\art-custom-settings.json</strong> file and setting the <strong>enableGroovySandbox</strong> property to <strong>false</strong>. Modification of the art-custom-settings.json file would require clearing the Custom Settings cache to take effect.</p> 
+     <p>You can use <a class="" href="http://groovy-lang.org/" rel="nofollow">groovy</a> in the SQL source section to achieve dynamic sql. Set the <strong>Use Groovy</strong> field of the report to specify that you are using groovy in the sql source. </p> 
+     <p>The groovy script may return a string that has the sql to be executed or it may return a java.util.List of Maps or GroovyRowResult objects that contain the data to be output.</p> 
+     <p>The groovy code is run through a sandbox and depending on the code in the script, you may need to specify additional classes in the <strong>WEB-INF\groovy-whitelist.txt</strong> file. If you get a security exception when running the report, add the indicated class to the groovy whitelist file and run the report again. You can also disable the sandbox completely by modifying the <strong>WEB-INF\art-custom-settings.json</strong> file and setting the <strong>enableGroovySandbox</strong> property to <strong>false</strong>. Modifications of the art-custom-settings.json file require clearing the Custom Settings cache in order to take effect.</p> 
      <h3 id="example">Example</h3> 
      <p>A trivial example is given below.</p> 
      <div class="codehilite"> 

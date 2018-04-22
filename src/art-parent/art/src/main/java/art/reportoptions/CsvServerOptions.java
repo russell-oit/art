@@ -18,6 +18,7 @@
 package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 
 /**
  * Represents report options for report types that define a csv file on the
@@ -26,8 +27,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CsvServerOptions {
+public class CsvServerOptions implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String dataFile;
 
 	/**

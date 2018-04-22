@@ -131,6 +131,7 @@ public class RunReportController {
 						testReport.setReportSource(testReport.getReportSourceHtml());
 					}
 				}
+				testReport.loadGeneralOptions();
 				report = testReport;
 			}
 
@@ -172,6 +173,8 @@ public class RunReportController {
 			ReportType reportType = report.getReportType();
 
 			if (reportType.isDashboard()) {
+				//https://stackoverflow.com/questions/8585216/spring-forward-with-added-parameters
+				request.setAttribute("suppliedReport", report);
 				return "forward:/showDashboard";
 			} else if (reportType.isJPivot()) {
 				//setting model attributes won't include parameters in the redirect request because
@@ -259,7 +262,7 @@ public class RunReportController {
 
 			boolean showReportHeaderAndFooter = true;
 
-			if (reportType.isStandardOutput() && !reportFormat.isJson()) {
+			if (reportType.isStandardOutput() && reportFormat.hasStandardOutputInstance()) {
 				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 				boolean isJob = false;
 				StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob, report);

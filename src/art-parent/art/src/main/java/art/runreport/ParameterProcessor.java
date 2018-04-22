@@ -552,6 +552,8 @@ public class ParameterProcessor {
 					reportOptions.setPrettyPrint(true);
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "swapAxes")) {
 					reportOptions.setSwapAxes(true);
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "plotlyType")) {
+					reportOptions.setPlotlyType(paramValue);
 				}
 
 			}

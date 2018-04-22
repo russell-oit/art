@@ -129,7 +129,7 @@ public class CsvOutputUnivocity {
 	 * @param locale the locale that determines date format output
 	 * @throws java.io.IOException
 	 */
-	public void generateOutput(Writer writer, CsvOutputUnivocityOptions csvOptions,
+	public void generateOutput(StringWriter writer, CsvOutputUnivocityOptions csvOptions,
 			Locale locale) throws IOException {
 
 		logger.debug("Entering generateOutput");
@@ -160,7 +160,6 @@ public class CsvOutputUnivocity {
 				+ " report={}", reportFormat, fullOutputFileName, report);
 
 		Objects.requireNonNull(csvOptions, "csvOptions must not be null");
-		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 
 		//https://stackoverflow.com/questions/37556698/mysql-dump-character-escaping-and-csv-read
 		//https://stackoverflow.com/a/36974864/3274227
