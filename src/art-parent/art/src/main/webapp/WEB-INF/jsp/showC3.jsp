@@ -73,8 +73,22 @@
 		});
 	}
 	axis.rotated = ${options.rotatedAxis};
-	
 	options.axis = axis;
+
+	var width = ${options.width};
+	var height = ${options.height};
+
+	if (width > 0 || height > 0) {
+		var size = {};
+		if (width > 0) {
+			size.width = width;
+		}
+		if (height > 0) {
+			size.height = height;
+		}
+		options.size = size;
+	}
+
 
 	//http://c3js.org/reference.html
 	$.extend(options, {
