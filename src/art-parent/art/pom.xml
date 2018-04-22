@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>3.5</version>
+		<version>3.6-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>art</artifactId>
@@ -197,22 +197,22 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-dbcp</artifactId>
-			<version>3.5</version>
+			<version>3.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
-			<version>3.5</version>
+			<version>3.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>3.5</version>
+			<version>3.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
-			<version>3.5</version>
+			<version>3.6-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -227,7 +227,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>3.5</version>
+			<version>3.6-SNAPSHOT</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
@@ -247,7 +247,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>3.5</version>
+			<version>3.6-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -258,7 +258,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jdbc-n1ql-art</artifactId>
-			<version>3.5</version>
+			<version>3.6-SNAPSHOT</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
