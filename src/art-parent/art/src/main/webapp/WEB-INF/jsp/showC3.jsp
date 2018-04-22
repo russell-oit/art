@@ -36,6 +36,7 @@
 	var jsonData = JSON.parse(dataString);
 
 	//https://github.com/c3js/c3/issues/236
+	//http://c3js.org/reference.html
 	var data = {
 		json: jsonData
 	};
@@ -66,7 +67,7 @@
 	var axis = {};
 	var xAxis = {};
 	var yAxis = {};
-	
+
 	if (x) {
 		//https://github.com/jonschlinkert/set-value
 		xAxis.type = 'category';
@@ -76,19 +77,19 @@
 			}
 		});
 	}
-	
+
 	var xAxisLabel = {};
 	var yAxisLabel = {};
-	
+
 	xAxisLabel.text = '${options.xAxisLabel}';
 	xAxisLabel.position = '${options.xAxisLabelPosition}';
-	
+
 	yAxisLabel.text = '${options.yAxisLabel}';
 	yAxisLabel.position = '${options.yAxisLabelPosition}';
-	
+
 	xAxis.label = xAxisLabel;
 	yAxis.label = yAxisLabel;
-	
+
 	axis.x = xAxis;
 	axis.y = yAxis;
 
@@ -110,18 +111,17 @@
 		options.size = size;
 	}
 
+	var legend = {};
+	var tooltip = {};
 
-	//http://c3js.org/reference.html
-	$.extend(options, {
-		legend: {
-			show: ${options.showLegend},
-			position: '${options.legendPosition}'
-		},
-		tooltip: {
-			show: ${options.showTooltip},
-			grouped: ${options.groupedTooltip}
-		}
-	});
+	legend.show = ${options.showLegend};
+	legend.position = '${options.legendPosition}';
+
+	tooltip.show = ${options.showTooltip};
+	tooltip.grouped = ${options.groupedTooltip};
+
+	options.legend = legend;
+	options.tooltip = tooltip;
 </script>
 
 <c:if test="${not empty templateFileName}">
