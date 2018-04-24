@@ -1099,7 +1099,7 @@
 				<hr>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="errorNotificationTo">
-						<spring:message code="settings.text.errorNotification"/>
+						<spring:message code="jobs.label.errorNotificationEmail"/>
 					</label>
 					<div class="col-md-8">
 						<form:input path="errorNotificationTo" maxlength="500" class="form-control"/>
