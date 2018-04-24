@@ -142,25 +142,42 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	}
 
 	@Bean
-	public TemplateEngine emailTemplateEngine() {
+	public TemplateEngine defaultTemplateEngine() {
 		SpringTemplateEngine templateEngine = new SpringTemplateEngine();
 		templateEngine.setEnableSpringELCompiler(true);
-		templateEngine.setTemplateResolver(emailTemplateResolver());
+		templateEngine.setTemplateResolver(defaultTemplateResolver());
 		return templateEngine;
 	}
 
-	private ITemplateResolver emailTemplateResolver() {
+	private ITemplateResolver defaultTemplateResolver() {
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
 		resolver.setApplicationContext(applicationContext);
 		resolver.setPrefix("/WEB-INF/thymeleaf/");
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setSuffix(".html");
 		resolver.setCharacterEncoding("UTF-8");
-		resolver.setCacheable(false);
+		resolver.setCacheable(true);
 		return resolver;
 	}
 	
-	
+	@Bean
+	public TemplateEngine jobTemplateEngine() {
+		SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+		templateEngine.setEnableSpringELCompiler(true);
+		templateEngine.setTemplateResolver(jobTemplateResolver());
+		return templateEngine;
+	}
+
+	private ITemplateResolver jobTemplateResolver() {
+		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
+		resolver.setApplicationContext(applicationContext);
+		resolver.setPrefix("/WEB-INF/thymeleaf/jobs/");
+		resolver.setTemplateMode(TemplateMode.HTML);
+		resolver.setSuffix(".html");
+		resolver.setCharacterEncoding("UTF-8");
+		resolver.setCacheable(false);
+		return resolver;
+	}
 	
 	@Bean
 	public HandlerInterceptor authorizationInterceptor(){

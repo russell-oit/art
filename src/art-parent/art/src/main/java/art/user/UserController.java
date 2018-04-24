@@ -76,7 +76,7 @@ public class UserController {
 	private UserGroupMembershipService2 userGroupMembershipService2;
 
 	@Autowired
-	private TemplateEngine emailTemplateEngine;
+	private TemplateEngine defaultTemplateEngine;
 
 	@Autowired
 	private MessageSource messageSource;
@@ -579,7 +579,8 @@ public class UserController {
 		ctx.setVariable("password", password);
 		ctx.setVariable("artLink", artLink);
 
-		String finalMessage = emailTemplateEngine.process("credentialsEmail", ctx);
+		String templateName = "credentialsEmail";
+		String finalMessage = defaultTemplateEngine.process(templateName, ctx);
 
 		String subjectI18nText;
 		if (newAccount) {

@@ -198,7 +198,7 @@ public class Config extends HttpServlet {
 	 */
 	private void ConfigInit() {
 		logger.debug("Entering ConfigInit");
-		
+
 		//http://nesbot.com/2011/11/28/play-2-morphia-logging-error
 		//https://stackoverflow.com/questions/5115635/morphia-logging-over-log4j-in-spring
 		MorphiaLoggerFactory.registerLogger(SLF4JLoggerImplFactory.class);
@@ -719,7 +719,7 @@ public class Config extends HttpServlet {
 
 	/**
 	 * Loads custom settings
-	 * 
+	 *
 	 * @param ctx the servlet context
 	 */
 	public static void loadCustomSettings(ServletContext ctx) {
@@ -945,12 +945,21 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Returns the full path to the thymeleaf templates directory
+	 * Returns the full path to the thymeleaf directory
 	 *
-	 * @return full path to the thymeleaf templates directory
+	 * @return full path to the thymeleaf directory
 	 */
-	public static String getThymeleafTemplatesPath() {
+	public static String getThymeleafPath() {
 		return webinfPath + "thymeleaf" + File.separator;
+	}
+
+	/**
+	 * Returns the full path to the job thymeleaf templates directory
+	 *
+	 * @return full path to the job thymeleaf templates directory
+	 */
+	public static String getJobTemplatesPath() {
+		return webinfPath + "thymeleaf" + File.separator + "jobs" + File.separator;
 	}
 
 	/**
@@ -988,7 +997,7 @@ public class Config extends HttpServlet {
 	public static String getAppPath() {
 		return appPath;
 	}
-	
+
 	/**
 	 * Returns the full path to the js directory
 	 *

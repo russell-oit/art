@@ -764,7 +764,7 @@ public class JobController {
 		validExtensions.add("html");
 
 		//save file
-		String templatesPath = Config.getThymeleafTemplatesPath();
+		String templatesPath = Config.getJobTemplatesPath();
 		UploadHelper uploadHelper = new UploadHelper();
 		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
 

@@ -1,3 +1,6 @@
+ART 3.6
+* Changed job templates directory to WEB-INF\thymeleaf\jobs
+
 ART 3.5
 * Add field to indicate use of groovy instead of sql in report source
 * Added pivotTableJs, c3 and plotly as report formats for tabular reports
