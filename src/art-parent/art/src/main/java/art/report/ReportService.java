@@ -160,6 +160,7 @@ public class ReportService {
 			report.setModifyPassword(rs.getString("MODIFY_PASSWORD"));
 			report.setSourceReportId(rs.getInt("SOURCE_REPORT_ID"));
 			report.setUseGroovy(rs.getBoolean("USE_GROOVY"));
+			report.setPivotTableJsSavedOptions(rs.getString("PIVOTTABLEJS_SAVED_OPTIONS"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -580,14 +581,14 @@ public class ReportService {
 
 		sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_SAVED_PARAMETERS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
 
 		//lastly, delete query
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID=?";
 		int affectedRows = dbService.update(sql, id);
-		
+
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
@@ -851,9 +852,9 @@ public class ReportService {
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
-					+ " USE_GROOVY,"
+					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 43) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 44) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -897,6 +898,7 @@ public class ReportService {
 				encryptorId,
 				report.getSourceReportId(),
 				BooleanUtils.toInteger(report.isUseGroovy()),
+				report.getPivotTableJsSavedOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -919,7 +921,7 @@ public class ReportService {
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
 					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
 					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
-					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?,"
+					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?, PIVOTTABLEJS_SAVED_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -964,6 +966,7 @@ public class ReportService {
 				encryptorId,
 				report.getSourceReportId(),
 				BooleanUtils.toInteger(report.isUseGroovy()),
+				report.getPivotTableJsSavedOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()
@@ -1394,21 +1397,13 @@ public class ReportService {
 		//https://stackoverflow.com/questions/10240901/how-best-to-retrieve-result-of-select-count-from-sql-query-in-java-jdbc-lon
 		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#3279
 		ResultSetHandler<Number> h = new ScalarHandler<>();
-		Number recordCountNumber = dbService.query(sql, h, values);
-
-		boolean canRunReport;
-		if (recordCountNumber == null) {
-			canRunReport = false;
+		Number recordCount = dbService.query(sql, h, values);
+		
+		if (recordCount == null || recordCount.longValue() == 0) {
+			return false;
 		} else {
-			long recordCountLong = recordCountNumber.longValue();
-			if (recordCountLong == 0) {
-				canRunReport = false;
-			} else {
-				canRunReport = true;
-			}
+			return true;
 		}
-
-		return canRunReport;
 	}
 
 	/**
@@ -1563,6 +1558,30 @@ public class ReportService {
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h, reportGroupId);
+	}
+
+	/**
+	 * Returns <code>true</code> if a report name exists
+	 *
+	 * @param reportName the user id
+	 * @return <code>true</code> if a report name exists
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public boolean reportNameExists(String reportName) throws SQLException {
+		logger.debug("Entering reportNameExists: reportName='{}'", reportName);
+
+		String sql = "SELECT COUNT(*) FROM ART_QUERIES"
+				+ " WHERE NAME=?";
+
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCount = dbService.query(sql, h, reportName);
+
+		if (recordCount == null || recordCount.longValue() == 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 }

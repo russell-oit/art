@@ -354,6 +354,22 @@ Edit report page
 					options.val(optionsEditor.getSession().getValue());
 				});
 
+				var pivotTableJsSavedOptionsEditor = ace.edit("pivotTableJsSavedOptionsEditor");
+				pivotTableJsSavedOptionsEditor.$blockScrolling = Infinity;
+				pivotTableJsSavedOptionsEditor.getSession().setMode("ace/mode/json");
+				pivotTableJsSavedOptionsEditor.setHighlightActiveLine(false);
+				pivotTableJsSavedOptionsEditor.setShowPrintMargin(false);
+				pivotTableJsSavedOptionsEditor.setOption("showLineNumbers", false);
+				pivotTableJsSavedOptionsEditor.setOption("maxLines", 20);
+				pivotTableJsSavedOptionsEditor.setOption("minLines", 3);
+				document.getElementById('pivotTableJsSavedOptionsEditor').style.fontSize = '14px';
+
+				var pivotTableJsSavedOptions = $('#pivotTableJsSavedOptions');
+				pivotTableJsSavedOptionsEditor.getSession().setValue(pivotTableJsSavedOptions.val());
+				pivotTableJsSavedOptionsEditor.getSession().on('change', function () {
+					pivotTableJsSavedOptions.val(pivotTableJsSavedOptionsEditor.getSession().getValue());
+				});
+
 				var jsonEditor = ace.edit("jsonEditor");
 				jsonEditor.$blockScrolling = Infinity;
 				jsonEditor.getSession().setMode("ace/mode/json");
@@ -991,6 +1007,17 @@ Edit report page
 						} else {
 							$("#encryptorDiv").hide();
 						}
+				}
+
+				//show/hide pivottable.js saved options
+				switch (reportTypeId) {
+					case 132: //pivottable.js
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
+						$("#pivotTableJsSavedOptionsDiv").show();
+						break;
+					default:
+						$("#pivotTableJsSavedOptionsDiv").hide();
 				}
 			}
 		</script>
@@ -1708,6 +1735,16 @@ Edit report page
 							<form:checkbox path="useGroovy" id="useGroovy" class="switch-yes-no"/>
 						</div>
 						<form:errors path="useGroovy" cssClass="error"/>
+					</div>
+				</div>
+
+				<div id="pivotTableJsSavedOptionsDiv" class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="pivotTableJsSavedOptions">
+						<spring:message code="reports.label.savedOptions"/>
+					</label>
+					<div class="col-md-12">
+						<form:hidden path="pivotTableJsSavedOptions"/>
+						<div id="pivotTableJsSavedOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 

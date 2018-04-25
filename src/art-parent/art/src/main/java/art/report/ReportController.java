@@ -600,7 +600,7 @@ public class ReportController {
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
+			response.setErrorMessage(ex.getMessage());
 		}
 
 		return response;
@@ -618,12 +618,12 @@ public class ReportController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			int userId = sessionUser.getUserId();
-			
+
 			savedParameterService.deleteSavedParameters(userId, reportId);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
+			response.setErrorMessage(ex.getMessage());
 		}
 
 		return response;
@@ -1054,6 +1054,87 @@ public class ReportController {
 		}
 
 		return "parameterReports";
+	}
+
+	@PostMapping("/savePivotTableJs")
+	public @ResponseBody
+	AjaxResponse savePivotTableJs(@RequestParam("reportId") Integer reportId,
+			@RequestParam("config") String config, @RequestParam("name") String name,
+			@RequestParam("description") String description,
+			@RequestParam(value = "overwrite", required = false) String overwrite,
+			HttpSession session, Locale locale) {
+
+		logger.debug("Entering savePivotTableJs: reportId={}, config='{}',"
+				+ " name='{}', description='{}', overwrite='{}'",
+				reportId, config, name, description, overwrite);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Report report = reportService.getReport(reportId);
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			report.setPivotTableJsSavedOptions(config);
+			if (StringUtils.isNotBlank(description)) {
+				report.setDescription(description);
+			}
+
+			if (overwrite == null) {
+				if (StringUtils.isBlank(name)) {
+					String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
+					response.setErrorMessage(message);
+				} else if (reportService.reportNameExists(name)) {
+					String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
+					response.setErrorMessage(message);
+				} else {
+					//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
+					report.setName(name);
+
+					reportService.copyReport(report, report.getReportId(), sessionUser);
+					reportService.grantAccess(report, sessionUser);
+
+					//don't return whole report object. will contain including clear text passwords e.g. for the datasource. can be seen from browser console
+					response.setData(report.getReportId());
+					response.setSuccess(true);
+				}
+			} else {
+				reportService.updateReport(report, sessionUser);
+
+				response.setData(report.getReportId());
+				response.setSuccess(true);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.getMessage());
+		}
+
+		return response;
+	}
+
+	@PostMapping("/deletePivotTableJs")
+	public @ResponseBody
+	AjaxResponse deletePivotTableJs(@RequestParam("id") Integer id) {
+		logger.debug("Entering deletePivotTableJs: id={}", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult = reportService.deleteReport(id);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				//report not deleted because of linked jobs
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.getMessage());
+		}
+
+		return response;
 	}
 
 }

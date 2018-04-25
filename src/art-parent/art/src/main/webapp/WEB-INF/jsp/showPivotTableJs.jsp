@@ -12,6 +12,32 @@
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="pivotTableJs.text.processing" var="processingText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="dialog.button.cancel" var="cancelText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="reports.message.reportSaved" var="reportSavedText"/>
+<spring:message code="reports.message.reportDeleted" var="reportDeletedText"/>
+<spring:message code="dialog.title.saveReport" var="saveReportText"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
+<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
+
+
+<div class="row form-inline" style="margin-right: 1px; margin-bottom: 5px">
+	<span class="pull-right">
+		<a class="btn btn-default" id="link-${outputDivId}" style="display: none"
+		   href="">
+			<spring:message code="reports.link.newReport"/>
+		</a>
+		<c:if test="${exclusiveAccess}">
+			<button class="btn btn-default" id="delete-${outputDivId}">
+				<spring:message code="page.action.delete"/>
+			</button>
+		</c:if>
+		<button class="btn btn-primary" id="save-${outputDivId}">
+			<spring:message code="page.button.save"/>
+		</button>
+	</span>
+</div>
 
 <div id="${outputDivId}">
 
@@ -37,6 +63,11 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-subtotal-renderer-1.7.1/subtotal.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-subtotal-renderer-1.7.1/subtotal.min.js"></script>
 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+
 <script type="text/javascript">
 	//set default values. can be overridden in template file
 	//https://github.com/nicolaskruchten/pivottable/wiki/Parameters
@@ -53,6 +84,12 @@
 		renderers: renderers,
 		dataClass: $.pivotUtilities.SubtotalPivotData
 	};
+
+	var configString = '${encode:forJavaScript(configJson)}';
+	if (configString) {
+		var specifiedConfig = JSON.parse(configString);
+		$.extend(options, specifiedConfig);
+	}
 
 	var overwrite = false;
 	var locale = 'en';
@@ -81,6 +118,10 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>
 </c:if>
 
+<c:if test="${not empty cssFileName}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(cssFileName)}">
+</c:if>
+
 <c:if test="${not empty locale}">
 	<script type="text/javascript">
 	locale = '${locale}';
@@ -88,12 +129,20 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.${locale}.js"></script>
 </c:if>
 
+<script>
+	var savedConfigString = '${encode:forJavaScript(savedConfigJson)}';
+	if (savedConfigString) {
+		var savedConfig = JSON.parse(savedConfigString);
+		$.extend(options, savedConfig);
+	}
+</script>
+
 <c:choose>
 	<c:when test="${reportType == 'PivotTableJs'}">
 		<script type="text/javascript">
-	var inputString = '${encode:forJavaScript(input)}';
-	var input = JSON.parse(inputString);
-	$("#${outputDivId}").pivotUI(input, options, overwrite, locale);
+			var inputString = '${encode:forJavaScript(input)}';
+			var input = JSON.parse(inputString);
+			$("#${outputDivId}").pivotUI(input, options, overwrite, locale);
 		</script>
 	</c:when>
 	<c:when test="${reportType == 'PivotTableJsCsvLocal'}">
@@ -160,3 +209,175 @@
 		</script>
 	</c:when>
 </c:choose>
+
+<div id="div-${outputDivId}" style="display:none;">
+	<form id="form-${outputDivId}" class="form-horizontal" role="form">
+		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+		<input type="hidden" name="reportId" value="${report.reportId}">
+		<input type="hidden" id="config" name="config" value="">
+        <div class="form-group">
+			<label class="control-label col-md-4" for="name">
+				<spring:message code="page.text.name"/>
+			</label>
+			<div class="col-md-8">
+				<input type="text" id="name" name="name" maxlength="50" class="form-control"/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-md-4" for="description">
+				<spring:message code="page.text.description"/>
+			</label>
+			<div class="col-md-8">
+				<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
+			</div>
+		</div>
+		<c:if test="${exclusiveAccess}">
+			<div class="form-group">
+				<label class="control-label col-md-4" for="overwrite">
+					<spring:message code="reports.text.overwrite"/>
+				</label>
+				<div class="col-md-8">
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" name="overwrite" id="overwrite" checked value="">
+						</label>
+					</div>
+				</div>
+			</div>
+		</c:if>
+	</form>
+</div>
+
+<script>
+	$("#save-${outputDivId}").on("click", function () {
+		//https://stackoverflow.com/questions/42620131/save-the-pivottable-fields-and-filters-in-database
+		//https://pivottable.js.org/examples/onrefresh.html
+		//https://pivottable.js.org/examples/save_restore.html
+		//https://github.com/nicolaskruchten/pivottable/wiki/Parameters
+
+		var config = $("#${outputDivId}").data("pivotUIOptions");
+		var config_copy = JSON.parse(JSON.stringify(config));
+		//delete some values which will not serialize to JSON
+		delete config_copy["aggregators"];
+		delete config_copy["renderers"];
+		//delete some bulky default values
+		delete config_copy["rendererOptions"];
+		delete config_copy["localeStrings"];
+
+		$("#config").val(JSON.stringify(config_copy));
+
+		var dialog = bootbox.confirm({
+			title: "${saveReportText}",
+			message: $("#div-${outputDivId}").html(),
+			buttons: {
+				cancel: {
+					label: "${cancelText}"
+				},
+				confirm: {
+					label: "${okText}"
+				}
+			},
+			callback: function (result) {
+				if (result) {
+					//https://github.com/makeusabrew/bootbox/issues/572
+					var form = dialog.find('#form-${outputDivId}');
+					var data = form.serialize();
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/savePivotTableJs',
+						dataType: 'json',
+						data: data,
+						success: function (response)
+						{
+							if (response.success) {
+								if (!${exclusiveAccess} ||
+										(${exclusiveAccess} && !dialog.find('#overwrite').is(':checked'))) {
+									var newReportId = response.data;
+									var newUrl = "${pageContext.request.contextPath}/selectReportParameters?reportId=" + newReportId;
+									$("#link-${outputDivId}").attr("href", newUrl);
+									$("#link-${outputDivId}").show();
+								}
+								$.notify("${reportSavedText}", "success");
+							} else {
+								$.notify(response.errorMessage, "error");
+							}
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
+				} //end if result
+			} //end callback
+		}); //end bootbox confirm
+
+		//https://github.com/makeusabrew/bootbox/issues/411
+		dialog.on("shown.bs.modal", function () {
+			dialog.attr("id", "dialog-${outputDivId}");
+		});
+	});
+
+	//https://stackoverflow.com/questions/26328539/bootbox-make-the-default-button-work-with-the-enter-key
+	$(document).on("submit", "#dialog-${outputDivId} form", function (e) {
+		e.preventDefault();
+		$("#dialog-${outputDivId} .btn-primary").click();
+	});
+
+	$("#delete-${outputDivId}").on("click", function () {
+		var reportName = '${encode:forJavaScript(report.name)}'
+		var reportId = ${report.reportId};
+
+		bootbox.confirm({
+			message: "${deleteRecordText}: <b>" + reportName + "</b>",
+			buttons: {
+				cancel: {
+					label: "${cancelText}"
+				},
+				confirm: {
+					label: "${okText}"
+				}
+			},
+			callback: function (result) {
+				if (result) {
+					//user confirmed delete. make delete request
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "${pageContext.request.contextPath}/deletePivotTableJs",
+						data: {id: reportId},
+						success: function (response) {
+							var nonDeletedRecords = response.data;
+							if (response.success) {
+								$.notify("${reportDeletedText}", "success");
+							} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+								$.notify("${cannotDeleteReportText}", "error");
+							} else {
+								$.notify(response.errorMessage, "error");
+							}
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
+				} //end if result
+			} //end callback
+		}); //end bootbox confirm
+	});
+
+	var token = $("meta[name='_csrf']").attr("content");
+	var header = $("meta[name='_csrf_header']").attr("content");
+	$(document).ajaxSend(function (e, xhr, options) {
+		xhr.setRequestHeader(header, token);
+	});
+
+	$(document).ajaxStart(function () {
+		$('#spinner').show();
+	}).ajaxStop(function () {
+		$('#spinner').hide();
+	});
+</script>

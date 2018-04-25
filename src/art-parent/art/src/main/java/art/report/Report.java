@@ -168,6 +168,8 @@ public class Report implements Serializable {
 	private Boolean dummyBoolean; //used for the test report functionality
 	@Parsed
 	private boolean useGroovy;
+	@Parsed
+	private String pivotTableJsSavedOptions;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -179,6 +181,20 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
+
+	/**
+	 * @return the pivotTableJsSavedOptions
+	 */
+	public String getPivotTableJsSavedOptions() {
+		return pivotTableJsSavedOptions;
+	}
+
+	/**
+	 * @param pivotTableJsSavedOptions the pivotTableJsSavedOptions to set
+	 */
+	public void setPivotTableJsSavedOptions(String pivotTableJsSavedOptions) {
+		this.pivotTableJsSavedOptions = pivotTableJsSavedOptions;
+	}
 
 	/**
 	 * @return the useGroovy
