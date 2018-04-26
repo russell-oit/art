@@ -181,14 +181,14 @@ public class HtmlPlainOutput extends StandardOutput {
 		String formattedValue = formatDateValue(value);
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
-		out.println("<td style='text-align: left'>" + escapedFormattedValue + "</td>");
+		out.println("<td style='text-align: right'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
-		out.println("<td style='text-align: left'>" + escapedFormattedValue + "</td>");
+		out.println("<td style='text-align: right'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
