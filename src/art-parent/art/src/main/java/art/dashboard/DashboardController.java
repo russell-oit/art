@@ -454,7 +454,8 @@ public class DashboardController {
 		} else {
 			refreshPeriodSeconds = Integer.parseInt(value);
 			final int MINIMUM_REFRESH_SECONDS = 5;
-			if (refreshPeriodSeconds < MINIMUM_REFRESH_SECONDS) {
+			if (refreshPeriodSeconds!= PORTLET_NO_REFRESH_SETTING
+					&& refreshPeriodSeconds < MINIMUM_REFRESH_SECONDS) {
 				throw new IllegalArgumentException("Refresh setting less than minimum. Setting="
 						+ refreshPeriodSeconds + ", Minimum=5");
 			}
