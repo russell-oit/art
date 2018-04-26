@@ -37,7 +37,6 @@ public class HtmlFancyOutput extends StandardOutput {
 
 		//include required css and javascript files
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/DataTables-1.10.13/css/dataTables.bootstrap.min.css'>");
 		//note that including script files will cause the browser to display the following warning e.g. on firefox's debug console (Ctrl + Shift + I) when report run inline (using ajax)
 		//Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience
 		//https://stackoverflow.com/questions/24639335/javascript-console-log-causes-error-synchronous-xmlhttprequest-on-the-main-thr
@@ -47,8 +46,7 @@ public class HtmlFancyOutput extends StandardOutput {
 			//including jquery.js while using $.load() or $.post() results in spinner not appearing on second run
 			out.println("<script src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
 		}
-		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/jquery.dataTables.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js'></script>");
+		out.println("<script src='" + contextPath + "/js/bootstrap-3.3.6/js/bootstrap.min.js'></script>");
 	}
 
 	@Override
