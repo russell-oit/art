@@ -121,7 +121,7 @@ public class Config extends HttpServlet {
 	private static final Map<String, String> languages = new TreeMap<>();
 	private static Configuration freemarkerConfig;
 	private static TemplateEngine thymeleafReportTemplateEngine;
-	private static TemplateEngine defaultThymeleafTemplateEngine;
+	private static SpringTemplateEngine defaultThymeleafTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
 	private static VelocityEngine velocityEngine;
 	private static String serverTimeZoneDescription;
@@ -364,7 +364,7 @@ public class Config extends HttpServlet {
 		defaultTemplateResolver.setCacheable(false);
 
 		defaultThymeleafTemplateEngine = new SpringTemplateEngine();
-		((SpringTemplateEngine) defaultThymeleafTemplateEngine).setEnableSpringELCompiler(true);
+		defaultThymeleafTemplateEngine.setEnableSpringELCompiler(true);
 		defaultThymeleafTemplateEngine.setTemplateResolver(defaultTemplateResolver);
 	}
 
@@ -384,7 +384,7 @@ public class Config extends HttpServlet {
 	 * @return the template engine to use for default thymeleaf templates used
 	 * within the application
 	 */
-	public static TemplateEngine getDefaultThymeleafTemplateEngine() {
+	public static SpringTemplateEngine getDefaultThymeleafTemplateEngine() {
 		return defaultThymeleafTemplateEngine;
 	}
 

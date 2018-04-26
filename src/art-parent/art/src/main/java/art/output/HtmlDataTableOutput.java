@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring4.SpringTemplateEngine;
 
 /**
  * Generates DataTables html output
@@ -80,8 +81,10 @@ public class HtmlDataTableOutput extends StandardOutput {
 		ctx.setVariable("tableId", tableId);
 		ctx.setVariable("language", language);
 
-		TemplateEngine templateEngine = Config.getDefaultThymeleafTemplateEngine();
-		String templateName = "htmlDataTableInit";
+		SpringTemplateEngine templateEngine = Config.getDefaultThymeleafTemplateEngine();
+		templateEngine.setMessageSource(messageSource);
+
+		String templateName = "htmlDataTableOutputInit";
 		String initString = templateEngine.process(templateName, ctx);
 		out.println(initString);
 	}
