@@ -3296,8 +3296,7 @@ public class ReportJob implements org.quartz.Job {
 			String jobEmailTemplateFilePath = Config.getJobTemplatesPath() + jobEmailTemplateFileName;
 			File jobEmailTemplateFile = new File(jobEmailTemplateFilePath);
 			if (jobEmailTemplateFile.exists()) {
-				String templateName = FilenameUtils.getBaseName(jobEmailTemplateFilePath);
-				finalMessage = jobTemplateEngine.process(templateName, ctx);
+				finalMessage = jobTemplateEngine.process(jobEmailTemplateFileName, ctx);
 			} else {
 				throw new IllegalStateException("Email template file not found: " + jobEmailTemplateFilePath);
 			}

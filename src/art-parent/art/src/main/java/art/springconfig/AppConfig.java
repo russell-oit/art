@@ -173,7 +173,6 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		resolver.setApplicationContext(applicationContext);
 		resolver.setPrefix("/WEB-INF/thymeleaf/jobs/");
 		resolver.setTemplateMode(TemplateMode.HTML);
-		resolver.setSuffix(".html");
 		resolver.setCharacterEncoding("UTF-8");
 		resolver.setCacheable(false);
 		return resolver;

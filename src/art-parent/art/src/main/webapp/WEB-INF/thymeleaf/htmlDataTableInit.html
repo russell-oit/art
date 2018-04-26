@@ -1,0 +1,71 @@
+<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/css/htmlDataTableOutput.css'}"/>
+<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/bootstrap-3.3.6/css/bootstrap.min.css'}"/>
+<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/DataTables-1.10.13/css/dataTables.bootstrap.min.css'}"/>
+<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/Buttons-1.2.4/css/buttons.dataTables.min.css'}"/>
+<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/Buttons-1.2.4/css/buttons.bootstrap.min.css'}"/>
+
+<th:block th:if='${!ajax}'>
+	<script th:src="${contextPath} + ${'/js/jquery-1.12.4.min.js'}"></script>
+</th:block>
+
+<script th:src="${contextPath} + ${'/js/dataTables/DataTables-1.10.13/js/jquery.dataTables.min.js'}"></script>
+<script th:src="${contextPath} + ${'/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js'}"></script>
+<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js'}"></script>
+<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js'}"></script>
+<script th:src="${contextPath} + ${'/js/dataTables/JSZip-2.5.0/jszip.min.js'}"></script>
+<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.18/pdfmake.min.js'}"></script>
+<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.18/vfs_fonts.js'}"></script>
+<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.2.4/js/buttons.html5.min.js'}"></script>
+<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.2.4/js/buttons.print.min.js'}"></script>
+<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.2.4/js/buttons.colVis.min.js'}"></script>
+<script th:src="${contextPath} + ${'/js/art.js'}"></script>
+
+<script th:inline="javascript">
+	$(document).ready(function () {
+
+		var tableId = /*[[${tableId}]]*/ "table";
+		var showAllRowsText = /*[[#{dataTables.text.showAllRows}]]*/ "All";
+		
+		//http://forum.thymeleaf.org/Expressions-vs-substitutions-newbie-question-td4025767.html
+		var url = /*[[${contextPath} + ${'/js/dataTables/i18n/dataTables_'} + ${language} + ${'.json'}]]*/ "";
+
+		//http://www.datatables.net/reference
+		$('#' + tableId).dataTable({
+			orderClasses: false,
+			order: [],
+			pagingType: 'full_numbers',
+			lengthMenu: [
+				[10, 25, 50, 100, -1], [10, 25, 50, 100, showAllRowsText]
+			], // must have space between first brackets to prevent thymeleaf from processing this 
+			pageLength: 50,
+			dom: 'lBfrtip',
+			buttons: [
+				{
+					extend: 'colvis',
+					postfixButtons: ['colvisRestore']
+				},
+				{
+					extend: 'excel',
+					exportOptions: {columns: ':visible'}
+				},
+				{
+					extend: 'pdf',
+					exportOptions: {columns: ':visible'}
+				},
+				{
+					extend: 'print',
+					exportOptions: {columns: ':visible'}
+				}
+			],
+			language: {
+				url: url
+			},
+			initComplete: function () {
+				if (!isMobile()) {
+					$('div.dataTables_filter input').focus();
+				}
+			}
+		});
+	});
+</script>
+

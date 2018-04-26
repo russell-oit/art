@@ -91,6 +91,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
+import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 /**
  * Initializes and shuts down the application, including creating and shutting
@@ -120,6 +121,7 @@ public class Config extends HttpServlet {
 	private static final Map<String, String> languages = new TreeMap<>();
 	private static Configuration freemarkerConfig;
 	private static TemplateEngine thymeleafReportTemplateEngine;
+	private static TemplateEngine defaultThymeleafTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
 	private static VelocityEngine velocityEngine;
 	private static String serverTimeZoneDescription;
@@ -227,7 +229,7 @@ public class Config extends HttpServlet {
 
 		createFreemarkerConfiguration();
 
-		createThymeleafReportTemplateEngine();
+		createThymeleafTemplateEngines(ctx);
 
 		createVelocityEngine();
 
@@ -331,28 +333,53 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Creates the template engine to use for the thymeleaf report type. Uses
-	 * html template mode
+	 * Creates the template engine to use for the thymeleaf report type and the
+	 * default template engine for use within the application. Uses html
+	 * template mode
+	 *
+	 * @param ctx the servlet context
 	 */
-	private static void createThymeleafReportTemplateEngine() {
-		FileTemplateResolver templateResolver = new FileTemplateResolver();
-		templateResolver.setPrefix(getTemplatesPath());
-		templateResolver.setTemplateMode(TemplateMode.HTML);
-		templateResolver.setCharacterEncoding("UTF-8");
-		templateResolver.setCacheable(false);
+	private static void createThymeleafTemplateEngines(ServletContext ctx) {
+		FileTemplateResolver reportsTemplateResolver = new FileTemplateResolver();
+		reportsTemplateResolver.setPrefix(getTemplatesPath());
+		reportsTemplateResolver.setTemplateMode(TemplateMode.HTML);
+		reportsTemplateResolver.setCharacterEncoding("UTF-8");
+		reportsTemplateResolver.setCacheable(false);
 
 		thymeleafReportTemplateEngine = new SpringTemplateEngine();
 		((SpringTemplateEngine) thymeleafReportTemplateEngine).setEnableSpringELCompiler(true);
-		thymeleafReportTemplateEngine.setTemplateResolver(templateResolver);
+		thymeleafReportTemplateEngine.setTemplateResolver(reportsTemplateResolver);
+
+		ServletContextTemplateResolver defaultTemplateResolver = new ServletContextTemplateResolver(ctx);
+		defaultTemplateResolver.setPrefix("/WEB-INF/thymeleaf/");
+		defaultTemplateResolver.setTemplateMode(TemplateMode.HTML);
+		defaultTemplateResolver.setSuffix(".html");
+		defaultTemplateResolver.setCharacterEncoding("UTF-8");
+		defaultTemplateResolver.setCacheable(false);
+
+		defaultThymeleafTemplateEngine = new SpringTemplateEngine();
+		((SpringTemplateEngine) defaultThymeleafTemplateEngine).setEnableSpringELCompiler(true);
+		defaultThymeleafTemplateEngine.setTemplateResolver(defaultTemplateResolver);
 	}
 
 	/**
 	 * Returns the template engine to use for the thymeleaf report type
 	 *
-	 * @return
+	 * @return the template engine to use for the thymeleaf report type
 	 */
 	public static TemplateEngine getThymeleafReportTemplateEngine() {
 		return thymeleafReportTemplateEngine;
+	}
+
+	/**
+	 * Returns the template engine to use for default thymeleaf templates used
+	 * within the application
+	 *
+	 * @return the template engine to use for default thymeleaf templates used
+	 * within the application
+	 */
+	public static TemplateEngine getDefaultThymeleafTemplateEngine() {
+		return defaultThymeleafTemplateEngine;
 	}
 
 	/**
