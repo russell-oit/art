@@ -227,9 +227,7 @@ public class Config extends HttpServlet {
 		//load custom settings
 		loadCustomSettings(ctx);
 
-		createFreemarkerConfiguration();
-
-		createThymeleafTemplateEngines(ctx);
+		createDefaultThymeleafTemplateEngine(ctx);
 
 		createVelocityEngine();
 
@@ -311,6 +309,7 @@ public class Config extends HttpServlet {
 	 * Creates the freemarker configuration object
 	 */
 	private static void createFreemarkerConfiguration() {
+		freemarkerConfig = null;
 		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_26);
 
 		try {
@@ -333,23 +332,30 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Creates the template engine to use for the thymeleaf report type and the
-	 * default template engine for use within the application. Uses html
-	 * template mode
+	 * Creates the template engine to use for the thymeleaf report type. Uses
+	 * html template mode.
 	 *
-	 * @param ctx the servlet context
 	 */
-	private static void createThymeleafTemplateEngines(ServletContext ctx) {
+	private static void createThymeleafReportTemplateEngine() {
 		FileTemplateResolver reportsTemplateResolver = new FileTemplateResolver();
 		reportsTemplateResolver.setPrefix(getTemplatesPath());
 		reportsTemplateResolver.setTemplateMode(TemplateMode.HTML);
 		reportsTemplateResolver.setCharacterEncoding("UTF-8");
 		reportsTemplateResolver.setCacheable(false);
 
+		thymeleafReportTemplateEngine = null;
 		thymeleafReportTemplateEngine = new SpringTemplateEngine();
 		((SpringTemplateEngine) thymeleafReportTemplateEngine).setEnableSpringELCompiler(true);
 		thymeleafReportTemplateEngine.setTemplateResolver(reportsTemplateResolver);
+	}
 
+	/**
+	 * Creates the default thymeleaf template engine for use within the
+	 * application
+	 *
+	 * @param ctx the servlet context
+	 */
+	private static void createDefaultThymeleafTemplateEngine(ServletContext ctx) {
 		ServletContextTemplateResolver defaultTemplateResolver = new ServletContextTemplateResolver(ctx);
 		defaultTemplateResolver.setPrefix("/WEB-INF/thymeleaf/");
 		defaultTemplateResolver.setTemplateMode(TemplateMode.HTML);
@@ -814,6 +820,10 @@ public class Config extends HttpServlet {
 
 		//ensure work directories exist
 		createWorkDirectories();
+
+		//create template engines which need to use updated template/work directories
+		createFreemarkerConfiguration();
+		createThymeleafReportTemplateEngine();
 	}
 
 	/**
