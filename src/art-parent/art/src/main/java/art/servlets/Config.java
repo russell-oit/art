@@ -87,7 +87,6 @@ import org.saiku.service.olap.OlapDiscoverService;
 import org.saiku.service.olap.ThinQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
@@ -120,7 +119,7 @@ public class Config extends HttpServlet {
 	private static String artVersion;
 	private static final Map<String, String> languages = new TreeMap<>();
 	private static Configuration freemarkerConfig;
-	private static TemplateEngine thymeleafReportTemplateEngine;
+	private static SpringTemplateEngine thymeleafReportTemplateEngine;
 	private static SpringTemplateEngine defaultThymeleafTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
 	private static VelocityEngine velocityEngine;
@@ -345,7 +344,7 @@ public class Config extends HttpServlet {
 
 		thymeleafReportTemplateEngine = null;
 		thymeleafReportTemplateEngine = new SpringTemplateEngine();
-		((SpringTemplateEngine) thymeleafReportTemplateEngine).setEnableSpringELCompiler(true);
+		thymeleafReportTemplateEngine.setEnableSpringELCompiler(true);
 		thymeleafReportTemplateEngine.setTemplateResolver(reportsTemplateResolver);
 	}
 
@@ -373,7 +372,7 @@ public class Config extends HttpServlet {
 	 *
 	 * @return the template engine to use for the thymeleaf report type
 	 */
-	public static TemplateEngine getThymeleafReportTemplateEngine() {
+	public static SpringTemplateEngine getThymeleafReportTemplateEngine() {
 		return thymeleafReportTemplateEngine;
 	}
 

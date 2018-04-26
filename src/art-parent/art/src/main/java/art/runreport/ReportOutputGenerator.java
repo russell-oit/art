@@ -1030,11 +1030,11 @@ public class ReportOutputGenerator {
 
 		String configJson = ArtUtils.objectToJson(pivotTableJsOptions.getConfig());
 		request.setAttribute("configJson", configJson);
-		
+
 		String savedConfigJson = report.getPivotTableJsSavedOptions();
 		request.setAttribute("savedConfigJson", savedConfigJson);
-		
-		ReportService reportService=new ReportService();
+
+		ReportService reportService = new ReportService();
 		boolean exclusiveAccess = reportService.hasExclusiveAccess(user, report.getReportId());
 		request.setAttribute("exclusiveAccess", exclusiveAccess);
 
@@ -1413,10 +1413,13 @@ public class ReportOutputGenerator {
 		rs = reportRunner.getResultSet();
 
 		ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+
 		thymeleafOutput.setContextPath(contextPath);
 		thymeleafOutput.setLocale(locale);
 		thymeleafOutput.setResultSet(rs);
 		thymeleafOutput.setData(groovyData);
+		thymeleafOutput.setMessageSource(messageSource);
+
 		thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
 
 		if (groovyDataSize == null) {
