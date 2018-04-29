@@ -12,6 +12,14 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="dialog.button.cancel" var="cancelText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="reports.message.reportSaved" var="reportSavedText"/>
+<spring:message code="reports.message.reportDeleted" var="reportDeletedText"/>
+<spring:message code="dialog.title.saveReport" var="saveReportText"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
+<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
+
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 
@@ -19,11 +27,35 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" /> 
 
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
+
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/lodash-3.5.0/lodash.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.js"></script>
 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+
+
+<div class="row form-inline" style="margin-right: 1px; margin-bottom: 5px">
+	<span class="pull-right">
+		<a class="btn btn-default" id="newDashboardLink" style="display: none"
+		   href="">
+			<spring:message code="reports.link.newReport"/>
+		</a>
+		<c:if test="${exclusiveAccess}">
+			<button class="btn btn-default" id="deleteDashboard">
+				<spring:message code="page.action.delete"/>
+			</button>
+		</c:if>
+		<button class="btn btn-primary" id="saveDashboard">
+			<spring:message code="page.button.save"/>
+		</button>
+	</span>
+</div>
 
 <div id="reportOutput" class="container-fluid">
 	<div class="row">
@@ -47,7 +79,8 @@
 							 ${item.minWidth == 0 ? '' : ' data-gs-min-width="'.concat(item.minWidth).concat('"')}
 							 ${item.minHeight == 0 ? '' : ' data-gs-min-height="'.concat(item.minHeight).concat('"')}
 							 ${item.maxWidth == 0 ? '' : ' data-gs-max-width="'.concat(item.maxWidth).concat('"')}
-							 ${item.maxHeight == 0 ? '' : ' data-gs-max-height="'.concat(item.maxHeight).concat('"')}>
+							 ${item.maxHeight == 0 ? '' : ' data-gs-max-height="'.concat(item.maxHeight).concat('"')}
+							 data-index='${item.index}'>
 							<div class="grid-stack-item-content" style="border: 1px solid #ccc">
 								<div id="item_${item.index}">
 									<div class="portletAUTOBox">
@@ -277,4 +310,186 @@
 	$(document).ajaxSend(function (e, xhr, options) {
 		xhr.setRequestHeader(header, token);
 	});
+</script>
+
+<div id="saveDashboardDialogDiv" style="display:none;">
+	<form id="saveDashboardForm" class="form-horizontal" role="form">
+		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+		<input type="hidden" name="reportId" value="${report.reportId}">
+		<input type="hidden" id="config" name="config" value="">
+        <div class="form-group">
+			<label class="control-label col-md-4" for="name">
+				<spring:message code="page.text.name"/>
+			</label>
+			<div class="col-md-8">
+				<input type="text" id="name" name="name" maxlength="50" class="form-control"/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-md-4" for="description">
+				<spring:message code="page.text.description"/>
+			</label>
+			<div class="col-md-8">
+				<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
+			</div>
+		</div>
+		<c:if test="${exclusiveAccess}">
+			<div class="form-group">
+				<label class="control-label col-md-4" for="overwrite">
+					<spring:message code="reports.text.overwrite"/>
+				</label>
+				<div class="col-md-8">
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" name="overwrite" id="overwrite" checked value="">
+						</label>
+					</div>
+				</div>
+			</div>
+		</c:if>
+	</form>
+</div>
+
+<script>
+	//https://github.com/gridstack/gridstack.js/issues/50
+	//https://github.com/gridstack/gridstack.js/issues/575
+	$("#saveDashboard").on("click", function () {
+		var items = [];
+
+		$('.grid-stack-item.ui-draggable').each(function () {
+			var $this = $(this);
+			items.push({
+				index: parseInt($this.attr('data-index'), 10),
+				x: parseInt($this.attr('data-gs-x'), 10),
+				y: parseInt($this.attr('data-gs-y'), 10),
+				width: parseInt($this.attr('data-gs-width'), 10),
+				height: parseInt($this.attr('data-gs-height'), 10)
+			});
+		});
+		
+		$("#config").val(JSON.stringify(items));
+
+		var dialog = bootbox.confirm({
+			title: "${saveReportText}",
+			message: $("#saveDashboardDialogDiv").html(),
+			buttons: {
+				cancel: {
+					label: "${cancelText}"
+				},
+				confirm: {
+					label: "${okText}"
+				}
+			},
+			callback: function (result) {
+				if (result) {
+					//https://github.com/makeusabrew/bootbox/issues/572
+					var form = dialog.find('#saveDashboardForm');
+					var data = form.serialize();
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/saveGridstack',
+						dataType: 'json',
+						data: data,
+						success: function (response)
+						{
+							if (response.success) {
+								if (!${exclusiveAccess} ||
+										(${exclusiveAccess} && !dialog.find('#overwrite').is(':checked'))) {
+									var newReportId = response.data;
+									var newUrl = "${pageContext.request.contextPath}/selectReportParameters?reportId=" + newReportId;
+									$("#newDashboardLink").attr("href", newUrl);
+									$("#newDashboardLink").show();
+								}
+								$.notify("${reportSavedText}", "success");
+							} else {
+								$.notify(response.errorMessage, "error");
+							}
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
+				} //end if result
+			} //end callback
+		}); //end bootbox confirm
+
+		//https://github.com/makeusabrew/bootbox/issues/411
+		//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
+		dialog.on("shown.bs.modal", function () {
+			dialog.attr("id", "saveDashboardDialog");
+			dialog.find('#name').focus();
+		});
+	});
+	
+	$(document).on("submit", "#saveDashboardDialog form", function (e) {
+		e.preventDefault();
+		$("#saveDashboardDialog .btn-primary").click();
+	});
+
+	$("#deleteDashboard").on("click", function () {
+		var reportName = '${encode:forJavaScript(report.name)}';
+		var reportId = ${report.reportId};
+
+		bootbox.confirm({
+			message: "${deleteRecordText}: <b>" + reportName + "</b>",
+			buttons: {
+				cancel: {
+					label: "${cancelText}"
+				},
+				confirm: {
+					label: "${okText}"
+				}
+			},
+			callback: function (result) {
+				if (result) {
+					//user confirmed delete. make delete request
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "${pageContext.request.contextPath}/deleteGridstack",
+						data: {id: reportId},
+						success: function (response) {
+							var nonDeletedRecords = response.data;
+							if (response.success) {
+								$.notify("${reportDeletedText}", "success");
+							} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+								$.notify("${cannotDeleteReportText}", "error");
+							} else {
+								$.notify(response.errorMessage, "error");
+							}
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
+				} //end if result
+			} //end callback
+		}); //end bootbox confirm
+	});
+
+	$(document).ajaxStart(function () {
+		$('#spinner').show();
+	}).ajaxStop(function () {
+		$('#spinner').hide();
+	});
+
+//	$('.grid-stack').on('added', function (event, items) {
+//		for (var i = 0; i < items.length; i++) {
+//			console.log('item added');
+//			console.log(items[i]);
+//		}
+//	});
+//	
+//	$('.grid-stack').on('change', function (event, items) {
+//		for (var i = 0; i < items.length; i++) {
+//			console.log('item changed');
+//			console.log(items[i]);
+//		}
+//	});
 </script>

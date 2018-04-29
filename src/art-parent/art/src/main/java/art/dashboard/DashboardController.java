@@ -21,6 +21,7 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.GridstackItemOptions;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
@@ -32,6 +33,8 @@ import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -126,7 +129,7 @@ public class DashboardController {
 		String startTimeString = df.format(new Date(startTime));
 
 		Report report;
-		
+
 		try {
 			Report suppliedReport = (Report) request.getAttribute("suppliedReport");
 			if (suppliedReport == null) {
@@ -192,6 +195,10 @@ public class DashboardController {
 					description = " :: " + shortDescription;
 				}
 			} else {
+				boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, report.getReportId());
+				request.setAttribute("exclusiveAccess", exclusiveAccess);
+				request.setAttribute("report", report);
+				
 				if (reportType == ReportType.Dashboard) {
 					Dashboard dashboard = buildDashboard(report, request, locale, reportParamsMap);
 					model.addAttribute("dashboard", dashboard);
@@ -227,7 +234,7 @@ public class DashboardController {
 			request.setAttribute("startTimeString", startTimeString);
 		}
 
-		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), report.getReportId() , totalTimeSeconds, fetchTimeSeconds, "dashboard", reportParamsList);
+		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), report.getReportId(), totalTimeSeconds, fetchTimeSeconds, "dashboard", reportParamsList);
 
 		if (reportFormat == ReportFormat.pdf) {
 			if (showInline) {
@@ -454,7 +461,7 @@ public class DashboardController {
 		} else {
 			refreshPeriodSeconds = Integer.parseInt(value);
 			final int MINIMUM_REFRESH_SECONDS = 5;
-			if (refreshPeriodSeconds!= PORTLET_NO_REFRESH_SETTING
+			if (refreshPeriodSeconds != PORTLET_NO_REFRESH_SETTING
 					&& refreshPeriodSeconds < MINIMUM_REFRESH_SECONDS) {
 				throw new IllegalArgumentException("Refresh setting less than minimum. Setting="
 						+ refreshPeriodSeconds + ", Minimum=5");
@@ -672,6 +679,18 @@ public class DashboardController {
 		List<GridstackItem> items = new ArrayList<>();
 		Map<Integer, DashboardItem> itemsMap = new HashMap<>();
 
+		List<GridstackItemOptions> itemOptions;
+		String savedOptions = report.getGridstackSavedOptions();
+		if (StringUtils.isBlank(savedOptions)) {
+			itemOptions = new ArrayList<>();
+		} else {
+			//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
+			//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
+			ObjectMapper mapper = new ObjectMapper();
+			itemOptions = mapper.readValue(savedOptions, new TypeReference<List<GridstackItemOptions>>() {
+			});
+		}
+
 		NodeList itemNodes = (NodeList) xPath.evaluate("ITEM", rootNode, XPathConstants.NODESET);
 		int itemIndex = 0;
 		for (int i = 0; i < itemNodes.getLength(); i++) {
@@ -683,6 +702,16 @@ public class DashboardController {
 			item.setIndex(itemIndex);
 
 			setGridstackItemProperties(item, itemNode, request, locale);
+
+			for (GridstackItemOptions itemOption : itemOptions) {
+				int index = itemOption.getIndex();
+				if (index == itemIndex) {
+					item.setxPosition(itemOption.getX());
+					item.setyPosition(itemOption.getY());
+					item.setWidth(itemOption.getWidth());
+					item.setHeight(itemOption.getHeight());
+				}
+			}
 
 			items.add(item);
 

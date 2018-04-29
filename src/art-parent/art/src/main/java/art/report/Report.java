@@ -170,6 +170,8 @@ public class Report implements Serializable {
 	private boolean useGroovy;
 	@Parsed
 	private String pivotTableJsSavedOptions;
+	@Parsed
+	private String gridstackSavedOptions;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -181,6 +183,20 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
+
+	/**
+	 * @return the gridstackSavedOptions
+	 */
+	public String getGridstackSavedOptions() {
+		return gridstackSavedOptions;
+	}
+
+	/**
+	 * @param gridstackSavedOptions the gridstackSavedOptions to set
+	 */
+	public void setGridstackSavedOptions(String gridstackSavedOptions) {
+		this.gridstackSavedOptions = gridstackSavedOptions;
+	}
 
 	/**
 	 * @return the pivotTableJsSavedOptions

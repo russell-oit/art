@@ -369,6 +369,22 @@ Edit report page
 				pivotTableJsSavedOptionsEditor.getSession().on('change', function () {
 					pivotTableJsSavedOptions.val(pivotTableJsSavedOptionsEditor.getSession().getValue());
 				});
+				
+				var gridstackSavedOptionsEditor = ace.edit("gridstackSavedOptionsEditor");
+				gridstackSavedOptionsEditor.$blockScrolling = Infinity;
+				gridstackSavedOptionsEditor.getSession().setMode("ace/mode/json");
+				gridstackSavedOptionsEditor.setHighlightActiveLine(false);
+				gridstackSavedOptionsEditor.setShowPrintMargin(false);
+				gridstackSavedOptionsEditor.setOption("showLineNumbers", false);
+				gridstackSavedOptionsEditor.setOption("maxLines", 20);
+				gridstackSavedOptionsEditor.setOption("minLines", 3);
+				document.getElementById('gridstackSavedOptionsEditor').style.fontSize = '14px';
+
+				var gridstackSavedOptions = $('#gridstackSavedOptions');
+				gridstackSavedOptionsEditor.getSession().setValue(gridstackSavedOptions.val());
+				gridstackSavedOptionsEditor.getSession().on('change', function () {
+					gridstackSavedOptions.val(gridstackSavedOptionsEditor.getSession().getValue());
+				});
 
 				var jsonEditor = ace.edit("jsonEditor");
 				jsonEditor.$blockScrolling = Infinity;
@@ -1018,6 +1034,15 @@ Edit report page
 						break;
 					default:
 						$("#pivotTableJsSavedOptionsDiv").hide();
+				}
+				
+				//show/hide gridstack saved options
+				switch (reportTypeId) {
+					case 129: //gridstack dashboard
+						$("#gridstackSavedOptionsDiv").show();
+						break;
+					default:
+						$("#gridstackSavedOptionsDiv").hide();
 				}
 			}
 		</script>
@@ -1745,6 +1770,16 @@ Edit report page
 					<div class="col-md-12">
 						<form:hidden path="pivotTableJsSavedOptions"/>
 						<div id="pivotTableJsSavedOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
+					</div>
+				</div>
+						
+				<div id="gridstackSavedOptionsDiv" class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="gridstackSavedOptions">
+						<spring:message code="reports.label.savedOptions"/>
+					</label>
+					<div class="col-md-12">
+						<form:hidden path="gridstackSavedOptions"/>
+						<div id="gridstackSavedOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 

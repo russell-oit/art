@@ -1093,14 +1093,12 @@ public class ReportController {
 					reportService.copyReport(report, report.getReportId(), sessionUser);
 					reportService.grantAccess(report, sessionUser);
 
-					//don't return whole report object. will contain including clear text passwords e.g. for the datasource. can be seen from browser console
+					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
 					response.setData(report.getReportId());
 					response.setSuccess(true);
 				}
 			} else {
 				reportService.updateReport(report, sessionUser);
-
-				response.setData(report.getReportId());
 				response.setSuccess(true);
 			}
 		} catch (SQLException | RuntimeException ex) {
@@ -1115,6 +1113,84 @@ public class ReportController {
 	public @ResponseBody
 	AjaxResponse deletePivotTableJs(@RequestParam("id") Integer id) {
 		logger.debug("Entering deletePivotTableJs: id={}", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult = reportService.deleteReport(id);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				//report not deleted because of linked jobs
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.getMessage());
+		}
+
+		return response;
+	}
+
+	@PostMapping("/saveGridstack")
+	public @ResponseBody
+	AjaxResponse saveGridstack(@RequestParam("reportId") Integer reportId,
+			@RequestParam("config") String config, @RequestParam("name") String name,
+			@RequestParam("description") String description,
+			@RequestParam(value = "overwrite", required = false) String overwrite,
+			HttpSession session, Locale locale) {
+
+		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
+				+ " name='{}', description='{}', overwrite='{}'",
+				reportId, config, name, description, overwrite);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Report report = reportService.getReport(reportId);
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			report.setGridstackSavedOptions(config);
+			if (StringUtils.isNotBlank(description)) {
+				report.setDescription(description);
+			}
+
+			if (overwrite == null) {
+				if (StringUtils.isBlank(name)) {
+					String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
+					response.setErrorMessage(message);
+				} else if (reportService.reportNameExists(name)) {
+					String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
+					response.setErrorMessage(message);
+				} else {
+					report.setName(name);
+
+					reportService.copyReport(report, report.getReportId(), sessionUser);
+					reportService.grantAccess(report, sessionUser);
+
+					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
+					response.setData(report.getReportId());
+					response.setSuccess(true);
+				}
+			} else {
+				reportService.updateReport(report, sessionUser);
+				response.setSuccess(true);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.getMessage());
+		}
+
+		return response;
+	}
+
+	@PostMapping("/deleteGridstack")
+	public @ResponseBody
+	AjaxResponse deleteGridstack(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteGridstack: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 

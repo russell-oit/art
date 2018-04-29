@@ -161,6 +161,7 @@ public class ReportService {
 			report.setSourceReportId(rs.getInt("SOURCE_REPORT_ID"));
 			report.setUseGroovy(rs.getBoolean("USE_GROOVY"));
 			report.setPivotTableJsSavedOptions(rs.getString("PIVOTTABLEJS_SAVED_OPTIONS"));
+			report.setGridstackSavedOptions(rs.getString("GRIDSTACK_SAVED_OPTIONS"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -852,9 +853,9 @@ public class ReportService {
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
-					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS,"
+					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 44) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 45) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -899,6 +900,7 @@ public class ReportService {
 				report.getSourceReportId(),
 				BooleanUtils.toInteger(report.isUseGroovy()),
 				report.getPivotTableJsSavedOptions(),
+				report.getGridstackSavedOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -922,6 +924,7 @@ public class ReportService {
 					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
 					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
 					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?, PIVOTTABLEJS_SAVED_OPTIONS=?,"
+					+ " GRIDSTACK_SAVED_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -967,6 +970,7 @@ public class ReportService {
 				report.getSourceReportId(),
 				BooleanUtils.toInteger(report.isUseGroovy()),
 				report.getPivotTableJsSavedOptions(),
+				report.getGridstackSavedOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

@@ -316,6 +316,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				|| StringUtils.equals(page, "clearSavedParameterSelection")
 				|| StringUtils.equals(page, "savePivotTableJs")
 				|| StringUtils.equals(page, "deletePivotTableJs")
+				|| StringUtils.equals(page, "saveGridstack")
+				|| StringUtils.equals(page, "deleteGridstack")
 				|| StringUtils.equals(page, "getLovValues")) {
 			//everyone can access
 			//NOTE: "everyone" doesn't include when accessing as the art database user

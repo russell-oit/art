@@ -3,6 +3,7 @@
 -- CHANGES:
 -- update database version
 -- add pivottable.js saved options field
+-- add gridstack saved options field
 
 
 -- NOTES:
@@ -20,3 +21,6 @@ UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='3.6-snapshot';
 
 -- add pivottable.js saved options field
 ALTER TABLE ART_QUERIES ADD PIVOTTABLEJS_SAVED_OPTIONS CLOB;
+
+-- add gridstack saved options field
+ALTER TABLE ART_QUERIES ADD GRIDSTACK_SAVED_OPTIONS CLOB;

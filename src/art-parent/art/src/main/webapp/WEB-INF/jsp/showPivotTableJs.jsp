@@ -328,7 +328,7 @@
 	});
 
 	$("#delete-${outputDivId}").on("click", function () {
-		var reportName = '${encode:forJavaScript(report.name)}'
+		var reportName = '${encode:forJavaScript(report.name)}';
 		var reportId = ${report.reportId};
 
 		bootbox.confirm({
