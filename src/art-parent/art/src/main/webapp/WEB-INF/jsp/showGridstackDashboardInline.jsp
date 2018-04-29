@@ -284,7 +284,7 @@
 			width: ${dashboard.width},
 			alwaysShowResizeHandle: ${dashboard.alwaysShowResizeHandle},
 			resizable: {
-				handles: 'e, se, s, sw, w'
+				handles: 'e, se, s, sw, w, n'
 			},
 			cellHeight: '${dashboard.cellHeight}',
 			float: ${dashboard.floatEnabled},
