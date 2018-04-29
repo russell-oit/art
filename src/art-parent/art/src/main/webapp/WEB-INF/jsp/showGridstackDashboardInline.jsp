@@ -366,7 +366,7 @@
 				height: parseInt($this.attr('data-gs-height'), 10)
 			});
 		});
-		
+
 		$("#config").val(JSON.stringify(items));
 
 		var dialog = bootbox.confirm({
@@ -423,7 +423,7 @@
 			dialog.find('#name').focus();
 		});
 	});
-	
+
 	$(document).on("submit", "#saveDashboardDialog form", function (e) {
 		e.preventDefault();
 		$("#saveDashboardDialog .btn-primary").click();

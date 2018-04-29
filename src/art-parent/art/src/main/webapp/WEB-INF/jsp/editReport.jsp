@@ -369,7 +369,7 @@ Edit report page
 				pivotTableJsSavedOptionsEditor.getSession().on('change', function () {
 					pivotTableJsSavedOptions.val(pivotTableJsSavedOptionsEditor.getSession().getValue());
 				});
-				
+
 				var gridstackSavedOptionsEditor = ace.edit("gridstackSavedOptionsEditor");
 				gridstackSavedOptionsEditor.$blockScrolling = Infinity;
 				gridstackSavedOptionsEditor.getSession().setMode("ace/mode/json");
@@ -421,6 +421,23 @@ Edit report page
 				});
 
 				toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
+
+				$("#applyOptions").on("click", function () {
+					var items = [];
+
+					$('.grid-stack-item.ui-draggable').each(function () {
+						var $this = $(this);
+						items.push({
+							index: parseInt($this.attr('data-index'), 10),
+							x: parseInt($this.attr('data-gs-x'), 10),
+							y: parseInt($this.attr('data-gs-y'), 10),
+							width: parseInt($this.attr('data-gs-width'), 10),
+							height: parseInt($this.attr('data-gs-height'), 10)
+						});
+					});
+
+					gridstackSavedOptionsEditor.getSession().setValue(JSON.stringify(items));
+				});
 			});
 		</script>
 
@@ -1035,7 +1052,7 @@ Edit report page
 					default:
 						$("#pivotTableJsSavedOptionsDiv").hide();
 				}
-				
+
 				//show/hide gridstack saved options
 				switch (reportTypeId) {
 					case 129: //gridstack dashboard
@@ -1043,6 +1060,15 @@ Edit report page
 						break;
 					default:
 						$("#gridstackSavedOptionsDiv").hide();
+				}
+
+				//show/hide apply options
+				switch (reportTypeId) {
+					case 129: //gridstack dashboard
+						$("#applyOptions").show();
+						break;
+					default:
+						$("#applyOptions").hide();
 				}
 			}
 		</script>
@@ -1772,7 +1798,7 @@ Edit report page
 						<div id="pivotTableJsSavedOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
-						
+
 				<div id="gridstackSavedOptionsDiv" class="form-group">
 					<label class="control-label col-md-12" style="text-align: center" for="gridstackSavedOptions">
 						<spring:message code="reports.label.savedOptions"/>
@@ -1815,6 +1841,9 @@ Edit report page
 				<div class="form-group">
 					<div class="col-md-12">
 						<span class="pull-right">
+							<button type="button" class="btn btn-default" id="applyOptions">
+								<spring:message code="page.button.apply"/>
+							</button>
 							<button type="button" id="testReportData" class="btn btn-default action">
 								<spring:message code="reports.button.testData"/>
 							</button>
