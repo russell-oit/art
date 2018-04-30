@@ -177,17 +177,41 @@
 
 	<c:forEach var="item" items="${items}">
 		var contentDivId = "#itemContent_${item.index}";
-		var itemUrl = "${item.url}";
+		var itemUrl = "${encode:forJavaScript(item.url)}";
 
 		if (${item.executeOnLoad}) {
-			var baseUrl = "${item.baseUrl}";
+			var baseUrl = "${encode:forJavaScript(item.baseUrl)}";
 			if (baseUrl) {
 				//use post for art reports
 				//https://api.jquery.com/load/
-				//use single quote as json string will have double quotes for attribute names and values
-				var parametersJson = '${item.parametersJson}';
+				var parametersJson = '${encode:forJavaScript(item.parametersJson)}';
 				var parametersObject = JSON.parse(parametersJson);
-				$(contentDivId).load(baseUrl, parametersObject);
+				$(contentDivId).load(baseUrl, parametersObject, function () {
+					//https://github.com/gridstack/gridstack.js/issues/404
+					if (${item.autoheight} || ${item.autowidth}) {
+						var index = ${item.index} - 1;
+						
+						var newHeightPixels;
+						if (${item.autoheight}) {
+							newHeightPixels = Math.ceil(($('.grid-stack-item-content')[index].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
+						} else {
+							newHeightPixels = $($('.grid-stack-item')[index]).attr('data-gs-height');
+						}
+						
+						var newWidthPixels;
+						if (${item.autowidth}) {
+							newWidthPixels = Math.ceil($('.grid-stack-item-content')[index].scrollWidth / $('.grid-stack').width() * ${dashboard.width});
+						} else {
+							newWidthPixels = $($('.grid-stack-item')[index]).attr('data-gs-width');
+						}
+
+						$('.grid-stack').data('gridstack').resize(
+								$('.grid-stack-item')[index],
+								newWidthPixels,
+								newHeightPixels
+								);
+					}
+				});
 			} else {
 				$(contentDivId).load(itemUrl);
 			}

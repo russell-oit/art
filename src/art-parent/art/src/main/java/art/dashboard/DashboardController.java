@@ -792,6 +792,14 @@ public class DashboardController {
 			height = Integer.parseInt(heightString);
 		}
 		item.setHeight(height);
+		
+		String autoheightString = xPath.evaluate("AUTOHEIGHT", itemNode);
+		boolean autoheight = BooleanUtils.toBoolean(autoheightString);
+		item.setAutoheight(autoheight);
+		
+		String autowidthString = xPath.evaluate("AUTOWIDTH", itemNode);
+		boolean autowidth = BooleanUtils.toBoolean(autowidthString);
+		item.setAutowidth(autowidth);
 
 		String noResizeString = xPath.evaluate("NORESIZE", itemNode);
 		boolean noResize = BooleanUtils.toBoolean(noResizeString);

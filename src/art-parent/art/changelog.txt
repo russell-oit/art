@@ -2,6 +2,7 @@ ART 3.6
 * Changed job templates directory to WEB-INF\thymeleaf\jobs
 * Allow saving of pivottable.js state
 * Allow modifying and saving of gridstack dashboard item positions
+* Added AUTOHEIGHT and AUTOWIDTH options for gridstack dashboard items
 
 ART 3.5
 * Add field to indicate use of groovy instead of sql in report source
