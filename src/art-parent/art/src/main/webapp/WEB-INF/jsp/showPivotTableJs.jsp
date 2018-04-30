@@ -39,7 +39,7 @@
 	</span>
 </div>
 
-<div id="${outputDivId}">
+<div id="${outputDivId}" class='pivotTableJsOutputDiv'>
 
 </div>
 

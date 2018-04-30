@@ -423,20 +423,41 @@ Edit report page
 				toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
 
 				$("#applyOptions").on("click", function () {
-					var items = [];
+					var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
+					switch (reportTypeId) {
+						case 129: //gridstack dashboard
+							var items = [];
 
-					$('.grid-stack-item.ui-draggable').each(function () {
-						var $this = $(this);
-						items.push({
-							index: parseInt($this.attr('data-index'), 10),
-							x: parseInt($this.attr('data-gs-x'), 10),
-							y: parseInt($this.attr('data-gs-y'), 10),
-							width: parseInt($this.attr('data-gs-width'), 10),
-							height: parseInt($this.attr('data-gs-height'), 10)
-						});
-					});
+							$('.grid-stack-item.ui-draggable').each(function () {
+								var $this = $(this);
+								items.push({
+									index: parseInt($this.attr('data-index'), 10),
+									x: parseInt($this.attr('data-gs-x'), 10),
+									y: parseInt($this.attr('data-gs-y'), 10),
+									width: parseInt($this.attr('data-gs-width'), 10),
+									height: parseInt($this.attr('data-gs-height'), 10)
+								});
+							});
 
-					gridstackSavedOptionsEditor.getSession().setValue(JSON.stringify(items));
+							gridstackSavedOptionsEditor.getSession().setValue(JSON.stringify(items));
+							break;
+						case 132: //pivottable.js
+						case 133: //pivottable.js csv local
+						case 134: //pivottable.js csv server
+							var config = $(".pivotTableJsOutputDiv").data("pivotUIOptions");
+							var config_copy = JSON.parse(JSON.stringify(config));
+							//delete some values which will not serialize to JSON
+							delete config_copy["aggregators"];
+							delete config_copy["renderers"];
+							//delete some bulky default values
+							delete config_copy["rendererOptions"];
+							delete config_copy["localeStrings"];
+							
+							pivotTableJsSavedOptionsEditor.getSession().setValue(JSON.stringify(config_copy));
+							break;
+						default:
+							break;
+					}
 				});
 			});
 		</script>
@@ -1053,7 +1074,7 @@ Edit report page
 						$("#pivotTableJsSavedOptionsDiv").hide();
 				}
 
-				//show/hide gridstack saved options
+				//show/hide gridstack saved options field
 				switch (reportTypeId) {
 					case 129: //gridstack dashboard
 						$("#gridstackSavedOptionsDiv").show();
@@ -1062,9 +1083,12 @@ Edit report page
 						$("#gridstackSavedOptionsDiv").hide();
 				}
 
-				//show/hide apply options
+				//show/hide apply button
 				switch (reportTypeId) {
 					case 129: //gridstack dashboard
+					case 132: //pivottable.js
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
 						$("#applyOptions").show();
 						break;
 					default:
