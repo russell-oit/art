@@ -198,7 +198,7 @@ public class DashboardController {
 				boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, report.getReportId());
 				request.setAttribute("exclusiveAccess", exclusiveAccess);
 				request.setAttribute("report", report);
-				
+
 				if (reportType == ReportType.Dashboard) {
 					Dashboard dashboard = buildDashboard(report, request, locale, reportParamsMap);
 					model.addAttribute("dashboard", dashboard);
@@ -753,20 +753,44 @@ public class DashboardController {
 		String title = getPortletTitle(itemNode, request, executeOnLoad, refreshPeriodSeconds, locale);
 		item.setTitle(title);
 
+		int xPosition;
 		String xPositionString = xPath.evaluate("XPOSITION", itemNode);
-		int xPosition = Integer.parseInt(xPositionString);
+		if (StringUtils.isBlank(xPositionString)) {
+			final int DEFAULT_X_POSITION = 0;
+			xPosition = DEFAULT_X_POSITION;
+		} else {
+			xPosition = Integer.parseInt(xPositionString);
+		}
 		item.setxPosition(xPosition);
 
+		int yPosition;
 		String yPositionString = xPath.evaluate("YPOSITION", itemNode);
-		int yPosition = Integer.parseInt(yPositionString);
+		if (StringUtils.isBlank(yPositionString)) {
+			final int DEFAULT_Y_POSITION = 0;
+			yPosition = DEFAULT_Y_POSITION;
+		} else {
+			yPosition = Integer.parseInt(yPositionString);
+		}
 		item.setyPosition(yPosition);
 
+		int width;
 		String widthString = xPath.evaluate("WIDTH", itemNode);
-		int width = Integer.parseInt(widthString);
+		if (StringUtils.isBlank(widthString)) {
+			final int DEFAULT_WIDTH = 2;
+			width = DEFAULT_WIDTH;
+		} else {
+			width = Integer.parseInt(widthString);
+		}
 		item.setWidth(width);
 
+		int height;
 		String heightString = xPath.evaluate("HEIGHT", itemNode);
-		int height = Integer.parseInt(heightString);
+		if (StringUtils.isBlank(heightString)) {
+			final int DEFAULT_HEIGHT = 2;
+			height = DEFAULT_HEIGHT;
+		} else {
+			height = Integer.parseInt(heightString);
+		}
 		item.setHeight(height);
 
 		String noResizeString = xPath.evaluate("NORESIZE", itemNode);
