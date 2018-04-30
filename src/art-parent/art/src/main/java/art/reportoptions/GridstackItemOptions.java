@@ -17,13 +17,16 @@
  */
 package art.reportoptions;
 
+import java.io.Serializable;
+
 /**
  * Represents gridstack item options
  * 
  * @author Timothy Anyona
  */
-public class GridstackItemOptions {
+public class GridstackItemOptions implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private int index;
 	private int x;
 	private int y;

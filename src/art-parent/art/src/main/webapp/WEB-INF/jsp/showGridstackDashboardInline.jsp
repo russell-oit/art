@@ -39,6 +39,10 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
+<c:if test="${not empty cssFileName}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(cssFileName)}">
+</c:if>
+
 
 <div class="row form-inline" style="margin-right: 1px; margin-bottom: 5px">
 	<span class="pull-right">

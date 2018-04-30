@@ -22,6 +22,7 @@ import art.enums.ReportType;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.GridstackItemOptions;
+import art.reportoptions.GridstackOptions;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
@@ -35,6 +36,7 @@ import art.utils.FilenameHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -195,16 +197,31 @@ public class DashboardController {
 					description = " :: " + shortDescription;
 				}
 			} else {
-				boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, report.getReportId());
-				request.setAttribute("exclusiveAccess", exclusiveAccess);
-				request.setAttribute("report", report);
-
 				if (reportType == ReportType.Dashboard) {
 					Dashboard dashboard = buildDashboard(report, request, locale, reportParamsMap);
 					model.addAttribute("dashboard", dashboard);
 				} else if (reportType == ReportType.GridstackDashboard) {
 					GridstackDashboard dashboard = buildGridstackDashboard(report, request, locale, reportParamsMap);
 					model.addAttribute("dashboard", dashboard);
+
+					boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, report.getReportId());
+					request.setAttribute("exclusiveAccess", exclusiveAccess);
+					request.setAttribute("report", report);
+
+					String options = report.getOptions();
+					if (StringUtils.isNotBlank(options)) {
+						GridstackOptions gridstackOptions = ArtUtils.jsonToObject(options, GridstackOptions.class);
+						String cssFileName = gridstackOptions.getCssFile();
+						if (StringUtils.isNotBlank(cssFileName)) {
+							String jsTemplatesPath = Config.getJsTemplatesPath();
+							String fullCssFileName = jsTemplatesPath + cssFileName;
+							File cssFile = new File(fullCssFileName);
+							if (!cssFile.exists()) {
+								throw new IllegalStateException("Css file not found: " + fullCssFileName);
+							}
+							request.setAttribute("cssFileName", cssFileName);
+						}
+					}
 				}
 			}
 
@@ -792,11 +809,11 @@ public class DashboardController {
 			height = Integer.parseInt(heightString);
 		}
 		item.setHeight(height);
-		
+
 		String autoheightString = xPath.evaluate("AUTOHEIGHT", itemNode);
 		boolean autoheight = BooleanUtils.toBoolean(autoheightString);
 		item.setAutoheight(autoheight);
-		
+
 		String autowidthString = xPath.evaluate("AUTOWIDTH", itemNode);
 		boolean autowidth = BooleanUtils.toBoolean(autowidthString);
 		item.setAutowidth(autowidth);
