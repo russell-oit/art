@@ -44,7 +44,7 @@
 </c:if>
 
 
-<div class="row form-inline" style="margin-right: 1px; margin-bottom: 5px">
+<div class="row form-inline" style="margin-right: 1px;">
 	<span class="pull-right">
 		<a class="btn btn-default" id="newDashboardLink" style="display: none"
 		   href="">
