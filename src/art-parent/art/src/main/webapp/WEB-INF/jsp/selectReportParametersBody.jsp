@@ -270,7 +270,7 @@ Display section to allow selecting of report parameters and initiate running of 
 	</div>
 </c:if>
 
-<div class="row  page-header">
+<div class="row reportName">
     <div class="col-md-10">
         <h3>${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}</h3>
     </div>
