@@ -170,7 +170,7 @@
 		}
 	</c:forEach>
 
-		$('body').on('click', '.toggle', function () {
+		$('.toggle').on('click', function () {
 			var parentDiv = $(this).parent('div');
 			var contentDivId = parentDiv.data("content-div-id");
 			var portletUrl = parentDiv.data("url");
@@ -198,7 +198,7 @@
 			}
 		});
 
-		$('body').on('click', '.refresh', function () {
+		$('.refresh').on('click', function () {
 			var parentDiv = $(this).parent('div');
 			var contentDivId = parentDiv.data("content-div-id");
 			var portletUrl = parentDiv.data("url");
