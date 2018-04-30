@@ -270,7 +270,7 @@
 		}
 	</c:forEach>
 
-		$('body').on('click', '.toggle', function () {
+		$('.toggle').on('click', function () {
 			var parentDiv = $(this).parent('div');
 			var contentDivId = parentDiv.data("content-div-id");
 			var itemUrl = parentDiv.data("url");
@@ -282,7 +282,7 @@
 			var index = parentDiv.data("index");
 			var autoheight = parentDiv.data("autoheight");
 			var autowidth = parentDiv.data("autowidth");
-
+			
 			if (src === mimimizeUrl) {
 				$(contentDivId).hide();
 				$(this).attr('src', maximizeUrl);
@@ -302,7 +302,7 @@
 			}
 		});
 
-		$('body').on('click', '.refresh', function () {
+		$('.refresh').on('click', function () {
 			var parentDiv = $(this).parent('div');
 			var contentDivId = parentDiv.data("content-div-id");
 			var itemUrl = parentDiv.data("url");
@@ -312,7 +312,7 @@
 			var index = parentDiv.data("index");
 			var autoheight = parentDiv.data("autoheight");
 			var autowidth = parentDiv.data("autowidth");
-
+			
 			if (baseUrl) {
 				//use post for art reports
 				$(contentDivId).load(baseUrl, parametersObject, function () {
