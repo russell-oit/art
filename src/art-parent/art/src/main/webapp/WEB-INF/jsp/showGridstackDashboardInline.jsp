@@ -89,7 +89,9 @@
 											 data-url="${encode:forHtmlAttribute(item.url)}"
 											 data-refresh-period-seconds="${item.refreshPeriodSeconds}"
 											 data-base-url="${encode:forHtmlAttribute(item.baseUrl)}"
-											 data-parameters-json="${encode:forHtmlAttribute(item.parametersJson)}">
+											 data-parameters-json="${encode:forHtmlAttribute(item.parametersJson)}"
+											 data-index='${item.index}' data-autoheight='${item.autoheight}'
+											 data-autowidth='${item.autowidth}'>
 											<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 											<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 										</div>
@@ -128,7 +130,8 @@
 										 ${item.minWidth == 0 ? '' : ' data-gs-min-width="'.concat(item.minWidth).concat('"')}
 										 ${item.minHeight == 0 ? '' : ' data-gs-min-height="'.concat(item.minHeight).concat('"')}
 										 ${item.maxWidth == 0 ? '' : ' data-gs-max-width="'.concat(item.maxWidth).concat('"')}
-										 ${item.maxHeight == 0 ? '' : ' data-gs-max-height="'.concat(item.maxHeight).concat('"')}>
+										 ${item.maxHeight == 0 ? '' : ' data-gs-max-height="'.concat(item.maxHeight).concat('"')}
+										 data-index='${item.index}'>
 										<div class="grid-stack-item-content" style="border: 1px solid #ccc">
 											<div id="item_${item.index}">
 												<div class="portletAUTOBox">
@@ -137,7 +140,9 @@
 														 data-url="${encode:forHtmlAttribute(item.url)}"
 														 data-refresh-period-seconds="${item.refreshPeriodSeconds}"
 														 data-base-url="${encode:forHtmlAttribute(item.baseUrl)}"
-														 data-parameters-json="${encode:forHtmlAttribute(item.parametersJson)}">
+														 data-parameters-json="${encode:forHtmlAttribute(item.parametersJson)}"
+														 data-index='${item.index}' data-autoheight='${item.autoheight}'
+														 data-autowidth='${item.autowidth}'>
 														<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 														<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 													</div>
@@ -166,6 +171,33 @@
 		//https://stackoverflow.com/questions/351495/dynamically-creating-keys-in-javascript-associative-array
 		var intervalIds = {};
 
+		function autosize(autoheight, autowidth, itemIndex) {
+			//https://github.com/gridstack/gridstack.js/issues/404
+			if (autoheight || autowidth) {
+				var index = itemIndex - 1;
+
+				var newHeightPixels;
+				if (autoheight) {
+					newHeightPixels = Math.ceil(($('.grid-stack-item-content')[index].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
+				} else {
+					newHeightPixels = $($('.grid-stack-item')[index]).attr('data-gs-height');
+				}
+
+				var newWidthPixels;
+				if (autowidth) {
+					newWidthPixels = Math.ceil($('.grid-stack-item-content')[index].scrollWidth / $('.grid-stack').width() * ${dashboard.width});
+				} else {
+					newWidthPixels = $($('.grid-stack-item')[index]).attr('data-gs-width');
+				}
+
+				$('.grid-stack').data('gridstack').resize(
+						$('.grid-stack-item')[index],
+						newWidthPixels,
+						newHeightPixels
+						);
+			}
+		}
+
 	<c:choose>
 		<c:when test="${dashboard.tabList == null}">
 			<c:set var="items" value="${dashboard.items}"/>
@@ -187,30 +219,7 @@
 				var parametersJson = '${encode:forJavaScript(item.parametersJson)}';
 				var parametersObject = JSON.parse(parametersJson);
 				$(contentDivId).load(baseUrl, parametersObject, function () {
-					//https://github.com/gridstack/gridstack.js/issues/404
-					if (${item.autoheight} || ${item.autowidth}) {
-						var index = ${item.index} - 1;
-						
-						var newHeightPixels;
-						if (${item.autoheight}) {
-							newHeightPixels = Math.ceil(($('.grid-stack-item-content')[index].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
-						} else {
-							newHeightPixels = $($('.grid-stack-item')[index]).attr('data-gs-height');
-						}
-						
-						var newWidthPixels;
-						if (${item.autowidth}) {
-							newWidthPixels = Math.ceil($('.grid-stack-item-content')[index].scrollWidth / $('.grid-stack').width() * ${dashboard.width});
-						} else {
-							newWidthPixels = $($('.grid-stack-item')[index]).attr('data-gs-width');
-						}
-
-						$('.grid-stack').data('gridstack').resize(
-								$('.grid-stack-item')[index],
-								newWidthPixels,
-								newHeightPixels
-								);
-					}
+					autosize(${item.autoheight}, ${item.autowidth}, ${item.index});
 				});
 			} else {
 				$(contentDivId).load(itemUrl);
@@ -226,7 +235,29 @@
 					//use single quote as json string will have double quotes for attribute names and values
 					var parametersJson = '${item.parametersJson}';
 					var parametersObject = JSON.parse(parametersJson);
-					$("#itemContent_${item.index}").load("${item.baseUrl}", parametersObject);
+					$("#itemContent_${item.index}").load("${item.baseUrl}", parametersObject, function () {
+						if (${item.autoheight} || ${item.autowidth}) {
+							var newHeightPixels;
+							if (${item.autoheight}) {
+								newHeightPixels = Math.ceil(($('.grid-stack-item-content')[${item.index} - 1].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
+							} else {
+								newHeightPixels = $($('.grid-stack-item')[${item.index} - 1]).attr('data-gs-height');
+							}
+
+							var newWidthPixels;
+							if (${item.autowidth}) {
+								newWidthPixels = Math.ceil($('.grid-stack-item-content')[${item.index} - 1].scrollWidth / $('.grid-stack').width() * ${dashboard.width});
+							} else {
+								newWidthPixels = $($('.grid-stack-item')[${item.index} - 1]).attr('data-gs-width');
+							}
+
+							$('.grid-stack').data('gridstack').resize(
+									$('.grid-stack-item')[${item.index} - 1],
+									newWidthPixels,
+									newHeightPixels
+									);
+						}
+					});
 				} else {
 					$("#itemContent_${item.index}").load("${item.url}");
 				}
@@ -246,6 +277,11 @@
 			var src = $(this).attr('src'); //this.src gives full url i.e. http://... while $(this).attr('src') gives relative url i.e. contextpath/...
 			var mimimizeUrl = "${pageContext.request.contextPath}/images/minimize.png";
 			var maximizeUrl = "${pageContext.request.contextPath}/images/maximize.png";
+			var baseUrl = parentDiv.data("base-url");
+			var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
+			var index = parentDiv.data("index");
+			var autoheight = parentDiv.data("autoheight");
+			var autowidth = parentDiv.data("autowidth");
 
 			if (src === mimimizeUrl) {
 				$(contentDivId).hide();
@@ -255,12 +291,11 @@
 				$(this).attr('src', mimimizeUrl);
 
 				//refresh item contents every time it's maximized/shown
-				var baseUrl = parentDiv.data("base-url");
-				var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
-
 				if (baseUrl) {
 					//use post for art reports
-					$(contentDivId).load(baseUrl, parametersObject);
+					$(contentDivId).load(baseUrl, parametersObject, function () {
+						autosize(autoheight, autowidth, index);
+					});
 				} else {
 					$(contentDivId).load(itemUrl);
 				}
@@ -274,10 +309,15 @@
 			var refreshPeriodSeconds = parentDiv.data("refresh-period-seconds");
 			var baseUrl = parentDiv.data("base-url");
 			var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
+			var index = parentDiv.data("index");
+			var autoheight = parentDiv.data("autoheight");
+			var autowidth = parentDiv.data("autowidth");
 
 			if (baseUrl) {
 				//use post for art reports
-				$(contentDivId).load(baseUrl, parametersObject);
+				$(contentDivId).load(baseUrl, parametersObject, function () {
+					autosize(autoheight, autowidth, index);
+				});
 			} else {
 				$(contentDivId).load(itemUrl);
 			}
@@ -291,7 +331,9 @@
 				var setIntervalId = setInterval(function () {
 					if (baseUrl) {
 						//use post for art reports
-						$(contentDivId).load(baseUrl, parametersObject);
+						$(contentDivId).load(baseUrl, parametersObject, function () {
+							autosize(autoheight, autowidth, index);
+						});
 					} else {
 						$(contentDivId).load(itemUrl);
 					}
