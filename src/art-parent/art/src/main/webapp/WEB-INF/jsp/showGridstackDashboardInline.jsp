@@ -61,7 +61,7 @@
 	</span>
 </div>
 
-<div id="reportOutput" class="container-fluid">
+<div class="container-fluid">
 	<div class="row">
 		<h2>${encode:forHtmlContent(dashboard.title)}  
 			<small>  ${encode:forHtmlContent(dashboard.description)}</small>
