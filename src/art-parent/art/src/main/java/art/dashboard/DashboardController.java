@@ -727,6 +727,7 @@ public class DashboardController {
 					item.setyPosition(itemOption.getY());
 					item.setWidth(itemOption.getWidth());
 					item.setHeight(itemOption.getHeight());
+					break;
 				}
 			}
 
