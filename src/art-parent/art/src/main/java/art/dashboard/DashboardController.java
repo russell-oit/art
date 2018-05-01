@@ -208,6 +208,10 @@ public class DashboardController {
 					request.setAttribute("exclusiveAccess", exclusiveAccess);
 					request.setAttribute("report", report);
 
+					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+						request.setAttribute("ajax", true);
+					}
+
 					String options = report.getOptions();
 					if (StringUtils.isNotBlank(options)) {
 						GridstackOptions gridstackOptions = ArtUtils.jsonToObject(options, GridstackOptions.class);

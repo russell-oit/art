@@ -113,7 +113,7 @@
 		</c:choose>
 	</div>
 </div>
-
+	
 <script type="text/javascript">
 	$(document).ready(function () {
 		//https://stackoverflow.com/questions/109086/stop-setinterval-call-in-javascript

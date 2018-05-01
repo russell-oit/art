@@ -27,7 +27,16 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" /> 
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
+<c:if test="${!ajax}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
+	<script type="text/javascript">
+		$(document).ajaxStart(function () {
+			$('#spinner').show();
+		}).ajaxStop(function () {
+			$('#spinner').hide();
+		});
+	</script>
+</c:if>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
@@ -286,7 +295,7 @@
 			var index = parentDiv.data("index");
 			var autoheight = parentDiv.data("autoheight");
 			var autowidth = parentDiv.data("autowidth");
-			
+
 			if (src === mimimizeUrl) {
 				$(contentDivId).hide();
 				$(this).attr('src', maximizeUrl);
@@ -316,7 +325,7 @@
 			var index = parentDiv.data("index");
 			var autoheight = parentDiv.data("autoheight");
 			var autowidth = parentDiv.data("autowidth");
-			
+
 			if (baseUrl) {
 				//use post for art reports
 				$(contentDivId).load(baseUrl, parametersObject, function () {
@@ -494,7 +503,7 @@
 		});
 	});
 
-	$(document).on("submit", "#saveDashboardDialog form", function (e) {
+	$(document).on("submit", "#saveDashboardForm", function (e) {
 		e.preventDefault();
 		$("#saveDashboardDialog .btn-primary").click();
 	});
@@ -541,12 +550,6 @@
 				} //end if result
 			} //end callback
 		}); //end bootbox confirm
-	});
-
-	$(document).ajaxStart(function () {
-		$('#spinner').show();
-	}).ajaxStop(function () {
-		$('#spinner').hide();
 	});
 
 //	$('.grid-stack').on('added', function (event, items) {
