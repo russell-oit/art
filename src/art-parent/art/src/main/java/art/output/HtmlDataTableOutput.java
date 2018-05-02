@@ -23,8 +23,6 @@ import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.owasp.encoder.Encode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
@@ -35,8 +33,6 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
  * @author Timothy Anyona
  */
 public class HtmlDataTableOutput extends StandardOutput {
-
-	private static final Logger logger = LoggerFactory.getLogger(HtmlDataTableOutput.class);
 
 	private String tableId;
 	private int localRowCount; //use local variable for reportengine output

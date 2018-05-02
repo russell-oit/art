@@ -1496,9 +1496,15 @@ public class Report implements Serializable {
 		modifyPassword = AesEncryptor.encrypt(modifyPassword);
 	}
 
+	/**
+	 * Returns a copy of this report with only some fields filled
+	 *
+	 * @return a copy of this report with only some fields filled
+	 */
 	@JsonIgnore
 	public Report getBasicReport() {
 		Report basic = new Report();
+
 		basic.setReportId(reportId);
 		basic.setName(name);
 		basic.setDescription(description);
@@ -1517,13 +1523,20 @@ public class Report implements Serializable {
 		basic.setGridstackSavedOptions(gridstackSavedOptions);
 		basic.setOptions(options);
 		basic.setReportSource(reportSource);
+
 		if (reportType == ReportType.Text) {
 			basic.setReportSourceHtml(reportSource);
 		}
+
 		if (datasource != null) {
 			datasource.setPassword("");
+			datasource.setUsername("");
+			datasource.setUrl("");
+			datasource.setDriver("");
+			datasource.setTestSql("");
 			basic.setDatasource(datasource);
 		}
+
 		return basic;
 	}
 

@@ -145,10 +145,10 @@ Reports configuration page
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, '${showAllRowsText}']],
 					pageLength: 10,
 					ajax: {
-						"type": "GET",
+						type: "GET",
 						dataType: "json",
 						url: "${pageContext.request.contextPath}/getConfigReports",
-						"dataSrc": function (response) {
+						dataSrc: function (response) {
 							//https://stackoverflow.com/questions/35475964/datatables-ajax-call-error-handle
 							if (response.success) {
 								return response.data;
@@ -159,7 +159,7 @@ Reports configuration page
 						},
 						error: ajaxErrorHandler
 					},
-					"columns": [
+					columns: [
 						{"data": null, defaultContent: ""},
 						{"data": "reportId"},
 						{"data": "name"},
@@ -227,16 +227,6 @@ Reports configuration page
 
 				var table = oTable.api();
 
-				//add thead row with yadcf filters
-				var headingRow = tbl.find('thead tr:first');
-				var visibleColCount = 7;
-				var cols = '';
-				for (var i = 1; i <= visibleColCount; i++) {
-					cols += '<th></th>';
-				}
-				var filterRow = '<tr>' + cols + '</tr>';
-				//headingRow.after(filterRow);
-
 				yadcf.init(table,
 						[
 							{
@@ -273,9 +263,6 @@ Reports configuration page
 
 				tbl.find('tbody').on('click', '.editRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
-					//var recordId = row.data("id");
-//					console.log("recordId", recordId);
-					//console.log("data",table.row(row).data());
 					var recordId = table.row(row).data().reportId;
 					$.ajax({
 						type: "GET",
@@ -311,35 +298,23 @@ Reports configuration page
 					//https://stackoverflow.com/questions/14804253/how-to-set-selected-value-on-select-using-selectpicker-plugin-from-bootstrap
 					//https://silviomoreto.github.io/bootstrap-select/methods/
 					$("#reportTypeId").selectpicker('val', report.reportTypeId);
-//					$("#reportTypeId").val(report.reportTypeId);
-//					$("#reportTypeId").change();
 
 					if (report.datasource) {
-						//console.log(report.datasource.datasourceId);
 						//https://learn.jquery.com/using-jquery-core/faq/how-do-i-select-an-element-by-an-id-that-has-characters-used-in-css-notation/
 						//https://api.jquery.com/jQuery.escapeSelector/
 						//https://stackoverflow.com/questions/605630/how-to-select-html-nodes-by-id-with-jquery-when-the-id-contains-a-dot
 						//https://stackoverflow.com/questions/9930577/jquery-dot-in-id-selector/9930611
 						$("#datasource\\.datasourceId").selectpicker('val', report.datasource.datasourceId);
-//						$("#datasourceId").val(report.datasource.datasourceId);
-//						$("#datasourceId").selectpicker('refresh');
 					}
 					$("#useGroovy").bootstrapSwitch('state', report.useGroovy);
 					$("#pivotTableJsSavedOptions").val(report.pivotTableJsSavedOptions);
 					$("#gridstackSavedOptions").val(report.gridstackSavedOptions);
 					$("#options").val(report.options);
 					$("#reportSource").val(report.reportSource);
-					//$("#reportSourceHtml").val(report.reportSourceHtml);
 
-//					console.log("report.reportSource", report.reportSource);
-//					console.log("report.reportSourceHtml", report.reportSourceHtml);
 					if (report.reportSourceHtml) {
 						tinyMCE.get('reportSourceHtml').setContent(report.reportSourceHtml);
 					}
-
-//					if(report.reportTypeId === 111){
-//						$("#reportSourceHtml").val(report.reportSource);
-//					}
 
 					toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
 
@@ -348,7 +323,7 @@ Reports configuration page
 
 				$("#testReport").click(function () {
 					//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
-					//tinymce.triggerSave();
+					tinymce.triggerSave();
 
 					//disable buttons
 					$('.action').prop('disabled', true);
@@ -561,6 +536,7 @@ Reports configuration page
 
 				function toggleGroovyEditor(reportSource, groovyEditor, sqlEditor) {
 					var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
+
 					switch (reportTypeId) {
 						case 110: //dashboard
 						case 129: //gridstack dashboard
@@ -789,6 +765,7 @@ Reports configuration page
 				$("#deleteRecord").click(function () {
 					var recordName = $("#name").val();
 					var recordId = $("#reportId").val();
+
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + recordName + "</b>",
 						buttons: {
@@ -933,7 +910,6 @@ Reports configuration page
 				$("#refreshRecords").click(function () {
 					table.ajax.reload();
 				});
-
 			});
 		</script>
 	</jsp:attribute>
