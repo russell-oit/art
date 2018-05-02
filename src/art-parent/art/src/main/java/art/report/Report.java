@@ -41,6 +41,7 @@ import art.ruleValue.UserRuleValue;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
@@ -183,6 +184,51 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
+	private String dtName;
+	private String dtActiveStatus;
+	private String dtAction;
+
+	/**
+	 * @return the dtName
+	 */
+	public String getDtName() {
+		return dtName;
+	}
+
+	/**
+	 * @param dtName the dtName to set
+	 */
+	public void setDtName(String dtName) {
+		this.dtName = dtName;
+	}
+
+	/**
+	 * @return the dtActiveStatus
+	 */
+	public String getDtActiveStatus() {
+		return dtActiveStatus;
+	}
+
+	/**
+	 * @param dtActiveStatus the dtActiveStatus to set
+	 */
+	public void setDtActiveStatus(String dtActiveStatus) {
+		this.dtActiveStatus = dtActiveStatus;
+	}
+
+	/**
+	 * @return the dtAction
+	 */
+	public String getDtAction() {
+		return dtAction;
+	}
+
+	/**
+	 * @param dtAction the dtAction to set
+	 */
+	public void setDtAction(String dtAction) {
+		this.dtAction = dtAction;
+	}
 
 	/**
 	 * @return the gridstackSavedOptions
@@ -1157,6 +1203,7 @@ public class Report implements Serializable {
 	 *
 	 * @return the report ids for reports defined within a dashboard report
 	 */
+	@JsonIgnore
 	public List<Integer> getDashboardReportIds() {
 		List<Integer> reportIds = new ArrayList<>();
 
@@ -1287,7 +1334,7 @@ public class Report implements Serializable {
 			if (c3Options == null) {
 				generalOptions.setC3(defaultC3Options);
 			}
-			
+
 			PlotlyOptions plotlyOptions = generalOptions.getPlotly();
 			if (plotlyOptions == null) {
 				generalOptions.setPlotly(defaultPlotlyOptions);
@@ -1447,6 +1494,46 @@ public class Report implements Serializable {
 	public void encryptPasswords() {
 		openPassword = AesEncryptor.encrypt(openPassword);
 		modifyPassword = AesEncryptor.encrypt(modifyPassword);
+	}
+
+	@JsonIgnore
+	public Report getBasicReport() {
+		Report basic = new Report();
+		basic.setReportId(reportId);
+		basic.setName(name);
+		basic.setDescription(description);
+		basic.setUseGroovy(useGroovy);
+		basic.setReportSource(reportSource);
+		basic.setReportType(reportType);
+		basic.setReportTypeId(reportTypeId);
+		basic.setDtName(dtName);
+		basic.setDtActiveStatus(dtActiveStatus);
+		basic.setDtAction(dtAction);
+		basic.setCreatedBy(createdBy);
+		basic.setUpdatedBy(updatedBy);
+		basic.setReportGroups(reportGroups);
+		basic.setUseGroovy(useGroovy);
+		basic.setPivotTableJsSavedOptions(pivotTableJsSavedOptions);
+		basic.setGridstackSavedOptions(gridstackSavedOptions);
+		basic.setOptions(options);
+		basic.setReportSource(reportSource);
+		if (reportType == ReportType.Text) {
+			basic.setReportSourceHtml(reportSource);
+		}
+		if (datasource != null) {
+			datasource.setPassword("");
+			basic.setDatasource(datasource);
+		}
+		return basic;
+	}
+
+	/**
+	 * Returns the string to use as the record's datatable rowid
+	 *
+	 * @return the string to use as the record's datatable rowid
+	 */
+	public String getDtRowId() {
+		return "row-" + reportId;
 	}
 
 }

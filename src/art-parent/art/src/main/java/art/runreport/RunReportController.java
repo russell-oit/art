@@ -123,6 +123,21 @@ public class RunReportController {
 			if (testReport.getDummyBoolean() == null) {
 				report = reportService.getReport(reportId);
 			} else {
+				boolean basicReport = BooleanUtils.toBoolean(request.getParameter("basicReport"));
+				if (basicReport) {
+					Report originalReport = reportService.getReport(reportId);
+					originalReport.setName(testReport.getName());
+					originalReport.setDescription(testReport.getDescription());
+					originalReport.setDatasource(testReport.getDatasource());
+					originalReport.setUseGroovy(testReport.isUseGroovy());
+					originalReport.setPivotTableJsSavedOptions(testReport.getPivotTableJsSavedOptions());
+					originalReport.setGridstackSavedOptions(testReport.getGridstackSavedOptions());
+					originalReport.setOptions(testReport.getOptions());
+					originalReport.setReportSource(testReport.getReportSource());
+					originalReport.setReportSourceHtml(testReport.getReportSourceHtml());
+					testReport = originalReport;
+				}
+
 				if (BooleanUtils.isTrue(testData)) {
 					testReport.setReportType(ReportType.Tabular);
 				} else {

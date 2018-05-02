@@ -47,7 +47,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.mail.MessagingException;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +61,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,6 +71,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.TemplateEngine;
 
 /**
  * Controller for reports pages
@@ -99,6 +103,12 @@ public class ReportController {
 
 	@Autowired
 	private SavedParameterService savedParameterService;
+
+	@Autowired
+	private ServletContext servletContext;
+
+	@Autowired
+	private TemplateEngine defaultTemplateEngine;
 
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
@@ -161,17 +171,141 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/reportsConfig", method = RequestMethod.GET)
-	public String showReportsConfig(Model model) {
+	public String showReportsConfig(Model model, HttpSession session) {
 		logger.debug("Entering showReportsConfig");
 
 		try {
-			model.addAttribute("reports", reportService.getAllReports());
+			//model.addAttribute("reports", reportService.getAllReports());
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			model.addAttribute("reportTypes", ReportType.list());
+			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
 		return "reportsConfig";
+	}
+
+	@GetMapping("/getConfigReports")
+	public @ResponseBody
+	AjaxResponse getConfigReports(Locale locale, HttpServletRequest request,
+			HttpServletResponse response) {
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
+		try {
+			List<Report> reports = reportService.getAllReports();
+
+			String newText = messageSource.getMessage("page.text.new", null, locale);
+			String updatedText = messageSource.getMessage("page.text.updated", null, locale);
+			String newSpan = "<span class='label label-success'>" + newText + "</span>";
+			String updatedSpan = "<span class='label label-success'>" + updatedText + "</span>";
+
+			String activeText = messageSource.getMessage("activeStatus.option.active", null, locale);
+			String disabledText = messageSource.getMessage("activeStatus.option.disabled", null, locale);
+			String activeSpan = "<span class='label label-success'>" + activeText + "</span>";
+			String disabledSpan = "<span class='label label-danger'>" + disabledText + "</span>";
+
+			String editText = messageSource.getMessage("page.action.edit", null, locale);
+			String action = "<button type=\"button\" class=\"btn btn-default editRecord\">"
+					+ "<i class=\"fa fa-pencil-square-o\"></i>" + editText + "</button>";
+
+			//WebContext ctx = new WebContext(request, response, servletContext, locale);
+			List<Report> basicReports = new ArrayList<>();
+			for (Report report : reports) {
+//				String dtName = report.getLocalizedName(locale);
+//				final int NEW_UPDATED_LIMIT = 7;
+//				if (ArtUtils.daysUntilToday(report.getCreationDate()) <= NEW_UPDATED_LIMIT) {
+//					dtName += " " + newSpan;
+//				}
+//				if (ArtUtils.daysUntilToday(report.getUpdateDate()) <= NEW_UPDATED_LIMIT) {
+//					dtName += " " + updatedSpan;
+//				}
+//				report.setDtName(dtName);
+
+//				String description = report.getLocalizedDescription(locale);
+//				report.setDescription(description);
+				String activeStatus;
+				if (report.isActive()) {
+					activeStatus = activeSpan;
+				} else {
+					activeStatus = disabledSpan;
+				}
+				report.setDtActiveStatus(activeStatus);
+
+				//ctx.setVariable("report", report);
+				String templateName = "jobsConfigAction";
+				//String dtAction = defaultTemplateEngine.process(templateName, ctx);
+				report.setDtAction(action);
+				basicReports.add(report.getBasicReport());
+			}
+			ajaxResponse.setData(basicReports);
+			ajaxResponse.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			ajaxResponse.setErrorMessage(ex.toString());
+		}
+
+		return ajaxResponse;
+	}
+
+	@GetMapping("/getBasicReport")
+	public @ResponseBody
+	AjaxResponse getBasicReport(@RequestParam("id") Integer id) {
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Report report = reportService.getReportWithOwnSource(id);
+			if (report == null) {
+				response.setErrorMessage("Report not found");
+			} else {
+				response.setData(report.getBasicReport());
+				response.setSuccess(true);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@PostMapping("/saveBasicReport")
+	public @ResponseBody
+	AjaxResponse saveBasicReport(@ModelAttribute("basicReport") Report basicReport,
+			@RequestParam("reportId") Integer reportId, HttpSession session) {
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Report originalReport = reportService.getReportWithOwnSource(reportId);
+			if (originalReport == null) {
+				response.setErrorMessage("Report not found");
+			} else {
+				originalReport.setName(basicReport.getName());
+				originalReport.setDescription(basicReport.getDescription());
+				originalReport.setDatasource(basicReport.getDatasource());
+				originalReport.setUseGroovy(basicReport.isUseGroovy());
+				originalReport.setPivotTableJsSavedOptions(basicReport.getPivotTableJsSavedOptions());
+				originalReport.setGridstackSavedOptions(basicReport.getGridstackSavedOptions());
+				originalReport.setOptions(basicReport.getOptions());
+				originalReport.setReportSource(basicReport.getReportSource());
+				originalReport.setReportSourceHtml(basicReport.getReportSourceHtml());
+				
+				User sessionUser = (User) session.getAttribute("sessionUser");
+				reportService.updateReport(originalReport, sessionUser);
+				response.setSuccess(true);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+
 	}
 
 	@RequestMapping(value = "/deleteReport", method = RequestMethod.POST)
