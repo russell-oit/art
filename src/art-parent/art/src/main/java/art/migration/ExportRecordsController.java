@@ -30,6 +30,7 @@ import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
+import art.enums.MigrationFileFormat;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
 import art.enums.ReportType;
@@ -200,7 +201,17 @@ public class ExportRecordsController {
 					extension = ".json";
 					break;
 				default:
-					extension = ".csv";
+					MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+					switch (fileFormat) {
+						case json:
+							extension = ".json";
+							break;
+						case csv:
+							extension = ".csv";
+							break;
+						default:
+							throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+					}
 			}
 
 			String exportFileName = baseExportFilename + extension;
@@ -297,6 +308,7 @@ public class ExportRecordsController {
 		try {
 			model.addAttribute("datasources", datasourceService.getActiveJdbcDatasources());
 			model.addAttribute("locations", MigrationLocation.list());
+			model.addAttribute("fileFormats", MigrationFileFormat.list());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -364,9 +376,20 @@ public class ExportRecordsController {
 		}
 
 		MigrationLocation location = exportRecords.getLocation();
+		MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(datasources, Datasource.class, file);
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, datasources);
+						break;
+					case csv:
+						csvRoutines.writeAll(datasources, Datasource.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				datasourceService.importDatasources(datasources, sessionUser, conn);

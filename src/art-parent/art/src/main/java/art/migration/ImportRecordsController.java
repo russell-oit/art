@@ -30,6 +30,7 @@ import art.destination.DestinationService;
 import art.drilldown.Drilldown;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
+import art.enums.MigrationFileFormat;
 import art.enums.MigrationRecordType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
@@ -67,6 +68,7 @@ import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvRoutines;
@@ -162,7 +164,7 @@ public class ImportRecordsController {
 
 		model.addAttribute("importRecords", importRecords);
 
-		return "importRecords";
+		return showEditImportRecords(model);
 	}
 
 	@PostMapping("/importRecords")
@@ -175,7 +177,7 @@ public class ImportRecordsController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return "importRecords";
+			return showEditImportRecords(model);
 		}
 
 		try {
@@ -206,7 +208,7 @@ public class ImportRecordsController {
 						importSettings(tempFile, sessionUser, conn, session);
 						break;
 					case Datasources:
-						importDatasources(tempFile, sessionUser, conn, csvRoutines);
+						importDatasources(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Destinations:
 						importDestinations(tempFile, sessionUser, conn, csvRoutines);
@@ -259,6 +261,18 @@ public class ImportRecordsController {
 			model.addAttribute("error", ex);
 		}
 
+		return showEditImportRecords(model);
+	}
+
+	/**
+	 * Prepares model data and returns the jsp file to display
+	 *
+	 * @param model the model object
+	 * @return the jsp file to display
+	 */
+	private String showEditImportRecords(Model model) {
+		model.addAttribute("fileFormats", MigrationFileFormat.list());
+
 		return "importRecords";
 	}
 
@@ -296,14 +310,28 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importDatasources(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importDatasources: sessionUser={}", sessionUser);
 
-		List<Datasource> datasources = csvRoutines.parseAll(Datasource.class, file);
+		List<Datasource> datasources;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				datasources = mapper.readValue(file, new TypeReference<List<Datasource>>() {
+				});
+				break;
+			case csv:
+				datasources = csvRoutines.parseAll(Datasource.class, file);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
 
 		for (Datasource datasource : datasources) {
 			if (datasource.isClearTextPassword()) {

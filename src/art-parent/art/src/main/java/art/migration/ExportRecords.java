@@ -18,6 +18,7 @@
 package art.migration;
 
 import art.datasource.Datasource;
+import art.enums.MigrationFileFormat;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
 import java.io.Serializable;
@@ -50,6 +51,21 @@ public class ExportRecords implements Serializable {
 	private String ids;
 	private MigrationLocation location = MigrationLocation.File;
 	private Datasource datasource;
+	private MigrationFileFormat fileFormat = MigrationFileFormat.json;
+
+	/**
+	 * @return the fileFormat
+	 */
+	public MigrationFileFormat getFileFormat() {
+		return fileFormat;
+	}
+
+	/**
+	 * @param fileFormat the fileFormat to set
+	 */
+	public void setFileFormat(MigrationFileFormat fileFormat) {
+		this.fileFormat = fileFormat;
+	}
 
 	/**
 	 * @return the recordType

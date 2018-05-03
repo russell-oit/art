@@ -17,6 +17,7 @@
  */
 package art.migration;
 
+import art.enums.MigrationFileFormat;
 import art.enums.MigrationRecordType;
 import java.io.Serializable;
 
@@ -29,6 +30,21 @@ public class ImportRecords implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private MigrationRecordType recordType;
+	private MigrationFileFormat fileFormat = MigrationFileFormat.json;
+
+	/**
+	 * @return the fileFormat
+	 */
+	public MigrationFileFormat getFileFormat() {
+		return fileFormat;
+	}
+
+	/**
+	 * @param fileFormat the fileFormat to set
+	 */
+	public void setFileFormat(MigrationFileFormat fileFormat) {
+		this.fileFormat = fileFormat;
+	}
 
 	/**
 	 * @return the recordType
