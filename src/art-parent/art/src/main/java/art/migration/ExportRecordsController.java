@@ -854,10 +854,32 @@ public class ExportRecordsController {
 		String ids = exportRecords.getIds();
 		List<Parameter> parameters = parameterService.getParameters(ids);
 
+		for (Parameter parameter : parameters) {
+			Report defaultValueReport = parameter.getDefaultValueReport();
+			if (defaultValueReport != null) {
+				defaultValueReport.encryptAllPasswords();
+			}
+			Report lovReport = parameter.getLovReport();
+			if (lovReport != null) {
+				lovReport.encryptAllPasswords();
+			}
+		}
+
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(parameters, Parameter.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, parameters);
+						break;
+					case csv:
+						csvRoutines.writeAll(parameters, Parameter.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				boolean local = false;
@@ -923,7 +945,7 @@ public class ExportRecordsController {
 		String ids = exportRecords.getIds();
 		List<Report> reports = reportService.getReports(ids);
 		for (Report report : reports) {
-			report.encryptPasswords();
+			report.encryptAllPasswords();
 		}
 
 		List<ReportGroup> allReportGroups = new ArrayList<>();

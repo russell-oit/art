@@ -110,7 +110,9 @@ public class Report implements Serializable {
 	@Parsed
 	private String reportSource;
 	private boolean useBlankXmlaPassword;
+	@JsonIgnore
 	private ChartOptions chartOptions;
+	@JsonIgnore
 	private String reportSourceHtml; //used with text reports
 	private String createdBy;
 	private String updatedBy;
@@ -152,6 +154,7 @@ public class Report implements Serializable {
 	private boolean omitTitleRow;
 	@Parsed
 	private boolean lovUseDynamicDatasource;
+	@JsonIgnore
 	private GeneralReportOptions generalOptions;
 	@Parsed
 	private String openPassword;
@@ -162,6 +165,7 @@ public class Report implements Serializable {
 	private Report sourceReport;
 	@Parsed
 	private int sourceReportId;
+	@JsonIgnore
 	private CloneOptions cloneOptions;
 	private List<ReportGroup> reportGroups;
 	@Parsed
@@ -187,6 +191,8 @@ public class Report implements Serializable {
 	private String dtName;
 	private String dtActiveStatus;
 	private String dtAction;
+	private String dtRowId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
+	private String reportGroupNames; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 
 	/**
 	 * @return the dtName
@@ -805,21 +811,6 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Determine whether this is an lov report
-	 *
-	 * @return
-	 */
-	public boolean isLov() {
-		ReportType reportTypeEnum = ReportType.toEnum(reportTypeId);
-
-		if (reportTypeEnum == ReportType.LovDynamic || reportTypeEnum == ReportType.LovDynamic) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * @return the createdBy
 	 */
 	public String getCreatedBy() {
@@ -1199,6 +1190,24 @@ public class Report implements Serializable {
 	}
 
 	/**
+	 * Returns <code>true</code> if this is an lov report
+	 *
+	 * @return <code>true</code> if this is an lov report
+	 */
+	@JsonIgnore
+	public boolean isLov() {
+		ReportType reportTypeEnum = ReportType.toEnum(reportTypeId);
+
+		switch (reportTypeEnum) {
+			case LovDynamic:
+			case LovStatic:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
 	 * Returns the report ids for reports defined within a dashboard report
 	 *
 	 * @return the report ids for reports defined within a dashboard report
@@ -1468,16 +1477,16 @@ public class Report implements Serializable {
 	 * @return the names of the report groups that this report belongs to
 	 */
 	public String getReportGroupNames() {
-		String namesString = "";
+		reportGroupNames = "";
 		if (CollectionUtils.isNotEmpty(reportGroups)) {
 			List<String> names = new ArrayList<>();
 			for (ReportGroup reportGroup : reportGroups) {
 				names.add(reportGroup.getName());
 			}
-			namesString = StringUtils.join(names, ", ");
+			reportGroupNames = StringUtils.join(names, ", ");
 		}
 
-		return namesString;
+		return reportGroupNames;
 	}
 
 	/**
@@ -1494,6 +1503,39 @@ public class Report implements Serializable {
 	public void encryptPasswords() {
 		openPassword = AesEncryptor.encrypt(openPassword);
 		modifyPassword = AesEncryptor.encrypt(modifyPassword);
+	}
+
+	/**
+	 * Encrypts all passwords fields in the report including for datasources etc
+	 */
+	public void encryptAllPasswords() {
+		encryptPasswords();
+		
+		if (datasource != null) {
+			datasource.encryptPassword();
+		}
+		
+		if (encryptor != null) {
+			encryptor.encryptPasswords();
+		}
+	}
+
+	/**
+	 * Encrypts all passwords fields in the report including for datasources etc
+	 * where the respective clearTextPassword field is true
+	 */
+	public void encryptAllClearTextPasswords() {
+		if (clearTextPasswords) {
+			encryptPasswords();
+		}
+		
+		if (datasource != null && datasource.isClearTextPassword()) {
+			datasource.encryptPassword();
+		}
+		
+		if (encryptor != null && encryptor.isClearTextPasswords()) {
+			encryptor.encryptPasswords();
+		}
 	}
 
 	/**
@@ -1546,7 +1588,8 @@ public class Report implements Serializable {
 	 * @return the string to use as the record's datatable rowid
 	 */
 	public String getDtRowId() {
-		return "row-" + reportId;
+		dtRowId = "row-" + reportId;
+		return dtRowId;
 	}
 
 }

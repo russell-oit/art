@@ -238,7 +238,7 @@ public class ImportRecordsController {
 						importRules(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Parameters:
-						importParameters(tempFile, sessionUser, conn, csvRoutines);
+						importParameters(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Jobs:
 						importJobs(tempFile, sessionUser, conn, csvRoutines);
@@ -734,14 +734,40 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importParameters(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importParameters: sessionUser={}", sessionUser);
 
-		List<Parameter> parameters = csvRoutines.parseAll(Parameter.class, file);
+		List<Parameter> parameters;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				parameters = mapper.readValue(file, new TypeReference<List<Parameter>>() {
+				});
+				break;
+			case csv:
+				parameters = csvRoutines.parseAll(Parameter.class, file);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
+		
+		for (Parameter parameter : parameters) {
+			Report defaultValueReport = parameter.getDefaultValueReport();
+			if (defaultValueReport != null) {
+				defaultValueReport.encryptAllClearTextPasswords();
+			}
+			Report lovReport = parameter.getLovReport();
+			if (lovReport != null) {
+				lovReport.encryptAllClearTextPasswords();
+			}
+		}
+
 		boolean local = true;
 		parameterService.importParameters(parameters, sessionUser, conn, local);
 	}
@@ -1215,9 +1241,7 @@ public class ImportRecordsController {
 		}
 
 		for (Report report : reports) {
-			if (report.isClearTextPasswords()) {
-				report.encryptPasswords();
-			}
+			report.encryptAllClearTextPasswords();
 		}
 
 		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
