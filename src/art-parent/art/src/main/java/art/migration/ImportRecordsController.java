@@ -217,7 +217,7 @@ public class ImportRecordsController {
 						importEncryptors(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Holidays:
-						importHolidays(tempFile, sessionUser, conn, csvRoutines);
+						importHolidays(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case ReportGroups:
 						importReportGroups(tempFile, sessionUser, conn, csvRoutines);
@@ -435,14 +435,29 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importHolidays(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importHolidays: sessionUser={}", sessionUser);
+		
+		List<Holiday> holidays;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				holidays = mapper.readValue(file, new TypeReference<List<Holiday>>() {
+				});
+				break;
+			case csv:
+				holidays = csvRoutines.parseAll(Holiday.class, file);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
 
-		List<Holiday> holidays = csvRoutines.parseAll(Holiday.class, file);
 		holidayService.importHolidays(holidays, sessionUser, conn);
 	}
 
