@@ -226,7 +226,7 @@ public class ImportRecordsController {
 						importSmtpServers(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case UserGroups:
-						importUserGroups(tempFile, sessionUser, conn, csvRoutines);
+						importUserGroups(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Schedules:
 						importSchedules(tempFile, sessionUser, conn, csvRoutines);
@@ -540,14 +540,29 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importUserGroups(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importUserGroups: sessionUser={}", sessionUser);
 
-		List<UserGroup> userGroups = csvRoutines.parseAll(UserGroup.class, file);
+		List<UserGroup> userGroups;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				userGroups = mapper.readValue(file, new TypeReference<List<UserGroup>>() {
+				});
+				break;
+			case csv:
+				userGroups = csvRoutines.parseAll(UserGroup.class, file);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
+
 		userGroupService.importUserGroups(userGroups, sessionUser, conn);
 	}
 
