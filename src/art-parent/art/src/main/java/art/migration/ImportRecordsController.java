@@ -224,7 +224,7 @@ public class ImportRecordsController {
 						importUserGroups(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Schedules:
-						importSchedules(tempFile, sessionUser, conn, csvRoutines);
+						importSchedules(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Users:
 						importUsers(tempFile, sessionUser, conn, csvRoutines);
@@ -565,55 +565,68 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importSchedules(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException, IOException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importSchedules: sessionUser={}", sessionUser);
 
 		List<Schedule> schedules;
-		String extension = FilenameUtils.getExtension(file.getName());
-		if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-			schedules = csvRoutines.parseAll(Schedule.class, file);
-		} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
-			String artTempPath = Config.getArtTempPath();
-			ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
-			String schedulesFileName = artTempPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
-			File schedulesFile = new File(schedulesFileName);
-			if (schedulesFile.exists()) {
-				schedules = csvRoutines.parseAll(Schedule.class, schedulesFile);
-			} else {
-				throw new IllegalStateException("File not found: " + schedulesFileName);
-			}
-
-			String holidaysFileName = artTempPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
-			File holidaysFile = new File(holidaysFileName);
-			if (holidaysFile.exists()) {
-				List<Holiday> holidays = csvRoutines.parseAll(Holiday.class, holidaysFile);
-				Map<Integer, Schedule> schedulesMap = new HashMap<>();
-				for (Schedule schedule : schedules) {
-					schedulesMap.put(schedule.getScheduleId(), schedule);
-				}
-				for (Holiday holiday : holidays) {
-					int parentId = holiday.getParentId();
-					Schedule schedule = schedulesMap.get(parentId);
-					if (schedule == null) {
-						throw new IllegalStateException("Schedule not found. Parent Id = " + parentId);
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				schedules = mapper.readValue(file, new TypeReference<List<Schedule>>() {
+				});
+				break;
+			case csv:
+				String extension = FilenameUtils.getExtension(file.getName());
+				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+					schedules = csvRoutines.parseAll(Schedule.class, file);
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String artTempPath = Config.getArtTempPath();
+					ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+					String schedulesFileName = artTempPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
+					File schedulesFile = new File(schedulesFileName);
+					if (schedulesFile.exists()) {
+						schedules = csvRoutines.parseAll(Schedule.class, schedulesFile);
 					} else {
-						List<Holiday> sharedHolidays = schedule.getSharedHolidays();
-						if (sharedHolidays == null) {
-							sharedHolidays = new ArrayList<>();
-						}
-						sharedHolidays.add(holiday);
-						schedule.setSharedHolidays(sharedHolidays);
+						throw new IllegalStateException("File not found: " + schedulesFileName);
 					}
+
+					String holidaysFileName = artTempPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
+					File holidaysFile = new File(holidaysFileName);
+					if (holidaysFile.exists()) {
+						List<Holiday> holidays = csvRoutines.parseAll(Holiday.class, holidaysFile);
+						Map<Integer, Schedule> schedulesMap = new HashMap<>();
+						for (Schedule schedule : schedules) {
+							schedulesMap.put(schedule.getScheduleId(), schedule);
+						}
+						for (Holiday holiday : holidays) {
+							int parentId = holiday.getParentId();
+							Schedule schedule = schedulesMap.get(parentId);
+							if (schedule == null) {
+								throw new IllegalStateException("Schedule not found. Parent Id = " + parentId);
+							} else {
+								List<Holiday> sharedHolidays = schedule.getSharedHolidays();
+								if (sharedHolidays == null) {
+									sharedHolidays = new ArrayList<>();
+								}
+								sharedHolidays.add(holiday);
+								schedule.setSharedHolidays(sharedHolidays);
+							}
+						}
+					}
+					schedulesFile.delete();
+					holidaysFile.delete();
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}
-			}
-			schedulesFile.delete();
-			holidaysFile.delete();
-		} else {
-			throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
 		scheduleService.importSchedules(schedules, sessionUser, conn);
@@ -748,7 +761,7 @@ public class ImportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
-		
+
 		for (Parameter parameter : parameters) {
 			Report defaultValueReport = parameter.getDefaultValueReport();
 			if (defaultValueReport != null) {

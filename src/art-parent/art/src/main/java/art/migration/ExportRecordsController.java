@@ -189,7 +189,6 @@ public class ExportRecordsController {
 
 		try {
 			MigrationRecordType recordType = exportRecords.getRecordType();
-			String baseExportFilename = "art-export-" + recordType;
 			String extension;
 			switch (recordType) {
 				case Settings:
@@ -209,6 +208,7 @@ public class ExportRecordsController {
 					}
 			}
 
+			String baseExportFilename = "art-export-" + recordType;
 			String exportFileName = baseExportFilename + extension;
 			String recordsExportPath = Config.getRecordsExportPath();
 			String exportFilePath = recordsExportPath + exportFileName;
@@ -254,7 +254,7 @@ public class ExportRecordsController {
 						exportUserGroups(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Schedules:
-						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn, file);
 						break;
 					case Users:
 						exportFilePath = exportUsers(exportRecords, sessionUser, csvRoutines, conn);
@@ -671,12 +671,13 @@ public class ExportRecordsController {
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
+	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private String exportSchedules(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportSchedules");
@@ -690,27 +691,39 @@ public class ExportRecordsController {
 		switch (location) {
 			case File:
 				String recordsExportPath = Config.getRecordsExportPath();
-				String schedulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
-				File schedulesFile = new File(schedulesFilePath);
-				csvRoutines.writeAll(schedules, Schedule.class, schedulesFile);
-				List<Holiday> holidays = new ArrayList<>();
-				for (Schedule schedule : schedules) {
-					List<Holiday> sharedHolidays = schedule.getSharedHolidays();
-					for (Holiday holiday : sharedHolidays) {
-						holiday.setParentId(schedule.getScheduleId());
-						holidays.add(holiday);
-					}
-				}
-				if (CollectionUtils.isNotEmpty(holidays)) {
-					String holidaysFilePath = recordsExportPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
-					File holidaysFile = new File(holidaysFilePath);
-					csvRoutines.writeAll(holidays, Holiday.class, holidaysFile);
-					exportFilePath = recordsExportPath + "art-export-Schedules.zip";
-					ArtUtils.zipFiles(exportFilePath, schedulesFilePath, holidaysFilePath);
-					schedulesFile.delete();
-					holidaysFile.delete();
-				} else {
-					exportFilePath = schedulesFilePath;
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, schedules);
+						exportFilePath = recordsExportPath + "art-export-Schedules.json";
+						break;
+					case csv:
+						String schedulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
+						File schedulesFile = new File(schedulesFilePath);
+						csvRoutines.writeAll(schedules, Schedule.class, schedulesFile);
+						List<Holiday> holidays = new ArrayList<>();
+						for (Schedule schedule : schedules) {
+							List<Holiday> sharedHolidays = schedule.getSharedHolidays();
+							for (Holiday holiday : sharedHolidays) {
+								holiday.setParentId(schedule.getScheduleId());
+								holidays.add(holiday);
+							}
+						}
+						if (CollectionUtils.isNotEmpty(holidays)) {
+							String holidaysFilePath = recordsExportPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
+							File holidaysFile = new File(holidaysFilePath);
+							csvRoutines.writeAll(holidays, Holiday.class, holidaysFile);
+							exportFilePath = recordsExportPath + "art-export-Schedules.zip";
+							ArtUtils.zipFiles(exportFilePath, schedulesFilePath, holidaysFilePath);
+							schedulesFile.delete();
+							holidaysFile.delete();
+						} else {
+							exportFilePath = schedulesFilePath;
+						}
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 				}
 				break;
 			case Datasource:

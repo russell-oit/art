@@ -18,6 +18,7 @@
 package art.schedule;
 
 import art.holiday.Holiday;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -352,6 +353,12 @@ public class Schedule implements Serializable {
 		return "Schedule{" + "name=" + name + '}';
 	}
 	
+	/**
+	 * Returns the cron string for the main schedule fields
+	 * 
+	 * @return the cron string for the main schedule fields
+	 */
+	@JsonIgnore
 	public String getMainScheduleCronString(){
 		String cronString = second + " " + minute
 					+ " " + hour + " " + day
