@@ -607,7 +607,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(smtpServers, SmtpServer.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, smtpServers);
+						break;
+					case csv:
+						csvRoutines.writeAll(smtpServers, SmtpServer.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);

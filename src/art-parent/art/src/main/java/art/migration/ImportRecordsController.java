@@ -223,7 +223,7 @@ public class ImportRecordsController {
 						importReportGroups(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case SmtpServers:
-						importSmtpServers(tempFile, sessionUser, conn, csvRoutines);
+						importSmtpServers(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case UserGroups:
 						importUserGroups(tempFile, sessionUser, conn, csvRoutines);
@@ -442,7 +442,7 @@ public class ImportRecordsController {
 			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importHolidays: sessionUser={}", sessionUser);
-		
+
 		List<Holiday> holidays;
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
@@ -475,7 +475,7 @@ public class ImportRecordsController {
 			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importReportGroups: sessionUser={}", sessionUser);
-		
+
 		List<ReportGroup> reportGroups;
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
@@ -501,14 +501,28 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importSmtpServers(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importSmtpServers: sessionUser={}", sessionUser);
 
-		List<SmtpServer> smtpServers = csvRoutines.parseAll(SmtpServer.class, file);
+		List<SmtpServer> smtpServers;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				smtpServers = mapper.readValue(file, new TypeReference<List<SmtpServer>>() {
+				});
+				break;
+			case csv:
+				smtpServers = csvRoutines.parseAll(SmtpServer.class, file);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
 
 		for (SmtpServer smtpServer : smtpServers) {
 			if (smtpServer.isClearTextPassword()) {
