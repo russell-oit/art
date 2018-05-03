@@ -35,8 +35,6 @@ import art.enums.MigrationRecordType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
-import art.job.Job;
-import art.job.JobService;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.Report;
@@ -150,9 +148,6 @@ public class ImportRecordsController {
 	private ParameterService parameterService;
 
 	@Autowired
-	private JobService jobService;
-
-	@Autowired
 	private CacheHelper cacheHelper;
 
 	@GetMapping("/importRecords")
@@ -239,9 +234,6 @@ public class ImportRecordsController {
 						break;
 					case Parameters:
 						importParameters(tempFile, sessionUser, conn, csvRoutines, importRecords);
-						break;
-					case Jobs:
-						importJobs(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					case Reports:
 						importReports(tempFile, sessionUser, conn, csvRoutines);
@@ -770,24 +762,6 @@ public class ImportRecordsController {
 
 		boolean local = true;
 		parameterService.importParameters(parameters, sessionUser, conn, local);
-	}
-
-	/**
-	 * Imports job records
-	 *
-	 * @param file the file that contains the records to import
-	 * @param sessionUser the session user
-	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @throws SQLException
-	 */
-	private void importJobs(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
-
-		logger.debug("Entering importJobs: sessionUser={}", sessionUser);
-
-		List<Job> jobs = csvRoutines.parseAll(Job.class, file);
-		jobService.importJobs(jobs, sessionUser, conn);
 	}
 
 	/**

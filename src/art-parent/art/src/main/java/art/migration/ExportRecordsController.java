@@ -36,8 +36,6 @@ import art.enums.MigrationRecordType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
-import art.job.Job;
-import art.job.JobService;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.Report;
@@ -142,9 +140,6 @@ public class ExportRecordsController {
 
 	@Autowired
 	private ParameterService parameterService;
-
-	@Autowired
-	private JobService jobService;
 
 	@Autowired
 	private ReportService reportService;
@@ -269,9 +264,6 @@ public class ExportRecordsController {
 						break;
 					case Parameters:
 						exportParameters(exportRecords, file, sessionUser, csvRoutines, conn);
-						break;
-					case Jobs:
-						exportJobs(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Reports:
 						exportFilePath = exportReports(exportRecords, sessionUser, csvRoutines, conn);
@@ -884,39 +876,6 @@ public class ExportRecordsController {
 			case Datasource:
 				boolean local = false;
 				parameterService.importParameters(parameters, sessionUser, conn, local);
-				break;
-			default:
-				throw new IllegalArgumentException("Unexpected location: " + location);
-		}
-	}
-
-	/**
-	 * Exports job records
-	 *
-	 * @param exportRecords the export records object
-	 * @param file the export file to use
-	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
-	 * @param conn the connection to use for datasource export
-	 * @throws SQLException
-	 * @throws IOException
-	 */
-	private void exportJobs(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
-
-		logger.debug("Entering exportJobs");
-
-		String ids = exportRecords.getIds();
-		List<Job> jobs = jobService.getJobs(ids);
-
-		MigrationLocation location = exportRecords.getLocation();
-		switch (location) {
-			case File:
-				csvRoutines.writeAll(jobs, Job.class, file);
-				break;
-			case Datasource:
-				jobService.importJobs(jobs, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
