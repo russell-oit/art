@@ -235,7 +235,7 @@ public class ImportRecordsController {
 						importUsers(tempFile, sessionUser, conn, csvRoutines);
 						break;
 					case Rules:
-						importRules(tempFile, sessionUser, conn, csvRoutines);
+						importRules(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Parameters:
 						importParameters(tempFile, sessionUser, conn, csvRoutines);
@@ -701,14 +701,29 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importRules(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importRules: sessionUser={}", sessionUser);
 
-		List<Rule> rules = csvRoutines.parseAll(Rule.class, file);
+		List<Rule> rules;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				rules = mapper.readValue(file, new TypeReference<List<Rule>>() {
+				});
+				break;
+			case csv:
+				rules = csvRoutines.parseAll(Rule.class, file);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
+
 		ruleService.importRules(rules, sessionUser, conn);
 	}
 
