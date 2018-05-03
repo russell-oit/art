@@ -257,7 +257,7 @@ public class ExportRecordsController {
 						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn, file);
 						break;
 					case Users:
-						exportFilePath = exportUsers(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportUsers(exportRecords, sessionUser, csvRoutines, conn, file);
 						break;
 					case Rules:
 						exportRules(exportRecords, file, sessionUser, csvRoutines, conn);
@@ -743,12 +743,13 @@ public class ExportRecordsController {
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
+	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private String exportUsers(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportUsers");
@@ -762,27 +763,39 @@ public class ExportRecordsController {
 		switch (location) {
 			case File:
 				String recordsExportPath = Config.getRecordsExportPath();
-				String usersFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERS_FILENAME;
-				File usersFile = new File(usersFilePath);
-				csvRoutines.writeAll(users, User.class, usersFile);
-				List<UserGroup> allUserGroups = new ArrayList<>();
-				for (User user : users) {
-					List<UserGroup> userGroups = user.getUserGroups();
-					for (UserGroup userGroup : userGroups) {
-						userGroup.setParentId(user.getUserId());
-						allUserGroups.add(userGroup);
-					}
-				}
-				if (CollectionUtils.isNotEmpty(allUserGroups)) {
-					String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
-					File userGroupsFile = new File(userGroupsFilePath);
-					csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
-					exportFilePath = recordsExportPath + "art-export-Users.zip";
-					ArtUtils.zipFiles(exportFilePath, usersFilePath, userGroupsFilePath);
-					usersFile.delete();
-					userGroupsFile.delete();
-				} else {
-					exportFilePath = usersFilePath;
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, users);
+						exportFilePath = recordsExportPath + "art-export-Users.json";
+						break;
+					case csv:
+						String usersFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERS_FILENAME;
+						File usersFile = new File(usersFilePath);
+						csvRoutines.writeAll(users, User.class, usersFile);
+						List<UserGroup> allUserGroups = new ArrayList<>();
+						for (User user : users) {
+							List<UserGroup> userGroups = user.getUserGroups();
+							for (UserGroup userGroup : userGroups) {
+								userGroup.setParentId(user.getUserId());
+								allUserGroups.add(userGroup);
+							}
+						}
+						if (CollectionUtils.isNotEmpty(allUserGroups)) {
+							String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
+							File userGroupsFile = new File(userGroupsFilePath);
+							csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
+							exportFilePath = recordsExportPath + "art-export-Users.zip";
+							ArtUtils.zipFiles(exportFilePath, usersFilePath, userGroupsFilePath);
+							usersFile.delete();
+							userGroupsFile.delete();
+						} else {
+							exportFilePath = usersFilePath;
+						}
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 				}
 				break;
 			case Datasource:

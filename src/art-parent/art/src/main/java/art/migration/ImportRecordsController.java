@@ -227,7 +227,7 @@ public class ImportRecordsController {
 						importSchedules(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Users:
-						importUsers(tempFile, sessionUser, conn, csvRoutines);
+						importUsers(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Rules:
 						importRules(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -639,55 +639,68 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importUsers(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException, IOException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importUsers: sessionUser={}", sessionUser);
 
 		List<User> users;
-		String extension = FilenameUtils.getExtension(file.getName());
-		if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-			users = csvRoutines.parseAll(User.class, file);
-		} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
-			String artTempPath = Config.getArtTempPath();
-			ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
-			String usersFileName = artTempPath + ExportRecords.EMBEDDED_USERS_FILENAME;
-			File usersFile = new File(usersFileName);
-			if (usersFile.exists()) {
-				users = csvRoutines.parseAll(User.class, usersFile);
-			} else {
-				throw new IllegalStateException("File not found: " + usersFileName);
-			}
-
-			String userGroupsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
-			File userGroupsFile = new File(userGroupsFileName);
-			if (userGroupsFile.exists()) {
-				List<UserGroup> allUserGroups = csvRoutines.parseAll(UserGroup.class, userGroupsFile);
-				Map<Integer, User> usersMap = new HashMap<>();
-				for (User user : users) {
-					usersMap.put(user.getUserId(), user);
-				}
-				for (UserGroup userGroup : allUserGroups) {
-					int parentId = userGroup.getParentId();
-					User user = usersMap.get(parentId);
-					if (user == null) {
-						throw new IllegalStateException("User not found. Parent Id = " + parentId);
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				users = mapper.readValue(file, new TypeReference<List<User>>() {
+				});
+				break;
+			case csv:
+				String extension = FilenameUtils.getExtension(file.getName());
+				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+					users = csvRoutines.parseAll(User.class, file);
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String artTempPath = Config.getArtTempPath();
+					ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+					String usersFileName = artTempPath + ExportRecords.EMBEDDED_USERS_FILENAME;
+					File usersFile = new File(usersFileName);
+					if (usersFile.exists()) {
+						users = csvRoutines.parseAll(User.class, usersFile);
 					} else {
-						List<UserGroup> userGroups = user.getUserGroups();
-						if (userGroups == null) {
-							userGroups = new ArrayList<>();
-						}
-						userGroups.add(userGroup);
-						user.setUserGroups(userGroups);
+						throw new IllegalStateException("File not found: " + usersFileName);
 					}
+
+					String userGroupsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
+					File userGroupsFile = new File(userGroupsFileName);
+					if (userGroupsFile.exists()) {
+						List<UserGroup> allUserGroups = csvRoutines.parseAll(UserGroup.class, userGroupsFile);
+						Map<Integer, User> usersMap = new HashMap<>();
+						for (User user : users) {
+							usersMap.put(user.getUserId(), user);
+						}
+						for (UserGroup userGroup : allUserGroups) {
+							int parentId = userGroup.getParentId();
+							User user = usersMap.get(parentId);
+							if (user == null) {
+								throw new IllegalStateException("User not found. Parent Id = " + parentId);
+							} else {
+								List<UserGroup> userGroups = user.getUserGroups();
+								if (userGroups == null) {
+									userGroups = new ArrayList<>();
+								}
+								userGroups.add(userGroup);
+								user.setUserGroups(userGroups);
+							}
+						}
+					}
+					usersFile.delete();
+					userGroupsFile.delete();
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}
-			}
-			usersFile.delete();
-			userGroupsFile.delete();
-		} else {
-			throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
 		for (User user : users) {
