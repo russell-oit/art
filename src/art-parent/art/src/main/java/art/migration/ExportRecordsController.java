@@ -376,9 +376,9 @@ public class ExportRecordsController {
 		}
 
 		MigrationLocation location = exportRecords.getLocation();
-		MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 		switch (location) {
 			case File:
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
 						ObjectMapper mapper = new ObjectMapper();
@@ -423,9 +423,9 @@ public class ExportRecordsController {
 		}
 
 		MigrationLocation location = exportRecords.getLocation();
-		MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 		switch (location) {
 			case File:
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
 						ObjectMapper mapper = new ObjectMapper();
@@ -472,7 +472,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(encryptors, Encryptor.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, encryptors);
+						break;
+					case csv:
+						csvRoutines.writeAll(encryptors, Encryptor.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				encryptorService.importEncryptors(encryptors, sessionUser, conn);
