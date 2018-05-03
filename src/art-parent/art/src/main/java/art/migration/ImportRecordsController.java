@@ -220,7 +220,7 @@ public class ImportRecordsController {
 						importHolidays(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case ReportGroups:
-						importReportGroups(tempFile, sessionUser, conn, csvRoutines);
+						importReportGroups(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case SmtpServers:
 						importSmtpServers(tempFile, sessionUser, conn, csvRoutines);
@@ -468,14 +468,29 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importReportGroups(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importReportGroups: sessionUser={}", sessionUser);
+		
+		List<ReportGroup> reportGroups;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				reportGroups = mapper.readValue(file, new TypeReference<List<ReportGroup>>() {
+				});
+				break;
+			case csv:
+				reportGroups = csvRoutines.parseAll(ReportGroup.class, file);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
 
-		List<ReportGroup> reportGroups = csvRoutines.parseAll(ReportGroup.class, file);
 		reportGroupService.importReportGroups(reportGroups, sessionUser, conn);
 	}
 
