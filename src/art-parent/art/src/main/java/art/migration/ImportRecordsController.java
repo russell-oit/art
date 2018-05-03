@@ -211,7 +211,7 @@ public class ImportRecordsController {
 						importDatasources(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Destinations:
-						importDestinations(tempFile, sessionUser, conn, csvRoutines);
+						importDestinations(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Encryptors:
 						importEncryptors(tempFile, sessionUser, conn, csvRoutines);
@@ -357,14 +357,28 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importDestinations(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importDestinations: sessionUser={}", sessionUser);
 
-		List<Destination> destinations = csvRoutines.parseAll(Destination.class, file);
+		List<Destination> destinations;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				destinations = mapper.readValue(file, new TypeReference<List<Destination>>() {
+				});
+				break;
+			case csv:
+				destinations = csvRoutines.parseAll(Destination.class, file);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
 
 		for (Destination destination : destinations) {
 			if (destination.isClearTextPassword()) {

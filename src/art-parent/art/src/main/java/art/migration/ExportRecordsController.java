@@ -423,9 +423,20 @@ public class ExportRecordsController {
 		}
 
 		MigrationLocation location = exportRecords.getLocation();
+		MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(destinations, Destination.class, file);
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, destinations);
+						break;
+					case csv:
+						csvRoutines.writeAll(destinations, Destination.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				destinationService.importDestinations(destinations, sessionUser, conn);
