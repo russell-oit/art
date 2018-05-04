@@ -753,4 +753,17 @@ public class Parameter implements Serializable {
 		}
 		return json;
 	}
+
+	/**
+	 * Encrypts all passwords fields in the parameter members including e.g. for
+	 * lov reports etc
+	 */
+	public void encryptAllPasswords() {
+		if (defaultValueReport != null) {
+			defaultValueReport.encryptAllPasswords();
+		}
+		if (lovReport != null) {
+			lovReport.encryptAllPasswords();
+		}
+	}
 }

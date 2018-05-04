@@ -23,6 +23,7 @@ import art.migration.PrefixTransformer;
 import art.parameter.Parameter;
 import art.report.Report;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.IOException;
@@ -50,18 +51,24 @@ public class ReportParameter implements Serializable {
 	private int parentId; //used for import/export of linked records e.g. reports
 	@Parsed
 	private int reportParameterId;
+	@JsonIgnore
 	private Report report;
 	@Parsed
 	private int position;
+	@JsonIgnore
 	private String[] passedParameterValues; //used for run report logic
+	@JsonIgnore
 	private Map<Object, String> lovValues; //store value and label for lov parameters
+	@JsonIgnore
 	private List<Object> actualParameterValues;
 	@Parsed
 	private String chainedParents;
 	@Parsed
 	private String chainedDepends;
 	private boolean chainedParent;
+	@JsonIgnore
 	private Map<String, String> lovValuesAsString;
+	@JsonIgnore
 	private Map<String, String> defaultValueLovValues;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "parameter")
 	private Parameter parameter;

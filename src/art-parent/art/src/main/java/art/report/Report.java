@@ -31,6 +31,7 @@ import art.reportoptions.Reporti18nOptions;
 import art.encryption.AESCrypt;
 import art.encryption.AesEncryptor;
 import art.migration.PrefixTransformer;
+import art.parameter.Parameter;
 import art.reportoptions.C3Options;
 import art.reportoptions.CloneOptions;
 import art.reportoptions.PlotlyOptions;
@@ -1510,13 +1511,20 @@ public class Report implements Serializable {
 	 */
 	public void encryptAllPasswords() {
 		encryptPasswords();
-		
+
 		if (datasource != null) {
 			datasource.encryptPassword();
 		}
-		
+
 		if (encryptor != null) {
 			encryptor.encryptPasswords();
+		}
+
+		if (reportParams != null) {
+			for (ReportParameter reportParam : reportParams) {
+				Parameter reportParamParameter = reportParam.getParameter();
+				reportParamParameter.encryptAllPasswords();
+			}
 		}
 	}
 
@@ -1528,11 +1536,11 @@ public class Report implements Serializable {
 		if (clearTextPasswords) {
 			encryptPasswords();
 		}
-		
+
 		if (datasource != null && datasource.isClearTextPassword()) {
 			datasource.encryptPassword();
 		}
-		
+
 		if (encryptor != null && encryptor.isClearTextPasswords()) {
 			encryptor.encryptPasswords();
 		}
@@ -1571,12 +1579,10 @@ public class Report implements Serializable {
 		}
 
 		if (datasource != null) {
-			datasource.setPassword("");
-			datasource.setUsername("");
-			datasource.setUrl("");
-			datasource.setDriver("");
-			datasource.setTestSql("");
-			basic.setDatasource(datasource);
+			Datasource basicDatasource = new Datasource();
+			basicDatasource.setDatasourceId(datasource.getDatasourceId());
+			basicDatasource.setName(datasource.getName());
+			basic.setDatasource(basicDatasource);
 		}
 
 		return basic;

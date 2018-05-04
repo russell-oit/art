@@ -236,7 +236,7 @@ public class ImportRecordsController {
 						importParameters(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					case Reports:
-						importReports(tempFile, sessionUser, conn, csvRoutines);
+						importReports(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					default:
 						break;
@@ -797,447 +797,265 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importReports(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines) throws SQLException, IOException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
 
 		logger.debug("Entering importReports: sessionUser={}", sessionUser);
 
 		List<Report> reports;
 		String extension = FilenameUtils.getExtension(file.getName());
-		if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-			reports = csvRoutines.parseAll(Report.class, file);
-		} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
-			String artTempPath = Config.getArtTempPath();
-			ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
-			String reportsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
-			File reportsFile = new File(reportsFileName);
-			if (reportsFile.exists()) {
-				reports = csvRoutines.parseAll(Report.class, reportsFile);
-			} else {
-				throw new IllegalStateException("File not found: " + reportsFileName);
-			}
+		String artTempPath = Config.getArtTempPath();
 
-			Map<Integer, Report> reportsMap = new HashMap<>();
-			for (Report report : reports) {
-				reportsMap.put(report.getReportId(), report);
-			}
-
-			String reportGroupsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
-			File reportGroupsFile = new File(reportGroupsFileName);
-			if (reportGroupsFile.exists()) {
-				List<ReportGroup> allReportGroups = csvRoutines.parseAll(ReportGroup.class, reportGroupsFile);
-				for (ReportGroup reportGroup : allReportGroups) {
-					int parentId = reportGroup.getParentId();
-					Report report = reportsMap.get(parentId);
-					if (report == null) {
-						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				if (StringUtils.equalsIgnoreCase(extension, "json")) {
+					ObjectMapper mapper = new ObjectMapper();
+					reports = mapper.readValue(file, new TypeReference<List<Report>>() {
+					});
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+					String reportsFileName = artTempPath + "art-export-Reports.json";
+					File reportsFile = new File(reportsFileName);
+					if (reportsFile.exists()) {
+						ObjectMapper mapper = new ObjectMapper();
+						reports = mapper.readValue(reportsFile, new TypeReference<List<Report>>() {
+						});
 					} else {
-						List<ReportGroup> reportGroups = report.getReportGroups();
-						if (reportGroups == null) {
-							reportGroups = new ArrayList<>();
-						}
-						reportGroups.add(reportGroup);
-						report.setReportGroups(reportGroups);
-					}
-				}
-			}
-
-			String reportParamsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME;
-			File reportParamsFile = new File(reportParamsFileName);
-			if (reportParamsFile.exists()) {
-				List<ReportParameter> allReportParams = csvRoutines.parseAll(ReportParameter.class, reportParamsFile);
-				for (ReportParameter reportParam : allReportParams) {
-					int parentId = reportParam.getParentId();
-					Report report = reportsMap.get(parentId);
-					if (report == null) {
-						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
-					} else {
-						List<ReportParameter> reportParams = report.getReportParams();
-						if (reportParams == null) {
-							reportParams = new ArrayList<>();
-						}
-						reportParams.add(reportParam);
-						report.setReportParams(reportParams);
-					}
-				}
-			}
-
-			String userRuleValuesFileName = artTempPath + ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME;
-			File userRuleValuesFile = new File(userRuleValuesFileName);
-			if (userRuleValuesFile.exists()) {
-				List<UserRuleValue> allUserRuleValues = csvRoutines.parseAll(UserRuleValue.class, userRuleValuesFile);
-				for (UserRuleValue userRuleValue : allUserRuleValues) {
-					int parentId = userRuleValue.getParentId();
-					Report report = reportsMap.get(parentId);
-					if (report == null) {
-						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
-					} else {
-						List<UserRuleValue> userRuleValues = report.getUserRuleValues();
-						if (userRuleValues == null) {
-							userRuleValues = new ArrayList<>();
-						}
-						userRuleValues.add(userRuleValue);
-						report.setUserRuleValues(userRuleValues);
-					}
-				}
-			}
-
-			String userGroupRuleValuesFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME;
-			File userGroupRuleValuesFile = new File(userGroupRuleValuesFileName);
-			if (userGroupRuleValuesFile.exists()) {
-				List<UserGroupRuleValue> allUserGroupRuleValues = csvRoutines.parseAll(UserGroupRuleValue.class, userGroupRuleValuesFile);
-				for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
-					int parentId = userGroupRuleValue.getParentId();
-					Report report = reportsMap.get(parentId);
-					if (report == null) {
-						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
-					} else {
-						List<UserGroupRuleValue> userGroupRuleValues = report.getUserGroupRuleValues();
-						if (userGroupRuleValues == null) {
-							userGroupRuleValues = new ArrayList<>();
-						}
-						userGroupRuleValues.add(userGroupRuleValue);
-						report.setUserGroupRuleValues(userGroupRuleValues);
-					}
-				}
-			}
-
-			String reportRulesFileName = artTempPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
-			File reportRulesFile = new File(reportRulesFileName);
-			if (reportRulesFile.exists()) {
-				List<ReportRule> allReportRules = csvRoutines.parseAll(ReportRule.class, reportRulesFile);
-				for (ReportRule reportRule : allReportRules) {
-					int parentId = reportRule.getParentId();
-					Report report = reportsMap.get(parentId);
-					if (report == null) {
-						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
-					} else {
-						List<ReportRule> reportRules = report.getReportRules();
-						if (reportRules == null) {
-							reportRules = new ArrayList<>();
-						}
-						reportRules.add(reportRule);
-						report.setReportRules(reportRules);
-					}
-				}
-			}
-
-			String userReportRightsFileName = artTempPath + ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME;
-			File userReportRightsFile = new File(userReportRightsFileName);
-			if (userReportRightsFile.exists()) {
-				List<UserReportRight> allUserReportRights = csvRoutines.parseAll(UserReportRight.class, userReportRightsFile);
-				for (UserReportRight userReportRight : allUserReportRights) {
-					int parentId = userReportRight.getParentId();
-					Report report = reportsMap.get(parentId);
-					if (report == null) {
-						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
-					} else {
-						List<UserReportRight> userReportRights = report.getUserReportRights();
-						if (userReportRights == null) {
-							userReportRights = new ArrayList<>();
-						}
-						userReportRights.add(userReportRight);
-						report.setUserReportRights(userReportRights);
-					}
-				}
-			}
-
-			String userGroupReportRightsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME;
-			File userGroupReportRightsFile = new File(userGroupReportRightsFileName);
-			if (userGroupReportRightsFile.exists()) {
-				List<UserGroupReportRight> allUserGroupReportRights = csvRoutines.parseAll(UserGroupReportRight.class, userGroupReportRightsFile);
-				for (UserGroupReportRight userGroupReportRight : allUserGroupReportRights) {
-					int parentId = userGroupReportRight.getParentId();
-					Report report = reportsMap.get(parentId);
-					if (report == null) {
-						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
-					} else {
-						List<UserGroupReportRight> userGroupReportRights = report.getUserGroupReportRights();
-						if (userGroupReportRights == null) {
-							userGroupReportRights = new ArrayList<>();
-						}
-						userGroupReportRights.add(userGroupReportRight);
-						report.setUserGroupReportRights(userGroupReportRights);
-					}
-				}
-			}
-
-			String drilldownsFileName = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME;
-			File drilldownsFile = new File(drilldownsFileName);
-			String drilldownReportParamsFileName = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME;
-			File drilldownReportParamsFile = new File(drilldownReportParamsFileName);
-			if (drilldownsFile.exists()) {
-				List<Drilldown> allDrilldowns = csvRoutines.parseAll(Drilldown.class, drilldownsFile);
-				for (Drilldown drilldown : allDrilldowns) {
-					int parentId = drilldown.getParentId();
-					Report report = reportsMap.get(parentId);
-					if (report == null) {
-						throw new IllegalStateException("Report not found. Parent Id = " + parentId);
-					} else {
-						List<Drilldown> drilldowns = report.getDrilldowns();
-						if (drilldowns == null) {
-							drilldowns = new ArrayList<>();
-						}
-						drilldowns.add(drilldown);
-						report.setDrilldowns(drilldowns);
-					}
-				}
-
-				if (drilldownReportParamsFile.exists()) {
-					Map<Integer, Report> drilldownReportsMap = new HashMap<>();
-					for (Drilldown drilldown : allDrilldowns) {
-						Report drilldownReport = drilldown.getDrilldownReport();
-						drilldownReportsMap.put(drilldownReport.getReportId(), drilldownReport);
+						throw new IllegalStateException("File not found: " + reportsFileName);
 					}
 
-					List<ReportParameter> allDrilldownReportParams = csvRoutines.parseAll(ReportParameter.class, drilldownReportParamsFile);
-					for (ReportParameter drilldownReportParam : allDrilldownReportParams) {
-						int parentId = drilldownReportParam.getParentId();
-						Report drilldownReport = drilldownReportsMap.get(parentId);
-						if (drilldownReport == null) {
-							throw new IllegalStateException("Drilldown report not found. Parent Id = " + parentId);
-						} else {
-							List<ReportParameter> reportParams = drilldownReport.getReportParams();
-							if (reportParams == null) {
-								reportParams = new ArrayList<>();
-							}
-							reportParams.add(drilldownReportParam);
-							drilldownReport.setReportParams(reportParams);
-						}
-					}
-				}
-			}
-
-			for (Report report : reports) {
-				ReportType reportType = report.getReportType();
-				if (reportType == null) {
-					logger.warn("reportType is null. Report={}", report);
+					copyTemplateFiles(reports, artTempPath);
+					reportsFile.delete();
 				} else {
-					String template = report.getTemplate();
-					if (StringUtils.isNotBlank(template)) {
-						String templateFilePath = artTempPath + template;
-						File templateFile = new File(templateFilePath);
-						if (templateFile.exists()) {
-							String templatesPath;
-							if (reportType.isUseJsTemplatesPath()) {
-								templatesPath = Config.getJsTemplatesPath();
-							} else if (reportType == ReportType.JPivotMondrian) {
-								templatesPath = Config.getDefaultTemplatesPath();
-							} else {
-								templatesPath = Config.getTemplatesPath();
-							}
-							String destinationFilePath = templatesPath + template;
-							File destinationFile = new File(destinationFilePath);
-							FileUtils.copyFile(templateFile, destinationFile);
-							templateFile.delete();
-						}
-					}
-
-					String options = report.getOptions();
-					if (StringUtils.isNotBlank(options)) {
-						switch (reportType) {
-							case JxlsArt:
-							case JxlsTemplate:
-								JxlsOptions jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
-								String areaConfigFilename = jxlsOptions.getAreaConfigFile();
-								if (StringUtils.isNotBlank(areaConfigFilename)) {
-									String fullAreaConfigFilename = artTempPath + areaConfigFilename;
-									File areaConfigFile = new File(fullAreaConfigFilename);
-									if (areaConfigFile.exists()) {
-										String templatesPath = Config.getTemplatesPath();
-										String destinationFilePath = templatesPath + areaConfigFilename;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(areaConfigFile, destinationFile);
-										areaConfigFile.delete();
-									}
-								}
-								break;
-							case PivotTableJsCsvServer:
-							case DygraphsCsvServer:
-							case DataTablesCsvServer:
-								CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
-								String dataFileName = csvServerOptions.getDataFile();
-								if (StringUtils.isNotBlank(dataFileName)) {
-									String fullDataFileName = artTempPath + dataFileName;
-									File dataFile = new File(fullDataFileName);
-									if (dataFile.exists()) {
-										String jsTemplatesPath = Config.getJsTemplatesPath();
-										String destinationFilePath = jsTemplatesPath + dataFileName;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(dataFile, destinationFile);
-										dataFile.delete();
-									}
-								}
-								break;
-							case C3:
-								C3Options c3Options = ArtUtils.jsonToObject(options, C3Options.class);
-								String cssFileName = c3Options.getCssFile();
-								if (StringUtils.isNotBlank(cssFileName)) {
-									String fullCssFileName = artTempPath + cssFileName;
-									File cssFile = new File(fullCssFileName);
-									if (cssFile.exists()) {
-										String jsTemplatesPath = Config.getJsTemplatesPath();
-										String destinationFilePath = jsTemplatesPath + cssFileName;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(cssFile, destinationFile);
-										cssFile.delete();
-									}
-								}
-								break;
-							case Datamaps:
-							case DatamapsFile:
-								DatamapsOptions datamapsOptions = ArtUtils.jsonToObject(options, DatamapsOptions.class);
-								String jsTemplatesPath = Config.getJsTemplatesPath();
-
-								String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
-								if (StringUtils.isNotBlank(datamapsJsFileName)) {
-									String fullDatamapsJsFileName = artTempPath + datamapsJsFileName;
-									File datamapsJsFile = new File(fullDatamapsJsFileName);
-									if (datamapsJsFile.exists()) {
-										String destinationFilePath = jsTemplatesPath + datamapsJsFileName;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(datamapsJsFile, destinationFile);
-										datamapsJsFile.delete();
-									}
-								}
-
-								dataFileName = datamapsOptions.getDataFile();
-								if (StringUtils.isNotBlank(dataFileName)) {
-									String fullDataFileName = artTempPath + dataFileName;
-									File dataFile = new File(fullDataFileName);
-									if (dataFile.exists()) {
-										String destinationFilePath = jsTemplatesPath + dataFileName;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(dataFile, destinationFile);
-										dataFile.delete();
-									}
-								}
-
-								String mapFileName = datamapsOptions.getMapFile();
-								if (StringUtils.isNotBlank(mapFileName)) {
-									String fullMapFileName = artTempPath + mapFileName;
-									File mapFile = new File(fullMapFileName);
-									if (mapFile.exists()) {
-										String destinationFilePath = jsTemplatesPath + mapFileName;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(mapFile, destinationFile);
-										mapFile.delete();
-									}
-								}
-
-								cssFileName = datamapsOptions.getCssFile();
-								if (StringUtils.isNotBlank(cssFileName)) {
-									String fullCssFileName = artTempPath + cssFileName;
-									File cssFile = new File(fullCssFileName);
-									if (cssFile.exists()) {
-										String destinationFilePath = jsTemplatesPath + cssFileName;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(cssFile, destinationFile);
-										cssFile.delete();
-									}
-								}
-								break;
-							case Leaflet:
-							case OpenLayers:
-								WebMapOptions webMapOptions = ArtUtils.jsonToObject(options, WebMapOptions.class);
-								jsTemplatesPath = Config.getJsTemplatesPath();
-
-								cssFileName = webMapOptions.getCssFile();
-								if (StringUtils.isNotBlank(cssFileName)) {
-									String fullCssFileName = artTempPath + cssFileName;
-									File cssFile = new File(fullCssFileName);
-									if (cssFile.exists()) {
-										String destinationFilePath = jsTemplatesPath + cssFileName;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(cssFile, destinationFile);
-										cssFile.delete();
-									}
-								}
-
-								dataFileName = webMapOptions.getDataFile();
-								if (StringUtils.isNotBlank(dataFileName)) {
-									String fullDataFileName = artTempPath + dataFileName;
-									File dataFile = new File(fullDataFileName);
-									if (dataFile.exists()) {
-										String destinationFilePath = jsTemplatesPath + dataFileName;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(dataFile, destinationFile);
-										dataFile.delete();
-									}
-								}
-
-								List<String> jsFileNames = webMapOptions.getJsFiles();
-								if (CollectionUtils.isNotEmpty(jsFileNames)) {
-									for (String jsFileName : jsFileNames) {
-										if (StringUtils.isNotBlank(jsFileName)) {
-											String fullJsFileName = artTempPath + jsFileName;
-											File jsFile = new File(fullJsFileName);
-											if (jsFile.exists()) {
-												String destinationFilePath = jsTemplatesPath + jsFileName;
-												File destinationFile = new File(destinationFilePath);
-												FileUtils.copyFile(jsFile, destinationFile);
-												jsFile.delete();
-											}
-										}
-									}
-								}
-
-								List<String> cssFileNames = webMapOptions.getCssFiles();
-								if (CollectionUtils.isNotEmpty(cssFileNames)) {
-									for (String listCssFileName : cssFileNames) {
-										if (StringUtils.isNotBlank(listCssFileName)) {
-											String fullListCssFileName = artTempPath + listCssFileName;
-											File listCssFile = new File(fullListCssFileName);
-											if (listCssFile.exists()) {
-												String destinationFilePath = jsTemplatesPath + listCssFileName;
-												File destinationFile = new File(destinationFilePath);
-												FileUtils.copyFile(listCssFile, destinationFile);
-												listCssFile.delete();
-											}
-										}
-									}
-								}
-								break;
-							case OrgChartDatabase:
-							case OrgChartJson:
-							case OrgChartList:
-							case OrgChartAjax:
-								OrgChartOptions orgChartOptions = ArtUtils.jsonToObject(options, OrgChartOptions.class);
-								jsTemplatesPath = Config.getJsTemplatesPath();
-
-								cssFileName = orgChartOptions.getCssFile();
-								if (StringUtils.isNotBlank(cssFileName)) {
-									String fullCssFileName = artTempPath + cssFileName;
-									File cssFile = new File(fullCssFileName);
-									if (cssFile.exists()) {
-										String destinationFilePath = jsTemplatesPath + cssFileName;
-										File destinationFile = new File(destinationFilePath);
-										FileUtils.copyFile(cssFile, destinationFile);
-										cssFile.delete();
-									}
-								}
-								break;
-							default:
-								break;
-						}
-					}
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}
-			}
+				break;
+			case csv:
+				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+					reports = csvRoutines.parseAll(Report.class, file);
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+					String reportsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
+					File reportsFile = new File(reportsFileName);
+					if (reportsFile.exists()) {
+						reports = csvRoutines.parseAll(Report.class, reportsFile);
+					} else {
+						throw new IllegalStateException("File not found: " + reportsFileName);
+					}
 
-			reportsFile.delete();
-			reportGroupsFile.delete();
-			reportParamsFile.delete();
-			userRuleValuesFile.delete();
-			userGroupRuleValuesFile.delete();
-			reportRulesFile.delete();
-			userReportRightsFile.delete();
-			userGroupReportRightsFile.delete();
-			drilldownsFile.delete();
-			drilldownReportParamsFile.delete();
-		} else {
-			throw new IllegalArgumentException("Unexpected file extension: " + extension);
+					Map<Integer, Report> reportsMap = new HashMap<>();
+					for (Report report : reports) {
+						reportsMap.put(report.getReportId(), report);
+					}
+
+					String reportGroupsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
+					File reportGroupsFile = new File(reportGroupsFileName);
+					if (reportGroupsFile.exists()) {
+						List<ReportGroup> allReportGroups = csvRoutines.parseAll(ReportGroup.class, reportGroupsFile);
+						for (ReportGroup reportGroup : allReportGroups) {
+							int parentId = reportGroup.getParentId();
+							Report report = reportsMap.get(parentId);
+							if (report == null) {
+								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+							} else {
+								List<ReportGroup> reportGroups = report.getReportGroups();
+								if (reportGroups == null) {
+									reportGroups = new ArrayList<>();
+								}
+								reportGroups.add(reportGroup);
+								report.setReportGroups(reportGroups);
+							}
+						}
+					}
+
+					String reportParamsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME;
+					File reportParamsFile = new File(reportParamsFileName);
+					if (reportParamsFile.exists()) {
+						List<ReportParameter> allReportParams = csvRoutines.parseAll(ReportParameter.class, reportParamsFile);
+						for (ReportParameter reportParam : allReportParams) {
+							int parentId = reportParam.getParentId();
+							Report report = reportsMap.get(parentId);
+							if (report == null) {
+								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+							} else {
+								List<ReportParameter> reportParams = report.getReportParams();
+								if (reportParams == null) {
+									reportParams = new ArrayList<>();
+								}
+								reportParams.add(reportParam);
+								report.setReportParams(reportParams);
+							}
+						}
+					}
+
+					String userRuleValuesFileName = artTempPath + ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME;
+					File userRuleValuesFile = new File(userRuleValuesFileName);
+					if (userRuleValuesFile.exists()) {
+						List<UserRuleValue> allUserRuleValues = csvRoutines.parseAll(UserRuleValue.class, userRuleValuesFile);
+						for (UserRuleValue userRuleValue : allUserRuleValues) {
+							int parentId = userRuleValue.getParentId();
+							Report report = reportsMap.get(parentId);
+							if (report == null) {
+								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+							} else {
+								List<UserRuleValue> userRuleValues = report.getUserRuleValues();
+								if (userRuleValues == null) {
+									userRuleValues = new ArrayList<>();
+								}
+								userRuleValues.add(userRuleValue);
+								report.setUserRuleValues(userRuleValues);
+							}
+						}
+					}
+
+					String userGroupRuleValuesFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME;
+					File userGroupRuleValuesFile = new File(userGroupRuleValuesFileName);
+					if (userGroupRuleValuesFile.exists()) {
+						List<UserGroupRuleValue> allUserGroupRuleValues = csvRoutines.parseAll(UserGroupRuleValue.class, userGroupRuleValuesFile);
+						for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
+							int parentId = userGroupRuleValue.getParentId();
+							Report report = reportsMap.get(parentId);
+							if (report == null) {
+								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+							} else {
+								List<UserGroupRuleValue> userGroupRuleValues = report.getUserGroupRuleValues();
+								if (userGroupRuleValues == null) {
+									userGroupRuleValues = new ArrayList<>();
+								}
+								userGroupRuleValues.add(userGroupRuleValue);
+								report.setUserGroupRuleValues(userGroupRuleValues);
+							}
+						}
+					}
+
+					String reportRulesFileName = artTempPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
+					File reportRulesFile = new File(reportRulesFileName);
+					if (reportRulesFile.exists()) {
+						List<ReportRule> allReportRules = csvRoutines.parseAll(ReportRule.class, reportRulesFile);
+						for (ReportRule reportRule : allReportRules) {
+							int parentId = reportRule.getParentId();
+							Report report = reportsMap.get(parentId);
+							if (report == null) {
+								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+							} else {
+								List<ReportRule> reportRules = report.getReportRules();
+								if (reportRules == null) {
+									reportRules = new ArrayList<>();
+								}
+								reportRules.add(reportRule);
+								report.setReportRules(reportRules);
+							}
+						}
+					}
+
+					String userReportRightsFileName = artTempPath + ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME;
+					File userReportRightsFile = new File(userReportRightsFileName);
+					if (userReportRightsFile.exists()) {
+						List<UserReportRight> allUserReportRights = csvRoutines.parseAll(UserReportRight.class, userReportRightsFile);
+						for (UserReportRight userReportRight : allUserReportRights) {
+							int parentId = userReportRight.getParentId();
+							Report report = reportsMap.get(parentId);
+							if (report == null) {
+								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+							} else {
+								List<UserReportRight> userReportRights = report.getUserReportRights();
+								if (userReportRights == null) {
+									userReportRights = new ArrayList<>();
+								}
+								userReportRights.add(userReportRight);
+								report.setUserReportRights(userReportRights);
+							}
+						}
+					}
+
+					String userGroupReportRightsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME;
+					File userGroupReportRightsFile = new File(userGroupReportRightsFileName);
+					if (userGroupReportRightsFile.exists()) {
+						List<UserGroupReportRight> allUserGroupReportRights = csvRoutines.parseAll(UserGroupReportRight.class, userGroupReportRightsFile);
+						for (UserGroupReportRight userGroupReportRight : allUserGroupReportRights) {
+							int parentId = userGroupReportRight.getParentId();
+							Report report = reportsMap.get(parentId);
+							if (report == null) {
+								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+							} else {
+								List<UserGroupReportRight> userGroupReportRights = report.getUserGroupReportRights();
+								if (userGroupReportRights == null) {
+									userGroupReportRights = new ArrayList<>();
+								}
+								userGroupReportRights.add(userGroupReportRight);
+								report.setUserGroupReportRights(userGroupReportRights);
+							}
+						}
+					}
+
+					String drilldownsFileName = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME;
+					File drilldownsFile = new File(drilldownsFileName);
+					String drilldownReportParamsFileName = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME;
+					File drilldownReportParamsFile = new File(drilldownReportParamsFileName);
+					if (drilldownsFile.exists()) {
+						List<Drilldown> allDrilldowns = csvRoutines.parseAll(Drilldown.class, drilldownsFile);
+						for (Drilldown drilldown : allDrilldowns) {
+							int parentId = drilldown.getParentId();
+							Report report = reportsMap.get(parentId);
+							if (report == null) {
+								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+							} else {
+								List<Drilldown> drilldowns = report.getDrilldowns();
+								if (drilldowns == null) {
+									drilldowns = new ArrayList<>();
+								}
+								drilldowns.add(drilldown);
+								report.setDrilldowns(drilldowns);
+							}
+						}
+
+						if (drilldownReportParamsFile.exists()) {
+							Map<Integer, Report> drilldownReportsMap = new HashMap<>();
+							for (Drilldown drilldown : allDrilldowns) {
+								Report drilldownReport = drilldown.getDrilldownReport();
+								drilldownReportsMap.put(drilldownReport.getReportId(), drilldownReport);
+							}
+
+							List<ReportParameter> allDrilldownReportParams = csvRoutines.parseAll(ReportParameter.class, drilldownReportParamsFile);
+							for (ReportParameter drilldownReportParam : allDrilldownReportParams) {
+								int parentId = drilldownReportParam.getParentId();
+								Report drilldownReport = drilldownReportsMap.get(parentId);
+								if (drilldownReport == null) {
+									throw new IllegalStateException("Drilldown report not found. Parent Id = " + parentId);
+								} else {
+									List<ReportParameter> reportParams = drilldownReport.getReportParams();
+									if (reportParams == null) {
+										reportParams = new ArrayList<>();
+									}
+									reportParams.add(drilldownReportParam);
+									drilldownReport.setReportParams(reportParams);
+								}
+							}
+						}
+					}
+
+					copyTemplateFiles(reports, artTempPath);
+
+					reportsFile.delete();
+					reportGroupsFile.delete();
+					reportParamsFile.delete();
+					userRuleValuesFile.delete();
+					userGroupRuleValuesFile.delete();
+					reportRulesFile.delete();
+					userReportRightsFile.delete();
+					userGroupReportRightsFile.delete();
+					drilldownsFile.delete();
+					drilldownReportParamsFile.delete();
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
 		for (Report report : reports) {
@@ -1255,6 +1073,232 @@ public class ImportRecordsController {
 		cacheHelper.clearRules();
 		cacheHelper.clearUsers();
 		cacheHelper.clearUserGroups();
+	}
+
+	/**
+	 * Copies template files included in reports export zip file to the
+	 * appropriate template locations
+	 *
+	 * @param reports the list of reports being imported
+	 * @param artTempPath the path where the files will be obtained from
+	 * @throws IOException
+	 */
+	private void copyTemplateFiles(List<Report> reports, String artTempPath) throws IOException {
+		for (Report report : reports) {
+			ReportType reportType = report.getReportType();
+			if (reportType == null) {
+				logger.warn("reportType is null. Report={}", report);
+			} else {
+				String template = report.getTemplate();
+				if (StringUtils.isNotBlank(template)) {
+					String templateFilePath = artTempPath + template;
+					File templateFile = new File(templateFilePath);
+					if (templateFile.exists()) {
+						String templatesPath;
+						if (reportType.isUseJsTemplatesPath()) {
+							templatesPath = Config.getJsTemplatesPath();
+						} else if (reportType == ReportType.JPivotMondrian) {
+							templatesPath = Config.getDefaultTemplatesPath();
+						} else {
+							templatesPath = Config.getTemplatesPath();
+						}
+						String destinationFilePath = templatesPath + template;
+						File destinationFile = new File(destinationFilePath);
+						FileUtils.copyFile(templateFile, destinationFile);
+						templateFile.delete();
+					}
+				}
+
+				String options = report.getOptions();
+				if (StringUtils.isNotBlank(options)) {
+					switch (reportType) {
+						case JxlsArt:
+						case JxlsTemplate:
+							JxlsOptions jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
+							String areaConfigFilename = jxlsOptions.getAreaConfigFile();
+							if (StringUtils.isNotBlank(areaConfigFilename)) {
+								String fullAreaConfigFilename = artTempPath + areaConfigFilename;
+								File areaConfigFile = new File(fullAreaConfigFilename);
+								if (areaConfigFile.exists()) {
+									String templatesPath = Config.getTemplatesPath();
+									String destinationFilePath = templatesPath + areaConfigFilename;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(areaConfigFile, destinationFile);
+									areaConfigFile.delete();
+								}
+							}
+							break;
+						case PivotTableJsCsvServer:
+						case DygraphsCsvServer:
+						case DataTablesCsvServer:
+							CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
+							String dataFileName = csvServerOptions.getDataFile();
+							if (StringUtils.isNotBlank(dataFileName)) {
+								String fullDataFileName = artTempPath + dataFileName;
+								File dataFile = new File(fullDataFileName);
+								if (dataFile.exists()) {
+									String jsTemplatesPath = Config.getJsTemplatesPath();
+									String destinationFilePath = jsTemplatesPath + dataFileName;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(dataFile, destinationFile);
+									dataFile.delete();
+								}
+							}
+							break;
+						case C3:
+							C3Options c3Options = ArtUtils.jsonToObject(options, C3Options.class);
+							String cssFileName = c3Options.getCssFile();
+							if (StringUtils.isNotBlank(cssFileName)) {
+								String fullCssFileName = artTempPath + cssFileName;
+								File cssFile = new File(fullCssFileName);
+								if (cssFile.exists()) {
+									String jsTemplatesPath = Config.getJsTemplatesPath();
+									String destinationFilePath = jsTemplatesPath + cssFileName;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(cssFile, destinationFile);
+									cssFile.delete();
+								}
+							}
+							break;
+						case Datamaps:
+						case DatamapsFile:
+							DatamapsOptions datamapsOptions = ArtUtils.jsonToObject(options, DatamapsOptions.class);
+							String jsTemplatesPath = Config.getJsTemplatesPath();
+
+							String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
+							if (StringUtils.isNotBlank(datamapsJsFileName)) {
+								String fullDatamapsJsFileName = artTempPath + datamapsJsFileName;
+								File datamapsJsFile = new File(fullDatamapsJsFileName);
+								if (datamapsJsFile.exists()) {
+									String destinationFilePath = jsTemplatesPath + datamapsJsFileName;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(datamapsJsFile, destinationFile);
+									datamapsJsFile.delete();
+								}
+							}
+
+							dataFileName = datamapsOptions.getDataFile();
+							if (StringUtils.isNotBlank(dataFileName)) {
+								String fullDataFileName = artTempPath + dataFileName;
+								File dataFile = new File(fullDataFileName);
+								if (dataFile.exists()) {
+									String destinationFilePath = jsTemplatesPath + dataFileName;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(dataFile, destinationFile);
+									dataFile.delete();
+								}
+							}
+
+							String mapFileName = datamapsOptions.getMapFile();
+							if (StringUtils.isNotBlank(mapFileName)) {
+								String fullMapFileName = artTempPath + mapFileName;
+								File mapFile = new File(fullMapFileName);
+								if (mapFile.exists()) {
+									String destinationFilePath = jsTemplatesPath + mapFileName;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(mapFile, destinationFile);
+									mapFile.delete();
+								}
+							}
+
+							cssFileName = datamapsOptions.getCssFile();
+							if (StringUtils.isNotBlank(cssFileName)) {
+								String fullCssFileName = artTempPath + cssFileName;
+								File cssFile = new File(fullCssFileName);
+								if (cssFile.exists()) {
+									String destinationFilePath = jsTemplatesPath + cssFileName;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(cssFile, destinationFile);
+									cssFile.delete();
+								}
+							}
+							break;
+						case Leaflet:
+						case OpenLayers:
+							WebMapOptions webMapOptions = ArtUtils.jsonToObject(options, WebMapOptions.class);
+							jsTemplatesPath = Config.getJsTemplatesPath();
+
+							cssFileName = webMapOptions.getCssFile();
+							if (StringUtils.isNotBlank(cssFileName)) {
+								String fullCssFileName = artTempPath + cssFileName;
+								File cssFile = new File(fullCssFileName);
+								if (cssFile.exists()) {
+									String destinationFilePath = jsTemplatesPath + cssFileName;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(cssFile, destinationFile);
+									cssFile.delete();
+								}
+							}
+
+							dataFileName = webMapOptions.getDataFile();
+							if (StringUtils.isNotBlank(dataFileName)) {
+								String fullDataFileName = artTempPath + dataFileName;
+								File dataFile = new File(fullDataFileName);
+								if (dataFile.exists()) {
+									String destinationFilePath = jsTemplatesPath + dataFileName;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(dataFile, destinationFile);
+									dataFile.delete();
+								}
+							}
+
+							List<String> jsFileNames = webMapOptions.getJsFiles();
+							if (CollectionUtils.isNotEmpty(jsFileNames)) {
+								for (String jsFileName : jsFileNames) {
+									if (StringUtils.isNotBlank(jsFileName)) {
+										String fullJsFileName = artTempPath + jsFileName;
+										File jsFile = new File(fullJsFileName);
+										if (jsFile.exists()) {
+											String destinationFilePath = jsTemplatesPath + jsFileName;
+											File destinationFile = new File(destinationFilePath);
+											FileUtils.copyFile(jsFile, destinationFile);
+											jsFile.delete();
+										}
+									}
+								}
+							}
+
+							List<String> cssFileNames = webMapOptions.getCssFiles();
+							if (CollectionUtils.isNotEmpty(cssFileNames)) {
+								for (String listCssFileName : cssFileNames) {
+									if (StringUtils.isNotBlank(listCssFileName)) {
+										String fullListCssFileName = artTempPath + listCssFileName;
+										File listCssFile = new File(fullListCssFileName);
+										if (listCssFile.exists()) {
+											String destinationFilePath = jsTemplatesPath + listCssFileName;
+											File destinationFile = new File(destinationFilePath);
+											FileUtils.copyFile(listCssFile, destinationFile);
+											listCssFile.delete();
+										}
+									}
+								}
+							}
+							break;
+						case OrgChartDatabase:
+						case OrgChartJson:
+						case OrgChartList:
+						case OrgChartAjax:
+							OrgChartOptions orgChartOptions = ArtUtils.jsonToObject(options, OrgChartOptions.class);
+							jsTemplatesPath = Config.getJsTemplatesPath();
+
+							cssFileName = orgChartOptions.getCssFile();
+							if (StringUtils.isNotBlank(cssFileName)) {
+								String fullCssFileName = artTempPath + cssFileName;
+								File cssFile = new File(fullCssFileName);
+								if (cssFile.exists()) {
+									String destinationFilePath = jsTemplatesPath + cssFileName;
+									File destinationFile = new File(destinationFilePath);
+									FileUtils.copyFile(cssFile, destinationFile);
+									cssFile.delete();
+								}
+							}
+							break;
+						default:
+							break;
+					}
+				}
+			}
+		}
 	}
 
 }
