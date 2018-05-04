@@ -126,16 +126,18 @@ public class RunReportController {
 				boolean basicReport = BooleanUtils.toBoolean(request.getParameter("basicReport"));
 				if (basicReport) {
 					Report originalReport = reportService.getReport(reportId);
-					originalReport.setName(testReport.getName());
-					originalReport.setDescription(testReport.getDescription());
-					originalReport.setDatasource(testReport.getDatasource());
-					originalReport.setUseGroovy(testReport.isUseGroovy());
-					originalReport.setPivotTableJsSavedOptions(testReport.getPivotTableJsSavedOptions());
-					originalReport.setGridstackSavedOptions(testReport.getGridstackSavedOptions());
-					originalReport.setOptions(testReport.getOptions());
-					originalReport.setReportSource(testReport.getReportSource());
-					originalReport.setReportSourceHtml(testReport.getReportSourceHtml());
-					testReport = originalReport;
+					//don't modify original object from reportService. will be cached and reused so property changes will be reflected in later uses of the object
+					Report originalReportCopy = Config.copyObject(originalReport, Report.class);
+					originalReportCopy.setName(testReport.getName());
+					originalReportCopy.setDescription(testReport.getDescription());
+					originalReportCopy.setDatasource(testReport.getDatasource());
+					originalReportCopy.setUseGroovy(testReport.isUseGroovy());
+					originalReportCopy.setPivotTableJsSavedOptions(testReport.getPivotTableJsSavedOptions());
+					originalReportCopy.setGridstackSavedOptions(testReport.getGridstackSavedOptions());
+					originalReportCopy.setOptions(testReport.getOptions());
+					originalReportCopy.setReportSource(testReport.getReportSource());
+					originalReportCopy.setReportSourceHtml(testReport.getReportSourceHtml());
+					testReport = originalReportCopy;
 				}
 
 				if (BooleanUtils.isTrue(testData)) {

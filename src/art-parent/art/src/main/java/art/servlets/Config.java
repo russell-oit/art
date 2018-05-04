@@ -72,6 +72,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.app.VelocityEngine;
+import org.dozer.DozerBeanMapperBuilder;
+import org.dozer.Mapper;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.logging.slf4j.SLF4JLoggerImplFactory;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
@@ -125,6 +127,7 @@ public class Config extends HttpServlet {
 	private static VelocityEngine velocityEngine;
 	private static String serverTimeZoneDescription;
 	private static final Map<String, String> timeZones = new LinkedHashMap<>();
+	private static final Mapper dozerMapper = DozerBeanMapperBuilder.buildDefault();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -1457,4 +1460,26 @@ public class Config extends HttpServlet {
 
 		rootLogger.addAppender(whisperAppender);
 	}
+
+	/**
+	 * Returns the dozer mapper
+	 *
+	 * @return the dozer mapper
+	 */
+	public static Mapper getDozerMapper() {
+		return dozerMapper;
+	}
+
+	/**
+	 * Creates a deep copy of an object
+	 *
+	 * @param <T> the type
+	 * @param o the object to copy
+	 * @param type the destination object's class
+	 * @return a copy of the object
+	 */
+	public static <T> T copyObject(Object o, Class<T> type) {
+		return dozerMapper.map(o, type);
+	}
+
 }
