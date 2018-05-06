@@ -2610,6 +2610,10 @@ public class ReportOutputGenerator {
 			if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 				standardOutput.setAjax(true);
 			}
+
+			if (request.getAttribute("pageHeaderLoaded") != null) {
+				standardOutput.setPageHeaderLoaded(true);
+			}
 		}
 
 		return standardOutput;

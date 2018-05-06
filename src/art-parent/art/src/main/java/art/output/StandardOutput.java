@@ -107,6 +107,21 @@ public abstract class StandardOutput {
 	protected boolean ajax;
 	protected String dynamicOpenPassword;
 	protected String dynamicModifyPassword;
+	protected boolean pageHeaderLoaded;
+
+	/**
+	 * @return the pageHeaderLoaded
+	 */
+	public boolean isPageHeaderLoaded() {
+		return pageHeaderLoaded;
+	}
+
+	/**
+	 * @param pageHeaderLoaded the pageHeaderLoaded to set
+	 */
+	public void setPageHeaderLoaded(boolean pageHeaderLoaded) {
+		this.pageHeaderLoaded = pageHeaderLoaded;
+	}
 
 	/**
 	 * @return the dynamicOpenPassword

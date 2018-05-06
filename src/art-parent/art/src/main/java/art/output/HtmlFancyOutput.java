@@ -36,17 +36,20 @@ public class HtmlFancyOutput extends StandardOutput {
 		localRowCount = 0;
 
 		//include required css and javascript files
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
 		//note that including script files will cause the browser to display the following warning e.g. on firefox's debug console (Ctrl + Shift + I) when report run inline (using ajax)
 		//Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience
 		//https://stackoverflow.com/questions/24639335/javascript-console-log-causes-error-synchronous-xmlhttprequest-on-the-main-thr
 		//https://github.com/jquery/jquery/issues/2060
 		//however we have to include the script files for report run by ajax to work
-		if (!ajax) {
+		if (!ajax && !pageHeaderLoaded) {
 			//including jquery.js while using $.load() or $.post() results in spinner not appearing on second run
 			out.println("<script src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
 		}
-		out.println("<script src='" + contextPath + "/js/bootstrap-3.3.6/js/bootstrap.min.js'></script>");
+
+		if (!pageHeaderLoaded) {
+			out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
+			out.println("<script src='" + contextPath + "/js/bootstrap-3.3.6/js/bootstrap.min.js'></script>");
+		}
 	}
 
 	@Override

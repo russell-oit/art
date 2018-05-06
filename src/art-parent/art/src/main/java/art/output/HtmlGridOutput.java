@@ -44,6 +44,7 @@ public class HtmlGridOutput extends StandardOutput {
 
 		Context ctx = new Context(locale);
 		ctx.setVariable("ajax", ajax);
+		ctx.setVariable("pageHeaderLoaded", pageHeaderLoaded);
 		ctx.setVariable("contextPath", contextPath);
 		ctx.setVariable("tableId", tableId);
 

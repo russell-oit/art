@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/Buttons-1.2.4/css/buttons.dataTables.min.css'}"/>
 <link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/Buttons-1.2.4/css/buttons.bootstrap.min.css'}"/>
 
-<th:block th:if='${!ajax}'>
+<th:block th:if='${!ajax && !pageHeaderLoaded}'>
 	<script th:src="${contextPath} + ${'/js/jquery-1.12.4.min.js'}"></script>
 </th:block>
 

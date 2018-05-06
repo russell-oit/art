@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/css/htmlGridOutput.css'}"/>
 
-<th:block th:if='${!ajax}'>
+<th:block th:if='${!ajax && !pageHeaderLoaded}'>
 	<script th:src="${contextPath} + ${'/js/jquery-1.12.4.min.js'}"></script>
 </th:block>
 

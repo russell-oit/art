@@ -335,6 +335,7 @@ public class RunReportController {
 
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
 				writer.flush();
+				request.setAttribute("pageHeaderLoaded", true);
 			}
 
 			List<ReportParameter> reportParamsList = null;
