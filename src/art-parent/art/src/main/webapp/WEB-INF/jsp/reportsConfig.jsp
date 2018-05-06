@@ -1051,7 +1051,7 @@ Reports configuration page
 				</div>
 				<div class='row'>
 					<div class="col-md-12">
-						<form id="basicReportForm" class="form-horizontal" method="POST" modelAttribute="basicReport" enctype="multipart/form-data">
+						<form id="basicReportForm" class="form-horizontal" method="POST">
 							<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 							<input type="hidden" name="dummyBoolean" value="true"/>
 							<input type="hidden" name="showInline" value="true">
@@ -1130,7 +1130,7 @@ Reports configuration page
 									<spring:message code="page.label.id"/>
 								</label>
 								<div class="col-md-8">
-									<input type="text" name="reportId" id="reportId" readonly="true" class="form-control"/>
+									<input type="text" name="reportId" id="reportId" readonly class="form-control"/>
 								</div>
 							</div>
 							<div class="form-group">
@@ -1229,7 +1229,7 @@ Reports configuration page
 							</div>
 							<div id="reportSourceHtmlDiv" class="form-group">
 								<div class="col-md-12">
-									<textarea name="reportSourceHtml" id="reportSourceHtml" rows="20" cols="70" wrap="off" class="form-control editor"></textarea>
+									<textarea name="reportSourceHtml" id="reportSourceHtml" rows="20" cols="70" class="form-control editor"></textarea>
 									<input name="image" type="file" id="upload" style="display:none;" onchange="">
 								</div>
 							</div>
