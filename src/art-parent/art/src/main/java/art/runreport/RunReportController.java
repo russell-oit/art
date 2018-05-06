@@ -123,6 +123,23 @@ public class RunReportController {
 			if (testReport.getDummyBoolean() == null) {
 				report = reportService.getReport(reportId);
 			} else {
+				boolean basicReport = BooleanUtils.toBoolean(request.getParameter("basicReport"));
+				if (basicReport) {
+					Report originalReport = reportService.getReport(reportId);
+					//don't modify original object from reportService. will be cached and reused so property changes will be reflected in later uses of the object
+					Report originalReportCopy = Config.copyObject(originalReport, Report.class);
+					originalReportCopy.setName(testReport.getName());
+					originalReportCopy.setDescription(testReport.getDescription());
+					originalReportCopy.setDatasource(testReport.getDatasource());
+					originalReportCopy.setUseGroovy(testReport.isUseGroovy());
+					originalReportCopy.setPivotTableJsSavedOptions(testReport.getPivotTableJsSavedOptions());
+					originalReportCopy.setGridstackSavedOptions(testReport.getGridstackSavedOptions());
+					originalReportCopy.setOptions(testReport.getOptions());
+					originalReportCopy.setReportSource(testReport.getReportSource());
+					originalReportCopy.setReportSourceHtml(testReport.getReportSourceHtml());
+					testReport = originalReportCopy;
+				}
+
 				if (BooleanUtils.isTrue(testData)) {
 					testReport.setReportType(ReportType.Tabular);
 				} else {
@@ -318,6 +335,7 @@ public class RunReportController {
 
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
 				writer.flush();
+				request.setAttribute("pageHeaderLoaded", true);
 			}
 
 			List<ReportParameter> reportParamsList = null;

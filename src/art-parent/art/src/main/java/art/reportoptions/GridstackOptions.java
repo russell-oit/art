@@ -15,48 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.migration;
+package art.reportoptions;
 
-import art.enums.MigrationFileFormat;
-import art.enums.MigrationRecordType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 
 /**
- * Represents an import records operation
+ * Represents gridstack report options
  * 
  * @author Timothy Anyona
  */
-public class ImportRecords implements Serializable {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class GridstackOptions implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private MigrationRecordType recordType;
-	private MigrationFileFormat fileFormat = MigrationFileFormat.json;
+	private String cssFile;
 
 	/**
-	 * @return the fileFormat
+	 * @return the cssFile
 	 */
-	public MigrationFileFormat getFileFormat() {
-		return fileFormat;
+	public String getCssFile() {
+		return cssFile;
 	}
 
 	/**
-	 * @param fileFormat the fileFormat to set
+	 * @param cssFile the cssFile to set
 	 */
-	public void setFileFormat(MigrationFileFormat fileFormat) {
-		this.fileFormat = fileFormat;
+	public void setCssFile(String cssFile) {
+		this.cssFile = cssFile;
 	}
-
-	/**
-	 * @return the recordType
-	 */
-	public MigrationRecordType getRecordType() {
-		return recordType;
-	}
-
-	/**
-	 * @param recordType the recordType to set
-	 */
-	public void setRecordType(MigrationRecordType recordType) {
-		this.recordType = recordType;
-	}
+	
 }

@@ -363,7 +363,7 @@ Edit datasource page
 				</div>
 				<div id="connectionPoolTimeoutDiv" class="form-group">
 					<label class="control-label col-md-4" for="connectionPoolTimeoutMins">
-						<spring:message code="page.label.connectionPoolTimeout"/>
+						<spring:message code="page.label.connectionPoolTimeoutMins"/>
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">

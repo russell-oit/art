@@ -36,8 +36,9 @@ import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thymeleaf.TemplateEngine;
+import org.springframework.context.MessageSource;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring4.SpringTemplateEngine;
 
 /**
  * Generates output using the thymeleaf library
@@ -52,6 +53,21 @@ public class ThymeleafOutput {
 	private Locale locale;
 	private ResultSet resultSet;
 	private Object data;
+	private MessageSource messageSource;
+
+	/**
+	 * @return the messageSource
+	 */
+	public MessageSource getMessageSource() {
+		return messageSource;
+	}
+
+	/**
+	 * @param messageSource the messageSource to set
+	 */
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
 
 	/**
 	 * @return the resultSet
@@ -199,10 +215,11 @@ public class ThymeleafOutput {
 		}
 
 		//create output
-		Context ctx = new Context();
+		Context ctx = new Context(locale);
 		ctx.setVariables(variables);
 
-		TemplateEngine templateEngine = Config.getThymeleafReportTemplateEngine();
+		SpringTemplateEngine templateEngine = Config.getThymeleafReportTemplateEngine();
+		templateEngine.setMessageSource(messageSource);
 		templateEngine.process(templateFileName, ctx, writer);
 		writer.flush();
 	}

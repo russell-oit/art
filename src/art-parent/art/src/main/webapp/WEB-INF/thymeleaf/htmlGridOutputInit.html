@@ -1,0 +1,17 @@
+<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/css/htmlGridOutput.css'}"/>
+
+<th:block th:if='${!ajax && !pageHeaderLoaded}'>
+	<script th:src="${contextPath} + ${'/js/jquery-1.12.4.min.js'}"></script>
+</th:block>
+
+<script th:src="${contextPath} + ${'/js/sorttable.js'}"></script>
+<script th:src="${contextPath} + ${'/js/htmlGridOutput.js'}"></script>
+
+<script th:inline="javascript">
+	$(document).ready(function () {
+		var tableId = /*[[${tableId}]]*/ "table";
+		var table = document.getElementById(tableId);
+		sorttable.DATE_RE = /^(\\d\\d?)[\\/\\.-](\\d\\d?)[\\/\\.-]((\\d\\d)?\\d\\d)$/;
+		sorttable.makeSortable(table);
+	});
+</script>

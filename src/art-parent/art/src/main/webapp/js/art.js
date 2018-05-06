@@ -30,6 +30,14 @@
  */
 var alertCloseButton = '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>';
 
+/**
+ * alert button html used in ajax responses. alert can be shown again after being closed
+ * 
+ * @constant
+ * @type String
+ */
+var reusableAlertCloseButton = '<button type="button" class="close" aria-hidden="true">x</button>';
+
 
 //functions
 

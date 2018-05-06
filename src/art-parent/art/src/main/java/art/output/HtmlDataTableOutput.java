@@ -21,8 +21,10 @@ import art.servlets.Config;
 import java.io.File;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.owasp.encoder.Encode;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring4.SpringTemplateEngine;
 
 /**
  * Generates DataTables html output
@@ -39,47 +41,18 @@ public class HtmlDataTableOutput extends StandardOutput {
 	public void init() {
 		localRowCount = 0;
 
-		//include required css and javascript files
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlDataTableOutput.css'>");
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/DataTables-1.10.13/css/dataTables.bootstrap.min.css'>");
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/Buttons-1.2.4/css/buttons.dataTables.min.css'>");
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/Buttons-1.2.4/css/buttons.bootstrap.min.css'>");
-		//note that including script files will cause the browser to display the following warning e.g. on firefox's debug console (Ctrl + Shift + I) when report run inline (using ajax)
-		//Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience
-		//https://stackoverflow.com/questions/24639335/javascript-console-log-causes-error-synchronous-xmlhttprequest-on-the-main-thr
-		//https://github.com/jquery/jquery/issues/2060
-		//however we have to include the script files for report run by ajax to work
-		if (!ajax) {
-			//including jquery.js while using $.load() or $.post() results in spinner not appearing on second run
-			out.println("<script src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
-		}
-		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/jquery.dataTables.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/JSZip-2.5.0/jszip.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/pdfmake-0.1.18/pdfmake.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/pdfmake-0.1.18/vfs_fonts.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.html5.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.print.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.colVis.min.js'></script>");
-		out.println("<script src='" + contextPath + "/js/art.js'></script>");
-
 		//set language file to use for localization
 		//language files to be put in the /js/datatables/i18n directory and to be named dataTables_xx.json according to the locale
 		//language file content examples at http://datatables.net/plug-ins/i18n
 		//https://datatables.net/reference/api/i18n()
 		//https://datatables.net/reference/option/language
-		//by default don't set the language file option. (will default to english - in jquery.dataTables.min.js)
-		String languageSetting = "";
-
-		String language = "";
-		if (locale != null) {
+		//if the language file option is not set, it will default to the english strings in jquery.dataTables.min.js
+		final String DEFAULT_LANGUAGE = "en";
+		String language;
+		if (locale == null) {
+			language = DEFAULT_LANGUAGE;
+		} else {
 			language = locale.toString(); //e.g. en, en_US, it, fr etc
-		}
-
-		if (StringUtils.isNotBlank(language)) {
 			String languageFileName = "dataTables_" + language + ".json";
 
 			String languageFilePath = Config.getAppPath() + File.separator
@@ -90,43 +63,26 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 			File languageFile = new File(languageFilePath);
 
-			if (languageFile.exists()) {
-				languageSetting = ", language: {url: '" + contextPath + "/js/dataTables/i18n/"
-						+ languageFileName + "'}";
+			if (!languageFile.exists()) {
+				language = DEFAULT_LANGUAGE;
 			}
 		}
 
-		String allText = "All";
-		if (messageSource != null && locale != null) {
-			allText = messageSource.getMessage("dataTables.text.showAllRows", null, locale);
-			allText = Encode.forJavaScript(allText);
-		}
+		tableId = "table-" + RandomStringUtils.randomAlphanumeric(5);
 
-		//http://www.datatables.net/reference
-		String dataTableOptions
-				= "{"
-				+ "orderClasses: false"
-				+ ", order: []"
-				+ ", pagingType: 'full_numbers'"
-				+ ", lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, '" + allText + "']]"
-				+ ", pageLength: 50"
-				+ ", dom: 'lBfrtip'"
-				+ ", buttons: ["
-				+ "{extend: 'colvis', postfixButtons: ['colvisRestore']},"
-				+ "{extend: 'excel', exportOptions: {columns: ':visible'}},"
-				+ "{extend: 'pdf', exportOptions: {columns: ':visible'}},"
-				+ "{extend: 'print', exportOptions: {columns: ':visible'}}"
-				+ "]"
-				+ languageSetting
-				+ ", initComplete: function() {if(!isMobile()){$('div.dataTables_filter input').focus();}}"
-				+ "}";
+		Context ctx = new Context(locale);
+		ctx.setVariable("ajax", ajax);
+		ctx.setVariable("pageHeaderLoaded", pageHeaderLoaded);
+		ctx.setVariable("contextPath", contextPath);
+		ctx.setVariable("tableId", tableId);
+		ctx.setVariable("language", language);
 
-		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
-		out.println("<script>");
-		out.println("	$(document).ready(function() {");
-		out.println("		$('#" + tableId + "').dataTable(" + dataTableOptions + ");");
-		out.println("	});");
-		out.println("</script>");
+		SpringTemplateEngine templateEngine = Config.getDefaultThymeleafTemplateEngine();
+		templateEngine.setMessageSource(messageSource);
+
+		String templateName = "htmlDataTableOutputInit";
+		String initString = templateEngine.process(templateName, ctx);
+		out.println(initString);
 	}
 
 	@Override

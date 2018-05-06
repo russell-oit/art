@@ -17,9 +17,13 @@
  */
 package art.output;
 
+import art.servlets.Config;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.owasp.encoder.Encode;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 /**
  * Generates Grid html output mode
@@ -36,24 +40,18 @@ public class HtmlGridOutput extends StandardOutput {
 	public void init() {
 		localRowCount = 0;
 
-		//include required css and javascript files
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlGridOutput.css'>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/sorttable.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/htmlGridOutput.js'></script>");
+		tableId = "table-" + RandomStringUtils.randomAlphanumeric(5);
 
-		if (!ajax) {
-			//including jquery.js while using $.load() or $.post() results in spinner not appearing on second run
-			out.println("<script src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
-		}
+		Context ctx = new Context(locale);
+		ctx.setVariable("ajax", ajax);
+		ctx.setVariable("pageHeaderLoaded", pageHeaderLoaded);
+		ctx.setVariable("contextPath", contextPath);
+		ctx.setVariable("tableId", tableId);
 
-		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
-		out.println("<script>");
-		out.println("	$(document).ready(function() {");
-		out.println("		var newTableObject = document.getElementById('" + tableId + "');");
-		out.println("		sorttable.DATE_RE = /^(\\d\\d?)[\\/\\.-](\\d\\d?)[\\/\\.-]((\\d\\d)?\\d\\d)$/;");
-		out.println("		sorttable.makeSortable(newTableObject);");
-		out.println("	});");
-		out.println("</script>");
+		TemplateEngine templateEngine = Config.getDefaultThymeleafTemplateEngine();
+		String templateName = "htmlGridOutputInit";
+		String initString = templateEngine.process(templateName, ctx);
+		out.println(initString);
 	}
 
 	@Override

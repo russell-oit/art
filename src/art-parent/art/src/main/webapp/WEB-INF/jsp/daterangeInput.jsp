@@ -12,7 +12,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="daterangepicker.button.apply" var="applyText"/>
+<spring:message code="page.button.apply" var="applyText"/>
 <spring:message code="daterangepicker.button.customRange" var="customRangeText"/>
 <spring:message code="daterangepicker.text.today" var="todayText"/>
 <spring:message code="daterangepicker.text.yesterday" var="yesterdayText"/>

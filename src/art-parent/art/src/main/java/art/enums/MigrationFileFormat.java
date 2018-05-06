@@ -22,20 +22,17 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Represents type of records being imported/exported
- * 
+ * Represents file formats for import/export to file
+ *
  * @author Timothy Anyona
  */
-public enum MigrationRecordType {
-	
-	Settings("Settings"), Datasources("Datasources"), Destinations("Destinations"),
-	Encryptors("Encryptors"), Holidays("Holidays"), ReportGroups("ReportGroups"),
-	SmtpServers("SmtpServers"), UserGroups("UserGroups"), Schedules("Schedules"),
-	Users("Users"), Rules("Rules"), Parameters("Parameters"), Reports("Reports");
-	
+public enum MigrationFileFormat {
+
+	json("JSON"), csv("CSV");
+
 	private final String value;
 
-	private MigrationRecordType(String value) {
+	private MigrationFileFormat(String value) {
 		this.value = value;
 	}
 
@@ -53,9 +50,9 @@ public enum MigrationRecordType {
 	 *
 	 * @return all enum options
 	 */
-	public static List<MigrationRecordType> list() {
+	public static List<MigrationFileFormat> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
-		List<MigrationRecordType> items = new ArrayList<>();
+		List<MigrationFileFormat> items = new ArrayList<>();
 		items.addAll(Arrays.asList(values()));
 		return items;
 	}
@@ -66,7 +63,7 @@ public enum MigrationRecordType {
 	 * @param value the value to convert
 	 * @return the enum option that corresponds to the value, null otherwise
 	 */
-	public static MigrationRecordType toEnum(String value) {
+	public static MigrationFileFormat toEnum(String value) {
 		return toEnum(value, null);
 	}
 
@@ -78,8 +75,8 @@ public enum MigrationRecordType {
 	 * @param defaultEnum the default enum option to use
 	 * @return the enum option that corresponds to the value
 	 */
-	public static MigrationRecordType toEnum(String value, MigrationRecordType defaultEnum) {
-		for (MigrationRecordType v : values()) {
+	public static MigrationFileFormat toEnum(String value, MigrationFileFormat defaultEnum) {
+		for (MigrationFileFormat v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
@@ -96,15 +93,4 @@ public enum MigrationRecordType {
 		return value;
 	}
 
-	/**
-	 * Returns this enum option's i18n message string for use in the user
-	 * interface
-	 *
-	 * @return this enum option's i18n message string
-	 */
-	public String getLocalizedDescription() {
-		return "migrationRecordType.option." + value;
-	}
-
-	
 }

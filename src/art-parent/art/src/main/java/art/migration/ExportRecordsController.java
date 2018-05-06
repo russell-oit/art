@@ -30,13 +30,12 @@ import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
+import art.enums.MigrationFileFormat;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
-import art.job.Job;
-import art.job.JobService;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.Report;
@@ -143,9 +142,6 @@ public class ExportRecordsController {
 	private ParameterService parameterService;
 
 	@Autowired
-	private JobService jobService;
-
-	@Autowired
 	private ReportService reportService;
 
 	@Autowired
@@ -193,16 +189,26 @@ public class ExportRecordsController {
 
 		try {
 			MigrationRecordType recordType = exportRecords.getRecordType();
-			String baseExportFilename = "art-export-" + recordType;
 			String extension;
 			switch (recordType) {
 				case Settings:
 					extension = ".json";
 					break;
 				default:
-					extension = ".csv";
+					MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+					switch (fileFormat) {
+						case json:
+							extension = ".json";
+							break;
+						case csv:
+							extension = ".csv";
+							break;
+						default:
+							throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+					}
 			}
 
+			String baseExportFilename = "art-export-" + recordType;
 			String exportFileName = baseExportFilename + extension;
 			String recordsExportPath = Config.getRecordsExportPath();
 			String exportFilePath = recordsExportPath + exportFileName;
@@ -248,19 +254,16 @@ public class ExportRecordsController {
 						exportUserGroups(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Schedules:
-						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn, file);
 						break;
 					case Users:
-						exportFilePath = exportUsers(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportUsers(exportRecords, sessionUser, csvRoutines, conn, file);
 						break;
 					case Rules:
 						exportRules(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Parameters:
 						exportParameters(exportRecords, file, sessionUser, csvRoutines, conn);
-						break;
-					case Jobs:
-						exportJobs(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Reports:
 						exportFilePath = exportReports(exportRecords, sessionUser, csvRoutines, conn);
@@ -297,6 +300,7 @@ public class ExportRecordsController {
 		try {
 			model.addAttribute("datasources", datasourceService.getActiveJdbcDatasources());
 			model.addAttribute("locations", MigrationLocation.list());
+			model.addAttribute("fileFormats", MigrationFileFormat.list());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -366,7 +370,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(datasources, Datasource.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, datasources);
+						break;
+					case csv:
+						csvRoutines.writeAll(datasources, Datasource.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				datasourceService.importDatasources(datasources, sessionUser, conn);
@@ -402,7 +417,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(destinations, Destination.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, destinations);
+						break;
+					case csv:
+						csvRoutines.writeAll(destinations, Destination.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				destinationService.importDestinations(destinations, sessionUser, conn);
@@ -438,7 +464,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(encryptors, Encryptor.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, encryptors);
+						break;
+					case csv:
+						csvRoutines.writeAll(encryptors, Encryptor.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				encryptorService.importEncryptors(encryptors, sessionUser, conn);
@@ -471,7 +508,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(holidays, Holiday.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, holidays);
+						break;
+					case csv:
+						csvRoutines.writeAll(holidays, Holiday.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				holidayService.importHolidays(holidays, sessionUser, conn);
@@ -504,7 +552,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(reportGroups, ReportGroup.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, reportGroups);
+						break;
+					case csv:
+						csvRoutines.writeAll(reportGroups, ReportGroup.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				reportGroupService.importReportGroups(reportGroups, sessionUser, conn);
@@ -540,7 +599,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(smtpServers, SmtpServer.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, smtpServers);
+						break;
+					case csv:
+						csvRoutines.writeAll(smtpServers, SmtpServer.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);
@@ -573,7 +643,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(userGroups, UserGroup.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, userGroups);
+						break;
+					case csv:
+						csvRoutines.writeAll(userGroups, UserGroup.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				userGroupService.importUserGroups(userGroups, sessionUser, conn);
@@ -590,12 +671,13 @@ public class ExportRecordsController {
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
+	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private String exportSchedules(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportSchedules");
@@ -609,27 +691,39 @@ public class ExportRecordsController {
 		switch (location) {
 			case File:
 				String recordsExportPath = Config.getRecordsExportPath();
-				String schedulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
-				File schedulesFile = new File(schedulesFilePath);
-				csvRoutines.writeAll(schedules, Schedule.class, schedulesFile);
-				List<Holiday> holidays = new ArrayList<>();
-				for (Schedule schedule : schedules) {
-					List<Holiday> sharedHolidays = schedule.getSharedHolidays();
-					for (Holiday holiday : sharedHolidays) {
-						holiday.setParentId(schedule.getScheduleId());
-						holidays.add(holiday);
-					}
-				}
-				if (CollectionUtils.isNotEmpty(holidays)) {
-					String holidaysFilePath = recordsExportPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
-					File holidaysFile = new File(holidaysFilePath);
-					csvRoutines.writeAll(holidays, Holiday.class, holidaysFile);
-					exportFilePath = recordsExportPath + "art-export-Schedules.zip";
-					ArtUtils.zipFiles(exportFilePath, schedulesFilePath, holidaysFilePath);
-					schedulesFile.delete();
-					holidaysFile.delete();
-				} else {
-					exportFilePath = schedulesFilePath;
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, schedules);
+						exportFilePath = recordsExportPath + "art-export-Schedules.json";
+						break;
+					case csv:
+						String schedulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
+						File schedulesFile = new File(schedulesFilePath);
+						csvRoutines.writeAll(schedules, Schedule.class, schedulesFile);
+						List<Holiday> holidays = new ArrayList<>();
+						for (Schedule schedule : schedules) {
+							List<Holiday> sharedHolidays = schedule.getSharedHolidays();
+							for (Holiday holiday : sharedHolidays) {
+								holiday.setParentId(schedule.getScheduleId());
+								holidays.add(holiday);
+							}
+						}
+						if (CollectionUtils.isNotEmpty(holidays)) {
+							String holidaysFilePath = recordsExportPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
+							File holidaysFile = new File(holidaysFilePath);
+							csvRoutines.writeAll(holidays, Holiday.class, holidaysFile);
+							exportFilePath = recordsExportPath + "art-export-Schedules.zip";
+							ArtUtils.zipFiles(exportFilePath, schedulesFilePath, holidaysFilePath);
+							schedulesFile.delete();
+							holidaysFile.delete();
+						} else {
+							exportFilePath = schedulesFilePath;
+						}
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 				}
 				break;
 			case Datasource:
@@ -649,12 +743,13 @@ public class ExportRecordsController {
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
+	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private String exportUsers(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportUsers");
@@ -668,27 +763,39 @@ public class ExportRecordsController {
 		switch (location) {
 			case File:
 				String recordsExportPath = Config.getRecordsExportPath();
-				String usersFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERS_FILENAME;
-				File usersFile = new File(usersFilePath);
-				csvRoutines.writeAll(users, User.class, usersFile);
-				List<UserGroup> allUserGroups = new ArrayList<>();
-				for (User user : users) {
-					List<UserGroup> userGroups = user.getUserGroups();
-					for (UserGroup userGroup : userGroups) {
-						userGroup.setParentId(user.getUserId());
-						allUserGroups.add(userGroup);
-					}
-				}
-				if (CollectionUtils.isNotEmpty(allUserGroups)) {
-					String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
-					File userGroupsFile = new File(userGroupsFilePath);
-					csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
-					exportFilePath = recordsExportPath + "art-export-Users.zip";
-					ArtUtils.zipFiles(exportFilePath, usersFilePath, userGroupsFilePath);
-					usersFile.delete();
-					userGroupsFile.delete();
-				} else {
-					exportFilePath = usersFilePath;
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, users);
+						exportFilePath = recordsExportPath + "art-export-Users.json";
+						break;
+					case csv:
+						String usersFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERS_FILENAME;
+						File usersFile = new File(usersFilePath);
+						csvRoutines.writeAll(users, User.class, usersFile);
+						List<UserGroup> allUserGroups = new ArrayList<>();
+						for (User user : users) {
+							List<UserGroup> userGroups = user.getUserGroups();
+							for (UserGroup userGroup : userGroups) {
+								userGroup.setParentId(user.getUserId());
+								allUserGroups.add(userGroup);
+							}
+						}
+						if (CollectionUtils.isNotEmpty(allUserGroups)) {
+							String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
+							File userGroupsFile = new File(userGroupsFilePath);
+							csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
+							exportFilePath = recordsExportPath + "art-export-Users.zip";
+							ArtUtils.zipFiles(exportFilePath, usersFilePath, userGroupsFilePath);
+							usersFile.delete();
+							userGroupsFile.delete();
+						} else {
+							exportFilePath = usersFilePath;
+						}
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 				}
 				break;
 			case Datasource:
@@ -724,7 +831,18 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(rules, Rule.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, rules);
+						break;
+					case csv:
+						csvRoutines.writeAll(rules, Rule.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				ruleService.importRules(rules, sessionUser, conn);
@@ -754,47 +872,29 @@ public class ExportRecordsController {
 		String ids = exportRecords.getIds();
 		List<Parameter> parameters = parameterService.getParameters(ids);
 
+		for (Parameter parameter : parameters) {
+			parameter.encryptAllPasswords();
+		}
+
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				csvRoutines.writeAll(parameters, Parameter.class, file);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, parameters);
+						break;
+					case csv:
+						csvRoutines.writeAll(parameters, Parameter.class, file);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				boolean local = false;
 				parameterService.importParameters(parameters, sessionUser, conn, local);
-				break;
-			default:
-				throw new IllegalArgumentException("Unexpected location: " + location);
-		}
-	}
-
-	/**
-	 * Exports job records
-	 *
-	 * @param exportRecords the export records object
-	 * @param file the export file to use
-	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
-	 * @param conn the connection to use for datasource export
-	 * @throws SQLException
-	 * @throws IOException
-	 */
-	private void exportJobs(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
-
-		logger.debug("Entering exportJobs");
-
-		String ids = exportRecords.getIds();
-		List<Job> jobs = jobService.getJobs(ids);
-
-		MigrationLocation location = exportRecords.getLocation();
-		switch (location) {
-			case File:
-				csvRoutines.writeAll(jobs, Job.class, file);
-				break;
-			case Datasource:
-				jobService.importJobs(jobs, sessionUser, conn);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -822,9 +922,6 @@ public class ExportRecordsController {
 
 		String ids = exportRecords.getIds();
 		List<Report> reports = reportService.getReports(ids);
-		for (Report report : reports) {
-			report.encryptPasswords();
-		}
 
 		List<ReportGroup> allReportGroups = new ArrayList<>();
 		List<ReportParameter> allReportParams = new ArrayList<>();
@@ -834,6 +931,8 @@ public class ExportRecordsController {
 		List<UserReportRight> allUserReportRights = new ArrayList<>();
 		List<UserGroupReportRight> allUserGroupReportRights = new ArrayList<>();
 		List<Drilldown> allDrilldowns = new ArrayList<>();
+		List<ReportParameter> allDrilldownReportParams = new ArrayList<>();
+
 		for (Report report : reports) {
 			int reportId = report.getReportId();
 
@@ -890,12 +989,7 @@ public class ExportRecordsController {
 			for (Drilldown drilldown : drilldowns) {
 				drilldown.setParentId(reportId);
 				allDrilldowns.add(drilldown);
-			}
-		}
 
-		List<ReportParameter> allDrilldownReportParams = new ArrayList<>();
-		if (CollectionUtils.isNotEmpty(allDrilldowns)) {
-			for (Drilldown drilldown : allDrilldowns) {
 				Report drilldownReport = drilldown.getDrilldownReport();
 				int drilldownReportId = drilldownReport.getReportId();
 				List<ReportParameter> drilldownReportParams = reportParameterService.getReportParameters(drilldownReportId);
@@ -906,289 +1000,146 @@ public class ExportRecordsController {
 			}
 		}
 
+		for (Report report : reports) {
+			report.encryptAllPasswords();
+		}
+
+		for (Drilldown drilldown : allDrilldowns) {
+			Report drilldownReport = drilldown.getDrilldownReport();
+			drilldownReport.encryptAllPasswords();
+		}
+
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
 				String recordsExportPath = Config.getRecordsExportPath();
-				String reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
-				File reportsFile = new File(reportsFilePath);
-				csvRoutines.writeAll(reports, Report.class, reportsFile);
+				String reportsFilePath;
+				File reportsFile;
+				
+				List<String> filesToZip = getTemplateFilesToInclude(reports);
 
-				List<String> filesToZip = new ArrayList<>();
-				for (Report report : reports) {
-					ReportType reportType = report.getReportType();
-					if (reportType == null) {
-						logger.warn("reportType is null. Report={}", report);
-					} else {
-						String template = report.getTemplate();
-						if (StringUtils.isNotBlank(template)) {
-							String templatesPath;
-							if (reportType.isUseJsTemplatesPath()) {
-								templatesPath = Config.getJsTemplatesPath();
-							} else if (reportType == ReportType.JPivotMondrian) {
-								templatesPath = Config.getDefaultTemplatesPath();
-							} else {
-								templatesPath = Config.getTemplatesPath();
-							}
-							String templateFilePath = templatesPath + template;
-							File templateFile = new File(templateFilePath);
-							if (templateFile.exists() && !filesToZip.contains(templateFilePath)) {
-								filesToZip.add(templateFilePath);
-							}
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						reportsFilePath = recordsExportPath + "art-export-Reports.json";
+						reportsFile = new File(reportsFilePath);
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(reportsFile, reports);
+						if (CollectionUtils.isNotEmpty(filesToZip)) {
+							filesToZip.add(reportsFilePath);
+							exportFilePath = recordsExportPath + "art-export-Reports.zip";
+							ArtUtils.zipFiles(exportFilePath, filesToZip);
+							reportsFile.delete();
+						} else {
+							exportFilePath = reportsFilePath;
 						}
+						break;
+					case csv:
+						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
+						reportsFile = new File(reportsFilePath);
+						csvRoutines.writeAll(reports, Report.class, reportsFile);
 
-						String options = report.getOptions();
-						if (StringUtils.isNotBlank(options)) {
-							switch (reportType) {
-								case JxlsArt:
-								case JxlsTemplate:
-									JxlsOptions jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
-									String areaConfigFilename = jxlsOptions.getAreaConfigFile();
-									if (StringUtils.isNotBlank(areaConfigFilename)) {
-										String templatesPath = Config.getTemplatesPath();
-										String fullAreaConfigFilename = templatesPath + areaConfigFilename;
-										File areaConfigFile = new File(fullAreaConfigFilename);
-										if (areaConfigFile.exists() && !filesToZip.contains(fullAreaConfigFilename)) {
-											filesToZip.add(fullAreaConfigFilename);
-										}
-									}
-									break;
-								case PivotTableJsCsvServer:
-								case DygraphsCsvServer:
-								case DataTablesCsvServer:
-									CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
-									String dataFileName = csvServerOptions.getDataFile();
-									if (StringUtils.isNotBlank(dataFileName)) {
-										String jsTemplatesPath = Config.getJsTemplatesPath();
-										String fullDataFileName = jsTemplatesPath + dataFileName;
-										File dataFile = new File(fullDataFileName);
-										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
-											filesToZip.add(fullDataFileName);
-										}
-									}
-									break;
-								case C3:
-									C3Options c3Options = ArtUtils.jsonToObject(options, C3Options.class);
-									String cssFileName = c3Options.getCssFile();
-									if (StringUtils.isNotBlank(cssFileName)) {
-										String jsTemplatesPath = Config.getJsTemplatesPath();
-										String fullCssFileName = jsTemplatesPath + cssFileName;
-										File cssFile = new File(fullCssFileName);
-										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
-											filesToZip.add(fullCssFileName);
-										}
-									}
-									break;
-								case Datamaps:
-								case DatamapsFile:
-									DatamapsOptions datamapsOptions = ArtUtils.jsonToObject(options, DatamapsOptions.class);
-									String jsTemplatesPath = Config.getJsTemplatesPath();
+						if (CollectionUtils.isNotEmpty(allReportGroups)
+								|| CollectionUtils.isNotEmpty(allReportParams)
+								|| CollectionUtils.isNotEmpty(allUserRuleValues)
+								|| CollectionUtils.isNotEmpty(allUserGroupRuleValues)
+								|| CollectionUtils.isNotEmpty(allReportRules)
+								|| CollectionUtils.isNotEmpty(allUserReportRights)
+								|| CollectionUtils.isNotEmpty(allUserGroupReportRights)
+								|| CollectionUtils.isNotEmpty(allDrilldowns)
+								|| CollectionUtils.isNotEmpty(filesToZip)) {
+							filesToZip.add(reportsFilePath);
 
-									String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
-									if (StringUtils.isNotBlank(datamapsJsFileName)) {
-										String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
-										File datamapsJsFile = new File(fullDatamapsJsFileName);
-										if (datamapsJsFile.exists() && !filesToZip.contains(fullDatamapsJsFileName)) {
-											filesToZip.add(fullDatamapsJsFileName);
-										}
-									}
+							String reportGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
+							File reportGroupsFile = new File(reportGroupsFilePath);
 
-									dataFileName = datamapsOptions.getDataFile();
-									if (StringUtils.isNotBlank(dataFileName)) {
-										String fullDataFileName = jsTemplatesPath + dataFileName;
-										File dataFile = new File(fullDataFileName);
-										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
-											filesToZip.add(fullDataFileName);
-										}
-									}
+							String reportParamsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME;
+							File reportParamsFile = new File(reportParamsFilePath);
 
-									String mapFileName = datamapsOptions.getMapFile();
-									if (StringUtils.isNotBlank(mapFileName)) {
-										String fullMapFileName = jsTemplatesPath + mapFileName;
-										File mapFile = new File(fullMapFileName);
-										if (mapFile.exists() && !filesToZip.contains(fullMapFileName)) {
-											filesToZip.add(fullMapFileName);
-										}
-									}
+							String userRuleValuesFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME;
+							File userRuleValuesFile = new File(userRuleValuesFilePath);
 
-									cssFileName = datamapsOptions.getCssFile();
-									if (StringUtils.isNotBlank(cssFileName)) {
-										String fullCssFileName = jsTemplatesPath + cssFileName;
-										File cssFile = new File(fullCssFileName);
-										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
-											filesToZip.add(fullCssFileName);
-										}
-									}
-									break;
-								case Leaflet:
-								case OpenLayers:
-									WebMapOptions webMapOptions = ArtUtils.jsonToObject(options, WebMapOptions.class);
-									jsTemplatesPath = Config.getJsTemplatesPath();
+							String userGroupRuleValuesFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME;
+							File userGroupRuleValuesFile = new File(userGroupRuleValuesFilePath);
 
-									cssFileName = webMapOptions.getCssFile();
-									if (StringUtils.isNotBlank(cssFileName)) {
-										String fullCssFileName = jsTemplatesPath + cssFileName;
-										File cssFile = new File(fullCssFileName);
-										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
-											filesToZip.add(fullCssFileName);
-										}
-									}
+							String reportRulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
+							File reportRulesFile = new File(reportRulesFilePath);
 
-									dataFileName = webMapOptions.getDataFile();
-									if (StringUtils.isNotBlank(dataFileName)) {
-										String fullDataFileName = jsTemplatesPath + dataFileName;
-										File dataFile = new File(fullDataFileName);
-										if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
-											filesToZip.add(fullDataFileName);
-										}
-									}
+							String userReportRightsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME;
+							File userReportRightsFile = new File(userReportRightsFilePath);
 
-									List<String> jsFileNames = webMapOptions.getJsFiles();
-									if (CollectionUtils.isNotEmpty(jsFileNames)) {
-										for (String jsFileName : jsFileNames) {
-											if (StringUtils.isNotBlank(jsFileName)) {
-												String fullJsFileName = jsTemplatesPath + jsFileName;
-												File jsFile = new File(fullJsFileName);
-												if (jsFile.exists() && !filesToZip.contains(fullJsFileName)) {
-													filesToZip.add(fullJsFileName);
-												}
-											}
-										}
-									}
+							String userGroupReportRightsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME;
+							File userGroupReportRightsFile = new File(userGroupReportRightsFilePath);
 
-									List<String> cssFileNames = webMapOptions.getCssFiles();
-									if (CollectionUtils.isNotEmpty(cssFileNames)) {
-										for (String listCssFileName : cssFileNames) {
-											if (StringUtils.isNotBlank(listCssFileName)) {
-												String fullListCssFileName = jsTemplatesPath + listCssFileName;
-												File listCssFile = new File(fullListCssFileName);
-												if (listCssFile.exists() && !filesToZip.contains(fullListCssFileName)) {
-													filesToZip.add(fullListCssFileName);
-												}
-											}
-										}
-									}
-									break;
-								case OrgChartDatabase:
-								case OrgChartJson:
-								case OrgChartList:
-								case OrgChartAjax:
-									OrgChartOptions orgChartOptions = ArtUtils.jsonToObject(options, OrgChartOptions.class);
-									jsTemplatesPath = Config.getJsTemplatesPath();
+							String drilldownsFilePath = recordsExportPath + ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME;
+							File drilldownsFile = new File(drilldownsFilePath);
 
-									cssFileName = orgChartOptions.getCssFile();
-									if (StringUtils.isNotBlank(cssFileName)) {
-										String fullCssFileName = jsTemplatesPath + cssFileName;
-										File cssFile = new File(fullCssFileName);
-										if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
-											filesToZip.add(fullCssFileName);
-										}
-									}
-									break;
-								default:
-									break;
+							String drilldownReportParamsFilePath = recordsExportPath + ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME;
+							File drilldownReportParamsFile = new File(drilldownReportParamsFilePath);
+
+							if (CollectionUtils.isNotEmpty(allReportGroups)) {
+								csvRoutines.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
+								filesToZip.add(reportGroupsFilePath);
 							}
+
+							if (CollectionUtils.isNotEmpty(allReportParams)) {
+								csvRoutines.writeAll(allReportParams, ReportParameter.class, reportParamsFile);
+								filesToZip.add(reportParamsFilePath);
+							}
+
+							if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
+								csvRoutines.writeAll(allUserRuleValues, UserRuleValue.class, userRuleValuesFile);
+								filesToZip.add(userRuleValuesFilePath);
+							}
+
+							if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
+								csvRoutines.writeAll(allUserGroupRuleValues, UserGroupRuleValue.class, userGroupRuleValuesFile);
+								filesToZip.add(userGroupRuleValuesFilePath);
+							}
+
+							if (CollectionUtils.isNotEmpty(allReportRules)) {
+								csvRoutines.writeAll(allReportRules, ReportRule.class, reportRulesFile);
+								filesToZip.add(reportRulesFilePath);
+							}
+
+							if (CollectionUtils.isNotEmpty(allUserReportRights)) {
+								csvRoutines.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
+								filesToZip.add(userReportRightsFilePath);
+							}
+
+							if (CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
+								csvRoutines.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
+								filesToZip.add(userGroupReportRightsFilePath);
+							}
+
+							if (CollectionUtils.isNotEmpty(allDrilldowns)) {
+								csvRoutines.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
+								filesToZip.add(drilldownsFilePath);
+
+								if (CollectionUtils.isNotEmpty(allDrilldownReportParams)) {
+									csvRoutines.writeAll(allDrilldownReportParams, ReportParameter.class, drilldownReportParamsFile);
+									filesToZip.add(drilldownReportParamsFilePath);
+								}
+							}
+
+							exportFilePath = recordsExportPath + "art-export-Reports.zip";
+							ArtUtils.zipFiles(exportFilePath, filesToZip);
+							reportsFile.delete();
+							reportGroupsFile.delete();
+							reportParamsFile.delete();
+							userRuleValuesFile.delete();
+							userGroupRuleValuesFile.delete();
+							reportRulesFile.delete();
+							userReportRightsFile.delete();
+							userGroupReportRightsFile.delete();
+							drilldownsFile.delete();
+							drilldownReportParamsFile.delete();
+						} else {
+							exportFilePath = reportsFilePath;
 						}
-					}
-				}
-
-				if (CollectionUtils.isNotEmpty(allReportGroups)
-						|| CollectionUtils.isNotEmpty(allReportParams)
-						|| CollectionUtils.isNotEmpty(allUserRuleValues)
-						|| CollectionUtils.isNotEmpty(allUserGroupRuleValues)
-						|| CollectionUtils.isNotEmpty(allReportRules)
-						|| CollectionUtils.isNotEmpty(allUserReportRights)
-						|| CollectionUtils.isNotEmpty(allUserGroupReportRights)
-						|| CollectionUtils.isNotEmpty(allDrilldowns)
-						|| CollectionUtils.isNotEmpty(filesToZip)) {
-					filesToZip.add(reportsFilePath);
-
-					String reportGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
-					File reportGroupsFile = new File(reportGroupsFilePath);
-
-					String reportParamsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME;
-					File reportParamsFile = new File(reportParamsFilePath);
-
-					String userRuleValuesFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME;
-					File userRuleValuesFile = new File(userRuleValuesFilePath);
-
-					String userGroupRuleValuesFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME;
-					File userGroupRuleValuesFile = new File(userGroupRuleValuesFilePath);
-
-					String reportRulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
-					File reportRulesFile = new File(reportRulesFilePath);
-
-					String userReportRightsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME;
-					File userReportRightsFile = new File(userReportRightsFilePath);
-
-					String userGroupReportRightsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME;
-					File userGroupReportRightsFile = new File(userGroupReportRightsFilePath);
-
-					String drilldownsFilePath = recordsExportPath + ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME;
-					File drilldownsFile = new File(drilldownsFilePath);
-
-					String drilldownReportParamsFilePath = recordsExportPath + ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME;
-					File drilldownReportParamsFile = new File(drilldownReportParamsFilePath);
-
-					if (CollectionUtils.isNotEmpty(allReportGroups)) {
-						csvRoutines.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
-						filesToZip.add(reportGroupsFilePath);
-					}
-
-					if (CollectionUtils.isNotEmpty(allReportParams)) {
-						csvRoutines.writeAll(allReportParams, ReportParameter.class, reportParamsFile);
-						filesToZip.add(reportParamsFilePath);
-					}
-
-					if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
-						csvRoutines.writeAll(allUserRuleValues, UserRuleValue.class, userRuleValuesFile);
-						filesToZip.add(userRuleValuesFilePath);
-					}
-
-					if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
-						csvRoutines.writeAll(allUserGroupRuleValues, UserGroupRuleValue.class, userGroupRuleValuesFile);
-						filesToZip.add(userGroupRuleValuesFilePath);
-					}
-
-					if (CollectionUtils.isNotEmpty(allReportRules)) {
-						csvRoutines.writeAll(allReportRules, ReportRule.class, reportRulesFile);
-						filesToZip.add(reportRulesFilePath);
-					}
-
-					if (CollectionUtils.isNotEmpty(allUserReportRights)) {
-						csvRoutines.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
-						filesToZip.add(userReportRightsFilePath);
-					}
-
-					if (CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
-						csvRoutines.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
-						filesToZip.add(userGroupReportRightsFilePath);
-					}
-
-					if (CollectionUtils.isNotEmpty(allDrilldowns)) {
-						csvRoutines.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
-						filesToZip.add(drilldownsFilePath);
-
-						if (CollectionUtils.isNotEmpty(allDrilldownReportParams)) {
-							csvRoutines.writeAll(allDrilldownReportParams, ReportParameter.class, drilldownReportParamsFile);
-							filesToZip.add(drilldownReportParamsFilePath);
-						}
-					}
-
-					exportFilePath = recordsExportPath + "art-export-Reports.zip";
-					ArtUtils.zipFiles(exportFilePath, filesToZip);
-					reportsFile.delete();
-					reportGroupsFile.delete();
-					reportParamsFile.delete();
-					userRuleValuesFile.delete();
-					userGroupRuleValuesFile.delete();
-					reportRulesFile.delete();
-					userReportRightsFile.delete();
-					userGroupReportRightsFile.delete();
-					drilldownsFile.delete();
-					drilldownReportParamsFile.delete();
-				} else {
-					exportFilePath = reportsFilePath;
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 				}
 				break;
 			case Datasource:
@@ -1201,6 +1152,196 @@ public class ExportRecordsController {
 		}
 
 		return exportFilePath;
+	}
+
+	/**
+	 * Returns full paths of template files to include in the final zip package
+	 *
+	 * @param reports the reports being exported
+	 * @return full paths of template files to include in the final zip package
+	 * @throws IOException
+	 */
+	private List<String> getTemplateFilesToInclude(List<Report> reports) throws IOException {
+		List<String> filesToZip = new ArrayList<>();
+
+		for (Report report : reports) {
+			ReportType reportType = report.getReportType();
+			if (reportType == null) {
+				logger.warn("reportType is null. Report={}", report);
+			} else {
+				String template = report.getTemplate();
+				if (StringUtils.isNotBlank(template)) {
+					String templatesPath;
+					if (reportType.isUseJsTemplatesPath()) {
+						templatesPath = Config.getJsTemplatesPath();
+					} else if (reportType == ReportType.JPivotMondrian) {
+						templatesPath = Config.getDefaultTemplatesPath();
+					} else {
+						templatesPath = Config.getTemplatesPath();
+					}
+					String templateFilePath = templatesPath + template;
+					File templateFile = new File(templateFilePath);
+					if (templateFile.exists() && !filesToZip.contains(templateFilePath)) {
+						filesToZip.add(templateFilePath);
+					}
+				}
+
+				String options = report.getOptions();
+				if (StringUtils.isNotBlank(options)) {
+					switch (reportType) {
+						case JxlsArt:
+						case JxlsTemplate:
+							JxlsOptions jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
+							String areaConfigFilename = jxlsOptions.getAreaConfigFile();
+							if (StringUtils.isNotBlank(areaConfigFilename)) {
+								String templatesPath = Config.getTemplatesPath();
+								String fullAreaConfigFilename = templatesPath + areaConfigFilename;
+								File areaConfigFile = new File(fullAreaConfigFilename);
+								if (areaConfigFile.exists() && !filesToZip.contains(fullAreaConfigFilename)) {
+									filesToZip.add(fullAreaConfigFilename);
+								}
+							}
+							break;
+						case PivotTableJsCsvServer:
+						case DygraphsCsvServer:
+						case DataTablesCsvServer:
+							CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
+							String dataFileName = csvServerOptions.getDataFile();
+							if (StringUtils.isNotBlank(dataFileName)) {
+								String jsTemplatesPath = Config.getJsTemplatesPath();
+								String fullDataFileName = jsTemplatesPath + dataFileName;
+								File dataFile = new File(fullDataFileName);
+								if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
+									filesToZip.add(fullDataFileName);
+								}
+							}
+							break;
+						case C3:
+							C3Options c3Options = ArtUtils.jsonToObject(options, C3Options.class);
+							String cssFileName = c3Options.getCssFile();
+							if (StringUtils.isNotBlank(cssFileName)) {
+								String jsTemplatesPath = Config.getJsTemplatesPath();
+								String fullCssFileName = jsTemplatesPath + cssFileName;
+								File cssFile = new File(fullCssFileName);
+								if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+									filesToZip.add(fullCssFileName);
+								}
+							}
+							break;
+						case Datamaps:
+						case DatamapsFile:
+							DatamapsOptions datamapsOptions = ArtUtils.jsonToObject(options, DatamapsOptions.class);
+							String jsTemplatesPath = Config.getJsTemplatesPath();
+
+							String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
+							if (StringUtils.isNotBlank(datamapsJsFileName)) {
+								String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
+								File datamapsJsFile = new File(fullDatamapsJsFileName);
+								if (datamapsJsFile.exists() && !filesToZip.contains(fullDatamapsJsFileName)) {
+									filesToZip.add(fullDatamapsJsFileName);
+								}
+							}
+
+							dataFileName = datamapsOptions.getDataFile();
+							if (StringUtils.isNotBlank(dataFileName)) {
+								String fullDataFileName = jsTemplatesPath + dataFileName;
+								File dataFile = new File(fullDataFileName);
+								if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
+									filesToZip.add(fullDataFileName);
+								}
+							}
+
+							String mapFileName = datamapsOptions.getMapFile();
+							if (StringUtils.isNotBlank(mapFileName)) {
+								String fullMapFileName = jsTemplatesPath + mapFileName;
+								File mapFile = new File(fullMapFileName);
+								if (mapFile.exists() && !filesToZip.contains(fullMapFileName)) {
+									filesToZip.add(fullMapFileName);
+								}
+							}
+
+							cssFileName = datamapsOptions.getCssFile();
+							if (StringUtils.isNotBlank(cssFileName)) {
+								String fullCssFileName = jsTemplatesPath + cssFileName;
+								File cssFile = new File(fullCssFileName);
+								if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+									filesToZip.add(fullCssFileName);
+								}
+							}
+							break;
+						case Leaflet:
+						case OpenLayers:
+							WebMapOptions webMapOptions = ArtUtils.jsonToObject(options, WebMapOptions.class);
+							jsTemplatesPath = Config.getJsTemplatesPath();
+
+							cssFileName = webMapOptions.getCssFile();
+							if (StringUtils.isNotBlank(cssFileName)) {
+								String fullCssFileName = jsTemplatesPath + cssFileName;
+								File cssFile = new File(fullCssFileName);
+								if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+									filesToZip.add(fullCssFileName);
+								}
+							}
+
+							dataFileName = webMapOptions.getDataFile();
+							if (StringUtils.isNotBlank(dataFileName)) {
+								String fullDataFileName = jsTemplatesPath + dataFileName;
+								File dataFile = new File(fullDataFileName);
+								if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
+									filesToZip.add(fullDataFileName);
+								}
+							}
+
+							List<String> jsFileNames = webMapOptions.getJsFiles();
+							if (CollectionUtils.isNotEmpty(jsFileNames)) {
+								for (String jsFileName : jsFileNames) {
+									if (StringUtils.isNotBlank(jsFileName)) {
+										String fullJsFileName = jsTemplatesPath + jsFileName;
+										File jsFile = new File(fullJsFileName);
+										if (jsFile.exists() && !filesToZip.contains(fullJsFileName)) {
+											filesToZip.add(fullJsFileName);
+										}
+									}
+								}
+							}
+
+							List<String> cssFileNames = webMapOptions.getCssFiles();
+							if (CollectionUtils.isNotEmpty(cssFileNames)) {
+								for (String listCssFileName : cssFileNames) {
+									if (StringUtils.isNotBlank(listCssFileName)) {
+										String fullListCssFileName = jsTemplatesPath + listCssFileName;
+										File listCssFile = new File(fullListCssFileName);
+										if (listCssFile.exists() && !filesToZip.contains(fullListCssFileName)) {
+											filesToZip.add(fullListCssFileName);
+										}
+									}
+								}
+							}
+							break;
+						case OrgChartDatabase:
+						case OrgChartJson:
+						case OrgChartList:
+						case OrgChartAjax:
+							OrgChartOptions orgChartOptions = ArtUtils.jsonToObject(options, OrgChartOptions.class);
+							jsTemplatesPath = Config.getJsTemplatesPath();
+
+							cssFileName = orgChartOptions.getCssFile();
+							if (StringUtils.isNotBlank(cssFileName)) {
+								String fullCssFileName = jsTemplatesPath + cssFileName;
+								File cssFile = new File(fullCssFileName);
+								if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
+									filesToZip.add(fullCssFileName);
+								}
+							}
+							break;
+						default:
+							break;
+					}
+				}
+			}
+		}
+
+		return filesToZip;
 	}
 
 }

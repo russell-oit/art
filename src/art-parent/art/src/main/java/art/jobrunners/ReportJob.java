@@ -184,7 +184,10 @@ public class ReportJob implements org.quartz.Job {
 	private JobOptions jobOptions;
 
 	@Autowired
-	private TemplateEngine emailTemplateEngine;
+	private TemplateEngine jobTemplateEngine;
+
+	@Autowired
+	private TemplateEngine defaultTemplateEngine;
 
 	@Autowired
 	private CacheHelper cacheHelper;
@@ -354,7 +357,7 @@ public class ReportJob implements org.quartz.Job {
 					ctx.setVariable("job", job);
 
 					String emailTemplateName = "jobErrorEmail";
-					String message = emailTemplateEngine.process(emailTemplateName, ctx);
+					String message = defaultTemplateEngine.process(emailTemplateName, ctx);
 					mailer.setMessage(message);
 
 					mailer.send();
@@ -1504,8 +1507,7 @@ public class ReportJob implements org.quartz.Job {
 		ctx.setVariable("job", job);
 		ctx.setVariable("value", value);
 
-		String emailTemplateName = getEmailTemplateName();
-		String finalMessage = emailTemplateEngine.process(emailTemplateName, ctx);
+		String finalMessage = getFinalEmailMessage(ctx);
 		mailer.setMessage(finalMessage);
 	}
 
@@ -1685,8 +1687,7 @@ public class ReportJob implements org.quartz.Job {
 			ctx.setVariable("params", reportParamsList);
 			ctx.setVariable("locale", locale);
 
-			String emailTemplateName = getEmailTemplateName();
-			String finalMessage = emailTemplateEngine.process(emailTemplateName, ctx);
+			String finalMessage = getFinalEmailMessage(ctx);
 			mailer.setMessage(finalMessage);
 		}
 	}
@@ -3276,26 +3277,32 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Returns the name of the email template to use
+	 * Returns the string to use in the email message based on the appropriate
+	 * template
 	 *
-	 * @return the name of the email template to use
+	 * @return the string to use in the email message based on the appropriate
+	 * template
 	 */
-	private String getEmailTemplateName() {
-		String templateName = "basicEmail";
+	private String getFinalEmailMessage(Context ctx) {
+		String finalMessage;
 
 		String jobEmailTemplateFileName = job.getEmailTemplate();
 		logger.debug("jobEmailTemplateFileName='{}'", jobEmailTemplateFileName);
-		if (StringUtils.isNotBlank(jobEmailTemplateFileName)) {
-			String jobEmailTemplateFilePath = Config.getThymeleafTemplatesPath() + jobEmailTemplateFileName;
+
+		if (StringUtils.isBlank(jobEmailTemplateFileName)) {
+			String templateName = "basicEmail";
+			finalMessage = defaultTemplateEngine.process(templateName, ctx);
+		} else {
+			String jobEmailTemplateFilePath = Config.getJobTemplatesPath() + jobEmailTemplateFileName;
 			File jobEmailTemplateFile = new File(jobEmailTemplateFilePath);
-			if (!jobEmailTemplateFile.exists()) {
-				throw new IllegalStateException("Email template file not found: " + jobEmailTemplateFilePath);
+			if (jobEmailTemplateFile.exists()) {
+				finalMessage = jobTemplateEngine.process(jobEmailTemplateFileName, ctx);
 			} else {
-				templateName = FilenameUtils.getBaseName(jobEmailTemplateFilePath);
+				throw new IllegalStateException("Email template file not found: " + jobEmailTemplateFilePath);
 			}
 		}
 
-		return templateName;
+		return finalMessage;
 	}
 
 	/**

@@ -61,14 +61,21 @@
 		<script type="text/javascript">
 			function toggleVisibleFields() {
 				var location = $("input[name='location']:checked").val();
+				var recordType = "${exportRecords.recordType}";
 
 				//https://stackoverflow.com/questions/14910760/switch-case-as-string
 				switch (location) {
 					case 'File':
 						$("#datasourceDiv").hide();
+						if (recordType === 'Settings') {
+							$("#fileFormatDiv").hide();
+						} else {
+							$("#fileFormatDiv").show();
+						}
 						break;
 					case 'Datasource':
 						$("#datasourceDiv").show();
+						$("#fileFormatDiv").hide();
 						break;
 					default:
 						break;
@@ -148,6 +155,21 @@
 							</c:forEach>
 						</form:select>
 						<form:errors path="datasource.datasourceId" cssClass="error"/>
+					</div>
+				</div>
+				<div id="fileFormatDiv" class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="reports.label.format"/>
+					</label>
+					<div class="col-md-8">
+						<c:forEach var="fileFormat" items="${fileFormats}">
+							<label class="radio-inline">
+								<form:radiobutton path="fileFormat"
+												  value="${fileFormat}"/>
+								${fileFormat.description}
+							</label>
+						</c:forEach>
+						<form:errors path="fileFormat" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

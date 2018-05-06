@@ -59,6 +59,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -161,17 +162,125 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/reportsConfig", method = RequestMethod.GET)
-	public String showReportsConfig(Model model) {
+	public String showReportsConfig(Model model, HttpSession session) {
 		logger.debug("Entering showReportsConfig");
 
 		try {
-			model.addAttribute("reports", reportService.getAllReports());
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			model.addAttribute("reportTypes", ReportType.list());
+			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
 		return "reportsConfig";
+	}
+
+	@GetMapping("/getConfigReports")
+	public @ResponseBody
+	AjaxResponse getConfigReports(Locale locale) {
+		logger.debug("Entering getConfigReports");
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			List<Report> reports = reportService.getAllReports();
+
+			String activeText = messageSource.getMessage("activeStatus.option.active", null, locale);
+			String disabledText = messageSource.getMessage("activeStatus.option.disabled", null, locale);
+			String activeSpan = "<span class='label label-success'>" + activeText + "</span>";
+			String disabledSpan = "<span class='label label-danger'>" + disabledText + "</span>";
+
+			String editText = messageSource.getMessage("page.action.edit", null, locale);
+			String action = "<button type='button' class='btn btn-default editRecord'>"
+					+ "<i class='fa fa-pencil-square-o'></i>" + editText + "</button>";
+
+			List<Report> basicReports = new ArrayList<>();
+
+			for (Report report : reports) {
+				String activeStatus;
+				if (report.isActive()) {
+					activeStatus = activeSpan;
+				} else {
+					activeStatus = disabledSpan;
+				}
+
+				report.setDtActiveStatus(activeStatus);
+				report.setDtAction(action);
+
+				basicReports.add(report.getBasicReport());
+			}
+			response.setData(basicReports);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@GetMapping("/getBasicReport")
+	public @ResponseBody
+	AjaxResponse getBasicReport(@RequestParam("id") Integer id) {
+		logger.debug("Entering getBasicReport: id={}", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Report report = reportService.getReportWithOwnSource(id);
+			if (report == null) {
+				response.setErrorMessage("Report not found");
+			} else {
+				response.setData(report.getBasicReport());
+				response.setSuccess(true);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@PostMapping("/saveBasicReport")
+	public @ResponseBody
+	AjaxResponse saveBasicReport(@ModelAttribute("basicReport") Report basicReport,
+			@RequestParam("reportId") Integer reportId, HttpSession session) {
+
+		logger.debug("Entering saveBasicReport: reportId={}", reportId);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Report originalReport = reportService.getReportWithOwnSource(reportId);
+			if (originalReport == null) {
+				response.setErrorMessage("Report not found");
+			} else {
+				originalReport.setName(basicReport.getName());
+				originalReport.setDescription(basicReport.getDescription());
+				originalReport.setDatasource(basicReport.getDatasource());
+				originalReport.setUseGroovy(basicReport.isUseGroovy());
+				originalReport.setPivotTableJsSavedOptions(basicReport.getPivotTableJsSavedOptions());
+				originalReport.setGridstackSavedOptions(basicReport.getGridstackSavedOptions());
+				originalReport.setOptions(basicReport.getOptions());
+				originalReport.setReportSource(basicReport.getReportSource());
+				originalReport.setReportSourceHtml(basicReport.getReportSourceHtml());
+
+				originalReport.encryptPasswords();
+
+				User sessionUser = (User) session.getAttribute("sessionUser");
+				reportService.updateReport(originalReport, sessionUser);
+				response.setSuccess(true);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+
 	}
 
 	@RequestMapping(value = "/deleteReport", method = RequestMethod.POST)
@@ -600,7 +709,7 @@ public class ReportController {
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
+			response.setErrorMessage(ex.getMessage());
 		}
 
 		return response;
@@ -618,12 +727,12 @@ public class ReportController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			int userId = sessionUser.getUserId();
-			
+
 			savedParameterService.deleteSavedParameters(userId, reportId);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
+			response.setErrorMessage(ex.getMessage());
 		}
 
 		return response;
@@ -1054,6 +1163,167 @@ public class ReportController {
 		}
 
 		return "parameterReports";
+	}
+
+	@PostMapping("/savePivotTableJs")
+	public @ResponseBody
+	AjaxResponse savePivotTableJs(@RequestParam("reportId") Integer reportId,
+			@RequestParam("config") String config, @RequestParam("name") String name,
+			@RequestParam("description") String description,
+			@RequestParam(value = "overwrite", required = false) String overwrite,
+			HttpSession session, Locale locale) {
+
+		logger.debug("Entering savePivotTableJs: reportId={}, config='{}',"
+				+ " name='{}', description='{}', overwrite='{}'",
+				reportId, config, name, description, overwrite);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Report report = reportService.getReport(reportId);
+			report.encryptPasswords();
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			report.setPivotTableJsSavedOptions(config);
+			if (StringUtils.isNotBlank(description)) {
+				report.setDescription(description);
+			}
+
+			if (overwrite == null) {
+				if (StringUtils.isBlank(name)) {
+					String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
+					response.setErrorMessage(message);
+				} else if (reportService.reportNameExists(name)) {
+					String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
+					response.setErrorMessage(message);
+				} else {
+					//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
+					report.setName(name);
+
+					reportService.copyReport(report, report.getReportId(), sessionUser);
+					reportService.grantAccess(report, sessionUser);
+
+					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
+					response.setData(report.getReportId());
+					response.setSuccess(true);
+				}
+			} else {
+				reportService.updateReport(report, sessionUser);
+				response.setSuccess(true);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.getMessage());
+		}
+
+		return response;
+	}
+
+	@PostMapping("/deletePivotTableJs")
+	public @ResponseBody
+	AjaxResponse deletePivotTableJs(@RequestParam("id") Integer id) {
+		logger.debug("Entering deletePivotTableJs: id={}", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult = reportService.deleteReport(id);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				//report not deleted because of linked jobs
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.getMessage());
+		}
+
+		return response;
+	}
+
+	@PostMapping("/saveGridstack")
+	public @ResponseBody
+	AjaxResponse saveGridstack(@RequestParam("reportId") Integer reportId,
+			@RequestParam("config") String config, @RequestParam("name") String name,
+			@RequestParam("description") String description,
+			@RequestParam(value = "overwrite", required = false) String overwrite,
+			HttpSession session, Locale locale) {
+
+		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
+				+ " name='{}', description='{}', overwrite='{}'",
+				reportId, config, name, description, overwrite);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Report report = reportService.getReport(reportId);
+			report.encryptPasswords();
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			report.setGridstackSavedOptions(config);
+			if (StringUtils.isNotBlank(description)) {
+				report.setDescription(description);
+			}
+
+			if (overwrite == null) {
+				if (StringUtils.isBlank(name)) {
+					String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
+					response.setErrorMessage(message);
+				} else if (reportService.reportNameExists(name)) {
+					String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
+					response.setErrorMessage(message);
+				} else {
+					report.setName(name);
+
+					reportService.copyReport(report, report.getReportId(), sessionUser);
+					reportService.grantAccess(report, sessionUser);
+
+					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
+					response.setData(report.getReportId());
+					response.setSuccess(true);
+				}
+			} else {
+				reportService.updateReport(report, sessionUser);
+				response.setSuccess(true);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.getMessage());
+		}
+
+		return response;
+	}
+
+	@PostMapping("/deleteGridstack")
+	public @ResponseBody
+	AjaxResponse deleteGridstack(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteGridstack: id={}", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult = reportService.deleteReport(id);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				//report not deleted because of linked jobs
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.getMessage());
+		}
+
+		return response;
 	}
 
 }

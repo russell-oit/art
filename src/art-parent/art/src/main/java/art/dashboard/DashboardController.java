@@ -21,6 +21,8 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.GridstackItemOptions;
+import art.reportoptions.GridstackOptions;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
@@ -32,6 +34,9 @@ import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -126,7 +131,7 @@ public class DashboardController {
 		String startTimeString = df.format(new Date(startTime));
 
 		Report report;
-		
+
 		try {
 			Report suppliedReport = (Report) request.getAttribute("suppliedReport");
 			if (suppliedReport == null) {
@@ -198,6 +203,29 @@ public class DashboardController {
 				} else if (reportType == ReportType.GridstackDashboard) {
 					GridstackDashboard dashboard = buildGridstackDashboard(report, request, locale, reportParamsMap);
 					model.addAttribute("dashboard", dashboard);
+
+					boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, report.getReportId());
+					request.setAttribute("exclusiveAccess", exclusiveAccess);
+					request.setAttribute("report", report);
+
+					if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+						request.setAttribute("ajax", true);
+					}
+
+					String options = report.getOptions();
+					if (StringUtils.isNotBlank(options)) {
+						GridstackOptions gridstackOptions = ArtUtils.jsonToObject(options, GridstackOptions.class);
+						String cssFileName = gridstackOptions.getCssFile();
+						if (StringUtils.isNotBlank(cssFileName)) {
+							String jsTemplatesPath = Config.getJsTemplatesPath();
+							String fullCssFileName = jsTemplatesPath + cssFileName;
+							File cssFile = new File(fullCssFileName);
+							if (!cssFile.exists()) {
+								throw new IllegalStateException("Css file not found: " + fullCssFileName);
+							}
+							request.setAttribute("cssFileName", cssFileName);
+						}
+					}
 				}
 			}
 
@@ -227,7 +255,7 @@ public class DashboardController {
 			request.setAttribute("startTimeString", startTimeString);
 		}
 
-		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), report.getReportId() , totalTimeSeconds, fetchTimeSeconds, "dashboard", reportParamsList);
+		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), report.getReportId(), totalTimeSeconds, fetchTimeSeconds, "dashboard", reportParamsList);
 
 		if (reportFormat == ReportFormat.pdf) {
 			if (showInline) {
@@ -454,7 +482,8 @@ public class DashboardController {
 		} else {
 			refreshPeriodSeconds = Integer.parseInt(value);
 			final int MINIMUM_REFRESH_SECONDS = 5;
-			if (refreshPeriodSeconds < MINIMUM_REFRESH_SECONDS) {
+			if (refreshPeriodSeconds != PORTLET_NO_REFRESH_SETTING
+					&& refreshPeriodSeconds < MINIMUM_REFRESH_SECONDS) {
 				throw new IllegalArgumentException("Refresh setting less than minimum. Setting="
 						+ refreshPeriodSeconds + ", Minimum=5");
 			}
@@ -671,6 +700,18 @@ public class DashboardController {
 		List<GridstackItem> items = new ArrayList<>();
 		Map<Integer, DashboardItem> itemsMap = new HashMap<>();
 
+		List<GridstackItemOptions> itemOptions;
+		String savedOptions = report.getGridstackSavedOptions();
+		if (StringUtils.isBlank(savedOptions)) {
+			itemOptions = new ArrayList<>();
+		} else {
+			//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
+			//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
+			ObjectMapper mapper = new ObjectMapper();
+			itemOptions = mapper.readValue(savedOptions, new TypeReference<List<GridstackItemOptions>>() {
+			});
+		}
+
 		NodeList itemNodes = (NodeList) xPath.evaluate("ITEM", rootNode, XPathConstants.NODESET);
 		int itemIndex = 0;
 		for (int i = 0; i < itemNodes.getLength(); i++) {
@@ -682,6 +723,17 @@ public class DashboardController {
 			item.setIndex(itemIndex);
 
 			setGridstackItemProperties(item, itemNode, request, locale);
+
+			for (GridstackItemOptions itemOption : itemOptions) {
+				int index = itemOption.getIndex();
+				if (index == itemIndex) {
+					item.setxPosition(itemOption.getX());
+					item.setyPosition(itemOption.getY());
+					item.setWidth(itemOption.getWidth());
+					item.setHeight(itemOption.getHeight());
+					break;
+				}
+			}
 
 			items.add(item);
 
@@ -723,21 +775,53 @@ public class DashboardController {
 		String title = getPortletTitle(itemNode, request, executeOnLoad, refreshPeriodSeconds, locale);
 		item.setTitle(title);
 
+		int xPosition;
 		String xPositionString = xPath.evaluate("XPOSITION", itemNode);
-		int xPosition = Integer.parseInt(xPositionString);
+		if (StringUtils.isBlank(xPositionString)) {
+			final int DEFAULT_X_POSITION = 0;
+			xPosition = DEFAULT_X_POSITION;
+		} else {
+			xPosition = Integer.parseInt(xPositionString);
+		}
 		item.setxPosition(xPosition);
 
+		int yPosition;
 		String yPositionString = xPath.evaluate("YPOSITION", itemNode);
-		int yPosition = Integer.parseInt(yPositionString);
+		if (StringUtils.isBlank(yPositionString)) {
+			final int DEFAULT_Y_POSITION = 0;
+			yPosition = DEFAULT_Y_POSITION;
+		} else {
+			yPosition = Integer.parseInt(yPositionString);
+		}
 		item.setyPosition(yPosition);
 
+		int width;
 		String widthString = xPath.evaluate("WIDTH", itemNode);
-		int width = Integer.parseInt(widthString);
+		if (StringUtils.isBlank(widthString)) {
+			final int DEFAULT_WIDTH = 2;
+			width = DEFAULT_WIDTH;
+		} else {
+			width = Integer.parseInt(widthString);
+		}
 		item.setWidth(width);
 
+		int height;
 		String heightString = xPath.evaluate("HEIGHT", itemNode);
-		int height = Integer.parseInt(heightString);
+		if (StringUtils.isBlank(heightString)) {
+			final int DEFAULT_HEIGHT = 2;
+			height = DEFAULT_HEIGHT;
+		} else {
+			height = Integer.parseInt(heightString);
+		}
 		item.setHeight(height);
+
+		String autoheightString = xPath.evaluate("AUTOHEIGHT", itemNode);
+		boolean autoheight = BooleanUtils.toBoolean(autoheightString);
+		item.setAutoheight(autoheight);
+
+		String autowidthString = xPath.evaluate("AUTOWIDTH", itemNode);
+		boolean autowidth = BooleanUtils.toBoolean(autowidthString);
+		item.setAutowidth(autowidth);
 
 		String noResizeString = xPath.evaluate("NORESIZE", itemNode);
 		boolean noResize = BooleanUtils.toBoolean(noResizeString);

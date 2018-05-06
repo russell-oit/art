@@ -36,9 +36,39 @@ public class GridstackItem extends DashboardItem {
 	private boolean autoposition;
 	private boolean locked;
 	private int minWidth; //0 doesn't have same effect as html attribute not being present in jsp, therefore requires conditional inclusion using ternary operator in jsp
-	private int minHeight; //0 has same effect as html attribute no being present in jsp. doesn't require ternary operator in jsp
+	private int minHeight; //0 has same effect as html attribute not being present in jsp. doesn't require ternary operator in jsp
 	private int maxWidth; //0 results in item having mimimum width, so omit html attribute if 0 (if not specified)
 	private int maxHeight; //0 results in item having mimimum height, so omit html attribute if 0 (if not specified)
+	private boolean autoheight;
+	private boolean autowidth;
+
+	/**
+	 * @return the autoheight
+	 */
+	public boolean isAutoheight() {
+		return autoheight;
+	}
+
+	/**
+	 * @param autoheight the autoheight to set
+	 */
+	public void setAutoheight(boolean autoheight) {
+		this.autoheight = autoheight;
+	}
+
+	/**
+	 * @return the autowidth
+	 */
+	public boolean isAutowidth() {
+		return autowidth;
+	}
+
+	/**
+	 * @param autowidth the autowidth to set
+	 */
+	public void setAutowidth(boolean autowidth) {
+		this.autowidth = autowidth;
+	}
 
 	/**
 	 * @return the xPosition

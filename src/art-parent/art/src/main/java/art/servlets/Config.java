@@ -72,6 +72,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.app.VelocityEngine;
+import org.dozer.DozerBeanMapperBuilder;
+import org.dozer.Mapper;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.logging.slf4j.SLF4JLoggerImplFactory;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
@@ -87,10 +89,10 @@ import org.saiku.service.olap.OlapDiscoverService;
 import org.saiku.service.olap.ThinQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
+import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 /**
  * Initializes and shuts down the application, including creating and shutting
@@ -119,11 +121,13 @@ public class Config extends HttpServlet {
 	private static String artVersion;
 	private static final Map<String, String> languages = new TreeMap<>();
 	private static Configuration freemarkerConfig;
-	private static TemplateEngine thymeleafReportTemplateEngine;
+	private static SpringTemplateEngine thymeleafReportTemplateEngine;
+	private static SpringTemplateEngine defaultThymeleafTemplateEngine;
 	private static Map<Integer, SaikuConnectionProvider> saikuConnections = new HashMap<>();
 	private static VelocityEngine velocityEngine;
 	private static String serverTimeZoneDescription;
 	private static final Map<String, String> timeZones = new LinkedHashMap<>();
+	private static final Mapper dozerMapper = DozerBeanMapperBuilder.buildDefault();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -198,7 +202,7 @@ public class Config extends HttpServlet {
 	 */
 	private void ConfigInit() {
 		logger.debug("Entering ConfigInit");
-		
+
 		//http://nesbot.com/2011/11/28/play-2-morphia-logging-error
 		//https://stackoverflow.com/questions/5115635/morphia-logging-over-log4j-in-spring
 		MorphiaLoggerFactory.registerLogger(SLF4JLoggerImplFactory.class);
@@ -225,9 +229,7 @@ public class Config extends HttpServlet {
 		//load custom settings
 		loadCustomSettings(ctx);
 
-		createFreemarkerConfiguration();
-
-		createThymeleafReportTemplateEngine();
+		createDefaultThymeleafTemplateEngine(ctx);
 
 		createVelocityEngine();
 
@@ -309,6 +311,7 @@ public class Config extends HttpServlet {
 	 * Creates the freemarker configuration object
 	 */
 	private static void createFreemarkerConfiguration() {
+		freemarkerConfig = null;
 		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_26);
 
 		try {
@@ -332,27 +335,59 @@ public class Config extends HttpServlet {
 
 	/**
 	 * Creates the template engine to use for the thymeleaf report type. Uses
-	 * html template mode
+	 * html template mode.
+	 *
 	 */
 	private static void createThymeleafReportTemplateEngine() {
-		FileTemplateResolver templateResolver = new FileTemplateResolver();
-		templateResolver.setPrefix(getTemplatesPath());
-		templateResolver.setTemplateMode(TemplateMode.HTML);
-		templateResolver.setCharacterEncoding("UTF-8");
-		templateResolver.setCacheable(false);
+		FileTemplateResolver reportsTemplateResolver = new FileTemplateResolver();
+		reportsTemplateResolver.setPrefix(getTemplatesPath());
+		reportsTemplateResolver.setTemplateMode(TemplateMode.HTML);
+		reportsTemplateResolver.setCharacterEncoding("UTF-8");
+		reportsTemplateResolver.setCacheable(false);
 
+		thymeleafReportTemplateEngine = null;
 		thymeleafReportTemplateEngine = new SpringTemplateEngine();
-		((SpringTemplateEngine) thymeleafReportTemplateEngine).setEnableSpringELCompiler(true);
-		thymeleafReportTemplateEngine.setTemplateResolver(templateResolver);
+		thymeleafReportTemplateEngine.setEnableSpringELCompiler(true);
+		thymeleafReportTemplateEngine.setTemplateResolver(reportsTemplateResolver);
+	}
+
+	/**
+	 * Creates the default thymeleaf template engine for use within the
+	 * application
+	 *
+	 * @param ctx the servlet context
+	 */
+	private static void createDefaultThymeleafTemplateEngine(ServletContext ctx) {
+		ServletContextTemplateResolver defaultTemplateResolver = new ServletContextTemplateResolver(ctx);
+		defaultTemplateResolver.setPrefix("/WEB-INF/thymeleaf/");
+		defaultTemplateResolver.setTemplateMode(TemplateMode.HTML);
+		defaultTemplateResolver.setSuffix(".html");
+		defaultTemplateResolver.setCharacterEncoding("UTF-8");
+		defaultTemplateResolver.setCacheable(true);
+
+		defaultThymeleafTemplateEngine = new SpringTemplateEngine();
+		defaultThymeleafTemplateEngine.setEnableSpringELCompiler(true);
+		defaultThymeleafTemplateEngine.setTemplateResolver(defaultTemplateResolver);
 	}
 
 	/**
 	 * Returns the template engine to use for the thymeleaf report type
 	 *
-	 * @return
+	 * @return the template engine to use for the thymeleaf report type
 	 */
-	public static TemplateEngine getThymeleafReportTemplateEngine() {
+	public static SpringTemplateEngine getThymeleafReportTemplateEngine() {
 		return thymeleafReportTemplateEngine;
+	}
+
+	/**
+	 * Returns the template engine to use for default thymeleaf templates used
+	 * within the application
+	 *
+	 * @return the template engine to use for default thymeleaf templates used
+	 * within the application
+	 */
+	public static SpringTemplateEngine getDefaultThymeleafTemplateEngine() {
+		return defaultThymeleafTemplateEngine;
 	}
 
 	/**
@@ -719,7 +754,7 @@ public class Config extends HttpServlet {
 
 	/**
 	 * Loads custom settings
-	 * 
+	 *
 	 * @param ctx the servlet context
 	 */
 	public static void loadCustomSettings(ServletContext ctx) {
@@ -787,6 +822,10 @@ public class Config extends HttpServlet {
 
 		//ensure work directories exist
 		createWorkDirectories();
+
+		//create template engines which need to use updated template/work directories
+		createFreemarkerConfiguration();
+		createThymeleafReportTemplateEngine();
 	}
 
 	/**
@@ -945,12 +984,21 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Returns the full path to the thymeleaf templates directory
+	 * Returns the full path to the thymeleaf directory
 	 *
-	 * @return full path to the thymeleaf templates directory
+	 * @return full path to the thymeleaf directory
 	 */
-	public static String getThymeleafTemplatesPath() {
+	public static String getThymeleafPath() {
 		return webinfPath + "thymeleaf" + File.separator;
+	}
+
+	/**
+	 * Returns the full path to the job thymeleaf templates directory
+	 *
+	 * @return full path to the job thymeleaf templates directory
+	 */
+	public static String getJobTemplatesPath() {
+		return webinfPath + "thymeleaf" + File.separator + "jobs" + File.separator;
 	}
 
 	/**
@@ -988,7 +1036,7 @@ public class Config extends HttpServlet {
 	public static String getAppPath() {
 		return appPath;
 	}
-	
+
 	/**
 	 * Returns the full path to the js directory
 	 *
@@ -1412,4 +1460,26 @@ public class Config extends HttpServlet {
 
 		rootLogger.addAppender(whisperAppender);
 	}
+
+	/**
+	 * Returns the dozer mapper
+	 *
+	 * @return the dozer mapper
+	 */
+	public static Mapper getDozerMapper() {
+		return dozerMapper;
+	}
+
+	/**
+	 * Creates a deep copy of an object
+	 *
+	 * @param <T> the type
+	 * @param o the object to copy
+	 * @param type the destination object's class
+	 * @return a copy of the object
+	 */
+	public static <T> T copyObject(Object o, Class<T> type) {
+		return dozerMapper.map(o, type);
+	}
+
 }

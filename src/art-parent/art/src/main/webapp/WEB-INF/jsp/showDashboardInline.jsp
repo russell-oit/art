@@ -15,7 +15,7 @@
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 
-<div id="reportOutput" class="container-fluid">
+<div class="container-fluid">
 	<%-- https://stackoverflow.com/questions/26192952/single-full-width-column-in-row-with-twitter-bootstrap-grid --%>
 	<%-- https://stackoverflow.com/questions/18854586/best-practice-for-single-column-within-row-in-bootstrap-v3-grid-system --%>
 	<%-- http://www.helloerik.com/the-subtle-magic-behind-why-the-bootstrap-3-grid-works --%>
@@ -113,7 +113,7 @@
 		</c:choose>
 	</div>
 </div>
-
+	
 <script type="text/javascript">
 	$(document).ready(function () {
 		//https://stackoverflow.com/questions/109086/stop-setinterval-call-in-javascript
@@ -170,7 +170,7 @@
 		}
 	</c:forEach>
 
-		$('body').on('click', '.toggle', function () {
+		$('.toggle').on('click', function () {
 			var parentDiv = $(this).parent('div');
 			var contentDivId = parentDiv.data("content-div-id");
 			var portletUrl = parentDiv.data("url");
@@ -198,7 +198,7 @@
 			}
 		});
 
-		$('body').on('click', '.refresh', function () {
+		$('.refresh').on('click', function () {
 			var parentDiv = $(this).parent('div');
 			var contentDivId = parentDiv.data("content-div-id");
 			var portletUrl = parentDiv.data("url");

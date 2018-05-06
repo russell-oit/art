@@ -143,3 +143,9 @@ body {
 .modal-body {
 	overflow-x: auto;
 }
+
+.reportName {
+  padding-bottom: 9px;
+  margin: 20px 0 20px;
+  border-bottom: 1px solid #eee;
+}

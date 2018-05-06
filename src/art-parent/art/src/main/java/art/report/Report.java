@@ -31,6 +31,7 @@ import art.reportoptions.Reporti18nOptions;
 import art.encryption.AESCrypt;
 import art.encryption.AesEncryptor;
 import art.migration.PrefixTransformer;
+import art.parameter.Parameter;
 import art.reportoptions.C3Options;
 import art.reportoptions.CloneOptions;
 import art.reportoptions.PlotlyOptions;
@@ -41,6 +42,7 @@ import art.ruleValue.UserRuleValue;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
@@ -109,7 +111,9 @@ public class Report implements Serializable {
 	@Parsed
 	private String reportSource;
 	private boolean useBlankXmlaPassword;
+	@JsonIgnore
 	private ChartOptions chartOptions;
+	@JsonIgnore
 	private String reportSourceHtml; //used with text reports
 	private String createdBy;
 	private String updatedBy;
@@ -151,6 +155,7 @@ public class Report implements Serializable {
 	private boolean omitTitleRow;
 	@Parsed
 	private boolean lovUseDynamicDatasource;
+	@JsonIgnore
 	private GeneralReportOptions generalOptions;
 	@Parsed
 	private String openPassword;
@@ -161,6 +166,7 @@ public class Report implements Serializable {
 	private Report sourceReport;
 	@Parsed
 	private int sourceReportId;
+	@JsonIgnore
 	private CloneOptions cloneOptions;
 	private List<ReportGroup> reportGroups;
 	@Parsed
@@ -168,6 +174,10 @@ public class Report implements Serializable {
 	private Boolean dummyBoolean; //used for the test report functionality
 	@Parsed
 	private boolean useGroovy;
+	@Parsed
+	private String pivotTableJsSavedOptions;
+	@Parsed
+	private String gridstackSavedOptions;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -179,6 +189,81 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
+	private String dtName;
+	private String dtActiveStatus;
+	private String dtAction;
+	private String dtRowId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
+	private String reportGroupNames; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
+
+	/**
+	 * @return the dtName
+	 */
+	public String getDtName() {
+		return dtName;
+	}
+
+	/**
+	 * @param dtName the dtName to set
+	 */
+	public void setDtName(String dtName) {
+		this.dtName = dtName;
+	}
+
+	/**
+	 * @return the dtActiveStatus
+	 */
+	public String getDtActiveStatus() {
+		return dtActiveStatus;
+	}
+
+	/**
+	 * @param dtActiveStatus the dtActiveStatus to set
+	 */
+	public void setDtActiveStatus(String dtActiveStatus) {
+		this.dtActiveStatus = dtActiveStatus;
+	}
+
+	/**
+	 * @return the dtAction
+	 */
+	public String getDtAction() {
+		return dtAction;
+	}
+
+	/**
+	 * @param dtAction the dtAction to set
+	 */
+	public void setDtAction(String dtAction) {
+		this.dtAction = dtAction;
+	}
+
+	/**
+	 * @return the gridstackSavedOptions
+	 */
+	public String getGridstackSavedOptions() {
+		return gridstackSavedOptions;
+	}
+
+	/**
+	 * @param gridstackSavedOptions the gridstackSavedOptions to set
+	 */
+	public void setGridstackSavedOptions(String gridstackSavedOptions) {
+		this.gridstackSavedOptions = gridstackSavedOptions;
+	}
+
+	/**
+	 * @return the pivotTableJsSavedOptions
+	 */
+	public String getPivotTableJsSavedOptions() {
+		return pivotTableJsSavedOptions;
+	}
+
+	/**
+	 * @param pivotTableJsSavedOptions the pivotTableJsSavedOptions to set
+	 */
+	public void setPivotTableJsSavedOptions(String pivotTableJsSavedOptions) {
+		this.pivotTableJsSavedOptions = pivotTableJsSavedOptions;
+	}
 
 	/**
 	 * @return the useGroovy
@@ -727,21 +812,6 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Determine whether this is an lov report
-	 *
-	 * @return
-	 */
-	public boolean isLov() {
-		ReportType reportTypeEnum = ReportType.toEnum(reportTypeId);
-
-		if (reportTypeEnum == ReportType.LovDynamic || reportTypeEnum == ReportType.LovDynamic) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * @return the createdBy
 	 */
 	public String getCreatedBy() {
@@ -1121,10 +1191,29 @@ public class Report implements Serializable {
 	}
 
 	/**
+	 * Returns <code>true</code> if this is an lov report
+	 *
+	 * @return <code>true</code> if this is an lov report
+	 */
+	@JsonIgnore
+	public boolean isLov() {
+		ReportType reportTypeEnum = ReportType.toEnum(reportTypeId);
+
+		switch (reportTypeEnum) {
+			case LovDynamic:
+			case LovStatic:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
 	 * Returns the report ids for reports defined within a dashboard report
 	 *
 	 * @return the report ids for reports defined within a dashboard report
 	 */
+	@JsonIgnore
 	public List<Integer> getDashboardReportIds() {
 		List<Integer> reportIds = new ArrayList<>();
 
@@ -1255,7 +1344,7 @@ public class Report implements Serializable {
 			if (c3Options == null) {
 				generalOptions.setC3(defaultC3Options);
 			}
-			
+
 			PlotlyOptions plotlyOptions = generalOptions.getPlotly();
 			if (plotlyOptions == null) {
 				generalOptions.setPlotly(defaultPlotlyOptions);
@@ -1389,16 +1478,16 @@ public class Report implements Serializable {
 	 * @return the names of the report groups that this report belongs to
 	 */
 	public String getReportGroupNames() {
-		String namesString = "";
+		reportGroupNames = "";
 		if (CollectionUtils.isNotEmpty(reportGroups)) {
 			List<String> names = new ArrayList<>();
 			for (ReportGroup reportGroup : reportGroups) {
 				names.add(reportGroup.getName());
 			}
-			namesString = StringUtils.join(names, ", ");
+			reportGroupNames = StringUtils.join(names, ", ");
 		}
 
-		return namesString;
+		return reportGroupNames;
 	}
 
 	/**
@@ -1415,6 +1504,98 @@ public class Report implements Serializable {
 	public void encryptPasswords() {
 		openPassword = AesEncryptor.encrypt(openPassword);
 		modifyPassword = AesEncryptor.encrypt(modifyPassword);
+	}
+
+	/**
+	 * Encrypts all passwords fields in the report including for datasources etc
+	 */
+	public void encryptAllPasswords() {
+		encryptPasswords();
+
+		if (datasource != null) {
+			datasource.encryptPassword();
+		}
+
+		if (encryptor != null) {
+			encryptor.encryptPasswords();
+		}
+
+		if (reportParams != null) {
+			for (ReportParameter reportParam : reportParams) {
+				Parameter reportParamParameter = reportParam.getParameter();
+				reportParamParameter.encryptAllPasswords();
+			}
+		}
+	}
+
+	/**
+	 * Encrypts all passwords fields in the report including for datasources etc
+	 * where the respective clearTextPassword field is true
+	 */
+	public void encryptAllClearTextPasswords() {
+		if (clearTextPasswords) {
+			encryptPasswords();
+		}
+
+		if (datasource != null && datasource.isClearTextPassword()) {
+			datasource.encryptPassword();
+		}
+
+		if (encryptor != null && encryptor.isClearTextPasswords()) {
+			encryptor.encryptPasswords();
+		}
+	}
+
+	/**
+	 * Returns a copy of this report with only some fields filled
+	 *
+	 * @return a copy of this report with only some fields filled
+	 */
+	@JsonIgnore
+	public Report getBasicReport() {
+		Report basic = new Report();
+
+		basic.setReportId(reportId);
+		basic.setName(name);
+		basic.setDescription(description);
+		basic.setUseGroovy(useGroovy);
+		basic.setReportSource(reportSource);
+		basic.setReportType(reportType);
+		basic.setReportTypeId(reportTypeId);
+		basic.setDtName(dtName);
+		basic.setDtActiveStatus(dtActiveStatus);
+		basic.setDtAction(dtAction);
+		basic.setCreatedBy(createdBy);
+		basic.setUpdatedBy(updatedBy);
+		basic.setReportGroups(reportGroups);
+		basic.setUseGroovy(useGroovy);
+		basic.setPivotTableJsSavedOptions(pivotTableJsSavedOptions);
+		basic.setGridstackSavedOptions(gridstackSavedOptions);
+		basic.setOptions(options);
+		basic.setReportSource(reportSource);
+
+		if (reportType == ReportType.Text) {
+			basic.setReportSourceHtml(reportSource);
+		}
+
+		if (datasource != null) {
+			Datasource basicDatasource = new Datasource();
+			basicDatasource.setDatasourceId(datasource.getDatasourceId());
+			basicDatasource.setName(datasource.getName());
+			basic.setDatasource(basicDatasource);
+		}
+
+		return basic;
+	}
+
+	/**
+	 * Returns the string to use as the record's datatable rowid
+	 *
+	 * @return the string to use as the record's datatable rowid
+	 */
+	public String getDtRowId() {
+		dtRowId = "row-" + reportId;
+		return dtRowId;
 	}
 
 }

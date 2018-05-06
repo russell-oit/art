@@ -79,6 +79,7 @@ import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JFreeChartOptions;
 import art.reportoptions.MongoDbOptions;
 import art.reportoptions.OrgChartOptions;
+import art.reportoptions.PivotTableJsOptions;
 import art.reportoptions.PlotlyOptions;
 import art.reportoptions.ReportEngineOptions;
 import art.reportoptions.WebMapOptions;
@@ -399,7 +400,7 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.ReactPivot) {
 				generateReactPivotReport();
 			} else if (reportType.isPivotTableJs()) {
-				generatePivotTableJsOutput(reportType);
+				generatePivotTableJsReport();
 			} else if (reportType.isDygraphs()) {
 				generateDygraphReport();
 			} else if (reportType.isDataTables()) {
@@ -881,14 +882,58 @@ public class ReportOutputGenerator {
 	}
 
 	/**
-	 * Generates pivot table js output
+	 * Generates a pivottable.js report
 	 *
-	 * @param reportType the report type for the output
 	 * @throws SQLException
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private void generatePivotTableJsOutput(ReportType reportType) throws SQLException, IOException, ServletException {
+	private void generatePivotTableJsReport() throws SQLException, IOException, ServletException {
+		PivotTableJsOptions pivotTableJsOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			pivotTableJsOptions = new PivotTableJsOptions();
+		} else {
+			pivotTableJsOptions = ArtUtils.jsonToObject(options, PivotTableJsOptions.class);
+		}
+
+		String reportTemplate = report.getTemplate();
+		String optionsTemplate = pivotTableJsOptions.getTemplate();
+
+		logger.debug("optionsTemplate='{}'", optionsTemplate);
+
+		if (StringUtils.isBlank(optionsTemplate)) {
+			pivotTableJsOptions.setTemplate(reportTemplate);
+		}
+
+		generatePivotTableJsOutput(reportType, pivotTableJsOptions);
+	}
+
+	/**
+	 * Generates pivottable.js output for a standard/tabular report
+	 *
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateStandardReportPivotTableJsOutput() throws SQLException, IOException, ServletException {
+		PivotTableJsOptions pivotTableJsOptions = report.getGeneralOptions().getPivotTableJs();
+		generatePivotTableJsOutput(ReportType.PivotTableJs, pivotTableJsOptions);
+	}
+
+	/**
+	 * Generates pivot table js output
+	 *
+	 * @param reportType the report type for the output
+	 * @param pivotTableJsOptions report options
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generatePivotTableJsOutput(ReportType reportType,
+			PivotTableJsOptions pivotTableJsOptions) throws SQLException,
+			IOException, ServletException {
+
 		logger.debug("Entering generatePivotTableJsOutput");
 
 		if (isJob) {
@@ -896,6 +941,11 @@ public class ReportOutputGenerator {
 		}
 
 		request.setAttribute("reportType", reportType);
+		request.setAttribute("report", report);
+
+		if (pivotTableJsOptions == null) {
+			pivotTableJsOptions = new PivotTableJsOptions();
+		}
 
 		if (reportType == ReportType.PivotTableJs) {
 			rs = reportRunner.getResultSet();
@@ -912,7 +962,7 @@ public class ReportOutputGenerator {
 			request.setAttribute("input", jsonData);
 		}
 
-		String templateFileName = report.getTemplate();
+		String templateFileName = pivotTableJsOptions.getTemplate();
 		String jsTemplatesPath = Config.getJsTemplatesPath();
 		String fullTemplateFileName = jsTemplatesPath + templateFileName;
 
@@ -927,16 +977,23 @@ public class ReportOutputGenerator {
 			request.setAttribute("templateFileName", templateFileName);
 		}
 
-		if (reportType == ReportType.PivotTableJsCsvServer) {
-			String optionsString = report.getOptions();
+		String cssFileName = pivotTableJsOptions.getCssFile();
 
-			if (StringUtils.isBlank(optionsString)) {
-				throw new IllegalArgumentException("Options not specified");
+		logger.debug("cssFileName='{}'", cssFileName);
+
+		//need to explicitly check if file name is empty string
+		//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new IllegalStateException("Css file not found: " + fullCssFileName);
 			}
+			request.setAttribute("cssFileName", cssFileName);
+		}
 
-			ObjectMapper mapper = new ObjectMapper();
-			CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
-			String dataFileName = options.getDataFile();
+		if (reportType == ReportType.PivotTableJsCsvServer) {
+			String dataFileName = pivotTableJsOptions.getDataFile();
 
 			logger.debug("dataFileName='{}'", dataFileName);
 
@@ -971,8 +1028,19 @@ public class ReportOutputGenerator {
 			request.setAttribute("locale", localeString);
 		}
 
+		String configJson = ArtUtils.objectToJson(pivotTableJsOptions.getConfig());
+		request.setAttribute("configJson", configJson);
+
+		String savedConfigJson = report.getPivotTableJsSavedOptions();
+		request.setAttribute("savedConfigJson", savedConfigJson);
+
+		ReportService reportService = new ReportService();
+		boolean exclusiveAccess = reportService.hasExclusiveAccess(user, report.getReportId());
+		request.setAttribute("exclusiveAccess", exclusiveAccess);
+
 		String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);
 		request.setAttribute("outputDivId", outputDivId);
+		request.setAttribute("options", pivotTableJsOptions);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
 	}
 
@@ -992,7 +1060,7 @@ public class ReportOutputGenerator {
 
 		switch (reportFormat) {
 			case pivotTableJs:
-				generatePivotTableJsOutput(ReportType.PivotTableJs);
+				generateStandardReportPivotTableJsOutput();
 				break;
 			case c3:
 				generateStandardReportC3Output();
@@ -1345,10 +1413,13 @@ public class ReportOutputGenerator {
 		rs = reportRunner.getResultSet();
 
 		ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+
 		thymeleafOutput.setContextPath(contextPath);
 		thymeleafOutput.setLocale(locale);
 		thymeleafOutput.setResultSet(rs);
 		thymeleafOutput.setData(groovyData);
+		thymeleafOutput.setMessageSource(messageSource);
+
 		thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
 
 		if (groovyDataSize == null) {
@@ -2538,6 +2609,10 @@ public class ReportOutputGenerator {
 
 			if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 				standardOutput.setAjax(true);
+			}
+
+			if (request.getAttribute("pageHeaderLoaded") != null) {
+				standardOutput.setPageHeaderLoaded(true);
 			}
 		}
 

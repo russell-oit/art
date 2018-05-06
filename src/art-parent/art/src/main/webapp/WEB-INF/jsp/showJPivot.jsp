@@ -191,7 +191,7 @@
 										<td>
 											<input type="text" name="newPivotName" value="" size="20" maxlength="50" />
 											<c:if test="${exclusiveAccess}">
-											<input type="checkbox" name="overwrite" /><spring:message code="jpivot.text.overwrite"/> &nbsp;
+											<input type="checkbox" name="overwrite" /><spring:message code="reports.text.overwrite"/> &nbsp;
 											<input type="checkbox" name="delete" /><spring:message code="page.action.delete"/> &nbsp;
 										</c:if>
 										<button type="submit" id="save" class="btn btn-default action">

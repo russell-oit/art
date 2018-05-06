@@ -15,48 +15,62 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.migration;
+package art.reportoptions;
 
-import art.enums.MigrationFileFormat;
-import art.enums.MigrationRecordType;
-import java.io.Serializable;
+import java.util.Map;
 
 /**
- * Represents an import records operation
- * 
+ * Report options for pivottable.js reports
+ *
  * @author Timothy Anyona
  */
-public class ImportRecords implements Serializable {
-	
+public class PivotTableJsOptions extends CsvServerOptions {
+
 	private static final long serialVersionUID = 1L;
-	private MigrationRecordType recordType;
-	private MigrationFileFormat fileFormat = MigrationFileFormat.json;
+	private String cssFile;
+	private Map<String, Object> config;
+	private String template;
 
 	/**
-	 * @return the fileFormat
+	 * @return the cssFile
 	 */
-	public MigrationFileFormat getFileFormat() {
-		return fileFormat;
+	public String getCssFile() {
+		return cssFile;
 	}
 
 	/**
-	 * @param fileFormat the fileFormat to set
+	 * @param cssFile the cssFile to set
 	 */
-	public void setFileFormat(MigrationFileFormat fileFormat) {
-		this.fileFormat = fileFormat;
+	public void setCssFile(String cssFile) {
+		this.cssFile = cssFile;
 	}
 
 	/**
-	 * @return the recordType
+	 * @return the config
 	 */
-	public MigrationRecordType getRecordType() {
-		return recordType;
+	public Map<String, Object> getConfig() {
+		return config;
 	}
 
 	/**
-	 * @param recordType the recordType to set
+	 * @param config the config to set
 	 */
-	public void setRecordType(MigrationRecordType recordType) {
-		this.recordType = recordType;
+	public void setConfig(Map<String, Object> config) {
+		this.config = config;
 	}
+
+	/**
+	 * @return the template
+	 */
+	public String getTemplate() {
+		return template;
+	}
+
+	/**
+	 * @param template the template to set
+	 */
+	public void setTemplate(String template) {
+		this.template = template;
+	}
+
 }

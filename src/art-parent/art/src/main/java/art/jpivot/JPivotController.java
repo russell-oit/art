@@ -479,12 +479,12 @@ public class JPivotController {
 					report.setDescription(queryDescription);
 				}
 				reportService.updateReport(report, sessionUser);
-				redirectAttributes.addFlashAttribute("message", "jpivot.message.reportSaved");
+				redirectAttributes.addFlashAttribute("message", "reports.message.reportSaved");
 				return "redirect:/success";
 			} else if (deleting) {
 				//delete query
 				reportService.deleteReport(reportId);
-				redirectAttributes.addFlashAttribute("message", "jpivot.message.reportDeleted");
+				redirectAttributes.addFlashAttribute("message", "reports.message.reportDeleted");
 				return "redirect:/success";
 			} else {
 				//create new query based on current query
@@ -506,7 +506,7 @@ public class JPivotController {
 				String queryName = request.getParameter("newPivotName");
 				if (StringUtils.isBlank(queryName)) {
 					//no name provided for the new query. create a default name
-					queryName = report.getLocalizedName(locale) + "-" + RandomStringUtils.randomAlphanumeric(2);
+					queryName = StringUtils.left(report.getLocalizedName(locale),45) + "-" + RandomStringUtils.randomAlphanumeric(4);
 				}
 				newReport.setName(queryName);
 

@@ -23,6 +23,7 @@ import art.migration.PrefixTransformer;
 import art.reportgroup.ReportGroup;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
@@ -62,6 +63,7 @@ public class User implements Serializable {
 	private Date updateDate;
 	private List<UserGroup> userGroups;
 	private String effectiveStartReport;
+	@JsonIgnore
 	private ReportGroup effectiveDefaultReportGroup;
 	private boolean useBlankPassword; //only used for user interface logic
 	private String createdBy;
@@ -464,10 +466,11 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Determine if this is an admin user
+	 * Returns <code>true</code> if this is an admin user
 	 *
-	 * @return
+	 * @return <code>true</code> if this is an admin user
 	 */
+	@JsonIgnore
 	public boolean isAdminUser() {
 		if (accessLevel == null || accessLevel.getValue() < AccessLevel.JuniorAdmin.getValue()) {
 			return false;
@@ -477,10 +480,11 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Determine if this is the public user
+	 * Returns <code>true</code> if this is the public user
 	 *
-	 * @return
+	 * @return <code>true</code> if this is the public user
 	 */
+	@JsonIgnore
 	public boolean isPublicUser() {
 		if (StringUtils.equals(username, ArtUtils.PUBLIC_USER)) {
 			return true;

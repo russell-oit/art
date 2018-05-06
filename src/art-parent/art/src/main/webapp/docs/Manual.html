@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.5"> 
+  <meta name="version" content="3.6"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -494,8 +494,8 @@
         <td>A short SQL query used to determine if a connection is alive e.g. "Select 1"</td> 
        </tr> 
        <tr> 
-        <td><strong>Connection Pool Timeout</strong></td> 
-        <td>How long an idle connection should be maintained in the connection pool before being closed. This setting applies to the ART database as well as all report datasources.</td> 
+        <td><strong>Connection Pool Timeout (Mins)</strong></td> 
+        <td>How long in minutes an idle connection should be maintained in the connection pool before being closed. This setting applies to the ART database as well as all report datasources.</td> 
        </tr> 
        <tr> 
         <td><strong>Max Pool Connections</strong></td> 
@@ -879,8 +879,8 @@
         <td>A short SQL query that can be used to determine if a connection is OK e.g. "Select 1"</td> 
        </tr> 
        <tr> 
-        <td><strong>Connection Pool Timeout</strong></td> 
-        <td>How long a connection should be maintained in the connection pool before being closed</td> 
+        <td><strong>Connection Pool Timeout (Mins)</strong></td> 
+        <td>How long in minutes an idle connection should be maintained in the connection pool before being closed</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -1327,6 +1327,10 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        <tr> 
         <td><strong>Use Groovy</strong></td> 
         <td>Whether the report source is groovy rather than SQL</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Saved Options</strong></td> 
+        <td>Dynamically generated options e.g. when saving the state of a PivotTable.js report</td> 
        </tr> 
        <tr> 
         <td><strong>Options</strong></td> 
@@ -4456,27 +4460,39 @@ WHERE REGION = #region#
       <tbody> 
        <tr> 
         <td><code>&lt;XPOSITION&gt;</code></td> 
-        <td>Integer. <strong>required</strong></td> 
+        <td>Integer</td> 
         <td></td> 
-        <td>The x axis position of the item</td> 
+        <td>The x axis position of the item. From 0 to <code>&lt;DASHBOARDWIDTH&gt;</code></td> 
        </tr> 
        <tr> 
         <td><code>&lt;YPOSITION&gt;</code></td> 
-        <td>Integer. <strong>required</strong></td> 
+        <td>Integer</td> 
         <td></td> 
         <td>The y axis position of the item</td> 
        </tr> 
        <tr> 
         <td><code>&lt;WIDTH&gt;</code></td> 
-        <td>Integer. <strong>required</strong></td> 
-        <td></td> 
+        <td>Integer</td> 
+        <td>2</td> 
         <td>The width of the item. This defines the number of columns that the item will occupy, in relation to the number of columns of the whole grid as defined by the dashboard's <code>&lt;DASHBOARDWIDTH&gt;</code> property.</td> 
        </tr> 
        <tr> 
         <td><code>&lt;HEIGHT&gt;</code></td> 
-        <td>Integer. <strong>required</strong></td> 
-        <td></td> 
+        <td>Integer</td> 
+        <td>2</td> 
         <td>The height of the item. This defines the number of rows that the item will occupy, one row being the size defined in the dashboard's <code>&lt;CELLHEIGHT&gt;</code> property.</td> 
+       </tr> 
+       <tr> 
+        <td><code>&lt;AUTOWIDTH&gt;</code></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether the width should be automatically set according to the item contents</td> 
+       </tr> 
+       <tr> 
+        <td><code>&lt;AUTOHEIGHT&gt;</code></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether the height should be automatically set according to the item contents</td> 
        </tr> 
        <tr> 
         <td><code>&lt;NORESIZE&gt;</code></td> 
@@ -4944,7 +4960,7 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>Template</strong></td> 
-        <td>A thymeleaf template file that can be used as a template for the email body. The template file name must have a <strong>.html</strong> extension.</td> 
+        <td>A thymeleaf template file that can be used as a template for the email body</td> 
        </tr> 
        <tr> 
         <td><strong>SMTP Server</strong></td> 
@@ -5011,7 +5027,7 @@ WHERE {#!saleTypes#}
         <td>Shared holidays configured from the <strong>Configure | Holidays</strong> menu that should be applied for this job.</td> 
        </tr> 
        <tr> 
-        <td><strong>Error Notification</strong></td> 
+        <td><strong>Error Notification Email</strong></td> 
         <td>An email address that should be notified if an error occurrs while running the job. Multiple email addresses can be specified separated by commas. The "From" email address will be that which is set in the <strong>Settings</strong> page under the <strong>Error Notification</strong> section. The SMTP server used is that configured in the Settings page.</td> 
        </tr> 
        <tr> 

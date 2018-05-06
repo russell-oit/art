@@ -354,6 +354,38 @@ Edit report page
 					options.val(optionsEditor.getSession().getValue());
 				});
 
+				var pivotTableJsSavedOptionsEditor = ace.edit("pivotTableJsSavedOptionsEditor");
+				pivotTableJsSavedOptionsEditor.$blockScrolling = Infinity;
+				pivotTableJsSavedOptionsEditor.getSession().setMode("ace/mode/json");
+				pivotTableJsSavedOptionsEditor.setHighlightActiveLine(false);
+				pivotTableJsSavedOptionsEditor.setShowPrintMargin(false);
+				pivotTableJsSavedOptionsEditor.setOption("showLineNumbers", false);
+				pivotTableJsSavedOptionsEditor.setOption("maxLines", 20);
+				pivotTableJsSavedOptionsEditor.setOption("minLines", 3);
+				document.getElementById('pivotTableJsSavedOptionsEditor').style.fontSize = '14px';
+
+				var pivotTableJsSavedOptions = $('#pivotTableJsSavedOptions');
+				pivotTableJsSavedOptionsEditor.getSession().setValue(pivotTableJsSavedOptions.val());
+				pivotTableJsSavedOptionsEditor.getSession().on('change', function () {
+					pivotTableJsSavedOptions.val(pivotTableJsSavedOptionsEditor.getSession().getValue());
+				});
+
+				var gridstackSavedOptionsEditor = ace.edit("gridstackSavedOptionsEditor");
+				gridstackSavedOptionsEditor.$blockScrolling = Infinity;
+				gridstackSavedOptionsEditor.getSession().setMode("ace/mode/json");
+				gridstackSavedOptionsEditor.setHighlightActiveLine(false);
+				gridstackSavedOptionsEditor.setShowPrintMargin(false);
+				gridstackSavedOptionsEditor.setOption("showLineNumbers", false);
+				gridstackSavedOptionsEditor.setOption("maxLines", 20);
+				gridstackSavedOptionsEditor.setOption("minLines", 3);
+				document.getElementById('gridstackSavedOptionsEditor').style.fontSize = '14px';
+
+				var gridstackSavedOptions = $('#gridstackSavedOptions');
+				gridstackSavedOptionsEditor.getSession().setValue(gridstackSavedOptions.val());
+				gridstackSavedOptionsEditor.getSession().on('change', function () {
+					gridstackSavedOptions.val(gridstackSavedOptionsEditor.getSession().getValue());
+				});
+
 				var jsonEditor = ace.edit("jsonEditor");
 				jsonEditor.$blockScrolling = Infinity;
 				jsonEditor.getSession().setMode("ace/mode/json");
@@ -389,6 +421,44 @@ Edit report page
 				});
 
 				toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
+
+				$("#applyOptions").on("click", function () {
+					var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
+					switch (reportTypeId) {
+						case 129: //gridstack dashboard
+							var items = [];
+
+							$('.grid-stack-item.ui-draggable').each(function () {
+								var $this = $(this);
+								items.push({
+									index: parseInt($this.attr('data-index'), 10),
+									x: parseInt($this.attr('data-gs-x'), 10),
+									y: parseInt($this.attr('data-gs-y'), 10),
+									width: parseInt($this.attr('data-gs-width'), 10),
+									height: parseInt($this.attr('data-gs-height'), 10)
+								});
+							});
+
+							gridstackSavedOptionsEditor.getSession().setValue(JSON.stringify(items));
+							break;
+						case 132: //pivottable.js
+						case 133: //pivottable.js csv local
+						case 134: //pivottable.js csv server
+							var config = $(".pivotTableJsOutputDiv").data("pivotUIOptions");
+							var config_copy = JSON.parse(JSON.stringify(config));
+							//delete some values which will not serialize to JSON
+							delete config_copy["aggregators"];
+							delete config_copy["renderers"];
+							//delete some bulky default values
+							delete config_copy["rendererOptions"];
+							delete config_copy["localeStrings"];
+							
+							pivotTableJsSavedOptionsEditor.getSession().setValue(JSON.stringify(config_copy));
+							break;
+						default:
+							break;
+					}
+				});
 			});
 		</script>
 
@@ -991,6 +1061,38 @@ Edit report page
 						} else {
 							$("#encryptorDiv").hide();
 						}
+				}
+
+				//show/hide pivottable.js saved options
+				switch (reportTypeId) {
+					case 132: //pivottable.js
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
+						$("#pivotTableJsSavedOptionsDiv").show();
+						break;
+					default:
+						$("#pivotTableJsSavedOptionsDiv").hide();
+				}
+
+				//show/hide gridstack saved options field
+				switch (reportTypeId) {
+					case 129: //gridstack dashboard
+						$("#gridstackSavedOptionsDiv").show();
+						break;
+					default:
+						$("#gridstackSavedOptionsDiv").hide();
+				}
+
+				//show/hide apply button
+				switch (reportTypeId) {
+					case 129: //gridstack dashboard
+					case 132: //pivottable.js
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
+						$("#applyOptions").show();
+						break;
+					default:
+						$("#applyOptions").hide();
 				}
 			}
 		</script>
@@ -1711,6 +1813,26 @@ Edit report page
 					</div>
 				</div>
 
+				<div id="pivotTableJsSavedOptionsDiv" class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="pivotTableJsSavedOptions">
+						<spring:message code="reports.label.savedOptions"/>
+					</label>
+					<div class="col-md-12">
+						<form:hidden path="pivotTableJsSavedOptions"/>
+						<div id="pivotTableJsSavedOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
+					</div>
+				</div>
+
+				<div id="gridstackSavedOptionsDiv" class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="gridstackSavedOptions">
+						<spring:message code="reports.label.savedOptions"/>
+					</label>
+					<div class="col-md-12">
+						<form:hidden path="gridstackSavedOptions"/>
+						<div id="gridstackSavedOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
+					</div>
+				</div>
+
 				<div id="optionsDiv" class="form-group">
 					<label class="control-label col-md-12" style="text-align: center" for="options">
 						<spring:message code="page.label.options"/>
@@ -1743,6 +1865,9 @@ Edit report page
 				<div class="form-group">
 					<div class="col-md-12">
 						<span class="pull-right">
+							<button type="button" class="btn btn-default" id="applyOptions">
+								<spring:message code="page.button.apply"/>
+							</button>
 							<button type="button" id="testReportData" class="btn btn-default action">
 								<spring:message code="reports.button.testData"/>
 							</button>

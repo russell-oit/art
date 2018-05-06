@@ -156,7 +156,7 @@ Display rules
 				</button>
 			</div>
 			<div class="btn-group">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Users">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Rules">
 					<spring:message code="page.text.import"/>
 				</a>
 				<button type="button" id="exportRecords" class="btn btn-default">
