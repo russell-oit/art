@@ -27,7 +27,7 @@
 		<owasp.encoder.version>1.2.1</owasp.encoder.version>
 		<thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
 		<xdocreport.version>2.0.1</xdocreport.version>
-		<jclouds.version>2.0.3</jclouds.version>
+		<jclouds.version>2.1.0</jclouds.version>
 		<spring.security.version>4.2.4.RELEASE</spring.security.version>
 		<morphia.version>1.3.2</morphia.version>
 	</properties>
@@ -181,7 +181,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>16.0.1</version>
+				<version>18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.amazonaws</groupId>
@@ -896,6 +896,11 @@
 		<dependency>
 			<groupId>org.apache.jclouds.provider</groupId>
 			<artifactId>azureblob</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.provider</groupId>
+			<artifactId>b2</artifactId>
 			<version>${jclouds.version}</version>
 		</dependency>
 		<dependency>

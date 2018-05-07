@@ -1,3 +1,6 @@
+ART 3.7
+* Updated jclouds
+
 ART 3.6
 * Changed job templates directory to WEB-INF\thymeleaf\jobs
 * Allow saving of pivottable.js state

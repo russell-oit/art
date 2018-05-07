@@ -141,7 +141,6 @@
 				jsonEditor.getSession().on('change', function () {
 					options.val(jsonEditor.getSession().getValue());
 				});
-
 			});
 		</script>
 
@@ -188,6 +187,7 @@
 					case 'S3jclouds':
 					case 'S3AwsSdk':
 					case 'Azure':
+					case 'B2':
 					case 'WebDav':
 						$("#subDirectoryDiv").show();
 						break;

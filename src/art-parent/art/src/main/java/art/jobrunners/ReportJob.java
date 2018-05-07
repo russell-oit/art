@@ -137,6 +137,8 @@ import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
+import org.jclouds.blobstore.domain.BlobBuilder;
+import org.jclouds.blobstore.domain.BlobBuilder.PayloadBlobBuilder;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jsoup.Connection.Method;
@@ -471,6 +473,9 @@ public class ReportJob implements org.quartz.Job {
 					case Azure:
 						sendFileToAzure(destination, fullLocalFileName);
 						break;
+					case B2:
+						sendFileToB2(destination, fullLocalFileName);
+						break;
 					case WebDav:
 						sendFileToWebDav(destination, fullLocalFileName);
 						break;
@@ -663,13 +668,24 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Copies the generated file to an amazon s3 or compatible storage provider
+	 * Copies the generated file to microsoft azure blob storage
 	 *
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
 	private void sendFileToAzure(Destination destination, String fullLocalFileName) {
 		String provider = "azureblob";
+		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+	}
+
+	/**
+	 * Copies the generated file to backblaze b2 storage
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToB2(Destination destination, String fullLocalFileName) {
+		String provider = "b2";
 		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
 
@@ -842,18 +858,29 @@ public class ReportJob implements org.quartz.Job {
 
 			BlobStore blobStore = context.getBlobStore();
 
+			//https://www.javatips.net/api/jclouds-master/providers/b2/src/test/java/org/jclouds/b2/blobstore/integration/B2BlobIntegrationLiveTest.java
 			ByteSource payload = Files.asByteSource(localFile);
-			Blob blob = blobStore.blobBuilder(remoteFileName)
+			PayloadBlobBuilder blobBuilder = blobStore.blobBuilder(remoteFileName)
 					.payload(payload)
-					.contentDisposition(fileName)
 					.contentLength(payload.size())
-					.contentType(mimeType)
-					.build();
+					.contentType((String)null);
+
+			if (!StringUtils.equals(provider, "b2")) {
+				blobBuilder.contentDisposition(fileName)
+						.contentType(mimeType);
+			}
+
+			Blob blob = blobBuilder.build();
 
 			String containerName = destination.getPath();
 
 			// Upload the Blob
-			String eTag = blobStore.putBlob(containerName, blob, multipart());
+			String eTag;
+			if (StringUtils.equals(provider, "b2")) {
+				eTag = blobStore.putBlob(containerName, blob);
+			} else {
+				eTag = blobStore.putBlob(containerName, blob, multipart());
+			}
 			logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", fileName, eTag, jobId);
 		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
