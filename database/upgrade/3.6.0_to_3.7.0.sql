@@ -2,10 +2,14 @@
 
 -- CHANGES:
 -- update database version
+-- add json key file field
 
 -- ------------------------------------------------
 
 
 -- update database version
 UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='3.7-snapshot';
+
+-- add json key file field
+ALTER TABLE ART_DESTINATIONS ADD GOOGLE_JSON_KEY_FILE VARCHAR(100);
 

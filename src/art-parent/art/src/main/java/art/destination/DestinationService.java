@@ -99,6 +99,7 @@ public class DestinationService {
 			destination.setSubDirectory(rs.getString("SUB_DIRECTORY"));
 			destination.setCreateDirectories(rs.getBoolean("CREATE_DIRECTORIES"));
 			destination.setOptions(rs.getString("DESTINATION_OPTIONS"));
+			destination.setGoogleJsonKeyFile(rs.getString("GOOGLE_JSON_KEY_FILE"));
 			destination.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			destination.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			destination.setCreatedBy(rs.getString("CREATED_BY"));
@@ -344,9 +345,9 @@ public class DestinationService {
 					+ " DESTINATION_TYPE, SERVER, PORT, DESTINATION_USER,"
 					+ " DESTINATION_PASSWORD, USER_DOMAIN,"
 					+ " DESTINATION_PATH, SUB_DIRECTORY,"
-					+ " CREATE_DIRECTORIES, DESTINATION_OPTIONS,"
+					+ " CREATE_DIRECTORIES, DESTINATION_OPTIONS, GOOGLE_JSON_KEY_FILE,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 17) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -363,6 +364,7 @@ public class DestinationService {
 				destination.getSubDirectory(),
 				BooleanUtils.toInteger(destination.isCreateDirectories()),
 				destination.getOptions(),
+				destination.getGoogleJsonKeyFile(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -378,6 +380,7 @@ public class DestinationService {
 					+ " DESTINATION_USER=?, DESTINATION_PASSWORD=?,"
 					+ " USER_DOMAIN=?, DESTINATION_PATH=?,"
 					+ " SUB_DIRECTORY=?, CREATE_DIRECTORIES=?, DESTINATION_OPTIONS=?,"
+					+ " GOOGLE_JSON_KEY_FILE=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE DESTINATION_ID=?";
 
@@ -395,6 +398,7 @@ public class DestinationService {
 				destination.getSubDirectory(),
 				BooleanUtils.toInteger(destination.isCreateDirectories()),
 				destination.getOptions(),
+				destination.getGoogleJsonKeyFile(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				destination.getDestinationId()

@@ -14,23 +14,9 @@
 		<MaxSize>512</MaxSize>
 	</appender>
 	
-	    <logger name="org.jclouds">
-        <level value="DEBUG" />
-    </logger>
-
-    <logger name="jclouds.wire">
-        <level value="DEBUG" />
-    </logger>
-
-    <logger name="jclouds.headers">
-        <level value="DEBUG" />
-    </logger>
-	
-	
 	<logger name="org.quartz" level="info"/>
 	
 	<logger name="art" level="info"/>
-	
 	
 	<root level="warn">
 		<appender-ref ref="stdout"/>

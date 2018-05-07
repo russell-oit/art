@@ -66,6 +66,22 @@ public class Destination implements Serializable {
 	private boolean createDirectories;
 	@Parsed
 	private boolean clearTextPassword;
+	@Parsed
+	private String googleJsonKeyFile;
+
+	/**
+	 * @return the googleJsonKeyFile
+	 */
+	public String getGoogleJsonKeyFile() {
+		return googleJsonKeyFile;
+	}
+
+	/**
+	 * @param googleJsonKeyFile the googleJsonKeyFile to set
+	 */
+	public void setGoogleJsonKeyFile(String googleJsonKeyFile) {
+		this.googleJsonKeyFile = googleJsonKeyFile;
+	}
 
 	/**
 	 * @return the clearTextPassword

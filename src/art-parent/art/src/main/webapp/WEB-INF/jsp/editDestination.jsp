@@ -35,6 +35,8 @@
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 <spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="reports.text.selectFile" var="selectFileText"/>
+<spring:message code="reports.text.change" var="changeText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -42,6 +44,7 @@
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
@@ -50,6 +53,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -188,6 +192,7 @@
 					case 'S3AwsSdk':
 					case 'Azure':
 					case 'B2':
+					case 'GoogleCloudStorage':
 					case 'WebDav':
 						$("#subDirectoryDiv").show();
 						break;
@@ -214,6 +219,24 @@
 					default:
 						$("#testConnection").hide();
 				}
+
+				//show/hide username-password fields
+				switch (destinationType) {
+					case 'GoogleCloudStorage':
+						$("#credentialsFields").hide();
+						break;
+					default:
+						$("#credentialsFields").show();
+				}
+
+				//show/hide google json key file field
+				switch (destinationType) {
+					case 'GoogleCloudStorage':
+						$("#googleJsonKeyFileDiv").show();
+						break;
+					default:
+						$("#googleJsonKeyFileDiv").hide();
+				}
 			}
 		</script>
 	</jsp:attribute>
@@ -228,7 +251,7 @@
 
 	<jsp:body>
 		<spring:url var="formUrl" value="/saveDestination"/>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="destination">
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="destination" enctype="multipart/form-data">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -251,7 +274,7 @@
 						<spring:message code="${message}"/>
 					</div>
 				</c:if>
-				
+
 				<div id="ajaxResponse">
 				</div>
 
@@ -314,7 +337,6 @@
 						<form:errors path="destinationType" cssClass="error"/>
 					</div>
 				</div>
-
 				<fieldset id="serverFields">
 					<div class="form-group">
 						<label class="control-label col-md-4" for="server">
@@ -335,38 +357,59 @@
 						</div>
 					</div>
 				</fieldset>
-
-				<div class="form-group">
-					<label class="control-label col-md-4" for="user">
-						<spring:message code="page.text.user"/>
-					</label>
-					<div class="col-md-8">
-						<form:input path="user" maxlength="50" class="form-control"/>
-						<form:errors path="user" cssClass="error"/>
+				<fieldset id="credentialsFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="user">
+							<spring:message code="page.text.user"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="user" maxlength="50" class="form-control"/>
+							<form:errors path="user" cssClass="error"/>
+						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="password">
-						<spring:message code="page.label.password"/>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="password">
+							<spring:message code="page.label.password"/>
+						</label>
+						<div class="col-md-8">
+							<div class="input-group">
+								<form:password path="password" autocomplete="off" maxlength="100" class="form-control" />
+								<spring:message code="page.help.password" var="help" />
+								<span class="input-group-btn" >
+									<button class="btn btn-default" type="button"
+											data-toggle="tooltip" title="${help}">
+										<i class="fa fa-info"></i>
+									</button>
+								</span>
+							</div>
+							<div class="checkbox">
+								<label>
+									<form:checkbox path="useBlankPassword"/>
+									<spring:message code="page.checkbox.useBlankPassword"/>
+								</label>
+							</div>
+							<form:errors path="password" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+				<div id="googleJsonKeyFileDiv" class="form-group">
+					<label class="control-label col-md-4" for="googleJsonKeyFile">
+						<spring:message code="destinations.label.jsonKeyFile"/>
 					</label>
 					<div class="col-md-8">
-						<div class="input-group">
-							<form:password path="password" autocomplete="off" maxlength="100" class="form-control" />
-							<spring:message code="page.help.password" var="help" />
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
+						<div>
+							<form:input path="googleJsonKeyFile" maxlength="100" class="form-control"/>
+							<form:errors path="googleJsonKeyFile" cssClass="error"/>
+						</div>
+						<div class="fileinput fileinput-new" data-provides="fileinput">
+							<span class="btn btn-default btn-file">
+								<span class="fileinput-new">${selectFileText}</span>
+								<span class="fileinput-exists">${changeText}</span>
+								<input type="file" name="jsonKeyFile">
 							</span>
+							<span class="fileinput-filename"></span>
+							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
 						</div>
-						<div class="checkbox">
-							<label>
-								<form:checkbox path="useBlankPassword"/>
-								<spring:message code="page.checkbox.useBlankPassword"/>
-							</label>
-						</div>
-						<form:errors path="password" cssClass="error"/>
 					</div>
 				</div>
 				<div id="domainDiv" class="form-group">

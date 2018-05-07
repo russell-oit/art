@@ -1,4 +1,5 @@
 ART 3.7
+* Added google cloud storage destination type
 * Updated jclouds
 
 ART 3.6

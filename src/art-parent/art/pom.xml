@@ -904,6 +904,11 @@
 			<version>${jclouds.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.jclouds.provider</groupId>
+			<artifactId>google-cloud-storage</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.lookfirst</groupId>
 			<artifactId>sardine</artifactId>
 			<version>5.8</version>
