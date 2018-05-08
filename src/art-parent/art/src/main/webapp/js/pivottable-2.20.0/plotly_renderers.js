@@ -93,7 +93,12 @@
           }
         };
         result = $("<div>").appendTo($("body"));
-        Plotly.newPlot(result[0], data, $.extend(layout, layoutOptions, opts.plotly));
+		//Timothy Anyona 08052018. Remove edit in chart studio and produced with plotly toolbar items
+		var config = {
+			modeBarButtonsToRemove: ['sendDataToCloud'],
+			displaylogo: false
+		};
+        Plotly.newPlot(result[0], data, $.extend(layout, layoutOptions, opts.plotly), config);
         return result.detach();
       };
     };
@@ -152,37 +157,43 @@
           style: "display:none;"
         }).appendTo($("body"));
         result = $("<div>").appendTo(renderArea);
-        Plotly.plot(result[0], [data], $.extend(layout, opts.plotly));
+		//Timothy Anyona 08052018. Remove edit in chart studio and produced with plotly toolbar items
+		var config = {
+			modeBarButtonsToRemove: ['sendDataToCloud'],
+			displaylogo: false
+		};
+        Plotly.plot(result[0], [data], $.extend(layout, opts.plotly), config);
         result.detach();
         renderArea.remove();
         return result;
       };
     };
+	//Timothy Anyona 08052018. Added "Plotly" prefix to enable use together with C3 renderers
     return $.pivotUtilities.plotly_renderers = {
-      "Horizontal Bar Chart": makePlotlyChart({
+      "Plotly Horizontal Bar Chart": makePlotlyChart({
         type: 'bar',
         orientation: 'h'
       }, {
         barmode: 'group'
       }, true),
-      "Horizontal Stacked Bar Chart": makePlotlyChart({
+      "Plotly Horizontal Stacked Bar Chart": makePlotlyChart({
         type: 'bar',
         orientation: 'h'
       }, {
         barmode: 'stack'
       }, true),
-      "Bar Chart": makePlotlyChart({
+      "Plotly Bar Chart": makePlotlyChart({
         type: 'bar'
       }, {
         barmode: 'group'
       }),
-      "Stacked Bar Chart": makePlotlyChart({
+      "Plotly Stacked Bar Chart": makePlotlyChart({
         type: 'bar'
       }, {
         barmode: 'stack'
       }),
-      "Line Chart": makePlotlyChart(),
-      "Scatter Chart": makePlotlyScatterChart()
+      "Plotly Line Chart": makePlotlyChart(),
+      "Plotly Scatter Chart": makePlotlyScatterChart()
     };
   });
 

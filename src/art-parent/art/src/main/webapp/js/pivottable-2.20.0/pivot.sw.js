@@ -19,6 +19,7 @@
     gcr = $.pivotUtilities.gchart_renderers;
     d3r = $.pivotUtilities.d3_renderers;
     c3r = $.pivotUtilities.c3_renderers;
+	plr = $.pivotUtilities.plotly_renderers;
     frFmt = nf({
       thousandsSep: ",",
       decimalSep: "."
@@ -95,11 +96,23 @@
     }
     if (c3r) {
       $.pivotUtilities.locales.sw.c3_renderers = {
-        "Chati mstari": c3r["Line Chart"],
-        "Chati pau": c3r["Bar Chart"],
-        "Upau mpororo": c3r["Stacked Bar Chart"],
-        "Chati eneo": c3r["Area Chart"],
-		"Chati tawanya": c3r["Scatter Chart"]
+        "Chati mstari C3": c3r["C3 Line Chart"],
+        "Chati pau C3": c3r["C3 Bar Chart"],
+        "Upau mpororo C3": c3r["C3 Stacked Bar Chart"],
+        "Chati eneo C3": c3r["C3 Area Chart"],
+		"Chati pau mlalo C3": c3r["C3 Horizontal Bar Chart"],
+		"Upau mpororo mlalo C3": c3r["C3 Horizontal Stacked Bar Chart"],
+		"Chati tawanya C3": c3r["C3 Scatter Chart"]
+      };
+    }
+	if (plr) {
+      $.pivotUtilities.locales.sw.plotly_renderers = {
+        "Chati mstari Plotly": c3r["Plotly Line Chart"],
+        "Chati pau Plotly": c3r["Plotly Bar Chart"],
+        "Upau mpororo Plotly": c3r["Plotly Stacked Bar Chart"],
+		"Chati pau mlalo Plotly": c3r["Plotly Horizontal Bar Chart"],
+		"Upau mpororo mlalo Plotly": c3r["Plotly Horizontal Stacked Bar Chart"],
+		"Chati tawanya Plotly": c3r["Plotly Scatter Chart"]
       };
     }
     return $.pivotUtilities.locales.sw;

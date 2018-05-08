@@ -295,29 +295,30 @@
         return $("<div>").append(title, result);
       };
     };
+	//Timothy Anyona 08052018. Added "C3" prefix to enable use together with plotly renderers
     return $.pivotUtilities.c3_renderers = {
-      "Horizontal Bar Chart": makeC3Chart({
+      "C3 Horizontal Bar Chart": makeC3Chart({
         type: "bar",
         horizontal: true
       }),
-      "Horizontal Stacked Bar Chart": makeC3Chart({
+      "C3 Horizontal Stacked Bar Chart": makeC3Chart({
         type: "bar",
         stacked: true,
         horizontal: true
       }),
-      "Bar Chart": makeC3Chart({
+      "C3 Bar Chart": makeC3Chart({
         type: "bar"
       }),
-      "Stacked Bar Chart": makeC3Chart({
+      "C3 Stacked Bar Chart": makeC3Chart({
         type: "bar",
         stacked: true
       }),
-      "Line Chart": makeC3Chart(),
-      "Area Chart": makeC3Chart({
+      "C3 Line Chart": makeC3Chart(),
+      "C3 Area Chart": makeC3Chart({
         type: "area",
         stacked: true
       }),
-      "Scatter Chart": makeC3Chart({
+      "C3 Scatter Chart": makeC3Chart({
         type: "scatter"
       })
     };

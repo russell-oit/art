@@ -19,6 +19,7 @@
     gcr = $.pivotUtilities.gchart_renderers;
     d3r = $.pivotUtilities.d3_renderers;
     c3r = $.pivotUtilities.c3_renderers;
+	plr = $.pivotUtilities.plotly_renderers;
     frFmt = nf({
       thousandsSep: ",",
       decimalSep: "."
@@ -96,11 +97,23 @@
     }
     if (c3r) {
       $.pivotUtilities.locales.en.c3_renderers = {
-        "Line Chart": c3r["Line Chart"],
-        "Bar Chart": c3r["Bar Chart"],
-        "Stacked Bar Chart": c3r["Stacked Bar Chart"],
-        "Area Chart": c3r["Area Chart"],
-		"Scatter Chart": c3r["Scatter Chart"]
+        "C3 Line Chart": c3r["C3 Line Chart"],
+        "C3 Bar Chart": c3r["C3 Bar Chart"],
+        "C3 Stacked Bar Chart": c3r["C3 Stacked Bar Chart"],
+        "C3 Area Chart": c3r["C3 Area Chart"],
+		"C3 Horizontal Bar Chart": c3r["C3 Horizontal Bar Chart"],
+		"C3 Horizontal Stacked Bar Chart": c3r["C3 Horizontal Stacked Bar Chart"],
+		"C3 Scatter Chart": c3r["C3 Scatter Chart"]
+      };
+    }
+	if (plr) {
+      $.pivotUtilities.locales.en.plotly_renderers = {
+        "Plotly Line Chart": c3r["Plotly Line Chart"],
+        "Plotly Bar Chart": c3r["Plotly Bar Chart"],
+        "Plotly Stacked Bar Chart": c3r["Plotly Stacked Bar Chart"],
+		"Plotly Horizontal Bar Chart": c3r["Plotly Horizontal Bar Chart"],
+		"Plotly Horizontal Stacked Bar Chart": c3r["Plotly Horizontal Stacked Bar Chart"],
+		"Plotly Scatter Chart": c3r["Plotly Scatter Chart"]
       };
     }
     return $.pivotUtilities.locales.en;

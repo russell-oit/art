@@ -1027,6 +1027,20 @@ public class ReportOutputGenerator {
 		if (languageFile.exists()) {
 			request.setAttribute("locale", localeString);
 		}
+		
+		String plotlyLocaleString = StringUtils.lowerCase(localeString, Locale.ENGLISH);
+		plotlyLocaleString = StringUtils.replace(plotlyLocaleString, "_", "-");
+		String plotlyLanguageFileName = "plotly-locale-" + plotlyLocaleString + ".js";
+
+		String plotlyLanguageFilePath = Config.getJsPath()
+				+ "plotly.js-1.36.0" + File.separator
+				+ plotlyLanguageFileName;
+
+		File plotlyLanguageFile = new File(plotlyLanguageFilePath);
+
+		if (plotlyLanguageFile.exists()) {
+			request.setAttribute("plotlyLocaleFileName", plotlyLanguageFileName);
+		}
 
 		String configJson = ArtUtils.objectToJson(pivotTableJsOptions.getConfig());
 		request.setAttribute("configJson", configJson);
