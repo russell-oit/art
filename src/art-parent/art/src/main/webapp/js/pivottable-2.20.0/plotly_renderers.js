@@ -168,32 +168,31 @@
         return result;
       };
     };
-	//Timothy Anyona 08052018. Added "Plotly" prefix to enable use together with C3 renderers
     return $.pivotUtilities.plotly_renderers = {
-      "Plotly Horizontal Bar Chart": makePlotlyChart({
+      "Horizontal Bar Chart": makePlotlyChart({
         type: 'bar',
         orientation: 'h'
       }, {
         barmode: 'group'
       }, true),
-      "Plotly Horizontal Stacked Bar Chart": makePlotlyChart({
+      "Horizontal Stacked Bar Chart": makePlotlyChart({
         type: 'bar',
         orientation: 'h'
       }, {
         barmode: 'stack'
       }, true),
-      "Plotly Bar Chart": makePlotlyChart({
+      "Bar Chart": makePlotlyChart({
         type: 'bar'
       }, {
         barmode: 'group'
       }),
-      "Plotly Stacked Bar Chart": makePlotlyChart({
+      "Stacked Bar Chart": makePlotlyChart({
         type: 'bar'
       }, {
         barmode: 'stack'
       }),
-      "Plotly Line Chart": makePlotlyChart(),
-      "Plotly Scatter Chart": makePlotlyScatterChart()
+      "Line Chart": makePlotlyChart(),
+      "Scatter Chart": makePlotlyScatterChart()
     };
   });
 

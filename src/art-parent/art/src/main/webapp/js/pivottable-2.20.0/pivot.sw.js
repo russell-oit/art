@@ -12,7 +12,7 @@
   };
 
   callWithJQuery(function($) {
-    var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl;
+    var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl, plr, er;
     nf = $.pivotUtilities.numberFormat;
     tpl = $.pivotUtilities.aggregatorTemplates;
     r = $.pivotUtilities.renderers;
@@ -20,6 +20,7 @@
     d3r = $.pivotUtilities.d3_renderers;
     c3r = $.pivotUtilities.c3_renderers;
 	plr = $.pivotUtilities.plotly_renderers;
+	er = $.pivotUtilities.export_renderers;
     frFmt = nf({
       thousandsSep: ",",
       decimalSep: "."
@@ -96,25 +97,30 @@
     }
     if (c3r) {
       $.pivotUtilities.locales.sw.c3_renderers = {
-        "Chati mstari C3": c3r["C3 Line Chart"],
-        "Chati pau C3": c3r["C3 Bar Chart"],
-        "Upau mpororo C3": c3r["C3 Stacked Bar Chart"],
-        "Chati eneo C3": c3r["C3 Area Chart"],
-		"Chati pau mlalo C3": c3r["C3 Horizontal Bar Chart"],
-		"Upau mpororo mlalo C3": c3r["C3 Horizontal Stacked Bar Chart"],
-		"Chati tawanya C3": c3r["C3 Scatter Chart"]
+        "Chati mstari C3": c3r["Line Chart"],
+        "Chati pau C3": c3r["Bar Chart"],
+        "Upau mpororo C3": c3r["Stacked Bar Chart"],
+        "Chati eneo C3": c3r["Area Chart"],
+		"Chati pau mlalo C3": c3r["Horizontal Bar Chart"],
+		"Upau mpororo mlalo C3": c3r["Horizontal Stacked Bar Chart"],
+		"Chati tawanya C3": c3r["Scatter Chart"]
       };
     }
 	if (plr) {
       $.pivotUtilities.locales.sw.plotly_renderers = {
-        "Chati mstari Plotly": c3r["Plotly Line Chart"],
-        "Chati pau Plotly": c3r["Plotly Bar Chart"],
-        "Upau mpororo Plotly": c3r["Plotly Stacked Bar Chart"],
-		"Chati pau mlalo Plotly": c3r["Plotly Horizontal Bar Chart"],
-		"Upau mpororo mlalo Plotly": c3r["Plotly Horizontal Stacked Bar Chart"],
-		"Chati tawanya Plotly": c3r["Plotly Scatter Chart"]
+        "Chati mstari Plotly": plr["Line Chart"],
+        "Chati pau Plotly": plr["Bar Chart"],
+        "Upau mpororo Plotly": plr["Stacked Bar Chart"],
+		"Chati pau mlalo Plotly": plr["Horizontal Bar Chart"],
+		"Upau mpororo mlalo Plotly": plr["Horizontal Stacked Bar Chart"],
+		"Chati tawanya Plotly": plr["Scatter Chart"]
       };
     }
+	if (er) {
+		$.pivotUtilities.locales.sw.export_renderers = {
+			"Hamishia TSV" : er["TSV Export"]
+		};
+	}
     return $.pivotUtilities.locales.sw;
   });
 

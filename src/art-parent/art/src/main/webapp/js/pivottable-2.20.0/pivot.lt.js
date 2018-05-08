@@ -12,13 +12,15 @@
 	};
 
 	callWithJQuery(function($) {
-		var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl;
+		var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl, plr, er;
 		nf = $.pivotUtilities.numberFormat;
 		tpl = $.pivotUtilities.aggregatorTemplates;
 		r = $.pivotUtilities.renderers;
 		gcr = $.pivotUtilities.gchart_renderers;
 		d3r = $.pivotUtilities.d3_renderers;
 		c3r = $.pivotUtilities.c3_renderers;
+		plr = $.pivotUtilities.plotly_renderers;
+		er = $.pivotUtilities.export_renderers;
 		frFmt = nf({
 			thousandsSep: " ",
 			decimalSep: "."
@@ -95,11 +97,28 @@
 		}
 		if (c3r) {
 			$.pivotUtilities.locales.lt.c3_renderers = {
-				"Linijinė diagrama": c3r["Line Chart"],
-				"Juostinė diagrama": c3r["Bar Chart"],
-				"Sudurtinė juostinė diagrama": c3r["Stacked Bar Chart"],
-				"Sritinė diagrama": c3r["Area Chart"],
-				"Taškinė diagrama": c3r["Scatter Chart"]
+				"Linijinė diagrama C3": c3r["Line Chart"],
+				"Juostinė diagrama C3": c3r["Bar Chart"],
+				"Sudurtinė juostinė diagrama C3": c3r["Stacked Bar Chart"],
+				"Sritinė diagrama C3": c3r["Area Chart"],
+				"C3 Horizontal Bar Chart": c3r["Horizontal Bar Chart"],
+				"C3 Horizontal Stacked Bar Chart": c3r["Horizontal Stacked Bar Chart"],
+				"Taškinė diagrama C3": c3r["Scatter Chart"]
+			};
+		}
+		if (plr) {
+			$.pivotUtilities.locales.lt.plotly_renderers = {
+				"Linijinė diagrama Plotly": plr["Line Chart"],
+				"Juostinė diagrama Plotly": plr["Bar Chart"],
+				"Sudurtinė juostinė diagrama Plotly": plr["Stacked Bar Chart"],
+				"Plotly Horizontal Bar Chart": plr["Horizontal Bar Chart"],
+				"Plotly Horizontal Stacked Bar Chart": plr["Horizontal Stacked Bar Chart"],
+				"Taškinė diagrama Plotly": plr["Scatter Chart"]
+			};
+		}
+		if (er) {
+			$.pivotUtilities.locales.lt.export_renderers = {
+				"TSV Export" : er["TSV Export"]
 			};
 		}
 		return $.pivotUtilities.locales.lt;

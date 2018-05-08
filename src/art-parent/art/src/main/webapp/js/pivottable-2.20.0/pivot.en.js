@@ -12,7 +12,7 @@
   };
 
   callWithJQuery(function($) {
-    var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl;
+    var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl, plr, er;
     nf = $.pivotUtilities.numberFormat;
     tpl = $.pivotUtilities.aggregatorTemplates;
     r = $.pivotUtilities.renderers;
@@ -20,6 +20,7 @@
     d3r = $.pivotUtilities.d3_renderers;
     c3r = $.pivotUtilities.c3_renderers;
 	plr = $.pivotUtilities.plotly_renderers;
+	er = $.pivotUtilities.export_renderers;
     frFmt = nf({
       thousandsSep: ",",
       decimalSep: "."
@@ -97,25 +98,30 @@
     }
     if (c3r) {
       $.pivotUtilities.locales.en.c3_renderers = {
-        "C3 Line Chart": c3r["C3 Line Chart"],
-        "C3 Bar Chart": c3r["C3 Bar Chart"],
-        "C3 Stacked Bar Chart": c3r["C3 Stacked Bar Chart"],
-        "C3 Area Chart": c3r["C3 Area Chart"],
-		"C3 Horizontal Bar Chart": c3r["C3 Horizontal Bar Chart"],
-		"C3 Horizontal Stacked Bar Chart": c3r["C3 Horizontal Stacked Bar Chart"],
-		"C3 Scatter Chart": c3r["C3 Scatter Chart"]
+        "C3 Line Chart": c3r["Line Chart"],
+        "C3 Bar Chart": c3r["Bar Chart"],
+        "C3 Stacked Bar Chart": c3r["Stacked Bar Chart"],
+        "C3 Area Chart": c3r["Area Chart"],
+		"C3 Horizontal Bar Chart": c3r["Horizontal Bar Chart"],
+		"C3 Horizontal Stacked Bar Chart": c3r["Horizontal Stacked Bar Chart"],
+		"C3 Scatter Chart": c3r["Scatter Chart"]
       };
     }
 	if (plr) {
       $.pivotUtilities.locales.en.plotly_renderers = {
-        "Plotly Line Chart": c3r["Plotly Line Chart"],
-        "Plotly Bar Chart": c3r["Plotly Bar Chart"],
-        "Plotly Stacked Bar Chart": c3r["Plotly Stacked Bar Chart"],
-		"Plotly Horizontal Bar Chart": c3r["Plotly Horizontal Bar Chart"],
-		"Plotly Horizontal Stacked Bar Chart": c3r["Plotly Horizontal Stacked Bar Chart"],
-		"Plotly Scatter Chart": c3r["Plotly Scatter Chart"]
+        "Plotly Line Chart": plr["Line Chart"],
+        "Plotly Bar Chart": plr["Bar Chart"],
+        "Plotly Stacked Bar Chart": plr["Stacked Bar Chart"],
+		"Plotly Horizontal Bar Chart": plr["Horizontal Bar Chart"],
+		"Plotly Horizontal Stacked Bar Chart": plr["Horizontal Stacked Bar Chart"],
+		"Plotly Scatter Chart": plr["Scatter Chart"]
       };
     }
+	if (er) {
+		$.pivotUtilities.locales.en.export_renderers = {
+			"TSV Export" : er["TSV Export"]
+		};
+	}
     return $.pivotUtilities.locales.en;
   });
 

@@ -55,7 +55,7 @@
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/c3_renderers.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/c3_renderers.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/export_renderers.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.1.4/papaparse.min.js"></script>
@@ -71,18 +71,51 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
+<c:if test="${not empty locale}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.${locale}.js"></script>
+</c:if>
+
 <script type="text/javascript">
 	//set default values. can be overridden in template file
 	//https://github.com/nicolaskruchten/pivottable/wiki/Parameters
 	//https://stackoverflow.com/questions/4528744/how-does-extend-work-in-jquery
 	//https://stackoverflow.com/questions/10130908/jquery-merge-two-objects
-	var renderers = $.extend(
-			$.pivotUtilities.renderers,
-			$.pivotUtilities.c3_renderers,
-			$.pivotUtilities.plotly_renderers,
-			$.pivotUtilities.export_renderers,
-			$.pivotUtilities.subtotal_renderers
-			);
+	var locale;
+	var passedLocale = '${encode:forJavaScript(locale)}';
+	if (passedLocale) {
+		//passed locale is empty if translation file doesn't exist i.e. pivot.xx.js
+		locale = passedLocale;
+	} else {
+		locale = "en";
+	}
+
+	//https://github.com/nicolaskruchten/pivottable/issues/875
+	var renderers = {};
+	if ($.pivotUtilities.locales[locale].renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.renderers);
+	}
+
+	if ($.pivotUtilities.locales[locale].c3_renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].c3_renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.c3_renderers);
+	}
+
+	if ($.pivotUtilities.locales[locale].plotly_renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].plotly_renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.plotly_renderers);
+	}
+
+	if ($.pivotUtilities.locales[locale].export_renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].export_renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.export_renderers);
+	}
+
+	$.extend(renderers, $.pivotUtilities.subtotal_renderers);
 
 	var options = {
 		renderers: renderers,
@@ -96,7 +129,6 @@
 	}
 
 	var overwrite = false;
-	var locale = 'en';
 
 	var download;
 	var reportType = '${encode:forJavaScript(reportType)}';
@@ -124,13 +156,6 @@
 
 <c:if test="${not empty cssFileName}">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(cssFileName)}">
-</c:if>
-
-<c:if test="${not empty locale}">
-	<script type="text/javascript">
-	locale = '${locale}';
-	</script>
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.${locale}.js"></script>
 </c:if>
 
 <c:if test="${not empty plotlyLocaleFileName}">
