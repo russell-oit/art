@@ -53,10 +53,10 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/c3_renderers.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/export_renderers.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/c3_renderers.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/export_renderers.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.1.4/papaparse.min.js"></script>
 
@@ -126,7 +126,7 @@
 	<script type="text/javascript">
 	locale = '${locale}';
 	</script>
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.${locale}.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.${locale}.js"></script>
 </c:if>
 
 <script>

@@ -1,6 +1,6 @@
 ART 3.7
 * Added google cloud storage destination type
-* Updated jclouds
+* Updated jclouds, pivottable.js
 
 ART 3.6
 * Changed job templates directory to WEB-INF\thymeleaf\jobs

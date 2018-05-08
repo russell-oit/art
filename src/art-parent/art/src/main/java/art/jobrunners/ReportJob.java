@@ -842,6 +842,7 @@ public class ReportJob implements org.quartz.Job {
 		//https://jclouds.apache.org/reference/providers/#blobstore-providers
 		//https://github.com/apache/camel/blob/master/components/camel-jclouds/src/main/java/org/apache/camel/component/jclouds/JcloudsBlobStoreHelper.java
 		//https://jclouds.apache.org/guides/google/
+		//https://help.backblaze.com/hc/en-us/articles/224991568-Where-can-I-find-my-Account-ID-and-Application-Key-
 		BlobStoreContext context = null;
 
 		try {
