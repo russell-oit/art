@@ -21,7 +21,6 @@ import art.datasource.DatasourceService;
 import art.destination.DestinationService;
 import art.enums.JobType;
 import art.enums.ReportType;
-import art.ftpserver.FtpServerService;
 import art.holiday.HolidayService;
 import art.jobdestination.JobDestinationService;
 import art.jobholiday.JobHolidayService;
@@ -113,9 +112,6 @@ public class JobController {
 
 	@Autowired
 	private JobParameterService jobParameterService;
-
-	@Autowired
-	private FtpServerService ftpServerService;
 
 	@Autowired
 	private JobHolidayService jobHolidayService;
@@ -682,7 +678,6 @@ public class JobController {
 			model.addAttribute("dynamicRecipientReports", reportService.getDynamicRecipientReports());
 			model.addAttribute("schedules", scheduleService.getAllSchedules());
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
-			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
 			model.addAttribute("holidays", holidayService.getAllHolidays());
 			model.addAttribute("destinations", destinationService.getAllDestinations());
 			model.addAttribute("smtpServers", smtpServerService.getAllSmtpServers());

@@ -19,7 +19,6 @@ package art.job;
 
 import art.destination.Destination;
 import art.enums.JobType;
-import art.ftpserver.FtpServer;
 import art.holiday.Holiday;
 import art.migration.PrefixTransformer;
 import art.report.Report;
@@ -119,7 +118,6 @@ public class Job implements Serializable {
 	private int cachedDatasourceId;
 	@Parsed
 	private String batchFile;
-	private FtpServer ftpServer;
 	@Parsed
 	private String fixedFileName;
 	@Parsed
@@ -355,20 +353,6 @@ public class Job implements Serializable {
 	 */
 	public void setFixedFileName(String fixedFileName) {
 		this.fixedFileName = fixedFileName;
-	}
-
-	/**
-	 * @return the ftpServer
-	 */
-	public FtpServer getFtpServer() {
-		return ftpServer;
-	}
-
-	/**
-	 * @param ftpServer the ftpServer to set
-	 */
-	public void setFtpServer(FtpServer ftpServer) {
-		this.ftpServer = ftpServer;
 	}
 
 	/**
