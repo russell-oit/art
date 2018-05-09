@@ -1504,7 +1504,6 @@ public class ReportJob implements org.quartz.Job {
 			logger.info("Emailing disabled. Job Id {}", jobId);
 			runMessage = "jobs.message.emailingDisabled";
 		} else if (jobSmtpServer != null) {
-			//sometimes jobSmtpServer will be a new/default object even though there is no job smtp server configured. happens intermittently not sure why.
 			if (!jobSmtpServer.isActive()) {
 				sendEmail = false;
 				logger.info("Job smtp server disabled. Job Id {}", jobId);
@@ -1799,20 +1798,19 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering getMailFrom");
 
 		String from;
+
 		String settingsFrom = Config.getSettings().getSmtpFrom();
 		logger.debug("settingsFrom='{}'", settingsFrom);
 
 		String jobSmtpServerFrom = null;
 		SmtpServer jobSmtpServer = job.getSmtpServer();
-		logger.debug("jobSmtpServer={}", jobSmtpServer);
+		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
+			jobSmtpServerFrom = jobSmtpServer.getFrom();
+		}
+		logger.debug("jobSmtpServerFrom='{}'", jobSmtpServerFrom);
 
 		String jobMailFrom = job.getMailFrom();
 		logger.debug("jobMailFrom='{}'", jobMailFrom);
-
-		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
-			jobSmtpServerFrom = jobSmtpServer.getFrom();
-			logger.debug("jobSmtpServerFrom='{}'", jobSmtpServerFrom);
-		}
 
 		if (StringUtils.isNotBlank(jobSmtpServerFrom)) {
 			from = jobSmtpServerFrom;

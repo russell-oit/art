@@ -25,6 +25,7 @@ import art.rule.StringToRule;
 import art.schedule.StringToSchedule;
 import art.usergroup.StringToUserGroup;
 import art.general.StringToDouble;
+import art.smtpserver.StringToSmtpServer;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.LocaleUtils;
@@ -88,6 +89,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToDestination stringToDestination;
+	
+	@Autowired
+	private StringToSmtpServer stringToSmtpServer;
 
 	@Autowired
 	private StringToRule stringToRule;
@@ -238,6 +242,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addConverter(stringToHoliday);
 		registry.addConverter(stringToDestination);
 		registry.addConverter(stringToRule);
+		registry.addConverter(stringToSmtpServer);
 	}
 
 	@Bean

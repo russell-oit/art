@@ -856,11 +856,11 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-md-4 control-label " for="smtpServer.smtpServerId">
+						<label class="col-md-4 control-label " for="smtpServer">
 							<spring:message code="settings.label.smtpServer"/>
 						</label>
 						<div class="col-md-8">
-							<form:select path="smtpServer.smtpServerId" class="form-control selectpicker">
+							<form:select path="smtpServer" class="form-control selectpicker">
 								<form:option value="0">--</form:option>
 									<option data-divider="true"></option>
 								<c:forEach var="smtpServer" items="${smtpServers}">
@@ -873,7 +873,7 @@
 									</form:option>
 								</c:forEach>
 							</form:select>
-							<form:errors path="smtpServer.smtpServerId" cssClass="error"/>
+							<form:errors path="smtpServer" cssClass="error"/>
 						</div>
 					</div>
 					<div id="mailMessageDiv">
