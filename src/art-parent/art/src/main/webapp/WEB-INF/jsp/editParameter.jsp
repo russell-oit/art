@@ -314,16 +314,16 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="defaultValueReport.reportId">
+					<label class="col-md-4 control-label " for="defaultValueReport">
 						<spring:message code="parameters.label.defaultValueReport"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="defaultValueReport.reportId" class="form-control selectpicker">
+						<form:select path="defaultValueReport" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
 								<option data-divider="true"></option>
 							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
 						</form:select>
-						<form:errors path="defaultValueReport.reportId" cssClass="error"/>
+						<form:errors path="defaultValueReport" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -377,16 +377,16 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="lovReport.reportId">
+					<label class="col-md-4 control-label " for="lovReport">
 						<spring:message code="parameters.label.lovReport"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="lovReport.reportId" class="form-control selectpicker">
+						<form:select path="lovReport" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
 								<option data-divider="true"></option>
 							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
 						</form:select>
-						<form:errors path="lovReport.reportId" cssClass="error"/>
+						<form:errors path="lovReport" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
