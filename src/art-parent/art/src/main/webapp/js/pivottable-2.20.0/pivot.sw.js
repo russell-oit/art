@@ -12,7 +12,7 @@
   };
 
   callWithJQuery(function($) {
-    var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl, plr, er;
+    var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl, plr, er, sr;
     nf = $.pivotUtilities.numberFormat;
     tpl = $.pivotUtilities.aggregatorTemplates;
     r = $.pivotUtilities.renderers;
@@ -21,6 +21,7 @@
     c3r = $.pivotUtilities.c3_renderers;
 	plr = $.pivotUtilities.plotly_renderers;
 	er = $.pivotUtilities.export_renderers;
+	sr = $.pivotUtilities.subtotal_renderers;
     frFmt = nf({
       thousandsSep: ",",
       decimalSep: "."
@@ -119,6 +120,15 @@
 	if (er) {
 		$.pivotUtilities.locales.sw.export_renderers = {
 			"Hamishia TSV" : er["TSV Export"]
+		};
+	}
+	if (sr) {
+		$.pivotUtilities.locales.sw.subtotal_renderers = {
+			"Meza na Subtotal" : sr["Table With Subtotal"],
+			"Meza na Subtotal Bar Chart" : sr["Table With Subtotal Bar Chart"],
+			"Meza na Subtotal Heatmap" : sr["Table With Subtotal Heatmap"],
+			"Meza na Subtotal Row Heatmap" : sr["Table With Subtotal Row Heatmap"],
+			"Meza na Subtotal Col Heatmap" : sr["Table With Subtotal Col Heatmap"]
 		};
 	}
     return $.pivotUtilities.locales.sw;

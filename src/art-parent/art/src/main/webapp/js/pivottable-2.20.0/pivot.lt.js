@@ -12,7 +12,7 @@
 	};
 
 	callWithJQuery(function($) {
-		var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl, plr, er;
+		var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl, plr, er, sr;
 		nf = $.pivotUtilities.numberFormat;
 		tpl = $.pivotUtilities.aggregatorTemplates;
 		r = $.pivotUtilities.renderers;
@@ -21,6 +21,7 @@
 		c3r = $.pivotUtilities.c3_renderers;
 		plr = $.pivotUtilities.plotly_renderers;
 		er = $.pivotUtilities.export_renderers;
+		sr = $.pivotUtilities.subtotal_renderers;
 		frFmt = nf({
 			thousandsSep: " ",
 			decimalSep: "."
@@ -119,6 +120,15 @@
 		if (er) {
 			$.pivotUtilities.locales.lt.export_renderers = {
 				"TSV Export" : er["TSV Export"]
+			};
+		}
+		if (sr) {
+			$.pivotUtilities.locales.lt.subtotal_renderers = {
+				"Table With Subtotal" : sr["Table With Subtotal"],
+				"Table With Subtotal Bar Chart" : sr["Table With Subtotal Bar Chart"],
+				"Table With Subtotal Heatmap" : sr["Table With Subtotal Heatmap"],
+				"Table With Subtotal Row Heatmap" : sr["Table With Subtotal Row Heatmap"],
+				"Table With Subtotal Col Heatmap" : sr["Table With Subtotal Col Heatmap"]
 			};
 		}
 		return $.pivotUtilities.locales.lt;

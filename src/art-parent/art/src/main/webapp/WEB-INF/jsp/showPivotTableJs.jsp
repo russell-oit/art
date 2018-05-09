@@ -114,8 +114,12 @@
 	} else {
 		$.extend(renderers, $.pivotUtilities.export_renderers);
 	}
-
-	$.extend(renderers, $.pivotUtilities.subtotal_renderers);
+	
+	if ($.pivotUtilities.locales[locale].subtotal_renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].subtotal_renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.subtotal_renderers);
+	}
 
 	var options = {
 		renderers: renderers,
