@@ -17,7 +17,9 @@
  */
 package art.springconfig;
 
+import art.datasource.StringToDatasource;
 import art.destination.StringToDestination;
+import art.encryptor.StringToEncryptor;
 import art.holiday.StringToHoliday;
 import art.report.StringToReport;
 import art.reportgroup.StringToReportGroup;
@@ -92,6 +94,12 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	
 	@Autowired
 	private StringToSmtpServer stringToSmtpServer;
+	
+	@Autowired
+	private StringToDatasource stringToDatasource;
+	
+	@Autowired
+	private StringToEncryptor stringToEncryptor;
 
 	@Autowired
 	private StringToRule stringToRule;
@@ -243,6 +251,8 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addConverter(stringToDestination);
 		registry.addConverter(stringToRule);
 		registry.addConverter(stringToSmtpServer);
+		registry.addConverter(stringToDatasource);
+		registry.addConverter(stringToEncryptor);
 	}
 
 	@Bean

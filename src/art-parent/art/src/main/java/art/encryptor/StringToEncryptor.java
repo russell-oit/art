@@ -1,8 +1,8 @@
 /*
  * ART. A Reporting Tool.
- * Copyright (C) 2017 Enrico Liboni <eliboni@users.sf.net>
+ * Copyright (C) 2018 Enrico Liboni <eliboni@users.sf.net>
  *
- * This program is free software: you can redistribute it and/or modify
+ * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -13,9 +13,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.datasource;
+package art.encryptor;
 
 import java.sql.SQLException;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -26,29 +26,30 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 /**
- * Spring converter from string (datasource id) to datasource object
+ * Spring converter for string (encryptor id) to encryptor object
  *
  * @author Timothy Anyona
  */
 @Component
-public class StringToDatasource implements Converter<String, Datasource> {
+public class StringToEncryptor implements Converter<String, Encryptor> {
 
-	private static final Logger logger = LoggerFactory.getLogger(StringToDatasource.class);
+	private static final Logger logger = LoggerFactory.getLogger(StringToEncryptor.class);
 
 	@Autowired
-	private DatasourceService datasourceService;
+	private EncryptorService encryptorService;
 
 	@Override
-	public Datasource convert(String s) {
+	public Encryptor convert(String s) {
 		int id = NumberUtils.toInt(s);
 
-		Datasource datasource = null;
+		Encryptor encryptor = null;
 		try {
-			datasource = datasourceService.getDatasource(id);
+			encryptor = encryptorService.getEncryptor(id);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
 
-		return datasource;
+		return encryptor;
 	}
+
 }

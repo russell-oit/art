@@ -1266,11 +1266,11 @@ Edit report page
 					</div>
 				</div>
 				<div id="datasourceDiv" class="form-group">
-					<label class="col-md-4 control-label " for="datasource.datasourceId">
+					<label class="col-md-4 control-label " for="datasource">
 						<spring:message code="page.text.datasource"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="datasource.datasourceId" class="form-control selectpicker">
+						<form:select path="datasource" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
 								<option data-divider="true"></option>
 							<c:forEach var="datasource" items="${datasources}">
@@ -1283,7 +1283,7 @@ Edit report page
 								</form:option>
 							</c:forEach>
 						</form:select>
-						<form:errors path="datasource.datasourceId" cssClass="error"/>
+						<form:errors path="datasource" cssClass="error"/>
 					</div>
 				</div>
 				<div id="usesRulesDiv" class="form-group">
@@ -1525,11 +1525,11 @@ Edit report page
 				</div>
 
 				<div id="encryptorDiv" class="form-group">
-					<label class="col-md-4 control-label " for="encryptor.encryptorId">
+					<label class="col-md-4 control-label " for="encryptor">
 						<spring:message code="reports.label.encryptor"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="encryptor.encryptorId" class="form-control selectpicker">
+						<form:select path="encryptor" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
 								<option data-divider="true"></option>
 							<c:forEach var="encryptor" items="${encryptors}">
@@ -1542,7 +1542,7 @@ Edit report page
 								</form:option>
 							</c:forEach>
 						</form:select>
-						<form:errors path="encryptor.encryptorId" cssClass="error"/>
+						<form:errors path="encryptor" cssClass="error"/>
 					</div>
 				</div>
 

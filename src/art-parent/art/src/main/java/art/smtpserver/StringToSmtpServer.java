@@ -26,7 +26,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 /**
- * Spring converter for string (smtp server id) to SmtpServer object
+ * Spring converter for string (smtp server id) to smtp server object
  *
  * @author Timothy Anyona
  */
