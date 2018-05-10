@@ -452,7 +452,7 @@ Edit report page
 							//delete some bulky default values
 							delete config_copy["rendererOptions"];
 							delete config_copy["localeStrings"];
-							
+
 							pivotTableJsSavedOptionsEditor.getSession().setValue(JSON.stringify(config_copy));
 							break;
 						default:
@@ -1277,10 +1277,15 @@ Edit report page
 								<c:set var="datasourceStatus">
 									<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>
 								</c:set>
-								<form:option value="${datasource.datasourceId}"
-											 data-content="${datasource.name} ${datasourceStatus}">
-									${datasource.name} 
-								</form:option>
+								<c:if test="${report.datasource != null}">
+									<c:set var="selected">
+										${report.datasource.datasourceId == datasource.datasourceId ? "selected" : ""}
+									</c:set>
+								</c:if>
+								<option value="${datasource.datasourceId}" ${selected}
+										data-content="${encode:forHtmlAttribute(datasource.name)}&nbsp;${encode:forHtmlAttribute(datasourceStatus)}">
+									${encode:forHtmlContent(datasource.name)}
+								</option>
 							</c:forEach>
 						</form:select>
 						<form:errors path="datasource" cssClass="error"/>
@@ -1536,10 +1541,15 @@ Edit report page
 								<c:set var="encryptorStatus">
 									<t:displayActiveStatus active="${encryptor.active}" hideActive="true"/>
 								</c:set>
-								<form:option value="${encryptor.encryptorId}"
-											 data-content="${encryptor.name} ${encryptorStatus}">
-									${encryptor.name} 
-								</form:option>
+								<c:if test="${report.encryptor != null}">
+									<c:set var="selected">
+										${report.encryptor.encryptorId == encryptor.encryptorId ? "selected" : ""}
+									</c:set>
+								</c:if>
+								<option value="${encryptor.encryptorId}" ${selected}
+										data-content="${encode:forHtmlAttribute(encryptor.name)}&nbsp;${encode:forHtmlAttribute(encryptorStatus)}">
+									${encode:forHtmlContent(encryptor.name)}
+								</option>
 							</c:forEach>
 						</form:select>
 						<form:errors path="encryptor" cssClass="error"/>
