@@ -102,7 +102,7 @@ public class ReportController {
 	private SavedParameterService savedParameterService;
 
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
-	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
+	public String showReports(HttpSession session, Model model) {
 		logger.debug("Entering showReports");
 
 		try {
@@ -142,7 +142,7 @@ public class ReportController {
 
 	@RequestMapping(value = "/getReports", method = RequestMethod.GET)
 	public @ResponseBody
-	List<Report> getReports(HttpSession session, HttpServletRequest request) {
+	List<Report> getReports(HttpSession session) {
 		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
 		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
 

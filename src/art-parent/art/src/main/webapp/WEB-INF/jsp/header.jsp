@@ -55,6 +55,20 @@ Header that appears at the top of all pages, except the login and logs pages
 								<spring:message code="header.link.archives"/>
 							</a>
 						</li>
+						<li class="dropdown">
+							<a id="selfService" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
+								<i class="fa fa-cog"></i> 
+								<spring:message code="header.link.selfService"/>
+								<b class="caret"></b>
+							</a>
+							<ul class="dropdown-menu">
+								<li>
+									<a href="${pageContext.request.contextPath}/selfServiceDashboards">
+										<spring:message code="header.link.selfServiceDashboards"/>
+									</a>
+								</li>
+							</ul>
+						</li>
 					</c:if>
 					<c:if test="${sessionUser.accessLevel.value >= 10 || sessionUser.accessLevel.value < 0}">
 						<li class="dropdown">

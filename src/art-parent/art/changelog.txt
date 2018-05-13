@@ -1,6 +1,7 @@
 ART 3.7
 * Added google cloud storage destination type
 * Fix for pivottable.js renderers localization not working
+* Have self service dashboards
 * Updated jclouds, pivottable.js
 
 ART 3.6
