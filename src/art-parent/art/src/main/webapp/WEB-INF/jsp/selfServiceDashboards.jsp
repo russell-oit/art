@@ -17,6 +17,7 @@
 <spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <t:mainPage title="${pageTitle}">
 
@@ -32,6 +33,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lodash-3.5.0/lodash.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script>
 			$(document).ready(function () {
@@ -50,15 +52,46 @@
 
 				//https://stackoverflow.com/questions/35349239/bootstrap-select-event-parameters
 				//https://github.com/gridstack/gridstack.js/tree/master/doc
+				//https://jonsuh.com/blog/javascript-templating-without-a-library/
 				$("#reports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
-					var reportId = $(this).val();
+					var reportId = $("#reports option:selected").val();
 					var grid = $('.grid-stack').data('gridstack');
-					var el = $('<div><div class="grid-stack-item-content" style="border: 1px solid #ccc"><div id="content_'
-							+ reportId + '"></div></div></div>');
+					var el = $(processWidgetTemplate(reportId));
 					grid.addWidget(el, 0, 0, 3, 2, true);
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/runReport',
+						data: {reportId: reportId, isFragment: true},
+						success: function (data, status, xhr) {
+							$("#content_" + reportId).html(data);
+						},
+						error: function (xhr, status, error) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
 				});
+
+				function processWidgetTemplate(reportId) {
+					var processedTemplate = $("#widgetTemplate").html().replace(/#reportId#/g, reportId);
+					return processedTemplate;
+				}
 			});
 		</script>
+
+		<script type="text/template" id="widgetTemplate">
+			<div>
+			<div class="grid-stack-item-content" style="border: 1px solid #ccc">
+			<div id="content_#reportId#">
+			</div>
+			</div>
+			</div>
+		</script>
+
+		
 	</jsp:attribute>
 
 	<jsp:body>
