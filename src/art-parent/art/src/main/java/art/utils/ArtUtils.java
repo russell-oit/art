@@ -296,7 +296,7 @@ public class ArtUtils {
 		databaseTypes.put("vertica", "Vertica - driver not included"); //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
 		databaseTypes.put("informix", "Informix");
 		databaseTypes.put("cassandra-adejanovski", "Cassandra (adejanovski driver)");
-		databaseTypes.put("neo4j", "Neo4j");
+		databaseTypes.put("neo4j", "Neo4j - driver not included"); //causes issues. https://sourceforge.net/p/art/discussion/352129/thread/aa8e9973/
 		databaseTypes.put("exasol", "EXASOL - driver not included"); //license doesn't allow distribution without consent from exasol
 		databaseTypes.put("redshift", "Redshift - driver not included"); //license issues
 		databaseTypes.put("teradata", "Teradata - driver not included"); //license issues
