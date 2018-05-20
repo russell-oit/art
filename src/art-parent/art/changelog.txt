@@ -3,6 +3,7 @@ ART 3.7
 * Fix for pivottable.js renderers localization not working
 * Have self service dashboards
 * Omitted neo4j driver
+* Fix for documentation link not working
 * Updated jclouds, pivottable.js
 
 ART 3.6
