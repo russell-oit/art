@@ -54,44 +54,65 @@
 				//https://github.com/gridstack/gridstack.js/tree/master/doc
 				//https://jonsuh.com/blog/javascript-templating-without-a-library/
 				$("#reports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
-					var reportId = $("#reports option:selected").val();
+					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
+					var reportId = $(this).find('option').eq(clickedIndex).val();
 					var grid = $('.grid-stack').data('gridstack');
-					var el = $(processWidgetTemplate(reportId));
-					grid.addWidget(el, 0, 0, 3, 2, true);
+					
+					if (newValue) {
+						var el = $(processWidgetTemplate(reportId));
+						grid.addWidget(el, 0, 0, 4, 3, true);
 
-					$.ajax({
-						type: 'POST',
-						url: '${pageContext.request.contextPath}/runReport',
-						data: {reportId: reportId, isFragment: true},
-						success: function (data, status, xhr) {
-							$("#content_" + reportId).html(data);
-						},
-						error: function (xhr, status, error) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
-						}
-					});
+						$.ajax({
+							type: 'POST',
+							url: '${pageContext.request.contextPath}/runReport',
+							data: {reportId: reportId, isFragment: true},
+							success: function (data, status, xhr) {
+								$("#content_" + reportId).html(data);
+							},
+							error: function (xhr, status, error) {
+								bootbox.alert({
+									title: '${errorOccurredText}',
+									message: xhr.responseText
+								});
+							}
+						});
+					} else {
+						var contentDiv = $("#content_" + reportId);
+						var item = contentDiv.closest('.grid-stack-item');
+						grid.removeWidget(item);
+					}
 				});
 
 				function processWidgetTemplate(reportId) {
 					var processedTemplate = $("#widgetTemplate").html().replace(/#reportId#/g, reportId);
 					return processedTemplate;
 				}
+
+				//https://stackoverflow.com/questions/31983495/gridstack-js-delete-widget-using-jquery
+				$('.grid-stack').on('click', '.removeWidget', function () {
+					var grid = $('.grid-stack').data('gridstack');
+					var el = $(this).closest('.grid-stack-item');
+					grid.removeWidget(el);
+					var reportId = $(this).data("reportId");
+					$('#reports').find('[value=' + reportId + ']').prop('selected', false);
+					$('.selectpicker').selectpicker('refresh');
+				});
 			});
 		</script>
 
 		<script type="text/template" id="widgetTemplate">
 			<div>
 			<div class="grid-stack-item-content" style="border: 1px solid #ccc">
+			<div style="text-align: right">
+			<span class="fa fa-times removeWidget" style="cursor: pointer" data-report-id="#reportId#">
+			</div>
 			<div id="content_#reportId#">
 			</div>
 			</div>
 			</div>
 		</script>
 
-		
+
 	</jsp:attribute>
 
 	<jsp:body>
