@@ -4,7 +4,7 @@ ART 3.7
 * Have self service dashboards
 * Omitted neo4j driver
 * Fix for documentation link not working
-* Updated jclouds, pivottable.js
+* Updated jclouds, pivottable.js, ucanaccess
 
 ART 3.6
 * Changed job templates directory to WEB-INF\thymeleaf\jobs
