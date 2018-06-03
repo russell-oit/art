@@ -4,6 +4,8 @@ ART 3.7
 * Have self service dashboards
 * Omitted neo4j driver
 * Fix for documentation link not working
+* Updated pt_BR translation
+* Fix for save not working with pivottable.js report run using run in new page option
 * Updated jclouds, pivottable.js, ucanaccess
 
 ART 3.6
