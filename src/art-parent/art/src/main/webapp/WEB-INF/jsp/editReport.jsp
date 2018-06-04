@@ -467,6 +467,7 @@ Edit report page
 				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
 				switch (reportTypeId) {
 					case 110: //dashboard
+					case 111: //text
 					case 129: //gridstack dashboard
 					case 156: //org chart list
 					case 149: //saiku report

@@ -356,14 +356,7 @@ public class ReportController {
 		logger.debug("Entering editReport: id={}", id);
 
 		try {
-			Report report = reportService.getReportWithOwnSource(id);
-			if (report != null) {
-				ReportType reportType = report.getReportType();
-				if (reportType == ReportType.Text) {
-					report.setReportSourceHtml(report.getReportSource());
-				}
-			}
-			model.addAttribute("report", report);
+			model.addAttribute("report", reportService.getReportWithOwnSource(id));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
