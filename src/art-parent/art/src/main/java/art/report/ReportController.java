@@ -1258,11 +1258,11 @@ public class ReportController {
 	AjaxResponse saveGridstack(@RequestParam("reportId") Integer reportId,
 			@RequestParam("config") String config, @RequestParam("name") String name,
 			@RequestParam("description") String description,
-			@RequestParam(value = "overwrite", required = false) String overwrite,
+			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
 			HttpSession session, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
-				+ " name='{}', description='{}', overwrite='{}'",
+				+ " name='{}', description='{}', overwrite={}",
 				reportId, config, name, description, overwrite);
 
 		AjaxResponse response = new AjaxResponse();
@@ -1277,26 +1277,35 @@ public class ReportController {
 			if (StringUtils.isNotBlank(description)) {
 				report.setDescription(description);
 			}
+			if (StringUtils.isNotBlank(name)) {
+				report.setName(name);
+			}
 
-			if (overwrite == null) {
-				if (StringUtils.isBlank(name)) {
-					String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
-					response.setErrorMessage(message);
-				} else if (reportService.reportNameExists(name)) {
-					String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
-					response.setErrorMessage(message);
-				} else {
-					report.setName(name);
-
-					reportService.copyReport(report, report.getReportId(), sessionUser);
-					reportService.grantAccess(report, sessionUser);
-
-					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
-					response.setData(report.getReportId());
-					response.setSuccess(true);
+			boolean reportNameNotProvided = false;
+			boolean reportNameExists = false;
+			if (StringUtils.isBlank(name)) {
+				if (!overwrite) {
+					reportNameNotProvided = true;
 				}
 			} else {
+				reportNameExists = reportService.reportNameExists(name);
+			}
+
+			if (reportNameNotProvided) {
+				String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
+				response.setErrorMessage(message);
+			} else if (reportNameExists) {
+				String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
+				response.setErrorMessage(message);
+			} else if (overwrite) {
 				reportService.updateReport(report, sessionUser);
+				response.setSuccess(true);
+			} else {
+				reportService.copyReport(report, report.getReportId(), sessionUser);
+				reportService.grantAccess(report, sessionUser);
+
+				//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
+				response.setData(report.getReportId());
 				response.setSuccess(true);
 			}
 		} catch (SQLException | RuntimeException ex) {
