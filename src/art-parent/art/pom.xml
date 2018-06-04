@@ -959,10 +959,11 @@
 			<artifactId>spring-security-config</artifactId>
 			<version>${spring.security.version}</version>
 		</dependency>
+		<!-- dozer 6.2.0+ uses javax.el v3 -->
 		<dependency>
 			<groupId>com.github.dozermapper</groupId>
 			<artifactId>dozer-core</artifactId>
-			<version>6.2.0</version>
+			<version>6.1.0</version>
 		</dependency>
 	</dependencies>
 </project>
