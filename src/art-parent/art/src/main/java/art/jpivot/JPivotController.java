@@ -468,7 +468,9 @@ public class JPivotController {
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
+
 			String queryDescription = request.getParameter("newPivotDescription");
+			String queryName = request.getParameter("newPivotName");
 
 			if (overwriting) {
 				//overwrite query source with current mdx
@@ -477,6 +479,9 @@ public class JPivotController {
 				if (StringUtils.isNotBlank(queryDescription)) {
 					//update description
 					report.setDescription(queryDescription);
+				}
+				if (StringUtils.isNotBlank(queryName)) {
+					report.setName(queryName);
 				}
 				reportService.updateReport(report, sessionUser);
 				redirectAttributes.addFlashAttribute("message", "reports.message.reportSaved");
@@ -503,10 +508,9 @@ public class JPivotController {
 				}
 				newReport.setDescription(queryDescription);
 
-				String queryName = request.getParameter("newPivotName");
 				if (StringUtils.isBlank(queryName)) {
 					//no name provided for the new query. create a default name
-					queryName = StringUtils.left(report.getLocalizedName(locale),45) + "-" + RandomStringUtils.randomAlphanumeric(4);
+					queryName = StringUtils.left(report.getLocalizedName(locale), 45) + "-" + RandomStringUtils.randomAlphanumeric(4);
 				}
 				newReport.setName(queryName);
 
