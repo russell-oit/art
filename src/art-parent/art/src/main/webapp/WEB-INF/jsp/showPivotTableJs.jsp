@@ -276,7 +276,7 @@
 				<div class="col-md-8">
 					<div class="checkbox">
 						<label>
-							<input type="checkbox" name="overwrite" id="overwrite" checked value="">
+							<input type="checkbox" name="overwrite" id="overwrite" checked>
 						</label>
 					</div>
 				</div>
@@ -290,7 +290,7 @@
 				<div class="col-md-8">
 					<div class="checkbox">
 						<label>
-							<input type="checkbox" name="savePivotTableOnly" id="savePivotTableOnly" value="">
+							<input type="checkbox" name="savePivotTableOnly" id="savePivotTableOnly">
 						</label>
 					</div>
 				</div>

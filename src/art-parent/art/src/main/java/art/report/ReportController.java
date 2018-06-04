@@ -1163,13 +1163,13 @@ public class ReportController {
 	AjaxResponse savePivotTableJs(@RequestParam("reportId") Integer reportId,
 			@RequestParam("config") String config, @RequestParam("name") String name,
 			@RequestParam("description") String description,
-			@RequestParam(value = "overwrite", required = false) String overwrite,
-			@RequestParam(value = "savePivotTableOnly", required = false) String savePivotTableOnly,
+			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
+			@RequestParam(value = "savePivotTableOnly", defaultValue = "false") Boolean savePivotTableOnly,
 			HttpSession session, Locale locale) {
 
 		logger.debug("Entering savePivotTableJs: reportId={}, config='{}',"
-				+ " name='{}', description='{}', overwrite='{}'",
-				reportId, config, name, description, overwrite);
+				+ " name='{}', description='{}', overwrite={}, savePivotTableOnly={}",
+				reportId, config, name, description, overwrite, savePivotTableOnly);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -1184,7 +1184,8 @@ public class ReportController {
 				report.setDescription(description);
 			}
 
-			if (overwrite == null) {
+			//https://stackoverflow.com/questions/37359851/how-to-receive-html-check-box-value-in-spring-mvc-controller
+			if (!overwrite) {
 				if (StringUtils.isBlank(name)) {
 					String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
 					response.setErrorMessage(message);
@@ -1193,7 +1194,7 @@ public class ReportController {
 					response.setErrorMessage(message);
 				} else {
 					report.setName(name);
-					if (savePivotTableOnly != null) {
+					if (savePivotTableOnly) {
 						report.setReportType(ReportType.PivotTableJs);
 					}
 
