@@ -1164,6 +1164,7 @@ public class ReportController {
 			@RequestParam("config") String config, @RequestParam("name") String name,
 			@RequestParam("description") String description,
 			@RequestParam(value = "overwrite", required = false) String overwrite,
+			@RequestParam(value = "savePivotTableOnly", required = false) String savePivotTableOnly,
 			HttpSession session, Locale locale) {
 
 		logger.debug("Entering savePivotTableJs: reportId={}, config='{}',"
@@ -1191,8 +1192,10 @@ public class ReportController {
 					String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
 					response.setErrorMessage(message);
 				} else {
-					//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
 					report.setName(name);
+					if (savePivotTableOnly != null) {
+						report.setReportType(ReportType.PivotTableJs);
+					}
 
 					reportService.copyReport(report, report.getReportId(), sessionUser);
 					reportService.grantAccess(report, sessionUser);

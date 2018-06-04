@@ -114,7 +114,7 @@
 	} else {
 		$.extend(renderers, $.pivotUtilities.export_renderers);
 	}
-	
+
 	if ($.pivotUtilities.locales[locale].subtotal_renderers) {
 		$.extend(renderers, $.pivotUtilities.locales[locale].subtotal_renderers);
 	} else {
@@ -277,6 +277,20 @@
 					<div class="checkbox">
 						<label>
 							<input type="checkbox" name="overwrite" id="overwrite" checked value="">
+						</label>
+					</div>
+				</div>
+			</div>
+		</c:if>
+		<c:if test="${!report.reportType.pivotTableJs}">
+			<div class="form-group">
+				<label class="control-label col-md-4" for="savePivotTableOnly">
+					<spring:message code="dialog.label.savePivotTableOnly"/>
+				</label>
+				<div class="col-md-8">
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" name="savePivotTableOnly" id="savePivotTableOnly" value="">
 						</label>
 					</div>
 				</div>
