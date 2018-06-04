@@ -1171,6 +1171,7 @@ public class ReportController {
 				+ " name='{}', description='{}', overwrite={}, savePivotTableOnly={}",
 				reportId, config, name, description, overwrite, savePivotTableOnly);
 
+		//https://stackoverflow.com/questions/37359851/how-to-receive-html-check-box-value-in-spring-mvc-controller
 		AjaxResponse response = new AjaxResponse();
 
 		try {
@@ -1183,30 +1184,39 @@ public class ReportController {
 			if (StringUtils.isNotBlank(description)) {
 				report.setDescription(description);
 			}
+			if (StringUtils.isNotBlank(name)) {
+				report.setName(name);
+			}
 
-			//https://stackoverflow.com/questions/37359851/how-to-receive-html-check-box-value-in-spring-mvc-controller
-			if (!overwrite) {
-				if (StringUtils.isBlank(name)) {
-					String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
-					response.setErrorMessage(message);
-				} else if (reportService.reportNameExists(name)) {
-					String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
-					response.setErrorMessage(message);
-				} else {
-					report.setName(name);
-					if (savePivotTableOnly) {
-						report.setReportType(ReportType.PivotTableJs);
-					}
-
-					reportService.copyReport(report, report.getReportId(), sessionUser);
-					reportService.grantAccess(report, sessionUser);
-
-					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
-					response.setData(report.getReportId());
-					response.setSuccess(true);
+			boolean reportNameNotProvided = false;
+			boolean reportNameExists = false;
+			if (StringUtils.isBlank(name)) {
+				if (!overwrite) {
+					reportNameNotProvided = true;
 				}
 			} else {
+				reportNameExists = reportService.reportNameExists(name);
+			}
+
+			if (reportNameNotProvided) {
+				String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
+				response.setErrorMessage(message);
+			} else if (reportNameExists) {
+				String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
+				response.setErrorMessage(message);
+			} else if (overwrite) {
 				reportService.updateReport(report, sessionUser);
+				response.setSuccess(true);
+			} else {
+				if (savePivotTableOnly) {
+					report.setReportType(ReportType.PivotTableJs);
+				}
+
+				reportService.copyReport(report, report.getReportId(), sessionUser);
+				reportService.grantAccess(report, sessionUser);
+
+				//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
+				response.setData(report.getReportId());
 				response.setSuccess(true);
 			}
 		} catch (SQLException | RuntimeException ex) {
