@@ -10,6 +10,7 @@ ART 3.7
 * Allow saving pivot table only from a tabular report
 * Allow changing report name when overwriting pivottable.js and gridstack reports
 * Allow saving of selected parameters when saving pivottable.js and gridstack reports
+* Fix for saiku art home link not working when art deployed in root
 * Updated jclouds, pivottable.js, ucanaccess
 
 ART 3.6
