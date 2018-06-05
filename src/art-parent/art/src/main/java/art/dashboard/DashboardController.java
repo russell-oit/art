@@ -212,6 +212,9 @@ public class DashboardController {
 						request.setAttribute("ajax", true);
 					}
 
+					RunReportHelper runReportHelper = new RunReportHelper();
+					request.setAttribute("requestParameters", runReportHelper.getRequestParametersString(request));
+
 					String options = report.getOptions();
 					if (StringUtils.isNotBlank(options)) {
 						GridstackOptions gridstackOptions = ArtUtils.jsonToObject(options, GridstackOptions.class);

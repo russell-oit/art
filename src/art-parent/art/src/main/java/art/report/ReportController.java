@@ -1278,7 +1278,8 @@ public class ReportController {
 			@RequestParam("config") String config, @RequestParam("name") String name,
 			@RequestParam("description") String description,
 			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
-			HttpSession session, Locale locale) {
+			@RequestParam(value = "saveSelectedParameters", defaultValue = "false") Boolean saveSelectedParameters,
+			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
 				+ " name='{}', description='{}', overwrite={}",
@@ -1316,15 +1317,19 @@ public class ReportController {
 			} else if (reportNameExists) {
 				String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
 				response.setErrorMessage(message);
-			} else if (overwrite) {
-				reportService.updateReport(report, sessionUser);
-				response.setSuccess(true);
 			} else {
-				reportService.copyReport(report, report.getReportId(), sessionUser);
-				reportService.grantAccess(report, sessionUser);
+				if (overwrite) {
+					reportService.updateReport(report, sessionUser);
+				} else {
+					reportService.copyReport(report, report.getReportId(), sessionUser);
+					reportService.grantAccess(report, sessionUser);
 
-				//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
-				response.setData(report.getReportId());
+					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
+					response.setData(report.getReportId());
+				}
+				if (saveSelectedParameters) {
+					saveParameterSelection(session, request, report.getReportId());
+				}
 				response.setSuccess(true);
 			}
 		} catch (SQLException | RuntimeException ex) {
