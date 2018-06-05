@@ -253,27 +253,27 @@
 		<input type="hidden" name="reportId" value="${report.reportId}">
 		<input type="hidden" id="config" name="config" value="">
         <div class="form-group">
-			<label class="control-label col-md-4" for="name">
+			<label class="control-label col-md-5" for="name">
 				<spring:message code="page.text.name"/>
 			</label>
-			<div class="col-md-8">
+			<div class="col-md-7">
 				<input type="text" id="name" name="name" maxlength="50" class="form-control"/>
 			</div>
 		</div>
 		<div class="form-group">
-			<label class="control-label col-md-4" for="description">
+			<label class="control-label col-md-5" for="description">
 				<spring:message code="page.text.description"/>
 			</label>
-			<div class="col-md-8">
+			<div class="col-md-7">
 				<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
 			</div>
 		</div>
 		<c:if test="${exclusiveAccess}">
 			<div class="form-group">
-				<label class="control-label col-md-4" for="overwrite">
+				<label class="control-label col-md-5" for="overwrite">
 					<spring:message code="reports.text.overwrite"/>
 				</label>
-				<div class="col-md-8">
+				<div class="col-md-7">
 					<div class="checkbox">
 						<label>
 							<input type="checkbox" name="overwrite" id="overwrite" checked>
@@ -283,10 +283,10 @@
 			</div>
 		</c:if>
 		<div class="form-group">
-			<label class="control-label col-md-4" for="saveSelectedParameters">
+			<label class="control-label col-md-5" for="saveSelectedParameters">
 				<spring:message code="dialog.label.saveSelectedParameters"/>
 			</label>
-			<div class="col-md-8">
+			<div class="col-md-7">
 				<div class="checkbox">
 					<label>
 						<input type="checkbox" name="saveSelectedParameters" id="saveSelectedParameters">
@@ -296,13 +296,13 @@
 		</div>
 		<c:if test="${!report.reportType.pivotTableJs}">
 			<div class="form-group">
-				<label class="control-label col-md-4" for="savePivotTableOnly">
-					<spring:message code="dialog.label.savePivotTableOnly"/>
+				<label class="control-label col-md-5" for="saveAsPivotTable">
+					<spring:message code="dialog.label.saveAsPivotTable"/>
 				</label>
-				<div class="col-md-8">
+				<div class="col-md-7">
 					<div class="checkbox">
 						<label>
-							<input type="checkbox" name="savePivotTableOnly" id="savePivotTableOnly">
+							<input type="checkbox" name="saveAsPivotTable" id="saveAsPivotTable">
 						</label>
 					</div>
 				</div>
