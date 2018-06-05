@@ -282,6 +282,18 @@
 				</div>
 			</div>
 		</c:if>
+		<div class="form-group">
+			<label class="control-label col-md-4" for="saveSelectedParameters">
+				<spring:message code="dialog.label.saveSelectedParameters"/>
+			</label>
+			<div class="col-md-8">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="saveSelectedParameters" id="saveSelectedParameters">
+					</label>
+				</div>
+			</div>
+		</div>
 		<c:if test="${!report.reportType.pivotTableJs}">
 			<div class="form-group">
 				<label class="control-label col-md-4" for="savePivotTableOnly">
@@ -333,6 +345,13 @@
 					//https://github.com/makeusabrew/bootbox/issues/572
 					var form = dialog.find('#form-${outputDivId}');
 					var data = form.serialize();
+					var reportParameters = $('#parametersForm').serialize();
+					if (reportParameters) {
+						data = data + '&' + reportParameters;
+					}
+//					console.log("params", $('#parametersForm').serialize());
+//					$.extend(data, $('#parametersForm').serialize());
+
 					$.ajax({
 						type: 'POST',
 						url: '${pageContext.request.contextPath}/savePivotTableJs',
