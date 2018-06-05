@@ -103,7 +103,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -942,6 +944,7 @@ public class ReportOutputGenerator {
 
 		request.setAttribute("reportType", reportType);
 		request.setAttribute("report", report);
+		request.setAttribute("requestParameters", getRequestParametersString());
 
 		if (pivotTableJsOptions == null) {
 			pivotTableJsOptions = new PivotTableJsOptions();
@@ -1027,7 +1030,7 @@ public class ReportOutputGenerator {
 		if (languageFile.exists()) {
 			request.setAttribute("locale", localeString);
 		}
-		
+
 		String plotlyLocaleString = StringUtils.lowerCase(localeString, Locale.ENGLISH);
 		plotlyLocaleString = StringUtils.replace(plotlyLocaleString, "_", "-");
 		String plotlyLanguageFileName = "plotly-locale-" + plotlyLocaleString + ".js";
@@ -2797,6 +2800,25 @@ public class ReportOutputGenerator {
 		request.setAttribute("data", jsonData);
 		request.setAttribute("options", plotlyOptions);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPlotly.jsp").include(request, response);
+	}
+
+	private String getRequestParametersString() throws UnsupportedEncodingException {
+		List<String> parametersList = new ArrayList<>();
+		Map<String, String[]> requestParameters = request.getParameterMap();
+		for (Entry<String, String[]> entry : requestParameters.entrySet()) {
+			String paramName = entry.getKey();
+			String[] paramValues = entry.getValue();
+			String encodedParamName = URLEncoder.encode(paramName, "UTF-8");
+			for (String paramValue : paramValues) {
+				String encodedParamValue = URLEncoder.encode(paramValue, "UTF-8");
+				String paramString = encodedParamName + "=" + encodedParamValue;
+				parametersList.add(paramString);
+			}
+		}
+
+		String parametersString = StringUtils.join(parametersList, "&");
+
+		return parametersString;
 	}
 
 }

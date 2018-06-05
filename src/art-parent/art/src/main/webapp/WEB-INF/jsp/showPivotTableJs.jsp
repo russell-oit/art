@@ -345,12 +345,10 @@
 					//https://github.com/makeusabrew/bootbox/issues/572
 					var form = dialog.find('#form-${outputDivId}');
 					var data = form.serialize();
-					var reportParameters = $('#parametersForm').serialize();
+					var reportParameters = '${requestParameters}';
 					if (reportParameters) {
 						data = data + '&' + reportParameters;
 					}
-//					console.log("params", $('#parametersForm').serialize());
-//					$.extend(data, $('#parametersForm').serialize());
 
 					$.ajax({
 						type: 'POST',
