@@ -23,6 +23,7 @@ import art.dashboard.PdfDashboard;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.destination.Destination;
+import art.destination.GoogleServiceAccountJsonKey;
 import art.destinationoptions.S3AwsSdkOptions;
 import art.destinationoptions.FtpOptions;
 import art.destinationoptions.NetworkShareOptions;
@@ -71,6 +72,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sardine.Sardine;
 import com.github.sardine.SardineFactory;
 import com.google.common.collect.ImmutableSet;
@@ -137,6 +139,7 @@ import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
+import org.jclouds.blobstore.domain.BlobBuilder.PayloadBlobBuilder;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jsoup.Connection.Method;
@@ -471,6 +474,12 @@ public class ReportJob implements org.quartz.Job {
 					case Azure:
 						sendFileToAzure(destination, fullLocalFileName);
 						break;
+//					case B2:
+//						sendFileToB2(destination, fullLocalFileName);
+//						break;
+					case GoogleCloudStorage:
+						sendFileToGoogleCloudStorage(destination, fullLocalFileName);
+						break;
 					case WebDav:
 						sendFileToWebDav(destination, fullLocalFileName);
 						break;
@@ -663,13 +672,35 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Copies the generated file to an amazon s3 or compatible storage provider
+	 * Copies the generated file to microsoft azure blob storage
 	 *
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
 	private void sendFileToAzure(Destination destination, String fullLocalFileName) {
 		String provider = "azureblob";
+		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+	}
+
+	/**
+	 * Copies the generated file to backblaze b2 storage
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToB2(Destination destination, String fullLocalFileName) {
+		String provider = "b2";
+		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+	}
+
+	/**
+	 * Copies the generated file to google cloud storage
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToGoogleCloudStorage(Destination destination, String fullLocalFileName) {
+		String provider = "google-cloud-storage";
 		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
 
@@ -810,18 +841,46 @@ public class ReportJob implements org.quartz.Job {
 		//https://jclouds.apache.org/guides/aws/
 		//https://jclouds.apache.org/reference/providers/#blobstore-providers
 		//https://github.com/apache/camel/blob/master/components/camel-jclouds/src/main/java/org/apache/camel/component/jclouds/JcloudsBlobStoreHelper.java
-		String identity = destination.getUser();
-		String credential = destination.getPassword();
-
-		Iterable<Module> modules = ImmutableSet.<Module>of(
-				new SLF4JLoggingModule());
-
-		BlobStoreContext context = ContextBuilder.newBuilder(provider)
-				.credentials(identity, credential)
-				.modules(modules)
-				.buildView(BlobStoreContext.class);
+		//https://jclouds.apache.org/guides/google/
+		//https://help.backblaze.com/hc/en-us/articles/224991568-Where-can-I-find-my-Account-ID-and-Application-Key-
+		BlobStoreContext context = null;
 
 		try {
+			String identity;
+			String credential;
+
+			DestinationType destinationType = destination.getDestinationType();
+			switch (destinationType) {
+				case GoogleCloudStorage:
+					String templatesPath = Config.getTemplatesPath();
+					String jsonKeyFileName = destination.getGoogleJsonKeyFile();
+					if (StringUtils.isBlank(jsonKeyFileName)) {
+						throw new IllegalArgumentException("JSON Key file not specified");
+					}
+					String jsonKeyFilePath = templatesPath + jsonKeyFileName;
+					File jsonKeyFile = new File(jsonKeyFilePath);
+					if (jsonKeyFile.exists()) {
+						ObjectMapper mapper = new ObjectMapper();
+						GoogleServiceAccountJsonKey jsonKey = mapper.readValue(jsonKeyFile, GoogleServiceAccountJsonKey.class);
+						identity = jsonKey.getClient_email();
+						credential = jsonKey.getPrivate_key();
+					} else {
+						throw new IllegalStateException("JSON Key file not found: " + jsonKeyFilePath);
+					}
+					break;
+				default:
+					identity = destination.getUser();
+					credential = destination.getPassword();
+			}
+
+			Iterable<Module> modules = ImmutableSet.<Module>of(
+					new SLF4JLoggingModule());
+
+			context = ContextBuilder.newBuilder(provider)
+					.credentials(identity, credential)
+					.modules(modules)
+					.buildView(BlobStoreContext.class);
+
 			String destinationSubDirectory = destination.getSubDirectory();
 			String jobSubDirectory = job.getSubDirectory();
 
@@ -842,18 +901,31 @@ public class ReportJob implements org.quartz.Job {
 
 			BlobStore blobStore = context.getBlobStore();
 
+			//https://www.javatips.net/api/jclouds-master/providers/b2/src/test/java/org/jclouds/b2/blobstore/integration/B2BlobIntegrationLiveTest.java
+			//https://www.backblaze.com/b2/docs/b2_upload_file.html
 			ByteSource payload = Files.asByteSource(localFile);
-			Blob blob = blobStore.blobBuilder(remoteFileName)
+			PayloadBlobBuilder blobBuilder = blobStore.blobBuilder(remoteFileName)
 					.payload(payload)
-					.contentDisposition(fileName)
-					.contentLength(payload.size())
-					.contentType(mimeType)
-					.build();
+					.contentLength(payload.size());
+
+			if (!StringUtils.equals(provider, "b2")) {
+				blobBuilder.contentDisposition(fileName)
+						.contentType(mimeType);
+			}
+
+			Blob blob = blobBuilder.build();
 
 			String containerName = destination.getPath();
 
 			// Upload the Blob
-			String eTag = blobStore.putBlob(containerName, blob, multipart());
+			//https://stackoverflow.com/questions/49078140/jclouds-multipart-upload-to-google-cloud-storage-failing-with-400-bad-request
+			//https://issues.apache.org/jira/browse/JCLOUDS-1389
+			String eTag;
+			if (StringUtils.equalsAny(provider, "b2", "google-cloud-storage")) {
+				eTag = blobStore.putBlob(containerName, blob);
+			} else {
+				eTag = blobStore.putBlob(containerName, blob, multipart());
+			}
 			logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", fileName, eTag, jobId);
 		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
@@ -1726,20 +1798,19 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering getMailFrom");
 
 		String from;
+
 		String settingsFrom = Config.getSettings().getSmtpFrom();
 		logger.debug("settingsFrom='{}'", settingsFrom);
 
 		String jobSmtpServerFrom = null;
 		SmtpServer jobSmtpServer = job.getSmtpServer();
-		logger.debug("jobSmtpServer={}", jobSmtpServer);
+		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
+			jobSmtpServerFrom = jobSmtpServer.getFrom();
+		}
+		logger.debug("jobSmtpServerFrom='{}'", jobSmtpServerFrom);
 
 		String jobMailFrom = job.getMailFrom();
 		logger.debug("jobMailFrom='{}'", jobMailFrom);
-
-		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
-			jobSmtpServerFrom = jobSmtpServer.getFrom();
-			logger.debug("jobSmtpServerFrom='{}'", jobSmtpServerFrom);
-		}
 
 		if (StringUtils.isNotBlank(jobSmtpServerFrom)) {
 			from = jobSmtpServerFrom;
@@ -1747,6 +1818,12 @@ public class ReportJob implements org.quartz.Job {
 			from = settingsFrom;
 		} else {
 			from = jobMailFrom;
+		}
+
+		logger.debug("from='{}'", from);
+
+		if (StringUtils.isBlank(from)) {
+			logger.warn("From email address not available: Job Id {}", jobId);
 		}
 
 		return from;

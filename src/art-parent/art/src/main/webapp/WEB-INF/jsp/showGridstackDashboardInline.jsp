@@ -179,37 +179,37 @@
 </div>
 
 <script type="text/javascript">
-	$(document).ready(function () {
-		//https://stackoverflow.com/questions/109086/stop-setinterval-call-in-javascript
-		//https://stackoverflow.com/questions/351495/dynamically-creating-keys-in-javascript-associative-array
-		var intervalIds = {};
+		$(document).ready(function () {
+			//https://stackoverflow.com/questions/109086/stop-setinterval-call-in-javascript
+			//https://stackoverflow.com/questions/351495/dynamically-creating-keys-in-javascript-associative-array
+			var intervalIds = {};
 
-		function autosize(autoheight, autowidth, itemIndex) {
-			//https://github.com/gridstack/gridstack.js/issues/404
-			if (autoheight || autowidth) {
-				var index = itemIndex - 1;
+			function autosize(autoheight, autowidth, itemIndex) {
+				//https://github.com/gridstack/gridstack.js/issues/404
+				if (autoheight || autowidth) {
+					var index = itemIndex - 1;
 
-				var newHeightPixels;
-				if (autoheight) {
-					newHeightPixels = Math.ceil(($('.grid-stack-item-content')[index].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
-				} else {
-					newHeightPixels = $($('.grid-stack-item')[index]).attr('data-gs-height');
+					var newHeightPixels;
+					if (autoheight) {
+						newHeightPixels = Math.ceil(($('.grid-stack-item-content')[index].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
+					} else {
+						newHeightPixels = $($('.grid-stack-item')[index]).attr('data-gs-height');
+					}
+
+					var newWidthPixels;
+					if (autowidth) {
+						newWidthPixels = Math.ceil($('.grid-stack-item-content')[index].scrollWidth / $('.grid-stack').width() * ${dashboard.width});
+					} else {
+						newWidthPixels = $($('.grid-stack-item')[index]).attr('data-gs-width');
+					}
+
+					$('.grid-stack').data('gridstack').resize(
+							$('.grid-stack-item')[index],
+							newWidthPixels,
+							newHeightPixels
+							);
 				}
-
-				var newWidthPixels;
-				if (autowidth) {
-					newWidthPixels = Math.ceil($('.grid-stack-item-content')[index].scrollWidth / $('.grid-stack').width() * ${dashboard.width});
-				} else {
-					newWidthPixels = $($('.grid-stack-item')[index]).attr('data-gs-width');
-				}
-
-				$('.grid-stack').data('gridstack').resize(
-						$('.grid-stack-item')[index],
-						newWidthPixels,
-						newHeightPixels
-						);
 			}
-		}
 
 	<c:choose>
 		<c:when test="${dashboard.tabList == null}">
@@ -221,127 +221,89 @@
 	</c:choose>
 
 	<c:forEach var="item" items="${items}">
-		var contentDivId = "#itemContent_${item.index}";
-		var itemUrl = "${encode:forJavaScript(item.url)}";
+			var contentDivId = "#itemContent_${item.index}";
+			var itemUrl = "${encode:forJavaScript(item.url)}";
 
-		if (${item.executeOnLoad}) {
-			var baseUrl = "${encode:forJavaScript(item.baseUrl)}";
-			if (baseUrl) {
-				//use post for art reports
-				//https://api.jquery.com/load/
-				var parametersJson = '${encode:forJavaScript(item.parametersJson)}';
-				var parametersObject = JSON.parse(parametersJson);
-				$(contentDivId).load(baseUrl, parametersObject, function () {
-					autosize(${item.autoheight}, ${item.autowidth}, ${item.index});
-				});
-			} else {
-				$(contentDivId).load(itemUrl);
-			}
-		}
-
-		var refreshPeriodSeconds = ${item.refreshPeriodSeconds};
-		if (refreshPeriodSeconds !== -1) {
-			var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
-			var intervalId = setInterval(function () {
-				if ("${item.baseUrl}") {
-					//use post for art reports
-					//use single quote as json string will have double quotes for attribute names and values
-					var parametersJson = '${item.parametersJson}';
-					var parametersObject = JSON.parse(parametersJson);
-					$("#itemContent_${item.index}").load("${item.baseUrl}", parametersObject, function () {
-						if (${item.autoheight} || ${item.autowidth}) {
-							var newHeightPixels;
-							if (${item.autoheight}) {
-								newHeightPixels = Math.ceil(($('.grid-stack-item-content')[${item.index} - 1].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
-							} else {
-								newHeightPixels = $($('.grid-stack-item')[${item.index} - 1]).attr('data-gs-height');
-							}
-
-							var newWidthPixels;
-							if (${item.autowidth}) {
-								newWidthPixels = Math.ceil($('.grid-stack-item-content')[${item.index} - 1].scrollWidth / $('.grid-stack').width() * ${dashboard.width});
-							} else {
-								newWidthPixels = $($('.grid-stack-item')[${item.index} - 1]).attr('data-gs-width');
-							}
-
-							$('.grid-stack').data('gridstack').resize(
-									$('.grid-stack-item')[${item.index} - 1],
-									newWidthPixels,
-									newHeightPixels
-									);
-						}
-					});
-				} else {
-					$("#itemContent_${item.index}").load("${item.url}");
-				}
-				//https://stackoverflow.com/questions/2441197/javascript-setinterval-loop-not-holding-variable
-				//using variables like below doesn't work properly. setinterval will be set on the last portlet (last variable contents)
-				//$(contentDivId).load(itemUrl);
-			}, refreshPeriodMilliseconds);
-
-			intervalIds[contentDivId] = intervalId;
-		}
-	</c:forEach>
-
-		$('.toggle').on('click', function () {
-			var parentDiv = $(this).parent('div');
-			var contentDivId = parentDiv.data("content-div-id");
-			var itemUrl = parentDiv.data("url");
-			var src = $(this).attr('src'); //this.src gives full url i.e. http://... while $(this).attr('src') gives relative url i.e. contextpath/...
-			var mimimizeUrl = "${pageContext.request.contextPath}/images/minimize.png";
-			var maximizeUrl = "${pageContext.request.contextPath}/images/maximize.png";
-			var baseUrl = parentDiv.data("base-url");
-			var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
-			var index = parentDiv.data("index");
-			var autoheight = parentDiv.data("autoheight");
-			var autowidth = parentDiv.data("autowidth");
-
-			if (src === mimimizeUrl) {
-				$(contentDivId).hide();
-				$(this).attr('src', maximizeUrl);
-			} else {
-				$(contentDivId).show();
-				$(this).attr('src', mimimizeUrl);
-
-				//refresh item contents every time it's maximized/shown
+			if (${item.executeOnLoad}) {
+				var baseUrl = "${encode:forJavaScript(item.baseUrl)}";
 				if (baseUrl) {
 					//use post for art reports
+					//https://api.jquery.com/load/
+					var parametersJson = '${encode:forJavaScript(item.parametersJson)}';
+					var parametersObject = JSON.parse(parametersJson);
 					$(contentDivId).load(baseUrl, parametersObject, function () {
-						autosize(autoheight, autowidth, index);
+						autosize(${item.autoheight}, ${item.autowidth}, ${item.index});
 					});
 				} else {
 					$(contentDivId).load(itemUrl);
 				}
 			}
-		});
 
-		$('.refresh').on('click', function () {
-			var parentDiv = $(this).parent('div');
-			var contentDivId = parentDiv.data("content-div-id");
-			var itemUrl = parentDiv.data("url");
-			var refreshPeriodSeconds = parentDiv.data("refresh-period-seconds");
-			var baseUrl = parentDiv.data("base-url");
-			var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
-			var index = parentDiv.data("index");
-			var autoheight = parentDiv.data("autoheight");
-			var autowidth = parentDiv.data("autowidth");
-
-			if (baseUrl) {
-				//use post for art reports
-				$(contentDivId).load(baseUrl, parametersObject, function () {
-					autosize(autoheight, autowidth, index);
-				});
-			} else {
-				$(contentDivId).load(itemUrl);
-			}
-
-			//reset/restart refresh interval
+			var refreshPeriodSeconds = ${item.refreshPeriodSeconds};
 			if (refreshPeriodSeconds !== -1) {
-				clearInterval(intervalIds[contentDivId]);
-
 				var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
+				var intervalId = setInterval(function () {
+					if ("${item.baseUrl}") {
+						//use post for art reports
+						//use single quote as json string will have double quotes for attribute names and values
+						var parametersJson = '${item.parametersJson}';
+						var parametersObject = JSON.parse(parametersJson);
+						$("#itemContent_${item.index}").load("${item.baseUrl}", parametersObject, function () {
+							if (${item.autoheight} || ${item.autowidth}) {
+								var newHeightPixels;
+								if (${item.autoheight}) {
+									newHeightPixels = Math.ceil(($('.grid-stack-item-content')[${item.index} - 1].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
+								} else {
+									newHeightPixels = $($('.grid-stack-item')[${item.index} - 1]).attr('data-gs-height');
+								}
 
-				var setIntervalId = setInterval(function () {
+								var newWidthPixels;
+								if (${item.autowidth}) {
+									newWidthPixels = Math.ceil($('.grid-stack-item-content')[${item.index} - 1].scrollWidth / $('.grid-stack').width() * ${dashboard.width});
+								} else {
+									newWidthPixels = $($('.grid-stack-item')[${item.index} - 1]).attr('data-gs-width');
+								}
+
+								$('.grid-stack').data('gridstack').resize(
+										$('.grid-stack-item')[${item.index} - 1],
+										newWidthPixels,
+										newHeightPixels
+										);
+							}
+						});
+					} else {
+						$("#itemContent_${item.index}").load("${item.url}");
+					}
+					//https://stackoverflow.com/questions/2441197/javascript-setinterval-loop-not-holding-variable
+					//using variables like below doesn't work properly. setinterval will be set on the last portlet (last variable contents)
+					//$(contentDivId).load(itemUrl);
+				}, refreshPeriodMilliseconds);
+
+				intervalIds[contentDivId] = intervalId;
+			}
+	</c:forEach>
+
+			$('.toggle').on('click', function () {
+				var parentDiv = $(this).parent('div');
+				var contentDivId = parentDiv.data("content-div-id");
+				var itemUrl = parentDiv.data("url");
+				var src = $(this).attr('src'); //this.src gives full url i.e. http://... while $(this).attr('src') gives relative url i.e. contextpath/...
+				var mimimizeUrl = "${pageContext.request.contextPath}/images/minimize.png";
+				var maximizeUrl = "${pageContext.request.contextPath}/images/maximize.png";
+				var baseUrl = parentDiv.data("base-url");
+				var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
+				var index = parentDiv.data("index");
+				var autoheight = parentDiv.data("autoheight");
+				var autowidth = parentDiv.data("autowidth");
+
+				if (src === mimimizeUrl) {
+					$(contentDivId).hide();
+					$(this).attr('src', maximizeUrl);
+				} else {
+					$(contentDivId).show();
+					$(this).attr('src', mimimizeUrl);
+
+					//refresh item contents every time it's maximized/shown
 					if (baseUrl) {
 						//use post for art reports
 						$(contentDivId).load(baseUrl, parametersObject, function () {
@@ -350,29 +312,67 @@
 					} else {
 						$(contentDivId).load(itemUrl);
 					}
-				}, refreshPeriodMilliseconds);
+				}
+			});
 
-				intervalIds[contentDivId] = setIntervalId;
-			}
-		});
+			$('.refresh').on('click', function () {
+				var parentDiv = $(this).parent('div');
+				var contentDivId = parentDiv.data("content-div-id");
+				var itemUrl = parentDiv.data("url");
+				var refreshPeriodSeconds = parentDiv.data("refresh-period-seconds");
+				var baseUrl = parentDiv.data("base-url");
+				var parametersObject = parentDiv.data("parameters-json"); //json string gets converted to object
+				var index = parentDiv.data("index");
+				var autoheight = parentDiv.data("autoheight");
+				var autowidth = parentDiv.data("autowidth");
 
-		//horizontal margin/padding not an api option. defaults to 20px (10px on the left + 10px on the right)
-		//can be overriden in css
-		//https://github.com/troolee/gridstack.js/issues/33
-		$('.grid-stack').gridstack({
-			width: ${dashboard.width},
-			alwaysShowResizeHandle: ${dashboard.alwaysShowResizeHandle},
-			resizable: {
-				handles: 'e, se, s, sw, w, n'
-			},
-			cellHeight: '${dashboard.cellHeight}',
-			float: ${dashboard.floatEnabled},
-			animate: ${dashboard.animate},
-			disableDrag: ${dashboard.disableDrag},
-			disableResize: ${dashboard.disableResize},
-			verticalMargin: '${dashboard.verticalMargin}'
+				if (baseUrl) {
+					//use post for art reports
+					$(contentDivId).load(baseUrl, parametersObject, function () {
+						autosize(autoheight, autowidth, index);
+					});
+				} else {
+					$(contentDivId).load(itemUrl);
+				}
+
+				//reset/restart refresh interval
+				if (refreshPeriodSeconds !== -1) {
+					clearInterval(intervalIds[contentDivId]);
+
+					var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
+
+					var setIntervalId = setInterval(function () {
+						if (baseUrl) {
+							//use post for art reports
+							$(contentDivId).load(baseUrl, parametersObject, function () {
+								autosize(autoheight, autowidth, index);
+							});
+						} else {
+							$(contentDivId).load(itemUrl);
+						}
+					}, refreshPeriodMilliseconds);
+
+					intervalIds[contentDivId] = setIntervalId;
+				}
+			});
+
+			//horizontal margin/padding not an api option. defaults to 20px (10px on the left + 10px on the right)
+			//can be overriden in css
+			//https://github.com/troolee/gridstack.js/issues/33
+			$('.grid-stack').gridstack({
+				width: ${dashboard.width},
+				alwaysShowResizeHandle: ${dashboard.alwaysShowResizeHandle},
+				resizable: {
+					handles: 'e, se, s, sw, w, n'
+				},
+				cellHeight: '${dashboard.cellHeight}',
+				float: ${dashboard.floatEnabled},
+				animate: ${dashboard.animate},
+				disableDrag: ${dashboard.disableDrag},
+				disableResize: ${dashboard.disableResize},
+				verticalMargin: '${dashboard.verticalMargin}'
+			});
 		});
-	});
 </script>
 
 <script type="text/javascript">
@@ -397,35 +397,47 @@
 		<input type="hidden" name="reportId" value="${report.reportId}">
 		<input type="hidden" id="config" name="config" value="">
         <div class="form-group">
-			<label class="control-label col-md-4" for="name">
+			<label class="control-label col-md-5" for="name">
 				<spring:message code="page.text.name"/>
 			</label>
-			<div class="col-md-8">
+			<div class="col-md-7">
 				<input type="text" id="name" name="name" maxlength="50" class="form-control"/>
 			</div>
 		</div>
 		<div class="form-group">
-			<label class="control-label col-md-4" for="description">
+			<label class="control-label col-md-5" for="description">
 				<spring:message code="page.text.description"/>
 			</label>
-			<div class="col-md-8">
+			<div class="col-md-7">
 				<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
 			</div>
 		</div>
 		<c:if test="${exclusiveAccess}">
 			<div class="form-group">
-				<label class="control-label col-md-4" for="overwrite">
+				<label class="control-label col-md-5" for="overwrite">
 					<spring:message code="reports.text.overwrite"/>
 				</label>
-				<div class="col-md-8">
+				<div class="col-md-7">
 					<div class="checkbox">
 						<label>
-							<input type="checkbox" name="overwrite" id="overwrite" checked value="">
+							<input type="checkbox" name="overwrite" id="overwrite" checked>
 						</label>
 					</div>
 				</div>
 			</div>
 		</c:if>
+		<div class="form-group">
+			<label class="control-label col-md-5" for="saveSelectedParameters">
+				<spring:message code="dialog.label.saveSelectedParameters"/>
+			</label>
+			<div class="col-md-7">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="saveSelectedParameters" id="saveSelectedParameters">
+					</label>
+				</div>
+			</div>
+		</div>
 	</form>
 </div>
 
@@ -464,6 +476,11 @@
 					//https://github.com/makeusabrew/bootbox/issues/572
 					var form = dialog.find('#saveDashboardForm');
 					var data = form.serialize();
+					var reportParameters = '${requestParameters}';
+					if (reportParameters) {
+						data = data + '&' + reportParameters;
+					}
+
 					$.ajax({
 						type: 'POST',
 						url: '${pageContext.request.contextPath}/saveGridstack',

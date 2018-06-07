@@ -46,7 +46,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -296,7 +295,7 @@ public class ArtUtils {
 		databaseTypes.put("vertica", "Vertica - driver not included"); //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
 		databaseTypes.put("informix", "Informix");
 		databaseTypes.put("cassandra-adejanovski", "Cassandra (adejanovski driver)");
-		databaseTypes.put("neo4j", "Neo4j");
+		databaseTypes.put("neo4j", "Neo4j - driver not included"); //causes issues. https://sourceforge.net/p/art/discussion/352129/thread/aa8e9973/
 		databaseTypes.put("exasol", "EXASOL - driver not included"); //license doesn't allow distribution without consent from exasol
 		databaseTypes.put("redshift", "Redshift - driver not included"); //license issues
 		databaseTypes.put("teradata", "Teradata - driver not included"); //license issues
@@ -640,42 +639,6 @@ public class ArtUtils {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Unzips a file to a designated location
-	 *
-	 * @param zipFileName the full file name of the file to unzip
-	 * @param destinationDirectory the location to unzip to
-	 * @return file names of files contained in the zip file
-	 * @throws IOException
-	 */
-	public static List<String> unzipFile(String zipFileName,
-			String destinationDirectory) throws IOException {
-
-		List<String> fileNames = new ArrayList<>();
-		//http://www.baeldung.com/java-compress-and-uncompress
-		byte[] buffer = new byte[1024];
-		try (FileInputStream fis = new FileInputStream(zipFileName);
-				ZipInputStream zis = new ZipInputStream(fis)) {
-			ZipEntry zipEntry = zis.getNextEntry();
-			while (zipEntry != null) {
-				String fileName = zipEntry.getName();
-				fileNames.add(fileName);
-				String filePath = destinationDirectory + fileName;
-				File newFile = new File(filePath);
-				try (FileOutputStream fos = new FileOutputStream(newFile)) {
-					int len;
-					while ((len = zis.read(buffer)) > 0) {
-						fos.write(buffer, 0, len);
-					}
-				}
-				zipEntry = zis.getNextEntry();
-			}
-			zis.closeEntry();
-		}
-
-		return fileNames;
 	}
 
 }

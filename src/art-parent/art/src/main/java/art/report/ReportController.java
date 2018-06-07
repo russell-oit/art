@@ -102,7 +102,7 @@ public class ReportController {
 	private SavedParameterService savedParameterService;
 
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
-	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
+	public String showReports(HttpSession session, Model model) {
 		logger.debug("Entering showReports");
 
 		try {
@@ -142,7 +142,7 @@ public class ReportController {
 
 	@RequestMapping(value = "/getReports", method = RequestMethod.GET)
 	public @ResponseBody
-	List<Report> getReports(HttpSession session, HttpServletRequest request) {
+	List<Report> getReports(HttpSession session) {
 		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
 		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
 
@@ -356,14 +356,7 @@ public class ReportController {
 		logger.debug("Entering editReport: id={}", id);
 
 		try {
-			Report report = reportService.getReportWithOwnSource(id);
-			if (report != null) {
-				ReportType reportType = report.getReportType();
-				if (reportType == ReportType.Text) {
-					report.setReportSourceHtml(report.getReportSource());
-				}
-			}
-			model.addAttribute("report", report);
+			model.addAttribute("report", reportService.getReportWithOwnSource(id));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -614,98 +607,16 @@ public class ReportController {
 
 	@PostMapping("/saveParameterSelection")
 	public @ResponseBody
-	AjaxResponse saveParameterSelection(HttpServletRequest request,
+	AjaxResponse saveParameterSelectionHandler(HttpServletRequest request,
 			HttpSession session) {
 
-		logger.debug("Entering saveParameterSelection");
+		logger.debug("Entering saveParameterSelectionHandler");
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
-			int userId = sessionUser.getUserId();
 			int reportId = Integer.parseInt(request.getParameter("reportId"));
-
-			Map<String, String[]> passedValues = new HashMap<>();
-
-			List<String> nonBooleanParams = new ArrayList<>();
-			nonBooleanParams.add("chartWidth");
-			nonBooleanParams.add("chartHeight");
-
-			Map<String, String[]> requestParameters = request.getParameterMap();
-			for (Map.Entry<String, String[]> entry : requestParameters.entrySet()) {
-				String htmlParamName = entry.getKey();
-				logger.debug("htmlParamName='{}'", htmlParamName);
-
-				if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)
-						|| ArtUtils.containsIgnoreCase(nonBooleanParams, htmlParamName)) {
-					String[] paramValues = entry.getValue();
-					passedValues.put(htmlParamName, paramValues);
-				}
-			}
-
-			savedParameterService.deleteSavedParameters(userId, reportId);
-
-			SavedParameter savedParam = new SavedParameter();
-			savedParam.setUserId(userId);
-			savedParam.setReportId(reportId);
-
-			//add report parameters
-			for (Map.Entry<String, String[]> entry : passedValues.entrySet()) {
-				String name = entry.getKey();
-				String[] values = entry.getValue();
-				for (String value : values) {
-					savedParam.setName(name);
-					savedParam.setValue(value);
-					savedParameterService.addSavedParameter(savedParam);
-				}
-			}
-
-			//add report options
-			String showSelectedParametersValue = request.getParameter("showSelectedParameters");
-			if (showSelectedParametersValue != null) {
-				savedParam.setName("showSelectedParameters");
-				savedParam.setValue("true");
-				savedParameterService.addSavedParameter(savedParam);
-			}
-			String swapAxesValue = request.getParameter("swapAxes");
-			if (swapAxesValue != null) {
-				savedParam.setName("swapAxes");
-				savedParam.setValue("true");
-				savedParameterService.addSavedParameter(savedParam);
-			}
-			String showSqlValue = request.getParameter("showSql");
-			if (showSqlValue != null) {
-				savedParam.setName("showSql");
-				savedParam.setValue("true");
-				savedParameterService.addSavedParameter(savedParam);
-			}
-
-			//add boolean chart options
-			String showLegendValue = request.getParameter("showLegend");
-			if (showLegendValue != null) {
-				savedParam.setName("showLegend");
-				savedParam.setValue("true");
-				savedParameterService.addSavedParameter(savedParam);
-			}
-			String showLabelsValue = request.getParameter("showLabels");
-			if (showLabelsValue != null) {
-				savedParam.setName("showLabels");
-				savedParam.setValue("true");
-				savedParameterService.addSavedParameter(savedParam);
-			}
-			String showDataValue = request.getParameter("showData");
-			if (showDataValue != null) {
-				savedParam.setName("showData");
-				savedParam.setValue("true");
-				savedParameterService.addSavedParameter(savedParam);
-			}
-			String showPointsValue = request.getParameter("showPoints");
-			if (showPointsValue != null) {
-				savedParam.setName("showPoints");
-				savedParam.setValue("true");
-				savedParameterService.addSavedParameter(savedParam);
-			}
+			saveParameterSelection(session, request, reportId);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -713,6 +624,102 @@ public class ReportController {
 		}
 
 		return response;
+	}
+
+	/**
+	 * Saves the parameter selection for the current user and the given report
+	 *
+	 * @param session the http session
+	 * @param request the http request
+	 * @throws NumberFormatException
+	 * @throws SQLException
+	 */
+	private void saveParameterSelection(HttpSession session, HttpServletRequest request,
+			int reportId) throws NumberFormatException, SQLException {
+
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		int userId = sessionUser.getUserId();
+
+		Map<String, String[]> passedValues = new HashMap<>();
+
+		List<String> nonBooleanParams = new ArrayList<>();
+		nonBooleanParams.add("chartWidth");
+		nonBooleanParams.add("chartHeight");
+
+		Map<String, String[]> requestParameters = request.getParameterMap();
+		for (Map.Entry<String, String[]> entry : requestParameters.entrySet()) {
+			String htmlParamName = entry.getKey();
+			logger.debug("htmlParamName='{}'", htmlParamName);
+
+			if (StringUtils.startsWithIgnoreCase(htmlParamName, ArtUtils.PARAM_PREFIX)
+					|| ArtUtils.containsIgnoreCase(nonBooleanParams, htmlParamName)) {
+				String[] paramValues = entry.getValue();
+				passedValues.put(htmlParamName, paramValues);
+			}
+		}
+
+		savedParameterService.deleteSavedParameters(userId, reportId);
+
+		SavedParameter savedParam = new SavedParameter();
+		savedParam.setUserId(userId);
+		savedParam.setReportId(reportId);
+
+		//add report parameters
+		for (Map.Entry<String, String[]> entry : passedValues.entrySet()) {
+			String name = entry.getKey();
+			String[] values = entry.getValue();
+			for (String value : values) {
+				savedParam.setName(name);
+				savedParam.setValue(value);
+				savedParameterService.addSavedParameter(savedParam);
+			}
+		}
+
+		//add report options
+		String showSelectedParametersValue = request.getParameter("showSelectedParameters");
+		if (showSelectedParametersValue != null) {
+			savedParam.setName("showSelectedParameters");
+			savedParam.setValue("true");
+			savedParameterService.addSavedParameter(savedParam);
+		}
+		String swapAxesValue = request.getParameter("swapAxes");
+		if (swapAxesValue != null) {
+			savedParam.setName("swapAxes");
+			savedParam.setValue("true");
+			savedParameterService.addSavedParameter(savedParam);
+		}
+		String showSqlValue = request.getParameter("showSql");
+		if (showSqlValue != null) {
+			savedParam.setName("showSql");
+			savedParam.setValue("true");
+			savedParameterService.addSavedParameter(savedParam);
+		}
+
+		//add boolean chart options
+		String showLegendValue = request.getParameter("showLegend");
+		if (showLegendValue != null) {
+			savedParam.setName("showLegend");
+			savedParam.setValue("true");
+			savedParameterService.addSavedParameter(savedParam);
+		}
+		String showLabelsValue = request.getParameter("showLabels");
+		if (showLabelsValue != null) {
+			savedParam.setName("showLabels");
+			savedParam.setValue("true");
+			savedParameterService.addSavedParameter(savedParam);
+		}
+		String showDataValue = request.getParameter("showData");
+		if (showDataValue != null) {
+			savedParam.setName("showData");
+			savedParam.setValue("true");
+			savedParameterService.addSavedParameter(savedParam);
+		}
+		String showPointsValue = request.getParameter("showPoints");
+		if (showPointsValue != null) {
+			savedParam.setName("showPoints");
+			savedParam.setValue("true");
+			savedParameterService.addSavedParameter(savedParam);
+		}
 	}
 
 	@PostMapping("/clearSavedParameterSelection")
@@ -1170,13 +1177,18 @@ public class ReportController {
 	AjaxResponse savePivotTableJs(@RequestParam("reportId") Integer reportId,
 			@RequestParam("config") String config, @RequestParam("name") String name,
 			@RequestParam("description") String description,
-			@RequestParam(value = "overwrite", required = false) String overwrite,
-			HttpSession session, Locale locale) {
+			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
+			@RequestParam(value = "saveAsPivotTable", defaultValue = "false") Boolean saveAsPivotTable,
+			@RequestParam(value = "saveSelectedParameters", defaultValue = "false") Boolean saveSelectedParameters,
+			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering savePivotTableJs: reportId={}, config='{}',"
-				+ " name='{}', description='{}', overwrite='{}'",
-				reportId, config, name, description, overwrite);
+				+ " name='{}', description='{}', overwrite={}, saveAsPivotTable={},"
+				+ " saveSelectedParameters={}",
+				reportId, config, name, description, overwrite, saveAsPivotTable,
+				saveSelectedParameters);
 
+		//https://stackoverflow.com/questions/37359851/how-to-receive-html-check-box-value-in-spring-mvc-controller
 		AjaxResponse response = new AjaxResponse();
 
 		try {
@@ -1189,27 +1201,43 @@ public class ReportController {
 			if (StringUtils.isNotBlank(description)) {
 				report.setDescription(description);
 			}
+			if (StringUtils.isNotBlank(name)) {
+				report.setName(name);
+			}
 
-			if (overwrite == null) {
-				if (StringUtils.isBlank(name)) {
-					String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
-					response.setErrorMessage(message);
-				} else if (reportService.reportNameExists(name)) {
-					String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
-					response.setErrorMessage(message);
+			boolean reportNameNotProvided = false;
+			boolean reportNameExists = false;
+			if (StringUtils.isBlank(name)) {
+				if (!overwrite) {
+					reportNameNotProvided = true;
+				}
+			} else {
+				reportNameExists = reportService.reportNameExists(name);
+			}
+
+			if (reportNameNotProvided) {
+				String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
+				response.setErrorMessage(message);
+			} else if (reportNameExists) {
+				String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
+				response.setErrorMessage(message);
+			} else {
+				if (overwrite) {
+					reportService.updateReport(report, sessionUser);
 				} else {
-					//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
-					report.setName(name);
+					if (saveAsPivotTable) {
+						report.setReportType(ReportType.PivotTableJs);
+					}
 
 					reportService.copyReport(report, report.getReportId(), sessionUser);
 					reportService.grantAccess(report, sessionUser);
 
 					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
 					response.setData(report.getReportId());
-					response.setSuccess(true);
 				}
-			} else {
-				reportService.updateReport(report, sessionUser);
+				if (saveSelectedParameters) {
+					saveParameterSelection(session, request, report.getReportId());
+				}
 				response.setSuccess(true);
 			}
 		} catch (SQLException | RuntimeException ex) {
@@ -1251,12 +1279,13 @@ public class ReportController {
 	AjaxResponse saveGridstack(@RequestParam("reportId") Integer reportId,
 			@RequestParam("config") String config, @RequestParam("name") String name,
 			@RequestParam("description") String description,
-			@RequestParam(value = "overwrite", required = false) String overwrite,
-			HttpSession session, Locale locale) {
+			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
+			@RequestParam(value = "saveSelectedParameters", defaultValue = "false") Boolean saveSelectedParameters,
+			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
-				+ " name='{}', description='{}', overwrite='{}'",
-				reportId, config, name, description, overwrite);
+				+ " name='{}', description='{}', overwrite={}, saveSelectedParameters={}",
+				reportId, config, name, description, overwrite, saveSelectedParameters);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -1270,26 +1299,39 @@ public class ReportController {
 			if (StringUtils.isNotBlank(description)) {
 				report.setDescription(description);
 			}
+			if (StringUtils.isNotBlank(name)) {
+				report.setName(name);
+			}
 
-			if (overwrite == null) {
-				if (StringUtils.isBlank(name)) {
-					String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
-					response.setErrorMessage(message);
-				} else if (reportService.reportNameExists(name)) {
-					String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
-					response.setErrorMessage(message);
+			boolean reportNameNotProvided = false;
+			boolean reportNameExists = false;
+			if (StringUtils.isBlank(name)) {
+				if (!overwrite) {
+					reportNameNotProvided = true;
+				}
+			} else {
+				reportNameExists = reportService.reportNameExists(name);
+			}
+
+			if (reportNameNotProvided) {
+				String message = messageSource.getMessage("reports.message.reportNameNotProvided", null, locale);
+				response.setErrorMessage(message);
+			} else if (reportNameExists) {
+				String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
+				response.setErrorMessage(message);
+			} else {
+				if (overwrite) {
+					reportService.updateReport(report, sessionUser);
 				} else {
-					report.setName(name);
-
 					reportService.copyReport(report, report.getReportId(), sessionUser);
 					reportService.grantAccess(report, sessionUser);
 
 					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
 					response.setData(report.getReportId());
-					response.setSuccess(true);
 				}
-			} else {
-				reportService.updateReport(report, sessionUser);
+				if (saveSelectedParameters) {
+					saveParameterSelection(session, request, report.getReportId());
+				}
 				response.setSuccess(true);
 			}
 		} catch (SQLException | RuntimeException ex) {

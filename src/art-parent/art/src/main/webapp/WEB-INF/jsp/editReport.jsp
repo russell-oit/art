@@ -452,7 +452,7 @@ Edit report page
 							//delete some bulky default values
 							delete config_copy["rendererOptions"];
 							delete config_copy["localeStrings"];
-							
+
 							pivotTableJsSavedOptionsEditor.getSession().setValue(JSON.stringify(config_copy));
 							break;
 						default:
@@ -467,6 +467,7 @@ Edit report page
 				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
 				switch (reportTypeId) {
 					case 110: //dashboard
+					case 111: //text
 					case 129: //gridstack dashboard
 					case 156: //org chart list
 					case 149: //saiku report
@@ -1266,24 +1267,29 @@ Edit report page
 					</div>
 				</div>
 				<div id="datasourceDiv" class="form-group">
-					<label class="col-md-4 control-label " for="datasource.datasourceId">
+					<label class="col-md-4 control-label " for="datasource">
 						<spring:message code="page.text.datasource"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="datasource.datasourceId" class="form-control selectpicker">
+						<form:select path="datasource" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
 								<option data-divider="true"></option>
 							<c:forEach var="datasource" items="${datasources}">
 								<c:set var="datasourceStatus">
 									<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>
 								</c:set>
-								<form:option value="${datasource.datasourceId}"
-											 data-content="${datasource.name} ${datasourceStatus}">
-									${datasource.name} 
-								</form:option>
+								<c:if test="${report.datasource != null}">
+									<c:set var="selected">
+										${report.datasource.datasourceId == datasource.datasourceId ? "selected" : ""}
+									</c:set>
+								</c:if>
+								<option value="${datasource.datasourceId}" ${selected}
+										data-content="${encode:forHtmlAttribute(datasource.name)}&nbsp;${encode:forHtmlAttribute(datasourceStatus)}">
+									${encode:forHtmlContent(datasource.name)}
+								</option>
 							</c:forEach>
 						</form:select>
-						<form:errors path="datasource.datasourceId" cssClass="error"/>
+						<form:errors path="datasource" cssClass="error"/>
 					</div>
 				</div>
 				<div id="usesRulesDiv" class="form-group">
@@ -1525,24 +1531,29 @@ Edit report page
 				</div>
 
 				<div id="encryptorDiv" class="form-group">
-					<label class="col-md-4 control-label " for="encryptor.encryptorId">
+					<label class="col-md-4 control-label " for="encryptor">
 						<spring:message code="reports.label.encryptor"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="encryptor.encryptorId" class="form-control selectpicker">
+						<form:select path="encryptor" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
 								<option data-divider="true"></option>
 							<c:forEach var="encryptor" items="${encryptors}">
 								<c:set var="encryptorStatus">
 									<t:displayActiveStatus active="${encryptor.active}" hideActive="true"/>
 								</c:set>
-								<form:option value="${encryptor.encryptorId}"
-											 data-content="${encryptor.name} ${encryptorStatus}">
-									${encryptor.name} 
-								</form:option>
+								<c:if test="${report.encryptor != null}">
+									<c:set var="selected">
+										${report.encryptor.encryptorId == encryptor.encryptorId ? "selected" : ""}
+									</c:set>
+								</c:if>
+								<option value="${encryptor.encryptorId}" ${selected}
+										data-content="${encode:forHtmlAttribute(encryptor.name)}&nbsp;${encode:forHtmlAttribute(encryptorStatus)}">
+									${encode:forHtmlContent(encryptor.name)}
+								</option>
 							</c:forEach>
 						</form:select>
-						<form:errors path="encryptor.encryptorId" cssClass="error"/>
+						<form:errors path="encryptor" cssClass="error"/>
 					</div>
 				</div>
 

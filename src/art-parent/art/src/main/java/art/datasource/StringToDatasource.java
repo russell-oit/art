@@ -17,24 +17,37 @@
  */
 package art.datasource;
 
+import java.sql.SQLException;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 /**
  * Spring converter from string (datasource id) to datasource object
- * 
+ *
  * @author Timothy Anyona
  */
 @Component
 public class StringToDatasource implements Converter<String, Datasource> {
 
+	private static final Logger logger = LoggerFactory.getLogger(StringToDatasource.class);
+
+	@Autowired
+	private DatasourceService datasourceService;
+
 	@Override
 	public Datasource convert(String s) {
 		int id = NumberUtils.toInt(s);
 
-		Datasource datasource = new Datasource();
-		datasource.setDatasourceId(id);
+		Datasource datasource = null;
+		try {
+			datasource = datasourceService.getDatasource(id);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 
 		return datasource;
 	}

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>3.6</version>
+		<version>3.7</version>
 	</parent>
 
 	<artifactId>art</artifactId>
@@ -27,7 +27,7 @@
 		<owasp.encoder.version>1.2.1</owasp.encoder.version>
 		<thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
 		<xdocreport.version>2.0.1</xdocreport.version>
-		<jclouds.version>2.0.3</jclouds.version>
+		<jclouds.version>2.1.0</jclouds.version>
 		<spring.security.version>4.2.4.RELEASE</spring.security.version>
 		<morphia.version>1.3.2</morphia.version>
 	</properties>
@@ -181,7 +181,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>16.0.1</version>
+				<version>18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.amazonaws</groupId>
@@ -197,22 +197,22 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-dbcp</artifactId>
-			<version>3.6</version>
+			<version>3.7</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
-			<version>3.6</version>
+			<version>3.7</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>3.6</version>
+			<version>3.7</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
-			<version>3.6</version>
+			<version>3.7</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -227,7 +227,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>3.6</version>
+			<version>3.7</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
@@ -247,7 +247,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>3.6</version>
+			<version>3.7</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -258,7 +258,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jdbc-n1ql-art</artifactId>
-			<version>3.6</version>
+			<version>3.7</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
@@ -413,7 +413,7 @@
 		<dependency>
 			<groupId>net.sf.ucanaccess</groupId>
 			<artifactId>ucanaccess</artifactId>
-			<version>4.0.2</version>
+			<version>4.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.healthmarketscience.jackcess</groupId>
@@ -489,12 +489,6 @@
 		<dependency>
 			<groupId>com.github.adejanovski</groupId>
 			<artifactId>cassandra-jdbc-wrapper</artifactId>
-			<version>3.1.0</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j-jdbc-driver</artifactId>
 			<version>3.1.0</version>
 			<scope>runtime</scope>
 		</dependency>
@@ -899,6 +893,16 @@
 			<version>${jclouds.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.jclouds.provider</groupId>
+			<artifactId>b2</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.provider</groupId>
+			<artifactId>google-cloud-storage</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.lookfirst</groupId>
 			<artifactId>sardine</artifactId>
 			<version>5.8</version>
@@ -955,10 +959,16 @@
 			<artifactId>spring-security-config</artifactId>
 			<version>${spring.security.version}</version>
 		</dependency>
+		<!-- dozer 6.2.0+ uses javax.el v3 -->
 		<dependency>
 			<groupId>com.github.dozermapper</groupId>
 			<artifactId>dozer-core</artifactId>
-			<version>6.2.0</version>
+			<version>6.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.zeroturnaround</groupId>
+			<artifactId>zt-zip</artifactId>
+			<version>1.13</version>
 		</dependency>
 	</dependencies>
 </project>

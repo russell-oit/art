@@ -17,7 +17,11 @@
  */
 package art.reportgroup;
 
+import java.sql.SQLException;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -29,15 +33,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class StringToReportGroup implements Converter<String, ReportGroup> {
 
+	private static final Logger logger = LoggerFactory.getLogger(StringToReportGroup.class);
+
+	@Autowired
+	private ReportGroupService reportGroupService;
+
 	@Override
 	public ReportGroup convert(String s) {
 		int id = NumberUtils.toInt(s);
 
-		//get value from database instead of new object with only id populated? not necessary?
-		ReportGroup group = new ReportGroup();
-		group.setReportGroupId(id);
+		ReportGroup reportGroup = null;
+		try {
+			reportGroup = reportGroupService.getReportGroup(id);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 
-		return group;
+		return reportGroup;
 	}
 
 }

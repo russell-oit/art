@@ -33,10 +33,13 @@ public class StringToUserGroup implements Converter<String, UserGroup> {
 	public UserGroup convert(String s) {
 		int id = NumberUtils.toInt(s);
 
-		UserGroup group = new UserGroup();
-		group.setUserGroupId(id);
-
-		return group;
+		if (id == 0) {
+			return null;
+		} else {
+			UserGroup group = new UserGroup();
+			group.setUserGroupId(id);
+			return group;
+		}
 	}
 
 }

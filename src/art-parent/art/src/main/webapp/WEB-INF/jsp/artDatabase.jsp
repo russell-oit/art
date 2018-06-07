@@ -128,7 +128,7 @@ Display art database configuration page
 								<option value="">--</option>
 								<option data-divider="true"></option>
 								<c:forEach var="dbType" items="${databaseTypes}">
-									<option value="${dbType.key}">${dbType.value}</option>
+									<option value="${encode:forHtmlAttribute(dbType.key)}">${encode:forHtmlContent(dbType.value)}</option>
 								</c:forEach>
 							</select>
 							<spring:message code="page.help.databaseType" var="help"/>

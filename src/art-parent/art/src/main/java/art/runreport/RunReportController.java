@@ -264,7 +264,7 @@ public class RunReportController {
 			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
 				if (reportType.isJasperReports()) {
 					reportFormat = ReportFormat.pdf;
-				} else if (reportType.isChart()) {
+				} else if (reportType.isChart() || reportType == ReportType.Group) {
 					reportFormat = ReportFormat.html;
 				} else {
 					reportFormat = ReportFormat.htmlFancy;

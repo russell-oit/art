@@ -943,6 +943,9 @@ public class ReportOutputGenerator {
 		request.setAttribute("reportType", reportType);
 		request.setAttribute("report", report);
 
+		RunReportHelper runReportHelper = new RunReportHelper();
+		request.setAttribute("requestParameters", runReportHelper.getRequestParametersString(request));
+
 		if (pivotTableJsOptions == null) {
 			pivotTableJsOptions = new PivotTableJsOptions();
 		}
@@ -1019,13 +1022,27 @@ public class ReportOutputGenerator {
 
 		String languageFilePath = Config.getAppPath() + File.separator
 				+ "js" + File.separator
-				+ "pivottable-2.7.0" + File.separator
+				+ "pivottable-2.20.0" + File.separator
 				+ languageFileName;
 
 		File languageFile = new File(languageFilePath);
 
 		if (languageFile.exists()) {
 			request.setAttribute("locale", localeString);
+		}
+
+		String plotlyLocaleString = StringUtils.lowerCase(localeString, Locale.ENGLISH);
+		plotlyLocaleString = StringUtils.replace(plotlyLocaleString, "_", "-");
+		String plotlyLanguageFileName = "plotly-locale-" + plotlyLocaleString + ".js";
+
+		String plotlyLanguageFilePath = Config.getJsPath()
+				+ "plotly.js-1.36.0" + File.separator
+				+ plotlyLanguageFileName;
+
+		File plotlyLanguageFile = new File(plotlyLanguageFilePath);
+
+		if (plotlyLanguageFile.exists()) {
+			request.setAttribute("plotlyLocaleFileName", plotlyLanguageFileName);
 		}
 
 		String configJson = ArtUtils.objectToJson(pivotTableJsOptions.getConfig());

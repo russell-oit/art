@@ -113,7 +113,6 @@ public class Report implements Serializable {
 	private boolean useBlankXmlaPassword;
 	@JsonIgnore
 	private ChartOptions chartOptions;
-	@JsonIgnore
 	private String reportSourceHtml; //used with text reports
 	private String createdBy;
 	private String updatedBy;
@@ -1573,10 +1572,7 @@ public class Report implements Serializable {
 		basic.setGridstackSavedOptions(gridstackSavedOptions);
 		basic.setOptions(options);
 		basic.setReportSource(reportSource);
-
-		if (reportType == ReportType.Text) {
-			basic.setReportSourceHtml(reportSource);
-		}
+		basic.setReportSourceHtml(reportSourceHtml);
 
 		if (datasource != null) {
 			Datasource basicDatasource = new Datasource();

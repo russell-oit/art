@@ -167,6 +167,11 @@ public class ReportService {
 			report.setCreatedBy(rs.getString("CREATED_BY"));
 			report.setUpdatedBy(rs.getString("UPDATED_BY"));
 
+			ReportType reportType = report.getReportType();
+			if (reportType == ReportType.Text) {
+				report.setReportSourceHtml(report.getReportSource());
+			}
+
 			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATASOURCE_ID"));
 			report.setDatasource(datasource);
 
@@ -1402,7 +1407,7 @@ public class ReportService {
 		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#3279
 		ResultSetHandler<Number> h = new ScalarHandler<>();
 		Number recordCount = dbService.query(sql, h, values);
-		
+
 		if (recordCount == null || recordCount.longValue() == 0) {
 			return false;
 		} else {

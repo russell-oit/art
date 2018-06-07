@@ -37,6 +37,7 @@ Reports configuration page
 <spring:message code="select.text.deselectAll" var="deselectAllText"/>
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="reports.label.reportSource" var="reportSourceText"/>
 
 <t:mainPage title="${pageTitle}">
 
@@ -282,6 +283,126 @@ Reports configuration page
 					});
 				});
 
+				//https://stackoverflow.com/questions/6440439/how-do-i-make-a-textarea-an-ace-editor
+				//https://stackoverflow.com/questions/8963855/how-do-i-get-value-from-ace-editor
+				//https://ace.c9.io/#nav=howto
+				//https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts
+				//https://templth.wordpress.com/2014/12/29/using-ace-editor-into-angular-applications/
+				var sqlEditor = ace.edit("sqlEditor");
+				//https://stackoverflow.com/questions/28936479/where-to-set-ace-editor-blockscrolling
+				//https://github.com/angular-ui/ui-ace/issues/104
+				sqlEditor.$blockScrolling = Infinity;
+				sqlEditor.getSession().setMode("ace/mode/sql");
+				sqlEditor.setHighlightActiveLine(false);
+				//https://stackoverflow.com/questions/14907184/is-there-a-way-to-hide-the-vertical-ruler-in-ace-editor
+				sqlEditor.setShowPrintMargin(false);
+				//https://stackoverflow.com/questions/28283344/is-there-a-way-to-hide-the-line-numbers-in-ace-editor
+				//sqlEditor.renderer.setShowGutter(false);
+				sqlEditor.setOption("showLineNumbers", true);
+				//https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
+				//https://ace.c9.io/demo/autoresize.html
+				//https://issues.jenkins-ci.org/browse/JENKINS-31585
+				sqlEditor.setOption("maxLines", 30);
+				sqlEditor.setOption("minLines", 10);
+
+				document.getElementById('sqlEditor').style.fontSize = '14px'; //default seems to be 12px
+
+				var reportSource = $('#reportSource');
+				sqlEditor.getSession().on('change', function () {
+					reportSource.val(sqlEditor.getSession().getValue());
+				});
+
+				var xmlEditor = ace.edit("xmlEditor");
+				xmlEditor.$blockScrolling = Infinity;
+				xmlEditor.getSession().setMode("ace/mode/xml");
+				xmlEditor.setHighlightActiveLine(false);
+				xmlEditor.setShowPrintMargin(false);
+
+				//https://github.com/ajaxorg/ace/commit/abb1e4703b737757e20d1e7040943ba4e2483007
+				//https://github.com/ajaxorg/ace/wiki/Configuring-Ace
+				xmlEditor.setOption("showLineNumbers", false);
+				xmlEditor.setOption("maxLines", 30);
+				xmlEditor.setOption("minLines", 10);
+
+				document.getElementById('xmlEditor').style.fontSize = '14px';
+
+				xmlEditor.getSession().on('change', function () {
+					reportSource.val(xmlEditor.getSession().getValue());
+				});
+
+				var optionsEditor = ace.edit("optionsEditor");
+				optionsEditor.$blockScrolling = Infinity;
+				optionsEditor.getSession().setMode("ace/mode/json");
+				optionsEditor.setHighlightActiveLine(false);
+				optionsEditor.setShowPrintMargin(false);
+				optionsEditor.setOption("showLineNumbers", false);
+				optionsEditor.setOption("maxLines", 20);
+				optionsEditor.setOption("minLines", 7);
+				document.getElementById('optionsEditor').style.fontSize = '14px';
+
+				var options = $('#options');
+				optionsEditor.getSession().on('change', function () {
+					options.val(optionsEditor.getSession().getValue());
+				});
+
+				var pivotTableJsSavedOptionsEditor = ace.edit("pivotTableJsSavedOptionsEditor");
+				pivotTableJsSavedOptionsEditor.$blockScrolling = Infinity;
+				pivotTableJsSavedOptionsEditor.getSession().setMode("ace/mode/json");
+				pivotTableJsSavedOptionsEditor.setHighlightActiveLine(false);
+				pivotTableJsSavedOptionsEditor.setShowPrintMargin(false);
+				pivotTableJsSavedOptionsEditor.setOption("showLineNumbers", false);
+				pivotTableJsSavedOptionsEditor.setOption("maxLines", 20);
+				pivotTableJsSavedOptionsEditor.setOption("minLines", 3);
+				document.getElementById('pivotTableJsSavedOptionsEditor').style.fontSize = '14px';
+
+				var pivotTableJsSavedOptions = $('#pivotTableJsSavedOptions');
+				pivotTableJsSavedOptionsEditor.getSession().on('change', function () {
+					pivotTableJsSavedOptions.val(pivotTableJsSavedOptionsEditor.getSession().getValue());
+				});
+
+				var gridstackSavedOptionsEditor = ace.edit("gridstackSavedOptionsEditor");
+				gridstackSavedOptionsEditor.$blockScrolling = Infinity;
+				gridstackSavedOptionsEditor.getSession().setMode("ace/mode/json");
+				gridstackSavedOptionsEditor.setHighlightActiveLine(false);
+				gridstackSavedOptionsEditor.setShowPrintMargin(false);
+				gridstackSavedOptionsEditor.setOption("showLineNumbers", false);
+				gridstackSavedOptionsEditor.setOption("maxLines", 20);
+				gridstackSavedOptionsEditor.setOption("minLines", 3);
+				document.getElementById('gridstackSavedOptionsEditor').style.fontSize = '14px';
+
+				var gridstackSavedOptions = $('#gridstackSavedOptions');
+				gridstackSavedOptionsEditor.getSession().on('change', function () {
+					gridstackSavedOptions.val(gridstackSavedOptionsEditor.getSession().getValue());
+				});
+
+				var jsonEditor = ace.edit("jsonEditor");
+				jsonEditor.$blockScrolling = Infinity;
+				jsonEditor.getSession().setMode("ace/mode/json");
+				jsonEditor.setHighlightActiveLine(false);
+				jsonEditor.setShowPrintMargin(false);
+				jsonEditor.setOption("showLineNumbers", false);
+				jsonEditor.setOption("maxLines", 30);
+				jsonEditor.setOption("minLines", 10);
+				document.getElementById('jsonEditor').style.fontSize = '14px';
+
+				jsonEditor.getSession().on('change', function () {
+					reportSource.val(jsonEditor.getSession().getValue());
+				});
+
+				var groovyEditor = ace.edit("groovyEditor");
+				groovyEditor.$blockScrolling = Infinity;
+				groovyEditor.getSession().setMode("ace/mode/groovy");
+				groovyEditor.setHighlightActiveLine(false);
+				groovyEditor.setShowPrintMargin(false);
+				groovyEditor.setOption("showLineNumbers", true);
+				groovyEditor.setOption("maxLines", 30);
+				groovyEditor.setOption("minLines", 10);
+				document.getElementById('groovyEditor').style.fontSize = '14px';
+
+				groovyEditor.getSession().on('change', function () {
+					reportSource.val(groovyEditor.getSession().getValue());
+				});
+
 				function setReportFields(report) {
 					$("#editLink").attr("href", "${pageContext.request.contextPath}/editReport?id=" + report.reportId);
 					$("#copyLink").attr("href", "${pageContext.request.contextPath}/copyReport?id=" + report.reportId);
@@ -311,10 +432,19 @@ Reports configuration page
 					$("#gridstackSavedOptions").val(report.gridstackSavedOptions);
 					$("#options").val(report.options);
 					$("#reportSource").val(report.reportSource);
-
+					$("#reportSourceHtml").val(report.reportSourceHtml);
+					
 					if (report.reportSourceHtml) {
 						tinyMCE.get('reportSourceHtml').setContent(report.reportSourceHtml);
 					}
+
+					sqlEditor.getSession().setValue(reportSource.val());
+					xmlEditor.getSession().setValue(reportSource.val());
+					optionsEditor.getSession().setValue(options.val());
+					pivotTableJsSavedOptionsEditor.getSession().setValue(pivotTableJsSavedOptions.val());
+					gridstackSavedOptionsEditor.getSession().setValue(gridstackSavedOptions.val());
+					jsonEditor.getSession().setValue(reportSource.val());
+					groovyEditor.getSession().setValue(reportSource.val());
 
 					toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
 
@@ -365,133 +495,6 @@ Reports configuration page
 					});
 				});
 
-				//https://stackoverflow.com/questions/6440439/how-do-i-make-a-textarea-an-ace-editor
-				//https://stackoverflow.com/questions/8963855/how-do-i-get-value-from-ace-editor
-				//https://ace.c9.io/#nav=howto
-				//https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts
-				//https://templth.wordpress.com/2014/12/29/using-ace-editor-into-angular-applications/
-				var sqlEditor = ace.edit("sqlEditor");
-				//https://stackoverflow.com/questions/28936479/where-to-set-ace-editor-blockscrolling
-				//https://github.com/angular-ui/ui-ace/issues/104
-				sqlEditor.$blockScrolling = Infinity;
-				sqlEditor.getSession().setMode("ace/mode/sql");
-				sqlEditor.setHighlightActiveLine(false);
-				//https://stackoverflow.com/questions/14907184/is-there-a-way-to-hide-the-vertical-ruler-in-ace-editor
-				sqlEditor.setShowPrintMargin(false);
-				//https://stackoverflow.com/questions/28283344/is-there-a-way-to-hide-the-line-numbers-in-ace-editor
-				//sqlEditor.renderer.setShowGutter(false);
-				sqlEditor.setOption("showLineNumbers", true);
-				//https://stackoverflow.com/questions/11584061/automatically-adjust-height-to-contents-in-ace-cloud-9-editor
-				//https://ace.c9.io/demo/autoresize.html
-				//https://issues.jenkins-ci.org/browse/JENKINS-31585
-				sqlEditor.setOption("maxLines", 30);
-				sqlEditor.setOption("minLines", 10);
-
-				document.getElementById('sqlEditor').style.fontSize = '14px'; //default seems to be 12px
-
-				var reportSource = $('#reportSource');
-				sqlEditor.getSession().setValue(reportSource.val());
-				sqlEditor.getSession().on('change', function () {
-					reportSource.val(sqlEditor.getSession().getValue());
-				});
-
-				var xmlEditor = ace.edit("xmlEditor");
-				xmlEditor.$blockScrolling = Infinity;
-				xmlEditor.getSession().setMode("ace/mode/xml");
-				xmlEditor.setHighlightActiveLine(false);
-				xmlEditor.setShowPrintMargin(false);
-
-				//https://github.com/ajaxorg/ace/commit/abb1e4703b737757e20d1e7040943ba4e2483007
-				//https://github.com/ajaxorg/ace/wiki/Configuring-Ace
-				xmlEditor.setOption("showLineNumbers", false);
-				xmlEditor.setOption("maxLines", 30);
-				xmlEditor.setOption("minLines", 10);
-
-				document.getElementById('xmlEditor').style.fontSize = '14px';
-
-				xmlEditor.getSession().setValue(reportSource.val());
-				xmlEditor.getSession().on('change', function () {
-					reportSource.val(xmlEditor.getSession().getValue());
-				});
-
-				var optionsEditor = ace.edit("optionsEditor");
-				optionsEditor.$blockScrolling = Infinity;
-				optionsEditor.getSession().setMode("ace/mode/json");
-				optionsEditor.setHighlightActiveLine(false);
-				optionsEditor.setShowPrintMargin(false);
-				optionsEditor.setOption("showLineNumbers", false);
-				optionsEditor.setOption("maxLines", 20);
-				optionsEditor.setOption("minLines", 7);
-				document.getElementById('optionsEditor').style.fontSize = '14px';
-
-				var options = $('#options');
-				optionsEditor.getSession().setValue(options.val());
-				optionsEditor.getSession().on('change', function () {
-					options.val(optionsEditor.getSession().getValue());
-				});
-
-				var pivotTableJsSavedOptionsEditor = ace.edit("pivotTableJsSavedOptionsEditor");
-				pivotTableJsSavedOptionsEditor.$blockScrolling = Infinity;
-				pivotTableJsSavedOptionsEditor.getSession().setMode("ace/mode/json");
-				pivotTableJsSavedOptionsEditor.setHighlightActiveLine(false);
-				pivotTableJsSavedOptionsEditor.setShowPrintMargin(false);
-				pivotTableJsSavedOptionsEditor.setOption("showLineNumbers", false);
-				pivotTableJsSavedOptionsEditor.setOption("maxLines", 20);
-				pivotTableJsSavedOptionsEditor.setOption("minLines", 3);
-				document.getElementById('pivotTableJsSavedOptionsEditor').style.fontSize = '14px';
-
-				var pivotTableJsSavedOptions = $('#pivotTableJsSavedOptions');
-				pivotTableJsSavedOptionsEditor.getSession().setValue(pivotTableJsSavedOptions.val());
-				pivotTableJsSavedOptionsEditor.getSession().on('change', function () {
-					pivotTableJsSavedOptions.val(pivotTableJsSavedOptionsEditor.getSession().getValue());
-				});
-
-				var gridstackSavedOptionsEditor = ace.edit("gridstackSavedOptionsEditor");
-				gridstackSavedOptionsEditor.$blockScrolling = Infinity;
-				gridstackSavedOptionsEditor.getSession().setMode("ace/mode/json");
-				gridstackSavedOptionsEditor.setHighlightActiveLine(false);
-				gridstackSavedOptionsEditor.setShowPrintMargin(false);
-				gridstackSavedOptionsEditor.setOption("showLineNumbers", false);
-				gridstackSavedOptionsEditor.setOption("maxLines", 20);
-				gridstackSavedOptionsEditor.setOption("minLines", 3);
-				document.getElementById('gridstackSavedOptionsEditor').style.fontSize = '14px';
-
-				var gridstackSavedOptions = $('#gridstackSavedOptions');
-				gridstackSavedOptionsEditor.getSession().setValue(gridstackSavedOptions.val());
-				gridstackSavedOptionsEditor.getSession().on('change', function () {
-					gridstackSavedOptions.val(gridstackSavedOptionsEditor.getSession().getValue());
-				});
-
-				var jsonEditor = ace.edit("jsonEditor");
-				jsonEditor.$blockScrolling = Infinity;
-				jsonEditor.getSession().setMode("ace/mode/json");
-				jsonEditor.setHighlightActiveLine(false);
-				jsonEditor.setShowPrintMargin(false);
-				jsonEditor.setOption("showLineNumbers", false);
-				jsonEditor.setOption("maxLines", 30);
-				jsonEditor.setOption("minLines", 10);
-				document.getElementById('jsonEditor').style.fontSize = '14px';
-
-				jsonEditor.getSession().setValue(reportSource.val());
-				jsonEditor.getSession().on('change', function () {
-					reportSource.val(jsonEditor.getSession().getValue());
-				});
-
-				var groovyEditor = ace.edit("groovyEditor");
-				groovyEditor.$blockScrolling = Infinity;
-				groovyEditor.getSession().setMode("ace/mode/groovy");
-				groovyEditor.setHighlightActiveLine(false);
-				groovyEditor.setShowPrintMargin(false);
-				groovyEditor.setOption("showLineNumbers", true);
-				groovyEditor.setOption("maxLines", 30);
-				groovyEditor.setOption("minLines", 10);
-				document.getElementById('groovyEditor').style.fontSize = '14px';
-
-				groovyEditor.getSession().setValue(reportSource.val());
-				groovyEditor.getSession().on('change', function () {
-					reportSource.val(groovyEditor.getSession().getValue());
-				});
-
 				$('#useGroovy').on('switchChange.bootstrapSwitch', function (event, state) {
 					toggleGroovyEditor(reportSource, groovyEditor, sqlEditor);
 				});
@@ -539,6 +542,7 @@ Reports configuration page
 
 					switch (reportTypeId) {
 						case 110: //dashboard
+						case 111: //text
 						case 129: //gridstack dashboard
 						case 156: //org chart list
 						case 149: //saiku report

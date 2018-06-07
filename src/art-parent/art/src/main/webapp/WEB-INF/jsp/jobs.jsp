@@ -374,8 +374,6 @@ Display user jobs and jobs configuration
 					<th><spring:message code="jobs.text.lastEndDate"/></th>
 					<th><spring:message code="jobs.text.result"/></th>
 					<th><spring:message code="jobs.text.nextRunDate"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -425,8 +423,6 @@ Display user jobs and jobs configuration
 						<td data-sort="${job.nextRunDate.time}">
 							<fmt:formatDate value="${job.nextRunDate}" pattern="${dateDisplayPattern}"/>
 						</td>
-						<td>${encode:forHtmlContent(job.createdBy)}</td>
-						<td>${encode:forHtmlContent(job.updatedBy)}</td>
 						<td>
 							<c:if test="${sessionUser.userId == job.user.userId || action == 'config'}">
 								<div class="btn-group">

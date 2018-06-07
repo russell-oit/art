@@ -32,12 +32,15 @@ public class StringToReport implements Converter<String, Report> {
 	@Override
 	public Report convert(String s) {
 		int id = NumberUtils.toInt(s);
-		
+
 		//get value from database instead of new object with only id populated? not necessary?
-		Report report = new Report();
-		report.setReportId(id);
-		
-		return report;
+		if (id == 0) {
+			return null;
+		} else {
+			Report report = new Report();
+			report.setReportId(id);
+			return report;
+		}
 	}
 
 }

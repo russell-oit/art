@@ -23,8 +23,6 @@ import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
 import art.destination.DestinationService;
 import art.enums.JobType;
-import art.ftpserver.FtpServer;
-import art.ftpserver.FtpServerService;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.jobrunners.ReportJob;
@@ -88,7 +86,6 @@ public class JobService {
 	private final DbService dbService;
 	private final ReportService reportService;
 	private final UserService userService;
-	private final FtpServerService ftpServerService;
 	private final ScheduleService scheduleService;
 	private final HolidayService holidayService;
 	private final DestinationService destinationService;
@@ -96,14 +93,13 @@ public class JobService {
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
-			UserService userService, FtpServerService ftpServerService,
-			ScheduleService scheduleService, HolidayService holidayService,
-			DestinationService destinationService, SmtpServerService smtpServerService) {
+			UserService userService, ScheduleService scheduleService,
+			HolidayService holidayService, DestinationService destinationService,
+			SmtpServerService smtpServerService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
 		this.userService = userService;
-		this.ftpServerService = ftpServerService;
 		this.scheduleService = scheduleService;
 		this.holidayService = holidayService;
 		this.destinationService = destinationService;
@@ -114,7 +110,6 @@ public class JobService {
 		dbService = new DbService();
 		reportService = new ReportService();
 		userService = new UserService();
-		ftpServerService = new FtpServerService();
 		scheduleService = new ScheduleService();
 		holidayService = new HolidayService();
 		destinationService = new DestinationService();
@@ -233,9 +228,6 @@ public class JobService {
 
 		User user = userService.getUser(rs.getInt("USER_ID"));
 		job.setUser(user);
-
-		FtpServer ftpServer = ftpServerService.getFtpServer(rs.getInt("FTP_SERVER_ID"));
-		job.setFtpServer(ftpServer);
 
 		Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
 		job.setSchedule(schedule);
@@ -509,12 +501,7 @@ public class JobService {
 			recipientsReportId = null;
 		}
 
-		Integer ftpServerId;
-		if (job.getFtpServer() == null) {
-			ftpServerId = 0;
-		} else {
-			ftpServerId = job.getFtpServer().getFtpServerId();
-		}
+		Integer ftpServerId = 0;
 
 		Integer scheduleId = null;
 		if (job.getSchedule() != null) {
@@ -949,7 +936,7 @@ public class JobService {
 		}
 
 		Set<Trigger> triggers = processTriggers(job, globalCalendar, timeZone);
-		
+
 		//get earliest next run date from all available triggers
 		List<Trigger> triggersList = new ArrayList<>(triggers);
 		Date nextRunDate = JobUtils.getNextFireTime(triggersList, scheduler);

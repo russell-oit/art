@@ -53,32 +53,73 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/c3_renderers.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/export_renderers.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/c3_renderers.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/export_renderers.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.1.4/papaparse.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-subtotal-renderer-1.7.1/subtotal.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-subtotal-renderer-1.7.1/subtotal.min.js"></script>
 
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-basic.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/plotly_renderers.js"></script>
+
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+
+<c:if test="${not empty locale}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.${locale}.js"></script>
+</c:if>
 
 <script type="text/javascript">
 	//set default values. can be overridden in template file
 	//https://github.com/nicolaskruchten/pivottable/wiki/Parameters
 	//https://stackoverflow.com/questions/4528744/how-does-extend-work-in-jquery
 	//https://stackoverflow.com/questions/10130908/jquery-merge-two-objects
-	var renderers = $.extend(
-			$.pivotUtilities.renderers,
-			$.pivotUtilities.c3_renderers,
-			$.pivotUtilities.export_renderers,
-			$.pivotUtilities.subtotal_renderers
-			);
+	var locale;
+	var passedLocale = '${encode:forJavaScript(locale)}';
+	if (passedLocale) {
+		//passed locale is empty if translation file doesn't exist i.e. pivot.xx.js
+		locale = passedLocale;
+	} else {
+		locale = "en";
+	}
+
+	//https://github.com/nicolaskruchten/pivottable/issues/875
+	var renderers = {};
+	if ($.pivotUtilities.locales[locale].renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.renderers);
+	}
+
+	if ($.pivotUtilities.locales[locale].c3_renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].c3_renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.c3_renderers);
+	}
+
+	if ($.pivotUtilities.locales[locale].plotly_renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].plotly_renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.plotly_renderers);
+	}
+
+	if ($.pivotUtilities.locales[locale].export_renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].export_renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.export_renderers);
+	}
+
+	if ($.pivotUtilities.locales[locale].subtotal_renderers) {
+		$.extend(renderers, $.pivotUtilities.locales[locale].subtotal_renderers);
+	} else {
+		$.extend(renderers, $.pivotUtilities.subtotal_renderers);
+	}
 
 	var options = {
 		renderers: renderers,
@@ -92,7 +133,6 @@
 	}
 
 	var overwrite = false;
-	var locale = 'en';
 
 	var download;
 	var reportType = '${encode:forJavaScript(reportType)}';
@@ -122,11 +162,8 @@
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(cssFileName)}">
 </c:if>
 
-<c:if test="${not empty locale}">
-	<script type="text/javascript">
-	locale = '${locale}';
-	</script>
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.${locale}.js"></script>
+<c:if test="${not empty plotlyLocaleFileName}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/${plotlyLocaleFileName}"></script>
 </c:if>
 
 <script>
@@ -216,30 +253,56 @@
 		<input type="hidden" name="reportId" value="${report.reportId}">
 		<input type="hidden" id="config" name="config" value="">
         <div class="form-group">
-			<label class="control-label col-md-4" for="name">
+			<label class="control-label col-md-5" for="name">
 				<spring:message code="page.text.name"/>
 			</label>
-			<div class="col-md-8">
+			<div class="col-md-7">
 				<input type="text" id="name" name="name" maxlength="50" class="form-control"/>
 			</div>
 		</div>
 		<div class="form-group">
-			<label class="control-label col-md-4" for="description">
+			<label class="control-label col-md-5" for="description">
 				<spring:message code="page.text.description"/>
 			</label>
-			<div class="col-md-8">
+			<div class="col-md-7">
 				<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
 			</div>
 		</div>
 		<c:if test="${exclusiveAccess}">
 			<div class="form-group">
-				<label class="control-label col-md-4" for="overwrite">
+				<label class="control-label col-md-5" for="overwrite">
 					<spring:message code="reports.text.overwrite"/>
 				</label>
-				<div class="col-md-8">
+				<div class="col-md-7">
 					<div class="checkbox">
 						<label>
-							<input type="checkbox" name="overwrite" id="overwrite" checked value="">
+							<input type="checkbox" name="overwrite" id="overwrite" checked>
+						</label>
+					</div>
+				</div>
+			</div>
+		</c:if>
+		<div class="form-group">
+			<label class="control-label col-md-5" for="saveSelectedParameters">
+				<spring:message code="dialog.label.saveSelectedParameters"/>
+			</label>
+			<div class="col-md-7">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="saveSelectedParameters" id="saveSelectedParameters">
+					</label>
+				</div>
+			</div>
+		</div>
+		<c:if test="${!report.reportType.pivotTableJs}">
+			<div class="form-group">
+				<label class="control-label col-md-5" for="saveAsPivotTable">
+					<spring:message code="dialog.label.saveAsPivotTable"/>
+				</label>
+				<div class="col-md-7">
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" name="saveAsPivotTable" id="saveAsPivotTable">
 						</label>
 					</div>
 				</div>
@@ -282,6 +345,11 @@
 					//https://github.com/makeusabrew/bootbox/issues/572
 					var form = dialog.find('#form-${outputDivId}');
 					var data = form.serialize();
+					var reportParameters = '${requestParameters}';
+					if (reportParameters) {
+						data = data + '&' + reportParameters;
+					}
+
 					$.ajax({
 						type: 'POST',
 						url: '${pageContext.request.contextPath}/savePivotTableJs',

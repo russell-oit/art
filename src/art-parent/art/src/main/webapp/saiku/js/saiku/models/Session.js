@@ -186,7 +186,13 @@ var Session = Backbone.Model.extend({
         this.isAdmin = false;
         this.destroy({async: false });
         delete this.id;
-		window.location = Settings.CONTEXT_PATH;
+		
+		//https://sourceforge.net/p/art/discussion/352129/thread/e7b4873f/
+		if(Settings.CONTEXT_PATH){
+			window.location = Settings.CONTEXT_PATH;
+		} else {
+			window.location = "/";
+		}
     },
 
     url: function() {

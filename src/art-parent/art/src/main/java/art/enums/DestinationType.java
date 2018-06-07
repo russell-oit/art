@@ -30,7 +30,8 @@ public enum DestinationType {
 
 	FTP("FTP"), SFTP("SFTP"), NetworkShare("Network Share"),
 	S3jclouds("Amazon S3 - jclouds"), S3AwsSdk("Amazon S3 - AWS SDK"),
-	Azure("Microsoft Azure"), WebDav("WebDAV"), Website("Website");
+	Azure("Microsoft Azure"), GoogleCloudStorage("Google Cloud Storage"),
+	WebDav("WebDAV"), Website("Website");
 
 	private final String value;
 

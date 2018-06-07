@@ -40,6 +40,8 @@ import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.sql.GroovyRowResult;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -1097,6 +1099,35 @@ public class RunReportHelper {
 		}
 
 		return listData;
+	}
+
+	/**
+	 * Returns form parameters contained in the request as a string that can go
+	 * into a url
+	 *
+	 * @param request the http request
+	 * @return request parameters as a string
+	 * @throws UnsupportedEncodingException
+	 */
+	public String getRequestParametersString(HttpServletRequest request)
+			throws UnsupportedEncodingException {
+
+		List<String> parametersList = new ArrayList<>();
+		Map<String, String[]> requestParameters = request.getParameterMap();
+		for (Entry<String, String[]> entry : requestParameters.entrySet()) {
+			String paramName = entry.getKey();
+			String[] paramValues = entry.getValue();
+			String encodedParamName = URLEncoder.encode(paramName, "UTF-8");
+			for (String paramValue : paramValues) {
+				String encodedParamValue = URLEncoder.encode(paramValue, "UTF-8");
+				String paramString = encodedParamName + "=" + encodedParamValue;
+				parametersList.add(paramString);
+			}
+		}
+
+		String parametersString = StringUtils.join(parametersList, "&");
+
+		return parametersString;
 	}
 
 }

@@ -247,7 +247,7 @@ Header that appears at the top of all pages, except the login and logs pages
 					</c:if>
 					<c:if test="${sessionUser.accessLevel.value >= 10}">
 						<li>
-							<a href="${pageContext.request.contextPath}/docs">
+							<a href="${pageContext.request.contextPath}/docs/index.html">
 								<i class="fa fa-book"></i> 
 								<spring:message code="header.link.documentation"/>
 							</a>

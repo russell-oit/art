@@ -14,11 +14,9 @@
 		<MaxSize>512</MaxSize>
 	</appender>
 	
-	
 	<logger name="org.quartz" level="info"/>
 	
 	<logger name="art" level="info"/>
-	
 	
 	<root level="warn">
 		<appender-ref ref="stdout"/>

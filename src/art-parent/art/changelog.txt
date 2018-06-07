@@ -1,3 +1,17 @@
+ART 3.7
+* Added google cloud storage destination type
+* Fix for pivottable.js renderers localization not working
+* Omitted neo4j driver
+* Fix for documentation link not working
+* Updated pt_BR translation
+* Fix for save not working with pivottable.js report run using run in new page option
+* Fix for report source not being displayed in quick edit section
+* Allow saving pivot table only from a tabular report
+* Allow changing report name when overwriting pivottable.js and gridstack reports
+* Allow saving of selected parameters when saving pivottable.js and gridstack reports
+* Fix for saiku art home link not working when art deployed in root
+* Updated jclouds, pivottable.js, ucanaccess
+
 ART 3.6
 * Changed job templates directory to WEB-INF\thymeleaf\jobs
 * Allow saving of pivottable.js state
