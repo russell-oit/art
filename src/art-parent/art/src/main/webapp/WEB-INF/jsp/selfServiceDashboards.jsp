@@ -57,7 +57,7 @@
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var reportId = $(this).find('option').eq(clickedIndex).val();
 					var grid = $('.grid-stack').data('gridstack');
-					
+
 					if (newValue) {
 						var el = $(processWidgetTemplate(reportId));
 						grid.addWidget(el, 0, 0, 4, 3, true);
@@ -68,6 +68,9 @@
 							data: {reportId: reportId, isFragment: true},
 							success: function (data, status, xhr) {
 								$("#content_" + reportId).html(data);
+								var autoheight = false;
+								var autowidth = true;
+								autosize(autoheight, autowidth, reportId);
 							},
 							error: function (xhr, status, error) {
 								bootbox.alert({
@@ -97,12 +100,50 @@
 					$('#reports').find('[value=' + reportId + ']').prop('selected', false);
 					$('.selectpicker').selectpicker('refresh');
 				});
+
+				function autosize(autoheight, autowidth, reportId) {
+					//https://github.com/gridstack/gridstack.js/issues/404
+					if (autoheight || autowidth) {
+						var itemContentDiv = $("#itemContent_" + reportId);
+						var itemContentDiv = $("#itemContent_" + reportId);
+						var itemDiv = itemContentDiv.closest('.grid-stack-item');
+
+//						console.log("itemContentDiv", itemContentDiv);
+//						console.log("itemDiv", itemDiv);
+
+						var newHeightPixels;
+						if (autoheight) {
+							newHeightPixels = Math.ceil((itemContentDiv[0].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
+						} else {
+							newHeightPixels = $(itemDiv).attr('data-gs-height');
+						}
+//						console.log("newHeightPixels", newHeightPixels);
+
+						var newWidthPixels;
+						if (autowidth) {
+							var dashboardWidth = 14; //12 + 2 (2 because of col-md-10)
+//							console.log("scrollWidth", itemContentDiv[0].scrollWidth);
+//							console.log("gridstackWidth", $('.grid-stack').width());
+//							console.log("calc", itemContentDiv[0].scrollWidth / $('.grid-stack').width() * dashboardWidth);
+							newWidthPixels = Math.ceil(itemContentDiv[0].scrollWidth / $('.grid-stack').width() * dashboardWidth);
+						} else {
+							newWidthPixels = $(itemDiv).attr('data-gs-width');
+						}
+//						console.log("newWidthPixels", newWidthPixels);
+
+						$('.grid-stack').data('gridstack').resize(
+								itemDiv,
+								newWidthPixels,
+								newHeightPixels
+								);
+					}
+				}
 			});
 		</script>
 
 		<script type="text/template" id="widgetTemplate">
 			<div>
-			<div class="grid-stack-item-content" style="border: 1px solid #ccc">
+			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#">
 			<div style="text-align: right">
 			<span class="fa fa-times removeWidget" style="cursor: pointer" data-report-id="#reportId#">
 			</div>
