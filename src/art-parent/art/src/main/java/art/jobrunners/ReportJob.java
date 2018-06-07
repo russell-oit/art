@@ -474,9 +474,9 @@ public class ReportJob implements org.quartz.Job {
 					case Azure:
 						sendFileToAzure(destination, fullLocalFileName);
 						break;
-					case B2:
-						sendFileToB2(destination, fullLocalFileName);
-						break;
+//					case B2:
+//						sendFileToB2(destination, fullLocalFileName);
+//						break;
 					case GoogleCloudStorage:
 						sendFileToGoogleCloudStorage(destination, fullLocalFileName);
 						break;
