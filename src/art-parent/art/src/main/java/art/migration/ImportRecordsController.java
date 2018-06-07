@@ -97,6 +97,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.zeroturnaround.zip.ZipUtil;
 
 /**
  * Controller for importing repository artifacts
@@ -587,7 +588,7 @@ public class ImportRecordsController {
 					schedules = csvRoutines.parseAll(Schedule.class, file);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
-					ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+					ZipUtil.unpack(file, new File(artTempPath));
 					String schedulesFileName = artTempPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
 					File schedulesFile = new File(schedulesFileName);
 					if (schedulesFile.exists()) {
@@ -661,7 +662,7 @@ public class ImportRecordsController {
 					users = csvRoutines.parseAll(User.class, file);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
-					ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+					ZipUtil.unpack(file, new File(artTempPath));
 					String usersFileName = artTempPath + ExportRecords.EMBEDDED_USERS_FILENAME;
 					File usersFile = new File(usersFileName);
 					if (usersFile.exists()) {
@@ -817,7 +818,7 @@ public class ImportRecordsController {
 					reports = mapper.readValue(file, new TypeReference<List<Report>>() {
 					});
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
-					ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+					ZipUtil.unpack(file, new File(artTempPath));
 					String reportsFileName = artTempPath + "art-export-Reports.json";
 					File reportsFile = new File(reportsFileName);
 					if (reportsFile.exists()) {
@@ -838,7 +839,7 @@ public class ImportRecordsController {
 				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
 					reports = csvRoutines.parseAll(Report.class, file);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
-					ArtUtils.unzipFile(file.getAbsolutePath(), artTempPath);
+					ZipUtil.unpack(file, new File(artTempPath));
 					String reportsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
 					File reportsFile = new File(reportsFileName);
 					if (reportsFile.exists()) {

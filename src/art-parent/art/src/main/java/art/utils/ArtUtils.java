@@ -46,7 +46,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -640,42 +639,6 @@ public class ArtUtils {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Unzips a file to a designated location
-	 *
-	 * @param zipFileName the full file name of the file to unzip
-	 * @param destinationDirectory the location to unzip to
-	 * @return file names of files contained in the zip file
-	 * @throws IOException
-	 */
-	public static List<String> unzipFile(String zipFileName,
-			String destinationDirectory) throws IOException {
-
-		List<String> fileNames = new ArrayList<>();
-		//http://www.baeldung.com/java-compress-and-uncompress
-		byte[] buffer = new byte[1024];
-		try (FileInputStream fis = new FileInputStream(zipFileName);
-				ZipInputStream zis = new ZipInputStream(fis)) {
-			ZipEntry zipEntry = zis.getNextEntry();
-			while (zipEntry != null) {
-				String fileName = zipEntry.getName();
-				fileNames.add(fileName);
-				String filePath = destinationDirectory + fileName;
-				File newFile = new File(filePath);
-				try (FileOutputStream fos = new FileOutputStream(newFile)) {
-					int len;
-					while ((len = zis.read(buffer)) > 0) {
-						fos.write(buffer, 0, len);
-					}
-				}
-				zipEntry = zis.getNextEntry();
-			}
-			zis.closeEntry();
-		}
-
-		return fileNames;
 	}
 
 }
