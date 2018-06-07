@@ -41,19 +41,19 @@ public class SelfServiceController {
 	@Autowired
 	private ReportService reportService;
 	
-	@GetMapping("/selfServiceDashboards")
-	public String showSelfServiceDashboards(HttpSession session, Model model){
-		logger.debug("Entering showSelfServiceDashboards");
-
-		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
-			model.addAttribute("reports", reportService.getDisplayReports(sessionUser.getUserId()));
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-		
-		return "selfServiceDashboards";
-	}
+//	@GetMapping("/selfServiceDashboards")
+//	public String showSelfServiceDashboards(HttpSession session, Model model){
+//		logger.debug("Entering showSelfServiceDashboards");
+//
+//		try {
+//			User sessionUser = (User) session.getAttribute("sessionUser");
+//			model.addAttribute("reports", reportService.getDisplayReports(sessionUser.getUserId()));
+//		} catch (SQLException | RuntimeException ex) {
+//			logger.error("Error", ex);
+//			model.addAttribute("error", ex);
+//		}
+//		
+//		return "selfServiceDashboards";
+//	}
 	
 }
