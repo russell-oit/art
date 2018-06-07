@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.6"> 
+  <meta name="version" content="3.7"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -5235,12 +5235,16 @@ WHERE {#!saleTypes#}
         <td>The destination user's password. For <strong>Amazon S3</strong> destinations, this is the IAM user's secret access key. For <strong>Microsoft Azure</strong> Blob Storage destinations, this is the primary access key.</td> 
        </tr> 
        <tr> 
+        <td><strong>JSON Key File</strong></td> 
+        <td>For <strong>Google Cloud Storage</strong> destinations, the service account JSON Key file</td> 
+       </tr> 
+       <tr> 
         <td><strong>Domain</strong></td> 
-        <td>For <strong>Network Share</strong> destinations, an optional specification of the user's domain.</td> 
+        <td>For <strong>Network Share</strong> destinations, an optional specification of the user's domain</td> 
        </tr> 
        <tr> 
         <td><strong>Path</strong></td> 
-        <td>The location of the destination. For <strong>Network Share</strong> destinations, this is the share name. For <strong>FTP</strong> and <strong>SFTP</strong> destinations, this is an optional directory path where files should be copied. For <strong>Amazon S3</strong> destinations, this is the bucket name. For <strong>Microsoft Azure</strong> destinations, this is the container name. For <strong>WebDAV</strong> destinations, this is the URL of the WebDAV server e.g. <code>http://localhost</code>. For <strong>Website</strong> destinations, this is a URL that POSTs a form, which includes a file field.</td> 
+        <td>The location of the destination. For <strong>Network Share</strong> destinations, this is the share name. For <strong>FTP</strong> and <strong>SFTP</strong> destinations, this is an optional directory path where files should be copied. For <strong>Amazon S3</strong> and <strong>Google Cloud Storage</strong> destinations, this is the bucket name. For <strong>Microsoft Azure</strong> destinations, this is the container name. For <strong>WebDAV</strong> destinations, this is the URL of the WebDAV server e.g. <code>http://localhost</code>. For <strong>Website</strong> destinations, this is a URL that POSTs a form which includes a file field.</td> 
        </tr> 
        <tr> 
         <td><strong>Sub-Directory</strong></td> 
@@ -6061,11 +6065,11 @@ a2enmod proxy_http
      <h2 id="translating-art">Translating ART</h2> 
      <p>You can translate ART so that the user interface is displayed in your own language. Follow the following steps to translate ART.</p> 
      <ul> 
-      <li>Download the latest ART package, unzip it and unzip the <strong>art.war</strong> file using any zip/unzip software. Get the <strong>ArtMessages.properties</strong> file from the <strong>ART_HOME\WEB-INF\i18n</strong> directory and and make a copy of it, naming your new file in the format <strong>ArtMessages_xx.properties</strong>, where xx is the ISO 639-1 language code for your language. A List of these language codes can be found here - <a href="http://www.mathguide.de/info/tools/languagecode.html." rel="nofollow">http://www.mathguide.de/info/tools/languagecode.html.</a> An example would be ArtMessages_pt.properties for Portuguese. If your language is written differently in different countries you can add the 2 letter country specifier to the file name so that your have a file name like ArtMessages_pt_BR.properties for Brazilian Portuguese. You can find a list of country codes here - <a href="http://www.immigration-usa.com/country_digraphs.html." rel="nofollow">http://www.immigration-usa.com/country_digraphs.html.</a></li> 
+      <li>Download the latest ART package, unzip it and unzip the <strong>art.war</strong> file using any zip/unzip software. Get the <strong>ArtMessages.properties</strong> file from the <strong>ART_HOME\WEB-INF\i18n</strong> directory and and make a copy of it, naming your new file in the format <strong>ArtMessages_xx.properties</strong>, where xx is the ISO 639-1 language code for your language. A List of these language codes can be found <a class="" href="http://www.mathguide.de/info/tools/languagecode.html" rel="nofollow">here</a>. An example would be ArtMessages_pt.properties for Portuguese. If your language is written differently in different countries you can add the 2 letter country specifier to the file name so that you have a file name like ArtMessages_pt_BR.properties for Brazilian Portuguese. You can find a list of country codes <a class="" href="http://www.immigration-usa.com/country_digraphs.html" rel="nofollow">here</a>.</li> 
       <li>Change all the text in your new properties file after the = signs to your language </li> 
       <li> <p>If your language uses a non ISO-8859 character set (e.g. chinese, arabic, russian etc) name the file ArtMessages_xx-UTF8.properties and then decode it to an ISO-8859 character set with UTF-8 escapes using the <strong>native2ascii</strong> tool that is available with your Java installation. An example command is as below.</p> 
        <div class="codehilite"> 
-        <pre><span></span>native2ascii ArtMessages_xx-UTF8.properties ArtMessages_xx.properties
+        <pre><span></span>native2ascii -encoding utf-8 ArtMessages_xx-UTF8.properties ArtMessages_xx.properties
 </pre> 
        </div> </li> 
       <li> <p>Once you have your translated properties file in the i18n folder, you can restart the application server to make the new translation available to the application, or wait for 1 hour after which the messages are refreshed.</p> </li> 
