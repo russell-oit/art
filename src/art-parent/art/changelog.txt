@@ -1,5 +1,6 @@
 ART 3.8
 * Have self service dashboards
+* Updated jxls
 
 ART 3.7
 * Added google cloud storage destination type
