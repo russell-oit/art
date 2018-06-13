@@ -102,11 +102,18 @@ Header that appears at the top of all pages, except the login and logs pages
 									</li>
 								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 10}">
+									<li class="divider"></li>
 									<li>
 										<a href="${pageContext.request.contextPath}/reportsConfig">
 											<spring:message code="header.link.reportsConfiguration"/>
 										</a>
 									</li>
+									<li>
+										<a href="${pageContext.request.contextPath}/addReport">
+											<spring:message code="page.title.addReport"/>
+										</a>
+									</li>
+									<li class="divider"></li>
 								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 80}">
 									<li>
