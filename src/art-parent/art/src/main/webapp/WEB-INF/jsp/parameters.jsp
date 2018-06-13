@@ -174,8 +174,6 @@ Display parameters
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -198,8 +196,6 @@ Display parameters
 								</span>
 							</c:if>
 						</td>
-						<td>${encode:forHtmlContent(parameter.createdBy)}</td>
-						<td>${encode:forHtmlContent(parameter.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
