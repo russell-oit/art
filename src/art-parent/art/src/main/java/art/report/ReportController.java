@@ -178,13 +178,13 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/reportConfig", method = RequestMethod.GET)
-	public String showReportConfig(@RequestParam("id") Integer id, Model model,
+	public String showReportConfig(@RequestParam("reportId") Integer reportId, Model model,
 			HttpSession session) {
 
-		logger.debug("Entering showReportConfig: id={}", id);
+		logger.debug("Entering showReportConfig: reportId={}", reportId);
 
 		try {
-			model.addAttribute("report", reportService.getReport(id));
+			model.addAttribute("report", reportService.getReport(reportId));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -455,7 +455,7 @@ public class ReportController {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
-			return "redirect:/reportConfig?id=" + report.getReportId();
+			return "redirect:/reportConfig?reportId=" + report.getReportId();
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

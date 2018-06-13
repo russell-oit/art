@@ -38,7 +38,7 @@ Display report drilldowns
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Select-1.2.0/js/dataTables.select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js"></script>
@@ -215,17 +215,24 @@ Display report drilldowns
 		</div>
 
 		<div class="text-center">
-			<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${parentReportName}
+			<p>
+				<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${parentReportName}
+			</p>
 		</div>
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/addDrilldown?parent=${parentReportId}">
-				<i class="fa fa-plus"></i>
-				<spring:message code="page.action.add"/>
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/addDrilldown?parent=${parentReportId}">
+					<i class="fa fa-plus"></i>
+					<spring:message code="page.action.add"/>
+				</a>
+				<button type="button" id="deleteRecords" class="btn btn-default">
+					<i class="fa fa-trash-o"></i>
+					<spring:message code="page.action.delete"/>
+				</button>
+			</div>
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/reportConfig?reportId=${parentReportId}">
+				<spring:message code="page.text.report"/>
 			</a>
-			<button type="button" id="deleteRecords" class="btn btn-default">
-				<i class="fa fa-trash-o"></i>
-				<spring:message code="page.action.delete"/>
-			</button>
 		</div>
 
 		<table id="drilldowns" class="table table-bordered table-striped table-condensed">

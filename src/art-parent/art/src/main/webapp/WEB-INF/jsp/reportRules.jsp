@@ -36,7 +36,7 @@ Display report filters
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Select-1.2.0/js/dataTables.select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js"></script>
@@ -192,7 +192,9 @@ Display report filters
 		</div>
 
 		<div class="text-center">
-			<b><spring:message code="page.text.report"/>:</b> ${reportName}
+			<p>
+				<b><spring:message code="page.text.report"/>:</b> ${reportName}
+			</p>
 		</div>
 		<div style="margin-bottom: 10px;">
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/addRule?reportId=${reportId}">
@@ -207,6 +209,9 @@ Display report filters
 				<i class="fa fa-trash-o"></i>
 				<spring:message code="page.action.delete"/>
 			</button>
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/reportConfig?reportId=${reportId}">
+				<spring:message code="page.text.report"/>
+			</a>
 		</div>
 
 		<table id="reportRules" class="table table-bordered table-striped table-condensed">
