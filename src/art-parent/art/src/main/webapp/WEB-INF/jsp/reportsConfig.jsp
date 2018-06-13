@@ -945,49 +945,6 @@ Reports configuration page
 					<div class="alert alert-success alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
-						<c:if test="${record != null}">
-							&nbsp;
-							<div class="btn-group">
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/editReport?id=${record.reportId}">
-									<spring:message code="page.action.edit"/>
-								</a>
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/copyReport?id=${record.reportId}">
-									<spring:message code="page.action.copy"/>
-								</a>
-							</div>
-							<div class="btn-group">
-								<a class="btn btn-default"
-								   href="${pageContext.request.contextPath}/reportParameterConfig?reportId=${record.reportId}">
-									<spring:message code="reports.action.parameters"/>
-								</a>
-								<a class="btn btn-default"
-								   href="${pageContext.request.contextPath}/reportRules?reportId=${record.reportId}">
-									<spring:message code="reports.action.rules"/>
-								</a>
-								<a class="btn btn-default"
-								   href="${pageContext.request.contextPath}/drilldowns?reportId=${record.reportId}">
-									<spring:message code="reports.action.drilldowns"/>
-								</a>
-							</div>
-							<c:if test="${record.reportType.canSchedule()}">
-								<div class="btn-group">
-									<a class="btn btn-default"
-									   href="${pageContext.request.contextPath}/addJob?reportId=${record.reportId}&nextPage=jobsConfig">
-										<spring:message code="reports.action.schedule"/>
-									</a>
-								</div>
-							</c:if>
-							<c:if test="${record.reportType != 'LovStatic'}">
-								<div class="btn-group">
-									<a class="btn btn-default"
-									   href="${pageContext.request.contextPath}/selectReportParameters?reportId=${record.reportId}">
-										<spring:message code="reports.action.preview"/>
-									</a>
-								</div>
-							</c:if>
-						</c:if>
 					</div>
 				</c:if>
 

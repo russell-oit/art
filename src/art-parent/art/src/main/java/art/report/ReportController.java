@@ -177,6 +177,22 @@ public class ReportController {
 		return "reportsConfig";
 	}
 
+	@RequestMapping(value = "/reportConfig", method = RequestMethod.GET)
+	public String showReportConfig(@RequestParam("id") Integer id, Model model,
+			HttpSession session) {
+
+		logger.debug("Entering showReportConfig: id={}", id);
+
+		try {
+			model.addAttribute("report", reportService.getReport(id));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "reportConfig";
+	}
+
 	@GetMapping("/getConfigReports")
 	public @ResponseBody
 	AjaxResponse getConfigReports(Locale locale) {
@@ -341,7 +357,6 @@ public class ReportController {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		Report report = new Report();
-		report.setActive(true);
 		report.setContactPerson(sessionUser.getFullName());
 
 		model.addAttribute("report", report);
@@ -434,18 +449,13 @@ public class ReportController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
-			report.loadGeneralOptions();
-			String recordName = report.getLocalizedName(locale) + " (" + report.getReportId() + ")";
-			redirectAttributes.addFlashAttribute("recordName", recordName);
-			redirectAttributes.addFlashAttribute("record", report);
-
 			try {
 				reportGroupMembershipService2.recreateReportGroupMemberships(report);
 			} catch (SQLException | RuntimeException ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
-			return "redirect:/reportsConfig";
+			return "redirect:/reportConfig?id=" + report.getReportId();
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
