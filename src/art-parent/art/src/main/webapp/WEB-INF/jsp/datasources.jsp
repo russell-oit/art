@@ -204,8 +204,6 @@ Display datasources
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -222,8 +220,6 @@ Display datasources
 						</td>
 						<td>${encode:forHtmlContent(datasource.description)}</td>
 						<td><t:displayActiveStatus active="${datasource.active}"/></td>
-						<td>${encode:forHtmlContent(datasource.createdBy)}</td>
-						<td>${encode:forHtmlContent(datasource.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

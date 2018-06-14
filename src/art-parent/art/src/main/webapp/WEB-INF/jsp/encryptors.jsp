@@ -191,8 +191,6 @@
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -209,8 +207,6 @@
 						</td>
 						<td>${encode:forHtmlContent(encryptor.description)}</td>
 						<td><t:displayActiveStatus active="${encryptor.active}"/></td>
-						<td>${encode:forHtmlContent(encryptor.createdBy)}</td>
-						<td>${encode:forHtmlContent(encryptor.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" href="${pageContext.request.contextPath}/editEncryptor?id=${encryptor.encryptorId}">

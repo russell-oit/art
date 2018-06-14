@@ -189,8 +189,6 @@
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -207,8 +205,6 @@
 						</td>
 						<td>${encode:forHtmlContent(smtpServer.description)}</td>
 						<td><t:displayActiveStatus active="${smtpServer.active}"/></td>
-						<td>${encode:forHtmlContent(smtpServer.createdBy)}</td>
-						<td>${encode:forHtmlContent(smtpServer.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
