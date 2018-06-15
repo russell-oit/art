@@ -299,27 +299,15 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 		int accessLevel = user.getAccessLevel().getValue();
 
-		if (StringUtils.equals(page, "reports")
-				|| StringUtils.equals(page, "") //home page "/"
-				|| StringUtils.equals(page, "selectReportParameters")
-				|| StringUtils.equals(page, "showDashboard")
-				|| StringUtils.equals(page, "showJPivot")
-				|| StringUtils.equals(page, "saveJPivot")
-				|| StringUtils.equals(page, "jpivotError")
-				|| StringUtils.equals(page, "jpivotBusy")
-				|| StringUtils.equals(page, "getSchedule")
-				|| StringUtils.equals(page, "runReport")
-				|| StringUtils.equals(page, "archives")
-				|| StringUtils.equals(page, "emailReport")
-				|| StringUtils.equals(page, "saiku3")
-				|| StringUtils.equals(page, "saveParameterSelection")
-				|| StringUtils.equals(page, "clearSavedParameterSelection")
-				|| StringUtils.equals(page, "savePivotTableJs")
-				|| StringUtils.equals(page, "deletePivotTableJs")
-				|| StringUtils.equals(page, "saveGridstack")
-				|| StringUtils.equals(page, "deleteGridstack")
-				|| StringUtils.equals(page, "selfServiceDashboards")
-				|| StringUtils.equals(page, "getLovValues")) {
+		//"" = home page "/"
+		if (StringUtils.equalsAny(page, "", "reports", "selectReportParameters",
+				"selectReportParameters", "showDashboard", "getLovValues",
+				"showJPivot", "saveJPivot", "jpivotError", "jpivotBusy",
+				"getSchedule", "runReport", "archives", "emailReport", "saiku3",
+				"saveParameterSelection", "clearSavedParameterSelection",
+				"savePivotTableJs", "deletePivotTableJs",
+				"saveGridstack", "deleteGridstack",
+				"selfServiceDashboards", "getDashboardCandidateReports")) {
 			//everyone can access
 			//NOTE: "everyone" doesn't include when accessing as the art database user
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {

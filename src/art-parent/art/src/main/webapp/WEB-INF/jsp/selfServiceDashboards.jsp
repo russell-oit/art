@@ -34,6 +34,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lodash-3.5.0/lodash.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
 		<script>
 			$(document).ready(function () {
@@ -66,13 +67,13 @@
 							type: 'POST',
 							url: '${pageContext.request.contextPath}/runReport',
 							data: {reportId: reportId, isFragment: true},
-							success: function (data, status, xhr) {
+							success: function (data) {
 								$("#content_" + reportId).html(data);
 								var autoheight = false;
 								var autowidth = true;
 								autosize(autoheight, autowidth, reportId);
 							},
-							error: function (xhr, status, error) {
+							error: function (xhr) {
 								bootbox.alert({
 									title: '${errorOccurredText}',
 									message: xhr.responseText
@@ -98,7 +99,7 @@
 					grid.removeWidget(el);
 					var reportId = $(this).data("reportId");
 					$('#reports').find('[value=' + reportId + ']').prop('selected', false);
-					$('.selectpicker').selectpicker('refresh');
+					$('#reports').selectpicker('refresh');
 				});
 
 				function autosize(autoheight, autowidth, reportId) {
@@ -138,6 +139,39 @@
 								);
 					}
 				}
+
+				$("#newDashboard").click(function () {
+					$.ajax({
+						type: 'GET',
+						dataType: "json",
+						url: '${pageContext.request.contextPath}/getDashboardCandidateReports',
+						success: function (response) {
+							if (response.success) {
+								//https://github.com/silviomoreto/bootstrap-select/issues/1151
+								var reports = response.data;
+								var options = '';
+								$.each(reports, function (index, report) {
+									options += '<option value=' + report.reportId + '>' + escapeHtmlContent(report.name2) + '</option>';
+								});
+								var select = $("#reports");
+								select.empty();
+								select.append(options);
+								select.selectpicker('refresh');
+
+								var grid = $('.grid-stack').data("gridstack");
+								grid.removeAll();
+							} else {
+								$.notify(response.errorMessage, "error");
+							}
+						},
+						error: function (xhr) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
+				});
 			});
 		</script>
 
@@ -167,28 +201,33 @@
 			</div>
 		</c:if>
 
-		<div class="row form-inline" style="margin-right: 1px;">
-			<span class="pull-right">
-				<a class="btn btn-default" id="newDashboardLink" style="display: none"
-				   href="">
-					<spring:message code="reports.link.newReport"/>
-				</a>
-				<c:if test="${exclusiveAccess}">
-					<button class="btn btn-default" id="deleteDashboard">
-						<spring:message code="page.action.delete"/>
-					</button>
-				</c:if>
-				<button class="btn btn-primary" id="saveDashboard">
-					<spring:message code="page.button.save"/>
+		<div class="row" style="margin-right: 1px; margin-bottom: 10px;">
+			<div class="col-md-12">
+				<button class="btn btn-default" id="newDashboard">
+					<spring:message code="page.text.new"/>
 				</button>
-			</span>
+				<button class="btn btn-default" id="editDashboard">
+					<spring:message code="page.action.edit"/>
+				</button>
+				<span class="pull-right">
+					<a class="btn btn-default" id="newDashboardLink" style="display: none"
+					   href="">
+						<spring:message code="reports.link.newReport"/>
+					</a>
+					<c:if test="${exclusiveAccess}">
+						<button class="btn btn-default" id="deleteDashboard">
+							<spring:message code="page.action.delete"/>
+						</button>
+					</c:if>
+					<button class="btn btn-primary" id="saveDashboard">
+						<spring:message code="page.button.save"/>
+					</button>
+				</span>
+			</div>
 		</div>
 		<div class="row">
 			<div class="col-md-2">
 				<select id="reports" class="form-control selectpicker" multiple>
-					<c:forEach var="report" items="${reports}">
-						<option value="${report.reportId}">${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}</option>
-					</c:forEach>
 				</select>
 			</div>
 			<div class="col-md-10">
