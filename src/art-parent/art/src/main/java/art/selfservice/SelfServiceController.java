@@ -29,7 +29,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Controller for self service
+ * Controller for self service reports
  * 
  * @author Timothy Anyona
  */
@@ -47,7 +47,7 @@ public class SelfServiceController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			model.addAttribute("reports", reportService.getDisplayReports(sessionUser.getUserId()));
+			model.addAttribute("reports", reportService.getDashboardCandidateReports(sessionUser.getUserId()));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

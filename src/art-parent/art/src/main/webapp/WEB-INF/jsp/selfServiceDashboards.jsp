@@ -167,6 +167,22 @@
 			</div>
 		</c:if>
 
+		<div class="row form-inline" style="margin-right: 1px;">
+			<span class="pull-right">
+				<a class="btn btn-default" id="newDashboardLink" style="display: none"
+				   href="">
+					<spring:message code="reports.link.newReport"/>
+				</a>
+				<c:if test="${exclusiveAccess}">
+					<button class="btn btn-default" id="deleteDashboard">
+						<spring:message code="page.action.delete"/>
+					</button>
+				</c:if>
+				<button class="btn btn-primary" id="saveDashboard">
+					<spring:message code="page.button.save"/>
+				</button>
+			</span>
+		</div>
 		<div class="row">
 			<div class="col-md-2">
 				<select id="reports" class="form-control selectpicker" multiple>
