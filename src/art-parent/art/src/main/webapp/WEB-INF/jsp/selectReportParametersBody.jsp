@@ -54,7 +54,8 @@ Display section to allow selecting of report parameters and initiate running of 
 					if (response.success) {
 						$.notify("${fileSentText}", "success");
 					} else {
-						$.notify(response.errorMessage, "error");
+						var reusable = true;
+						notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
 					}
 				},
 				error: function (xhr) {
@@ -112,7 +113,8 @@ Display section to allow selecting of report parameters and initiate running of 
 					if (response.success) {
 						$.notify("${parametersSavedText}", "success");
 					} else {
-						$.notify(response.errorMessage, "error");
+						var reusable = true;
+						notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
 					}
 				},
 				error: function (xhr, status, error) {
@@ -138,7 +140,8 @@ Display section to allow selecting of report parameters and initiate running of 
 					if (response.success) {
 						$.notify("${parametersClearedText}", "success");
 					} else {
-						$.notify(response.errorMessage, "error");
+						var reusable = true;
+						notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
 					}
 				},
 				error: function (xhr, status, error) {
@@ -148,6 +151,10 @@ Display section to allow selecting of report parameters and initiate running of 
 					});
 				}
 			});
+		});
+
+		$('#errorsDiv').on("click", ".alert .close", function () {
+			$(this).parent().hide();
 		});
 
 

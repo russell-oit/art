@@ -607,7 +607,7 @@ public class ReportController {
 		} catch (MessagingException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			response.setSuccess(false);
-			response.setErrorMessage(ex.toString());
+			response.setErrorMessage(ex.getMessage());
 		}
 
 		response.setSuccess(true);
@@ -744,7 +744,7 @@ public class ReportController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			int userId = sessionUser.getUserId();
-
+			
 			savedParameterService.deleteSavedParameters(userId, reportId);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {

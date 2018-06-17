@@ -497,14 +497,27 @@ function notifyActionSuccess(actionText, recordName) {
  * @param {string} errorOccurredText - basic error occurred message
  * @param {string} errorMessage - error details
  * @param {boolean} showErrors - whether to show error details
+ * @param {boolean} reusable - whether to create a reusable alert
  */
-function notifyActionError(errorOccurredText, errorMessage, showErrors) {
+function notifyActionError(errorOccurredText, errorMessage, showErrors, reusable) {
 	var msg;
-	msg = alertCloseButton + "<p>" + errorOccurredText + "</p>";
+	
+	if (reusable) {
+		msg = reusableAlertCloseButton;
+	} else {
+		msg = alertCloseButton;
+	}
+
+	msg += "<p>" + errorOccurredText + "</p>";
 	if (showErrors) {
 		msg += "<p>" + escapeHtmlContent(errorMessage) + "</p>";
 	}
+	
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+	if(reusable){
+		$("#ajaxResponse").show();
+	}
+	
 	$.notify(errorOccurredText, "error");
 }
 

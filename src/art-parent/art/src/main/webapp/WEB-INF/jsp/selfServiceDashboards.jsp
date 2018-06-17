@@ -161,16 +161,8 @@
 								var grid = $('.grid-stack').data("gridstack");
 								grid.removeAll();
 							} else {
-								var errorOccurredText = '${errorOccurredText}';
-								var errorMessage = response.errorMessage;
-								var msg;
-								msg = reusableAlertCloseButton + "<p>" + errorOccurredText + "</p>";
-								if (${showErrors}) {
-									msg += "<p>" + errorMessage + "</p>";
-								}
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$("#ajaxResponse").show();
-								$.notify(errorOccurredText, "error");
+								var reusable = true;
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
 							}
 						},
 						error: function (xhr) {
