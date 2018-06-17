@@ -149,9 +149,9 @@
 							if (response.success) {
 								//https://github.com/silviomoreto/bootstrap-select/issues/1151
 								var reports = response.data;
-								var options = '';
+								var options = "";
 								$.each(reports, function (index, report) {
-									options += '<option value=' + report.reportId + '>' + escapeHtmlContent(report.name2) + '</option>';
+									options += "<option value=" + report.reportId + ">" + escapeDoubleQuotes(report.name2) + "</option>";
 								});
 								var select = $("#reports");
 								select.empty();

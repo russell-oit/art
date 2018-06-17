@@ -177,7 +177,7 @@ public class Report implements Serializable {
 	private String pivotTableJsSavedOptions;
 	@Parsed
 	private String gridstackSavedOptions;
-	private String name2; //holds localized name
+	private String name2; //used for holding a processed report name e.g. in self service dashboard reports list
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")

@@ -287,6 +287,11 @@ function escapeHtmlAttribute(s) {
 }
 //END code for escaping html content
 
+//https://gist.github.com/getify/3667624
+function escapeDoubleQuotes(str) {
+	return str.replace(/\\([\s\S])|(")/g,"\\$1$2"); // thanks @slevithan!
+}
+
 /**
  * Create column filter input boxes
  * 

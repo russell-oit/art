@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpSession;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,8 +74,9 @@ public class SelfServiceController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			List<Report> reports = reportService.getDashboardCandidateReports(sessionUser.getUserId());
 			for (Report report : reports) {
-				String localizedName = report.getLocalizedName(locale);
-				report.setName2(localizedName);
+				String name = report.getLocalizedName(locale);
+				name = Encode.forHtmlContent(name);
+				report.setName2(name);
 			}
 			response.setData(reports);
 			response.setSuccess(true);
