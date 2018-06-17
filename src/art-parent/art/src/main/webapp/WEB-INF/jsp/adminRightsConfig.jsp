@@ -113,7 +113,7 @@ Admin rights configuration page
 							if (response.success) {
 								notifyActionSuccess(rightsUpdatedMessage);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

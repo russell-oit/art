@@ -76,7 +76,7 @@
 						if (response.success) {
 							notifyActionSuccess("${recordMovedText}", escapeHtmlContent(response.data));
 						} else {
-							notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 						}
 					},
 					fnAlert: function (message) {
@@ -116,7 +116,7 @@
 												selectedRows.remove().draw(false);
 												notifyActionSuccess("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler

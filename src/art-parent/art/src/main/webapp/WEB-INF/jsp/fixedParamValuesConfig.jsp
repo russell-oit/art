@@ -120,7 +120,7 @@
 							if (response.success) {
 								notifyActionSuccess(valuesUpdatedMessage);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

@@ -123,7 +123,7 @@ Display user jobs and jobs configuration
 							if (response.success) {
 								notifyActionSuccess("${runningText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -158,7 +158,7 @@ Display user jobs and jobs configuration
 							if (response.success) {
 								notifyActionSuccess("${scheduledText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -208,7 +208,7 @@ Display user jobs and jobs configuration
 
 								notifyActionSuccess("${refreshedText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -246,7 +246,7 @@ Display user jobs and jobs configuration
 												selectedRows.remove().draw(false);
 												notifyActionSuccess("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -287,7 +287,7 @@ Display user jobs and jobs configuration
 							if (response.success) {
 								notifyActionSuccess("${runningText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

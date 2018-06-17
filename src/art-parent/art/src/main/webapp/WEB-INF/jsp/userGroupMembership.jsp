@@ -86,7 +86,7 @@ Display user group membership
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 											notifyActionSuccess("${membershipRemovedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler

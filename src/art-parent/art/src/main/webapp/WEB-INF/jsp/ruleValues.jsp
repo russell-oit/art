@@ -86,7 +86,7 @@ Display rule values
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 											notifyActionSuccess("${valueRemovedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler

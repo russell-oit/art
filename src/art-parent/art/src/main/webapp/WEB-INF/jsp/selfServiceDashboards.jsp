@@ -151,7 +151,7 @@
 								var reports = response.data;
 								var options = "";
 								$.each(reports, function (index, report) {
-									options += "<option value=" + report.reportId + ">" + escapeDoubleQuotes(report.name2) + "</option>";
+									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
 								});
 								var select = $("#reports");
 								select.empty();
@@ -163,10 +163,9 @@
 							} else {
 								var errorOccurredText = '${errorOccurredText}';
 								var errorMessage = response.errorMessage;
-								var showErrors = '${showErrors}';
 								var msg;
 								msg = reusableAlertCloseButton + "<p>" + errorOccurredText + "</p>";
-								if (showErrors) {
+								if (${showErrors}) {
 									msg += "<p>" + errorMessage + "</p>";
 								}
 								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);

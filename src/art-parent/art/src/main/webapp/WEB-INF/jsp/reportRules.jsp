@@ -108,7 +108,7 @@ Display report filters
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 											notifyActionSuccess("${recordDeletedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -154,7 +154,7 @@ Display report filters
 												selectedRows.remove().draw(false);
 												notifyActionSuccess("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler

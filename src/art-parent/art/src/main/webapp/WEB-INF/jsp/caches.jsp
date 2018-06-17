@@ -59,7 +59,7 @@ Page to allow manual clearing of caches
 							if (response.success) {
 								notifyActionSuccess("${cacheClearedText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -76,7 +76,7 @@ Page to allow manual clearing of caches
 							if (response.success) {
 								notifyActionSuccess("${cachesClearedText}", undefined);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

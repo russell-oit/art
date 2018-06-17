@@ -93,7 +93,7 @@
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
 												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler

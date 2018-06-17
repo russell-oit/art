@@ -68,7 +68,7 @@ Page to display connections status
 
 								notifyActionSuccess("${connectionResetText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

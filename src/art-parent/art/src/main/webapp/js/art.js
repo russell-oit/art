@@ -165,7 +165,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
 		urlElement.value = "jdbc:ucanaccess://<file_path>;jackcessOpener=art.utils.CryptCodecOpener";
 		testSqlElement.value = "";
-		
+
 		var usernameElement = document.getElementById("username");
 		if (usernameElement !== null) {
 			usernameElement.value = "";
@@ -289,7 +289,7 @@ function escapeHtmlAttribute(s) {
 
 //https://gist.github.com/getify/3667624
 function escapeDoubleQuotes(str) {
-	return str.replace(/\\([\s\S])|(")/g,"\\$1$2"); // thanks @slevithan!
+	return str.replace(/\\([\s\S])|(")/g, "\\$1$2");
 }
 
 /**
@@ -496,10 +496,14 @@ function notifyActionSuccess(actionText, recordName) {
  * 
  * @param {string} errorOccurredText - basic error occurred message
  * @param {string} errorMessage - error details
+ * @param {boolean} showErrors - whether to show error details
  */
-function notifyActionError(errorOccurredText, errorMessage) {
+function notifyActionError(errorOccurredText, errorMessage, showErrors) {
 	var msg;
-	msg = alertCloseButton + "<p>" + errorOccurredText + "</p><p>" + errorMessage + "</p>";
+	msg = alertCloseButton + "<p>" + errorOccurredText + "</p>";
+	if (showErrors) {
+		msg += "<p>" + escapeHtmlContent(errorMessage) + "</p>";
+	}
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
 	$.notify(errorOccurredText, "error");
 }

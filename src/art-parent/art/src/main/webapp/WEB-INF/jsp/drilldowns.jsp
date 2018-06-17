@@ -118,7 +118,7 @@ Display report drilldowns
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 											notifyActionSuccess("${recordDeletedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -137,7 +137,7 @@ Display report drilldowns
 						if (response.success) {
 							notifyActionSuccess("${recordMovedText}", escapeHtmlContent(response.data));
 						} else {
-							notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 						}
 					},
 					fnAlert: function (message) {
@@ -177,7 +177,7 @@ Display report drilldowns
 												selectedRows.remove().draw(false);
 												notifyActionSuccess("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler

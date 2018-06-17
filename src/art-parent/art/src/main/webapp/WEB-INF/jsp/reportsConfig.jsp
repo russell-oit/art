@@ -276,7 +276,7 @@ Reports configuration page
 								setReportFields(report);
 								$("#editReport").show();
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -796,7 +796,7 @@ Reports configuration page
 											$("#editReport").hide();
 											notifyActionSuccess("${recordDeletedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -828,7 +828,7 @@ Reports configuration page
 								table.cell(rowSelector, 2).data(recordName);
 								$.notify("${recordUpdatedText}", "success");
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -872,7 +872,7 @@ Reports configuration page
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
 												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
