@@ -222,7 +222,7 @@
 			</div>
 		</div>
 
-		<div class="row" style="margin-right: 1px; margin-bottom: 10px;">
+		<div class="row" style="margin-bottom: 10px;">
 			<div class="col-md-12">
 				<button class="btn btn-default" id="newDashboard">
 					<spring:message code="page.text.new"/>
