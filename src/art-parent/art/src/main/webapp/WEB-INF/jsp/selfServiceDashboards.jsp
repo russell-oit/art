@@ -161,7 +161,17 @@
 								var grid = $('.grid-stack').data("gridstack");
 								grid.removeAll();
 							} else {
-								$.notify(response.errorMessage, "error");
+								var errorOccurredText = '${errorOccurredText}';
+								var errorMessage = response.errorMessage;
+								var showErrors = '${showErrors}';
+								var msg;
+								msg = reusableAlertCloseButton + "<p>" + errorOccurredText + "</p>";
+								if (showErrors) {
+									msg += "<p>" + errorMessage + "</p>";
+								}
+								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+								$("#ajaxResponse").show();
+								$.notify(errorOccurredText, "error");
 							}
 						},
 						error: function (xhr) {
@@ -171,6 +181,10 @@
 							});
 						}
 					});
+				});
+
+				$('#errorsDiv').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 			});
 		</script>
@@ -191,15 +205,22 @@
 	</jsp:attribute>
 
 	<jsp:body>
-		<c:if test="${error != null}">
-			<div class="alert alert-danger alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-				<p><spring:message code="page.message.errorOccurred"/></p>
-				<c:if test="${showErrors}">
-					<p>${encode:forHtmlContent(error)}</p>
+		<div class='row' id="errorsDiv">
+			<div class="col-md-12">
+				<c:if test="${error != null}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<p><spring:message code="page.message.errorOccurred"/></p>
+						<c:if test="${showErrors}">
+							<p>${encode:forHtmlContent(error)}</p>
+						</c:if>
+					</div>
 				</c:if>
+
+				<div id="ajaxResponse">
+				</div>
 			</div>
-		</c:if>
+		</div>
 
 		<div class="row" style="margin-right: 1px; margin-bottom: 10px;">
 			<div class="col-md-12">
