@@ -560,6 +560,11 @@ public class ReportController {
 			logger.info("Could not email report. Email server not configured. User = {}", sessionUser);
 			return response;
 		}
+		
+		if (!Config.getCustomSettings().isEnableEmailing()) {
+			logger.info("Could not email report. Emailing disabled. User = {}", sessionUser);
+			return response;
+		}
 
 		String subject = mailSubject;
 		if (StringUtils.isBlank(subject)) {
