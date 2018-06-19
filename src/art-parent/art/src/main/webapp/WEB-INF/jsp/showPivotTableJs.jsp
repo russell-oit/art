@@ -355,8 +355,7 @@
 						url: '${pageContext.request.contextPath}/savePivotTableJs',
 						dataType: 'json',
 						data: data,
-						success: function (response)
-						{
+						success: function (response) {
 							if (response.success) {
 								if (!${exclusiveAccess} ||
 										(${exclusiveAccess} && !dialog.find('#overwrite').is(':checked'))) {
@@ -367,10 +366,11 @@
 								}
 								$.notify("${reportSavedText}", "success");
 							} else {
-								$.notify(response.errorMessage, "error");
+								var reusable = true;
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
 							}
 						},
-						error: function (xhr, status, error) {
+						error: function (xhr) {
 							bootbox.alert({
 								title: '${errorOccurredText}',
 								message: xhr.responseText
@@ -424,10 +424,11 @@
 							} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
 								$.notify("${cannotDeleteReportText}", "error");
 							} else {
-								$.notify(response.errorMessage, "error");
+								var reusable = true;
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
 							}
 						},
-						error: function (xhr, status, error) {
+						error: function (xhr) {
 							bootbox.alert({
 								title: '${errorOccurredText}',
 								message: xhr.responseText

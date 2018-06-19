@@ -744,7 +744,7 @@ public class ReportController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			int userId = sessionUser.getUserId();
-			
+
 			savedParameterService.deleteSavedParameters(userId, reportId);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
@@ -1286,7 +1286,7 @@ public class ReportController {
 
 	@PostMapping("/saveGridstack")
 	public @ResponseBody
-	AjaxResponse saveGridstack(@RequestParam("reportId") Integer reportId,
+	AjaxResponse saveGridstack(@RequestParam(value = "reportId", required = false) Integer reportId,
 			@RequestParam("config") String config, @RequestParam("name") String name,
 			@RequestParam("description") String description,
 			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
@@ -1300,8 +1300,14 @@ public class ReportController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			Report report = reportService.getReport(reportId);
-			report.encryptPasswords();
+			Report report;
+			if (reportId == null) {
+				report = new Report();
+				report.setReportType(ReportType.GridstackDashboard);
+			} else {
+				report = reportService.getReport(reportId);
+				report.encryptPasswords();
+			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -1333,7 +1339,12 @@ public class ReportController {
 				if (overwrite) {
 					reportService.updateReport(report, sessionUser);
 				} else {
-					reportService.copyReport(report, report.getReportId(), sessionUser);
+					if (reportId == null) {
+						reportService.addReport(report, sessionUser);
+					} else {
+						reportService.copyReport(report, report.getReportId(), sessionUser);
+					}
+					
 					reportService.grantAccess(report, sessionUser);
 
 					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console

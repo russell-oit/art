@@ -16,7 +16,7 @@ Html page header fragment when displaying report output in a new page
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		
+
 		<meta name="_csrf" content="${_csrf.token}"/>
 		<meta name="_csrf_header" content="${_csrf.headerName}"/>
 
@@ -32,7 +32,7 @@ Html page header fragment when displaying report output in a new page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
-		
+
 		<c:if test="${allowSelectParameters}">
 			<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 			<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
@@ -51,6 +51,13 @@ Html page header fragment when displaying report output in a new page
 
 			<div id="pageContent">
 				<div class="container-fluid">
+
+					<div class="row" id="errorsDiv">
+						<div class="col-md-12">
+							<div id="ajaxResponse">
+							</div>
+						</div>
+					</div>
 
 					<c:if test="${allowSelectParameters}">
 						<jsp:include page="/WEB-INF/jsp/selectReportParametersBody.jsp"/>

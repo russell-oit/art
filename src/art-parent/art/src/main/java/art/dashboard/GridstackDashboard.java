@@ -21,19 +21,23 @@ import java.util.List;
 
 /**
  * Represents a gridstack dashboard, holding properties of the overall dashboard
- * 
+ *
  * @author Timothy Anyona
  */
 public class GridstackDashboard extends AbstractDashboard {
+
 	//https://github.com/troolee/gridstack.js/tree/master/doc
 	private static final long serialVersionUID = 1L;
-	private int width;
+	private final int DEFAULT_DASHBOARD_WIDTH = 12;
+	private int width = DEFAULT_DASHBOARD_WIDTH;
 	private boolean floatEnabled;
 	private boolean animate;
 	private boolean disableDrag;
 	private boolean disableResize;
-	private String cellHeight;
-	private String verticalMargin;
+	private final String DEFAULT_CELL_HEIGHT = "60px";
+	private String cellHeight = DEFAULT_CELL_HEIGHT;
+	private final String DEFAULT_VERTICAL_MARGIN = "20px";
+	private String verticalMargin = DEFAULT_VERTICAL_MARGIN;
 	private boolean alwaysShowResizeHandle;
 	private List<GridstackItem> items;
 	private int height;
@@ -177,5 +181,5 @@ public class GridstackDashboard extends AbstractDashboard {
 	public void setHeight(int height) {
 		this.height = height;
 	}
-	
+
 }
