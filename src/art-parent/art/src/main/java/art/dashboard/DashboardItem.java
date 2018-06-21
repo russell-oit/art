@@ -35,21 +35,6 @@ public abstract class DashboardItem implements Serializable {
 	private int index;
 	private String baseUrl;
 	private String parametersJson;
-	private String reportIdString;
-
-	/**
-	 * @return the reportIdString
-	 */
-	public String getReportIdString() {
-		return reportIdString;
-	}
-
-	/**
-	 * @param reportIdString the reportIdString to set
-	 */
-	public void setReportIdString(String reportIdString) {
-		this.reportIdString = reportIdString;
-	}
 
 	/**
 	 * @return the parametersJson

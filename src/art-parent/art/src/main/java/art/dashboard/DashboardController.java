@@ -301,6 +301,10 @@ public class DashboardController {
 
 		String dashboardXml = report.getReportSource();
 		logger.debug("dashboardXml='{}'", dashboardXml);
+		
+		if (StringUtils.isBlank(dashboardXml)) {
+			throw new IllegalArgumentException("No dashboard content");
+		}
 
 		Dashboard dashboard = new Dashboard();
 
@@ -551,8 +555,6 @@ public class DashboardController {
 
 		String url = null;
 
-		dashboardItem.setReportIdString(reportIdString);
-
 		if (StringUtils.isBlank(reportIdString)) {
 			//no report defined. use url tag
 			url = urlSetting;
@@ -721,6 +723,10 @@ public class DashboardController {
 		String dashboardXml = report.getReportSource();
 		logger.debug("dashboardXml='{}'", dashboardXml);
 
+		if (StringUtils.isBlank(dashboardXml)) {
+			throw new IllegalArgumentException("No dashboard content");
+		}
+
 		GridstackDashboard dashboard = new GridstackDashboard();
 
 		String dashboardTitle = getDashboardTitle(report, reportParamsMap, locale);
@@ -742,82 +748,49 @@ public class DashboardController {
 			});
 		}
 
-		if (StringUtils.isBlank(dashboardXml)) {
+		//https://stackoverflow.com/questions/773012/getting-xml-node-text-value-with-java-dom
+		//https://stackoverflow.com/questions/4076910/how-to-retrieve-element-value-of-xml-using-java
+		//http://www.w3schools.com/xml/xpath_intro.asp
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document document = builder.parse(new InputSource(new StringReader(dashboardXml)));
+		rootNode = document.getDocumentElement();
+
+		xPath = XPathFactory.newInstance().newXPath();
+
+		setGridstackDashboardProperties(dashboard);
+
+		Map<Integer, DashboardItem> itemsMap = new HashMap<>();
+
+		NodeList itemNodes = (NodeList) xPath.evaluate("ITEM", rootNode, XPathConstants.NODESET);
+		int itemIndex = 0;
+		for (int i = 0; i < itemNodes.getLength(); i++) {
+			itemIndex++;
+
+			Node itemNode = itemNodes.item(i);
+
+			GridstackItem item = new GridstackItem();
+			item.setIndex(itemIndex);
+
+			setGridstackItemProperties(item, itemNode, request, locale);
+
 			for (GridstackItemOptions itemOption : itemOptions) {
-				GridstackItem item = new GridstackItem();
-
-				item.setIndex(itemOption.getIndex());
-				item.setxPosition(itemOption.getX());
-				item.setyPosition(itemOption.getY());
-				item.setWidth(itemOption.getWidth());
-				item.setHeight(itemOption.getHeight());
-
-				int refreshPeriodSeconds = PORTLET_NO_REFRESH_SETTING;
-				item.setRefreshPeriodSeconds(refreshPeriodSeconds);
-
-				boolean executeOnLoad = true;
-				item.setExecuteOnLoad(executeOnLoad);
-
-				String reportIdString = itemOption.getReportIdString();
-				String reportIdOnly = StringUtils.substringBefore(reportIdString, "?");
-				String optionTitle = "";
-				if (StringUtils.isNotBlank(reportIdOnly)) {
-					int reportId = Integer.parseInt(reportIdOnly);
-					optionTitle = reportService.getReportName(reportId);
+				int index = itemOption.getIndex();
+				if (index == itemIndex) {
+					item.setxPosition(itemOption.getX());
+					item.setyPosition(itemOption.getY());
+					item.setWidth(itemOption.getWidth());
+					item.setHeight(itemOption.getHeight());
+					break;
 				}
-				String title = getPortletTitle(optionTitle, request, executeOnLoad, refreshPeriodSeconds, locale);
-				item.setTitle(title);
-
-				String urlSetting = null;
-				setPortletUrl(item, reportIdString, urlSetting, request);
-
-				items.add(item);
-			}
-		} else {
-			//https://stackoverflow.com/questions/773012/getting-xml-node-text-value-with-java-dom
-			//https://stackoverflow.com/questions/4076910/how-to-retrieve-element-value-of-xml-using-java
-			//http://www.w3schools.com/xml/xpath_intro.asp
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document document = builder.parse(new InputSource(new StringReader(dashboardXml)));
-			rootNode = document.getDocumentElement();
-
-			xPath = XPathFactory.newInstance().newXPath();
-
-			setGridstackDashboardProperties(dashboard);
-
-			Map<Integer, DashboardItem> itemsMap = new HashMap<>();
-
-			NodeList itemNodes = (NodeList) xPath.evaluate("ITEM", rootNode, XPathConstants.NODESET);
-			int itemIndex = 0;
-			for (int i = 0; i < itemNodes.getLength(); i++) {
-				itemIndex++;
-
-				Node itemNode = itemNodes.item(i);
-
-				GridstackItem item = new GridstackItem();
-				item.setIndex(itemIndex);
-
-				setGridstackItemProperties(item, itemNode, request, locale);
-
-				for (GridstackItemOptions itemOption : itemOptions) {
-					int index = itemOption.getIndex();
-					if (index == itemIndex) {
-						item.setxPosition(itemOption.getX());
-						item.setyPosition(itemOption.getY());
-						item.setWidth(itemOption.getWidth());
-						item.setHeight(itemOption.getHeight());
-						break;
-					}
-				}
-
-				items.add(item);
-
-				itemsMap.put(item.getIndex(), item);
 			}
 
-			setDashboardTabs(itemsMap, dashboard);
+			items.add(item);
+
+			itemsMap.put(item.getIndex(), item);
 		}
+
+		setDashboardTabs(itemsMap, dashboard);
 
 		dashboard.setItems(items);
 

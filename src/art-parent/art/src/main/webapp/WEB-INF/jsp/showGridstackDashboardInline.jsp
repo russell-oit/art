@@ -93,7 +93,7 @@
 							 ${item.minHeight == 0 ? '' : ' data-gs-min-height="'.concat(item.minHeight).concat('"')}
 							 ${item.maxWidth == 0 ? '' : ' data-gs-max-width="'.concat(item.maxWidth).concat('"')}
 							 ${item.maxHeight == 0 ? '' : ' data-gs-max-height="'.concat(item.maxHeight).concat('"')}
-							 data-index='${item.index}' data-report-id-string="${item.reportIdString}">
+							 data-index='${item.index}'>
 							<div class="grid-stack-item-content" style="border: 1px solid #ccc">
 								<div id="item_${item.index}">
 									<div class="portletAUTOBox">
@@ -144,7 +144,7 @@
 										 ${item.minHeight == 0 ? '' : ' data-gs-min-height="'.concat(item.minHeight).concat('"')}
 										 ${item.maxWidth == 0 ? '' : ' data-gs-max-width="'.concat(item.maxWidth).concat('"')}
 										 ${item.maxHeight == 0 ? '' : ' data-gs-max-height="'.concat(item.maxHeight).concat('"')}
-										 data-index='${item.index}' data-report-id-string="${item.reportIdString}">
+										 data-index='${item.index}'>
 										<div class="grid-stack-item-content" style="border: 1px solid #ccc">
 											<div id="item_${item.index}">
 												<div class="portletAUTOBox">
@@ -451,7 +451,6 @@
 			var $this = $(this);
 			items.push({
 				index: parseInt($this.attr('data-index'), 10),
-				reportIdString: $this.attr('data-report-id-string'),
 				x: parseInt($this.attr('data-gs-x'), 10),
 				y: parseInt($this.attr('data-gs-y'), 10),
 				width: parseInt($this.attr('data-gs-width'), 10),

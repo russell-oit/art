@@ -509,7 +509,7 @@ function notifyActionError(errorOccurredText, errorMessage, showErrors, reusable
 	}
 
 	msg += "<p>" + errorOccurredText + "</p>";
-	if (showErrors) {
+	if (showErrors && errorMessage) {
 		msg += "<p>" + escapeHtmlContent(errorMessage) + "</p>";
 	}
 	

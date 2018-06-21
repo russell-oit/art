@@ -28,24 +28,24 @@ public class GridstackItemOptions implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private int index;
-	private String reportIdString;
+	private int reportId;
 	private int x;
 	private int y;
 	private int height;
 	private int width;
 
 	/**
-	 * @return the reportIdString
+	 * @return the reportId
 	 */
-	public String getReportIdString() {
-		return reportIdString;
+	public int getReportId() {
+		return reportId;
 	}
 
 	/**
-	 * @param reportIdString the reportIdString to set
+	 * @param reportId the reportId to set
 	 */
-	public void setReportIdString(String reportIdString) {
-		this.reportIdString = reportIdString;
+	public void setReportId(int reportId) {
+		this.reportId = reportId;
 	}
 
 	/**

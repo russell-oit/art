@@ -31,11 +31,14 @@ import art.servlets.Config;
 import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
+import art.reportoptions.GridstackItemOptions;
 import art.savedparameter.SavedParameter;
 import art.savedparameter.SavedParameterService;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -50,6 +53,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -560,7 +564,7 @@ public class ReportController {
 			logger.info("Could not email report. Email server not configured. User = {}", sessionUser);
 			return response;
 		}
-		
+
 		if (!Config.getCustomSettings().isEnableEmailing()) {
 			logger.info("Could not email report. Emailing disabled. User = {}", sessionUser);
 			return response;
@@ -1299,7 +1303,7 @@ public class ReportController {
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
-				+ " name='{}', description='{}', overwrite={}, saveSelectedParameters={}",
+				+ " name='{}', description='{}', overwrite={}, saveSelectedParameters={},",
 				reportId, config, name, description, overwrite, saveSelectedParameters);
 
 		AjaxResponse response = new AjaxResponse();
@@ -1345,11 +1349,40 @@ public class ReportController {
 					reportService.updateReport(report, sessionUser);
 				} else {
 					if (reportId == null) {
+						//self service
+						//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
+						//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
+						ObjectMapper mapper = new ObjectMapper();
+						List<GridstackItemOptions> itemOptions = mapper.readValue(config, new TypeReference<List<GridstackItemOptions>>() {
+						});
+						if (CollectionUtils.isEmpty(itemOptions)) {
+							String message = messageSource.getMessage("reports.message.nothingToSave", null, locale);
+							response.setErrorMessage(message);
+							return response;
+						} else {
+							StringBuilder sb = new StringBuilder();
+							sb.append("<DASHBOARD>");
+							for (GridstackItemOptions itemOption : itemOptions) {
+								int itemReportId = itemOption.getReportId();
+								String reportName = reportService.getReportName(itemReportId);
+								sb.append("<ITEM>")
+										.append("<TITLE>")
+										.append(reportName)
+										.append("</TITLE>")
+										.append("<REPORTID>")
+										.append(String.valueOf(itemReportId))
+										.append("</REPORTID>")
+										.append("</ITEM>");
+							}
+							sb.append("</DASHBOARD>");
+							report.setReportSource(sb.toString());
+						}
+
 						reportService.addReport(report, sessionUser);
 					} else {
 						reportService.copyReport(report, report.getReportId(), sessionUser);
 					}
-					
+
 					reportService.grantAccess(report, sessionUser);
 
 					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
@@ -1360,7 +1393,7 @@ public class ReportController {
 				}
 				response.setSuccess(true);
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.getMessage());
 		}
