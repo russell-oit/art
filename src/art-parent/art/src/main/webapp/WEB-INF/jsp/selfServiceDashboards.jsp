@@ -294,11 +294,12 @@
 			$('.grid-stack-item.ui-draggable').each(function (index) {
 				var $this = $(this);
 				var content = $(this).find('.grid-stack-item-content');
-				var reportId = content.data("reportId");
+				//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
+				var reportIdString = content.data("reportId").toString();
 
 				items.push({
 					index: index + 1,
-					reportId: reportId,
+					reportIdString: reportIdString,
 					x: parseInt($this.attr('data-gs-x'), 10),
 					y: parseInt($this.attr('data-gs-y'), 10),
 					width: parseInt($this.attr('data-gs-width'), 10),

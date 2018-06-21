@@ -551,6 +551,8 @@ public class DashboardController {
 
 		String url = null;
 
+		dashboardItem.setReportIdString(reportIdString);
+
 		if (StringUtils.isBlank(reportIdString)) {
 			//no report defined. use url tag
 			url = urlSetting;
@@ -756,15 +758,16 @@ public class DashboardController {
 				boolean executeOnLoad = true;
 				item.setExecuteOnLoad(executeOnLoad);
 
-				Integer reportId = itemOption.getReportId();
-				String optionTitle = itemOption.getTitle();
-				if (StringUtils.isBlank(optionTitle) && reportId != null) {
+				String reportIdString = itemOption.getReportIdString();
+				String reportIdOnly = StringUtils.substringBefore(reportIdString, "?");
+				String optionTitle = "";
+				if (StringUtils.isNotBlank(reportIdOnly)) {
+					int reportId = Integer.parseInt(reportIdOnly);
 					optionTitle = reportService.getReportName(reportId);
 				}
 				String title = getPortletTitle(optionTitle, request, executeOnLoad, refreshPeriodSeconds, locale);
 				item.setTitle(title);
 
-				String reportIdString = String.valueOf(reportId);
 				String urlSetting = null;
 				setPortletUrl(item, reportIdString, urlSetting, request);
 
