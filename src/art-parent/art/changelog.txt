@@ -1,5 +1,6 @@
 ART 3.8
 * Have self service dashboards
+* Fix for error when run with java 7
 * Updated jxls
 
 ART 3.7
