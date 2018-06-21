@@ -140,6 +140,8 @@
 				}
 
 				$("#newDashboard").click(function () {
+					$("#newDashboardLink").hide();
+
 					$.ajax({
 						type: 'GET',
 						dataType: "json",
@@ -178,263 +180,181 @@
 				});
 			});
 		</script>
+	</jsp:attribute>
 
+	<jsp:body>
 		<script type="text/template" id="widgetTemplate">
 			<div>
 			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#" data-report-id="#reportId#">
-					<div style="text-align: right">
-						<span class="fa fa-times removeWidget" style="cursor: pointer" data-report-id="#reportId#">
-					</span>
+			<div style="text-align: right">
+			<span class="fa fa-times removeWidget" style="cursor: pointer" data-report-id="#reportId#">
+			</span>
 			</div>	
 			<div id="content_#reportId#">
 			</div>
-		</div>
-		</div>
+			</div>
+			</div>
 		</script>
-</jsp:attribute>
 
-<jsp:body>
-	<div class='row' id="errorsDiv">
-		<div class="col-md-12">
-			<c:if test="${error != null}">
-				<div class="alert alert-danger alert-dismissable">
-					<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-					<p><spring:message code="page.message.errorOccurred"/></p>
-					<c:if test="${showErrors}">
-						<p>${encode:forHtmlContent(error)}</p>
-					</c:if>
-				</div>
-			</c:if>
-
-			<div id="ajaxResponse">
-			</div>
-		</div>
-	</div>
-
-	<div class="row" style="margin-bottom: 10px;">
-		<div class="col-md-12">
-			<button class="btn btn-default" id="newDashboard">
-				<spring:message code="page.text.new"/>
-			</button>
-			<button class="btn btn-default" id="editDashboard">
-				<spring:message code="page.action.edit"/>
-			</button>
-			<span class="pull-right">
-				<a class="btn btn-default" id="newDashboardLink" style="display: none"
-				   href="">
-					<spring:message code="reports.link.newReport"/>
-				</a>
-				<c:if test="${exclusiveAccess}">
-					<button class="btn btn-default" id="deleteDashboard">
-						<spring:message code="page.action.delete"/>
-					</button>
+		<div class='row' id="errorsDiv">
+			<div class="col-md-12">
+				<c:if test="${error != null}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<p><spring:message code="page.message.errorOccurred"/></p>
+						<c:if test="${showErrors}">
+							<p>${encode:forHtmlContent(error)}</p>
+						</c:if>
+					</div>
 				</c:if>
-				<button class="btn btn-primary" id="saveDashboard">
-					<spring:message code="page.button.save"/>
-				</button>
-			</span>
-		</div>
-	</div>
-	<div class="row" style="margin-bottom: 20px">
-		<div class="col-md-4">
-			<select id="reports" class="form-control selectpicker" multiple>
-			</select>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-12">
-			<div id="dashboard" class="grid-stack"></div>
-		</div>
-	</div>
 
-	<div id="saveDashboardDialogDiv" style="display:none;">
-		<form id="saveDashboardForm" class="form-horizontal" role="form">
-			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-			<input type="hidden" name="reportId" value="">
-			<input type="hidden" id="config" name="config" value="">
-			<div class="form-group">
-				<label class="control-label col-md-4" for="name">
-					<spring:message code="page.text.name"/>
-				</label>
-				<div class="col-md-8">
-					<input type="text" id="name" name="name" maxlength="50" class="form-control"/>
+				<div id="ajaxResponse">
 				</div>
 			</div>
-			<div class="form-group">
-				<label class="control-label col-md-4" for="description">
-					<spring:message code="page.text.description"/>
-				</label>
-				<div class="col-md-8">
-					<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
-				</div>
+		</div>
+
+		<div class="row" style="margin-bottom: 10px;">
+			<div class="col-md-12">
+				<button class="btn btn-default" id="newDashboard">
+					<spring:message code="page.text.new"/>
+				</button>
+				<span class="pull-right">
+					<a class="btn btn-default" id="newDashboardLink" style="display: none"
+					   href="">
+						<spring:message code="reports.link.newReport"/>
+					</a>
+					<button class="btn btn-primary" id="saveDashboard">
+						<spring:message code="page.button.save"/>
+					</button>
+				</span>
 			</div>
-			<c:if test="${exclusiveAccess}">
+		</div>
+		<div class="row" style="margin-bottom: 20px">
+			<div class="col-md-4">
+				<select id="reports" class="form-control selectpicker" multiple>
+				</select>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div id="dashboard" class="grid-stack"></div>
+			</div>
+		</div>
+
+		<div id="saveDashboardDialogDiv" style="display:none;">
+			<form id="saveDashboardForm" class="form-horizontal" role="form">
+				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+				<input type="hidden" name="reportId" value="">
+				<input type="hidden" id="config" name="config" value="">
 				<div class="form-group">
-					<label class="control-label col-md-4" for="overwrite">
-						<spring:message code="reports.text.overwrite"/>
+					<label class="control-label col-md-4" for="name">
+						<spring:message code="page.text.name"/>
 					</label>
 					<div class="col-md-8">
-						<div class="checkbox">
-							<label>
-								<input type="checkbox" name="overwrite" id="overwrite" checked>
-							</label>
-						</div>
+						<input type="text" id="name" name="name" maxlength="50" class="form-control"/>
 					</div>
 				</div>
-			</c:if>
-		</form>
-	</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="description">
+						<spring:message code="page.text.description"/>
+					</label>
+					<div class="col-md-8">
+						<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
+					</div>
+				</div>
+			</form>
+		</div>
 
-	<script>
-		//https://github.com/gridstack/gridstack.js/issues/50
-		//https://github.com/gridstack/gridstack.js/issues/575
-		$("#saveDashboard").on("click", function () {
-			var items = [];
+		<script>
+			//https://github.com/gridstack/gridstack.js/issues/50
+			//https://github.com/gridstack/gridstack.js/issues/575
+			$("#saveDashboard").on("click", function () {
+				var items = [];
 
-			$('.grid-stack-item.ui-draggable').each(function (index) {
-				var $this = $(this);
-				var content = $(this).find('.grid-stack-item-content');
-				//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
-				var reportIdString = content.data("reportId").toString();
+				$('.grid-stack-item.ui-draggable').each(function (index) {
+					var $this = $(this);
+					var content = $(this).find('.grid-stack-item-content');
+					//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
+					var reportIdString = content.data("reportId").toString();
 
-				items.push({
-					index: index + 1,
-					reportIdString: reportIdString,
-					x: parseInt($this.attr('data-gs-x'), 10),
-					y: parseInt($this.attr('data-gs-y'), 10),
-					width: parseInt($this.attr('data-gs-width'), 10),
-					height: parseInt($this.attr('data-gs-height'), 10)
+					items.push({
+						index: index + 1,
+						reportIdString: reportIdString,
+						x: parseInt($this.attr('data-gs-x'), 10),
+						y: parseInt($this.attr('data-gs-y'), 10),
+						width: parseInt($this.attr('data-gs-width'), 10),
+						height: parseInt($this.attr('data-gs-height'), 10)
+					});
+				});
+
+				$("#config").val(JSON.stringify(items));
+
+				var dialog = bootbox.confirm({
+					title: "${saveReportText}",
+					message: $("#saveDashboardDialogDiv").html(),
+					buttons: {
+						cancel: {
+							label: "${cancelText}"
+						},
+						confirm: {
+							label: "${okText}"
+						}
+					},
+					callback: function (result) {
+						if (result) {
+							//https://github.com/makeusabrew/bootbox/issues/572
+							var form = dialog.find('#saveDashboardForm');
+							var data = form.serialize();
+
+							$.ajax({
+								type: 'POST',
+								url: '${pageContext.request.contextPath}/saveGridstack',
+								dataType: 'json',
+								data: data,
+								success: function (response) {
+									if (response.success) {
+										$.notify("${reportSavedText}", "success");
+										var newReportId = response.data;
+										if (newReportId) {
+											var newUrl = "${pageContext.request.contextPath}/selectReportParameters?reportId=" + newReportId;
+											$("#newDashboardLink").attr("href", newUrl);
+											$("#newDashboardLink").show();
+										}
+									} else {
+										var reusable = true;
+										notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
+									}
+								},
+								error: function (xhr) {
+									bootbox.alert({
+										title: '${errorOccurredText}',
+										message: xhr.responseText
+									});
+								}
+							});
+						} //end if result
+					} //end callback
+				}); //end bootbox confirm
+
+				//https://github.com/makeusabrew/bootbox/issues/411
+				//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
+				dialog.on("shown.bs.modal", function () {
+					dialog.attr("id", "saveDashboardDialog");
+					dialog.find('#name').focus();
 				});
 			});
 
-			$("#config").val(JSON.stringify(items));
-
-			var dialog = bootbox.confirm({
-				title: "${saveReportText}",
-				message: $("#saveDashboardDialogDiv").html(),
-				buttons: {
-					cancel: {
-						label: "${cancelText}"
-					},
-					confirm: {
-						label: "${okText}"
-					}
-				},
-				callback: function (result) {
-					if (result) {
-						//https://github.com/makeusabrew/bootbox/issues/572
-						var form = dialog.find('#saveDashboardForm');
-						var data = form.serialize();
-
-						$.ajax({
-							type: 'POST',
-							url: '${pageContext.request.contextPath}/saveGridstack',
-							dataType: 'json',
-							data: data,
-							success: function (response) {
-								if (response.success) {
-									$.notify("${reportSavedText}", "success");
-									var newReportId = response.data;
-									if (newReportId) {
-										var newUrl = "${pageContext.request.contextPath}/selectReportParameters?reportId=" + newReportId;
-										$("#newDashboardLink").attr("href", newUrl);
-										$("#newDashboardLink").show();
-									}
-								} else {
-									var reusable = true;
-									notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
-								}
-							},
-							error: function (xhr) {
-								bootbox.alert({
-									title: '${errorOccurredText}',
-									message: xhr.responseText
-								});
-							}
-						});
-					} //end if result
-				} //end callback
-			}); //end bootbox confirm
-
-			//https://github.com/makeusabrew/bootbox/issues/411
-			//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
-			dialog.on("shown.bs.modal", function () {
-				dialog.attr("id", "saveDashboardDialog");
-				dialog.find('#name').focus();
+			$(document).on("submit", "#saveDashboardForm", function (e) {
+				e.preventDefault();
+				$("#saveDashboardDialog .btn-primary").click();
 			});
-		});
 
-		$(document).on("submit", "#saveDashboardForm", function (e) {
-			e.preventDefault();
-			$("#saveDashboardDialog .btn-primary").click();
-		});
-
-		$("#deleteDashboard").on("click", function () {
-			var reportName = '${encode:forJavaScript(report.name)}';
-			var reportId = 1;
-
-			bootbox.confirm({
-				message: "${deleteRecordText}: <b>" + reportName + "</b>",
-				buttons: {
-					cancel: {
-						label: "${cancelText}"
-					},
-					confirm: {
-						label: "${okText}"
-					}
-				},
-				callback: function (result) {
-					if (result) {
-						//user confirmed delete. make delete request
-						$.ajax({
-							type: "POST",
-							dataType: "json",
-							url: "${pageContext.request.contextPath}/deleteGridstack",
-							data: {id: reportId},
-							success: function (response) {
-								var nonDeletedRecords = response.data;
-								if (response.success) {
-									$.notify("${reportDeletedText}", "success");
-								} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-									$.notify("${cannotDeleteReportText}", "error");
-								} else {
-									var reusable = true;
-									notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
-								}
-							},
-							error: function (xhr, status, error) {
-								bootbox.alert({
-									title: '${errorOccurredText}',
-									message: xhr.responseText
-								});
-							}
-						});
-					} //end if result
-				} //end callback
-			}); //end bootbox confirm
-		});
-
-		var token = $("meta[name='_csrf']").attr("content");
-		var header = $("meta[name='_csrf_header']").attr("content");
-		$(document).ajaxSend(function (e, xhr, options) {
-			xhr.setRequestHeader(header, token);
-		});
-
-		//	$('.grid-stack').on('added', function (event, items) {
-		//		for (var i = 0; i < items.length; i++) {
-		//			console.log('item added');
-		//			console.log(items[i]);
-		//		}
-		//	});
-		//	
-		//	$('.grid-stack').on('change', function (event, items) {
-		//		for (var i = 0; i < items.length; i++) {
-		//			console.log('item changed');
-		//			console.log(items[i]);
-		//		}
-		//	});
-	</script>
-
-</jsp:body>
+			var token = $("meta[name='_csrf']").attr("content");
+			var header = $("meta[name='_csrf_header']").attr("content");
+			$(document).ajaxSend(function (e, xhr, options) {
+				xhr.setRequestHeader(header, token);
+			});
+		</script>
+	</jsp:body>
 </t:mainPage>
 
