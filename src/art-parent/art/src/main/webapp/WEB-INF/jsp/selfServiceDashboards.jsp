@@ -56,7 +56,11 @@
 					countSelectedText: '${selectedCountText}'
 				});
 
-				$('.grid-stack').gridstack();
+				$('.grid-stack').gridstack({
+					resizable: {
+						handles: 'e, se, s, sw, w, n'
+					}
+				});
 
 				//https://stackoverflow.com/questions/35349239/bootstrap-select-event-parameters
 				//https://github.com/gridstack/gridstack.js/tree/master/doc
