@@ -433,7 +433,7 @@ Reports configuration page
 					$("#options").val(report.options);
 					$("#reportSource").val(report.reportSource);
 					$("#reportSourceHtml").val(report.reportSourceHtml);
-					
+
 					if (report.reportSourceHtml) {
 						tinyMCE.get('reportSourceHtml').setContent(report.reportSourceHtml);
 					}
@@ -763,6 +763,51 @@ Reports configuration page
 							break;
 						default:
 							$("#applyOptions").hide();
+					}
+
+					//show/hide test report button
+					switch (reportTypeId) {
+						case 112: //jpivot mondrian
+						case 113: //jpivot mondrian xmla
+						case 114: //jpivot sql server xmla
+						case 149: //saiku report
+						case 150: //saiku connection
+						case 120: //lov static
+							$("#testReport").hide();
+							break;
+						default:
+							$("#testReport").show();
+					}
+
+					//show/hide test report data button
+					switch (reportTypeId) {
+						case 100: //update
+						case 110: //dashboard
+						case 129: //gridstack dashboard
+						case 111: //text
+						case 112: //jpivot mondrian
+						case 113: //jpivot mondrian xmla
+						case 114: //jpivot sql server xmla
+						case 149: //saiku report
+						case 150: //saiku connection
+						case 115: //jasper template
+						case 117: //jxls template
+						case 120: //lov static
+						case 133: //pivottable.js csv local
+						case 134: //pivottable.sj csv server
+						case 151: //mongo
+						case 136: //dygraphs csv local
+						case 137: //dygraphs csv server
+						case 139: //datatables csv local
+						case 140: //datatables csv server
+						case 155: //org chart json
+						case 156: //org chart list
+						case 157: //org chart ajax
+						case 159: //report engine file
+							$("#testReportData").hide();
+							break;
+						default:
+							$("#testReportData").show();
 					}
 				}
 
