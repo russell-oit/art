@@ -1,9 +1,7 @@
 <%-- 
-    Document   : rules
-    Created on : 24-Apr-2014, 10:11:46
+    Document   : roles
+    Created on : 25-Jun-2018, 19:12:22
     Author     : Timothy Anyona
-
-Display rules
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -14,7 +12,7 @@ Display rules
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.rules" var="pageTitle"/>
+<spring:message code="page.title.roles" var="pageTitle"/>
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
@@ -22,11 +20,8 @@ Display rules
 <spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
-<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
-<spring:message code="rules.message.linkedReportsExist" var="linkedReportsExistText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
-<spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 
 <t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -34,9 +29,9 @@ Display rules
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="rules"]').parent().addClass('active');
+				$('a[href*="roles"]').parent().addClass('active');
 
-				var tbl = $('#rules');
+				var tbl = $('#roles');
 
 				//initialize datatable and process delete action
 				var oTable = initConfigPage(tbl,
@@ -50,12 +45,12 @@ Display rules
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteRule", //deleteUrl
+						"deleteRole", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
-						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						"${linkedReportsExistText}" //linkedRecordsExistText
+						undefined, //cannotDeleteRecordText
+						undefined //linkedRecordsExistText
 						);
 
 				var table = oTable.api();
@@ -83,15 +78,12 @@ Display rules
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteRules",
+										url: "${pageContext.request.contextPath}/deleteRoles",
 										data: {ids: ids},
 										success: function (response) {
-											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
 												notifyActionSuccess("${recordsDeletedText}", ids);
-											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
 												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
@@ -113,7 +105,7 @@ Display rules
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Rules&ids=' + ids;
+						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Roles&ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
@@ -145,7 +137,7 @@ Display rules
 
 		<div style="margin-bottom: 10px;">
 			<div class="btn-group">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/addRule">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/addRole">
 					<i class="fa fa-plus"></i>
 					<spring:message code="page.action.add"/>
 				</a>
@@ -155,7 +147,7 @@ Display rules
 				</button>
 			</div>
 			<div class="btn-group">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Rules">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Roles">
 					<spring:message code="page.text.import"/>
 				</a>
 				<button type="button" id="exportRecords" class="btn btn-default">
@@ -164,7 +156,7 @@ Display rules
 			</div>
 		</div>
 
-		<table id="rules" class="table table-bordered table-striped table-condensed">
+		<table id="roles" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
 					<th class="noFilter"></th>
@@ -175,21 +167,21 @@ Display rules
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="rule" items="${rules}">
-					<tr data-id="${rule.ruleId}" 
-						data-name="${encode:forHtmlAttribute(rule.name)}">
+				<c:forEach var="role" items="${roles}">
+					<tr data-id="${role.roleId}" 
+						data-name="${encode:forHtmlAttribute(role.name)}">
 
 						<td></td>
-						<td>${rule.ruleId}</td>
-						<td>${encode:forHtmlContent(rule.name)} &nbsp;
-							<t:displayNewLabel creationDate="${rule.creationDate}"
-											   updateDate="${rule.updateDate}"/>
+						<td>${role.roleId}</td>
+						<td>${encode:forHtmlContent(role.name)} &nbsp;
+							<t:displayNewLabel creationDate="${role.creationDate}"
+											   updateDate="${role.updateDate}"/>
 						</td>
-						<td>${encode:forHtmlContent(rule.description)}</td>
+						<td>${encode:forHtmlContent(role.description)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/editRule?id=${rule.ruleId}">
+								   href="${pageContext.request.contextPath}/editRole?id=${role.roleId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>
@@ -198,26 +190,10 @@ Display rules
 									<spring:message code="page.action.delete"/>
 								</button>
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/copyRule?id=${rule.ruleId}">
+								   href="${pageContext.request.contextPath}/copyRole?id=${role.roleId}">
 									<i class="fa fa-copy"></i>
 									<spring:message code="page.action.copy"/>
 								</a>
-							</div>
-							<div class="btn-group">
-								<button type="button" class="btn btn-default dropdown-toggle"
-										data-toggle="dropdown" data-hover="dropdown"
-										data-delay="100">
-									<spring:message code="reports.action.more"/>
-									<span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu">
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/ruleRuleValues?ruleId=${rule.ruleId}">
-											<spring:message code="page.title.ruleValues"/>
-										</a>
-									</li>
-								</ul>
 							</div>
 						</td>
 					</tr>

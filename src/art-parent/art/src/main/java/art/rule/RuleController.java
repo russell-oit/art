@@ -187,7 +187,7 @@ public class RuleController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
+			if (StringUtils.equalsAny(action, "add", "copy")) {
 				ruleService.addRule(rule, sessionUser);
 				if (reportId != null && reportId != 0) {
 					ReportRule reportRule = new ReportRule();

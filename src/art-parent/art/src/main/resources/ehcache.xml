@@ -50,4 +50,10 @@
 	<cache name="smtpServers"
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
+	<cache name="permissions"
+		   eternal="true" maxEntriesLocalHeap="10" />
+	
+	<cache name="roles"
+		   eternal="true" maxEntriesLocalHeap="10" />
+	
 </ehcache>

@@ -27,6 +27,8 @@ import art.rule.StringToRule;
 import art.schedule.StringToSchedule;
 import art.usergroup.StringToUserGroup;
 import art.general.StringToDouble;
+import art.permission.StringToPermission;
+import art.role.StringToRole;
 import art.smtpserver.StringToSmtpServer;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
@@ -103,6 +105,12 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToRule stringToRule;
+	
+	@Autowired
+	private StringToRole stringToRole;
+	
+	@Autowired
+	private StringToPermission stringToPermission;
 
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
@@ -253,6 +261,8 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addConverter(stringToSmtpServer);
 		registry.addConverter(stringToDatasource);
 		registry.addConverter(stringToEncryptor);
+		registry.addConverter(stringToRole);
+		registry.addConverter(stringToPermission);
 	}
 
 	@Bean

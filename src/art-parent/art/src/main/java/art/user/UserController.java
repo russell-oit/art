@@ -337,7 +337,7 @@ public class UserController {
 
 				if (user.isGenerateAndSend()) {
 					boolean newAccount;
-					if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
+					if (StringUtils.equalsAny(action, "add", "copy")) {
 						newAccount = true;
 					} else {
 						newAccount = false;
