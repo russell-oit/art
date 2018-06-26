@@ -19,8 +19,11 @@ package art.role;
 
 import art.general.AjaxResponse;
 import art.permission.PermissionService;
+import art.rolepermission.RolePermissionService;
 import art.user.User;
+import java.io.IOException;
 import java.sql.SQLException;
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +55,9 @@ public class RoleController {
 
 	@Autowired
 	private PermissionService permissionService;
+
+	@Autowired
+	private RolePermissionService rolePermissionService;
 
 	@RequestMapping(value = "/roles", method = RequestMethod.GET)
 	public String showRoles(Model model) {
@@ -169,6 +175,14 @@ public class RoleController {
 
 			String recordName = role.getName() + " (" + role.getRoleId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
+
+			try {
+				rolePermissionService.recreateRolePermissions(role);
+			} catch (SQLException | RuntimeException ex) {
+				logger.error("Error", ex);
+				redirectAttributes.addFlashAttribute("error", ex);
+			}
+
 			return "redirect:/roles";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

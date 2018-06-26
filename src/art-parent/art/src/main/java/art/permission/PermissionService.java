@@ -90,8 +90,9 @@ public class PermissionService {
 	public List<Permission> getAllPermissions() throws SQLException {
 		logger.debug("Entering getAllPermissions");
 
+		String sql = SQL_SELECT_ALL + " ORDER BY NAME";
 		ResultSetHandler<List<Permission>> h = new BeanListHandler<>(Permission.class, new PermissionMapper());
-		return dbService.query(SQL_SELECT_ALL, h);
+		return dbService.query(sql, h);
 	}
 
 	/**
