@@ -18,6 +18,7 @@
 package art.usergroup;
 
 import art.migration.PrefixTransformer;
+import art.permission.Permission;
 import art.reportgroup.ReportGroup;
 import art.role.Role;
 import com.univocity.parsers.annotations.Nested;
@@ -54,6 +55,21 @@ public class UserGroup implements Serializable {
 	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
 	private List<Role> roles;
+	private List<Permission> permissions;
+
+	/**
+	 * @return the permissions
+	 */
+	public List<Permission> getPermissions() {
+		return permissions;
+	}
+
+	/**
+	 * @param permissions the permissions to set
+	 */
+	public void setPermissions(List<Permission> permissions) {
+		this.permissions = permissions;
+	}
 
 	/**
 	 * @return the roles

@@ -26,14 +26,16 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Provides methods for retrieving permissions
+ * Provides methods for retrieving and updating permissions
  *
  * @author Timothy Anyona
  */
@@ -144,6 +146,190 @@ public class PermissionService {
 				+ " WHERE ARPM.ROLE_ID=?";
 		ResultSetHandler<List<Permission>> h = new BeanListHandler<>(Permission.class, new PermissionMapper());
 		return dbService.query(sql, h, roleId);
+	}
+
+	/**
+	 * Adds or removes permissions
+	 *
+	 * @param action "add" or "remove". anything else will be treated as remove
+	 * @param users the relevant user ids
+	 * @param userGroups the relevant user group ids
+	 * @param roles the relevant role ids
+	 * @param permissions the relevant permission ids
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
+	public void updatePermissions(String action, Integer[] users, Integer[] userGroups,
+			Integer[] roles, Integer[] permissions) throws SQLException {
+
+		logger.debug("Entering updatePermissions: action='{}'", action);
+
+		boolean add;
+		if (StringUtils.equalsIgnoreCase(action, "add")) {
+			add = true;
+		} else {
+			add = false;
+		}
+
+		//update user permissions
+		if (users != null) {
+			String sqlUserRole;
+			String sqlUserPermission;
+
+			if (add) {
+				sqlUserRole = "INSERT INTO ART_USER_ROLE_MAP (USER_ID, ROLE_ID) VALUES (?, ?)";
+				sqlUserPermission = "INSERT INTO ART_USER_PERMISSION_MAP (USER_ID, PERMISSION_ID) VALUES (?, ?)";
+			} else {
+				sqlUserRole = "DELETE FROM ART_USER_ROLE_MAP WHERE USER_ID=? AND ROLE_ID=?";
+				sqlUserPermission = "DELETE FROM ART_USER_PERMISSION_MAP WHERE USER_ID=? AND PERMISSION_ID=?";
+			}
+
+			String sqlTestUserRole = "UPDATE ART_USER_ROLE_MAP SET USER_ID=? WHERE USER_ID=? AND ROLE_ID=?";
+			String sqlTestUserPermission = "UPDATE ART_USER_PERMISSION_MAP SET USER_ID=? WHERE USER_ID=? AND PERMISSION_ID=?";
+
+			int affectedRows;
+			boolean updateRight;
+
+			for (Integer userId : users) {
+				//update roles
+				if (roles != null) {
+					for (Integer roleId : roles) {
+						//if you use a batch update, some drivers e.g. oracle will
+						//stop after the first error. we should continue in the event of an integrity constraint error (access already added)
+
+						updateRight = true;
+						if (add) {
+							//test if role exists. to avoid integrity constraint error
+							affectedRows = dbService.update(sqlTestUserRole, userId, userId, roleId);
+							if (affectedRows > 0) {
+								//role exists. don't attempt a reinsert.
+								updateRight = false;
+							}
+						}
+						if (updateRight) {
+							dbService.update(sqlUserRole, userId, roleId);
+						}
+					}
+				}
+
+				//update permissions
+				if (permissions != null) {
+					for (Integer permissionId : permissions) {
+						updateRight = true;
+						if (add) {
+							//test if permission exists. to avoid integrity constraint error
+							affectedRows = dbService.update(sqlTestUserPermission, userId, userId, permissionId);
+							if (affectedRows > 0) {
+								//permission exists. don't attempt a reinsert.
+								updateRight = false;
+							}
+						}
+						if (updateRight) {
+							dbService.update(sqlUserPermission, userId, permissionId);
+						}
+					}
+				}
+			}
+		}
+
+		//update user group permissions
+		if (userGroups != null) {
+			String sqlUserGroupRole;
+			String sqlUserGroupPermission;
+
+			if (add) {
+				sqlUserGroupRole = "INSERT INTO ART_USER_GROUP_ROLE_MAP (USER_GROUP_ID, ROLE_ID) VALUES (?, ?)";
+				sqlUserGroupPermission = "INSERT INTO ART_USER_GROUP_PERM_MAP (USER_GROUP_ID, PERMISSION_ID) VALUES (?, ?)";
+			} else {
+				sqlUserGroupRole = "DELETE FROM ART_USER_GROUP_ROLE_MAP WHERE USER_GROUP_ID=? AND ROLE_ID=?";
+				sqlUserGroupPermission = "DELETE FROM ART_USER_GROUP_PERM_MAP WHERE USER_GROUP_ID=? AND PERMISSION_ID=?";
+			}
+
+			String sqlTestUserGroupRole = "UPDATE ART_USER_GROUP_ROLE_MAP SET USER_GROUP_ID=? WHERE USER_GROUP_ID=? AND ROLE_ID=?";
+			String sqlTestUserGroupPermission = "UPDATE ART_USER_GROUP_PERM_MAP SET USER_GROUP_ID=? WHERE USER_GROUP_ID=? AND PERMISSION_ID=?";
+
+			int affectedRows;
+			boolean updateRight;
+
+			for (Integer userGroupId : userGroups) {
+				//update roles
+				if (roles != null) {
+					for (Integer roleId : roles) {
+						//if you use a batch update, some drivers e.g. oracle will
+						//stop after the first error. we should continue in the event of an integrity constraint error (access already added)
+
+						updateRight = true;
+						if (add) {
+							//test if role exists. to avoid integrity constraint error
+							affectedRows = dbService.update(sqlTestUserGroupRole, userGroupId, userGroupId, roleId);
+							if (affectedRows > 0) {
+								//role exists. don't attempt a reinsert.
+								updateRight = false;
+							}
+						}
+						if (updateRight) {
+							dbService.update(sqlUserGroupRole, userGroupId, roleId);
+						}
+					}
+				}
+
+				//update permissions
+				if (permissions != null) {
+					for (Integer permissionId : permissions) {
+						updateRight = true;
+						if (add) {
+							//test if permission exists. to avoid integrity constraint error
+							affectedRows = dbService.update(sqlTestUserGroupPermission, userGroupId, userGroupId, permissionId);
+							if (affectedRows > 0) {
+								//permission exists. don't attempt a reinsert.
+								updateRight = false;
+							}
+						}
+						if (updateRight) {
+							dbService.update(sqlUserGroupPermission, userGroupId, permissionId);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns the permissions attached to a given user
+	 *
+	 * @param userId the user id
+	 * @return the user's permissions
+	 * @throws SQLException
+	 */
+	@Cacheable("permissions")
+	public List<Permission> getPermissionsForUser(int userId) throws SQLException {
+		logger.debug("Entering getPermissionsForUser: userId={}", userId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_USER_PERMISSION_MAP AUPM"
+				+ " ON AP.PERMISSION_ID=AUPM.PERMISSION_ID"
+				+ " WHERE AUPM.USER_ID=?";
+		ResultSetHandler<List<Permission>> h = new BeanListHandler<>(Permission.class, new PermissionMapper());
+		return dbService.query(sql, h, userId);
+	}
+
+	/**
+	 * Returns the permissions attached to a given user group
+	 *
+	 * @param userGroupId the user group id
+	 * @return the user group's permissions
+	 * @throws SQLException
+	 */
+	@Cacheable("permissions")
+	public List<Permission> getPermissionsForUserGroup(int userGroupId) throws SQLException {
+		logger.debug("Entering getPermissionsForUserGroup: userGroupId={}", userGroupId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_USER_GROUP_PERM_MAP AUGPM"
+				+ " ON AP.PERMISSION_ID=AUGPM.PERMISSION_ID"
+				+ " WHERE AUGPM.USER_GROUP_ID=?";
+		ResultSetHandler<List<Permission>> h = new BeanListHandler<>(Permission.class, new PermissionMapper());
+		return dbService.query(sql, h, userGroupId);
 	}
 
 }

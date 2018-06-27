@@ -102,7 +102,6 @@ Header that appears at the top of all pages, except the login and logs pages
 									</li>
 								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 10}">
-									<li class="divider"></li>
 									<li>
 										<a href="${pageContext.request.contextPath}/reportsConfig">
 											<spring:message code="header.link.reportsConfiguration"/>
@@ -113,7 +112,6 @@ Header that appears at the top of all pages, except the login and logs pages
 											<spring:message code="page.title.addReport"/>
 										</a>
 									</li>
-									<li class="divider"></li>
 								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 80}">
 									<li>
@@ -150,6 +148,23 @@ Header that appears at the top of all pages, except the login and logs pages
 										</a>
 									</li>
 								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 40}">
+									<li>
+										<a href="${pageContext.request.contextPath}/roles">
+											<spring:message code="page.title.roles"/>
+										</a>
+									</li>
+									<li>
+										<a href="${pageContext.request.contextPath}/rolePermissionsConfig">
+											<spring:message code="page.title.rolePermissions"/>
+										</a>
+									</li>
+									<li>
+										<a href="${pageContext.request.contextPath}/permissionsConfig">
+											<spring:message code="page.text.permissions"/>
+										</a>
+									</li>
+								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 30}">
 									<li>
 										<a href="${pageContext.request.contextPath}/accessRightsConfig">
@@ -161,18 +176,6 @@ Header that appears at the top of all pages, except the login and logs pages
 									<li>
 										<a href="${pageContext.request.contextPath}/adminRightsConfig">
 											<spring:message code="header.link.adminRights"/>
-										</a>
-									</li>
-								</c:if>
-								<c:if test="${sessionUser.accessLevel.value >= 40}">
-									<li>
-										<a href="${pageContext.request.contextPath}/roles">
-											<spring:message code="page.title.roles"/>
-										</a>
-									</li>
-									<li>
-										<a href="${pageContext.request.contextPath}/rolePermissionsConfig">
-											<spring:message code="page.title.rolePermissions"/>
 										</a>
 									</li>
 								</c:if>

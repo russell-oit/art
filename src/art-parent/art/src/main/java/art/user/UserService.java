@@ -26,6 +26,8 @@ import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.usergroupmembership.UserGroupMembershipService2;
 import art.general.ActionResult;
+import art.permission.Permission;
+import art.permission.PermissionService;
 import art.role.Role;
 import art.role.RoleService;
 import art.utils.ArtUtils;
@@ -70,18 +72,20 @@ public class UserService {
 	private final ReportGroupService reportGroupService;
 	private final UserGroupMembershipService2 userGroupMembershipService2;
 	private final RoleService roleService;
+	private final PermissionService permissionService;
 
 	@Autowired
 	public UserService(DbService dbService, UserGroupService userGroupService,
 			ReportGroupService reportGroupService,
 			UserGroupMembershipService2 userGroupMembershipService2,
-			RoleService roleService) {
+			RoleService roleService, PermissionService permissionService) {
 
 		this.dbService = dbService;
 		this.userGroupService = userGroupService;
 		this.reportGroupService = reportGroupService;
 		this.userGroupMembershipService2 = userGroupMembershipService2;
 		this.roleService = roleService;
+		this.permissionService = permissionService;
 	}
 
 	public UserService() {
@@ -90,6 +94,7 @@ public class UserService {
 		reportGroupService = new ReportGroupService();
 		userGroupMembershipService2 = new UserGroupMembershipService2();
 		roleService = new RoleService();
+		permissionService = new PermissionService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
@@ -135,6 +140,11 @@ public class UserService {
 
 			List<Role> roles = roleService.getRolesForUser(user.getUserId());
 			user.setRoles(roles);
+
+			List<Permission> permissions = permissionService.getPermissionsForUser(user.getUserId());
+			user.setPermissions(permissions);
+			
+			user.prepareFlatPermissions();
 
 			return type.cast(user);
 		}
