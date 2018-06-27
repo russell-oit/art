@@ -23,6 +23,8 @@ import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.user.User;
 import art.general.ActionResult;
+import art.role.Role;
+import art.role.RoleService;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -56,16 +58,21 @@ public class UserGroupService {
 
 	private final DbService dbService;
 	private final ReportGroupService reportGroupService;
+	private final RoleService roleService;
 
 	@Autowired
-	public UserGroupService(DbService dbService, ReportGroupService reportGroupService) {
+	public UserGroupService(DbService dbService, ReportGroupService reportGroupService,
+			RoleService roleService) {
+
 		this.dbService = dbService;
 		this.reportGroupService = reportGroupService;
+		this.roleService = roleService;
 	}
 
 	public UserGroupService() {
 		dbService = new DbService();
 		reportGroupService = new ReportGroupService();
+		roleService = new RoleService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUPS AUG";
@@ -99,6 +106,9 @@ public class UserGroupService {
 
 			ReportGroup defaultReportGroup = reportGroupService.getReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 			group.setDefaultReportGroup(defaultReportGroup);
+
+			List<Role> roles = roleService.getRolesForUserGroup(group.getUserGroupId());
+			group.setRoles(roles);
 
 			return type.cast(group);
 		}
@@ -230,10 +240,10 @@ public class UserGroupService {
 
 		sql = "DELETE FROM ART_USER_GROUP_JOBS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_GROUP_PARAM_DEFAULTS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_GROUP_FIXED_PARAM_VAL WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
 

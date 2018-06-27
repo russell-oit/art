@@ -386,4 +386,24 @@ public class RoleService {
 		ResultSetHandler<List<Role>> h = new BeanListHandler<>(Role.class, new RoleMapper());
 		return dbService.query(sql, h, userId);
 	}
+
+	/**
+	 * Returns the roles attached to a given user group
+	 *
+	 * @param userGroupId the user group id
+	 * @return the user group's roles
+	 * @throws SQLException
+	 */
+	@Cacheable("roles")
+	public List<Role> getRolesForUserGroup(int userGroupId) throws SQLException {
+		logger.debug("Entering getRolesForUserGroup: userGroupId={}", userGroupId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_USER_GROUP_ROLE_MAP AUGRM"
+				+ " ON AR.ROLE_ID=AUGRM.ROLE_ID"
+				+ " WHERE AUGRM.USER_GROUP_ID=?";
+		ResultSetHandler<List<Role>> h = new BeanListHandler<>(Role.class, new RoleMapper());
+		return dbService.query(sql, h, userGroupId);
+	}
+
 }

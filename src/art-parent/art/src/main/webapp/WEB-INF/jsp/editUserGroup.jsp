@@ -32,7 +32,11 @@ Edit user group page
 	</c:when>
 </c:choose>
 
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -55,7 +59,11 @@ Edit user group page
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
-					noneResultsText: '${noResultsMatchText}'
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}',
+					selectAllText: '${selectAllText}',
+					deselectAllText: '${deselectAllText}'
 				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
@@ -161,6 +169,19 @@ Edit user group page
 							</span>
 						</div>
 						<form:errors path="startReport" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="roles">
+						<spring:message code="page.text.roles"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="roles" items="${roles}" multiple="true" 
+									 itemLabel="name" itemValue="roleId" 
+									 class="form-control selectpicker"
+									 data-actions-box="true"
+									 />
+						<form:errors path="roles" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
