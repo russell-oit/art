@@ -32,7 +32,6 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -370,18 +369,21 @@ public class RoleService {
 	}
 
 	/**
-	 * Returns the name of a given role
+	 * Returns the roles attached to a given user
 	 *
-	 * @param id the role id
-	 * @return the name of the given role
+	 * @param userId the user id
+	 * @return the user's roles
 	 * @throws SQLException
 	 */
 	@Cacheable("roles")
-	public String getRoleName(int id) throws SQLException {
-		logger.debug("Entering getRoleName: id={}", id);
+	public List<Role> getRolesForUser(int userId) throws SQLException {
+		logger.debug("Entering getRolesForUser: userId={}", userId);
 
-		String sql = "SELECT NAME FROM ART_ROLES WHERE ROLE_ID=?";
-		ResultSetHandler<String> h = new ScalarHandler<>(1);
-		return dbService.query(sql, h, id);
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_USER_ROLE_MAP AURM"
+				+ " ON AR.ROLE_ID=AURM.ROLE_ID"
+				+ " WHERE AURM.USER_ID=?";
+		ResultSetHandler<List<Role>> h = new BeanListHandler<>(Role.class, new RoleMapper());
+		return dbService.query(sql, h, userId);
 	}
 }

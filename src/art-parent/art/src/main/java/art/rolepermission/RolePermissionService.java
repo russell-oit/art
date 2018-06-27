@@ -123,7 +123,6 @@ public class RolePermissionService {
 		logger.debug("(roles == null) = {}", roles == null);
 		logger.debug("(permissions == null) = {}", permissions == null);
 		if (roles == null || permissions == null) {
-			logger.warn("Update not performed. roles or permissions is null.");
 			return;
 		}
 

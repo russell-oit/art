@@ -274,6 +274,19 @@ Display edit user page
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="col-md-4 control-label " for="roles">
+						<spring:message code="page.text.roles"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="roles" items="${roles}" multiple="true" 
+									 itemLabel="name" itemValue="roleId" 
+									 class="form-control selectpicker"
+									 data-actions-box="true"
+									 />
+						<form:errors path="roles" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">
 							<spring:message code="page.button.save"/>

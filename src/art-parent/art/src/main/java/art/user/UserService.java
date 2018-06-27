@@ -26,6 +26,8 @@ import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.usergroupmembership.UserGroupMembershipService2;
 import art.general.ActionResult;
+import art.role.Role;
+import art.role.RoleService;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -67,16 +69,19 @@ public class UserService {
 	private final UserGroupService userGroupService;
 	private final ReportGroupService reportGroupService;
 	private final UserGroupMembershipService2 userGroupMembershipService2;
+	private final RoleService roleService;
 
 	@Autowired
 	public UserService(DbService dbService, UserGroupService userGroupService,
 			ReportGroupService reportGroupService,
-			UserGroupMembershipService2 userGroupMembershipService2) {
+			UserGroupMembershipService2 userGroupMembershipService2,
+			RoleService roleService) {
 
 		this.dbService = dbService;
 		this.userGroupService = userGroupService;
 		this.reportGroupService = reportGroupService;
 		this.userGroupMembershipService2 = userGroupMembershipService2;
+		this.roleService = roleService;
 	}
 
 	public UserService() {
@@ -84,6 +89,7 @@ public class UserService {
 		userGroupService = new UserGroupService();
 		reportGroupService = new ReportGroupService();
 		userGroupMembershipService2 = new UserGroupMembershipService2();
+		roleService = new RoleService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
@@ -126,6 +132,9 @@ public class UserService {
 
 			List<UserGroup> userGroups = userGroupService.getUserGroupsForUser(user.getUserId());
 			user.setUserGroups(userGroups);
+
+			List<Role> roles = roleService.getRolesForUser(user.getUserId());
+			user.setRoles(roles);
 
 			return type.cast(user);
 		}
@@ -338,13 +347,13 @@ public class UserService {
 
 		sql = "DELETE FROM ART_LOGGED_IN_USERS WHERE USER_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_SAVED_PARAMETERS WHERE USER_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_PARAM_DEFAULTS WHERE USER_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_FIXED_PARAM_VAL WHERE USER_ID=?";
 		dbService.update(sql, id);
 

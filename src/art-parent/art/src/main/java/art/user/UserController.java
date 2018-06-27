@@ -26,6 +26,8 @@ import art.usergroup.UserGroupService;
 import art.usergroupmembership.UserGroupMembershipService2;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
+import art.role.RoleService;
+import art.userrole.UserRoleService;
 import art.utils.ArtHelper;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -80,6 +82,12 @@ public class UserController {
 
 	@Autowired
 	private MessageSource messageSource;
+
+	@Autowired
+	private RoleService roleService;
+	
+	@Autowired
+	private UserRoleService userRoleService;
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
@@ -334,6 +342,7 @@ public class UserController {
 
 			try {
 				userGroupMembershipService2.recreateUserGroupMemberships(user);
+				userRoleService.recreateUserRoles(user);
 
 				if (user.isGenerateAndSend()) {
 					boolean newAccount;
@@ -418,6 +427,7 @@ public class UserController {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
 			model.addAttribute("accessLevels", getAccessLevels(session));
+			model.addAttribute("roles", roleService.getAllRoles());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

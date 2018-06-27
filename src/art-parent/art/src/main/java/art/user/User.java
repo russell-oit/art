@@ -21,6 +21,7 @@ import art.encryption.PasswordUtils;
 import art.enums.AccessLevel;
 import art.migration.PrefixTransformer;
 import art.reportgroup.ReportGroup;
+import art.role.Role;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -62,6 +63,7 @@ public class User implements Serializable {
 	private Date creationDate;
 	private Date updateDate;
 	private List<UserGroup> userGroups;
+	private List<Role> roles;
 	private String effectiveStartReport;
 	@JsonIgnore
 	private ReportGroup effectiveDefaultReportGroup;
@@ -73,6 +75,20 @@ public class User implements Serializable {
 	private boolean clearTextPassword; //used to allow import with clear text passwords
 	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
+
+	/**
+	 * @return the roles
+	 */
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * @param roles the roles to set
+	 */
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
+	}
 
 	/**
 	 * @return the clearTextPassword

@@ -132,7 +132,7 @@ public class UserGroupMembershipController {
 	public @ResponseBody
 	AjaxResponse updateUserGroupMembership(Model model, @RequestParam("action") String action,
 			@RequestParam("users[]") String[] users,
-			@RequestParam(value = "userGroups[]", required = false) Integer[] userGroups) {
+			@RequestParam("userGroups[]") Integer[] userGroups) {
 
 		//jquery ajax post appends [] to parameter name where data is an array
 		//https://stackoverflow.com/questions/17627056/how-to-pass-multiple-request-parameters-in-spring
