@@ -59,7 +59,7 @@ public class UserGroupRoleService {
 	 * @param userGroup the user group
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
 	public void recreateUserGroupRoles(UserGroup userGroup) throws SQLException {
 		logger.debug("Entering recreateUserGroupRoles: userGroup={}", userGroup);
 
@@ -75,7 +75,7 @@ public class UserGroupRoleService {
 	 * @param userGroupId the user group id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
 	public void deleteAllRolesForUserGroup(int userGroupId) throws SQLException {
 		logger.debug("Entering deleteAllRolesForUserGroup: userGroupId={}", userGroupId);
 
@@ -90,7 +90,7 @@ public class UserGroupRoleService {
 	 * @param roles the roles
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
 	public void addUserGroupRoles(int userGroupId, List<Role> roles) throws SQLException {
 		logger.debug("Entering addUserGroupRoles: userGroupId={}", userGroupId);
 
@@ -116,7 +116,7 @@ public class UserGroupRoleService {
 	 * @param roles role ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
 	public void updateUserGroupRoles(String action, Integer[] userGroups, Integer[] roles) throws SQLException {
 		logger.debug("Entering updateUserGroupRoles: action='{}'", action);
 

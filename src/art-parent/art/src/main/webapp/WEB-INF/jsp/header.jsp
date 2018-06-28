@@ -273,7 +273,7 @@ Header that appears at the top of all pages, except the login and logs pages
 							</ul>
 						</li>
 					</c:if>
-					<c:if test="${sessionUser.accessLevel.value >= 80}">
+					<c:if test="${sessionUser.hasPermission('view_logs')}">
 						<li>
 							<a href="${pageContext.request.contextPath}/logs">
 								<i class="fa fa-bars"></i> 

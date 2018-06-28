@@ -75,7 +75,7 @@ public class RolePermissionService {
 	 * @param roleId the role id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
 	public void deleteAllPermissionsForRole(int roleId) throws SQLException {
 		logger.debug("Entering deleteAllPermissionsForRole: roleId={}", roleId);
 
@@ -90,7 +90,7 @@ public class RolePermissionService {
 	 * @param permissions the permissions
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
 	public void addRolePermissions(int roleId, List<Permission> permissions) throws SQLException {
 		logger.debug("Entering addRolePermissions: roleId={}", roleId);
 
@@ -116,7 +116,7 @@ public class RolePermissionService {
 	 * @param permissions permission ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
 	public void updateRolePermissions(String action, Integer[] roles, Integer[] permissions) throws SQLException {
 		logger.debug("Entering updateRolePermissions: action='{}'", action);
 

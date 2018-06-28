@@ -326,7 +326,7 @@ public class UserGroupService {
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "userGroups", allEntries = true)
+	@CacheEvict(value = {"userGroups", "users"}, allEntries = true)
 	public void updateUserGroup(UserGroup group, User actionUser) throws SQLException {
 		logger.debug("Entering updateUserGroup: group={}, actionUser={}", group, actionUser);
 

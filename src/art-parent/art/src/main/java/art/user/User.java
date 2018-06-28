@@ -80,7 +80,7 @@ public class User implements Serializable {
 	private List<Role> roles;
 	private List<Permission> permissions;
 	@JsonIgnore
-	private List<String> flatPermissions;
+	private List<String> flatPermissions = new ArrayList<>();
 
 	/**
 	 * @return the permissions
@@ -555,8 +555,7 @@ public class User implements Serializable {
 	 * Creates a list of all permissions that this user has
 	 */
 	public void prepareFlatPermissions() {
-		flatPermissions = null;
-		flatPermissions = new ArrayList<>();
+		flatPermissions.clear();
 
 		if (CollectionUtils.isNotEmpty(permissions)) {
 			for (Permission permission : permissions) {

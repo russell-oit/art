@@ -333,7 +333,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			}
 		} else if (StringUtils.equals(page, "logs")) {
 			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+			if (user.hasPermission("view_logs")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "users") || StringUtils.endsWith(page, "User")
