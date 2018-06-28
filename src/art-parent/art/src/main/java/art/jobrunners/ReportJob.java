@@ -2975,9 +2975,9 @@ public class ReportJob implements org.quartz.Job {
 		ReportRunner reportRunner = new ReportRunner();
 		reportRunner.setUser(user);
 		reportRunner.setReport(report);
+		reportRunner.setJob(job);
 
 		return reportRunner;
-
 	}
 
 	/**

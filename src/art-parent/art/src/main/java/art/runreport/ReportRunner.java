@@ -23,6 +23,7 @@ import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.enums.ReportType;
+import art.job.Job;
 import art.report.Report;
 import art.reportoptions.GeneralReportOptions;
 import art.reportparameter.ReportParameter;
@@ -100,9 +101,24 @@ public class ReportRunner {
 	private boolean postgreSqlFetchSizeApplied;
 	private final String QUESTION_PLACEHOLDER = "[ART_QUESTION_MARK_PLACEHOLDER]";
 	private Object groovyData;
+	private Job job;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the job
+	 */
+	public Job getJob() {
+		return job;
+	}
+
+	/**
+	 * @param job the job to set
+	 */
+	public void setJob(Job job) {
+		this.job = job;
 	}
 
 	/**
@@ -1473,9 +1489,7 @@ public class ReportRunner {
 		//replace :USERNAME: with currently logged in user's username
 		if (user != null) {
 			String username = user.getUsername();
-			String searchString = ":username:";
-			String replaceString = "'" + username + "'";
-			querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
+			querySql = StringUtils.replaceIgnoreCase(querySql, ":username:", "'" + username + "'");
 		}
 
 		//replace :DATE: with current date
@@ -1483,12 +1497,20 @@ public class ReportRunner {
 
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(ArtUtils.ISO_DATE_FORMAT);
 		String date = dateFormatter.format(now);
-		querySql = querySql.replaceAll("(?iu):date:", "'" + date + "'"); //postgresql has casting syntax like ::date
+		querySql = StringUtils.replaceIgnoreCase(querySql, ":date:", "'" + date + "'"); //postgresql has casting syntax like ::date
 
 		//replace :TIME: with current date and time
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT);
 		String time = timeFormatter.format(now);
-		querySql = querySql.replaceAll("(?iu):time:", "'" + time + "'");
+		querySql = StringUtils.replaceIgnoreCase(querySql, ":time:", "'" + time + "'");
+
+		//replace :reportId:
+		querySql = StringUtils.replace(querySql,  ":reportId:", String.valueOf(report.getReportId()));
+
+		//replace :jobId:
+		if (job != null) {
+			querySql = StringUtils.replace(querySql, ":jobId:", String.valueOf(job.getJobId()));
+		}
 
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
