@@ -678,14 +678,6 @@ public class UserService {
 		logger.debug("Entering saveUser: user={}, newRecordId={}, actionUser={}",
 				user, newRecordId, actionUser);
 
-		//set values for possibly null property objects
-		int accessLevel;
-		if (user.getAccessLevel() == null) {
-			accessLevel = 0;
-		} else {
-			accessLevel = user.getAccessLevel().getValue();
-		}
-
 		Integer defaultReportGroupId = null;
 		if (user.getDefaultReportGroup() != null) {
 			defaultReportGroupId = user.getDefaultReportGroup().getReportGroupId();
@@ -704,9 +696,9 @@ public class UserService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_USERS"
 					+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
-					+ " FULL_NAME, EMAIL, ACCESS_LEVEL, DEFAULT_QUERY_GROUP,"
+					+ " FULL_NAME, EMAIL, DEFAULT_QUERY_GROUP,"
 					+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -715,7 +707,6 @@ public class UserService {
 				user.getPasswordAlgorithm(),
 				user.getFullName(),
 				user.getEmail(),
-				accessLevel,
 				defaultReportGroupId,
 				user.getStartReport(),
 				BooleanUtils.toInteger(user.isCanChangePassword()),
@@ -732,7 +723,7 @@ public class UserService {
 		} else {
 			String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 					+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
-					+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
+					+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
 					+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE USER_ID=?";
 
@@ -742,7 +733,6 @@ public class UserService {
 				user.getPasswordAlgorithm(),
 				user.getFullName(),
 				user.getEmail(),
-				accessLevel,
 				defaultReportGroupId,
 				user.getStartReport(),
 				BooleanUtils.toInteger(user.isCanChangePassword()),

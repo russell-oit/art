@@ -331,5 +331,5 @@ public class PermissionService {
 		ResultSetHandler<List<Permission>> h = new BeanListHandler<>(Permission.class, new PermissionMapper());
 		return dbService.query(sql, h, userGroupId);
 	}
-
+	
 }

@@ -15,76 +15,67 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.permission;
+package art.userpermission;
 
 import art.general.AjaxResponse;
-import art.role.RoleService;
 import art.user.UserService;
-import art.usergroup.UserGroupService;
 import java.sql.SQLException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * Controller for permission configuration
+ * Controller for user permission display
  *
  * @author Timothy Anyona
  */
 @Controller
-public class PermissionController {
+public class UserPermissionController {
 
-	private static final Logger logger = LoggerFactory.getLogger(PermissionController.class);
-
-	@Autowired
-	private PermissionService permissionService;
+	private static final Logger logger = LoggerFactory.getLogger(UserPermissionController.class);
 
 	@Autowired
 	private UserService userService;
 
 	@Autowired
-	private UserGroupService userGroupService;
+	private UserPermissionService userPermissionService;
 
-	@Autowired
-	private RoleService roleService;
-
-	@RequestMapping(value = "/permissionsConfig", method = RequestMethod.GET)
-	public String showPermissionsConfig(Model model) {
-		logger.debug("Entering showPermissionsConfig");
+	@GetMapping("/userPermissions")
+	public String showUserPermissions(Model model, @RequestParam("userId") Integer userId) {
+		logger.debug("Entering showUserPermissions: userId={}", userId);
 
 		try {
-			model.addAttribute("users", userService.getAllUsers());
-			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
-			model.addAttribute("roles", roleService.getAllRoles());
-			model.addAttribute("permissions", permissionService.getAllPermissions());
+			model.addAttribute("user", userService.getUser(userId));
+			model.addAttribute("userPermissions", userPermissionService.getUserPermissionsForUser(userId));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return "permissionsConfig";
+		return "userPermissions";
 	}
 
-	@RequestMapping(value = "/updatePermissions", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteUserPermission", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse updatePermissions(Model model, @RequestParam("action") String action,
-			@RequestParam(value = "users[]", required = false) Integer[] users,
-			@RequestParam(value = "userGroups[]", required = false) Integer[] userGroups,
-			@RequestParam(value = "roles[]", required = false) Integer[] roles,
-			@RequestParam(value = "permissions[]", required = false) Integer[] permissions) {
-
-		logger.debug("Entering updatePermissions: action='{}'", action);
+	AjaxResponse deleteUserPermission(@RequestParam("id") String id) {
+		logger.debug("Entering deleteUserPermission: id='{}'", id);
 
 		AjaxResponse response = new AjaxResponse();
 
+		//id format = <user id>-<permission id>
+		String[] values = StringUtils.split(id, "-");
+
 		try {
-			permissionService.updatePermissions(action, users, userGroups, roles, permissions);
+			userPermissionService.deleteUserPermission(NumberUtils.toInt(values[0]), NumberUtils.toInt(values[1]));
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

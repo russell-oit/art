@@ -245,6 +245,12 @@ Display user configuration page
 											<spring:message code="page.action.accessRights"/>
 										</a>
 									</li>
+									<li>
+										<a 
+											href="${pageContext.request.contextPath}/userPermissions?userId=${user.userId}">
+											<spring:message code="page.text.permissions"/>
+										</a>
+									</li>
 								</ul>
 							</div>
 						</td>

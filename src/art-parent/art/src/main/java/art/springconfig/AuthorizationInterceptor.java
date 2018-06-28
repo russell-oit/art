@@ -524,7 +524,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				|| StringUtils.equals(page, "rolePermissionsConfig")
 				|| StringUtils.equals(page, "updateRolePermissions")
 				|| StringUtils.equals(page, "permissionsConfig")
-				|| StringUtils.endsWith(page, "Permissions")) {
+				|| StringUtils.endsWith(page, "Permissions")
+				|| StringUtils.endsWith(page, "Permission")) {
 			//standard admins and above
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;

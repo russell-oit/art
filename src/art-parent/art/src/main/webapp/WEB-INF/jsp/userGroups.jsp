@@ -228,6 +228,12 @@ Display user groups
 											<spring:message code="page.action.accessRights"/>
 										</a>
 									</li>
+									<li>
+										<a 
+											href="${pageContext.request.contextPath}/userGroupPermissions?userGroupId=${group.userGroupId}">
+											<spring:message code="page.text.permissions"/>
+										</a>
+									</li>
 								</ul>
 							</div>
 						</td>

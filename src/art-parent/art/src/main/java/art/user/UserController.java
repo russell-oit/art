@@ -85,7 +85,7 @@ public class UserController {
 
 	@Autowired
 	private RoleService roleService;
-	
+
 	@Autowired
 	private UserRoleService userRoleService;
 
@@ -246,15 +246,7 @@ public class UserController {
 
 		model.addAttribute("multipleUserEdit", multipleUserEdit);
 
-		try {
-			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
-			model.addAttribute("accessLevels", getAccessLevels(session));
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return "editUsers";
+		return showEditUsers(model);
 	}
 
 	@RequestMapping(value = "/saveUser", method = RequestMethod.POST)
@@ -378,7 +370,7 @@ public class UserController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditUsers();
+			return showEditUsers(model);
 		}
 
 		try {
@@ -408,7 +400,7 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditUsers();
+		return showEditUsers(model);
 	}
 
 	/**
@@ -444,8 +436,15 @@ public class UserController {
 	 *
 	 * @return returns the jsp file to display
 	 */
-	private String showEditUsers() {
+	private String showEditUsers(Model model) {
 		logger.debug("Entering showEditUsers");
+
+		try {
+			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
 
 		return "editUsers";
 	}
