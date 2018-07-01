@@ -234,8 +234,13 @@ public class UpgradeHelper {
 	 * @param templatesPath the path to the templates directory
 	 */
 	private void upgradeDatabase(String templatesPath) {
-		upgradeDatabaseTo30(templatesPath);
-		upgradeDatabaseTo31();
+		try {
+			upgradeDatabaseTo30(templatesPath);
+			upgradeDatabaseTo31();
+			upgradeDatabaseTo38();
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 	}
 
 	/**
@@ -243,67 +248,59 @@ public class UpgradeHelper {
 	 *
 	 * @param templatesPath the path to the templates directory
 	 */
-	private void upgradeDatabaseTo30(String templatesPath) {
-		try {
-			String databaseVersionString = "3.0";
-			String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
-			ResultSetHandler<Number> h = new ScalarHandler<>();
-			Number upgradedValue = dbService.query(sql, h, databaseVersionString);
-			if (upgradedValue == null || upgradedValue.intValue() == 1) {
-				return;
-			}
-
-			logger.info("Performing 3.0 upgrade steps");
-
-			addUserIds();
-			addScheduleIds();
-			addDrilldownIds();
-			addRuleIds();
-			addQueryRuleIds();
-			addParameters();
-			addUserRuleValueKeys();
-			addUserGroupRuleValueKeys();
-			addCachedDatasourceIds();
-			updateDatasourcePasswords();
-
-			sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
-			dbService.update(sql, databaseVersionString);
-
-			logger.info("Done performing 3.0 upgrade steps");
-
-			deleteDotJasperFiles(templatesPath);
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
+	private void upgradeDatabaseTo30(String templatesPath) throws SQLException {
+		String databaseVersionString = "3.0";
+		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number upgradedValue = dbService.query(sql, h, databaseVersionString);
+		if (upgradedValue == null || upgradedValue.intValue() == 1) {
+			return;
 		}
+
+		logger.info("Performing 3.0 upgrade steps");
+
+		addUserIds();
+		addScheduleIds();
+		addDrilldownIds();
+		addRuleIds();
+		addQueryRuleIds();
+		addParameters();
+		addUserRuleValueKeys();
+		addUserGroupRuleValueKeys();
+		addCachedDatasourceIds();
+		updateDatasourcePasswords();
+
+		sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
+		dbService.update(sql, databaseVersionString);
+
+		logger.info("Done performing 3.0 upgrade steps");
+
+		deleteDotJasperFiles(templatesPath);
 	}
 
 	/**
 	 * Upgrades the database to 3.1
 	 *
 	 */
-	private void upgradeDatabaseTo31() {
-		try {
-			String databaseVersionString = "3.1";
-			String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
-			ResultSetHandler<Number> h = new ScalarHandler<>();
-			Number upgradedValue = dbService.query(sql, h, databaseVersionString);
-			if (upgradedValue == null || upgradedValue.intValue() == 1) {
-				return;
-			}
-
-			logger.info("Performing 3.1 upgrade steps");
-
-			populateReportSourceColumn();
-			populateReportReportGroupsTable();
-			populateDestinationsTable();
-
-			sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
-			dbService.update(sql, databaseVersionString);
-
-			logger.info("Done performing 3.1 upgrade steps");
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
+	private void upgradeDatabaseTo31() throws SQLException {
+		String databaseVersionString = "3.1";
+		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number upgradedValue = dbService.query(sql, h, databaseVersionString);
+		if (upgradedValue == null || upgradedValue.intValue() == 1) {
+			return;
 		}
+
+		logger.info("Performing 3.1 upgrade steps");
+
+		populateReportSourceColumn();
+		populateReportReportGroupsTable();
+		populateDestinationsTable();
+
+		sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
+		dbService.update(sql, databaseVersionString);
+
+		logger.info("Done performing 3.1 upgrade steps");
 	}
 
 	/**
@@ -911,4 +908,63 @@ public class UpgradeHelper {
 			}
 		}
 	}
+
+	/**
+	 * Upgrades the database to 3.8
+	 *
+	 */
+	private void upgradeDatabaseTo38() throws SQLException {
+		String databaseVersionString = "3.8";
+		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number upgradedValue = dbService.query(sql, h, databaseVersionString);
+		if (upgradedValue == null || upgradedValue.intValue() == 1) {
+			return;
+		}
+
+		logger.info("Performing 3.8 upgrade steps");
+
+		populateUserRolesTable();
+
+		sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
+		dbService.update(sql, databaseVersionString);
+
+		logger.info("Done performing 3.8 upgrade steps");
+	}
+
+	/**
+	 * Populates the user roles table. Table added in 3.8
+	 *
+	 * @throws SQLException
+	 */
+	private void populateUserRolesTable() throws SQLException {
+		logger.debug("Entering populateUserRolesTable");
+
+		String sql;
+
+		sql = "INSERT INTO ART_USER_ROLE_MAP (USER_ID, ROLE_ID) SELECT USER_ID, ACCESS_LEVEL FROM ART_USERS";
+		dbService.update(sql);
+
+		sql = "UPDATE ART_USER_ROLE_MAP SET ROLE_ID=1 WHERE ROLE_ID=0";
+		dbService.update(sql);
+
+		sql = "UPDATE ART_USER_ROLE_MAP SET ROLE_ID=2 WHERE ROLE_ID=5";
+		dbService.update(sql);
+
+		sql = "UPDATE ART_USER_ROLE_MAP SET ROLE_ID=3 WHERE ROLE_ID=10";
+		dbService.update(sql);
+
+		sql = "UPDATE ART_USER_ROLE_MAP SET ROLE_ID=4 WHERE ROLE_ID=30";
+		dbService.update(sql);
+
+		sql = "UPDATE ART_USER_ROLE_MAP SET ROLE_ID=5 WHERE ROLE_ID=40";
+		dbService.update(sql);
+
+		sql = "UPDATE ART_USER_ROLE_MAP SET ROLE_ID=6 WHERE ROLE_ID=80";
+		dbService.update(sql);
+
+		sql = "UPDATE ART_USER_ROLE_MAP SET ROLE_ID=7 WHERE ROLE_ID=100";
+		dbService.update(sql);
+	}
+
 }

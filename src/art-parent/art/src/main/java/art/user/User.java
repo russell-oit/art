@@ -652,4 +652,15 @@ public class User implements Serializable {
 		return hasPermission;
 	}
 
+	/**
+	 * Sets permissions for the initial setup or repository user
+	 */
+	public void buildSetupUserPermissions(){
+		flatPermissions.clear();
+		
+		flatPermissions.addAll(Arrays.asList("configure_users",
+				"configure_art_database", "configure_roles",
+				"configure_role_permissions"));
+	}
+
 }

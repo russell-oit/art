@@ -20,7 +20,7 @@ Admin rights configuration page
 <spring:message code="page.message.rightsGranted" var="rightsGrantedText"/>
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 <spring:message code="adminRights.message.selectAdmin" var="selectAdminText"/>
-<spring:message code="adminRights.message.selectDatasourceOrGroup" var="selectDatasourceOrGroupText"/>
+<spring:message code="adminRights.message.selectDatasourceOrReportGroup" var="selectDatasourceOrReportGroupText"/>
 <spring:message code="page.text.available" var="availableText"/>
 <spring:message code="page.text.selected" var="selectedText"/>
 <spring:message code="page.text.search" var="searchText"/>
@@ -92,7 +92,7 @@ Admin rights configuration page
 						return;
 					}
 					if (datasources === null && reportGroups === null) {
-						bootbox.alert("${selectDatasourceOrGroupText}");
+						bootbox.alert("${selectDatasourceOrReportGroupText}");
 						return;
 					}
 
