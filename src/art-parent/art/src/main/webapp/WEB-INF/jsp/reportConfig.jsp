@@ -78,7 +78,7 @@
 							<spring:message code="reports.action.drilldowns"/>
 						</a>
 					</div>
-					<c:if test="${report.reportType.canSchedule()}">
+					<c:if test="${report.reportType.canSchedule() && sessionUser.hasPermission('schedule_jobs')}">
 						<div class="btn-group">
 							<a class="btn btn-default"
 							   href="${pageContext.request.contextPath}/addJob?reportId=${report.reportId}&nextPage=jobsConfig">

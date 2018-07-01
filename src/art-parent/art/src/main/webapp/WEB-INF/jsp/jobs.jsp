@@ -195,8 +195,8 @@ Display user jobs and jobs configuration
 									result = result + '</p>';
 								}
 
-								var accessLevel = ${sessionUser.accessLevel.value};
-								if (accessLevel >= 80) {
+								var hasConfigureJobsPermission = ${sessionUser.hasPermission('configure_jobs')};
+								if (hasConfigureJobsPermission) {
 									result = result + '<p><br><a type="application/octet-stream" ';
 									result = result + 'href="${pageContext.request.contextPath}/export/jobLogs/' + job.jobId + '.log">';
 									result = result + 'log</a></p>';
@@ -411,7 +411,7 @@ Display user jobs and jobs configuration
 									${job.lastRunDetails}
 								</p>
 							</c:if>
-							<c:if test="${sessionUser.accessLevel.value >= 80}">
+							<c:if test="${sessionUser.hasPermission('configure_jobs')}">
 								<p><br>
 									<a type="application/octet-stream" 
 									   href="${pageContext.request.contextPath}/export/jobLogs/${job.jobId}.log">

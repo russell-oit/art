@@ -22,22 +22,24 @@
 <spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
 
 
-<div class="row form-inline" style="margin-right: 1px; margin-bottom: 5px">
-	<span class="pull-right">
-		<a class="btn btn-default" id="link-${outputDivId}" style="display: none"
-		   href="">
-			<spring:message code="reports.link.newReport"/>
-		</a>
-		<c:if test="${exclusiveAccess}">
-			<button class="btn btn-default" id="delete-${outputDivId}">
-				<spring:message code="page.action.delete"/>
+<c:if test="${sessionUser.hasPermission('save_reports')}">
+	<div class="row form-inline" style="margin-right: 1px; margin-bottom: 5px">
+		<span class="pull-right">
+			<a class="btn btn-default" id="link-${outputDivId}" style="display: none"
+			   href="">
+				<spring:message code="reports.link.newReport"/>
+			</a>
+			<c:if test="${exclusiveAccess}">
+				<button class="btn btn-default" id="delete-${outputDivId}">
+					<spring:message code="page.action.delete"/>
+				</button>
+			</c:if>
+			<button class="btn btn-primary" id="save-${outputDivId}">
+				<spring:message code="page.button.save"/>
 			</button>
-		</c:if>
-		<button class="btn btn-primary" id="save-${outputDivId}">
-			<spring:message code="page.button.save"/>
-		</button>
-	</span>
-</div>
+		</span>
+	</div>
+</c:if>
 
 <div id="${outputDivId}" class='pivotTableJsOutputDiv'>
 

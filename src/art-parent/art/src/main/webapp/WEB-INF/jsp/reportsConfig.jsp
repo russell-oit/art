@@ -1015,7 +1015,7 @@ Reports configuration page
 							<spring:message code="page.action.refresh"/>
 						</button>
 					</div>
-					<c:if test="${sessionUser.accessLevel.value >= 80}">
+					<c:if test="${sessionUser.hasPermission('migrate_records')}">
 						<div class="btn-group">
 							<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Reports">
 								<spring:message code="page.text.import"/>
@@ -1107,19 +1107,23 @@ Reports configuration page
 													<spring:message code="reports.action.drilldowns"/>
 												</a>
 											</li>
+											<c:if test="${sessionUser.hasPermission('configure_access_rights')}">
 											<li>
 												<a id="reportAccessRightsLink"
 												   href="">
 													<spring:message code="page.action.accessRights"/>
 												</a>
 											</li>
+											</c:if>
 											<li class="divider"></li>
-											<li id='scheduleItem'>
-												<a id="addJobLink"
-												   href="">
-													<spring:message code="reports.action.schedule"/>
-												</a>
-											</li>
+												<c:if test="${sessionUser.hasPermission('schedule_jobs')}">
+												<li id='scheduleItem'>
+													<a id="addJobLink"
+													   href="">
+														<spring:message code="reports.action.schedule"/>
+													</a>
+												</li>
+											</c:if>
 											<li id='previewItem'>
 												<a id="selectReportParametersLink"
 												   href="">

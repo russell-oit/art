@@ -30,6 +30,7 @@ import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
@@ -600,7 +601,7 @@ public class User implements Serializable {
 
 	/**
 	 * Returns <code>true</code> if the user has the given permission
-	 * 
+	 *
 	 * @param permission the permission name
 	 * @return <code>true</code> if the user has the given permission
 	 */
@@ -609,6 +610,43 @@ public class User implements Serializable {
 
 		if (CollectionUtils.isNotEmpty(flatPermissions)) {
 			hasPermission = flatPermissions.contains(permission);
+		}
+
+		return hasPermission;
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has any of the given permissions
+	 *
+	 * @param permissions the permission name
+	 * @return <code>true</code> if the user has any of the given permissions
+	 */
+	public boolean hasAnyPermission(String... permissions) {
+		boolean hasPermission = false;
+
+		if (CollectionUtils.isNotEmpty(flatPermissions) && permissions != null) {
+			List<String> permissionsList = Arrays.asList(permissions);
+			hasPermission = CollectionUtils.containsAny(flatPermissions, permissionsList);
+		}
+
+		return hasPermission;
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has any configure permission
+	 *
+	 * @return <code>true</code> if the user has any configure permission
+	 */
+	public boolean hasConfigurePermission() {
+		boolean hasPermission = false;
+
+		if (CollectionUtils.isNotEmpty(flatPermissions)) {
+			for (String permission : flatPermissions) {
+				if (StringUtils.startsWith(permission, "configure")) {
+					hasPermission = true;
+					break;
+				}
+			}
 		}
 
 		return hasPermission;

@@ -31,7 +31,6 @@ import art.userrole.UserRoleService;
 import art.utils.ArtHelper;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.mail.MessagingException;
@@ -418,7 +417,6 @@ public class UserController {
 		try {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
-			model.addAttribute("accessLevels", getAccessLevels(session));
 			model.addAttribute("roles", roleService.getAllRoles());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -447,40 +445,6 @@ public class UserController {
 		}
 
 		return "editUsers";
-	}
-
-	/**
-	 * Returns the relevant access levels to be used in the edit user page
-	 *
-	 * @param session the http session
-	 * @return the access levels to be used
-	 */
-	private List<AccessLevel> getAccessLevels(HttpSession session) {
-		logger.debug("Entering getAccessLevels");
-
-		List<AccessLevel> levels = new ArrayList<>();
-
-		//add only relevant levels according to the session user access level
-		//to ensure admin can't give himself a higher level
-		levels.add(AccessLevel.NormalUser);
-		levels.add(AccessLevel.ScheduleUser);
-		levels.add(AccessLevel.JuniorAdmin);
-		levels.add(AccessLevel.MidAdmin);
-		levels.add(AccessLevel.StandardAdmin);
-
-		//only standard admins and above and the repository user can edit users
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
-		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SeniorAdmin.getValue()
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
-			levels.add(AccessLevel.SeniorAdmin);
-		}
-		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SuperAdmin.getValue()
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
-			levels.add(AccessLevel.SuperAdmin);
-		}
-
-		return levels;
 	}
 
 	/**

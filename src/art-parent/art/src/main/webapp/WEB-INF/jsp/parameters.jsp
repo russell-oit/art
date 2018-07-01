@@ -155,7 +155,7 @@ Display parameters
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<c:if test="${sessionUser.accessLevel.value >= 80}">
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
 				<div class="btn-group">
 					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Parameters">
 						<spring:message code="page.text.import"/>

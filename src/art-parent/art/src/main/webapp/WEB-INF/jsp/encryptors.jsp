@@ -118,7 +118,7 @@
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 				$('#exportRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
@@ -173,14 +173,16 @@
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<div class="btn-group">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Encryptors">
-					<spring:message code="page.text.import"/>
-				</a>
-				<button type="button" id="exportRecords" class="btn btn-default">
-					<spring:message code="page.text.export"/>
-				</button>
-			</div>
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
+				<div class="btn-group">
+					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Encryptors">
+						<spring:message code="page.text.import"/>
+					</a>
+					<button type="button" id="exportRecords" class="btn btn-default">
+						<spring:message code="page.text.export"/>
+					</button>
+				</div>
+			</c:if>
 		</div>
 
 		<table id="encryptors" class="table table-bordered table-striped table-condensed">

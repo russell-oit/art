@@ -778,7 +778,7 @@
 							<spring:message code="jobs.label.mailFrom"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailFrom" readonly="${sessionUser.accessLevel.value >= 80 ? 'false' : 'true'}" class="form-control"/>
+							<form:input path="mailFrom" readonly="${sessionUser.hasPermission('configure_jobs') ? 'false' : 'true'}" class="form-control"/>
 							<form:errors path="mailFrom" cssClass="error"/>
 						</div>
 					</div>

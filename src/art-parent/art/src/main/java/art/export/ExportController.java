@@ -17,7 +17,6 @@
  */
 package art.export;
 
-import art.enums.AccessLevel;
 import art.report.ReportService;
 import art.servlets.Config;
 import art.user.User;
@@ -72,9 +71,8 @@ public class ExportController {
 		logger.debug("Entering serveJobLogFile: filename='{}'", filename);
 
 		try {
-			//only allow senior admins and above to view job log files
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (sessionUser.getAccessLevel().getValue() < AccessLevel.SeniorAdmin.getValue()) {
+			if (!sessionUser.hasPermission("configure_jobs")) {
 				request.getRequestDispatcher("/accessDenied").forward(request, response);
 				return;
 			}
@@ -96,9 +94,8 @@ public class ExportController {
 		logger.debug("Entering serveRecordsExportFile: filename='{}'", filename);
 
 		try {
-			//only allow senior admins and above to view records export files
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (sessionUser.getAccessLevel().getValue() < AccessLevel.SeniorAdmin.getValue()) {
+			if (!sessionUser.hasPermission("migrate_records")) {
 				request.getRequestDispatcher("/accessDenied").forward(request, response);
 				return;
 			}

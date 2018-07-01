@@ -156,7 +156,7 @@ Display user groups
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<c:if test="${sessionUser.accessLevel.value >= 80}">
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
 				<div class="btn-group">
 					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=UserGroups">
 						<spring:message code="page.text.import"/>
@@ -216,24 +216,30 @@ Display user groups
 									<span class="caret"></span>
 								</button>
 								<ul class="dropdown-menu">
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/userGroupUserGroupMembership?userGroupId=${group.userGroupId}">
-											<spring:message code="page.text.users"/>
-										</a>
-									</li>
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/userGroupAccessRights?userGroupId=${group.userGroupId}">
-											<spring:message code="page.action.accessRights"/>
-										</a>
-									</li>
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/userGroupPermissions?userGroupId=${group.userGroupId}">
-											<spring:message code="page.text.permissions"/>
-										</a>
-									</li>
+									<c:if test="${sessionUser.hasPermission('configure_user_group_membership')}">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/userGroupUserGroupMembership?userGroupId=${group.userGroupId}">
+												<spring:message code="page.text.users"/>
+											</a>
+										</li>
+									</c:if>
+									<c:if test="${sessionUser.hasPermission('configure_access_rights')}">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/userGroupAccessRights?userGroupId=${group.userGroupId}">
+												<spring:message code="page.action.accessRights"/>
+											</a>
+										</li>
+									</c:if>
+									<c:if test="${sessionUser.hasPermission('configure_permissions')}">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/userGroupPermissions?userGroupId=${group.userGroupId}">
+												<spring:message code="page.text.permissions"/>
+											</a>
+										</li>
+									</c:if>
 								</ul>
 							</div>
 						</td>

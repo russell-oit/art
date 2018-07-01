@@ -156,14 +156,16 @@ Display schedules
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<div class="btn-group">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Schedules">
-					<spring:message code="page.text.import"/>
-				</a>
-				<button type="button" id="exportRecords" class="btn btn-default">
-					<spring:message code="page.text.export"/>
-				</button>
-			</div>
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
+				<div class="btn-group">
+					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Schedules">
+						<spring:message code="page.text.import"/>
+					</a>
+					<button type="button" id="exportRecords" class="btn btn-default">
+						<spring:message code="page.text.export"/>
+					</button>
+				</div>
+			</c:if>
 		</div>
 
 		<table id="schedules" class="table table-bordered table-striped table-condensed">

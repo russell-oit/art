@@ -203,22 +203,24 @@ Display rules
 									<spring:message code="page.action.copy"/>
 								</a>
 							</div>
-							<div class="btn-group">
-								<button type="button" class="btn btn-default dropdown-toggle"
-										data-toggle="dropdown" data-hover="dropdown"
-										data-delay="100">
-									<spring:message code="reports.action.more"/>
-									<span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu">
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/ruleRuleValues?ruleId=${rule.ruleId}">
-											<spring:message code="page.title.ruleValues"/>
-										</a>
-									</li>
-								</ul>
-							</div>
+							<c:if test="${sessionUser.hasPermission('configure_rule_values')}">
+								<div class="btn-group">
+									<button type="button" class="btn btn-default dropdown-toggle"
+											data-toggle="dropdown" data-hover="dropdown"
+											data-delay="100">
+										<spring:message code="reports.action.more"/>
+										<span class="caret"></span>
+									</button>
+									<ul class="dropdown-menu">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/ruleRuleValues?ruleId=${rule.ruleId}">
+												<spring:message code="page.title.ruleValues"/>
+											</a>
+										</li>
+									</ul>
+								</div>
+							</c:if>
 						</td>
 					</tr>
 				</c:forEach>

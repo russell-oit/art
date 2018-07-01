@@ -41,7 +41,7 @@
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
@@ -75,7 +75,13 @@
 				});
 
 				toggleCanChangePasswordEnabled();
-				
+
+				$('#accessLevelUnchanged').change(function () {
+					toggleAccessLevelEnabled();
+				});
+
+				toggleAccessLevelEnabled();
+
 				$('#userGroupsUnchanged').change(function () {
 					toggleUserGroupsEnabled();
 				});
@@ -105,7 +111,15 @@
 					$('#canChangePassword').bootstrapSwitch('disabled', false);
 				}
 			}
-			
+
+			function toggleAccessLevelEnabled() {
+				if ($('#accessLevelUnchanged').is(':checked')) {
+					$('#accessLevel').prop('disabled', true);
+				} else {
+					$('#accessLevel').prop('disabled', false);
+				}
+			}
+
 			function toggleUserGroupsEnabled() {
 				if ($('#userGroupsUnchanged').is(':checked')) {
 					$('#userGroups').prop('disabled', true);
@@ -180,6 +194,23 @@
 								<spring:message code="page.checkbox.unchanged"/>
 							</label>
 						</div>
+					</div>
+				</div>
+				<div class="formgroup">
+					<label class="controllabel colmd4">
+						<spring:message code="users.label.accessLevel"/>
+					</label>
+					<div class="colmd8">
+						<form:select path="accessLevel" items="${accessLevels}"
+									 itemLabel="description" 
+									 class="formcontrol selectpicker"/>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="accessLevelUnchanged" id="accessLevelUnchanged"/>
+								<spring:message code="page.checkbox.unchanged"/>
+							</label>
+						</div>
+						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

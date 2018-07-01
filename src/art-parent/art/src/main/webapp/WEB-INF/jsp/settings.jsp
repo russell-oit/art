@@ -125,14 +125,16 @@ Settings configuration page
 					</div>
 				</c:if>
 
-				<div>
-					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Settings">
-						<spring:message code="page.text.import"/>
-					</a>
-					<a class="btn btn-default" href="${pageContext.request.contextPath}/exportRecords?type=Settings">
-						<spring:message code="page.text.export"/>
-					</a>
-				</div>
+				<c:if test="${sessionUser.hasPermission('migrate_records')}">
+					<div>
+						<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Settings">
+							<spring:message code="page.text.import"/>
+						</a>
+						<a class="btn btn-default" href="${pageContext.request.contextPath}/exportRecords?type=Settings">
+							<spring:message code="page.text.export"/>
+						</a>
+					</div>
+				</c:if>
 
 				<br>
 				<fieldset>

@@ -175,7 +175,7 @@ Display user configuration page
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<c:if test="${sessionUser.accessLevel.value >= 80}">
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
 				<div class="btn-group">
 					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Users">
 						<spring:message code="page.text.import"/>
@@ -239,18 +239,22 @@ Display user configuration page
 									<span class="caret"></span>
 								</button>
 								<ul class="dropdown-menu">
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/userAccessRights?userId=${user.userId}">
-											<spring:message code="page.action.accessRights"/>
-										</a>
-									</li>
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/userPermissions?userId=${user.userId}">
-											<spring:message code="page.text.permissions"/>
-										</a>
-									</li>
+									<c:if test="${sessionUser.hasPermission('configure_access_rights')}">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/userAccessRights?userId=${user.userId}">
+												<spring:message code="page.action.accessRights"/>
+											</a>
+										</li>
+									</c:if>
+									<c:if test="${sessionUser.hasPermission('configure_permissions')}">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/userPermissions?userId=${user.userId}">
+												<spring:message code="page.text.permissions"/>
+											</a>
+										</li>
+									</c:if>
 								</ul>
 							</div>
 						</td>
