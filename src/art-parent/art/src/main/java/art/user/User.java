@@ -659,8 +659,7 @@ public class User implements Serializable {
 		flatPermissions.clear();
 		
 		flatPermissions.addAll(Arrays.asList("configure_users",
-				"configure_art_database", "configure_roles",
-				"configure_role_permissions"));
+				"configure_art_database", "configure_roles"));
 	}
 
 }
