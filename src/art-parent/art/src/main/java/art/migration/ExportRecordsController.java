@@ -791,14 +791,40 @@ public class ExportRecordsController {
 								allUserGroups.add(userGroup);
 							}
 						}
-						if (CollectionUtils.isNotEmpty(allUserGroups)) {
+
+						List<Permission> allPermissions = new ArrayList<>();
+						for (User user : users) {
+							List<Permission> permissions = user.getPermissions();
+							for (Permission permission : permissions) {
+								permission.setParentId(user.getUserId());
+								allPermissions.add(permission);
+							}
+						}
+
+						if (CollectionUtils.isNotEmpty(allUserGroups)
+								|| CollectionUtils.isNotEmpty(allPermissions)) {
+							List<String> filesToZip = new ArrayList<>();
+							filesToZip.add(usersFilePath);
+
 							String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 							File userGroupsFile = new File(userGroupsFilePath);
-							csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
+							if (CollectionUtils.isNotEmpty(allUserGroups)) {
+								csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
+								filesToZip.add(userGroupsFilePath);
+							}
+							
+							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
+							File permissionsFile = new File(permissionsFilePath);
+							if (CollectionUtils.isNotEmpty(allPermissions)) {
+								csvRoutines.writeAll(allPermissions, Permission.class, permissionsFile);
+								filesToZip.add(permissionsFilePath);
+							}
+
 							exportFilePath = recordsExportPath + "art-export-Users.zip";
-							ArtUtils.zipFiles(exportFilePath, usersFilePath, userGroupsFilePath);
+							ArtUtils.zipFiles(exportFilePath, filesToZip);
 							usersFile.delete();
 							userGroupsFile.delete();
+							permissionsFile.delete();
 						} else {
 							exportFilePath = usersFilePath;
 						}
@@ -1399,9 +1425,7 @@ public class ExportRecordsController {
 								permissions.add(permission);
 							}
 						}
-						if (CollectionUtils.isEmpty(permissions)) {
-							exportFilePath = rolesFilePath;
-						} else {
+						if (CollectionUtils.isNotEmpty(permissions)) {
 							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 							File permissionsFile = new File(permissionsFilePath);
 							csvRoutines.writeAll(permissions, Permission.class, permissionsFile);
@@ -1409,6 +1433,8 @@ public class ExportRecordsController {
 							ArtUtils.zipFiles(exportFilePath, rolesFilePath, permissionsFilePath);
 							rolesFile.delete();
 							permissionsFile.delete();
+						} else {
+							exportFilePath = rolesFilePath;
 						}
 						break;
 					default:

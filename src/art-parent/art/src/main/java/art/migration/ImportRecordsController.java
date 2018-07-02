@@ -680,14 +680,15 @@ public class ImportRecordsController {
 						throw new IllegalStateException("File not found: " + usersFileName);
 					}
 
+					Map<Integer, User> usersMap = new HashMap<>();
+					for (User user : users) {
+						usersMap.put(user.getUserId(), user);
+					}
+
 					String userGroupsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 					File userGroupsFile = new File(userGroupsFileName);
 					if (userGroupsFile.exists()) {
 						List<UserGroup> allUserGroups = csvRoutines.parseAll(UserGroup.class, userGroupsFile);
-						Map<Integer, User> usersMap = new HashMap<>();
-						for (User user : users) {
-							usersMap.put(user.getUserId(), user);
-						}
 						for (UserGroup userGroup : allUserGroups) {
 							int parentId = userGroup.getParentId();
 							User user = usersMap.get(parentId);
@@ -703,8 +704,30 @@ public class ImportRecordsController {
 							}
 						}
 					}
+
+					String permissionsFileName = artTempPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
+					File permissionsFile = new File(permissionsFileName);
+					if (permissionsFile.exists()) {
+						List<Permission> allPermissions = csvRoutines.parseAll(Permission.class, permissionsFile);
+						for (Permission permission : allPermissions) {
+							int parentId = permission.getParentId();
+							User user = usersMap.get(parentId);
+							if (user == null) {
+								throw new IllegalStateException("User not found. Parent Id = " + parentId);
+							} else {
+								List<Permission> permissions = user.getPermissions();
+								if (permissions == null) {
+									permissions = new ArrayList<>();
+								}
+								permissions.add(permission);
+								user.setPermissions(permissions);
+							}
+						}
+					}
+
 					usersFile.delete();
 					userGroupsFile.delete();
+					permissionsFile.delete();
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}

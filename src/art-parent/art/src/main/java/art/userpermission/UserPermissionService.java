@@ -24,9 +24,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
- * Provides methods for retrieving and deleting user permissions
+ * Provides methods for retrieving, adding, updating and deleting user
+ * permissions
  *
  * @author Timothy Anyona
  */
@@ -139,6 +142,115 @@ public class UserPermissionService {
 
 		sql = "DELETE FROM ART_USER_PERMISSION_MAP WHERE USER_ID=? AND PERMISSION_ID=?";
 		dbService.update(sql, userId, permissionId);
+	}
+
+	/**
+	 * Recreates user-permission records for a given user
+	 *
+	 * @param user the user
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	public void recreateUserPermissions(User user) throws SQLException {
+		logger.debug("Entering recreateUserPermissions: user={}", user);
+
+		int userId = user.getUserId();
+		deleteAllUserPermissionsForUser(userId);
+		addUserPermissions(userId, user.getPermissions());
+	}
+
+	/**
+	 * Delete all user-permission records for the given user
+	 *
+	 * @param userId the user id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	public void deleteAllUserPermissionsForUser(int userId) throws SQLException {
+		logger.debug("Entering deleteAllUserPermissionsForUser: userId={}", userId);
+
+		String sql = "DELETE FROM ART_USER_PERMISSION_MAP WHERE USER_ID=?";
+		dbService.update(sql, userId);
+	}
+
+	/**
+	 * Adds user-permission records for the given user
+	 *
+	 * @param userId the user id
+	 * @param permissions the permissions
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	public void addUserPermissions(int userId, List<Permission> permissions) throws SQLException {
+		logger.debug("Entering addUserPermissions: userId={}", userId);
+
+		if (CollectionUtils.isEmpty(permissions)) {
+			return;
+		}
+
+		List<Integer> permissionIds = new ArrayList<>();
+		for (Permission permission : permissions) {
+			permissionIds.add(permission.getPermissionId());
+		}
+
+		Integer[] users = {userId};
+		String action = "add";
+		updateUserPermissions(action, users, permissionIds.toArray(new Integer[0]));
+	}
+
+	/**
+	 * Adds or removes user-permission records
+	 *
+	 * @param action "add" or "remove". anything else will be treated as remove
+	 * @param users user ids
+	 * @param permissions permission ids
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	public void updateUserPermissions(String action, Integer[] users, Integer[] permissions) throws SQLException {
+		logger.debug("Entering updateUserPermissions: action='{}'", action);
+
+		logger.debug("(users == null) = {}", users == null);
+		logger.debug("(permissions == null) = {}", permissions == null);
+		if (users == null || permissions == null) {
+			return;
+		}
+
+		boolean add;
+		if (StringUtils.equalsIgnoreCase(action, "add")) {
+			add = true;
+		} else {
+			add = false;
+		}
+
+		String sql;
+
+		if (add) {
+			sql = "INSERT INTO ART_USER_PERMISSION_MAP (USER_ID, PERMISSION_ID) VALUES (?, ?)";
+		} else {
+			sql = "DELETE FROM ART_USER_PERMISSION_MAP WHERE USER_ID=? AND PERMISSION_ID=?";
+		}
+
+		String sqlTest = "UPDATE ART_USER_PERMISSION_MAP SET USER_ID=? WHERE USER_ID=? AND PERMISSION_ID=?";
+		int affectedRows;
+		boolean updateRecord;
+
+		for (Integer userId : users) {
+			for (Integer permissionId : permissions) {
+				updateRecord = true;
+				if (add) {
+					//test if record exists. to avoid integrity constraint error
+					affectedRows = dbService.update(sqlTest, userId, userId, permissionId);
+					if (affectedRows > 0) {
+						//record exists. don't attempt a reinsert.
+						updateRecord = false;
+					}
+				}
+				if (updateRecord) {
+					dbService.update(sql, userId, permissionId);
+				}
+			}
+		}
 	}
 
 }
