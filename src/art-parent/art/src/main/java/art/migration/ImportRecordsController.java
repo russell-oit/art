@@ -577,6 +577,26 @@ public class ImportRecordsController {
 					for (UserGroup userGroup : userGroups) {
 						userGroupsMap.put(userGroup.getUserGroupId(), userGroup);
 					}
+					
+					String rolesFileName = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
+					File rolesFile = new File(rolesFileName);
+					if (rolesFile.exists()) {
+						List<Role> allRoles = csvRoutines.parseAll(Role.class, rolesFile);
+						for (Role role : allRoles) {
+							int parentId = role.getParentId();
+							UserGroup userGroup = userGroupsMap.get(parentId);
+							if (userGroup == null) {
+								throw new IllegalStateException("User Group not found. Parent Id = " + parentId);
+							} else {
+								List<Role> roles = userGroup.getRoles();
+								if (roles == null) {
+									roles = new ArrayList<>();
+								}
+								roles.add(role);
+								userGroup.setRoles(roles);
+							}
+						}
+					}
 
 					String permissionsFileName = artTempPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 					File permissionsFile = new File(permissionsFileName);
@@ -599,6 +619,7 @@ public class ImportRecordsController {
 					}
 
 					userGroupsFile.delete();
+					rolesFile.delete();
 					permissionsFile.delete();
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);

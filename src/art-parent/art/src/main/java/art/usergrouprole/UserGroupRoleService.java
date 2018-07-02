@@ -32,8 +32,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
- * Provides methods for retrieving, updating and deleting user group-role
- * records
+ * Provides methods for retrieving, adding, updating and deleting user
+ * group-role records
  *
  * @author Timothy Anyona
  */

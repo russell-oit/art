@@ -667,6 +667,15 @@ public class ExportRecordsController {
 						String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 						File userGroupsFile = new File(userGroupsFilePath);
 						csvRoutines.writeAll(userGroups, UserGroup.class, userGroupsFile);
+						
+						List<Role> allRoles = new ArrayList<>();
+						for (UserGroup userGroup : userGroups) {
+							List<Role> roles = userGroup.getRoles();
+							for (Role role : roles) {
+								role.setParentId(userGroup.getUserGroupId());
+								allRoles.add(role);
+							}
+						}
 
 						List<Permission> allPermissions = new ArrayList<>();
 						for (UserGroup userGroup : userGroups) {
@@ -677,9 +686,17 @@ public class ExportRecordsController {
 							}
 						}
 
-						if (CollectionUtils.isNotEmpty(allPermissions)) {
+						if (CollectionUtils.isNotEmpty(allRoles)
+								|| CollectionUtils.isNotEmpty(allPermissions)) {
 							List<String> filesToZip = new ArrayList<>();
 							filesToZip.add(userGroupsFilePath);
+							
+							String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
+							File rolesFile = new File(rolesFilePath);
+							if (CollectionUtils.isNotEmpty(allRoles)) {
+								csvRoutines.writeAll(allRoles, Role.class, rolesFile);
+								filesToZip.add(rolesFilePath);
+							}
 
 							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 							File permissionsFile = new File(permissionsFilePath);
@@ -691,6 +708,7 @@ public class ExportRecordsController {
 							exportFilePath = recordsExportPath + "art-export-UserGroups.zip";
 							ArtUtils.zipFiles(exportFilePath, filesToZip);
 							userGroupsFile.delete();
+							rolesFile.delete();
 							permissionsFile.delete();
 						} else {
 							exportFilePath = userGroupsFilePath;
