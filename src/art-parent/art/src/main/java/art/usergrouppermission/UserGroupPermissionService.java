@@ -24,9 +24,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
- * Provides methods for retrieving and deleting user group permissions
+ * Provides methods for retrieving, adding, updating and deleting user group
+ * permissions
  *
  * @author Timothy Anyona
  */
@@ -140,6 +143,115 @@ public class UserGroupPermissionService {
 
 		sql = "DELETE FROM ART_USER_GROUP_PERM_MAP WHERE USER_GROUP_ID=? AND PERMISSION_ID=?";
 		dbService.update(sql, userGroupId, permissionId);
+	}
+	
+	/**
+	 * Recreates user group-permission records for a given user group
+	 *
+	 * @param userGroup the user group
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	public void recreateUserGroupPermissions(UserGroup userGroup) throws SQLException {
+		logger.debug("Entering recreateUserGroupPermissions: userGroup={}", userGroup);
+
+		int userGroupId = userGroup.getUserGroupId();
+		deleteAllUserGroupPermissionsForUserGroup(userGroupId);
+		addUserGroupPermissions(userGroupId, userGroup.getPermissions());
+	}
+
+	/**
+	 * Delete all user group-permission records for the given user group
+	 *
+	 * @param userGroupId the user group id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	public void deleteAllUserGroupPermissionsForUserGroup(int userGroupId) throws SQLException {
+		logger.debug("Entering deleteAllUserGroupPermissionsForUserGroup: userGroupId={}", userGroupId);
+
+		String sql = "DELETE FROM ART_USER_GROUP_PERM_MAP WHERE USER_GROUP_ID=?";
+		dbService.update(sql, userGroupId);
+	}
+
+	/**
+	 * Adds user group-permission records for the given user group
+	 *
+	 * @param userGroupId the user group id
+	 * @param permissions the permissions
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	public void addUserGroupPermissions(int userGroupId, List<Permission> permissions) throws SQLException {
+		logger.debug("Entering addUserGroupPermissions: userGroupId={}", userGroupId);
+
+		if (CollectionUtils.isEmpty(permissions)) {
+			return;
+		}
+
+		List<Integer> permissionIds = new ArrayList<>();
+		for (Permission permission : permissions) {
+			permissionIds.add(permission.getPermissionId());
+		}
+
+		Integer[] userGroups = {userGroupId};
+		String action = "add";
+		updateUserGroupPermissions(action, userGroups, permissionIds.toArray(new Integer[0]));
+	}
+
+	/**
+	 * Adds or removes user group-permission records
+	 *
+	 * @param action "add" or "remove". anything else will be treated as remove
+	 * @param userGroups user group ids
+	 * @param permissions permission ids
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	public void updateUserGroupPermissions(String action, Integer[] userGroups, Integer[] permissions) throws SQLException {
+		logger.debug("Entering updateUserGroupPermissions: action='{}'", action);
+
+		logger.debug("(userGroups == null) = {}", userGroups == null);
+		logger.debug("(permissions == null) = {}", permissions == null);
+		if (userGroups == null || permissions == null) {
+			return;
+		}
+
+		boolean add;
+		if (StringUtils.equalsIgnoreCase(action, "add")) {
+			add = true;
+		} else {
+			add = false;
+		}
+
+		String sql;
+
+		if (add) {
+			sql = "INSERT INTO ART_USER_GROUP_PERM_MAP (USER_GROUP_ID, PERMISSION_ID) VALUES (?, ?)";
+		} else {
+			sql = "DELETE FROM ART_USER_GROUP_PERM_MAP WHERE USER_GROUP_ID=? AND PERMISSION_ID=?";
+		}
+
+		String sqlTest = "UPDATE ART_USER_GROUP_PERM_MAP SET USER_GROUP_ID=? WHERE USER_GROUP_ID=? AND PERMISSION_ID=?";
+		int affectedRows;
+		boolean updateRecord;
+
+		for (Integer userGroupId : userGroups) {
+			for (Integer permissionId : permissions) {
+				updateRecord = true;
+				if (add) {
+					//test if record exists. to avoid integrity constraint error
+					affectedRows = dbService.update(sqlTest, userGroupId, userGroupId, permissionId);
+					if (affectedRows > 0) {
+						//record exists. don't attempt a reinsert.
+						updateRecord = false;
+					}
+				}
+				if (updateRecord) {
+					dbService.update(sql, userGroupId, permissionId);
+				}
+			}
+		}
 	}
 
 }

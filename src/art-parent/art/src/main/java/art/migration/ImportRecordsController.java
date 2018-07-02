@@ -559,7 +559,50 @@ public class ImportRecordsController {
 				});
 				break;
 			case csv:
-				userGroups = csvRoutines.parseAll(UserGroup.class, file);
+				String extension = FilenameUtils.getExtension(file.getName());
+				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+					userGroups = csvRoutines.parseAll(UserGroup.class, file);
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String artTempPath = Config.getArtTempPath();
+					ZipUtil.unpack(file, new File(artTempPath));
+					String userGroupsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
+					File userGroupsFile = new File(userGroupsFileName);
+					if (userGroupsFile.exists()) {
+						userGroups = csvRoutines.parseAll(UserGroup.class, userGroupsFile);
+					} else {
+						throw new IllegalStateException("File not found: " + userGroupsFileName);
+					}
+
+					Map<Integer, UserGroup> userGroupsMap = new HashMap<>();
+					for (UserGroup userGroup : userGroups) {
+						userGroupsMap.put(userGroup.getUserGroupId(), userGroup);
+					}
+
+					String permissionsFileName = artTempPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
+					File permissionsFile = new File(permissionsFileName);
+					if (permissionsFile.exists()) {
+						List<Permission> allPermissions = csvRoutines.parseAll(Permission.class, permissionsFile);
+						for (Permission permission : allPermissions) {
+							int parentId = permission.getParentId();
+							UserGroup userGroup = userGroupsMap.get(parentId);
+							if (userGroup == null) {
+								throw new IllegalStateException("User Group not found. Parent Id = " + parentId);
+							} else {
+								List<Permission> permissions = userGroup.getPermissions();
+								if (permissions == null) {
+									permissions = new ArrayList<>();
+								}
+								permissions.add(permission);
+								userGroup.setPermissions(permissions);
+							}
+						}
+					}
+
+					userGroupsFile.delete();
+					permissionsFile.delete();
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);

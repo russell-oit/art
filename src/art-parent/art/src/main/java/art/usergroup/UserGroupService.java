@@ -27,6 +27,7 @@ import art.permission.Permission;
 import art.permission.PermissionService;
 import art.role.Role;
 import art.role.RoleService;
+import art.usergrouppermission.UserGroupPermissionService;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -62,15 +63,18 @@ public class UserGroupService {
 	private final ReportGroupService reportGroupService;
 	private final RoleService roleService;
 	private final PermissionService permissionService;
+	private final UserGroupPermissionService userGroupPermissionService;
 
 	@Autowired
 	public UserGroupService(DbService dbService, ReportGroupService reportGroupService,
-			RoleService roleService, PermissionService permissionService) {
+			RoleService roleService, PermissionService permissionService,
+			UserGroupPermissionService userGroupPermissionService) {
 
 		this.dbService = dbService;
 		this.reportGroupService = reportGroupService;
 		this.roleService = roleService;
 		this.permissionService = permissionService;
+		this.userGroupPermissionService = userGroupPermissionService;
 	}
 
 	public UserGroupService() {
@@ -78,6 +82,7 @@ public class UserGroupService {
 		reportGroupService = new ReportGroupService();
 		roleService = new RoleService();
 		permissionService = new PermissionService();
+		userGroupPermissionService = new UserGroupPermissionService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUPS AUG";
@@ -385,6 +390,7 @@ public class UserGroupService {
 					}
 				}
 				saveUserGroup(userGroup, userGroupId, actionUser, conn);
+				userGroupPermissionService.recreateUserGroupPermissions(userGroup);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

@@ -257,7 +257,7 @@ public class ExportRecordsController {
 						exportSmtpServers(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case UserGroups:
-						exportUserGroups(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportFilePath = exportUserGroups(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Schedules:
 						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn, file);
@@ -637,14 +637,17 @@ public class ExportRecordsController {
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
+	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void exportUserGroups(ExportRecords exportRecords, File file,
+	private String exportUserGroups(ExportRecords exportRecords, File file,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportUserGroups");
+
+		String exportFilePath = null;
 
 		String ids = exportRecords.getIds();
 		List<UserGroup> userGroups = userGroupService.getUserGroups(ids);
@@ -652,14 +655,46 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
+				String recordsExportPath = Config.getRecordsExportPath();
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
 						ObjectMapper mapper = new ObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, userGroups);
+						exportFilePath = recordsExportPath + "art-export-UserGroups.json";
 						break;
 					case csv:
-						csvRoutines.writeAll(userGroups, UserGroup.class, file);
+						String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
+						File userGroupsFile = new File(userGroupsFilePath);
+						csvRoutines.writeAll(userGroups, UserGroup.class, userGroupsFile);
+
+						List<Permission> allPermissions = new ArrayList<>();
+						for (UserGroup userGroup : userGroups) {
+							List<Permission> permissions = userGroup.getPermissions();
+							for (Permission permission : permissions) {
+								permission.setParentId(userGroup.getUserGroupId());
+								allPermissions.add(permission);
+							}
+						}
+
+						if (CollectionUtils.isNotEmpty(allPermissions)) {
+							List<String> filesToZip = new ArrayList<>();
+							filesToZip.add(userGroupsFilePath);
+
+							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
+							File permissionsFile = new File(permissionsFilePath);
+							if (CollectionUtils.isNotEmpty(allPermissions)) {
+								csvRoutines.writeAll(allPermissions, Permission.class, permissionsFile);
+								filesToZip.add(permissionsFilePath);
+							}
+
+							exportFilePath = recordsExportPath + "art-export-UserGroups.zip";
+							ArtUtils.zipFiles(exportFilePath, filesToZip);
+							userGroupsFile.delete();
+							permissionsFile.delete();
+						} else {
+							exportFilePath = userGroupsFilePath;
+						}
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -671,6 +706,8 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
+
+		return exportFilePath;
 	}
 
 	/**
@@ -783,6 +820,7 @@ public class ExportRecordsController {
 						String usersFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERS_FILENAME;
 						File usersFile = new File(usersFilePath);
 						csvRoutines.writeAll(users, User.class, usersFile);
+
 						List<UserGroup> allUserGroups = new ArrayList<>();
 						for (User user : users) {
 							List<UserGroup> userGroups = user.getUserGroups();
@@ -812,7 +850,7 @@ public class ExportRecordsController {
 								csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
 								filesToZip.add(userGroupsFilePath);
 							}
-							
+
 							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 							File permissionsFile = new File(permissionsFilePath);
 							if (CollectionUtils.isNotEmpty(allPermissions)) {
