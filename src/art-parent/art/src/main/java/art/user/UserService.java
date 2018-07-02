@@ -31,6 +31,7 @@ import art.permission.PermissionService;
 import art.role.Role;
 import art.role.RoleService;
 import art.userpermission.UserPermissionService;
+import art.userrole.UserRoleService;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -75,13 +76,15 @@ public class UserService {
 	private final RoleService roleService;
 	private final PermissionService permissionService;
 	private final UserPermissionService userPermissionService;
+	private final UserRoleService userRoleService;
 
 	@Autowired
 	public UserService(DbService dbService, UserGroupService userGroupService,
 			ReportGroupService reportGroupService,
 			UserGroupMembershipService2 userGroupMembershipService2,
 			RoleService roleService, PermissionService permissionService,
-			UserPermissionService userPermissionService) {
+			UserPermissionService userPermissionService,
+			UserRoleService userRoleService) {
 
 		this.dbService = dbService;
 		this.userGroupService = userGroupService;
@@ -89,7 +92,8 @@ public class UserService {
 		this.userGroupMembershipService2 = userGroupMembershipService2;
 		this.roleService = roleService;
 		this.permissionService = permissionService;
-		this.userPermissionService=userPermissionService;
+		this.userPermissionService = userPermissionService;
+		this.userRoleService = userRoleService;
 	}
 
 	public UserService() {
@@ -99,7 +103,8 @@ public class UserService {
 		userGroupMembershipService2 = new UserGroupMembershipService2();
 		roleService = new RoleService();
 		permissionService = new PermissionService();
-		userPermissionService=new UserPermissionService();
+		userPermissionService = new UserPermissionService();
+		userRoleService = new UserRoleService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
@@ -148,7 +153,7 @@ public class UserService {
 
 			List<Permission> permissions = permissionService.getPermissionsForUser(user.getUserId());
 			user.setPermissions(permissions);
-			
+
 			user.prepareFlatPermissions();
 
 			return type.cast(user);
@@ -566,11 +571,16 @@ public class UserService {
 			sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
 			int userGroupId = dbService.getMaxRecordId(sql);
 
+			sql = "SELECT MAX(ROLE_ID) FROM ART_ROLES";
+			int roleId = dbService.getMaxRecordId(sql);
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
 			Map<String, UserGroup> addedUserGroups = new HashMap<>();
+			Map<String, Role> addedRoles = new HashMap<>();
+
 			for (User user : users) {
 				userId++;
 
@@ -640,9 +650,34 @@ public class UserService {
 					}
 					user.setUserGroups(newUserGroups);
 				}
+
+				List<Role> roles = user.getRoles();
+				if (CollectionUtils.isNotEmpty(roles)) {
+					List<Role> newRoles = new ArrayList<>();
+					for (Role role : roles) {
+						String roleName = role.getName();
+						Role existingRole = roleService.getRole(roleName);
+						if (existingRole == null) {
+							Role addedRole = addedRoles.get(roleName);
+							if (addedRole == null) {
+								roleId++;
+								roleService.saveRole(role, roleId, actionUser, conn);
+								addedRoles.put(roleName, role);
+								newRoles.add(role);
+							} else {
+								newRoles.add(addedRole);
+							}
+						} else {
+							newRoles.add(existingRole);
+						}
+					}
+					user.setRoles(newRoles);
+				}
+
 				saveUser(user, userId, actionUser, conn);
 				userGroupMembershipService2.recreateUserGroupMemberships(user);
 				userPermissionService.recreateUserPermissions(user);
+				userRoleService.recreateUserRoles(user);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
@@ -683,7 +718,7 @@ public class UserService {
 
 		logger.debug("Entering saveUser: user={}, newRecordId={}, actionUser={}",
 				user, newRecordId, actionUser);
-		
+
 		//set values for possibly null property objects
 		int accessLevel;
 		if (user.getAccessLevel() == null) {

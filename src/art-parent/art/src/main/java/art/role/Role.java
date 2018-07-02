@@ -31,6 +31,9 @@ import java.util.List;
 public class Role implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	@Parsed
+	private int parentId; //used for import/export of linked records
 	@Parsed
 	private int roleId;
 	@Parsed
@@ -42,6 +45,20 @@ public class Role implements Serializable {
 	private Date updateDate;
 	private String updatedBy;
 	private List<Permission> permissions;
+
+	/**
+	 * @return the parentId
+	 */
+	public int getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 
 	/**
 	 * @return the roleId
