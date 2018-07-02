@@ -21,6 +21,7 @@ import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.permission.Permission;
 import art.permission.PermissionService;
+import art.rolepermission.RolePermissionService;
 import art.user.User;
 import art.utils.ArtUtils;
 import java.sql.Connection;
@@ -52,16 +53,20 @@ public class RoleService {
 
 	private final DbService dbService;
 	private final PermissionService permissionService;
+	private final RolePermissionService rolePermissionService;
 
 	@Autowired
-	public RoleService(DbService dbService, PermissionService permissionService) {
+	public RoleService(DbService dbService, PermissionService permissionService,
+			RolePermissionService rolePermissionService) {
 		this.dbService = dbService;
 		this.permissionService = permissionService;
+		this.rolePermissionService = rolePermissionService;
 	}
 
 	public RoleService() {
 		dbService = new DbService();
 		permissionService = new PermissionService();
+		rolePermissionService = new RolePermissionService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_ROLES AR";
@@ -267,6 +272,7 @@ public class RoleService {
 			for (Role role : roles) {
 				id++;
 				saveRole(role, id, actionUser, conn);
+				rolePermissionService.recreateRolePermissions(role);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

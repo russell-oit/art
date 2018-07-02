@@ -38,6 +38,7 @@ import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
+import art.permission.Permission;
 import art.report.Report;
 import art.report.ReportService;
 import art.report.ReportServiceHelper;
@@ -53,6 +54,8 @@ import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.reportrule.ReportRule;
 import art.reportrule.ReportRuleService;
+import art.role.Role;
+import art.role.RoleService;
 import art.rule.Rule;
 import art.rule.RuleService;
 import art.ruleValue.RuleValueService;
@@ -158,6 +161,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private DrilldownService drilldownService;
+
+	@Autowired
+	private RoleService roleService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -267,6 +273,9 @@ public class ExportRecordsController {
 						break;
 					case Reports:
 						exportFilePath = exportReports(exportRecords, sessionUser, csvRoutines, conn);
+						break;
+					case Roles:
+						exportFilePath = exportRoles(exportRecords, sessionUser, csvRoutines, conn, file);
 						break;
 					default:
 						break;
@@ -1015,7 +1024,7 @@ public class ExportRecordsController {
 				String recordsExportPath = Config.getRecordsExportPath();
 				String reportsFilePath;
 				File reportsFile;
-				
+
 				List<String> filesToZip = getTemplateFilesToInclude(reports);
 
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
@@ -1342,6 +1351,78 @@ public class ExportRecordsController {
 		}
 
 		return filesToZip;
+	}
+
+	/**
+	 * Exports role records
+	 *
+	 * @param exportRecords the export records object
+	 * @param sessionUser the session user
+	 * @param csvRoutines the CsvRoutines object to use for file export
+	 * @param conn the connection to use for datasource export
+	 * @param file the export file to use, for json output
+	 * @return the export file path for file export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private String exportRoles(ExportRecords exportRecords,
+			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
+			throws SQLException, IOException {
+
+		logger.debug("Entering exportRoles");
+
+		String exportFilePath = null;
+
+		String ids = exportRecords.getIds();
+		List<Role> roles = roleService.getRoles(ids);
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				String recordsExportPath = Config.getRecordsExportPath();
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, roles);
+						exportFilePath = recordsExportPath + "art-export-Roles.json";
+						break;
+					case csv:
+						String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
+						File rolesFile = new File(rolesFilePath);
+						csvRoutines.writeAll(roles, Role.class, rolesFile);
+						List<Permission> permissions = new ArrayList<>();
+						for (Role role : roles) {
+							List<Permission> rolePermissions = role.getPermissions();
+							for (Permission permission : rolePermissions) {
+								permission.setParentId(role.getRoleId());
+								permissions.add(permission);
+							}
+						}
+						if (CollectionUtils.isEmpty(permissions)) {
+							exportFilePath = rolesFilePath;
+						} else {
+							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
+							File permissionsFile = new File(permissionsFilePath);
+							csvRoutines.writeAll(permissions, Permission.class, permissionsFile);
+							exportFilePath = recordsExportPath + "art-export-Roles.zip";
+							ArtUtils.zipFiles(exportFilePath, rolesFilePath, permissionsFilePath);
+							rolesFile.delete();
+							permissionsFile.delete();
+						}
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
+				break;
+			case Datasource:
+				roleService.importRoles(roles, sessionUser, conn);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+
+		return exportFilePath;
 	}
 
 }

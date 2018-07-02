@@ -37,6 +37,7 @@ import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
+import art.permission.Permission;
 import art.report.Report;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
@@ -49,6 +50,8 @@ import art.reportoptions.OrgChartOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
+import art.role.Role;
+import art.role.RoleService;
 import art.rule.Rule;
 import art.rule.RuleService;
 import art.ruleValue.UserGroupRuleValue;
@@ -151,6 +154,9 @@ public class ImportRecordsController {
 	@Autowired
 	private CacheHelper cacheHelper;
 
+	@Autowired
+	private RoleService roleService;
+
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
 		logger.debug("Entering showImportRecords: type='{}'", type);
@@ -238,6 +244,9 @@ public class ImportRecordsController {
 						break;
 					case Reports:
 						importReports(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						break;
+					case Roles:
+						importRoles(tempFile, sessionUser, conn, csvRoutines, importRecords);
 						break;
 					default:
 						break;
@@ -1300,6 +1309,80 @@ public class ImportRecordsController {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Imports role records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param csvRoutines the CsvRoutines object to use
+	 * @param importRecords the import records object
+	 * @throws SQLException
+	 */
+	private void importRoles(File file, User sessionUser, Connection conn,
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+
+		logger.debug("Entering importRoles: sessionUser={}", sessionUser);
+
+		List<Role> roles;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = new ObjectMapper();
+				roles = mapper.readValue(file, new TypeReference<List<Role>>() {
+				});
+				break;
+			case csv:
+				String extension = FilenameUtils.getExtension(file.getName());
+				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+					roles = csvRoutines.parseAll(Role.class, file);
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String artTempPath = Config.getArtTempPath();
+					ZipUtil.unpack(file, new File(artTempPath));
+					String rolesFileName = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
+					File rolesFile = new File(rolesFileName);
+					if (rolesFile.exists()) {
+						roles = csvRoutines.parseAll(Role.class, rolesFile);
+					} else {
+						throw new IllegalStateException("File not found: " + rolesFileName);
+					}
+
+					String permissionsFileName = artTempPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
+					File permissionsFile = new File(permissionsFileName);
+					if (permissionsFile.exists()) {
+						List<Permission> permissions = csvRoutines.parseAll(Permission.class, permissionsFile);
+						Map<Integer, Role> rolesMap = new HashMap<>();
+						for (Role role : roles) {
+							rolesMap.put(role.getRoleId(), role);
+						}
+						for (Permission permission : permissions) {
+							int parentId = permission.getParentId();
+							Role role = rolesMap.get(parentId);
+							if (role == null) {
+								throw new IllegalStateException("Role not found. Parent Id = " + parentId);
+							} else {
+								List<Permission> rolePermissions = role.getPermissions();
+								if (rolePermissions == null) {
+									rolePermissions = new ArrayList<>();
+								}
+								rolePermissions.add(permission);
+								role.setPermissions(rolePermissions);
+							}
+						}
+					}
+					rolesFile.delete();
+					permissionsFile.delete();
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
+
+		roleService.importRoles(roles, sessionUser, conn);
 	}
 
 }
