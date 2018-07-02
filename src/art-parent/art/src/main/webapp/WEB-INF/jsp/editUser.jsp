@@ -221,11 +221,6 @@ Display edit user page
 						<form:select path="accessLevel" items="${accessLevels}"
 									 itemLabel="description" 
 									 class="form-control selectpicker"/>
-						<div class="text-right">
-							<a href="${pageContext.request.contextPath}/docs/Manual.html#access-levels">
-								<spring:message code="page.link.help"/>
-							</a>
-						</div>
 						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>

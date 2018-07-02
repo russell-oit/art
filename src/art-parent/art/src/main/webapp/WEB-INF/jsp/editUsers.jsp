@@ -196,14 +196,14 @@
 						</div>
 					</div>
 				</div>
-				<div class="formgroup">
-					<label class="controllabel colmd4">
+				<div class="form-group">
+					<label class="control-label col-md-4">
 						<spring:message code="users.label.accessLevel"/>
 					</label>
-					<div class="colmd8">
+					<div class="col-md-8">
 						<form:select path="accessLevel" items="${accessLevels}"
 									 itemLabel="description" 
-									 class="formcontrol selectpicker"/>
+									 class="form-control selectpicker"/>
 						<div class="checkbox">
 							<label>
 								<form:checkbox path="accessLevelUnchanged" id="accessLevelUnchanged"/>
@@ -214,7 +214,7 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="userGroups">
+					<label class="col-md-4 control-label" for="userGroups">
 						<spring:message code="page.text.userGroups"/>
 					</label>
 					<div class="col-md-8">

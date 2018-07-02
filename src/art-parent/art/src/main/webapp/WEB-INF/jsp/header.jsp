@@ -36,8 +36,6 @@ Header that appears at the top of all pages, except the login and logs pages
 								<spring:message code="header.link.reports"/>
 							</a>
 						</li>
-					</c:if>
-					<c:if test="${sessionUser.hasPermission('view_analytics')}">
 						<li>
 							<%-- https://stackoverflow.com/questions/7368863/how-to-get-visitors-locale-in-jsp-using-spring-3s-sessionlocaleresolver --%>
 							<a href="${pageContext.request.contextPath}/saiku3">
@@ -53,8 +51,6 @@ Header that appears at the top of all pages, except the login and logs pages
 								<spring:message code="header.link.jobs"/>
 							</a>
 						</li>
-					</c:if>
-					<c:if test="${sessionUser.hasPermission('view_archives')}">
 						<li>
 							<a href="${pageContext.request.contextPath}/archives">
 								<i class="fa fa-archive"></i> 
@@ -162,8 +158,6 @@ Header that appears at the top of all pages, except the login and logs pages
 											<spring:message code="page.title.roles"/>
 										</a>
 									</li>
-								</c:if>
-								<c:if test="${sessionUser.hasPermission('configure_role_permissions')}">
 									<li>
 										<a href="${pageContext.request.contextPath}/rolePermissionsConfig">
 											<spring:message code="page.title.rolePermissions"/>
@@ -191,35 +185,27 @@ Header that appears at the top of all pages, except the login and logs pages
 										</a>
 									</li>
 								</c:if>
-								<c:if test="${sessionUser.hasPermission('configure_parameters')}">
+								<c:if test="${sessionUser.hasPermission('configure_reports')}">
 									<li>
 										<a href="${pageContext.request.contextPath}/parameters">
 											<spring:message code="header.link.parameters"/>
 										</a>
 									</li>
-								</c:if>
-								<c:if test="${sessionUser.hasPermission('configure_parameter_defaults')}">
 									<li>
 										<a href="${pageContext.request.contextPath}/paramDefaultsConfig">
 											<spring:message code="page.title.paramDefaults"/>
 										</a>
 									</li>
-								</c:if>
-								<c:if test="${sessionUser.hasPermission('configure_fixed_parameter_values')}">
 									<li>
 										<a href="${pageContext.request.contextPath}/fixedParamValuesConfig">
 											<spring:message code="page.title.fixedParamValues"/>
 										</a>
 									</li>
-								</c:if>
-								<c:if test="${sessionUser.hasPermission('configure_rules')}">
 									<li>
 										<a href="${pageContext.request.contextPath}/rules">
 											<spring:message code="header.link.rules"/>
 										</a>
 									</li>
-								</c:if>
-								<c:if test="${sessionUser.hasPermission('configure_rule_values')}">
 									<li>
 										<a href="${pageContext.request.contextPath}/ruleValuesConfig">
 											<spring:message code="header.link.ruleValues"/>

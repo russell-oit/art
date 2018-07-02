@@ -14,9 +14,8 @@
 </p>
 <p>
 	After saving the ART Database configuration, use the
-	<b>Configure | Users</b> menu to create some users. Create at least
-	one Super Admin user which you can use to administer all aspects
-	of the application. After creating users, <b>Log Out</b> and log in 
+	<b>Configure | Users</b> menu to create some users. 
+	After creating users, <b>Log Out</b> and log in 
 	using one of the users, and continue using the application.
 </p>
 <p>

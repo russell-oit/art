@@ -295,12 +295,13 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		//"" = home page "/"
 		if (StringUtils.equalsAny(page, "", "reports", "selectReportParameters",
 				"showDashboard", "getLovValues", "runReport", "emailReport",
-				"showJPivot", "jpivotBusy", "jpivotError",
+				"showJPivot", "jpivotBusy", "jpivotError", "saiku3",
 				"saveParameterSelection", "clearSavedParameterSelection")) {
 			if (user.hasPermission("view_reports")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "saveJPivot")) {
+		} else if (StringUtils.equalsAny(page, "saveJPivot",
+				"savePivotTableJs", "deletePivotTableJs")) {
 			if (user.hasPermission("save_reports")) {
 				authorised = true;
 			}
@@ -308,16 +309,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("schedule_jobs")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "archives")) {
-			if (user.hasPermission("view_archives")) {
-				authorised = true;
-			}
-		} else if (StringUtils.equals(page, "saiku3")) {
-			if (user.hasPermission("view_analytics")) {
-				authorised = true;
-			}
-		} else if (StringUtils.equalsAny(page, "savePivotTableJs", "deletePivotTableJs")) {
-			if (user.hasPermission("save_reports")) {
+		} else if (StringUtils.equalsAny(page, "jobs", "archives")) {
+			if (user.hasPermission("view_jobs")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "saveGridstack", "deleteGridstack")) {
@@ -331,10 +324,6 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		} else if (StringUtils.startsWith(pathMinusContext, "/export/")) {
 			//all can access
 			authorised = true;
-		} else if (StringUtils.equals(page, "jobs")) {
-			if (user.hasPermission("view_jobs")) {
-				authorised = true;
-			}
 		} else if (StringUtils.endsWith(page, "Job")) {
 			if (user.hasPermission("schedule_jobs")) {
 				authorised = true;
@@ -446,37 +435,28 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("configure_report_group_membership")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "rules")
+		} else if (StringUtils.equalsAny(page, "rules", "reportRules")
 				|| StringUtils.endsWithAny(page, "Rule", "Rules")) {
-			if (user.hasPermission("configure_rules")) {
-				authorised = true;
-			}
-		} else if (StringUtils.equals(page, "reportRules") || StringUtils.endsWith(page, "ReportRule")) {
 			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "parameters")
+		} else if (StringUtils.equalsAny(page, "parameters", "reportParameterConfig")
 				|| StringUtils.endsWithAny(page, "Parameter", "Parameters")) {
-			if (user.hasPermission("configure_parameters")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "ruleValues", "ruleValuesConfig")
 				|| StringUtils.endsWithAny(page, "RuleValue", "RuleValues")) {
-			if (user.hasPermission("configure_rule_values")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "paramDefaults", "paramDefaultsConfig")
 				|| StringUtils.endsWithAny(page, "ParamDefault", "ParamDefaults")) {
-			if (user.hasPermission("configure_parameter_defaults")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "fixedParamValues", "fixedParamValuesConfig")
 				|| StringUtils.endsWithAny(page, "FixedParamValue", "FixedParamValues")) {
-			if (user.hasPermission("configure_fixed_parameter_values")) {
-				authorised = true;
-			}
-		} else if (StringUtils.equals(page, "reportParameterConfig")
-				|| StringUtils.endsWithAny(page, "ReportParameter", "ReportParameters")) {
 			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
@@ -494,13 +474,10 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("migrate_records")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "roles")
+		} else if (StringUtils.equalsAny(page, "roles", "rolePermissionsConfig",
+				"updateRolePermissions")
 				|| StringUtils.endsWithAny(page, "Role", "Roles")) {
 			if (user.hasPermission("configure_roles")) {
-				authorised = true;
-			}
-		} else if (StringUtils.equalsAny(page, "rolePermissionsConfig", "updateRolePermissions")) {
-			if (user.hasPermission("configure_role_permissions")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "permissionsConfig")
