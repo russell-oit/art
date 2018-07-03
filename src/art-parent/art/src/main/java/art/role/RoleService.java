@@ -175,7 +175,7 @@ public class RoleService {
 	 * @param id the role id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "roles", allEntries = true)
+	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
 	public void deleteRole(int id) throws SQLException {
 		logger.debug("Entering deleteRole: id={}", id);
 
@@ -201,7 +201,7 @@ public class RoleService {
 	 * @param ids the ids of the roles to delete
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "roles", allEntries = true)
+	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
 	public void deleteRoles(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteRoles: ids={}", (Object) ids);
 
@@ -238,7 +238,7 @@ public class RoleService {
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "roles", allEntries = true)
+	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
 	public void updateRole(Role role, User actionUser) throws SQLException {
 		logger.debug("Entering updateRole: role={}, actionUser={}", role, actionUser);
 
