@@ -265,6 +265,12 @@ public class UserGroupService {
 
 		sql = "DELETE FROM ART_USER_GROUP_FIXED_PARAM_VAL WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_PERM_MAP WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_ROLE_MAP WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
 
 		//finally delete user group
 		sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";
@@ -463,7 +469,7 @@ public class UserGroupService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "userGroups", allEntries = true)
+	@CacheEvict(value = {"userGroups", "users"}, allEntries = true)
 	public void saveUserGroup(UserGroup group, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
