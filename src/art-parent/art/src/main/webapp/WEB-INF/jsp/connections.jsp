@@ -25,7 +25,7 @@ Page to display connections status
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -58,6 +58,7 @@ Page to display connections status
 						url: "${pageContext.request.contextPath}/refreshConnectionPool",
 						data: {id: recordId},
 						success: function (response) {
+							var reusableAlert = true;
 							if (response.success) {
 								var pool = response.data;
 
@@ -66,13 +67,17 @@ Page to display connections status
 								table.cell(row, 5).data(pool.inUseCount);
 								table.cell(row, 6).data(pool.totalConnectionRequests);
 
-								notifyActionSuccess("${connectionResetText}", recordName);
+								notifyActionSuccess("${connectionResetText}", recordName, reusableAlert);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
 					});
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			});
@@ -96,7 +101,9 @@ Page to display connections status
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<table id="connections" class="table table-bordered table-striped table-condensed">

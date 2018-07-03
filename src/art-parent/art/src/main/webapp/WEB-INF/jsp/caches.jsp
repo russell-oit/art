@@ -26,7 +26,7 @@ Page to allow manual clearing of caches
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -56,10 +56,11 @@ Page to allow manual clearing of caches
 						url: "${pageContext.request.contextPath}/clearCache",
 						data: {id: recordId},
 						success: function (response) {
+							var reusableAlert = true;
 							if (response.success) {
-								notifyActionSuccess("${cacheClearedText}", recordName);
+								notifyActionSuccess("${cacheClearedText}", recordName, reusableAlert);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
@@ -71,21 +72,25 @@ Page to allow manual clearing of caches
 						type: 'POST',
 						url: '${pageContext.request.contextPath}/clearAllCaches',
 						dataType: 'json',
-						success: function (response)
-						{
+						success: function (response) {
+							var reusableAlert = true;
 							if (response.success) {
-								notifyActionSuccess("${cachesClearedText}", undefined);
+								var recordName = undefined;
+								notifyActionSuccess("${cachesClearedText}", recordName, reusableAlert);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
 					});
 				});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
 			});
 		</script>
-
 	</jsp:attribute>
 
 	<jsp:body>
@@ -99,7 +104,9 @@ Page to allow manual clearing of caches
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div style="margin-bottom: 10px;">

@@ -82,7 +82,6 @@ Edit report page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
@@ -256,11 +255,11 @@ Edit report page
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
 						data: $('#fileupload').serialize(),
-						success: function (data, status, xhr) {
+						success: function (data) {
 							$("#reportOutput").html(data);
 							$('.action').prop('disabled', false);
 						},
-						error: function (xhr, status, error) {
+						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 							bootbox.alert(xhr.responseText);
 							$('.action').prop('disabled', false);
@@ -277,11 +276,11 @@ Edit report page
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
 						data: $('#fileupload').serialize() + "&testData=true&reportFormat=htmlDataTable",
-						success: function (data, status, xhr) {
+						success: function (data) {
 							$("#reportOutput").html(data);
 							$('.action').prop('disabled', false);
 						},
-						error: function (xhr, status, error) {
+						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 							bootbox.alert(xhr.responseText);
 							$('.action').prop('disabled', false);

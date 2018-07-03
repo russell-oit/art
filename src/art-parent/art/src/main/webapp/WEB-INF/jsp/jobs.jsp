@@ -118,12 +118,12 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/runJob',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response)
-						{
+						success: function (response) {
+							var reusableAlert = true;
 							if (response.success) {
-								notifyActionSuccess("${runningText}", recordName);
+								notifyActionSuccess("${runningText}", recordName, reusableAlert);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
@@ -152,13 +152,13 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/runLaterJob',
 						dataType: 'json',
 						data: $('#runLaterForm').serialize(),
-						success: function (response)
-						{
+						success: function (response) {
+							var reusableAlert = true;
 							$("#runLaterModal").modal('hide');
 							if (response.success) {
-								notifyActionSuccess("${scheduledText}", recordName);
+								notifyActionSuccess("${scheduledText}", recordName, reusableAlert);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
@@ -175,8 +175,8 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/refreshJob',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response)
-						{
+						success: function (response) {
+							var reusableAlert = true;
 							if (response.success) {
 								var job = response.data;
 
@@ -206,9 +206,9 @@ Display user jobs and jobs configuration
 								table.cell(row, 5).data(result);
 								table.cell(row, 6).data(job.nextRunDateString);
 
-								notifyActionSuccess("${refreshedText}", recordName);
+								notifyActionSuccess("${refreshedText}", recordName, reusableAlert);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
@@ -242,11 +242,12 @@ Display user jobs and jobs configuration
 										url: "${pageContext.request.contextPath}/deleteJobs",
 										data: {ids: ids},
 										success: function (response) {
+											var reusableAlert = true;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccess("${recordsDeletedText}", ids, reusableAlert);
 											} else {
-												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 											}
 										},
 										error: ajaxErrorHandler
@@ -282,12 +283,12 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/runJob',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response)
-						{
+						success: function (response) {
+							var reusableAlert = true;
 							if (response.success) {
-								notifyActionSuccess("${runningText}", recordName);
+								notifyActionSuccess("${runningText}", recordName, reusableAlert);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
@@ -309,6 +310,10 @@ Display user jobs and jobs configuration
 				$('.datetimepicker').datetimepicker({
 					format: 'YYYY-MM-DD HH:mm:ss',
 					locale: '${pageContext.response.locale}'
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			}); //end document ready
@@ -338,7 +343,9 @@ Display user jobs and jobs configuration
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div class="row">

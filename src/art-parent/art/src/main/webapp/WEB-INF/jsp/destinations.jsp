@@ -86,14 +86,15 @@
 										url: "${pageContext.request.contextPath}/deleteDestinations",
 										data: {ids: ids},
 										success: function (response) {
+											var reusableAlert = true;
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccess("${recordsDeletedText}", ids, reusableAlert);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}", reusableAlert);
 											} else {
-												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 											}
 										},
 										error: ajaxErrorHandler
@@ -132,6 +133,10 @@
 					}
 				});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
 			}); //end document ready
 		</script>
 	</jsp:attribute>
@@ -153,7 +158,9 @@
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div style="margin-bottom: 10px;">

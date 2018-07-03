@@ -110,10 +110,12 @@ Admin rights configuration page
 						data: {action: action, admins: admins, datasources: datasources,
 							reportGroups: reportGroups},
 						success: function(response) {
+							var reusableAlert = true;
 							if (response.success) {
-								notifyActionSuccess(rightsUpdatedMessage);
+								var recordName = undefined;
+								notifyActionSuccess(rightsUpdatedMessage, recordName, reusableAlert);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
@@ -122,10 +124,12 @@ Admin rights configuration page
 
 				//handle select all/deselect all
 				addSelectDeselectAllHandler();
+				
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			}); //end document ready
-
-
 		</script>
 	</jsp:attribute>
 
@@ -143,7 +147,9 @@ Admin rights configuration page
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<div class="form-group">

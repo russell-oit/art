@@ -166,8 +166,7 @@
 								var grid = $('.grid-stack').data("gridstack");
 								grid.removeAll();
 							} else {
-								var reusable = true;
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: function (xhr) {
@@ -325,8 +324,7 @@
 											$("#newDashboardLink").show();
 										}
 									} else {
-										var reusable = true;
-										notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
+										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 									}
 								},
 								error: function (xhr) {

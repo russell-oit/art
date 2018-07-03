@@ -154,7 +154,7 @@ Reports configuration page
 							if (response.success) {
 								return response.data;
 							} else {
-								notifyActionError('${errorOccurredText}', escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 								return "";
 							}
 						},
@@ -276,7 +276,7 @@ Reports configuration page
 								setReportFields(report);
 								$("#editReport").show();
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -839,9 +839,9 @@ Reports configuration page
 											var rowSelector = "#row-" + recordId;
 											table.row(rowSelector).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 											$("#editReport").hide();
-											notifyActionSuccess("${recordDeletedText}", recordName);
+											notifyActionSuccessReusable("${recordDeletedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -873,7 +873,7 @@ Reports configuration page
 								table.cell(rowSelector, 2).data(recordName);
 								$.notify("${recordUpdatedText}", "success");
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -913,11 +913,11 @@ Reports configuration page
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -959,6 +959,11 @@ Reports configuration page
 				$("#refreshRecords").click(function () {
 					table.ajax.reload();
 				});
+				
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+				
 			});
 		</script>
 	</jsp:attribute>
@@ -993,7 +998,9 @@ Reports configuration page
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<div style="margin-bottom: 10px;">

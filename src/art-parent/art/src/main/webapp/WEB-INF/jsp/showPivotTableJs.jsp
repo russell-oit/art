@@ -368,8 +368,7 @@
 								}
 								$.notify("${reportSavedText}", "success");
 							} else {
-								var reusable = true;
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: function (xhr) {
@@ -426,8 +425,7 @@
 							} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
 								$.notify("${cannotDeleteReportText}", "error");
 							} else {
-								var reusable = true;
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: function (xhr) {

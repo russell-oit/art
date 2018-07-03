@@ -90,20 +90,22 @@
 							domain: domain, path: path, options: options,
 							action: action},
 						success: function (response) {
+							var reusableAlert = true;
 							if (response.success) {
-								var msg = alertCloseButton + "${connectionSuccessfulText}";
-								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								$.notify("${connectionSuccessfulText}", "success");
+								var recordName = undefined;
+								notifyActionSuccess("${connectionSuccessfulText}", recordName, reusableAlert);
 							} else {
-								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$.notify("${errorOccurredText}", "error");
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
-						error: function (xhr, status, error) {
+						error: function (xhr) {
 							bootbox.alert(xhr.responseText);
 						}
 					});
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 				//Enable Bootstrap-Select
@@ -275,7 +277,9 @@
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<input type="hidden" name="action" value="${action}">

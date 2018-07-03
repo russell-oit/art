@@ -475,19 +475,59 @@ function ajaxErrorHandler(xhr) {
 
 /**
  * Display notification if an action was successful. String arguments should be html escaped
+ * Message goes to a div with id "ajaxResponse". Alert created will be re-displayed
+ * if closed manually. Additional handler code needs to be added to enable re-display.
+ * 
+ * @param {string} actionText - message to display
+ * @param {string} [recordName] - name of record acted upon, if applicable 
+ */
+function notifyActionSuccessReusable(actionText, recordName) {
+	var reusableAlert = true;
+	notifyActionSuccess(actionText, recordName, reusableAlert);
+}
+
+/**
+ * Display notification if an action was successful. String arguments should be html escaped
  * Message goes to a div with id "ajaxResponse"
  * 
  * @param {string} actionText - message to display
  * @param {string} [recordName] - name of record acted upon, if applicable
+ * @param {boolean} reusableAlert - whether to create a reusable alert
  */
-function notifyActionSuccess(actionText, recordName) {
+function notifyActionSuccess(actionText, recordName, reusableAlert) {
 	var msg;
-	msg = alertCloseButton + actionText;
+	
+	if (reusableAlert) {
+		msg = reusableAlertCloseButton;
+	} else {
+		msg = alertCloseButton;
+	}
+	
+	msg += actionText;
 	if (recordName !== undefined) {
 		msg = msg + ": " + recordName;
 	}
+	
 	$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
+	if(reusableAlert){
+		$("#ajaxResponse").show();
+	}
+	
 	$.notify(actionText, "success");
+}
+
+/**
+ * Display notification if an action was not successful. String arguments should be html escaped
+ * Message goes to a div with id "ajaxResponse". Alert created will be re-displayed
+ * if closed manually. Additional handler code needs to be added to enable re-display.
+ * 
+ * @param {string} errorOccurredText - basic error occurred message
+ * @param {string} errorMessage - error details
+ * @param {boolean} showErrors - whether to show error details 
+ */
+function notifyActionErrorReusable(errorOccurredText, errorMessage, showErrors) {
+	var reusableAlert = true;
+	notifyActionError(errorOccurredText, errorMessage, showErrors, reusableAlert);
 }
 
 /**
@@ -497,12 +537,12 @@ function notifyActionSuccess(actionText, recordName) {
  * @param {string} errorOccurredText - basic error occurred message
  * @param {string} errorMessage - error details
  * @param {boolean} showErrors - whether to show error details
- * @param {boolean} reusable - whether to create a reusable alert
+ * @param {boolean} reusableAlert - whether to create a reusable alert
  */
-function notifyActionError(errorOccurredText, errorMessage, showErrors, reusable) {
+function notifyActionError(errorOccurredText, errorMessage, showErrors, reusableAlert) {
 	var msg;
 	
-	if (reusable) {
+	if (reusableAlert) {
 		msg = reusableAlertCloseButton;
 	} else {
 		msg = alertCloseButton;
@@ -514,7 +554,7 @@ function notifyActionError(errorOccurredText, errorMessage, showErrors, reusable
 	}
 	
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-	if(reusable){
+	if(reusableAlert){
 		$("#ajaxResponse").show();
 	}
 	
@@ -545,14 +585,36 @@ function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedR
 
 /**
  * Display notification if record cannot be deleted because important linked records exist.
+ * String arguments should be html escaped. Message goes to a div with id "ajaxResponse".
+ * Alert created will be re-displayed  * if closed manually.
+ * Additional handler code needs to be added to enable re-display.
+ * 
+ * @param {array} nonDeletedRecords - array with names of non-deleted records
+ * @param {string} someRecordsNotDeletedText - basic message shown in notification 
+ */
+function notifySomeRecordsNotDeletedReusable(nonDeletedRecords, someRecordsNotDeletedText) {
+	var reusableAlert = true;
+	notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedText, reusableAlert);
+}
+
+/**
+ * Display notification if record cannot be deleted because important linked records exist.
  * String arguments should be html escaped. Message goes to a div with id "ajaxResponse"
  * 
  * @param {array} nonDeletedRecords - array with names of non-deleted records
  * @param {string} someRecordsNotDeletedText - basic message shown in notification
+ * @param {boolean} reusableAlert - whether to create a reusable alert
  */
-function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedText) {
+function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedText, reusableAlert) {
 	var msg;
-	msg = alertCloseButton + someRecordsNotDeletedText + "<ul>";
+	
+	if (reusableAlert) {
+		msg = reusableAlertCloseButton;
+	} else {
+		msg = alertCloseButton;
+	}
+	
+	msg += someRecordsNotDeletedText + "<ul>";
 
 	$.each(nonDeletedRecords, function (index, value) {
 		msg += "<li>" + value + "</li>";
@@ -561,6 +623,10 @@ function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedTex
 	msg += "</ul>";
 
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+	if(reusableAlert){
+		$("#ajaxResponse").show();
+	}
+	
 	$.notify(someRecordsNotDeletedText, "error");
 }
 

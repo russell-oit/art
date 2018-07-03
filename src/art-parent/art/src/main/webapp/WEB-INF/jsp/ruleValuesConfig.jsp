@@ -120,9 +120,9 @@ Configure rule value
 							rule: rule, ruleValue: ruleValue},
 						success: function(response) {
 							if (response.success) {
-								notifyActionSuccess(valuesUpdatedMessage);
+								notifyActionSuccessReusable(valuesUpdatedMessage);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -131,6 +131,10 @@ Configure rule value
 
 				//handle select all/deselect all
 				addSelectDeselectAllHandler();
+				
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			}); //end document ready
 		</script>
@@ -150,7 +154,9 @@ Configure rule value
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<div class="form-group">

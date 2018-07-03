@@ -28,14 +28,14 @@ Display rule values
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="ruleValuesConfig"]').parent().addClass('active');
 
 				var tbl = $('#values');
-				
+
 				var columnFilterRow = createColumnFilters(tbl);
 
 				//initialize datatable and process delete action
@@ -49,7 +49,7 @@ Display rule values
 					},
 					initComplete: datatablesInitComplete
 				});
-				
+
 				//move column filter row after heading row
 				columnFilterRow.insertAfter(columnFilterRow.next());
 
@@ -84,9 +84,9 @@ Display rule values
 									success: function (response) {
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${valueRemovedText}", recordName);
+											notifyActionSuccessReusable("${valueRemovedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -94,6 +94,10 @@ Display rule values
 							} //end if result
 						} //end callback
 					}); //end bootbox confirm
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			});
@@ -117,7 +121,9 @@ Display rule values
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<table id="values" class="table table-striped table-bordered">

@@ -54,8 +54,7 @@ Display section to allow selecting of report parameters and initiate running of 
 					if (response.success) {
 						$.notify("${fileSentText}", "success");
 					} else {
-						var reusable = true;
-						notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
+						notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 					}
 				},
 				error: function (xhr) {
@@ -113,11 +112,10 @@ Display section to allow selecting of report parameters and initiate running of 
 					if (response.success) {
 						$.notify("${parametersSavedText}", "success");
 					} else {
-						var reusable = true;
-						notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
+						notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 					}
 				},
-				error: function (xhr, status, error) {
+				error: function (xhr) {
 					bootbox.alert({
 						title: '${errorOccurredText}',
 						message: xhr.responseText
@@ -140,11 +138,10 @@ Display section to allow selecting of report parameters and initiate running of 
 					if (response.success) {
 						$.notify("${parametersClearedText}", "success");
 					} else {
-						var reusable = true;
-						notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusable);
+						notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 					}
 				},
-				error: function (xhr, status, error) {
+				error: function (xhr) {
 					bootbox.alert({
 						title: '${errorOccurredText}',
 						message: xhr.responseText

@@ -77,6 +77,10 @@
 						this.qs2.cache();
 					}
 				});
+				
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			});
 
@@ -106,18 +110,13 @@
 					url: "${pageContext.request.contextPath}/updateReportGroupMembership",
 					data: {action: action, reports: reports, reportGroups: reportGroups},
 					success: function(response) {
-						var msg;
 						if (response.success) {
-							msg = alertCloseButton + recordsUpdatedMessage;
-							$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-							$.notify(recordsUpdatedMessage, "success");
+							notifyActionSuccessReusable(recordsUpdatedMessage);
 						} else {
-							msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-							$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-							$.notify("${errorOccurredText}", "error");
+							notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 						}
 					},
-					error: function(xhr, status, error) {
+					error: function(xhr) {
 						bootbox.alert(xhr.responseText);
 					}
 				}); //end ajax
@@ -157,7 +156,9 @@
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<div class="form-group">

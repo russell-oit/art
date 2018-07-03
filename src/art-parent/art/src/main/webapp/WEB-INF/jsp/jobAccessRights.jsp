@@ -80,11 +80,12 @@
 									url: "${pageContext.request.contextPath}/deleteAccessRight",
 									data: {id: recordId},
 									success: function (response) {
+										var reusableAlert = true;
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${rightsRevokedText}", recordName);
+											notifyActionSuccess("${rightsRevokedText}", recordName, reusableAlert);
 										} else {
-											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 										}
 									},
 									error: ajaxErrorHandler
@@ -92,6 +93,10 @@
 							} //end if result
 						} //end callback
 					}); //end bootbox confirm
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			});
@@ -109,9 +114,11 @@
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
-		
+
 		<div class="text-center">
 			<b><spring:message code="jobs.text.job"/>:</b> ${encode:forHtmlContent(job.name)} (${job.jobId})
 		</div>

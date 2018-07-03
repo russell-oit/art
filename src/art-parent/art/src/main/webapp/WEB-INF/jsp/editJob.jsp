@@ -217,8 +217,7 @@
 						dataType: 'json',
 						data: {second: second, minute: minute, hour: hour, day: day,
 							month: month, weekday: weekday, year: year},
-						success: function (response)
-						{
+						success: function (response) {
 							if (response.success) {
 								var scheduleDescription = response.data;
 								var finalString = "<p><pre>" + escapeHtmlContent(scheduleDescription.description)
@@ -227,38 +226,16 @@
 										+ "</pre></p>";
 								$("#mainScheduleDescriptionDiv").html(finalString);
 							} else {
-								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$.notify("${errorOccurredText}", "error");
+								var reusableAlert = true;
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
-						error: function (xhr, status, error) {
+						error: function (xhr) {
 							bootbox.alert(xhr.responseText);
 						}
 					});
 				});
-
-				var optionsEditor = ace.edit("optionsEditor");
-				optionsEditor.$blockScrolling = Infinity;
-				optionsEditor.getSession().setMode("ace/mode/json");
-				optionsEditor.setHighlightActiveLine(false);
-				optionsEditor.setShowPrintMargin(false);
-				optionsEditor.setOption("showLineNumbers", false);
-				optionsEditor.setOption("maxLines", 20);
-				optionsEditor.setOption("minLines", 7);
-				document.getElementById('optionsEditor').style.fontSize = '14px';
-
-				var options = $('#options');
-				optionsEditor.getSession().setValue(options.val());
-				optionsEditor.getSession().on('change', function () {
-					options.val(optionsEditor.getSession().getValue());
-				});
-
-			});
-		</script>
-
-		<script type="text/javascript">
-			$(function () {
+				
 				$('#getSchedule').click(function () {
 					var recordId = $('#schedules option:selected').val();
 
@@ -293,16 +270,38 @@
 									$('#sharedHolidays').selectpicker('val', sharedHolidayIds);
 								}
 							} else {
-								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$.notify("${errorOccurredText}", "error");
+								var reusableAlert = true;
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
 					});
 				});
-			});
+				
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
+				var optionsEditor = ace.edit("optionsEditor");
+				optionsEditor.$blockScrolling = Infinity;
+				optionsEditor.getSession().setMode("ace/mode/json");
+				optionsEditor.setHighlightActiveLine(false);
+				optionsEditor.setShowPrintMargin(false);
+				optionsEditor.setOption("showLineNumbers", false);
+				optionsEditor.setOption("maxLines", 20);
+				optionsEditor.setOption("minLines", 7);
+				document.getElementById('optionsEditor').style.fontSize = '14px';
+
+				var options = $('#options');
+				optionsEditor.getSession().setValue(options.val());
+				optionsEditor.getSession().on('change', function () {
+					options.val(optionsEditor.getSession().getValue());
+				});
+
+			});
+		</script>
+
+		<script type="text/javascript">			
 			function populateOutputFormatField() {
 				var list = $("#outputFormat");
 				var jobType = $('#jobType option:selected').val();
@@ -527,7 +526,9 @@
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<input type="hidden" name="action" value="${action}">

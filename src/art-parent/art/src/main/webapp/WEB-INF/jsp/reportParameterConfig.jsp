@@ -74,9 +74,9 @@
 					sRequestType: "POST",
 					fnSuccess: function (response) {
 						if (response.success) {
-							notifyActionSuccess("${recordMovedText}", escapeHtmlContent(response.data));
+							notifyActionSuccessReusable("${recordMovedText}", escapeHtmlContent(response.data));
 						} else {
-							notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+							notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 						}
 					},
 					fnAlert: function (message) {
@@ -114,9 +114,9 @@
 										success: function (response) {
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -127,6 +127,10 @@
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			}); //end document ready
@@ -150,7 +154,9 @@
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div class="text-center">

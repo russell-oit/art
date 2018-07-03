@@ -108,9 +108,9 @@
 							roles: roles, permissions: permissions},
 						success: function (response) {
 							if (response.success) {
-								notifyActionSuccess(permissionsUpdatedMessage);
+								notifyActionSuccessReusable(permissionsUpdatedMessage);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -119,6 +119,10 @@
 
 				//handle select all/deselect all
 				addSelectDeselectAllHandler();
+				
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			}); //end document ready
 		</script>
@@ -138,7 +142,9 @@
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<div class="form-group">

@@ -117,10 +117,12 @@
 						data: {action: action, users: users, userGroups: userGroups,
 							parameter: parameter, value: value},
 						success: function (response) {
+							var reusableAlert = true;
 							if (response.success) {
-								notifyActionSuccess(valuesUpdatedMessage);
+								var recordName = undefined;
+								notifyActionSuccess(valuesUpdatedMessage, recordName, reusableAlert);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 							}
 						},
 						error: ajaxErrorHandler
@@ -129,6 +131,10 @@
 
 				//handle select all/deselect all
 				addSelectDeselectAllHandler();
+				
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			}); //end document ready
 		</script>
@@ -148,7 +154,9 @@
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<div class="form-group">

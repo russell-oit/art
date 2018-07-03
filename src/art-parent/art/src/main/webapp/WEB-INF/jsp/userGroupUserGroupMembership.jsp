@@ -26,14 +26,14 @@
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="userGroups"]').parent().addClass('active');
 
 				var tbl = $('#memberships');
-				
+
 				var columnFilterRow = createColumnFilters(tbl);
 
 				//initialize datatable and process delete action
@@ -47,7 +47,7 @@
 					},
 					initComplete: datatablesInitComplete
 				});
-				
+
 				//move column filter row after heading row
 				columnFilterRow.insertAfter(columnFilterRow.next());
 
@@ -82,9 +82,9 @@
 									success: function (response) {
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${membershipRemovedText}", recordName);
+											notifyActionSuccessReusable("${membershipRemovedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -94,6 +94,9 @@
 					}); //end bootbox confirm
 				});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			});
 		</script>
@@ -110,9 +113,11 @@
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
-		
+
 		<div class="text-center">
 			<b><spring:message code="page.text.userGroup"/>:</b> ${encode:forHtmlContent(userGroup.name)}
 		</div>

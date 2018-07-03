@@ -28,14 +28,14 @@ Display user group membership
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="userGroupMembershipConfig"]').parent().addClass('active');
 
 				var tbl = $('#memberships');
-				
+
 				var columnFilterRow = createColumnFilters(tbl);
 
 				//initialize datatable and process delete action
@@ -49,7 +49,7 @@ Display user group membership
 					},
 					initComplete: datatablesInitComplete
 				});
-				
+
 				//move column filter row after heading row
 				columnFilterRow.insertAfter(columnFilterRow.next());
 
@@ -84,9 +84,9 @@ Display user group membership
 									success: function (response) {
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${membershipRemovedText}", recordName);
+											notifyActionSuccessReusable("${membershipRemovedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -96,6 +96,9 @@ Display user group membership
 					}); //end bootbox confirm
 				});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			});
 		</script>
@@ -112,7 +115,9 @@ Display user group membership
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<table id="memberships" class="table table-striped table-bordered">

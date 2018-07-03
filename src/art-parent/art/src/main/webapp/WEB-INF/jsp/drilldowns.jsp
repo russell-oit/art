@@ -114,11 +114,12 @@ Display report drilldowns
 									url: "${pageContext.request.contextPath}/deleteDrilldown",
 									data: {id: recordId},
 									success: function (response) {
+										var reusableAlert = true;
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${recordDeletedText}", recordName);
+											notifyActionSuccess("${recordDeletedText}", recordName, reusableAlert);
 										} else {
-											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 										}
 									},
 									error: ajaxErrorHandler
@@ -134,10 +135,11 @@ Display report drilldowns
 					sURL: "moveDrilldown",
 					sRequestType: "POST",
 					fnSuccess: function (response) {
+						var reusableAlert = true;
 						if (response.success) {
-							notifyActionSuccess("${recordMovedText}", escapeHtmlContent(response.data));
+							notifyActionSuccess("${recordMovedText}", escapeHtmlContent(response.data), reusableAlert);
 						} else {
-							notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+							notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 						}
 					},
 					fnAlert: function (message) {
@@ -173,11 +175,12 @@ Display report drilldowns
 										url: "${pageContext.request.contextPath}/deleteDrilldowns",
 										data: {ids: ids},
 										success: function (response) {
+											var reusableAlert = true;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccess("${recordsDeletedText}", ids, reusableAlert);
 											} else {
-												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors});
+												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
 											}
 										},
 										error: ajaxErrorHandler
@@ -188,6 +191,10 @@ Display report drilldowns
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			}); //end document ready
@@ -211,7 +218,9 @@ Display report drilldowns
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div class="text-center">
