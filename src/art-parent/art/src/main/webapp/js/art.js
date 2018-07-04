@@ -569,9 +569,30 @@ function notifyActionError(errorOccurredText, errorMessage, showErrors, reusable
  * @param {string} cannotDeleteRecordText - basic message shown in notification
  * @param {string} linkedRecordsExistText - more detailed message shown in div
  */
-function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText) {
+function notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText) {
+	var reusableAlert = true;
+	notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText, reusableAlert);
+}
+
+/**
+ * Display notification if record cannot be deleted because important linked records exist.
+ * String arguments should be html escaped. Message goes to a div with id "ajaxResponse"
+ * 
+ * @param {array} linkedRecords - array with names of linked records
+ * @param {string} cannotDeleteRecordText - basic message shown in notification
+ * @param {string} linkedRecordsExistText - more detailed message shown in div
+ * @param {boolean} reusableAlert - whether to create a reusable alert
+ */
+function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText, reusableAlert) {
 	var msg;
-	msg = alertCloseButton + linkedRecordsExistText + "<ul>";
+	
+	if (reusableAlert) {
+		msg = reusableAlertCloseButton;
+	} else {
+		msg = alertCloseButton;
+	}
+	
+	msg += linkedRecordsExistText + "<ul>";
 
 	$.each(linkedRecords, function (index, value) {
 		msg += "<li>" + value + "</li>";
@@ -580,6 +601,10 @@ function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedR
 	msg += "</ul>";
 
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+	if(reusableAlert){
+		$("#ajaxResponse").show();
+	}
+	
 	$.notify(cannotDeleteRecordText, "error");
 }
 
@@ -651,11 +676,11 @@ function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
 		if (deleteRow) {
 			table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 		}
-		notifyActionSuccess(recordDeletedText, recordName);
+		notifyActionSuccessReusable(recordDeletedText, recordName);
 	} else if (linkedRecords !== null && linkedRecords.length > 0) {
-		notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
+		notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
 	} else {
-		notifyActionError(errorOccurredText, escapeHtmlContent(response.errorMessage));
+		notifyActionErrorReusable(errorOccurredText, escapeHtmlContent(response.errorMessage));
 	}
 }
 
