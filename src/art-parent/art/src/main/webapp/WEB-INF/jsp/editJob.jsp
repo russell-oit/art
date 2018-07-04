@@ -220,11 +220,8 @@
 						success: function (response) {
 							if (response.success) {
 								var scheduleDescription = response.data;
-								var finalString = "<p><pre>" + escapeHtmlContent(scheduleDescription.description)
-										+ "</pre><b>${nextRunDateText}:</b> <pre>"
-										+ escapeHtmlContent(scheduleDescription.nextRunDateString)
-										+ "</pre></p>";
-								$("#mainScheduleDescriptionDiv").html(finalString);
+								$("#mainDescription").html(escapeHtmlContent(scheduleDescription.description));
+								$("#mainNextRunDate").html(escapeHtmlContent(scheduleDescription.nextRunDateString));
 							} else {
 								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
@@ -234,7 +231,7 @@
 						}
 					});
 				});
-				
+
 				$('#getSchedule').click(function () {
 					var recordId = $('#schedules option:selected').val();
 
@@ -243,8 +240,7 @@
 						url: '${pageContext.request.contextPath}/getSchedule',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response)
-						{
+						success: function (response) {
 							var schedule = response.data;
 
 							if (response.success) {
@@ -267,6 +263,9 @@
 										sharedHolidayIds.push(holiday.holidayId);
 									});
 									$('#sharedHolidays').selectpicker('val', sharedHolidayIds);
+
+									$("#mainDescription").html("");
+									$("#mainNextRunDate").html("");
 								}
 							} else {
 								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
@@ -275,7 +274,7 @@
 						error: ajaxErrorHandler
 					});
 				});
-				
+
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
 					$(this).parent().hide();
 				});
@@ -299,7 +298,7 @@
 			});
 		</script>
 
-		<script type="text/javascript">			
+		<script type="text/javascript">
 			function populateOutputFormatField() {
 				var list = $("#outputFormat");
 				var jobType = $('#jobType option:selected').val();
@@ -1012,10 +1011,9 @@
 							</button>
 							<div id="mainScheduleDescriptionDiv">
 								<p>
-									<c:if test="${not empty mainScheduleDescription}">
-									<pre>${encode:forHtmlContent(mainScheduleDescription)}</pre>
-									<b><spring:message code="jobs.text.nextRunDate"/>:</b> <pre><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
-								</c:if>
+								<pre id="mainDescription">${encode:forHtmlContent(mainScheduleDescription)}</pre>
+								<b><spring:message code="jobs.text.nextRunDate"/>:</b> 
+								<pre id="mainNextRunDate"><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
 								</p>
 							</div>
 						</div>
