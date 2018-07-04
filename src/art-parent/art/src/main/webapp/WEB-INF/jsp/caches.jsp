@@ -47,7 +47,7 @@ Page to allow manual clearing of caches
 
 				tbl.find('tbody').on('click', '.clearCache', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 
 					$.ajax({

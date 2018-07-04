@@ -61,7 +61,7 @@ Display current admin rights
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 					bootbox.confirm({
 						message: "${revokeText}: <b>" + recordName + "</b>",

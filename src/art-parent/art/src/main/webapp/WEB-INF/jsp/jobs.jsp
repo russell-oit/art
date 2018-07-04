@@ -110,7 +110,7 @@ Display user jobs and jobs configuration
 
 				tbl.find('tbody').on('click', '.run', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 
 					$.ajax({
@@ -131,7 +131,7 @@ Display user jobs and jobs configuration
 
 				tbl.find('tbody').on('click', '.runLater', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 
 					var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -165,7 +165,7 @@ Display user jobs and jobs configuration
 
 				tbl.find('tbody').on('click', '.refresh', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 
 					$.ajax({

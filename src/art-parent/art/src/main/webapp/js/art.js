@@ -746,7 +746,9 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 	//delete record
 	tbl.find('tbody').on('click', deleteButtonSelector, function () {
 		var row = $(this).closest("tr"); //jquery object
-		var recordName = escapeHtmlContent(row.data("name"));
+		//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
+		//https://stackoverflow.com/questions/10958047/issue-with-jquery-data-treating-string-as-number
+		var recordName = escapeHtmlContent(row.attr("data-name"));
 		var recordId = row.data("id");
 
 		if (showConfirmDialog) {
