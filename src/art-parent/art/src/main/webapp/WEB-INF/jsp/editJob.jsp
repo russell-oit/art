@@ -226,8 +226,7 @@
 										+ "</pre></p>";
 								$("#mainScheduleDescriptionDiv").html(finalString);
 							} else {
-								var reusableAlert = true;
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: function (xhr) {
@@ -270,8 +269,7 @@
 									$('#sharedHolidays').selectpicker('val', sharedHolidayIds);
 								}
 							} else {
-								var reusableAlert = true;
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

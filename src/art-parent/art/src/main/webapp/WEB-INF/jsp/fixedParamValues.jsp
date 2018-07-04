@@ -80,12 +80,11 @@
 									url: "${pageContext.request.contextPath}/deleteFixedParamValue",
 									data: {id: recordId},
 									success: function (response) {
-										var reusableAlert = true;
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${valueRemovedText}", recordName, reusableAlert);
+											notifyActionSuccessReusable("${valueRemovedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler

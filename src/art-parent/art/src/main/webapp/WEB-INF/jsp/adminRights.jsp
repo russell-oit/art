@@ -82,12 +82,11 @@ Display current admin rights
 									url: "${pageContext.request.contextPath}/deleteAdminRight",
 									data: {id: recordId},
 									success: function (response) {
-										var reusableAlert = true;
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${rightsRevokedText}", recordName, reusableAlert);
+											notifyActionSuccessReusable("${rightsRevokedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler

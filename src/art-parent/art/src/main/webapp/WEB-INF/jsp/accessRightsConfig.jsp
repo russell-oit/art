@@ -111,12 +111,10 @@ Access rights configuration
 							reports: reports, reportGroups: reportGroups,
 							jobs: jobs},
 						success: function (response) {
-							var reusableAlert = true;
 							if (response.success) {
-								var recordName = undefined;
-								notifyActionSuccess(rightsUpdatedMessage, recordName, reusableAlert);
+								notifyActionSuccessReusable(rightsUpdatedMessage);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

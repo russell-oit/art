@@ -117,12 +117,10 @@
 						data: {action: action, users: users, userGroups: userGroups,
 							parameter: parameter, value: value},
 						success: function (response) {
-							var reusableAlert = true;
 							if (response.success) {
-								var recordName = undefined;
-								notifyActionSuccess(valuesUpdatedMessage, recordName, reusableAlert);
+								notifyActionSuccessReusable(valuesUpdatedMessage);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

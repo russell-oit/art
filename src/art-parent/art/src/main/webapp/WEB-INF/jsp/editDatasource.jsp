@@ -81,12 +81,10 @@ Edit datasource page
 							password: password, useBlankPassword: useBlankPassword,
 							action: action},
 						success: function (response) {
-							var reusableAlert = true;
 							if (response.success) {
-								var recordName = undefined;
-								notifyActionSuccess("${connectionSuccessfulText}", recordName, reusableAlert);
+								notifyActionSuccessReusable("${connectionSuccessfulText}");
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: function (xhr) {

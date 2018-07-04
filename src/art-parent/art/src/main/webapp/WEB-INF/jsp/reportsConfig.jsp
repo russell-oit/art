@@ -864,14 +864,10 @@ Reports configuration page
 						success: function (response) {
 							if (response.success) {
 								//https://stackoverflow.com/questions/41524345/bootstrap-alert-div-is-not-display-on-second-ajax-request-when-cancel-on-first-a
-								var msg;
-								msg = reusableAlertCloseButton + "${recordUpdatedText}";
-								msg = msg + ": " + recordName + " (" + recordId + ")";
-								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								$("#ajaxResponse").show();
 								var rowSelector = "#row-" + recordId;
 								table.cell(rowSelector, 2).data(recordName);
-								$.notify("${recordUpdatedText}", "success");
+								var recordNameWithId = recordName + " (" + recordId + ")";
+								notifyActionSuccessReusable("${recordUpdatedText}", recordNameWithId);
 							} else {
 								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}

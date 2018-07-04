@@ -58,7 +58,6 @@ Page to display connections status
 						url: "${pageContext.request.contextPath}/refreshConnectionPool",
 						data: {id: recordId},
 						success: function (response) {
-							var reusableAlert = true;
 							if (response.success) {
 								var pool = response.data;
 
@@ -67,9 +66,9 @@ Page to display connections status
 								table.cell(row, 5).data(pool.inUseCount);
 								table.cell(row, 6).data(pool.totalConnectionRequests);
 
-								notifyActionSuccess("${connectionResetText}", recordName, reusableAlert);
+								notifyActionSuccessReusable("${connectionResetText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

@@ -56,11 +56,10 @@ Page to allow manual clearing of caches
 						url: "${pageContext.request.contextPath}/clearCache",
 						data: {id: recordId},
 						success: function (response) {
-							var reusableAlert = true;
 							if (response.success) {
-								notifyActionSuccess("${cacheClearedText}", recordName, reusableAlert);
+								notifyActionSuccessReusable("${cacheClearedText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -73,12 +72,10 @@ Page to allow manual clearing of caches
 						url: '${pageContext.request.contextPath}/clearAllCaches',
 						dataType: 'json',
 						success: function (response) {
-							var reusableAlert = true;
 							if (response.success) {
-								var recordName = undefined;
-								notifyActionSuccess("${cachesClearedText}", recordName, reusableAlert);
+								notifyActionSuccessReusable("${cachesClearedText}");
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler

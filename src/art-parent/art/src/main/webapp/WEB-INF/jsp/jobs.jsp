@@ -119,11 +119,10 @@ Display user jobs and jobs configuration
 						dataType: 'json',
 						data: {id: recordId},
 						success: function (response) {
-							var reusableAlert = true;
 							if (response.success) {
-								notifyActionSuccess("${runningText}", recordName, reusableAlert);
+								notifyActionSuccessReusable("${runningText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -153,12 +152,11 @@ Display user jobs and jobs configuration
 						dataType: 'json',
 						data: $('#runLaterForm').serialize(),
 						success: function (response) {
-							var reusableAlert = true;
 							$("#runLaterModal").modal('hide');
 							if (response.success) {
-								notifyActionSuccess("${scheduledText}", recordName, reusableAlert);
+								notifyActionSuccessReusable("${scheduledText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -176,7 +174,6 @@ Display user jobs and jobs configuration
 						dataType: 'json',
 						data: {id: recordId},
 						success: function (response) {
-							var reusableAlert = true;
 							if (response.success) {
 								var job = response.data;
 
@@ -206,9 +203,9 @@ Display user jobs and jobs configuration
 								table.cell(row, 5).data(result);
 								table.cell(row, 6).data(job.nextRunDateString);
 
-								notifyActionSuccess("${refreshedText}", recordName, reusableAlert);
+								notifyActionSuccessReusable("${refreshedText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -242,12 +239,11 @@ Display user jobs and jobs configuration
 										url: "${pageContext.request.contextPath}/deleteJobs",
 										data: {ids: ids},
 										success: function (response) {
-											var reusableAlert = true;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids, reusableAlert);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -284,11 +280,10 @@ Display user jobs and jobs configuration
 						dataType: 'json',
 						data: {id: recordId},
 						success: function (response) {
-							var reusableAlert = true;
 							if (response.success) {
-								notifyActionSuccess("${runningText}", recordName, reusableAlert);
+								notifyActionSuccessReusable("${runningText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", response.errorMessage, ${showErrors}, reusableAlert);
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
