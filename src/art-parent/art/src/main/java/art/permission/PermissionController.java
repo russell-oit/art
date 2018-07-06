@@ -19,8 +19,11 @@ package art.permission;
 
 import art.general.AjaxResponse;
 import art.role.RoleService;
+import art.rolepermission.RolePermissionService;
 import art.user.UserService;
 import art.usergroup.UserGroupService;
+import art.usergrouppermission.UserGroupPermissionService;
+import art.userpermission.UserPermissionService;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +56,15 @@ public class PermissionController {
 
 	@Autowired
 	private RoleService roleService;
+	
+	@Autowired
+	private UserPermissionService userPermissionService;
+	
+	@Autowired
+	private UserGroupPermissionService userGroupPermissionService;
+	
+	@Autowired
+	private RolePermissionService rolePermissionService;
 
 	@RequestMapping(value = "/permissionsConfig", method = RequestMethod.GET)
 	public String showPermissionsConfig(Model model) {
@@ -92,6 +104,39 @@ public class PermissionController {
 		}
 
 		return response;
+	}
+
+	@RequestMapping(value = "/permissions", method = RequestMethod.GET)
+	public String showPermissions(Model model) {
+		logger.debug("Entering showPermissions");
+
+		try {
+			model.addAttribute("permissions", permissionService.getAllPermissions());
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "permissions";
+	}
+
+	@RequestMapping(value = "/permissionUsage", method = RequestMethod.GET)
+	public String showPermissionUsage(Model model,
+			@RequestParam("permissionId") Integer permissionId) {
+
+		logger.debug("Entering showPermissionUsage");
+
+		try {
+			model.addAttribute("permission", permissionService.getPermission(permissionId));
+			model.addAttribute("userPermissions", userPermissionService.getUserPermissionsForPermission(permissionId));
+			model.addAttribute("userGroupPermissions", userGroupPermissionService.getUserGroupPermissionsForPermission(permissionId));
+			model.addAttribute("rolePermissions", rolePermissionService.getRolePermissionsForPermission(permissionId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "permissionUsage";
 	}
 
 }

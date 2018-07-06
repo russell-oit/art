@@ -480,7 +480,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("configure_roles")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "permissionsConfig")
+		} else if (StringUtils.equalsAny(page, "permissionsConfig", "permissions",
+				"permissionUsage")
 				|| StringUtils.endsWithAny(page, "Permission", "Permissions")) {
 			if (user.hasPermission("configure_permissions")) {
 				authorised = true;

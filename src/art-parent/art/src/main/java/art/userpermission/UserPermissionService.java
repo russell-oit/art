@@ -126,6 +126,21 @@ public class UserPermissionService {
 		ResultSetHandler<List<UserPermission>> h = new BeanListHandler<>(UserPermission.class, new UserPermissionMapper());
 		return dbService.query(sql, h, userId);
 	}
+	
+	/**
+	 * Returns the user permissions for a given permission
+	 *
+	 * @param permissionId the id of the permission
+	 * @return user permissions for a given permission
+	 * @throws SQLException
+	 */
+	public List<UserPermission> getUserPermissionsForPermission(int permissionId) throws SQLException {
+		logger.debug("Entering getUserPermissionsForPermission: permissionId={}", permissionId);
+
+		String sql = SQL_SELECT_ALL + " WHERE AP.PERMISSION_ID=?";
+		ResultSetHandler<List<UserPermission>> h = new BeanListHandler<>(UserPermission.class, new UserPermissionMapper());
+		return dbService.query(sql, h, permissionId);
+	}
 
 	/**
 	 * Deletes a user permission

@@ -126,6 +126,21 @@ public class UserGroupPermissionService {
 		ResultSetHandler<List<UserGroupPermission>> h = new BeanListHandler<>(UserGroupPermission.class, new UserGroupPermissionMapper());
 		return dbService.query(sql, h, userGroupId);
 	}
+	
+	/**
+	 * Returns the user group permissions for a given permission
+	 *
+	 * @param permissionId the id of the permission
+	 * @return user group permissions for a given permission
+	 * @throws SQLException
+	 */
+	public List<UserGroupPermission> getUserGroupPermissionsForPermission(int permissionId) throws SQLException {
+		logger.debug("Entering getUserGroupPermissionsForPermission: permissionId={}", permissionId);
+
+		String sql = SQL_SELECT_ALL + " WHERE AP.PERMISSION_ID=?";
+		ResultSetHandler<List<UserGroupPermission>> h = new BeanListHandler<>(UserGroupPermission.class, new UserGroupPermissionMapper());
+		return dbService.query(sql, h, permissionId);
+	}
 
 	/**
 	 * Deletes a user group permission

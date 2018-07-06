@@ -21,6 +21,8 @@ import art.general.AjaxResponse;
 import art.permission.PermissionService;
 import art.role.RoleService;
 import java.sql.SQLException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +79,27 @@ public class RolePermissionController {
 
 		try {
 			rolePermissionService.updateRolePermissions(action, roles, permissions);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+	
+	@RequestMapping(value = "/deleteRolePermission", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteRolePermission(@RequestParam("id") String id) {
+		logger.debug("Entering deleteRolePermission: id='{}'", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		//id format = <role id>-<permission id>
+		String[] values = StringUtils.split(id, "-");
+
+		try {
+			rolePermissionService.deleteRolePermission(NumberUtils.toInt(values[0]), NumberUtils.toInt(values[1]));
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

@@ -167,7 +167,12 @@ Header that appears at the top of all pages, except the login and logs pages
 								<c:if test="${sessionUser.hasPermission('configure_permissions')}">
 									<li>
 										<a href="${pageContext.request.contextPath}/permissionsConfig">
-											<spring:message code="page.text.permissions"/>
+											<spring:message code="page.title.permissionsConfiguration"/>
+										</a>
+									</li>
+									<li>
+										<a id="permissionsMenu" href="${pageContext.request.contextPath}/permissions">
+											<spring:message code="page.title.permissions"/>
 										</a>
 									</li>
 								</c:if>

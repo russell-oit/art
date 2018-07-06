@@ -20,10 +20,14 @@ package art.rolepermission;
 import art.dbutils.DbService;
 import art.permission.Permission;
 import art.role.Role;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.dbutils.BasicRowProcessor;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +57,108 @@ public class RolePermissionService {
 		dbService = new DbService();
 	}
 
+	private final String SQL_SELECT_ALL
+			= "SELECT AR.ROLE_ID, AR.NAME AS ROLE_NAME, AP.PERMISSION_ID, AP.NAME AS PERMISSION_NAME"
+			+ " FROM ART_ROLE_PERMISSION_MAP ARPM"
+			+ " INNER JOIN ART_ROLES AR ON"
+			+ " ARPM.ROLE_ID=AR.ROLE_ID"
+			+ " INNER JOIN ART_PERMISSIONS AP ON"
+			+ " ARPM.PERMISSION_ID=AP.PERMISSION_ID";
+
+	/**
+	 * Maps a resultset to an object
+	 */
+	private class RolePermissionMapper extends BasicRowProcessor {
+
+		@Override
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<>();
+			while (rs.next()) {
+				list.add(toBean(rs, type));
+			}
+			return list;
+		}
+
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			RolePermission rolePermission = new RolePermission();
+
+			Role role = new Role();
+			role.setRoleId(rs.getInt("ROLE_ID"));
+			role.setName(rs.getString("ROLE_NAME"));
+
+			rolePermission.setRole(role);
+
+			Permission permission = new Permission();
+			permission.setPermissionId(rs.getInt("PERMISSION_ID"));
+			permission.setName(rs.getString("PERMISSION_NAME"));
+
+			rolePermission.setPermission(permission);
+
+			return type.cast(rolePermission);
+		}
+	}
+
+	/**
+	 * Returns all role permissions
+	 *
+	 * @return all role permissions
+	 * @throws SQLException
+	 */
+	public List<RolePermission> getAllRolePermissions() throws SQLException {
+		logger.debug("Entering getAllRolePermissions");
+
+		ResultSetHandler<List<RolePermission>> h = new BeanListHandler<>(RolePermission.class, new RolePermissionMapper());
+		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns the role permissions for a given role
+	 *
+	 * @param roleId the id of the role
+	 * @return role permissions for a given role
+	 * @throws SQLException
+	 */
+	public List<RolePermission> getRolePermissionsForRole(int roleId) throws SQLException {
+		logger.debug("Entering getRolePermissionsForRole: roleId={}", roleId);
+
+		String sql = SQL_SELECT_ALL + " WHERE AR.ROLE_ID=?";
+		ResultSetHandler<List<RolePermission>> h = new BeanListHandler<>(RolePermission.class, new RolePermissionMapper());
+		return dbService.query(sql, h, roleId);
+	}
+
+	/**
+	 * Returns the role permissions for a given permission
+	 *
+	 * @param permissionId the id of the permission
+	 * @return role permissions for a given permission
+	 * @throws SQLException
+	 */
+	public List<RolePermission> getRolePermissionsForPermission(int permissionId) throws SQLException {
+		logger.debug("Entering getRolePermissionsForPermission: permissionId={}", permissionId);
+
+		String sql = SQL_SELECT_ALL + " WHERE AP.PERMISSION_ID=?";
+		ResultSetHandler<List<RolePermission>> h = new BeanListHandler<>(RolePermission.class, new RolePermissionMapper());
+		return dbService.query(sql, h, permissionId);
+	}
+
+	/**
+	 * Deletes a role permission
+	 *
+	 * @param roleId the role id
+	 * @param permissionId the permission id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"permissions", "roles", "users", "userGroups"}, allEntries = true)
+	public void deleteRolePermission(int roleId, int permissionId) throws SQLException {
+		logger.debug("Entering deleteRolePermission: roleId={}, permissionId={}", roleId, permissionId);
+
+		String sql;
+
+		sql = "DELETE FROM ART_ROLE_PERMISSION_MAP WHERE ROLE_ID=? AND PERMISSION_ID=?";
+		dbService.update(sql, roleId, permissionId);
+	}
+
 	/**
 	 * Recreates role-permission records for a given role
 	 *
@@ -64,7 +170,7 @@ public class RolePermissionService {
 		logger.debug("Entering recreateRolePermissions: role={}", role);
 
 		int roleId = role.getRoleId();
-		
+
 		deleteAllPermissionsForRole(roleId);
 		addRolePermissions(roleId, role.getPermissions());
 	}
