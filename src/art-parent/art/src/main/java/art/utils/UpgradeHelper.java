@@ -942,6 +942,7 @@ public class UpgradeHelper {
 
 		String sql;
 
+		//https://stackoverflow.com/questions/25969/insert-into-values-select-from
 		sql = "INSERT INTO ART_USER_ROLE_MAP (USER_ID, ROLE_ID) SELECT USER_ID, ACCESS_LEVEL FROM ART_USERS";
 		dbService.update(sql);
 
