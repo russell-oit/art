@@ -20,10 +20,14 @@ package art.usergrouprole;
 import art.dbutils.DbService;
 import art.role.Role;
 import art.usergroup.UserGroup;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.dbutils.BasicRowProcessor;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +55,109 @@ public class UserGroupRoleService {
 
 	public UserGroupRoleService() {
 		dbService = new DbService();
+	}
+
+	private final String SQL_SELECT_ALL
+			= "SELECT AUG.USER_GROUP_ID, AUG.NAME AS USER_GROUP_NAME, AR.ROLE_ID, AR.NAME AS ROLE_NAME"
+			+ " FROM ART_USER_GROUP_ROLE_MAP AUGRM"
+			+ " INNER JOIN ART_USER_GROUPS AUG ON"
+			+ " AUGRM.USER_GROUP_ID=AUG.USER_GROUP_ID"
+			+ " INNER JOIN ART_ROLES AR ON"
+			+ " AUGRM.ROLE_ID=AR.ROLE_ID";
+
+	/**
+	 * Maps a resultset to an object
+	 */
+	private class UserGroupRoleMapper extends BasicRowProcessor {
+
+		@Override
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<>();
+			while (rs.next()) {
+				list.add(toBean(rs, type));
+			}
+			return list;
+		}
+
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			UserGroupRole userGroupRole = new UserGroupRole();
+
+			UserGroup userGroup = new UserGroup();
+			userGroup.setUserGroupId(rs.getInt("USER_GROUP_ID"));
+			userGroup.setName(rs.getString("USER_GROUP_NAME"));
+
+			userGroupRole.setUserGroup(userGroup);
+
+			Role role = new Role();
+			role.setRoleId(rs.getInt("ROLE_ID"));
+			role.setName(rs.getString("ROLE_NAME"));
+
+			userGroupRole.setRole(role);
+
+			return type.cast(userGroupRole);
+		}
+	}
+
+	/**
+	 * Returns all user group roles
+	 *
+	 * @return all user group roles
+	 * @throws SQLException
+	 */
+	public List<UserGroupRole> getAllUserGroupRoles() throws SQLException {
+		logger.debug("Entering getAllUserGroupRoles");
+
+		ResultSetHandler<List<UserGroupRole>> h = new BeanListHandler<>(UserGroupRole.class, new UserGroupRoleMapper());
+		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns the user group roles for a given user group
+	 *
+	 * @param userGroupId the id of the user group
+	 * @return user group roles for a given user group
+	 * @throws SQLException
+	 */
+	public List<UserGroupRole> getUserGroupRolesForUserGroup(int userGroupId) throws SQLException {
+		logger.debug("Entering getUserGroupRolesForUserGroup: userGroupId={}", userGroupId);
+
+		String sql = SQL_SELECT_ALL + " WHERE AUG.USER_GROUP_ID=?";
+		ResultSetHandler<List<UserGroupRole>> h = new BeanListHandler<>(UserGroupRole.class, new UserGroupRoleMapper());
+		return dbService.query(sql, h, userGroupId);
+	}
+
+	/**
+	 * Returns the user group roles for a given role
+	 *
+	 * @param roleId the id of the role
+	 * @return user group roles for a given role
+	 * @throws SQLException
+	 */
+	public List<UserGroupRole> getUserGroupRolesForRole(int roleId) throws SQLException {
+		logger.debug("Entering getUserGroupRolesForRole: roleId={}", roleId);
+
+		String sql = SQL_SELECT_ALL + " WHERE AR.ROLE_ID=?";
+		ResultSetHandler<List<UserGroupRole>> h = new BeanListHandler<>(UserGroupRole.class, new UserGroupRoleMapper());
+		return dbService.query(sql, h, roleId);
+	}
+
+	/**
+	 * Deletes a user group role
+	 *
+	 * @param userGroupId the user group id
+	 * @param roleId the role id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"roles", "userGroups", "users"}, allEntries = true)
+	public void deleteUserGroupRole(int userGroupId, int roleId) throws SQLException {
+		logger.debug("Entering deleteUserGroupRole: userGroupId={}, roleId={}",
+				userGroupId, roleId);
+
+		String sql;
+
+		sql = "DELETE FROM ART_USER_GROUP_ROLE_MAP WHERE USER_GROUP_ID=? AND ROLE_ID=?";
+		dbService.update(sql, userGroupId, roleId);
 	}
 
 	/**

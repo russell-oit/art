@@ -21,6 +21,8 @@ import art.general.AjaxResponse;
 import art.permission.PermissionService;
 import art.rolepermission.RolePermissionService;
 import art.user.User;
+import art.usergrouprole.UserGroupRoleService;
+import art.userrole.UserRoleService;
 import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -56,6 +58,12 @@ public class RoleController {
 
 	@Autowired
 	private RolePermissionService rolePermissionService;
+	
+	@Autowired
+	private UserRoleService userRoleService;
+	
+	@Autowired
+	private UserGroupRoleService userGroupRoleService;
 
 	@RequestMapping(value = "/roles", method = RequestMethod.GET)
 	public String showRoles(Model model) {
@@ -211,4 +219,23 @@ public class RoleController {
 
 		return "editRole";
 	}
+	
+	@RequestMapping(value = "/roleUsage", method = RequestMethod.GET)
+	public String showRoleUsage(Model model,
+			@RequestParam("roleId") Integer roleId) {
+
+		logger.debug("Entering showRoleUsage");
+
+		try {
+			model.addAttribute("role", roleService.getRole(roleId));
+			model.addAttribute("userRoles", userRoleService.getUserRolesForRole(roleId));
+			model.addAttribute("userGroupRoles", userGroupRoleService.getUserGroupRolesForRole(roleId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "roleUsage";
+	}
+	
 }
