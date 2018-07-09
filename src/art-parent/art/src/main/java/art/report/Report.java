@@ -177,6 +177,7 @@ public class Report implements Serializable {
 	private String pivotTableJsSavedOptions;
 	@Parsed
 	private String gridstackSavedOptions;
+	private String name2; //used for holding a processed report name e.g. in self service dashboard reports list
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -193,6 +194,20 @@ public class Report implements Serializable {
 	private String dtAction;
 	private String dtRowId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 	private String reportGroupNames; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
+
+	/**
+	 * @return the name2
+	 */
+	public String getName2() {
+		return name2;
+	}
+
+	/**
+	 * @param name2 the name2 to set
+	 */
+	public void setName2(String name2) {
+		this.name2 = name2;
+	}
 
 	/**
 	 * @return the dtName

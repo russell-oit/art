@@ -28,9 +28,9 @@ Display current admin rights
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="adminRightsConfig"]').parent().addClass('active');
 
@@ -49,7 +49,7 @@ Display current admin rights
 					},
 					initComplete: datatablesInitComplete
 				});
-				
+
 				//move column filter row after heading row
 				columnFilterRow.insertAfter(columnFilterRow.next());
 
@@ -61,7 +61,7 @@ Display current admin rights
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 					bootbox.confirm({
 						message: "${revokeText}: <b>" + recordName + "</b>",
@@ -84,9 +84,9 @@ Display current admin rights
 									success: function (response) {
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${rightsRevokedText}", recordName);
+											notifyActionSuccessReusable("${rightsRevokedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -96,6 +96,9 @@ Display current admin rights
 					}); //end bootbox confirm
 				});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			});
 		</script>
@@ -112,7 +115,9 @@ Display current admin rights
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<table id="rights" class="table table-striped table-bordered">

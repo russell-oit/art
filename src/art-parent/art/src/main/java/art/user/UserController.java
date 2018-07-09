@@ -26,6 +26,8 @@ import art.usergroup.UserGroupService;
 import art.usergroupmembership.UserGroupMembershipService2;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
+import art.role.RoleService;
+import art.userrole.UserRoleService;
 import art.utils.ArtHelper;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -80,6 +82,12 @@ public class UserController {
 
 	@Autowired
 	private MessageSource messageSource;
+
+	@Autowired
+	private RoleService roleService;
+
+	@Autowired
+	private UserRoleService userRoleService;
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
@@ -238,15 +246,7 @@ public class UserController {
 
 		model.addAttribute("multipleUserEdit", multipleUserEdit);
 
-		try {
-			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
-			model.addAttribute("accessLevels", getAccessLevels(session));
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return "editUsers";
+		return showEditUsers(model, session);
 	}
 
 	@RequestMapping(value = "/saveUser", method = RequestMethod.POST)
@@ -334,10 +334,11 @@ public class UserController {
 
 			try {
 				userGroupMembershipService2.recreateUserGroupMemberships(user);
+				userRoleService.recreateUserRoles(user);
 
 				if (user.isGenerateAndSend()) {
 					boolean newAccount;
-					if (StringUtils.equals(action, "add") || StringUtils.equals(action, "copy")) {
+					if (StringUtils.equalsAny(action, "add", "copy")) {
 						newAccount = true;
 					} else {
 						newAccount = false;
@@ -369,7 +370,7 @@ public class UserController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditUsers();
+			return showEditUsers(model, session);
 		}
 
 		try {
@@ -399,7 +400,7 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditUsers();
+		return showEditUsers(model, session);
 	}
 
 	/**
@@ -418,6 +419,7 @@ public class UserController {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
 			model.addAttribute("accessLevels", getAccessLevels(session));
+			model.addAttribute("roles", roleService.getAllRoles());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -434,44 +436,18 @@ public class UserController {
 	 *
 	 * @return returns the jsp file to display
 	 */
-	private String showEditUsers() {
+	private String showEditUsers(Model model, HttpSession session) {
 		logger.debug("Entering showEditUsers");
 
+		try {
+			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
+			model.addAttribute("accessLevels", getAccessLevels(session));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
 		return "editUsers";
-	}
-
-	/**
-	 * Returns the relevant access levels to be used in the edit user page
-	 *
-	 * @param session the http session
-	 * @return the access levels to be used
-	 */
-	private List<AccessLevel> getAccessLevels(HttpSession session) {
-		logger.debug("Entering getAccessLevels");
-
-		List<AccessLevel> levels = new ArrayList<>();
-
-		//add only relevant levels according to the session user access level
-		//to ensure admin can't give himself a higher level
-		levels.add(AccessLevel.NormalUser);
-		levels.add(AccessLevel.ScheduleUser);
-		levels.add(AccessLevel.JuniorAdmin);
-		levels.add(AccessLevel.MidAdmin);
-		levels.add(AccessLevel.StandardAdmin);
-
-		//only standard admins and above and the repository user can edit users
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
-		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SeniorAdmin.getValue()
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
-			levels.add(AccessLevel.SeniorAdmin);
-		}
-		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SuperAdmin.getValue()
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
-			levels.add(AccessLevel.SuperAdmin);
-		}
-
-		return levels;
 	}
 
 	/**
@@ -629,4 +605,39 @@ public class UserController {
 
 		return from;
 	}
+
+	/**
+	 * Returns the relevant access levels to be used in the edit user page
+	 *
+	 * @param session the http session
+	 * @return the access levels to be used
+	 */
+	private List<AccessLevel> getAccessLevels(HttpSession session) {
+		logger.debug("Entering getAccessLevels");
+
+		List<AccessLevel> levels = new ArrayList<>();
+
+		//add only relevant levels according to the session user access level
+		//to ensure admin can't give himself a higher level
+		levels.add(AccessLevel.NormalUser);
+		levels.add(AccessLevel.ScheduleUser);
+		levels.add(AccessLevel.JuniorAdmin);
+		levels.add(AccessLevel.MidAdmin);
+		levels.add(AccessLevel.StandardAdmin);
+
+		//only standard admins and above and the repository user can edit users
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
+		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SeniorAdmin.getValue()
+				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
+			levels.add(AccessLevel.SeniorAdmin);
+		}
+		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SuperAdmin.getValue()
+				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
+			levels.add(AccessLevel.SuperAdmin);
+		}
+
+		return levels;
+	}
+
 }

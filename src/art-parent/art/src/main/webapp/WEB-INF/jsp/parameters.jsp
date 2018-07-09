@@ -90,11 +90,11 @@ Display parameters
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -120,6 +120,10 @@ Display parameters
 					}
 				});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
 			}); //end document ready
 		</script>
 	</jsp:attribute>
@@ -141,7 +145,9 @@ Display parameters
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div style="margin-bottom: 10px;">
@@ -155,7 +161,7 @@ Display parameters
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<c:if test="${sessionUser.accessLevel.value >= 80}">
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
 				<div class="btn-group">
 					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Parameters">
 						<spring:message code="page.text.import"/>
@@ -174,8 +180,6 @@ Display parameters
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -198,8 +202,6 @@ Display parameters
 								</span>
 							</c:if>
 						</td>
-						<td>${encode:forHtmlContent(parameter.createdBy)}</td>
-						<td>${encode:forHtmlContent(parameter.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

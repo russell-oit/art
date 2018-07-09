@@ -36,7 +36,7 @@ Display report filters
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Select-1.2.0/js/dataTables.select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js"></script>
@@ -83,7 +83,7 @@ Display report filters
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + recordName + "</b>",
@@ -106,9 +106,9 @@ Display report filters
 									success: function (response) {
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${recordDeletedText}", recordName);
+											notifyActionSuccessReusable("${recordDeletedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -152,9 +152,9 @@ Display report filters
 										success: function (response) {
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -165,6 +165,10 @@ Display report filters
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			}); //end document ready
@@ -188,11 +192,15 @@ Display report filters
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div class="text-center">
-			<b><spring:message code="page.text.report"/>:</b> ${reportName}
+			<p>
+				<b><spring:message code="page.text.report"/>:</b> ${reportName}
+			</p>
 		</div>
 		<div style="margin-bottom: 10px;">
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/addRule?reportId=${reportId}">
@@ -207,6 +215,9 @@ Display report filters
 				<i class="fa fa-trash-o"></i>
 				<spring:message code="page.action.delete"/>
 			</button>
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/reportConfig?reportId=${reportId}">
+				<spring:message code="page.text.report"/>
+			</a>
 		</div>
 
 		<table id="reportRules" class="table table-bordered table-striped table-condensed">

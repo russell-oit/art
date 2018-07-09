@@ -217,48 +217,21 @@
 						dataType: 'json',
 						data: {second: second, minute: minute, hour: hour, day: day,
 							month: month, weekday: weekday, year: year},
-						success: function (response)
-						{
+						success: function (response) {
 							if (response.success) {
 								var scheduleDescription = response.data;
-								var finalString = "<p><pre>" + escapeHtmlContent(scheduleDescription.description)
-										+ "</pre><b>${nextRunDateText}:</b> <pre>"
-										+ escapeHtmlContent(scheduleDescription.nextRunDateString)
-										+ "</pre></p>";
-								$("#mainScheduleDescriptionDiv").html(finalString);
+								$("#mainDescription").html(escapeHtmlContent(scheduleDescription.description));
+								$("#mainNextRunDate").html(escapeHtmlContent(scheduleDescription.nextRunDateString));
 							} else {
-								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$.notify("${errorOccurredText}", "error");
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
-						error: function (xhr, status, error) {
+						error: function (xhr) {
 							bootbox.alert(xhr.responseText);
 						}
 					});
 				});
 
-				var optionsEditor = ace.edit("optionsEditor");
-				optionsEditor.$blockScrolling = Infinity;
-				optionsEditor.getSession().setMode("ace/mode/json");
-				optionsEditor.setHighlightActiveLine(false);
-				optionsEditor.setShowPrintMargin(false);
-				optionsEditor.setOption("showLineNumbers", false);
-				optionsEditor.setOption("maxLines", 20);
-				optionsEditor.setOption("minLines", 7);
-				document.getElementById('optionsEditor').style.fontSize = '14px';
-
-				var options = $('#options');
-				optionsEditor.getSession().setValue(options.val());
-				optionsEditor.getSession().on('change', function () {
-					options.val(optionsEditor.getSession().getValue());
-				});
-
-			});
-		</script>
-
-		<script type="text/javascript">
-			$(function () {
 				$('#getSchedule').click(function () {
 					var recordId = $('#schedules option:selected').val();
 
@@ -267,8 +240,7 @@
 						url: '${pageContext.request.contextPath}/getSchedule',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response)
-						{
+						success: function (response) {
 							var schedule = response.data;
 
 							if (response.success) {
@@ -291,18 +263,42 @@
 										sharedHolidayIds.push(holiday.holidayId);
 									});
 									$('#sharedHolidays').selectpicker('val', sharedHolidayIds);
+
+									$("#mainDescription").html("");
+									$("#mainNextRunDate").html("");
 								}
 							} else {
-								var msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$.notify("${errorOccurredText}", "error");
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
 					});
 				});
-			});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
+				var optionsEditor = ace.edit("optionsEditor");
+				optionsEditor.$blockScrolling = Infinity;
+				optionsEditor.getSession().setMode("ace/mode/json");
+				optionsEditor.setHighlightActiveLine(false);
+				optionsEditor.setShowPrintMargin(false);
+				optionsEditor.setOption("showLineNumbers", false);
+				optionsEditor.setOption("maxLines", 20);
+				optionsEditor.setOption("minLines", 7);
+				document.getElementById('optionsEditor').style.fontSize = '14px';
+
+				var options = $('#options');
+				optionsEditor.getSession().setValue(options.val());
+				optionsEditor.getSession().on('change', function () {
+					options.val(optionsEditor.getSession().getValue());
+				});
+
+			});
+		</script>
+
+		<script type="text/javascript">
 			function populateOutputFormatField() {
 				var list = $("#outputFormat");
 				var jobType = $('#jobType option:selected').val();
@@ -527,7 +523,9 @@
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<input type="hidden" name="action" value="${action}">
@@ -778,7 +776,7 @@
 							<spring:message code="jobs.label.mailFrom"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailFrom" readonly="${sessionUser.accessLevel.value >= 80 ? 'false' : 'true'}" class="form-control"/>
+							<form:input path="mailFrom" readonly="${sessionUser.hasPermission('configure_jobs') ? 'false' : 'true'}" class="form-control"/>
 							<form:errors path="mailFrom" cssClass="error"/>
 						</div>
 					</div>
@@ -1013,10 +1011,9 @@
 							</button>
 							<div id="mainScheduleDescriptionDiv">
 								<p>
-									<c:if test="${not empty mainScheduleDescription}">
-									<pre>${encode:forHtmlContent(mainScheduleDescription)}</pre>
-									<b><spring:message code="jobs.text.nextRunDate"/>:</b> <pre><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
-								</c:if>
+								<pre id="mainDescription">${encode:forHtmlContent(mainScheduleDescription)}</pre>
+								<b><spring:message code="jobs.text.nextRunDate"/>:</b> 
+								<pre id="mainNextRunDate"><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
 								</p>
 							</div>
 						</div>

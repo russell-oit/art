@@ -165,7 +165,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
 		urlElement.value = "jdbc:ucanaccess://<file_path>;jackcessOpener=art.utils.CryptCodecOpener";
 		testSqlElement.value = "";
-		
+
 		var usernameElement = document.getElementById("username");
 		if (usernameElement !== null) {
 			usernameElement.value = "";
@@ -286,6 +286,11 @@ function escapeHtmlAttribute(s) {
 	});
 }
 //END code for escaping html content
+
+//https://gist.github.com/getify/3667624
+function escapeDoubleQuotes(str) {
+	return str.replace(/\\([\s\S])|(")/g, "\\$1$2");
+}
 
 /**
  * Create column filter input boxes
@@ -470,19 +475,59 @@ function ajaxErrorHandler(xhr) {
 
 /**
  * Display notification if an action was successful. String arguments should be html escaped
+ * Message goes to a div with id "ajaxResponse". Alert created will be re-displayed
+ * if closed manually. Additional handler code needs to be added to enable re-display.
+ * 
+ * @param {string} actionText - message to display
+ * @param {string} [recordName] - name of record acted upon, if applicable 
+ */
+function notifyActionSuccessReusable(actionText, recordName) {
+	var reusableAlert = true;
+	notifyActionSuccess(actionText, recordName, reusableAlert);
+}
+
+/**
+ * Display notification if an action was successful. String arguments should be html escaped
  * Message goes to a div with id "ajaxResponse"
  * 
  * @param {string} actionText - message to display
  * @param {string} [recordName] - name of record acted upon, if applicable
+ * @param {boolean} reusableAlert - whether to create a reusable alert
  */
-function notifyActionSuccess(actionText, recordName) {
+function notifyActionSuccess(actionText, recordName, reusableAlert) {
 	var msg;
-	msg = alertCloseButton + actionText;
+	
+	if (reusableAlert) {
+		msg = reusableAlertCloseButton;
+	} else {
+		msg = alertCloseButton;
+	}
+	
+	msg += actionText;
 	if (recordName !== undefined) {
 		msg = msg + ": " + recordName;
 	}
+	
 	$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
+	if(reusableAlert){
+		$("#ajaxResponse").show();
+	}
+	
 	$.notify(actionText, "success");
+}
+
+/**
+ * Display notification if an action was not successful. String arguments should be html escaped
+ * Message goes to a div with id "ajaxResponse". Alert created will be re-displayed
+ * if closed manually. Additional handler code needs to be added to enable re-display.
+ * 
+ * @param {string} errorOccurredText - basic error occurred message
+ * @param {string} errorMessage - error details
+ * @param {boolean} showErrors - whether to show error details 
+ */
+function notifyActionErrorReusable(errorOccurredText, errorMessage, showErrors) {
+	var reusableAlert = true;
+	notifyActionError(errorOccurredText, errorMessage, showErrors, reusableAlert);
 }
 
 /**
@@ -491,11 +536,28 @@ function notifyActionSuccess(actionText, recordName) {
  * 
  * @param {string} errorOccurredText - basic error occurred message
  * @param {string} errorMessage - error details
+ * @param {boolean} showErrors - whether to show error details
+ * @param {boolean} reusableAlert - whether to create a reusable alert
  */
-function notifyActionError(errorOccurredText, errorMessage) {
+function notifyActionError(errorOccurredText, errorMessage, showErrors, reusableAlert) {
 	var msg;
-	msg = alertCloseButton + "<p>" + errorOccurredText + "</p><p>" + errorMessage + "</p>";
+	
+	if (reusableAlert) {
+		msg = reusableAlertCloseButton;
+	} else {
+		msg = alertCloseButton;
+	}
+
+	msg += "<p>" + errorOccurredText + "</p>";
+	if (showErrors && errorMessage) {
+		msg += "<p>" + escapeHtmlContent(errorMessage) + "</p>";
+	}
+	
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+	if(reusableAlert){
+		$("#ajaxResponse").show();
+	}
+	
 	$.notify(errorOccurredText, "error");
 }
 
@@ -507,9 +569,30 @@ function notifyActionError(errorOccurredText, errorMessage) {
  * @param {string} cannotDeleteRecordText - basic message shown in notification
  * @param {string} linkedRecordsExistText - more detailed message shown in div
  */
-function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText) {
+function notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText) {
+	var reusableAlert = true;
+	notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText, reusableAlert);
+}
+
+/**
+ * Display notification if record cannot be deleted because important linked records exist.
+ * String arguments should be html escaped. Message goes to a div with id "ajaxResponse"
+ * 
+ * @param {array} linkedRecords - array with names of linked records
+ * @param {string} cannotDeleteRecordText - basic message shown in notification
+ * @param {string} linkedRecordsExistText - more detailed message shown in div
+ * @param {boolean} reusableAlert - whether to create a reusable alert
+ */
+function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText, reusableAlert) {
 	var msg;
-	msg = alertCloseButton + linkedRecordsExistText + "<ul>";
+	
+	if (reusableAlert) {
+		msg = reusableAlertCloseButton;
+	} else {
+		msg = alertCloseButton;
+	}
+	
+	msg += linkedRecordsExistText + "<ul>";
 
 	$.each(linkedRecords, function (index, value) {
 		msg += "<li>" + value + "</li>";
@@ -518,7 +601,25 @@ function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedR
 	msg += "</ul>";
 
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+	if(reusableAlert){
+		$("#ajaxResponse").show();
+	}
+	
 	$.notify(cannotDeleteRecordText, "error");
+}
+
+/**
+ * Display notification if record cannot be deleted because important linked records exist.
+ * String arguments should be html escaped. Message goes to a div with id "ajaxResponse".
+ * Alert created will be re-displayed  * if closed manually.
+ * Additional handler code needs to be added to enable re-display.
+ * 
+ * @param {array} nonDeletedRecords - array with names of non-deleted records
+ * @param {string} someRecordsNotDeletedText - basic message shown in notification 
+ */
+function notifySomeRecordsNotDeletedReusable(nonDeletedRecords, someRecordsNotDeletedText) {
+	var reusableAlert = true;
+	notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedText, reusableAlert);
 }
 
 /**
@@ -527,10 +628,18 @@ function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedR
  * 
  * @param {array} nonDeletedRecords - array with names of non-deleted records
  * @param {string} someRecordsNotDeletedText - basic message shown in notification
+ * @param {boolean} reusableAlert - whether to create a reusable alert
  */
-function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedText) {
+function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedText, reusableAlert) {
 	var msg;
-	msg = alertCloseButton + someRecordsNotDeletedText + "<ul>";
+	
+	if (reusableAlert) {
+		msg = reusableAlertCloseButton;
+	} else {
+		msg = alertCloseButton;
+	}
+	
+	msg += someRecordsNotDeletedText + "<ul>";
 
 	$.each(nonDeletedRecords, function (index, value) {
 		msg += "<li>" + value + "</li>";
@@ -539,6 +648,10 @@ function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedTex
 	msg += "</ul>";
 
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+	if(reusableAlert){
+		$("#ajaxResponse").show();
+	}
+	
 	$.notify(someRecordsNotDeletedText, "error");
 }
 
@@ -563,11 +676,11 @@ function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
 		if (deleteRow) {
 			table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 		}
-		notifyActionSuccess(recordDeletedText, recordName);
+		notifyActionSuccessReusable(recordDeletedText, recordName);
 	} else if (linkedRecords !== null && linkedRecords.length > 0) {
-		notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
+		notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
 	} else {
-		notifyActionError(errorOccurredText, escapeHtmlContent(response.errorMessage));
+		notifyActionErrorReusable(errorOccurredText, escapeHtmlContent(response.errorMessage));
 	}
 }
 
@@ -633,7 +746,9 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 	//delete record
 	tbl.find('tbody').on('click', deleteButtonSelector, function () {
 		var row = $(this).closest("tr"); //jquery object
-		var recordName = escapeHtmlContent(row.data("name"));
+		//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
+		//https://stackoverflow.com/questions/10958047/issue-with-jquery-data-treating-string-as-number
+		var recordName = escapeHtmlContent(row.attr("data-name"));
 		var recordId = row.data("id");
 
 		if (showConfirmDialog) {

@@ -41,7 +41,7 @@
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
@@ -75,13 +75,13 @@
 				});
 
 				toggleCanChangePasswordEnabled();
-				
+
 				$('#accessLevelUnchanged').change(function () {
 					toggleAccessLevelEnabled();
 				});
 
 				toggleAccessLevelEnabled();
-				
+
 				$('#userGroupsUnchanged').change(function () {
 					toggleUserGroupsEnabled();
 				});
@@ -111,7 +111,7 @@
 					$('#canChangePassword').bootstrapSwitch('disabled', false);
 				}
 			}
-			
+
 			function toggleAccessLevelEnabled() {
 				if ($('#accessLevelUnchanged').is(':checked')) {
 					$('#accessLevel').prop('disabled', true);
@@ -119,7 +119,7 @@
 					$('#accessLevel').prop('disabled', false);
 				}
 			}
-			
+
 			function toggleUserGroupsEnabled() {
 				if ($('#userGroupsUnchanged').is(':checked')) {
 					$('#userGroups').prop('disabled', true);
@@ -214,7 +214,7 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="userGroups">
+					<label class="col-md-4 control-label" for="userGroups">
 						<spring:message code="page.text.userGroups"/>
 					</label>
 					<div class="col-md-8">

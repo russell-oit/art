@@ -131,6 +131,12 @@ public class CacheController {
 				case CustomSettings:
 					cacheHelper.clearCustomSettings();
 					break;
+				case Roles:
+					cacheHelper.clearRoles();
+					break;
+				case Permissions:
+					cacheHelper.clearPermissions();
+					break;
 				default:
 					message = "Clear cache not available: " + id;
 			}

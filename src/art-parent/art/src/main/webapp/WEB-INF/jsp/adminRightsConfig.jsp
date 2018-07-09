@@ -20,7 +20,7 @@ Admin rights configuration page
 <spring:message code="page.message.rightsGranted" var="rightsGrantedText"/>
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 <spring:message code="adminRights.message.selectAdmin" var="selectAdminText"/>
-<spring:message code="adminRights.message.selectDatasourceOrGroup" var="selectDatasourceOrGroupText"/>
+<spring:message code="adminRights.message.selectDatasourceOrReportGroup" var="selectDatasourceOrReportGroupText"/>
 <spring:message code="page.text.available" var="availableText"/>
 <spring:message code="page.text.selected" var="selectedText"/>
 <spring:message code="page.text.search" var="searchText"/>
@@ -92,7 +92,7 @@ Admin rights configuration page
 						return;
 					}
 					if (datasources === null && reportGroups === null) {
-						bootbox.alert("${selectDatasourceOrGroupText}");
+						bootbox.alert("${selectDatasourceOrReportGroupText}");
 						return;
 					}
 
@@ -111,9 +111,9 @@ Admin rights configuration page
 							reportGroups: reportGroups},
 						success: function(response) {
 							if (response.success) {
-								notifyActionSuccess(rightsUpdatedMessage);
+								notifyActionSuccessReusable(rightsUpdatedMessage);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -122,10 +122,12 @@ Admin rights configuration page
 
 				//handle select all/deselect all
 				addSelectDeselectAllHandler();
+				
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			}); //end document ready
-
-
 		</script>
 	</jsp:attribute>
 
@@ -143,7 +145,9 @@ Admin rights configuration page
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<div class="form-group">

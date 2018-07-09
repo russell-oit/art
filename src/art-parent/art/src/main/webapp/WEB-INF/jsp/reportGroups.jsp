@@ -90,11 +90,11 @@ Report groups configuration page
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -106,7 +106,7 @@ Report groups configuration page
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 				$('#exportRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
@@ -118,6 +118,10 @@ Report groups configuration page
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			}); //end document ready
@@ -141,7 +145,9 @@ Report groups configuration page
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div style="margin-bottom: 10px;">
@@ -155,14 +161,16 @@ Report groups configuration page
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<div class="btn-group">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=ReportGroups">
-					<spring:message code="page.text.import"/>
-				</a>
-				<button type="button" id="exportRecords" class="btn btn-default">
-					<spring:message code="page.text.export"/>
-				</button>
-			</div>
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
+				<div class="btn-group">
+					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=ReportGroups">
+						<spring:message code="page.text.import"/>
+					</a>
+					<button type="button" id="exportRecords" class="btn btn-default">
+						<spring:message code="page.text.export"/>
+					</button>
+				</div>
+			</c:if>
 		</div>
 
 		<table id="reportGroups" class="table table-bordered table-striped table-condensed">
@@ -172,8 +180,6 @@ Report groups configuration page
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -189,8 +195,6 @@ Report groups configuration page
 											   updateDate="${group.updateDate}"/>
 						</td>
 						<td>${encode:forHtmlContent(group.description)}</td>
-						<td>${encode:forHtmlContent(group.createdBy)}</td>
-						<td>${encode:forHtmlContent(group.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
@@ -217,12 +221,14 @@ Report groups configuration page
 											<spring:message code="page.text.reports"/>
 										</a>
 									</li>
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/reportGroupAccessRights?reportGroupId=${group.reportGroupId}">
-											<spring:message code="page.action.accessRights"/>
-										</a>
-									</li>
+									<c:if test="${sessionUser.hasPermission('configure_access_rights')}">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/reportGroupAccessRights?reportGroupId=${group.reportGroupId}">
+												<spring:message code="page.action.accessRights"/>
+											</a>
+										</li>
+									</c:if>
 								</ul>
 							</div>
 						</td>

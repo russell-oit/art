@@ -31,11 +31,14 @@ import art.servlets.Config;
 import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
+import art.reportoptions.GridstackItemOptions;
 import art.savedparameter.SavedParameter;
 import art.savedparameter.SavedParameterService;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -50,6 +53,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -175,6 +179,22 @@ public class ReportController {
 		}
 
 		return "reportsConfig";
+	}
+
+	@RequestMapping(value = "/reportConfig", method = RequestMethod.GET)
+	public String showReportConfig(@RequestParam("reportId") Integer reportId, Model model,
+			HttpSession session) {
+
+		logger.debug("Entering showReportConfig: reportId={}", reportId);
+
+		try {
+			model.addAttribute("report", reportService.getReport(reportId));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "reportConfig";
 	}
 
 	@GetMapping("/getConfigReports")
@@ -341,7 +361,6 @@ public class ReportController {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		Report report = new Report();
-		report.setActive(true);
 		report.setContactPerson(sessionUser.getFullName());
 
 		model.addAttribute("report", report);
@@ -434,18 +453,13 @@ public class ReportController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
-			report.loadGeneralOptions();
-			String recordName = report.getLocalizedName(locale) + " (" + report.getReportId() + ")";
-			redirectAttributes.addFlashAttribute("recordName", recordName);
-			redirectAttributes.addFlashAttribute("record", report);
-
 			try {
 				reportGroupMembershipService2.recreateReportGroupMemberships(report);
 			} catch (SQLException | RuntimeException ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
-			return "redirect:/reportsConfig";
+			return "redirect:/reportConfig?reportId=" + report.getReportId();
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -551,6 +565,11 @@ public class ReportController {
 			return response;
 		}
 
+		if (!Config.getCustomSettings().isEnableEmailing()) {
+			logger.info("Could not email report. Emailing disabled. User = {}", sessionUser);
+			return response;
+		}
+
 		String subject = mailSubject;
 		if (StringUtils.isBlank(subject)) {
 			subject = "Report";
@@ -597,7 +616,7 @@ public class ReportController {
 		} catch (MessagingException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			response.setSuccess(false);
-			response.setErrorMessage(ex.toString());
+			response.setErrorMessage(ex.getMessage());
 		}
 
 		response.setSuccess(true);
@@ -1276,7 +1295,7 @@ public class ReportController {
 
 	@PostMapping("/saveGridstack")
 	public @ResponseBody
-	AjaxResponse saveGridstack(@RequestParam("reportId") Integer reportId,
+	AjaxResponse saveGridstack(@RequestParam(value = "reportId", required = false) Integer reportId,
 			@RequestParam("config") String config, @RequestParam("name") String name,
 			@RequestParam("description") String description,
 			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
@@ -1284,14 +1303,20 @@ public class ReportController {
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
-				+ " name='{}', description='{}', overwrite={}, saveSelectedParameters={}",
+				+ " name='{}', description='{}', overwrite={}, saveSelectedParameters={},",
 				reportId, config, name, description, overwrite, saveSelectedParameters);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			Report report = reportService.getReport(reportId);
-			report.encryptPasswords();
+			Report report;
+			if (reportId == null) {
+				report = new Report();
+				report.setReportType(ReportType.GridstackDashboard);
+			} else {
+				report = reportService.getReport(reportId);
+				report.encryptPasswords();
+			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -1323,7 +1348,41 @@ public class ReportController {
 				if (overwrite) {
 					reportService.updateReport(report, sessionUser);
 				} else {
-					reportService.copyReport(report, report.getReportId(), sessionUser);
+					if (reportId == null) {
+						//self service
+						//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
+						//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
+						ObjectMapper mapper = new ObjectMapper();
+						List<GridstackItemOptions> itemOptions = mapper.readValue(config, new TypeReference<List<GridstackItemOptions>>() {
+						});
+						if (CollectionUtils.isEmpty(itemOptions)) {
+							String message = messageSource.getMessage("reports.message.nothingToSave", null, locale);
+							response.setErrorMessage(message);
+							return response;
+						} else {
+							StringBuilder sb = new StringBuilder();
+							sb.append("<DASHBOARD>");
+							for (GridstackItemOptions itemOption : itemOptions) {
+								int itemReportId = itemOption.getReportId();
+								String reportName = reportService.getReportName(itemReportId);
+								sb.append("<ITEM>")
+										.append("<TITLE>")
+										.append(reportName)
+										.append("</TITLE>")
+										.append("<REPORTID>")
+										.append(String.valueOf(itemReportId))
+										.append("</REPORTID>")
+										.append("</ITEM>");
+							}
+							sb.append("</DASHBOARD>");
+							report.setReportSource(sb.toString());
+						}
+
+						reportService.addReport(report, sessionUser);
+					} else {
+						reportService.copyReport(report, report.getReportId(), sessionUser);
+					}
+
 					reportService.grantAccess(report, sessionUser);
 
 					//don't return whole report object. will include clear text passwords e.g. for the datasource which can be seen from the browser console
@@ -1334,7 +1393,7 @@ public class ReportController {
 				}
 				response.setSuccess(true);
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.getMessage());
 		}

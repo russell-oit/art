@@ -18,11 +18,14 @@
 package art.usergroup;
 
 import art.migration.PrefixTransformer;
+import art.permission.Permission;
 import art.reportgroup.ReportGroup;
+import art.role.Role;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Represents a user group
@@ -51,6 +54,36 @@ public class UserGroup implements Serializable {
 	private String updatedBy;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
+	private List<Role> roles;
+	private List<Permission> permissions;
+
+	/**
+	 * @return the permissions
+	 */
+	public List<Permission> getPermissions() {
+		return permissions;
+	}
+
+	/**
+	 * @param permissions the permissions to set
+	 */
+	public void setPermissions(List<Permission> permissions) {
+		this.permissions = permissions;
+	}
+
+	/**
+	 * @return the roles
+	 */
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * @param roles the roles to set
+	 */
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
+	}
 
 	/**
 	 * @return the parentId

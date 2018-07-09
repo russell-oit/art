@@ -54,10 +54,10 @@ Display section to allow selecting of report parameters and initiate running of 
 					if (response.success) {
 						$.notify("${fileSentText}", "success");
 					} else {
-						$.notify(response.errorMessage, "error");
+						notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 					}
 				},
-				error: function (xhr, status, error) {
+				error: function (xhr) {
 					bootbox.alert({
 						title: '${errorOccurredText}',
 						message: xhr.responseText
@@ -85,11 +85,11 @@ Display section to allow selecting of report parameters and initiate running of 
 				type: "POST",
 				url: "${pageContext.request.contextPath}/runReport",
 				data: $('#parametersForm').serialize(),
-				success: function (data, status, xhr) {
+				success: function (data) {
 					$("#reportOutput").html(data);
 					$('.action').prop('disabled', false);
 				},
-				error: function (xhr, status, error) {
+				error: function (xhr) {
 					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 					bootbox.alert({
 						title: '${errorOccurredText}',
@@ -108,15 +108,14 @@ Display section to allow selecting of report parameters and initiate running of 
 				url: '${pageContext.request.contextPath}/saveParameterSelection',
 				dataType: 'json',
 				data: $('#parametersForm').serialize(),
-				success: function (response)
-				{
+				success: function (response) {
 					if (response.success) {
 						$.notify("${parametersSavedText}", "success");
 					} else {
-						$.notify(response.errorMessage, "error");
+						notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 					}
 				},
-				error: function (xhr, status, error) {
+				error: function (xhr) {
 					bootbox.alert({
 						title: '${errorOccurredText}',
 						message: xhr.responseText
@@ -135,21 +134,24 @@ Display section to allow selecting of report parameters and initiate running of 
 				url: '${pageContext.request.contextPath}/clearSavedParameterSelection',
 				dataType: 'json',
 				data: {reportId: reportId},
-				success: function (response)
-				{
+				success: function (response) {
 					if (response.success) {
 						$.notify("${parametersClearedText}", "success");
 					} else {
-						$.notify(response.errorMessage, "error");
+						notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 					}
 				},
-				error: function (xhr, status, error) {
+				error: function (xhr) {
 					bootbox.alert({
 						title: '${errorOccurredText}',
 						message: xhr.responseText
 					});
 				}
 			});
+		});
+
+		$('#errorsDiv').on("click", ".alert .close", function () {
+			$(this).parent().hide();
 		});
 
 

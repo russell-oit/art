@@ -112,11 +112,11 @@ public class CacheHelper {
 			logger.error("Error", ex);
 		}
 	}
-	
+
 	/**
 	 * Refreshes custom settings
 	 */
-	public void clearCustomSettings(){
+	public void clearCustomSettings() {
 		Config.loadCustomSettings(servletContext);
 	}
 
@@ -225,13 +225,30 @@ public class CacheHelper {
 	}
 
 	/**
+	 * Clears the roles cache
+	 */
+	@CacheEvict(value = "roles", allEntries = true)
+	public void clearRoles() {
+		logger.debug("Entering clearRoles");
+	}
+
+	/**
+	 * Clears the permissions cache
+	 */
+	@CacheEvict(value = "permissions", allEntries = true)
+	public void clearPermissions() {
+		logger.debug("Entering clearPermissions");
+	}
+
+	/**
 	 * Clears all caches
 	 *
 	 * @param session the http session
 	 */
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
 		"datasources", "schedules", "jobs", "rules", "parameters",
-		"encryptors", "holidays", "destinations", "smtpServers"}, allEntries = true)
+		"encryptors", "holidays", "destinations", "smtpServers", "roles",
+		"permissions"}, allEntries = true)
 	public void clearAll(HttpSession session) {
 		logger.debug("Entering clearAll");
 

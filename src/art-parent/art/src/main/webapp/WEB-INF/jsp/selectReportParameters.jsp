@@ -31,6 +31,12 @@ Display report parameters and initiate running of report
 	</jsp:attribute>
 
 	<jsp:body>
+		<div class="row" id="errorsDiv">
+			<div class="col-md-12">
+				<div id="ajaxResponse">
+				</div>
+			</div>
+		</div>
 		<jsp:include page="/WEB-INF/jsp/selectReportParametersBody.jsp"/>
 		<div class="row">
 			<div class="col-md-12">

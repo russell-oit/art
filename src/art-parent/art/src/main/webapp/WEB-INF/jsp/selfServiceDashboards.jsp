@@ -18,6 +18,13 @@
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="dialog.button.cancel" var="cancelText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="reports.message.reportSaved" var="reportSavedText"/>
+<spring:message code="reports.message.reportDeleted" var="reportDeletedText"/>
+<spring:message code="dialog.title.saveReport" var="saveReportText"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
+<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
 
 <t:mainPage title="${pageTitle}">
 
@@ -34,6 +41,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lodash-3.5.0/lodash.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
 		<script>
 			$(document).ready(function () {
@@ -48,7 +56,11 @@
 					countSelectedText: '${selectedCountText}'
 				});
 
-				$('.grid-stack').gridstack();
+				$('.grid-stack').gridstack({
+					resizable: {
+						handles: 'e, se, s, sw, w, n'
+					}
+				});
 
 				//https://stackoverflow.com/questions/35349239/bootstrap-select-event-parameters
 				//https://github.com/gridstack/gridstack.js/tree/master/doc
@@ -57,7 +69,7 @@
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var reportId = $(this).find('option').eq(clickedIndex).val();
 					var grid = $('.grid-stack').data('gridstack');
-					
+
 					if (newValue) {
 						var el = $(processWidgetTemplate(reportId));
 						grid.addWidget(el, 0, 0, 4, 3, true);
@@ -66,10 +78,13 @@
 							type: 'POST',
 							url: '${pageContext.request.contextPath}/runReport',
 							data: {reportId: reportId, isFragment: true},
-							success: function (data, status, xhr) {
+							success: function (data) {
 								$("#content_" + reportId).html(data);
+								var autoheight = false;
+								var autowidth = true;
+								autosize(autoheight, autowidth, reportId);
 							},
-							error: function (xhr, status, error) {
+							error: function (xhr) {
 								bootbox.alert({
 									title: '${errorOccurredText}',
 									message: xhr.responseText
@@ -95,49 +110,253 @@
 					grid.removeWidget(el);
 					var reportId = $(this).data("reportId");
 					$('#reports').find('[value=' + reportId + ']').prop('selected', false);
-					$('.selectpicker').selectpicker('refresh');
+					$('#reports').selectpicker('refresh');
+				});
+
+				function autosize(autoheight, autowidth, reportId) {
+					//https://github.com/gridstack/gridstack.js/issues/404
+					if (autoheight || autowidth) {
+						var itemContentDiv = $("#itemContent_" + reportId);
+						var itemContentDiv = $("#itemContent_" + reportId);
+						var itemDiv = itemContentDiv.closest('.grid-stack-item');
+
+						var newHeightPixels;
+						if (autoheight) {
+							newHeightPixels = Math.ceil((itemContentDiv[0].scrollHeight + $('.grid-stack').data('gridstack').opts.verticalMargin) / ($('.grid-stack').data('gridstack').cellHeight() + $('.grid-stack').data('gridstack').opts.verticalMargin));
+						} else {
+							newHeightPixels = $(itemDiv).attr('data-gs-height');
+						}
+
+						var newWidthPixels;
+						if (autowidth) {
+							var dashboardWidth = 12;
+							newWidthPixels = Math.ceil(itemContentDiv[0].scrollWidth / $('.grid-stack').width() * dashboardWidth);
+						} else {
+							newWidthPixels = $(itemDiv).attr('data-gs-width');
+						}
+
+						$('.grid-stack').data('gridstack').resize(
+								itemDiv,
+								newWidthPixels,
+								newHeightPixels
+								);
+					}
+				}
+
+				$("#newDashboard").click(function () {
+					$("#newDashboardLink").hide();
+
+					$.ajax({
+						type: 'GET',
+						dataType: "json",
+						url: '${pageContext.request.contextPath}/getDashboardCandidateReports',
+						success: function (response) {
+							if (response.success) {
+								//https://github.com/silviomoreto/bootstrap-select/issues/1151
+								var reports = response.data;
+								var options = "";
+								$.each(reports, function (index, report) {
+									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
+								});
+								var select = $("#reports");
+								select.empty();
+								select.append(options);
+								select.selectpicker('refresh');
+
+								var grid = $('.grid-stack').data("gridstack");
+								grid.removeAll();
+							} else {
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+							}
+						},
+						error: function (xhr) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
+				});
+
+				$('#errorsDiv').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 			});
 		</script>
+	</jsp:attribute>
 
+	<jsp:body>
 		<script type="text/template" id="widgetTemplate">
 			<div>
-			<div class="grid-stack-item-content" style="border: 1px solid #ccc">
+			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#" data-report-id="#reportId#">
 			<div style="text-align: right">
 			<span class="fa fa-times removeWidget" style="cursor: pointer" data-report-id="#reportId#">
-			</div>
+			</span>
+			</div>	
 			<div id="content_#reportId#">
 			</div>
 			</div>
 			</div>
 		</script>
 
-
-	</jsp:attribute>
-
-	<jsp:body>
-		<c:if test="${error != null}">
-			<div class="alert alert-danger alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-				<p><spring:message code="page.message.errorOccurred"/></p>
-				<c:if test="${showErrors}">
-					<p>${encode:forHtmlContent(error)}</p>
+		<div class='row' id="errorsDiv">
+			<div class="col-md-12">
+				<c:if test="${error != null}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<p><spring:message code="page.message.errorOccurred"/></p>
+						<c:if test="${showErrors}">
+							<p>${encode:forHtmlContent(error)}</p>
+						</c:if>
+					</div>
 				</c:if>
-			</div>
-		</c:if>
 
-		<div class="row">
-			<div class="col-md-2">
+				<div id="ajaxResponse">
+				</div>
+			</div>
+		</div>
+
+		<div class="row" style="margin-bottom: 10px;">
+			<div class="col-md-12">
+				<button class="btn btn-default" id="newDashboard">
+					<spring:message code="page.text.new"/>
+				</button>
+				<span class="pull-right">
+					<a class="btn btn-default" id="newDashboardLink" style="display: none"
+					   href="">
+						<spring:message code="reports.link.newReport"/>
+					</a>
+					<button class="btn btn-primary" id="saveDashboard">
+						<spring:message code="page.button.save"/>
+					</button>
+				</span>
+			</div>
+		</div>
+		<div class="row" style="margin-bottom: 20px">
+			<div class="col-md-4">
 				<select id="reports" class="form-control selectpicker" multiple>
-					<c:forEach var="report" items="${reports}">
-						<option value="${report.reportId}">${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}</option>
-					</c:forEach>
 				</select>
 			</div>
-			<div class="col-md-10">
+		</div>
+		<div class="row">
+			<div class="col-md-12">
 				<div id="dashboard" class="grid-stack"></div>
 			</div>
 		</div>
+
+		<div id="saveDashboardDialogDiv" style="display:none;">
+			<form id="saveDashboardForm" class="form-horizontal" role="form">
+				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+				<input type="hidden" name="reportId" value="">
+				<input type="hidden" id="config" name="config" value="">
+				<div class="form-group">
+					<label class="control-label col-md-4" for="name">
+						<spring:message code="page.text.name"/>
+					</label>
+					<div class="col-md-8">
+						<input type="text" id="name" name="name" maxlength="50" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="description">
+						<spring:message code="page.text.description"/>
+					</label>
+					<div class="col-md-8">
+						<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<script>
+			//https://github.com/gridstack/gridstack.js/issues/50
+			//https://github.com/gridstack/gridstack.js/issues/575
+			$("#saveDashboard").on("click", function () {
+				var items = [];
+
+				$('.grid-stack-item.ui-draggable').each(function (index) {
+					var $this = $(this);
+					var content = $(this).find('.grid-stack-item-content');
+					//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
+					var reportId = content.data("reportId");
+
+					items.push({
+						index: index + 1,
+						reportId: reportId,
+						x: parseInt($this.attr('data-gs-x'), 10),
+						y: parseInt($this.attr('data-gs-y'), 10),
+						width: parseInt($this.attr('data-gs-width'), 10),
+						height: parseInt($this.attr('data-gs-height'), 10)
+					});
+				});
+
+				$("#config").val(JSON.stringify(items));
+
+				var dialog = bootbox.confirm({
+					title: "${saveReportText}",
+					message: $("#saveDashboardDialogDiv").html(),
+					buttons: {
+						cancel: {
+							label: "${cancelText}"
+						},
+						confirm: {
+							label: "${okText}"
+						}
+					},
+					callback: function (result) {
+						if (result) {
+							//https://github.com/makeusabrew/bootbox/issues/572
+							var form = dialog.find('#saveDashboardForm');
+							var data = form.serialize();
+
+							$.ajax({
+								type: 'POST',
+								url: '${pageContext.request.contextPath}/saveGridstack',
+								dataType: 'json',
+								data: data,
+								success: function (response) {
+									if (response.success) {
+										$.notify("${reportSavedText}", "success");
+										var newReportId = response.data;
+										if (newReportId) {
+											var newUrl = "${pageContext.request.contextPath}/selectReportParameters?reportId=" + newReportId;
+											$("#newDashboardLink").attr("href", newUrl);
+											$("#newDashboardLink").show();
+										}
+									} else {
+										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+									}
+								},
+								error: function (xhr) {
+									bootbox.alert({
+										title: '${errorOccurredText}',
+										message: xhr.responseText
+									});
+								}
+							});
+						} //end if result
+					} //end callback
+				}); //end bootbox confirm
+
+				//https://github.com/makeusabrew/bootbox/issues/411
+				//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
+				dialog.on("shown.bs.modal", function () {
+					dialog.attr("id", "saveDashboardDialog");
+					dialog.find('#name').focus();
+				});
+			});
+
+			$(document).on("submit", "#saveDashboardForm", function (e) {
+				e.preventDefault();
+				$("#saveDashboardDialog .btn-primary").click();
+			});
+
+			var token = $("meta[name='_csrf']").attr("content");
+			var header = $("meta[name='_csrf_header']").attr("content");
+			$(document).ajaxSend(function (e, xhr, options) {
+				xhr.setRequestHeader(header, token);
+			});
+		</script>
 	</jsp:body>
 </t:mainPage>
 

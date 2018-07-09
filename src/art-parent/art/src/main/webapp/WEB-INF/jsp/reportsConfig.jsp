@@ -154,7 +154,7 @@ Reports configuration page
 							if (response.success) {
 								return response.data;
 							} else {
-								notifyActionError('${errorOccurredText}', escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 								return "";
 							}
 						},
@@ -276,7 +276,7 @@ Reports configuration page
 								setReportFields(report);
 								$("#editReport").show();
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -433,7 +433,7 @@ Reports configuration page
 					$("#options").val(report.options);
 					$("#reportSource").val(report.reportSource);
 					$("#reportSourceHtml").val(report.reportSourceHtml);
-					
+
 					if (report.reportSourceHtml) {
 						tinyMCE.get('reportSourceHtml').setContent(report.reportSourceHtml);
 					}
@@ -764,6 +764,51 @@ Reports configuration page
 						default:
 							$("#applyOptions").hide();
 					}
+
+					//show/hide test report button
+					switch (reportTypeId) {
+						case 112: //jpivot mondrian
+						case 113: //jpivot mondrian xmla
+						case 114: //jpivot sql server xmla
+						case 149: //saiku report
+						case 150: //saiku connection
+						case 120: //lov static
+							$("#testReport").hide();
+							break;
+						default:
+							$("#testReport").show();
+					}
+
+					//show/hide test report data button
+					switch (reportTypeId) {
+						case 100: //update
+						case 110: //dashboard
+						case 129: //gridstack dashboard
+						case 111: //text
+						case 112: //jpivot mondrian
+						case 113: //jpivot mondrian xmla
+						case 114: //jpivot sql server xmla
+						case 149: //saiku report
+						case 150: //saiku connection
+						case 115: //jasper template
+						case 117: //jxls template
+						case 120: //lov static
+						case 133: //pivottable.js csv local
+						case 134: //pivottable.sj csv server
+						case 151: //mongo
+						case 136: //dygraphs csv local
+						case 137: //dygraphs csv server
+						case 139: //datatables csv local
+						case 140: //datatables csv server
+						case 155: //org chart json
+						case 156: //org chart list
+						case 157: //org chart ajax
+						case 159: //report engine file
+							$("#testReportData").hide();
+							break;
+						default:
+							$("#testReportData").show();
+					}
 				}
 
 				$("#deleteRecord").click(function () {
@@ -794,9 +839,9 @@ Reports configuration page
 											var rowSelector = "#row-" + recordId;
 											table.row(rowSelector).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 											$("#editReport").hide();
-											notifyActionSuccess("${recordDeletedText}", recordName);
+											notifyActionSuccessReusable("${recordDeletedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -819,16 +864,12 @@ Reports configuration page
 						success: function (response) {
 							if (response.success) {
 								//https://stackoverflow.com/questions/41524345/bootstrap-alert-div-is-not-display-on-second-ajax-request-when-cancel-on-first-a
-								var msg;
-								msg = reusableAlertCloseButton + "${recordUpdatedText}";
-								msg = msg + ": " + recordName + " (" + recordId + ")";
-								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								$("#ajaxResponse").show();
 								var rowSelector = "#row-" + recordId;
 								table.cell(rowSelector, 2).data(recordName);
-								$.notify("${recordUpdatedText}", "success");
+								var recordNameWithId = recordName + " (" + recordId + ")";
+								notifyActionSuccessReusable("${recordUpdatedText}", recordNameWithId);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -868,11 +909,11 @@ Reports configuration page
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -914,6 +955,11 @@ Reports configuration page
 				$("#refreshRecords").click(function () {
 					table.ajax.reload();
 				});
+				
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+				
 			});
 		</script>
 	</jsp:attribute>
@@ -945,53 +991,12 @@ Reports configuration page
 					<div class="alert alert-success alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
-						<c:if test="${record != null}">
-							&nbsp;
-							<div class="btn-group">
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/editReport?id=${record.reportId}">
-									<spring:message code="page.action.edit"/>
-								</a>
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/copyReport?id=${record.reportId}">
-									<spring:message code="page.action.copy"/>
-								</a>
-							</div>
-							<div class="btn-group">
-								<a class="btn btn-default"
-								   href="${pageContext.request.contextPath}/reportParameterConfig?reportId=${record.reportId}">
-									<spring:message code="reports.action.parameters"/>
-								</a>
-								<a class="btn btn-default"
-								   href="${pageContext.request.contextPath}/reportRules?reportId=${record.reportId}">
-									<spring:message code="reports.action.rules"/>
-								</a>
-								<a class="btn btn-default"
-								   href="${pageContext.request.contextPath}/drilldowns?reportId=${record.reportId}">
-									<spring:message code="reports.action.drilldowns"/>
-								</a>
-							</div>
-							<c:if test="${record.reportType.canSchedule()}">
-								<div class="btn-group">
-									<a class="btn btn-default"
-									   href="${pageContext.request.contextPath}/addJob?reportId=${record.reportId}&nextPage=jobsConfig">
-										<spring:message code="reports.action.schedule"/>
-									</a>
-								</div>
-							</c:if>
-							<c:if test="${record.reportType != 'LovStatic'}">
-								<div class="btn-group">
-									<a class="btn btn-default"
-									   href="${pageContext.request.contextPath}/selectReportParameters?reportId=${record.reportId}">
-										<spring:message code="reports.action.preview"/>
-									</a>
-								</div>
-							</c:if>
-						</c:if>
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<div style="margin-bottom: 10px;">
@@ -1013,7 +1018,7 @@ Reports configuration page
 							<spring:message code="page.action.refresh"/>
 						</button>
 					</div>
-					<c:if test="${sessionUser.accessLevel.value >= 80}">
+					<c:if test="${sessionUser.hasPermission('migrate_records')}">
 						<div class="btn-group">
 							<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Reports">
 								<spring:message code="page.text.import"/>
@@ -1105,19 +1110,23 @@ Reports configuration page
 													<spring:message code="reports.action.drilldowns"/>
 												</a>
 											</li>
+											<c:if test="${sessionUser.hasPermission('configure_access_rights')}">
 											<li>
 												<a id="reportAccessRightsLink"
 												   href="">
 													<spring:message code="page.action.accessRights"/>
 												</a>
 											</li>
+											</c:if>
 											<li class="divider"></li>
-											<li id='scheduleItem'>
-												<a id="addJobLink"
-												   href="">
-													<spring:message code="reports.action.schedule"/>
-												</a>
-											</li>
+												<c:if test="${sessionUser.hasPermission('schedule_jobs')}">
+												<li id='scheduleItem'>
+													<a id="addJobLink"
+													   href="">
+														<spring:message code="reports.action.schedule"/>
+													</a>
+												</li>
+											</c:if>
 											<li id='previewItem'>
 												<a id="selectReportParametersLink"
 												   href="">

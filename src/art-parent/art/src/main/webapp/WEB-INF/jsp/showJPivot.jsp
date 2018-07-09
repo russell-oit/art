@@ -19,10 +19,10 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		
+
 		<meta name="_csrf" content="${_csrf.token}"/>
 		<meta name="_csrf_header" content="${_csrf.headerName}"/>
-		
+
         <title>ART - ${reportName}</title>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/jpivot/table/mdxtable.css" />
@@ -69,15 +69,18 @@
 						</c:otherwise>
 					</c:choose>
 					<% }%>
-					
+
 
 					<table class="pivot" style="margin: 0 auto; width: 50%">
-						<tr> <td class="title">
-								<b> <br /> ${encode:forHtmlContent(title)} </b> <br /> <br />
-							</td> </tr>
+						<tr>
+							<td class="title">
+								<b> <br> ${encode:forHtmlContent(title)} </b> <br> <br>
+							</td>
+						</tr>
 
-						<tr><td>
-								<br />
+						<tr>
+							<td>
+								<br>
 
 								<form action="showJPivot" method="post">
 									<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
@@ -112,10 +115,10 @@
 										<wcf:scriptbutton id="nonEmpty" tooltip="toolb.non.empty" img="non-empty" model="${tableNonEmptyButtonPressed}"/>
 										<wcf:scriptbutton id="swapAxes" tooltip="toolb.swap.axes"  img="swap-axes" model="${tableSwapAxesButtonPressed}"/>
 										<wcf:separator/>
-										<wcf:scriptbutton model="${tableDrillMemberEnabled}"	 tooltip="toolb.navi.member" radioGroup="navi" id="drillMember"   img="navi-member"/>
+										<wcf:scriptbutton model="${tableDrillMemberEnabled}" tooltip="toolb.navi.member" radioGroup="navi" id="drillMember" img="navi-member"/>
 										<wcf:scriptbutton model="${tableDrillPositionEnabled}" tooltip="toolb.navi.position" radioGroup="navi" id="drillPosition" img="navi-position"/>
-										<wcf:scriptbutton model="${tableDrillReplaceEnabled}"	 tooltip="toolb.navi.replace" radioGroup="navi" id="drillReplace"  img="navi-replace"/>
-										<wcf:scriptbutton model="${tableDrillThroughEnabled}"  tooltip="toolb.navi.drillthru" id="drillThrough01"  img="navi-through"/>
+										<wcf:scriptbutton model="${tableDrillReplaceEnabled}" tooltip="toolb.navi.replace" radioGroup="navi" id="drillReplace" img="navi-replace"/>
+										<wcf:scriptbutton model="${tableDrillThroughEnabled}" tooltip="toolb.navi.drillthru" id="drillThrough01" img="navi-through"/>
 										<wcf:separator/>
 										<wcf:scriptbutton id="chartButton01" tooltip="toolb.chart" img="chart" model="${chartVisible}"/>
 										<wcf:scriptbutton id="chartPropertiesButton01" tooltip="toolb.chart.config" img="chart-config" model="${chartFormVisible}"/>
@@ -154,69 +157,73 @@
 									<wcf:render ref="${printFormId}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true"/>
 
 									<!-- render the table -->
-									<p> <br />
-									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true" locale="${pageContext.response.locale}"/>
+									<p>
+										<br />
+										<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true" locale="${pageContext.response.locale}"/>
 									</p>
 
 									<p>
-									<spring:message code="jpivot.text.slicer"/>:
-									<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxslicer.xsl" xslCache="true"/>
+										<spring:message code="jpivot.text.slicer"/>:
+										<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxslicer.xsl" xslCache="true"/>
 									</p>
 
 									<p>
 										<!-- drill through table -->
-									<wcf:render ref="${queryDrillThroughTable}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" locale="${pageContext.response.locale}"/>
+										<wcf:render ref="${queryDrillThroughTable}" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" locale="${pageContext.response.locale}"/>
 									</p>
 
 									<p>
 										<!-- render chart -->
-									<wcf:render ref="${chartId}" xslUri="/WEB-INF/jpivot/chart/chart.xsl" xslCache="true"/>
+										<wcf:render ref="${chartId}" xslUri="/WEB-INF/jpivot/chart/chart.xsl" xslCache="true"/>
 									</p>
-
 								</form>
-								<br />
-							</td></tr>
-
-						<tr><td class="info">
-								<i><spring:message code="jpivot.text.saveCurrentView"/></i>
 								<br>
-
-								<form method="post" action="saveJPivot">
-									<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-									<input type="hidden" name="pivotReportId" value="${reportId}" />
-									<table>
-										<tr><td>
-										<spring:message code="page.text.name"/>
-										</td>
-										<td>
-											<input type="text" name="newPivotName" value="" size="20" maxlength="50" />
-											<c:if test="${exclusiveAccess}">
-											<input type="checkbox" name="overwrite" /><spring:message code="reports.text.overwrite"/> &nbsp;
-											<input type="checkbox" name="delete" /><spring:message code="page.action.delete"/> &nbsp;
-										</c:if>
-										<button type="submit" id="save" class="btn btn-default action">
-											<spring:message code="page.button.save"/>
-										</button>
-										</td>
-										</tr>
-										<tr><td>
-										<spring:message code="page.text.description"/>
-										</td>
-										<td>
-											<input type="text" name="newPivotDescription" value="" size="45" maxlength="2000">
-										</td>
-										</tr>
-									</table>
-								</form>
-
 							</td>
 						</tr>
+
+						<c:if test="${sessionUser.hasPermission('save_reports')}">
+							<tr>
+								<td class="info">
+									<i><spring:message code="jpivot.text.saveCurrentView"/></i>
+									<br>
+
+									<form method="post" action="saveJPivot">
+										<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+										<input type="hidden" name="pivotReportId" value="${reportId}" />
+										<table>
+											<tr>
+												<td>
+													<spring:message code="page.text.name"/>
+												</td>
+												<td>
+													<input type="text" name="newPivotName" value="" size="20" maxlength="50" />
+													<c:if test="${exclusiveAccess}">
+														<input type="checkbox" name="overwrite" /><spring:message code="reports.text.overwrite"/> &nbsp;
+														<input type="checkbox" name="delete" /><spring:message code="page.action.delete"/> &nbsp;
+													</c:if>
+													<button type="submit" id="save" class="btn btn-default action">
+														<spring:message code="page.button.save"/>
+													</button>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<spring:message code="page.text.description"/>
+												</td>
+												<td>
+													<input type="text" name="newPivotDescription" value="" size="45" maxlength="2000">
+												</td>
+											</tr>
+										</table>
+									</form>
+								</td>
+							</tr>
+						</c:if>
 					</table>
 				</div>
 			</div>
 			<div id="push"></div>
 		</div>
-
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</body>
 </html>

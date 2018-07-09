@@ -38,7 +38,7 @@ Display report drilldowns
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Select-1.2.0/js/dataTables.select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js"></script>
@@ -93,7 +93,7 @@ Display report drilldowns
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + recordName + "</b>",
@@ -116,9 +116,9 @@ Display report drilldowns
 									success: function (response) {
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${recordDeletedText}", recordName);
+											notifyActionSuccessReusable("${recordDeletedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 										}
 									},
 									error: ajaxErrorHandler
@@ -135,9 +135,9 @@ Display report drilldowns
 					sRequestType: "POST",
 					fnSuccess: function (response) {
 						if (response.success) {
-							notifyActionSuccess("${recordMovedText}", escapeHtmlContent(response.data));
+							notifyActionSuccessReusable("${recordMovedText}", escapeHtmlContent(response.data));
 						} else {
-							notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 						}
 					},
 					fnAlert: function (message) {
@@ -175,9 +175,9 @@ Display report drilldowns
 										success: function (response) {
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -188,6 +188,10 @@ Display report drilldowns
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			}); //end document ready
@@ -211,21 +215,30 @@ Display report drilldowns
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div class="text-center">
-			<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${parentReportName}
+			<p>
+				<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${parentReportName}
+			</p>
 		</div>
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/addDrilldown?parent=${parentReportId}">
-				<i class="fa fa-plus"></i>
-				<spring:message code="page.action.add"/>
+			<div class="btn-group">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/addDrilldown?parent=${parentReportId}">
+					<i class="fa fa-plus"></i>
+					<spring:message code="page.action.add"/>
+				</a>
+				<button type="button" id="deleteRecords" class="btn btn-default">
+					<i class="fa fa-trash-o"></i>
+					<spring:message code="page.action.delete"/>
+				</button>
+			</div>
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/reportConfig?reportId=${parentReportId}">
+				<spring:message code="page.text.report"/>
 			</a>
-			<button type="button" id="deleteRecords" class="btn btn-default">
-				<i class="fa fa-trash-o"></i>
-				<spring:message code="page.action.delete"/>
-			</button>
 		</div>
 
 		<table id="drilldowns" class="table table-bordered table-striped table-condensed">

@@ -45,6 +45,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -270,18 +271,80 @@ public class ReportService {
 	 * Returns the reports that a user can access. Excludes disabled reports.
 	 *
 	 * @param userId the user id
-	 * @return accesible reports
+	 * @param includedReportTypes report types that should be included
+	 * @return accessible reports
 	 * @throws SQLException
 	 */
-	@Cacheable("reports")
-	public List<Report> getAccessibleReports(int userId) throws SQLException {
+	public List<Report> getAccessibleReportsWithReportTypes(int userId,
+			List<ReportType> includedReportTypes) throws SQLException {
+
+		List<ReportType> excludedReportTypes = null;
+		return getAccessibleReports(userId, includedReportTypes, excludedReportTypes);
+	}
+
+	/**
+	 * Returns the reports that a user can access. Excludes disabled reports.
+	 *
+	 * @param userId the user id
+	 * @param excludedReportTypes report types that should be excluded
+	 * @return accessible reports
+	 * @throws SQLException
+	 */
+	public List<Report> getAccessibleReportsWithoutReportTypes(int userId,
+			List<ReportType> excludedReportTypes) throws SQLException {
+
+		List<ReportType> includedReportTypes = null;
+		return getAccessibleReports(userId, includedReportTypes, excludedReportTypes);
+	}
+
+	/**
+	 * Returns the reports that a user can access. Excludes disabled reports.
+	 *
+	 * @param userId the user id
+	 * @param includedReportTypes report types that should be included
+	 * @param excludedReportTypes report types that should be excluded
+	 * @return accessible reports
+	 * @throws SQLException
+	 */
+	public List<Report> getAccessibleReports(int userId,
+			List<ReportType> includedReportTypes, List<ReportType> excludedReportTypes)
+			throws SQLException {
+
 		logger.debug("Entering getAccessibleReports: userId={}", userId);
+
+		String includedReportTypesCondition = "";
+		if (CollectionUtils.isNotEmpty(includedReportTypes)) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < includedReportTypes.size(); i++) {
+				if (i == 0) {
+					sb.append(includedReportTypes.get(i).getValue());
+				} else {
+					sb.append(",").append(includedReportTypes.get(i).getValue());
+				}
+			}
+			includedReportTypesCondition = " AND AQ.QUERY_TYPE IN(" + sb.toString() + ") ";
+		}
+
+		String excludedReportTypesCondition = "";
+		if (CollectionUtils.isNotEmpty(excludedReportTypes)) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < excludedReportTypes.size(); i++) {
+				if (i == 0) {
+					sb.append(excludedReportTypes.get(i).getValue());
+				} else {
+					sb.append(",").append(excludedReportTypes.get(i).getValue());
+				}
+			}
+			excludedReportTypesCondition = " AND AQ.QUERY_TYPE NOT IN(" + sb.toString() + ") ";
+		}
 
 		String sql = SQL_SELECT_ALL
 				//only show active reports
 				+ " WHERE AQ.ACTIVE=1"
 				//don't show hidden reports
 				+ " AND AQ.HIDDEN<>1"
+				+ includedReportTypesCondition
+				+ excludedReportTypesCondition
 				+ " AND("
 				//user can run report if he has direct access to it
 				+ " EXISTS (SELECT *"
@@ -334,24 +397,30 @@ public class ReportService {
 	public List<Report> getDisplayReports(int userId) throws SQLException {
 		logger.debug("Entering getDisplayReports: userId={}", userId);
 
-		List<Report> accessibleReports = getAccessibleReports(userId);
-		List<Report> displayReports = new ArrayList<>();
+		List<ReportType> excludedReportTypes = Arrays.asList(ReportType.LovStatic,
+				ReportType.LovDynamic, ReportType.JobRecipients, ReportType.SaikuConnection);
 
-		for (Report report : accessibleReports) {
-			ReportType reportType = report.getReportType();
-			switch (reportType) {
-				case LovDynamic:
-				case LovStatic:
-				case JobRecipients:
-				case SaikuConnection:
-					//do nothing. don't add to new list
-					break;
-				default:
-					displayReports.add(report);
-			}
-		}
+		return getAccessibleReportsWithoutReportTypes(userId, excludedReportTypes);
+	}
+	
+	/**
+	 * Returns the reports that a user can add to a self service dashboard
+	 *
+	 * @param userId the user id
+	 * @return dashboard candidate reports
+	 * @throws SQLException
+	 */
+	@Cacheable("reports")
+	public List<Report> getDashboardCandidateReports(int userId) throws SQLException {
+		logger.debug("Entering getDashboardCandidateReports: userId={}", userId);
 
-		return displayReports;
+		List<ReportType> excludedReportTypes = Arrays.asList(ReportType.LovStatic,
+				ReportType.LovDynamic, ReportType.JobRecipients, ReportType.SaikuConnection,
+				ReportType.Dashboard, ReportType.GridstackDashboard, ReportType.Update,
+				ReportType.JPivotMondrian, ReportType.JPivotMondrianXmla,
+				ReportType.JPivotSqlServerXmla, ReportType.SaikuReport);
+
+		return getAccessibleReportsWithoutReportTypes(userId, excludedReportTypes);
 	}
 
 	/**
@@ -1259,17 +1328,15 @@ public class ReportService {
 		logger.debug("Entering getAvailableSaikuReports: userId={}", userId);
 
 		List<SaikuReport> saikuReports = new ArrayList<>();
-		List<Report> availableReports = getAccessibleReports(userId);
+		List<Report> availableSaikuReports = getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.SaikuReport));
 
-		for (Report report : availableReports) {
-			if (report.getReportType() == ReportType.SaikuReport) {
-				SaikuReport saikuReport = new SaikuReport();
-				saikuReport.setReportId(report.getReportId());
-				saikuReport.setName(report.getLocalizedName(locale));
-				saikuReport.setShortDescription(report.getLocalizedShortDescription(locale));
-				saikuReport.setDescription(report.getLocalizedDescription(locale));
-				saikuReports.add(saikuReport);
-			}
+		for (Report report : availableSaikuReports) {
+			SaikuReport saikuReport = new SaikuReport();
+			saikuReport.setReportId(report.getReportId());
+			saikuReport.setName(report.getLocalizedName(locale));
+			saikuReport.setShortDescription(report.getLocalizedShortDescription(locale));
+			saikuReport.setDescription(report.getLocalizedDescription(locale));
+			saikuReports.add(saikuReport);
 		}
 
 		return saikuReports;
@@ -1286,18 +1353,7 @@ public class ReportService {
 	public List<Report> getAvailableSaikuConnectionReports(int userId) throws SQLException {
 		logger.debug("Entering getAvailableSaikuConnectionReports: userId={}", userId);
 
-		List<Report> saikuConnectionReports = new ArrayList<>();
-		List<Report> availableReports = getAccessibleReports(userId);
-
-		//http://zetcode.com/articles/javafilterlist/
-		//http://guidogarcia.net/blog/2011/10/29/java-different-ways-filter-collection/
-		for (Report report : availableReports) {
-			if (report.getReportType() == ReportType.SaikuConnection) {
-				saikuConnectionReports.add(report);
-			}
-		}
-
-		return saikuConnectionReports;
+		return getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.SaikuConnection));
 	}
 
 	/**

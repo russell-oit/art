@@ -31,6 +31,7 @@ import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rits.cloning.Cloner;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
@@ -127,7 +128,8 @@ public class RunReportController {
 				if (basicReport) {
 					Report originalReport = reportService.getReport(reportId);
 					//don't modify original object from reportService. will be cached and reused so property changes will be reflected in later uses of the object
-					Report originalReportCopy = Config.copyObject(originalReport, Report.class);
+					Cloner cloner = new Cloner();
+					Report originalReportCopy = cloner.deepClone(originalReport);
 					originalReportCopy.setName(testReport.getName());
 					originalReportCopy.setDescription(testReport.getDescription());
 					originalReportCopy.setDatasource(testReport.getDatasource());

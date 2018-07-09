@@ -221,11 +221,6 @@ Display edit user page
 						<form:select path="accessLevel" items="${accessLevels}"
 									 itemLabel="description" 
 									 class="form-control selectpicker"/>
-						<div class="text-right">
-							<a href="${pageContext.request.contextPath}/docs/Manual.html#access-levels">
-								<spring:message code="page.link.help"/>
-							</a>
-						</div>
 						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>
@@ -271,6 +266,19 @@ Display edit user page
 									 data-actions-box="true"
 									 />
 						<form:errors path="userGroups" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="roles">
+						<spring:message code="page.text.roles"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="roles" items="${roles}" multiple="true" 
+									 itemLabel="name" itemValue="roleId" 
+									 class="form-control selectpicker"
+									 data-actions-box="true"
+									 />
+						<form:errors path="roles" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

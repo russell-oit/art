@@ -23,6 +23,12 @@ import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.user.User;
 import art.general.ActionResult;
+import art.permission.Permission;
+import art.permission.PermissionService;
+import art.role.Role;
+import art.role.RoleService;
+import art.usergrouppermission.UserGroupPermissionService;
+import art.usergrouprole.UserGroupRoleService;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -31,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -56,16 +63,32 @@ public class UserGroupService {
 
 	private final DbService dbService;
 	private final ReportGroupService reportGroupService;
+	private final RoleService roleService;
+	private final PermissionService permissionService;
+	private final UserGroupPermissionService userGroupPermissionService;
+	private final UserGroupRoleService userGroupRoleService;
 
 	@Autowired
-	public UserGroupService(DbService dbService, ReportGroupService reportGroupService) {
+	public UserGroupService(DbService dbService, ReportGroupService reportGroupService,
+			RoleService roleService, PermissionService permissionService,
+			UserGroupPermissionService userGroupPermissionService,
+			UserGroupRoleService userGroupRoleService) {
+
 		this.dbService = dbService;
 		this.reportGroupService = reportGroupService;
+		this.roleService = roleService;
+		this.permissionService = permissionService;
+		this.userGroupPermissionService = userGroupPermissionService;
+		this.userGroupRoleService = userGroupRoleService;
 	}
 
 	public UserGroupService() {
 		dbService = new DbService();
 		reportGroupService = new ReportGroupService();
+		roleService = new RoleService();
+		permissionService = new PermissionService();
+		userGroupPermissionService = new UserGroupPermissionService();
+		userGroupRoleService = new UserGroupRoleService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUPS AUG";
@@ -99,6 +122,12 @@ public class UserGroupService {
 
 			ReportGroup defaultReportGroup = reportGroupService.getReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 			group.setDefaultReportGroup(defaultReportGroup);
+
+			List<Role> roles = roleService.getRolesForUserGroup(group.getUserGroupId());
+			group.setRoles(roles);
+
+			List<Permission> permissions = permissionService.getPermissionsForUserGroup(group.getUserGroupId());
+			group.setPermissions(permissions);
 
 			return type.cast(group);
 		}
@@ -230,11 +259,17 @@ public class UserGroupService {
 
 		sql = "DELETE FROM ART_USER_GROUP_JOBS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_GROUP_PARAM_DEFAULTS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_GROUP_FIXED_PARAM_VAL WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_PERM_MAP WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_ROLE_MAP WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
 
 		//finally delete user group
@@ -308,7 +343,7 @@ public class UserGroupService {
 	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "userGroups", allEntries = true)
+	@CacheEvict(value = {"userGroups", "users"}, allEntries = true)
 	public void updateUserGroup(UserGroup group, User actionUser) throws SQLException {
 		logger.debug("Entering updateUserGroup: group={}, actionUser={}", group, actionUser);
 
@@ -339,10 +374,15 @@ public class UserGroupService {
 			sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
 			int reportGroupId = dbService.getMaxRecordId(conn, sql);
 
+			sql = "SELECT MAX(ROLE_ID) FROM ART_ROLES";
+			int roleId = dbService.getMaxRecordId(sql);
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
+			Map<String, Role> addedRoles = new HashMap<>();
+
 			for (UserGroup userGroup : userGroups) {
 				userGroupId++;
 				ReportGroup defaultReportGroup = userGroup.getDefaultReportGroup();
@@ -366,7 +406,33 @@ public class UserGroupService {
 						}
 					}
 				}
+
+				List<Role> roles = userGroup.getRoles();
+				if (CollectionUtils.isNotEmpty(roles)) {
+					List<Role> newRoles = new ArrayList<>();
+					for (Role role : roles) {
+						String roleName = role.getName();
+						Role existingRole = roleService.getRole(roleName);
+						if (existingRole == null) {
+							Role addedRole = addedRoles.get(roleName);
+							if (addedRole == null) {
+								roleId++;
+								roleService.saveRole(role, roleId, actionUser, conn);
+								addedRoles.put(roleName, role);
+								newRoles.add(role);
+							} else {
+								newRoles.add(addedRole);
+							}
+						} else {
+							newRoles.add(existingRole);
+						}
+					}
+					userGroup.setRoles(newRoles);
+				}
+
 				saveUserGroup(userGroup, userGroupId, actionUser, conn);
+				userGroupPermissionService.recreateUserGroupPermissions(userGroup);
+				userGroupRoleService.recreateUserGroupRoles(userGroup);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
@@ -403,7 +469,7 @@ public class UserGroupService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "userGroups", allEntries = true)
+	@CacheEvict(value = {"userGroups", "users"}, allEntries = true)
 	public void saveUserGroup(UserGroup group, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 

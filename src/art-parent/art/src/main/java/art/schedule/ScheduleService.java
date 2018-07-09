@@ -297,6 +297,7 @@ public class ScheduleService {
 			conn.setAutoCommit(false);
 
 			Map<String, Holiday> addedHolidays = new HashMap<>();
+			
 			for (Schedule schedule : schedules) {
 				scheduleId++;
 				List<Holiday> sharedHolidays = schedule.getSharedHolidays();

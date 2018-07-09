@@ -36,12 +36,12 @@ Access rights configuration
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="accessRightsConfig"]').parent().addClass('active');
-					
+
 				$('.multi-select').multiSelect({
 					selectableHeader: "<div>${availableText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
@@ -112,9 +112,9 @@ Access rights configuration
 							jobs: jobs},
 						success: function (response) {
 							if (response.success) {
-								notifyActionSuccess(rightsUpdatedMessage);
+								notifyActionSuccessReusable(rightsUpdatedMessage);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -123,6 +123,10 @@ Access rights configuration
 
 				//handle select all/deselect all
 				addSelectDeselectAllHandler();
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
 			}); //end document ready
 		</script>
@@ -142,7 +146,9 @@ Access rights configuration
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 
 				<div class="form-group">

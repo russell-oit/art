@@ -22,6 +22,10 @@ Display report parameter that uses dropdown input
 <spring:message code="page.text.loading" var="loadingText"/>
 
 <script type="text/javascript">
+	//parents and depends parameter names should not contain spaces or special characters
+	//https://sourceforge.net/p/art/discussion/352129/thread/3320849d/
+	//https://stackoverflow.com/questions/70579/what-are-valid-values-for-the-id-attribute-in-html
+	//https://api.jquery.com/category/selectors/
 	$("#${encode:forJavaScript(reportParam.htmlElementName)}").remoteChained({
 		parents: "${encode:forJavaScript(reportParam.chainedParentsHtmlIds)}",
 		url: "${pageContext.request.contextPath}/getLovValues?reportId=${reportParam.parameter.lovReport.reportId}",

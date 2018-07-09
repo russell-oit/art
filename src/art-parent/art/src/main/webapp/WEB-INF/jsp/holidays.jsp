@@ -89,11 +89,11 @@
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -119,6 +119,10 @@
 					}
 				});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
 			}); //end document ready
 		</script>
 	</jsp:attribute>
@@ -140,7 +144,9 @@
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div style="margin-bottom: 10px;">
@@ -154,14 +160,16 @@
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<div class="btn-group">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Holidays">
-					<spring:message code="page.text.import"/>
-				</a>
-				<button type="button" id="exportRecords" class="btn btn-default">
-					<spring:message code="page.text.export"/>
-				</button>
-			</div>
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
+				<div class="btn-group">
+					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Holidays">
+						<spring:message code="page.text.import"/>
+					</a>
+					<button type="button" id="exportRecords" class="btn btn-default">
+						<spring:message code="page.text.export"/>
+					</button>
+				</div>
+			</c:if>
 		</div>
 
 		<table id="holidays" class="table table-bordered table-striped table-condensed">
@@ -171,8 +179,6 @@
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -188,8 +194,6 @@
 											   updateDate="${holiday.updateDate}"/>
 						</td>
 						<td>${encode:forHtmlContent(holiday.description)}</td>
-						<td>${encode:forHtmlContent(holiday.createdBy)}</td>
-						<td>${encode:forHtmlContent(holiday.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

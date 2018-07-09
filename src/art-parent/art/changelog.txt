@@ -1,3 +1,11 @@
+ART 3.8
+* Have self service dashboards
+* Fix for error when run with java 7
+* Have configurable roles
+* Added :reportId: and :jobId: tags
+* Don't output extra tabs for tsv report format
+* Updated jxls
+
 ART 3.7
 * Added google cloud storage destination type
 * Fix for pivottable.js renderers localization not working

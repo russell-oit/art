@@ -17,7 +17,6 @@
  */
 package art.springconfig;
 
-import art.enums.AccessLevel;
 import art.enums.ArtAuthenticationMethod;
 import art.login.LoginHelper;
 import art.login.LoginResult;
@@ -291,78 +290,63 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 	private boolean canAccessPage(String page, User user, HttpSession session,
 			String pathMinusContext) {
 
-		if (user.getAccessLevel() == null) {
-			return false;
-		}
-
 		boolean authorised = false;
 
-		int accessLevel = user.getAccessLevel().getValue();
-
-		if (StringUtils.equals(page, "reports")
-				|| StringUtils.equals(page, "") //home page "/"
-				|| StringUtils.equals(page, "selectReportParameters")
-				|| StringUtils.equals(page, "showDashboard")
-				|| StringUtils.equals(page, "showJPivot")
-				|| StringUtils.equals(page, "saveJPivot")
-				|| StringUtils.equals(page, "jpivotError")
-				|| StringUtils.equals(page, "jpivotBusy")
-				|| StringUtils.equals(page, "getSchedule")
-				|| StringUtils.equals(page, "runReport")
-				|| StringUtils.equals(page, "archives")
-				|| StringUtils.equals(page, "emailReport")
-				|| StringUtils.equals(page, "saiku3")
-				|| StringUtils.equals(page, "saveParameterSelection")
-				|| StringUtils.equals(page, "clearSavedParameterSelection")
-				|| StringUtils.equals(page, "savePivotTableJs")
-				|| StringUtils.equals(page, "deletePivotTableJs")
-				|| StringUtils.equals(page, "saveGridstack")
-				|| StringUtils.equals(page, "deleteGridstack")
-				|| StringUtils.equals(page, "getLovValues")) {
-			//everyone can access
-			//NOTE: "everyone" doesn't include when accessing as the art database user
-			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
+		//"" = home page "/"
+		if (StringUtils.equalsAny(page, "", "reports", "selectReportParameters",
+				"showDashboard", "getLovValues", "runReport", "emailReport",
+				"showJPivot", "jpivotBusy", "jpivotError", "saiku3",
+				"saveParameterSelection", "clearSavedParameterSelection")) {
+			if (user.hasPermission("view_reports")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equalsAny(page, "saveJPivot",
+				"savePivotTableJs", "deletePivotTableJs")) {
+			if (user.hasPermission("save_reports")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "getSchedule")) {
+			if (user.hasPermission("schedule_jobs")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equalsAny(page, "jobs", "archives")) {
+			if (user.hasPermission("view_jobs")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equalsAny(page, "saveGridstack", "deleteGridstack")) {
+			if (user.hasAnyPermission("save_reports", "self_service_dashboards")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equalsAny(page, "selfServiceDashboards", "getDashboardCandidateReports")) {
+			if (user.hasPermission("self_service_dashboards")) {
 				authorised = true;
 			}
 		} else if (StringUtils.startsWith(pathMinusContext, "/export/")) {
 			//all can access
 			authorised = true;
-		} else if (StringUtils.equals(page, "jobs")) {
-			//everyone
-			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
+		} else if (StringUtils.endsWith(page, "Job")) {
+			if (user.hasPermission("schedule_jobs")) {
 				authorised = true;
 			}
-		} else if (StringUtils.endsWith(page, "Job") || StringUtils.endsWith(page, "Jobs")) {
-			//schedule users and above
-			if (accessLevel >= AccessLevel.ScheduleUser.getValue()) {
-				authorised = true;
-			}
-		} else if (StringUtils.equals(page, "jobsConfig")) {
-			//standard admins and above
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+		} else if (StringUtils.endsWith(page, "Jobs") || StringUtils.equals(page, "jobsConfig")) {
+			if (user.hasPermission("configure_jobs")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "logs")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+			if (user.hasPermission("view_logs")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "users") || StringUtils.endsWith(page, "User")
-				|| StringUtils.endsWith(page, "Users")) {
-			//standard admins and above, and repository user
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()
-					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
+		} else if (StringUtils.equals(page, "users")
+				|| StringUtils.endsWithAny(page, "User", "Users")) {
+			if (user.hasPermission("configure_users")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "artDatabase")) {
-			//super admins, and repository user
-			if (accessLevel == AccessLevel.SuperAdmin.getValue()
-					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
+			if (user.hasPermission("configure_art_database")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "settings")) {
-			//super admins
-			if (accessLevel == AccessLevel.SuperAdmin.getValue()) {
+			if (user.hasPermission("configure_settings")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "language")) {
@@ -375,158 +359,131 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 					&& StringUtils.equals(authenticationMethod, ArtAuthenticationMethod.Internal.getValue())) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "success")
-				|| StringUtils.equals(page, "accessDenied")
-				|| StringUtils.equals(page, "reportError")) {
+		} else if (StringUtils.equalsAny(page, "success", "accessDenied", "reportError")) {
 			//all can access
 			authorised = true;
-		} else if (StringUtils.equals(page, "userGroups") || StringUtils.endsWith(page, "UserGroup")
-				|| StringUtils.endsWith(page, "UserGroups")) {
-			//standard admins and above
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+		} else if (StringUtils.equals(page, "userGroups")
+				|| StringUtils.endsWithAny(page, "UserGroup", "UserGroups")) {
+			if (user.hasPermission("configure_user_groups")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "datasources") || StringUtils.endsWith(page, "Datasource")
-				|| StringUtils.equals(page, "testDatasource")
-				|| StringUtils.endsWith(page, "Datasources")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "datasources", "testDatasource")
+				|| StringUtils.endsWithAny(page, "Datasource", "Datasources")) {
+			if (user.hasPermission("configure_datasources")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "reportsConfig") || StringUtils.endsWith(page, "Report")
-				|| StringUtils.endsWith(page, "Reports") || StringUtils.equals(page, "uploadResources")) {
-			//junior admins and above
-			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "reportsConfig", "uploadResources", "reportConfig")
+				|| StringUtils.endsWithAny(page, "Report", "Reports")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "caches") || StringUtils.endsWith(page, "Cache")
-				|| StringUtils.equals(page, "clearAllCaches")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "caches", "clearAllCaches")
+				|| StringUtils.endsWith(page, "Cache")) {
+			if (user.hasPermission("configure_caches")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "connections")
-				|| StringUtils.equals(page, "refreshConnectionPool")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "connections", "refreshConnectionPool")) {
+			if (user.hasPermission("configure_connections")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "loggers") || StringUtils.endsWith(page, "Logger")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+			if (user.hasPermission("configure_loggers")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "reportGroups") || StringUtils.endsWith(page, "ReportGroup")
-				|| StringUtils.endsWith(page, "ReportGroups")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equals(page, "reportGroups")
+				|| StringUtils.endsWithAny(page, "ReportGroup", "ReportGroups")) {
+			if (user.hasPermission("configure_report_groups")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "schedules") || StringUtils.endsWith(page, "Schedule")
-				|| StringUtils.endsWith(page, "Schedules")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equals(page, "schedules")
+				|| StringUtils.endsWithAny(page, "Schedule", "Schedules")) {
+			if (user.hasPermission("configure_schedules")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "holidays") || StringUtils.endsWith(page, "Holiday")
-				|| StringUtils.endsWith(page, "Holidays")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equals(page, "holidays")
+				|| StringUtils.endsWithAny(page, "Holiday", "Holidays")) {
+			if (user.hasPermission("configure_holidays")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "destinations") || StringUtils.endsWith(page, "Destination")
-				|| StringUtils.endsWith(page, "Destinations")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equals(page, "destinations")
+				|| StringUtils.endsWithAny(page, "Destination", "Destinations")) {
+			if (user.hasPermission("configure_destinations")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "drilldowns")
-				|| StringUtils.endsWith(page, "Drilldown")
-				|| StringUtils.endsWith(page, "Drilldowns")) {
-			//junior admins and above
-			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
+				|| StringUtils.endsWithAny(page, "Drilldown", "Drilldowns")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "adminRights") || StringUtils.endsWith(page, "AdminRight")
-				|| StringUtils.equals(page, "adminRightsConfig")) {
-			//standard admins and above
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "adminRights", "adminRightsConfig")
+				|| StringUtils.endsWith(page, "AdminRight")) {
+			if (user.hasPermission("configure_admin_rights")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "accessRights") || StringUtils.endsWith(page, "AccessRight")
-				|| StringUtils.equals(page, "accessRightsConfig")
-				|| StringUtils.endsWith(page, "AccessRights")) {
-			//mid admins and above
-			if (accessLevel >= AccessLevel.MidAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "accessRights", "accessRightsConfig")
+				|| StringUtils.endsWithAny(page, "AccessRight", "AccessRights")) {
+			if (user.hasPermission("configure_access_rights")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "userGroupMembership") || StringUtils.endsWith(page, "UserGroupMembership")
-				|| StringUtils.equals(page, "userGroupMembershipConfig")) {
-			//standard admins and above
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "userGroupMembership", "userGroupMembershipConfig")
+				|| StringUtils.endsWith(page, "UserGroupMembership")) {
+			if (user.hasPermission("configure_user_group_membership")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "reportGroupMembership") || StringUtils.endsWith(page, "ReportGroupMembership")
-				|| StringUtils.equals(page, "reportGroupMembershipConfig")) {
-			//standard admins and above
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "reportGroupMembership", "reportGroupMembershipConfig")
+				|| StringUtils.endsWith(page, "ReportGroupMembership")) {
+			if (user.hasPermission("configure_report_group_membership")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "rules") || StringUtils.endsWith(page, "Rule")
-				|| StringUtils.endsWith(page, "Rules")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "rules", "reportRules")
+				|| StringUtils.endsWithAny(page, "Rule", "Rules")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "reportRules") || StringUtils.endsWith(page, "ReportRule")) {
-			//junior admins and above
-			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "parameters", "reportParameterConfig")
+				|| StringUtils.endsWithAny(page, "Parameter", "Parameters")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "parameters") || StringUtils.endsWith(page, "Parameter")
-				|| StringUtils.endsWith(page, "Parameters")) {
-			//junior admins and above
-			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "ruleValues", "ruleValuesConfig")
+				|| StringUtils.endsWithAny(page, "RuleValue", "RuleValues")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "ruleValues") || StringUtils.endsWith(page, "RuleValue")
-				|| StringUtils.equals(page, "ruleValuesConfig") || StringUtils.endsWith(page, "RuleValues")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "paramDefaults", "paramDefaultsConfig")
+				|| StringUtils.endsWithAny(page, "ParamDefault", "ParamDefaults")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "paramDefaults") || StringUtils.endsWith(page, "ParamDefault")
-				|| StringUtils.equals(page, "paramDefaultsConfig") || StringUtils.endsWith(page, "ParamDefaults")) {
-			if (accessLevel >= AccessLevel.MidAdmin.getValue()) {
+		} else if (StringUtils.equalsAny(page, "fixedParamValues", "fixedParamValuesConfig")
+				|| StringUtils.endsWithAny(page, "FixedParamValue", "FixedParamValues")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "fixedParamValues") || StringUtils.endsWith(page, "FixedParamValue")
-				|| StringUtils.equals(page, "fixedParamValuesConfig") || StringUtils.endsWith(page, "FixedParamValues")) {
-			if (accessLevel >= AccessLevel.MidAdmin.getValue()) {
+		} else if (StringUtils.equals(page, "smtpServers")
+				|| StringUtils.endsWithAny(page, "SmtpServer", "SmtpServers")) {
+			if (user.hasPermission("configure_smtp_servers")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "reportParameterConfig")
-				|| StringUtils.endsWith(page, "ReportParameter")
-				|| StringUtils.endsWith(page, "ReportParameters")) {
-			//junior admins and above
-			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
-				authorised = true;
-			}
-		} else if (StringUtils.equals(page, "smtpServers") || StringUtils.endsWith(page, "SmtpServer")
-				|| StringUtils.endsWith(page, "SmtpServers")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
-				authorised = true;
-			}
-		} else if (StringUtils.equals(page, "encryptors") || StringUtils.endsWith(page, "Encryptor")
-				|| StringUtils.endsWith(page, "Encryptors")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+		} else if (StringUtils.equals(page, "encryptors")
+				|| StringUtils.endsWithAny(page, "Encryptor", "Encryptors")) {
+			if (user.hasPermission("configure_encryptors")) {
 				authorised = true;
 			}
 		} else if (StringUtils.endsWith(page, "Records")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+			if (user.hasPermission("migrate_records")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equalsAny(page, "roles", "rolePermissionsConfig",
+				"updateRolePermissions", "roleUsage")
+				|| StringUtils.endsWithAny(page, "Role", "Roles")) {
+			if (user.hasPermission("configure_roles")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equalsAny(page, "permissionsConfig", "permissions",
+				"permissionUsage")
+				|| StringUtils.endsWithAny(page, "Permission", "Permissions")) {
+			if (user.hasPermission("configure_permissions")) {
 				authorised = true;
 			}
 		}

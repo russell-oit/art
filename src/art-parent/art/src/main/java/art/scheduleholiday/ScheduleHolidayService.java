@@ -122,7 +122,6 @@ public class ScheduleHolidayService {
 		logger.debug("(schedules == null) = {}", schedules == null);
 		logger.debug("(holidays == null) = {}", holidays == null);
 		if (schedules == null || holidays == null) {
-			logger.warn("Update not performed. schedules or holidays is null.");
 			return;
 		}
 

@@ -20,15 +20,20 @@ package art.user;
 import art.encryption.PasswordUtils;
 import art.enums.AccessLevel;
 import art.migration.PrefixTransformer;
+import art.permission.Permission;
 import art.reportgroup.ReportGroup;
+import art.role.Role;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -73,6 +78,52 @@ public class User implements Serializable {
 	private boolean clearTextPassword; //used to allow import with clear text passwords
 	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
+	private List<Role> roles;
+	private List<Permission> permissions;
+	@JsonIgnore
+	private List<String> flatPermissions = new ArrayList<>();
+
+	/**
+	 * @return the permissions
+	 */
+	public List<Permission> getPermissions() {
+		return permissions;
+	}
+
+	/**
+	 * @param permissions the permissions to set
+	 */
+	public void setPermissions(List<Permission> permissions) {
+		this.permissions = permissions;
+	}
+
+	/**
+	 * @return the flatPermissions
+	 */
+	public List<String> getFlatPermissions() {
+		return flatPermissions;
+	}
+
+	/**
+	 * @param flatPermissions the flatPermissions to set
+	 */
+	public void setFlatPermissions(List<String> flatPermissions) {
+		this.flatPermissions = flatPermissions;
+	}
+
+	/**
+	 * @return the roles
+	 */
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * @param roles the roles to set
+	 */
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
+	}
 
 	/**
 	 * @return the clearTextPassword
@@ -499,6 +550,116 @@ public class User implements Serializable {
 	public void encryptPassword() {
 		password = PasswordUtils.HashPasswordBcrypt(password);
 		passwordAlgorithm = "bcrypt";
+	}
+
+	/**
+	 * Creates a list of all permissions that this user has
+	 */
+	public void prepareFlatPermissions() {
+		flatPermissions.clear();
+
+		if (CollectionUtils.isNotEmpty(permissions)) {
+			for (Permission permission : permissions) {
+				flatPermissions.add(permission.getName());
+			}
+		}
+
+		if (CollectionUtils.isNotEmpty(roles)) {
+			for (Role role : roles) {
+				List<Permission> rolePermissions = role.getPermissions();
+				if (CollectionUtils.isNotEmpty(rolePermissions)) {
+					for (Permission permission : rolePermissions) {
+						flatPermissions.add(permission.getName());
+					}
+				}
+			}
+		}
+
+		if (CollectionUtils.isNotEmpty(userGroups)) {
+			for (UserGroup userGroup : userGroups) {
+				List<Permission> userGroupPermissions = userGroup.getPermissions();
+				if (CollectionUtils.isNotEmpty(userGroupPermissions)) {
+					for (Permission permission : userGroupPermissions) {
+						flatPermissions.add(permission.getName());
+					}
+				}
+
+				List<Role> userGroupRoles = userGroup.getRoles();
+				if (CollectionUtils.isNotEmpty(userGroupRoles)) {
+					for (Role role : userGroupRoles) {
+						List<Permission> rolePermissions = role.getPermissions();
+						if (CollectionUtils.isNotEmpty(rolePermissions)) {
+							for (Permission permission : rolePermissions) {
+								flatPermissions.add(permission.getName());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has the given permission
+	 *
+	 * @param permission the permission name
+	 * @return <code>true</code> if the user has the given permission
+	 */
+	public boolean hasPermission(String permission) {
+		boolean hasPermission = false;
+
+		if (CollectionUtils.isNotEmpty(flatPermissions)) {
+			hasPermission = flatPermissions.contains(permission);
+		}
+
+		return hasPermission;
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has any of the given permissions
+	 *
+	 * @param permissions the permission name
+	 * @return <code>true</code> if the user has any of the given permissions
+	 */
+	public boolean hasAnyPermission(String... permissions) {
+		boolean hasPermission = false;
+
+		if (CollectionUtils.isNotEmpty(flatPermissions) && permissions != null) {
+			List<String> permissionsList = Arrays.asList(permissions);
+			hasPermission = CollectionUtils.containsAny(flatPermissions, permissionsList);
+		}
+
+		return hasPermission;
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has any configure permission
+	 *
+	 * @return <code>true</code> if the user has any configure permission
+	 */
+	public boolean hasConfigurePermission() {
+		boolean hasPermission = false;
+
+		if (CollectionUtils.isNotEmpty(flatPermissions)) {
+			for (String permission : flatPermissions) {
+				if (StringUtils.startsWith(permission, "configure")) {
+					hasPermission = true;
+					break;
+				}
+			}
+		}
+
+		return hasPermission;
+	}
+
+	/**
+	 * Sets permissions for the initial setup or repository user
+	 */
+	public void buildSetupUserPermissions(){
+		flatPermissions.clear();
+		
+		flatPermissions.addAll(Arrays.asList("configure_users",
+				"configure_art_database", "configure_roles"));
 	}
 
 }

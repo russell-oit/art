@@ -82,7 +82,6 @@ Edit report page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
@@ -256,11 +255,11 @@ Edit report page
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
 						data: $('#fileupload').serialize(),
-						success: function (data, status, xhr) {
+						success: function (data) {
 							$("#reportOutput").html(data);
 							$('.action').prop('disabled', false);
 						},
-						error: function (xhr, status, error) {
+						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 							bootbox.alert(xhr.responseText);
 							$('.action').prop('disabled', false);
@@ -277,11 +276,11 @@ Edit report page
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
 						data: $('#fileupload').serialize() + "&testData=true&reportFormat=htmlDataTable",
-						success: function (data, status, xhr) {
+						success: function (data) {
 							$("#reportOutput").html(data);
 							$('.action').prop('disabled', false);
 						},
-						error: function (xhr, status, error) {
+						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 							bootbox.alert(xhr.responseText);
 							$('.action').prop('disabled', false);
@@ -1094,6 +1093,51 @@ Edit report page
 						break;
 					default:
 						$("#applyOptions").hide();
+				}
+
+				//show/hide test report button
+				switch (reportTypeId) {
+					case 112: //jpivot mondrian
+					case 113: //jpivot mondrian xmla
+					case 114: //jpivot sql server xmla
+					case 149: //saiku report
+					case 150: //saiku connection
+					case 120: //lov static
+						$("#testReport").hide();
+						break;
+					default:
+						$("#testReport").show();
+				}
+
+				//show/hide test report data button
+				switch (reportTypeId) {
+					case 100: //update
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 111: //text
+					case 112: //jpivot mondrian
+					case 113: //jpivot mondrian xmla
+					case 114: //jpivot sql server xmla
+					case 149: //saiku report
+					case 150: //saiku connection
+					case 115: //jasper template
+					case 117: //jxls template
+					case 120: //lov static
+					case 133: //pivottable.js csv local
+					case 134: //pivottable.sj csv server
+					case 151: //mongo
+					case 136: //dygraphs csv local
+					case 137: //dygraphs csv server
+					case 139: //datatables csv local
+					case 140: //datatables csv server
+					case 155: //org chart json
+					case 156: //org chart list
+					case 157: //org chart ajax
+					case 159: //report engine file
+						$("#testReportData").hide();
+						break;
+					default:
+						$("#testReportData").show();
 				}
 			}
 		</script>

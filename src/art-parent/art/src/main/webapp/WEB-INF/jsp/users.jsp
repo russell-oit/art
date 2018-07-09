@@ -92,11 +92,11 @@ Display user configuration page
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -135,8 +135,11 @@ Display user configuration page
 					}
 				});
 
-			});
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
+			});
 		</script>
 	</jsp:attribute>
 
@@ -157,7 +160,9 @@ Display user configuration page
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div style="margin-bottom: 10px;">
@@ -175,7 +180,7 @@ Display user configuration page
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<c:if test="${sessionUser.accessLevel.value >= 80}">
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
 				<div class="btn-group">
 					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Users">
 						<spring:message code="page.text.import"/>
@@ -196,8 +201,6 @@ Display user configuration page
 					<th><spring:message code="users.text.username"/></th>
 					<th><spring:message code="users.text.fullName"/></th>
 					<th><spring:message code="page.text.active"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -217,8 +220,6 @@ Display user configuration page
 											   activeText="${activeText}"
 											   disabledText="${disabledText}"/>
 						</td>
-						<td>${encode:forHtmlContent(user.createdBy)}</td>
-						<td>${encode:forHtmlContent(user.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" href="${pageContext.request.contextPath}/editUser?id=${user.userId}">
@@ -243,12 +244,22 @@ Display user configuration page
 									<span class="caret"></span>
 								</button>
 								<ul class="dropdown-menu">
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/userAccessRights?userId=${user.userId}">
-											<spring:message code="page.action.accessRights"/>
-										</a>
-									</li>
+									<c:if test="${sessionUser.hasPermission('configure_access_rights')}">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/userAccessRights?userId=${user.userId}">
+												<spring:message code="page.action.accessRights"/>
+											</a>
+										</li>
+									</c:if>
+									<c:if test="${sessionUser.hasPermission('configure_permissions')}">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/userPermissions?userId=${user.userId}">
+												<spring:message code="page.text.permissions"/>
+											</a>
+										</li>
+									</c:if>
 								</ul>
 							</div>
 						</td>

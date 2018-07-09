@@ -1,5 +1,5 @@
 /* 
-    Document   : art-3
+    Document   : art
     Created on : 27-Sep-2013, 09:03:00
     Author     : Timothy Anyona
     Description: ART css
@@ -54,12 +54,12 @@ td.details {
 
 /* styling for datatables details content */
 div.details { 
-	margin-left:50px;
+	margin-left: 50px;
 }
 
 /* remove bootstrap border-top from details row */
 table.expandable table tbody>tr>td {
-	border:none;
+	border: none;
 }
 
 /* show hand cursor for expandable rows */
@@ -145,7 +145,7 @@ body {
 }
 
 .reportName {
-  padding-bottom: 9px;
-  margin: 20px 0 20px;
+  padding-bottom: 5px;
+  margin: 10px 0 20px;
   border-bottom: 1px solid #eee;
 }

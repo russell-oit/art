@@ -90,11 +90,11 @@ Display datasources
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -119,7 +119,7 @@ Display datasources
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 				$('#exportRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
@@ -133,8 +133,11 @@ Display datasources
 					}
 				});
 
-			}); //end document ready
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
 
+			}); //end document ready
 		</script>
 	</jsp:attribute>
 
@@ -168,7 +171,9 @@ Display datasources
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div style="margin-bottom: 10px;">
@@ -186,14 +191,16 @@ Display datasources
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<div class="btn-group">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Datasources">
-					<spring:message code="page.text.import"/>
-				</a>
-				<button type="button" id="exportRecords" class="btn btn-default">
-					<spring:message code="page.text.export"/>
-				</button>
-			</div>
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
+				<div class="btn-group">
+					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Datasources">
+						<spring:message code="page.text.import"/>
+					</a>
+					<button type="button" id="exportRecords" class="btn btn-default">
+						<spring:message code="page.text.export"/>
+					</button>
+				</div>
+			</c:if>
 		</div>
 
 		<table id="datasources" class="table table-bordered table-striped table-condensed">
@@ -204,8 +211,6 @@ Display datasources
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -222,8 +227,6 @@ Display datasources
 						</td>
 						<td>${encode:forHtmlContent(datasource.description)}</td>
 						<td><t:displayActiveStatus active="${datasource.active}"/></td>
-						<td>${encode:forHtmlContent(datasource.createdBy)}</td>
-						<td>${encode:forHtmlContent(datasource.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

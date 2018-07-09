@@ -21,6 +21,8 @@ import art.reportgroup.ReportGroupService;
 import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
+import art.role.RoleService;
+import art.usergrouprole.UserGroupRoleService;
 import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -54,6 +56,12 @@ public class UserGroupController {
 
 	@Autowired
 	private ReportGroupService reportGroupService;
+
+	@Autowired
+	private RoleService roleService;
+
+	@Autowired
+	private UserGroupRoleService userGroupRoleService;
 
 	@RequestMapping(value = "/userGroups", method = RequestMethod.GET)
 	public String showUserGroups(Model model) {
@@ -183,6 +191,13 @@ public class UserGroupController {
 
 			String recordName = group.getName() + " (" + group.getUserGroupId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
+
+			try {
+				userGroupRoleService.recreateUserGroupRoles(group);
+			} catch (SQLException | RuntimeException ex) {
+				logger.error("Error", ex);
+				redirectAttributes.addFlashAttribute("error", ex);
+			}
 			return "redirect:/userGroups";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -204,6 +219,7 @@ public class UserGroupController {
 
 		try {
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
+			model.addAttribute("roles", roleService.getAllRoles());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

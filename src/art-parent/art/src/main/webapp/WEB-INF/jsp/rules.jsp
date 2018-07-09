@@ -13,7 +13,6 @@ Display rules
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
-<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:message code="page.title.rules" var="pageTitle"/>
 
@@ -45,7 +44,7 @@ Display rules
 						"${showAllRowsText}",
 						"${pageContext.request.contextPath}",
 						"${pageContext.response.locale}",
-						undefined, //addColumnRules. pass undefined to use default
+						undefined, //addColumnFilters. pass undefined to use default
 						".deleteRecord", //deleteButtonSelector
 						true, //showConfirmDialog
 						"${deleteRecordText}",
@@ -90,11 +89,11 @@ Display rules
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -120,6 +119,10 @@ Display rules
 					}
 				});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
 			}); //end document ready
 		</script>
 	</jsp:attribute>
@@ -141,7 +144,9 @@ Display rules
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div style="margin-bottom: 10px;">
@@ -172,8 +177,6 @@ Display rules
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
-					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -189,8 +192,6 @@ Display rules
 											   updateDate="${rule.updateDate}"/>
 						</td>
 						<td>${encode:forHtmlContent(rule.description)}</td>
-						<td>${encode:forHtmlContent(rule.createdBy)}</td>
-						<td>${encode:forHtmlContent(rule.updatedBy)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
@@ -208,22 +209,24 @@ Display rules
 									<spring:message code="page.action.copy"/>
 								</a>
 							</div>
-							<div class="btn-group">
-								<button type="button" class="btn btn-default dropdown-toggle"
-										data-toggle="dropdown" data-hover="dropdown"
-										data-delay="100">
-									<spring:message code="reports.action.more"/>
-									<span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu">
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/ruleRuleValues?ruleId=${rule.ruleId}">
-											<spring:message code="page.title.ruleValues"/>
-										</a>
-									</li>
-								</ul>
-							</div>
+							<c:if test="${sessionUser.hasPermission('configure_rule_values')}">
+								<div class="btn-group">
+									<button type="button" class="btn btn-default dropdown-toggle"
+											data-toggle="dropdown" data-hover="dropdown"
+											data-delay="100">
+										<spring:message code="reports.action.more"/>
+										<span class="caret"></span>
+									</button>
+									<ul class="dropdown-menu">
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/ruleRuleValues?ruleId=${rule.ruleId}">
+												<spring:message code="page.title.ruleValues"/>
+											</a>
+										</li>
+									</ul>
+								</div>
+							</c:if>
 						</td>
 					</tr>
 				</c:forEach>

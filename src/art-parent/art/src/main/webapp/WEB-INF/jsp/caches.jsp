@@ -26,7 +26,7 @@ Page to allow manual clearing of caches
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -47,7 +47,7 @@ Page to allow manual clearing of caches
 
 				tbl.find('tbody').on('click', '.clearCache', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 
 					$.ajax({
@@ -57,9 +57,9 @@ Page to allow manual clearing of caches
 						data: {id: recordId},
 						success: function (response) {
 							if (response.success) {
-								notifyActionSuccess("${cacheClearedText}", recordName);
+								notifyActionSuccessReusable("${cacheClearedText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -71,21 +71,23 @@ Page to allow manual clearing of caches
 						type: 'POST',
 						url: '${pageContext.request.contextPath}/clearAllCaches',
 						dataType: 'json',
-						success: function (response)
-						{
+						success: function (response) {
 							if (response.success) {
-								notifyActionSuccess("${cachesClearedText}", undefined);
+								notifyActionSuccessReusable("${cachesClearedText}");
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
 					});
 				});
 
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
 			});
 		</script>
-
 	</jsp:attribute>
 
 	<jsp:body>
@@ -99,7 +101,9 @@ Page to allow manual clearing of caches
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div style="margin-bottom: 10px;">

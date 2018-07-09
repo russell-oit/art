@@ -74,9 +74,9 @@
 					sRequestType: "POST",
 					fnSuccess: function (response) {
 						if (response.success) {
-							notifyActionSuccess("${recordMovedText}", escapeHtmlContent(response.data));
+							notifyActionSuccessReusable("${recordMovedText}", escapeHtmlContent(response.data));
 						} else {
-							notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 						}
 					},
 					fnAlert: function (message) {
@@ -114,9 +114,9 @@
 										success: function (response) {
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -127,6 +127,10 @@
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			}); //end document ready
@@ -150,11 +154,15 @@
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div class="text-center">
-			<b><spring:message code="page.text.report"/>:</b> ${reportName}
+			<p>
+				<b><spring:message code="page.text.report"/>:</b> ${reportName}
+			</p>
 		</div>
 		<div style="margin-bottom: 10px;">
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/addParameter?reportId=${reportId}">
@@ -169,6 +177,9 @@
 				<i class="fa fa-trash-o"></i>
 				<spring:message code="page.action.delete"/>
 			</button>
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/reportConfig?reportId=${reportId}">
+				<spring:message code="page.text.report"/>
+			</a>
 		</div>
 
 		<table id="reportParameters" class="table table-bordered table-striped table-condensed">

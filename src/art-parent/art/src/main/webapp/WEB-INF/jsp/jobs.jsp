@@ -110,7 +110,7 @@ Display user jobs and jobs configuration
 
 				tbl.find('tbody').on('click', '.run', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 
 					$.ajax({
@@ -118,12 +118,11 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/runJob',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response)
-						{
+						success: function (response) {
 							if (response.success) {
-								notifyActionSuccess("${runningText}", recordName);
+								notifyActionSuccessReusable("${runningText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -132,7 +131,7 @@ Display user jobs and jobs configuration
 
 				tbl.find('tbody').on('click', '.runLater', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 
 					var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -152,13 +151,12 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/runLaterJob',
 						dataType: 'json',
 						data: $('#runLaterForm').serialize(),
-						success: function (response)
-						{
+						success: function (response) {
 							$("#runLaterModal").modal('hide');
 							if (response.success) {
-								notifyActionSuccess("${scheduledText}", recordName);
+								notifyActionSuccessReusable("${scheduledText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -167,7 +165,7 @@ Display user jobs and jobs configuration
 
 				tbl.find('tbody').on('click', '.refresh', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 
 					$.ajax({
@@ -175,8 +173,7 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/refreshJob',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response)
-						{
+						success: function (response) {
 							if (response.success) {
 								var job = response.data;
 
@@ -195,8 +192,8 @@ Display user jobs and jobs configuration
 									result = result + '</p>';
 								}
 
-								var accessLevel = ${sessionUser.accessLevel.value};
-								if (accessLevel >= 80) {
+								var hasConfigureJobsPermission = ${sessionUser.hasPermission('configure_jobs')};
+								if (hasConfigureJobsPermission) {
 									result = result + '<p><br><a type="application/octet-stream" ';
 									result = result + 'href="${pageContext.request.contextPath}/export/jobLogs/' + job.jobId + '.log">';
 									result = result + 'log</a></p>';
@@ -206,9 +203,9 @@ Display user jobs and jobs configuration
 								table.cell(row, 5).data(result);
 								table.cell(row, 6).data(job.nextRunDateString);
 
-								notifyActionSuccess("${refreshedText}", recordName);
+								notifyActionSuccessReusable("${refreshedText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -244,9 +241,9 @@ Display user jobs and jobs configuration
 										success: function (response) {
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", ids);
+												notifyActionSuccessReusable("${recordsDeletedText}", ids);
 											} else {
-												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}
 										},
 										error: ajaxErrorHandler
@@ -282,12 +279,11 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/runJob',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response)
-						{
+						success: function (response) {
 							if (response.success) {
-								notifyActionSuccess("${runningText}", recordName);
+								notifyActionSuccessReusable("${runningText}", recordName);
 							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
 						},
 						error: ajaxErrorHandler
@@ -309,6 +305,10 @@ Display user jobs and jobs configuration
 				$('.datetimepicker').datetimepicker({
 					format: 'YYYY-MM-DD HH:mm:ss',
 					locale: '${pageContext.response.locale}'
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
 				});
 
 			}); //end document ready
@@ -338,7 +338,9 @@ Display user jobs and jobs configuration
 			</div>
 		</c:if>
 
-		<div id="ajaxResponse">
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
 		</div>
 
 		<div class="row">
@@ -411,7 +413,7 @@ Display user jobs and jobs configuration
 									${job.lastRunDetails}
 								</p>
 							</c:if>
-							<c:if test="${sessionUser.accessLevel.value >= 80}">
+							<c:if test="${sessionUser.hasPermission('configure_jobs')}">
 								<p><br>
 									<a type="application/octet-stream" 
 									   href="${pageContext.request.contextPath}/export/jobLogs/${job.jobId}.log">

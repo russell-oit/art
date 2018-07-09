@@ -27,6 +27,8 @@ import art.rule.StringToRule;
 import art.schedule.StringToSchedule;
 import art.usergroup.StringToUserGroup;
 import art.general.StringToDouble;
+import art.permission.StringToPermission;
+import art.role.StringToRole;
 import art.smtpserver.StringToSmtpServer;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
@@ -91,22 +93,28 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToDestination stringToDestination;
-	
+
 	@Autowired
 	private StringToSmtpServer stringToSmtpServer;
-	
+
 	@Autowired
 	private StringToDatasource stringToDatasource;
-	
+
 	@Autowired
 	private StringToEncryptor stringToEncryptor;
 
 	@Autowired
 	private StringToRule stringToRule;
+	
+	@Autowired
+	private StringToRole stringToRole;
+	
+	@Autowired
+	private StringToPermission stringToPermission;
 
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
-	
+
 	private ApplicationContext applicationContext;
 
 	@Override
@@ -171,7 +179,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		resolver.setCacheable(true);
 		return resolver;
 	}
-	
+
 	@Bean
 	public TemplateEngine jobTemplateEngine() {
 		SpringTemplateEngine templateEngine = new SpringTemplateEngine();
@@ -189,14 +197,14 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		resolver.setCacheable(false);
 		return resolver;
 	}
-	
+
 	@Bean
-	public HandlerInterceptor authorizationInterceptor(){
+	public HandlerInterceptor authorizationInterceptor() {
 		return new AuthorizationInterceptor();
 	}
-	
+
 	@Bean
-	public HandlerInterceptor apiInterceptor(){
+	public HandlerInterceptor apiInterceptor() {
 		return new ApiInterceptor();
 	}
 
@@ -217,7 +225,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 						"/customAuthentication", "/api/**",
 						"/error", "/error-404", "/error-405", "/error-400",
 						"/error-403", "/error-500");
-		
+
 		registry.addInterceptor(apiInterceptor())
 				.addPathPatterns("/api/**");
 	}
@@ -253,6 +261,8 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addConverter(stringToSmtpServer);
 		registry.addConverter(stringToDatasource);
 		registry.addConverter(stringToEncryptor);
+		registry.addConverter(stringToRole);
+		registry.addConverter(stringToPermission);
 	}
 
 	@Bean

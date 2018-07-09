@@ -20,7 +20,6 @@ package art.runreport;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.encryptor.Encryptor;
-import art.enums.AccessLevel;
 import art.enums.ColumnType;
 import art.enums.EncryptorType;
 import art.enums.ParameterDataType;
@@ -260,10 +259,8 @@ public class RunReportHelper {
 		}
 		request.setAttribute("reportFormat", reportFormat);
 
-		int accessLevel = sessionUser.getAccessLevel().getValue();
-
 		boolean enableSchedule;
-		if (accessLevel >= AccessLevel.ScheduleUser.getValue()
+		if (sessionUser.hasPermission("schedule_jobs")
 				&& Config.getSettings().isSchedulingEnabled()) {
 			enableSchedule = reportType.canSchedule();
 		} else {
@@ -297,7 +294,7 @@ public class RunReportHelper {
 				enableShowSelectedParameters = false;
 				break;
 			default:
-				if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
+				if (sessionUser.hasPermission("configure_reports")){
 					enableShowSql = true;
 				} else {
 					enableShowSql = false;

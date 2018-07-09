@@ -45,9 +45,10 @@ public class TsvOutput extends StandardOutput {
 	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
 	private ZipType zipType = ZipType.None;
 	private int localRowCount;
-	
-	public TsvOutput(){
-		
+	private int currentColumnIndex;
+
+	public TsvOutput() {
+
 	}
 
 	public TsvOutput(ZipType zipType) {
@@ -64,7 +65,8 @@ public class TsvOutput extends StandardOutput {
 		zout = null;
 		gzout = null;
 		sb = null;
-		localRowCount=0;
+		localRowCount = 0;
+		currentColumnIndex = 0;
 	}
 
 	@Override
@@ -109,23 +111,23 @@ public class TsvOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
+		addColumnTab();
 		sb.append(value);
-		sb.append("\t");
 	}
 
 	@Override
 	public void addCellString(String value) {
+		addColumnTab();
 		if (value == null) {
 			sb.append(value);
-			sb.append("\t");
 		} else {
 			sb.append(value.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '));
-			sb.append("\t");
 		}
 	}
 
 	@Override
 	public void addCellNumeric(Double value) {
+		addColumnTab();
 		String formattedValue;
 
 		if (value == null) {
@@ -134,31 +136,35 @@ public class TsvOutput extends StandardOutput {
 			formattedValue = plainNumberFormatter.format(value.doubleValue());
 		}
 
-		sb.append(formattedValue).append("\t");
+		sb.append(formattedValue);
 	}
 
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
-		sb.append(formattedValue).append("\t");
+		addColumnTab();
+		sb.append(formattedValue);
 	}
 
 	@Override
 	public void addCellDate(Date value) {
+		addColumnTab();
 		String formattedValue = Config.getDateDisplayString(value);
-		sb.append(formattedValue).append("\t");
+		sb.append(formattedValue);
 	}
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
-		sb.append(formattedValue).append("\t");
+		addColumnTab();
+		sb.append(formattedValue);
 	}
 
 	@Override
 	public void newRow() {
 		localRowCount++;
-		
+		currentColumnIndex = 0;
+
 		sb.append("\n");
-		
+
 		if ((localRowCount * totalColumnCount) > FLUSH_SIZE) {
 			try {
 				String tmpstr = sb.toString();
@@ -221,6 +227,16 @@ public class TsvOutput extends StandardOutput {
 			fout = null; // these nulls are because it seems to be a memory leak in some JVMs
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
+		}
+	}
+
+	/**
+	 * Adds a tab to the current output and increments the column index counter
+	 */
+	private void addColumnTab() {
+		currentColumnIndex++;
+		if (currentColumnIndex > 1) {
+			sb.append("\t");
 		}
 	}
 }

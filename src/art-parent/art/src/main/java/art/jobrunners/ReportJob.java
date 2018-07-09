@@ -682,16 +682,16 @@ public class ReportJob implements org.quartz.Job {
 		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
 
-	/**
-	 * Copies the generated file to backblaze b2 storage
-	 *
-	 * @param destination the destination object
-	 * @param fullLocalFileName the path of the file to copy
-	 */
-	private void sendFileToB2(Destination destination, String fullLocalFileName) {
-		String provider = "b2";
-		sendFileToBlobStorage(provider, destination, fullLocalFileName);
-	}
+//	/**
+//	 * Copies the generated file to backblaze b2 storage
+//	 *
+//	 * @param destination the destination object
+//	 * @param fullLocalFileName the path of the file to copy
+//	 */
+//	private void sendFileToB2(Destination destination, String fullLocalFileName) {
+//		String provider = "b2";
+//		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+//	}
 
 	/**
 	 * Copies the generated file to google cloud storage
@@ -2975,9 +2975,9 @@ public class ReportJob implements org.quartz.Job {
 		ReportRunner reportRunner = new ReportRunner();
 		reportRunner.setUser(user);
 		reportRunner.setReport(report);
+		reportRunner.setJob(job);
 
 		return reportRunner;
-
 	}
 
 	/**

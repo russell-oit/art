@@ -81,6 +81,7 @@ public class LoginController {
 			user.setUserId(-1);
 			user.setUsername("initial setup");
 			user.setAccessLevel(AccessLevel.RepositoryUser);
+			user.buildSetupUserPermissions();
 
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("initialSetup", "true");
@@ -322,6 +323,7 @@ public class LoginController {
 				user.setUserId(-2);
 				user.setUsername("art db");
 				user.setAccessLevel(AccessLevel.RepositoryUser);
+				user.buildSetupUserPermissions();
 
 				result = new LoginResult();
 				result.setAuthenticated(true);
