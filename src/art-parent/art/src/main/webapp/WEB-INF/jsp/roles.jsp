@@ -22,6 +22,9 @@
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
+<spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
+<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
+<spring:message code="page.message.linkedRecordsExist" var="linkedRecordsExistText"/>
 
 <t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -49,8 +52,8 @@
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
-						undefined, //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
+						"${cannotDeleteRecordText}", //cannotDeleteRecordText
+						"${linkedRecordsExistText}" //linkedRecordsExistText
 						);
 
 				var table = oTable.api();
@@ -81,9 +84,12 @@
 										url: "${pageContext.request.contextPath}/deleteRoles",
 										data: {ids: ids},
 										success: function (response) {
+											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
 												notifyActionSuccessReusable("${recordsDeletedText}", ids);
+											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
 												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 											}

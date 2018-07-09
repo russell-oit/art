@@ -19,6 +19,7 @@ package art.role;
 
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
+import art.general.ActionResult;
 import art.permission.Permission;
 import art.permission.PermissionService;
 import art.rolepermission.RolePermissionService;
@@ -29,10 +30,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,11 +176,22 @@ public class RoleService {
 	 * Deletes a role
 	 *
 	 * @param id the role id
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * users and user groups which prevented the role from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
-	public void deleteRole(int id) throws SQLException {
+	public ActionResult deleteRole(int id) throws SQLException {
 		logger.debug("Entering deleteRole: id={}", id);
+
+		ActionResult result = new ActionResult();
+
+		//don't delete if important linked records exist
+		List<String> linkedRecords = getLinkedRecords(id);
+		if (!linkedRecords.isEmpty()) {
+			result.setData(linkedRecords);
+			return result;
+		}
 
 		String sql;
 
@@ -193,21 +207,44 @@ public class RoleService {
 		//finally delete role
 		sql = "DELETE FROM ART_ROLES WHERE ROLE_ID=?";
 		dbService.update(sql, id);
+
+		result.setSuccess(true);
+
+		return result;
 	}
 
 	/**
 	 * Deletes multiple roles
 	 *
 	 * @param ids the ids of the roles to delete
+	  * @return ActionResult. if not successful, data contains details of
+	 * roles which weren't deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
-	public void deleteRoles(Integer[] ids) throws SQLException {
+	public ActionResult deleteRoles(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteRoles: ids={}", (Object) ids);
 
+		ActionResult result = new ActionResult();
+		List<String> nonDeletedRecords = new ArrayList<>();
+
 		for (Integer id : ids) {
-			deleteRole(id);
+			ActionResult deleteResult = deleteRole(id);
+			if (!deleteResult.isSuccess()) {
+				@SuppressWarnings("unchecked")
+				List<String> linkedRecords = (List<String>) deleteResult.getData();
+				String value = String.valueOf(id) + " - " + StringUtils.join(linkedRecords, ", ");
+				nonDeletedRecords.add(value);
+			}
 		}
+
+		if (nonDeletedRecords.isEmpty()) {
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+
+		return result;
 	}
 
 	/**
@@ -410,6 +447,42 @@ public class RoleService {
 				+ " WHERE AUGRM.USER_GROUP_ID=?";
 		ResultSetHandler<List<Role>> h = new BeanListHandler<>(Role.class, new RoleMapper());
 		return dbService.query(sql, h, userGroupId);
+	}
+
+	/**
+	 * Returns details of users and user groups that have a given role
+	 *
+	 * @param roleId the role id
+	 * @return linked user and user group details
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedRecords(int roleId) throws SQLException {
+		logger.debug("Entering getLinkedRecords: roleId={}", roleId);
+
+		//union removes duplicate records, union all does not
+		//use union all in case a user and a user group have the same name?
+		String sql = "SELECT AU.USERNAME AS RECORD_NAME"
+				+ " FROM ART_USERS AU"
+				+ " INNER JOIN ART_USER_ROLE_MAP AURM"
+				+ " ON AU.USER_ID=AURM.USER_ID"
+				+ " WHERE AURM.ROLE_ID=?"
+				+ " UNION ALL"
+				+ " SELECT AUG.NAME AS RECORD_NAME"
+				+ " FROM ART_USER_GROUPS AUG"
+				+ " INNER JOIN ART_USER_GROUP_ROLE_MAP AUGRM"
+				+ " ON AUG.USER_GROUP_ID=AUGRM.USER_GROUP_ID"
+				+ " WHERE AUGRM.ROLE_ID=?";
+
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> recordDetails = dbService.query(sql, h, roleId, roleId);
+
+		List<String> records = new ArrayList<>();
+		for (Map<String, Object> recordDetail : recordDetails) {
+			String recordName = (String) recordDetail.get("RECORD_NAME");
+			records.add(recordName);
+		}
+
+		return records;
 	}
 
 }

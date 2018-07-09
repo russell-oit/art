@@ -17,6 +17,7 @@
  */
 package art.role;
 
+import art.general.ActionResult;
 import art.general.AjaxResponse;
 import art.permission.PermissionService;
 import art.rolepermission.RolePermissionService;
@@ -24,6 +25,7 @@ import art.user.User;
 import art.usergrouprole.UserGroupRoleService;
 import art.userrole.UserRoleService;
 import java.sql.SQLException;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -87,8 +89,16 @@ public class RoleController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			roleService.deleteRole(id);
-			response.setSuccess(true);
+			ActionResult deleteResult = roleService.deleteRole(id);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				//role not deleted because of linked users or user groups
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
@@ -105,8 +115,15 @@ public class RoleController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			roleService.deleteRoles(ids);
-			response.setSuccess(true);
+			ActionResult deleteResult = roleService.deleteRoles(ids);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				List<String> cleanedData = deleteResult.cleanData();
+				response.setData(cleanedData);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
