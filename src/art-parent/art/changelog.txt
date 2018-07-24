@@ -1,6 +1,6 @@
 ART 3.9
 * Allow jTDS driver to use imageColumns option
-* Updated sql server driver
+* Updated sql server driver, commons-lang
 
 ART 3.8
 * Have self service dashboards
