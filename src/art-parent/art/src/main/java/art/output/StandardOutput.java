@@ -2103,6 +2103,7 @@ public abstract class StandardOutput {
 			case Types.BINARY:
 			case Types.VARBINARY:
 			case Types.LONGVARBINARY:
+			case Types.BLOB:
 				binary = true;
 				break;
 			default:
