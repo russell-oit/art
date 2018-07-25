@@ -189,7 +189,7 @@
 				}
 
 				function resetDashboard() {
-					var grid = $('.grid-stack').data("gridstack");
+					var grid = $('.grid-stack').data('gridstack');
 					grid.removeAll();
 					$("#reports").selectpicker('deselectAll');
 				}
@@ -328,15 +328,15 @@
 		<script type="text/template" id="widgetTemplate">
 			<div>
 			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#" data-report-id="#reportId#">
-					<div class="portletTitle">
-						<span><b>#reportName#</b></span>
-				<span class="fa fa-times removeWidget pull-right" style="cursor: pointer" data-report-id="#reportId#">					
-				</span>
+			<div class="portletTitle">
+			<span><b>#reportName#</b></span>
+			<span class="fa fa-times removeWidget pull-right" style="cursor: pointer" data-report-id="#reportId#">					
+			</span>
 			</div>				
 			<div id="content_#reportId#">
 			</div>
-		</div>		
-	</div>
+			</div>		
+			</div>
 		</script>
 
 		<div class='row' id="errorsDiv">
