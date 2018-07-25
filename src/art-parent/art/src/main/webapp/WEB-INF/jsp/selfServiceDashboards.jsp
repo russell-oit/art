@@ -191,7 +191,13 @@
 				function resetDashboard() {
 					var grid = $('.grid-stack').data('gridstack');
 					grid.removeAll();
-					$("#reports").selectpicker('deselectAll');
+					//calling deselectAll causes problem with gridstack
+					//$("#reports").selectpicker('deselectAll');
+					$("#reports option").prop("selected", false);
+					$("#reports").selectpicker('refresh');
+					
+					$("#dashboardReports option").prop("selected", false);
+					$("#dashboardReports").selectpicker('refresh');
 				}
 
 				$('#errorsDiv').on("click", ".alert .close", function () {
@@ -515,4 +521,3 @@
 		</script>
 	</jsp:body>
 </t:mainPage>
-
