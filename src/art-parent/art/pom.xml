@@ -473,16 +473,6 @@
 			<artifactId>mssql-jdbc</artifactId>
 			<version>6.4.0.jre7</version>
 			<scope>runtime</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.microsoft.azure</groupId>
-					<artifactId>azure-keyvault</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.microsoft.azure</groupId>
-					<artifactId>adal4j</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
