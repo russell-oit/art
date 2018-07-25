@@ -32,6 +32,7 @@
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" />
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" />
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
@@ -62,17 +63,26 @@
 					}
 				});
 
+				loadCandidateReports();
+				loadEditDashboard();
+
 				//https://stackoverflow.com/questions/35349239/bootstrap-select-event-parameters
 				//https://github.com/gridstack/gridstack.js/tree/master/doc
 				//https://jonsuh.com/blog/javascript-templating-without-a-library/
 				$("#reports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
-					var reportId = $(this).find('option').eq(clickedIndex).val();
 					var grid = $('.grid-stack').data('gridstack');
+					var reportId = $(this).find('option').eq(clickedIndex).val();
+					var reportName = $(this).find('option').eq(clickedIndex).text();
 
 					if (newValue) {
-						var el = $(processWidgetTemplate(reportId));
-						grid.addWidget(el, 0, 0, 4, 3, true);
+						var el = $(processWidgetTemplate(reportId, reportName));
+						var x = 0;
+						var y = 0;
+						var width = 4;
+						var height = 3;
+						var autoPosition = true;
+						grid.addWidget(el, x, y, width, height, autoPosition);
 
 						$.ajax({
 							type: 'POST',
@@ -98,8 +108,8 @@
 					}
 				});
 
-				function processWidgetTemplate(reportId) {
-					var processedTemplate = $("#widgetTemplate").html().replace(/#reportId#/g, reportId);
+				function processWidgetTemplate(reportId, reportName) {
+					var processedTemplate = $("#widgetTemplate").html().replace(/#reportId#/g, reportId).replace(/#reportName#/g, reportName);
 					return processedTemplate;
 				}
 
@@ -145,7 +155,10 @@
 
 				$("#newDashboard").click(function () {
 					$("#newDashboardLink").hide();
+					resetDashboard();
+				});
 
+				function loadCandidateReports() {
 					$.ajax({
 						type: 'GET',
 						dataType: "json",
@@ -162,9 +175,87 @@
 								select.empty();
 								select.append(options);
 								select.selectpicker('refresh');
+							} else {
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+							}
+						},
+						error: function (xhr) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
+				}
 
-								var grid = $('.grid-stack').data("gridstack");
-								grid.removeAll();
+				function resetDashboard() {
+					var grid = $('.grid-stack').data("gridstack");
+					grid.removeAll();
+					$("#reports").selectpicker('deselectAll');
+				}
+
+				$('#errorsDiv').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
+				$("#editDashboard").click(function () {
+					$("#newDashboardLink").hide();
+
+					resetDashboard();
+					loadEditDashboard();
+				});
+
+				function loadEditDashboard() {
+					$.ajax({
+						type: 'GET',
+						dataType: "json",
+						url: '${pageContext.request.contextPath}/getEditDashboardReports',
+						success: function (response) {
+							if (response.success) {
+								//https://github.com/silviomoreto/bootstrap-select/issues/1151
+								var reports = response.data;
+								var options = "<option value='0'>--</option>";
+								$.each(reports, function (index, report) {
+									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
+								});
+								var select = $("#dashboardReports");
+								select.empty();
+								select.append(options);
+								select.selectpicker('refresh');
+							} else {
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+							}
+						},
+						error: function (xhr) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
+				}
+
+				$("#editAllDashboards").click(function () {
+					$("#newDashboardLink").hide();
+
+					resetDashboard();
+
+					$.ajax({
+						type: 'GET',
+						dataType: "json",
+						url: '${pageContext.request.contextPath}/getEditAllDashboardReports',
+						success: function (response) {
+							if (response.success) {
+								//https://github.com/silviomoreto/bootstrap-select/issues/1151
+								var reports = response.data;
+								var options = "<option value='0'>--</option>";
+								$.each(reports, function (index, report) {
+									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
+								});
+								var select = $("#dashboardReports");
+								select.empty();
+								select.append(options);
+								select.selectpicker('refresh');
 							} else {
 								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
@@ -178,9 +269,57 @@
 					});
 				});
 
-				$('#errorsDiv').on("click", ".alert .close", function () {
-					$(this).parent().hide();
+				$("#dashboardReports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
+					var reportId = $(this).find('option').eq(clickedIndex).val();
+					if (reportId > 0) {
+						$.ajax({
+							type: 'GET',
+							url: '${pageContext.request.contextPath}/getDashboardDetails',
+							data: {reportId: reportId},
+							success: function (response) {
+								if (response.success) {
+									var grid = $('.grid-stack').data('gridstack');
+									var dashboard = response.data;
+									$.each(dashboard.items, function (index, item) {
+										var itemReportId = item.reportId;
+										if (itemReportId > 0) {
+											var el = $(processWidgetTemplate(itemReportId, item.title));
+											var autoPosition = true;
+											grid.addWidget(el, item.xPosition, item.yPosition, item.width, item.height, autoPosition);
+
+											$.ajax({
+												type: 'POST',
+												url: '${pageContext.request.contextPath}/runReport',
+												data: {reportId: itemReportId, isFragment: true},
+												success: function (data) {
+													$("#content_" + itemReportId).html(data);
+													$('#reports').find('[value=' + itemReportId + ']').prop('selected', true);
+													$('#reports').selectpicker('refresh');
+												},
+												error: function (xhr) {
+													bootbox.alert({
+														title: '${errorOccurredText}',
+														message: xhr.responseText
+													});
+												}
+											});
+										}
+									});
+								} else {
+									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+								}
+							},
+							error: function (xhr) {
+								bootbox.alert({
+									title: '${errorOccurredText}',
+									message: xhr.responseText
+								});
+							}
+						});
+					}
 				});
+
 			});
 		</script>
 	</jsp:attribute>
@@ -189,14 +328,15 @@
 		<script type="text/template" id="widgetTemplate">
 			<div>
 			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#" data-report-id="#reportId#">
-			<div style="text-align: right">
-			<span class="fa fa-times removeWidget" style="cursor: pointer" data-report-id="#reportId#">
-			</span>
-			</div>	
+					<div class="portletTitle">
+						<span><b>#reportName#</b></span>
+				<span class="fa fa-times removeWidget pull-right" style="cursor: pointer" data-report-id="#reportId#">					
+				</span>
+			</div>				
 			<div id="content_#reportId#">
 			</div>
-			</div>
-			</div>
+		</div>		
+	</div>
 		</script>
 
 		<div class='row' id="errorsDiv">
@@ -217,10 +357,22 @@
 		</div>
 
 		<div class="row" style="margin-bottom: 10px;">
-			<div class="col-md-12">
+			<div class="col-md-4">
 				<button class="btn btn-default" id="newDashboard">
 					<spring:message code="page.text.new"/>
 				</button>
+			</div>
+			<div class="col-md-4">
+				<button class="btn btn-default" id="editDashboard">
+					<spring:message code="page.action.edit"/>
+				</button>
+				<c:if test="${sessionUser.hasPermission('configure_reports')}">
+					<button class="btn btn-default" id="editAllDashboards">
+						<spring:message code="selfService.button.editAll"/>
+					</button>
+				</c:if>
+			</div>
+			<div class="col-md-4">
 				<span class="pull-right">
 					<a class="btn btn-default" id="newDashboardLink" style="display: none"
 					   href="">
@@ -235,6 +387,10 @@
 		<div class="row" style="margin-bottom: 20px">
 			<div class="col-md-4">
 				<select id="reports" class="form-control selectpicker" multiple>
+				</select>
+			</div>
+			<div class="col-md-4">
+				<select id="dashboardReports" class="form-control selectpicker">
 				</select>
 			</div>
 		</div>

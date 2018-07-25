@@ -275,6 +275,7 @@ public class ReportService {
 	 * @return accessible reports
 	 * @throws SQLException
 	 */
+	@Cacheable(value = "reports")
 	public List<Report> getAccessibleReportsWithReportTypes(int userId,
 			List<ReportType> includedReportTypes) throws SQLException {
 
@@ -290,6 +291,7 @@ public class ReportService {
 	 * @return accessible reports
 	 * @throws SQLException
 	 */
+	@Cacheable(value = "reports")
 	public List<Report> getAccessibleReportsWithoutReportTypes(int userId,
 			List<ReportType> excludedReportTypes) throws SQLException {
 
@@ -306,6 +308,7 @@ public class ReportService {
 	 * @return accessible reports
 	 * @throws SQLException
 	 */
+	@Cacheable(value = "reports")
 	public List<Report> getAccessibleReports(int userId,
 			List<ReportType> includedReportTypes, List<ReportType> excludedReportTypes)
 			throws SQLException {
@@ -1307,6 +1310,22 @@ public class ReportService {
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE QUERY_TYPE=110 OR QUERY_TYPE=129";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h);
+	}
+	
+	/**
+	 * Returns gridstack dashboard reports
+	 *
+	 * @return gridstack dashboard reports
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getGridstackDashboardReports() throws SQLException {
+		logger.debug("Entering getGridstackDashboardReports");
+
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_TYPE=129";
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);

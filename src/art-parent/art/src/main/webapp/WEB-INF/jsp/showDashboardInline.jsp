@@ -39,7 +39,7 @@
 								<c:forEach var="portlet" items="${column}">
 									<div id="portlet_${portlet.index}">
 										<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Box">
-											<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Tools"
+											<div class="portletTools"
 												 data-content-div-id="#portletContent_${portlet.index}"
 												 data-url="${encode:forHtmlAttribute(portlet.url)}"
 												 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}"
@@ -48,7 +48,7 @@
 												<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 												<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 											</div>
-											<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Title">
+											<div class="portletTitle">
 												<%-- don't encode title because it may contain image source where onload is false --%>
 												${portlet.title}
 											</div>
@@ -83,7 +83,7 @@
 												<c:if test="${loop2.count == portlet.columnIndex}">
 													<div id="portlet_${portlet.index}">
 														<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Box">
-															<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Tools"
+															<div class="portletTools"
 																 data-content-div-id="#portletContent_${portlet.index}"
 																 data-url="${encode:forHtmlAttribute(portlet.url)}"
 																 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}"
@@ -92,7 +92,7 @@
 																<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 																<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 															</div>
-															<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Title">
+															<div class="portletTitle">
 																${portlet.title}
 															</div>
 															<div id="portletContent_${portlet.index}"

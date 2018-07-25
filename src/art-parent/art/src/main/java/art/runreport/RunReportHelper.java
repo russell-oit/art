@@ -62,6 +62,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -294,7 +295,7 @@ public class RunReportHelper {
 				enableShowSelectedParameters = false;
 				break;
 			default:
-				if (sessionUser.hasPermission("configure_reports")){
+				if (sessionUser.hasPermission("configure_reports")) {
 					enableShowSql = true;
 				} else {
 					enableShowSql = false;
@@ -572,32 +573,34 @@ public class RunReportHelper {
 
 		String outputString = sourceString;
 
-		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
-			String paramName = entry.getKey();
-			ReportParameter reportParam = entry.getValue();
+		if (MapUtils.isNotEmpty(reportParamsMap)) {
+			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+				String paramName = entry.getKey();
+				ReportParameter reportParam = entry.getValue();
 
-			List<Object> actualParameterValues = reportParam.getActualParameterValues();
+				List<Object> actualParameterValues = reportParam.getActualParameterValues();
 
-			if (CollectionUtils.isEmpty(actualParameterValues)) {
-				continue;
-			}
-
-			String searchString = placeholderPrefix + "#" + paramName + "#";
-
-			List<String> paramValues = new ArrayList<>();
-			for (Object value : actualParameterValues) {
-				String paramValue;
-				if (value instanceof Date) {
-					Date dateValue = (Date) value;
-					paramValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
-				} else {
-					paramValue = String.valueOf(value);
+				if (CollectionUtils.isEmpty(actualParameterValues)) {
+					continue;
 				}
-				paramValues.add(paramValue);
-			}
 
-			String replaceString = StringUtils.join(paramValues, ",");
-			outputString = StringUtils.replaceIgnoreCase(outputString, searchString, replaceString);
+				String searchString = placeholderPrefix + "#" + paramName + "#";
+
+				List<String> paramValues = new ArrayList<>();
+				for (Object value : actualParameterValues) {
+					String paramValue;
+					if (value instanceof Date) {
+						Date dateValue = (Date) value;
+						paramValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
+					} else {
+						paramValue = String.valueOf(value);
+					}
+					paramValues.add(paramValue);
+				}
+
+				String replaceString = StringUtils.join(paramValues, ",");
+				outputString = StringUtils.replaceIgnoreCase(outputString, searchString, replaceString);
+			}
 		}
 
 		return outputString;

@@ -317,8 +317,13 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasAnyPermission("save_reports", "self_service_dashboards")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equalsAny(page, "selfServiceDashboards", "getDashboardCandidateReports")) {
+		} else if (StringUtils.equalsAny(page, "selfServiceDashboards", "getDashboardCandidateReports",
+				"getEditDashboardReports", "getDashboardDetails")) {
 			if (user.hasPermission("self_service_dashboards")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "getEditAllDashboardReports")) {
+			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
 		} else if (StringUtils.startsWith(pathMinusContext, "/export/")) {

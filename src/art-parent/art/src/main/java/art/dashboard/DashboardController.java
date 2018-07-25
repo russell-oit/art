@@ -301,7 +301,7 @@ public class DashboardController {
 
 		String dashboardXml = report.getReportSource();
 		logger.debug("dashboardXml='{}'", dashboardXml);
-		
+
 		if (StringUtils.isBlank(dashboardXml)) {
 			throw new IllegalArgumentException("No dashboard content");
 		}
@@ -603,6 +603,9 @@ public class DashboardController {
 
 			baseUrl = baseUrl + paramsSb.toString();
 			dashboardItem.setBaseUrl(baseUrl);
+
+			int reportId = Integer.parseInt(StringUtils.substringBefore(reportIdString, "&"));
+			dashboardItem.setReportId(reportId);
 		}
 
 		dashboardItem.setUrl(url);
