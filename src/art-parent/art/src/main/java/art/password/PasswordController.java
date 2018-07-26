@@ -74,6 +74,11 @@ public class PasswordController {
 
 		logger.debug("Entering processPassword");
 
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		if (!sessionUser.isCanChangePassword()) {
+			return "redirect:/accessDenied";
+		}
+
 		if (!StringUtils.equals(newPassword1, newPassword2)) {
 			model.addAttribute("message", "password.message.passwordsDontMatch");
 		} else if (!PasswordValidator.validateLength(newPassword1)) {
@@ -106,7 +111,6 @@ public class PasswordController {
 			String passwordHash = PasswordUtils.HashPasswordBcrypt(newPassword1);
 			String passwordAlgorithm = "bcrypt";
 
-			User sessionUser = (User) session.getAttribute("sessionUser");
 			try {
 				userService.updatePassword(sessionUser.getUserId(), passwordHash, passwordAlgorithm, sessionUser);
 

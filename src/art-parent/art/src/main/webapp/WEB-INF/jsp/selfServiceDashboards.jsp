@@ -154,8 +154,7 @@
 				}
 
 				$("#newDashboard").click(function () {
-					$("#newDashboardLink").hide();
-					resetDashboard();
+					resetAll();
 				});
 
 				function loadCandidateReports() {
@@ -188,25 +187,12 @@
 					});
 				}
 
-				function resetDashboard() {
-					var grid = $('.grid-stack').data('gridstack');
-					grid.removeAll();
-					//calling deselectAll causes problem with gridstack
-					//$("#reports").selectpicker('deselectAll');
-					$("#reports option").prop("selected", false);
-					$("#reports").selectpicker('refresh');
-					
-					$("#dashboardReports option").prop("selected", false);
-					$("#dashboardReports").selectpicker('refresh');
-				}
-
-				$('#errorsDiv').on("click", ".alert .close", function () {
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
 					$(this).parent().hide();
 				});
 
 				$("#editDashboard").click(function () {
 					$("#newDashboardLink").hide();
-
 					resetDashboard();
 					loadEditDashboard();
 				});
@@ -278,7 +264,19 @@
 				$("#dashboardReports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var reportId = $(this).find('option').eq(clickedIndex).val();
-					if (reportId > 0) {
+					var reportName = $(this).find('option').eq(clickedIndex).text();
+
+					//https://stackoverflow.com/questions/27347004/jquery-val-integer-datatype-comparison
+					if (reportId === '0') {
+						$("#deleteDashboard").hide();
+						$("#newDashboardLink").hide();
+						resetDashboard();
+					} else {
+						resetDashboard();
+						$("#deleteDashboard").attr("data-report-name", reportName);
+						$("#deleteDashboard").attr("data-report-id", reportId);
+						$("#deleteDashboard").show();
+
 						$.ajax({
 							type: 'GET',
 							url: '${pageContext.request.contextPath}/getDashboardDetails',
@@ -327,6 +325,33 @@
 				});
 
 			});
+
+			function resetAll() {
+				resetDashboard();
+				$("#dashboardReports option").prop("selected", false);
+				$("#dashboardReports").selectpicker('refresh');
+				$("#newDashboardLink").hide();
+				$("#deleteDashboard").hide();
+			}
+
+			function resetDashboard() {
+				clearGrid();
+				//calling deselectAll causes problem with gridstack
+				//$("#reports").selectpicker('deselectAll');
+				$("#reports option").prop("selected", false);
+				$("#reports").selectpicker('refresh');
+			}
+
+			function clearGrid() {
+				var grid = $('.grid-stack').data('gridstack');
+				grid.removeAll();
+			}
+
+			function showDeleteDashboard(reportName, reportId) {
+				$("#deleteDashboard").attr("data-report-name", reportName);
+				$("#deleteDashboard").attr("data-report-id", reportId);
+				$("#deleteDashboard").show();
+			}
 		</script>
 	</jsp:attribute>
 
@@ -357,7 +382,9 @@
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 			</div>
 		</div>
@@ -384,6 +411,9 @@
 					   href="">
 						<spring:message code="reports.link.newReport"/>
 					</a>
+					<button class="btn btn-default" id="deleteDashboard" style="display: none">
+						<spring:message code="page.action.delete"/>
+					</button>
 					<button class="btn btn-primary" id="saveDashboard">
 						<spring:message code="page.button.save"/>
 					</button>
@@ -409,7 +439,7 @@
 		<div id="saveDashboardDialogDiv" style="display:none;">
 			<form id="saveDashboardForm" class="form-horizontal" role="form">
 				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-				<input type="hidden" name="reportId" value="">
+				<input type="hidden" name="reportId" id="reportId" value="">
 				<input type="hidden" id="config" name="config" value="">
 				<div class="form-group">
 					<label class="control-label col-md-4" for="name">
@@ -470,6 +500,7 @@
 							//https://github.com/makeusabrew/bootbox/issues/572
 							var form = dialog.find('#saveDashboardForm');
 							var data = form.serialize();
+							var reportName = dialog.find('#name').val();
 
 							$.ajax({
 								type: 'POST',
@@ -484,6 +515,10 @@
 											var newUrl = "${pageContext.request.contextPath}/selectReportParameters?reportId=" + newReportId;
 											$("#newDashboardLink").attr("href", newUrl);
 											$("#newDashboardLink").show();
+											$('#dashboardReports').append("<option value='" + newReportId + "'>" + reportName + "</option>");
+											$('#dashboardReports').find('[value=' + newReportId + ']').prop('selected', true);
+											$("#dashboardReports").selectpicker('refresh');
+											showDeleteDashboard(reportName, newReportId);
 										}
 									} else {
 										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
@@ -517,6 +552,53 @@
 			var header = $("meta[name='_csrf_header']").attr("content");
 			$(document).ajaxSend(function (e, xhr, options) {
 				xhr.setRequestHeader(header, token);
+			});
+
+			$("#deleteDashboard").on("click", function () {
+				var reportName = $(this).attr("data-report-name");
+				reportName = escapeHtmlContent(reportName);
+				var reportId = $(this).attr("data-report-id");
+
+				bootbox.confirm({
+					message: "${deleteRecordText}: <b>" + reportName + "</b>",
+					buttons: {
+						cancel: {
+							label: "${cancelText}"
+						},
+						confirm: {
+							label: "${okText}"
+						}
+					},
+					callback: function (result) {
+						if (result) {
+							//user confirmed delete. make delete request
+							$.ajax({
+								type: "POST",
+								dataType: "json",
+								url: "${pageContext.request.contextPath}/deleteGridstack",
+								data: {id: reportId},
+								success: function (response) {
+									var nonDeletedRecords = response.data;
+									if (response.success) {
+										$("#dashboardReports option[value='" + reportId + "']").remove();
+										resetAll();
+										$.notify("${reportDeletedText}", "success");
+									} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+										$.notify("${cannotDeleteReportText}", "error");
+									} else {
+										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+									}
+								},
+								error: function (xhr) {
+									bootbox.alert({
+										title: '${errorOccurredText}',
+										message: xhr.responseText
+									});
+								}
+							});
+						} //end if result
+					} //end callback
+				}); //end bootbox confirm
 			});
 		</script>
 	</jsp:body>
