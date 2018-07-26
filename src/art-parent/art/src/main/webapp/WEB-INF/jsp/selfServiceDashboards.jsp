@@ -276,6 +276,7 @@
 						$("#deleteDashboard").attr("data-report-name", reportName);
 						$("#deleteDashboard").attr("data-report-id", reportId);
 						$("#deleteDashboard").show();
+						$("#reportId").val(reportId);
 
 						$.ajax({
 							type: 'GET',
@@ -340,6 +341,7 @@
 				//$("#reports").selectpicker('deselectAll');
 				$("#reports option").prop("selected", false);
 				$("#reports").selectpicker('refresh');
+				$("#reportId").val('');
 			}
 
 			function clearGrid() {
@@ -457,6 +459,18 @@
 						<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
 					</div>
 				</div>
+				<div class="form-group" id="overwriteDiv">
+					<label class="control-label col-md-4" for="overwrite">
+						<spring:message code="reports.text.overwrite"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" name="overwrite" id="overwrite">
+							</label>
+						</div>
+					</div>
+				</div>
 			</form>
 		</div>
 
@@ -483,6 +497,15 @@
 				});
 
 				$("#config").val(JSON.stringify(items));
+
+				var reportId = $("#reportId").val();
+				if (reportId) {
+					//setting checked property here doesn't work with bootbox dialog
+					//$('#overwrite').prop('checked', true);
+					$("#overwriteDiv").show();
+				} else {
+					$("#overwriteDiv").hide();
+				}
 
 				var dialog = bootbox.confirm({
 					title: "${saveReportText}",
@@ -539,6 +562,12 @@
 				//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
 				dialog.on("shown.bs.modal", function () {
 					dialog.attr("id", "saveDashboardDialog");
+					var reportId = dialog.find("#reportId").val();
+					if (reportId) {
+						dialog.find('#overwrite').prop('checked', true);
+					} else {
+						dialog.find("#overwrite").prop('checked', false);
+					}
 					dialog.find('#name').focus();
 				});
 			});
