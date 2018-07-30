@@ -21,8 +21,10 @@
 	<%-- http://www.helloerik.com/the-subtle-magic-behind-why-the-bootstrap-3-grid-works --%>
 	<%-- https://medium.com/wdstack/how-the-bootstrap-grid-really-works-471d7a089cfc --%>
 	<div class="row">
-		<h2>${encode:forHtmlContent(dashboard.title)}  
-			<small>  ${encode:forHtmlContent(dashboard.description)}</small>
+		<h2>${encode:forHtmlContent(dashboard.title)}
+			<c:if test="${not empty dashboard.description}">
+				<br><small>&nbsp;&nbsp;${encode:forHtmlContent(dashboard.description)}</small>
+			</c:if>
 		</h2>
 	</div>
 	<div class="row">

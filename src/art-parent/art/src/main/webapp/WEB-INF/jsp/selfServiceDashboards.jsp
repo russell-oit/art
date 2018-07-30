@@ -191,12 +191,6 @@
 					$(this).parent().hide();
 				});
 
-				$("#editDashboard").click(function () {
-					$("#newDashboardLink").hide();
-					resetDashboard();
-					loadEditDashboard();
-				});
-
 				function loadEditDashboard() {
 					$.ajax({
 						type: 'GET',
@@ -226,40 +220,6 @@
 						}
 					});
 				}
-
-				$("#editAllDashboards").click(function () {
-					$("#newDashboardLink").hide();
-
-					resetDashboard();
-
-					$.ajax({
-						type: 'GET',
-						dataType: "json",
-						url: '${pageContext.request.contextPath}/getEditAllDashboardReports',
-						success: function (response) {
-							if (response.success) {
-								//https://github.com/silviomoreto/bootstrap-select/issues/1151
-								var reports = response.data;
-								var options = "<option value='0'>--</option>";
-								$.each(reports, function (index, report) {
-									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
-								});
-								var select = $("#dashboardReports");
-								select.empty();
-								select.append(options);
-								select.selectpicker('refresh');
-							} else {
-								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-							}
-						},
-						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
-						}
-					});
-				});
 
 				$("#dashboardReports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
@@ -397,17 +357,7 @@
 					<spring:message code="page.text.new"/>
 				</button>
 			</div>
-			<div class="col-md-4">
-				<button class="btn btn-default" id="editDashboard">
-					<spring:message code="page.action.edit"/>
-				</button>
-				<c:if test="${sessionUser.hasPermission('configure_reports')}">
-					<button class="btn btn-default" id="editAllDashboards">
-						<spring:message code="selfService.button.editAll"/>
-					</button>
-				</c:if>
-			</div>
-			<div class="col-md-4">
+			<div class="col-md-8">
 				<span class="pull-right">
 					<a class="btn btn-default" id="newDashboardLink" style="display: none"
 					   href="">
@@ -443,6 +393,7 @@
 				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 				<input type="hidden" name="reportId" id="reportId" value="">
 				<input type="hidden" id="config" name="config" value="">
+				<input type="hidden" name="selfService" value="true">
 				<div class="form-group">
 					<label class="control-label col-md-4" for="name">
 						<spring:message code="page.text.name"/>
@@ -542,6 +493,10 @@
 											$('#dashboardReports').find('[value=' + newReportId + ']').prop('selected', true);
 											$("#dashboardReports").selectpicker('refresh');
 											showDeleteDashboard(reportName, newReportId);
+											$("#reportId").val(newReportId);
+										} else {
+											$('#dashboardReports').find('[value=' + reportId + ']').text(reportName);
+											$("#dashboardReports").selectpicker('refresh');
 										}
 									} else {
 										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
