@@ -84,7 +84,7 @@ public class ChainedParameterController {
 		} finally {
 			reportRunner.close();
 		}
-
+		
 		for (Entry<String, String> entry : values.entrySet()) {
 			Map<String, String> value = new HashMap<>();
 			value.put(entry.getKey(), entry.getValue());

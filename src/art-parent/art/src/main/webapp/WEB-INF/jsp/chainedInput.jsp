@@ -15,7 +15,8 @@ Display report parameter that uses dropdown input
 
 <select class="form-control"
 		name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-		id="${encode:forHtmlAttribute(reportParam.htmlElementName)}">
+		id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
+		${reportParam.parameter.parameterType == 'MultiValue' ? 'multiple data-actions-box="true"' : ""}>
 	<option value="">--</option>
 </select>
 
@@ -29,7 +30,30 @@ Display report parameter that uses dropdown input
 	$("#${encode:forJavaScript(reportParam.htmlElementName)}").remoteChained({
 		parents: "${encode:forJavaScript(reportParam.chainedParentsHtmlIds)}",
 		url: "${pageContext.request.contextPath}/getLovValues?reportId=${reportParam.parameter.lovReport.reportId}",
-		loading: "${loadingText}...",
-		depends: "${encode:forJavaScript(reportParam.chainedDependsHtmlIds)}"
+				loading: "${loadingText}...",
+				depends: "${encode:forJavaScript(reportParam.chainedDependsHtmlIds)}"
+			});
+</script>
+
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
+
+<script type="text/javascript">
+	$('#${encode:forJavaScript(reportParam.htmlElementName)}').selectpicker({
+		liveSearch: true,
+		noneSelectedText: '${nothingSelectedText}',
+		noneResultsText: '${noResultsMatchText}',
+		countSelectedText: '${selectedCountText}',
+		selectAllText: '${selectAllText}',
+		deselectAllText: '${deselectAllText}'
+	});
+
+	//https://stackoverflow.com/questions/43653231/combine-bootstrap-select-and-jquery-chained
+	//https://stackoverflow.com/questions/31475457/chained-dropdown-with-bootstrap-selectpicker-not-working?rq=1
+	$('#${encode:forJavaScript(reportParam.htmlElementName)}').on('change', function () {
+		$(this).selectpicker('refresh');
 	});
 </script>
