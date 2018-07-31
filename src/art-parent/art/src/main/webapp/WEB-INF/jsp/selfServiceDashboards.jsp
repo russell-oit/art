@@ -225,11 +225,12 @@
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var reportId = $(this).find('option').eq(clickedIndex).val();
 					var reportName = $(this).find('option').eq(clickedIndex).text();
+					
+					$("#newDashboardLink").hide();
 
 					//https://stackoverflow.com/questions/27347004/jquery-val-integer-datatype-comparison
 					if (reportId === '0') {
 						$("#deleteDashboard").hide();
-						$("#newDashboardLink").hide();
 						resetDashboard();
 					} else {
 						resetDashboard();
@@ -250,7 +251,7 @@
 										var itemReportId = item.reportId;
 										if (itemReportId > 0) {
 											var el = $(processWidgetTemplate(itemReportId, item.title));
-											var autoPosition = true;
+											var autoPosition = false;
 											grid.addWidget(el, item.xPosition, item.yPosition, item.width, item.height, autoPosition);
 
 											$.ajax({
@@ -494,9 +495,10 @@
 											$("#dashboardReports").selectpicker('refresh');
 											showDeleteDashboard(reportName, newReportId);
 											$("#reportId").val(newReportId);
-										} else {
+										} else if (reportName) {
 											$('#dashboardReports').find('[value=' + reportId + ']').text(reportName);
 											$("#dashboardReports").selectpicker('refresh');
+											$("#deleteDashboard").attr("data-report-name", reportName);
 										}
 									} else {
 										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
