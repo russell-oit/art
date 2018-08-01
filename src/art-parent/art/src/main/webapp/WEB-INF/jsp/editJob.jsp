@@ -407,6 +407,8 @@
 				if (jobOutputFormat) {
 					$("#outputFormat > [value=" + jobOutputFormat + "]").attr("selected", "true");
 				}
+				
+				$("#outputFormat").selectpicker('refresh');
 			}
 
 			function toggleVisibleFields() {
@@ -630,7 +632,7 @@
 							<spring:message code="jobs.label.outputFormat"/>
 						</label>
 						<div class="col-md-8">
-							<form:select path="outputFormat" class="form-control"/>
+							<form:select path="outputFormat" class="form-control selectpicker"/>
 							<form:errors path="outputFormat" cssClass="error"/>
 						</div>
 					</div>
