@@ -204,6 +204,9 @@ public class ReportJob implements org.quartz.Job {
 	@Autowired
 	private DbService dbService;
 
+	@Autowired
+	ReportService reportService;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
@@ -298,6 +301,8 @@ public class ReportJob implements org.quartz.Job {
 			} else if (!job.getUser().isActive()) {
 				runMessage = "jobs.message.ownerDisabled";
 			} else {
+				runReports(job.getPreRunReport());
+
 				if (job.getRecipientsReportId() > 0) {
 					//job has dynamic recipients
 					runDynamicRecipientsJob();
@@ -309,6 +314,7 @@ public class ReportJob implements org.quartz.Job {
 
 			sendFileToDestinations();
 			runBatchFile();
+			runReports(job.getPostRunReport());
 		} catch (Exception ex) {
 			logErrorAndSetDetails(ex);
 		}
@@ -326,6 +332,44 @@ public class ReportJob implements org.quartz.Job {
 		progressLogger.info("Completed. Time taken - {}", duration);
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
+	}
+
+	/**
+	 * Run pre/post run reports
+	 *
+	 * @param reportIds comma separated list of report ids to run
+	 * @throws SQLException
+	 */
+	private void runReports(String reportIds) throws SQLException {
+		logger.debug("Entering runReports: reportIds='{}'", reportIds);
+
+		if (StringUtils.isBlank(reportIds)) {
+			return;
+		}
+
+		String[] tempReportIdsArray = StringUtils.split(reportIds, ",");
+		String[] reportIdsArray = StringUtils.stripAll(tempReportIdsArray);
+
+		for (String reportIdString : reportIdsArray) {
+			int reportId = Integer.parseInt(reportIdString);
+			logger.debug("reportId={}", reportId);
+			Report report = reportService.getReport(reportId);
+			User jobUser = job.getUser();
+			if (report == null) {
+				throw new IllegalArgumentException("Pre/Post run report not found: " + reportId);
+			} else if (!reportService.canUserRunReport(jobUser.getUserId(), reportId)) {
+				throw new IllegalStateException("Job owner doesn't have access to pre/post run report: " + jobUser.getUsername() + " - " + reportId);
+			}
+			ReportRunner reportRunner = prepareReportRunner(jobUser, report);
+			try {
+				ParameterProcessorResult paramProcessorResult = buildParameters(reportId, jobId, jobUser);
+				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+				reportRunner.setReportParamsMap(reportParamsMap);
+				reportRunner.execute();
+			} finally {
+				reportRunner.close();
+			}
+		}
 	}
 
 	/**
@@ -692,7 +736,6 @@ public class ReportJob implements org.quartz.Job {
 //		String provider = "b2";
 //		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 //	}
-
 	/**
 	 * Copies the generated file to google cloud storage
 	 *
@@ -2957,7 +3000,6 @@ public class ReportJob implements org.quartz.Job {
 	private ReportRunner prepareReportRunner(User user, int reportId) throws SQLException {
 		logger.debug("Entering prepareReportRunner: user={}, reportId={}", user, reportId);
 
-		ReportService reportService = new ReportService();
 		Report report = reportService.getReport(reportId);
 
 		return prepareReportRunner(user, report);

@@ -23,6 +23,7 @@ import art.encryptor.Encryptor;
 import art.enums.ColumnType;
 import art.enums.EncryptorType;
 import art.enums.ParameterDataType;
+import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.enums.SqlColumnType;
 import art.output.ColumnTypeDefinition;
@@ -1128,6 +1129,28 @@ public class RunReportHelper {
 		String parametersString = StringUtils.join(parametersList, "&");
 
 		return parametersString;
+	}
+
+	/**
+	 * Returns the default report format to use for a given report type
+	 * 
+	 * @param reportType the report type
+	 * @return the default report format to use
+	 */
+	public ReportFormat getDefaultReportFormat(ReportType reportType) {
+		Objects.requireNonNull(reportType, "reportType must not be null");
+		
+		ReportFormat reportFormat;
+		
+		if (reportType.isJasperReports()) {
+			reportFormat = ReportFormat.pdf;
+		} else if (reportType.isChart() || reportType == ReportType.Group) {
+			reportFormat = ReportFormat.html;
+		} else {
+			reportFormat = ReportFormat.htmlFancy;
+		}
+		
+		return reportFormat;
 	}
 
 }

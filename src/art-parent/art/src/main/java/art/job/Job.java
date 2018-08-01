@@ -20,14 +20,10 @@ package art.job;
 import art.destination.Destination;
 import art.enums.JobType;
 import art.holiday.Holiday;
-import art.migration.PrefixTransformer;
 import art.report.Report;
 import art.schedule.Schedule;
 import art.smtpserver.SmtpServer;
 import art.user.User;
-import com.univocity.parsers.annotations.Format;
-import com.univocity.parsers.annotations.Nested;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -40,11 +36,9 @@ import java.util.List;
 public class Job implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@Parsed
+	
 	private int jobId;
-	@Parsed
 	private String name;
-	@Parsed
 	private JobType jobType;
 	protected Date lastEndDate;
 	private Date lastStartDate;
@@ -55,95 +49,85 @@ public class Job implements Serializable {
 	protected String sharedLastRunDetails;
 	private Date sharedLastStartDate;
 	protected Date sharedLastEndDate;
-	@Parsed
 	private String outputFormat;
-	@Parsed
 	private String mailTo;
-	@Parsed
 	private String mailCc;
-	@Parsed
 	private String mailBcc;
-	@Parsed
 	private String mailFrom;
-	@Parsed
 	private String mailMessage;
-	@Parsed
 	private String mailSubject;
-	@Parsed
 	private String cachedTableName;
-	@Parsed
 	private String scheduleSecond;
-	@Parsed
 	private String scheduleMinute;
-	@Parsed
 	private String scheduleHour;
-	@Parsed
 	private String scheduleDay;
-	@Parsed
 	private String scheduleMonth;
-	@Parsed
 	private String scheduleWeekday;
-	@Parsed
 	private String scheduleYear;
-	@Parsed
 	private String scheduleTimeZone;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
-	@Parsed
-	private boolean active;
-	@Parsed
+	private boolean active = true;
 	private int recipientsReportId;
-	@Parsed
 	private boolean allowSharing;
-	@Parsed
 	private boolean allowSplitting;
-	@Parsed
 	private boolean enableAudit;
-	@Parsed
 	private int runsToArchive;
-	@Format(formats = "yyyy-MM-dd")
-	@Parsed
 	private Date startDate;
-	@Format(formats = "yyyy-MM-dd")
-	@Parsed
 	private Date endDate;
 	private String startDateString;
 	private String endDateString;
 	private String lastRunMessage;
 	private String lastEndDateString;
 	private String nextRunDateString;
-	@Parsed
 	private int cachedDatasourceId;
-	@Parsed
 	private String batchFile;
-	@Parsed
 	private String fixedFileName;
-	@Parsed
 	private String emailTemplate;
-	@Parsed
 	private String extraSchedules;
-	@Parsed
 	private String holidays;
-	@Parsed
 	private String quartzCalendarNames;
 	private List<Holiday> sharedHolidays;
 	private List<Destination> destinations;
-	@Parsed
 	private String subDirectory;
-	@Parsed
 	private String options;
-	@Parsed
 	private String errorNotificationTo;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "report")
+	private String preRunReport;
+	private String postRunReport;
 	private Report report;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "user")
 	private User user;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "schedule")
 	private Schedule schedule;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "smtpServer")
 	private SmtpServer smtpServer;
+
+	/**
+	 * @return the preRunReport
+	 */
+	public String getPreRunReport() {
+		return preRunReport;
+	}
+
+	/**
+	 * @param preRunReport the preRunReport to set
+	 */
+	public void setPreRunReport(String preRunReport) {
+		this.preRunReport = preRunReport;
+	}
+
+	/**
+	 * @return the postRunReport
+	 */
+	public String getPostRunReport() {
+		return postRunReport;
+	}
+
+	/**
+	 * @param postRunReport the postRunReport to set
+	 */
+	public void setPostRunReport(String postRunReport) {
+		this.postRunReport = postRunReport;
+	}
 
 	/**
 	 * @return the scheduleTimeZone

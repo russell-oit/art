@@ -260,17 +260,13 @@ public class RunReportController {
 
 			long overallStartTime = System.currentTimeMillis(); //overall start time
 
+			RunReportHelper runReportHelper = new RunReportHelper();
+
 			//get report format to use
 			ReportFormat reportFormat;
 			String reportFormatString = request.getParameter("reportFormat");
 			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
-				if (reportType.isJasperReports()) {
-					reportFormat = ReportFormat.pdf;
-				} else if (reportType.isChart() || reportType == ReportType.Group) {
-					reportFormat = ReportFormat.html;
-				} else {
-					reportFormat = ReportFormat.htmlFancy;
-				}
+				reportFormat = runReportHelper.getDefaultReportFormat(reportType);
 			} else {
 				reportFormat = ReportFormat.toEnum(reportFormatString);
 			}
@@ -319,8 +315,6 @@ public class RunReportController {
 				default:
 				//do nothing
 			}
-
-			RunReportHelper runReportHelper = new RunReportHelper();
 
 			//output page header. if showInline, page header and footer already exist. 
 			if (!showInline) {
