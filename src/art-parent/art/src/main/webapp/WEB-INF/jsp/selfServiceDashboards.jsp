@@ -74,6 +74,7 @@
 					var grid = $('.grid-stack').data('gridstack');
 					var reportId = $(this).find('option').eq(clickedIndex).val();
 					var reportName = $(this).find('option').eq(clickedIndex).text();
+					reportName = escapeHtml(reportName);
 
 					if (newValue) {
 						var el = $(processWidgetTemplate(reportId, reportName));
@@ -225,7 +226,7 @@
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var reportId = $(this).find('option').eq(clickedIndex).val();
 					var reportName = $(this).find('option').eq(clickedIndex).text();
-					
+
 					$("#newDashboardLink").hide();
 
 					//https://stackoverflow.com/questions/27347004/jquery-val-integer-datatype-comparison
