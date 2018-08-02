@@ -477,6 +477,7 @@
 							var form = dialog.find('#saveDashboardForm');
 							var data = form.serialize();
 							var reportName = dialog.find('#name').val();
+							reportName = escapeHtml(reportName);
 
 							$.ajax({
 								type: 'POST',

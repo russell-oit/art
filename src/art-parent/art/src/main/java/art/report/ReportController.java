@@ -56,6 +56,7 @@ import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -219,6 +220,11 @@ public class ReportController {
 			List<Report> basicReports = new ArrayList<>();
 
 			for (Report report : reports) {
+				report.setName(Encode.forHtml(report.getName()));
+				if (StringUtils.isNotBlank(report.getDescription())) {
+					report.setDescription(Encode.forHtml(report.getDescription()));
+				}
+
 				String activeStatus;
 				if (report.isActive()) {
 					activeStatus = activeSpan;

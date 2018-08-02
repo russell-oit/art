@@ -530,6 +530,7 @@
 
 	$("#deleteDashboard").on("click", function () {
 		var reportName = '${encode:forJavaScript(report.name)}';
+		reportName = escapeHtmlContent(reportName);
 		var reportId = ${report.reportId};
 
 		bootbox.confirm({

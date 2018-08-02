@@ -103,7 +103,7 @@ Reports page. Also main/home page
 				);
 
 			<c:if test="${not empty sessionUser.effectiveDefaultReportGroup}">
-				yadcf.exFilterColumn(oTable, [[1, '${sessionUser.effectiveDefaultReportGroup.name}']]);
+				yadcf.exFilterColumn(oTable, [[1, '${encode:forHtml(sessionUser.effectiveDefaultReportGroup.name)}']]);
 			</c:if>
 
 				//show/hide details
