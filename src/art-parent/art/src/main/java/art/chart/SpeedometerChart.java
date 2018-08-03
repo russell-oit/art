@@ -82,17 +82,19 @@ public class SpeedometerChart extends Chart {
 			resultSetRecordCount++;
 
 			Map<String, Object> row = new LinkedHashMap<>();
+			Map<Integer, Object> indexRow = new LinkedHashMap<>();
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				String columnName = rsmd.getColumnLabel(i);
 				Object data = rs.getObject(i);
 				row.put(columnName, data);
+				indexRow.put(i, data);
 			}
 
 			if (includeDataInOutput) {
 				resultSetData.add(row);
 			}
 
-			prepareRow(row, resultSetColumnNames, dataset, columnCount);
+			prepareRow(row, indexRow, resultSetColumnNames, dataset, columnCount);
 		}
 
 		setDataset(dataset);
@@ -106,7 +108,8 @@ public class SpeedometerChart extends Chart {
 
 		if (CollectionUtils.isNotEmpty(data)) {
 			Object row = data.get(0);
-			prepareRow(row, columnNames, dataset, colCount);
+			Map<Integer, Object> indexRow = null;
+			prepareRow(row, indexRow, columnNames, dataset, colCount);
 		}
 
 		setDataset(dataset);
@@ -115,25 +118,28 @@ public class SpeedometerChart extends Chart {
 	/**
 	 * Fills the dataset with a row of data
 	 *
-	 * @param row the row of data
+	 * @param row the row of data. May be null if indexRow is used.
+	 * @param indexRow the row of data with the column index as the key. May be
+	 * null if row is used. If not null, will be used even if row is supplied.
 	 * @param dataColumnNames the data column names
 	 * @param dataset the dataset
 	 * @param dataColumnCount the column count
 	 */
-	private void prepareRow(Object row, List<String> dataColumnNames,
-			DefaultValueDataset dataset, int dataColumnCount) {
+	private void prepareRow(Object row, Map<Integer, Object> indexRow,
+			List<String> dataColumnNames, DefaultValueDataset dataset,
+			int dataColumnCount) {
 
-		dataset.setValue(RunReportHelper.getDoubleRowValue(row, 1, dataColumnNames));
+		dataset.setValue(RunReportHelper.getDoubleRowValue(row, indexRow, 1, dataColumnNames));
 
-		minValue = RunReportHelper.getDoubleRowValue(row, 2, dataColumnNames);
-		maxValue = RunReportHelper.getDoubleRowValue(row, 3, dataColumnNames);
-		unitsDescription = RunReportHelper.getStringRowValue(row, 4, dataColumnNames);
+		minValue = RunReportHelper.getDoubleRowValue(row, indexRow, 2, dataColumnNames);
+		maxValue = RunReportHelper.getDoubleRowValue(row, indexRow, 3, dataColumnNames);
+		unitsDescription = RunReportHelper.getStringRowValue(row, indexRow, 4, dataColumnNames);
 
 		if (dataColumnCount > 4) {
 			//ranges have been specified
 			rangeCount = 0;
 			for (int i = 5; i <= dataColumnCount; i++) {
-				String rangeSpec = RunReportHelper.getStringRowValue(row, i, dataColumnNames);
+				String rangeSpec = RunReportHelper.getStringRowValue(row, indexRow, i, dataColumnNames);
 				String[] rangeDetails = StringUtils.split(rangeSpec, ":");
 				if (rangeDetails != null && rangeDetails.length == 3) {
 					rangeCount++;

@@ -138,10 +138,12 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			resultSetRecordCount++;
 
 			Map<String, Object> row = new LinkedHashMap<>();
+			Map<Integer, Object> indexRow = new LinkedHashMap<>();
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				String columnName = rsmd.getColumnLabel(i);
 				Object data = rs.getObject(i);
 				row.put(columnName, data);
+				indexRow.put(i, data);
 			}
 
 			if (includeDataInOutput) {
@@ -153,10 +155,10 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			Date date;
 			switch (reportType) {
 				case TimeSeriesChart:
-					date = RunReportHelper.getDateTimeRowValue(row, 1, resultSetColumnNames);
+					date = RunReportHelper.getDateTimeRowValue(indexRow, 1);
 					break;
 				case DateSeriesChart:
-					date = RunReportHelper.getDateRowValue(row, 1, resultSetColumnNames);
+					date = RunReportHelper.getDateRowValue(indexRow, 1);
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected report type: " + reportType);
@@ -164,8 +166,8 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 
 			if (dynamicSeries) {
 				//series name is the contents of the second column
-				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop, resultSetColumnNames);
-				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop, resultSetColumnNames);
+				String seriesName = RunReportHelper.getStringRowValue(indexRow, 2 + hop);
+				double yValue = RunReportHelper.getDoubleRowValue(indexRow, 3 + hop);
 
 				//set series name
 				int seriesIndex;
@@ -196,7 +198,7 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
 					String seriesName = resultSetColumnNames.get(columnIndex - 1);
-					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex, resultSetColumnNames);
+					double yValue = RunReportHelper.getDoubleRowValue(indexRow, columnIndex);
 					addData(row, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
 				}
 			}

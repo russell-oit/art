@@ -842,7 +842,7 @@ public class RunReportHelper {
 					columnTypes.put(i, columnTypeDefinition);
 				}
 			} else {
-				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
+				throw new IllegalArgumentException("Unexpected sample object: " + sample.getClass().getCanonicalName());
 			}
 		}
 
@@ -932,6 +932,40 @@ public class RunReportHelper {
 	}
 
 	/**
+	 * Returns the date time value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param index the one-based index
+	 * @return the date time value for a given data index
+	 */
+	public static Date getDateTimeRowValue(Map<Integer, Object> row, int index) {
+		Object columnValue = getRowValue(row, index);
+		Date dateValue = (Date) columnValue;
+		return dateValue;
+	}
+
+	/**
+	 * Returns the date time value for a given data index
+	 *
+	 * @param row the object representing a row of data. May be null if indexRow
+	 * is used.
+	 * @param indexRow the row of data with the column index as the key. May be
+	 * null if row is used. If not null, will be used even if row is supplied.
+	 * @param index the one-based index
+	 * @param columnNames the column names
+	 * @return the date time value for a given data index
+	 */
+	public static Date getDateTimeRowValue(Object row, Map<Integer, Object> indexRow,
+			int index, List<String> columnNames) {
+
+		if (indexRow == null) {
+			return getDateTimeRowValue(row, index, columnNames);
+		} else {
+			return getDateTimeRowValue(indexRow, index);
+		}
+	}
+
+	/**
 	 * Returns the date value for a given data index
 	 *
 	 * @param row the object representing a row of data
@@ -947,6 +981,41 @@ public class RunReportHelper {
 	}
 
 	/**
+	 * Returns the date value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param index the one-based index
+	 * @return the date value for a given data index
+	 */
+	public static Date getDateRowValue(Map<Integer, Object> row, int index) {
+		Object columnValue = getRowValue(row, index);
+		Date dateValue = (Date) columnValue;
+		Date zeroTimeDate = ArtUtils.zeroTime(dateValue);
+		return zeroTimeDate;
+	}
+
+	/**
+	 * Returns the date value for a given data index
+	 *
+	 * @param row the object representing a row of data. May be null if indexRow
+	 * is used.
+	 * @param indexRow the row of data with the column index as the key. May be
+	 * null if row is used. If not null, will be used even if row is supplied.
+	 * @param index the one-based index
+	 * @param columnNames the column names
+	 * @return the date value for a given data index
+	 */
+	public static Date getDateRowValue(Object row, Map<Integer, Object> indexRow,
+			int index, List<String> columnNames) {
+
+		if (indexRow == null) {
+			return getDateRowValue(row, index, columnNames);
+		} else {
+			return getDateRowValue(indexRow, index);
+		}
+	}
+
+	/**
 	 * Returns the string value for a given data index
 	 *
 	 * @param row the object representing a row of data
@@ -957,6 +1026,39 @@ public class RunReportHelper {
 	public static String getStringRowValue(Object row, int index, List<String> columnNames) {
 		Object columnValue = getRowValue(row, index, columnNames);
 		return String.valueOf(columnValue);
+	}
+
+	/**
+	 * Returns the string value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param index the one-based index
+	 * @return the string value for a given data index
+	 */
+	public static String getStringRowValue(Map<Integer, Object> row, int index) {
+		Object columnValue = getRowValue(row, index);
+		return String.valueOf(columnValue);
+	}
+
+	/**
+	 * Returns the string value for a given data index
+	 *
+	 * @param row the object representing a row of data. May be null if indexRow
+	 * is used.
+	 * @param indexRow the row of data with the column index as the key. May be
+	 * null if row is used. If not null, will be used even if row is supplied.
+	 * @param index the one-based index
+	 * @param columnNames the column names
+	 * @return the string value for a given data index
+	 */
+	public static String getStringRowValue(Object row, Map<Integer, Object> indexRow,
+			int index, List<String> columnNames) {
+
+		if (indexRow == null) {
+			return getStringRowValue(row, index, columnNames);
+		} else {
+			return getStringRowValue(indexRow, index);
+		}
 	}
 
 	/**
@@ -992,6 +1094,46 @@ public class RunReportHelper {
 	}
 
 	/**
+	 * Returns the double value for a given data index
+	 *
+	 * @param row the object representing a row of data
+	 * @param index the one-based index
+	 * @return the double value for a given data index
+	 */
+	public static double getDoubleRowValue(Map<Integer, Object> row, int index) {
+		Object columnValue = getRowValue(row, index);
+		double doubleValue;
+		if (columnValue == null) {
+			doubleValue = 0D;
+		} else {
+			doubleValue = ((Number) columnValue).doubleValue();
+		}
+
+		return doubleValue;
+	}
+
+	/**
+	 * Returns the double value for a given data index
+	 *
+	 * @param row the object representing a row of data. May be null if indexRow
+	 * is used.
+	 * @param indexRow the row of data with the column index as the key. May be
+	 * null if row is used. If not null, will be used even if row is supplied.
+	 * @param index the one-based index
+	 * @param columnNames the column names
+	 * @return the double value for a given data index
+	 */
+	public static double getDoubleRowValue(Object row, Map<Integer, Object> indexRow,
+			int index, List<String> columnNames) {
+
+		if (indexRow == null) {
+			return getDoubleRowValue(row, index, columnNames);
+		} else {
+			return getDoubleRowValue(indexRow, index);
+		}
+	}
+
+	/**
 	 * Returns the value for a given data index
 	 *
 	 * @param row the object representing a row of data
@@ -1021,10 +1163,21 @@ public class RunReportHelper {
 			Map rowMap = (Map) row;
 			columnValue = rowMap.get(columnName);
 		} else {
-			throw new IllegalArgumentException("Unexpected data type: " + row.getClass().getCanonicalName());
+			throw new IllegalArgumentException("Unexpected row object: " + row.getClass().getCanonicalName());
 		}
 
 		return columnValue;
+	}
+
+	/**
+	 * Returns the value for a given data column
+	 *
+	 * @param row the object representing a row of data
+	 * @param columnIndex the column index
+	 * @return the value for a given data column
+	 */
+	public static Object getRowValue(Map<Integer, Object> row, Integer columnIndex) {
+		return row.get(columnIndex);
 	}
 
 	/**
@@ -1075,7 +1228,7 @@ public class RunReportHelper {
 					finalData.add(rowMap);
 				}
 			} else {
-				throw new IllegalArgumentException("Unexpected data type: " + sample.getClass().getCanonicalName());
+				throw new IllegalArgumentException("Unexpected sample object: " + sample.getClass().getCanonicalName());
 			}
 		}
 
@@ -1133,15 +1286,15 @@ public class RunReportHelper {
 
 	/**
 	 * Returns the default report format to use for a given report type
-	 * 
+	 *
 	 * @param reportType the report type
 	 * @return the default report format to use
 	 */
 	public ReportFormat getDefaultReportFormat(ReportType reportType) {
 		Objects.requireNonNull(reportType, "reportType must not be null");
-		
+
 		ReportFormat reportFormat;
-		
+
 		if (reportType.isJasperReports()) {
 			reportFormat = ReportFormat.pdf;
 		} else if (reportType.isChart() || reportType == ReportType.Group) {
@@ -1149,7 +1302,7 @@ public class RunReportHelper {
 		} else {
 			reportFormat = ReportFormat.htmlFancy;
 		}
-		
+
 		return reportFormat;
 	}
 

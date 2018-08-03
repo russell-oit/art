@@ -3,6 +3,7 @@ ART 3.9
 * Enable edit of self service dashboards
 * Use bootstrap select for chained parameters
 * Allow running of an update statement before/after a job runs
+* Don't require column alias for speedometer chart with sql server database
 * Updated sql server driver, commons-lang, jxls
 
 ART 3.8
