@@ -622,33 +622,33 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		Plot plot = chart.getPlot();
 
 		String labelFormat = chartOptions.getLabelFormat(); //either "off" or a format string e.g. {2}
-		if (chartOptions.getShowLabels() && labelFormat != null) {
-			if (plot instanceof PiePlot) {
-				PiePlot piePlot = (PiePlot) plot;
+		if (plot instanceof PiePlot) {
+			PiePlot piePlot = (PiePlot) plot;
 
-				if (StringUtils.equalsIgnoreCase(labelFormat, "off")) {
-					piePlot.setLabelGenerator(null);
-				} else {
-					piePlot.setLabelGenerator(new StandardPieSectionLabelGenerator(labelFormat));
-				}
-			} else if (plot instanceof CategoryPlot) {
-				CategoryPlot categoryPlot = (CategoryPlot) plot;
+			if (!chartOptions.getShowLabels()
+					|| (labelFormat != null && StringUtils.equalsIgnoreCase(labelFormat, "off"))) {
+				piePlot.setLabelGenerator(null);
+			} else {
+				piePlot.setLabelGenerator(new StandardPieSectionLabelGenerator(labelFormat));
+			}
+		} else if (plot instanceof CategoryPlot) {
+			CategoryPlot categoryPlot = (CategoryPlot) plot;
 
-				CategoryItemRenderer renderer = categoryPlot.getRenderer(); //could be a version of BarRenderer or LineAndShapeRenderer for line graphs
-				if (StringUtils.equalsIgnoreCase(labelFormat, "off")) {
-					renderer.setBaseItemLabelGenerator(null);
-					renderer.setBaseItemLabelsVisible(false);
-				} else {
-					//display data values in the labels
-					NumberFormat nf = NumberFormat.getInstance(locale);
+			CategoryItemRenderer renderer = categoryPlot.getRenderer(); //could be a version of BarRenderer or LineAndShapeRenderer for line graphs
+			if (!chartOptions.getShowLabels()
+					|| (labelFormat != null && StringUtils.equalsIgnoreCase(labelFormat, "off"))) {
+				renderer.setBaseItemLabelGenerator(null);
+				renderer.setBaseItemLabelsVisible(false);
+			} else {
+				//display data values in the labels
+				NumberFormat nf = NumberFormat.getInstance(locale);
 
-					CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(labelFormat, nf);
-					renderer.setBaseItemLabelGenerator(generator);
-					renderer.setBaseItemLabelsVisible(true);
+				CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(labelFormat, nf);
+				renderer.setBaseItemLabelGenerator(generator);
+				renderer.setBaseItemLabelsVisible(true);
 
-					renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
-					renderer.setBaseNegativeItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
-				}
+				renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
+				renderer.setBaseNegativeItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
 			}
 		}
 	}
