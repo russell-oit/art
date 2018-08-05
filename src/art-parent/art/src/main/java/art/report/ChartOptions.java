@@ -213,17 +213,18 @@ public class ChartOptions implements Serializable {
 	public void setBackgroundColor(String backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
-	
+
 	/**
-	 * Sets some chart option properties from a string representation of the options
-	 * 
+	 * Sets some chart option properties from a string representation of the
+	 * options
+	 *
 	 * @param optionsString the options string
 	 */
 	public void setChartOptionsFromString(String optionsString) {
-		if(StringUtils.isBlank(optionsString)){
+		if (StringUtils.isBlank(optionsString)) {
 			return;
 		}
-		
+
 		StringTokenizer st = new StringTokenizer(optionsString.trim(), " ");
 
 		String token;
@@ -264,5 +265,15 @@ public class ChartOptions implements Serializable {
 				setBackgroundColor(token);
 			}
 		}
+	}
+
+	/**
+	 * Set boolean variables to a default of false
+	 */
+	public void prepareDefaultBooleans() {
+		showLegend = false;
+		showLabels = false;
+		showPoints = false;
+		showData = false;
 	}
 }

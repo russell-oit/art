@@ -178,6 +178,7 @@ public class RunReportHelper {
 		//prepare report parameters
 		ParameterProcessor paramProcessor = new ParameterProcessor();
 		paramProcessor.setUseSavedValues(true);
+		paramProcessor.setParameterSelection(true);
 		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 		ReportOptions reportOptions = paramProcessorResult.getReportOptions();

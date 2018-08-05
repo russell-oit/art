@@ -53,8 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Processes report parameters contained in http requests or maps and
- * provides their final values
+ * Processes report parameters contained in http requests or maps and provides
+ * their final values
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -69,6 +69,21 @@ public class ParameterProcessor {
 	private Boolean isJob = false;
 	private boolean useSavedValues;
 	private Report suppliedReport;
+	private boolean parameterSelection = false;
+
+	/**
+	 * @return the parameterSelection
+	 */
+	public boolean isParameterSelection() {
+		return parameterSelection;
+	}
+
+	/**
+	 * @param parameterSelection the parameterSelection to set
+	 */
+	public void setParameterSelection(boolean parameterSelection) {
+		this.parameterSelection = parameterSelection;
+	}
 
 	/**
 	 * @return the suppliedReport
@@ -127,8 +142,8 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Processes a http request for running a report and fills objects
-	 * with parameter values to be used when running a report
+	 * Processes a http request for running a report and fills objects with
+	 * parameter values to be used when running a report
 	 *
 	 * @param request the http request
 	 * @param locale the locale being used
@@ -165,8 +180,7 @@ public class ParameterProcessor {
 	 * @param passedValuesMap the parameter values. key is html parameter name
 	 * e.g. p-due_date, value is string array with values
 	 * @param reportId the report id
-	 * @param user the user under whose permission the report is being
-	 * run
+	 * @param user the user under whose permission the report is being run
 	 * @param locale the locale being used
 	 * @return final report parameters
 	 * @throws java.sql.SQLException
@@ -332,8 +346,7 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Populates actual parameter values to be used for the report
-	 * parameters
+	 * Populates actual parameter values to be used for the report parameters
 	 *
 	 * @param reportParamsList the report parameters
 	 * @throws NumberFormatException
@@ -524,10 +537,9 @@ public class ParameterProcessor {
 	/**
 	 * Processes report options in a given set of parameters
 	 *
-	 * @param passedValuesMap the parameters that may contain some
-	 * report options
-	 * @return final report option values to use when running a
-	 * report
+	 * @param passedValuesMap the parameters that may contain some report
+	 * options
+	 * @return final report option values to use when running a report
 	 */
 	private ReportOptions processReportOptions(Map<String, String[]> passedValuesMap) {
 		logger.debug("Entering processReportOptions");
@@ -572,6 +584,9 @@ public class ParameterProcessor {
 		logger.debug("Entering processChartOptions");
 
 		ChartOptions chartOptions = new ChartOptions();
+		if (!parameterSelection) {
+			chartOptions.prepareDefaultBooleans();
+		}
 
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
 			String htmlParamName = entry.getKey();
@@ -685,12 +700,10 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Populates default values for parameters which use a default value
-	 * report
+	 * Populates default values for parameters which use a default value report
 	 *
 	 * @param reportParamsMap the report parameters
-	 * @param user the user under whose permission the report is being
-	 * run
+	 * @param user the user under whose permission the report is being run
 	 * @throws SQLException
 	 */
 	private void setDefaultValueLovValues(Map<String, ReportParameter> reportParamsMap)
@@ -729,8 +742,8 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Processes final report parameters where "All" is selected for
-	 * multi-value parameters
+	 * Processes final report parameters where "All" is selected for multi-value
+	 * parameters
 	 *
 	 * @param reportParamsMap the report parameters
 	 * @throws SQLException
