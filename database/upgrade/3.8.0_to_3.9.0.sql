@@ -8,7 +8,7 @@
 
 
 -- update database version
-UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='3.9-snapshot';
+UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='3.9';
 
 -- add pre and post run report fields
 ALTER TABLE ART_JOBS ADD PRE_RUN_REPORT VARCHAR(50);
