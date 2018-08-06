@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.8"> 
+  <meta name="version" content="3.9"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -3978,20 +3978,19 @@ where #rules#
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="chained-parameters">Chained Parameters</h1> 
-     <p>A chained parameter is one whose values depend on the value selected in another parameter. The parameter that triggers the change is called the "parent". A chained parameter can be used as a parent for another parameter, which in turn can have another child parameter and so on.</p> 
+     <p>A chained parameter is one whose values depend on the value selected in another parameter. The parameter that triggers the change is called the "parent". Only Single-Value parameters can be chained parents. A chained parameter can be used as a parent for another parameter, which in turn can have another child parameter and so on.</p> 
      <h2 id="example">Example</h2> 
      <p>Suppose we want to view customers who reside in a particular city. We want the user to select a country and then have cities in that country displayed. He'll then pick one of these cities and run the report. We have a <code>CUSTOMERS</code> table, and one of the columns it has is <code>CITY_ID</code>. We also have a <code>COUNTRIES</code> table which has <code>COUNTRY_ID</code> and <code>COUNTRY_NAME</code> columns. Finally, we have a <code>CITIES</code> table with <code>CITY_ID</code>, <code>CITY_NAME</code> and <code>COUNTRY_ID</code> columns.</p> 
      <p>We could take the following steps to set up the report.</p> 
      <ul> 
-      <li> <p>Create a Dynamic LOV report named <strong>countries</strong> that will display country names. The country will be the parent parameter. Depending on what country is selected, the available cities will change. The report would have the following SQL.</p> 
+      <li> <p>Create a Dynamic LOV report named <strong>Countries</strong> that will display country names. Depending on what country is selected, the available cities will change. The countries report would have the following SQL.</p> 
        <div class="codehilite"> 
         <pre><span></span>SELECT COUNTRY_ID, COUNTRY_NAME
 FROM COUNTRIES
 ORDER BY 2
 </pre> 
        </div> </li> 
-      <li> <p>Create a Parameter named <strong>countryId</strong> with a Data Type of <strong>Integer</strong>, set it to <strong>Use LOV</strong> and select "countries" as the <strong>LOV Report</strong>.</p> </li> 
-      <li> <p>Create a Dynamic LOV report named <strong>cities</strong> that will display city names. The query needs to have a parameter label for the country parameter. This will be replaced at runtime with the country selected.</p> 
+      <li> <p>Create a Dynamic LOV report named <strong>Cities</strong> that will display city names. The query needs to have a parameter label for the country parameter. This will be replaced at runtime with the country selected.</p> 
        <div class="codehilite"> 
         <pre><span></span>SELECT CITY_ID, CITY_NAME
 FROM CITIES
@@ -3999,9 +3998,8 @@ WHERE COUNTRY_ID = #countryId#
 ORDER BY 2
 </pre> 
        </div> </li> 
-      <li> <p>Once you have saved the cities report, select the <strong>More | Parameters</strong> option for this report to allocate the countryId parameter.</p> </li> 
-      <li>Add a Report Parameter and set the <strong>Parameter</strong> field to the <strong>countryId</strong> parameter created earlier.</li> 
-      <li>Create a Parameter named <strong>cityId</strong> with a Data Type of <strong>Integer</strong>.</li> 
+      <li> <p>Once you have saved the Cities report, click on the <strong>Parameters</strong> option to assign the countryId parameter</p> </li> 
+      <li>Use the <strong>Add New</strong> option to create a Single-Value parameter with a Name of <strong>countryId</strong>, Label of <strong>Country</strong>, Data Type of <strong>Integer</strong>, set it to <strong>Shared</strong>, set it to <strong>Use LOV</strong> and select <strong>Countries</strong> as the <strong>LOV Report</strong>.</li> 
       <li> <p>Create the main report. The SQL for the report will need to have a placeholder for the cityId parameter. </p> 
        <div class="codehilite"> 
         <pre><span></span>SELECT FIRST_NAME, LAST_NAME, EMAIL
@@ -4009,11 +4007,11 @@ FROM CUSTOMERS
 WHERE CITY_ID = #cityId#
 </pre> 
        </div> </li> 
-      <li> <p>Once you have saved the main report, select the <strong>More | Parameters</strong> option for this report in order to allocate the report parameters.</p> </li> 
-      <li>Add a Report Parameter and set the <strong>Parameter</strong> field to the <strong>countryId</strong> parameter created earlier.</li> 
-      <li>Add another Report Parameter, set the <strong>Parameter</strong> field to <strong>cityId</strong> and the <strong>Chained Parents</strong> field to "countryId" i.e. the name of the parent parameter for this chained parameter.</li> 
+      <li> <p>Once you have saved the main report, click on the <strong>Parameters</strong> option to allocate the report parameters</p> </li> 
+      <li>Use the <strong>Add Existing</strong> option to add the <strong>countryId</strong> shared parameter created earlier</li> 
+      <li>Use the <strong>Add New</strong> option to create a Single-Value parameter with a Name of <strong>cityId</strong>, Label of <strong>City</strong> and Data Type of <strong>Integer</strong>. Once you have saved this parameter, click on its <strong>Edit</strong> button on the Report Parameters page and set the <strong>Chained Parents</strong> field to <strong>countryId</strong> i.e. the name of the parent parameter for this chained parameter.</li> 
      </ul> 
-     <p>Now when you run the main report, you are presented with two drop down boxes. Depending on what country you select, a different set of cities is displayed, from which you can choose one and run the report to see the final results.</p> 
+     <p>Now when you run the main report, you are presented with two drop down boxes. Depending on what country you select, a different set of cities is displayed, from which you can choose and run the report to see the final results.</p> 
     </div> 
    </div> 
    <div> 
@@ -4776,12 +4774,6 @@ WHERE REGION = #region#
         <td></td> 
         <td>The name of the file that has configuration details of areas within the template e.g. <code>jxls2config.xml</code>. This is an xml file that can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
-       <tr> 
-        <td><strong>useStandardFormulaProcessor</strong></td> 
-        <td>Boolean</td> 
-        <td>false</td> 
-        <td>Whether the standard formula processor should be used. This can be set to true in case the template seems to be producing invalid formula results. This setting is only considered if using an area config file.</td> 
-       </tr> 
       </tbody> 
      </table> 
     </div> 
@@ -5014,6 +5006,14 @@ WHERE {#!saleTypes#}
        <tr> 
         <td><strong>Batch File</strong></td> 
         <td>The name of a batch file or script that should be run after the job completes. The batch file must exist in the <strong>WEB-INF\work\batch</strong> directory. You only set the file name in this field e.g. <code>test.bat</code> or <code>test.sh</code>. ART passes the file name of the generated output as the first parameter to the batch file so you can use this e.g. to copy the file to another location, a batch file may contain the following command - <code>copy ..\export\jobs\%1 C:\temp</code>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Pre Run Report</strong></td> 
+        <td>The report id of an Update Statement report that should be run before the job is run. Multiple reports can be specified separated by commas.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Post Run Report</strong></td> 
+        <td>The report id of an Update Statement report that should be run after the job has run. Multiple reports can be specified separated by commas.</td> 
        </tr> 
        <tr> 
         <td><strong>From</strong></td> 

@@ -64,6 +64,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.openpgp.PGPException;
 import org.c02e.jpgpj.HashingAlgorithm;
 import org.c02e.jpgpj.Key;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,6 +195,7 @@ public class Report implements Serializable {
 	private String dtAction;
 	private String dtRowId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 	private String reportGroupNames; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
+	private String reportGroupNamesHtml;
 
 	/**
 	 * @return the name2
@@ -1502,6 +1504,20 @@ public class Report implements Serializable {
 		}
 
 		return reportGroupNames;
+	}
+
+	/**
+	 * Returns report group names html encoded
+	 * 
+	 * @return report group names, html encoded
+	 */
+	public String getReportGroupNamesHtml() {
+		reportGroupNamesHtml = getReportGroupNames();
+		if (StringUtils.isNotBlank(reportGroupNamesHtml)) {
+			reportGroupNamesHtml = Encode.forHtml(reportGroupNamesHtml);
+		}
+
+		return reportGroupNamesHtml;
 	}
 
 	/**

@@ -407,6 +407,8 @@
 				if (jobOutputFormat) {
 					$("#outputFormat > [value=" + jobOutputFormat + "]").attr("selected", "true");
 				}
+				
+				$("#outputFormat").selectpicker('refresh');
 			}
 
 			function toggleVisibleFields() {
@@ -630,7 +632,7 @@
 							<spring:message code="jobs.label.outputFormat"/>
 						</label>
 						<div class="col-md-8">
-							<form:select path="outputFormat" class="form-control"/>
+							<form:select path="outputFormat" class="form-control selectpicker"/>
 							<form:errors path="outputFormat" cssClass="error"/>
 						</div>
 					</div>
@@ -765,6 +767,24 @@
 						<div class="col-md-8">
 							<form:input path="batchFile" maxlength="50" class="form-control"/>
 							<form:errors path="batchFile" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="preRunReport">
+							<spring:message code="jobs.label.preRunReport"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="preRunReport" maxlength="50" class="form-control"/>
+							<form:errors path="preRunReport" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="postRunReport">
+							<spring:message code="jobs.label.postRunReport"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="postRunReport" maxlength="50" class="form-control"/>
+							<form:errors path="postRunReport" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

@@ -74,8 +74,10 @@
 
 <div class="container-fluid">
 	<div class="row">
-		<h2>${encode:forHtmlContent(dashboard.title)}  
-			<small>  ${encode:forHtmlContent(dashboard.description)}</small>
+		<h2>${encode:forHtmlContent(dashboard.title)}
+			<c:if test="${not empty dashboard.description}">
+				<br><small>&nbsp;&nbsp;${encode:forHtmlContent(dashboard.description)}</small>
+			</c:if>
 		</h2>
 	</div>
 	<div class="row">
@@ -99,7 +101,7 @@
 							<div class="grid-stack-item-content" style="border: 1px solid #ccc">
 								<div id="item_${item.index}">
 									<div class="portletAUTOBox">
-										<div class="portletAUTOTools"
+										<div class="portletTools"
 											 data-content-div-id="#itemContent_${item.index}"
 											 data-url="${encode:forHtmlAttribute(item.url)}"
 											 data-refresh-period-seconds="${item.refreshPeriodSeconds}"
@@ -110,7 +112,7 @@
 											<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 											<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 										</div>
-										<div class="portletAUTOTitle">
+										<div class="portletTitle">
 											<%-- don't encode title because it may contain image source where onload is false --%>
 											${item.title}
 										</div>
@@ -150,7 +152,7 @@
 										<div class="grid-stack-item-content" style="border: 1px solid #ccc">
 											<div id="item_${item.index}">
 												<div class="portletAUTOBox">
-													<div class="portletAUTOTools"
+													<div class="portletTools"
 														 data-content-div-id="#itemContent_${item.index}"
 														 data-url="${encode:forHtmlAttribute(item.url)}"
 														 data-refresh-period-seconds="${item.refreshPeriodSeconds}"
@@ -161,7 +163,7 @@
 														<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
 														<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 													</div>
-													<div class="portletAUTOTitle">
+													<div class="portletTitle">
 														${item.title}
 													</div>
 													<div id="itemContent_${item.index}" class="portletAUTOContent">
@@ -528,6 +530,7 @@
 
 	$("#deleteDashboard").on("click", function () {
 		var reportName = '${encode:forJavaScript(report.name)}';
+		reportName = escapeHtmlContent(reportName);
 		var reportId = ${report.reportId};
 
 		bootbox.confirm({

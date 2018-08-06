@@ -96,23 +96,25 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 			resultSetRecordCount++;
 
 			Map<String, Object> row = new LinkedHashMap<>();
+			Map<Integer, Object> indexRow = new LinkedHashMap<>();
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				String columnName = rsmd.getColumnLabel(i);
 				Object data = rs.getObject(i);
 				row.put(columnName, data);
+				indexRow.put(i, data);
 			}
 
 			if (includeDataInOutput) {
 				resultSetData.add(row);
 			}
 
-			double xValue = RunReportHelper.getDoubleRowValue(row, 1, resultSetColumnNames);
-			double yValue = RunReportHelper.getDoubleRowValue(row, 2, resultSetColumnNames);
+			double xValue = RunReportHelper.getDoubleRowValue(indexRow, 1);
+			double yValue = RunReportHelper.getDoubleRowValue(indexRow, 2);
 
 			String seriesName;
 			if (dynamicSeries) {
 				//series name is the contents of the third column
-				seriesName = RunReportHelper.getStringRowValue(row, 3, resultSetColumnNames);
+				seriesName = RunReportHelper.getStringRowValue(indexRow, 3);
 			} else {
 				//currently only one series supported
 				//series name is the column alias of the second column

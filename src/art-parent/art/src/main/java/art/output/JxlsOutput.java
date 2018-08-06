@@ -289,9 +289,9 @@ public class JxlsOutput {
 				if (StringUtils.isBlank(fullAreaConfigFilename)) {
 					//http://jxls.sourceforge.net/samples/multi_sheet_markup_demo.html
 					JxlsHelper jxlsHelper = JxlsHelper.getInstance();
-					if (options.isUseStandardFormulaProcessor()) {
-						jxlsHelper.setUseFastFormulaProcessor(false);
-					}
+//					if (options.isUseStandardFormulaProcessor()) {
+//						jxlsHelper.setUseFastFormulaProcessor(false);
+//					}
 					jxlsHelper.processTemplate(is, os, context);
 				} else {
 					processUsingXmlConfig(fullAreaConfigFilename, is, os, context, options);
@@ -323,9 +323,9 @@ public class JxlsOutput {
 			for (Area xlsArea : xlsAreaList) {
 				xlsArea.applyAt(xlsArea.getStartCellRef(), context);
 				//http://jxls.sourceforge.net/reference/formulas.html
-				if (options.isUseStandardFormulaProcessor()) {
-					xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
-				}
+//				if (options.isUseStandardFormulaProcessor()) {
+//					xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
+//				}
 				xlsArea.processFormulas();
 			}
 			transformer.write();

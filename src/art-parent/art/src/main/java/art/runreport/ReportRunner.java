@@ -942,6 +942,8 @@ public class ReportRunner {
 			case OrgChartList:
 			case OrgChartAjax:
 			case ReportEngineFile:
+			case Dashboard:
+			case GridstackDashboard:
 				return;
 			default:
 			//do nothing

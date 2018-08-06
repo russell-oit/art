@@ -32,6 +32,7 @@
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" />
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" />
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
@@ -62,17 +63,27 @@
 					}
 				});
 
+				loadCandidateReports();
+				loadEditDashboard();
+
 				//https://stackoverflow.com/questions/35349239/bootstrap-select-event-parameters
 				//https://github.com/gridstack/gridstack.js/tree/master/doc
 				//https://jonsuh.com/blog/javascript-templating-without-a-library/
 				$("#reports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
-					var reportId = $(this).find('option').eq(clickedIndex).val();
 					var grid = $('.grid-stack').data('gridstack');
+					var reportId = $(this).find('option').eq(clickedIndex).val();
+					var reportName = $(this).find('option').eq(clickedIndex).text();
+					reportName = escapeHtml(reportName);
 
 					if (newValue) {
-						var el = $(processWidgetTemplate(reportId));
-						grid.addWidget(el, 0, 0, 4, 3, true);
+						var el = $(processWidgetTemplate(reportId, reportName));
+						var x = 0;
+						var y = 0;
+						var width = 4;
+						var height = 3;
+						var autoPosition = true;
+						grid.addWidget(el, x, y, width, height, autoPosition);
 
 						$.ajax({
 							type: 'POST',
@@ -98,8 +109,8 @@
 					}
 				});
 
-				function processWidgetTemplate(reportId) {
-					var processedTemplate = $("#widgetTemplate").html().replace(/#reportId#/g, reportId);
+				function processWidgetTemplate(reportId, reportName) {
+					var processedTemplate = $("#widgetTemplate").html().replace(/#reportId#/g, reportId).replace(/#reportName#/g, reportName);
 					return processedTemplate;
 				}
 
@@ -144,8 +155,10 @@
 				}
 
 				$("#newDashboard").click(function () {
-					$("#newDashboardLink").hide();
+					resetAll();
+				});
 
+				function loadCandidateReports() {
 					$.ajax({
 						type: 'GET',
 						dataType: "json",
@@ -162,9 +175,6 @@
 								select.empty();
 								select.append(options);
 								select.selectpicker('refresh');
-
-								var grid = $('.grid-stack').data("gridstack");
-								grid.removeAll();
 							} else {
 								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
@@ -176,12 +186,136 @@
 							});
 						}
 					});
-				});
+				}
 
-				$('#errorsDiv').on("click", ".alert .close", function () {
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
 					$(this).parent().hide();
 				});
+
+				function loadEditDashboard() {
+					$.ajax({
+						type: 'GET',
+						dataType: "json",
+						url: '${pageContext.request.contextPath}/getEditDashboardReports',
+						success: function (response) {
+							if (response.success) {
+								//https://github.com/silviomoreto/bootstrap-select/issues/1151
+								var reports = response.data;
+								var options = "<option value='0'>--</option>";
+								$.each(reports, function (index, report) {
+									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
+								});
+								var select = $("#dashboardReports");
+								select.empty();
+								select.append(options);
+								select.selectpicker('refresh');
+							} else {
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+							}
+						},
+						error: function (xhr) {
+							bootbox.alert({
+								title: '${errorOccurredText}',
+								message: xhr.responseText
+							});
+						}
+					});
+				}
+
+				$("#dashboardReports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
+					var reportId = $(this).find('option').eq(clickedIndex).val();
+					var reportName = $(this).find('option').eq(clickedIndex).text();
+
+					$("#newDashboardLink").hide();
+
+					//https://stackoverflow.com/questions/27347004/jquery-val-integer-datatype-comparison
+					if (reportId === '0') {
+						$("#deleteDashboard").hide();
+						resetDashboard();
+					} else {
+						resetDashboard();
+						$("#deleteDashboard").attr("data-report-name", reportName);
+						$("#deleteDashboard").attr("data-report-id", reportId);
+						$("#deleteDashboard").show();
+						$("#reportId").val(reportId);
+
+						$.ajax({
+							type: 'GET',
+							url: '${pageContext.request.contextPath}/getDashboardDetails',
+							data: {reportId: reportId},
+							success: function (response) {
+								if (response.success) {
+									var grid = $('.grid-stack').data('gridstack');
+									var dashboard = response.data;
+									$.each(dashboard.items, function (index, item) {
+										var itemReportId = item.reportId;
+										if (itemReportId > 0) {
+											var el = $(processWidgetTemplate(itemReportId, item.title));
+											var autoPosition = false;
+											grid.addWidget(el, item.xPosition, item.yPosition, item.width, item.height, autoPosition);
+
+											$.ajax({
+												type: 'POST',
+												url: '${pageContext.request.contextPath}/runReport',
+												data: {reportId: itemReportId, isFragment: true},
+												success: function (data) {
+													$("#content_" + itemReportId).html(data);
+													$('#reports').find('[value=' + itemReportId + ']').prop('selected', true);
+													$('#reports').selectpicker('refresh');
+												},
+												error: function (xhr) {
+													bootbox.alert({
+														title: '${errorOccurredText}',
+														message: xhr.responseText
+													});
+												}
+											});
+										}
+									});
+								} else {
+									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+								}
+							},
+							error: function (xhr) {
+								bootbox.alert({
+									title: '${errorOccurredText}',
+									message: xhr.responseText
+								});
+							}
+						});
+					}
+				});
+
 			});
+
+			function resetAll() {
+				resetDashboard();
+				$("#dashboardReports option").prop("selected", false);
+				$("#dashboardReports").selectpicker('refresh');
+				$("#newDashboardLink").hide();
+				$("#deleteDashboard").hide();
+			}
+
+			function resetDashboard() {
+				clearGrid();
+				//calling deselectAll causes problem with gridstack
+				//$("#reports").selectpicker('deselectAll');
+				$("#reports option").prop("selected", false);
+				$("#reports").selectpicker('refresh');
+				$("#reportId").val('');
+			}
+
+			function clearGrid() {
+				var grid = $('.grid-stack').data('gridstack');
+				grid.removeAll();
+			}
+
+			function showDeleteDashboard(reportName, reportId) {
+				$("#deleteDashboard").attr("data-report-name", reportName);
+				$("#deleteDashboard").attr("data-report-id", reportId);
+				$("#deleteDashboard").show();
+			}
 		</script>
 	</jsp:attribute>
 
@@ -189,13 +323,14 @@
 		<script type="text/template" id="widgetTemplate">
 			<div>
 			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#" data-report-id="#reportId#">
-			<div style="text-align: right">
-			<span class="fa fa-times removeWidget" style="cursor: pointer" data-report-id="#reportId#">
+			<div class="portletTitle">
+			<span><b>#reportName#</b></span>
+			<span class="fa fa-times removeWidget pull-right" style="cursor: pointer" data-report-id="#reportId#">					
 			</span>
-			</div>	
+			</div>				
 			<div id="content_#reportId#">
 			</div>
-			</div>
+			</div>		
 			</div>
 		</script>
 
@@ -211,21 +346,28 @@
 					</div>
 				</c:if>
 
-				<div id="ajaxResponse">
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
 				</div>
 			</div>
 		</div>
 
 		<div class="row" style="margin-bottom: 10px;">
-			<div class="col-md-12">
+			<div class="col-md-4">
 				<button class="btn btn-default" id="newDashboard">
 					<spring:message code="page.text.new"/>
 				</button>
+			</div>
+			<div class="col-md-8">
 				<span class="pull-right">
 					<a class="btn btn-default" id="newDashboardLink" style="display: none"
 					   href="">
 						<spring:message code="reports.link.newReport"/>
 					</a>
+					<button class="btn btn-default" id="deleteDashboard" style="display: none">
+						<spring:message code="page.action.delete"/>
+					</button>
 					<button class="btn btn-primary" id="saveDashboard">
 						<spring:message code="page.button.save"/>
 					</button>
@@ -235,6 +377,10 @@
 		<div class="row" style="margin-bottom: 20px">
 			<div class="col-md-4">
 				<select id="reports" class="form-control selectpicker" multiple>
+				</select>
+			</div>
+			<div class="col-md-4">
+				<select id="dashboardReports" class="form-control selectpicker">
 				</select>
 			</div>
 		</div>
@@ -247,8 +393,9 @@
 		<div id="saveDashboardDialogDiv" style="display:none;">
 			<form id="saveDashboardForm" class="form-horizontal" role="form">
 				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-				<input type="hidden" name="reportId" value="">
+				<input type="hidden" name="reportId" id="reportId" value="">
 				<input type="hidden" id="config" name="config" value="">
+				<input type="hidden" name="selfService" value="true">
 				<div class="form-group">
 					<label class="control-label col-md-4" for="name">
 						<spring:message code="page.text.name"/>
@@ -263,6 +410,18 @@
 					</label>
 					<div class="col-md-8">
 						<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
+					</div>
+				</div>
+				<div class="form-group" id="overwriteDiv">
+					<label class="control-label col-md-4" for="overwrite">
+						<spring:message code="reports.text.overwrite"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" name="overwrite" id="overwrite">
+							</label>
+						</div>
 					</div>
 				</div>
 			</form>
@@ -292,6 +451,15 @@
 
 				$("#config").val(JSON.stringify(items));
 
+				var reportId = $("#reportId").val();
+				if (reportId) {
+					//setting checked property here doesn't work with bootbox dialog
+					//$('#overwrite').prop('checked', true);
+					$("#overwriteDiv").show();
+				} else {
+					$("#overwriteDiv").hide();
+				}
+
 				var dialog = bootbox.confirm({
 					title: "${saveReportText}",
 					message: $("#saveDashboardDialogDiv").html(),
@@ -308,6 +476,8 @@
 							//https://github.com/makeusabrew/bootbox/issues/572
 							var form = dialog.find('#saveDashboardForm');
 							var data = form.serialize();
+							var reportName = dialog.find('#name').val();
+							reportName = escapeHtml(reportName);
 
 							$.ajax({
 								type: 'POST',
@@ -322,6 +492,15 @@
 											var newUrl = "${pageContext.request.contextPath}/selectReportParameters?reportId=" + newReportId;
 											$("#newDashboardLink").attr("href", newUrl);
 											$("#newDashboardLink").show();
+											$('#dashboardReports').append("<option value='" + newReportId + "'>" + reportName + "</option>");
+											$('#dashboardReports').find('[value=' + newReportId + ']').prop('selected', true);
+											$("#dashboardReports").selectpicker('refresh');
+											showDeleteDashboard(reportName, newReportId);
+											$("#reportId").val(newReportId);
+										} else if (reportName) {
+											$('#dashboardReports').find('[value=' + reportId + ']').text(reportName);
+											$("#dashboardReports").selectpicker('refresh');
+											$("#deleteDashboard").attr("data-report-name", reportName);
 										}
 									} else {
 										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
@@ -342,6 +521,12 @@
 				//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
 				dialog.on("shown.bs.modal", function () {
 					dialog.attr("id", "saveDashboardDialog");
+					var reportId = dialog.find("#reportId").val();
+					if (reportId) {
+						dialog.find('#overwrite').prop('checked', true);
+					} else {
+						dialog.find("#overwrite").prop('checked', false);
+					}
 					dialog.find('#name').focus();
 				});
 			});
@@ -356,7 +541,53 @@
 			$(document).ajaxSend(function (e, xhr, options) {
 				xhr.setRequestHeader(header, token);
 			});
+
+			$("#deleteDashboard").on("click", function () {
+				var reportName = $(this).attr("data-report-name");
+				reportName = escapeHtmlContent(reportName);
+				var reportId = $(this).attr("data-report-id");
+
+				bootbox.confirm({
+					message: "${deleteRecordText}: <b>" + reportName + "</b>",
+					buttons: {
+						cancel: {
+							label: "${cancelText}"
+						},
+						confirm: {
+							label: "${okText}"
+						}
+					},
+					callback: function (result) {
+						if (result) {
+							//user confirmed delete. make delete request
+							$.ajax({
+								type: "POST",
+								dataType: "json",
+								url: "${pageContext.request.contextPath}/deleteGridstack",
+								data: {id: reportId},
+								success: function (response) {
+									var nonDeletedRecords = response.data;
+									if (response.success) {
+										$("#dashboardReports option[value='" + reportId + "']").remove();
+										resetAll();
+										$.notify("${reportDeletedText}", "success");
+									} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+										$.notify("${cannotDeleteReportText}", "error");
+									} else {
+										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+									}
+								},
+								error: function (xhr) {
+									bootbox.alert({
+										title: '${errorOccurredText}',
+										message: xhr.responseText
+									});
+								}
+							});
+						} //end if result
+					} //end callback
+				}); //end bootbox confirm
+			});
 		</script>
 	</jsp:body>
 </t:mainPage>
-

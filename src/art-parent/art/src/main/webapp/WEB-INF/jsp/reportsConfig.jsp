@@ -164,7 +164,7 @@ Reports configuration page
 						{"data": null, defaultContent: ""},
 						{"data": "reportId"},
 						{"data": "name"},
-						{"data": "reportGroupNames"},
+						{"data": "reportGroupNamesHtml"},
 						{"data": "description"},
 						{"data": "dtActiveStatus"},
 						{data: "dtAction"}
@@ -813,6 +813,7 @@ Reports configuration page
 
 				$("#deleteRecord").click(function () {
 					var recordName = $("#name").val();
+					recordName = escapeHtmlContent(recordName);
 					var recordId = $("#reportId").val();
 
 					bootbox.confirm({
@@ -855,6 +856,7 @@ Reports configuration page
 					e.preventDefault();
 
 					var recordName = $("#name").val();
+					recordName = escapeHtml(recordName);
 					var recordId = $("#reportId").val();
 
 					$.ajax({

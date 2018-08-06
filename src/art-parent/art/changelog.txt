@@ -1,3 +1,12 @@
+ART 3.9
+* Allow jTDS driver to use imageColumns option
+* Enable edit of self service dashboards
+* Use bootstrap select for chained parameters
+* Allow running of an update statement before/after a job runs
+* Don't require column alias for speedometer chart with sql server database
+* Fix for show legend not being respected when running report
+* Updated sql server driver, commons-lang, jxls
+
 ART 3.8
 * Have self service dashboards
 * Fix for error when run with java 7

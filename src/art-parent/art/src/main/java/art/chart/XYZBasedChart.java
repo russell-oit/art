@@ -109,10 +109,12 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 			resultSetRecordCount++;
 
 			Map<String, Object> row = new LinkedHashMap<>();
+			Map<Integer, Object> indexRow = new LinkedHashMap<>();
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				String columnName = rsmd.getColumnLabel(i);
 				Object data = rs.getObject(i);
 				row.put(columnName, data);
+				indexRow.put(i, data);
 			}
 
 			if (includeDataInOutput) {
@@ -121,7 +123,7 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 
 			recordCount++;
 
-			prepareRow(row, resultSetColumnNames, columnCount, recordCount, xValuesList, yValuesList, zValuesList, seriesIndex, itemIndex, seriesName);
+			prepareRow(row, indexRow, resultSetColumnNames, columnCount, recordCount, xValuesList, yValuesList, zValuesList, seriesIndex, itemIndex, seriesName);
 
 			itemIndex++;
 		}
@@ -156,7 +158,8 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 		for (Object row : data) {
 			recordCount++;
 
-			prepareRow(row, columnNames, colCount, recordCount, xValuesList, yValuesList, zValuesList, seriesIndex, itemIndex, seriesName);
+			Map<Integer, Object> indexRow = null;
+			prepareRow(row, indexRow, columnNames, colCount, recordCount, xValuesList, yValuesList, zValuesList, seriesIndex, itemIndex, seriesName);
 
 			itemIndex++;
 		}
@@ -175,32 +178,34 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 	/**
 	 * Prepares a row of data
 	 *
-	 * @param row the row of data
+	 * @param row the row of data. May be null if indexRow is used.
+	 * @param indexRow the row of data with the column index as the key. May be
+	 * null if row is used. If not null, will be used even if row is supplied.
 	 * @param dataColumnNames the data column names
 	 * @param dataColumnCount the column count
 	 * @param recordCount the current record index
 	 * @param xValuesList the x values list
 	 * @param yValuesList the y values list
 	 * @param zValuesList the z values list
-	 * @param seriesIndex the seris index
+	 * @param seriesIndex the series index
 	 * @param itemIndex the item index
 	 * @param seriesName the series name
 	 */
-	private void prepareRow(Object row, List<String> dataColumnNames,
-			int dataColumnCount, int recordCount, List<Double> xValuesList,
-			List<Double> yValuesList, List<Double> zValuesList,
+	private void prepareRow(Object row, Map<Integer, Object> indexRow,
+			List<String> dataColumnNames, int dataColumnCount, int recordCount,
+			List<Double> xValuesList, List<Double> yValuesList, List<Double> zValuesList,
 			int seriesIndex, int itemIndex, String seriesName) {
 
-		double xValue = RunReportHelper.getDoubleRowValue(row, 1, dataColumnNames);
-		double yValue = RunReportHelper.getDoubleRowValue(row, 2, dataColumnNames);
-		double actualZValue = RunReportHelper.getDoubleRowValue(row, 3, dataColumnNames);
+		double xValue = RunReportHelper.getDoubleRowValue(row, indexRow, 1, dataColumnNames);
+		double yValue = RunReportHelper.getDoubleRowValue(row, indexRow, 2, dataColumnNames);
+		double actualZValue = RunReportHelper.getDoubleRowValue(row, indexRow, 3, dataColumnNames);
 
 		double zValue;
 		if (reportType == ReportType.BubbleChart && dataColumnCount >= 4) {
 			//use normalized z value to plot
 			//bubble value normalized to the y axis values so that bubbles aren't too large,
 			//in case z value is much larger than y value
-			zValue = RunReportHelper.getDoubleRowValue(row, 4, dataColumnNames);
+			zValue = RunReportHelper.getDoubleRowValue(row, indexRow, 4, dataColumnNames);
 		} else {
 			//use actual z value to plot
 			zValue = actualZValue;
@@ -214,7 +219,7 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 		// set heat map options
 		if (reportType == ReportType.HeatmapChart && recordCount == 1) {
 			for (int i = 4; i <= dataColumnCount; i++) {
-				String optionSpec = RunReportHelper.getStringRowValue(row, i, dataColumnNames);
+				String optionSpec = RunReportHelper.getStringRowValue(row, indexRow, i, dataColumnNames);
 				if (optionSpec != null) {
 					String[] optionDetails = StringUtils.split(optionSpec, "=");
 					if (optionDetails.length == 2) {
@@ -306,4 +311,5 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 			heatmapPP.processChart(chart, heatmapOptions);
 		}
 	}
+
 }

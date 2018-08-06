@@ -1,12 +1,6 @@
 /* --- dashboard CSS --- */
 
-/* AUTO sized portlet */
-
-.portletAUTOBox {
-  border: 1px solid #ccc;
-}
-
-.portletAUTOTitle {
+.portletTitle {
   background-color: #e8ebf0;
   border-top: 0;
   border-left: 0;
@@ -17,7 +11,7 @@
   font: bold 10pt Arial;
 }
 
-.portletAUTOTools {
+.portletTools {
   float: right;
   padding: 2px 4px;
   margin-top: 1px;
@@ -26,14 +20,20 @@
   cursor: pointer;
 }
 
-.portletAUTOTools img {
+.portletTools img {
   border-left: 1px solid #666;
   padding: 0px 3px;
   cursor: pointer;
 }
 
-.portletAUTOTools img:first-child {
+.portletTools img:first-child {
   border: none;
+}
+
+/* AUTO sized portlet */
+
+.portletAUTOBox {
+  border: 1px solid #ccc;
 }
 
 .portletAUTOContent {
@@ -50,36 +50,6 @@
   border: 1px solid #ccc;
 }
 
-.portletSMALLTitle {
-  background-color: #e8ebf0;
-  border-top: 0;
-  border-left: 0;
-  border-right: 0;
-  border-bottom: 1px solid #ccc;
-  padding: 2px 4px;
-  color: #666;
-  font: bold 10pt Arial;
-}
-
-.portletSMALLTools {
-  float: right;
-  padding: 2px 4px;
-  margin-top: 1px;
-  color: #666;
-  font: bold 8pt Arial;
-  cursor: pointer;
-}
-
-.portletSMALLTools img {
-  border-left: 1px solid #666;
-  padding: 0px 3px;
-  cursor: pointer;
-}
-
-.portletSMALLTools img:first-child {
-  border: none;
-}
-
 .portletSMALLContent {
   min-height: 2px;
   overflow: auto;
@@ -93,36 +63,6 @@
   border: 1px solid #ccc;
 }
 
-.portletMEDIUMTitle {
-  background-color: #e8ebf0;
-  border-top: 0;
-  border-left: 0;
-  border-right: 0;
-  border-bottom: 1px solid #ccc;
-  padding: 2px 4px;
-  color: #666;
-  font: bold 10pt Arial;
-}
-
-.portletMEDIUMTools {
-  float: right;
-  padding: 2px 4px;
-  margin-top: 1px;
-  color: #666;
-  font: bold 8pt Arial;
-  cursor: pointer;
-}
-
-.portletMEDIUMTools img {
-  border-left: 1px solid #666;
-  padding: 0px 3px;
-  cursor: pointer;
-}
-
-.portletMEDIUMTools img:first-child {
-  border: none;
-}
-
 .portletMEDIUMContent {
   min-height: 2px;
   overflow: auto;
@@ -134,36 +74,6 @@
 .portletLARGEBox {
   width: 600px;
   border: 1px solid #ccc;
-}
-
-.portletLARGETitle {
-  background-color: #e8ebf0;
-  border-top: 0;
-  border-left: 0;
-  border-right: 0;
-  border-bottom: 1px solid #ccc;
-  padding: 2px 4px;
-  color: #666;
-  font: bold 10pt Arial;
-}
-
-.portletLARGETools {
-  float: right;
-  padding: 2px 4px;
-  margin-top: 1px;
-  color: #666;
-  font: bold 8pt Arial;
-  cursor: pointer;
-}
-
-.portletLARGETools img {
-  border-left: 1px solid #666;
-  padding: 0px 3px;
-  cursor: pointer;
-}
-
-.portletLARGETools img:first-child {
-  border: none;
 }
 
 .portletLARGEContent {

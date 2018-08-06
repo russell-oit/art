@@ -628,8 +628,8 @@ public class Config extends HttpServlet {
 
 		//set available report formats
 		String reportFormatsString = settings.getReportFormats();
-		String[] tmpReportFormatsArray = StringUtils.split(reportFormatsString, ",");
-		String[] reportFormatsArray = StringUtils.stripAll(tmpReportFormatsArray);
+		String[] tempReportFormatsArray = StringUtils.split(reportFormatsString, ",");
+		String[] reportFormatsArray = StringUtils.stripAll(tempReportFormatsArray);
 		reportFormats.clear();
 		if (reportFormatsArray != null) {
 			reportFormats.addAll(Arrays.asList(reportFormatsArray));

@@ -140,22 +140,24 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 			resultSetRecordCount++;
 
 			Map<String, Object> row = new LinkedHashMap<>();
+			Map<Integer, Object> indexRow = new LinkedHashMap<>();
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				String columnName = rsmd.getColumnLabel(i);
 				Object data = rs.getObject(i);
 				row.put(columnName, data);
+				indexRow.put(i, data);
 			}
 			
 			if (includeDataInOutput) {
 				resultSetData.add(row);
 			}
 
-			String categoryName = RunReportHelper.getStringRowValue(row, 1, resultSetColumnNames);
+			String categoryName = RunReportHelper.getStringRowValue(indexRow, 1);
 
 			if (dynamicSeries) {
 				//series name is the contents of the second column
-				String seriesName = RunReportHelper.getStringRowValue(row, 2 + hop, resultSetColumnNames);
-				double yValue = RunReportHelper.getDoubleRowValue(row, 3 + hop, resultSetColumnNames);
+				String seriesName = RunReportHelper.getStringRowValue(indexRow, 2 + hop);
+				double yValue = RunReportHelper.getDoubleRowValue(indexRow, 3 + hop);
 
 				//set series index
 				int seriesIndex;
@@ -172,7 +174,7 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
 					String seriesName = resultSetColumnNames.get(columnIndex - 1);
-					double yValue = RunReportHelper.getDoubleRowValue(row, columnIndex, resultSetColumnNames);
+					double yValue = RunReportHelper.getDoubleRowValue(indexRow, columnIndex);
 					addData(row, dataset, seriesIndex, yValue, categoryName, seriesName);
 				}
 			}

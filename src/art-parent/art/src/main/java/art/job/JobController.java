@@ -316,16 +316,19 @@ public class JobController {
 		Job job = new Job();
 
 		try {
-			job.setActive(true);
+			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			String reportIdString = request.getParameter("reportId");
 			if (reportIdString != null) {
-				Report report = reportService.getReport(Integer.parseInt(reportIdString));
+				int reportId = Integer.parseInt(reportIdString);
+				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
+					return "redirect:/accessDenied";
+				}
+				Report report = reportService.getReport(reportId);
 				job.setReport(report);
 				job.setName(report.getLocalizedName(locale));
 			}
 
-			User sessionUser = (User) session.getAttribute("sessionUser");
 			job.setUser(sessionUser);
 			job.setMailFrom(sessionUser.getEmail());
 

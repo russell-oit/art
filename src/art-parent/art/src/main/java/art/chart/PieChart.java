@@ -87,17 +87,19 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 			resultSetRecordCount++;
 
 			Map<String, Object> row = new LinkedHashMap<>();
+			Map<Integer, Object> indexRow = new LinkedHashMap<>();
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				String columnName = rsmd.getColumnLabel(i);
 				Object data = rs.getObject(i);
 				row.put(columnName, data);
+				indexRow.put(i, data);
 			}
 
 			if (includeDataInOutput) {
 				resultSetData.add(row);
 			}
 
-			prepareRow(row, resultSetColumnNames, dataset);
+			prepareRow(row, indexRow, resultSetColumnNames, dataset);
 		}
 
 		setDataset(dataset);
@@ -114,7 +116,8 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 		//resultset structure
 		//category, value [, link]
 		for (Object row : data) {
-			prepareRow(row, columnNames, dataset);
+			Map<Integer, Object> indexRow = null;
+			prepareRow(row, indexRow, columnNames, dataset);
 		}
 
 		setDataset(dataset);
@@ -123,15 +126,17 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 	/**
 	 * Fills the dataset with a row of data
 	 *
-	 * @param row the row of data
+	 * @param row the row of data. May be null if indexRow is used.
+	 * @param indexRow the row of data with the column index as the key. May be
+	 * null if row is used. If not null, will be used even if row is supplied.
 	 * @param dataColumnNames the data column names
 	 * @param dataset the dataset
 	 */
-	private void prepareRow(Object row, List<String> dataColumnNames,
-			DefaultPieDataset dataset) {
+	private void prepareRow(Object row, Map<Integer, Object> indexRow,
+			List<String> dataColumnNames, DefaultPieDataset dataset) {
 
-		String category = RunReportHelper.getStringRowValue(row, 1, dataColumnNames);
-		double value = RunReportHelper.getDoubleRowValue(row, 2, dataColumnNames);
+		String category = RunReportHelper.getStringRowValue(row, indexRow, 1, dataColumnNames);
+		double value = RunReportHelper.getDoubleRowValue(row, indexRow, 2, dataColumnNames);
 
 		//add dataset value
 		dataset.setValue(category, value);

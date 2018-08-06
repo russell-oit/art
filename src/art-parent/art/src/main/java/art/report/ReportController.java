@@ -56,6 +56,7 @@ import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -219,6 +220,11 @@ public class ReportController {
 			List<Report> basicReports = new ArrayList<>();
 
 			for (Report report : reports) {
+				report.setName(Encode.forHtml(report.getName()));
+				if (StringUtils.isNotBlank(report.getDescription())) {
+					report.setDescription(Encode.forHtml(report.getDescription()));
+				}
+
 				String activeStatus;
 				if (report.isActive()) {
 					activeStatus = activeSpan;
@@ -1300,11 +1306,14 @@ public class ReportController {
 			@RequestParam("description") String description,
 			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
 			@RequestParam(value = "saveSelectedParameters", defaultValue = "false") Boolean saveSelectedParameters,
+			@RequestParam(value = "selfService", defaultValue = "false") Boolean selfService,
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
-				+ " name='{}', description='{}', overwrite={}, saveSelectedParameters={},",
-				reportId, config, name, description, overwrite, saveSelectedParameters);
+				+ " name='{}', description='{}', overwrite={},"
+				+ " saveSelectedParameters={}, selfService={}",
+				reportId, config, name, description, overwrite,
+				saveSelectedParameters, selfService);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -1326,6 +1335,7 @@ public class ReportController {
 			}
 			if (StringUtils.isNotBlank(name)) {
 				report.setName(name);
+				report.setShortDescription(name);
 			}
 
 			boolean reportNameNotProvided = false;
@@ -1345,39 +1355,40 @@ public class ReportController {
 				String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
 				response.setErrorMessage(message);
 			} else {
+				if (selfService) {
+					//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
+					//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
+					ObjectMapper mapper = new ObjectMapper();
+					List<GridstackItemOptions> itemOptions = mapper.readValue(config, new TypeReference<List<GridstackItemOptions>>() {
+					});
+					if (CollectionUtils.isEmpty(itemOptions)) {
+						String message = messageSource.getMessage("reports.message.nothingToSave", null, locale);
+						response.setErrorMessage(message);
+						return response;
+					} else {
+						StringBuilder sb = new StringBuilder();
+						sb.append("<DASHBOARD>");
+						for (GridstackItemOptions itemOption : itemOptions) {
+							int itemReportId = itemOption.getReportId();
+							String reportName = reportService.getReportName(itemReportId);
+							sb.append("<ITEM>")
+									.append("<TITLE>")
+									.append(reportName)
+									.append("</TITLE>")
+									.append("<REPORTID>")
+									.append(String.valueOf(itemReportId))
+									.append("</REPORTID>")
+									.append("</ITEM>");
+						}
+						sb.append("</DASHBOARD>");
+						report.setReportSource(sb.toString());
+					}
+				}
+
 				if (overwrite) {
 					reportService.updateReport(report, sessionUser);
 				} else {
 					if (reportId == null) {
-						//self service
-						//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
-						//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
-						ObjectMapper mapper = new ObjectMapper();
-						List<GridstackItemOptions> itemOptions = mapper.readValue(config, new TypeReference<List<GridstackItemOptions>>() {
-						});
-						if (CollectionUtils.isEmpty(itemOptions)) {
-							String message = messageSource.getMessage("reports.message.nothingToSave", null, locale);
-							response.setErrorMessage(message);
-							return response;
-						} else {
-							StringBuilder sb = new StringBuilder();
-							sb.append("<DASHBOARD>");
-							for (GridstackItemOptions itemOption : itemOptions) {
-								int itemReportId = itemOption.getReportId();
-								String reportName = reportService.getReportName(itemReportId);
-								sb.append("<ITEM>")
-										.append("<TITLE>")
-										.append(reportName)
-										.append("</TITLE>")
-										.append("<REPORTID>")
-										.append(String.valueOf(itemReportId))
-										.append("</REPORTID>")
-										.append("</ITEM>");
-							}
-							sb.append("</DASHBOARD>");
-							report.setReportSource(sb.toString());
-						}
-
 						reportService.addReport(report, sessionUser);
 					} else {
 						reportService.copyReport(report, report.getReportId(), sessionUser);

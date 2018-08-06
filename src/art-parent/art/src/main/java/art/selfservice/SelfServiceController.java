@@ -17,12 +17,17 @@
  */
 package art.selfservice;
 
+import art.dashboard.DashboardHelper;
+import art.dashboard.GridstackDashboard;
+import art.enums.ReportType;
 import art.general.AjaxResponse;
 import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpSession;
@@ -33,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -81,6 +87,84 @@ public class SelfServiceController {
 			response.setData(reports);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException | IOException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@GetMapping("/getEditDashboardReports")
+	@ResponseBody
+	public AjaxResponse getEditDashboardReports(HttpSession session, Locale locale) {
+		logger.debug("Entering getEditDashboardReports");
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			List<Report> reports = reportService.getAccessibleReportsWithReportTypes(sessionUser.getUserId(), Arrays.asList(ReportType.GridstackDashboard));
+
+			List<Report> finalReports = new ArrayList<>();
+			for (Report report : reports) {
+				if (reportService.hasExclusiveAccess(sessionUser, report.getReportId())) {
+					finalReports.add(report);
+				}
+			}
+
+			for (Report report : finalReports) {
+				String name = report.getLocalizedName(locale);
+				name = Encode.forHtmlContent(name);
+				report.setName2(name);
+			}
+			response.setData(finalReports);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException | IOException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@GetMapping("/getEditAllDashboardReports")
+	@ResponseBody
+	public AjaxResponse getEditAllDashboardReports(Locale locale) {
+		logger.debug("Entering getEditAllDashboardReports");
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			List<Report> reports = reportService.getGridstackDashboardReports();
+			for (Report report : reports) {
+				String name = report.getLocalizedName(locale);
+				name = Encode.forHtmlContent(name);
+				report.setName2(name);
+			}
+			response.setData(reports);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException | IOException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@GetMapping("/getDashboardDetails")
+	@ResponseBody
+	public AjaxResponse getDashboardDetails(@RequestParam("reportId") Integer reportId) {
+		logger.debug("Entering getDashboardDetails: reportId={}", reportId);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Report report = reportService.getReport(reportId);
+			DashboardHelper dashboardHelper = new DashboardHelper();
+			GridstackDashboard dashboard = dashboardHelper.buildBasicGridstackDashboardObject(report);
+			response.setData(dashboard);
+			response.setSuccess(true);
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
