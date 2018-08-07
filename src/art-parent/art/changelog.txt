@@ -1,3 +1,6 @@
+ART 3.10
+* Provide edit report link from select parameters page
+
 ART 3.9
 * Allow jTDS driver to use imageColumns option
 * Enable edit of self service dashboards

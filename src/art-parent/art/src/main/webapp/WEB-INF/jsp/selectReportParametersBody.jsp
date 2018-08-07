@@ -273,12 +273,17 @@ Display section to allow selecting of report parameters and initiate running of 
 </c:if>
 
 <div class="row reportName">
-    <div class="col-md-10">
+    <div class="col-md-9">
         <h3>${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}</h3>
     </div>
-	<div class="col-md-2">
+	<div class="col-md-3">
 		<h3 class="text-right">
 			<small>
+				<c:if test="${sessionUser.hasPermission('configure_reports')}">
+					<a class="btn btn-sm btn-default" href="${pageContext.request.contextPath}/reportConfig?reportId=${report.reportId}">
+						<spring:message code="page.text.report"/>
+					</a>
+				</c:if>
 				<a data-toggle="collapse" href="#collapse1" class="btn btn-sm btn-default">
 					<spring:message code="jobs.text.parameters"/> <i class="fa fa-angle-down" aria-hidden="true"></i>
 				</a>
