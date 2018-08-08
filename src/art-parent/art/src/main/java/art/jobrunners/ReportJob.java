@@ -301,8 +301,7 @@ public class ReportJob implements org.quartz.Job {
 			} else if (!job.getUser().isActive()) {
 				runMessage = "jobs.message.ownerDisabled";
 			} else {
-				runReports(job.getPreRunReport());
-
+				runPreRunReports();
 				if (job.getRecipientsReportId() > 0) {
 					//job has dynamic recipients
 					runDynamicRecipientsJob();
@@ -314,7 +313,7 @@ public class ReportJob implements org.quartz.Job {
 
 			sendFileToDestinations();
 			runBatchFile();
-			runReports(job.getPostRunReport());
+			runPostRunReports();
 		} catch (Exception ex) {
 			logErrorAndSetDetails(ex);
 		}
@@ -332,6 +331,22 @@ public class ReportJob implements org.quartz.Job {
 		progressLogger.info("Completed. Time taken - {}", duration);
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
+	}
+	
+	/**
+	 * Run pre run reports
+	 * 
+	 * @throws SQLException 
+	 */
+	private void runPreRunReports() throws SQLException {
+		runReports(job.getPreRunReport());
+	}
+	
+	/**
+	 * Run post run reports
+	 */
+	private void runPostRunReports() throws SQLException {
+		runReports(job.getPostRunReport());
 	}
 
 	/**
