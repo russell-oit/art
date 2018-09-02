@@ -1,6 +1,7 @@
 ART 3.10
 * Provide edit report link from select parameters page
 * Allow changing job owner
+* Updated jclouds
 
 ART 3.9
 * Allow jTDS driver to use imageColumns option

@@ -979,7 +979,7 @@ public class ReportJob implements org.quartz.Job {
 			//https://stackoverflow.com/questions/49078140/jclouds-multipart-upload-to-google-cloud-storage-failing-with-400-bad-request
 			//https://issues.apache.org/jira/browse/JCLOUDS-1389
 			String eTag;
-			if (StringUtils.equalsAny(provider, "b2", "google-cloud-storage")) {
+			if (StringUtils.equals(provider, "b2")) {
 				eTag = blobStore.putBlob(containerName, blob);
 			} else {
 				eTag = blobStore.putBlob(containerName, blob, multipart());
