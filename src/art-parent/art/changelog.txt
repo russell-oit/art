@@ -1,6 +1,7 @@
 ART 3.10
 * Provide edit report link from select parameters page
 * Allow changing job owner
+* Check upper case and lower case table names for cache resultset jobs
 * Updated jclouds
 
 ART 3.9
