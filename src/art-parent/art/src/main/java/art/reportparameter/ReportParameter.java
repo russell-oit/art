@@ -291,11 +291,36 @@ public class ReportParameter implements Serializable {
 	}
 
 	/**
-	 * Returns actual parameter values in a formatted manner
+	 * Returns actual parameter values in a formatted manner. For lov
+	 * parameters, parameter display value is included together with bracketed
+	 * internal value.
 	 *
 	 * @return actual parameter values in a formatted manner
 	 */
 	public String getDisplayValues() {
+		boolean textOnly = false;
+		return getDisplayValuesWithTextOption(textOnly);
+	}
+
+	/**
+	 * Returns actual parameter values in a formatted manner. For lov
+	 * parameters, only parameter display name is included.
+	 *
+	 * @return actual parameter values in a formatted manner
+	 */
+	public String getDisplayValuesTextOnly() {
+		boolean textOnly = true;
+		return getDisplayValuesWithTextOption(textOnly);
+	}
+
+	/**
+	 * Returns actual parameter values in a formatted manner
+	 *
+	 * @param textOnly whether to have text only without bracketed value for lov
+	 * parameters
+	 * @return actual parameter values in a formatted manner
+	 */
+	private String getDisplayValuesWithTextOption(boolean textOnly) {
 		List<String> paramDisplayStrings = new ArrayList<>();
 
 		for (Object paramValue : actualParameterValues) {
@@ -322,7 +347,10 @@ public class ReportParameter implements Serializable {
 			if (displayValue == null) {
 				paramDisplayString = paramValueString;
 			} else {
-				paramDisplayString = displayValue + " (" + paramValueString + ")";
+				paramDisplayString = displayValue;
+				if (!textOnly) {
+					paramDisplayString += " (" + paramValueString + ")";
+				}
 			}
 
 			paramDisplayStrings.add(paramDisplayString);
