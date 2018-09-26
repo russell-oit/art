@@ -108,6 +108,21 @@ public abstract class StandardOutput {
 	protected String dynamicOpenPassword;
 	protected String dynamicModifyPassword;
 	protected boolean pageHeaderLoaded;
+	private Map<String, String[]> reportRequestParameters;
+
+	/**
+	 * @return the reportRequestParameters
+	 */
+	public Map<String, String[]> getReportRequestParameters() {
+		return reportRequestParameters;
+	}
+
+	/**
+	 * @param reportRequestParameters the reportRequestParameters to set
+	 */
+	public void setReportRequestParameters(Map<String, String[]> reportRequestParameters) {
+		this.reportRequestParameters = reportRequestParameters;
+	}
 
 	/**
 	 * @return the pageHeaderLoaded
@@ -1992,7 +2007,7 @@ public abstract class StandardOutput {
 		}
 
 		for (Drilldown drilldown : drilldowns) {
-			DrilldownLinkHelper drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList, locale);
+			DrilldownLinkHelper drilldownLinkHelper = new DrilldownLinkHelper(drilldown, locale, reportRequestParameters);
 			String drilldownUrl = drilldownLinkHelper.getDrilldownLink(columnValues.toArray());
 
 			String drilldownText = drilldown.getLinkText();
