@@ -70,36 +70,7 @@ public class ParameterProcessor {
 	private boolean useSavedValues;
 	private Report suppliedReport;
 	private boolean parameterSelection = false;
-	private Map<String, String[]> requestParameters;
 	private Map<String, String[]> reportRequestParameters;
-
-	/**
-	 * @return the requestParameters
-	 */
-	public Map<String, String[]> getRequestParameters() {
-		return requestParameters;
-	}
-
-	/**
-	 * @param requestParameters the requestParameters to set
-	 */
-	public void setRequestParameters(Map<String, String[]> requestParameters) {
-		this.requestParameters = requestParameters;
-	}
-
-	/**
-	 * @return the reportRequestParameters
-	 */
-	public Map<String, String[]> getReportRequestParameters() {
-		return reportRequestParameters;
-	}
-
-	/**
-	 * @param reportRequestParameters the reportRequestParameters to set
-	 */
-	public void setReportRequestParameters(Map<String, String[]> reportRequestParameters) {
-		this.reportRequestParameters = reportRequestParameters;
-	}
 
 	/**
 	 * @return the parameterSelection
@@ -194,7 +165,7 @@ public class ParameterProcessor {
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
 		Map<String, String[]> passedValues = new HashMap<>();
-		requestParameters = request.getParameterMap();
+		Map<String, String[]> requestParameters = request.getParameterMap();
 		passedValues.putAll(requestParameters);
 
 		reportRequestParameters = new HashMap<>();
