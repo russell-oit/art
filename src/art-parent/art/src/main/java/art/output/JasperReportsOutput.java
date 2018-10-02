@@ -253,6 +253,11 @@ public class JasperReportsOutput {
 				case xlsx:
 					JRXlsxExporter xlsxExporter = new JRXlsxExporter();
 
+					//http://jasper-bi-suite.blogspot.com/2013/10/export-report-output-to-multiple-sheets.html
+					//http://jasperreports.sourceforge.net/sample.reference/nopagebreak/
+					//https://community.jaspersoft.com/questions/534549/specifying-export-parameters
+					//https://community.jaspersoft.com/wiki/xls-export-parameters-jasperreports-server
+					//https://robert-reiz.com/2011/03/17/jasperreport-subreport-not-displayed/
 					xlsxExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					xlsxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					xlsxExporter.exportReport();
