@@ -59,8 +59,6 @@ import net.sf.jasperreports.engine.util.JRVisitorSupport;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
-import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -248,22 +246,12 @@ public class JasperReportsOutput {
 				case xls:
 					JRXlsExporter xlsExporter = new JRXlsExporter();
 
-					SimpleXlsReportConfiguration xlsConfiguration = new SimpleXlsReportConfiguration();
-					xlsConfiguration.setOnePagePerSheet(Boolean.FALSE);
-					xlsConfiguration.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
-					xlsExporter.setConfiguration(xlsConfiguration);
-
 					xlsExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					xlsExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
 					xlsExporter.exportReport();
 					break;
 				case xlsx:
 					JRXlsxExporter xlsxExporter = new JRXlsxExporter();
-
-					SimpleXlsxReportConfiguration xlsxConfiguration = new SimpleXlsxReportConfiguration();
-					xlsxConfiguration.setOnePagePerSheet(Boolean.FALSE);
-					xlsxConfiguration.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
-					xlsxExporter.setConfiguration(xlsxConfiguration);
 
 					xlsxExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 					xlsxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputFileName));
