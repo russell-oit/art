@@ -39,7 +39,7 @@ Edit datasource page
 <spring:message code="switch.text.no" var="noText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
-					 mainColumnClass="col-md-6 col-md-offset-3">
+					 mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
@@ -152,7 +152,7 @@ Edit datasource page
 	</jsp:attribute>
 
 	<jsp:attribute name="belowMainPanel">
-		<div class="col-md-6 col-md-offset-3">
+		<div class="col-md-8 col-md-offset-2">
 			<div class="alert alert-info">
 				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>
 			</div>
