@@ -257,6 +257,16 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.teradata.jdbc.TeraDriver";
 		urlElement.value = "jdbc:teradata://<server_name>/DATABASE=<database_name>";
 		testSqlElement.value = "";
+	} else if (dbType === "snowflake1-us-west") {
+		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
+		urlElement.value = "jdbc:snowflake://<account_name>.snowflakecomputing.com/?warehouse=<warehouse_name>&db=<database_name>&schema=<schema_name>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "snowflake2-other") {
+		//https://docs.snowflake.net/manuals/user-guide/jdbc-configure.html
+		//https://docs.snowflake.net/manuals/user-guide/intro-regions.html
+		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
+		urlElement.value = "jdbc:snowflake://<account_name>.<region_id>.snowflakecomputing.com/?warehouse=<warehouse_name>&db=<database_name>&schema=<schema_name>";
+		testSqlElement.value = "select 1";
 	}
 }
 

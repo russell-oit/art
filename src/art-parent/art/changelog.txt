@@ -4,6 +4,7 @@ ART 3.10
 * Check upper case and lower case table names for cache resultset jobs
 * Fix for parent parameters not being considered in drilldown reports
 * Stop setting jasperreports excel export options
+* Added snowflake jdbc driver
 * Updated jclouds
 
 ART 3.9

@@ -89,6 +89,8 @@ public class ArtDatabaseController {
 		databaseTypes.remove("exasol");
 		databaseTypes.remove("redshift");
 		databaseTypes.remove("teradata");
+		databaseTypes.remove("snowflake1-us-west");
+		databaseTypes.remove("snowflake2-other");
 
 		return databaseTypes;
 	}

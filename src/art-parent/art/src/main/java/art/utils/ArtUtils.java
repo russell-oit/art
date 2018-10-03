@@ -295,10 +295,12 @@ public class ArtUtils {
 		databaseTypes.put("vertica", "Vertica - driver not included"); //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
 		databaseTypes.put("informix", "Informix");
 		databaseTypes.put("cassandra-adejanovski", "Cassandra (adejanovski driver)");
-		databaseTypes.put("neo4j", "Neo4j - driver not included"); //causes issues. https://sourceforge.net/p/art/discussion/352129/thread/aa8e9973/
+		databaseTypes.put("neo4j", "Neo4j - driver not included"); //causes issues when in a VM. https://sourceforge.net/p/art/discussion/352129/thread/aa8e9973/
 		databaseTypes.put("exasol", "EXASOL - driver not included"); //license doesn't allow distribution without consent from exasol
-		databaseTypes.put("redshift", "Redshift - driver not included"); //license issues
-		databaseTypes.put("teradata", "Teradata - driver not included"); //license issues
+		databaseTypes.put("redshift", "Redshift - driver not included"); //license issues. https://docs.aws.amazon.com/redshift/latest/mgmt/configure-jdbc-connection-with-maven.html
+		databaseTypes.put("teradata", "Teradata - driver not included"); //license issues. https://downloads.teradata.com/download/license?destination=download/files/7424/187200/1/TeraJDBC__indep_indep.14.10.00.39.zip&message=License%2520Agreement
+		databaseTypes.put("snowflake1-us-west", "Snowflake (US West Region)");
+		databaseTypes.put("snowflake2-other", "Snowflake (Other Regions)");
 
 		return databaseTypes;
 	}
