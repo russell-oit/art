@@ -30,6 +30,7 @@ import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
+import art.enums.EncryptorType;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
@@ -246,7 +247,7 @@ public class ExportRecordsController {
 						exportDestinations(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Encryptors:
-						exportEncryptors(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportFilePath = exportEncryptors(exportRecords, sessionUser, csvRoutines, conn);
 						break;
 					case Holidays:
 						exportHolidays(exportRecords, file, sessionUser, csvRoutines, conn);
@@ -452,18 +453,20 @@ public class ExportRecordsController {
 	 * Exports encryptor records
 	 *
 	 * @param exportRecords the export records object
-	 * @param file the export file to use
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
+	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void exportEncryptors(ExportRecords exportRecords, File file,
+	private String exportEncryptors(ExportRecords exportRecords,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportEncryptors");
+
+		String exportFilePath = null;
 
 		String ids = exportRecords.getIds();
 		List<Encryptor> encryptors = encryptorService.getEncryptors(ids);
@@ -474,14 +477,41 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
+				String recordsExportPath = Config.getRecordsExportPath();
+				String zipFilePath = recordsExportPath + "art-export-Encryptors.zip";
+				String encryptorsFilePath;
+				File encryptorsFile;
+
+				List<String> filesToZip = getEncryptorFiles(encryptors);
+
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
+						encryptorsFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME;
+						encryptorsFile = new File(encryptorsFilePath);
 						ObjectMapper mapper = new ObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, encryptors);
+						mapper.writerWithDefaultPrettyPrinter().writeValue(encryptorsFile, encryptors);
+						if (CollectionUtils.isNotEmpty(filesToZip)) {
+							filesToZip.add(encryptorsFilePath);
+							exportFilePath = zipFilePath;
+							ArtUtils.zipFiles(exportFilePath, filesToZip);
+							encryptorsFile.delete();
+						} else {
+							exportFilePath = encryptorsFilePath;
+						}
 						break;
 					case csv:
-						csvRoutines.writeAll(encryptors, Encryptor.class, file);
+						encryptorsFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_ENCRYPTORS_FILENAME;
+						encryptorsFile = new File(encryptorsFilePath);
+						csvRoutines.writeAll(encryptors, Encryptor.class, encryptorsFile);
+						if (CollectionUtils.isNotEmpty(filesToZip)) {
+							filesToZip.add(encryptorsFilePath);
+							exportFilePath = zipFilePath;
+							ArtUtils.zipFiles(exportFilePath, filesToZip);
+							encryptorsFile.delete();
+						} else {
+							exportFilePath = encryptorsFilePath;
+						}
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -493,6 +523,8 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
+
+		return exportFilePath;
 	}
 
 	/**
@@ -1506,10 +1538,46 @@ public class ExportRecordsController {
 						String template = parameter.getTemplate();
 						if (StringUtils.isNotBlank(template)) {
 							String jsTemplatesPath = Config.getJsTemplatesPath();
-							String fullTemplateFileName = jsTemplatesPath + template;
-							File templateFile = new File(fullTemplateFileName);
-							if (templateFile.exists() && !filesToZip.contains(fullTemplateFileName)) {
-								filesToZip.add(fullTemplateFileName);
+							String templateFilePath = jsTemplatesPath + template;
+							File templateFile = new File(templateFilePath);
+							if (templateFile.exists() && !filesToZip.contains(templateFilePath)) {
+								filesToZip.add(templateFilePath);
+							}
+						}
+						break;
+					default:
+						break;
+				}
+			}
+		}
+
+		return filesToZip;
+	}
+
+	/**
+	 * Returns full paths of encryptor files to include in the final zip package
+	 *
+	 * @param encryptors the encryptors being exported
+	 * @return full paths of template files to include in the final zip package
+	 * @throws IOException
+	 */
+	private List<String> getEncryptorFiles(List<Encryptor> encryptors) throws IOException {
+		List<String> filesToZip = new ArrayList<>();
+
+		for (Encryptor encryptor : encryptors) {
+			EncryptorType encryptorType = encryptor.getEncryptorType();
+			if (encryptorType == null) {
+				logger.warn("encryptorType is null. Encryptor={}", encryptor);
+			} else {
+				switch (encryptorType) {
+					case OpenPGP:
+						String publicKeyFileName = encryptor.getOpenPgpPublicKeyFile();
+						if (StringUtils.isNotBlank(publicKeyFileName)) {
+							String templatesPath = Config.getTemplatesPath();
+							String publicKeyPath = templatesPath + publicKeyFileName;
+							File publicKeyFile = new File(publicKeyPath);
+							if (publicKeyFile.exists() && !filesToZip.contains(publicKeyPath)) {
+								filesToZip.add(publicKeyPath);
 							}
 						}
 						break;

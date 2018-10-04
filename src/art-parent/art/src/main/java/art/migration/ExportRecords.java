@@ -51,6 +51,8 @@ public class ExportRecords implements Serializable {
 	public static final String EMBEDDED_PERMISSIONS_FILENAME = "art-export-Permissions.csv";
 	public static final String EMBEDDED_CSV_PARAMETERS_FILENAME = "art-export-Parameters.csv";
 	public static final String EMBEDDED_JSON_PARAMETERS_FILENAME = "art-export-Parameters.json";
+	public static final String EMBEDDED_CSV_ENCRYPTORS_FILENAME = "art-export-Encryptors.csv";
+	public static final String EMBEDDED_JSON_ENCRYPTORS_FILENAME = "art-export-Encryptors.json";
 
 	private MigrationRecordType recordType;
 	private String ids;

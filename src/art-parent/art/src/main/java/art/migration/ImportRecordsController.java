@@ -30,6 +30,7 @@ import art.destination.DestinationService;
 import art.drilldown.Drilldown;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
+import art.enums.EncryptorType;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationRecordType;
 import art.enums.ParameterDataType;
@@ -408,15 +409,50 @@ public class ImportRecordsController {
 		logger.debug("Entering importEncryptors: sessionUser={}", sessionUser);
 
 		List<Encryptor> encryptors;
+		String extension = FilenameUtils.getExtension(file.getName());
+		String artTempPath = Config.getArtTempPath();
+
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
-				encryptors = mapper.readValue(file, new TypeReference<List<Encryptor>>() {
-				});
+				if (StringUtils.equalsIgnoreCase(extension, "json")) {
+					ObjectMapper mapper = new ObjectMapper();
+					encryptors = mapper.readValue(file, new TypeReference<List<Encryptor>>() {
+					});
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String encryptorsFilePath = artTempPath + ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME;
+					File encryptorsFile = new File(encryptorsFilePath);
+					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME, encryptorsFile);
+					if (unpacked) {
+						ObjectMapper mapper = new ObjectMapper();
+						encryptors = mapper.readValue(encryptorsFile, new TypeReference<List<Encryptor>>() {
+						});
+						encryptorsFile.delete();
+						copyEncryptorFiles(encryptors, artTempPath, file);
+					} else {
+						throw new IllegalStateException("File not found: " + encryptorsFilePath);
+					}
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
 				break;
 			case csv:
-				encryptors = csvRoutines.parseAll(Encryptor.class, file);
+				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+					encryptors = csvRoutines.parseAll(Encryptor.class, file);
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String encryptorsFilePath = artTempPath + ExportRecords.EMBEDDED_CSV_ENCRYPTORS_FILENAME;
+					File encryptorsFile = new File(encryptorsFilePath);
+					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_CSV_ENCRYPTORS_FILENAME, encryptorsFile);
+					if (unpacked) {
+						encryptors = csvRoutines.parseAll(Encryptor.class, encryptorsFile);
+						encryptorsFile.delete();
+						copyEncryptorFiles(encryptors, artTempPath, file);
+					} else {
+						throw new IllegalStateException("File not found: " + encryptorsFilePath);
+					}
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -1517,6 +1553,46 @@ public class ImportRecordsController {
 								File destinationFile = new File(destinationFilePath);
 								FileUtils.copyFile(templateFile, destinationFile);
 								templateFile.delete();
+							}
+						}
+						break;
+					default:
+						break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Copies files included in encryptors export zip file to the appropriate
+	 * locations
+	 *
+	 * @param encryptors the encryptors being imported
+	 * @param sourcePath the path where the files will be obtained from
+	 * @param zipFile the zip file that contains files to be unzipped
+	 * @throws IOException
+	 */
+	private void copyEncryptorFiles(List<Encryptor> encryptors, String sourcePath,
+			File zipFile) throws IOException {
+
+		for (Encryptor encryptor : encryptors) {
+			EncryptorType encryptorType = encryptor.getEncryptorType();
+			if (encryptorType == null) {
+				logger.warn("encryptorType is null. Encryptor={}", encryptor);
+			} else {
+				switch (encryptorType) {
+					case OpenPGP:
+						String publicKeyFileName = encryptor.getOpenPgpPublicKeyFile();
+						if (StringUtils.isNotBlank(publicKeyFileName)) {
+							String publicKeyFilePath = sourcePath + publicKeyFileName;
+							File publicKeyFile = new File(publicKeyFilePath);
+							boolean unpacked = ZipUtil.unpackEntry(zipFile, publicKeyFileName, publicKeyFile);
+							if (unpacked) {
+								String templatesPath = Config.getTemplatesPath();
+								String destinationFilePath = templatesPath + publicKeyFileName;
+								File destinationFile = new File(destinationFilePath);
+								FileUtils.copyFile(publicKeyFile, destinationFile);
+								publicKeyFile.delete();
 							}
 						}
 						break;
