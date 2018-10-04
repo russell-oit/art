@@ -267,6 +267,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
 		urlElement.value = "jdbc:snowflake://<account_name>.<region_id>.snowflakecomputing.com/?warehouse=<warehouse_name>&db=<database_name>&schema=<schema_name>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "presto") {
+		driverElement.value = "com.facebook.presto.jdbc.PrestoDriver";
+		urlElement.value = "jdbc:presto://<server_name>:<port>/<catalog_name>/<schema_name>";
+		testSqlElement.value = "select 1";
 	}
 }
 

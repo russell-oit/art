@@ -91,6 +91,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("teradata");
 		databaseTypes.remove("snowflake1-us-west");
 		databaseTypes.remove("snowflake2-other");
+		databaseTypes.remove("presto");
 
 		return databaseTypes;
 	}
