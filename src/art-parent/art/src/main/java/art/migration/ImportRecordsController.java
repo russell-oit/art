@@ -32,6 +32,7 @@ import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationRecordType;
+import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
@@ -577,7 +578,7 @@ public class ImportRecordsController {
 					for (UserGroup userGroup : userGroups) {
 						userGroupsMap.put(userGroup.getUserGroupId(), userGroup);
 					}
-					
+
 					String rolesFileName = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 					File rolesFile = new File(rolesFileName);
 					if (rolesFile.exists()) {
@@ -768,7 +769,7 @@ public class ImportRecordsController {
 							}
 						}
 					}
-					
+
 					String rolesFileName = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 					File rolesFile = new File(rolesFileName);
 					if (rolesFile.exists()) {
@@ -879,15 +880,51 @@ public class ImportRecordsController {
 		logger.debug("Entering importParameters: sessionUser={}", sessionUser);
 
 		List<Parameter> parameters;
+		String extension = FilenameUtils.getExtension(file.getName());
+		String artTempPath = Config.getArtTempPath();
+
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
-				parameters = mapper.readValue(file, new TypeReference<List<Parameter>>() {
-				});
+				if (StringUtils.equalsIgnoreCase(extension, "json")) {
+					ObjectMapper mapper = new ObjectMapper();
+					parameters = mapper.readValue(file, new TypeReference<List<Parameter>>() {
+					});
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					ZipUtil.unpack(file, new File(artTempPath));
+					String parametersFileName = artTempPath + ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME;
+					File parametersFile = new File(parametersFileName);
+					if (parametersFile.exists()) {
+						ObjectMapper mapper = new ObjectMapper();
+						parameters = mapper.readValue(parametersFile, new TypeReference<List<Parameter>>() {
+						});
+					} else {
+						throw new IllegalStateException("File not found: " + parametersFileName);
+					}
+
+					copyParameterTemplateFiles(parameters, artTempPath);
+					parametersFile.delete();
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
 				break;
 			case csv:
-				parameters = csvRoutines.parseAll(Parameter.class, file);
+				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+					parameters = csvRoutines.parseAll(Parameter.class, file);
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					ZipUtil.unpack(file, new File(artTempPath));
+					String parametersFileName = artTempPath + ExportRecords.EMBEDDED_CSV_PARAMETERS_FILENAME;
+					File parametersFile = new File(parametersFileName);
+					if (parametersFile.exists()) {
+						parameters = csvRoutines.parseAll(Parameter.class, parametersFile);
+						copyParameterTemplateFiles(parameters, artTempPath);
+						parametersFile.delete();
+					} else {
+						throw new IllegalStateException("File not found: " + parametersFileName);
+					}
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -936,18 +973,18 @@ public class ImportRecordsController {
 					});
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					ZipUtil.unpack(file, new File(artTempPath));
-					String reportsFileName = artTempPath + "art-export-Reports.json";
+					String reportsFileName = artTempPath + ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME;
 					File reportsFile = new File(reportsFileName);
 					if (reportsFile.exists()) {
 						ObjectMapper mapper = new ObjectMapper();
 						reports = mapper.readValue(reportsFile, new TypeReference<List<Report>>() {
 						});
+
+						copyReportTemplateFiles(reports, artTempPath);
+						reportsFile.delete();
 					} else {
 						throw new IllegalStateException("File not found: " + reportsFileName);
 					}
-
-					copyTemplateFiles(reports, artTempPath);
-					reportsFile.delete();
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}
@@ -957,7 +994,7 @@ public class ImportRecordsController {
 					reports = csvRoutines.parseAll(Report.class, file);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					ZipUtil.unpack(file, new File(artTempPath));
-					String reportsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
+					String reportsFileName = artTempPath + ExportRecords.EMBEDDED_CSV_REPORTS_FILENAME;
 					File reportsFile = new File(reportsFileName);
 					if (reportsFile.exists()) {
 						reports = csvRoutines.parseAll(Report.class, reportsFile);
@@ -1156,7 +1193,7 @@ public class ImportRecordsController {
 						}
 					}
 
-					copyTemplateFiles(reports, artTempPath);
+					copyReportTemplateFiles(reports, artTempPath);
 
 					reportsFile.delete();
 					reportGroupsFile.delete();
@@ -1197,11 +1234,11 @@ public class ImportRecordsController {
 	 * Copies template files included in reports export zip file to the
 	 * appropriate template locations
 	 *
-	 * @param reports the list of reports being imported
+	 * @param reports the reports being imported
 	 * @param artTempPath the path where the files will be obtained from
 	 * @throws IOException
 	 */
-	private void copyTemplateFiles(List<Report> reports, String artTempPath) throws IOException {
+	private void copyReportTemplateFiles(List<Report> reports, String artTempPath) throws IOException {
 		for (Report report : reports) {
 			ReportType reportType = report.getReportType();
 			if (reportType == null) {
@@ -1414,6 +1451,42 @@ public class ImportRecordsController {
 						default:
 							break;
 					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Copies template files included in parameters export zip file to the
+	 * appropriate template locations
+	 *
+	 * @param parameters the parameters being imported
+	 * @param artTempPath the path where the files will be obtained from
+	 * @throws IOException
+	 */
+	private void copyParameterTemplateFiles(List<Parameter> parameters, String artTempPath) throws IOException {
+		for (Parameter parameter : parameters) {
+			ParameterDataType dataType = parameter.getDataType();
+			if (dataType == null) {
+				logger.warn("dataType is null. Parameter={}", parameter);
+			} else {
+				switch (dataType) {
+					case DateRange:
+						String template = parameter.getTemplate();
+						if (StringUtils.isNotBlank(template)) {
+							String templateFilePath = artTempPath + template;
+							File templateFile = new File(templateFilePath);
+							if (templateFile.exists()) {
+								String jsTemplatesPath = Config.getJsTemplatesPath();
+								String destinationFilePath = jsTemplatesPath + template;
+								File destinationFile = new File(destinationFilePath);
+								FileUtils.copyFile(templateFile, destinationFile);
+								templateFile.delete();
+							}
+						}
+						break;
+					default:
+						break;
 				}
 			}
 		}

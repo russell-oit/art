@@ -95,10 +95,10 @@ Edit parameter definition
 				});
 
 				$("#dataType").change(function () {
-					toggleDateFormatVisible();
+					toggleVisibleFields();
 				});
 
-				toggleDateFormatVisible(); //show/hide on page load
+				toggleVisibleFields(); //show/hide on page load
 
 				$('#name').focus();
 
@@ -106,7 +106,7 @@ Edit parameter definition
 		</script>
 
 		<script type="text/javascript">
-			function toggleDateFormatVisible() {
+			function toggleVisibleFields() {
 				var dataType = $('#dataType option:selected').val();
 
 				//show/hide date format field

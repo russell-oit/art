@@ -5,6 +5,7 @@ ART 3.10
 * Fix for parent parameters not being considered in drilldown reports
 * Stop setting jasperreports excel export options
 * Added snowflake jdbc driver
+* Include daterange parameter template files in import/export
 * Updated jclouds
 
 ART 3.9

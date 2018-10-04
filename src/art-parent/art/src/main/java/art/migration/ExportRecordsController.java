@@ -33,6 +33,7 @@ import art.encryptor.EncryptorService;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
+import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
@@ -269,7 +270,7 @@ public class ExportRecordsController {
 						exportRules(exportRecords, file, sessionUser, csvRoutines, conn);
 						break;
 					case Parameters:
-						exportParameters(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportFilePath = exportParameters(exportRecords, sessionUser, csvRoutines, conn);
 						break;
 					case Reports:
 						exportFilePath = exportReports(exportRecords, sessionUser, csvRoutines, conn);
@@ -667,7 +668,7 @@ public class ExportRecordsController {
 						String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 						File userGroupsFile = new File(userGroupsFilePath);
 						csvRoutines.writeAll(userGroups, UserGroup.class, userGroupsFile);
-						
+
 						List<Role> allRoles = new ArrayList<>();
 						for (UserGroup userGroup : userGroups) {
 							List<Role> roles = userGroup.getRoles();
@@ -690,7 +691,7 @@ public class ExportRecordsController {
 								|| CollectionUtils.isNotEmpty(allPermissions)) {
 							List<String> filesToZip = new ArrayList<>();
 							filesToZip.add(userGroupsFilePath);
-							
+
 							String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 							File rolesFile = new File(rolesFilePath);
 							if (CollectionUtils.isNotEmpty(allRoles)) {
@@ -847,7 +848,7 @@ public class ExportRecordsController {
 								allUserGroups.add(userGroup);
 							}
 						}
-						
+
 						List<Role> allRoles = new ArrayList<>();
 						for (User user : users) {
 							List<Role> roles = user.getRoles();
@@ -865,7 +866,7 @@ public class ExportRecordsController {
 								allPermissions.add(permission);
 							}
 						}
-						
+
 						if (CollectionUtils.isNotEmpty(allUserGroups)
 								|| CollectionUtils.isNotEmpty(allRoles)
 								|| CollectionUtils.isNotEmpty(allPermissions)) {
@@ -878,7 +879,7 @@ public class ExportRecordsController {
 								csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
 								filesToZip.add(userGroupsFilePath);
 							}
-							
+
 							String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 							File rolesFile = new File(rolesFilePath);
 							if (CollectionUtils.isNotEmpty(allRoles)) {
@@ -965,18 +966,20 @@ public class ExportRecordsController {
 	 * Exports parameter records
 	 *
 	 * @param exportRecords the export records object
-	 * @param file the export file to use
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
+	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void exportParameters(ExportRecords exportRecords, File file,
+	private String exportParameters(ExportRecords exportRecords,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
 			throws SQLException, IOException {
 
 		logger.debug("Entering exportParameters");
+
+		String exportFilePath = null;
 
 		String ids = exportRecords.getIds();
 		List<Parameter> parameters = parameterService.getParameters(ids);
@@ -988,14 +991,41 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
+				String recordsExportPath = Config.getRecordsExportPath();
+				String zipFilePath = recordsExportPath + "art-export-Parameters.zip";
+				String parametersFilePath;
+				File parametersFile;
+
+				List<String> filesToZip = getParameterTemplateFiles(parameters);
+
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
+						parametersFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME;
+						parametersFile = new File(parametersFilePath);
 						ObjectMapper mapper = new ObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, parameters);
+						mapper.writerWithDefaultPrettyPrinter().writeValue(parametersFile, parameters);
+						if (CollectionUtils.isNotEmpty(filesToZip)) {
+							filesToZip.add(parametersFilePath);
+							exportFilePath = zipFilePath;
+							ArtUtils.zipFiles(exportFilePath, filesToZip);
+							parametersFile.delete();
+						} else {
+							exportFilePath = parametersFilePath;
+						}
 						break;
 					case csv:
-						csvRoutines.writeAll(parameters, Parameter.class, file);
+						parametersFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_PARAMETERS_FILENAME;
+						parametersFile = new File(parametersFilePath);
+						csvRoutines.writeAll(parameters, Parameter.class, parametersFile);
+						if (CollectionUtils.isNotEmpty(filesToZip)) {
+							filesToZip.add(parametersFilePath);
+							exportFilePath = zipFilePath;
+							ArtUtils.zipFiles(exportFilePath, filesToZip);
+							parametersFile.delete();
+						} else {
+							exportFilePath = parametersFilePath;
+						}
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -1008,6 +1038,8 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
+
+		return exportFilePath;
 	}
 
 	/**
@@ -1122,21 +1154,22 @@ public class ExportRecordsController {
 		switch (location) {
 			case File:
 				String recordsExportPath = Config.getRecordsExportPath();
+				String zipFilePath = recordsExportPath + "art-export-Reports.zip";
 				String reportsFilePath;
 				File reportsFile;
 
-				List<String> filesToZip = getTemplateFilesToInclude(reports);
+				List<String> filesToZip = getReportTemplateFiles(reports);
 
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						reportsFilePath = recordsExportPath + "art-export-Reports.json";
+						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME;
 						reportsFile = new File(reportsFilePath);
 						ObjectMapper mapper = new ObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(reportsFile, reports);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(reportsFilePath);
-							exportFilePath = recordsExportPath + "art-export-Reports.zip";
+							exportFilePath = zipFilePath;
 							ArtUtils.zipFiles(exportFilePath, filesToZip);
 							reportsFile.delete();
 						} else {
@@ -1144,7 +1177,7 @@ public class ExportRecordsController {
 						}
 						break;
 					case csv:
-						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
+						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_REPORTS_FILENAME;
 						reportsFile = new File(reportsFilePath);
 						csvRoutines.writeAll(reports, Report.class, reportsFile);
 
@@ -1231,7 +1264,7 @@ public class ExportRecordsController {
 								}
 							}
 
-							exportFilePath = recordsExportPath + "art-export-Reports.zip";
+							exportFilePath = zipFilePath;
 							ArtUtils.zipFiles(exportFilePath, filesToZip);
 							reportsFile.delete();
 							reportGroupsFile.delete();
@@ -1270,7 +1303,7 @@ public class ExportRecordsController {
 	 * @return full paths of template files to include in the final zip package
 	 * @throws IOException
 	 */
-	private List<String> getTemplateFilesToInclude(List<Report> reports) throws IOException {
+	private List<String> getReportTemplateFiles(List<Report> reports) throws IOException {
 		List<String> filesToZip = new ArrayList<>();
 
 		for (Report report : reports) {
@@ -1446,6 +1479,42 @@ public class ExportRecordsController {
 						default:
 							break;
 					}
+				}
+			}
+		}
+
+		return filesToZip;
+	}
+
+	/**
+	 * Returns full paths of template files to include in the final zip package
+	 *
+	 * @param parameters the parameters being exported
+	 * @return full paths of template files to include in the final zip package
+	 * @throws IOException
+	 */
+	private List<String> getParameterTemplateFiles(List<Parameter> parameters) throws IOException {
+		List<String> filesToZip = new ArrayList<>();
+
+		for (Parameter parameter : parameters) {
+			ParameterDataType dataType = parameter.getDataType();
+			if (dataType == null) {
+				logger.warn("dataType is null. Parameter={}", parameter);
+			} else {
+				switch (dataType) {
+					case DateRange:
+						String template = parameter.getTemplate();
+						if (StringUtils.isNotBlank(template)) {
+							String jsTemplatesPath = Config.getJsTemplatesPath();
+							String fullTemplateFileName = jsTemplatesPath + template;
+							File templateFile = new File(fullTemplateFileName);
+							if (templateFile.exists() && !filesToZip.contains(fullTemplateFileName)) {
+								filesToZip.add(fullTemplateFileName);
+							}
+						}
+						break;
+					default:
+						break;
 				}
 			}
 		}
