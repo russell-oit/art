@@ -21,7 +21,15 @@ Display art database configuration page
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+<c:set var="mainColumnClass">
+	${empty initialSetup ? "col-md-8 col-md-offset-2" : "col-md-8"}
+</c:set>
+
+<c:set var="belowPanelClass">
+	${empty initialSetup ? "col-md-8 col-md-offset-2" : "col-md-8 col-md-offset-4"}
+</c:set>
+
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="${mainColumnClass}">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
@@ -70,9 +78,9 @@ Display art database configuration page
 		</div>
 	</jsp:attribute>
 
-	<jsp:attribute name="rightMainPanel">
+	<jsp:attribute name="leftMainPanel">
 		<c:if test="${not empty initialSetup}">
-			<div class="col-md-2">
+			<div class="col-md-4">
 				<div class="alert alert-info">
 					<jsp:include page="/WEB-INF/jsp/welcomeNotes.jsp"/>
 				</div>
@@ -81,7 +89,7 @@ Display art database configuration page
 	</jsp:attribute>
 
 	<jsp:attribute name="belowMainPanel">
-		<div class="col-md-8 col-md-offset-2">
+		<div class="${belowPanelClass}">
 			<div class="alert alert-info">
 				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>
 				<ul>
