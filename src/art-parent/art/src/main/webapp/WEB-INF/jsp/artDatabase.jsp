@@ -72,7 +72,7 @@ Display art database configuration page
 
 	<jsp:attribute name="rightMainPanel">
 		<c:if test="${not empty initialSetup}">
-			<div class="col-md-3">
+			<div class="col-md-2">
 				<div class="alert alert-info">
 					<jsp:include page="/WEB-INF/jsp/welcomeNotes.jsp"/>
 				</div>

@@ -618,7 +618,7 @@ public class User implements Serializable {
 	/**
 	 * Returns <code>true</code> if the user has any of the given permissions
 	 *
-	 * @param permissions the permission name
+	 * @param permissions the permissions
 	 * @return <code>true</code> if the user has any of the given permissions
 	 */
 	public boolean hasAnyPermission(String... permissions) {
@@ -630,6 +630,22 @@ public class User implements Serializable {
 		}
 
 		return hasPermission;
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has any of the given permissions
+	 *
+	 * @param permissionString the permissions, in a comma separated string
+	 * @return <code>true</code> if the user has any of the given permissions
+	 */
+	public boolean hasAnyPermissionCommaSeparated(String permissionString) {
+		//need a separate method because you can't use a method with a varargs parameter in el/jsp
+		//https://stackoverflow.com/questions/15560508/invoke-method-with-varargs-in-el-throws-java-lang-illegalargumentexception-wron
+		//https://stackoverflow.com/questions/46955785/illegalargumentexception-on-expression-language-with-varargs-parameter-can-not-b
+		//https://sourceforge.net/p/art/discussion/352129/thread/c1a607e9c1/?limit=25#92c5
+		String[] tempPermissions=StringUtils.split(permissionString, ",");
+		String[] strippedPermissions = StringUtils.stripAll(tempPermissions);
+		return hasAnyPermission(strippedPermissions);
 	}
 
 	/**
@@ -655,9 +671,9 @@ public class User implements Serializable {
 	/**
 	 * Sets permissions for the initial setup or repository user
 	 */
-	public void buildSetupUserPermissions(){
+	public void buildSetupUserPermissions() {
 		flatPermissions.clear();
-		
+
 		flatPermissions.addAll(Arrays.asList("configure_users",
 				"configure_art_database", "configure_roles"));
 	}
