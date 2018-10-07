@@ -40,6 +40,13 @@ Display user configuration page
 				$('a[href*="users"]').parent().addClass('active');
 
 				var tbl = $('#users');
+				
+				var columnDefs = [
+					{
+						targets: "actionCol",
+						width: "375px"
+					}
+				];
 
 				//initialize datatable and process delete action
 				var oTable = initConfigPage(tbl,
@@ -58,7 +65,8 @@ Display user configuration page
 						"${errorOccurredText}",
 						true, //deleteRow
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						"${linkedJobsExistText}" //linkedRecordsExistText
+						"${linkedJobsExistText}", //linkedRecordsExistText
+						columnDefs
 						);
 
 				var table = oTable.api();
@@ -201,7 +209,7 @@ Display user configuration page
 					<th><spring:message code="users.text.username"/></th>
 					<th><spring:message code="users.text.fullName"/></th>
 					<th><spring:message code="page.text.active"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

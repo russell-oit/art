@@ -38,6 +38,13 @@ Display datasources
 				$('a[href*="datasources"]').parent().addClass('active');
 
 				var tbl = $('#datasources');
+				
+				var columnDefs = [
+					{
+						targets: "actionCol",
+						width: "370px"
+					}
+				];
 
 				//initialize datatable and process delete action
 				var oTable = initConfigPage(tbl,
@@ -56,7 +63,8 @@ Display datasources
 						"${errorOccurredText}",
 						true, //deleteRow
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						"${linkedReportsExistText}" //linkedRecordsExistText
+						"${linkedReportsExistText}", //linkedRecordsExistText
+						columnDefs
 						);
 
 				var table = oTable.api();
@@ -211,7 +219,7 @@ Display datasources
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

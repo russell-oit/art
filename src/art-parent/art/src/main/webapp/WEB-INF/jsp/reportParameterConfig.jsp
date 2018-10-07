@@ -26,7 +26,7 @@
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 
 
-<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">

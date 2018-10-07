@@ -90,7 +90,8 @@ Reports configuration page
 					//https://datatables.net/reference/option/rowId
 					rowId: "dtRowId",
 					autoWidth: false,
-					columnDefs: [{
+					columnDefs: [
+						{
 							targets: 0,
 							orderable: false,
 							className: 'select-checkbox'

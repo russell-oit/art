@@ -389,10 +389,11 @@ function datatablesInitComplete() {
  * @param {string} contextPath
  * @param {string} localeCode
  * @param {boolean} addColumnFilters
+ * @param {array} columnDefs - column definitions
  * @returns {jQuery} datatables jquery object
  */
 function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
-		addColumnFilters) {
+		addColumnFilters, columnDefs) {
 
 	if (pageLength === undefined || isNaN(pageLength)) {
 		pageLength = 10;
@@ -407,6 +408,25 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 	if (addColumnFilters) {
 		columnFilterRow = createColumnFilters(tbl);
 	}
+	
+	var defaultColumnDefs = [
+		{
+			targets: 0,
+			orderable: false,
+			className: 'select-checkbox'
+		},
+		{
+			targets: "dtHidden", //target name matches class name of th.
+			visible: false
+		}
+	];
+	
+	var finalColumnDefs;
+	if(columnDefs === undefined){
+		finalColumnDefs = defaultColumnDefs;
+	} else {
+		finalColumnDefs = defaultColumnDefs.concat(columnDefs);
+	}
 
 	//use initialization that returns a jquery object. to be able to use plugins
 	/** @type {jQuery} */
@@ -415,16 +435,7 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		pagingType: "full_numbers",
 		lengthMenu: [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
 		pageLength: pageLength,
-		columnDefs: [{
-				targets: 0,
-				orderable: false,
-				className: 'select-checkbox'
-			},
-			{
-				targets: "dtHidden", //target name matches class name of th.
-				visible: false
-			}
-		],
+		columnDefs: finalColumnDefs,
 		dom: 'lBfrtip',
 		buttons: [
 			'selectAll',
@@ -816,16 +827,17 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
  * @param {boolean} deleteRow
  * @param {string} cannotDeleteRecordText
  * @param {string} linkedRecordsExistText
+ * @param {array} columnDefs - column definitions
  * @returns {jQuery} datatables jquery object
  */
 function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, localeCode, addColumnFilters,
 		deleteButtonSelector,
 		showConfirmDialog, deleteRecordText, okText, cancelText,
 		deleteUrl, recordDeletedText, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
+		deleteRow, cannotDeleteRecordText, linkedRecordsExistText, columnDefs) {
 
 	var oTable = initConfigTable(tbl, pageLength, showAllRowsText, contextPath,
-			localeCode, addColumnFilters);
+			localeCode, addColumnFilters, columnDefs);
 
 	//get datatables api object
 	var table = oTable.api();
