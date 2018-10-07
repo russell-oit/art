@@ -6,6 +6,10 @@
     width: 50px;
 }
 
-.yadcf-default-filter {
-    width: 100px;
+.yadcf-name-filter {
+    width: 140px;
+}
+
+.yadcf-description-filter {
+    width: 140px;
 }

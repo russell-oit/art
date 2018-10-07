@@ -50,7 +50,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.mail.MessagingException;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
@@ -74,6 +76,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
 
 /**
  * Controller for reports pages
@@ -105,6 +109,12 @@ public class ReportController {
 
 	@Autowired
 	private SavedParameterService savedParameterService;
+
+	@Autowired
+	private TemplateEngine defaultTemplateEngine;
+
+	@Autowired
+	private ServletContext servletContext;
 
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, Model model) {
@@ -167,17 +177,8 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/reportsConfig", method = RequestMethod.GET)
-	public String showReportsConfig(Model model, HttpSession session) {
+	public String showReportsConfig() {
 		logger.debug("Entering showReportsConfig");
-
-		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
-			model.addAttribute("reportTypes", ReportType.list());
-			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
 
 		return "reportsConfig";
 	}
@@ -200,27 +201,41 @@ public class ReportController {
 
 	@GetMapping("/getConfigReports")
 	public @ResponseBody
-	AjaxResponse getConfigReports(Locale locale) {
+	AjaxResponse getConfigReports(Locale locale, HttpServletRequest request,
+			HttpServletResponse httpResponse) throws SQLException, IOException {
+
 		logger.debug("Entering getConfigReports");
 
-		AjaxResponse response = new AjaxResponse();
+		AjaxResponse ajaxResponse = new AjaxResponse();
 
 		try {
 			List<Report> reports = reportService.getAllReports();
+
+			String newText = messageSource.getMessage("page.text.new", null, locale);
+			String updatedText = messageSource.getMessage("page.text.updated", null, locale);
+			String newSpan = "<span class='label label-success'>" + newText + "</span>";
+			String updatedSpan = "<span class='label label-success'>" + updatedText + "</span>";
 
 			String activeText = messageSource.getMessage("activeStatus.option.active", null, locale);
 			String disabledText = messageSource.getMessage("activeStatus.option.disabled", null, locale);
 			String activeSpan = "<span class='label label-success'>" + activeText + "</span>";
 			String disabledSpan = "<span class='label label-danger'>" + disabledText + "</span>";
 
-			String editText = messageSource.getMessage("page.action.edit", null, locale);
-			String action = "<button type='button' class='btn btn-default editRecord'>"
-					+ "<i class='fa fa-pencil-square-o'></i>" + editText + "</button>";
+			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
 
 			List<Report> basicReports = new ArrayList<>();
 
 			for (Report report : reports) {
-				report.setName(Encode.forHtml(report.getName()));
+				String name = Encode.forHtml(report.getName());
+				final int NEW_UPDATED_LIMIT = 7;
+				if (ArtUtils.daysUntilToday(report.getCreationDate()) <= NEW_UPDATED_LIMIT) {
+					name += " " + newSpan;
+				}
+				if (ArtUtils.daysUntilToday(report.getUpdateDate()) <= NEW_UPDATED_LIMIT) {
+					name += " " + updatedSpan;
+				}
+				report.setName(name);
+
 				if (StringUtils.isNotBlank(report.getDescription())) {
 					report.setDescription(Encode.forHtml(report.getDescription()));
 				}
@@ -231,82 +246,23 @@ public class ReportController {
 				} else {
 					activeStatus = disabledSpan;
 				}
-
 				report.setDtActiveStatus(activeStatus);
-				report.setDtAction(action);
+
+				ctx.setVariable("report", report);
+				String emailTemplateName = "reportsConfigAction";
+				String dtAction = defaultTemplateEngine.process(emailTemplateName, ctx);
+				report.setDtAction(dtAction);
 
 				basicReports.add(report.getBasicReport());
 			}
-			response.setData(basicReports);
-			response.setSuccess(true);
+			ajaxResponse.setData(basicReports);
+			ajaxResponse.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
+			ajaxResponse.setErrorMessage(ex.toString());
 		}
 
-		return response;
-	}
-
-	@GetMapping("/getBasicReport")
-	public @ResponseBody
-	AjaxResponse getBasicReport(@RequestParam("id") Integer id) {
-		logger.debug("Entering getBasicReport: id={}", id);
-
-		AjaxResponse response = new AjaxResponse();
-
-		try {
-			Report report = reportService.getReportWithOwnSource(id);
-			if (report == null) {
-				response.setErrorMessage("Report not found");
-			} else {
-				response.setData(report.getBasicReport());
-				response.setSuccess(true);
-			}
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
-		}
-
-		return response;
-	}
-
-	@PostMapping("/saveBasicReport")
-	public @ResponseBody
-	AjaxResponse saveBasicReport(@ModelAttribute("basicReport") Report basicReport,
-			@RequestParam("reportId") Integer reportId, HttpSession session) {
-
-		logger.debug("Entering saveBasicReport: reportId={}", reportId);
-
-		AjaxResponse response = new AjaxResponse();
-
-		try {
-			Report originalReport = reportService.getReportWithOwnSource(reportId);
-			if (originalReport == null) {
-				response.setErrorMessage("Report not found");
-			} else {
-				originalReport.setName(basicReport.getName());
-				originalReport.setDescription(basicReport.getDescription());
-				originalReport.setDatasource(basicReport.getDatasource());
-				originalReport.setUseGroovy(basicReport.isUseGroovy());
-				originalReport.setPivotTableJsSavedOptions(basicReport.getPivotTableJsSavedOptions());
-				originalReport.setGridstackSavedOptions(basicReport.getGridstackSavedOptions());
-				originalReport.setOptions(basicReport.getOptions());
-				originalReport.setReportSource(basicReport.getReportSource());
-				originalReport.setReportSourceHtml(basicReport.getReportSourceHtml());
-
-				originalReport.encryptPasswords();
-
-				User sessionUser = (User) session.getAttribute("sessionUser");
-				reportService.updateReport(originalReport, sessionUser);
-				response.setSuccess(true);
-			}
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
-		}
-
-		return response;
-
+		return ajaxResponse;
 	}
 
 	@RequestMapping(value = "/deleteReport", method = RequestMethod.POST)
