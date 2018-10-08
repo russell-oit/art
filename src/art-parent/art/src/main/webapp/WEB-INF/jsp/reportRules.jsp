@@ -73,7 +73,7 @@ Display report filters
 					},
 					orderClasses: false,
 					pagingType: "full_numbers",
-					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
 						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"

@@ -396,7 +396,7 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		addColumnFilters, columnDefs) {
 
 	if (pageLength === undefined || isNaN(pageLength)) {
-		pageLength = 10;
+		pageLength = 20;
 	}
 
 	if (addColumnFilters === undefined) {
@@ -433,7 +433,7 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 	var oTable = tbl.dataTable({
 		orderClasses: false,
 		pagingType: "full_numbers",
-		lengthMenu: [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
+		lengthMenu: [[10, 20, 50, -1], [10, 20, 50, showAllRowsText]],
 		pageLength: pageLength,
 		columnDefs: finalColumnDefs,
 		dom: 'lBfrtip',

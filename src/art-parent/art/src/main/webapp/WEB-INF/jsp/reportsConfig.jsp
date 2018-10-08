@@ -61,7 +61,7 @@ Reports configuration page
 					order: [[1, 'asc']],
 					deferRender: true,
 					pagingType: "full_numbers",
-					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, '${showAllRowsText}']],
+					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, '${showAllRowsText}']],
 					pageLength: 10,
 					ajax: {
 						type: "GET",
