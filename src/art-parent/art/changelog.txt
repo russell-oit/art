@@ -6,7 +6,7 @@ ART 3.10
 * Stop setting jasperreports excel export options
 * Added snowflake jdbc driver
 * Include daterange parameter template files in import/export
-* Fix for error in wildfly
+* Fix for error when using wildfly
 * Removed report quick edit panel
 * Updated jclouds
 

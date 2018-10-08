@@ -830,8 +830,8 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
  * @param {array} columnDefs - column definitions
  * @returns {jQuery} datatables jquery object
  */
-function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, localeCode, addColumnFilters,
-		deleteButtonSelector,
+function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, 
+		localeCode, addColumnFilters, deleteButtonSelector,
 		showConfirmDialog, deleteRecordText, okText, cancelText,
 		deleteUrl, recordDeletedText, errorOccurredText,
 		deleteRow, cannotDeleteRecordText, linkedRecordsExistText, columnDefs) {

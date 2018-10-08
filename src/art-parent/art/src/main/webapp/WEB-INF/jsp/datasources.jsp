@@ -39,6 +39,22 @@ Display datasources
 
 				var tbl = $('#datasources');
 				
+				var pageLength = undefined; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = undefined; //pass undefined to use the default
+				var deleteButtonSelector = ".deleteRecord";
+				var showConfirmDialog = true;
+				var deleteRecordText = "${deleteRecordText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteUrl = "deleteDatasource";
+				var recordDeletedText = "${recordDeletedText}";
+				var errorOccurredText = "${errorOccurredText}";
+				var deleteRow = true;
+				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
+				var linkedRecordsExistText = "${linkedReportsExistText}";
 				var columnDefs = [
 					{
 						targets: "actionCol",
@@ -48,22 +64,22 @@ Display datasources
 
 				//initialize datatable and process delete action
 				var oTable = initConfigPage(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						undefined, //addColumnFilters. pass undefined to use default
-						".deleteRecord", //deleteButtonSelector
-						true, //showConfirmDialog
-						"${deleteRecordText}",
-						"${okText}",
-						"${cancelText}",
-						"deleteDatasource", //deleteUrl
-						"${recordDeletedText}",
-						"${errorOccurredText}",
-						true, //deleteRow
-						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						"${linkedReportsExistText}", //linkedRecordsExistText
+						pageLength,
+						showAllRowsText,
+						contextPath,
+						localeCode,
+						addColumnFilters,
+						deleteButtonSelector,
+						showConfirmDialog, //showConfirmDialog
+						deleteRecordText,
+						okText,
+						cancelText,
+						deleteUrl,
+						recordDeletedText,
+						errorOccurredText,
+						deleteRow, //deleteRow
+						cannotDeleteRecordText,
+						linkedRecordsExistText,
 						columnDefs
 						);
 

@@ -38,25 +38,44 @@ Display schedules
 				$('a[href*="schedules"]').parent().addClass('active');
 
 				var tbl = $('#schedules');
+				
+				var pageLength = undefined; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = undefined; //pass undefined to use the default
+				var deleteButtonSelector = ".deleteRecord";
+				var showConfirmDialog = true;
+				var deleteRecordText = "${deleteRecordText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteUrl = "deleteSchedule";
+				var recordDeletedText = "${recordDeletedText}";
+				var errorOccurredText = "${errorOccurredText}";
+				var deleteRow = true;
+				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
+				var linkedRecordsExistText = "${linkedJobsExistText}";
+				var columnDefs = undefined
 
 				//initialize datatable and process delete action
 				var oTable = initConfigPage(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						undefined, //addColumnFilters. pass undefined to use default
-						".deleteRecord", //deleteButtonSelector
-						true, //showConfirmDialog
-						"${deleteRecordText}",
-						"${okText}",
-						"${cancelText}",
-						"deleteSchedule", //deleteUrl
-						"${recordDeletedText}",
-						"${errorOccurredText}",
-						true, //deleteRow
-						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						"${linkedJobsExistText}" //linkedRecordsExistText
+						pageLength,
+						showAllRowsText,
+						contextPath,
+						localeCode,
+						addColumnFilters,
+						deleteButtonSelector,
+						showConfirmDialog, //showConfirmDialog
+						deleteRecordText,
+						okText,
+						cancelText,
+						deleteUrl,
+						recordDeletedText,
+						errorOccurredText,
+						deleteRow, //deleteRow
+						cannotDeleteRecordText,
+						linkedRecordsExistText,
+						columnDefs
 						);
 
 				var table = oTable.api();
