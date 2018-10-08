@@ -36,15 +36,19 @@ Display user jobs and jobs configuration
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 <spring:message code="jobs.message.scheduled" var="scheduledText"/>
+<spring:message code="reports.text.selectValue" var="selectValueText"/>
 
 <t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yadcf.css"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.js"></script>
 
 		<script>
 			//put obtaining of server offset in head to reduce difference between server and client time
@@ -85,12 +89,12 @@ Display user jobs and jobs configuration
 				setInterval('updateClock()', 1000);
 
 				var tbl = $('#jobs');
-				
+
 				var pageLength = undefined; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
-				var addColumnFilters = undefined; //pass undefined to use the default
+				var addColumnFilters = false; //pass undefined to use the default
 				var deleteButtonSelector = ".deleteRecord";
 				var deleteRecordText = "${deleteRecordText}";
 				var okText = "${okText}";
@@ -100,7 +104,24 @@ Display user jobs and jobs configuration
 				var errorOccurredText = "${errorOccurredText}";
 				var cannotDeleteRecordText = undefined;
 				var linkedRecordsExistText = undefined;
-				var columnDefs = undefined;
+				var columnDefs = [
+					{
+						targets: "idCol",
+						width: "50px"
+					},
+					{
+						targets: "nameCol",
+						width: "220px"
+					},
+					{
+						targets: "dateCol",
+						width: "130px"
+					},
+					{
+						targets: "resultCol",
+						width: "400px"
+					}
+				];
 
 				//initialize datatable and process delete action
 				var oTable = initConfigPage(tbl,
@@ -122,6 +143,46 @@ Display user jobs and jobs configuration
 						);
 
 				var table = oTable.api();
+
+				yadcf.init(table,
+						[
+							{
+								column_number: 1,
+								filter_type: 'text',
+								filter_default_label: "",
+								style_class: "yadcf-id-filter"
+							},
+							{
+								column_number: 2,
+								filter_type: 'text',
+								filter_default_label: "",
+								style_class: "yadcf-job-name-filter"
+							},
+							{
+								column_number: 3,
+								filter_default_label: '${selectValueText}',
+								column_data_type: "html",
+								html_data_type: "text"
+							},
+							{
+								column_number: 4,
+								filter_type: 'text',
+								filter_default_label: "",
+								style_class: "yadcf-job-date-filter"
+							},
+							{
+								column_number: 5,
+								filter_type: 'text',
+								filter_default_label: ""
+							},
+							{
+								column_number: 6,
+								filter_type: 'text',
+								filter_default_label: "",
+								style_class: "yadcf-job-date-filter"
+							}
+						]
+						);
 
 				tbl.find('tbody').on('click', '.run', function () {
 					var row = $(this).closest("tr"); //jquery object
@@ -384,14 +445,14 @@ Display user jobs and jobs configuration
 		<table id="jobs" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th class="noFilter"></th>
-					<th><spring:message code="page.text.id"/></th>
-					<th><spring:message code="page.text.name"/></th>
-					<th class="dtHidden"><spring:message code="page.text.active"/></th>
-					<th><spring:message code="jobs.text.lastEndDate"/></th>
-					<th><spring:message code="jobs.text.result"/></th>
-					<th><spring:message code="jobs.text.nextRunDate"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter selectorCol"></th>
+					<th class="idCol"><spring:message code="page.text.id"/><p></p></th>
+					<th class="nameCol"><spring:message code="page.text.name"/><p></p></th>
+					<th class="dtHidden"><spring:message code="page.text.active"/><p></p></th>
+					<th class="dateCol"><spring:message code="jobs.text.lastEndDate"/><p></p></th>
+					<th class="resultCol"><spring:message code="jobs.text.result"/><p></p></th>
+					<th class="dateCol"><spring:message code="jobs.text.nextRunDate"/><p></p></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/><p></p></th>
 				</tr>
 			</thead>
 			<tbody>

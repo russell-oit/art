@@ -13,3 +13,15 @@
 .yadcf-description-filter {
     width: 140px;
 }
+
+.yadcf-job-name-filter {
+    width: 150px;
+}
+
+.yadcf-job-date-filter {
+    width: 120px;
+}
+
+.yadcf-job-result-filter {
+    width: 150px;
+}
