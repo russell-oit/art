@@ -227,6 +227,8 @@ public class ReportController {
 
 			for (Report report : reports) {
 				String name = Encode.forHtml(report.getName());
+				report.setName(name);
+				
 				final int NEW_UPDATED_LIMIT = 7;
 				if (ArtUtils.daysUntilToday(report.getCreationDate()) <= NEW_UPDATED_LIMIT) {
 					name += " " + newSpan;
@@ -234,7 +236,7 @@ public class ReportController {
 				if (ArtUtils.daysUntilToday(report.getUpdateDate()) <= NEW_UPDATED_LIMIT) {
 					name += " " + updatedSpan;
 				}
-				report.setName(name);
+				report.setName2(name);
 
 				if (StringUtils.isNotBlank(report.getDescription())) {
 					report.setDescription(Encode.forHtml(report.getDescription()));

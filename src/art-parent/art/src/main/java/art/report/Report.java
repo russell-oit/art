@@ -1573,6 +1573,7 @@ public class Report implements Serializable {
 
 		basic.setReportId(reportId);
 		basic.setName(name);
+		basic.setName2(name2);
 		basic.setDescription(description);
 		basic.setDtActiveStatus(dtActiveStatus);
 		basic.setDtAction(dtAction);

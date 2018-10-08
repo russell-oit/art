@@ -81,7 +81,7 @@ Reports configuration page
 					columns: [
 						{"data": null, defaultContent: ""},
 						{"data": "reportId"},
-						{"data": "name"},
+						{"data": "name2"},
 						{"data": "reportGroupNamesHtml"},
 						{"data": "description"},
 						{"data": "dtActiveStatus"},
@@ -210,9 +210,9 @@ Reports configuration page
 									success: function (response) {
 										if (response.success) {
 											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccess("${recordDeletedText}", recordName);
+											notifyActionSuccessReusable("${recordDeletedText}", recordName);
 										} else {
-											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											notifyActionErrorReusable("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
 										}
 									},
 									error: ajaxErrorHandler
