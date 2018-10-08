@@ -168,6 +168,7 @@ Display user jobs and jobs configuration
 								column_number: 4,
 								filter_type: 'text',
 								filter_default_label: "",
+								html5_data: "data-filter",
 								style_class: "yadcf-job-date-filter"
 							},
 							{
@@ -179,6 +180,7 @@ Display user jobs and jobs configuration
 								column_number: 6,
 								filter_type: 'text',
 								filter_default_label: "",
+								html5_data: "data-filter",
 								style_class: "yadcf-job-date-filter"
 							}
 						]
