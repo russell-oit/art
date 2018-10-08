@@ -582,7 +582,7 @@
 						</label>
 						<div class="col-md-8">
 							<p class="form-control-static">
-								<a href="${pageContext.request.contextPath}/editReport?id=${job.report.reportId}">
+								<a href="${pageContext.request.contextPath}/reportConfig?reportId=${job.report.reportId}">
 									${encode:forHtmlContent(job.report.getLocalizedName(pageContext.response.locale))}
 								</a>
 							</p>
