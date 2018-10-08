@@ -163,7 +163,7 @@ Reports configuration page
 								column_number: 2,
 								filter_type: 'text',
 								filter_default_label: "",
-								style_class: "yadcf-name-filter"
+								style_class: "yadcf-report-name-filter"
 							},
 							{
 								column_number: 3,
@@ -174,7 +174,7 @@ Reports configuration page
 								column_number: 4,
 								filter_type: 'text',
 								filter_default_label: "",
-								style_class: "yadcf-description-filter"
+								style_class: "yadcf-report-description-filter"
 							},
 							{
 								column_number: 5,
