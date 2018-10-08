@@ -45,7 +45,6 @@ Display parameters
 				var localeCode = "${pageContext.response.locale}";
 				var addColumnFilters = undefined; //pass undefined to use the default
 				var deleteButtonSelector = ".deleteRecord";
-				var showConfirmDialog = true;
 				var deleteRecordText = "${deleteRecordText}";
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
@@ -64,7 +63,6 @@ Display parameters
 						localeCode,
 						addColumnFilters,
 						deleteButtonSelector,
-						showConfirmDialog, //showConfirmDialog
 						deleteRecordText,
 						okText,
 						cancelText,

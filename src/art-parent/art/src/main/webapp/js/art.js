@@ -747,7 +747,6 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
  * @param {jQuery} tbl
  * @param {DataTables.Api} table
  * @param {string} deleteButtonSelector
- * @param {boolean} showConfirmDialog
  * @param {string} deleteRecordText
  * @param {string} okText - confirm dialog ok button text
  * @param {string} cancelText - confirm dialog cancel button text
@@ -759,7 +758,7 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
  * @param {string} linkedRecordsExistText
  */
 function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
-		showConfirmDialog, deleteRecordText, okText, cancelText,
+		deleteRecordText, okText, cancelText,
 		contextPath, deleteUrl, recordDeletedText, errorOccurredText,
 		cannotDeleteRecordText, linkedRecordsExistText) {
 
@@ -771,35 +770,28 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 		var recordName = escapeHtmlContent(row.attr("data-name"));
 		var recordId = row.data("id");
 
-		if (showConfirmDialog) {
-			//display confirm dialog
-			bootbox.confirm({
-				message: deleteRecordText + ": <b>" + recordName + "</b>",
-				buttons: {
-					cancel: {
-						label: cancelText
-					},
-					confirm: {
-						label: okText
-					}
+		//display confirm dialog
+		bootbox.confirm({
+			message: deleteRecordText + ": <b>" + recordName + "</b>",
+			buttons: {
+				cancel: {
+					label: cancelText
 				},
-				callback: function (result) {
-					if (result) {
-						//user confirmed delete. make delete request
-						sendDeleteRequest(contextPath, deleteUrl, recordId,
-								table, row, recordDeletedText, recordName, 
-								errorOccurredText, cannotDeleteRecordText,
-								linkedRecordsExistText);
+				confirm: {
+					label: okText
+				}
+			},
+			callback: function (result) {
+				if (result) {
+					//user confirmed delete. make delete request
+					sendDeleteRequest(contextPath, deleteUrl, recordId,
+							table, row, recordDeletedText, recordName, 
+							errorOccurredText, cannotDeleteRecordText,
+							linkedRecordsExistText);
 
-					} //end if result
-				} //end callback
-			}); //end bootbox confirm
-		} else {
-			sendDeleteRequest(contextPath, deleteUrl, recordId,
-					table, row, recordDeletedText, recordName, errorOccurredText,
-					cannotDeleteRecordText, linkedRecordsExistText);
-		}
-
+				} //end if result
+			} //end callback
+		}); //end bootbox confirm
 	}); //end on click
 }
 
@@ -813,7 +805,6 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
  * @param {string} localeCode
  * @param {boolean} addColumnFilters
  * @param {string} deleteButtonSelector
- * @param {boolean} showConfirmDialog
  * @param {string} deleteRecordText
  * @param {string} okText
  * @param {string} cancelText
@@ -827,7 +818,7 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
  */
 function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, 
 		localeCode, addColumnFilters, deleteButtonSelector,
-		showConfirmDialog, deleteRecordText, okText, cancelText,
+		deleteRecordText, okText, cancelText,
 		deleteUrl, recordDeletedText, errorOccurredText,
 		cannotDeleteRecordText, linkedRecordsExistText, columnDefs) {
 
@@ -838,7 +829,7 @@ function initConfigPage(tbl, pageLength, showAllRowsText, contextPath,
 	var table = oTable.api();
 
 	addDeleteRecordHandler(tbl, table, deleteButtonSelector,
-			showConfirmDialog, deleteRecordText, okText, cancelText,
+			deleteRecordText, okText, cancelText,
 			contextPath, deleteUrl, recordDeletedText, errorOccurredText,
 			cannotDeleteRecordText, linkedRecordsExistText);
 
