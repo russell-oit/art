@@ -364,12 +364,12 @@ Reports configuration page
 				<thead>
 					<tr>
 						<th class="noFilter"></th>
-						<th><spring:message code="page.text.id"/><br><br></th>
-						<th><spring:message code="page.text.name"/><br><br></th>
-						<th><spring:message code="reports.text.groupName"/><br><br></th>
-						<th><spring:message code="page.text.description"/><br><br></th>
-						<th><spring:message code="page.text.active"/><br><br></th>
-						<th class="noFilter"><spring:message code="page.text.action"/><br><br></th>
+						<th><spring:message code="page.text.id"/><p></p></th>
+						<th><spring:message code="page.text.name"/><p></p></th>
+						<th><spring:message code="reports.text.groupName"/><p></p></th>
+						<th><spring:message code="page.text.description"/><p></p></th>
+						<th><spring:message code="page.text.active"/><p></p></th>
+						<th class="noFilter"><spring:message code="page.text.action"/><p></p></th>
 					</tr>
 				</thead>
 			</table>
