@@ -52,7 +52,6 @@ Display user groups
 				var deleteUrl = "deleteUserGroup";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
-				var deleteRow = true;
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedUsersExistText}";
 				var columnDefs = undefined;
@@ -72,7 +71,6 @@ Display user groups
 						deleteUrl,
 						recordDeletedText,
 						errorOccurredText,
-						deleteRow, //deleteRow
 						cannotDeleteRecordText,
 						linkedRecordsExistText,
 						columnDefs

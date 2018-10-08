@@ -99,7 +99,6 @@ Display user jobs and jobs configuration
 				var deleteUrl = "deleteJob";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
-				var deleteRow = true;
 				var cannotDeleteRecordText = undefined;
 				var linkedRecordsExistText = undefined;
 				var columnDefs = undefined;
@@ -119,7 +118,6 @@ Display user jobs and jobs configuration
 						deleteUrl,
 						recordDeletedText,
 						errorOccurredText,
-						deleteRow, //deleteRow
 						cannotDeleteRecordText,
 						linkedRecordsExistText,
 						columnDefs

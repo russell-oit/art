@@ -54,7 +54,6 @@ Display user configuration page
 				var deleteUrl = "deleteUser";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
-				var deleteRow = true;
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedJobsExistText}";
 				var columnDefs = [
@@ -79,7 +78,6 @@ Display user configuration page
 						deleteUrl,
 						recordDeletedText,
 						errorOccurredText,
-						deleteRow, //deleteRow
 						cannotDeleteRecordText,
 						linkedRecordsExistText,
 						columnDefs

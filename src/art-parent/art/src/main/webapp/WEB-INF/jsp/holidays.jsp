@@ -50,7 +50,6 @@
 				var deleteUrl = "deleteHoliday";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
-				var deleteRow = true;
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedRecordsExistText}";
 				var columnDefs = undefined;
@@ -70,7 +69,6 @@
 						deleteUrl,
 						recordDeletedText,
 						errorOccurredText,
-						deleteRow, //deleteRow
 						cannotDeleteRecordText,
 						linkedRecordsExistText,
 						columnDefs

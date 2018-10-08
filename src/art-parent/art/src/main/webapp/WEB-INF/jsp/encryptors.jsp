@@ -51,7 +51,6 @@
 				var deleteUrl = "deleteEncryptor";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
-				var deleteRow = true;
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedReportsExistText}";
 				var columnDefs = [
@@ -76,7 +75,6 @@
 						deleteUrl,
 						recordDeletedText,
 						errorOccurredText,
-						deleteRow, //deleteRow
 						cannotDeleteRecordText,
 						linkedRecordsExistText,
 						columnDefs

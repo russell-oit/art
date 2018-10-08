@@ -689,18 +689,15 @@ function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedTex
  * @param {string} recordDeletedText 
  * @param {string} recordName
  * @param {string} errorOccurredText
- * @param {boolean} deleteRow 
  * @param {string} [cannotDeleteRecordText]
  * @param {string} [linkedRecordsExistText]
  */
-function deleteDoneHandler(response, table, row, recordDeletedText, recordName, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
+function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
+		errorOccurredText, cannotDeleteRecordText, linkedRecordsExistText) {
 
 	var linkedRecords = response.data;
 	if (response.success) {
-		if (deleteRow) {
-			table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-		}
+		table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 		notifyActionSuccessReusable(recordDeletedText, recordName);
 	} else if (linkedRecords !== null && linkedRecords.length > 0) {
 		notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
@@ -720,13 +717,12 @@ function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
  * @param {string} recordDeletedText - message shown after successful deletion
  * @param {string} recordName
  * @param {string} errorOccurredText
- * @param {boolean} deleteRow - whether to delete the table row for the affected record
  * @param {string} [cannotDeleteRecordText]
  * @param {string} [linkedRecordsExistText]
  */
 function sendDeleteRequest(contextPath, deleteUrl, recordId,
 		table, row, recordDeletedText, recordName, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
+		cannotDeleteRecordText, linkedRecordsExistText) {
 
 	var request = $.ajax({
 		type: "POST",
@@ -738,8 +734,8 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
 	//register http success callback
 	request.done(function (response) {
 		deleteDoneHandler(response, table, row, recordDeletedText,
-				recordName, errorOccurredText,
-				deleteRow, cannotDeleteRecordText, linkedRecordsExistText);
+				recordName, errorOccurredText, cannotDeleteRecordText,
+				linkedRecordsExistText);
 	});
 	//register http error callback
 	request.fail(ajaxErrorHandler);
@@ -759,14 +755,13 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
  * @param {string} deleteUrl
  * @param {string} recordDeletedText
  * @param {string} errorOccurredText
- * @param {boolean} deleteRow
  * @param {string} cannotDeleteRecordText
  * @param {string} linkedRecordsExistText
  */
 function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 		showConfirmDialog, deleteRecordText, okText, cancelText,
 		contextPath, deleteUrl, recordDeletedText, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
+		cannotDeleteRecordText, linkedRecordsExistText) {
 
 	//delete record
 	tbl.find('tbody').on('click', deleteButtonSelector, function () {
@@ -792,8 +787,9 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 					if (result) {
 						//user confirmed delete. make delete request
 						sendDeleteRequest(contextPath, deleteUrl, recordId,
-								table, row, recordDeletedText, recordName, errorOccurredText,
-								deleteRow, cannotDeleteRecordText, linkedRecordsExistText);
+								table, row, recordDeletedText, recordName, 
+								errorOccurredText, cannotDeleteRecordText,
+								linkedRecordsExistText);
 
 					} //end if result
 				} //end callback
@@ -801,7 +797,7 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 		} else {
 			sendDeleteRequest(contextPath, deleteUrl, recordId,
 					table, row, recordDeletedText, recordName, errorOccurredText,
-					deleteRow, cannotDeleteRecordText, linkedRecordsExistText);
+					cannotDeleteRecordText, linkedRecordsExistText);
 		}
 
 	}); //end on click
@@ -824,7 +820,6 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
  * @param {string} deleteUrl
  * @param {string} recordDeletedText
  * @param {string} errorOccurredText
- * @param {boolean} deleteRow
  * @param {string} cannotDeleteRecordText
  * @param {string} linkedRecordsExistText
  * @param {array} columnDefs - column definitions
@@ -834,7 +829,7 @@ function initConfigPage(tbl, pageLength, showAllRowsText, contextPath,
 		localeCode, addColumnFilters, deleteButtonSelector,
 		showConfirmDialog, deleteRecordText, okText, cancelText,
 		deleteUrl, recordDeletedText, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText, columnDefs) {
+		cannotDeleteRecordText, linkedRecordsExistText, columnDefs) {
 
 	var oTable = initConfigTable(tbl, pageLength, showAllRowsText, contextPath,
 			localeCode, addColumnFilters, columnDefs);
@@ -845,7 +840,7 @@ function initConfigPage(tbl, pageLength, showAllRowsText, contextPath,
 	addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 			showConfirmDialog, deleteRecordText, okText, cancelText,
 			contextPath, deleteUrl, recordDeletedText, errorOccurredText,
-			deleteRow, cannotDeleteRecordText, linkedRecordsExistText);
+			cannotDeleteRecordText, linkedRecordsExistText);
 
 	return oTable;
 }

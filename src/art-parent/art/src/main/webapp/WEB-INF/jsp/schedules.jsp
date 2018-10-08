@@ -52,7 +52,6 @@ Display schedules
 				var deleteUrl = "deleteSchedule";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
-				var deleteRow = true;
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedJobsExistText}";
 				var columnDefs = undefined
@@ -72,7 +71,6 @@ Display schedules
 						deleteUrl,
 						recordDeletedText,
 						errorOccurredText,
-						deleteRow, //deleteRow
 						cannotDeleteRecordText,
 						linkedRecordsExistText,
 						columnDefs

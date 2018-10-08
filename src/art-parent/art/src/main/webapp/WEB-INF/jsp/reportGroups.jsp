@@ -52,7 +52,6 @@ Report groups configuration page
 				var deleteUrl = "deleteReportGroup";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
-				var deleteRow = true;
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedReportsExistText}";
 				var columnDefs = undefined;
@@ -72,7 +71,6 @@ Report groups configuration page
 						deleteUrl,
 						recordDeletedText,
 						errorOccurredText,
-						deleteRow, //deleteRow
 						cannotDeleteRecordText,
 						linkedRecordsExistText,
 						columnDefs

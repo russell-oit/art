@@ -52,7 +52,6 @@ Display parameters
 				var deleteUrl = "deleteParameter";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
-				var deleteRow = true;
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedReportsExistText}";
 				var columnDefs = undefined;
@@ -72,7 +71,6 @@ Display parameters
 						deleteUrl,
 						recordDeletedText,
 						errorOccurredText,
-						deleteRow, //deleteRow
 						cannotDeleteRecordText,
 						linkedRecordsExistText,
 						columnDefs
