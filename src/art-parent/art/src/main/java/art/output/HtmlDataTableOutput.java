@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.owasp.encoder.Encode;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
@@ -70,12 +71,18 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 		tableId = "table-" + RandomStringUtils.randomAlphanumeric(5);
 
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			options = "";
+		}
+
 		Context ctx = new Context(locale);
 		ctx.setVariable("ajax", ajax);
 		ctx.setVariable("pageHeaderLoaded", pageHeaderLoaded);
 		ctx.setVariable("contextPath", contextPath);
 		ctx.setVariable("tableId", tableId);
 		ctx.setVariable("language", language);
+		ctx.setVariable("options", options);
 
 		SpringTemplateEngine templateEngine = Config.getDefaultThymeleafTemplateEngine();
 		templateEngine.setMessageSource(messageSource);
@@ -94,7 +101,17 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
-		out.println("<th>" + value + "</th>");
+		String cleanClassName;
+		if (value == null) {
+			cleanClassName = "";
+		} else {
+			//only allow english alphabets, numbers, underscore, dash
+			cleanClassName = value.replaceAll("[^a-zA-Z0-9_\\-]+", "-");
+		}
+		String encodedClassName = Encode.forHtmlAttribute(cleanClassName);
+		String finalClassName = "rcol-" + encodedClassName;
+		
+		out.println("<th class='" + finalClassName + "'>" + value + "</th>");
 	}
 
 	@Override

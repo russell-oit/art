@@ -8,6 +8,7 @@ ART 3.10
 * Include daterange parameter template files in import/export
 * Fix for error when using wildfly
 * Removed report quick edit panel
+* Allow specification of column widths for datatable report format of tabular reports
 * Updated jclouds
 
 ART 3.9

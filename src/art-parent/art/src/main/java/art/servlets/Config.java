@@ -360,7 +360,7 @@ public class Config extends HttpServlet {
 		defaultTemplateResolver.setTemplateMode(TemplateMode.HTML);
 		defaultTemplateResolver.setSuffix(".html");
 		defaultTemplateResolver.setCharacterEncoding("UTF-8");
-		defaultTemplateResolver.setCacheable(true);
+		defaultTemplateResolver.setCacheable(false);
 
 		defaultThymeleafTemplateEngine = new SpringTemplateEngine();
 		defaultThymeleafTemplateEngine.setEnableSpringELCompiler(true);

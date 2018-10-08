@@ -180,7 +180,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setSuffix(".html");
 		resolver.setCharacterEncoding("UTF-8");
-		resolver.setCacheable(true);
+		resolver.setCacheable(false);
 		return resolver;
 	}
 

@@ -27,10 +27,10 @@ import java.util.List;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StandardOutputOptions implements Serializable {
+public class StandardOutputOptions {
 	
-	private static final long serialVersionUID = 1L;
 	private List<String> imageColumns;
+	private Object dtOptions;
 
 	/**
 	 * @return the imageColumns
@@ -44,5 +44,19 @@ public class StandardOutputOptions implements Serializable {
 	 */
 	public void setImageColumns(List<String> imageColumns) {
 		this.imageColumns = imageColumns;
+	}
+
+	/**
+	 * @return the dtOptions
+	 */
+	public Object getDtOptions() {
+		return dtOptions;
+	}
+
+	/**
+	 * @param dtOptions the dtOptions to set
+	 */
+	public void setDtOptions(Object dtOptions) {
+		this.dtOptions = dtOptions;
 	}
 }
