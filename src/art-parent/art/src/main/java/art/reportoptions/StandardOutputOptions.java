@@ -22,15 +22,16 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Represents options for standard output report types - primarily tabular reports
- * 
+ * Represents options for standard output report types - primarily tabular
+ * reports
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StandardOutputOptions {
-	
+public class StandardOutputOptions implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private List<String> imageColumns;
-	private Object dtOptions;
 
 	/**
 	 * @return the imageColumns
@@ -46,17 +47,4 @@ public class StandardOutputOptions {
 		this.imageColumns = imageColumns;
 	}
 
-	/**
-	 * @return the dtOptions
-	 */
-	public Object getDtOptions() {
-		return dtOptions;
-	}
-
-	/**
-	 * @param dtOptions the dtOptions to set
-	 */
-	public void setDtOptions(Object dtOptions) {
-		this.dtOptions = dtOptions;
-	}
 }

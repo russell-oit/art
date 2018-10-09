@@ -1708,6 +1708,7 @@ public class ReportOutputGenerator {
 			options = mapper.readValue(optionsString, DataTablesOptions.class);
 		}
 		request.setAttribute("options", options);
+		request.setAttribute("optionsJson", optionsString);
 
 		if (reportType == ReportType.DataTablesCsvServer) {
 			if (StringUtils.isBlank(optionsString)) {

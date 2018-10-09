@@ -62,7 +62,7 @@
 	if (javaInputDateFormat) {
 		inputDateFormat = moment().toMomentFormatString(javaInputDateFormat);
 	}
-	
+
 	var outputDateFormat = ''; //moment format e.g. DD-MMM-YYYY
 	var javaOutputDateFormat = '${encode:forJavaScript(options.outputDateFormat)}';
 	if (javaOutputDateFormat) {
@@ -74,7 +74,7 @@
 	if (javaInputDateTimeFormat) {
 		inputDateTimeFormat = moment().toMomentFormatString(javaInputDateTimeFormat);
 	}
-	
+
 	var outputDateTimeFormat = ''; //moment format e.g. DD-MMM-YYYY HH:mm:ss
 	var javaOutputDateTimeFormat = '${encode:forJavaScript(options.outputDateTimeFormat)}';
 	if (javaOutputDateTimeFormat) {
@@ -178,6 +178,17 @@
 		},
 		initComplete: afterTableInitialization
 	};
+
+	var reportOptionsString = '${encode:forJavaScript(optionsJson)}';
+	if (reportOptionsString) {
+		var reportOptions = JSON.parse(reportOptionsString);
+		if (reportOptions) {
+			var dtOptions = reportOptions.dtOptions;
+			if (dtOptions) {
+				$.extend(options, dtOptions);
+			}
+		}
+	}
 
 	function afterTableInitialization(settings) {
 		//https://datatables.net/forums/discussion/34352/passing-datatable-object-to-initcomplete-callback
@@ -321,7 +332,7 @@
 
 	var dataString = '${encode:forJavaScript(data)}';
 	var data = JSON.parse(dataString);
-	
+
 	$.extend(options, {
 		data: data,
 		columns: columns
