@@ -17,16 +17,19 @@
 
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
-	
+
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -35,6 +38,12 @@
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneResultsText: '${noResultsMatchText}'
+				});
+
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
@@ -44,12 +53,12 @@
 				$('#activeUnchanged').change(function () {
 					toggleActiveEnabled();
 				});
-				
+
 				toggleActiveEnabled();
 
 			});
 		</script>
-		
+
 		<script type="text/javascript">
 			function toggleActiveEnabled() {
 				if ($('#activeUnchanged').is(':checked')) {
@@ -111,6 +120,24 @@
 								<spring:message code="page.checkbox.unchanged"/>
 							</label>
 						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="user">
+						<spring:message code="jobs.label.owner"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="user" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+								<option data-divider="true"></option>
+							<c:forEach var="user" items="${users}">
+								<c:set var="fullName" value=""/>
+								<form:option value="${user.userId}">
+									${encode:forHtmlContent(user.username)}&nbsp;${user.fullName==null || user.fullName=="" ? "" : "(".concat(encode:forHtmlContent(user.fullName)).concat(")")}
+								</form:option>
+							</c:forEach>
+						</form:select>
+						<form:errors path="user" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

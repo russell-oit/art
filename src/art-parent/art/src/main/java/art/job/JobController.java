@@ -42,6 +42,7 @@ import art.servlets.Config;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
 import art.general.AjaxResponse;
+import art.user.UserService;
 import art.utils.ArtUtils;
 import art.utils.CronStringHelper;
 import art.utils.ExpressionHelper;
@@ -127,6 +128,9 @@ public class JobController {
 
 	@Autowired
 	private SmtpServerService smtpServerService;
+
+	@Autowired
+	private UserService userService;
 
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -413,7 +417,7 @@ public class JobController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditJobs();
+			return showEditJobs(model);
 		}
 
 		try {
@@ -427,7 +431,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditJobs();
+		return showEditJobs(model);
 	}
 
 	/**
@@ -435,8 +439,16 @@ public class JobController {
 	 *
 	 * @return the jsp file to display
 	 */
-	private String showEditJobs() {
+	private String showEditJobs(Model model) {
 		logger.debug("Entering showEditJobs");
+
+		try {
+			model.addAttribute("users", userService.getActiveUsers());
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
 		return "editJobs";
 	}
 
@@ -601,7 +613,7 @@ public class JobController {
 
 		model.addAttribute("multipleJobEdit", multipleJobEdit);
 
-		return "editJobs";
+		return showEditJobs(model);
 	}
 
 	/**

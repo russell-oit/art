@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>3.9</version>
+		<version>3.10</version>
 	</parent>
 
 	<artifactId>art</artifactId>
@@ -27,7 +27,7 @@
 		<owasp.encoder.version>1.2.1</owasp.encoder.version>
 		<thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
 		<xdocreport.version>2.0.1</xdocreport.version>
-		<jclouds.version>2.1.0</jclouds.version>
+		<jclouds.version>2.1.1</jclouds.version>
 		<spring.security.version>4.2.4.RELEASE</spring.security.version>
 		<morphia.version>1.3.2</morphia.version>
 	</properties>
@@ -203,22 +203,22 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-dbcp</artifactId>
-			<version>3.9</version>
+			<version>3.10</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
-			<version>3.9</version>
+			<version>3.10</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>3.9</version>
+			<version>3.10</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
-			<version>3.9</version>
+			<version>3.10</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -233,7 +233,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>3.9</version>
+			<version>3.10</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
@@ -253,7 +253,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>3.9</version>
+			<version>3.10</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -264,7 +264,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jdbc-n1ql-art</artifactId>
-			<version>3.9</version>
+			<version>3.10</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
@@ -517,6 +517,12 @@
 					<artifactId>bson</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>net.snowflake</groupId>
+			<artifactId>snowflake-jdbc</artifactId>
+			<version>3.6.12</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mongodb</groupId>

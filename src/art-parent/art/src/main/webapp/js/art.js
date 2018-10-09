@@ -257,6 +257,20 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.teradata.jdbc.TeraDriver";
 		urlElement.value = "jdbc:teradata://<server_name>/DATABASE=<database_name>";
 		testSqlElement.value = "";
+	} else if (dbType === "snowflake1-us-west") {
+		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
+		urlElement.value = "jdbc:snowflake://<account_name>.snowflakecomputing.com/?warehouse=<warehouse_name>&db=<database_name>&schema=<schema_name>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "snowflake2-other") {
+		//https://docs.snowflake.net/manuals/user-guide/jdbc-configure.html
+		//https://docs.snowflake.net/manuals/user-guide/intro-regions.html
+		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
+		urlElement.value = "jdbc:snowflake://<account_name>.<region_id>.snowflakecomputing.com/?warehouse=<warehouse_name>&db=<database_name>&schema=<schema_name>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "presto") {
+		driverElement.value = "com.facebook.presto.jdbc.PrestoDriver";
+		urlElement.value = "jdbc:presto://<server_name>:<port>/<catalog_name>/<schema_name>";
+		testSqlElement.value = "select 1";
 	}
 }
 
@@ -375,13 +389,14 @@ function datatablesInitComplete() {
  * @param {string} contextPath
  * @param {string} localeCode
  * @param {boolean} addColumnFilters
+ * @param {array} columnDefs - column definitions
  * @returns {jQuery} datatables jquery object
  */
 function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
-		addColumnFilters) {
+		addColumnFilters, columnDefs) {
 
 	if (pageLength === undefined || isNaN(pageLength)) {
-		pageLength = 10;
+		pageLength = 20;
 	}
 
 	if (addColumnFilters === undefined) {
@@ -393,24 +408,34 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 	if (addColumnFilters) {
 		columnFilterRow = createColumnFilters(tbl);
 	}
+	
+	var defaultColumnDefs = [
+		{
+			targets: 0,
+			orderable: false,
+			className: 'select-checkbox'
+		},
+		{
+			targets: "dtHidden", //target name matches class name of th.
+			visible: false
+		}
+	];
+	
+	var finalColumnDefs;
+	if(columnDefs === undefined){
+		finalColumnDefs = defaultColumnDefs;
+	} else {
+		finalColumnDefs = defaultColumnDefs.concat(columnDefs);
+	}
 
 	//use initialization that returns a jquery object. to be able to use plugins
 	/** @type {jQuery} */
 	var oTable = tbl.dataTable({
 		orderClasses: false,
 		pagingType: "full_numbers",
-		lengthMenu: [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
+		lengthMenu: [[10, 20, 50, -1], [10, 20, 50, showAllRowsText]],
 		pageLength: pageLength,
-		columnDefs: [{
-				targets: 0,
-				orderable: false,
-				className: 'select-checkbox'
-			},
-			{
-				targets: "dtHidden", //target name matches class name of th.
-				visible: false
-			}
-		],
+		columnDefs: finalColumnDefs,
 		dom: 'lBfrtip',
 		buttons: [
 			'selectAll',
@@ -664,18 +689,15 @@ function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedTex
  * @param {string} recordDeletedText 
  * @param {string} recordName
  * @param {string} errorOccurredText
- * @param {boolean} deleteRow 
  * @param {string} [cannotDeleteRecordText]
  * @param {string} [linkedRecordsExistText]
  */
-function deleteDoneHandler(response, table, row, recordDeletedText, recordName, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
+function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
+		errorOccurredText, cannotDeleteRecordText, linkedRecordsExistText) {
 
 	var linkedRecords = response.data;
 	if (response.success) {
-		if (deleteRow) {
-			table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-		}
+		table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 		notifyActionSuccessReusable(recordDeletedText, recordName);
 	} else if (linkedRecords !== null && linkedRecords.length > 0) {
 		notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
@@ -695,13 +717,12 @@ function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
  * @param {string} recordDeletedText - message shown after successful deletion
  * @param {string} recordName
  * @param {string} errorOccurredText
- * @param {boolean} deleteRow - whether to delete the table row for the affected record
  * @param {string} [cannotDeleteRecordText]
  * @param {string} [linkedRecordsExistText]
  */
 function sendDeleteRequest(contextPath, deleteUrl, recordId,
 		table, row, recordDeletedText, recordName, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
+		cannotDeleteRecordText, linkedRecordsExistText) {
 
 	var request = $.ajax({
 		type: "POST",
@@ -713,8 +734,8 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
 	//register http success callback
 	request.done(function (response) {
 		deleteDoneHandler(response, table, row, recordDeletedText,
-				recordName, errorOccurredText,
-				deleteRow, cannotDeleteRecordText, linkedRecordsExistText);
+				recordName, errorOccurredText, cannotDeleteRecordText,
+				linkedRecordsExistText);
 	});
 	//register http error callback
 	request.fail(ajaxErrorHandler);
@@ -726,7 +747,6 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
  * @param {jQuery} tbl
  * @param {DataTables.Api} table
  * @param {string} deleteButtonSelector
- * @param {boolean} showConfirmDialog
  * @param {string} deleteRecordText
  * @param {string} okText - confirm dialog ok button text
  * @param {string} cancelText - confirm dialog cancel button text
@@ -734,14 +754,13 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
  * @param {string} deleteUrl
  * @param {string} recordDeletedText
  * @param {string} errorOccurredText
- * @param {boolean} deleteRow
  * @param {string} cannotDeleteRecordText
  * @param {string} linkedRecordsExistText
  */
 function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
-		showConfirmDialog, deleteRecordText, okText, cancelText,
+		deleteRecordText, okText, cancelText,
 		contextPath, deleteUrl, recordDeletedText, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
+		cannotDeleteRecordText, linkedRecordsExistText) {
 
 	//delete record
 	tbl.find('tbody').on('click', deleteButtonSelector, function () {
@@ -751,34 +770,28 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 		var recordName = escapeHtmlContent(row.attr("data-name"));
 		var recordId = row.data("id");
 
-		if (showConfirmDialog) {
-			//display confirm dialog
-			bootbox.confirm({
-				message: deleteRecordText + ": <b>" + recordName + "</b>",
-				buttons: {
-					cancel: {
-						label: cancelText
-					},
-					confirm: {
-						label: okText
-					}
+		//display confirm dialog
+		bootbox.confirm({
+			message: deleteRecordText + ": <b>" + recordName + "</b>",
+			buttons: {
+				cancel: {
+					label: cancelText
 				},
-				callback: function (result) {
-					if (result) {
-						//user confirmed delete. make delete request
-						sendDeleteRequest(contextPath, deleteUrl, recordId,
-								table, row, recordDeletedText, recordName, errorOccurredText,
-								deleteRow, cannotDeleteRecordText, linkedRecordsExistText);
+				confirm: {
+					label: okText
+				}
+			},
+			callback: function (result) {
+				if (result) {
+					//user confirmed delete. make delete request
+					sendDeleteRequest(contextPath, deleteUrl, recordId,
+							table, row, recordDeletedText, recordName, 
+							errorOccurredText, cannotDeleteRecordText,
+							linkedRecordsExistText);
 
-					} //end if result
-				} //end callback
-			}); //end bootbox confirm
-		} else {
-			sendDeleteRequest(contextPath, deleteUrl, recordId,
-					table, row, recordDeletedText, recordName, errorOccurredText,
-					deleteRow, cannotDeleteRecordText, linkedRecordsExistText);
-		}
-
+				} //end if result
+			} //end callback
+		}); //end bootbox confirm
 	}); //end on click
 }
 
@@ -792,34 +805,33 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
  * @param {string} localeCode
  * @param {boolean} addColumnFilters
  * @param {string} deleteButtonSelector
- * @param {boolean} showConfirmDialog
  * @param {string} deleteRecordText
  * @param {string} okText
  * @param {string} cancelText
  * @param {string} deleteUrl
  * @param {string} recordDeletedText
  * @param {string} errorOccurredText
- * @param {boolean} deleteRow
  * @param {string} cannotDeleteRecordText
  * @param {string} linkedRecordsExistText
+ * @param {array} columnDefs - column definitions
  * @returns {jQuery} datatables jquery object
  */
-function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, localeCode, addColumnFilters,
-		deleteButtonSelector,
-		showConfirmDialog, deleteRecordText, okText, cancelText,
+function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, 
+		localeCode, addColumnFilters, deleteButtonSelector,
+		deleteRecordText, okText, cancelText,
 		deleteUrl, recordDeletedText, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
+		cannotDeleteRecordText, linkedRecordsExistText, columnDefs) {
 
 	var oTable = initConfigTable(tbl, pageLength, showAllRowsText, contextPath,
-			localeCode, addColumnFilters);
+			localeCode, addColumnFilters, columnDefs);
 
 	//get datatables api object
 	var table = oTable.api();
 
 	addDeleteRecordHandler(tbl, table, deleteButtonSelector,
-			showConfirmDialog, deleteRecordText, okText, cancelText,
+			deleteRecordText, okText, cancelText,
 			contextPath, deleteUrl, recordDeletedText, errorOccurredText,
-			deleteRow, cannotDeleteRecordText, linkedRecordsExistText);
+			cannotDeleteRecordText, linkedRecordsExistText);
 
 	return oTable;
 }

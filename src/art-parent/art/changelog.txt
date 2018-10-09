@@ -1,3 +1,16 @@
+ART 3.10
+* Provide edit report link from select parameters page
+* Allow changing job owner
+* Check upper case and lower case table names for cache resultset jobs
+* Fix for parent parameters not being considered in drilldown reports
+* Stop setting jasperreports excel export options
+* Added snowflake jdbc driver
+* Include daterange parameter template files in import/export
+* Fix for error when using wildfly
+* Removed report quick edit panel
+* Allow specification of column widths for datatable report format of tabular reports
+* Updated jclouds
+
 ART 3.9
 * Allow jTDS driver to use imageColumns option
 * Enable edit of self service dashboards

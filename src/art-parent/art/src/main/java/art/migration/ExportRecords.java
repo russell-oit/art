@@ -36,7 +36,8 @@ public class ExportRecords implements Serializable {
 	public static final String EMBEDDED_HOLIDAYS_FILENAME = "art-export-Holidays.csv";
 	public static final String EMBEDDED_USERS_FILENAME = "art-export-Users.csv";
 	public static final String EMBEDDED_USERGROUPS_FILENAME = "art-export-UserGroups.csv";
-	public static final String EMBEDDED_REPORTS_FILENAME = "art-export-Reports.csv";
+	public static final String EMBEDDED_CSV_REPORTS_FILENAME = "art-export-Reports.csv";
+	public static final String EMBEDDED_JSON_REPORTS_FILENAME = "art-export-Reports.json";
 	public static final String EMBEDDED_REPORTGROUPS_FILENAME = "art-export-ReportGroups.csv";
 	public static final String EMBEDDED_REPORTPARAMETERS_FILENAME = "art-export-ReportParameters.csv";
 	public static final String EMBEDDED_USERRULEVALUES_FILENAME = "art-export-UserRuleValues.csv";
@@ -48,6 +49,10 @@ public class ExportRecords implements Serializable {
 	public static final String EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME = "art-export-DrilldownReportParameters.csv";
 	public static final String EMBEDDED_ROLES_FILENAME = "art-export-Roles.csv";
 	public static final String EMBEDDED_PERMISSIONS_FILENAME = "art-export-Permissions.csv";
+	public static final String EMBEDDED_CSV_PARAMETERS_FILENAME = "art-export-Parameters.csv";
+	public static final String EMBEDDED_JSON_PARAMETERS_FILENAME = "art-export-Parameters.json";
+	public static final String EMBEDDED_CSV_ENCRYPTORS_FILENAME = "art-export-Encryptors.csv";
+	public static final String EMBEDDED_JSON_ENCRYPTORS_FILENAME = "art-export-Encryptors.json";
 
 	private MigrationRecordType recordType;
 	private String ids;

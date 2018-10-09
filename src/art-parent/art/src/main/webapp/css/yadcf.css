@@ -6,6 +6,22 @@
     width: 50px;
 }
 
-.yadcf-default-filter {
-    width: 100px;
+.yadcf-report-name-filter {
+    width: 140px;
+}
+
+.yadcf-report-description-filter {
+    width: 140px;
+}
+
+.yadcf-job-name-filter {
+    width: 150px;
+}
+
+.yadcf-job-date-filter {
+    width: 120px;
+}
+
+.yadcf-job-result-filter {
+    width: 150px;
 }

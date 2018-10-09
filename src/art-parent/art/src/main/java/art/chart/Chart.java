@@ -111,6 +111,21 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	protected List<Map<String, Object>> resultSetData;
 	protected int resultSetRecordCount;
 	protected boolean includeDataInOutput;
+	private Map<String, String[]> reportRequestParameters;
+
+	/**
+	 * @return the reportRequestParameters
+	 */
+	public Map<String, String[]> getReportRequestParameters() {
+		return reportRequestParameters;
+	}
+
+	/**
+	 * @param reportRequestParameters the reportRequestParameters to set
+	 */
+	public void setReportRequestParameters(Map<String, String[]> reportRequestParameters) {
+		this.reportRequestParameters = reportRequestParameters;
+	}
 
 	/**
 	 * @return the includeDataInOutput
@@ -468,7 +483,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 		drilldownLinks = new HashMap<>();
 		openLinksInNewWindow = drilldown.isOpenInNewWindow();
-		drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList, locale);
+		drilldownLinkHelper = new DrilldownLinkHelper(drilldown, locale, reportRequestParameters);
 	}
 
 	private void prepareHyperLinkDetails(ResultSet rs) throws SQLException {

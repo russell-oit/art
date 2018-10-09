@@ -30,14 +30,13 @@
 		//https://www.concretepage.com/thymeleaf/thymeleaf-javascript-inline-example-with-variable
 		//https://stackoverflow.com/questions/20995687/thymeleaf-configure-mail-subject-in-template
 		var url = /*[[${contextPath} + ${'/js/dataTables/i18n/dataTables_'} + ${language} + ${'.json'}]]*/ "";
-
-		//http://www.datatables.net/reference
-		$('#' + tableId).dataTable({
+		
+		var options = {
 			orderClasses: false,
 			order: [],
 			pagingType: 'full_numbers',
 			lengthMenu: [
-				[10, 25, 50, 100, -1], [10, 25, 50, 100, showAllRowsText]
+				[10, 20, 50, -1], [10, 20, 50, showAllRowsText]
 			], // must have space between first brackets to prevent thymeleaf from processing this 
 			pageLength: 50,
 			dom: 'lBfrtip',
@@ -67,6 +66,20 @@
 					$('div.dataTables_filter input').focus();
 				}
 			}
-		});
+		};
+		
+		var reportOptionsString = /*[[${options}]]*/ "";
+		if (reportOptionsString) {
+			var reportOptions = JSON.parse(reportOptionsString);
+			if (reportOptions) {
+				var dtOptions = reportOptions.dtOptions;
+				if (dtOptions) {
+					$.extend(options, dtOptions);
+				}
+			}
+		}
+
+		//http://www.datatables.net/reference
+		$('#' + tableId).dataTable(options);
 	});
 </script>

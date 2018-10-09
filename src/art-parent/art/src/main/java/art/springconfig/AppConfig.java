@@ -30,6 +30,7 @@ import art.general.StringToDouble;
 import art.permission.StringToPermission;
 import art.role.StringToRole;
 import art.smtpserver.StringToSmtpServer;
+import art.user.StringToUser;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.LocaleUtils;
@@ -111,6 +112,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	
 	@Autowired
 	private StringToPermission stringToPermission;
+	
+	@Autowired
+	private StringToUser stringToUser;
 
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
@@ -263,6 +267,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addConverter(stringToEncryptor);
 		registry.addConverter(stringToRole);
 		registry.addConverter(stringToPermission);
+		registry.addConverter(stringToUser);
 	}
 
 	@Bean

@@ -175,6 +175,7 @@ public class ReportOutputGenerator {
 	private ChartOptions parameterChartOptions;
 	private User user;
 	private Locale reportOutputLocale;
+	private Map<String, String[]> reportRequestParameters;
 
 	/**
 	 * @return the dynamicOpenPassword
@@ -350,6 +351,7 @@ public class ReportOutputGenerator {
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 			reportOptions = paramProcessorResult.getReportOptions();
 			parameterChartOptions = paramProcessorResult.getChartOptions();
+			reportRequestParameters = paramProcessorResult.getReportRequestParameters();
 
 			//for pdf dashboards, more parameters may be passed than are relevant for a report
 			applicableReportParamsList = new ArrayList<>();
@@ -472,6 +474,7 @@ public class ReportOutputGenerator {
 		chart.setYAxisLabel(outputReport.getyAxisLabel());
 		chart.setSwapAxes(swapAxes);
 		chart.setIncludeDataInOutput(includeDataInOutput);
+		chart.setReportRequestParameters(reportRequestParameters);
 
 		String optionsString = outputReport.getOptions();
 		JFreeChartOptions options;
@@ -1705,6 +1708,7 @@ public class ReportOutputGenerator {
 			options = mapper.readValue(optionsString, DataTablesOptions.class);
 		}
 		request.setAttribute("options", options);
+		request.setAttribute("optionsJson", optionsString);
 
 		if (reportType == ReportType.DataTablesCsvServer) {
 			if (StringUtils.isBlank(optionsString)) {
@@ -2620,6 +2624,7 @@ public class ReportOutputGenerator {
 		standardOutput.setReport(report);
 		standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
 		standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
+		standardOutput.setReportRequestParameters(reportRequestParameters);
 
 		if (request != null) {
 			standardOutput.setContextPath(contextPath);

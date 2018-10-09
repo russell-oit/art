@@ -190,7 +190,6 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
-	private String dtName;
 	private String dtActiveStatus;
 	private String dtAction;
 	private String dtRowId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
@@ -209,20 +208,6 @@ public class Report implements Serializable {
 	 */
 	public void setName2(String name2) {
 		this.name2 = name2;
-	}
-
-	/**
-	 * @return the dtName
-	 */
-	public String getDtName() {
-		return dtName;
-	}
-
-	/**
-	 * @param dtName the dtName to set
-	 */
-	public void setDtName(String dtName) {
-		this.dtName = dtName;
 	}
 
 	/**
@@ -1491,7 +1476,8 @@ public class Report implements Serializable {
 	 * Returns the names of the report groups that this report belongs to in a
 	 * comma separated string
 	 *
-	 * @return the names of the report groups that this report belongs to
+	 * @return the names of the report groups that this report belongs to in a
+	 * comma separated string
 	 */
 	public String getReportGroupNames() {
 		reportGroupNames = "";
@@ -1507,7 +1493,7 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Returns report group names html encoded
+	 * Returns report group names, html encoded
 	 * 
 	 * @return report group names, html encoded
 	 */
@@ -1587,30 +1573,11 @@ public class Report implements Serializable {
 
 		basic.setReportId(reportId);
 		basic.setName(name);
+		basic.setName2(name2);
 		basic.setDescription(description);
-		basic.setUseGroovy(useGroovy);
-		basic.setReportSource(reportSource);
-		basic.setReportType(reportType);
-		basic.setReportTypeId(reportTypeId);
-		basic.setDtName(dtName);
 		basic.setDtActiveStatus(dtActiveStatus);
 		basic.setDtAction(dtAction);
-		basic.setCreatedBy(createdBy);
-		basic.setUpdatedBy(updatedBy);
 		basic.setReportGroups(reportGroups);
-		basic.setUseGroovy(useGroovy);
-		basic.setPivotTableJsSavedOptions(pivotTableJsSavedOptions);
-		basic.setGridstackSavedOptions(gridstackSavedOptions);
-		basic.setOptions(options);
-		basic.setReportSource(reportSource);
-		basic.setReportSourceHtml(reportSourceHtml);
-
-		if (datasource != null) {
-			Datasource basicDatasource = new Datasource();
-			basicDatasource.setDatasourceId(datasource.getDatasourceId());
-			basicDatasource.setName(datasource.getName());
-			basic.setDatasource(basicDatasource);
-		}
 
 		return basic;
 	}

@@ -724,6 +724,22 @@ public class JobService {
 
 			dbService.update(sql, valuesArray);
 		}
+		User jobUser = multipleJobEdit.getUser();
+		if (jobUser != null) {
+			sql = "UPDATE ART_JOBS SET USER_ID=?, USERNAME=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE JOB_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(jobUser.getUserId());
+			valuesList.add(jobUser.getUsername());
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(idsList);
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, valuesArray);
+		}
 	}
 
 	/**

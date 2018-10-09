@@ -19,7 +19,6 @@ package art.drilldown;
 
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
-import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -28,8 +27,11 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import org.apache.commons.collections4.MapUtils;
 
 /**
  * Provides methods for generating drilldown links
@@ -42,25 +44,25 @@ public class DrilldownLinkHelper implements Serializable {
 	private final Drilldown drilldown;
 	private final List<Parameter> drilldownParams;
 	private final Set<String> drilldownParamNames;
-	private final List<ReportParameter> reportParamsList;
 	private final Locale locale;
+	private final Map<String, String[]> reportRequestParameters;
 
 	/**
 	 * Constructs a new drilldown link helper
 	 *
 	 * @param drilldown the drilldown to use
-	 * @param reportParamsList the report parameters, may be null
 	 * @param locale the locale to use
+	 * @param reportRequestParameters report parameters in the request url
 	 * @throws SQLException
 	 */
-	public DrilldownLinkHelper(Drilldown drilldown, List<ReportParameter> reportParamsList,
-			 Locale locale) throws SQLException {
-		
+	public DrilldownLinkHelper(Drilldown drilldown, Locale locale,
+			Map<String, String[]> reportRequestParameters) throws SQLException {
+
 		Objects.requireNonNull(drilldown, "drilldown must not be null");
 
 		this.drilldown = drilldown;
-		this.reportParamsList = reportParamsList;
-		this.locale=locale;
+		this.locale = locale;
+		this.reportRequestParameters = reportRequestParameters;
 
 		int drilldownReportId = drilldown.getDrilldownReport().getReportId();
 		ParameterService parameterService = new ParameterService();
@@ -122,14 +124,16 @@ public class DrilldownLinkHelper implements Serializable {
 	 *
 	 * @param sb the drilldown link string builder
 	 */
-	private void addParentParameters(StringBuilder sb) {
-		if (reportParamsList == null) {
+	private void addReportRequestParameters(StringBuilder sb) {
+
+		if (MapUtils.isEmpty(reportRequestParameters)) {
 			return;
 		}
 
-		for (ReportParameter reportParam : reportParamsList) {
-			String paramName = reportParam.getParameter().getName();
-			String[] paramValues = reportParam.getPassedParameterValues();
+		for (Entry<String, String[]> entry : reportRequestParameters.entrySet()) {
+			String htmlParamName = entry.getKey();
+			String paramName = htmlParamName.substring(ArtUtils.PARAM_PREFIX.length());
+			String[] paramValues = entry.getValue();
 
 			//add parameter only if one with a similar name doesn't already
 			//exist in the drill down parameters
@@ -150,6 +154,7 @@ public class DrilldownLinkHelper implements Serializable {
 	 * @return the drilldown link to use
 	 */
 	public String getDrilldownLink(Object... paramValues) {
+
 		StringBuilder sb = new StringBuilder(200);
 
 		//add base url
@@ -167,7 +172,7 @@ public class DrilldownLinkHelper implements Serializable {
 		}
 
 		//add parameters from parent report
-		addParentParameters(sb);
+		addReportRequestParameters(sb);
 
 		String drilldownUrl = sb.toString();
 

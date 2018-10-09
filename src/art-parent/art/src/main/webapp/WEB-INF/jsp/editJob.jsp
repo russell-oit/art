@@ -565,10 +565,10 @@
 				<fieldset>
 					<legend><spring:message code="jobs.text.job"/></legend>
 					<div class="form-group">
-						<label class="col-sm-4 control-label">
+						<label class="col-md-4 control-label">
 							<spring:message code="jobs.label.owner"/>
 						</label>
-						<div class="col-sm-8">
+						<div class="col-md-8">
 							<p class="form-control-static">
 								${encode:forHtmlContent(job.user.username)}
 							</p>
@@ -577,12 +577,12 @@
 					<form:hidden path="user.userId" />
 					<form:hidden path="user.username" />
 					<div class="form-group">
-						<label class="col-sm-4 control-label">
+						<label class="col-md-4 control-label">
 							<spring:message code="page.text.report"/>
 						</label>
-						<div class="col-sm-8">
+						<div class="col-md-8">
 							<p class="form-control-static">
-								<a href="${pageContext.request.contextPath}/editReport?id=${job.report.reportId}">
+								<a href="${pageContext.request.contextPath}/reportConfig?reportId=${job.report.reportId}">
 									${encode:forHtmlContent(job.report.getLocalizedName(pageContext.response.locale))}
 								</a>
 							</p>

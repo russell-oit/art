@@ -22,13 +22,14 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Represents options for standard output report types - primarily tabular reports
- * 
+ * Represents options for standard output report types - primarily tabular
+ * reports
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StandardOutputOptions implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private List<String> imageColumns;
 
@@ -45,4 +46,5 @@ public class StandardOutputOptions implements Serializable {
 	public void setImageColumns(List<String> imageColumns) {
 		this.imageColumns = imageColumns;
 	}
+
 }

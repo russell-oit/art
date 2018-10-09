@@ -11,6 +11,7 @@ Header that appears at the top of all pages, except the login and logs pages
 
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div id="pageHeader">
 
@@ -58,7 +59,7 @@ Header that appears at the top of all pages, except the login and logs pages
 							</a>
 						</li>
 					</c:if>
-					<c:if test="${sessionUser.hasAnyPermission('self_service_dashboards')}">
+					<c:if test="${sessionUser.hasAnyPermissionCommaSeparated('self_service_dashboards')}">
 						<li class="dropdown">
 							<a id="selfService" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
 								<i class="fa fa-cog"></i> 
@@ -323,7 +324,7 @@ Header that appears at the top of all pages, except the login and logs pages
 					</li>
 				</ul>
 				<div class="nav navbar-nav navbar-right navbar-text">
-					<i class="fa fa-user"></i> ${sessionUser.username} 
+					<i class="fa fa-user"></i> ${encode:forHtmlContent(sessionUser.username)} 
 				</div>
 			</div><!--/.nav-collapse -->
 		</div>

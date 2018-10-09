@@ -30,8 +30,10 @@ import art.destination.DestinationService;
 import art.drilldown.Drilldown;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
+import art.enums.EncryptorType;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationRecordType;
+import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
@@ -407,15 +409,50 @@ public class ImportRecordsController {
 		logger.debug("Entering importEncryptors: sessionUser={}", sessionUser);
 
 		List<Encryptor> encryptors;
+		String extension = FilenameUtils.getExtension(file.getName());
+		String artTempPath = Config.getArtTempPath();
+
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
-				encryptors = mapper.readValue(file, new TypeReference<List<Encryptor>>() {
-				});
+				if (StringUtils.equalsIgnoreCase(extension, "json")) {
+					ObjectMapper mapper = new ObjectMapper();
+					encryptors = mapper.readValue(file, new TypeReference<List<Encryptor>>() {
+					});
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String encryptorsFilePath = artTempPath + ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME;
+					File encryptorsFile = new File(encryptorsFilePath);
+					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME, encryptorsFile);
+					if (unpacked) {
+						ObjectMapper mapper = new ObjectMapper();
+						encryptors = mapper.readValue(encryptorsFile, new TypeReference<List<Encryptor>>() {
+						});
+						encryptorsFile.delete();
+						copyEncryptorFiles(encryptors, artTempPath, file);
+					} else {
+						throw new IllegalStateException("File not found: " + encryptorsFilePath);
+					}
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
 				break;
 			case csv:
-				encryptors = csvRoutines.parseAll(Encryptor.class, file);
+				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+					encryptors = csvRoutines.parseAll(Encryptor.class, file);
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String encryptorsFilePath = artTempPath + ExportRecords.EMBEDDED_CSV_ENCRYPTORS_FILENAME;
+					File encryptorsFile = new File(encryptorsFilePath);
+					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_CSV_ENCRYPTORS_FILENAME, encryptorsFile);
+					if (unpacked) {
+						encryptors = csvRoutines.parseAll(Encryptor.class, encryptorsFile);
+						encryptorsFile.delete();
+						copyEncryptorFiles(encryptors, artTempPath, file);
+					} else {
+						throw new IllegalStateException("File not found: " + encryptorsFilePath);
+					}
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -564,24 +601,28 @@ public class ImportRecordsController {
 					userGroups = csvRoutines.parseAll(UserGroup.class, file);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
-					ZipUtil.unpack(file, new File(artTempPath));
-					String userGroupsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
-					File userGroupsFile = new File(userGroupsFileName);
-					if (userGroupsFile.exists()) {
+					boolean unpacked;
+					String userGroupsFilePath = artTempPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
+					File userGroupsFile = new File(userGroupsFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERGROUPS_FILENAME, userGroupsFile);
+					if (unpacked) {
 						userGroups = csvRoutines.parseAll(UserGroup.class, userGroupsFile);
+						userGroupsFile.delete();
 					} else {
-						throw new IllegalStateException("File not found: " + userGroupsFileName);
+						throw new IllegalStateException("File not found: " + userGroupsFilePath);
 					}
 
 					Map<Integer, UserGroup> userGroupsMap = new HashMap<>();
 					for (UserGroup userGroup : userGroups) {
 						userGroupsMap.put(userGroup.getUserGroupId(), userGroup);
 					}
-					
-					String rolesFileName = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
-					File rolesFile = new File(rolesFileName);
-					if (rolesFile.exists()) {
+
+					String rolesFilePath = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
+					File rolesFile = new File(rolesFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_ROLES_FILENAME, rolesFile);
+					if (unpacked) {
 						List<Role> allRoles = csvRoutines.parseAll(Role.class, rolesFile);
+						rolesFile.delete();
 						for (Role role : allRoles) {
 							int parentId = role.getParentId();
 							UserGroup userGroup = userGroupsMap.get(parentId);
@@ -598,10 +639,12 @@ public class ImportRecordsController {
 						}
 					}
 
-					String permissionsFileName = artTempPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
-					File permissionsFile = new File(permissionsFileName);
-					if (permissionsFile.exists()) {
+					String permissionsFilePath = artTempPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
+					File permissionsFile = new File(permissionsFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_PERMISSIONS_FILENAME, permissionsFile);
+					if (unpacked) {
 						List<Permission> allPermissions = csvRoutines.parseAll(Permission.class, permissionsFile);
+						permissionsFile.delete();
 						for (Permission permission : allPermissions) {
 							int parentId = permission.getParentId();
 							UserGroup userGroup = userGroupsMap.get(parentId);
@@ -617,10 +660,6 @@ public class ImportRecordsController {
 							}
 						}
 					}
-
-					userGroupsFile.delete();
-					rolesFile.delete();
-					permissionsFile.delete();
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}
@@ -661,19 +700,23 @@ public class ImportRecordsController {
 					schedules = csvRoutines.parseAll(Schedule.class, file);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
-					ZipUtil.unpack(file, new File(artTempPath));
-					String schedulesFileName = artTempPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
-					File schedulesFile = new File(schedulesFileName);
-					if (schedulesFile.exists()) {
+					boolean unpacked;
+					String schedulesFilePath = artTempPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
+					File schedulesFile = new File(schedulesFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_SCHEDULES_FILENAME, schedulesFile);
+					if (unpacked) {
 						schedules = csvRoutines.parseAll(Schedule.class, schedulesFile);
+						schedulesFile.delete();
 					} else {
-						throw new IllegalStateException("File not found: " + schedulesFileName);
+						throw new IllegalStateException("File not found: " + schedulesFilePath);
 					}
 
-					String holidaysFileName = artTempPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
-					File holidaysFile = new File(holidaysFileName);
-					if (holidaysFile.exists()) {
+					String holidaysFilePath = artTempPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
+					File holidaysFile = new File(holidaysFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_HOLIDAYS_FILENAME, holidaysFile);
+					if (unpacked) {
 						List<Holiday> holidays = csvRoutines.parseAll(Holiday.class, holidaysFile);
+						holidaysFile.delete();
 						Map<Integer, Schedule> schedulesMap = new HashMap<>();
 						for (Schedule schedule : schedules) {
 							schedulesMap.put(schedule.getScheduleId(), schedule);
@@ -693,8 +736,6 @@ public class ImportRecordsController {
 							}
 						}
 					}
-					schedulesFile.delete();
-					holidaysFile.delete();
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}
@@ -735,13 +776,15 @@ public class ImportRecordsController {
 					users = csvRoutines.parseAll(User.class, file);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
-					ZipUtil.unpack(file, new File(artTempPath));
-					String usersFileName = artTempPath + ExportRecords.EMBEDDED_USERS_FILENAME;
-					File usersFile = new File(usersFileName);
-					if (usersFile.exists()) {
+					boolean unpacked;
+					String usersFilePath = artTempPath + ExportRecords.EMBEDDED_USERS_FILENAME;
+					File usersFile = new File(usersFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERS_FILENAME, usersFile);
+					if (unpacked) {
 						users = csvRoutines.parseAll(User.class, usersFile);
+						usersFile.delete();
 					} else {
-						throw new IllegalStateException("File not found: " + usersFileName);
+						throw new IllegalStateException("File not found: " + usersFilePath);
 					}
 
 					Map<Integer, User> usersMap = new HashMap<>();
@@ -749,10 +792,12 @@ public class ImportRecordsController {
 						usersMap.put(user.getUserId(), user);
 					}
 
-					String userGroupsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
-					File userGroupsFile = new File(userGroupsFileName);
-					if (userGroupsFile.exists()) {
+					String userGroupsFilePath = artTempPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
+					File userGroupsFile = new File(userGroupsFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERGROUPS_FILENAME, userGroupsFile);
+					if (unpacked) {
 						List<UserGroup> allUserGroups = csvRoutines.parseAll(UserGroup.class, userGroupsFile);
+						userGroupsFile.delete();
 						for (UserGroup userGroup : allUserGroups) {
 							int parentId = userGroup.getParentId();
 							User user = usersMap.get(parentId);
@@ -768,11 +813,13 @@ public class ImportRecordsController {
 							}
 						}
 					}
-					
-					String rolesFileName = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
-					File rolesFile = new File(rolesFileName);
-					if (rolesFile.exists()) {
+
+					String rolesFilePath = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
+					File rolesFile = new File(rolesFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_ROLES_FILENAME, rolesFile);
+					if (unpacked) {
 						List<Role> allRoles = csvRoutines.parseAll(Role.class, rolesFile);
+						rolesFile.delete();
 						for (Role role : allRoles) {
 							int parentId = role.getParentId();
 							User user = usersMap.get(parentId);
@@ -791,8 +838,10 @@ public class ImportRecordsController {
 
 					String permissionsFileName = artTempPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 					File permissionsFile = new File(permissionsFileName);
-					if (permissionsFile.exists()) {
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_PERMISSIONS_FILENAME, permissionsFile);
+					if (unpacked) {
 						List<Permission> allPermissions = csvRoutines.parseAll(Permission.class, permissionsFile);
+						permissionsFile.delete();
 						for (Permission permission : allPermissions) {
 							int parentId = permission.getParentId();
 							User user = usersMap.get(parentId);
@@ -808,11 +857,6 @@ public class ImportRecordsController {
 							}
 						}
 					}
-
-					usersFile.delete();
-					userGroupsFile.delete();
-					rolesFile.delete();
-					permissionsFile.delete();
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}
@@ -879,15 +923,50 @@ public class ImportRecordsController {
 		logger.debug("Entering importParameters: sessionUser={}", sessionUser);
 
 		List<Parameter> parameters;
+		String extension = FilenameUtils.getExtension(file.getName());
+		String artTempPath = Config.getArtTempPath();
+
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
-				parameters = mapper.readValue(file, new TypeReference<List<Parameter>>() {
-				});
+				if (StringUtils.equalsIgnoreCase(extension, "json")) {
+					ObjectMapper mapper = new ObjectMapper();
+					parameters = mapper.readValue(file, new TypeReference<List<Parameter>>() {
+					});
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String parametersFilePath = artTempPath + ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME;
+					File parametersFile = new File(parametersFilePath);
+					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME, parametersFile);
+					if (unpacked) {
+						ObjectMapper mapper = new ObjectMapper();
+						parameters = mapper.readValue(parametersFile, new TypeReference<List<Parameter>>() {
+						});
+						parametersFile.delete();
+						copyParameterTemplateFiles(parameters, artTempPath, file);
+					} else {
+						throw new IllegalStateException("File not found: " + parametersFilePath);
+					}
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
 				break;
 			case csv:
-				parameters = csvRoutines.parseAll(Parameter.class, file);
+				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
+					parameters = csvRoutines.parseAll(Parameter.class, file);
+				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
+					String parametersFilePath = artTempPath + ExportRecords.EMBEDDED_CSV_PARAMETERS_FILENAME;
+					File parametersFile = new File(parametersFilePath);
+					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_CSV_PARAMETERS_FILENAME, parametersFile);
+					if (unpacked) {
+						parameters = csvRoutines.parseAll(Parameter.class, parametersFile);
+						parametersFile.delete();
+						copyParameterTemplateFiles(parameters, artTempPath, file);
+					} else {
+						throw new IllegalStateException("File not found: " + parametersFilePath);
+					}
+				} else {
+					throw new IllegalArgumentException("Unexpected file extension: " + extension);
+				}
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -935,19 +1014,18 @@ public class ImportRecordsController {
 					reports = mapper.readValue(file, new TypeReference<List<Report>>() {
 					});
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
-					ZipUtil.unpack(file, new File(artTempPath));
-					String reportsFileName = artTempPath + "art-export-Reports.json";
-					File reportsFile = new File(reportsFileName);
-					if (reportsFile.exists()) {
+					String reportsFilePath = artTempPath + ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME;
+					File reportsFile = new File(reportsFilePath);
+					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME, reportsFile);
+					if (unpacked) {
 						ObjectMapper mapper = new ObjectMapper();
 						reports = mapper.readValue(reportsFile, new TypeReference<List<Report>>() {
 						});
+						reportsFile.delete();
+						copyReportTemplateFiles(reports, artTempPath, file);
 					} else {
-						throw new IllegalStateException("File not found: " + reportsFileName);
+						throw new IllegalStateException("File not found: " + reportsFilePath);
 					}
-
-					copyTemplateFiles(reports, artTempPath);
-					reportsFile.delete();
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}
@@ -956,13 +1034,16 @@ public class ImportRecordsController {
 				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
 					reports = csvRoutines.parseAll(Report.class, file);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
-					ZipUtil.unpack(file, new File(artTempPath));
-					String reportsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTS_FILENAME;
-					File reportsFile = new File(reportsFileName);
-					if (reportsFile.exists()) {
+					boolean unpacked;
+					String reportsFilePath = artTempPath + ExportRecords.EMBEDDED_CSV_REPORTS_FILENAME;
+					File reportsFile = new File(reportsFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_CSV_REPORTS_FILENAME, reportsFile);
+					if (unpacked) {
 						reports = csvRoutines.parseAll(Report.class, reportsFile);
+						reportsFile.delete();
+						copyReportTemplateFiles(reports, artTempPath, file);
 					} else {
-						throw new IllegalStateException("File not found: " + reportsFileName);
+						throw new IllegalStateException("File not found: " + reportsFilePath);
 					}
 
 					Map<Integer, Report> reportsMap = new HashMap<>();
@@ -970,10 +1051,12 @@ public class ImportRecordsController {
 						reportsMap.put(report.getReportId(), report);
 					}
 
-					String reportGroupsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
-					File reportGroupsFile = new File(reportGroupsFileName);
-					if (reportGroupsFile.exists()) {
+					String reportGroupsFilePath = artTempPath + ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME;
+					File reportGroupsFile = new File(reportGroupsFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME, reportGroupsFile);
+					if (unpacked) {
 						List<ReportGroup> allReportGroups = csvRoutines.parseAll(ReportGroup.class, reportGroupsFile);
+						reportGroupsFile.delete();
 						for (ReportGroup reportGroup : allReportGroups) {
 							int parentId = reportGroup.getParentId();
 							Report report = reportsMap.get(parentId);
@@ -990,10 +1073,12 @@ public class ImportRecordsController {
 						}
 					}
 
-					String reportParamsFileName = artTempPath + ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME;
-					File reportParamsFile = new File(reportParamsFileName);
-					if (reportParamsFile.exists()) {
+					String reportParamsFilePath = artTempPath + ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME;
+					File reportParamsFile = new File(reportParamsFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME, reportParamsFile);
+					if (unpacked) {
 						List<ReportParameter> allReportParams = csvRoutines.parseAll(ReportParameter.class, reportParamsFile);
+						reportParamsFile.delete();
 						for (ReportParameter reportParam : allReportParams) {
 							int parentId = reportParam.getParentId();
 							Report report = reportsMap.get(parentId);
@@ -1010,10 +1095,12 @@ public class ImportRecordsController {
 						}
 					}
 
-					String userRuleValuesFileName = artTempPath + ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME;
-					File userRuleValuesFile = new File(userRuleValuesFileName);
-					if (userRuleValuesFile.exists()) {
+					String userRuleValuesFilePath = artTempPath + ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME;
+					File userRuleValuesFile = new File(userRuleValuesFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME, userRuleValuesFile);
+					if (unpacked) {
 						List<UserRuleValue> allUserRuleValues = csvRoutines.parseAll(UserRuleValue.class, userRuleValuesFile);
+						userRuleValuesFile.delete();
 						for (UserRuleValue userRuleValue : allUserRuleValues) {
 							int parentId = userRuleValue.getParentId();
 							Report report = reportsMap.get(parentId);
@@ -1030,10 +1117,12 @@ public class ImportRecordsController {
 						}
 					}
 
-					String userGroupRuleValuesFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME;
-					File userGroupRuleValuesFile = new File(userGroupRuleValuesFileName);
-					if (userGroupRuleValuesFile.exists()) {
+					String userGroupRuleValuesFilePath = artTempPath + ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME;
+					File userGroupRuleValuesFile = new File(userGroupRuleValuesFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME, userGroupRuleValuesFile);
+					if (unpacked) {
 						List<UserGroupRuleValue> allUserGroupRuleValues = csvRoutines.parseAll(UserGroupRuleValue.class, userGroupRuleValuesFile);
+						userGroupRuleValuesFile.delete();
 						for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
 							int parentId = userGroupRuleValue.getParentId();
 							Report report = reportsMap.get(parentId);
@@ -1050,10 +1139,12 @@ public class ImportRecordsController {
 						}
 					}
 
-					String reportRulesFileName = artTempPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
-					File reportRulesFile = new File(reportRulesFileName);
-					if (reportRulesFile.exists()) {
+					String reportRulesFilePath = artTempPath + ExportRecords.EMBEDDED_REPORTRULES_FILENAME;
+					File reportRulesFile = new File(reportRulesFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_REPORTRULES_FILENAME, reportRulesFile);
+					if (unpacked) {
 						List<ReportRule> allReportRules = csvRoutines.parseAll(ReportRule.class, reportRulesFile);
+						reportRulesFile.delete();
 						for (ReportRule reportRule : allReportRules) {
 							int parentId = reportRule.getParentId();
 							Report report = reportsMap.get(parentId);
@@ -1070,10 +1161,12 @@ public class ImportRecordsController {
 						}
 					}
 
-					String userReportRightsFileName = artTempPath + ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME;
-					File userReportRightsFile = new File(userReportRightsFileName);
-					if (userReportRightsFile.exists()) {
+					String userReportRightsFilePath = artTempPath + ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME;
+					File userReportRightsFile = new File(userReportRightsFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME, userReportRightsFile);
+					if (unpacked) {
 						List<UserReportRight> allUserReportRights = csvRoutines.parseAll(UserReportRight.class, userReportRightsFile);
+						userReportRightsFile.delete();
 						for (UserReportRight userReportRight : allUserReportRights) {
 							int parentId = userReportRight.getParentId();
 							Report report = reportsMap.get(parentId);
@@ -1090,10 +1183,12 @@ public class ImportRecordsController {
 						}
 					}
 
-					String userGroupReportRightsFileName = artTempPath + ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME;
-					File userGroupReportRightsFile = new File(userGroupReportRightsFileName);
-					if (userGroupReportRightsFile.exists()) {
+					String userGroupReportRightsFilePath = artTempPath + ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME;
+					File userGroupReportRightsFile = new File(userGroupReportRightsFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME, userGroupReportRightsFile);
+					if (unpacked) {
 						List<UserGroupReportRight> allUserGroupReportRights = csvRoutines.parseAll(UserGroupReportRight.class, userGroupReportRightsFile);
+						userGroupReportRightsFile.delete();
 						for (UserGroupReportRight userGroupReportRight : allUserGroupReportRights) {
 							int parentId = userGroupReportRight.getParentId();
 							Report report = reportsMap.get(parentId);
@@ -1110,12 +1205,17 @@ public class ImportRecordsController {
 						}
 					}
 
-					String drilldownsFileName = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME;
-					File drilldownsFile = new File(drilldownsFileName);
-					String drilldownReportParamsFileName = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME;
-					File drilldownReportParamsFile = new File(drilldownReportParamsFileName);
+					String drilldownsFilePath = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME;
+					File drilldownsFile = new File(drilldownsFilePath);
+					ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME, drilldownsFile);
+
+					String drilldownReportParamsFilePath = artTempPath + ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME;
+					File drilldownReportParamsFile = new File(drilldownReportParamsFilePath);
+					ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME, drilldownReportParamsFile);
+
 					if (drilldownsFile.exists()) {
 						List<Drilldown> allDrilldowns = csvRoutines.parseAll(Drilldown.class, drilldownsFile);
+						drilldownsFile.delete();
 						for (Drilldown drilldown : allDrilldowns) {
 							int parentId = drilldown.getParentId();
 							Report report = reportsMap.get(parentId);
@@ -1139,6 +1239,7 @@ public class ImportRecordsController {
 							}
 
 							List<ReportParameter> allDrilldownReportParams = csvRoutines.parseAll(ReportParameter.class, drilldownReportParamsFile);
+							drilldownReportParamsFile.delete();
 							for (ReportParameter drilldownReportParam : allDrilldownReportParams) {
 								int parentId = drilldownReportParam.getParentId();
 								Report drilldownReport = drilldownReportsMap.get(parentId);
@@ -1155,19 +1256,6 @@ public class ImportRecordsController {
 							}
 						}
 					}
-
-					copyTemplateFiles(reports, artTempPath);
-
-					reportsFile.delete();
-					reportGroupsFile.delete();
-					reportParamsFile.delete();
-					userRuleValuesFile.delete();
-					userGroupRuleValuesFile.delete();
-					reportRulesFile.delete();
-					userReportRightsFile.delete();
-					userGroupReportRightsFile.delete();
-					drilldownsFile.delete();
-					drilldownReportParamsFile.delete();
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}
@@ -1197,11 +1285,14 @@ public class ImportRecordsController {
 	 * Copies template files included in reports export zip file to the
 	 * appropriate template locations
 	 *
-	 * @param reports the list of reports being imported
-	 * @param artTempPath the path where the files will be obtained from
+	 * @param reports the reports being imported
+	 * @param sourcePath the path where the files will be obtained from
+	 * @param zipFile the zip file that contains template files to be unzipped
 	 * @throws IOException
 	 */
-	private void copyTemplateFiles(List<Report> reports, String artTempPath) throws IOException {
+	private void copyReportTemplateFiles(List<Report> reports, String sourcePath,
+			File zipFile) throws IOException {
+
 		for (Report report : reports) {
 			ReportType reportType = report.getReportType();
 			if (reportType == null) {
@@ -1209,9 +1300,10 @@ public class ImportRecordsController {
 			} else {
 				String template = report.getTemplate();
 				if (StringUtils.isNotBlank(template)) {
-					String templateFilePath = artTempPath + template;
+					String templateFilePath = sourcePath + template;
 					File templateFile = new File(templateFilePath);
-					if (templateFile.exists()) {
+					boolean unpacked = ZipUtil.unpackEntry(zipFile, template, templateFile);
+					if (unpacked) {
 						String templatesPath;
 						if (reportType.isUseJsTemplatesPath()) {
 							templatesPath = Config.getJsTemplatesPath();
@@ -1235,9 +1327,10 @@ public class ImportRecordsController {
 							JxlsOptions jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
 							String areaConfigFilename = jxlsOptions.getAreaConfigFile();
 							if (StringUtils.isNotBlank(areaConfigFilename)) {
-								String fullAreaConfigFilename = artTempPath + areaConfigFilename;
-								File areaConfigFile = new File(fullAreaConfigFilename);
-								if (areaConfigFile.exists()) {
+								String areaConfigFilePath = sourcePath + areaConfigFilename;
+								File areaConfigFile = new File(areaConfigFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, areaConfigFilename, areaConfigFile);
+								if (unpacked) {
 									String templatesPath = Config.getTemplatesPath();
 									String destinationFilePath = templatesPath + areaConfigFilename;
 									File destinationFile = new File(destinationFilePath);
@@ -1252,9 +1345,10 @@ public class ImportRecordsController {
 							CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
 							String dataFileName = csvServerOptions.getDataFile();
 							if (StringUtils.isNotBlank(dataFileName)) {
-								String fullDataFileName = artTempPath + dataFileName;
-								File dataFile = new File(fullDataFileName);
-								if (dataFile.exists()) {
+								String dataFilePath = sourcePath + dataFileName;
+								File dataFile = new File(dataFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, dataFileName, dataFile);
+								if (unpacked) {
 									String jsTemplatesPath = Config.getJsTemplatesPath();
 									String destinationFilePath = jsTemplatesPath + dataFileName;
 									File destinationFile = new File(destinationFilePath);
@@ -1267,9 +1361,10 @@ public class ImportRecordsController {
 							C3Options c3Options = ArtUtils.jsonToObject(options, C3Options.class);
 							String cssFileName = c3Options.getCssFile();
 							if (StringUtils.isNotBlank(cssFileName)) {
-								String fullCssFileName = artTempPath + cssFileName;
-								File cssFile = new File(fullCssFileName);
-								if (cssFile.exists()) {
+								String cssFilePath = sourcePath + cssFileName;
+								File cssFile = new File(cssFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, cssFileName, cssFile);
+								if (unpacked) {
 									String jsTemplatesPath = Config.getJsTemplatesPath();
 									String destinationFilePath = jsTemplatesPath + cssFileName;
 									File destinationFile = new File(destinationFilePath);
@@ -1285,9 +1380,10 @@ public class ImportRecordsController {
 
 							String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
 							if (StringUtils.isNotBlank(datamapsJsFileName)) {
-								String fullDatamapsJsFileName = artTempPath + datamapsJsFileName;
-								File datamapsJsFile = new File(fullDatamapsJsFileName);
-								if (datamapsJsFile.exists()) {
+								String datamapsJsFilePath = sourcePath + datamapsJsFileName;
+								File datamapsJsFile = new File(datamapsJsFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, datamapsJsFileName, datamapsJsFile);
+								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + datamapsJsFileName;
 									File destinationFile = new File(destinationFilePath);
 									FileUtils.copyFile(datamapsJsFile, destinationFile);
@@ -1297,9 +1393,10 @@ public class ImportRecordsController {
 
 							dataFileName = datamapsOptions.getDataFile();
 							if (StringUtils.isNotBlank(dataFileName)) {
-								String fullDataFileName = artTempPath + dataFileName;
-								File dataFile = new File(fullDataFileName);
-								if (dataFile.exists()) {
+								String dataFilePath = sourcePath + dataFileName;
+								File dataFile = new File(dataFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, dataFileName, dataFile);
+								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + dataFileName;
 									File destinationFile = new File(destinationFilePath);
 									FileUtils.copyFile(dataFile, destinationFile);
@@ -1309,9 +1406,10 @@ public class ImportRecordsController {
 
 							String mapFileName = datamapsOptions.getMapFile();
 							if (StringUtils.isNotBlank(mapFileName)) {
-								String fullMapFileName = artTempPath + mapFileName;
-								File mapFile = new File(fullMapFileName);
-								if (mapFile.exists()) {
+								String mapFilePath = sourcePath + mapFileName;
+								File mapFile = new File(mapFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, mapFileName, mapFile);
+								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + mapFileName;
 									File destinationFile = new File(destinationFilePath);
 									FileUtils.copyFile(mapFile, destinationFile);
@@ -1321,9 +1419,10 @@ public class ImportRecordsController {
 
 							cssFileName = datamapsOptions.getCssFile();
 							if (StringUtils.isNotBlank(cssFileName)) {
-								String fullCssFileName = artTempPath + cssFileName;
-								File cssFile = new File(fullCssFileName);
-								if (cssFile.exists()) {
+								String cssFilePath = sourcePath + cssFileName;
+								File cssFile = new File(cssFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, cssFileName, cssFile);
+								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + cssFileName;
 									File destinationFile = new File(destinationFilePath);
 									FileUtils.copyFile(cssFile, destinationFile);
@@ -1338,9 +1437,10 @@ public class ImportRecordsController {
 
 							cssFileName = webMapOptions.getCssFile();
 							if (StringUtils.isNotBlank(cssFileName)) {
-								String fullCssFileName = artTempPath + cssFileName;
-								File cssFile = new File(fullCssFileName);
-								if (cssFile.exists()) {
+								String cssFilePath = sourcePath + cssFileName;
+								File cssFile = new File(cssFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, cssFileName, cssFile);
+								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + cssFileName;
 									File destinationFile = new File(destinationFilePath);
 									FileUtils.copyFile(cssFile, destinationFile);
@@ -1350,9 +1450,10 @@ public class ImportRecordsController {
 
 							dataFileName = webMapOptions.getDataFile();
 							if (StringUtils.isNotBlank(dataFileName)) {
-								String fullDataFileName = artTempPath + dataFileName;
-								File dataFile = new File(fullDataFileName);
-								if (dataFile.exists()) {
+								String dataFilePath = sourcePath + dataFileName;
+								File dataFile = new File(dataFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, dataFileName, dataFile);
+								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + dataFileName;
 									File destinationFile = new File(destinationFilePath);
 									FileUtils.copyFile(dataFile, destinationFile);
@@ -1364,9 +1465,10 @@ public class ImportRecordsController {
 							if (CollectionUtils.isNotEmpty(jsFileNames)) {
 								for (String jsFileName : jsFileNames) {
 									if (StringUtils.isNotBlank(jsFileName)) {
-										String fullJsFileName = artTempPath + jsFileName;
-										File jsFile = new File(fullJsFileName);
-										if (jsFile.exists()) {
+										String jsFilePath = sourcePath + jsFileName;
+										File jsFile = new File(jsFilePath);
+										boolean unpacked = ZipUtil.unpackEntry(zipFile, jsFileName, jsFile);
+										if (unpacked) {
 											String destinationFilePath = jsTemplatesPath + jsFileName;
 											File destinationFile = new File(destinationFilePath);
 											FileUtils.copyFile(jsFile, destinationFile);
@@ -1380,9 +1482,10 @@ public class ImportRecordsController {
 							if (CollectionUtils.isNotEmpty(cssFileNames)) {
 								for (String listCssFileName : cssFileNames) {
 									if (StringUtils.isNotBlank(listCssFileName)) {
-										String fullListCssFileName = artTempPath + listCssFileName;
-										File listCssFile = new File(fullListCssFileName);
-										if (listCssFile.exists()) {
+										String listCssFilePath = sourcePath + listCssFileName;
+										File listCssFile = new File(listCssFilePath);
+										boolean unpacked = ZipUtil.unpackEntry(zipFile, listCssFileName, listCssFile);
+										if (unpacked) {
 											String destinationFilePath = jsTemplatesPath + listCssFileName;
 											File destinationFile = new File(destinationFilePath);
 											FileUtils.copyFile(listCssFile, destinationFile);
@@ -1401,9 +1504,10 @@ public class ImportRecordsController {
 
 							cssFileName = orgChartOptions.getCssFile();
 							if (StringUtils.isNotBlank(cssFileName)) {
-								String fullCssFileName = artTempPath + cssFileName;
-								File cssFile = new File(fullCssFileName);
-								if (cssFile.exists()) {
+								String cssFilePath = sourcePath + cssFileName;
+								File cssFile = new File(cssFilePath);
+								boolean unpacked = ZipUtil.unpackEntry(zipFile, cssFileName, cssFile);
+								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + cssFileName;
 									File destinationFile = new File(destinationFilePath);
 									FileUtils.copyFile(cssFile, destinationFile);
@@ -1414,6 +1518,86 @@ public class ImportRecordsController {
 						default:
 							break;
 					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Copies template files included in parameters export zip file to the
+	 * appropriate template locations
+	 *
+	 * @param parameters the parameters being imported
+	 * @param sourcePath the path where the files will be obtained from
+	 * @param zipFile the zip file that contains template files to be unzipped
+	 * @throws IOException
+	 */
+	private void copyParameterTemplateFiles(List<Parameter> parameters, String sourcePath,
+			File zipFile) throws IOException {
+
+		for (Parameter parameter : parameters) {
+			ParameterDataType dataType = parameter.getDataType();
+			if (dataType == null) {
+				logger.warn("dataType is null. Parameter={}", parameter);
+			} else {
+				switch (dataType) {
+					case DateRange:
+						String template = parameter.getTemplate();
+						if (StringUtils.isNotBlank(template)) {
+							String templateFilePath = sourcePath + template;
+							File templateFile = new File(templateFilePath);
+							boolean unpacked = ZipUtil.unpackEntry(zipFile, template, templateFile);
+							if (unpacked) {
+								String jsTemplatesPath = Config.getJsTemplatesPath();
+								String destinationFilePath = jsTemplatesPath + template;
+								File destinationFile = new File(destinationFilePath);
+								FileUtils.copyFile(templateFile, destinationFile);
+								templateFile.delete();
+							}
+						}
+						break;
+					default:
+						break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Copies files included in encryptors export zip file to the appropriate
+	 * locations
+	 *
+	 * @param encryptors the encryptors being imported
+	 * @param sourcePath the path where the files will be obtained from
+	 * @param zipFile the zip file that contains files to be unzipped
+	 * @throws IOException
+	 */
+	private void copyEncryptorFiles(List<Encryptor> encryptors, String sourcePath,
+			File zipFile) throws IOException {
+
+		for (Encryptor encryptor : encryptors) {
+			EncryptorType encryptorType = encryptor.getEncryptorType();
+			if (encryptorType == null) {
+				logger.warn("encryptorType is null. Encryptor={}", encryptor);
+			} else {
+				switch (encryptorType) {
+					case OpenPGP:
+						String publicKeyFileName = encryptor.getOpenPgpPublicKeyFile();
+						if (StringUtils.isNotBlank(publicKeyFileName)) {
+							String publicKeyFilePath = sourcePath + publicKeyFileName;
+							File publicKeyFile = new File(publicKeyFilePath);
+							boolean unpacked = ZipUtil.unpackEntry(zipFile, publicKeyFileName, publicKeyFile);
+							if (unpacked) {
+								String templatesPath = Config.getTemplatesPath();
+								String destinationFilePath = templatesPath + publicKeyFileName;
+								File destinationFile = new File(destinationFilePath);
+								FileUtils.copyFile(publicKeyFile, destinationFile);
+								publicKeyFile.delete();
+							}
+						}
+						break;
+					default:
+						break;
 				}
 			}
 		}
@@ -1448,19 +1632,23 @@ public class ImportRecordsController {
 					roles = csvRoutines.parseAll(Role.class, file);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
-					ZipUtil.unpack(file, new File(artTempPath));
-					String rolesFileName = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
-					File rolesFile = new File(rolesFileName);
-					if (rolesFile.exists()) {
+					boolean unpacked;
+					String rolesFilePath = artTempPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
+					File rolesFile = new File(rolesFilePath);
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_ROLES_FILENAME, rolesFile);
+					if (unpacked) {
 						roles = csvRoutines.parseAll(Role.class, rolesFile);
+						rolesFile.delete();
 					} else {
-						throw new IllegalStateException("File not found: " + rolesFileName);
+						throw new IllegalStateException("File not found: " + rolesFilePath);
 					}
 
 					String permissionsFileName = artTempPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 					File permissionsFile = new File(permissionsFileName);
-					if (permissionsFile.exists()) {
+					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_PERMISSIONS_FILENAME, permissionsFile);
+					if (unpacked) {
 						List<Permission> permissions = csvRoutines.parseAll(Permission.class, permissionsFile);
+						permissionsFile.delete();
 						Map<Integer, Role> rolesMap = new HashMap<>();
 						for (Role role : roles) {
 							rolesMap.put(role.getRoleId(), role);
@@ -1480,8 +1668,6 @@ public class ImportRecordsController {
 							}
 						}
 					}
-					rolesFile.delete();
-					permissionsFile.delete();
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
 				}

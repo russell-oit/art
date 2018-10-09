@@ -301,8 +301,7 @@ public class ReportJob implements org.quartz.Job {
 			} else if (!job.getUser().isActive()) {
 				runMessage = "jobs.message.ownerDisabled";
 			} else {
-				runReports(job.getPreRunReport());
-
+				runPreRunReports();
 				if (job.getRecipientsReportId() > 0) {
 					//job has dynamic recipients
 					runDynamicRecipientsJob();
@@ -314,7 +313,7 @@ public class ReportJob implements org.quartz.Job {
 
 			sendFileToDestinations();
 			runBatchFile();
-			runReports(job.getPostRunReport());
+			runPostRunReports();
 		} catch (Exception ex) {
 			logErrorAndSetDetails(ex);
 		}
@@ -332,6 +331,22 @@ public class ReportJob implements org.quartz.Job {
 		progressLogger.info("Completed. Time taken - {}", duration);
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
+	}
+	
+	/**
+	 * Run pre run reports
+	 * 
+	 * @throws SQLException 
+	 */
+	private void runPreRunReports() throws SQLException {
+		runReports(job.getPreRunReport());
+	}
+	
+	/**
+	 * Run post run reports
+	 */
+	private void runPostRunReports() throws SQLException {
+		runReports(job.getPostRunReport());
 	}
 
 	/**
@@ -964,7 +979,7 @@ public class ReportJob implements org.quartz.Job {
 			//https://stackoverflow.com/questions/49078140/jclouds-multipart-upload-to-google-cloud-storage-failing-with-400-bad-request
 			//https://issues.apache.org/jira/browse/JCLOUDS-1389
 			String eTag;
-			if (StringUtils.equalsAny(provider, "b2", "google-cloud-storage")) {
+			if (StringUtils.equals(provider, "b2")) {
 				eTag = blobStore.putBlob(containerName, blob);
 			} else {
 				eTag = blobStore.putBlob(containerName, blob, multipart());

@@ -28,6 +28,8 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,16 +163,12 @@ public class CachedResult {
 	 */
 	public void cacheIt() throws SQLException {
 		try {
-			//check if the table exist in the target database (if yes assume it is correct)
-			DatabaseMetaData dbmd = conn.getMetaData();
-			// note some rdbms might be case sensitive and some might create database objects always in uppercase or lowercase
-			logger.debug("tableName='{}'", tableName);
-			try (ResultSet dbrs = dbmd.getTables(null, null, tableName, null)) {
-				if (!dbrs.next()) {
-					// table does not exist, let's create it
-					createTable();
-				}
+			//check if the table exists in the target database
+			if (!tableExists()) {
+				// table does not exist, let's create it
+				createTable();
 			}
+
 			logger.debug("jobType={}", jobType);
 			if (jobType == JobType.CacheInsert) {
 				// delete/insert:let's delete the content
@@ -179,6 +177,7 @@ public class CachedResult {
 					st.executeUpdate(sql);
 				}
 			}
+
 			// reverse the resultset into the table
 			insertData();
 		} catch (SQLException e) {
@@ -401,5 +400,59 @@ public class CachedResult {
 	private String parseString(String s) {
 		return s.replace(" ", "_").replace(",", "_").replace("(", "_").replace(")", "_")
 				.replace("'", "_").replace("*", "_").replace("#", "_").replace("-", "_");
+	}
+
+	/**
+	 * Returns <code>true</code> if the cached table name exists
+	 *
+	 * @return <code>true</code> if the cached table name exists
+	 * @throws SQLException
+	 */
+	private boolean tableExists() throws SQLException {
+		//some rdbms might be case sensitive and some might create/check database objects in uppercase or lowercase
+		boolean tExists = tableExists(tableName);
+
+		if (!tExists) {
+			//try lowercase
+			String lowercaseTableName = tableName.toLowerCase(Locale.ENGLISH);
+			tExists = tableExists(lowercaseTableName);
+		}
+
+		if (!tExists) {
+			//try uppercase
+			String uppercaseTableName = tableName.toUpperCase(Locale.ENGLISH);
+			tExists = tableExists(uppercaseTableName);
+		}
+
+		return tExists;
+	}
+
+	/**
+	 * Returns <code>true</code> if the cached table name exists
+	 *
+	 * @param pTableName the table name to check
+	 * @return <code>true</code> if the cached table name exists
+	 * @throws SQLException
+	 */
+	private boolean tableExists(String pTableName) throws SQLException {
+		logger.debug("Entering tableExists: pTableName='{}'", pTableName);
+
+		boolean tExists = false;
+
+		//https://stackoverflow.com/questions/2942788/check-if-table-exists
+		//https://docs.oracle.com/javase/7/docs/api/java/sql/DatabaseMetaData.html#getTables%28java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String%5B%5D%29
+		// note some rdbms might be case sensitive and some might create/check database objects in uppercase or lowercase
+		DatabaseMetaData dbmd = conn.getMetaData();
+		try (ResultSet dbrs = dbmd.getTables(null, null, pTableName, null)) {
+			while (dbrs.next()) {
+				String tName = dbrs.getString("TABLE_NAME");
+				if (StringUtils.equalsIgnoreCase(tName, pTableName)) {
+					tExists = true;
+					break;
+				}
+			}
+		}
+
+		return tExists;
 	}
 }

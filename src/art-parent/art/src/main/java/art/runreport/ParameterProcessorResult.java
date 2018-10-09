@@ -25,16 +25,31 @@ import java.util.Map;
 
 /**
  * Represents the results of parameter processing
- * 
+ *
  * @author Timothy Anyona
  */
 public class ParameterProcessorResult implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private List<ReportParameter> reportParamsList;
 	private Map<String, ReportParameter> reportParamsMap;
 	private ReportOptions reportOptions;
 	private ChartOptions chartOptions;
+	private Map<String, String[]> reportRequestParameters;
+
+	/**
+	 * @return the reportRequestParameters
+	 */
+	public Map<String, String[]> getReportRequestParameters() {
+		return reportRequestParameters;
+	}
+
+	/**
+	 * @param reportRequestParameters the reportRequestParameters to set
+	 */
+	public void setReportRequestParameters(Map<String, String[]> reportRequestParameters) {
+		this.reportRequestParameters = reportRequestParameters;
+	}
 
 	/**
 	 * @return the chartOptions

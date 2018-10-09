@@ -17,6 +17,7 @@
  */
 package art.job;
 
+import art.user.User;
 import java.io.Serializable;
 
 /**
@@ -30,6 +31,21 @@ public class MultipleJobEdit implements Serializable {
 	private String ids;
 	private boolean active;
 	private boolean activeUnchanged = true;
+	private User user;
+
+	/**
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
+	}
+
+	/**
+	 * @param user the user to set
+	 */
+	public void setUser(User user) {
+		this.user = user;
+	}
 
 	/**
 	 * @return the ids

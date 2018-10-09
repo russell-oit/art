@@ -389,7 +389,7 @@ public class ParameterService {
 	 * @param actionUser the user performing the action
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "parameters", allEntries = true)
+	@CacheEvict(value = {"parameters", "reports"}, allEntries = true)
 	public void updateParameter(Parameter parameter, User actionUser) throws SQLException {
 		logger.debug("Entering updateParameter: parameter={}, actionUser={}", parameter, actionUser);
 
