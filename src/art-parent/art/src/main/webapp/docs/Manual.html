@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.9"> 
+  <meta name="version" content="3.10"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -936,11 +936,11 @@
      <p>Driver Name: org.hsqldb.jdbcDriver</p> 
      <p>JDBC URL: <code>jdbc:hsqldb:hsql://&lt;server_name&gt;[:port]/&lt;database_alias&gt;[;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 9001)</p> 
      <p>Driver Available from: <a href="http://hsqldb.org/" rel="nofollow">http://hsqldb.org/</a><br> <br><br></p> 
-     <p>Database: <strong>DB2 (IBM Data Server Driver for JDBC and SQLJ)</strong></p> 
+     <p>Database: <strong>Db2 (IBM Data Server Driver for JDBC and SQLJ)</strong></p> 
      <p>Driver Name: com.ibm.db2.jcc.DB2Driver</p> 
-     <p>JDBC URL: <code>jdbc:db2://&lt;server_name&gt;[:port]/&lt;database_name&gt;[:&lt;property&gt;=&lt;value&gt;[;...]</code> (default port for IBM DB2 is many times one of the following: 446, 6789, or 50000)</p> 
-     <p>Driver Available from: <a href="http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217" rel="nofollow">http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217</a> (registration required).<br> This driver can connect to a DB2 database on any platform i.e. iSeries, zSeries, or Intel-based machines with Linux or Windows. <br> <br><br></p> 
-     <p>Database: <strong>DB2 for iSeries (Toolbox or JTOpen driver)</strong></p> 
+     <p>JDBC URL: <code>jdbc:db2://&lt;server_name&gt;[:port]/&lt;database_name&gt;[:&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is often either 446, 6789, or 50000)</p> 
+     <p>Driver Available from: <a href="http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217" rel="nofollow">http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217</a> (registration required).<br> This driver can connect to a Db2 database on any platform i.e. iSeries, zSeries, or Intel-based machines with Linux or Windows. <br> <br><br></p> 
+     <p>Database: <strong>Db2 for iSeries (Toolbox or JTOpen driver)</strong></p> 
      <p>Driver Name: com.ibm.as400.access.AS400JDBCDriver</p> 
      <p>JDBC URL: <code>jdbc:as400://&lt;server_name&gt;;prompt=false;translate binary=true[;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
      <p>Driver Available from: <a href="http://jt400.sourceforge.net/">http://jt400.sourceforge.net/</a><br> <br><br></p> 
@@ -1893,19 +1893,25 @@ FROM mytable
         <td><strong>outputDateFormat</strong></td> 
         <td>String</td> 
         <td></td> 
-        <td>The format of output data for date columns. If blank, the data will be output as is. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+        <td>The format of output data for date columns. If blank, the data will be output as is. The format is as per the <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateTimeFormat</strong></td> 
         <td>String</td> 
         <td></td> 
-        <td>The format of output data for datetime columns. If blank, the data will be output as is. The format is as per<a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+        <td>The format of output data for datetime columns. If blank, the data will be output as is. The format is as per the <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>showColumnFilters</strong></td> 
         <td>Boolean</td> 
         <td>false</td> 
         <td>Determines if column filters will be displayed</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dtOptions</strong></td> 
+        <td>Object</td> 
+        <td></td> 
+        <td>Options related to the DataTables output. Available options are as per the <a class="" href="https://www.datatables.net/reference/option/" rel="nofollow">DataTables documentation</a>. Where a <code>&lt;th&gt;</code> column class name is required, you can use <code>rcol-&lt;column name&gt;</code>. Spaces and other characters apart from numbers, letters, underscores and hyphens will be replaced with a hyphen; so for a report column named <code>Due Date</code>, the class name to use would be <code>rcol-Due-Date</code>.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -2766,31 +2772,37 @@ FROM mytable
         <td><strong>inputDateFormat</strong></td> 
         <td>String</td> 
         <td>yyyy-MM-dd</td> 
-        <td>The format of input data for columns with a <strong>date</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+        <td>The format of input data for columns with a <strong>date</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateFormat</strong></td> 
         <td>String</td> 
         <td></td> 
-        <td>The format of output/displayed data for columns with a <strong>date</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+        <td>The format of output/displayed data for columns with a <strong>date</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>inputDateTimeFormat</strong></td> 
         <td>String</td> 
         <td>yyyy-MM-dd HH:mm:ss.SSS</td> 
-        <td>The format of input data for columns with a <strong>datetime</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+        <td>The format of input data for columns with a <strong>datetime</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateTimeFormat</strong></td> 
         <td>String</td> 
         <td></td> 
-        <td>The format of output/displayed data for columns with a <strong>datetime</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+        <td>The format of output/displayed data for columns with a <strong>datetime</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>showColumnFilters</strong></td> 
         <td>Boolean</td> 
         <td>true</td> 
         <td>Determines if column filters will be displayed in the tabular output.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dtOptions</strong></td> 
+        <td>Object</td> 
+        <td></td> 
+        <td>Options related to the DataTables output. Available options are as per the <a class="" href="https://www.datatables.net/reference/option/" rel="nofollow">DataTables documentation</a>. Where a <code>&lt;th&gt;</code> column class name is required, you can use <code>rcol-&lt;column name&gt;</code>. Spaces and other characters apart from numbers, letters, underscores and hyphens will be replaced with a hyphen; so for a report column named <code>Due Date</code>, the class name to use would be <code>rcol-Due-Date</code>.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -2908,6 +2920,11 @@ FROM mytable
         <td><strong>imageColumns</strong></td> 
         <td>Array of strings</td> 
         <td>An indication of the column indices or column names for blob columns that contain images. The first column has an index of 1. e.g. <code>["2"]</code> or <code>["image"]</code> or <code>["3", "image"]</code>. A note that ods and odt report formats will not display images.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dtOptions</strong></td> 
+        <td>Object</td> 
+        <td>Options to be used with the <strong>htmlDataTable</strong> report format. Available options are as per the <a class="" href="https://www.datatables.net/reference/option/" rel="nofollow">DataTables documentation</a>. Where a <code>&lt;th&gt;</code> column class name is required, you can use <code>rcol-&lt;column name&gt;</code>. Spaces and other characters apart from numbers, letters, underscores and hyphens will be replaced with a hyphen; so for a report column named <code>Due Date</code>, the class name to use would be <code>rcol-Due-Date</code>.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -4972,6 +4989,14 @@ WHERE {#!saleTypes#}
         <td>The output format for the job</td> 
        </tr> 
        <tr> 
+        <td><strong>Cached Datasource</strong></td> 
+        <td>For Cache ResultSet jobs, the datasource to use</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Cached Table Name</strong></td> 
+        <td>For Cache ResultSet jobs, the table to use</td> 
+       </tr> 
+       <tr> 
         <td><strong>Active</strong></td> 
         <td>Whether the job can run or not</td> 
        </tr> 
@@ -5581,7 +5606,7 @@ WHERE {#!saleTypes#}
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="cached-results">Cached Results</h1> 
-     <p>ART can be used to reverse query results from a datasource to the same or a different datasource. <br> This allows administrators to:</p> 
+     <p>ART can be used to reverse query results from a datasource to the same or a different datasource.<br> This allows administrators to:</p> 
      <ul> 
       <li>Group data to summary tables, creating a data mart from which to develop other reports</li> 
       <li>Create Data-Transformation-Load procedures (DTL) to feed other systems</li> 
@@ -5596,7 +5621,7 @@ WHERE {#!saleTypes#}
         <li><strong>Cache ResultSet (Append)</strong></li> 
         <li><strong>Cache ResultSet (Delete &amp; Insert)</strong></li> 
        </ul> </li> 
-      <li>Select the datasource where to reverse the data (note: the datasource must be writeable i.e. the datasource user should have UPDATE/DELETE/INSERT/CREATE TABLE rights on the target database table)</li> 
+      <li>In the <strong>Cached Datasource</strong> field, select the datasource where to reverse the data (note: the datasource must be writeable i.e. the datasource user should have UPDATE/DELETE/INSERT/CREATE TABLE rights on the target database table)</li> 
       <li>In the <strong>Cached Table Name</strong> field, enter the name of the table in the target datasource that will contain the data</li> 
       <li>Schedule the timing when the action should take place, like any other job</li> 
      </ul> 
