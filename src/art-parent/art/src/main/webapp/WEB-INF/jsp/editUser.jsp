@@ -214,6 +214,16 @@ Display edit user page
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="control-label col-md-4" for="publicUser">
+						<spring:message code="users.label.publicUser"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="publicUser" id="publicUser" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="users.label.accessLevel"/>
 					</label>

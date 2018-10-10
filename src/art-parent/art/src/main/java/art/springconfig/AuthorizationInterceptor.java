@@ -64,6 +64,9 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 	@Autowired
 	private LocaleResolver localeResolver;
 
+	@Autowired
+	private UserService userService;
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
 			Object handler) throws Exception {
@@ -94,10 +97,21 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 		String urlUsername = request.getParameter("username");
 		String urlPassword = request.getParameter("password");
+		boolean publicSession = Boolean.parseBoolean(request.getParameter("public"));
+		String urlUser = request.getParameter("user");
+		String publicUsername;
+		if (urlUser == null) {
+			//default to "public_user" (pre-3.11)
+			publicUsername = ArtUtils.PUBLIC_USER;
+		} else {
+			publicUsername = urlUser;
+		}
 
 		//reset session user if different username passed in url
-		if (user != null && processUrlCredentials(page, urlUsername, urlPassword)
-				&& !StringUtils.equalsIgnoreCase(user.getUsername(), urlUsername)) {
+		if (user != null && ((shouldProcessUrlCredentials(page, urlUsername, urlPassword)
+				&& !StringUtils.equalsIgnoreCase(user.getUsername(), urlUsername))
+				|| (publicSession
+				&& !StringUtils.equalsIgnoreCase(user.getUsername(), publicUsername)))) {
 			session.removeAttribute("sessionUser");
 			user = null;
 		}
@@ -112,15 +126,15 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (username == null) {
 				//not using custom authentication
 				//check if this is a public session
-				if (Boolean.parseBoolean(request.getParameter("public"))) {
-					username = ArtUtils.PUBLIC_USER;
+				if (publicSession) {
 					loginMethod = ArtAuthenticationMethod.Public;
+					username = publicUsername;
 				} else {
 					//check if credentials passed in url
 					String windowsDomain = request.getParameter("windowsDomain");
 					String authenticationMethodString = request.getParameter("authenticationMethod");
 					//some pages e.g. saveUser, saveDatasource send the fields "username" and "password"
-					if (processUrlCredentials(page, urlUsername, urlPassword)) {
+					if (shouldProcessUrlCredentials(page, urlUsername, urlPassword)) {
 						LoginHelper loginHelper = new LoginHelper();
 						ArtAuthenticationMethod authenticationMethod = ArtAuthenticationMethod.toEnum(authenticationMethodString);
 						LoginResult result = loginHelper.authenticate(authenticationMethod, urlUsername, urlPassword, windowsDomain);
@@ -141,7 +155,6 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			} else {
 				//either custom authentication or public user session or credentials in url
 				//ensure user exists
-				UserService userService = new UserService();
 				try {
 					user = userService.getUser(username);
 				} catch (SQLException ex) {
@@ -154,20 +167,24 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				if (user == null) {
 					//user doesn't exist
 					message = "login.message.artUserInvalid";
-					//log failure
 					loginHelper.logFailure(loginMethod, username, ip, ArtUtils.ART_USER_INVALID);
 				} else if (!user.isActive()) {
 					//user disabled
+					user = null;
 					message = "login.message.artUserDisabled";
-					//log failure
 					loginHelper.logFailure(loginMethod, username, ip, ArtUtils.ART_USER_DISABLED);
+				} else if (loginMethod == ArtAuthenticationMethod.Public && !user.isPublicUser()) {
+					//public session but user not public user
+					user = null;
+					message = "login.message.userNotPublicUser";
+					String logMessage = "user not public user";
+					loginHelper.logFailure(loginMethod, username, ip, logMessage);
 				} else {
 					//valid access
 					session.setAttribute("sessionUser", user);
 					session.setAttribute("authenticationMethod", loginMethod.getValue());
 					session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
 					session.setAttribute("casLogoutUrl", Config.getSettings().getCasLogoutUrl());
-					//log success
 					loginHelper.logSuccess(loginMethod, username, ip);
 				}
 			}
@@ -178,7 +195,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		//https://stackoverflow.com/questions/24612568/localcontexthandler-usage
 		Locale locale = localeResolver.resolveLocale(request);
 
-		if (user == null || !user.isActive()) {
+		if (user == null) {
 			//forward to login page. 
 			//use forward instead of redirect so that an indication of the
 			//page that was being accessed remains in the browser
@@ -257,7 +274,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 	 * @param urlPassword the "password" url parameter value
 	 * @return <code>true</code> if credentials in the url should be considered
 	 */
-	private boolean processUrlCredentials(String page, String urlUsername, String urlPassword) {
+	private boolean shouldProcessUrlCredentials(String page, String urlUsername, String urlPassword) {
 		//some pages e.g. saveUser, saveDatasource, testDatasource send the fields "username" and "password"
 		//and so should not be considered. mainly considering running reports via url, page = runReport
 		//login doesn't pass through authorizationInterceptor
@@ -360,7 +377,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		} else if (StringUtils.equals(page, "password")) {
 			//everyone, if enabled to change password and is using internal authentication
 			String authenticationMethod = (String) session.getAttribute("authenticationMethod");
-			if (user.isCanChangePassword()
+			if (user.isPasswordChangeAllowed()
 					&& StringUtils.equals(authenticationMethod, ArtAuthenticationMethod.Internal.getValue())) {
 				authorised = true;
 			}

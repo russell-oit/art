@@ -58,7 +58,7 @@ public class PasswordController {
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
-		if (sessionUser.isCanChangePassword()) {
+		if (sessionUser.isPasswordChangeAllowed()) {
 			return "password";
 		} else {
 			return "accessDenied";
@@ -75,7 +75,7 @@ public class PasswordController {
 		logger.debug("Entering processPassword");
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
-		if (!sessionUser.isCanChangePassword()) {
+		if (!sessionUser.isPasswordChangeAllowed()) {
 			return "redirect:/accessDenied";
 		}
 

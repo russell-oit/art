@@ -299,7 +299,7 @@ Header that appears at the top of all pages, except the login and logs pages
 							<spring:message code="header.link.documentation"/>
 						</a>
 					</li>
-					<c:if test="${authenticationMethod eq internalAuthentication && sessionUser.canChangePassword}">
+					<c:if test="${authenticationMethod eq internalAuthentication && sessionUser.passwordChangeAllowed}">
 						<li>
 							<a href="${pageContext.request.contextPath}/password">
 								<i class="fa fa-lock"></i> 
