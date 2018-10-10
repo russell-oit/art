@@ -1411,22 +1411,6 @@ public class ReportService {
 				//everyone can run lov report
 				+ " QUERY_TYPE IN(?,?)"
 				+ " OR"
-				//everyone can run report if the public user has direct access to it
-				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERIES AUQ"
-				+ " INNER JOIN ART_USERS AU"
-				+ " ON AUQ.USER_ID=AU.USER_ID"
-				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AU.USERNAME=?)"
-				+ " OR"
-				//everyone can run report if the public user has access to the report's group
-				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERY_GROUPS AUQG"
-				+ " INNER JOIN ART_USERS AU"
-				+ " ON AUQG.USER_ID=AU.USER_ID"
-				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
-				+ " ON AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
-				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AU.USERNAME=?)"
-				+ " OR"
 				//admins can run all reports
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USERS"
@@ -1465,8 +1449,6 @@ public class ReportService {
 			reportId,
 			ReportType.LovDynamic.getValue(), //lov reports
 			ReportType.LovStatic.getValue(),
-			ArtUtils.PUBLIC_USER, //public user access to report
-			ArtUtils.PUBLIC_USER, //public user access to report's group
 			userId, //admin user
 			AccessLevel.JuniorAdmin.getValue(),
 			userId, //user access to report
