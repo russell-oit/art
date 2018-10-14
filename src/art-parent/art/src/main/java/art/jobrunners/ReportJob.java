@@ -161,6 +161,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import synapticloop.b2.B2ApiClient;
+import synapticloop.b2.exception.B2ApiException;
 
 /**
  * Runs report jobs
@@ -332,16 +334,16 @@ public class ReportJob implements org.quartz.Job {
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
 	}
-	
+
 	/**
 	 * Run pre run reports
-	 * 
-	 * @throws SQLException 
+	 *
+	 * @throws SQLException
 	 */
 	private void runPreRunReports() throws SQLException {
 		runReports(job.getPreRunReport());
 	}
-	
+
 	/**
 	 * Run post run reports
 	 */
@@ -533,9 +535,6 @@ public class ReportJob implements org.quartz.Job {
 					case Azure:
 						sendFileToAzure(destination, fullLocalFileName);
 						break;
-//					case B2:
-//						sendFileToB2(destination, fullLocalFileName);
-//						break;
 					case GoogleCloudStorage:
 						sendFileToGoogleCloudStorage(destination, fullLocalFileName);
 						break;
@@ -545,9 +544,56 @@ public class ReportJob implements org.quartz.Job {
 					case Website:
 						sendFileToWebsite(destination, fullLocalFileName);
 						break;
+					case B2Synapticloop:
+						sendFileToB2Synapticloop(destination, fullLocalFileName);
+						break;
 					default:
 						throw new IllegalArgumentException("Unexpected destination type: " + destinationType);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Copies the generated file to backblaze b2 storage using the synapticloop
+	 * library
+	 *
+	 * @param destination the destination object
+	 * @param fullLocalFileName the path of the file to copy
+	 */
+	private void sendFileToB2Synapticloop(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering sendFileToB2Synapticloop: destination={},"
+				+ " fullLocalFileName='{}'", destination, fullLocalFileName);
+		
+		B2ApiClient b2ApiClient = new B2ApiClient();
+		
+		try {
+			String accountId = destination.getUser();
+			String applicationKey = destination.getPassword();
+			
+			b2ApiClient.authenticate(accountId, applicationKey);
+			
+			String destinationSubDirectory = destination.getSubDirectory();
+			String jobSubDirectory = job.getSubDirectory();
+
+			String directorySeparator = "/";
+			String finalPath = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
+
+			String remoteFileName = finalPath + fileName;
+
+			File localFile = new File(fullLocalFileName);
+			
+			String bucketId = destination.getPath();
+			
+			b2ApiClient.uploadFile(bucketId, remoteFileName, localFile);
+			logger.debug("Uploaded '{}'. Job Id {}", remoteFileName, jobId);
+		} catch (B2ApiException | IOException ex) {
+			logErrorAndSetDetails(ex);
+		} finally {
+			try {
+				b2ApiClient.close();
+			} catch (IOException ex) {
+				logError(ex);
 			}
 		}
 	}
@@ -741,16 +787,6 @@ public class ReportJob implements org.quartz.Job {
 		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
 
-//	/**
-//	 * Copies the generated file to backblaze b2 storage
-//	 *
-//	 * @param destination the destination object
-//	 * @param fullLocalFileName the path of the file to copy
-//	 */
-//	private void sendFileToB2(Destination destination, String fullLocalFileName) {
-//		String provider = "b2";
-//		sendFileToBlobStorage(provider, destination, fullLocalFileName);
-//	}
 	/**
 	 * Copies the generated file to google cloud storage
 	 *

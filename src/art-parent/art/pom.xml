@@ -142,6 +142,11 @@
 			<id>clojars</id>
 			<url>http://clojars.org/repo/</url>
 		</repository>
+		<!-- repository for synapticloop b2 api -->
+		<repository>
+			<id>jcenter</id>
+			<url>http://jcenter.bintray.com</url>
+		</repository>
 	</repositories>
 	
 	<dependencyManagement>
@@ -974,6 +979,11 @@
 			<groupId>uk.com.robust-it</groupId>
 			<artifactId>cloning</artifactId>
 			<version>1.9.10</version>
+		</dependency>
+		<dependency>
+			<groupId>synapticloop</groupId>
+			<artifactId>backblaze-b2-java-api</artifactId>
+			<version>2.2.0</version>
 		</dependency>
 	</dependencies>
 </project>
