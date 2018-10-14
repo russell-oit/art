@@ -202,11 +202,14 @@
 
 				//show/hide create directories field
 				switch (destinationType) {
-					case 'Website':
-						$("#createDirectoriesDiv").hide();
+					case 'FTP':
+					case 'SFTP':
+					case 'NetworkShare':
+					case 'WebDav':
+						$("#createDirectoriesDiv").show();
 						break;
 					default:
-						$("#createDirectoriesDiv").show();
+						$("#createDirectoriesDiv").hide();
 				}
 
 				//show/hide test button
