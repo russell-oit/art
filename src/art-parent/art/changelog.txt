@@ -1,5 +1,5 @@
 ART 3.11
-* Allow different report access for different public users
+* Allow for several public users
 * Added Backblaze B2 destination type
 
 ART 3.10
