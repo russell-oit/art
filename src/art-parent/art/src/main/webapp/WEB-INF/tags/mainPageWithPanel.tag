@@ -27,6 +27,7 @@ Includes main page, plus a bootstrap panel where the contents go
 <%@attribute name="mainPanelTitle" %>
 <%@attribute name="hasTable" type="java.lang.Boolean" %>
 <%@attribute name="configPage" type="java.lang.Boolean" %>
+<%@attribute name="hasNotify" type="java.lang.Boolean" %>
 
 <%-- any content can be specified here e.g.: --%>
 <c:if test="${empty mainColumnClass}">
@@ -72,6 +73,9 @@ Includes main page, plus a bootstrap panel where the contents go
 	<!--		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Responsive-2.0.2/js/dataTables.responsive.min.js"></script>
 			<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Responsive-2.0.2/js/responsive.bootstrap.min.js"></script>-->
 
+		</c:if>
+			
+		<c:if test="${hasNotify || configPage}">
 			<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 			<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 		</c:if>

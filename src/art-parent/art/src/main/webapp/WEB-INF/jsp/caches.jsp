@@ -21,11 +21,10 @@ Page to allow manual clearing of caches
 <spring:message code="caches.message.cacheCleared" var="cacheClearedText"/>
 <spring:message code="caches.message.cachesCleared" var="cachesClearedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3" hasTable="true">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3"
+					 hasTable="true" hasNotify="true">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
