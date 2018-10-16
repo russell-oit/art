@@ -29,7 +29,7 @@ Display schedules
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 <spring:message code="schedules.message.linkedJobsExist" var="linkedJobsExistText"/>
 
-<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
@@ -250,4 +250,4 @@ Display schedules
 			</tbody>
 		</table>
 	</jsp:body>
-</t:mainConfigPage>
+</t:mainPageWithPanel>

@@ -31,7 +31,7 @@ Display user configuration page
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 
-<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
@@ -288,5 +288,5 @@ Display user configuration page
 			</tbody>
 		</table>
 	</jsp:body>
-</t:mainConfigPage>
+</t:mainPageWithPanel>
 

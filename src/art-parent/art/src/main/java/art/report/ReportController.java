@@ -145,7 +145,7 @@ public class ReportController {
 				return "reportError";
 			} else {
 				RunReportHelper runReportHelper = new RunReportHelper();
-				runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService, locale);
+				runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
 			}
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);

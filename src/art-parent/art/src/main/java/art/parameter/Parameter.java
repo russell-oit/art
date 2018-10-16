@@ -766,4 +766,20 @@ public class Parameter implements Serializable {
 			lovReport.encryptAllPasswords();
 		}
 	}
+
+	/**
+	 * Returns <code>true</code> if this parameter is to be displayed in the
+	 * select parameters page
+	 *
+	 * @return <code>true</code> if this parameter is to be displayed in the
+	 * select parameters page
+	 */
+	@JsonIgnore
+	public boolean isForDisplay() {
+		if (hidden || fixedValue) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 }

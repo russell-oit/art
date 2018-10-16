@@ -324,7 +324,7 @@ public class RunReportController {
 				boolean allowSelectParameters = Boolean.parseBoolean(request.getParameter("allowSelectParameters"));
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
-					runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService, locale);
+					runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
 				}
 
 				request.setAttribute("reportType", reportType);

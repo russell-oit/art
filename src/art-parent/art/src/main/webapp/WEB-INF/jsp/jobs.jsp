@@ -38,7 +38,7 @@ Display user jobs and jobs configuration
 <spring:message code="jobs.message.scheduled" var="scheduledText"/>
 <spring:message code="reports.text.selectValue" var="selectValueText"/>
 
-<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
@@ -621,5 +621,5 @@ Display user jobs and jobs configuration
 			</div>
 		</div>
 	</jsp:body>
-</t:mainConfigPage>
+</t:mainPageWithPanel>
 

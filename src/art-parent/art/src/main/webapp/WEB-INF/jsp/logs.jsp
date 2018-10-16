@@ -21,7 +21,7 @@ Display application logs
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" hasTable="true">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Select-1.2.0/css/select.bootstrap.min.css"/>

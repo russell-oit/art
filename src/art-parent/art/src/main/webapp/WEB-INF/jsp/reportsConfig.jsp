@@ -39,7 +39,7 @@ Reports configuration page
 <spring:message code="switch.text.no" var="noText"/>
 <spring:message code="reports.label.reportSource" var="reportSourceText"/>
 
-<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.css"/>
@@ -375,4 +375,4 @@ Reports configuration page
 			</table>
 		</div>
 	</jsp:body>
-</t:mainConfigPage>
+</t:mainPageWithPanel>

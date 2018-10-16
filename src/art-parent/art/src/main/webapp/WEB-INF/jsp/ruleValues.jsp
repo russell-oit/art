@@ -23,7 +23,7 @@ Display rule values
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" hasTable="true">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>

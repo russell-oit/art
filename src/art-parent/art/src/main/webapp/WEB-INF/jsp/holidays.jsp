@@ -27,7 +27,7 @@
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 <spring:message code="holidays.message.linkedRecordsExist" var="linkedRecordsExistText"/>
 
-<t:mainConfigPage title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
@@ -248,4 +248,4 @@
 			</tbody>
 		</table>
 	</jsp:body>
-</t:mainConfigPage>
+</t:mainPageWithPanel>

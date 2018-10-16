@@ -19,14 +19,8 @@ Display section to allow selecting of report parameters and initiate running of 
 <spring:message code="reports.message.parametersCleared" var="parametersClearedText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-daterangepicker-2.1.27/daterangepicker.js"></script>
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-daterangepicker-2.1.27/daterangepicker.css">
 
 <script type="text/javascript">
 	$(document).ready(function () {

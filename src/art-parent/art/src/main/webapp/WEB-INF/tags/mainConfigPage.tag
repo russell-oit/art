@@ -12,20 +12,29 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
-<%@attribute name="title" required="true" %>
 <%@attribute name="css" fragment="true" %>
 <%@attribute name="javascript" fragment="true" %>
-<%@attribute name="mainColumnClass" required="true" %>
-<%@attribute name="mainPanelTitle" %>
 <%@attribute name="aboveMainPanel" fragment="true" %>
 <%@attribute name="belowMainPanel" fragment="true" %>
 <%@attribute name="leftMainPanel" fragment="true" %>
 <%@attribute name="rightMainPanel" fragment="true" %>
 <%@attribute name="headContent" fragment="true" %>
+<%@attribute name="title" required="true" %>
+<%@attribute name="mainColumnClass" %>
+<%@attribute name="mainPanelTitle" %>
 
 <%-- any content can be specified here e.g.: --%>
+<c:if test="${empty mainColumnClass}">
+	<c:set var="mainColumnClass" value="col-md-12"/>
+</c:if>
+
+<c:if test="${empty mainPanelTitle}">
+	<c:set var="mainPanelTitle" value="${title}"/>
+</c:if>
+
 <t:mainPage title="${title}">
 	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/DataTables-1.10.13/css/dataTables.bootstrap.min.css"/>
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Select-1.2.0/css/select.bootstrap.min.css"/>
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/css/buttons.dataTables.min.css"/>
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/css/buttons.bootstrap.min.css"/>
@@ -35,6 +44,8 @@
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/DataTables-1.10.13/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Select-1.2.0/js/dataTables.select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js"></script>
@@ -63,18 +74,11 @@
 		<div class="row">
 			<jsp:invoke fragment="leftMainPanel"/>
 
-			<div class="${mainColumnClass}">
+			<div class="${encode:forHtmlAttribute(mainColumnClass)}">
 				<div class="panel panel-success">
 					<div class="panel-heading">
 						<h4 class="panel-title text-center">
-							<c:choose>
-								<c:when test="${empty mainPanelTitle}">
-									${encode:forHtmlContent(title)}
-								</c:when>
-								<c:otherwise>
-									${encode:forHtmlContent(mainPanelTitle)}
-								</c:otherwise>
-							</c:choose>
+							${encode:forHtmlContent(mainPanelTitle)}
 						</h4>
 					</div>
 					<div class="panel-body">
