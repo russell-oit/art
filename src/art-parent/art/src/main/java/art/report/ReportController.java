@@ -32,6 +32,10 @@ import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
 import art.reportoptions.GridstackItemOptions;
+import art.reportparameter.ReportParameter;
+import art.runreport.ParameterProcessor;
+import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportRunner;
 import art.savedparameter.SavedParameter;
 import art.savedparameter.SavedParameterService;
 import art.utils.ArtHelper;
@@ -228,7 +232,7 @@ public class ReportController {
 			for (Report report : reports) {
 				String name = Encode.forHtml(report.getName());
 				report.setName(name);
-				
+
 				final int NEW_UPDATED_LIMIT = 7;
 				if (ArtUtils.daysUntilToday(report.getCreationDate()) <= NEW_UPDATED_LIMIT) {
 					name += " " + newSpan;
@@ -1394,6 +1398,49 @@ public class ReportController {
 		}
 
 		return response;
+	}
+
+	@RequestMapping(value = "/getLovValues", method = RequestMethod.GET)
+	public @ResponseBody
+	List<Map<String, String>> getLovValues(@RequestParam("reportId") Integer reportId,
+			HttpSession session, HttpServletRequest request, Locale locale) {
+
+		logger.debug("Entering getLovValues: reportId={}", reportId);
+
+		//https://appelsiini.net/projects/chained/
+		//encapsulate values in a list (will be a json array) to ensure values
+		//are displayed in the order given
+		List<Map<String, String>> list = new ArrayList<>();
+		Map<String, String> values = new HashMap<>();
+		ReportRunner reportRunner = new ReportRunner();
+		try {
+			Report report = reportService.getReport(reportId);
+			reportRunner.setReport(report);
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			reportRunner.setUser(sessionUser);
+
+			ParameterProcessor paramProcessor = new ParameterProcessor();
+			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			reportRunner.setReportParamsMap(reportParamsMap);
+
+			values = reportRunner.getLovValues();
+		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
+			logger.error("Error", ex);
+		} finally {
+			reportRunner.close();
+		}
+
+		for (Map.Entry<String, String> entry : values.entrySet()) {
+			Map<String, String> value = new HashMap<>();
+			String encodedKey = Encode.forHtmlAttribute(entry.getKey());
+			String encodedValue = Encode.forHtmlContent(entry.getValue());
+			value.put(encodedKey, encodedValue);
+			list.add(value);
+		}
+
+		return list;
 	}
 
 }
