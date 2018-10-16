@@ -18,3 +18,13 @@ Display report parameter that uses text input
 	   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 	   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(requestContext.locale))}">
 
+<c:if test="${reportParam.parameter.hasRobinHerbotsMask()}">
+	<script type="text/javascript">
+		var paramOptionsString = '${encode:forJavaScript(reportParam.parameter.options)}';
+		var paramOptions = JSON.parse(paramOptionsString);
+		var robinHerbotsOptions = paramOptions.mask1;
+		if (robinHerbotsOptions) {
+			$('#${encode:forJavaScript(reportParam.htmlElementName)}').inputmask(robinHerbotsOptions);
+		}
+	</script>
+</c:if>

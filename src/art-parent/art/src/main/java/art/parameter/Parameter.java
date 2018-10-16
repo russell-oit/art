@@ -782,4 +782,15 @@ public class Parameter implements Serializable {
 			return true;
 		}
 	}
+
+	/**
+	 * Returns <code>true</code> if the parameter has a mask1 (RobinHerbots)
+	 * mask defined in the options field
+	 *
+	 * @return <code>true</code> if the parameter has a mask1 (RobinHerbots)
+	 * mask defined in the options field
+	 */
+	public boolean hasRobinHerbotsMask() {
+		return StringUtils.contains(options, "\"mask1\"");
+	}
 }

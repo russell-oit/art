@@ -11,14 +11,15 @@
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
-<c:if test="${hasDateParam}">
-	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
-</c:if>
-
+<%-- moment.js needs to be loaded before eonasdan datepicker --%>
 <c:if test="${hasDateParam || hasDateRangeParam}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
+</c:if>
+
+<c:if test="${hasDateParam}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 </c:if>
 
 <c:if test="${hasDateRangeParam}">
@@ -33,6 +34,10 @@
 
 <c:if test="${hasChainedParam}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects-1.0.1/jquery.chained.remote.min.js"></script>
+</c:if>
+
+<c:if test="${hasRobinHerbotsMask}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/Inputmask-4.0.2/min/jquery.inputmask.bundle.min.js"></script>
 </c:if>
 
 <c:forEach var="reportParameter" items="${reportParams}">

@@ -283,6 +283,16 @@ public class RunReportHelper {
 			}
 		}
 		request.setAttribute("hasChainedParam", hasChainedParam);
+		
+		boolean hasRobinHerbotsMask = false;
+		for (ReportParameter reportParam : reportParamsList) {
+			Parameter param = reportParam.getParameter();
+			if (param.isForDisplay() && param.hasRobinHerbotsMask()) {
+				hasRobinHerbotsMask = true;
+				break;
+			}
+		}
+		request.setAttribute("hasRobinHerbotsMask", hasRobinHerbotsMask);
 
 		boolean enableReportFormats;
 		switch (reportType) {
