@@ -21,12 +21,6 @@ Display report parameters and initiate running of report
 
 <t:mainPage title="${report.getLocalizedName(pageContext.response.locale)}">
 
-	<jsp:attribute name="headContent">
-		<c:if test="${hasChainedParam}">
-			<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects-1.0.1/jquery.chained.remote.min.js"></script>
-		</c:if>
-	</jsp:attribute>
-
 	<jsp:body>
 		<div class="row" id="errorsDiv">
 			<div class="col-md-12">
