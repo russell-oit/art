@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,10 +85,13 @@ public class ChainedParameterController {
 		} finally {
 			reportRunner.close();
 		}
-		
+
 		for (Entry<String, String> entry : values.entrySet()) {
 			Map<String, String> value = new HashMap<>();
-			value.put(entry.getKey(), entry.getValue());
+			String encodedKey = Encode.forHtmlAttribute(entry.getKey());
+			String encodedValue = Encode.forHtmlContent(entry.getValue());
+			value.put(encodedKey, encodedValue);
+//			value.put(entry.getKey(), entry.getValue());
 			list.add(value);
 		}
 
