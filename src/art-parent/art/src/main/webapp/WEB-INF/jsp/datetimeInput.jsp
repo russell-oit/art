@@ -22,23 +22,8 @@
 	</span>
 </div>
 
-<script>
-	var javaDateFormat = '${encode:forJavaScript(reportParam.parameter.dateFormat)}';
-	var finalDateFormat;
-	if (javaDateFormat) {
-		var momentDateFormat = moment().toMomentFormatString(javaDateFormat);
-		finalDateFormat = momentDateFormat;
-	} else {
-		finalDateFormat = 'YYYY-MM-DD HH:mm';
-	}
-
-	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').datetimepicker({
-		locale: '${requestContext.locale}',
-		format: finalDateFormat,
-		keepInvalid: true,
-		useStrict: true
-	});
-</script>
+<t:addDatePicker reportParam="${reportParam}" locale="${requestContext.locale}"
+				 defaultFormat="YYYY-MM-DD HH:mm"/>
 
 <c:if test="${not empty reportParam.parameter.template}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(reportParam.parameter.template)}"></script>

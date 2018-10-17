@@ -24,27 +24,8 @@ Display input for date and datetime parameters
 	</span>
 </div>
 
-<script>
-	var javaDateFormat = '${encode:forJavaScript(reportParam.parameter.dateFormat)}';
-	var finalDateFormat;
-	if (javaDateFormat) {
-		var momentDateFormat = moment().toMomentFormatString(javaDateFormat);
-		finalDateFormat = momentDateFormat;
-	} else {
-		finalDateFormat = 'YYYY-MM-DD';
-	}
-
-	//must use useStrict in addition to keepInvalid if using the format property
-	//https://github.com/Eonasdan/bootstrap-datetimepicker/issues/1711
-	//https://github.com/Eonasdan/bootstrap-datetimepicker/issues/919
-	//https://eonasdan.github.io/bootstrap-datetimepicker/Options/
-	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').datetimepicker({
-		locale: '${requestContext.locale}',
-		format: finalDateFormat,
-		keepInvalid: true,
-		useStrict: true
-	});
-</script>
+<t:addDatePicker reportParam="${reportParam}" locale="${requestContext.locale}"
+				 defaultFormat="YYYY-MM-DD"/>
 
 <c:if test="${not empty reportParam.parameter.template}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(reportParam.parameter.template)}"></script>
