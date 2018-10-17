@@ -20,6 +20,10 @@
 		var paramOptions = JSON.parse(paramOptionsString);
 		var robinHerbotsOptions = paramOptions.mask1;
 		if (robinHerbotsOptions) {
+			//https://stackoverflow.com/questions/858181/how-to-check-a-not-defined-variable-in-javascript
+			if (typeof mask1Options !== 'undefined') {
+				$.extend(robinHerbotsOptions, mask1Options);
+			}
 			$('#${encode:forJavaScript(reportParam.htmlElementName)}').inputmask(robinHerbotsOptions);
 		}
 	</script>

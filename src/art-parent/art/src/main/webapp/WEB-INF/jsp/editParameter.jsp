@@ -118,15 +118,6 @@ Edit parameter definition
 					default:
 						$("#dateFormatDiv").hide();
 				}
-				
-				//show/hide template field
-				switch (dataType) {
-					case "DateRange":
-						$("#templateDiv").show();
-						break;
-					default:
-						$("#templateDiv").hide();
-				}
 			}
 		</script>
 	</jsp:attribute>

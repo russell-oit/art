@@ -33,7 +33,6 @@ import art.encryptor.EncryptorService;
 import art.enums.EncryptorType;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationRecordType;
-import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
@@ -1536,28 +1535,17 @@ public class ImportRecordsController {
 			File zipFile) throws IOException {
 
 		for (Parameter parameter : parameters) {
-			ParameterDataType dataType = parameter.getDataType();
-			if (dataType == null) {
-				logger.warn("dataType is null. Parameter={}", parameter);
-			} else {
-				switch (dataType) {
-					case DateRange:
-						String template = parameter.getTemplate();
-						if (StringUtils.isNotBlank(template)) {
-							String templateFilePath = sourcePath + template;
-							File templateFile = new File(templateFilePath);
-							boolean unpacked = ZipUtil.unpackEntry(zipFile, template, templateFile);
-							if (unpacked) {
-								String jsTemplatesPath = Config.getJsTemplatesPath();
-								String destinationFilePath = jsTemplatesPath + template;
-								File destinationFile = new File(destinationFilePath);
-								FileUtils.copyFile(templateFile, destinationFile);
-								templateFile.delete();
-							}
-						}
-						break;
-					default:
-						break;
+			String template = parameter.getTemplate();
+			if (StringUtils.isNotBlank(template)) {
+				String templateFilePath = sourcePath + template;
+				File templateFile = new File(templateFilePath);
+				boolean unpacked = ZipUtil.unpackEntry(zipFile, template, templateFile);
+				if (unpacked) {
+					String jsTemplatesPath = Config.getJsTemplatesPath();
+					String destinationFilePath = jsTemplatesPath + template;
+					File destinationFile = new File(destinationFilePath);
+					FileUtils.copyFile(templateFile, destinationFile);
+					templateFile.delete();
 				}
 			}
 		}
