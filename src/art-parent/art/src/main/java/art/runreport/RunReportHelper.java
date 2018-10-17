@@ -476,53 +476,54 @@ public class RunReportHelper {
 		request.setAttribute("enablePrintAlways", enablePrintAlways);
 
 		boolean enableEmail;
-//		switch (reportType) {
-//			case Update:
-//			case CrosstabHtml:
-//			case TabularHtml:
-//			case Text:
-//			case JPivotMondrian:
-//			case JPivotMondrianXmla:
-//			case JPivotSqlServerXmla:
-//			case FreeMarker:
-//			case Thymeleaf:
-//			case ReactPivot:
-//			case PivotTableJs:
-//			case PivotTableJsCsvLocal:
-//			case PivotTableJsCsvServer:
-//			case Dygraphs:
-//			case DygraphsCsvLocal:
-//			case DygraphsCsvServer:
-//			case DataTables:
-//			case DataTablesCsvLocal:
-//			case DataTablesCsvServer:
-//			case C3:
-//			case ChartJs:
-//			case Datamaps:
-//			case DatamapsFile:
-//			case Leaflet:
-//			case OpenLayers:
-//			case TabularHeatmap:
-//			case SaikuReport:
-//			case MongoDB:
-//			case Velocity:
-//			case OrgChartDatabase:
-//			case OrgChartJson:
-//			case OrgChartList:
-//			case OrgChartAjax:
-//			case Plotly:
-//				enableEmail = false;
-//				break;
-//			default:
-//				enableEmail = true;
-//		}
-//
-//		if (!Config.isEmailServerConfigured() || StringUtils.isBlank(sessionUser.getEmail())) {
-//			enableEmail = false;
-//		}
+		switch (reportType) {
+			case Update:
+			case CrosstabHtml:
+			case TabularHtml:
+			case Text:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
+			case FreeMarker:
+			case Thymeleaf:
+			case ReactPivot:
+			case PivotTableJs:
+			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
+			case Dygraphs:
+			case DygraphsCsvLocal:
+			case DygraphsCsvServer:
+			case DataTables:
+			case DataTablesCsvLocal:
+			case DataTablesCsvServer:
+			case C3:
+			case ChartJs:
+			case Datamaps:
+			case DatamapsFile:
+			case Leaflet:
+			case OpenLayers:
+			case TabularHeatmap:
+			case SaikuReport:
+			case MongoDB:
+			case Velocity:
+			case OrgChartDatabase:
+			case OrgChartJson:
+			case OrgChartList:
+			case OrgChartAjax:
+			case Plotly:
+				enableEmail = false;
+				break;
+			default:
+				enableEmail = true;
+		}
+
+		if (!Config.isEmailServerConfigured() || StringUtils.isBlank(sessionUser.getEmail())) {
+			enableEmail = false;
+		}
 
 		//little used? enable via setting? Enable Direct Report Emailing?
-		enableEmail = false; //disable email for now? feature may be abused by users to send spam?
+		//disable email for now? feature may be abused by users to send spam?
+		enableEmail = false;
 		request.setAttribute("enableEmail", enableEmail);
 
 		boolean enableSwapAxes;
