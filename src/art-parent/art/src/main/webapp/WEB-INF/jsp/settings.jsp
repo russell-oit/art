@@ -859,6 +859,16 @@ Settings configuration page
 							<form:errors path="jwtTokenExpiryMins" cssClass="error"/>
 						</div>
 					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="enableDirectReportEmailing">
+							<spring:message code="settings.label.enableDirectReportEmailing"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="enableDirectReportEmailing" id="enableDirectReportEmailing" class="switch-yes-no"/>
+							</div>
+						</div>
+					</div>
 				</fieldset>
 
 				<fieldset>

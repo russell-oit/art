@@ -101,6 +101,21 @@ public class Settings implements Serializable {
 	private int passwordMinSpecial;
 	private boolean clearTextPasswords; //used to enable import with passwords specified in clear text
 	private int jwtTokenExpiryMins = 60;
+	private boolean enableDirectReportEmailing;
+
+	/**
+	 * @return the enableDirectReportEmailing
+	 */
+	public boolean isEnableDirectReportEmailing() {
+		return enableDirectReportEmailing;
+	}
+
+	/**
+	 * @param enableDirectReportEmailing the enableDirectReportEmailing to set
+	 */
+	public void setEnableDirectReportEmailing(boolean enableDirectReportEmailing) {
+		this.enableDirectReportEmailing = enableDirectReportEmailing;
+	}
 
 	/**
 	 * @return the jwtTokenExpiryMins

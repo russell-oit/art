@@ -137,8 +137,9 @@ public class SettingsService {
 			settings.setPasswordMinUppercase(rs.getInt("PASSWORD_MIN_UPPERCASE"));
 			settings.setPasswordMinNumeric(rs.getInt("PASSWORD_MIN_NUMERIC"));
 			settings.setPasswordMinSpecial(rs.getInt("PASSWORD_MIN_SPECIAL"));
-			settings.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			settings.setJwtTokenExpiryMins(rs.getInt("JWT_TOKEN_EXPIRY"));
+			settings.setEnableDirectReportEmailing(rs.getBoolean("DIRECT_REPORT_EMAILING"));
+			settings.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			settings.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt passwords
@@ -243,8 +244,9 @@ public class SettingsService {
 					+ " ERROR_EMAIL_EXPIRE_AFTER, ERROR_EMAIL_DIGEST_FREQUENCY,"
 					+ " PASSWORD_MIN_LENGTH, PASSWORD_MIN_LOWERCASE, PASSWORD_MIN_UPPERCASE,"
 					+ " PASSWORD_MIN_NUMERIC, PASSWORD_MIN_SPECIAL, JWT_TOKEN_EXPIRY,"
+					+ " DIRECT_REPORT_EMAILING,"
 					+ " UPDATE_DATE, UPDATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 60) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 61) + ")";
 
 			Object[] values = {
 				settings.getSmtpServer(),
@@ -305,6 +307,7 @@ public class SettingsService {
 				settings.getPasswordMinNumeric(),
 				settings.getPasswordMinSpecial(),
 				settings.getJwtTokenExpiryMins(),
+				BooleanUtils.toInteger(settings.isEnableDirectReportEmailing()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};

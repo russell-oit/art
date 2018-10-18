@@ -263,7 +263,7 @@ public class RunReportHelper {
 			}
 		}
 		request.setAttribute("hasDateRangeParam", hasDateRangeParam);
-		
+
 		boolean hasLovParam = false;
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
@@ -273,7 +273,7 @@ public class RunReportHelper {
 			}
 		}
 		request.setAttribute("hasLovParam", hasLovParam);
-		
+
 		boolean hasChainedParam = false;
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
@@ -283,7 +283,7 @@ public class RunReportHelper {
 			}
 		}
 		request.setAttribute("hasChainedParam", hasChainedParam);
-		
+
 		boolean hasRobinHerbotsMask = false;
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
@@ -517,13 +517,12 @@ public class RunReportHelper {
 				enableEmail = true;
 		}
 
-		if (!Config.isEmailServerConfigured() || StringUtils.isBlank(sessionUser.getEmail())) {
+		if (!Config.getSettings().isEnableDirectReportEmailing()
+				|| !Config.isEmailServerConfigured()
+				|| StringUtils.isBlank(sessionUser.getEmail())) {
 			enableEmail = false;
 		}
 
-		//little used? enable via setting? Enable Direct Report Emailing?
-		//disable email for now? feature may be abused by users to send spam?
-		enableEmail = false;
 		request.setAttribute("enableEmail", enableEmail);
 
 		boolean enableSwapAxes;
