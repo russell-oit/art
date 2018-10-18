@@ -544,8 +544,8 @@ public class ReportJob implements org.quartz.Job {
 					case Website:
 						sendFileToWebsite(destination, fullLocalFileName);
 						break;
-					case B2Synapticloop:
-						sendFileToB2Synapticloop(destination, fullLocalFileName);
+					case B2:
+						sendFileToB2(destination, fullLocalFileName);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected destination type: " + destinationType);
@@ -561,8 +561,8 @@ public class ReportJob implements org.quartz.Job {
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
-	private void sendFileToB2Synapticloop(Destination destination, String fullLocalFileName) {
-		logger.debug("Entering sendFileToB2Synapticloop: destination={},"
+	private void sendFileToB2(Destination destination, String fullLocalFileName) {
+		logger.debug("Entering sendFileToB2: destination={},"
 				+ " fullLocalFileName='{}'", destination, fullLocalFileName);
 		
 		B2ApiClient b2ApiClient = new B2ApiClient();

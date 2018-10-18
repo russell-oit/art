@@ -189,7 +189,7 @@
 					case 'S3jclouds':
 					case 'S3AwsSdk':
 					case 'Azure':
-					case 'B2Synapticloop':
+					case 'B2':
 					case 'GoogleCloudStorage':
 					case 'WebDav':
 						$("#subDirectoryDiv").show();
