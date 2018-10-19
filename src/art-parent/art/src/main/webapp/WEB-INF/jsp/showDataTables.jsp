@@ -162,7 +162,7 @@
 		orderClasses: false,
 		order: [],
 		pagingType: "full_numbers",
-		lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
+		lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "${showAllRowsText}"]],
 		pageLength: 50,
 		processing: true,
 		dom: "lBfrtip",
