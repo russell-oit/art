@@ -316,7 +316,7 @@ public class ParameterController {
 	 *
 	 * @param file the file to save
 	 * @param parameter the parameter object to set
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
 	private String saveTemplateFile(MultipartFile file, Parameter parameter)

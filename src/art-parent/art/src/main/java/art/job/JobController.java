@@ -732,7 +732,7 @@ public class JobController {
 	 *
 	 * @param file the file to save
 	 * @param job the job object to set
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
 	private String saveEmailTemplateFile(MultipartFile file, Job job)
