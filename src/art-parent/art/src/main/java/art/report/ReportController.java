@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.owasp.encoder.Encode;
@@ -1007,7 +1008,7 @@ public class ReportController {
 
 			if (FinalFilenameValidator.isValid(filename)) {
 				try {
-					boolean overwrite = Boolean.parseBoolean(request.getParameter("overwriteFiles"));
+					boolean overwrite = BooleanUtils.toBoolean(request.getParameter("overwriteFiles"));
 					String errorMessage = saveFile(file, reportTypeId, overwrite, locale);
 					if (errorMessage != null) {
 						fileDetails.setError(errorMessage);
