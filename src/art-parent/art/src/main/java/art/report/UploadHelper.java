@@ -23,31 +23,53 @@ import art.utils.FinalFilenameValidator;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Provides helper methods for saving uploaded files to the server
- * 
+ *
  * @author Timothy Anyona
  */
 public class UploadHelper {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(UploadHelper.class);
-	
-		/**
+
+	private MessageSource messageSource;
+	private Locale locale;
+
+	public UploadHelper() {
+
+	}
+
+	public UploadHelper(MessageSource messageSource, Locale locale) {
+		this.messageSource = messageSource;
+		this.locale = locale;
+	}
+
+	public String saveFile(MultipartFile file, String templatesPath,
+			List<String> validExtensions) throws IOException {
+
+		boolean overwrite = true;
+		return saveFile(file, templatesPath, validExtensions, overwrite);
+	}
+
+	/**
 	 * Saves a file and updates the report template property with the file name
 	 *
 	 * @param file the file to save
 	 * @param templatesPath the directory in which to save the file
 	 * @param validExtensions the allowed file extensions
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @param overwrite whether to overwrite existing files
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
 	public String saveFile(MultipartFile file, String templatesPath,
-			List<String> validExtensions) throws IOException {
+			List<String> validExtensions, boolean overwrite) throws IOException {
 
 		logger.debug("Entering saveFile: templatesPath='{}'", templatesPath);
 
@@ -72,7 +94,14 @@ public class UploadHelper {
 		logger.debug("maxUploadSize={}, uploadSize={}", maxUploadSize, uploadSize);
 
 		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //-1 or any negative value means no size limit
-			return "reports.message.fileBiggerThanMax";
+			if (messageSource != null && locale != null) {
+				Object[] value = {
+					maxUploadSize
+				};
+				return messageSource.getMessage("reports.message.fileTooLargeMB", value, locale);
+			} else {
+				throw new RuntimeException("File too large. Maximum allowed is " + maxUploadSize + " MB.");
+			}
 		}
 
 		String filename = file.getOriginalFilename();
@@ -80,19 +109,44 @@ public class UploadHelper {
 		String extension = FilenameUtils.getExtension(filename);
 
 		if (!ArtUtils.containsIgnoreCase(validExtensions, extension)) {
-			return "reports.message.fileTypeNotAllowed";
+			if (messageSource != null && locale != null) {
+				Object[] value = {
+					extension
+				};
+				return messageSource.getMessage("reports.message.fileTypeNotAllowed2", value, locale);
+			} else {
+				throw new RuntimeException("File type not allowed: " + extension);
+			}
 		}
 
 		if (!FinalFilenameValidator.isValid(filename)) {
-			return "reports.message.invalidFilename";
+			if (messageSource != null && locale != null) {
+				Object[] value = {
+					filename
+				};
+				return messageSource.getMessage("reports.message.invalidFilename2", value, locale);
+			} else {
+				throw new RuntimeException("Invalid file name: " + filename);
+			}
 		}
 
 		//save file
 		String destinationFilename = templatesPath + filename;
 		File destinationFile = new File(destinationFilename);
-		file.transferTo(destinationFile);
+		if (!overwrite && destinationFile.exists()) {
+			if (messageSource != null && locale != null) {
+				Object[] value = {
+					filename
+				};
+				return messageSource.getMessage("page.message.fileExists2", value, locale);
+			} else {
+				throw new RuntimeException("File exists: " + filename);
+			}
+		} else {
+			file.transferTo(destinationFile);
+		}
 
 		return null;
 	}
-	
+
 }

@@ -145,8 +145,20 @@ Edit parameter definition
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
 						<c:if test="${showErrors}">
-							<p><encode:forHtmlContent value="${error}"/></p>
+							<p>${encode:forHtmlContent(error)}</p>
 						</c:if>
+					</div>
+				</c:if>
+				<c:if test="${not empty message}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<spring:message code="${message}"/>
+					</div>
+				</c:if>
+				<c:if test="${not empty plainMessage}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						${encode:forHtmlContent(plainMessage)}
 					</div>
 				</c:if>
 
@@ -324,6 +336,12 @@ Edit parameter definition
 							</span>
 							<span class="fileinput-filename"></span>
 							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="overwriteFiles"/>
+								<spring:message code="page.checkbox.overwriteFiles"/>
+							</label>
 						</div>
 					</div>
 				</div>

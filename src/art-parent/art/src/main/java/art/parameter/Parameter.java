@@ -91,6 +91,22 @@ public class Parameter implements Serializable {
 	private Report defaultValueReport;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "lovReport")
 	private Report lovReport;
+	@JsonIgnore
+	private boolean overwriteFiles;
+
+	/**
+	 * @return the overwriteFiles
+	 */
+	public boolean isOverwriteFiles() {
+		return overwriteFiles;
+	}
+
+	/**
+	 * @param overwriteFiles the overwriteFiles to set
+	 */
+	public void setOverwriteFiles(boolean overwriteFiles) {
+		this.overwriteFiles = overwriteFiles;
+	}
 
 	/**
 	 * @return the template
