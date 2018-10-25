@@ -72,8 +72,6 @@ public class ParameterController {
 	@Autowired
 	private MessageSource messageSource;
 
-	private Locale locale;
-
 	@RequestMapping(value = "/parameters", method = RequestMethod.GET)
 	public String showParameters(Model model) {
 		logger.debug("Entering showParameters");
@@ -212,8 +210,7 @@ public class ParameterController {
 
 		try {
 			//save template file
-			this.locale = locale;
-			String saveFileMessage = saveTemplateFile(templateFile, parameter);
+			String saveFileMessage = saveTemplateFile(templateFile, parameter, locale);
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
 				model.addAttribute("plainMessage", saveFileMessage);
@@ -316,11 +313,12 @@ public class ParameterController {
 	 *
 	 * @param file the file to save
 	 * @param parameter the parameter object to set
+	 * @param locale the locale
 	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveTemplateFile(MultipartFile file, Parameter parameter)
-			throws IOException {
+	private String saveTemplateFile(MultipartFile file, Parameter parameter,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering saveTemplateFile: parameter={}", parameter);
 

@@ -67,8 +67,6 @@ public class EncryptorController {
 	@Autowired
 	private MessageSource messageSource;
 
-	private Locale locale;
-
 	@RequestMapping(value = "/encryptors", method = RequestMethod.GET)
 	public String showEncryptors(Model model) {
 		logger.debug("Entering showEncryptors");
@@ -199,8 +197,7 @@ public class EncryptorController {
 			}
 
 			//save files
-			this.locale = locale;
-			String saveFilesMessage = saveFiles(encryptor, publicKeyFile, signingKeyFile);
+			String saveFilesMessage = saveFiles(encryptor, publicKeyFile, signingKeyFile, locale);
 			logger.debug("saveFilesMessage='{}'", saveFilesMessage);
 			if (saveFilesMessage != null) {
 				model.addAttribute("plainMessage", saveFilesMessage);
@@ -417,11 +414,12 @@ public class EncryptorController {
 	 *
 	 * @param file the file to save
 	 * @param encryptor the encryptor object to set
+	 * @param locale the locale
 	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String savePublicKeyFile(MultipartFile file, Encryptor encryptor)
-			throws IOException {
+	private String savePublicKeyFile(MultipartFile file, Encryptor encryptor,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering savePublicKeyFile: encryptor={}", encryptor);
 
@@ -464,11 +462,12 @@ public class EncryptorController {
 	 *
 	 * @param file the file to save
 	 * @param encryptor the encryptor object to set
+	 * @param locale the locale
 	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveSigningKeyFile(MultipartFile file, Encryptor encryptor)
-			throws IOException {
+	private String saveSigningKeyFile(MultipartFile file, Encryptor encryptor,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering saveSigningKeyFile: encryptor={}", encryptor);
 
@@ -511,22 +510,23 @@ public class EncryptorController {
 	 * @param encryptor the encryptor to use
 	 * @param publicKeyFile the public key file
 	 * @param signingKeyFile the signing key file
+	 * @param locale the locale
 	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
 	private String saveFiles(Encryptor encryptor, MultipartFile publicKeyFile,
-			MultipartFile signingKeyFile) throws IOException {
+			MultipartFile signingKeyFile, Locale locale) throws IOException {
 
 		logger.debug("Entering saveFiles: encryptor={}", encryptor);
 
 		String message;
 
-		message = savePublicKeyFile(publicKeyFile, encryptor);
+		message = savePublicKeyFile(publicKeyFile, encryptor, locale);
 		if (message != null) {
 			return message;
 		}
 
-		message = saveSigningKeyFile(signingKeyFile, encryptor);
+		message = saveSigningKeyFile(signingKeyFile, encryptor, locale);
 		if (message != null) {
 			return message;
 		}

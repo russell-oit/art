@@ -81,8 +81,6 @@ public class DestinationController {
 	@Autowired
 	private MessageSource messageSource;
 
-	private Locale locale;
-
 	@RequestMapping(value = "/destinations", method = RequestMethod.GET)
 	public String showDestinations(Model model) {
 		logger.debug("Entering showDestinations");
@@ -224,8 +222,7 @@ public class DestinationController {
 			}
 
 			//save google cloud storage service account json key file
-			this.locale = locale;
-			String saveFileMessage = saveGoogleJsonKeyFile(jsonKeyFile, destination);
+			String saveFileMessage = saveGoogleJsonKeyFile(jsonKeyFile, destination, locale);
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
 				model.addAttribute("plainMessage", saveFileMessage);
@@ -655,11 +652,12 @@ public class DestinationController {
 	 *
 	 * @param file the file to save
 	 * @param destination the destination object to set
+	 * @param locale the locale
 	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveGoogleJsonKeyFile(MultipartFile file, Destination destination)
-			throws IOException {
+	private String saveGoogleJsonKeyFile(MultipartFile file, Destination destination,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering saveGoogleJsonKeyFile: destination={}", destination);
 

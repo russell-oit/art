@@ -128,8 +128,6 @@ public class JobController {
 	@Autowired
 	private UserService userService;
 
-	private Locale locale;
-
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
 		logger.debug("Entering showJobs");
@@ -365,8 +363,7 @@ public class JobController {
 
 		try {
 			//save email template file
-			this.locale = locale;
-			String saveFileMessage = saveEmailTemplateFile(emailTemplateFile, job);
+			String saveFileMessage = saveEmailTemplateFile(emailTemplateFile, job, locale);
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
 				model.addAttribute("plainMessage", saveFileMessage);
@@ -732,11 +729,12 @@ public class JobController {
 	 *
 	 * @param file the file to save
 	 * @param job the job object to set
+	 * @param locale the locale
 	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveEmailTemplateFile(MultipartFile file, Job job)
-			throws IOException {
+	private String saveEmailTemplateFile(MultipartFile file, Job job,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering saveEmailTemplateFile: job={}", job);
 
