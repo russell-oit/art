@@ -51,13 +51,6 @@ public class UploadHelper {
 		this.locale = locale;
 	}
 
-	public String saveFile(MultipartFile file, String templatesPath,
-			List<String> validExtensions) throws IOException {
-
-		boolean overwrite = true;
-		return saveFile(file, templatesPath, validExtensions, overwrite);
-	}
-
 	/**
 	 * Saves a file and updates the report template property with the file name
 	 *
