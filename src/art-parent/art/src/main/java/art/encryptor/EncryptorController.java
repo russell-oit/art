@@ -513,10 +513,9 @@ public class EncryptorController {
 	 * @param signingKeyFile the signing key file
 	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
-	 * @throws SQLException
 	 */
 	private String saveFiles(Encryptor encryptor, MultipartFile publicKeyFile,
-			MultipartFile signingKeyFile) throws IOException, SQLException {
+			MultipartFile signingKeyFile) throws IOException {
 
 		logger.debug("Entering saveFiles: encryptor={}", encryptor);
 

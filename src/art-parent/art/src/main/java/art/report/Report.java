@@ -195,6 +195,22 @@ public class Report implements Serializable {
 	private String dtRowId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 	private String reportGroupNames; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 	private String reportGroupNamesHtml;
+	@JsonIgnore
+	private boolean overwriteFiles;
+
+	/**
+	 * @return the overwriteFiles
+	 */
+	public boolean isOverwriteFiles() {
+		return overwriteFiles;
+	}
+
+	/**
+	 * @param overwriteFiles the overwriteFiles to set
+	 */
+	public void setOverwriteFiles(boolean overwriteFiles) {
+		this.overwriteFiles = overwriteFiles;
+	}
 
 	/**
 	 * @return the name2
