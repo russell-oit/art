@@ -81,6 +81,8 @@ public class DestinationController {
 	@Autowired
 	private MessageSource messageSource;
 
+	private Locale locale;
+
 	@RequestMapping(value = "/destinations", method = RequestMethod.GET)
 	public String showDestinations(Model model) {
 		logger.debug("Entering showDestinations");
@@ -202,7 +204,7 @@ public class DestinationController {
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam(value = "jsonKeyFile", required = false) MultipartFile jsonKeyFile,
-			HttpSession session) {
+			HttpSession session, Locale locale) {
 
 		logger.debug("Entering saveDestination: destination={}, action='{}'", destination, action);
 
@@ -220,12 +222,13 @@ public class DestinationController {
 				model.addAttribute("message", setPasswordMessage);
 				return showEditDestination(action, model);
 			}
-			
+
 			//save google cloud storage service account json key file
+			this.locale = locale;
 			String saveFileMessage = saveGoogleJsonKeyFile(jsonKeyFile, destination);
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
-				model.addAttribute("message", saveFileMessage);
+				model.addAttribute("plainMessage", saveFileMessage);
 				return showEditDestination(action, model);
 			}
 
@@ -679,17 +682,15 @@ public class DestinationController {
 
 		//save file
 		String templatesPath = Config.getTemplatesPath();
-		UploadHelper uploadHelper = new UploadHelper();
-		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, destination.isOverwriteFiles());
 
 		if (message != null) {
 			return message;
 		}
 
-		if (destination != null) {
-			String filename = file.getOriginalFilename();
-			destination.setGoogleJsonKeyFile(filename);
-		}
+		String filename = file.getOriginalFilename();
+		destination.setGoogleJsonKeyFile(filename);
 
 		return null;
 	}
