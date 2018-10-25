@@ -128,6 +128,8 @@ public class JobController {
 	@Autowired
 	private UserService userService;
 
+	private Locale locale;
+
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
 		logger.debug("Entering showJobs");
@@ -363,10 +365,11 @@ public class JobController {
 
 		try {
 			//save email template file
+			this.locale = locale;
 			String saveFileMessage = saveEmailTemplateFile(emailTemplateFile, job);
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
-				model.addAttribute("message", saveFileMessage);
+				model.addAttribute("plainMessage", saveFileMessage);
 				return showEditJob(action, model, job, locale);
 			}
 
@@ -756,17 +759,15 @@ public class JobController {
 
 		//save file
 		String templatesPath = Config.getJobTemplatesPath();
-		UploadHelper uploadHelper = new UploadHelper();
-		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, job.isOverwriteFiles());
 
 		if (message != null) {
 			return message;
 		}
 
-		if (job != null) {
-			String filename = file.getOriginalFilename();
-			job.setEmailTemplate(filename);
-		}
+		String filename = file.getOriginalFilename();
+		job.setEmailTemplate(filename);
 
 		return null;
 	}
