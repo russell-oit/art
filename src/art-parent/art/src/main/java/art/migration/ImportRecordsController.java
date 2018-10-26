@@ -1022,7 +1022,7 @@ public class ImportRecordsController {
 						reports = mapper.readValue(reportsFile, new TypeReference<List<Report>>() {
 						});
 						reportsFile.delete();
-						copyReportTemplateFiles(reports, artTempPath, file);
+						copyReportFiles(reports, artTempPath, file);
 					} else {
 						throw new IllegalStateException("File not found: " + reportsFilePath);
 					}
@@ -1041,7 +1041,7 @@ public class ImportRecordsController {
 					if (unpacked) {
 						reports = csvRoutines.parseAll(Report.class, reportsFile);
 						reportsFile.delete();
-						copyReportTemplateFiles(reports, artTempPath, file);
+						copyReportFiles(reports, artTempPath, file);
 					} else {
 						throw new IllegalStateException("File not found: " + reportsFilePath);
 					}
@@ -1290,7 +1290,7 @@ public class ImportRecordsController {
 	 * @param zipFile the zip file that contains template files to be unzipped
 	 * @throws IOException
 	 */
-	private void copyReportTemplateFiles(List<Report> reports, String sourcePath,
+	private void copyReportFiles(List<Report> reports, String sourcePath,
 			File zipFile) throws IOException {
 
 		for (Report report : reports) {
@@ -1314,7 +1314,15 @@ public class ImportRecordsController {
 						}
 						String destinationFilePath = templatesPath + template;
 						File destinationFile = new File(destinationFilePath);
-						FileUtils.copyFile(templateFile, destinationFile);
+						if (destinationFile.exists()) {
+							String newTemplate = ArtUtils.renameFile(template);
+							String newDestinationFilePath = templatesPath + newTemplate;
+							File newDestinationFile = new File(newDestinationFilePath);
+							FileUtils.copyFile(templateFile, newDestinationFile);
+							report.setTemplate(newTemplate);
+						} else {
+							FileUtils.copyFile(templateFile, destinationFile);
+						}
 						templateFile.delete();
 					}
 				}
