@@ -89,6 +89,7 @@ import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -941,7 +942,7 @@ public class ImportRecordsController {
 						parameters = mapper.readValue(parametersFile, new TypeReference<List<Parameter>>() {
 						});
 						parametersFile.delete();
-						copyParameterTemplateFiles(parameters, artTempPath, file);
+						copyParameterFiles(parameters, artTempPath, file);
 					} else {
 						throw new IllegalStateException("File not found: " + parametersFilePath);
 					}
@@ -959,7 +960,7 @@ public class ImportRecordsController {
 					if (unpacked) {
 						parameters = csvRoutines.parseAll(Parameter.class, parametersFile);
 						parametersFile.delete();
-						copyParameterTemplateFiles(parameters, artTempPath, file);
+						copyParameterFiles(parameters, artTempPath, file);
 					} else {
 						throw new IllegalStateException("File not found: " + parametersFilePath);
 					}
@@ -1531,7 +1532,7 @@ public class ImportRecordsController {
 	 * @param zipFile the zip file that contains template files to be unzipped
 	 * @throws IOException
 	 */
-	private void copyParameterTemplateFiles(List<Parameter> parameters, String sourcePath,
+	private void copyParameterFiles(List<Parameter> parameters, String sourcePath,
 			File zipFile) throws IOException {
 
 		for (Parameter parameter : parameters) {
@@ -1544,7 +1545,15 @@ public class ImportRecordsController {
 					String jsTemplatesPath = Config.getJsTemplatesPath();
 					String destinationFilePath = jsTemplatesPath + template;
 					File destinationFile = new File(destinationFilePath);
-					FileUtils.copyFile(templateFile, destinationFile);
+					if (destinationFile.exists()) {
+						String newTemplate = ArtUtils.renameFile(template);
+						String newDestinationFilePath = jsTemplatesPath + newTemplate;
+						File newDestinationFile = new File(newDestinationFilePath);
+						FileUtils.copyFile(templateFile, newDestinationFile);
+						parameter.setTemplate(newTemplate);
+					} else {
+						FileUtils.copyFile(templateFile, destinationFile);
+					}
 					templateFile.delete();
 				}
 			}

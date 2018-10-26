@@ -644,4 +644,20 @@ public class ArtUtils {
 		}
 	}
 
+	/**
+	 * Generates a new file name for a given file name
+	 *
+	 * @param filename the original file name
+	 * @return the new file name
+	 */
+	public static String renameFile(String filename) {
+		String extension = FilenameUtils.getExtension(filename);
+		String newFilename = FilenameUtils.getBaseName(filename);
+		newFilename += getRandomFileNameString();
+		if (StringUtils.isNotBlank(extension)) {
+			newFilename += "." + extension;
+		}
+		return newFilename;
+	}
+
 }
