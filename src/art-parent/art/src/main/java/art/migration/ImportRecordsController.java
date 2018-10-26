@@ -89,7 +89,6 @@ import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1315,11 +1314,7 @@ public class ImportRecordsController {
 						String destinationFilePath = templatesPath + template;
 						File destinationFile = new File(destinationFilePath);
 						if (destinationFile.exists()) {
-							String newTemplate = ArtUtils.renameFile(template);
-							String newDestinationFilePath = templatesPath + newTemplate;
-							File newDestinationFile = new File(newDestinationFilePath);
-							FileUtils.copyFile(templateFile, newDestinationFile);
-							report.setTemplate(newTemplate);
+							logger.warn("File not overwritten: '{}'. {}", template, report);
 						} else {
 							FileUtils.copyFile(templateFile, destinationFile);
 						}
@@ -1602,11 +1597,7 @@ public class ImportRecordsController {
 					String destinationFilePath = jsTemplatesPath + template;
 					File destinationFile = new File(destinationFilePath);
 					if (destinationFile.exists()) {
-						String newTemplate = ArtUtils.renameFile(template);
-						String newDestinationFilePath = jsTemplatesPath + newTemplate;
-						File newDestinationFile = new File(newDestinationFilePath);
-						FileUtils.copyFile(templateFile, newDestinationFile);
-						parameter.setTemplate(newTemplate);
+						logger.warn("File not overwritten: '{}'. {}", template, parameter);
 					} else {
 						FileUtils.copyFile(templateFile, destinationFile);
 					}
@@ -1645,11 +1636,7 @@ public class ImportRecordsController {
 								String destinationFilePath = templatesPath + publicKeyFileName;
 								File destinationFile = new File(destinationFilePath);
 								if (destinationFile.exists()) {
-									String newPublicKeyFileName = ArtUtils.renameFile(publicKeyFileName);
-									String newDestinationFilePath = templatesPath + newPublicKeyFileName;
-									File newDestinationFile = new File(newDestinationFilePath);
-									FileUtils.copyFile(publicKeyFile, newDestinationFile);
-									encryptor.setOpenPgpPublicKeyFile(newPublicKeyFileName);
+									logger.warn("File not overwritten: '{}'. {}", publicKeyFileName, encryptor);
 								} else {
 									FileUtils.copyFile(publicKeyFile, destinationFile);
 								}
