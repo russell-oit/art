@@ -1588,7 +1588,15 @@ public class ImportRecordsController {
 								String templatesPath = Config.getTemplatesPath();
 								String destinationFilePath = templatesPath + publicKeyFileName;
 								File destinationFile = new File(destinationFilePath);
-								FileUtils.copyFile(publicKeyFile, destinationFile);
+								if (destinationFile.exists()) {
+									String newPublicKeyFileName = ArtUtils.renameFile(publicKeyFileName);
+									String newDestinationFilePath = templatesPath + newPublicKeyFileName;
+									File newDestinationFile = new File(newDestinationFilePath);
+									FileUtils.copyFile(publicKeyFile, newDestinationFile);
+									encryptor.setOpenPgpPublicKeyFile(newPublicKeyFileName);
+								} else {
+									FileUtils.copyFile(publicKeyFile, destinationFile);
+								}
 								publicKeyFile.delete();
 							}
 						}
