@@ -57,7 +57,7 @@
 <spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
-					 mainColumnClass="col-md-6 col-md-offset-3">
+					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="belowMainPanel">
 		<div class="row">
@@ -77,11 +77,7 @@
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects-1.0.1/jquery.chained.remote.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
 
 		<script>
 			//put obtaining of server offset in head to reduce difference between server and client time
@@ -104,11 +100,11 @@
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
@@ -407,7 +403,7 @@
 				if (jobOutputFormat) {
 					$("#outputFormat > [value=" + jobOutputFormat + "]").attr("selected", "true");
 				}
-				
+
 				$("#outputFormat").selectpicker('refresh');
 			}
 
@@ -522,6 +518,12 @@
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<spring:message code="${message}"/>
+					</div>
+				</c:if>
+				<c:if test="${not empty plainMessage}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						${encode:forHtmlContent(plainMessage)}
 					</div>
 				</c:if>
 
@@ -870,6 +872,12 @@
 								</span>
 								<span class="fileinput-filename"></span>
 								<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+							</div>
+							<div class="checkbox">
+								<label>
+									<form:checkbox path="overwriteFiles"/>
+									<spring:message code="page.checkbox.overwriteFiles"/>
+								</label>
 							</div>
 						</div>
 					</div>

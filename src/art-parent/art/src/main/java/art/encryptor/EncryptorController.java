@@ -29,12 +29,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -61,6 +63,9 @@ public class EncryptorController {
 
 	@Autowired
 	private ReportService reportService;
+
+	@Autowired
+	private MessageSource messageSource;
 
 	@RequestMapping(value = "/encryptors", method = RequestMethod.GET)
 	public String showEncryptors(Model model) {
@@ -172,7 +177,7 @@ public class EncryptorController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam(value = "publicKeyFile", required = false) MultipartFile publicKeyFile,
 			@RequestParam(value = "signingKeyFile", required = false) MultipartFile signingKeyFile,
-			HttpSession session) {
+			HttpSession session, Locale locale) {
 
 		logger.debug("Entering saveEncryptor: encryptor={}, action='{}'", encryptor, action);
 
@@ -192,10 +197,10 @@ public class EncryptorController {
 			}
 
 			//save files
-			String saveFilesMessage = saveFiles(encryptor, publicKeyFile, signingKeyFile);
+			String saveFilesMessage = saveFiles(encryptor, publicKeyFile, signingKeyFile, locale);
 			logger.debug("saveFilesMessage='{}'", saveFilesMessage);
 			if (saveFilesMessage != null) {
-				model.addAttribute("message", saveFilesMessage);
+				model.addAttribute("plainMessage", saveFilesMessage);
 				return showEditEncryptor(action, model);
 			}
 
@@ -409,11 +414,12 @@ public class EncryptorController {
 	 *
 	 * @param file the file to save
 	 * @param encryptor the encryptor object to set
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @param locale the locale
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String savePublicKeyFile(MultipartFile file, Encryptor encryptor)
-			throws IOException {
+	private String savePublicKeyFile(MultipartFile file, Encryptor encryptor,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering savePublicKeyFile: encryptor={}", encryptor);
 
@@ -437,17 +443,15 @@ public class EncryptorController {
 
 		//save file
 		String templatesPath = Config.getTemplatesPath();
-		UploadHelper uploadHelper = new UploadHelper();
-		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, encryptor.isOverwriteFiles());
 
 		if (message != null) {
 			return message;
 		}
 
-		if (encryptor != null) {
-			String filename = file.getOriginalFilename();
-			encryptor.setOpenPgpPublicKeyFile(filename);
-		}
+		String filename = file.getOriginalFilename();
+		encryptor.setOpenPgpPublicKeyFile(filename);
 
 		return null;
 	}
@@ -458,11 +462,12 @@ public class EncryptorController {
 	 *
 	 * @param file the file to save
 	 * @param encryptor the encryptor object to set
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @param locale the locale
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveSigningKeyFile(MultipartFile file, Encryptor encryptor)
-			throws IOException {
+	private String saveSigningKeyFile(MultipartFile file, Encryptor encryptor,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering saveSigningKeyFile: encryptor={}", encryptor);
 
@@ -486,17 +491,15 @@ public class EncryptorController {
 
 		//save file
 		String templatesPath = Config.getTemplatesPath();
-		UploadHelper uploadHelper = new UploadHelper();
-		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, encryptor.isOverwriteFiles());
 
 		if (message != null) {
 			return message;
 		}
 
-		if (encryptor != null) {
-			String filename = file.getOriginalFilename();
-			encryptor.setOpenPgpSigningKeyFile(filename);
-		}
+		String filename = file.getOriginalFilename();
+		encryptor.setOpenPgpSigningKeyFile(filename);
 
 		return null;
 	}
@@ -507,24 +510,23 @@ public class EncryptorController {
 	 * @param encryptor the encryptor to use
 	 * @param publicKeyFile the public key file
 	 * @param signingKeyFile the signing key file
-	 * @return i18n message to display in the user interface if there was a
-	 * problem, null otherwise
+	 * @param locale the locale
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
-	 * @throws SQLException
 	 */
-	public String saveFiles(Encryptor encryptor, MultipartFile publicKeyFile,
-			MultipartFile signingKeyFile) throws IOException, SQLException {
+	private String saveFiles(Encryptor encryptor, MultipartFile publicKeyFile,
+			MultipartFile signingKeyFile, Locale locale) throws IOException {
 
 		logger.debug("Entering saveFiles: encryptor={}", encryptor);
 
 		String message;
 
-		message = savePublicKeyFile(publicKeyFile, encryptor);
+		message = savePublicKeyFile(publicKeyFile, encryptor, locale);
 		if (message != null) {
 			return message;
 		}
 
-		message = saveSigningKeyFile(signingKeyFile, encryptor);
+		message = saveSigningKeyFile(signingKeyFile, encryptor, locale);
 		if (message != null) {
 			return message;
 		}

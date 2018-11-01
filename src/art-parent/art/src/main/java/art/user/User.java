@@ -24,7 +24,6 @@ import art.permission.Permission;
 import art.reportgroup.ReportGroup;
 import art.role.Role;
 import art.usergroup.UserGroup;
-import art.utils.ArtUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
@@ -76,12 +75,28 @@ public class User implements Serializable {
 	private boolean generateAndSend; //only used for user interface logic
 	@Parsed
 	private boolean clearTextPassword; //used to allow import with clear text passwords
+	@Parsed
+	private boolean publicUser;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
 	private List<Role> roles;
 	private List<Permission> permissions;
 	@JsonIgnore
 	private List<String> flatPermissions = new ArrayList<>();
+
+	/**
+	 * @return the publicUser
+	 */
+	public boolean isPublicUser() {
+		return publicUser;
+	}
+
+	/**
+	 * @param publicUser the publicUser to set
+	 */
+	public void setPublicUser(boolean publicUser) {
+		this.publicUser = publicUser;
+	}
 
 	/**
 	 * @return the permissions
@@ -287,12 +302,7 @@ public class User implements Serializable {
 	 * @return the value of canChangePassword
 	 */
 	public boolean isCanChangePassword() {
-		//public user can't change password
-		if (isPublicUser()) {
-			return false;
-		} else {
-			return canChangePassword;
-		}
+		return canChangePassword;
 	}
 
 	/**
@@ -454,12 +464,7 @@ public class User implements Serializable {
 	 * @return the value of accessLevel
 	 */
 	public AccessLevel getAccessLevel() {
-		//ensure public user always has normal user access level
-		if (isPublicUser()) {
-			return AccessLevel.NormalUser;
-		} else {
-			return accessLevel;
-		}
+		return accessLevel;
 	}
 
 	/**
@@ -527,20 +532,6 @@ public class User implements Serializable {
 			return false;
 		} else {
 			return true;
-		}
-	}
-
-	/**
-	 * Returns <code>true</code> if this is the public user
-	 *
-	 * @return <code>true</code> if this is the public user
-	 */
-	@JsonIgnore
-	public boolean isPublicUser() {
-		if (StringUtils.equals(username, ArtUtils.PUBLIC_USER)) {
-			return true;
-		} else {
-			return false;
 		}
 	}
 
@@ -643,7 +634,7 @@ public class User implements Serializable {
 		//https://stackoverflow.com/questions/15560508/invoke-method-with-varargs-in-el-throws-java-lang-illegalargumentexception-wron
 		//https://stackoverflow.com/questions/46955785/illegalargumentexception-on-expression-language-with-varargs-parameter-can-not-b
 		//https://sourceforge.net/p/art/discussion/352129/thread/c1a607e9c1/?limit=25#92c5
-		String[] tempPermissions=StringUtils.split(permissionString, ",");
+		String[] tempPermissions = StringUtils.split(permissionString, ",");
 		String[] strippedPermissions = StringUtils.stripAll(tempPermissions);
 		return hasAnyPermission(strippedPermissions);
 	}
@@ -676,6 +667,21 @@ public class User implements Serializable {
 
 		flatPermissions.addAll(Arrays.asList("configure_users",
 				"configure_art_database", "configure_roles"));
+	}
+
+	/**
+	 * Returns <code>true</code> if the user is allowed to change their
+	 * password. Public users are not allowed to change their password.
+	 *
+	 * @return <code>true</code> if the user is allowed to change their password
+	 */
+	@JsonIgnore
+	public boolean isPasswordChangeAllowed() {
+		if (publicUser) {
+			return false;
+		} else {
+			return canChangePassword;
+		}
 	}
 
 }

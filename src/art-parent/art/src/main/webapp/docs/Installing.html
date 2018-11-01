@@ -34,11 +34,11 @@
        <li><a href="#deployment-on-tomcat">Deployment on Tomcat</a></li> 
       </ol></li> 
      <li><a href="#launch-art">Launch ART</a></li> 
-     <li><a href="#using-the-default-database">Using the default database</a> 
+     <li><a href="#using-the-demo-database">Using the demo database</a> 
       <ol> 
-       <li><a href="#default-users">Default users</a></li> 
-       <li><a href="#default-datasources">Default datasources</a></li> 
-       <li><a href="#default-queries">Default queries</a></li> 
+       <li><a href="#demo-users">Demo users</a></li> 
+       <li><a href="#demo-datasources">Demo datasources</a></li> 
+       <li><a href="#demo-reports">Demo reports</a></li> 
       </ol></li> 
      <li><a href="#using-your-own-rdbms">Using your own RDBMS</a> 
       <ol> 
@@ -55,7 +55,7 @@
    </div> 
    <h1 id="requirements">Requirements</h1> 
    <ul> 
-    <li>Java EE application server e.g. Apache Tomcat</li> 
+    <li>Java application server e.g. Apache Tomcat</li> 
     <li>Java 7 and above</li> 
    </ul> 
    <h1 id="download-art">Download ART</h1> 
@@ -99,60 +99,54 @@ sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
    <h1 id="launch-art">Launch ART</h1> 
    <ul> 
     <li>Using a browser, navigate to localhost:8080/art</li> 
-    <li>Click on the <strong>Settings</strong> button</li> 
-    <li>ART needs a database to store details about queries, users etc (the ART repository). The application comes with an already configured sample database. Click on the <strong>Submit</strong> button to use this default database</li> 
-    <li>Click on the <strong>Log Off</strong> link. You need to log off at this point so that you can log in as an actual user.</li> 
-    <li>Log in using the username/password admin/admin</li> 
+    <li>You will be taken to the ART Database page. ART needs a database to store details about reports, users etc (the ART repository).</li> 
    </ul> 
-   <p>Installation is complete. </p> 
-   <h1 id="using-the-default-database">Using the default database</h1> 
-   <p>ART comes with a sample database embedded within the application. This allows you to explore the application's functionality without having to set up your own database and queries first. The database is a HSQLDB database that is run in standalone mode. The files for the database are contained in the <strong>ART_HOME\WEB-INF\hsqldb</strong> directory of the deployed application. To use this database as the ART repository,</p> 
+   <h1 id="using-the-demo-database">Using the demo database</h1> 
+   <p>ART comes with a demo database embedded within the application. This allows you to explore the application's functionality without having to set up your own database first. The demo database is a HSQLDB database that is run in standalone mode. The files for the database are contained in the <strong>ART_HOME\WEB-INF\hsqldb</strong> directory of the deployed application. To use this database as the ART repository,</p> 
    <ul> 
-    <li>From the <strong>Admin Console</strong>, click on the <strong>Settings</strong> button</li> 
-    <li>Set the ART database username/password to ART/ART (both username and password are case sensitive)</li> 
-    <li>Set the jdbc driver field to "default"</li> 
-    <li>Set the jdbc url field to "default"</li> 
-    <li>Make any other application settings as you like and click on the <strong>Submit</strong> button</li> 
+    <li>Select the <strong>Configure | ART Database</strong> menu</li> 
+    <li>For the <strong>Database Type</strong> field, select <strong>Demo</strong></li> 
+    <li>Click on <strong>Save</strong></li> 
    </ul> 
    <p><strong>Note:</strong></p> 
    <ul> 
-    <li>If you decide to use the default database in a live/production environment, be careful. If you undeploy the application, accidentally or otherwise (e.g. when doing an application upgrade), you will lose the database as the database files will be deleted along with all other application files when the application is undeployed/redeployed.</li> 
+    <li>If you use the demo database as your live/production setting, be careful. If you undeploy the application, accidentally or otherwise (e.g. when doing an application upgrade), you will lose the database as the database files will be deleted along with all other application files when the application is undeployed/redeployed. It is therefore not recommended to use the demo database as your live database.</li> 
    </ul> 
-   <h2 id="default-users">Default users</h2> 
-   <p>The default database has 2 users configured - <strong>admin</strong> and <strong>auser</strong>. To login, use one of the following username/password combinations</p> 
+   <h2 id="demo-users">Demo users</h2> 
+   <p>The demo database has 2 users configured - <strong>admin</strong> and <strong>auser</strong>. To login, use one of the following username/password combinations</p> 
    <ul> 
-    <li>admin/admin (a super admin user)</li> 
+    <li>admin/admin (an admin user)</li> 
     <li>auser/auser (a normal user who can schedule jobs)</li> 
    </ul> 
-   <h2 id="default-datasources">Default datasources</h2> 
-   <p>The default database has 2 datasources configured - <strong>ArtRepository</strong> and <strong>SampleDB</strong>.</p> 
+   <h2 id="demo-datasources">Demo datasources</h2> 
+   <p>The demo database has 2 datasources configured - <strong>ArtRepository</strong> and <strong>SampleDB</strong>.</p> 
    <ul> 
     <li><strong>ArtRepository</strong> allows you to query ART repository tables e.g. ART_USERS, ART_QUERIES etc. The username/password for this datasource is ART/ART</li> 
-    <li><strong>SampleDB</strong> allows you to query a sample target database. It has tables like ORDERS, ITEMS, REGIONS, CITIES. Most of the sample queries use this datasource. The username/password for this datasource is SAMPLE/SAMPLE.</li> 
+    <li><strong>SampleDB</strong> allows you to query a sample target database. It has tables like ORDERS, ITEMS, REGIONS, CITIES. Most of the demo reports use this datasource. The username/password for this datasource is SAMPLE/SAMPLE</li> 
    </ul> 
-   <h2 id="default-queries">Default queries</h2> 
-   <p>The default database comes with a number of queries. These sample queries help to illustrate some of the query types and features of the application e.g. charts, dashboards etc</p> 
+   <h2 id="demo-reports">Demo reports</h2> 
+   <p>The demo database comes with a number of reports. These sample reports help to illustrate some of the report types and features of the application.</p> 
    <h1 id="using-your-own-rdbms">Using your own RDBMS</h1> 
-   <p>You can use a different RDBMS for the ART repository, instead of the sample one that comes with the application. The following steps are required to use a different database.</p> 
+   <p>You can use a different RDBMS for the ART repository, instead of the demo one that comes with the application. The following steps are required to use a different database.</p> 
    <ul> 
-    <li>Deploy the JDBC driver for your database to the application server. e.g. For Apache Tomcat, you can copy the driver to TOMCAT_HOME\lib or TOMCAT_HOME\webapps\art\WEB-INF\lib. ART comes with JDBC drivers for CUBRID, PostgreSQL, MySQL and HSQLDB.</li> 
+    <li>Deploy the JDBC driver for your database to the application server. e.g. For Apache Tomcat, you can copy the driver to TOMCAT_HOME\lib or TOMCAT_HOME\webapps\art\WEB-INF\lib. ART comes with JDBC drivers for a number of databases.</li> 
     <li>Create a database in your RDBMS to be used for the ART repository</li> 
-    <li>Run the SQL statements in the file <strong>PACKAGE_PATH\database\art_tables.sql</strong> to create the ART repository schema. Read the comments at the beginning of the file before running it to see if any modifications are needed for your RDBMS</li> 
+    <li>Run the SQL statements in the file <strong>PACKAGE_PATH\database\art_tables.sql</strong> to create the ART repository schema. Read the comments at the beginning of the file before running it to see if any modifications are needed for your RDBMS.</li> 
     <li>Run the SQL file for your RDBMS located in the <strong>PACKAGE_PATH\database\quartz</strong> directory</li> 
-    <li>Configure your database details in the Settings page</li> 
-    <li>Create a super admin user to administer the application</li> 
+    <li>Configure your database details in the <strong>ART Database</strong> page</li> 
+    <li>Create an admin user to administer the application</li> 
    </ul> 
    <p>A variety of databases can be used including Oracle, MySQL, PostgreSQL, HSQLDB, SQL Server, CUBRID.</p> 
    <h2 id="create-the-database">Create the database</h2> 
    <h3 id="using-mysql-on-windows">Using MySQL on Windows</h3> 
    <ul> 
     <li>Ensure the path to mysql.exe is included in the PATH environment variable</li> 
-    <li> <p>Open a command prompt window </p> 
+    <li> <p>Open a command prompt window and type the following command</p> 
      <div class="codehilite"> 
       <pre><span></span>c:\&gt; mysql -h localhost -u root -p
 </pre> 
      </div> </li> 
-    <li> <p>Enter the password</p> 
+    <li> <p>Enter the password and the following subsequent commands</p> 
      <div class="codehilite"> 
       <pre><span></span>mysql&gt; create database art;
 mysql&gt; grant all on art.* to artuser@localhost identified by "artpassword";
@@ -167,12 +161,13 @@ mysql&gt; quit;
    <h3 id="using-postgresql-on-windows">Using PostgreSQL on Windows</h3> 
    <ul> 
     <li>Ensure the path to the PostgreSQL bin folder is included in the PATH environment variable</li> 
-    <li> <p>Open a command prompt window</p> 
+    <li> <p>Open a command prompt window and type the following command</p> 
      <div class="codehilite"> 
       <pre><span></span>c:\&gt; psql -U postgres
 </pre> 
      </div> </li> 
-    <li> <p>When prompted for a password, enter the password for the postgres database user created when installing PostgreSQL. If the username of the account is not "postgres", use the appropriate name in place of postgres in the -U switch of the command.</p> 
+    <li> <p>When prompted for a password, enter the password for the postgres database user created when installing PostgreSQL. If the username of the account is not "postgres", use the appropriate name in place of postgres in the -U switch of the command.</p> </li> 
+    <li> <p>Enter the following subsequent commands</p> 
      <div class="codehilite"> 
       <pre><span></span>postgres=# create user artuser password 'artpassword';
 postgres=# create database art owner artuser;
@@ -196,12 +191,11 @@ art=# \q
    <h2 id="configure-art">Configure ART</h2> 
    <ul> 
     <li>Once the database is created, navigate to localhost:8080/art using your browser</li> 
-    <li>Ensure that the JDBC driver for your database is available to the application. The following drivers are included with the application (in the ART_HOME\WEB-INF\lib directory). CUBRID, PostgreSQL, MySQL, HSQLDB, SQL Server (jTDS)</li> 
-    <li>Click on the <strong>Settings</strong> button, enter the appropriate details for your database and other application details and click on the <strong>Submit</strong> button</li> 
-    <li>From the <strong>Admin Console</strong>, click on the <strong>Users</strong> button and then create a super admin user to be used for administering the application</li> 
+    <li>On the <strong>ART Database</strong> page enter the appropriate details for your database and other application details and click on the <strong>Save</strong> button</li> 
+    <li>Select the <strong>Configure | Users</strong> menu and then the <strong>Add</strong> button and create a user to be used for administering the application</li> 
     <li>Log off</li> 
-    <li>Log in as the newly created super admin user</li> 
-    <li>Create and publish queries as required</li> 
+    <li>Log in as the newly created admin user</li> 
+    <li>Create reports as desired</li> 
    </ul> 
    <h1 id="patches">Patches</h1> 
    <p>ART patches replace specific files in an ART installation in order to resolve specific issues.<br> If patches are available for your ART version, take the following steps.</p> 

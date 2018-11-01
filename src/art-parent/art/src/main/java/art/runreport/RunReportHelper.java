@@ -31,7 +31,6 @@ import art.output.ResultSetColumn;
 import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.report.Report;
-import art.report.ReportService;
 import art.reportoptions.GroovyOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -155,15 +154,35 @@ public class RunReportHelper {
 	 * @param report the report that is being run
 	 * @param request the http request
 	 * @param session the http session
-	 * @param reportService the report service to use
 	 * @param locale the current locale
 	 * @throws ParseException
 	 * @throws SQLException
 	 * @throws java.io.IOException
 	 */
 	public void setSelectReportParameterAttributes(Report report,
-			HttpServletRequest request, HttpSession session,
-			ReportService reportService, Locale locale)
+			HttpServletRequest request, HttpSession session, Locale locale)
+			throws ParseException, SQLException, IOException {
+
+		ParameterProcessorResult paramProcessorResult = null;
+		setSelectReportParameterAttributes(report, request, session, locale, paramProcessorResult);
+	}
+
+	/**
+	 * Sets request attributes relevant for the select parameters portion of the
+	 * run report page
+	 *
+	 * @param report the report that is being run
+	 * @param request the http request
+	 * @param session the http session
+	 * @param locale the current locale
+	 * @param paramProcessorResult the param processor result
+	 * @throws ParseException
+	 * @throws SQLException
+	 * @throws java.io.IOException
+	 */
+	public void setSelectReportParameterAttributes(Report report,
+			HttpServletRequest request, HttpSession session, Locale locale,
+			ParameterProcessorResult paramProcessorResult)
 			throws ParseException, SQLException, IOException {
 
 		logger.debug("Entering setSelectReportParameterAttributes: report={}", report);
@@ -176,10 +195,12 @@ public class RunReportHelper {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		//prepare report parameters
-		ParameterProcessor paramProcessor = new ParameterProcessor();
-		paramProcessor.setUseSavedValues(true);
-		paramProcessor.setParameterSelection(true);
-		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
+		if (paramProcessorResult == null) {
+			ParameterProcessor paramProcessor = new ParameterProcessor();
+			paramProcessor.setUseSavedValues(true);
+			paramProcessor.setParameterSelection(true);
+			paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
+		}
 		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 
@@ -190,11 +211,24 @@ public class RunReportHelper {
 		ChartOptions effectiveChartOptions = reportOutputGenerator.getEffectiveChartOptions(report, parameterChartOptions);
 		request.setAttribute("chartOptions", effectiveChartOptions);
 
-		//create map in order to display parameters by position
-		Map<Integer, ReportParameter> reportParams = getSelectParameters(report, reportParamsList);
-		request.setAttribute("reportParams", reportParams);
-
 		ReportType reportType = report.getReportType();
+
+		//create map in order to display parameters by position
+		Map<Integer, ReportParameter> reportParams = new TreeMap<>();
+		//for dashboard different report parameters for different reports may have
+		//same position so just display all in the order of the list (an arbitrary order)
+		if (reportType.isDashboard()) {
+			Integer count = 0;
+			for (ReportParameter reportParam : reportParamsList) {
+				count++;
+				reportParams.put(count, reportParam);
+			}
+		} else {
+			for (ReportParameter reportParam : reportParamsList) {
+				reportParams.put(reportParam.getPosition(), reportParam);
+			}
+		}
+		request.setAttribute("reportParams", reportParams);
 
 		boolean showSaveParameterSelection = false;
 		if (reportType.isChart()) {
@@ -202,13 +236,63 @@ public class RunReportHelper {
 		} else {
 			for (ReportParameter reportParam : reportParamsList) {
 				Parameter param = reportParam.getParameter();
-				if (!param.isHidden() && !param.isFixedValue()) {
+				if (param.isForDisplay()) {
 					showSaveParameterSelection = true;
 					break;
 				}
 			}
 		}
 		request.setAttribute("showSaveParameterSelection", showSaveParameterSelection);
+
+		boolean hasDateParam = false;
+		for (ReportParameter reportParam : reportParamsList) {
+			Parameter param = reportParam.getParameter();
+			if (param.isForDisplay() && param.getDataType().isDate()) {
+				hasDateParam = true;
+				break;
+			}
+		}
+		request.setAttribute("hasDateParam", hasDateParam);
+
+		boolean hasDateRangeParam = false;
+		for (ReportParameter reportParam : reportParamsList) {
+			Parameter param = reportParam.getParameter();
+			if (param.isForDisplay() && param.getDataType() == ParameterDataType.DateRange) {
+				hasDateRangeParam = true;
+				break;
+			}
+		}
+		request.setAttribute("hasDateRangeParam", hasDateRangeParam);
+
+		boolean hasLovParam = false;
+		for (ReportParameter reportParam : reportParamsList) {
+			Parameter param = reportParam.getParameter();
+			if (param.isForDisplay() && param.isUseLov()) {
+				hasLovParam = true;
+				break;
+			}
+		}
+		request.setAttribute("hasLovParam", hasLovParam);
+
+		boolean hasChainedParam = false;
+		for (ReportParameter reportParam : reportParamsList) {
+			Parameter param = reportParam.getParameter();
+			if (param.isForDisplay() && reportParam.isChained()) {
+				hasChainedParam = true;
+				break;
+			}
+		}
+		request.setAttribute("hasChainedParam", hasChainedParam);
+
+		boolean hasRobinHerbotsMask = false;
+		for (ReportParameter reportParam : reportParamsList) {
+			Parameter param = reportParam.getParameter();
+			if (param.isForDisplay() && param.hasRobinHerbotsMask()) {
+				hasRobinHerbotsMask = true;
+				break;
+			}
+		}
+		request.setAttribute("hasRobinHerbotsMask", hasRobinHerbotsMask);
 
 		boolean enableReportFormats;
 		switch (reportType) {
@@ -433,24 +517,14 @@ public class RunReportHelper {
 				enableEmail = true;
 		}
 
-		if (!Config.isEmailServerConfigured() || StringUtils.isBlank(sessionUser.getEmail())) {
+		if (!Config.getSettings().isEnableDirectReportEmailing()
+				|| !Config.isEmailServerConfigured()
+				|| StringUtils.isBlank(sessionUser.getEmail())) {
 			enableEmail = false;
 		}
 
-//		enableEmail = false; //disable email for now. feature may be abused by users to send spam?
 		request.setAttribute("enableEmail", enableEmail);
 
-		setEnableSwapAxes(reportType, request);
-	}
-
-	/**
-	 * Set the enableSwapAxes request attribute according to the given report
-	 * type
-	 *
-	 * @param reportType the report type
-	 * @param request the http request object
-	 */
-	public void setEnableSwapAxes(ReportType reportType, HttpServletRequest request) {
 		boolean enableSwapAxes;
 		switch (reportType) {
 			case XYChart:
@@ -637,37 +711,6 @@ public class RunReportHelper {
 		}
 
 		return resultSetType;
-	}
-
-	/**
-	 * Returns a map of select report parameters. Parameters to be displayed in
-	 * position order.
-	 *
-	 * @param report the relevant report
-	 * @param reportParamsList the report parameters list
-	 * @return map of select report parameters
-	 */
-	public Map<Integer, ReportParameter> getSelectParameters(Report report,
-			List<ReportParameter> reportParamsList) {
-
-		//create map in order to display parameters by position
-		Map<Integer, ReportParameter> reportParams = new TreeMap<>();
-		//for dashboard different report parameters for different reports may have
-		//same position so just display all in the order of the list (an arbitrary order)
-		ReportType reportType = report.getReportType();
-		if (reportType.isDashboard()) {
-			Integer count = 0;
-			for (ReportParameter reportParam : reportParamsList) {
-				count++;
-				reportParams.put(count, reportParam);
-			}
-		} else {
-			for (ReportParameter reportParam : reportParamsList) {
-				reportParams.put(reportParam.getPosition(), reportParam);
-			}
-		}
-
-		return reportParams;
 	}
 
 	/**

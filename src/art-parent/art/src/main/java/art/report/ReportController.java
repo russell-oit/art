@@ -32,6 +32,10 @@ import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
 import art.reportoptions.GridstackItemOptions;
+import art.reportparameter.ReportParameter;
+import art.runreport.ParameterProcessor;
+import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportRunner;
 import art.savedparameter.SavedParameter;
 import art.savedparameter.SavedParameterService;
 import art.utils.ArtHelper;
@@ -56,6 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.owasp.encoder.Encode;
@@ -145,7 +150,7 @@ public class ReportController {
 				return "reportError";
 			} else {
 				RunReportHelper runReportHelper = new RunReportHelper();
-				runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService, locale);
+				runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
 			}
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
@@ -228,7 +233,7 @@ public class ReportController {
 			for (Report report : reports) {
 				String name = Encode.forHtml(report.getName());
 				report.setName(name);
-				
+
 				final int NEW_UPDATED_LIMIT = 7;
 				if (ArtUtils.daysUntilToday(report.getCreationDate()) <= NEW_UPDATED_LIMIT) {
 					name += " " + newSpan;
@@ -376,7 +381,6 @@ public class ReportController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session, @RequestParam("action") String action,
 			@RequestParam(value = "templateFile", required = false) MultipartFile templateFile,
-			@RequestParam(value = "resourcesFile", required = false) MultipartFile resourcesFile,
 			Locale locale) {
 
 		logger.debug("Entering saveReport: report={}, action='{}'", report, action);
@@ -396,13 +400,16 @@ public class ReportController {
 				return showEditReport(action, model, session);
 			}
 
-			//finalise report properties
-			String prepareReportMessage = prepareReport(report, templateFile, resourcesFile, action);
-			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
-			if (prepareReportMessage != null) {
-				model.addAttribute("message", prepareReportMessage);
+			//save template file
+			String saveFileMessage = saveFile(templateFile, report.getReportTypeId(), report.isOverwriteFiles(), locale, report);
+			logger.debug("saveFileMessage='{}'", saveFileMessage);
+			if (saveFileMessage != null) {
+				model.addAttribute("plainMessage", saveFileMessage);
 				return showEditReport(action, model, session);
 			}
+
+			//finalise report properties
+			setProperties(report, action);
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -795,11 +802,15 @@ public class ReportController {
 	 *
 	 * @param file the file to save
 	 * @param reportTypeId the reportTypeId for the report related to the file
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @param overwrite whether to overwrite existing files
+	 * @param locale the locale
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveFile(MultipartFile file, int reportTypeId) throws IOException {
-		return saveFile(file, reportTypeId, null);
+	private String saveFile(MultipartFile file, int reportTypeId, boolean overwrite,
+			Locale locale) throws IOException {
+
+		return saveFile(file, reportTypeId, overwrite, locale, null);
 	}
 
 	/**
@@ -807,14 +818,14 @@ public class ReportController {
 	 *
 	 * @param file the file to save
 	 * @param reportTypeId the reportTypeId for the report related to the file
-	 * @param report the report to set #param updateTemplateField determines
-	 * whether the template field of the report should be updated with the name
-	 * of the file given
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @param overwrite whether to overwrite existing files
+	 * @param locale the locale
+	 * @param report the report to update, or null
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveFile(MultipartFile file, int reportTypeId, Report report)
-			throws IOException {
+	private String saveFile(MultipartFile file, int reportTypeId, boolean overwrite,
+			Locale locale, Report report) throws IOException {
 
 		logger.debug("Entering saveFile: report={}", report);
 
@@ -867,8 +878,8 @@ public class ReportController {
 			templatesPath = Config.getTemplatesPath();
 		}
 
-		UploadHelper uploadHelper = new UploadHelper();
-		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, overwrite);
 
 		if (message != null) {
 			return message;
@@ -887,11 +898,8 @@ public class ReportController {
 	 *
 	 * @param report the report to use
 	 * @param action the action to take, "add" or "edit"
-	 * @return i18n message to display in the user interface if there was a
-	 * problem, null otherwise
-	 * @throws SQLException
 	 */
-	private String setProperties(Report report, String action) throws SQLException {
+	private void setProperties(Report report, String action) {
 		logger.debug("Entering setProperties: report={}, action='{}'", report, action);
 
 		//set report source for text reports
@@ -907,8 +915,6 @@ public class ReportController {
 		if (reportType.isChart() && report.getChartOptions() != null) {
 			setChartOptionsSettingString(report);
 		}
-
-		return null;
 	}
 
 	/**
@@ -969,44 +975,6 @@ public class ReportController {
 		report.setChartOptionsSetting(StringUtils.join(options, " "));
 	}
 
-	/**
-	 * Finalises report properties
-	 *
-	 * @param report the report to use
-	 * @param templateFile the template file
-	 * @param resourcesFile the resources file
-	 * @param action the action to take
-	 * @return i18n message to display in the user interface if there was a
-	 * problem, null otherwise
-	 * @throws IOException
-	 * @throws SQLException
-	 */
-	private String prepareReport(Report report, MultipartFile templateFile,
-			MultipartFile resourcesFile, String action) throws IOException, SQLException {
-
-		logger.debug("Entering prepareReport: report={}, action='{}'", report, action);
-
-		String message;
-
-		int reportTypeId = report.getReportTypeId();
-		message = saveFile(templateFile, reportTypeId, report); //pass report so that template field is updated
-		if (message != null) {
-			return message;
-		}
-
-		message = saveFile(resourcesFile, reportTypeId);
-		if (message != null) {
-			return message;
-		}
-
-		message = setProperties(report, action);
-		if (message != null) {
-			return message;
-		}
-
-		return null;
-	}
-
 	@PostMapping("/uploadResources")
 	public @ResponseBody
 	Map<String, List<FileUploadResponse>> uploadResources(MultipartHttpServletRequest request,
@@ -1040,9 +1008,9 @@ public class ReportController {
 
 			if (FinalFilenameValidator.isValid(filename)) {
 				try {
-					String message = saveFile(file, reportTypeId);
-					if (message != null) {
-						String errorMessage = messageSource.getMessage(message, null, locale);
+					boolean overwrite = BooleanUtils.toBoolean(request.getParameter("overwriteFiles"));
+					String errorMessage = saveFile(file, reportTypeId, overwrite, locale);
+					if (errorMessage != null) {
 						fileDetails.setError(errorMessage);
 					}
 				} catch (IOException ex) {
@@ -1055,7 +1023,10 @@ public class ReportController {
 					}
 				}
 			} else {
-				String errorMessage = messageSource.getMessage("reports.message.invalidFilename", null, locale);
+				Object[] value = {
+					filename
+				};
+				String errorMessage = messageSource.getMessage("reports.message.invalidFilename2", value, locale);
 				fileDetails.setError(errorMessage);
 			}
 
@@ -1394,6 +1365,49 @@ public class ReportController {
 		}
 
 		return response;
+	}
+
+	@RequestMapping(value = "/getLovValues", method = RequestMethod.GET)
+	public @ResponseBody
+	List<Map<String, String>> getLovValues(@RequestParam("reportId") Integer reportId,
+			HttpSession session, HttpServletRequest request, Locale locale) {
+
+		logger.debug("Entering getLovValues: reportId={}", reportId);
+
+		//https://appelsiini.net/projects/chained/
+		//encapsulate values in a list (will be a json array) to ensure values
+		//are displayed in the order given
+		List<Map<String, String>> list = new ArrayList<>();
+		Map<String, String> values = new HashMap<>();
+		ReportRunner reportRunner = new ReportRunner();
+		try {
+			Report report = reportService.getReport(reportId);
+			reportRunner.setReport(report);
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			reportRunner.setUser(sessionUser);
+
+			ParameterProcessor paramProcessor = new ParameterProcessor();
+			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			reportRunner.setReportParamsMap(reportParamsMap);
+
+			values = reportRunner.getLovValues();
+		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
+			logger.error("Error", ex);
+		} finally {
+			reportRunner.close();
+		}
+
+		for (Map.Entry<String, String> entry : values.entrySet()) {
+			Map<String, String> value = new HashMap<>();
+			String encodedKey = Encode.forHtmlAttribute(entry.getKey());
+			String encodedValue = Encode.forHtmlContent(entry.getValue());
+			value.put(encodedKey, encodedValue);
+			list.add(value);
+		}
+
+		return list;
 	}
 
 }

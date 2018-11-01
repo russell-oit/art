@@ -19,6 +19,7 @@ package art.encryptor;
 
 import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -63,6 +64,22 @@ public class Encryptor implements Serializable {
 	private boolean useNoneModifyPassword; //only for use with ui
 	@Parsed
 	private boolean clearTextPasswords;
+	@JsonIgnore
+	private boolean overwriteFiles;
+
+	/**
+	 * @return the overwriteFiles
+	 */
+	public boolean isOverwriteFiles() {
+		return overwriteFiles;
+	}
+
+	/**
+	 * @param overwriteFiles the overwriteFiles to set
+	 */
+	public void setOverwriteFiles(boolean overwriteFiles) {
+		this.overwriteFiles = overwriteFiles;
+	}
 
 	/**
 	 * @return the clearTextPasswords

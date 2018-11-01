@@ -144,6 +144,12 @@
 						<spring:message code="${message}"/>
 					</div>
 				</c:if>
+				<c:if test="${not empty plainMessage}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						${encode:forHtmlContent(plainMessage)}
+					</div>
+				</c:if>
 
 				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
@@ -230,6 +236,12 @@
 								</span>
 								<span class="fileinput-filename"></span>
 								<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+							</div>
+							<div class="checkbox">
+								<label>
+									<form:checkbox path="overwriteFiles"/>
+									<spring:message code="page.checkbox.overwriteFiles"/>
+								</label>
 							</div>
 						</div>
 					</div>

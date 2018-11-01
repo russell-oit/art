@@ -21,7 +21,8 @@ Reports page. Also main/home page
 <spring:message code="page.text.description" var="descriptionText"/>
 <spring:message code="reports.text.selectValue" var="selectValueText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1"
+					 hasTable="true">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.css"/>

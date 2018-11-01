@@ -39,7 +39,7 @@
 <spring:message code="reports.text.change" var="changeText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
-					 mainColumnClass="col-md-6 col-md-offset-3">
+					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
@@ -51,8 +51,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
 
 		<script type="text/javascript">
@@ -202,11 +200,14 @@
 
 				//show/hide create directories field
 				switch (destinationType) {
-					case 'Website':
-						$("#createDirectoriesDiv").hide();
+					case 'FTP':
+					case 'SFTP':
+					case 'NetworkShare':
+					case 'WebDav':
+						$("#createDirectoriesDiv").show();
 						break;
 					default:
-						$("#createDirectoriesDiv").show();
+						$("#createDirectoriesDiv").hide();
 				}
 
 				//show/hide test button
@@ -272,6 +273,12 @@
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<spring:message code="${message}"/>
+					</div>
+				</c:if>
+				<c:if test="${not empty plainMessage}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						${encode:forHtmlContent(plainMessage)}
 					</div>
 				</c:if>
 
@@ -411,6 +418,12 @@
 							</span>
 							<span class="fileinput-filename"></span>
 							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="overwriteFiles"/>
+								<spring:message code="page.checkbox.overwriteFiles"/>
+							</label>
 						</div>
 					</div>
 				</div>

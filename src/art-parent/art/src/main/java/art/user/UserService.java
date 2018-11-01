@@ -137,6 +137,7 @@ public class UserService {
 			user.setStartReport(rs.getString("START_QUERY"));
 			user.setUserId(rs.getInt("USER_ID"));
 			user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
+			user.setPublicUser(rs.getBoolean("PUBLIC_USER"));
 			user.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			user.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			user.setCreatedBy(rs.getString("CREATED_BY"));
@@ -752,8 +753,9 @@ public class UserService {
 			String sql = "INSERT INTO ART_USERS"
 					+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
 					+ " FULL_NAME, EMAIL, ACCESS_LEVEL, DEFAULT_QUERY_GROUP,"
-					+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+					+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, PUBLIC_USER,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -767,6 +769,7 @@ public class UserService {
 				user.getStartReport(),
 				BooleanUtils.toInteger(user.isCanChangePassword()),
 				BooleanUtils.toInteger(user.isActive()),
+				BooleanUtils.toInteger(user.isPublicUser()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -780,7 +783,8 @@ public class UserService {
 			String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 					+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
 					+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-					+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, PUBLIC_USER=?,"
+					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE USER_ID=?";
 
 			Object[] values = {
@@ -794,6 +798,7 @@ public class UserService {
 				user.getStartReport(),
 				BooleanUtils.toInteger(user.isCanChangePassword()),
 				BooleanUtils.toInteger(user.isActive()),
+				BooleanUtils.toInteger(user.isPublicUser()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				user.getUserId()

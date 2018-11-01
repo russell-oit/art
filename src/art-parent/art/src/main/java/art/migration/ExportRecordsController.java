@@ -34,7 +34,6 @@ import art.enums.EncryptorType;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
-import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
@@ -1529,24 +1528,13 @@ public class ExportRecordsController {
 		List<String> filesToZip = new ArrayList<>();
 
 		for (Parameter parameter : parameters) {
-			ParameterDataType dataType = parameter.getDataType();
-			if (dataType == null) {
-				logger.warn("dataType is null. Parameter={}", parameter);
-			} else {
-				switch (dataType) {
-					case DateRange:
-						String template = parameter.getTemplate();
-						if (StringUtils.isNotBlank(template)) {
-							String jsTemplatesPath = Config.getJsTemplatesPath();
-							String templateFilePath = jsTemplatesPath + template;
-							File templateFile = new File(templateFilePath);
-							if (templateFile.exists() && !filesToZip.contains(templateFilePath)) {
-								filesToZip.add(templateFilePath);
-							}
-						}
-						break;
-					default:
-						break;
+			String template = parameter.getTemplate();
+			if (StringUtils.isNotBlank(template)) {
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+				String templateFilePath = jsTemplatesPath + template;
+				File templateFile = new File(templateFilePath);
+				if (templateFile.exists() && !filesToZip.contains(templateFilePath)) {
+					filesToZip.add(templateFilePath);
 				}
 			}
 		}

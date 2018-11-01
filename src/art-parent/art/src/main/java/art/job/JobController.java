@@ -27,15 +27,11 @@ import art.jobholiday.JobHolidayService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
 import art.jobrunners.ReportJob;
-import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.report.UploadHelper;
-import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
-import art.runreport.ReportOptions;
-import art.runreport.ReportOutputGenerator;
 import art.runreport.RunReportHelper;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
@@ -341,7 +337,7 @@ public class JobController {
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
 			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request, locale);
 			Report report = job.getReport();
-			addParameters(model, paramProcessorResult, report, request);
+			addParameters(paramProcessorResult, report, request, session, locale);
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -367,10 +363,10 @@ public class JobController {
 
 		try {
 			//save email template file
-			String saveFileMessage = saveEmailTemplateFile(emailTemplateFile, job);
+			String saveFileMessage = saveEmailTemplateFile(emailTemplateFile, job, locale);
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
-				model.addAttribute("message", saveFileMessage);
+				model.addAttribute("plainMessage", saveFileMessage);
 				return showEditJob(action, model, job, locale);
 			}
 
@@ -562,7 +558,7 @@ public class JobController {
 			paramProcessor.setValuesAsIs(true);
 			ParameterProcessorResult paramProcessorResult = paramProcessor.process(finalValues, reportId, sessionUser, locale);
 
-			addParameters(model, paramProcessorResult, report, request);
+			addParameters(paramProcessorResult, report, request, session, locale);
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -574,32 +570,17 @@ public class JobController {
 	/**
 	 * Adds report parameters, report options and chart options to the model
 	 *
-	 * @param model the model
 	 * @param paramProcessorResult the parameter processor result that contains
 	 * the job's report report parameters, report options and chart options
 	 * @report the job's report
 	 * @param the http request
 	 */
-	private void addParameters(Model model, ParameterProcessorResult paramProcessorResult,
-			Report report, HttpServletRequest request) {
+	private void addParameters(ParameterProcessorResult paramProcessorResult,
+			Report report, HttpServletRequest request, HttpSession session,
+			Locale locale) throws ParseException, SQLException, IOException {
 
 		RunReportHelper runReportHelper = new RunReportHelper();
-
-		//create map in order to display parameters by position
-		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-		Map<Integer, ReportParameter> reportParams = runReportHelper.getSelectParameters(report, reportParamsList);
-		model.addAttribute("reportParams", reportParams);
-
-		//add report options for the showSelectedParameters and swapAxes options
-		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-		model.addAttribute("reportOptions", reportOptions);
-
-		ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
-		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
-		ChartOptions effectiveChartOptions = reportOutputGenerator.getEffectiveChartOptions(report, parameterChartOptions);
-		model.addAttribute("chartOptions", effectiveChartOptions);
-
-		runReportHelper.setEnableSwapAxes(report.getReportType(), request);
+		runReportHelper.setSelectReportParameterAttributes(report, request, session, locale, paramProcessorResult);
 	}
 
 	@RequestMapping(value = "/editJobs", method = RequestMethod.GET)
@@ -748,11 +729,12 @@ public class JobController {
 	 *
 	 * @param file the file to save
 	 * @param job the job object to set
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @param locale the locale
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveEmailTemplateFile(MultipartFile file, Job job)
-			throws IOException {
+	private String saveEmailTemplateFile(MultipartFile file, Job job,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering saveEmailTemplateFile: job={}", job);
 
@@ -775,17 +757,15 @@ public class JobController {
 
 		//save file
 		String templatesPath = Config.getJobTemplatesPath();
-		UploadHelper uploadHelper = new UploadHelper();
-		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, job.isOverwriteFiles());
 
 		if (message != null) {
 			return message;
 		}
 
-		if (job != null) {
-			String filename = file.getOriginalFilename();
-			job.setEmailTemplate(filename);
-		}
+		String filename = file.getOriginalFilename();
+		job.setEmailTemplate(filename);
 
 		return null;
 	}

@@ -17,7 +17,8 @@
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1"
+					 hasTable="true">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">

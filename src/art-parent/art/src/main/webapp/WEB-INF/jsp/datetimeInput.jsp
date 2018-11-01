@@ -7,6 +7,8 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
+<%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div id="div-${encode:forHtmlAttribute(reportParam.htmlElementName)}" class='input-group date'>
@@ -20,20 +22,11 @@
 	</span>
 </div>
 
-<script>
-	var javaDateFormat = '${encode:forJavaScript(reportParam.parameter.dateFormat)}';
-	var finalDateFormat;
-	if (javaDateFormat) {
-		var momentDateFormat = moment().toMomentFormatString(javaDateFormat);
-		finalDateFormat = momentDateFormat;
-	} else {
-		finalDateFormat = 'YYYY-MM-DD HH:mm';
-	}
+<t:addDatePicker reportParam="${reportParam}" locale="${requestContext.locale}"
+				 defaultFormat="YYYY-MM-DD HH:mm"/>
 
-	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').datetimepicker({
-		locale: '${requestContext.locale}',
-		format: finalDateFormat,
-		keepInvalid: true,
-		useStrict: true
-	});
-</script>
+<c:if test="${not empty reportParam.parameter.template}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(reportParam.parameter.template)}"></script>
+</c:if>
+
+<t:addRobinHerbotsMask reportParam="${reportParam}"/>

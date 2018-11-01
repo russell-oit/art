@@ -33,7 +33,6 @@ import art.encryptor.EncryptorService;
 import art.enums.EncryptorType;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationRecordType;
-import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
@@ -942,7 +941,7 @@ public class ImportRecordsController {
 						parameters = mapper.readValue(parametersFile, new TypeReference<List<Parameter>>() {
 						});
 						parametersFile.delete();
-						copyParameterTemplateFiles(parameters, artTempPath, file);
+						copyParameterFiles(parameters, artTempPath, file);
 					} else {
 						throw new IllegalStateException("File not found: " + parametersFilePath);
 					}
@@ -960,7 +959,7 @@ public class ImportRecordsController {
 					if (unpacked) {
 						parameters = csvRoutines.parseAll(Parameter.class, parametersFile);
 						parametersFile.delete();
-						copyParameterTemplateFiles(parameters, artTempPath, file);
+						copyParameterFiles(parameters, artTempPath, file);
 					} else {
 						throw new IllegalStateException("File not found: " + parametersFilePath);
 					}
@@ -1022,7 +1021,7 @@ public class ImportRecordsController {
 						reports = mapper.readValue(reportsFile, new TypeReference<List<Report>>() {
 						});
 						reportsFile.delete();
-						copyReportTemplateFiles(reports, artTempPath, file);
+						copyReportFiles(reports, artTempPath, file);
 					} else {
 						throw new IllegalStateException("File not found: " + reportsFilePath);
 					}
@@ -1041,7 +1040,7 @@ public class ImportRecordsController {
 					if (unpacked) {
 						reports = csvRoutines.parseAll(Report.class, reportsFile);
 						reportsFile.delete();
-						copyReportTemplateFiles(reports, artTempPath, file);
+						copyReportFiles(reports, artTempPath, file);
 					} else {
 						throw new IllegalStateException("File not found: " + reportsFilePath);
 					}
@@ -1290,7 +1289,7 @@ public class ImportRecordsController {
 	 * @param zipFile the zip file that contains template files to be unzipped
 	 * @throws IOException
 	 */
-	private void copyReportTemplateFiles(List<Report> reports, String sourcePath,
+	private void copyReportFiles(List<Report> reports, String sourcePath,
 			File zipFile) throws IOException {
 
 		for (Report report : reports) {
@@ -1314,7 +1313,11 @@ public class ImportRecordsController {
 						}
 						String destinationFilePath = templatesPath + template;
 						File destinationFile = new File(destinationFilePath);
-						FileUtils.copyFile(templateFile, destinationFile);
+						if (destinationFile.exists()) {
+							logger.warn("File not overwritten: '{}'. {}", template, report);
+						} else {
+							FileUtils.copyFile(templateFile, destinationFile);
+						}
 						templateFile.delete();
 					}
 				}
@@ -1334,7 +1337,11 @@ public class ImportRecordsController {
 									String templatesPath = Config.getTemplatesPath();
 									String destinationFilePath = templatesPath + areaConfigFilename;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(areaConfigFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", areaConfigFilename, report);
+									} else {
+										FileUtils.copyFile(areaConfigFile, destinationFile);
+									}
 									areaConfigFile.delete();
 								}
 							}
@@ -1352,7 +1359,11 @@ public class ImportRecordsController {
 									String jsTemplatesPath = Config.getJsTemplatesPath();
 									String destinationFilePath = jsTemplatesPath + dataFileName;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(dataFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", dataFileName, report);
+									} else {
+										FileUtils.copyFile(dataFile, destinationFile);
+									}
 									dataFile.delete();
 								}
 							}
@@ -1368,7 +1379,11 @@ public class ImportRecordsController {
 									String jsTemplatesPath = Config.getJsTemplatesPath();
 									String destinationFilePath = jsTemplatesPath + cssFileName;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(cssFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", cssFileName, report);
+									} else {
+										FileUtils.copyFile(cssFile, destinationFile);
+									}
 									cssFile.delete();
 								}
 							}
@@ -1386,7 +1401,11 @@ public class ImportRecordsController {
 								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + datamapsJsFileName;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(datamapsJsFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", datamapsJsFileName, report);
+									} else {
+										FileUtils.copyFile(datamapsJsFile, destinationFile);
+									}
 									datamapsJsFile.delete();
 								}
 							}
@@ -1399,7 +1418,11 @@ public class ImportRecordsController {
 								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + dataFileName;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(dataFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", dataFileName, report);
+									} else {
+										FileUtils.copyFile(dataFile, destinationFile);
+									}
 									dataFile.delete();
 								}
 							}
@@ -1412,7 +1435,11 @@ public class ImportRecordsController {
 								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + mapFileName;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(mapFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", mapFileName, report);
+									} else {
+										FileUtils.copyFile(mapFile, destinationFile);
+									}
 									mapFile.delete();
 								}
 							}
@@ -1425,7 +1452,11 @@ public class ImportRecordsController {
 								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + cssFileName;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(cssFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", cssFileName, report);
+									} else {
+										FileUtils.copyFile(cssFile, destinationFile);
+									}
 									cssFile.delete();
 								}
 							}
@@ -1443,7 +1474,11 @@ public class ImportRecordsController {
 								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + cssFileName;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(cssFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", cssFileName, report);
+									} else {
+										FileUtils.copyFile(cssFile, destinationFile);
+									}
 									cssFile.delete();
 								}
 							}
@@ -1456,7 +1491,11 @@ public class ImportRecordsController {
 								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + dataFileName;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(dataFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", dataFileName, report);
+									} else {
+										FileUtils.copyFile(dataFile, destinationFile);
+									}
 									dataFile.delete();
 								}
 							}
@@ -1471,7 +1510,11 @@ public class ImportRecordsController {
 										if (unpacked) {
 											String destinationFilePath = jsTemplatesPath + jsFileName;
 											File destinationFile = new File(destinationFilePath);
-											FileUtils.copyFile(jsFile, destinationFile);
+											if (destinationFile.exists()) {
+												logger.warn("File not overwritten: '{}'. {}", jsFileName, report);
+											} else {
+												FileUtils.copyFile(jsFile, destinationFile);
+											}
 											jsFile.delete();
 										}
 									}
@@ -1488,7 +1531,11 @@ public class ImportRecordsController {
 										if (unpacked) {
 											String destinationFilePath = jsTemplatesPath + listCssFileName;
 											File destinationFile = new File(destinationFilePath);
-											FileUtils.copyFile(listCssFile, destinationFile);
+											if (destinationFile.exists()) {
+												logger.warn("File not overwritten: '{}'. {}", listCssFileName, report);
+											} else {
+												FileUtils.copyFile(listCssFile, destinationFile);
+											}
 											listCssFile.delete();
 										}
 									}
@@ -1510,7 +1557,11 @@ public class ImportRecordsController {
 								if (unpacked) {
 									String destinationFilePath = jsTemplatesPath + cssFileName;
 									File destinationFile = new File(destinationFilePath);
-									FileUtils.copyFile(cssFile, destinationFile);
+									if (destinationFile.exists()) {
+										logger.warn("File not overwritten: '{}'. {}", cssFileName, report);
+									} else {
+										FileUtils.copyFile(cssFile, destinationFile);
+									}
 									cssFile.delete();
 								}
 							}
@@ -1532,32 +1583,25 @@ public class ImportRecordsController {
 	 * @param zipFile the zip file that contains template files to be unzipped
 	 * @throws IOException
 	 */
-	private void copyParameterTemplateFiles(List<Parameter> parameters, String sourcePath,
+	private void copyParameterFiles(List<Parameter> parameters, String sourcePath,
 			File zipFile) throws IOException {
 
 		for (Parameter parameter : parameters) {
-			ParameterDataType dataType = parameter.getDataType();
-			if (dataType == null) {
-				logger.warn("dataType is null. Parameter={}", parameter);
-			} else {
-				switch (dataType) {
-					case DateRange:
-						String template = parameter.getTemplate();
-						if (StringUtils.isNotBlank(template)) {
-							String templateFilePath = sourcePath + template;
-							File templateFile = new File(templateFilePath);
-							boolean unpacked = ZipUtil.unpackEntry(zipFile, template, templateFile);
-							if (unpacked) {
-								String jsTemplatesPath = Config.getJsTemplatesPath();
-								String destinationFilePath = jsTemplatesPath + template;
-								File destinationFile = new File(destinationFilePath);
-								FileUtils.copyFile(templateFile, destinationFile);
-								templateFile.delete();
-							}
-						}
-						break;
-					default:
-						break;
+			String template = parameter.getTemplate();
+			if (StringUtils.isNotBlank(template)) {
+				String templateFilePath = sourcePath + template;
+				File templateFile = new File(templateFilePath);
+				boolean unpacked = ZipUtil.unpackEntry(zipFile, template, templateFile);
+				if (unpacked) {
+					String jsTemplatesPath = Config.getJsTemplatesPath();
+					String destinationFilePath = jsTemplatesPath + template;
+					File destinationFile = new File(destinationFilePath);
+					if (destinationFile.exists()) {
+						logger.warn("File not overwritten: '{}'. {}", template, parameter);
+					} else {
+						FileUtils.copyFile(templateFile, destinationFile);
+					}
+					templateFile.delete();
 				}
 			}
 		}
@@ -1591,7 +1635,11 @@ public class ImportRecordsController {
 								String templatesPath = Config.getTemplatesPath();
 								String destinationFilePath = templatesPath + publicKeyFileName;
 								File destinationFile = new File(destinationFilePath);
-								FileUtils.copyFile(publicKeyFile, destinationFile);
+								if (destinationFile.exists()) {
+									logger.warn("File not overwritten: '{}'. {}", publicKeyFileName, encryptor);
+								} else {
+									FileUtils.copyFile(publicKeyFile, destinationFile);
+								}
 								publicKeyFile.delete();
 							}
 						}

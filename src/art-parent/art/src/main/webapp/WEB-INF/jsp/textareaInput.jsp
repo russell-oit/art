@@ -9,6 +9,8 @@ Display report parameter that uses textarea input
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
+<%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <%-- https://stackoverflow.com/questions/18106503/bootstrap-textarea-adding-space-characters-inside-text-field --%>
@@ -17,3 +19,10 @@ Display report parameter that uses textarea input
 		  placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(requestContext.locale))}"
 		  name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		  id="${encode:forHtmlAttribute(reportParam.htmlElementName)}">${encode:forHtmlContent(reportParam.getHtmlValueWithLocale(requestContext.locale))}</textarea>
+
+
+<c:if test="${not empty reportParam.parameter.template}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(reportParam.parameter.template)}"></script>
+</c:if>
+
+<t:addRobinHerbotsMask reportParam="${reportParam}"/>

@@ -331,7 +331,7 @@ public class ReportParameter implements Serializable {
 					paramValueString = ArtUtils.isoDateFormatter.format((Date) paramValue);
 					break;
 				case DateTime:
-					paramValueString = ArtUtils.isoDateTimeFormatter.format((Date) paramValue);
+					paramValueString = ArtUtils.isoDateTimeSecondsFormatter.format((Date) paramValue);
 					break;
 				default:
 					paramValueString = String.valueOf(paramValue);

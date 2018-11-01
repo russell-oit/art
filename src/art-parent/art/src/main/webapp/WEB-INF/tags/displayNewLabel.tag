@@ -22,7 +22,7 @@ Display a label to indicate that a record is new or recently updated
 <%@attribute name="updatedText" %>
 
 <%-- any content can be specified here e.g.: --%>
-<c:if test="${empty newLimit}">
+<c:if test="${empty limit}">
 	<c:set var="limit" value="7"/>
 </c:if>
 <c:if test="${empty newText}">

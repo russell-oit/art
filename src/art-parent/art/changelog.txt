@@ -1,3 +1,8 @@
+ART 3.11
+* Allow for several public users
+* Added Backblaze B2 destination type
+* Enable use of masks for parameters
+
 ART 3.10
 * Provide edit report link from select parameters page
 * Allow changing job owner

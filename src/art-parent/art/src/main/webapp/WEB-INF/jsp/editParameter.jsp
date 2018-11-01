@@ -118,15 +118,6 @@ Edit parameter definition
 					default:
 						$("#dateFormatDiv").hide();
 				}
-				
-				//show/hide template field
-				switch (dataType) {
-					case "DateRange":
-						$("#templateDiv").show();
-						break;
-					default:
-						$("#templateDiv").hide();
-				}
 			}
 		</script>
 	</jsp:attribute>
@@ -154,8 +145,20 @@ Edit parameter definition
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
 						<c:if test="${showErrors}">
-							<p><encode:forHtmlContent value="${error}"/></p>
+							<p>${encode:forHtmlContent(error)}</p>
 						</c:if>
+					</div>
+				</c:if>
+				<c:if test="${not empty message}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<spring:message code="${message}"/>
+					</div>
+				</c:if>
+				<c:if test="${not empty plainMessage}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						${encode:forHtmlContent(plainMessage)}
 					</div>
 				</c:if>
 
@@ -284,26 +287,6 @@ Edit parameter definition
 						<form:errors path="dateFormat" cssClass="error"/>
 					</div>
 				</div>
-				<div id="templateDiv" class="form-group">
-					<label class="control-label col-md-4" for="template">
-						<spring:message code="reports.label.template"/>
-					</label>
-					<div class="col-md-8">
-						<div>
-							<form:input path="template" maxlength="100" class="form-control"/>
-							<form:errors path="template" cssClass="error"/>
-						</div>
-						<div class="fileinput fileinput-new" data-provides="fileinput">
-							<span class="btn btn-default btn-file">
-								<span class="fileinput-new">${selectFileText}</span>
-								<span class="fileinput-exists">${changeText}</span>
-								<input type="file" name="templateFile">
-							</span>
-							<span class="fileinput-filename"></span>
-							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
-						</div>
-					</div>
-				</div>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="defaultValue">
 						<spring:message code="parameters.label.defaultValue"/>
@@ -333,6 +316,32 @@ Edit parameter definition
 					<div class="col-md-8">
 						<div class="checkbox">
 							<form:checkbox path="useDefaultValueInJobs" id="useDefaultValueInJobs" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
+				<div id="templateDiv" class="form-group">
+					<label class="control-label col-md-4" for="template">
+						<spring:message code="reports.label.template"/>
+					</label>
+					<div class="col-md-8">
+						<div>
+							<form:input path="template" maxlength="100" class="form-control"/>
+							<form:errors path="template" cssClass="error"/>
+						</div>
+						<div class="fileinput fileinput-new" data-provides="fileinput">
+							<span class="btn btn-default btn-file">
+								<span class="fileinput-new">${selectFileText}</span>
+								<span class="fileinput-exists">${changeText}</span>
+								<input type="file" name="templateFile">
+							</span>
+							<span class="fileinput-filename"></span>
+							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="overwriteFiles"/>
+								<spring:message code="page.checkbox.overwriteFiles"/>
+							</label>
 						</div>
 					</div>
 				</div>

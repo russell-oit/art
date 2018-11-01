@@ -100,6 +100,21 @@ public class Job implements Serializable {
 	private User user;
 	private Schedule schedule;
 	private SmtpServer smtpServer;
+	private boolean overwriteFiles;
+
+	/**
+	 * @return the overwriteFiles
+	 */
+	public boolean isOverwriteFiles() {
+		return overwriteFiles;
+	}
+
+	/**
+	 * @param overwriteFiles the overwriteFiles to set
+	 */
+	public void setOverwriteFiles(boolean overwriteFiles) {
+		this.overwriteFiles = overwriteFiles;
+	}
 
 	/**
 	 * @return the preRunReport

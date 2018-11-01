@@ -14,6 +14,6 @@ Display report parameters
 
 <p>
 	<c:forEach var="entry" items="${parameterDisplayValues}">
-		<encode:forHtmlContent value="${entry.value}"/> <br>
+		${encode:forHtmlContent(entry.value)} <br>
 	</c:forEach>
 </p>

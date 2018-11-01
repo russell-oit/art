@@ -91,6 +91,22 @@ public class Parameter implements Serializable {
 	private Report defaultValueReport;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "lovReport")
 	private Report lovReport;
+	@JsonIgnore
+	private boolean overwriteFiles;
+
+	/**
+	 * @return the overwriteFiles
+	 */
+	public boolean isOverwriteFiles() {
+		return overwriteFiles;
+	}
+
+	/**
+	 * @param overwriteFiles the overwriteFiles to set
+	 */
+	public void setOverwriteFiles(boolean overwriteFiles) {
+		this.overwriteFiles = overwriteFiles;
+	}
 
 	/**
 	 * @return the template
@@ -765,5 +781,32 @@ public class Parameter implements Serializable {
 		if (lovReport != null) {
 			lovReport.encryptAllPasswords();
 		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this parameter is to be displayed in the
+	 * select parameters page
+	 *
+	 * @return <code>true</code> if this parameter is to be displayed in the
+	 * select parameters page
+	 */
+	@JsonIgnore
+	public boolean isForDisplay() {
+		if (hidden || fixedValue) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if the parameter has a mask1 (RobinHerbots)
+	 * mask defined in the options field
+	 *
+	 * @return <code>true</code> if the parameter has a mask1 (RobinHerbots)
+	 * mask defined in the options field
+	 */
+	public boolean hasRobinHerbotsMask() {
+		return StringUtils.contains(options, "\"mask1\"");
 	}
 }

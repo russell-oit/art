@@ -20,11 +20,10 @@ Page to display connections status
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="connections.message.connectionReset" var="connectionResetText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1"
+					 hasTable="true" hasNotify="true">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {

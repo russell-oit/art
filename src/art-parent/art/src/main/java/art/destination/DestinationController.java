@@ -202,7 +202,7 @@ public class DestinationController {
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam(value = "jsonKeyFile", required = false) MultipartFile jsonKeyFile,
-			HttpSession session) {
+			HttpSession session, Locale locale) {
 
 		logger.debug("Entering saveDestination: destination={}, action='{}'", destination, action);
 
@@ -220,12 +220,12 @@ public class DestinationController {
 				model.addAttribute("message", setPasswordMessage);
 				return showEditDestination(action, model);
 			}
-			
+
 			//save google cloud storage service account json key file
-			String saveFileMessage = saveGoogleJsonKeyFile(jsonKeyFile, destination);
+			String saveFileMessage = saveGoogleJsonKeyFile(jsonKeyFile, destination, locale);
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
-				model.addAttribute("message", saveFileMessage);
+				model.addAttribute("plainMessage", saveFileMessage);
 				return showEditDestination(action, model);
 			}
 
@@ -652,11 +652,12 @@ public class DestinationController {
 	 *
 	 * @param file the file to save
 	 * @param destination the destination object to set
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @param locale the locale
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveGoogleJsonKeyFile(MultipartFile file, Destination destination)
-			throws IOException {
+	private String saveGoogleJsonKeyFile(MultipartFile file, Destination destination,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering saveGoogleJsonKeyFile: destination={}", destination);
 
@@ -679,17 +680,15 @@ public class DestinationController {
 
 		//save file
 		String templatesPath = Config.getTemplatesPath();
-		UploadHelper uploadHelper = new UploadHelper();
-		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, destination.isOverwriteFiles());
 
 		if (message != null) {
 			return message;
 		}
 
-		if (destination != null) {
-			String filename = file.getOriginalFilename();
-			destination.setGoogleJsonKeyFile(filename);
-		}
+		String filename = file.getOriginalFilename();
+		destination.setGoogleJsonKeyFile(filename);
 
 		return null;
 	}

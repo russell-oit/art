@@ -19,6 +19,7 @@ package art.destination;
 
 import art.encryption.AesEncryptor;
 import art.enums.DestinationType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -68,6 +69,22 @@ public class Destination implements Serializable {
 	private boolean clearTextPassword;
 	@Parsed
 	private String googleJsonKeyFile;
+	@JsonIgnore
+	private boolean overwriteFiles;
+
+	/**
+	 * @return the overwriteFiles
+	 */
+	public boolean isOverwriteFiles() {
+		return overwriteFiles;
+	}
+
+	/**
+	 * @param overwriteFiles the overwriteFiles to set
+	 */
+	public void setOverwriteFiles(boolean overwriteFiles) {
+		this.overwriteFiles = overwriteFiles;
+	}
 
 	/**
 	 * @return the googleJsonKeyFile

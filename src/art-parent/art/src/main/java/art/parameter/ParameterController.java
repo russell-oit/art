@@ -31,12 +31,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -66,6 +68,9 @@ public class ParameterController {
 
 	@Autowired
 	private ReportParameterService reportParameterService;
+
+	@Autowired
+	private MessageSource messageSource;
 
 	@RequestMapping(value = "/parameters", method = RequestMethod.GET)
 	public String showParameters(Model model) {
@@ -192,7 +197,7 @@ public class ParameterController {
 			@RequestParam("returnReportId") Integer returnReportId,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam(value = "templateFile", required = false) MultipartFile templateFile,
-			HttpSession session) {
+			HttpSession session, Locale locale) {
 
 		logger.debug("Entering saveParameter: parameter={}, action='{}',"
 				+ " reportId={}, returnReportId={}", parameter, action, reportId, returnReportId);
@@ -205,13 +210,13 @@ public class ParameterController {
 
 		try {
 			//save template file
-			String saveFileMessage = saveTemplateFile(templateFile, parameter);
+			String saveFileMessage = saveTemplateFile(templateFile, parameter, locale);
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
-				model.addAttribute("message", saveFileMessage);
+				model.addAttribute("plainMessage", saveFileMessage);
 				return showEditParameter(action, model, reportId, returnReportId);
 			}
-			
+
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equalsAny(action, "add", "copy")) {
 				parameterService.addParameter(parameter, sessionUser);
@@ -303,16 +308,17 @@ public class ParameterController {
 	}
 
 	/**
-	 * Saves a template file and updates the appropriate parameter property
-	 * with the file name
+	 * Saves a template file and updates the appropriate parameter property with
+	 * the file name
 	 *
 	 * @param file the file to save
 	 * @param parameter the parameter object to set
-	 * @return an i18n message string if there was a problem, otherwise null
+	 * @param locale the locale
+	 * @return a problem description if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveTemplateFile(MultipartFile file, Parameter parameter)
-			throws IOException {
+	private String saveTemplateFile(MultipartFile file, Parameter parameter,
+			Locale locale) throws IOException {
 
 		logger.debug("Entering saveTemplateFile: parameter={}", parameter);
 
@@ -335,17 +341,15 @@ public class ParameterController {
 
 		//save file
 		String templatesPath = Config.getJsTemplatesPath();
-		UploadHelper uploadHelper = new UploadHelper();
-		String message = uploadHelper.saveFile(file, templatesPath, validExtensions);
+		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
+		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, parameter.isOverwriteFiles());
 
 		if (message != null) {
 			return message;
 		}
 
-		if (parameter != null) {
-			String filename = file.getOriginalFilename();
-			parameter.setTemplate(filename);
-		}
+		String filename = file.getOriginalFilename();
+		parameter.setTemplate(filename);
 
 		return null;
 	}
