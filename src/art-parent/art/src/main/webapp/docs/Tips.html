@@ -23,13 +23,13 @@
    <div class="toc"> 
     <ol> 
      <li><a href="#using-the-jtds-driver">Using the jTDS driver</a></li> 
-     <li><a href="#migrating-the-art-repository">Migrating the ART repository</a> 
+     <li><a href="#migrating-the-art-database">Migrating the ART Database</a> 
       <ol> 
        <li><a href="#migrating-between-the-same-rdbms">Migrating between the same RDBMS</a></li> 
        <li><a href="#migrating-between-different-rdbmss">Migrating between different RDBMSs</a> 
         <ol> 
          <li><a href="#using-pentaho-data-integration">Using Pentaho Data Integration</a></li> 
-         <li><a href="#migrating-the-default-database">Migrating the default database</a></li> 
+         <li><a href="#migrating-the-demo-database">Migrating the demo database</a></li> 
         </ol></li> 
       </ol></li> 
      <li><a href="#upgrading-a-hsqldb-database">Upgrading a HSQLDB database</a></li> 
@@ -47,7 +47,7 @@
 </pre> 
      </div> </li> 
    </ul> 
-   <h1 id="migrating-the-art-repository">Migrating the ART repository</h1> 
+   <h1 id="migrating-the-art-database">Migrating the ART Database</h1> 
    <p>ART doesn't provide any in-built tools to migrate the repository from one database to another. The following are suggested techniques for such a migration.</p> 
    <h2 id="migrating-between-the-same-rdbms">Migrating between the same RDBMS</h2> 
    <p>To migrate between the same RDBMS e.g. from a MySQL database to another MySQL database, use the backup/restore tools provided for your RDBMS</p> 
@@ -72,12 +72,12 @@
      </div> </li> 
    </ul> 
    <p>The migration is done. You can now launch ART and define this new database as your ART repository.</p> 
-   <h3 id="migrating-the-default-database">Migrating the default database</h3> 
-   <p>These steps illustrate the steps to migrate the default ART repository database (HSQLDB) to MySQL using Pentaho Data Integration.</p> 
+   <h3 id="migrating-the-demo-database">Migrating the demo database</h3> 
+   <p>These steps illustrate the steps to migrate the demo ART repository database (HSQLDB) to MySQL using Pentaho Data Integration.</p> 
    <ul> 
     <li>Navigate to the PDI_HOME\data-integration\<strong>libext\JDBC</strong> directory</li> 
-    <li>Delete the <strong>hsqldb.jar</strong> file and replace it with a version that corresponds to the version of the HSQLDB database e.g. for the default ART database, you can use the hsqldb jar found in the ART_HOME\WEB-INF\lib directory</li> 
-    <li>Start the default database in server mode. </li> 
+    <li>Delete the <strong>hsqldb.jar</strong> file and replace it with a version that corresponds to the version of the HSQLDB database e.g. for the demo ART database, you can use the hsqldb jar found in the ART_HOME\WEB-INF\lib directory</li> 
+    <li>Start the demo database in server mode. </li> 
     <li>Run the <strong>spoon.bat</strong> file in the PDI_HOME\data-integration directory</li> 
     <li>From the <strong>Tools | Wizards | Create database connection</strong> menu, create connections for your source and destination database</li> 
     <li>When creating the database connection to the HSQLDB database, use <strong>HyperSonic</strong> as the Type of database to connect to. In the next screen, for the name of the database, use <strong>artrepository</strong>.</li> 
@@ -104,7 +104,7 @@
     <li>Give the alias any name you want</li> 
     <li>Select the HSQLDB Standalone driver in the Drivers list</li> 
     <li>For the url, put the jdbc url for the file that you want to upgrade e.g. <code>jdbc:hsqldb:c:\my\ArtRepositoryDB</code></li> 
-    <li>Give the username/password for your database e.g ART/ART for the default ART repository, ArtRepositoryDB</li> 
+    <li>Give the username/password for your database e.g ART/ART for the demo ART repository, ArtRepositoryDB</li> 
     <li>Click on the <strong>Properties</strong> button and select the <strong>Driver Properties</strong> tab</li> 
     <li>Tick the <strong>Use driver properties</strong> box</li> 
     <li>For the <strong>shutdown</strong> property, tick the <strong>Specify</strong> column and select <strong>true</strong> for the value</li> 

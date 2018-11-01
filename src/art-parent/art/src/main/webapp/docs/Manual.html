@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.10"> 
+  <meta name="version" content="3.11"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -38,7 +38,6 @@
      <li><a href="#users">Users</a> 
       <ol> 
        <li><a href="#creating-a-new-user">Creating a new user</a></li> 
-       <li><a href="#setting-up-the-public-user">Setting up the Public User</a></li> 
        <li><a href="#access-levels">Access Levels</a></li> 
       </ol></li> 
      <li><a href="#authentication">Authentication</a> 
@@ -158,6 +157,7 @@
         <ol> 
          <li><a href="#i18n-options">i18n Options</a></li> 
          <li><a href="#date-range-options">Date Range Options</a></li> 
+         <li><a href="#other-options">Other Options</a></li> 
         </ol></li> 
       </ol></li> 
      <li><a href="#expressions">Expressions</a> 
@@ -653,11 +653,11 @@
        </tr> 
        <tr> 
         <td><strong>Date Format</strong></td> 
-        <td>Format to be used for date portions of dates. Format strings to be used is as per the java SimpleDateFormat class. See <a href="http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html</a></td> 
+        <td>Format to be used for date portions of dates. Format strings to be used is as per the Java <a class="" href="http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> class.</td> 
        </tr> 
        <tr> 
         <td><strong>Time Format</strong></td> 
-        <td>Format to be used for time portion of dates. Format strings to be used is as per the java SimpleDateFormat class. See <a href="http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html</a></td> 
+        <td>Format to be used for time portion of dates. Format strings to be used is as per the Java <a class="" href="http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> class.</td> 
        </tr> 
        <tr> 
         <td><strong>Report Formats</strong></td> 
@@ -669,7 +669,7 @@
        </tr> 
        <tr> 
         <td><strong>Show Header in Public User Session</strong></td> 
-        <td>Defines whether to show the menu bar and page footer for reports that are run with public access</td> 
+        <td>Whether to show the menu bar and page footer for reports that are run by a public user</td> 
        </tr> 
        <tr> 
         <td><strong>Mondrian Cache Expiry Period</strong></td> 
@@ -677,7 +677,7 @@
        </tr> 
        <tr> 
         <td><strong>Scheduling Enabled</strong></td> 
-        <td>Defines whether scheduled jobs will run.</td> 
+        <td>Defines whether scheduled jobs will run</td> 
        </tr> 
        <tr> 
         <td><strong>RSS Link</strong></td> 
@@ -689,7 +689,7 @@
        </tr> 
        <tr> 
         <td><strong>ART Base URL</strong></td> 
-        <td>The base URL for ART e.g. <a href="http://art-server:8080/art." rel="nofollow">http://art-server:8080/art.</a> This is used to include a link to publish job output in publish job reminder emails. Don't put a slash at the end.</td> 
+        <td>The base URL for ART e.g. <code>http://art-server:8080/art</code>. This is used to include a link to publish job output in publish job reminder emails. Don't put a slash at the end.</td> 
        </tr> 
        <tr> 
         <td><strong>System Locale</strong></td> 
@@ -697,11 +697,15 @@
        </tr> 
        <tr> 
         <td><strong>Logs Datasource</strong></td> 
-        <td>A database to which application logs should be written. The script located in the <strong>ART_PACKAGE\database\dbappender</strong> directory needs to have been run on the database. The demo database already has this script run on it. See <a href="https://logback.qos.ch/manual/appenders.html#DBAppender" rel="nofollow">https://logback.qos.ch/manual/appenders.html#DBAppender</a> for more details.</td> 
+        <td>A database to which application logs should be written. The script located in the <strong>ART_PACKAGE\database\dbappender</strong> directory needs to have been run on the database. See the <a class="" href="https://logback.qos.ch/manual/appenders.html#DBAppender" rel="nofollow">Logback DBAppender documentation</a> for more details. The demo database already has this script run on it.</td> 
        </tr> 
        <tr> 
         <td><strong>JWT Token Expiry (Mins)</strong></td> 
         <td>The expiry time in minutes for JWT tokens generated for REST API authentication. A value of 0 means no expiry.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Enable Direct Report Emailing</strong></td> 
+        <td>Whether users can directly email generated report files</td> 
        </tr> 
        <tr> 
         <td><strong>Error Notification To</strong></td> 
@@ -1001,6 +1005,10 @@
         <td>Whether the user can change his password</td> 
        </tr> 
        <tr> 
+        <td><strong>Public User</strong></td> 
+        <td>Whether the user can run reports without having logged into ART first</td> 
+       </tr> 
+       <tr> 
         <td><strong>Access Level</strong></td> 
         <td>The access level for the user</td> 
        </tr> 
@@ -1022,8 +1030,6 @@
        </tr> 
       </tbody> 
      </table> 
-     <h2 id="setting-up-the-public-user">Setting up the Public User</h2> 
-     <p>If you want a report to be run by anyone, without authentication, you'll need to create a user with the special username <strong>public_user</strong> and grant this user access to the report. This is useful for availing reports without requiring users to log in to ART.</p> 
      <h2 id="access-levels">Access Levels</h2> 
      <p>Access levels affect some aspects of the of the user as they work with the application.</p> 
      <table border="1"> 
@@ -2956,7 +2962,7 @@ FROM mytable
      </table> 
      <h2 id="running-a-report-via-url">Running a report via URL</h2> 
      <p>It is possible to run a report directly via URL. The report format and parameters are included in the URL. The basic URL for running a report is something like <code>http://server_name:port/art/runReport?reportId=x&amp;other_parameters</code></p> 
-     <p>If direct URL access is needed without requiring the user to log in to ART beforehand, the special user <strong>public_user</strong> must be granted access to the query and <strong>&amp;public=true</strong> must be included in the URL.</p> 
+     <p>If direct URL access is needed without requiring the user to log in to ART beforehand, <strong>public=true</strong> must be included in the URL together with a <strong>user</strong> parameter indicating the username under whose permissions the report will be run. In addition, this user must have the <strong>Public User</strong> field set to <strong>Yes</strong>. e.g. <code>http://localhost:8080/art/runReport?reportId=1&amp;public=true&amp;user=test</code></p> 
      <h3 id="report-options">Report Options</h3> 
      <p>Some report options can be specified in the URL to determine how the run should be handled.</p> 
      <table border="1"> 
@@ -3384,11 +3390,7 @@ FROM mytable
        </tr> 
        <tr> 
         <td><strong>Date Format</strong></td> 
-        <td>For <strong>Date</strong> and <strong>DateTime</strong> data types, the date format to use. Leave blank to use the default. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
-       </tr> 
-       <tr> 
-        <td><strong>Template</strong></td> 
-        <td>For <strong>DateRange</strong> data types, an optional javascript file that can be used to customize the date range picker. You can override the <strong>overallOptions</strong>, <strong>ranges</strong> or <strong>localeOptions</strong> variables as per the <strong>WEB-INF\jsp\daterangeInput.jsp</strong> file.</td> 
+        <td>For <strong>Date</strong> and <strong>DateTime</strong> data types, the date format to use. Leave blank to use the default. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>Default Value</strong></td> 
@@ -3401,6 +3403,10 @@ FROM mytable
        <tr> 
         <td><strong>Use Default Value In Jobs</strong></td> 
         <td>Whether the default value or values should be used as the parameter value when running jobs</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Template</strong></td> 
+        <td>An optional javascript file for additional configuration. For <strong>DateRange</strong> data types, the file can be used to customize the date range picker. You can override the <strong>overallOptions</strong>, <strong>ranges</strong> or <strong>localeOptions</strong> variables as per the <strong>WEB-INF\jsp\daterangeInput.jsp</strong> file. For masks, the file may contain additional configuration options. For "mask1" masks, specify the additional options in a variable named <strong>mask1Options</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>Shared</strong></td> 
@@ -3585,7 +3591,7 @@ FROM mytable
         <td><strong>fromParameter</strong></td> 
         <td>Object</td> 
         <td></td> 
-        <td>A specification of the parameter that should get the "From" date of the date range. This object has two properties, <strong>name</strong> which specifies the parameter name and <strong>format</strong> which specifies the date format of the parameter. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a> and the default is <strong>yyyy-MM-dd</strong>.</td> 
+        <td>A specification of the parameter that should get the "From" date of the date range. This object has two properties, <strong>name</strong> which specifies the parameter name and <strong>format</strong> which specifies the date format of the parameter. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format and the default is <strong>yyyy-MM-dd</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>toParameter</strong></td> 
@@ -3597,7 +3603,7 @@ FROM mytable
         <td><strong>format</strong></td> 
         <td>String</td> 
         <td>MMMM dd, yyyy</td> 
-        <td>The format of dates displayed in the date range picker text input. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+        <td>The format of dates displayed in the date range picker text input. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>separator</strong></td> 
@@ -3628,6 +3634,24 @@ FROM mytable
         <td>Boolean</td> 
         <td>true</td> 
         <td>When enabled, the two calendars displayed will always be for two sequential months (e.g. January and February), and both will be advanced when clicking the left or right arrows above the calendars. When disabled, the two calendars can be individually advanced and display any month/year.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="other-options">Other Options</h3> 
+     <p>Additional properties can be specified in the Options JSON as follows</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>mask1</strong></td> 
+        <td>Object</td> 
+        <td>Enables use of a mask for the parameter as per the <a class="" href="https://github.com/RobinHerbots/Inputmask" rel="nofollow">RobinHerbots Inputmask</a> e.g. <code>"mask1": { "mask": "99-aa", "autoUnmask": true }</code></td> 
        </tr> 
       </tbody> 
      </table> 
@@ -4237,8 +4261,8 @@ WHERE REGION = #region#
      <p>This is achieved in three steps:</p> 
      <ul> 
       <li>Create a report where column names follow RSS item element naming convention - see below. The resultset column names are used as the names of the <code>&lt;item&gt;</code> sub-elements in the produced xml file. </li> 
-      <li>Grant access to <strong>public_user</strong></li> 
-      <li>Run the report via direct URL, setting the <strong>reportFormat</strong> parameter to <strong>rss20</strong>. This URL, when executed via a browser or RSS reader/aggregator will return an RSS feed.</li> 
+      <li>Grant access to a public user</li> 
+      <li>Run the report via direct URL, setting the <strong>reportFormat</strong> parameter to <strong>rss20</strong>, <strong>public=true</strong> and the <strong>user</strong> parameter to the public user's username. This URL, when executed via a browser or RSS reader/aggregator will return an RSS feed.</li> 
      </ul> 
      <p>As a minimum, the report should contain a column named <strong>title</strong> or <strong>description</strong>. </p> 
      <table border="1"> 
@@ -5334,11 +5358,11 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>User</strong></td> 
-        <td>The user to use to connect to the destination. For <strong>Amazon S3</strong> destinations, this is the IAM user's access key id. For <strong>Microsoft Azure</strong> Blob Storage destinations, this is the storage account name.</td> 
+        <td>The user to use to connect to the destination. For <strong>Amazon S3</strong> destinations, this is the IAM user's access key id. For <strong>Microsoft Azure</strong> Blob Storage destinations, this is the storage account name. For <strong>Backblaze B2</strong> destinations, this is the Account ID.</td> 
        </tr> 
        <tr> 
         <td><strong>Password</strong></td> 
-        <td>The destination user's password. For <strong>Amazon S3</strong> destinations, this is the IAM user's secret access key. For <strong>Microsoft Azure</strong> Blob Storage destinations, this is the primary access key.</td> 
+        <td>The destination user's password. For <strong>Amazon S3</strong> destinations, this is the IAM user's secret access key. For <strong>Microsoft Azure</strong> Blob Storage destinations, this is the primary access key. For <strong>Backblaze B2</strong> destinations, this is the Application Key.</td> 
        </tr> 
        <tr> 
         <td><strong>JSON Key File</strong></td> 
@@ -5350,7 +5374,7 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>Path</strong></td> 
-        <td>The location of the destination. For <strong>Network Share</strong> destinations, this is the share name. For <strong>FTP</strong> and <strong>SFTP</strong> destinations, this is an optional directory path where files should be copied. For <strong>Amazon S3</strong> and <strong>Google Cloud Storage</strong> destinations, this is the bucket name. For <strong>Microsoft Azure</strong> destinations, this is the container name. For <strong>WebDAV</strong> destinations, this is the URL of the WebDAV server e.g. <code>http://localhost</code>. For <strong>Website</strong> destinations, this is a URL that POSTs a form which includes a file field.</td> 
+        <td>The location of the destination. For <strong>Network Share</strong> destinations, this is the share name. For <strong>FTP</strong> and <strong>SFTP</strong> destinations, this is an optional directory path where files should be copied. For <strong>Amazon S3</strong> and <strong>Google Cloud Storage</strong> destinations, this is the bucket name. For <strong>Microsoft Azure</strong> destinations, this is the container name. For <strong>WebDAV</strong> destinations, this is the URL of the WebDAV server e.g. <code>http://localhost</code>. For <strong>Website</strong> destinations, this is a URL that POSTs a form which includes a file field. For <strong>Backblaze B2</strong> destinations, this is the Bucket ID.</td> 
        </tr> 
        <tr> 
         <td><strong>Sub-Directory</strong></td> 
