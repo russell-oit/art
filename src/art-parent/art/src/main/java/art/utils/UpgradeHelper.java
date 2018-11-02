@@ -79,7 +79,7 @@ public class UpgradeHelper {
 		}
 
 		try {
-			String sql = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y'"
+			String sql = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ=NULL"
 					+ " WHERE JOB_ID=?";
 
 			User actionUser = new User();
