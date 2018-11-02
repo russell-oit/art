@@ -962,8 +962,7 @@ public class JobService {
 		Set<Trigger> triggers = processTriggers(job, globalCalendar, timeZone);
 
 		//get earliest next run date from all available triggers
-		List<Trigger> triggersList = new ArrayList<>(triggers);
-		Date nextRunDate = JobUtils.getNextFireTime(triggersList, scheduler);
+		Date nextRunDate = JobUtils.getNextFireTime(triggers, scheduler);
 		job.setNextRunDate(nextRunDate);
 
 		String quartzCalendarNames = StringUtils.join(calendarNames, ",");
