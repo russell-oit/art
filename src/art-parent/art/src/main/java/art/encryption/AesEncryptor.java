@@ -43,10 +43,15 @@ public class AesEncryptor {
 	//https://stackoverflow.com/questions/15554296/simple-java-aes-encrypt-decrypt-example
 	//http://www.madirish.net/561
 	//https://www.grc.com/passwords.htm
+	//https://docs.oracle.com/javase/7/docs/api/javax/crypto/Cipher.html
+	//https://crypto.stackexchange.com/questions/50782/what-size-of-initialization-vector-iv-is-needed-for-aes-encryption
+	//https://security.stackexchange.com/questions/90848/encrypting-using-aes-256-can-i-use-256-bits-iv
+	//https://stackoverflow.com/questions/6729834/need-solution-for-wrong-iv-length-in-aes
 
 	private static final Logger logger = LoggerFactory.getLogger(AesEncryptor.class);
 	private static final String KEY = "XH6YUHlrofcQDZjd"; // 128 bit key (16 bytes)
-	private static final int AES_128_IV_LENGTH = 16; //16 bytes
+	private static final String TRANSFORMATION = "AES/CBC/PKCS5PADDING";
+	private static final int AES_CBC_IV_LENGTH_BYTES = 16; //AES in CBC mode always uses 128 bit IV (16 bytes)
 
 	/**
 	 * Encrypts a string
@@ -62,12 +67,12 @@ public class AesEncryptor {
 
 		//use random IV that will be prepended to the cipher text
 		//so that the same string generates different cipher text
-		byte[] IVBytes = RandomUtils.nextBytes(AES_128_IV_LENGTH); //can use SecureRandom but that may block if there's insufficient entropy
+		byte[] IVBytes = RandomUtils.nextBytes(AES_CBC_IV_LENGTH_BYTES); //can use SecureRandom but that may block if there's insufficient entropy
 
 		try {
 			IvParameterSpec ivParameterSpec = new IvParameterSpec(IVBytes);
 			SecretKeySpec secretKeySpec = new SecretKeySpec(KEY.getBytes("UTF-8"), "AES");
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
 			cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 			byte[] encryptedBytes = cipher.doFinal(clearText.getBytes("UTF-8"));
@@ -94,11 +99,11 @@ public class AesEncryptor {
 
 		try {
 			byte[] encryptedBytes = Base64.decodeBase64(cipherText);
-			byte[] IVBytes = ArrayUtils.subarray(encryptedBytes, 0, AES_128_IV_LENGTH);
-			byte[] finalEncryptedBytes = ArrayUtils.subarray(encryptedBytes, AES_128_IV_LENGTH, encryptedBytes.length);
+			byte[] IVBytes = ArrayUtils.subarray(encryptedBytes, 0, AES_CBC_IV_LENGTH_BYTES);
+			byte[] finalEncryptedBytes = ArrayUtils.subarray(encryptedBytes, AES_CBC_IV_LENGTH_BYTES, encryptedBytes.length);
 			IvParameterSpec ivParameterSpec = new IvParameterSpec(IVBytes);
 			SecretKeySpec secretKeySpec = new SecretKeySpec(KEY.getBytes("UTF-8"), "AES");
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
 			cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
 			byte[] decryptedBytes = cipher.doFinal(finalEncryptedBytes);
@@ -109,5 +114,5 @@ public class AesEncryptor {
 
 		return null;
 	}
-	
+
 }
