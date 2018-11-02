@@ -17,21 +17,17 @@
  */
 package art.utils;
 
-import art.connectionpool.DbConnections;
 import art.dbutils.DbService;
-import art.dbutils.DatabaseUtils;
 import art.encryption.AesEncryptor;
 import art.encryption.DesEncryptor;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.job.Job;
 import art.job.JobService;
-import art.jobrunners.ReportJob;
+import art.user.User;
 import java.io.File;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Date;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -40,16 +36,8 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.quartz.CronExpression;
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import org.quartz.CronTrigger;
-import static org.quartz.JobBuilder.newJob;
-import org.quartz.JobDetail;
-import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import static org.quartz.TriggerBuilder.newTrigger;
-import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,141 +78,42 @@ public class UpgradeHelper {
 			return;
 		}
 
-		JobService jobService = new JobService();
-
-		Connection conn = null;
-		PreparedStatement psUpdate = null;
-
 		try {
-			conn = DbConnections.getArtDbConnection();
-
-			//prepare statement for updating migration status			
-			String updateJobSqlString = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y',"
-					+ " NEXT_RUN_DATE=?, JOB_MINUTE=?, JOB_HOUR=?, "
-					+ " JOB_DAY=?, JOB_WEEKDAY=?, JOB_MONTH=? "
+			String sql = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y'"
 					+ " WHERE JOB_ID=?";
-			psUpdate = conn.prepareStatement(updateJobSqlString);
 
-			int totalRecordCount = 0; //total number of jobs to be migrated
-			int migratedRecordCount = 0; //actual number of jobs migrated
-			final int batchSize = 100; //max number of updates to batch together for executebatch
+			User actionUser = new User();
+			actionUser.setUsername("art migration");
+
+			int nonQuartzJobCount = 0;
+			int successfulMigrationCount = 0;
+			
+			JobService jobService = new JobService();
 
 			List<Job> nonQuartzJobs = jobService.getNonQuartzJobs();
 			for (Job job : nonQuartzJobs) {
-				totalRecordCount += 1;
+				nonQuartzJobCount++;
 
-				//create quartz job
-				String minute = job.getScheduleMinute();
-				if (minute == null) {
-					minute = "0"; //default to 0
+				if (nonQuartzJobCount == 1) {
+					logger.info("Migrating jobs to quartz...");
 				}
-				String hour = job.getScheduleHour();
-				if (hour == null) {
-					hour = "3"; //default to 3am
-				}
-				String month = job.getScheduleMonth();
-				if (month == null) {
-					month = "*"; //default to every month
-				}
-				//set day and weekday
-				String day = job.getScheduleDay();
-				if (day == null) {
-					day = "*";
-				}
-				String weekday = job.getScheduleWeekday();
-				if (weekday == null) {
-					weekday = "?";
-				}
+				
+				int jobId = job.getJobId();
 
-				//set default day of the month if weekday is defined
-				if (day.length() == 0 && weekday.length() >= 1 && !weekday.equals("?")) {
-					//weekday defined but day of the month is not. default day to ?
-					day = "?";
-				}
-
-				if (day.length() == 0) {
-					//no day of month defined. default to *
-					day = "*";
-				}
-				if (weekday.length() == 0) {
-					//no day of week defined. default to undefined
-					weekday = "?";
-				}
-				if (day.equals("?") && weekday.equals("?")) {
-					//unsupported. only one can be ?
-					day = "*";
-					weekday = "?";
-				}
-				if (day.equals("*") && weekday.equals("*")) {
-					//unsupported. only one can be defined
-					day = "*";
-					weekday = "?";
-				}
-
-				String second = "0"; //seconds always 0
-				String cronString = second + " " + minute + " " + hour + " " + day + " " + month + " " + weekday;
-				if (CronExpression.isValidExpression(cronString)) {
-					//ensure that trigger will fire at least once in the future
-					CronTrigger tempTrigger = newTrigger().withSchedule(cronSchedule(cronString)).build();
-
-					Date nextRunDate = tempTrigger.getFireTimeAfter(new Date());
-					if (nextRunDate != null) {
-						//create job
-						migratedRecordCount += 1;
-						if (migratedRecordCount == 1) {
-							logger.info("Migrating jobs to quartz...");
-						}
-
-						int jobId = job.getJobId();
-						String jobName = "job" + jobId;
-						String triggerName = "trigger" + jobId;
-
-						JobDetail quartzJob = newJob(ReportJob.class)
-								.withIdentity(jobName, ArtUtils.JOB_GROUP)
-								.usingJobData("jobId", jobId)
-								.build();
-
-						//create trigger that defines the schedule for the job						
-						CronTrigger trigger = newTrigger().withIdentity(triggerName, ArtUtils.TRIGGER_GROUP).withSchedule(cronSchedule(cronString)).build();
-
-						//delete any existing jobs or triggers with the same id before adding them to the scheduler
-						scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP)); //delete job records
-						scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP)); //delete any trigger records
-
-						//add job and trigger to scheduler
-						scheduler.scheduleJob(quartzJob, trigger);
-
-						//update jobs table to indicate that the job has been migrated						
-						psUpdate.setTimestamp(1, new java.sql.Timestamp(nextRunDate.getTime()));
-						psUpdate.setString(2, minute);
-						psUpdate.setString(3, hour);
-						psUpdate.setString(4, day);
-						psUpdate.setString(5, weekday);
-						psUpdate.setString(6, month);
-						psUpdate.setInt(7, jobId);
-
-						psUpdate.addBatch();
-						//run executebatch periodically to prevent out of memory errors
-						if (migratedRecordCount % batchSize == 0) {
-							psUpdate.executeBatch();
-							psUpdate.clearBatch(); //not sure if this is necessary
-						}
-					}
+				try {
+					jobService.processSchedules(job, actionUser);
+					dbService.update(sql, jobId);
+					successfulMigrationCount++;
+				} catch (ParseException | SchedulerException | SQLException ex) {
+					logger.error("Error. Job Id {}", jobId, ex);
 				}
 			}
 
-			if (migratedRecordCount > 0) {
-				psUpdate.executeBatch(); //run any remaining updates																
+			if (nonQuartzJobCount > 0) {
+				logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs.", successfulMigrationCount, nonQuartzJobCount);
 			}
-
-			if (migratedRecordCount > 0) {
-				//output the number of jobs migrated
-				logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs", migratedRecordCount, totalRecordCount);
-			}
-		} catch (SQLException | SchedulerException ex) {
+		} catch (SQLException ex) {
 			logger.error("Error", ex);
-		} finally {
-			DatabaseUtils.close(psUpdate, conn);
 		}
 	}
 

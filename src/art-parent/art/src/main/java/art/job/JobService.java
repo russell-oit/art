@@ -521,8 +521,6 @@ public class JobService {
 			}
 		}
 
-		String migratedToQuartz = "X";
-
 		int affectedRows;
 
 		boolean newRecord = false;
@@ -539,14 +537,14 @@ public class JobService {
 					+ " SUBJECT, MESSAGE, CACHED_DATASOURCE_ID, CACHED_TABLE_NAME,"
 					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
-					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
+					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE,"
 					+ " FIXED_FILE_NAME, SUB_DIRECTORY, BATCH_FILE,"
 					+ " FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
 					+ " SCHEDULE_ID, SMTP_SERVER_ID, JOB_OPTIONS, ERROR_EMAIL_TO,"
 					+ " PRE_RUN_REPORT, POST_RUN_REPORT,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 49) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 48) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -581,7 +579,6 @@ public class JobService {
 				BooleanUtils.toInteger(job.isAllowSplitting()),
 				recipientsReportId,
 				job.getRunsToArchive(),
-				migratedToQuartz,
 				job.getFixedFileName(),
 				job.getSubDirectory(),
 				job.getBatchFile(),
@@ -615,8 +612,7 @@ public class JobService {
 					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
 					+ " ACTIVE=?, ENABLE_AUDIT=?,"
 					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
-					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?,"
-					+ " FIXED_FILE_NAME=?, SUB_DIRECTORY=?,"
+					+ " RUNS_TO_ARCHIVE=?, FIXED_FILE_NAME=?, SUB_DIRECTORY=?,"
 					+ " BATCH_FILE=?, FTP_SERVER_ID=?,"
 					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?, SMTP_SERVER_ID=?,"
@@ -657,7 +653,6 @@ public class JobService {
 				BooleanUtils.toInteger(job.isAllowSplitting()),
 				recipientsReportId,
 				job.getRunsToArchive(),
-				migratedToQuartz,
 				job.getFixedFileName(),
 				job.getSubDirectory(),
 				job.getBatchFile(),
