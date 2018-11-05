@@ -102,7 +102,11 @@ public class EncryptorService {
 			encryptor.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt passwords
-			encryptor.decryptPasswords();
+			try {
+				encryptor.decryptPasswords();
+			} catch (Exception ex) {
+				logger.error("Error. {}", encryptor, ex);
+			}
 
 			return type.cast(encryptor);
 		}

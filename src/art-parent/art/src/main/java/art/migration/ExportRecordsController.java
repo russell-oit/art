@@ -292,7 +292,7 @@ public class ExportRecordsController {
 
 			redirectAttributes.addFlashAttribute("message", "page.message.recordsExported");
 			return "redirect:/success";
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -326,11 +326,10 @@ public class ExportRecordsController {
 	 * @param file the export file to use
 	 * @param sessionUser the session user
 	 * @param conn the connection to use for datasource export
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	private void exportSettings(ExportRecords exportRecords, File file,
-			User sessionUser, Connection conn) throws SQLException, IOException {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportSettings");
 
@@ -362,12 +361,11 @@ public class ExportRecordsController {
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	private void exportDatasources(ExportRecords exportRecords, File file,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			throws Exception {
 
 		logger.debug("Entering exportDatasources");
 
@@ -409,12 +407,11 @@ public class ExportRecordsController {
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	private void exportDestinations(ExportRecords exportRecords, File file,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			throws Exception {
 
 		logger.debug("Entering exportDestinations");
 
@@ -456,12 +453,11 @@ public class ExportRecordsController {
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	private String exportEncryptors(ExportRecords exportRecords,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			throws Exception {
 
 		logger.debug("Entering exportEncryptors");
 
@@ -622,12 +618,11 @@ public class ExportRecordsController {
 	 * @param sessionUser the session user
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	private void exportSmtpServers(ExportRecords exportRecords, File file,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			throws Exception {
 
 		logger.debug("Entering exportSmtpServers");
 
@@ -1001,12 +996,11 @@ public class ExportRecordsController {
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	private String exportParameters(ExportRecords exportRecords,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			throws Exception {
 
 		logger.debug("Entering exportParameters");
 
@@ -1081,12 +1075,11 @@ public class ExportRecordsController {
 	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	private String exportReports(ExportRecords exportRecords,
 			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			throws Exception {
 
 		logger.debug("Entering exportReports");
 

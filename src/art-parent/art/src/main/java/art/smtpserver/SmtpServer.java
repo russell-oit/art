@@ -330,15 +330,19 @@ public class SmtpServer implements Serializable {
 
 	/**
 	 * Decrypts the password field
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void decryptPassword() {
+	public void decryptPassword() throws Exception {
 		password = AesEncryptor.decrypt(password);
 	}
 	
 	/**
 	 * Encrypts the password field
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void encryptPassword(){
+	public void encryptPassword() throws Exception {
 		password = AesEncryptor.encrypt(password);
 	}
 

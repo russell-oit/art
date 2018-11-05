@@ -6,5 +6,7 @@
 	"checkExportFileAccess" : false,
 	"enableGroovySandbox": true,
 	"enableEmailing": true,
-	"jwtSecret": ""
+	"jwtSecret": "",
+	"previousEncryptionKey": "",
+	"newEncryptionKey": ""
 }

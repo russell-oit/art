@@ -20,8 +20,14 @@ Settings configuration page
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="dialog.button.cancel" var="cancelText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="dialog.message.updateEncryptionKey" var="updateEncryptionKeyText"/>
+<spring:message code="settings.message.keyUpdated" var="keyUpdatedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
+					 hasNotify="true">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
@@ -78,6 +84,42 @@ Settings configuration page
 					delay: 100
 				});
 
+				$('#updateEncryptionKey').click(function () {
+					bootbox.confirm({
+						message: "${updateEncryptionKeyText}",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/updateEncryptionKey",
+									success: function (response) {
+										if (response.success) {
+											notifyActionSuccessReusable("${keyUpdatedText}");
+										} else {
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+										}
+									},
+									error: ajaxErrorHandler
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
 			});
 
 			function toggleSmtpUsernameEnabled() {
@@ -124,6 +166,11 @@ Settings configuration page
 						</c:if>
 					</div>
 				</c:if>
+
+				<div id="ajaxResponseContainer">
+					<div id="ajaxResponse">
+					</div>
+				</div>
 
 				<c:if test="${sessionUser.hasPermission('migrate_records')}">
 					<div>
@@ -867,6 +914,16 @@ Settings configuration page
 							<div class="checkbox">
 								<form:checkbox path="enableDirectReportEmailing" id="enableDirectReportEmailing" class="switch-yes-no"/>
 							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4">
+							<spring:message code="settings.label.encryptionKey"/>
+						</label>
+						<div class="col-md-8">
+							<button id="updateEncryptionKey" type="button" class="btn btn-default">
+								<spring:message code="settings.button.update"/>
+							</button>
 						</div>
 					</div>
 				</fieldset>

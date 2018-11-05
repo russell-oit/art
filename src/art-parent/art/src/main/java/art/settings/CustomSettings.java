@@ -21,8 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 
 /**
- * Represents custom settings that can't be set from the user interface. Mainly
- * to enhance security.
+ * Represents settings that aren't set from the user interface (for
+ * enhanced security)
  *
  * @author Timothy Anyona
  */
@@ -38,6 +38,36 @@ public class CustomSettings implements Serializable {
 	private boolean enableGroovySandbox = true; //whether to apply the groovy sandbox when running groovy scripts
 	private boolean enableEmailing = true; //whether sending of emails is enabled
 	private String jwtSecret;
+	private String previousEncryptionKey;
+	private String newEncryptionKey;
+
+	/**
+	 * @return the previousEncryptionKey
+	 */
+	public String getPreviousEncryptionKey() {
+		return previousEncryptionKey;
+	}
+
+	/**
+	 * @param previousEncryptionKey the previousEncryptionKey to set
+	 */
+	public void setPreviousEncryptionKey(String previousEncryptionKey) {
+		this.previousEncryptionKey = previousEncryptionKey;
+	}
+
+	/**
+	 * @return the newEncryptionKey
+	 */
+	public String getNewEncryptionKey() {
+		return newEncryptionKey;
+	}
+
+	/**
+	 * @param newEncryptionKey the newEncryptionKey to set
+	 */
+	public void setNewEncryptionKey(String newEncryptionKey) {
+		this.newEncryptionKey = newEncryptionKey;
+	}
 
 	/**
 	 * @return the jwtSecret

@@ -773,8 +773,10 @@ public class Parameter implements Serializable {
 	/**
 	 * Encrypts all passwords fields in the parameter members including e.g. for
 	 * lov reports etc
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void encryptAllPasswords() {
+	public void encryptAllPasswords() throws Exception {
 		if (defaultValueReport != null) {
 			defaultValueReport.encryptAllPasswords();
 		}

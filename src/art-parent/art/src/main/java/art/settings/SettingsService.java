@@ -142,8 +142,11 @@ public class SettingsService {
 			settings.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			settings.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			//decrypt passwords
-			settings.decryptPasswords();
+			try {
+				settings.decryptPasswords();
+			} catch (Exception ex) {
+				logger.error("Error", ex);
+			}
 
 			return type.cast(settings);
 		}

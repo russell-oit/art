@@ -75,10 +75,10 @@ public class ReportServiceHelper {
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
 	 * @param local whether the import is to the local/current art instance
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	public void importReports(List<Report> reports, User actionUser,
-			Connection conn, boolean local) throws SQLException {
+			Connection conn, boolean local) throws Exception {
 
 		boolean commit = true;
 		importReports(reports, actionUser, conn, local, commit);
@@ -92,10 +92,10 @@ public class ReportServiceHelper {
 	 * @param conn the connection to use
 	 * @param local whether the import is to the local/current art instance
 	 * @param commit whether to perform a commit after a successful import
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	public void importReports(List<Report> reports, User actionUser,
-			Connection conn, boolean local, boolean commit) throws SQLException {
+			Connection conn, boolean local, boolean commit) throws Exception {
 
 		logger.debug("Entering importReports: actionUser={}, local={},"
 				+ " commit={}", actionUser, local, commit);
@@ -498,7 +498,7 @@ public class ReportServiceHelper {
 			if (commit) {
 				conn.commit();
 			}
-		} catch (SQLException ex) {
+		} catch (Exception ex) {
 			conn.rollback();
 			throw ex;
 		} finally {

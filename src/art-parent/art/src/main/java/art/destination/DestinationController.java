@@ -242,7 +242,7 @@ public class DestinationController {
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			return "redirect:/destinations";
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -313,9 +313,9 @@ public class DestinationController {
 	 * @param action "add or "edit"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
-	 * @throws SQLException
+	 * @throws Exception
 	 */
-	private String setPassword(Destination destination, String action) throws SQLException {
+	private String setPassword(Destination destination, String action) throws Exception {
 		logger.debug("Entering setPassword: destination={}, action='{}'", destination, action);
 
 		//encrypt password

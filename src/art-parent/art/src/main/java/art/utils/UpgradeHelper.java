@@ -127,7 +127,7 @@ public class UpgradeHelper {
 			upgradeDatabaseTo30(templatesPath);
 			upgradeDatabaseTo31();
 			upgradeDatabaseTo38();
-		} catch (SQLException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
 	}
@@ -137,7 +137,7 @@ public class UpgradeHelper {
 	 *
 	 * @param templatesPath the path to the templates directory
 	 */
-	private void upgradeDatabaseTo30(String templatesPath) throws SQLException {
+	private void upgradeDatabaseTo30(String templatesPath) throws Exception {
 		String databaseVersionString = "3.0";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -742,9 +742,9 @@ public class UpgradeHelper {
 	/**
 	 * Updates datasource passwords to use AES-128
 	 *
-	 * @throws SQLException
+	 * @throws Exception
 	 */
-	private void updateDatasourcePasswords() throws SQLException {
+	private void updateDatasourcePasswords() throws Exception {
 		logger.debug("Entering updateDatasourcePasswords");
 
 		String sql;

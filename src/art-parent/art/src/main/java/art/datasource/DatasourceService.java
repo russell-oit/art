@@ -262,10 +262,27 @@ public class DatasourceService {
 	 */
 	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
 	public void updateDatasource(Datasource datasource, User actionUser) throws SQLException {
-		logger.debug("Entering updateDatasource: datasource={}, actionUser={}", datasource, actionUser);
+		Connection conn = null;
+		updateDatasource(datasource, actionUser, conn);
+	}
+
+	/**
+	 * Updates an existing datasource
+	 *
+	 * @param datasource the updated datasource
+	 * @param actionUser the user who is performing the update
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
+	public void updateDatasource(Datasource datasource, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering updateDatasource: datasource={}, actionUser={}",
+				datasource, actionUser);
 
 		Integer newRecordId = null;
-		saveDatasource(datasource, newRecordId, actionUser);
+		saveDatasource(datasource, newRecordId, actionUser, conn);
 	}
 
 	/**
@@ -405,13 +422,12 @@ public class DatasourceService {
 			}
 		}
 
-		logger.debug("affectedRows={}", affectedRows);
-
 		//if no exception, update datasource id in case of new or copy
 		if (newRecordId != null) {
 			datasource.setDatasourceId(newRecordId);
 		}
 
+		logger.debug("affectedRows={}", affectedRows);
 		if (affectedRows != 1) {
 			logger.warn("Problem with save. affectedRows={}, newRecord={}, datasource={}",
 					affectedRows, newRecord, datasource);
@@ -499,4 +515,5 @@ public class DatasourceService {
 			dbService.update(sql, valuesArray);
 		}
 	}
+
 }

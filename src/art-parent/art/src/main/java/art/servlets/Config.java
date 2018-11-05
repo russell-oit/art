@@ -559,7 +559,7 @@ public class Config extends HttpServlet {
 			} else {
 				logger.info("ART Database configuration file not found: '{}'", artDatabaseFilePath);
 			}
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
 
@@ -576,10 +576,10 @@ public class Config extends HttpServlet {
 	 * Saves art database configuration to file
 	 *
 	 * @param artDatabase the art database configuration
-	 * @throws java.io.IOException
+	 * @throws Exception
 	 */
 	public static void saveArtDatabaseConfiguration(ArtDatabase artDatabase)
-			throws IOException {
+			throws Exception {
 
 		//encrypt password field for storing
 		String encryptedPassword = AesEncryptor.encrypt(artDatabase.getPassword());
@@ -750,6 +750,26 @@ public class Config extends HttpServlet {
 	}
 
 	/**
+	 * Returns custom settings from the custom settings file
+	 * 
+	 * @return custom settings from the custom settings file
+	 * @throws IOException 
+	 */
+	public static CustomSettings getCustomSettingsFromFile() throws IOException {
+		CustomSettings fileCustomSettings = null;
+
+		String customSettingsFilePath = webinfPath + "art-custom-settings.json";
+		logger.debug("customSettingsFilePath='{}'", customSettingsFilePath);
+		File customSettingsFile = new File(customSettingsFilePath);
+		if (customSettingsFile.exists()) {
+			ObjectMapper mapper = new ObjectMapper();
+			fileCustomSettings = mapper.readValue(customSettingsFile, CustomSettings.class);
+		}
+
+		return fileCustomSettings;
+	}
+
+	/**
 	 * Loads custom settings
 	 *
 	 * @param ctx the servlet context
@@ -758,13 +778,7 @@ public class Config extends HttpServlet {
 		CustomSettings newCustomSettings = null;
 
 		try {
-			String customSettingsFilePath = webinfPath + "art-custom-settings.json";
-			logger.debug("customSettingsFilePath='{}'", customSettingsFilePath);
-			File customSettingsFile = new File(customSettingsFilePath);
-			if (customSettingsFile.exists()) {
-				ObjectMapper mapper = new ObjectMapper();
-				newCustomSettings = mapper.readValue(customSettingsFile, CustomSettings.class);
-			}
+			newCustomSettings = getCustomSettingsFromFile();
 		} catch (IOException ex) {
 			logger.error("Error", ex);
 		}

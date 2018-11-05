@@ -105,8 +105,11 @@ public class DestinationService {
 			destination.setCreatedBy(rs.getString("CREATED_BY"));
 			destination.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			//decrypt password
-			destination.decryptPassword();
+			try {
+				destination.decryptPassword();
+			} catch (Exception ex) {
+				logger.error("Error. {}", destination, ex);
+			}
 
 			return type.cast(destination);
 		}

@@ -1524,24 +1524,30 @@ public class Report implements Serializable {
 
 	/**
 	 * Decrypts password fields
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void decryptPasswords() {
+	public void decryptPasswords() throws Exception {
 		openPassword = AesEncryptor.decrypt(openPassword);
 		modifyPassword = AesEncryptor.decrypt(modifyPassword);
 	}
 
 	/**
 	 * Encrypts password fields
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void encryptPasswords() {
+	public void encryptPasswords() throws Exception {
 		openPassword = AesEncryptor.encrypt(openPassword);
 		modifyPassword = AesEncryptor.encrypt(modifyPassword);
 	}
 
 	/**
 	 * Encrypts all passwords fields in the report including for datasources etc
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void encryptAllPasswords() {
+	public void encryptAllPasswords() throws Exception {
 		encryptPasswords();
 
 		if (datasource != null) {
@@ -1563,8 +1569,10 @@ public class Report implements Serializable {
 	/**
 	 * Encrypts all passwords fields in the report including for datasources etc
 	 * where the respective clearTextPassword field is true
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void encryptAllClearTextPasswords() {
+	public void encryptAllClearTextPasswords() throws Exception {
 		if (clearTextPasswords) {
 			encryptPasswords();
 		}

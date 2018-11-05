@@ -183,7 +183,11 @@ public class ReportService {
 			report.setReportGroups(reportGroups);
 
 			//decrypt open and modify passwords
-			report.decryptPasswords();
+			try {
+				report.decryptPasswords();
+			} catch (Exception ex) {
+				logger.error("Error. {}", report, ex);
+			}
 
 			setChartOptions(report);
 
@@ -194,14 +198,14 @@ public class ReportService {
 					CloneOptions cloneOptions = mapper.readValue(options, CloneOptions.class);
 					report.setCloneOptions(cloneOptions);
 				} catch (IOException ex) {
-					logger.error("Error. Report Id {}", report.getReportId(), ex);
+					logger.error("Error. {}", report, ex);
 				}
 			}
 
 			try {
 				report.loadGeneralOptions();
 			} catch (IOException ex) {
-				logger.error("Error. Report Id {}", report.getReportId(), ex);
+				logger.error("Error. {}", report, ex);
 			}
 
 			return type.cast(report);
@@ -405,7 +409,7 @@ public class ReportService {
 
 		return getAccessibleReportsWithoutReportTypes(userId, excludedReportTypes);
 	}
-	
+
 	/**
 	 * Returns the reports that a user can add to a self service dashboard
 	 *
@@ -1314,7 +1318,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
 	}
-	
+
 	/**
 	 * Returns gridstack dashboard reports
 	 *

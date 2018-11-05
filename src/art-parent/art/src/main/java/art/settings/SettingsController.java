@@ -17,15 +17,22 @@
  */
 package art.settings;
 
+import art.artdatabase.ArtDatabase;
+import art.connectionpool.DbConnections;
+import art.datasource.Datasource;
 import art.datasource.DatasourceService;
+import art.dbutils.DatabaseUtils;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.LoggerLevel;
 import art.enums.PdfPageSize;
+import art.general.AjaxResponse;
 import art.servlets.Config;
 import art.user.User;
+import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -39,8 +46,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -140,20 +149,20 @@ public class SettingsController {
 		}
 		settings.setLdapBindPassword(newLdapBindPassword);
 
-		//encrypt password fields
-		settings.encryptPasswords();
-
 		try {
+			//encrypt password fields
+			settings.encryptPasswords();
+
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			settingsService.updateSettings(settings, sessionUser);
-			
+
 			SettingsHelper settingsHelper = new SettingsHelper();
 			settingsHelper.refreshSettings(settings, session, servletContext);
 
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");
 			return "redirect:/success";
-		} catch (SQLException | RuntimeException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -183,6 +192,57 @@ public class SettingsController {
 		}
 
 		return "settings";
+	}
+
+	@PostMapping("/updateEncryptionKey")
+	public @ResponseBody
+	AjaxResponse updateEncryptionKey(HttpSession session) {
+		logger.debug("Entering updateEncryptionKey");
+
+		AjaxResponse response = new AjaxResponse();
+
+		Connection conn = null;
+
+		try {
+			CustomSettings fileCustomSettings = Config.getCustomSettingsFromFile();
+			if (fileCustomSettings == null) {
+				response.setErrorMessage("Custom settings not available");
+				return response;
+			}
+			
+			String newEncryptionKey = fileCustomSettings.getNewEncryptionKey();
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			conn = DbConnections.getArtDbConnection();
+			conn.setAutoCommit(false);
+
+			Datasource datasource = datasourceService.getDatasource(1);
+			datasource.encryptPassword(newEncryptionKey);
+			datasourceService.updateDatasource(datasource, sessionUser, conn);
+			conn.commit();
+			CustomSettings customSettings = Config.getCustomSettings();
+			customSettings.setNewEncryptionKey(newEncryptionKey);
+			datasource.decryptPassword();
+			ArtDatabase artDbConfig = Config.getArtDbConfig();
+			//DbConnections.createConnectionPools(artDbConfig);
+			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			response.setSuccess(true);
+		} catch (Exception ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException ex2) {
+					logger.error("Error", ex2);
+				}
+			}
+		} finally {
+			DatabaseUtils.close(conn);
+		}
+
+		return response;
 	}
 
 }

@@ -174,8 +174,10 @@ public class Datasource extends DatasourceInfo implements Serializable {
 
 	/**
 	 * Decrypts the password field
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void decryptPassword() {
+	public void decryptPassword() throws Exception {
 		if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "art")) {
 			if (StringUtils.startsWith(password, "o:")) {
 				password = DesEncryptor.decrypt(password.substring(2));
@@ -187,9 +189,22 @@ public class Datasource extends DatasourceInfo implements Serializable {
 
 	/**
 	 * Encrypts the password field
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void encryptPassword() {
-		password = AesEncryptor.encrypt(password);
+	public void encryptPassword() throws Exception {
+		String key = null;
+		encryptPassword(key);
+	}
+
+	/**
+	 * Encrypts the password field
+	 *
+	 * @param key the key to use
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPassword(String key) throws Exception {
+		password = AesEncryptor.encrypt(password, key);
 		passwordAlgorithm = "AES";
 	}
 }

@@ -249,7 +249,7 @@ public class DatasourceController {
 			String recordName = datasource.getName() + " (" + datasource.getDatasourceId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/datasources";
-		} catch (SQLException | RuntimeException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -516,9 +516,9 @@ public class DatasourceController {
 	 * @param action "add", "edit" or "copy"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
-	 * @throws SQLException
+	 * @throws Exception
 	 */
-	private String setPassword(Datasource datasource, String action) throws SQLException {
+	private String setPassword(Datasource datasource, String action) throws Exception {
 		logger.debug("Entering setPassword: datasource={}, action='{}'", datasource, action);
 
 		boolean useCurrentPassword = false;

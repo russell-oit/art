@@ -334,8 +334,9 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasAnyPermission("save_reports", "self_service_dashboards")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equalsAny(page, "selfServiceDashboards", "getDashboardCandidateReports",
-				"getEditDashboardReports", "getDashboardDetails")) {
+		} else if (StringUtils.equalsAny(page, "selfServiceDashboards",
+				"getDashboardCandidateReports", "getEditDashboardReports",
+				"getDashboardDetails")) {
 			if (user.hasPermission("self_service_dashboards")) {
 				authorised = true;
 			}
@@ -367,7 +368,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("configure_art_database")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "settings")) {
+		} else if (StringUtils.equalsAny(page, "settings", "updateEncryptionKey")) {
 			if (user.hasPermission("configure_settings")) {
 				authorised = true;
 			}

@@ -259,7 +259,7 @@ public class ImportRecordsController {
 
 			redirectAttributes.addFlashAttribute("message", "page.message.recordsImported");
 			return "redirect:/success";
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -286,11 +286,10 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param session the http session
-	 * @throws IOException
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private void importSettings(File file, User sessionUser, Connection conn,
-			HttpSession session) throws IOException, SQLException {
+			HttpSession session) throws Exception {
 
 		logger.debug("Entering importSettings: sessionUser={}", sessionUser);
 
@@ -314,10 +313,10 @@ public class ImportRecordsController {
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
 	 * @param importRecords the import records object
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private void importDatasources(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
 
 		logger.debug("Entering importDatasources: sessionUser={}", sessionUser);
 
@@ -361,10 +360,10 @@ public class ImportRecordsController {
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
 	 * @param importRecords the import records object
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private void importDestinations(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
 
 		logger.debug("Entering importDestinations: sessionUser={}", sessionUser);
 
@@ -400,10 +399,10 @@ public class ImportRecordsController {
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
 	 * @param importRecords the import records object
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private void importEncryptors(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
 
 		logger.debug("Entering importEncryptors: sessionUser={}", sessionUser);
 
@@ -540,10 +539,10 @@ public class ImportRecordsController {
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
 	 * @param importRecords the import records object
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private void importSmtpServers(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
 
 		logger.debug("Entering importSmtpServers: sessionUser={}", sessionUser);
 
@@ -914,10 +913,10 @@ public class ImportRecordsController {
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
 	 * @param importRecords the import records object
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private void importParameters(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
 
 		logger.debug("Entering importParameters: sessionUser={}", sessionUser);
 
@@ -994,10 +993,10 @@ public class ImportRecordsController {
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
 	 * @param importRecords the import records object
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private void importReports(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
 
 		logger.debug("Entering importReports: sessionUser={}", sessionUser);
 

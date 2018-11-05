@@ -379,8 +379,10 @@ public class Encryptor implements Serializable {
 
 	/**
 	 * Decrypts password fields
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void decryptPasswords() {
+	public void decryptPasswords() throws Exception {
 		aesCryptPassword = AesEncryptor.decrypt(aesCryptPassword);
 		openPgpSigningKeyPassphrase = AesEncryptor.decrypt(openPgpSigningKeyPassphrase);
 		openPassword = AesEncryptor.decrypt(openPassword);
@@ -389,8 +391,10 @@ public class Encryptor implements Serializable {
 	
 	/**
 	 * Encrypts password fields
+	 * 
+	 * @throws java.lang.Exception
 	 */
-	public void encryptPasswords(){
+	public void encryptPasswords() throws Exception {
 		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword);
 		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase);
 		openPassword = AesEncryptor.encrypt(openPassword);

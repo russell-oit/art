@@ -100,8 +100,11 @@ public class SmtpServerService {
 			smtpServer.setCreatedBy(rs.getString("CREATED_BY"));
 			smtpServer.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			//decrypt password
-			smtpServer.decryptPassword();
+			try {
+				smtpServer.decryptPassword();
+			} catch (Exception ex) {
+				logger.error("Error. {}", smtpServer, ex);
+			}
 
 			return type.cast(smtpServer);
 		}
