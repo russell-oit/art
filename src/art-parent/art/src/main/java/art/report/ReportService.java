@@ -1270,7 +1270,7 @@ public class ReportService {
 	 * @return drilldown reports
 	 * @throws SQLException
 	 */
-	//@Cacheable(value = "reports")
+	//@Cacheable(value = "reports") //if you make this cacheable, you'll need to cacheevict "reports" in ParameterService
 	public List<Report> getDrilldownReports() throws SQLException {
 		logger.debug("Entering getDrilldownReports");
 
