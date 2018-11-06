@@ -18,6 +18,7 @@
 package art.artdatabase;
 
 import art.datasource.DatasourceInfo;
+import art.encryption.AesEncryptor;
 import art.enums.ConnectionPoolLibrary;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
@@ -62,6 +63,35 @@ public class ArtDatabase extends DatasourceInfo implements Serializable {
 	 */
 	public void setConnectionPoolLibrary(ConnectionPoolLibrary connectionPoolLibrary) {
 		this.connectionPoolLibrary = connectionPoolLibrary;
+	}
+	
+	/**
+	 * Decrypts the password field
+	 *
+	 * @throws java.lang.Exception
+	 */
+	public void decryptPassword() throws Exception {
+		password = AesEncryptor.decrypt(password);
+	}
+
+	/**
+	 * Encrypts the password field
+	 *
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPassword() throws Exception {
+		String key = null;
+		encryptPassword(key);
+	}
+
+	/**
+	 * Encrypts the password field
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPassword(String key) throws Exception {
+		password = AesEncryptor.encrypt(password, key);
 	}
 
 }

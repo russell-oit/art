@@ -22,6 +22,8 @@ import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
 import art.dbutils.DatabaseUtils;
+import art.encryptor.Encryptor;
+import art.encryptor.EncryptorService;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
@@ -31,7 +33,6 @@ import art.enums.PdfPageSize;
 import art.general.AjaxResponse;
 import art.servlets.Config;
 import art.user.User;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -70,6 +71,9 @@ public class SettingsController {
 
 	@Autowired
 	private SettingsService settingsService;
+
+	@Autowired
+	private EncryptorService encryptorService;
 
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
@@ -209,28 +213,35 @@ public class SettingsController {
 				response.setErrorMessage("Custom settings not available");
 				return response;
 			}
-			
+
 			String newEncryptionKey = fileCustomSettings.getNewEncryptionKey();
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			conn = DbConnections.getArtDbConnection();
-			conn.setAutoCommit(false);
-
-			Datasource datasource = datasourceService.getDatasource(1);
-			datasource.encryptPassword(newEncryptionKey);
-			datasourceService.updateDatasource(datasource, sessionUser, conn);
-			conn.commit();
-			CustomSettings customSettings = Config.getCustomSettings();
-			customSettings.setNewEncryptionKey(newEncryptionKey);
-			datasource.decryptPassword();
-			ArtDatabase artDbConfig = Config.getArtDbConfig();
-			//DbConnections.createConnectionPools(artDbConfig);
-			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
-			response.setSuccess(true);
+//			conn = DbConnections.getArtDbConnection();
+//			conn.setAutoCommit(false);
+//
+//			List<Encryptor> encryptors = encryptorService.getAllEncryptors();
+//			for(Encryptor encryptor: encryptors){
+//				encryptor.encryptPasswords(newEncryptionKey);
+//				encryptorService.updateEncryptor(encryptor, sessionUser, conn);
+//			}
+//
+//			Datasource datasource = datasourceService.getDatasource(1);
+//			datasource.encryptPassword(newEncryptionKey);
+//			datasourceService.updateDatasource(datasource, sessionUser, conn);
+//			conn.commit();
+//			CustomSettings customSettings = Config.getCustomSettings();
+//			customSettings.setNewEncryptionKey(newEncryptionKey);
+//			datasource.decryptPassword();
+//			ArtDatabase artDbConfig = Config.getArtDbConfig();
+//			//DbConnections.createConnectionPools(artDbConfig);
+//			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+//			response.setSuccess(true);
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
+
 			if (conn != null) {
 				try {
 					conn.rollback();

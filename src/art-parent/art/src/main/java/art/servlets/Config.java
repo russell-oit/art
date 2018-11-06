@@ -548,12 +548,8 @@ public class Config extends HttpServlet {
 			if (artDatabaseFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
 				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
-
-				//decrypt password field
-				String encryptedPassword = artDatabase.getPassword();
-				String decryptedPassword = AesEncryptor.decrypt(encryptedPassword);
-				artDatabase.setPassword(decryptedPassword);
-
+				
+				artDatabase.decryptPassword();
 				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
 			} else {
@@ -582,8 +578,7 @@ public class Config extends HttpServlet {
 			throws Exception {
 
 		//encrypt password field for storing
-		String encryptedPassword = AesEncryptor.encrypt(artDatabase.getPassword());
-		artDatabase.setPassword(encryptedPassword);
+		artDatabase.encryptPassword();
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();

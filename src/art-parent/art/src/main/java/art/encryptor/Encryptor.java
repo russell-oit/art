@@ -379,7 +379,7 @@ public class Encryptor implements Serializable {
 
 	/**
 	 * Decrypts password fields
-	 * 
+	 *
 	 * @throws java.lang.Exception
 	 */
 	public void decryptPasswords() throws Exception {
@@ -388,17 +388,28 @@ public class Encryptor implements Serializable {
 		openPassword = AesEncryptor.decrypt(openPassword);
 		modifyPassword = AesEncryptor.decrypt(modifyPassword);
 	}
-	
+
 	/**
 	 * Encrypts password fields
-	 * 
+	 *
 	 * @throws java.lang.Exception
 	 */
 	public void encryptPasswords() throws Exception {
-		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword);
-		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase);
-		openPassword = AesEncryptor.encrypt(openPassword);
-		modifyPassword = AesEncryptor.encrypt(modifyPassword);
+		String key = null;
+		encryptPasswords(key);
+	}
+
+	/**
+	 * Encrypts password fields
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPasswords(String key) throws Exception {
+		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword, key);
+		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase, key);
+		openPassword = AesEncryptor.encrypt(openPassword, key);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword, key);
 	}
 
 }

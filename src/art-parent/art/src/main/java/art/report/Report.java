@@ -1510,7 +1510,7 @@ public class Report implements Serializable {
 
 	/**
 	 * Returns report group names, html encoded
-	 * 
+	 *
 	 * @return report group names, html encoded
 	 */
 	public String getReportGroupNamesHtml() {
@@ -1524,7 +1524,7 @@ public class Report implements Serializable {
 
 	/**
 	 * Decrypts password fields
-	 * 
+	 *
 	 * @throws java.lang.Exception
 	 */
 	public void decryptPasswords() throws Exception {
@@ -1534,17 +1534,28 @@ public class Report implements Serializable {
 
 	/**
 	 * Encrypts password fields
-	 * 
+	 *
 	 * @throws java.lang.Exception
 	 */
 	public void encryptPasswords() throws Exception {
-		openPassword = AesEncryptor.encrypt(openPassword);
-		modifyPassword = AesEncryptor.encrypt(modifyPassword);
+		String key = null;
+		encryptPasswords(key);
+	}
+
+	/**
+	 * Encrypts password fields
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPasswords(String key) throws Exception {
+		openPassword = AesEncryptor.encrypt(openPassword, key);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword, key);
 	}
 
 	/**
 	 * Encrypts all passwords fields in the report including for datasources etc
-	 * 
+	 *
 	 * @throws java.lang.Exception
 	 */
 	public void encryptAllPasswords() throws Exception {
@@ -1569,7 +1580,7 @@ public class Report implements Serializable {
 	/**
 	 * Encrypts all passwords fields in the report including for datasources etc
 	 * where the respective clearTextPassword field is true
-	 * 
+	 *
 	 * @throws java.lang.Exception
 	 */
 	public void encryptAllClearTextPasswords() throws Exception {

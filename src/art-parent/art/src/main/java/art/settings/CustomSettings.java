@@ -38,22 +38,7 @@ public class CustomSettings implements Serializable {
 	private boolean enableGroovySandbox = true; //whether to apply the groovy sandbox when running groovy scripts
 	private boolean enableEmailing = true; //whether sending of emails is enabled
 	private String jwtSecret;
-	private String previousEncryptionKey;
 	private String newEncryptionKey;
-
-	/**
-	 * @return the previousEncryptionKey
-	 */
-	public String getPreviousEncryptionKey() {
-		return previousEncryptionKey;
-	}
-
-	/**
-	 * @param previousEncryptionKey the previousEncryptionKey to set
-	 */
-	public void setPreviousEncryptionKey(String previousEncryptionKey) {
-		this.previousEncryptionKey = previousEncryptionKey;
-	}
 
 	/**
 	 * @return the newEncryptionKey

@@ -200,7 +200,7 @@ public class Datasource extends DatasourceInfo implements Serializable {
 	/**
 	 * Encrypts the password field
 	 *
-	 * @param key the key to use
+	 * @param key the key to use. If null, the current key will be used
 	 * @throws java.lang.Exception
 	 */
 	public void encryptPassword(String key) throws Exception {

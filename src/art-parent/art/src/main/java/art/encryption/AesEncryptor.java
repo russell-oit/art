@@ -25,8 +25,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides encryption and decryption of strings using the AES algorithm
@@ -43,7 +41,6 @@ public class AesEncryptor {
 	//https://security.stackexchange.com/questions/90848/encrypting-using-aes-256-can-i-use-256-bits-iv
 	//https://stackoverflow.com/questions/6729834/need-solution-for-wrong-iv-length-in-aes
 
-	private static final Logger logger = LoggerFactory.getLogger(AesEncryptor.class);
 	private static final String DEFAULT_KEY = "XH6YUHlrofcQDZjd"; // 128 bit key (16 bytes)
 	private static final String TRANSFORMATION = "AES/CBC/PKCS5PADDING";
 	private static final int AES_CBC_IV_LENGTH_BYTES = 16; //AES in CBC mode always uses a 128 bit IV (16 bytes)
@@ -64,7 +61,7 @@ public class AesEncryptor {
 	 * Encrypts a string
 	 *
 	 * @param clearText the string to encrypt, not null
-	 * @param key the encryption key to use
+	 * @param key the key to use. If null, the current key will be used
 	 * @return the encrypted string, null if clearText is null
 	 * @throws java.lang.Exception
 	 */
@@ -88,6 +85,7 @@ public class AesEncryptor {
 		cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 		byte[] encryptedBytes = cipher.doFinal(clearText.getBytes("UTF-8"));
 		byte[] finalEncryptedBytes = ArrayUtils.addAll(IVBytes, encryptedBytes);
+		
 		return Base64.encodeBase64String(finalEncryptedBytes);
 	}
 
@@ -107,7 +105,7 @@ public class AesEncryptor {
 	 * Decrypts a string
 	 *
 	 * @param cipherText the encrypted string
-	 * @param key the decryption key to use
+	 * @param key the key to use. If null, the current key will be used
 	 * @return the decrypted string, null if cipherText is null
 	 * @throws java.lang.Exception
 	 */
@@ -129,6 +127,7 @@ public class AesEncryptor {
 
 		cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
 		byte[] decryptedBytes = cipher.doFinal(finalEncryptedBytes);
+		
 		return new String(decryptedBytes);
 	}
 
