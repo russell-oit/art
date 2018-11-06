@@ -1270,7 +1270,7 @@ public class ReportService {
 	 * @return drilldown reports
 	 * @throws SQLException
 	 */
-	@Cacheable(value = "reports")
+	//@Cacheable(value = "reports")
 	public List<Report> getDrilldownReports() throws SQLException {
 		logger.debug("Entering getDrilldownReports");
 
