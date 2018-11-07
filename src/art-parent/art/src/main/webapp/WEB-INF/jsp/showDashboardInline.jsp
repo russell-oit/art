@@ -115,7 +115,7 @@
 		</c:choose>
 	</div>
 </div>
-	
+
 <script type="text/javascript">
 	$(document).ready(function () {
 		//https://stackoverflow.com/questions/109086/stop-setinterval-call-in-javascript
@@ -245,6 +245,8 @@
 	var token = $("meta[name='_csrf']").attr("content");
 	var header = $("meta[name='_csrf_header']").attr("content");
 	$(document).ajaxSend(function (e, xhr, options) {
-		xhr.setRequestHeader(header, token);
+		if (header) {
+			xhr.setRequestHeader(header, token);
+		}
 	});
 </script>
