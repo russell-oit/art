@@ -41,9 +41,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		//https://stackoverflow.com/questions/22524470/spring-security-3-2-csrf-disable-for-specfic-urls
 		//https://stackoverflow.com/questions/32698808/how-to-ignore-spring-security-csrf-for-specific-urls-in-spring-boot-project
 		http
+				//https://docs.spring.io/autorepo/docs/spring-security/3.2.0.CI-SNAPSHOT/reference/html/headers.html
+				.headers().frameOptions().disable().and() //uncomment to enable running art in an iframe
+				//.headers().disable() //uncomment to disable all spring secrity added response headers
 				.csrf().ignoringAntMatchers("/saiku2/**", "/api/**")
 				.and()
-				//.csrf().disable() //uncomment to disable csrf
+				.csrf().disable() //uncomment to disable csrf
 				.authorizeRequests()
 				.anyRequest().permitAll();
 	}
