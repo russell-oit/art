@@ -112,6 +112,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server_name>/<database_name>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "citus") {
+		driverElement.value = "org.postgresql.Driver";
+		urlElement.value = "jdbc:postgresql://<server_name>/<database_name>";
+		testSqlElement.value = "select 1";
 	} else if (dbType === "hsqldb-standalone") {
 		driverElement.value = "org.hsqldb.jdbcDriver";
 		urlElement.value = "jdbc:hsqldb:file:<file_path>;shutdown=true;hsqldb.write_delay=false";

@@ -90,6 +90,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("snowflake2-other");
 		databaseTypes.remove("presto");
 		databaseTypes.remove("memsql");
+		databaseTypes.remove("citus");
 
 		return databaseTypes;
 	}
