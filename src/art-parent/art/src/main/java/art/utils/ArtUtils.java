@@ -302,6 +302,7 @@ public class ArtUtils {
 		databaseTypes.put("snowflake1-us-west", "Snowflake (US West Region)");
 		databaseTypes.put("snowflake2-other", "Snowflake (Other Regions)");
 		databaseTypes.put("presto", "Presto - driver not included"); //needs java 8
+		databaseTypes.put("memsql", "MemSQL (MySQL driver)");
 
 		return databaseTypes;
 	}

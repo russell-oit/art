@@ -100,6 +100,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.mysql.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server_name>/<database_name>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "memsql") {
+		driverElement.value = "com.mysql.jdbc.Driver";
+		urlElement.value = "jdbc:mysql://<server_name>/<database_name>";
+		testSqlElement.value = "select 1";
 	} else if (dbType === "mariadb") {
 		driverElement.value = "org.mariadb.jdbc.Driver";
 		urlElement.value = "jdbc:mariadb://<server_name>/<database_name>";
