@@ -137,6 +137,9 @@ public class CacheController {
 				case Permissions:
 					cacheHelper.clearPermissions();
 					break;
+				case Drilldowns:
+					cacheHelper.clearDrilldowns();
+					break;
 				default:
 					message = "Clear cache not available: " + id;
 			}

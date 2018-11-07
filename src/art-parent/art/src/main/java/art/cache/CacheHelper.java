@@ -239,6 +239,14 @@ public class CacheHelper {
 	public void clearPermissions() {
 		logger.debug("Entering clearPermissions");
 	}
+	
+	/**
+	 * Clears the drilldowns cache
+	 */
+	@CacheEvict(value = "drilldowns", allEntries = true)
+	public void clearDrilldowns() {
+		logger.debug("Entering clearDrilldowns");
+	}
 
 	/**
 	 * Clears all caches
@@ -248,7 +256,7 @@ public class CacheHelper {
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
 		"datasources", "schedules", "jobs", "rules", "parameters",
 		"encryptors", "holidays", "destinations", "smtpServers", "roles",
-		"permissions"}, allEntries = true)
+		"permissions", "drilldowns"}, allEntries = true)
 	public void clearAll(HttpSession session) {
 		logger.debug("Entering clearAll");
 

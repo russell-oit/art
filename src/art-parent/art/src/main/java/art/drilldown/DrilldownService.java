@@ -34,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -103,6 +105,7 @@ public class DrilldownService {
 	 * @return drilldowns for the given report
 	 * @throws SQLException
 	 */
+	@Cacheable("drilldowns")
 	public List<Drilldown> getDrilldowns(int parentReportId) throws SQLException {
 		logger.debug("Entering getDrilldowns: parentReportId={}", parentReportId);
 
@@ -118,6 +121,7 @@ public class DrilldownService {
 	 * @return drilldown if found, null otherwise
 	 * @throws SQLException
 	 */
+	@Cacheable("drilldowns")
 	public Drilldown getDrilldown(int id) throws SQLException {
 		logger.debug("Entering getDrilldown: id={}", id);
 
@@ -132,6 +136,7 @@ public class DrilldownService {
 	 * @param id the drilldown id
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "drilldowns", allEntries = true)
 	public void deleteDrilldown(int id) throws SQLException {
 		logger.debug("Entering deleteDrilldown: id={}", id);
 
@@ -147,6 +152,7 @@ public class DrilldownService {
 	 * @param ids the ids of the drilldowns to delete
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "drilldowns", allEntries = true)
 	public void deleteDrilldowns(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteDrilldowns: ids={}", (Object) ids);
 
@@ -165,6 +171,7 @@ public class DrilldownService {
 	 * @return new drilldown's id
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "drilldowns", allEntries = true)
 	public synchronized int addDrilldown(Drilldown drilldown, int parentReportId) throws SQLException {
 		logger.debug("Entering addDrilldown: drilldown={}", drilldown);
 
@@ -192,6 +199,7 @@ public class DrilldownService {
 	 * @param drilldown the updated drilldown
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "drilldowns", allEntries = true)
 	public void updateDrilldown(Drilldown drilldown) throws SQLException {
 		logger.debug("Entering updateDrilldown: drilldown={}", drilldown);
 
@@ -207,6 +215,7 @@ public class DrilldownService {
 	 * performed
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "drilldowns", allEntries = true)
 	public void importDrilldowns(List<Drilldown> drilldowns, Connection conn) throws SQLException {
 		logger.debug("Entering importDrilldowns");
 
@@ -327,6 +336,7 @@ public class DrilldownService {
 	 * @param parentReportId the drilldown's parent report id
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "drilldowns", allEntries = true)
 	public void moveDrilldown(int id, int fromPosition, int toPosition, String direction,
 			int parentReportId) throws SQLException {
 

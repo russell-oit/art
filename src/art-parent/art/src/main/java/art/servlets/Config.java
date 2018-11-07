@@ -19,7 +19,6 @@ package art.servlets;
 
 import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
-import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionPoolLibrary;
 import art.jobrunners.CleanJob;
