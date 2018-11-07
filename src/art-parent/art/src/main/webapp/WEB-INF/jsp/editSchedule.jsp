@@ -132,7 +132,7 @@ Edit schedule page
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert(xhr.responseText);
+							ajaxErrorHandler(xhr);
 						}
 					});
 				});

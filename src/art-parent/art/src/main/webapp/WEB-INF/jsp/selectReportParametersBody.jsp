@@ -52,10 +52,7 @@ Display section to allow selecting of report parameters and initiate running of 
 					}
 				},
 				error: function (xhr) {
-					bootbox.alert({
-						title: '${errorOccurredText}',
-						message: xhr.responseText
-					});
+					showUserAjaxError(xhr, '${errorOccurredText}');
 				}
 			});
 		});
@@ -85,10 +82,7 @@ Display section to allow selecting of report parameters and initiate running of 
 				},
 				error: function (xhr) {
 					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
-					bootbox.alert({
-						title: '${errorOccurredText}',
-						message: xhr.responseText
-					});
+					showUserAjaxError(xhr, '${errorOccurredText}');
 					$('.action').prop('disabled', false);
 				}
 			});
@@ -110,10 +104,7 @@ Display section to allow selecting of report parameters and initiate running of 
 					}
 				},
 				error: function (xhr) {
-					bootbox.alert({
-						title: '${errorOccurredText}',
-						message: xhr.responseText
-					});
+					showUserAjaxError(xhr, '${errorOccurredText}');
 				}
 			});
 		});
@@ -136,10 +127,7 @@ Display section to allow selecting of report parameters and initiate running of 
 					}
 				},
 				error: function (xhr) {
-					bootbox.alert({
-						title: '${errorOccurredText}',
-						message: xhr.responseText
-					});
+					showUserAjaxError(xhr, '${errorOccurredText}');
 				}
 			});
 		});

@@ -148,7 +148,10 @@
 		download: download,
 		skipEmptyLines: true,
 		error: function (e) {
-			bootbox.alert(e);
+			bootbox.alert({
+				title: '${errorOccurredText}',
+				message: e
+			});
 		},
 		complete: function (parsed) {
 			$("#${outputDivId}").pivotUI(parsed.data, options, overwrite, locale);
@@ -372,10 +375,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				} //end if result
@@ -429,10 +429,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				} //end if result

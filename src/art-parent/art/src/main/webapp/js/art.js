@@ -493,9 +493,46 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
  * Error handler for http errors after ajax calls
  * 
  * @param {jqXHR} xhr
+ * @param {string} status
+ * @param {string} error
  */
-function ajaxErrorHandler(xhr) {
-	bootbox.alert(xhr.responseText);
+function ajaxErrorHandler(xhr, status, error) {
+	//https://api.jquery.com/jquery.ajax/
+	var message = getAjaxErrorMessage(xhr);
+	bootbox.alert(message);
+}
+
+/**
+ * Show http errors after ajax calls by non-admin users
+ * 
+ * @param {jqXHR} xhr
+ * @param {string} errorOccurredText - optional alert title
+ */
+function showUserAjaxError(xhr, errorOccurredText) {
+	var message = getAjaxErrorMessage(xhr);
+	bootbox.alert({
+		title: errorOccurredText, //can be empty for alerts. if empty, alert won't have title
+		message: message //must not be empty
+	});
+}
+
+/**
+ * Gets the message to display for an ajax call error
+ * 
+ * @param {jqXHR} xhr
+ * @returns {String}
+ */
+function getAjaxErrorMessage(xhr) {
+	var message;
+	
+	var responseText = xhr.responseText; //can be undefined e.g. if request header name is empty string
+	if (responseText) {
+		message = responseText;
+	} else {
+		message = xhr.status + " " + xhr.statusText;
+	}
+	
+	return message;
 }
 
 /**

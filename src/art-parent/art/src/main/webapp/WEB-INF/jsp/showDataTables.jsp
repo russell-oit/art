@@ -12,6 +12,7 @@
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <div id="${outputDivId}">
 	<table id="${tableId}" class="table table-bordered table-striped table-condensed">
@@ -236,7 +237,10 @@
 		download: download,
 		header: true,
 		error: function (e) {
-			bootbox.alert(e);
+			bootbox.alert({
+				title: '${errorOccurredText}',
+				message: e
+			});
 		},
 		complete: function (parsed) {
 			//https://stackoverflow.com/questions/26597460/displaying-csv-headers-using-papaparse-plugin

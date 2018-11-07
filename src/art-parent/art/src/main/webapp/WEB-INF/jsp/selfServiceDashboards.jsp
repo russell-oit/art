@@ -96,10 +96,7 @@
 								autosize(autoheight, autowidth, reportId);
 							},
 							error: function (xhr) {
-								bootbox.alert({
-									title: '${errorOccurredText}',
-									message: xhr.responseText
-								});
+								showUserAjaxError(xhr, '${errorOccurredText}');
 							}
 						});
 					} else {
@@ -180,10 +177,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				}
@@ -214,10 +208,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				}
@@ -265,10 +256,7 @@
 													$('#reports').selectpicker('refresh');
 												},
 												error: function (xhr) {
-													bootbox.alert({
-														title: '${errorOccurredText}',
-														message: xhr.responseText
-													});
+													showUserAjaxError(xhr, '${errorOccurredText}');
 												}
 											});
 										}
@@ -278,10 +266,7 @@
 								}
 							},
 							error: function (xhr) {
-								bootbox.alert({
-									title: '${errorOccurredText}',
-									message: xhr.responseText
-								});
+								showUserAjaxError(xhr, '${errorOccurredText}');
 							}
 						});
 					}
@@ -507,10 +492,7 @@
 									}
 								},
 								error: function (xhr) {
-									bootbox.alert({
-										title: '${errorOccurredText}',
-										message: xhr.responseText
-									});
+									showUserAjaxError(xhr, '${errorOccurredText}');
 								}
 							});
 						} //end if result
@@ -578,10 +560,7 @@
 									}
 								},
 								error: function (xhr) {
-									bootbox.alert({
-										title: '${errorOccurredText}',
-										message: xhr.responseText
-									});
+									showUserAjaxError(xhr, '${errorOccurredText}');
 								}
 							});
 						} //end if result

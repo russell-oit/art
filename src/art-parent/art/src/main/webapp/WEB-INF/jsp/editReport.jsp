@@ -261,7 +261,7 @@ Edit report page
 						},
 						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
-							bootbox.alert(xhr.responseText);
+							ajaxErrorHandler(xhr);
 							$('.action').prop('disabled', false);
 						}
 					});
@@ -282,7 +282,7 @@ Edit report page
 						},
 						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
-							bootbox.alert(xhr.responseText);
+							ajaxErrorHandler(xhr);
 							$('.action').prop('disabled', false);
 						}
 					});

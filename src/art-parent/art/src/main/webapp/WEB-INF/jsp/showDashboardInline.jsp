@@ -239,10 +239,7 @@
 <script type="text/javascript">
 	//https://blogs.msdn.microsoft.com/ukadc/2010/02/12/handling-errors-with-jquery-load/
 	$(document).ajaxError(function (event, xhr, options) {
-		bootbox.alert({
-			title: '${errorOccurredText}',
-			message: xhr.responseText
-		});
+		showUserAjaxError(xhr, '${errorOccurredText}');
 	});
 
 	var token = $("meta[name='_csrf']").attr("content");

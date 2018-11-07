@@ -95,7 +95,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert(xhr.responseText);
+							ajaxErrorHandler(xhr);
 						}
 					});
 				});

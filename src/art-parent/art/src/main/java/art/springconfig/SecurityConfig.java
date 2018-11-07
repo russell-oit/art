@@ -43,6 +43,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 				.csrf().ignoringAntMatchers("/saiku2/**", "/api/**")
 				.and()
+				.csrf().disable()
 				.authorizeRequests()
 				.anyRequest().permitAll();
 	}

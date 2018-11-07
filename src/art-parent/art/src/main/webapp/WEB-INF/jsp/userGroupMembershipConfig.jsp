@@ -118,7 +118,7 @@ User group membership configuration
 						}
 					},
 					error: function(xhr) {
-						bootbox.alert(xhr.responseText);
+						ajaxErrorHandler(xhr);
 					}
 				}); //end ajax
 			}
