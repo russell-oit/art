@@ -15,6 +15,7 @@ com.mongodb.FindIterableImpl
 com.mongodb.MongoBatchCursorAdapter
 com.mongodb.WriteResult
 org.bson.Document
+org.bson.types.ObjectId
 
 #classes used with the jongo library
 org.jongo.Jongo

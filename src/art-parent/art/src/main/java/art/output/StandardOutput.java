@@ -67,6 +67,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -2152,7 +2153,12 @@ public abstract class StandardOutput {
 //				addCellString((String) value);
 //			}
 
-			addCellString((String) value);
+			if (value instanceof ObjectId) {
+				ObjectId objectId = (ObjectId) value;
+				addCellString(objectId.toString());
+			} else {
+				addCellString((String) value);
+			}
 		}
 	}
 
