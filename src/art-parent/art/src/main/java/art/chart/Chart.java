@@ -40,7 +40,6 @@ import net.sf.cewolfart.taglib.AbstractChartDefinition;
 import net.sf.cewolfart.taglib.CewolfChartFactory;
 import java.awt.Color;
 import java.io.File;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -450,11 +449,10 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 * @param data the data to use
 	 * @param drilldown the drilldown to use, if any
 	 * @param reportParamsList the report parameters to use
-	 * @throws SQLException
-	 * @throws java.io.IOException
+	 * @throws Exception
 	 */
 	public void prepareDataset(Object data, Drilldown drilldown,
-			List<ReportParameter> reportParamsList) throws SQLException, IOException {
+			List<ReportParameter> reportParamsList) throws Exception {
 
 		logger.debug("Entering prepareDataset");
 
@@ -695,17 +693,12 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 * show data is not required.
 	 * @param showResultSetData whether resultset data should be displayed with
 	 * the chart
-	 * @throws IOException
-	 * @throws DatasetProduceException
-	 * @throws ChartValidationException
-	 * @throws PostProcessingException
+	 * @throws Exception
 	 */
 	public void generateFile(ReportFormat reportFormat, String outputFileName,
 			Report report, boolean pdfPageNumbers,
 			String dynamicOpenPassword, String dynamicModifyPassword,
-			Object groovyData, boolean showResultSetData)
-			throws IOException, DatasetProduceException,
-			ChartValidationException, PostProcessingException {
+			Object groovyData, boolean showResultSetData) throws Exception {
 
 		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}', "
 				+ "report={}, pdfPageNumbers={}, showResultSetData={}", reportFormat,

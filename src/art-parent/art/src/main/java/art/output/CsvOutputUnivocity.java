@@ -30,7 +30,6 @@ import com.univocity.parsers.csv.CsvRoutines;
 import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -100,11 +99,11 @@ public class CsvOutputUnivocity {
 	 * @param reportFormat the report format to use
 	 * @param fullOutputFileName the output file name to use
 	 * @param locale the locale that determines date format output
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
 	public void generateOutput(PrintWriter writer, Report report,
 			ReportFormat reportFormat, String fullOutputFileName,
-			Locale locale) throws IOException {
+			Locale locale) throws Exception {
 
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
@@ -127,10 +126,10 @@ public class CsvOutputUnivocity {
 	 * @param writer the writer to output to
 	 * @param csvOptions the csv output options
 	 * @param locale the locale that determines date format output
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
 	public void generateOutput(StringWriter writer, CsvOutputUnivocityOptions csvOptions,
-			Locale locale) throws IOException {
+			Locale locale) throws Exception {
 
 		logger.debug("Entering generateOutput");
 
@@ -150,11 +149,11 @@ public class CsvOutputUnivocity {
 	 * @param fullOutputFileName the output file name to use
 	 * @param report the report object for the report being run
 	 * @param locale the locale that determines date format output
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
-	private void generateOutput(Writer writer,
-			CsvOutputUnivocityOptions csvOptions, ReportFormat reportFormat,
-			String fullOutputFileName, Report report, Locale locale) throws IOException {
+	private void generateOutput(Writer writer, CsvOutputUnivocityOptions csvOptions,
+			ReportFormat reportFormat, String fullOutputFileName, Report report,
+			Locale locale) throws Exception {
 
 		logger.debug("Entering generateOutput: reportFormat={}, fullOutputFileName='{}',"
 				+ " report={}", reportFormat, fullOutputFileName, report);

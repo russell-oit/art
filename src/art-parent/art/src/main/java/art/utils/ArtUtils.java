@@ -454,6 +454,20 @@ public class ArtUtils {
 	}
 
 	/**
+	 * Converts an object to a map representation, with the key being the
+	 * property names and the value being the property values
+	 *
+	 * @param object the object to convert
+	 * @return the map representation. A linked hash map is used.
+	 */
+	public static Map<String, Object> objectToMap(Object object) {
+		ObjectMapper mapper = new ObjectMapper();
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = mapper.convertValue(object, Map.class);
+		return map;
+	}
+
+	/**
 	 * Returns <code>true</code> if a list of strings contains a given string,
 	 * performing a case insensitive search
 	 *

@@ -91,7 +91,6 @@ import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
-import fr.opensagres.xdocreport.core.XDocReportException;
 import freemarker.template.TemplateException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -119,10 +118,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.sf.cewolfart.ChartValidationException;
-import net.sf.cewolfart.DatasetProduceException;
-import net.sf.cewolfart.PostProcessingException;
-import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -305,11 +300,11 @@ public class ReportOutputGenerator {
 	 * @return the output result
 	 * @throws Exception
 	 */
-	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
-			ReportFormat reportFormat, Locale locale,
+	public ReportOutputGeneratorResult generateOutput(Report report,
+			ReportRunner reportRunner, ReportFormat reportFormat, Locale locale,
 			ParameterProcessorResult paramProcessorResult,
-			PrintWriter writer, String fullOutputFilename, User user, MessageSource messageSource)
-			throws Exception {
+			PrintWriter writer, String fullOutputFilename, User user,
+			MessageSource messageSource) throws Exception {
 
 		logger.debug("Entering generateOutput");
 
@@ -451,11 +446,11 @@ public class ReportOutputGenerator {
 	 * @param includeDataInOutput whether resultset data should be included in
 	 * the output
 	 * @return the prepared chart
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private Chart prepareChart(Report outputReport, ResultSet outputResultSet,
 			boolean swapAxes, Object outputGroovyData, boolean includeDataInOutput)
-			throws SQLException, IOException {
+			throws Exception {
 
 		ReportType outputReportType = outputReport.getReportType();
 		Chart chart = getChartInstance(outputReportType);
@@ -887,11 +882,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a pivottable.js report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generatePivotTableJsReport() throws SQLException, IOException, ServletException {
+	private void generatePivotTableJsReport() throws Exception {
 		PivotTableJsOptions pivotTableJsOptions;
 		String options = report.getOptions();
 		if (StringUtils.isBlank(options)) {
@@ -915,11 +908,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates pivottable.js output for a standard/tabular report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateStandardReportPivotTableJsOutput() throws SQLException, IOException, ServletException {
+	private void generateStandardReportPivotTableJsOutput() throws Exception {
 		PivotTableJsOptions pivotTableJsOptions = report.getGeneralOptions().getPivotTableJs();
 		generatePivotTableJsOutput(ReportType.PivotTableJs, pivotTableJsOptions);
 	}
@@ -929,13 +920,10 @@ public class ReportOutputGenerator {
 	 *
 	 * @param reportType the report type for the output
 	 * @param pivotTableJsOptions report options
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
 	private void generatePivotTableJsOutput(ReportType reportType,
-			PivotTableJsOptions pivotTableJsOptions) throws SQLException,
-			IOException, ServletException {
+			PivotTableJsOptions pivotTableJsOptions) throws Exception {
 
 		logger.debug("Entering generatePivotTableJsOutput");
 
@@ -1069,12 +1057,10 @@ public class ReportOutputGenerator {
 	 *
 	 * @param outputResult the output result object to update if there is an
 	 * error
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
 	private void generateStandardReport(ReportOutputGeneratorResult outputResult)
-			throws SQLException, IOException, ServletException {
+			throws Exception {
 
 		logger.debug("Entering generateStandardReport");
 
@@ -1102,12 +1088,10 @@ public class ReportOutputGenerator {
 	 *
 	 * @param outputResult the output result object to update if there is an
 	 * error
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
 	private void generateStandardOutput(ReportOutputGeneratorResult outputResult)
-			throws SQLException, IOException, ServletException {
+			throws Exception {
 
 		logger.debug("Entering generateStandardOutput");
 
@@ -1160,10 +1144,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates standard report json report format output
 	 *
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	private void generateStandardReportJsonOutput() throws SQLException, IOException {
+	private void generateStandardReportJsonOutput() throws Exception {
 		logger.debug("Entering generateStandardReportJsonOutput");
 
 		rs = reportRunner.getResultSet();
@@ -1195,11 +1178,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a jasperreports report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws JRException
+	 * @throws Exception
 	 */
-	private void generateJasperReport() throws SQLException, IOException, JRException {
+	private void generateJasperReport() throws Exception {
 		logger.debug("Entering generateJasperReport");
 
 		JasperReportsOutput jrOutput = new JasperReportsOutput();
@@ -1243,11 +1224,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates group output
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateGroupReport() throws SQLException, IOException, ServletException {
+	private void generateGroupReport() throws Exception {
 		logger.debug("Entering generateGroupReport");
 
 		rs = reportRunner.getResultSet();
@@ -1291,16 +1270,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Outputs a chart report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws DatasetProduceException
-	 * @throws ChartValidationException
-	 * @throws PostProcessingException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateChartReport() throws SQLException, IOException,
-			DatasetProduceException, ChartValidationException,
-			PostProcessingException, ServletException {
+	private void generateChartReport() throws Exception {
 
 		logger.debug("Entering generateStandardChart");
 
@@ -1477,14 +1449,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates an xdocreport report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws XDocReportException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateXDocReport() throws SQLException, IOException,
-			XDocReportException, ServletException {
-
+	private void generateXDocReport() throws Exception {
 		logger.debug("Entering generateXDocReport");
 
 		rs = reportRunner.getResultSet();
@@ -1509,11 +1476,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a react pivot report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateReactPivotReport() throws SQLException, IOException, ServletException {
+	private void generateReactPivotReport() throws Exception {
 		logger.debug("Entering generateReactPivotReport");
 
 		if (isJob) {
@@ -1559,11 +1524,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a dygraphs report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateDygraphReport() throws SQLException, IOException, ServletException {
+	private void generateDygraphReport() throws Exception {
 		logger.debug("Entering generateDygraphReport");
 
 		if (isJob) {
@@ -1654,11 +1617,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates datatables reports
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateDataTablesOutput() throws SQLException, IOException, ServletException {
+	private void generateDataTablesOutput() throws Exception {
 		logger.debug("Entering generateDataTablesOutput");
 
 		if (isJob) {
@@ -1759,11 +1720,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a fixed width report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateFixedWidthReport() throws SQLException, IOException, ServletException {
+	private void generateFixedWidthReport() throws Exception {
 		logger.debug("Entering generateFixedWidthReport");
 
 		rs = reportRunner.getResultSet();
@@ -1787,11 +1746,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates output for a csv report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateCsvReport() throws SQLException, IOException, ServletException {
+	private void generateCsvReport() throws Exception {
 		logger.debug("Entering generateCsvReport");
 
 		rs = reportRunner.getResultSet();
@@ -1815,11 +1772,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a c3.js report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateC3Report() throws SQLException, IOException, ServletException {
+	private void generateC3Report() throws Exception {
 		C3Options c3Options;
 		String options = report.getOptions();
 		if (StringUtils.isBlank(options)) {
@@ -1843,11 +1798,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates c3.js output for a standard/tabular report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateStandardReportC3Output() throws SQLException, IOException, ServletException {
+	private void generateStandardReportC3Output() throws Exception {
 		C3Options c3Options = report.getGeneralOptions().getC3();
 		generateC3Report(c3Options);
 	}
@@ -1856,11 +1809,9 @@ public class ReportOutputGenerator {
 	 * Generates a c3.js report
 	 *
 	 * @param c3Options c3 options
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateC3Report(C3Options c3Options) throws SQLException, IOException, ServletException {
+	private void generateC3Report(C3Options c3Options) throws Exception {
 		logger.debug("Entering generateC3Report");
 
 		Objects.requireNonNull(c3Options, "c3Options must not be null");
@@ -1967,11 +1918,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generate a chart.js report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateChartJsReport() throws SQLException, IOException, ServletException {
+	private void generateChartJsReport() throws Exception {
 		logger.debug("Entering generateChartJsReport");
 
 		if (isJob) {
@@ -2027,11 +1976,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a datamaps report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateDatamapReport() throws SQLException, IOException, ServletException {
+	private void generateDatamapReport() throws Exception {
 		logger.debug("Entering generateDatamapReport");
 
 		if (isJob) {
@@ -2132,11 +2079,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a leaflet or open layers report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateWebMapReport() throws SQLException, IOException, ServletException {
+	private void generateWebMapReport() throws Exception {
 		logger.debug("Entering generateWebMapReport");
 
 		if (isJob) {
@@ -2360,9 +2305,7 @@ public class ReportOutputGenerator {
 						//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
 						//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
 						//http://www.makeinjava.com/convert-list-objects-tofrom-json-java-jackson-objectmapper-example/
-						ObjectMapper mapper = new ObjectMapper();
-						@SuppressWarnings("unchecked")
-						Map<String, Object> map = mapper.convertValue(sample, Map.class);
+						Map<String, Object> map = ArtUtils.objectToMap(sample);
 						for (Entry<String, Object> entry : map.entrySet()) {
 							String name = entry.getKey();
 							Object value = entry.getValue();
@@ -2431,6 +2374,7 @@ public class ReportOutputGenerator {
 								row.put(columnName, finalValue);
 							}
 						} else {
+							//for morphia syntax which can return a list of objects rather than a list of maps
 							//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
 							Class<?> c = object.getClass();
 							BeanInfo beanInfo = Introspector.getBeanInfo(c, Object.class);
@@ -2478,11 +2422,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates an org chart report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateOrgChartReport() throws SQLException, IOException, ServletException {
+	private void generateOrgChartReport() throws Exception {
 		logger.debug("Entering generateOrgChartReport");
 
 		if (isJob) {
@@ -2562,11 +2504,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a report engine report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateReportEngineReport() throws SQLException, IOException, ServletException {
+	private void generateReportEngineReport() throws Exception {
 		logger.debug("Entering generateReportEngineReport");
 
 		StandardOutput standardOutput = prepareStandardOutputInstance();
@@ -2644,11 +2584,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a plotly.js report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generatePlotlyReport() throws SQLException, IOException, ServletException {
+	private void generatePlotlyReport() throws Exception {
 		PlotlyOptions plotlyOptions;
 		String options = report.getOptions();
 		if (StringUtils.isBlank(options)) {
@@ -2672,11 +2610,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates plotly.js output for a standard/tabular report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateStandardReportPlotlyOutput() throws SQLException, IOException, ServletException {
+	private void generateStandardReportPlotlyOutput() throws Exception {
 		PlotlyOptions plotlyOptions = report.getGeneralOptions().getPlotly();
 		generatePlotlyReport(plotlyOptions);
 	}
@@ -2685,12 +2621,9 @@ public class ReportOutputGenerator {
 	 * Generates a plotly.js report
 	 *
 	 * @param plotlyOptions the plotly options
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generatePlotlyReport(PlotlyOptions plotlyOptions) throws SQLException,
-			IOException, ServletException {
+	private void generatePlotlyReport(PlotlyOptions plotlyOptions) throws Exception {
 
 		logger.debug("Entering generatePlotlyReport");
 

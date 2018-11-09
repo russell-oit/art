@@ -31,7 +31,6 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
@@ -64,13 +63,13 @@ public class PdfChart {
 	 * with the chart image
 	 * @param resultSetData the resultset data to be displayed with the chart
 	 * image
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
 	public static void generatePdf(JFreeChart chart, String filename, String title,
 			java.util.List<ReportParameter> reportParamsList,
 			Report report, boolean pdfPageNumbers, Object groovyData,
 			java.util.List<String> resultSetColumnNames,
-			java.util.List<Map<String, Object>> resultSetData) throws IOException {
+			java.util.List<Map<String, Object>> resultSetData) throws Exception {
 
 		logger.debug("Entering generatePdf: filename='{}', title='{}', report={}, "
 				+ "pdfPageNumbers={}", filename, title, report, pdfPageNumbers);

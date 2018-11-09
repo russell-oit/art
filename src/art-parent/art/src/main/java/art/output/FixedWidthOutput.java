@@ -31,11 +31,9 @@ import com.univocity.parsers.fixed.FixedWidthRoutines;
 import com.univocity.parsers.fixed.FixedWidthWriter;
 import com.univocity.parsers.fixed.FixedWidthWriterSettings;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -102,12 +100,11 @@ public class FixedWidthOutput {
 	 * @param reportFormat the report format to use
 	 * @param fullOutputFileName the output file name to use
 	 * @param locale the locale that determines date format output
-	 * @throws java.sql.SQLException
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
 	public void generateOutput(PrintWriter writer, Report report,
 			ReportFormat reportFormat, String fullOutputFileName, Locale locale)
-			throws SQLException, IOException {
+			throws Exception {
 
 		logger.debug("Entering generateOutput: report={}, reportFormat={},"
 				+ " fullOutputFileName='{}'", report, reportFormat, fullOutputFileName);

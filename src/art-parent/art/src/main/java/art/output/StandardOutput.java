@@ -62,12 +62,12 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -832,11 +832,10 @@ public abstract class StandardOutput {
 	 * @return StandardOutputResult. if successful, rowCount contains the number
 	 * of rows in the resultset. if not, message contains the i18n message
 	 * indicating the problem
-	 * @throws java.sql.SQLException
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
 	public StandardOutputResult generateTabularOutput(Object data,
-			ReportFormat reportFormat, Report report) throws SQLException, IOException {
+			ReportFormat reportFormat, Report report) throws Exception {
 
 		logger.debug("Entering generateTabularOutput");
 
@@ -1670,12 +1669,12 @@ public abstract class StandardOutput {
 	 * @param nullStringDisplay the string to display for null string values
 	 * @param reportFormat the report format being used
 	 * @return data for the output row
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	private List<Object> outputDataColumns(Map<Integer, ColumnTypeDefinition> columnTypes,
-			Object row, List<String> columnNames,
-			List<String> hiddenColumns, String nullNumberDisplay,
-			String nullStringDisplay, ReportFormat reportFormat) throws IOException {
+			Object row, List<String> columnNames, List<String> hiddenColumns,
+			String nullNumberDisplay, String nullStringDisplay,
+			ReportFormat reportFormat) throws Exception {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
@@ -1705,7 +1704,7 @@ public abstract class StandardOutput {
 				Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
 				value = rowMap.get(columnName);
 			} else {
-				throw new IllegalArgumentException("Unexpected row data type: " + row.getClass().getCanonicalName());
+				value = PropertyUtils.getProperty(row, columnName);
 			}
 
 			switch (columnType) {
@@ -2153,12 +2152,9 @@ public abstract class StandardOutput {
 //				addCellString((String) value);
 //			}
 
-			if (value instanceof ObjectId) {
-				ObjectId objectId = (ObjectId) value;
-				addCellString(objectId.toString());
-			} else {
-				addCellString((String) value);
-			}
+			//use String.valueOf() instead of cast in case value is not a string
+			//https://stackoverflow.com/questions/16815279/difference-between-casting-to-string-and-string-valueof
+			addCellString(String.valueOf(value));
 		}
 	}
 
@@ -2416,10 +2412,10 @@ public abstract class StandardOutput {
 	 * @param reportFormat the report format to use
 	 * @param report the report that is being run
 	 * @return output result
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
 	public StandardOutputResult generateCrosstabOutput(Object data,
-			ReportFormat reportFormat, Report report) throws IOException {
+			ReportFormat reportFormat, Report report) throws Exception {
 
 		logger.debug("Entering generateCrosstabOutput: reportFormat={},"
 				+ " report={}", reportFormat, report);
