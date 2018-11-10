@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,23 +40,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -458,13 +464,54 @@ public class ArtUtils {
 	 * property names and the value being the property values
 	 *
 	 * @param object the object to convert
-	 * @return the map representation. A linked hash map is used.
+	 * @return the map representation. A linked hash map.
+	 * @throws java.lang.IllegalAccessException
+	 * @throws java.lang.reflect.InvocationTargetException
+	 * @throws java.lang.NoSuchMethodException
 	 */
-	public static Map<String, Object> objectToMap(Object object) {
+	public static Map<String, Object> objectToMap(Object object) throws
+			IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException {
+
+		if (object == null) {
+			return null;
+		}
+
 		ObjectMapper mapper = new ObjectMapper();
-		@SuppressWarnings("unchecked")
-		Map<String, Object> map = mapper.convertValue(object, Map.class);
-		return map;
+		if (object instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = mapper.convertValue(object, Map.class);
+			return map;
+		} else {
+			//https://github.com/vaadin/framework/issues/8980
+			Map<String, Object> tempMap = new LinkedHashMap<>();
+			Class<?> c = object.getClass();
+			Field[] fields = c.getDeclaredFields();
+
+			Map<String, Object> properties = PropertyUtils.describe(object);
+			properties.remove("metaClass");
+			properties.remove("class");
+			Set<String> propertyNames = properties.keySet();
+			//iterate over fields to get properties in declared order rather than alphabetical order
+			for (Field field : fields) {
+				String fieldName = field.getName();
+				if (propertyNames.contains(fieldName)) {
+					Object finalValue;
+					Object value = properties.get(fieldName);
+					if (value instanceof ObjectId) {
+						ObjectId objectId = (ObjectId) value;
+						finalValue = objectId.toString();
+					} else {
+						finalValue = value;
+					}
+					tempMap.put(fieldName, finalValue);
+				}
+			}
+
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = mapper.convertValue(tempMap, Map.class);
+			return map;
+		}
 	}
 
 	/**

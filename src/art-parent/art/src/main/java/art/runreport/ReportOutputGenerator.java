@@ -94,10 +94,7 @@ import com.mongodb.MongoClient;
 import freemarker.template.TemplateException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
-import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -2192,16 +2189,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates a mongo db report
 	 *
-	 * @throws IOException
-	 * @throws IntrospectionException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
-	 * @throws ServletException
+	 * @throws Exception
 	 */
-	private void generateMongoDbReport() throws IOException,
-			IntrospectionException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException, ServletException {
+	private void generateMongoDbReport() throws Exception {
 
 		logger.debug("Entering generateMongoDbReport");
 		//https://learnxinyminutes.com/docs/groovy/
@@ -2352,51 +2342,25 @@ public class ReportOutputGenerator {
 					}
 
 					//_id is a complex object so we have to iterate and replace it with the toString() representation
-					//otherwise we would just call resultString = ArtUtils.objectToJson(resultList); directly and not have to create a new list
+					//also need to create a new list in case some columns are omitted in finalColumnNames
 					List<Map<String, Object>> finalResultList = new ArrayList<>();
 					for (Object object : resultList) {
 						Map<String, Object> row = new LinkedHashMap<>();
-						if (object instanceof Map) {
-							ObjectMapper mapper = new ObjectMapper();
-							@SuppressWarnings("unchecked")
-							Map<String, Object> map2 = mapper.convertValue(object, Map.class);
-							for (String columnName : finalColumnNames) {
-								Object value = map2.get(columnName);
-								Object finalValue;
-								if (value == null) {
-									finalValue = "";
-								} else if (value instanceof ObjectId) {
-									ObjectId objectId = (ObjectId) value;
-									finalValue = objectId.toString();
-								} else {
-									finalValue = value;
-								}
-								row.put(columnName, finalValue);
+						Map<String, Object> map = ArtUtils.objectToMap(object);
+						for (String columnName : finalColumnNames) {
+							Object value = map.get(columnName);
+							Object finalValue;
+							if (value == null) {
+								finalValue = "";
+							} else if (value instanceof ObjectId) {
+								ObjectId objectId = (ObjectId) value;
+								finalValue = objectId.toString();
+							} else {
+								finalValue = value;
 							}
-						} else {
-							//for morphia syntax which can return a list of objects rather than a list of maps
-							//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
-							Class<?> c = object.getClass();
-							BeanInfo beanInfo = Introspector.getBeanInfo(c, Object.class);
-							for (PropertyDescriptor propertyDesc : beanInfo.getPropertyDescriptors()) {
-								String propertyName = propertyDesc.getName();
-								if (StringUtils.equals(propertyName, "metaClass")) {
-									//don't include
-								} else {
-									if (ArtUtils.containsIgnoreCase(finalColumnNames, propertyName)) {
-										Object value = propertyDesc.getReadMethod().invoke(object);
-										Object finalValue;
-										if (value instanceof ObjectId) {
-											ObjectId objectId = (ObjectId) value;
-											finalValue = objectId.toString();
-										} else {
-											finalValue = value;
-										}
-										row.put(propertyName, finalValue);
-									}
-								}
-							}
+							row.put(columnName, finalValue);
 						}
+						
 						finalResultList.add(row);
 					}
 

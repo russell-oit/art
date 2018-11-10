@@ -2152,8 +2152,8 @@ public abstract class StandardOutput {
 //				addCellString((String) value);
 //			}
 
-			//use String.valueOf() instead of cast in case value is not a string
 			//https://stackoverflow.com/questions/16815279/difference-between-casting-to-string-and-string-valueof
+			//use String.valueOf() instead of cast in case value is not a string
 			addCellString(String.valueOf(value));
 		}
 	}
