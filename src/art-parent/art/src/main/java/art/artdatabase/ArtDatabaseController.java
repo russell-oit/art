@@ -165,7 +165,10 @@ public class ArtDatabaseController {
 			if (StringUtils.equalsIgnoreCase(artDatabase.getUrl(), "demo")) {
 				usingDemoDatabase = true;
 
-				artDatabase.setDriver("org.hsqldb.jdbcDriver");
+				//org.hsqldb.jdbcDriver is for hsqldb 1.x, org.hsqldb.jdbc.JDBCDriver for hsqldb 2.x
+				//http://hsqldb.org/doc/src/org/hsqldb/jdbc/JDBCDriver.html
+				//http://hsqldb.sourceforge.net/doc/src/org/hsqldb/jdbcDriver.html
+				artDatabase.setDriver("org.hsqldb.jdbc.JDBCDriver");
 				artDatabase.setUrl(demoDbUrl);
 
 				if (StringUtils.isBlank(username)) {
@@ -224,7 +227,7 @@ public class ArtDatabaseController {
 				//don't use hsqldbUrl which contains ; within it. ; is used as a separator in the mondrian url
 				//this means we can't effect the shutdown=true property and lock files will remain after the connections are closed
 				String mondrianJdbcUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "SampleDB";
-				String mondrianUrl = "jdbc:mondrian:Jdbc=" + mondrianJdbcUrl + ";JdbcDrivers=org.hsqldb.jdbcDriver";
+				String mondrianUrl = "jdbc:mondrian:Jdbc=" + mondrianJdbcUrl + ";JdbcDrivers=org.hsqldb.jdbc.JDBCDriver";
 				ps.setString(1, mondrianUrl);
 				ps.setInt(2, 3);
 				ps.addBatch();

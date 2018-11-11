@@ -117,7 +117,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "hsqldb-standalone") {
-		driverElement.value = "org.hsqldb.jdbcDriver";
+		driverElement.value = "org.hsqldb.jdbc.JDBCDriver";
 		urlElement.value = "jdbc:hsqldb:file:<file_path>;shutdown=true;hsqldb.write_delay=false";
 		testSqlElement.value = "values 1";
 	} else if (dbType === "sqlserver-ms") {
@@ -133,7 +133,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		urlElement.value = "";
 		testSqlElement.value = "";
 	} else if (dbType === "hsqldb-server") {
-		driverElement.value = "org.hsqldb.jdbcDriver";
+		driverElement.value = "org.hsqldb.jdbc.JDBCDriver";
 		urlElement.value = "jdbc:hsqldb:hsql://<server>:9001/<database_alias>";
 		testSqlElement.value = "values 1";
 	} else if (dbType === "sqlserver-jtds") {
