@@ -94,27 +94,27 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 
 	if (dbType === "oracle") {
 		driverElement.value = "oracle.jdbc.OracleDriver";
-		urlElement.value = "jdbc:oracle:thin:@<server_name>:1521:<sid>";
+		urlElement.value = "jdbc:oracle:thin:@<server>:1521:<sid>";
 		testSqlElement.value = "select 1 from dual";
 	} else if (dbType === "mysql") {
 		driverElement.value = "com.mysql.jdbc.Driver";
-		urlElement.value = "jdbc:mysql://<server_name>/<database_name>";
+		urlElement.value = "jdbc:mysql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "memsql") {
 		driverElement.value = "com.mysql.jdbc.Driver";
-		urlElement.value = "jdbc:mysql://<server_name>/<database_name>";
+		urlElement.value = "jdbc:mysql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "mariadb") {
 		driverElement.value = "org.mariadb.jdbc.Driver";
-		urlElement.value = "jdbc:mariadb://<server_name>/<database_name>";
+		urlElement.value = "jdbc:mariadb://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "postgresql") {
 		driverElement.value = "org.postgresql.Driver";
-		urlElement.value = "jdbc:postgresql://<server_name>/<database_name>";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "citus") {
 		driverElement.value = "org.postgresql.Driver";
-		urlElement.value = "jdbc:postgresql://<server_name>/<database_name>";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "hsqldb-standalone") {
 		driverElement.value = "org.hsqldb.jdbcDriver";
@@ -122,11 +122,11 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "values 1";
 	} else if (dbType === "sqlserver-ms") {
 		driverElement.value = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-		urlElement.value = "jdbc:sqlserver://<server_name>;databaseName=<database_name>";
+		urlElement.value = "jdbc:sqlserver://<server>;databaseName=<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "cubrid") {
 		driverElement.value = "cubrid.jdbc.driver.CUBRIDDriver";
-		urlElement.value = "jdbc:cubrid:<server_name>:33000:<database_name>:::";
+		urlElement.value = "jdbc:cubrid:<server>:33000:<database>:::";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "other") {
 		driverElement.value = "";
@@ -134,11 +134,11 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "hsqldb-server") {
 		driverElement.value = "org.hsqldb.jdbcDriver";
-		urlElement.value = "jdbc:hsqldb:hsql://<server_name>:9001/<database_alias>";
+		urlElement.value = "jdbc:hsqldb:hsql://<server>:9001/<database_alias>";
 		testSqlElement.value = "values 1";
 	} else if (dbType === "sqlserver-jtds") {
 		driverElement.value = "net.sourceforge.jtds.jdbc.Driver";
-		urlElement.value = "jdbc:jtds:sqlserver://<server_name>/<database_name>";
+		urlElement.value = "jdbc:jtds:sqlserver://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "sql-logging") {
 		driverElement.value = "net.sf.log4jdbc.sql.jdbcapi.DriverSpy";
@@ -146,7 +146,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "db2") {
 		driverElement.value = "com.ibm.db2.jcc.DB2Driver";
-		urlElement.value = "jdbc:db2://<server_name>:<port>/<database_name>";
+		urlElement.value = "jdbc:db2://<server>:<port>/<database>";
 		testSqlElement.value = "select 1 from sysibm.sysdummy1";
 	} else if (dbType === "generic-odbc") {
 		driverElement.value = "sun.jdbc.odbc.JdbcOdbcDriver";
@@ -163,7 +163,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		}
 	} else if (dbType === "hbase-phoenix") {
 		driverElement.value = "org.apache.phoenix.jdbc.PhoenixDriver";
-		urlElement.value = "jdbc:phoenix:<server_name>";
+		urlElement.value = "jdbc:phoenix:<server>";
 		testSqlElement.value = "";
 	} else if (dbType === "msaccess-ucanaccess") {
 		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
@@ -188,7 +188,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "h2-server") {
 		driverElement.value = "org.h2.Driver";
-		urlElement.value = "jdbc:h2://<server_name>/<database_name>";
+		urlElement.value = "jdbc:h2://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "h2-embedded") {
 		driverElement.value = "org.h2.Driver";
@@ -207,16 +207,16 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "couchbase") {
 		driverElement.value = "com.couchbase.jdbc.CBDriver";
-		urlElement.value = "jdbc:couchbase://<server_name>:8093";
+		urlElement.value = "jdbc:couchbase://<server>:8093";
 		testSqlElement.value = "";
 	} else if (dbType === "mongodb") {
 		driverElement.value = "";
-		urlElement.value = "mongodb://<server_name>";
+		urlElement.value = "mongodb://<server>";
 		testSqlElement.value = "";
 	} else if (dbType === "drill") {
 		//https://stackoverflow.com/questions/31654658/apache-drill-connection-to-drill-in-embedded-mode-java/33442630
 		driverElement.value = "org.apache.drill.jdbc.Driver";
-		urlElement.value = "jdbc:drill:drillbit=<server_name>";
+		urlElement.value = "jdbc:drill:drillbit=<server>";
 		testSqlElement.value = "select 1 from sys.version";
 	} else if (dbType === "firebird") {
 		//https://gist.github.com/mariuz/1043473
@@ -225,59 +225,59 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		//https://www.firebirdsql.org/file/documentation/drivers_documentation/java/faq.html#how-can-i-solve-the-error-connection-rejected-no-connection-character-set-specified
 		//http://www.firebirdfaq.org/faq30/
 		driverElement.value = "org.firebirdsql.jdbc.FBDriver";
-		urlElement.value = "jdbc:firebirdsql://<server_name>/<file_path or database_alias>?encoding=UTF8";
+		urlElement.value = "jdbc:firebirdsql://<server>/<file_path or database_alias>?encoding=UTF8";
 		testSqlElement.value = "select 1 from RDB$DATABASE";
 	} else if (dbType === "monetdb") {
 		//https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Select_queries/Select_without_tables
 		driverElement.value = "nl.cwi.monetdb.jdbc.MonetDriver";
-		urlElement.value = "jdbc:monetdb://<server_name>/<database_name>";
+		urlElement.value = "jdbc:monetdb://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "vertica") {
 		//https://my.vertica.com/docs/7.1.x/HTML/Content/Authoring/ConnectingToHPVertica/ClientJDBC/CreatingAndConfiguringAConnection.htm
 		driverElement.value = "com.vertica.jdbc.Driver";
-		urlElement.value = "jdbc:vertica://<server_name>/<database_name>";
+		urlElement.value = "jdbc:vertica://<server>/<database>";
 		testSqlElement.value = "select 1 from dual";
 	} else if (dbType === "informix") {
 		//https://gist.github.com/ikenna/5706366
 		driverElement.value = "com.informix.jdbc.IfxDriver";
-		urlElement.value = "jdbc:informix-sqli://<server_name>:<port>/<database_name>";
+		urlElement.value = "jdbc:informix-sqli://<server>:<port>/<database>";
 		testSqlElement.value = "select 1 from systables where tabid=1";
 	} else if (dbType === "cassandra-adejanovski") {
 		//https://datastax-oss.atlassian.net/browse/JAVA-975
 		//http://docs.datastax.com/en/cql/3.1/cql/cql_using/use_query_system_c.html
 		//https://stackoverflow.com/questions/34055752/select-contant-value-is-cassandra
 		driverElement.value = "com.github.adejanovski.cassandra.jdbc.CassandraDriver";
-		urlElement.value = "jdbc:cassandra://<server_name>/<keyspace>";
+		urlElement.value = "jdbc:cassandra://<server>/<keyspace>";
 		testSqlElement.value = "select release_version from system.local";
 	} else if (dbType === "neo4j") {
 		driverElement.value = "org.neo4j.jdbc.Driver";
-		urlElement.value = "jdbc:neo4j:bolt://<server_name>";
+		urlElement.value = "jdbc:neo4j:bolt://<server>";
 		testSqlElement.value = "";
 	} else if (dbType === "exasol") {
 		driverElement.value = "com.exasol.jdbc.EXADriver";
-		urlElement.value = "jdbc:exa://<server_name>;schema=<database_name>";
+		urlElement.value = "jdbc:exa://<server>;schema=<database>";
 		testSqlElement.value = "";
 	} else if (dbType === "redshift") {
 		driverElement.value = "com.amazon.redshift.jdbc.Driver";
-		urlElement.value = "jdbc:redshift://<server_name>/<database_name>";
+		urlElement.value = "jdbc:redshift://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "teradata") {
 		driverElement.value = "com.teradata.jdbc.TeraDriver";
-		urlElement.value = "jdbc:teradata://<server_name>/DATABASE=<database_name>";
+		urlElement.value = "jdbc:teradata://<server>/DATABASE=<database>";
 		testSqlElement.value = "";
 	} else if (dbType === "snowflake1-us-west") {
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
-		urlElement.value = "jdbc:snowflake://<account_name>.snowflakecomputing.com/?warehouse=<warehouse_name>&db=<database_name>&schema=<schema_name>";
+		urlElement.value = "jdbc:snowflake://<account_name>.snowflakecomputing.com/?warehouse=<warehouse>&db=<database>&schema=<schema>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "snowflake2-other") {
 		//https://docs.snowflake.net/manuals/user-guide/jdbc-configure.html
 		//https://docs.snowflake.net/manuals/user-guide/intro-regions.html
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
-		urlElement.value = "jdbc:snowflake://<account_name>.<region_id>.snowflakecomputing.com/?warehouse=<warehouse_name>&db=<database_name>&schema=<schema_name>";
+		urlElement.value = "jdbc:snowflake://<account_name>.<region_id>.snowflakecomputing.com/?warehouse=<warehouse>&db=<database>&schema=<schema>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "presto") {
 		driverElement.value = "com.facebook.presto.jdbc.PrestoDriver";
-		urlElement.value = "jdbc:presto://<server_name>:<port>/<catalog_name>/<schema_name>";
+		urlElement.value = "jdbc:presto://<server>:<port>/<catalog>/<schema>";
 		testSqlElement.value = "select 1";
 	}
 }
