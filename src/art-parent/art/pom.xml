@@ -531,6 +531,12 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.facebook.presto</groupId>
+			<artifactId>presto-jdbc</artifactId>
+			<version>0.213</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
 			<version>3.4.2</version>

@@ -307,7 +307,7 @@ public class ArtUtils {
 		databaseTypes.put("teradata", "Teradata - driver not included"); //license issues. https://downloads.teradata.com/download/license?destination=download/files/7424/187200/1/TeraJDBC__indep_indep.14.10.00.39.zip&message=License%2520Agreement
 		databaseTypes.put("snowflake1-us-west", "Snowflake (US West Region)");
 		databaseTypes.put("snowflake2-other", "Snowflake (Other Regions)");
-		databaseTypes.put("presto", "Presto - driver not included"); //needs java 8
+		databaseTypes.put("presto", "Presto");
 		databaseTypes.put("memsql", "MemSQL (MySQL driver)");
 		databaseTypes.put("citus", "Citus (PostgreSQL driver)");
 
