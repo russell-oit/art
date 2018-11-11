@@ -41,7 +41,6 @@ import ch.qos.logback.core.db.DataSourceConnectionSource;
 import com.eclecticlogic.whisper.logback.WhisperAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
-import com.mysql.jdbc.AbandonedConnectionCleanupThread;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 import java.io.File;
@@ -150,7 +149,11 @@ public class Config extends HttpServlet {
 		//https://www.ralph-schuster.eu/2014/07/09/solution-to-tomcat-cant-stop-an-abandoned-connection-cleanup-thread/
 		//https://stackoverflow.com/questions/25699985/the-web-application-appears-to-have-started-a-thread-named-abandoned-connect
 		//https://dev.mysql.com/doc/relnotes/connector-j/5.1/en/news-5-1-41.html
-		AbandonedConnectionCleanupThread.checkedShutdown();
+		//https://stackoverflow.com/questions/45055122/tomcat-7-memory-leak-on-stop-redeploy-spring-data-jpa-hibernate-mysql
+		//https://stackoverflow.com/questions/11872316/tomcat-guice-jdbc-memory-leak/19027873#19027873
+		//https://stackoverflow.com/questions/53187716/abandoned-connection-cleanup-in-mariadb-compared-to-mysql
+		//https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-api-changes.html
+		//AbandonedConnectionCleanupThread.checkedShutdown();
 
 		//deregister jdbc drivers
 		deregisterJdbcDrivers();

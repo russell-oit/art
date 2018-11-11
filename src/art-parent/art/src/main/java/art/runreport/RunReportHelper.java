@@ -796,6 +796,7 @@ public class RunReportHelper {
 	 * @return data attributes
 	 * @throws java.lang.Exception
 	 */
+	@SuppressWarnings("rawtypes")
 	public static GroovyDataDetails getGroovyDataDetails(Object data, Report report) throws Exception {
 		Objects.requireNonNull(data, "data must not be null");
 
@@ -823,7 +824,7 @@ public class RunReportHelper {
 			if (sample instanceof GroovyRowResult) {
 				GroovyRowResult sampleResult = (GroovyRowResult) sample;
 
-				for (Entry<Object, Object> entry : sampleResult.entrySet()) {
+				for (Entry entry : sampleResult.entrySet()) {
 					colCount++;
 					String columnName = String.valueOf(entry.getKey());
 					dataColumnNames.add(columnName);
