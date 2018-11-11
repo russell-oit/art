@@ -25,7 +25,7 @@ import net.sf.wcfart.wcf.ui.Button;
 /**
  * Default ButtonHandler.
  * 
- * TODO should be unified with ActionReference Code!
+ * should be unified with ActionReference Code!
  * 
  * Supports the following attributes
  * <dl>

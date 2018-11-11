@@ -823,7 +823,7 @@ public class RunReportHelper {
 			if (sample instanceof GroovyRowResult) {
 				GroovyRowResult sampleResult = (GroovyRowResult) sample;
 
-				for (Entry entry : sampleResult.entrySet()) {
+				for (Entry<Object, Object> entry : sampleResult.entrySet()) {
 					colCount++;
 					String columnName = String.valueOf(entry.getKey());
 					dataColumnNames.add(columnName);
