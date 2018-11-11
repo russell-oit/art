@@ -665,8 +665,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP-java7</artifactId>
-			<version>2.4.12</version>
+			<artifactId>HikariCP</artifactId>
+			<version>3.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
