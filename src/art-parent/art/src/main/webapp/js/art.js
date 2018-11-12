@@ -132,6 +132,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "timescaledb") {
+		driverElement.value = "org.postgresql.Driver";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
+		testSqlElement.value = "select 1";
 	} else if (dbType === "hsqldb-standalone") {
 		driverElement.value = "org.hsqldb.jdbc.JDBCDriver";
 		urlElement.value = "jdbc:hsqldb:file:<file_path>;shutdown=true;hsqldb.write_delay=false";

@@ -92,6 +92,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("aurora-mysql-mariadb");
 		databaseTypes.remove("aurora-postgresql-postgresql");
 		databaseTypes.remove("greenplum");
+		databaseTypes.remove("timescaledb");
 
 		return databaseTypes;
 	}
