@@ -219,6 +219,7 @@ public class ReportService {
 		private void setChartOptions(Report report) {
 
 			ChartOptions chartOptions = new ChartOptions();
+			chartOptions.prepareDefaultBooleans();
 
 			String optionsString;
 			boolean usingShortDescription;
