@@ -65,6 +65,7 @@ public class ArtDatabaseController {
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
 		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
+		
 		databaseTypes.remove("odbc-sun");
 		databaseTypes.remove("hbase-phoenix");
 		databaseTypes.remove("msaccess-ucanaccess");
@@ -90,6 +91,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("citus");
 		databaseTypes.remove("aurora-mysql-mariadb");
 		databaseTypes.remove("aurora-postgresql-postgresql");
+		databaseTypes.remove("greenplum");
 
 		return databaseTypes;
 	}

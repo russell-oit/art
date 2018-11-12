@@ -312,6 +312,7 @@ public class ArtUtils {
 		databaseTypes.put("citus", "Citus (PostgreSQL driver)");
 		databaseTypes.put("aurora-mysql-mariadb", "Amazon Aurora MySQL (MariaDB driver)");
 		databaseTypes.put("aurora-postgresql-postgresql", "Amazon Aurora PostgreSQL (PostgreSQL driver)");
+		databaseTypes.put("greenplum", "Greenplum (PostgreSQL driver)");
 
 		return databaseTypes;
 	}
