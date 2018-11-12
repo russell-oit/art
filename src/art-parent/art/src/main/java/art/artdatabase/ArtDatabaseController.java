@@ -167,13 +167,18 @@ public class ArtDatabaseController {
 				//org.hsqldb.jdbcDriver is for hsqldb 1.x, org.hsqldb.jdbc.JDBCDriver for hsqldb 2.x
 				//http://www.hsqldb.org/doc/1.8/src/org/hsqldb/jdbcDriver.html
 				//http://hsqldb.org/doc/src/org/hsqldb/jdbc/JDBCDriver.html
-				//need to use class.forName in a web app if you'll use DriverManager
+				//need to use class.forName() in a web app if you'll use DriverManager
+				//https://stackoverflow.com/questions/1911253/the-infamous-java-sql-sqlexception-no-suitable-driver-found
+				//https://tomcat.apache.org/tomcat-8.0-doc/jndi-datasource-examples-howto.html#DriverManager,_the_service_provider_mechanism_and_memory_leaks
+				//https://stackoverflow.com/questions/5556664/how-to-fix-no-suitable-driver-found-for-jdbcmysql-localhost-dbname-error-w?noredirect=1&lq=1
 				//https://docs.oracle.com/javase/8/docs/api/java/sql/DriverManager.html
 				//https://github.com/brettwooldridge/HikariCP/issues/288
 				//https://stackoverflow.com/questions/14478870/dynamically-load-the-jdbc-driver
 				//https://stackoverflow.com/questions/50750789/java-drivermanager-does-not-load-mysql-driver
 				//https://github.com/brettwooldridge/HikariCP/blob/dev/src/main/java/com/zaxxer/hikari/util/DriverDataSource.java
 				//https://stackoverflow.com/questions/33703785/ucanaccess-driver-not-in-drivermanager-getdrivers-list-unless-class-forname
+				//https://coderanch.com/t/619163/databases/suitable-driver-Tomcat
+				//https://stackoverflow.com/questions/11377018/tomcat-error-java-sql-sqlexception-no-suitable-driver-found-for-jdbcsqlserver
 				artDatabase.setDriver("org.hsqldb.jdbc.JDBCDriver");
 				artDatabase.setUrl(demoDbUrl);
 
