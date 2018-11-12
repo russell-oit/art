@@ -108,7 +108,7 @@ public class DashboardController {
 
 		long startTime = System.currentTimeMillis();
 
-		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
+		boolean showInline = BooleanUtils.toBoolean(request.getParameter("showInline"));
 
 		//set appropriate error page to use
 		String errorPage;

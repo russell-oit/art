@@ -62,6 +62,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -186,7 +187,7 @@ public class RunReportHelper {
 
 		logger.debug("Entering setSelectReportParameterAttributes: report={}", report);
 
-		boolean startSelectParametersHidden = Boolean.parseBoolean(request.getParameter("startSelectParametersHidden"));
+		boolean startSelectParametersHidden = BooleanUtils.toBoolean(request.getParameter("startSelectParametersHidden"));
 		request.setAttribute("startSelectParametersHidden", startSelectParametersHidden);
 
 		request.setAttribute("report", report);

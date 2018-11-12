@@ -106,9 +106,9 @@ public class RunReportController {
 		runningReportsCount++;
 
 		//check if output is being displayed within the show report page (inline) or in a new page
-		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
+		boolean showInline = BooleanUtils.toBoolean(request.getParameter("showInline"));
 		//check if the html code should be rendered as an html fragment (without <html> and </html> tags) e.g. in a dashboard section
-		boolean isFragment = Boolean.parseBoolean(request.getParameter("isFragment"));
+		boolean isFragment = BooleanUtils.toBoolean(request.getParameter("isFragment"));
 
 		//set appropriate error page to use
 		String errorPage;
@@ -321,7 +321,7 @@ public class RunReportController {
 				request.setAttribute("title", reportName);
 				request.setAttribute("reportFormat", reportFormat.getValue());
 
-				boolean allowSelectParameters = Boolean.parseBoolean(request.getParameter("allowSelectParameters"));
+				boolean allowSelectParameters = BooleanUtils.toBoolean(request.getParameter("allowSelectParameters"));
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
 					runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);

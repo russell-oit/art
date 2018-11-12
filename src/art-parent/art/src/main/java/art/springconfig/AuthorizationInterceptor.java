@@ -31,6 +31,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 		String urlUsername = request.getParameter("username");
 		String urlPassword = request.getParameter("password");
-		boolean publicSession = Boolean.parseBoolean(request.getParameter("public"));
+		boolean publicSession = BooleanUtils.toBoolean(request.getParameter("public"));
 		String urlUser = request.getParameter("user");
 		String publicUsername;
 		if (urlUser == null) {
