@@ -281,7 +281,7 @@ public class ArtUtils {
 		databaseTypes.put("hsqldb-standalone", "HSQLDB Standalone");
 		databaseTypes.put("hsqldb-server", "HSQLDB Server");
 		databaseTypes.put("db2", "Db2 - driver not included"); //license restrictions? must register to download.
-//		databaseTypes.put("generic-odbc", "Generic ODBC"); //generic jdbc-odbc will be removed in Java 8
+		databaseTypes.put("odbc-sun", "ODBC (Sun driver) - driver not included");
 		databaseTypes.put("sql-logging", "SQL Logging");
 		databaseTypes.put("other", "Other");
 		databaseTypes.put("hbase-phoenix", "HBase (Phoenix driver) - driver not included"); //adds 50MB

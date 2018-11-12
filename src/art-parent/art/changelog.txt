@@ -1,4 +1,5 @@
 ART 4.0
+* Updated jdbc drivers
 * Requires Java 8
 
 ART 3.11

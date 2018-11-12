@@ -65,10 +65,7 @@ public class ArtDatabaseController {
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
 		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
-		//generic sun jdbc-odbc bridge driver not supported for the art database
-		//for the jdbc-odbc bridge, you can only read column values ONCE
-		//and in the ORDER they appear in the select. Adhering to this is brittle and cumbersome.
-//		databaseTypes.remove("generic-odbc"); //sun jdbc-odbc bridge is removed in Java 8
+		databaseTypes.remove("odbc-sun");
 		databaseTypes.remove("hbase-phoenix");
 		databaseTypes.remove("msaccess-ucanaccess");
 		databaseTypes.remove("msaccess-ucanaccess-password");
@@ -168,7 +165,7 @@ public class ArtDatabaseController {
 				//org.hsqldb.jdbcDriver is for hsqldb 1.x, org.hsqldb.jdbc.JDBCDriver for hsqldb 2.x
 				//http://www.hsqldb.org/doc/1.8/src/org/hsqldb/jdbcDriver.html
 				//http://hsqldb.org/doc/src/org/hsqldb/jdbc/JDBCDriver.html
-				artDatabase.setDriver("org.hsqldb.jdbc.JDBCDriver");
+				//artDatabase.setDriver("org.hsqldb.jdbc.JDBCDriver");
 				artDatabase.setUrl(demoDbUrl);
 
 				if (StringUtils.isBlank(username)) {
