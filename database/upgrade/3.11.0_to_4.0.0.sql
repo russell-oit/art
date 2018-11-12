@@ -3,7 +3,6 @@
 -- CHANGES:
 -- update database version
 -- set migrated to quartz column to null
--- clear driver name for mysql datasources
 
 -- ------------------------------------------------
 
@@ -13,6 +12,3 @@ UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='4.0-snapshot';
 
 -- set migrated to quartz column to null
 UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ=NULL WHERE MIGRATED_TO_QUARTZ='X' OR MIGRATED_TO_QUARTZ='Y';
-
--- clear driver name for mysql datasources
-UPDATE ART_DATABASES SET DRIVER='' WHERE DRIVER='com.mysql.jdbc.Driver';

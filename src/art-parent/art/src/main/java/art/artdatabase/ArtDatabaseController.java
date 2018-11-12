@@ -167,7 +167,12 @@ public class ArtDatabaseController {
 				//org.hsqldb.jdbcDriver is for hsqldb 1.x, org.hsqldb.jdbc.JDBCDriver for hsqldb 2.x
 				//http://www.hsqldb.org/doc/1.8/src/org/hsqldb/jdbcDriver.html
 				//http://hsqldb.org/doc/src/org/hsqldb/jdbc/JDBCDriver.html
-				//artDatabase.setDriver("org.hsqldb.jdbc.JDBCDriver");
+				//need to use class.forName in a web app if you'll use DriverManager
+				//https://docs.oracle.com/javase/8/docs/api/java/sql/DriverManager.html
+				//https://github.com/brettwooldridge/HikariCP/issues/288
+				//https://stackoverflow.com/questions/14478870/dynamically-load-the-jdbc-driver
+				//https://stackoverflow.com/questions/50750789/java-drivermanager-does-not-load-mysql-driver
+				artDatabase.setDriver("org.hsqldb.jdbc.JDBCDriver");
 				artDatabase.setUrl(demoDbUrl);
 
 				if (StringUtils.isBlank(username)) {
