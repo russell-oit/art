@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,7 @@ public class ParameterProcessor {
 	private Report suppliedReport;
 	private boolean parameterSelection = false;
 	private Map<String, String[]> reportRequestParameters;
+	private boolean isFragment;
 
 	/**
 	 * @return the parameterSelection
@@ -156,6 +158,8 @@ public class ParameterProcessor {
 	public ParameterProcessorResult processHttpParameters(
 			HttpServletRequest request, Locale locale)
 			throws SQLException, ParseException, IOException {
+
+		isFragment = BooleanUtils.toBoolean(request.getParameter("isFragment"));
 
 		String reportIdString = request.getParameter("reportId");
 		logger.debug("reportIdString='{}'", reportIdString);
@@ -596,8 +600,8 @@ public class ParameterProcessor {
 		logger.debug("Entering processChartOptions");
 
 		ChartOptions chartOptions = new ChartOptions();
-		if (!parameterSelection) {
-			chartOptions.prepareDefaultBooleans();
+		if (!parameterSelection && !isFragment) {
+			chartOptions.initializeBooleansToFalse();
 		}
 
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {

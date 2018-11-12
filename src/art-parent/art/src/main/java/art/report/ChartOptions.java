@@ -270,7 +270,7 @@ public class ChartOptions implements Serializable {
 	/**
 	 * Set boolean variables to a default of false
 	 */
-	public void prepareDefaultBooleans() {
+	public void initializeBooleansToFalse() {
 		showLegend = false;
 		showLabels = false;
 		showPoints = false;

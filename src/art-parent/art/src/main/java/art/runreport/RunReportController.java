@@ -415,8 +415,6 @@ public class RunReportController {
 					DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
 					String startTimeString = df.format(new Date(overallStartTime));
 
-//					String reportInfo = "<b>" + reportName + "</b>"
-//							+ description + " :: " + startTimeString;
 					String reportInfo = "<h4>" + Encode.forHtmlContent(reportName) + "<small>"
 							+ Encode.forHtmlContent(description) + " :: "
 							+ Encode.forHtmlContent(startTimeString) + "</small></h4>";

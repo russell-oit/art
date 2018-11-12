@@ -1,4 +1,5 @@
 ART 4.0
+* Fix for legends always off for charts in dashboards
 * Updated jdbc drivers
 * Requires Java 8
 
