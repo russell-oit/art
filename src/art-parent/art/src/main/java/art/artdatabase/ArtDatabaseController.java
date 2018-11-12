@@ -172,6 +172,8 @@ public class ArtDatabaseController {
 				//https://github.com/brettwooldridge/HikariCP/issues/288
 				//https://stackoverflow.com/questions/14478870/dynamically-load-the-jdbc-driver
 				//https://stackoverflow.com/questions/50750789/java-drivermanager-does-not-load-mysql-driver
+				//https://github.com/brettwooldridge/HikariCP/blob/dev/src/main/java/com/zaxxer/hikari/util/DriverDataSource.java
+				//https://stackoverflow.com/questions/33703785/ucanaccess-driver-not-in-drivermanager-getdrivers-list-unless-class-forname
 				artDatabase.setDriver("org.hsqldb.jdbc.JDBCDriver");
 				artDatabase.setUrl(demoDbUrl);
 
