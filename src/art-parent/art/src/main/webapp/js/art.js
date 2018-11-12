@@ -108,11 +108,21 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "";
 		urlElement.value = "jdbc:mariadb://<server>/<database>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "aurora-mysql-mariadb") {
+		//https://mariadb.com/kb/en/library/failover-and-high-availability-with-mariadb-connector-j/#specifics-for-amazon-aurora
+		//https://stackoverflow.com/questions/44020489/db-connections-increase-after-setting-aurora-in-mariadb-connector
+		driverElement.value = "";
+		urlElement.value = "jdbc:mariadb:aurora://<cluster_end_point>/<database>";
+		testSqlElement.value = "select 1";
 	} else if (dbType === "postgresql") {
 		driverElement.value = "";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "citus") {
+		driverElement.value = "";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "aurora-postgresql-postgresql") {
 		driverElement.value = "";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";

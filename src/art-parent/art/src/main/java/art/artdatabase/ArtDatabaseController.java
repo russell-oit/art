@@ -88,6 +88,8 @@ public class ArtDatabaseController {
 		databaseTypes.remove("presto");
 		databaseTypes.remove("memsql");
 		databaseTypes.remove("citus");
+		databaseTypes.remove("aurora-mysql-mariadb");
+		databaseTypes.remove("aurora-postgresql-postgresql");
 
 		return databaseTypes;
 	}

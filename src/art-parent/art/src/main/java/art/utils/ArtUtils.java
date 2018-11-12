@@ -310,6 +310,8 @@ public class ArtUtils {
 		databaseTypes.put("presto", "Presto");
 		databaseTypes.put("memsql", "MemSQL (MySQL driver)");
 		databaseTypes.put("citus", "Citus (PostgreSQL driver)");
+		databaseTypes.put("aurora-mysql-mariadb", "Amazon Aurora MySQL (MariaDB driver)");
+		databaseTypes.put("aurora-postgresql-postgresql", "Amazon Aurora PostgreSQL (PostgreSQL driver)");
 
 		return databaseTypes;
 	}
