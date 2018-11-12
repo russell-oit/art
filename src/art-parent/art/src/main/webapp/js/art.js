@@ -99,11 +99,11 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 	} else if (dbType === "mysql") {
 		//https://mariadb.com/kb/en/library/about-mariadb-connector-j/
 		driverElement.value = "com.mysql.jdbc.Driver";
-		urlElement.value = "jdbc:mysql://<server>/<database>?&disableMariaDbDriver";
+		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "memsql") {
 		driverElement.value = "com.mysql.jdbc.Driver";
-		urlElement.value = "jdbc:mysql://<server>/<database>?&disableMariaDbDriver";
+		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "mariadb") {
 		driverElement.value = "org.mariadb.jdbc.Driver";
