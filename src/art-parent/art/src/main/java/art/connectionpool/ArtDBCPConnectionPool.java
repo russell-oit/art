@@ -64,15 +64,14 @@ public class ArtDBCPConnectionPool extends ConnectionPool {
 		logger.debug("Entering registerDriver: driver='{}'", driver);
 
 		try {
-			//newInstance only needed for buggy drivers e.g. neo4j 3.1.0
-			//https://stackoverflow.com/questions/2092659/what-is-difference-between-class-forname-and-class-forname-newinstance/2093236#2093236
 			//for jdbc 4 drivers, you don't have to specify driver or use class.forName()
 			//https://stackoverflow.com/questions/5484227/jdbc-class-forname-vs-drivermanager-registerdriver
+			//newInstance needed for buggy drivers e.g. neo4j 3.1.0
+			//https://stackoverflow.com/questions/2092659/what-is-difference-between-class-forname-and-class-forname-newinstance/2093236#2093236
 			if (StringUtils.isNotBlank(driver)) {
 				Class.forName(driver).newInstance();
 				logger.debug("JDBC driver registered: '{}'", driver);
 			}
-			//Class.forName(driver);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
 			logger.error("Error while registering JDBC driver: '{}'", driver, ex);
 		}

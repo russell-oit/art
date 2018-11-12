@@ -166,8 +166,8 @@ public class ArtDatabaseController {
 				usingDemoDatabase = true;
 
 				//org.hsqldb.jdbcDriver is for hsqldb 1.x, org.hsqldb.jdbc.JDBCDriver for hsqldb 2.x
+				//http://www.hsqldb.org/doc/1.8/src/org/hsqldb/jdbcDriver.html
 				//http://hsqldb.org/doc/src/org/hsqldb/jdbc/JDBCDriver.html
-				//http://hsqldb.sourceforge.net/doc/src/org/hsqldb/jdbcDriver.html
 				artDatabase.setDriver("org.hsqldb.jdbc.JDBCDriver");
 				artDatabase.setUrl(demoDbUrl);
 
