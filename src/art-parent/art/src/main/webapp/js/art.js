@@ -97,12 +97,13 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		urlElement.value = "jdbc:oracle:thin:@<server>:1521:<sid>";
 		testSqlElement.value = "select 1 from dual";
 	} else if (dbType === "mysql") {
+		//https://mariadb.com/kb/en/library/about-mariadb-connector-j/
 		driverElement.value = "com.mysql.jdbc.Driver";
-		urlElement.value = "jdbc:mysql://<server>/<database>";
+		urlElement.value = "jdbc:mysql://<server>/<database>?&disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "memsql") {
 		driverElement.value = "com.mysql.jdbc.Driver";
-		urlElement.value = "jdbc:mysql://<server>/<database>";
+		urlElement.value = "jdbc:mysql://<server>/<database>?&disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "mariadb") {
 		driverElement.value = "org.mariadb.jdbc.Driver";
