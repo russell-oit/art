@@ -712,8 +712,7 @@
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
-			<!-- http://freemarker.org/freemarkerdownload.html -->
-			<version>2.3.26-incubating</version>
+			<version>2.3.28</version>
 		</dependency>
 		<dependency>
 			<groupId>fr.opensagres.xdocreport</groupId>
