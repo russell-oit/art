@@ -862,7 +862,7 @@
 		<dependency>
 			<groupId>org.kohsuke</groupId>
 			<artifactId>groovy-sandbox</artifactId>
-			<version>1.11</version>
+			<version>1.19</version>
 			<!-- https://github.com/kohsuke/groovy-sandbox/issues/19 -->
 			<!-- https://github.com/kohsuke/groovy-sandbox/issues/29 -->
 			<exclusions>
