@@ -34,3 +34,5 @@ java.util.ArrayList
 java.util.LinkedHashMap
 java.util.Date
 java.util.HashMap
+[Ljava.lang.Object;
+[Ljava.lang.String;
