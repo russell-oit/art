@@ -311,7 +311,7 @@ public class Config extends HttpServlet {
 	 */
 	private static void createFreemarkerConfiguration() {
 		freemarkerConfig = null;
-		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_26);
+		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_28);
 
 		try {
 			freemarkerConfig.setDirectoryForTemplateLoading(new File(getTemplatesPath()));
