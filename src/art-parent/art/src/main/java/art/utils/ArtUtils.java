@@ -314,6 +314,7 @@ public class ArtUtils {
 		databaseTypes.put("aurora-postgresql-postgresql", "Amazon Aurora PostgreSQL (PostgreSQL driver)");
 		databaseTypes.put("greenplum", "Greenplum (PostgreSQL driver)");
 		databaseTypes.put("timescaledb", "TimescaleDB (PostgreSQL driver)");
+		databaseTypes.put("kdb", "kdb+");
 
 		return databaseTypes;
 	}

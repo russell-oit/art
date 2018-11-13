@@ -299,6 +299,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.facebook.presto.jdbc.PrestoDriver";
 		urlElement.value = "jdbc:presto://<server>:<port>/<catalog>/<schema>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "kdb") {
+		driverElement.value = "jdbc";
+		urlElement.value = "jdbc:q:<server>:<port>";
+		testSqlElement.value = "";
 	}
 }
 
