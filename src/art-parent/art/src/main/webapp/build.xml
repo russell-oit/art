@@ -29,7 +29,7 @@
 
 	<!-- Compile -->
 	<target name="compile"  description="Compile source code inline" >
-		<javac classpathref="classpath"  source="1.7" target="1.7"
+		<javac classpathref="classpath"  source="1.8" target="1.8"
 		srcdir="${dist}/WEB-INF/classes" includeAntRuntime="no"
 		debug="true" encoding="UTF-8">
 			<!-- <compilerarg value="-Xlint"/> -->
