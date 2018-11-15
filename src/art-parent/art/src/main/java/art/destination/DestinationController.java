@@ -572,54 +572,53 @@ public class DestinationController {
 			String password, String domain, String path, String options)
 			throws IOException {
 
-		com.hierynomus.smbj.connection.Connection connection = null;
+		NetworkShareOptions networkShareOptions;
+		if (StringUtils.isBlank(options)) {
+			networkShareOptions = new NetworkShareOptions();
+		} else {
+			networkShareOptions = ArtUtils.jsonToObject(options, NetworkShareOptions.class);
+		}
 
-		try {
-			NetworkShareOptions networkShareOptions;
-			if (StringUtils.isBlank(options)) {
-				networkShareOptions = new NetworkShareOptions();
-			} else {
-				networkShareOptions = ArtUtils.jsonToObject(options, NetworkShareOptions.class);
-			}
+		SmbConfig.Builder configBuilder = SmbConfig.builder();
+		if (networkShareOptions.getTimeoutSeconds() != null) {
+			configBuilder = configBuilder.withTimeout(networkShareOptions.getTimeoutSeconds(), TimeUnit.SECONDS);
+		}
+		if (networkShareOptions.getSocketTimeoutSeconds() != null) {
+			configBuilder = configBuilder.withSoTimeout(networkShareOptions.getSocketTimeoutSeconds(), TimeUnit.SECONDS);
+		}
+		if (networkShareOptions.getMultiProtocolNegotiate() != null) {
+			configBuilder = configBuilder.withMultiProtocolNegotiate(networkShareOptions.getMultiProtocolNegotiate());
+		}
+		if (networkShareOptions.getDfsEnabled() != null) {
+			configBuilder = configBuilder.withDfsEnabled(networkShareOptions.getDfsEnabled());
+		}
+		if (networkShareOptions.getSigningRequired() != null) {
+			configBuilder = configBuilder.withSigningRequired(networkShareOptions.getSigningRequired());
+		}
+		if (networkShareOptions.getBufferSize() != null) {
+			configBuilder = configBuilder.withBufferSize(networkShareOptions.getBufferSize());
+		}
 
-			SmbConfig.Builder configBuilder = SmbConfig.builder();
-			if (networkShareOptions.getTimeoutSeconds() != null) {
-				configBuilder = configBuilder.withTimeout(networkShareOptions.getTimeoutSeconds(), TimeUnit.SECONDS);
-			}
-			if (networkShareOptions.getSocketTimeoutSeconds() != null) {
-				configBuilder = configBuilder.withSoTimeout(networkShareOptions.getSocketTimeoutSeconds(), TimeUnit.SECONDS);
-			}
-			if (networkShareOptions.getMultiProtocolNegotiate() != null) {
-				configBuilder = configBuilder.withMultiProtocolNegotiate(networkShareOptions.getMultiProtocolNegotiate());
-			}
-			if (networkShareOptions.getDfsEnabled() != null) {
-				configBuilder = configBuilder.withDfsEnabled(networkShareOptions.getDfsEnabled());
-			}
-			if (networkShareOptions.getSigningRequired() != null) {
-				configBuilder = configBuilder.withSigningRequired(networkShareOptions.getSigningRequired());
-			}
-			if (networkShareOptions.getBufferSize() != null) {
-				configBuilder = configBuilder.withBufferSize(networkShareOptions.getBufferSize());
-			}
+		SmbConfig config = configBuilder.build();
 
-			SmbConfig config = configBuilder.build();
+		int finalPort;
+		if (port > 0) {
+			finalPort = port;
+		} else {
+			finalPort = SMBClient.DEFAULT_PORT;
+		}
 
-			try (SMBClient client = new SMBClient(config)) {
-				if (port > 0) {
-					connection = client.connect(server, port);
-				} else {
-					connection = client.connect(server);
-				}
-				
+		try (SMBClient client = new SMBClient(config)) {
+			try (com.hierynomus.smbj.connection.Connection connection = client.connect(server, finalPort)) {
 				String username = user;
 				if (username == null) {
 					username = "";
 				}
-				
+
 				if (password == null) {
 					password = "";
 				}
-				
+
 				AuthenticationContext ac;
 				if (networkShareOptions.isAnonymousUser()) {
 					ac = AuthenticationContext.anonymous();
@@ -628,20 +627,12 @@ public class DestinationController {
 				} else {
 					ac = new AuthenticationContext(username, password.toCharArray(), domain);
 				}
-				
+
 				com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
-				
+
 				// Connect to Share
 				DiskShare share = (DiskShare) session.connectShare(path);
 				share.close();
-			}
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception ex) {
-					logger.error("Error", ex);
-				}
 			}
 		}
 	}
