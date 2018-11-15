@@ -259,7 +259,7 @@ public class ReportServiceHelper {
 				for (Datasource datasource : addedDatasources.values()) {
 					if (datasource.isActive()) {
 						datasource.decryptPassword();
-						DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+						DbConnections.createDatasourceConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 					}
 				}
 			}

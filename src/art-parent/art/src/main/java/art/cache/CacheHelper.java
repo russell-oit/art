@@ -117,7 +117,7 @@ public class CacheHelper {
 	 * Refreshes custom settings
 	 */
 	public void clearCustomSettings() {
-		Config.loadCustomSettings(servletContext);
+		Config.initializeCustomSettings(servletContext);
 	}
 
 	/**

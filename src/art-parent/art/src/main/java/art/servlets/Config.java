@@ -220,12 +220,10 @@ public class Config extends HttpServlet {
 			appPath = appPath + File.separator;
 		}
 
-		//set web-inf path
 		webinfPath = appPath + "WEB-INF" + File.separator;
 		logger.debug("webinfPath='{}'", webinfPath);
 
-		//load custom settings
-		loadCustomSettings(ctx);
+		initializeCustomSettings(ctx);
 
 		createDefaultThymeleafTemplateEngine(ctx);
 
@@ -542,6 +540,16 @@ public class Config extends HttpServlet {
 	 * Loads art database configuration from the art-database.json file
 	 */
 	private static void loadArtDatabaseConfiguration() {
+		String encryptionKey = null;
+		loadArtDatabaseConfiguration(encryptionKey);
+	}
+
+	/**
+	 * Loads art database configuration from the art-database.json file
+	 *
+	 * @param encryptionKey the encryption key to use. null if to use current.
+	 */
+	private static void loadArtDatabaseConfiguration(String encryptionKey) {
 		ArtDatabase artDatabase = null;
 
 		try {
@@ -550,7 +558,7 @@ public class Config extends HttpServlet {
 				ObjectMapper mapper = new ObjectMapper();
 				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
 
-				artDatabase.decryptPassword();
+				artDatabase.decryptPassword(encryptionKey);
 				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
 			} else {
@@ -593,14 +601,18 @@ public class Config extends HttpServlet {
 			String encryptionKey) throws Exception {
 
 		//encrypt password field for storing
+		String originalPassword = artDatabase.getPassword();
 		artDatabase.encryptPassword(encryptionKey);
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabase);
+		
+		//restore unencrypted password to object
+		artDatabase.setPassword(originalPassword);
 
 		//refresh configuration and set defaults for invalid values
-		loadArtDatabaseConfiguration();
+		loadArtDatabaseConfiguration(encryptionKey);
 	}
 
 	/**
@@ -778,13 +790,11 @@ public class Config extends HttpServlet {
 
 		return fileCustomSettings;
 	}
-
+	
 	/**
-	 * Loads custom settings
-	 *
-	 * @param ctx the servlet context
+	 * Loads custom settings from file
 	 */
-	public static void loadCustomSettings(ServletContext ctx) {
+	public static void loadCustomSettings(){
 		CustomSettings newCustomSettings = null;
 
 		try {
@@ -800,6 +810,15 @@ public class Config extends HttpServlet {
 
 		customSettings = null;
 		customSettings = newCustomSettings;
+	}
+
+	/**
+	 * Initializes custom settings and variables dependent on custom settings
+	 *
+	 * @param ctx the servlet context
+	 */
+	public static void initializeCustomSettings(ServletContext ctx) {
+		loadCustomSettings();
 
 		//set show errors custom setting
 		ctx.setAttribute("showErrors", customSettings.isShowErrors());

@@ -222,7 +222,8 @@ public class SettingsController {
 
 		Connection conn = null;
 		boolean originalAutoCommit = false;
-		ArtDatabase originalArtDbConfig = Config.getArtDbConfig();
+		ArtDatabase artDbConfig = Config.getArtDbConfig();
+		String originalArtDbPassword = artDbConfig.getPassword();
 
 		try {
 			CustomSettings fileCustomSettings = Config.getCustomSettingsFromFile();
@@ -233,9 +234,9 @@ public class SettingsController {
 
 			String newEncryptionKey = fileCustomSettings.getEncryptionKey();
 
-			ArtDatabase artDbConfig = Config.getArtDbConfig();
 			Config.saveArtDatabaseConfiguration(artDbConfig, newEncryptionKey);
-			DbConnections.createConnectionPool(artDbConfig, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			artDbConfig.setPassword(originalArtDbPassword);
+			DbConnections.createJdbcConnectionPool(artDbConfig, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -248,8 +249,10 @@ public class SettingsController {
 				String originalPassword = datasource.getPassword();
 				datasource.encryptPassword(newEncryptionKey);
 				datasourceService.updateDatasource(datasource, sessionUser, conn);
-				datasource.setPassword(originalPassword);
-				DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+				if (datasource.isActive()) {
+					datasource.setPassword(originalPassword);
+					DbConnections.createDatasourceConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+				}
 			}
 
 			List<Destination> destinations = destinationService.getAllDestinations();
@@ -289,7 +292,8 @@ public class SettingsController {
 			response.setErrorMessage(ex.toString());
 
 			try {
-				Config.saveArtDatabaseConfiguration(originalArtDbConfig);
+				artDbConfig.setPassword(originalArtDbPassword);
+				Config.saveArtDatabaseConfiguration(artDbConfig);
 			} catch (Exception ex2) {
 				logger.error("Error", ex2);
 			}

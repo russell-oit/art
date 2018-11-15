@@ -173,6 +173,7 @@ public class AesEncryptor {
 		//https://commons.apache.org/proper/commons-cli/usage.html
 		//https://commons.apache.org/proper/commons-cli/properties.html
 		//https://stackoverflow.com/questions/11741625/apache-commons-cli-ordering-help-options
+		//https://stackoverflow.com/questions/10798208/commons-cli-required-groups
 		//https://stackoverflow.com/questions/48205610/java-commons-cli-overriding-required-parameters-while-using-help-parameter
 		//https://self-learning-java-tutorial.blogspot.com/2016/12/commons-cli-parsing-command-line-options.html
 		//https://self-learning-java-tutorial.blogspot.com/2016/12/commons-cli-optiongroup-group-mutually.html

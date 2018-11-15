@@ -64,14 +64,25 @@ public class ArtDatabase extends DatasourceInfo implements Serializable {
 	public void setConnectionPoolLibrary(ConnectionPoolLibrary connectionPoolLibrary) {
 		this.connectionPoolLibrary = connectionPoolLibrary;
 	}
-	
+
 	/**
 	 * Decrypts the password field
 	 *
 	 * @throws java.lang.Exception
 	 */
 	public void decryptPassword() throws Exception {
-		password = AesEncryptor.decrypt(password);
+		String key = null;
+		decryptPassword(key);
+	}
+
+	/**
+	 * Decrypts the password field
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @throws java.lang.Exception
+	 */
+	public void decryptPassword(String key) throws Exception {
+		password = AesEncryptor.decrypt(password, key);
 	}
 
 	/**

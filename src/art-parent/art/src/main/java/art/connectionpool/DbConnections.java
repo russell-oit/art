@@ -55,7 +55,7 @@ public class DbConnections {
 	private static Map<Integer, MongoClient> mongodbConnections;
 
 	/**
-	 * Creates connections to all report databases. Connections are pooled.
+	 * Create connection pools for the art database and active datasources
 	 *
 	 * @param artDbConfig
 	 * @throws SQLException
@@ -77,65 +77,65 @@ public class DbConnections {
 		logger.debug("maxPoolSize={}", maxPoolSize);
 
 		//create connection pool for the art database
-		createConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
+		createJdbcConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
 
-		//create connection pools for report databases
-		createJdbcDatasourceConnectionPools(maxPoolSize, connectionPoolLibrary);
-		createMongodbDatasourceConnectionPools();
+		//create connection pools for active datasources
+		createDatasourceConnectionPools(maxPoolSize, connectionPoolLibrary);
 	}
 
 	/**
-	 * Create connection pools for jdbc datasources
+	 * Create connection pools for active datasources
 	 *
-	 * @param maxPoolSize max connection pool size
-	 * @param connectionPoolLibrary connection pool library to use
+	 * @param maxPoolSize the maximum pool size
+	 * @param connectionPoolLibrary the connection pool library
 	 * @throws SQLException
 	 */
-	private static void createJdbcDatasourceConnectionPools(int maxPoolSize,
+	private static void createDatasourceConnectionPools(int maxPoolSize,
 			ConnectionPoolLibrary connectionPoolLibrary) throws SQLException {
 
-		logger.debug("Entering createJdbcDatasourceConnectionPools");
+		logger.debug("Entering createDatasourceConnectionPools");
 
-		//create connection pools for report datasources
 		//use QueryRunner directly instead of DbService or DatasourceService to avoid circular references
-		String sql = "SELECT *"
-				+ " FROM ART_DATABASES"
-				+ " WHERE ACTIVE=1 AND DATASOURCE_TYPE=?";
+		String sql = "SELECT * FROM ART_DATABASES WHERE ACTIVE=1";
 
 		QueryRunner run = new QueryRunner(getArtDbDataSource());
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
-		List<Datasource> datasources = run.query(sql, h, DatasourceType.JDBC.getValue());
+		List<Datasource> datasources = run.query(sql, h);
 
 		for (Datasource datasource : datasources) {
-			try {
-				createConnectionPool(datasource, maxPoolSize, connectionPoolLibrary);
-			} catch (RuntimeException ex) {
-				//include runtime exception in case of PoolInitializationException when using hikaricp
-				logger.error("Error", ex);
-			}
+			createDatasourceConnectionPool(datasource, maxPoolSize, connectionPoolLibrary);
 		}
 	}
 
 	/**
-	 * Creates connection pools for mongodb datasources
+	 * Creates a connection pool for the given datasource
 	 *
-	 * @throws SQLException
+	 * @param datasource the datasource details
+	 * @param maxPoolSize the maximum pool size
+	 * @param connectionPoolLibrary the connection pool library
 	 */
-	private static void createMongodbDatasourceConnectionPools() throws SQLException {
-		logger.debug("Entering createMongodbDatasourceConnectionPools");
+	public static void createDatasourceConnectionPool(Datasource datasource,
+			int maxPoolSize, ConnectionPoolLibrary connectionPoolLibrary) {
+		
+		logger.debug("Entering createDatasourceConnectionPool: datasource={}", datasource);
 
-		//create connection pools for report datasources
-		//use QueryRunner directly instead of DbService or DatasourceService to avoid circular references
-		String sql = "SELECT *"
-				+ " FROM ART_DATABASES"
-				+ " WHERE ACTIVE=1 AND DATASOURCE_TYPE=?";
+		DatasourceType datasourceType = datasource.getDatasourceType();
+		logger.debug("datasourceType={}", datasourceType);
 
-		QueryRunner run = new QueryRunner(getArtDbDataSource());
-		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
-		List<Datasource> datasources = run.query(sql, h, DatasourceType.MongoDB.getValue());
-
-		for (Datasource datasource : datasources) {
-			createMongodbConnectionPool(datasource);
+		switch (datasourceType) {
+			case JDBC:
+				try {
+					createJdbcConnectionPool(datasource, maxPoolSize, connectionPoolLibrary);
+				} catch (RuntimeException ex) {
+					//include runtime exception in case of PoolInitializationException when using hikaricp
+					logger.error("Error", ex);
+				}
+				break;
+			case MongoDB:
+				createMongodbConnectionPool(datasource);
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -146,10 +146,10 @@ public class DbConnections {
 	 * @param maxPoolSize the maximum pool size
 	 * @param connectionPoolLibrary the connection pool library
 	 */
-	public static void createConnectionPool(DatasourceInfo datasourceInfo,
+	public static void createJdbcConnectionPool(DatasourceInfo datasourceInfo,
 			int maxPoolSize, ConnectionPoolLibrary connectionPoolLibrary) {
 
-		logger.debug("Entering createConnectionPool");
+		logger.debug("Entering createJdbcConnectionPool");
 
 		//remove any existing connection pool for this datasource
 		removeConnectionPool(datasourceInfo.getDatasourceId());
@@ -181,8 +181,8 @@ public class DbConnections {
 	 *
 	 * @param datasource the mongodb datasource
 	 */
-	public static void createMongodbConnectionPool(Datasource datasource) {
-		logger.debug("Entering createMongodbConnectionPool");
+	private static void createMongodbConnectionPool(Datasource datasource) {
+		logger.debug("Entering createMongodbConnectionPool: datasource={}", datasource);
 
 		removeConnectionPool(datasource.getDatasourceId());
 
@@ -254,7 +254,7 @@ public class DbConnections {
 
 		return getConnectionPool(datasourceId).getPool();
 	}
-	
+
 	/**
 	 * Returns a javax.sql.DataSource for the given art datasource
 	 *

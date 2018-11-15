@@ -347,7 +347,7 @@ public class ImportRecordsController {
 		for (Datasource datasource : datasources) {
 			if (datasource.isActive()) {
 				datasource.decryptPassword();
-				DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+				DbConnections.createDatasourceConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 			}
 		}
 	}
