@@ -746,10 +746,27 @@ public class ReportService {
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
 	public void updateReport(Report report, User actionUser) throws SQLException {
-		logger.debug("Entering updateReport: report={}, actionUser={}", report, actionUser);
+		Connection conn = null;
+		updateReport(report, actionUser, conn);
+	}
+
+	/**
+	 * Updates an existing report
+	 *
+	 * @param report the updated report
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public void updateReport(Report report, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering updateReport: report={}, actionUser={}",
+				report, actionUser);
 
 		Integer newRecordId = null;
-		saveReport(report, newRecordId, actionUser);
+		saveReport(report, newRecordId, actionUser, conn);
 	}
 
 	/**

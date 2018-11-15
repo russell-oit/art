@@ -262,10 +262,27 @@ public class DestinationService {
 	 */
 	@CacheEvict(value = {"destinations", "jobs"}, allEntries = true)
 	public void updateDestination(Destination destination, User actionUser) throws SQLException {
-		logger.debug("Entering updateDestination: destination={}, actionUser={}", destination, actionUser);
+		Connection conn = null;
+		updateDestination(destination, actionUser, conn);
+	}
+
+	/**
+	 * Updates an existing destination
+	 *
+	 * @param destination the updated destination
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"destinations", "jobs"}, allEntries = true)
+	public void updateDestination(Destination destination, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering updateDestination: destination={},"
+				+ " actionUser={}", destination, actionUser);
 
 		Integer newRecordId = null;
-		saveDestination(destination, newRecordId, actionUser);
+		saveDestination(destination, newRecordId, actionUser, conn);
 	}
 
 	/**

@@ -254,10 +254,27 @@ public class SmtpServerService {
 	 */
 	@CacheEvict(value = {"smtpServers", "jobs"}, allEntries = true)
 	public void updateSmtpServer(SmtpServer smtpServer, User actionUser) throws SQLException {
-		logger.debug("Entering updateSmtpServer: smtpServer={}, actionUser={}", smtpServer, actionUser);
+		Connection conn = null;
+		updateSmtpServer(smtpServer, actionUser, conn);
+	}
+
+	/**
+	 * Updates an smtp server
+	 *
+	 * @param smtpServer the updated smtp server
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"smtpServers", "jobs"}, allEntries = true)
+	public void updateSmtpServer(SmtpServer smtpServer, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering updateSmtpServer: smtpServer={}, actionUser={}",
+				smtpServer, actionUser);
 
 		Integer newRecordId = null;
-		saveSmtpServer(smtpServer, newRecordId, actionUser);
+		saveSmtpServer(smtpServer, newRecordId, actionUser, conn);
 	}
 
 	/**

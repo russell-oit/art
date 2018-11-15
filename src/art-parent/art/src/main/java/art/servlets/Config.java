@@ -154,7 +154,6 @@ public class Config extends HttpServlet {
 		//https://stackoverflow.com/questions/53187716/abandoned-connection-cleanup-in-mariadb-compared-to-mysql
 		//https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-api-changes.html
 		//AbandonedConnectionCleanupThread.checkedShutdown();
-
 		//deregister jdbc drivers
 		deregisterJdbcDrivers();
 
@@ -540,7 +539,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Loads art database configuration from the art-database file
+	 * Loads art database configuration from the art-database.json file
 	 */
 	private static void loadArtDatabaseConfiguration() {
 		ArtDatabase artDatabase = null;
@@ -550,7 +549,7 @@ public class Config extends HttpServlet {
 			if (artDatabaseFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
 				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
-				
+
 				artDatabase.decryptPassword();
 				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
@@ -579,8 +578,22 @@ public class Config extends HttpServlet {
 	public static void saveArtDatabaseConfiguration(ArtDatabase artDatabase)
 			throws Exception {
 
+		String encryptionKey = null;
+		saveArtDatabaseConfiguration(artDatabase, encryptionKey);
+	}
+
+	/**
+	 * Saves art database configuration to file
+	 *
+	 * @param artDatabase the art database configuration
+	 * @param encryptionKey the encryption key to use. null if to use current.
+	 * @throws Exception
+	 */
+	public static void saveArtDatabaseConfiguration(ArtDatabase artDatabase,
+			String encryptionKey) throws Exception {
+
 		//encrypt password field for storing
-		artDatabase.encryptPassword();
+		artDatabase.encryptPassword(encryptionKey);
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
@@ -748,9 +761,9 @@ public class Config extends HttpServlet {
 
 	/**
 	 * Returns custom settings from the custom settings file
-	 * 
+	 *
 	 * @return custom settings from the custom settings file
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static CustomSettings getCustomSettingsFromFile() throws IOException {
 		CustomSettings fileCustomSettings = null;

@@ -7,5 +7,5 @@
 	"enableGroovySandbox": true,
 	"enableEmailing": true,
 	"jwtSecret": "",
-	"newEncryptionKey": ""
+	"encryptionKey": ""
 }

@@ -22,6 +22,8 @@ import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
 import art.dbutils.DatabaseUtils;
+import art.destination.Destination;
+import art.destination.DestinationService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.ArtAuthenticationMethod;
@@ -31,7 +33,11 @@ import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.LoggerLevel;
 import art.enums.PdfPageSize;
 import art.general.AjaxResponse;
+import art.report.Report;
+import art.report.ReportService;
 import art.servlets.Config;
+import art.smtpserver.SmtpServer;
+import art.smtpserver.SmtpServerService;
 import art.user.User;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -74,6 +80,15 @@ public class SettingsController {
 
 	@Autowired
 	private EncryptorService encryptorService;
+
+	@Autowired
+	private DestinationService destinationService;
+
+	@Autowired
+	private ReportService reportService;
+
+	@Autowired
+	private SmtpServerService smtpServerService;
 
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
@@ -206,6 +221,8 @@ public class SettingsController {
 		AjaxResponse response = new AjaxResponse();
 
 		Connection conn = null;
+		boolean originalAutoCommit = false;
+		ArtDatabase originalArtDbConfig = Config.getArtDbConfig();
 
 		try {
 			CustomSettings fileCustomSettings = Config.getCustomSettingsFromFile();
@@ -214,33 +231,68 @@ public class SettingsController {
 				return response;
 			}
 
-			String newEncryptionKey = fileCustomSettings.getNewEncryptionKey();
+			String newEncryptionKey = fileCustomSettings.getEncryptionKey();
+
+			ArtDatabase artDbConfig = Config.getArtDbConfig();
+			Config.saveArtDatabaseConfiguration(artDbConfig, newEncryptionKey);
+			DbConnections.createConnectionPool(artDbConfig, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-//			conn = DbConnections.getArtDbConnection();
-//			conn.setAutoCommit(false);
-//
-//			List<Encryptor> encryptors = encryptorService.getAllEncryptors();
-//			for(Encryptor encryptor: encryptors){
-//				encryptor.encryptPasswords(newEncryptionKey);
-//				encryptorService.updateEncryptor(encryptor, sessionUser, conn);
-//			}
-//
-//			Datasource datasource = datasourceService.getDatasource(1);
-//			datasource.encryptPassword(newEncryptionKey);
-//			datasourceService.updateDatasource(datasource, sessionUser, conn);
-//			conn.commit();
-//			CustomSettings customSettings = Config.getCustomSettings();
-//			customSettings.setNewEncryptionKey(newEncryptionKey);
-//			datasource.decryptPassword();
-//			ArtDatabase artDbConfig = Config.getArtDbConfig();
-//			//DbConnections.createConnectionPools(artDbConfig);
-//			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
-//			response.setSuccess(true);
+			conn = DbConnections.getArtDbConnection();
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			List<Datasource> datasources = datasourceService.getAllDatasources();
+			for (Datasource datasource : datasources) {
+				String originalPassword = datasource.getPassword();
+				datasource.encryptPassword(newEncryptionKey);
+				datasourceService.updateDatasource(datasource, sessionUser, conn);
+				datasource.setPassword(originalPassword);
+				DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			}
+
+			List<Destination> destinations = destinationService.getAllDestinations();
+			for (Destination destination : destinations) {
+				destination.encryptPassword(newEncryptionKey);
+				destinationService.updateDestination(destination, sessionUser, conn);
+			}
+
+			List<Encryptor> encryptors = encryptorService.getAllEncryptors();
+			for (Encryptor encryptor : encryptors) {
+				encryptor.encryptPasswords(newEncryptionKey);
+				encryptorService.updateEncryptor(encryptor, sessionUser, conn);
+			}
+
+			List<Report> reports = reportService.getAllReports();
+			for (Report report : reports) {
+				report.encryptPasswords(newEncryptionKey);
+				reportService.updateReport(report, sessionUser, conn);
+			}
+
+			Settings settings = settingsService.getSettings();
+			settings.encryptPasswords(newEncryptionKey);
+			settingsService.updateSettings(settings, sessionUser, conn);
+
+			List<SmtpServer> smtpServers = smtpServerService.getAllSmtpServers();
+			for (SmtpServer smtpServer : smtpServers) {
+				smtpServer.encryptPassword(newEncryptionKey);
+				smtpServerService.updateSmtpServer(smtpServer, sessionUser, conn);
+			}
+
+			conn.commit();
+			CustomSettings customSettings = Config.getCustomSettings();
+			customSettings.setEncryptionKey(newEncryptionKey);
+			response.setSuccess(true);
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
+
+			try {
+				Config.saveArtDatabaseConfiguration(originalArtDbConfig);
+			} catch (Exception ex2) {
+				logger.error("Error", ex2);
+			}
 
 			if (conn != null) {
 				try {
@@ -250,6 +302,13 @@ public class SettingsController {
 				}
 			}
 		} finally {
+			if (conn != null) {
+				try {
+					conn.setAutoCommit(originalAutoCommit);
+				} catch (SQLException ex) {
+					logger.error("Error", ex);
+				}
+			}
 			DatabaseUtils.close(conn);
 		}
 

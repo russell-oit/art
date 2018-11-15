@@ -85,7 +85,7 @@ public class AesEncryptor {
 		cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 		byte[] encryptedBytes = cipher.doFinal(clearText.getBytes("UTF-8"));
 		byte[] finalEncryptedBytes = ArrayUtils.addAll(IVBytes, encryptedBytes);
-		
+
 		return Base64.encodeBase64String(finalEncryptedBytes);
 	}
 
@@ -127,7 +127,7 @@ public class AesEncryptor {
 
 		cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
 		byte[] decryptedBytes = cipher.doFinal(finalEncryptedBytes);
-		
+
 		return new String(decryptedBytes);
 	}
 
@@ -138,11 +138,11 @@ public class AesEncryptor {
 	 */
 	private static String getEncryptionKey() {
 		String key;
-		String newEncryptionKey = Config.getCustomSettings().getNewEncryptionKey();
-		if (StringUtils.isNotBlank(newEncryptionKey)) {
-			key = newEncryptionKey;
-		} else {
+		String newEncryptionKey = Config.getCustomSettings().getEncryptionKey();
+		if (StringUtils.isBlank(newEncryptionKey)) {
 			key = DEFAULT_KEY;
+		} else {
+			key = newEncryptionKey;
 		}
 
 		return key;

@@ -38,20 +38,20 @@ public class CustomSettings implements Serializable {
 	private boolean enableGroovySandbox = true; //whether to apply the groovy sandbox when running groovy scripts
 	private boolean enableEmailing = true; //whether sending of emails is enabled
 	private String jwtSecret;
-	private String newEncryptionKey;
+	private String encryptionKey; //key for symmetric encryption within the application
 
 	/**
-	 * @return the newEncryptionKey
+	 * @return the encryptionKey
 	 */
-	public String getNewEncryptionKey() {
-		return newEncryptionKey;
+	public String getEncryptionKey() {
+		return encryptionKey;
 	}
 
 	/**
-	 * @param newEncryptionKey the newEncryptionKey to set
+	 * @param encryptionKey the encryptionKey to set
 	 */
-	public void setNewEncryptionKey(String newEncryptionKey) {
-		this.newEncryptionKey = newEncryptionKey;
+	public void setEncryptionKey(String encryptionKey) {
+		this.encryptionKey = encryptionKey;
 	}
 
 	/**
