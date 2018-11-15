@@ -367,6 +367,7 @@ public class RunReportController {
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				paramProcessor.setSuppliedReport(report);
+				paramProcessor.setIsFragment(isFragment);
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();

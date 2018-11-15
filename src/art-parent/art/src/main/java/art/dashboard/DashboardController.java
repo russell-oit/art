@@ -164,6 +164,7 @@ public class DashboardController {
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
 			paramProcessor.setSuppliedReport(report);
+			paramProcessor.setIsFragment(true);
 			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportParamsList = paramProcessorResult.getReportParamsList();

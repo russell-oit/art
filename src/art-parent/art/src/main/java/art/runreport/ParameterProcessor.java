@@ -72,7 +72,21 @@ public class ParameterProcessor {
 	private Report suppliedReport;
 	private boolean parameterSelection = false;
 	private Map<String, String[]> reportRequestParameters;
-	private boolean isFragment;
+	private Boolean isFragment = false;
+
+	/**
+	 * @return the isFragment
+	 */
+	public Boolean getIsFragment() {
+		return isFragment;
+	}
+
+	/**
+	 * @param isFragment the isFragment to set
+	 */
+	public void setIsFragment(Boolean isFragment) {
+		this.isFragment = isFragment;
+	}
 
 	/**
 	 * @return the parameterSelection
@@ -158,8 +172,6 @@ public class ParameterProcessor {
 	public ParameterProcessorResult processHttpParameters(
 			HttpServletRequest request, Locale locale)
 			throws SQLException, ParseException, IOException {
-
-		isFragment = BooleanUtils.toBoolean(request.getParameter("isFragment"));
 
 		String reportIdString = request.getParameter("reportId");
 		logger.debug("reportIdString='{}'", reportIdString);
@@ -600,7 +612,7 @@ public class ParameterProcessor {
 		logger.debug("Entering processChartOptions");
 
 		ChartOptions chartOptions = new ChartOptions();
-		if (!parameterSelection && !isFragment) {
+		if (!parameterSelection && !getIsFragment()) {
 			chartOptions.initializeBooleansToFalse();
 		}
 
