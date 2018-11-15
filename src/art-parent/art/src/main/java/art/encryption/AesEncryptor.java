@@ -33,8 +33,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides encryption and decryption of strings using the AES algorithm
@@ -50,8 +48,6 @@ public class AesEncryptor {
 	//https://crypto.stackexchange.com/questions/50782/what-size-of-initialization-vector-iv-is-needed-for-aes-encryption
 	//https://security.stackexchange.com/questions/90848/encrypting-using-aes-256-can-i-use-256-bits-iv
 	//https://stackoverflow.com/questions/6729834/need-solution-for-wrong-iv-length-in-aes
-
-	private static final Logger logger = LoggerFactory.getLogger(AesEncryptor.class);
 
 	private static final String DEFAULT_KEY = "XH6YUHlrofcQDZjd"; // 128 bit key (16 bytes)
 	private static final String TRANSFORMATION = "AES/CBC/PKCS5PADDING";

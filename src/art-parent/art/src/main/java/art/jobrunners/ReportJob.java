@@ -573,7 +573,7 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			String accountId = destination.getUser();
 			String applicationKey = destination.getPassword();
-			
+
 			//https://github.com/Backblaze/b2-sdk-java/blob/master/httpclient/src/main/java/com/backblaze/b2/client/webApiHttpClient/B2StorageHttpClientBuilder.java
 			//https://stackoverflow.com/questions/14664156/real-world-user-agents-what-are-they-how-to-set-them-java
 			//https://stackoverflow.com/questions/2529682/setting-user-agent-of-a-java-urlconnection
@@ -1075,86 +1075,87 @@ public class ReportJob implements org.quartz.Job {
 
 			SmbConfig config = configBuilder.build();
 
-			SMBClient client = new SMBClient(config);
+			try (SMBClient client = new SMBClient(config)) {
 
-			String server = destination.getServer();
-			int port = destination.getPort();
+				String server = destination.getServer();
+				int port = destination.getPort();
 
-			if (port > 0) {
-				connection = client.connect(server, port);
-			} else {
-				connection = client.connect(server);
-			}
-
-			String username = destination.getUser();
-			if (username == null) {
-				username = "";
-			}
-
-			String password = destination.getPassword();
-			if (password == null) {
-				password = "";
-			}
-
-			String domain = destination.getDomain();
-
-			AuthenticationContext ac;
-			if (networkShareOptions.isAnonymousUser()) {
-				ac = AuthenticationContext.anonymous();
-			} else if (networkShareOptions.isGuestUser()) {
-				ac = AuthenticationContext.guest();
-			} else {
-				ac = new AuthenticationContext(username, password.toCharArray(), domain);
-			}
-
-			com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
-
-			String destinationSubDirectory = destination.getSubDirectory();
-			destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
-
-			String jobSubDirectory = job.getSubDirectory();
-			jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
-
-			//linux shares can use either "\" or "/" as a directory separator
-			//windows shares can only use "\" as a directory separator
-			String directorySeparator;
-			if (StringUtils.contains(destinationSubDirectory, "/")
-					|| StringUtils.contains(jobSubDirectory, "/")) {
-				directorySeparator = "/";
-			} else {
-				directorySeparator = "\\";
-			}
-
-			String finalSubDirectory = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
-
-			// Connect to Share
-			String path = destination.getPath();
-			try (DiskShare share = (DiskShare) session.connectShare(path)) {
-				//https://stackoverflow.com/questions/44634892/java-smb-file-share-without-smb-1-0-cifs-compatibility-enabled
-				// if file is in folder(s), create them first
-				if (StringUtils.isNotBlank(finalSubDirectory)
-						&& destination.isCreateDirectories()) {
-					//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
-					String[] folders = StringUtils.split(finalSubDirectory, directorySeparator);
-					//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
-					List<String> subFolders = new ArrayList<>();
-					for (String folder : folders) {
-						subFolders.add(folder);
-						String partialPath = StringUtils.join(subFolders, directorySeparator);
-						try {
-							if (!share.folderExists(partialPath)) {
-								share.mkdir(partialPath);
-							}
-						} catch (SMBApiException ex) {
-							logError(ex);
-						}
-					}
+				if (port > 0) {
+					connection = client.connect(server, port);
+				} else {
+					connection = client.connect(server);
 				}
 
-				File file = new File(fullLocalFileName);
-				String destPath = finalSubDirectory + fileName;
-				boolean overwrite = true;
-				SmbFiles.copy(file, share, destPath, overwrite);
+				String username = destination.getUser();
+				if (username == null) {
+					username = "";
+				}
+
+				String password = destination.getPassword();
+				if (password == null) {
+					password = "";
+				}
+
+				String domain = destination.getDomain();
+
+				AuthenticationContext ac;
+				if (networkShareOptions.isAnonymousUser()) {
+					ac = AuthenticationContext.anonymous();
+				} else if (networkShareOptions.isGuestUser()) {
+					ac = AuthenticationContext.guest();
+				} else {
+					ac = new AuthenticationContext(username, password.toCharArray(), domain);
+				}
+
+				com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
+
+				String destinationSubDirectory = destination.getSubDirectory();
+				destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
+
+				String jobSubDirectory = job.getSubDirectory();
+				jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
+
+				//linux shares can use either "\" or "/" as a directory separator
+				//windows shares can only use "\" as a directory separator
+				String directorySeparator;
+				if (StringUtils.contains(destinationSubDirectory, "/")
+						|| StringUtils.contains(jobSubDirectory, "/")) {
+					directorySeparator = "/";
+				} else {
+					directorySeparator = "\\";
+				}
+
+				String finalSubDirectory = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
+
+				// Connect to Share
+				String path = destination.getPath();
+				try (DiskShare share = (DiskShare) session.connectShare(path)) {
+					//https://stackoverflow.com/questions/44634892/java-smb-file-share-without-smb-1-0-cifs-compatibility-enabled
+					// if file is in folder(s), create them first
+					if (StringUtils.isNotBlank(finalSubDirectory)
+							&& destination.isCreateDirectories()) {
+						//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
+						String[] folders = StringUtils.split(finalSubDirectory, directorySeparator);
+						//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
+						List<String> subFolders = new ArrayList<>();
+						for (String folder : folders) {
+							subFolders.add(folder);
+							String partialPath = StringUtils.join(subFolders, directorySeparator);
+							try {
+								if (!share.folderExists(partialPath)) {
+									share.mkdir(partialPath);
+								}
+							} catch (SMBApiException ex) {
+								logError(ex);
+							}
+						}
+					}
+
+					File file = new File(fullLocalFileName);
+					String destPath = finalSubDirectory + fileName;
+					boolean overwrite = true;
+					SmbFiles.copy(file, share, destPath, overwrite);
+				}
 			}
 		} catch (IOException | SMBApiException ex) {
 			logErrorAndSetDetails(ex);

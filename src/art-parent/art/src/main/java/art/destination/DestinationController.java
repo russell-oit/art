@@ -604,37 +604,37 @@ public class DestinationController {
 
 			SmbConfig config = configBuilder.build();
 
-			SMBClient client = new SMBClient(config);
-
-			if (port > 0) {
-				connection = client.connect(server, port);
-			} else {
-				connection = client.connect(server);
+			try (SMBClient client = new SMBClient(config)) {
+				if (port > 0) {
+					connection = client.connect(server, port);
+				} else {
+					connection = client.connect(server);
+				}
+				
+				String username = user;
+				if (username == null) {
+					username = "";
+				}
+				
+				if (password == null) {
+					password = "";
+				}
+				
+				AuthenticationContext ac;
+				if (networkShareOptions.isAnonymousUser()) {
+					ac = AuthenticationContext.anonymous();
+				} else if (networkShareOptions.isGuestUser()) {
+					ac = AuthenticationContext.guest();
+				} else {
+					ac = new AuthenticationContext(username, password.toCharArray(), domain);
+				}
+				
+				com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
+				
+				// Connect to Share
+				DiskShare share = (DiskShare) session.connectShare(path);
+				share.close();
 			}
-
-			String username = user;
-			if (username == null) {
-				username = "";
-			}
-
-			if (password == null) {
-				password = "";
-			}
-
-			AuthenticationContext ac;
-			if (networkShareOptions.isAnonymousUser()) {
-				ac = AuthenticationContext.anonymous();
-			} else if (networkShareOptions.isGuestUser()) {
-				ac = AuthenticationContext.guest();
-			} else {
-				ac = new AuthenticationContext(username, password.toCharArray(), domain);
-			}
-
-			com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
-
-			// Connect to Share
-			DiskShare share = (DiskShare) session.connectShare(path);
-			share.close();
 		} finally {
 			if (connection != null) {
 				try {
