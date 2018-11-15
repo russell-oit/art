@@ -21,10 +21,20 @@ import art.servlets.Config;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides encryption and decryption of strings using the AES algorithm
@@ -40,6 +50,8 @@ public class AesEncryptor {
 	//https://crypto.stackexchange.com/questions/50782/what-size-of-initialization-vector-iv-is-needed-for-aes-encryption
 	//https://security.stackexchange.com/questions/90848/encrypting-using-aes-256-can-i-use-256-bits-iv
 	//https://stackoverflow.com/questions/6729834/need-solution-for-wrong-iv-length-in-aes
+
+	private static final Logger logger = LoggerFactory.getLogger(AesEncryptor.class);
 
 	private static final String DEFAULT_KEY = "XH6YUHlrofcQDZjd"; // 128 bit key (16 bytes)
 	private static final String TRANSFORMATION = "AES/CBC/PKCS5PADDING";
@@ -146,6 +158,85 @@ public class AesEncryptor {
 		}
 
 		return key;
+	}
+
+	public static void main(String[] args) {
+		//https://stackoverflow.com/questions/18093928/what-does-could-not-find-or-load-main-class-mean
+		//https://stackoverflow.com/questions/219585/including-all-the-jars-in-a-directory-within-the-java-classpath
+		//from WEB-INF\classes\ directory
+		//windows: java -cp "../lib/*;." art.encryption.AesEncryptor
+		//linux: java -cp "../lib/*:." art.encryption.AesEncryptor 
+		//from WEB-INF\classes\art\encryption\ directory
+		//windows: java -cp "../../;../../../lib/*" art.encryption.AesEncryptor
+		//linux: java -cp "../../:../../../lib/*" art.encryption.AesEncryptor 
+
+		//https://commons.apache.org/proper/commons-cli/usage.html
+		//https://commons.apache.org/proper/commons-cli/properties.html
+		//https://stackoverflow.com/questions/11741625/apache-commons-cli-ordering-help-options
+		//https://stackoverflow.com/questions/48205610/java-commons-cli-overriding-required-parameters-while-using-help-parameter
+		//https://self-learning-java-tutorial.blogspot.com/2016/12/commons-cli-parsing-command-line-options.html
+		//https://self-learning-java-tutorial.blogspot.com/2016/12/commons-cli-optiongroup-group-mutually.html
+		Options options = new Options();
+		HelpFormatter helpFormatter = new HelpFormatter();
+
+		try {
+			final String ENCRYPT_OPTION = "e";
+			final String DECRYPT_OPTION = "d";
+			final String TEXT_OPTION = "t";
+			final String KEY_OPTION = "k";
+
+			Option encryptOption = Option.builder(ENCRYPT_OPTION)
+					.longOpt("encrypt")
+					.desc("perform encryption")
+					.build();
+
+			Option decryptOption = Option.builder(DECRYPT_OPTION)
+					.longOpt("decrypt")
+					.desc("perform decryption")
+					.build();
+
+			Option textOption = Option.builder(TEXT_OPTION)
+					.longOpt("text")
+					.desc("the text to encrypt/decrypt")
+					.hasArg()
+					.required()
+					.build();
+
+			Option keyOption = Option.builder(KEY_OPTION)
+					.longOpt("key")
+					.desc("the encryption/decryption key")
+					.required()
+					.hasArg()
+					.build();
+
+			OptionGroup actionGroup = new OptionGroup();
+			actionGroup.addOption(encryptOption);
+			actionGroup.addOption(decryptOption);
+			actionGroup.setRequired(true);
+
+			options.addOptionGroup(actionGroup);
+			options.addOption(textOption);
+			options.addOption(keyOption);
+
+			CommandLineParser commandLineParser = new DefaultParser();
+			CommandLine commandLine = commandLineParser.parse(options, args);
+
+			String text = commandLine.getOptionValue(TEXT_OPTION);
+			String key = commandLine.getOptionValue(KEY_OPTION);
+
+			if (commandLine.hasOption(ENCRYPT_OPTION)) {
+				String encryptedText = encrypt(text, key);
+				System.out.println("Encrypted text is '" + encryptedText + "'");
+			} else {
+				String decryptedText = decrypt(text, key);
+				System.out.println("Decrypted text is '" + decryptedText + "'");
+			}
+		} catch (ParseException ex) {
+			System.out.println(ex.getMessage());
+			helpFormatter.printHelp("AesEncryptor", options);
+		} catch (Exception ex) {
+			System.out.println(ex);
+		}
 	}
 
 }
