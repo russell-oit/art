@@ -24,6 +24,7 @@ import art.datasource.DatasourceService;
 import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
 import art.destination.DestinationService;
+import art.encryption.AesEncryptor;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.ArtAuthenticationMethod;
@@ -238,10 +239,13 @@ public class SettingsController {
 			}
 
 			String newEncryptionKey = fileCustomSettings.getEncryptionKey();
+			
+			if (StringUtils.isEmpty(newEncryptionKey)) {
+				newEncryptionKey = AesEncryptor.DEFAULT_KEY;
+			}
 
 			String currentEncryptionKeySetting = Config.getCustomSettings().getEncryptionKey();
-			if (StringUtils.isBlank(newEncryptionKey)
-					|| StringUtils.equals(newEncryptionKey, currentEncryptionKeySetting)) {
+			if (StringUtils.equals(newEncryptionKey, currentEncryptionKeySetting)) {
 				String message = messageSource.getMessage("settings.message.noChange", null, locale);
 				response.setErrorMessage(message);
 				return response;

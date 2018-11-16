@@ -49,7 +49,7 @@ public class AesEncryptor {
 	//https://security.stackexchange.com/questions/90848/encrypting-using-aes-256-can-i-use-256-bits-iv
 	//https://stackoverflow.com/questions/6729834/need-solution-for-wrong-iv-length-in-aes
 
-	private static final String DEFAULT_KEY = "XH6YUHlrofcQDZjd"; // 128 bit key (16 bytes)
+	public static final String DEFAULT_KEY = "XH6YUHlrofcQDZjd"; // 128 bit key (16 bytes)
 	private static final String TRANSFORMATION = "AES/CBC/PKCS5PADDING";
 	private static final int AES_CBC_IV_LENGTH_BYTES = 16; //AES in CBC mode always uses a 128 bit IV (16 bytes)
 
@@ -78,7 +78,7 @@ public class AesEncryptor {
 			return null;
 		}
 
-		if (StringUtils.isBlank(key)) {
+		if (StringUtils.isEmpty(key)) {
 			key = getEncryptionKey();
 		}
 
@@ -122,7 +122,7 @@ public class AesEncryptor {
 			return cipherText;
 		}
 
-		if (StringUtils.isBlank(key)) {
+		if (StringUtils.isEmpty(key)) {
 			key = getEncryptionKey();
 		}
 
@@ -146,11 +146,11 @@ public class AesEncryptor {
 	 */
 	private static String getEncryptionKey() {
 		String key;
-		String newEncryptionKey = Config.getCustomSettings().getEncryptionKey();
-		if (StringUtils.isBlank(newEncryptionKey)) {
+		String settingsEncryptionKey = Config.getCustomSettings().getEncryptionKey();
+		if (StringUtils.isEmpty(settingsEncryptionKey)) {
 			key = DEFAULT_KEY;
 		} else {
-			key = newEncryptionKey;
+			key = settingsEncryptionKey;
 		}
 
 		return key;
@@ -240,7 +240,7 @@ public class AesEncryptor {
 				String key = commandLine.getOptionValue(KEY_OPTION);
 
 				//when running on command line using java command, empty string accepted. not accepted when running from netbeans
-				if (StringUtils.isBlank(key)) {
+				if (StringUtils.isEmpty(key)) {
 					System.out.println("Using default key: '" + DEFAULT_KEY + "'");
 					key = DEFAULT_KEY;
 				}
