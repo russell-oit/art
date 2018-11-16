@@ -42,6 +42,7 @@ import art.user.User;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -49,6 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -89,6 +91,9 @@ public class SettingsController {
 
 	@Autowired
 	private SmtpServerService smtpServerService;
+
+	@Autowired
+	private MessageSource messageSource;
 
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
@@ -215,7 +220,7 @@ public class SettingsController {
 
 	@PostMapping("/updateEncryptionKey")
 	public @ResponseBody
-	AjaxResponse updateEncryptionKey(HttpSession session) {
+	AjaxResponse updateEncryptionKey(HttpSession session, Locale locale) {
 		logger.debug("Entering updateEncryptionKey");
 
 		AjaxResponse response = new AjaxResponse();
@@ -233,6 +238,14 @@ public class SettingsController {
 			}
 
 			String newEncryptionKey = fileCustomSettings.getEncryptionKey();
+
+			String currentEncryptionKeySetting = Config.getCustomSettings().getEncryptionKey();
+			if (StringUtils.isBlank(newEncryptionKey)
+					|| StringUtils.equals(newEncryptionKey, currentEncryptionKeySetting)) {
+				String message = messageSource.getMessage("settings.message.noChange", null, locale);
+				response.setErrorMessage(message);
+				return response;
+			}
 
 			Config.saveArtDatabaseConfiguration(artDbConfig, newEncryptionKey);
 			artDbConfig.setPassword(originalArtDbPassword);
