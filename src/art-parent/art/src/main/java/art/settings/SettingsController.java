@@ -249,8 +249,8 @@ public class SettingsController {
 				String originalPassword = datasource.getPassword();
 				datasource.encryptPassword(newEncryptionKey);
 				datasourceService.updateDatasource(datasource, sessionUser, conn);
+				datasource.setPassword(originalPassword);
 				if (datasource.isActive()) {
-					datasource.setPassword(originalPassword);
 					DbConnections.createDatasourceConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 				}
 			}

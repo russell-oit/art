@@ -160,11 +160,8 @@ public class AesEncryptor {
 		//https://stackoverflow.com/questions/18093928/what-does-could-not-find-or-load-main-class-mean
 		//https://stackoverflow.com/questions/219585/including-all-the-jars-in-a-directory-within-the-java-classpath
 		//from WEB-INF\classes\ directory
-		//windows: java -cp "../lib/*;." art.encryption.AesEncryptor
-		//linux: java -cp "../lib/*:." art.encryption.AesEncryptor 
-		//from WEB-INF\classes\art\encryption\ directory
-		//windows: java -cp "../../;../../../lib/*" art.encryption.AesEncryptor
-		//linux: java -cp "../../:../../../lib/*" art.encryption.AesEncryptor 
+		//windows: java -cp "../lib/*;../etc/*;." art.encryption.AesEncryptor
+		//linux: java -cp "../lib/*:../etc/*:." art.encryption.AesEncryptor 
 
 		//https://commons.apache.org/proper/commons-cli/usage.html
 		//https://commons.apache.org/proper/commons-cli/properties.html
@@ -221,6 +218,12 @@ public class AesEncryptor {
 			String text = commandLine.getOptionValue(TEXT_OPTION);
 			String key = commandLine.getOptionValue(KEY_OPTION);
 
+			//when running using java empty string accepted. not accepted when running from netbeans
+			if (StringUtils.isBlank(key)) {
+				System.out.println("Using default key: '" + DEFAULT_KEY + "'");
+				key = DEFAULT_KEY;
+			}
+
 			if (commandLine.hasOption(ENCRYPT_OPTION)) {
 				String encryptedText = encrypt(text, key);
 				System.out.println("Encrypted text is '" + encryptedText + "'");
@@ -232,7 +235,7 @@ public class AesEncryptor {
 			System.out.println(ex.getMessage());
 			helpFormatter.printHelp("AesEncryptor", options);
 		} catch (Exception ex) {
-			System.out.println(ex);
+			ex.printStackTrace(System.out);
 		}
 	}
 
