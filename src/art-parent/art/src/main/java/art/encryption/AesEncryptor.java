@@ -166,7 +166,6 @@ public class AesEncryptor {
 		//https://commons.apache.org/proper/commons-cli/usage.html
 		//https://commons.apache.org/proper/commons-cli/properties.html
 		//https://stackoverflow.com/questions/11741625/apache-commons-cli-ordering-help-options
-		//https://stackoverflow.com/questions/10798208/commons-cli-required-groups
 		//https://stackoverflow.com/questions/48205610/java-commons-cli-overriding-required-parameters-while-using-help-parameter
 		//https://self-learning-java-tutorial.blogspot.com/2016/12/commons-cli-parsing-command-line-options.html
 		//https://self-learning-java-tutorial.blogspot.com/2016/12/commons-cli-optiongroup-group-mutually.html
@@ -178,6 +177,12 @@ public class AesEncryptor {
 			final String DECRYPT_OPTION = "d";
 			final String TEXT_OPTION = "t";
 			final String KEY_OPTION = "k";
+			final String HELP_OPTION = "h";
+
+			Option helpOption = Option.builder(HELP_OPTION)
+					.longOpt("help")
+					.desc("show usage")
+					.build();
 
 			Option encryptOption = Option.builder(ENCRYPT_OPTION)
 					.longOpt("encrypt")
@@ -211,25 +216,42 @@ public class AesEncryptor {
 			options.addOptionGroup(actionGroup);
 			options.addOption(textOption);
 			options.addOption(keyOption);
+			options.addOption(helpOption);
+
+			//handle optional help option
+			//https://stackoverflow.com/questions/10798208/commons-cli-required-groups
+			Options options1 = new Options();
+			options1.addOption(helpOption);
 
 			CommandLineParser commandLineParser = new DefaultParser();
-			CommandLine commandLine = commandLineParser.parse(options, args);
+			//https://commons.apache.org/proper/commons-cli/javadocs/api-1.3.1/org/apache/commons/cli/DefaultParser.html#stopAtNonOption
+			//also options1 options must come before others in order to be effective
+			boolean stopAtNonOption = true;
+			CommandLine commandLine1 = commandLineParser.parse(options1, args, stopAtNonOption);
 
-			String text = commandLine.getOptionValue(TEXT_OPTION);
-			String key = commandLine.getOptionValue(KEY_OPTION);
-
-			//when running using java empty string accepted. not accepted when running from netbeans
-			if (StringUtils.isBlank(key)) {
-				System.out.println("Using default key: '" + DEFAULT_KEY + "'");
-				key = DEFAULT_KEY;
-			}
-
-			if (commandLine.hasOption(ENCRYPT_OPTION)) {
-				String encryptedText = encrypt(text, key);
-				System.out.println("Encrypted text is '" + encryptedText + "'");
+			if (ArrayUtils.isNotEmpty(commandLine1.getOptions())) {
+				if (commandLine1.hasOption(HELP_OPTION)) {
+					helpFormatter.printHelp("AesEncryptor", options);
+				}
 			} else {
-				String decryptedText = decrypt(text, key);
-				System.out.println("Decrypted text is '" + decryptedText + "'");
+				CommandLine commandLine = commandLineParser.parse(options, args);
+
+				String text = commandLine.getOptionValue(TEXT_OPTION);
+				String key = commandLine.getOptionValue(KEY_OPTION);
+
+				//when running using java empty string accepted. not accepted when running from netbeans
+				if (StringUtils.isBlank(key)) {
+					System.out.println("Using default key: '" + DEFAULT_KEY + "'");
+					key = DEFAULT_KEY;
+				}
+
+				if (commandLine.hasOption(ENCRYPT_OPTION)) {
+					String encryptedText = encrypt(text, key);
+					System.out.println("Encrypted text is '" + encryptedText + "'");
+				} else {
+					String decryptedText = decrypt(text, key);
+					System.out.println("Decrypted text is '" + decryptedText + "'");
+				}
 			}
 		} catch (ParseException ex) {
 			System.out.println(ex.getMessage());
