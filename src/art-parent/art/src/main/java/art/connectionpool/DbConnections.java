@@ -57,7 +57,7 @@ public class DbConnections {
 	/**
 	 * Create connection pools for the art database and active datasources
 	 *
-	 * @param artDbConfig
+	 * @param artDbConfig the art database configuration
 	 * @throws SQLException
 	 */
 	public static void createConnectionPools(ArtDatabase artDbConfig) throws SQLException {
@@ -70,14 +70,14 @@ public class DbConnections {
 		connectionPoolMap = new HashMap<>();
 		mongodbConnections = new HashMap<>();
 
+		//create connection pool for the art database
+		createArtDbConnectionPool(artDbConfig);
+
 		ConnectionPoolLibrary connectionPoolLibrary = artDbConfig.getConnectionPoolLibrary();
 		int maxPoolSize = artDbConfig.getMaxPoolConnections(); //will apply to all connection pools
 
 		logger.debug("connectionPoolLibrary={}", connectionPoolLibrary);
 		logger.debug("maxPoolSize={}", maxPoolSize);
-
-		//create connection pool for the art database
-		createJdbcConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
 
 		//create connection pools for active datasources
 		createDatasourceConnectionPools(maxPoolSize, connectionPoolLibrary);
@@ -116,7 +116,7 @@ public class DbConnections {
 	 */
 	public static void createDatasourceConnectionPool(Datasource datasource,
 			int maxPoolSize, ConnectionPoolLibrary connectionPoolLibrary) {
-		
+
 		logger.debug("Entering createDatasourceConnectionPool: datasource={}", datasource);
 
 		DatasourceType datasourceType = datasource.getDatasourceType();
@@ -140,13 +140,24 @@ public class DbConnections {
 	}
 
 	/**
+	 * Creates a connection pool for the art database
+	 *
+	 * @param artDbConfig the art database configuration
+	 */
+	public static void createArtDbConnectionPool(ArtDatabase artDbConfig) {
+		logger.debug("Entering createArtDbConnectionPool");
+
+		createJdbcConnectionPool(artDbConfig, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+	}
+
+	/**
 	 * Creates a connection pool for the given jdbc datasource
 	 *
 	 * @param datasourceInfo the datasource details
 	 * @param maxPoolSize the maximum pool size
 	 * @param connectionPoolLibrary the connection pool library
 	 */
-	public static void createJdbcConnectionPool(DatasourceInfo datasourceInfo,
+	private static void createJdbcConnectionPool(DatasourceInfo datasourceInfo,
 			int maxPoolSize, ConnectionPoolLibrary connectionPoolLibrary) {
 
 		logger.debug("Entering createJdbcConnectionPool");

@@ -236,7 +236,7 @@ public class SettingsController {
 
 			Config.saveArtDatabaseConfiguration(artDbConfig, newEncryptionKey);
 			artDbConfig.setPassword(originalArtDbPassword);
-			DbConnections.createJdbcConnectionPool(artDbConfig, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			DbConnections.createArtDbConnectionPool(artDbConfig);
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
