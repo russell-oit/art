@@ -239,7 +239,7 @@ public class AesEncryptor {
 				String text = commandLine.getOptionValue(TEXT_OPTION);
 				String key = commandLine.getOptionValue(KEY_OPTION);
 
-				//when running using java empty string accepted. not accepted when running from netbeans
+				//when running on command line using java command, empty string accepted. not accepted when running from netbeans
 				if (StringUtils.isBlank(key)) {
 					System.out.println("Using default key: '" + DEFAULT_KEY + "'");
 					key = DEFAULT_KEY;
