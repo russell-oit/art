@@ -144,7 +144,7 @@ public class AesEncryptor {
 	 *
 	 * @return the encryption/decryption key to use
 	 */
-	private static String getEncryptionKey() {
+	public static String getEncryptionKey() {
 		String key;
 		String settingsEncryptionKey = Config.getCustomSettings().getEncryptionKey();
 		if (StringUtils.isEmpty(settingsEncryptionKey)) {

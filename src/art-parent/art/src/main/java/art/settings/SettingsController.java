@@ -239,13 +239,13 @@ public class SettingsController {
 			}
 
 			String newEncryptionKey = fileCustomSettings.getEncryptionKey();
-			
+
 			if (StringUtils.isEmpty(newEncryptionKey)) {
 				newEncryptionKey = AesEncryptor.DEFAULT_KEY;
 			}
 
-			String currentEncryptionKeySetting = Config.getCustomSettings().getEncryptionKey();
-			if (StringUtils.equals(newEncryptionKey, currentEncryptionKeySetting)) {
+			String currentEncryptionKey = AesEncryptor.getEncryptionKey();
+			if (StringUtils.equals(newEncryptionKey, currentEncryptionKey)) {
 				String message = messageSource.getMessage("settings.message.noChange", null, locale);
 				response.setErrorMessage(message);
 				return response;
