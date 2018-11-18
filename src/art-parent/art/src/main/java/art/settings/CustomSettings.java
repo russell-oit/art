@@ -39,6 +39,21 @@ public class CustomSettings implements Serializable {
 	private boolean enableEmailing = true; //whether sending of emails is enabled
 	private String jwtSecret;
 	private String encryptionKey; //key for symmetric encryption within the application
+	private EncryptionPassword encryptionPassword;
+
+	/**
+	 * @return the encryptionPassword
+	 */
+	public EncryptionPassword getEncryptionPassword() {
+		return encryptionPassword;
+	}
+
+	/**
+	 * @param encryptionPassword the encryptionPassword to set
+	 */
+	public void setEncryptionPassword(EncryptionPassword encryptionPassword) {
+		this.encryptionPassword = encryptionPassword;
+	}
 
 	/**
 	 * @return the encryptionKey

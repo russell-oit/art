@@ -18,8 +18,18 @@
 package art.encryption;
 
 import art.servlets.Config;
+import art.settings.CustomSettings;
+import art.settings.EncryptionPassword;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.util.Objects;
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -33,6 +43,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  * Provides encryption and decryption of strings using the AES algorithm
@@ -48,6 +59,7 @@ public class AesEncryptor {
 	//https://crypto.stackexchange.com/questions/50782/what-size-of-initialization-vector-iv-is-needed-for-aes-encryption
 	//https://security.stackexchange.com/questions/90848/encrypting-using-aes-256-can-i-use-256-bits-iv
 	//https://stackoverflow.com/questions/6729834/need-solution-for-wrong-iv-length-in-aes
+	//https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html
 
 	public static final String DEFAULT_KEY = "XH6YUHlrofcQDZjd"; // 128 bit key (16 bytes)
 	private static final String TRANSFORMATION = "AES/CBC/PKCS5PADDING";
@@ -74,6 +86,22 @@ public class AesEncryptor {
 	 * @throws java.lang.Exception
 	 */
 	public static String encrypt(String clearText, String key) throws Exception {
+		EncryptionPassword encryptionPassword = null;
+		return encrypt(clearText, key, encryptionPassword);
+	}
+
+	/**
+	 * Encrypts a string
+	 *
+	 * @param clearText the string to encrypt, not null
+	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption password configuration
+	 * @return the encrypted string, null if clearText is null
+	 * @throws java.lang.Exception
+	 */
+	public static String encrypt(String clearText, String key,
+			EncryptionPassword encryptionPassword) throws Exception {
+
 		if (clearText == null) {
 			return null;
 		}
@@ -82,15 +110,16 @@ public class AesEncryptor {
 			key = getEncryptionKey();
 		}
 
+		SecretKey secretKey = generateSecretKey(key, encryptionPassword);
+
 		//use random IV that will be prepended to the cipher text
 		//so that the same string generates different cipher text
 		byte[] IVBytes = RandomUtils.nextBytes(AES_CBC_IV_LENGTH_BYTES); //can use SecureRandom but that may block if there's insufficient entropy
-
 		IvParameterSpec ivParameterSpec = new IvParameterSpec(IVBytes);
-		SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-		Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
-		cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+		Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+		cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
+
 		byte[] encryptedBytes = cipher.doFinal(clearText.getBytes("UTF-8"));
 		byte[] finalEncryptedBytes = ArrayUtils.addAll(IVBytes, encryptedBytes);
 
@@ -118,6 +147,22 @@ public class AesEncryptor {
 	 * @throws java.lang.Exception
 	 */
 	public static String decrypt(String cipherText, String key) throws Exception {
+		EncryptionPassword encryptionPassword = null;
+		return decrypt(cipherText, key, encryptionPassword);
+	}
+
+	/**
+	 * Decrypts a string
+	 *
+	 * @param cipherText the encrypted string
+	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption password configuration
+	 * @return the decrypted string, null if cipherText is null
+	 * @throws java.lang.Exception
+	 */
+	public static String decrypt(String cipherText, String key,
+			EncryptionPassword encryptionPassword) throws Exception {
+
 		if (cipherText == null || cipherText.equals("")) {
 			return cipherText;
 		}
@@ -126,14 +171,17 @@ public class AesEncryptor {
 			key = getEncryptionKey();
 		}
 
+		SecretKey secretKey = generateSecretKey(key, encryptionPassword);
+
 		byte[] encryptedBytes = Base64.decodeBase64(cipherText);
 		byte[] IVBytes = ArrayUtils.subarray(encryptedBytes, 0, AES_CBC_IV_LENGTH_BYTES);
 		byte[] finalEncryptedBytes = ArrayUtils.subarray(encryptedBytes, AES_CBC_IV_LENGTH_BYTES, encryptedBytes.length);
-		IvParameterSpec ivParameterSpec = new IvParameterSpec(IVBytes);
-		SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-		Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
-		cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
+		IvParameterSpec ivParameterSpec = new IvParameterSpec(IVBytes);
+
+		Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+		cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
+
 		byte[] decryptedBytes = cipher.doFinal(finalEncryptedBytes);
 
 		return new String(decryptedBytes);
@@ -146,7 +194,14 @@ public class AesEncryptor {
 	 */
 	public static String getEncryptionKey() {
 		String key;
-		String settingsEncryptionKey = Config.getCustomSettings().getEncryptionKey();
+
+		String settingsEncryptionKey = null;
+		CustomSettings customSettings = Config.getCustomSettings();
+		if (customSettings != null) {
+			//may be null if encrypt/decrypt method run from command line while art is not started
+			settingsEncryptionKey = customSettings.getEncryptionKey();
+		}
+
 		if (StringUtils.isEmpty(settingsEncryptionKey)) {
 			key = DEFAULT_KEY;
 		} else {
@@ -156,6 +211,75 @@ public class AesEncryptor {
 		return key;
 	}
 
+	/**
+	 * Returns the secret key object to use
+	 *
+	 * @param key the encryption key string
+	 * @param encryptionPassword the encryption password configuration
+	 * @return the secret key object
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 */
+	private static SecretKey generateSecretKey(String key, EncryptionPassword encryptionPassword)
+			throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeySpecException {
+
+		if (encryptionPassword == null || StringUtils.isEmpty(encryptionPassword.getPassword())) {
+			return generateSecretKeyUsingKey(key);
+		} else {
+			return generateSecretKeyUsingPassword(encryptionPassword);
+		}
+	}
+
+	/**
+	 * Returns the secret key object to use
+	 *
+	 * @param key the encryption key string
+	 * @return the secret key object
+	 * @throws UnsupportedEncodingException
+	 */
+	private static SecretKey generateSecretKeyUsingKey(String key) throws UnsupportedEncodingException {
+		Objects.requireNonNull(key, "key must not be null");
+		SecretKey secretKey = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+		return secretKey;
+	}
+
+	/**
+	 * Returns the secret key object to use
+	 *
+	 * @param encryptionPassword the encryption password configuration
+	 * @return the secret key object
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws UnsupportedEncodingException
+	 */
+	private static SecretKey generateSecretKeyUsingPassword(EncryptionPassword encryptionPassword)
+			throws NoSuchAlgorithmException, InvalidKeySpecException, UnsupportedEncodingException {
+
+		Objects.requireNonNull(encryptionPassword, "encryptionPassword must not be null");
+
+		String password = encryptionPassword.getPassword();
+		Objects.requireNonNull(password, "password must not be null");
+
+		int keyLength = encryptionPassword.getKeyLength();
+
+		//https://stackoverflow.com/questions/992019/java-256-bit-aes-password-based-encryption
+		//https://github.com/martinwithaar/Encryptor4j/blob/master/src/main/java/org/encryptor4j/factory/AbsKeyFactory.java
+		final int ITERATION_COUNT = 65536;
+		final String SALT = "(cFp((.]1x)60Re3w";
+		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+		KeySpec spec = new PBEKeySpec(password.toCharArray(), SALT.getBytes("UTF-8"), ITERATION_COUNT, keyLength);
+		SecretKey tmp = factory.generateSecret(spec);
+		SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
+
+		return secret;
+	}
+
+	/**
+	 * Allow testing of encryption/decryption from the command line
+	 *
+	 * @param args command line arguments
+	 */
 	public static void main(String[] args) {
 		//https://stackoverflow.com/questions/18093928/what-does-could-not-find-or-load-main-class-mean
 		//https://stackoverflow.com/questions/219585/including-all-the-jars-in-a-directory-within-the-java-classpath
@@ -178,6 +302,8 @@ public class AesEncryptor {
 			final String TEXT_OPTION = "t";
 			final String KEY_OPTION = "k";
 			final String HELP_OPTION = "h";
+			final String PASSWORD_OPTION = "p";
+			final String KEY_LENGTH_OPTION = "l";
 
 			Option helpOption = Option.builder(HELP_OPTION)
 					.longOpt("help")
@@ -204,7 +330,18 @@ public class AesEncryptor {
 			Option keyOption = Option.builder(KEY_OPTION)
 					.longOpt("key")
 					.desc("the encryption/decryption key")
-					.required()
+					.hasArg()
+					.build();
+
+			Option passwordOption = Option.builder(PASSWORD_OPTION)
+					.longOpt("password")
+					.desc("the encryption/decryption password")
+					.hasArg()
+					.build();
+
+			Option keyLengthOption = Option.builder(KEY_LENGTH_OPTION)
+					.longOpt("key-length")
+					.desc("the key length. used with the password option")
 					.hasArg()
 					.build();
 
@@ -217,6 +354,8 @@ public class AesEncryptor {
 			options.addOption(textOption);
 			options.addOption(keyOption);
 			options.addOption(helpOption);
+			options.addOption(passwordOption);
+			options.addOption(keyLengthOption);
 
 			//handle optional help option
 			//https://stackoverflow.com/questions/10798208/commons-cli-required-groups
@@ -236,20 +375,35 @@ public class AesEncryptor {
 			} else {
 				CommandLine commandLine = commandLineParser.parse(options, args);
 
-				String text = commandLine.getOptionValue(TEXT_OPTION);
-				String key = commandLine.getOptionValue(KEY_OPTION);
-
-				//when running on command line using java command, empty string accepted. not accepted when running from netbeans
-				if (StringUtils.isEmpty(key)) {
-					System.out.println("Using default key: '" + DEFAULT_KEY + "'");
-					key = DEFAULT_KEY;
+				if (!commandLine.hasOption(KEY_OPTION) && !commandLine.hasOption(PASSWORD_OPTION)) {
+					System.out.println("Must specify either key or password option");
+					helpFormatter.printHelp("AesEncryptor", options);
+					return;
+				} else if (commandLine.hasOption(KEY_OPTION) && commandLine.hasOption(PASSWORD_OPTION)) {
+					System.out.println("Must specify only key or password option");
+					helpFormatter.printHelp("AesEncryptor", options);
+					return;
+				} else if (commandLine.hasOption(PASSWORD_OPTION)
+						&& !commandLine.hasOption(KEY_LENGTH_OPTION)) {
+					System.out.println("Must specify key length option with the password option");
+					helpFormatter.printHelp("AesEncryptor", options);
+					return;
 				}
 
+				String text = commandLine.getOptionValue(TEXT_OPTION);
+				String key = commandLine.getOptionValue(KEY_OPTION);
+				String password = commandLine.getOptionValue(PASSWORD_OPTION);
+				int keyLength = NumberUtils.toInt(commandLine.getOptionValue(KEY_LENGTH_OPTION));
+
+				EncryptionPassword encryptionPassword = new EncryptionPassword();
+				encryptionPassword.setPassword(password);
+				encryptionPassword.setKeyLength(keyLength);
+
 				if (commandLine.hasOption(ENCRYPT_OPTION)) {
-					String encryptedText = encrypt(text, key);
+					String encryptedText = encrypt(text, key, encryptionPassword);
 					System.out.println("Encrypted text is '" + encryptedText + "'");
 				} else {
-					String decryptedText = decrypt(text, key);
+					String decryptedText = decrypt(text, key, encryptionPassword);
 					System.out.println("Decrypted text is '" + decryptedText + "'");
 				}
 			}
