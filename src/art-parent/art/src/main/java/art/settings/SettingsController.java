@@ -239,22 +239,30 @@ public class SettingsController {
 			}
 
 			String newPassword = null;
+			int newKeyLength = 0;
 			EncryptionPassword newEncryptionPasswordConfig = fileCustomSettings.getEncryptionPassword();
 			if (newEncryptionPasswordConfig == null) {
 				newEncryptionPasswordConfig = new EncryptionPassword();
 			} else {
 				newPassword = newEncryptionPasswordConfig.getPassword();
+				newKeyLength = newEncryptionPasswordConfig.getKeyLength();
 			}
 
 			String currentPassword = null;
+			int currentKeyLength = 0;
 			EncryptionPassword currentEncryptionPasswordConfig = Config.getCustomSettings().getEncryptionPassword();
 			if (currentEncryptionPasswordConfig != null) {
 				currentPassword = currentEncryptionPasswordConfig.getPassword();
+				currentKeyLength = currentEncryptionPasswordConfig.getKeyLength();
 			}
 
 			boolean passwordChange = false;
 			if (!StringUtils.equals(newPassword, currentPassword)
 					&& (StringUtils.isNotEmpty(newPassword) || StringUtils.isNotEmpty(newPassword))) {
+				passwordChange = true;
+			}
+
+			if (StringUtils.isNotEmpty(newPassword) && (newKeyLength != currentKeyLength)) {
 				passwordChange = true;
 			}
 
