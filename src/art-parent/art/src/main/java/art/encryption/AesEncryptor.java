@@ -281,6 +281,8 @@ public class AesEncryptor {
 
 		//https://stackoverflow.com/questions/992019/java-256-bit-aes-password-based-encryption
 		//https://github.com/martinwithaar/Encryptor4j/blob/master/src/main/java/org/encryptor4j/factory/AbsKeyFactory.java
+		//https://cryptosense.com/blog/parameter-choice-for-pbkdf2/
+		//https://stackoverflow.com/questions/44223813/aes-custom-password-key
 		final int ITERATION_COUNT = 10_000;
 		final String SALT = "(cFp((.]1x)60Re3w";
 		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
