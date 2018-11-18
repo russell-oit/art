@@ -258,7 +258,7 @@ public class SettingsController {
 
 			boolean passwordChange = false;
 			if (!StringUtils.equals(newPassword, currentPassword)
-					&& (StringUtils.isNotEmpty(newPassword) || StringUtils.isNotEmpty(newPassword))) {
+					&& (StringUtils.isNotEmpty(newPassword) || StringUtils.isNotEmpty(currentPassword))) {
 				passwordChange = true;
 			}
 
