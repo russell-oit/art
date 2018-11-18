@@ -19,8 +19,8 @@
 	</li>
 	<li>
 		The <b>SQL Server (Microsoft driver)</b> included with ART 
-		(Microsoft JDBC Driver 6) supports SQL Server 2005 and above.
-		If you need to connect to SQL Server 2000, use the jTDS driver.
+		(Microsoft JDBC Driver 7) supports SQL Server 2008R2 and above.
+		If you need to connect to SQL Server 2000 or 2005, use the jTDS driver.
 		See <a href="https://msdn.microsoft.com/en-us/library/mt679183(v=sql.110).aspx">
 			https://msdn.microsoft.com/en-us/library/mt679183(v=sql.110).aspx 
 		</a> for a support matrix for the Microsoft driver.
