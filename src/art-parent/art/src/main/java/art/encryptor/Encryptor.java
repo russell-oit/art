@@ -19,6 +19,7 @@ package art.encryptor;
 
 import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
+import art.settings.EncryptionPassword;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
@@ -396,20 +397,23 @@ public class Encryptor implements Serializable {
 	 */
 	public void encryptPasswords() throws Exception {
 		String key = null;
-		encryptPasswords(key);
+		EncryptionPassword encryptionPassword = null;
+		encryptPasswords(key, encryptionPassword);
 	}
 
 	/**
 	 * Encrypts password fields
 	 *
 	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
 	 * @throws java.lang.Exception
 	 */
-	public void encryptPasswords(String key) throws Exception {
-		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword, key);
-		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase, key);
-		openPassword = AesEncryptor.encrypt(openPassword, key);
-		modifyPassword = AesEncryptor.encrypt(modifyPassword, key);
+	public void encryptPasswords(String key, EncryptionPassword encryptionPassword) throws Exception {
+		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword, key, encryptionPassword);
+		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase, key, encryptionPassword);
+		openPassword = AesEncryptor.encrypt(openPassword, key, encryptionPassword);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword, key, encryptionPassword);
 	}
 
 }

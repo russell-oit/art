@@ -27,6 +27,7 @@ import art.logback.OnLevelEvaluator;
 import art.saiku.SaikuConnectionManager;
 import art.saiku.SaikuConnectionProvider;
 import art.settings.CustomSettings;
+import art.settings.EncryptionPassword;
 import art.settings.Settings;
 import art.settings.SettingsService;
 import art.utils.ArtUtils;
@@ -541,15 +542,20 @@ public class Config extends HttpServlet {
 	 */
 	private static void loadArtDatabaseConfiguration() {
 		String encryptionKey = null;
-		loadArtDatabaseConfiguration(encryptionKey);
+		EncryptionPassword encryptionPassword = null;
+		loadArtDatabaseConfiguration(encryptionKey, encryptionPassword);
 	}
 
 	/**
 	 * Loads art database configuration from the art-database.json file
 	 *
 	 * @param encryptionKey the encryption key to use. null if to use current.
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
 	 */
-	private static void loadArtDatabaseConfiguration(String encryptionKey) {
+	private static void loadArtDatabaseConfiguration(String encryptionKey,
+			EncryptionPassword encryptionPassword) {
+
 		ArtDatabase artDatabase = null;
 
 		try {
@@ -558,7 +564,7 @@ public class Config extends HttpServlet {
 				ObjectMapper mapper = new ObjectMapper();
 				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
 
-				artDatabase.decryptPassword(encryptionKey);
+				artDatabase.decryptPassword(encryptionKey, encryptionPassword);
 				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
 			} else {
@@ -587,7 +593,8 @@ public class Config extends HttpServlet {
 			throws Exception {
 
 		String encryptionKey = null;
-		saveArtDatabaseConfiguration(artDatabase, encryptionKey);
+		EncryptionPassword encryptionPassword = null;
+		saveArtDatabaseConfiguration(artDatabase, encryptionKey, encryptionPassword);
 	}
 
 	/**
@@ -595,24 +602,26 @@ public class Config extends HttpServlet {
 	 *
 	 * @param artDatabase the art database configuration
 	 * @param encryptionKey the encryption key to use. null if to use current.
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
 	 * @throws Exception
 	 */
 	public static void saveArtDatabaseConfiguration(ArtDatabase artDatabase,
-			String encryptionKey) throws Exception {
+			String encryptionKey, EncryptionPassword encryptionPassword) throws Exception {
 
 		//encrypt password field for storing
 		String originalPassword = artDatabase.getPassword();
-		artDatabase.encryptPassword(encryptionKey);
+		artDatabase.encryptPassword(encryptionKey, encryptionPassword);
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabase);
-		
+
 		//restore unencrypted password to object
 		artDatabase.setPassword(originalPassword);
 
 		//refresh configuration and set defaults for invalid values
-		loadArtDatabaseConfiguration(encryptionKey);
+		loadArtDatabaseConfiguration(encryptionKey, encryptionPassword);
 	}
 
 	/**
@@ -790,11 +799,11 @@ public class Config extends HttpServlet {
 
 		return fileCustomSettings;
 	}
-	
+
 	/**
 	 * Loads custom settings from file
 	 */
-	public static void loadCustomSettings(){
+	public static void loadCustomSettings() {
 		CustomSettings newCustomSettings = null;
 
 		try {

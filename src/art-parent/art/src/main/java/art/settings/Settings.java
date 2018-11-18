@@ -1185,17 +1185,20 @@ public class Settings implements Serializable {
 	 */
 	public void encryptPasswords() throws Exception {
 		String key = null;
-		encryptPasswords(key);
+		EncryptionPassword encryptionPassword = null;
+		encryptPasswords(key, encryptionPassword);
 	}
 
 	/**
 	 * Encrypt password fields
 	 *
 	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
 	 * @throws java.lang.Exception
 	 */
-	public void encryptPasswords(String key) throws Exception {
-		smtpPassword = AesEncryptor.encrypt(smtpPassword, key);
-		ldapBindPassword = AesEncryptor.encrypt(ldapBindPassword, key);
+	public void encryptPasswords(String key, EncryptionPassword encryptionPassword) throws Exception {
+		smtpPassword = AesEncryptor.encrypt(smtpPassword, key, encryptionPassword);
+		ldapBindPassword = AesEncryptor.encrypt(ldapBindPassword, key, encryptionPassword);
 	}
 }

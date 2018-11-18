@@ -238,20 +238,47 @@ public class SettingsController {
 				return response;
 			}
 
+			String newPassword = null;
+			EncryptionPassword newEncryptionPasswordConfig = fileCustomSettings.getEncryptionPassword();
+			if (newEncryptionPasswordConfig == null) {
+				newEncryptionPasswordConfig = new EncryptionPassword();
+			} else {
+				newPassword = newEncryptionPasswordConfig.getPassword();
+			}
+
+			String currentPassword = null;
+			EncryptionPassword currentEncryptionPasswordConfig = Config.getCustomSettings().getEncryptionPassword();
+			if (currentEncryptionPasswordConfig != null) {
+				currentPassword = currentEncryptionPasswordConfig.getPassword();
+			}
+
+			boolean passwordChange = false;
+			if (!StringUtils.equals(newPassword, currentPassword)
+					&& (StringUtils.isNotEmpty(newPassword) || StringUtils.isNotEmpty(newPassword))) {
+				passwordChange = true;
+			}
+
 			String newEncryptionKey = fileCustomSettings.getEncryptionKey();
 
 			if (StringUtils.isEmpty(newEncryptionKey)) {
 				newEncryptionKey = AesEncryptor.DEFAULT_KEY;
 			}
 
-			String currentEncryptionKey = AesEncryptor.getEncryptionKey();
-			if (StringUtils.equals(newEncryptionKey, currentEncryptionKey)) {
+			String currentEncryptionKey = AesEncryptor.getCurrentEncryptionKey();
+
+			boolean encryptionKeyChange = false;
+			if (StringUtils.isNotEmpty(newPassword)
+					&& !StringUtils.equals(newEncryptionKey, currentEncryptionKey)) {
+				encryptionKeyChange = true;
+			}
+
+			if (!passwordChange && !encryptionKeyChange) {
 				String message = messageSource.getMessage("settings.message.noChange", null, locale);
 				response.setErrorMessage(message);
 				return response;
 			}
 
-			Config.saveArtDatabaseConfiguration(artDbConfig, newEncryptionKey);
+			Config.saveArtDatabaseConfiguration(artDbConfig, newEncryptionKey, newEncryptionPasswordConfig);
 			artDbConfig.setPassword(originalArtDbPassword);
 			DbConnections.createArtDbConnectionPool(artDbConfig);
 
@@ -264,7 +291,7 @@ public class SettingsController {
 			List<Datasource> datasources = datasourceService.getAllDatasources();
 			for (Datasource datasource : datasources) {
 				String originalPassword = datasource.getPassword();
-				datasource.encryptPassword(newEncryptionKey);
+				datasource.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
 				datasourceService.updateDatasource(datasource, sessionUser, conn);
 				datasource.setPassword(originalPassword);
 				if (datasource.isActive()) {
@@ -274,35 +301,36 @@ public class SettingsController {
 
 			List<Destination> destinations = destinationService.getAllDestinations();
 			for (Destination destination : destinations) {
-				destination.encryptPassword(newEncryptionKey);
+				destination.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
 				destinationService.updateDestination(destination, sessionUser, conn);
 			}
 
 			List<Encryptor> encryptors = encryptorService.getAllEncryptors();
 			for (Encryptor encryptor : encryptors) {
-				encryptor.encryptPasswords(newEncryptionKey);
+				encryptor.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
 				encryptorService.updateEncryptor(encryptor, sessionUser, conn);
 			}
 
 			List<Report> reports = reportService.getAllReports();
 			for (Report report : reports) {
-				report.encryptPasswords(newEncryptionKey);
+				report.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
 				reportService.updateReport(report, sessionUser, conn);
 			}
 
 			Settings settings = settingsService.getSettings();
-			settings.encryptPasswords(newEncryptionKey);
+			settings.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
 			settingsService.updateSettings(settings, sessionUser, conn);
 
 			List<SmtpServer> smtpServers = smtpServerService.getAllSmtpServers();
 			for (SmtpServer smtpServer : smtpServers) {
-				smtpServer.encryptPassword(newEncryptionKey);
+				smtpServer.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
 				smtpServerService.updateSmtpServer(smtpServer, sessionUser, conn);
 			}
 
 			conn.commit();
 			CustomSettings customSettings = Config.getCustomSettings();
 			customSettings.setEncryptionKey(newEncryptionKey);
+			customSettings.setEncryptionPassword(newEncryptionPasswordConfig);
 			response.setSuccess(true);
 		} catch (Exception ex) {
 			logger.error("Error", ex);

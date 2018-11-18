@@ -40,6 +40,7 @@ import art.reportrule.ReportRule;
 import art.ruleValue.UserGroupRuleValue;
 import art.ruleValue.UserRuleValue;
 import art.servlets.Config;
+import art.settings.EncryptionPassword;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -1539,18 +1540,21 @@ public class Report implements Serializable {
 	 */
 	public void encryptPasswords() throws Exception {
 		String key = null;
-		encryptPasswords(key);
+		EncryptionPassword encryptionPassword = null;
+		encryptPasswords(key, encryptionPassword);
 	}
 
 	/**
 	 * Encrypts password fields
 	 *
 	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption configuration to use. null if to
+	 * use current.
 	 * @throws java.lang.Exception
 	 */
-	public void encryptPasswords(String key) throws Exception {
-		openPassword = AesEncryptor.encrypt(openPassword, key);
-		modifyPassword = AesEncryptor.encrypt(modifyPassword, key);
+	public void encryptPasswords(String key, EncryptionPassword encryptionPassword) throws Exception {
+		openPassword = AesEncryptor.encrypt(openPassword, key, encryptionPassword);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword, key, encryptionPassword);
 	}
 
 	/**

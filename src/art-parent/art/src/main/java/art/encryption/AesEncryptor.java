@@ -73,19 +73,7 @@ public class AesEncryptor {
 	 * @throws java.lang.Exception
 	 */
 	public static String encrypt(String clearText) throws Exception {
-		String key = getEncryptionKey();
-		return encrypt(clearText, key);
-	}
-
-	/**
-	 * Encrypts a string
-	 *
-	 * @param clearText the string to encrypt, not null
-	 * @param key the key to use. If null, the current key will be used
-	 * @return the encrypted string, null if clearText is null
-	 * @throws java.lang.Exception
-	 */
-	public static String encrypt(String clearText, String key) throws Exception {
+		String key = null;
 		EncryptionPassword encryptionPassword = null;
 		return encrypt(clearText, key, encryptionPassword);
 	}
@@ -95,7 +83,8 @@ public class AesEncryptor {
 	 *
 	 * @param clearText the string to encrypt, not null
 	 * @param key the key to use. If null, the current key will be used
-	 * @param encryptionPassword the encryption password configuration
+	 * @param encryptionPassword the encryption password configuration. If null,
+	 * the current configuration will be used.
 	 * @return the encrypted string, null if clearText is null
 	 * @throws java.lang.Exception
 	 */
@@ -106,11 +95,10 @@ public class AesEncryptor {
 			return null;
 		}
 
-		if (StringUtils.isEmpty(key)) {
-			key = getEncryptionKey();
-		}
+		String effectiveKey = getEffectiveKey(key);
+		EncryptionPassword effectiveEncryptionPassword = getEffectiveEncryptionPassword(encryptionPassword);
 
-		SecretKey secretKey = generateSecretKey(key, encryptionPassword);
+		SecretKey secretKey = generateSecretKey(effectiveKey, effectiveEncryptionPassword);
 
 		//use random IV that will be prepended to the cipher text
 		//so that the same string generates different cipher text
@@ -134,19 +122,7 @@ public class AesEncryptor {
 	 * @throws java.lang.Exception
 	 */
 	public static String decrypt(String cipherText) throws Exception {
-		String key = getEncryptionKey();
-		return decrypt(cipherText, key);
-	}
-
-	/**
-	 * Decrypts a string
-	 *
-	 * @param cipherText the encrypted string
-	 * @param key the key to use. If null, the current key will be used
-	 * @return the decrypted string, null if cipherText is null
-	 * @throws java.lang.Exception
-	 */
-	public static String decrypt(String cipherText, String key) throws Exception {
+		String key = null;
 		EncryptionPassword encryptionPassword = null;
 		return decrypt(cipherText, key, encryptionPassword);
 	}
@@ -155,8 +131,9 @@ public class AesEncryptor {
 	 * Decrypts a string
 	 *
 	 * @param cipherText the encrypted string
-	 * @param key the key to use. If null, the current key will be used
-	 * @param encryptionPassword the encryption password configuration
+	 * @param key the key to use. If null, the current key will be used.
+	 * @param encryptionPassword the encryption password configuration. If null,
+	 * the current configuration will be used.
 	 * @return the decrypted string, null if cipherText is null
 	 * @throws java.lang.Exception
 	 */
@@ -167,11 +144,10 @@ public class AesEncryptor {
 			return cipherText;
 		}
 
-		if (StringUtils.isEmpty(key)) {
-			key = getEncryptionKey();
-		}
+		String effectiveKey = getEffectiveKey(key);
+		EncryptionPassword effectiveEncryptionPassword = getEffectiveEncryptionPassword(encryptionPassword);
 
-		SecretKey secretKey = generateSecretKey(key, encryptionPassword);
+		SecretKey secretKey = generateSecretKey(effectiveKey, effectiveEncryptionPassword);
 
 		byte[] encryptedBytes = Base64.decodeBase64(cipherText);
 		byte[] IVBytes = ArrayUtils.subarray(encryptedBytes, 0, AES_CBC_IV_LENGTH_BYTES);
@@ -188,11 +164,11 @@ public class AesEncryptor {
 	}
 
 	/**
-	 * Returns the encryption/decryption key to use
+	 * Returns the current encryption/decryption key in use
 	 *
-	 * @return the encryption/decryption key to use
+	 * @return the current encryption/decryption key in use
 	 */
-	public static String getEncryptionKey() {
+	public static String getCurrentEncryptionKey() {
 		String key;
 
 		String settingsEncryptionKey = null;
@@ -209,6 +185,46 @@ public class AesEncryptor {
 		}
 
 		return key;
+	}
+
+	/**
+	 * Returns the effective encryption key to use
+	 *
+	 * @param key the passed key
+	 * @return the effective encryption key to use
+	 */
+	private static String getEffectiveKey(String key) {
+		String effectiveKey;
+
+		if (StringUtils.isEmpty(key)) {
+			effectiveKey = getCurrentEncryptionKey();
+		} else {
+			effectiveKey = key;
+		}
+
+		return effectiveKey;
+	}
+
+	/**
+	 * Returns the effective encryption password configuration to use
+	 *
+	 * @param encryptionPassword the passed configuration. If null, the current
+	 * configuration will be used.
+	 * @return the effective encryption password configuration to use
+	 */
+	private static EncryptionPassword getEffectiveEncryptionPassword(EncryptionPassword encryptionPassword) {
+		EncryptionPassword effectiveEncryptionPassword = null;
+
+		if (encryptionPassword == null) {
+			CustomSettings customSettings = Config.getCustomSettings();
+			if (customSettings != null) {
+				effectiveEncryptionPassword = customSettings.getEncryptionPassword();
+			}
+		} else {
+			effectiveEncryptionPassword = encryptionPassword;
+		}
+
+		return effectiveEncryptionPassword;
 	}
 
 	/**
@@ -398,10 +414,10 @@ public class AesEncryptor {
 				EncryptionPassword encryptionPassword = new EncryptionPassword();
 				encryptionPassword.setPassword(password);
 				encryptionPassword.setKeyLength(keyLength);
-				
-				if((commandLine.hasOption(KEY_OPTION) && StringUtils.isEmpty(key))
-						|| (commandLine.hasOption(PASSWORD_OPTION) && StringUtils.isEmpty(password))){
-					System.out.println("Using key: '" + getEncryptionKey() + "'");
+
+				if ((commandLine.hasOption(KEY_OPTION) && StringUtils.isEmpty(key))
+						|| (commandLine.hasOption(PASSWORD_OPTION) && StringUtils.isEmpty(password))) {
+					System.out.println("Using key: '" + getCurrentEncryptionKey() + "'");
 				}
 
 				if (commandLine.hasOption(ENCRYPT_OPTION)) {
