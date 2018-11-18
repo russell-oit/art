@@ -399,8 +399,9 @@ public class AesEncryptor {
 				encryptionPassword.setPassword(password);
 				encryptionPassword.setKeyLength(keyLength);
 				
-				if(commandLine.hasOption(KEY_OPTION) && StringUtils.isEmpty(key)){
-					System.out.println("Effective key: '" + getEncryptionKey() + "'");
+				if((commandLine.hasOption(KEY_OPTION) && StringUtils.isEmpty(key))
+						|| (commandLine.hasOption(PASSWORD_OPTION) && StringUtils.isEmpty(password))){
+					System.out.println("Using key: '" + getEncryptionKey() + "'");
 				}
 
 				if (commandLine.hasOption(ENCRYPT_OPTION)) {
