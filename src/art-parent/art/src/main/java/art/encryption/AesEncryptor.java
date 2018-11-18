@@ -398,6 +398,10 @@ public class AesEncryptor {
 				EncryptionPassword encryptionPassword = new EncryptionPassword();
 				encryptionPassword.setPassword(password);
 				encryptionPassword.setKeyLength(keyLength);
+				
+				if(commandLine.hasOption(KEY_OPTION) && StringUtils.isEmpty(key)){
+					System.out.println("Effective key: '" + getEncryptionKey() + "'");
+				}
 
 				if (commandLine.hasOption(ENCRYPT_OPTION)) {
 					String encryptedText = encrypt(text, key, encryptionPassword);
