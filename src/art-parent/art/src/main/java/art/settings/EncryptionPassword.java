@@ -30,7 +30,7 @@ public class EncryptionPassword implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String password;
-	private int keyLength = 128; //the length of the AES key to be produced
+	private int keyLength = 128;
 
 	/**
 	 * @return the password

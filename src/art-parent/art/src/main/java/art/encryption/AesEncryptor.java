@@ -281,7 +281,7 @@ public class AesEncryptor {
 
 		//https://stackoverflow.com/questions/992019/java-256-bit-aes-password-based-encryption
 		//https://github.com/martinwithaar/Encryptor4j/blob/master/src/main/java/org/encryptor4j/factory/AbsKeyFactory.java
-		final int ITERATION_COUNT = 65536;
+		final int ITERATION_COUNT = 10_000;
 		final String SALT = "(cFp((.]1x)60Re3w";
 		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 		KeySpec spec = new PBEKeySpec(password.toCharArray(), SALT.getBytes("UTF-8"), ITERATION_COUNT, keyLength);
