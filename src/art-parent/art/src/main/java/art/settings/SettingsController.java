@@ -182,7 +182,7 @@ public class SettingsController {
 			settingsService.updateSettings(settings, sessionUser);
 
 			SettingsHelper settingsHelper = new SettingsHelper();
-			settingsHelper.refreshSettings(settings, session, servletContext);
+			settingsHelper.refreshSettings(session, servletContext);
 
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");

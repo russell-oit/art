@@ -18,13 +18,11 @@
 package art.cache;
 
 import art.servlets.Config;
-import art.settings.Settings;
 import art.settings.SettingsHelper;
 import art.settings.SettingsService;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -102,15 +100,8 @@ public class CacheHelper {
 	public void clearSettings(HttpSession session) {
 		logger.debug("Entering clearSettings");
 
-		try {
-			Settings settings = settingsService.getSettings();
-			if (settings != null) {
-				SettingsHelper settingsHelper = new SettingsHelper();
-				settingsHelper.refreshSettings(settings, session, servletContext);
-			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-		}
+		SettingsHelper settingsHelper = new SettingsHelper();
+		settingsHelper.refreshSettings(session, servletContext);
 	}
 
 	/**
@@ -239,7 +230,7 @@ public class CacheHelper {
 	public void clearPermissions() {
 		logger.debug("Entering clearPermissions");
 	}
-	
+
 	/**
 	 * Clears the drilldowns cache
 	 */

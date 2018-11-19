@@ -302,7 +302,7 @@ public class ImportRecordsController {
 		settingsService.importSettings(settings, sessionUser, conn);
 
 		SettingsHelper settingsHelper = new SettingsHelper();
-		settingsHelper.refreshSettings(settings, session, servletContext);
+		settingsHelper.refreshSettings(session, servletContext);
 	}
 
 	/**
