@@ -674,7 +674,7 @@ public class Config extends HttpServlet {
 		if (StringUtils.isNotBlank(driver)) {
 			try {
 				Class.forName(driver).newInstance();
-				logger.info("Database Authentication JDBC Driver Registered: {}", driver);
+				logger.debug("Database Authentication JDBC Driver Registered: {}", driver);
 			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 				logger.error("Error while registering Database Authentication JDBC Driver: {}", driver, e);
 			}
