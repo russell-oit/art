@@ -28,14 +28,6 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" /> 
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
-<script type="text/javascript">
-	$(document).ajaxStart(function () {
-		$('#spinner').show();
-	}).ajaxStop(function () {
-		$('#spinner').hide();
-	});
-</script>
-
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/lodash-3.5.0/lodash.min.js"></script>
@@ -389,6 +381,12 @@
 		if (header) {
 			xhr.setRequestHeader(header, token);
 		}
+	});
+	
+	$(document).ajaxStart(function () {
+		$('#spinner').show();
+	}).ajaxStop(function () {
+		$('#spinner').hide();
 	});
 </script>
 
