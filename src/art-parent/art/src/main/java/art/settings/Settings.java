@@ -1201,4 +1201,17 @@ public class Settings implements Serializable {
 		smtpPassword = AesEncryptor.encrypt(smtpPassword, key, encryptionPassword);
 		ldapBindPassword = AesEncryptor.encrypt(ldapBindPassword, key, encryptionPassword);
 	}
+
+	/**
+	 * Returns <code>true</code> if all password fields are null
+	 *
+	 * @return <code>true</code> if all password fields are null
+	 */
+	public boolean hasNullPasswords() {
+		if (smtpPassword == null && ldapBindPassword == null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

@@ -360,5 +360,18 @@ public class SmtpServer implements Serializable {
 	public void encryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
 		password = AesEncryptor.encrypt(password, key, encryptionPassword);
 	}
+	
+	/**
+	 * Returns <code>true</code> if the password field is null
+	 *
+	 * @return <code>true</code> if the password field is null
+	 */
+	public boolean hasNullPassword() {
+		if (password == null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 }

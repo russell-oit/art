@@ -1558,6 +1558,19 @@ public class Report implements Serializable {
 	}
 
 	/**
+	 * Returns <code>true</code> if all password fields are null
+	 *
+	 * @return <code>true</code> if all password fields are null
+	 */
+	public boolean hasNullPasswords() {
+		if (openPassword == null && modifyPassword == null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Encrypts all passwords fields in the report including for datasources etc
 	 *
 	 * @throws java.lang.Exception

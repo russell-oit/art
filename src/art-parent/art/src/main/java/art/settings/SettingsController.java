@@ -298,41 +298,53 @@ public class SettingsController {
 
 			List<Datasource> datasources = datasourceService.getAllDatasources();
 			for (Datasource datasource : datasources) {
-				String originalPassword = datasource.getPassword();
-				datasource.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
-				datasourceService.updateDatasource(datasource, sessionUser, conn);
-				datasource.setPassword(originalPassword);
-				if (datasource.isActive()) {
-					DbConnections.createDatasourceConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+				if (!datasource.hasNullPassword()) {
+					String originalPassword = datasource.getPassword();
+					datasource.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
+					datasourceService.updateDatasource(datasource, sessionUser, conn);
+					datasource.setPassword(originalPassword);
+					if (datasource.isActive()) {
+						DbConnections.createDatasourceConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+					}
 				}
 			}
 
 			List<Destination> destinations = destinationService.getAllDestinations();
 			for (Destination destination : destinations) {
-				destination.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
-				destinationService.updateDestination(destination, sessionUser, conn);
+				if (!destination.hasNullPassword()) {
+					destination.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
+					destinationService.updateDestination(destination, sessionUser, conn);
+				}
 			}
 
 			List<Encryptor> encryptors = encryptorService.getAllEncryptors();
 			for (Encryptor encryptor : encryptors) {
-				encryptor.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
-				encryptorService.updateEncryptor(encryptor, sessionUser, conn);
+				if (!encryptor.hasNullPasswords()) {
+					encryptor.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
+					encryptorService.updateEncryptor(encryptor, sessionUser, conn);
+				}
 			}
 
 			List<Report> reports = reportService.getAllReports();
 			for (Report report : reports) {
-				report.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
-				reportService.updateReport(report, sessionUser, conn);
+				if (!report.hasNullPasswords()) {
+					report.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
+					reportService.updateReport(report, sessionUser, conn);
+				}
 			}
 
 			Settings settings = settingsService.getSettings();
-			settings.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
-			settingsService.updateSettings(settings, sessionUser, conn);
+			if (!settings.hasNullPasswords()) {
+				settings.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
+				settingsService.updateSettings(settings, sessionUser, conn);
+			}
 
 			List<SmtpServer> smtpServers = smtpServerService.getAllSmtpServers();
 			for (SmtpServer smtpServer : smtpServers) {
-				smtpServer.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
-				smtpServerService.updateSmtpServer(smtpServer, sessionUser, conn);
+				if (!smtpServer.hasNullPassword()) {
+					smtpServer.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
+					smtpServerService.updateSmtpServer(smtpServer, sessionUser, conn);
+				}
 			}
 
 			conn.commit();

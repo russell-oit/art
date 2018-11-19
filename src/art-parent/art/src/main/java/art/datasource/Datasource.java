@@ -211,4 +211,17 @@ public class Datasource extends DatasourceInfo implements Serializable {
 		password = AesEncryptor.encrypt(password, key, encryptionPassword);
 		passwordAlgorithm = "AES";
 	}
+
+	/**
+	 * Returns <code>true</code> if the password field is null
+	 *
+	 * @return <code>true</code> if the password field is null
+	 */
+	public boolean hasNullPassword() {
+		if (password == null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
