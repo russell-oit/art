@@ -27,16 +27,14 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" /> 
 
-<c:if test="${!ajax}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
-	<script type="text/javascript">
-		$(document).ajaxStart(function () {
-			$('#spinner').show();
-		}).ajaxStop(function () {
-			$('#spinner').hide();
-		});
-	</script>
-</c:if>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript">
+	$(document).ajaxStart(function () {
+		$('#spinner').show();
+	}).ajaxStop(function () {
+		$('#spinner').hide();
+	});
+</script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
