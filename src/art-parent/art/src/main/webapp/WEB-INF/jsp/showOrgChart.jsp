@@ -13,7 +13,7 @@
 
 <div id="${containerId}" style="text-align: center"></div>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome-4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/OrgChart-2.0.10/css/jquery.orgchart.min.css">
 
 <script src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>

@@ -23,7 +23,7 @@ Html page header fragment when displaying report output in a new page
 		<title>ART - ${title}</title>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.7.0/css/font-awesome.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
 
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">

@@ -56,7 +56,7 @@
 
 	<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 	
-	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.7.0/css/font-awesome.min.css">
 <!--	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>-->
 	
