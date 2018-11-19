@@ -56,7 +56,13 @@ Display a chart report
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
 
 <script type="text/javascript">
-	$('.tooltip-chart').tooltipster({
+	//https://github.com/iamceege/tooltipster/issues/527
+	//https://github.com/iamceege/tooltipster/issues/364
+	//https://stackoverflow.com/questions/7938259/all-but-not-jquery-selector
+	//https://api.jquery.com/not-selector/
+	//https://stackoverflow.com/questions/10687131/jquery-select-by-attribute-using-and-and-or-operators
+	//https://stackoverflow.com/questions/6166871/jquery-multiple-selectors-in-a-not
+	$('.tooltip-chart').not('.tooltipstered').tooltipster({
 		delay: 0,
 		animationDuration: 0
 	});
