@@ -105,7 +105,7 @@
 					offText: '${noText}'
 				});
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 			});
 

@@ -386,7 +386,7 @@
 		//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
 		dialog.on("shown.bs.modal", function () {
 			dialog.attr("id", "dialog-${outputDivId}");
-			dialog.find('#name').focus();
+			dialog.find('#name').trigger("focus");
 		});
 	});
 

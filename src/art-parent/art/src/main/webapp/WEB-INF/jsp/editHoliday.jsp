@@ -42,7 +42,7 @@
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 			});
 		</script>

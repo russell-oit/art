@@ -64,7 +64,7 @@ Edit a rule
 					delay: 100
 				});
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 			});
 		</script>

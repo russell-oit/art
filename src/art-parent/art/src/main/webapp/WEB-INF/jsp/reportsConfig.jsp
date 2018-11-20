@@ -145,7 +145,7 @@ Reports configuration page
 						});
 					},
 					initComplete: function () {
-						$('div.dataTables_filter input').focus();
+						$('div.dataTables_filter input').trigger("focus");
 					}
 				});
 

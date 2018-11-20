@@ -22,7 +22,8 @@ bootstrap js, jquery js, datatables css, datatables js
 <%-- any content can be specified here e.g.: --%>
 <t:genericPage title="ART - ${title}">
 	<jsp:attribute name="headContent">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.0.0.js"></script>
+		<script src="https://code.jquery.com/jquery-migrate-3.0.1.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>

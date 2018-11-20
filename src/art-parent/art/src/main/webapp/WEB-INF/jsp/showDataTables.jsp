@@ -193,7 +193,7 @@
 
 	function afterTableInitialization(settings) {
 		//https://datatables.net/forums/discussion/34352/passing-datatable-object-to-initcomplete-callback
-		$('div.dataTables_filter input').focus();
+		$('div.dataTables_filter input').trigger("focus");
 
 		if (showColumnFilters) {
 			var table = settings.oInstance.api();

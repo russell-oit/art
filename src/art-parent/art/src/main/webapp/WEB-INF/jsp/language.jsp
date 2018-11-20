@@ -27,7 +27,7 @@ Display application language selection page
 			$(document).ready(function() {
 				$('a[href*="language"]').parent().addClass('active');
 
-				$('#lang').focus();
+				$('#lang').trigger("focus");
 			});
 		</script>
 	</jsp:attribute>

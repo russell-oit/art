@@ -64,7 +64,7 @@ Reports page. Also main/home page
 						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: function () {
-						$('div.dataTables_filter input').focus();
+						$('div.dataTables_filter input').trigger("focus");
 					}
 				});
 				

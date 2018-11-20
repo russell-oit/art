@@ -82,7 +82,7 @@ Display edit user page
 					offText: '${noText}'
 				});
 
-				$('#username').focus();
+				$('#username').trigger("focus");
 
 			});
 		</script>

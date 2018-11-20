@@ -509,7 +509,7 @@
 					} else {
 						dialog.find("#overwrite").prop('checked', false);
 					}
-					dialog.find('#name').focus();
+					dialog.find('#name').trigger("focus");
 				});
 			});
 

@@ -23,7 +23,7 @@ Display change password page
 			$(document).ready(function () {
 				$('a[href*="password"]').parent().addClass('active');
 
-				$('#newPassword1').focus();
+				$('#newPassword1').trigger("focus");
 			});
 		</script>
 	</jsp:attribute>

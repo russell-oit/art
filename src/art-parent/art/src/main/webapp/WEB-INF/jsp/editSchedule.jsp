@@ -101,7 +101,7 @@ Edit schedule page
 					delay: 100
 				});
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 				$('#describeSchedule').click(function () {
 					var second = $('#second').val();

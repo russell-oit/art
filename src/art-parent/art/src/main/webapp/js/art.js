@@ -395,7 +395,7 @@ function isMobile() {
  * Actions to perform when datatables completes initializing a table
  */
 function datatablesInitComplete() {
-	$('div.dataTables_filter input').focus();
+	$('div.dataTables_filter input').trigger("focus");
 
 //	$('.dataTables_length select').addClass('selectpicker');
 ////	$('.dataTables_length select').attr({'data-toggle': 'dropdown', 'data-hover': 'dropdown'});

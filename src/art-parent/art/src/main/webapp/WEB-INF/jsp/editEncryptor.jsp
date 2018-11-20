@@ -78,7 +78,7 @@
 
 				toggleVisibleFields(); //show/hide on page load
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 			});
 		</script>

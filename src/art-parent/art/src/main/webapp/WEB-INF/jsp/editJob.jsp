@@ -196,7 +196,7 @@
 				toggleVisibleFields(); //show/hide on page load
 				populateOutputFormatField();
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 				$('#describeSchedule').click(function () {
 					var second = $('#scheduleSecond').val();

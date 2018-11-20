@@ -122,7 +122,7 @@
 					offText: '${noText}'
 				});
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 				$("#destinationType").change(function () {
 					toggleVisibleFields();

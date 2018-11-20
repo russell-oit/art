@@ -152,7 +152,7 @@ Edit report page
 
 				toggleVisibleFields(); //show/hide on page load
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 				var maxFileSizeBytes = ${maxFileSizeBytes};
 				if (maxFileSizeBytes < 0) {

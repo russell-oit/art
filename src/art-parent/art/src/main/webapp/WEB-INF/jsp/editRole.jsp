@@ -71,7 +71,7 @@
 					delay: 100
 				});
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 			});
 		</script>
