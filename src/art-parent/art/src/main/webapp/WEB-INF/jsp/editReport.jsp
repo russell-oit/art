@@ -244,7 +244,7 @@ Edit report page
 					}
 				});
 
-				$("#testReport").click(function () {
+				$("#testReport").on("click", function () {
 					//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
 					tinymce.triggerSave();
 
@@ -267,7 +267,7 @@ Edit report page
 					});
 				});
 
-				$("#testReportData").click(function () {
+				$("#testReportData").on("click", function () {
 					//disable buttons
 					$('.action').prop('disabled', true);
 

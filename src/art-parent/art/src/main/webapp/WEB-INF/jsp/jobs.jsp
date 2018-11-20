@@ -218,7 +218,7 @@ Display user jobs and jobs configuration
 					$('#runLaterModal').modal('show');
 				});
 
-				$("#runLaterSubmit").click(function (e) {
+				$("#runLaterSubmit").on("click", function (e) {
 					e.preventDefault();
 
 					var recordName = $('#runLaterJobName').val();
@@ -289,7 +289,7 @@ Display user jobs and jobs configuration
 					});
 				});
 
-				$('#deleteRecords').click(function () {
+				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -333,7 +333,7 @@ Display user jobs and jobs configuration
 					}
 				});
 
-				$('#editRecords').click(function () {
+				$('#editRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -346,7 +346,7 @@ Display user jobs and jobs configuration
 					}
 				});
 
-				$('#runSingle').click(function () {
+				$('#runSingle').on("click", function () {
 					var item = $(this);
 					var recordName = escapeHtmlContent(item.data("name"));
 					var recordId = item.data("id");
@@ -367,7 +367,7 @@ Display user jobs and jobs configuration
 					});
 				});
 
-				$('#runLaterSingle').click(function () {
+				$('#runLaterSingle').on("click", function () {
 					var item = $(this);
 					var recordName = escapeHtmlContent(item.data("name"));
 					var recordId = item.data("id");

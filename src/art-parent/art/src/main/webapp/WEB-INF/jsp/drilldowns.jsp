@@ -145,7 +145,7 @@ Display report drilldowns
 
 				var table = oTable.api();
 
-				$('#deleteRecords').click(function () {
+				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {

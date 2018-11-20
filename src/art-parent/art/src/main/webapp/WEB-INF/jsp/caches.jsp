@@ -65,7 +65,7 @@ Page to allow manual clearing of caches
 					});
 				});
 
-				$('#clearAll').click(function () {
+				$('#clearAll').on("click", function () {
 					$.ajax({
 						type: 'POST',
 						url: '${pageContext.request.contextPath}/clearAllCaches',

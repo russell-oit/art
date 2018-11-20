@@ -910,13 +910,13 @@ function initConfigPage(tbl, pageLength, showAllRowsText, contextPath,
  */
 function addSelectDeselectAllHandler() {
 	//handle select all/deselect all
-	$('.select-all').click(function (e) {
+	$('.select-all').on("click", function (e) {
 		//http://fuelyourcoding.com/jquery-events-stop-misusing-return-false/
 		e.preventDefault();
 		var item = $(this).data('item');
 		$(item).multiSelect('select_all');
 	});
-	$('.deselect-all').click(function (e) {
+	$('.deselect-all').on("click", function (e) {
 		e.preventDefault();
 		var item = $(this).data('item');
 		$(item).multiSelect('deselect_all');

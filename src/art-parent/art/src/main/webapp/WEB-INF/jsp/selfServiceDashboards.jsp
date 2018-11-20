@@ -151,7 +151,7 @@
 					}
 				}
 
-				$("#newDashboard").click(function () {
+				$("#newDashboard").on("click", function () {
 					resetAll();
 				});
 

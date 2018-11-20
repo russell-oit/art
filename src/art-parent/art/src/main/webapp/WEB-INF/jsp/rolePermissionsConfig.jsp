@@ -121,20 +121,20 @@
 				}); //end ajax
 			}
 
-			$('#select-all-roles').click(function() {
+			$('#select-all-roles').on("click", function() {
 				$('#roles').multiSelect('select_all');
 				return false;
 			});
-			$('#deselect-all-roles').click(function() {
+			$('#deselect-all-roles').on("click", function() {
 				$('#roles').multiSelect('deselect_all');
 				return false;
 			});
 
-			$('#select-all-permissions').click(function() {
+			$('#select-all-permissions').on("click", function() {
 				$('#permissions').multiSelect('select_all');
 				return false;
 			});
-			$('#deselect-all-permissions').click(function() {
+			$('#deselect-all-permissions').on("click", function() {
 				$('#permissions').multiSelect('deselect_all');
 				return false;
 			});

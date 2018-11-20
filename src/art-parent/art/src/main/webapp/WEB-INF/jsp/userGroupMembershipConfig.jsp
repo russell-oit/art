@@ -123,20 +123,20 @@ User group membership configuration
 				}); //end ajax
 			}
 
-			$('#select-all-users').click(function() {
+			$('#select-all-users').on("click", function() {
 				$('#users').multiSelect('select_all');
 				return false;
 			});
-			$('#deselect-all-users').click(function() {
+			$('#deselect-all-users').on("click", function() {
 				$('#users').multiSelect('deselect_all');
 				return false;
 			});
 
-			$('#select-all-userGroups').click(function() {
+			$('#select-all-userGroups').on("click", function() {
 				$('#userGroups').multiSelect('select_all');
 				return false;
 			});
-			$('#deselect-all-userGroups').click(function() {
+			$('#deselect-all-userGroups').on("click", function() {
 				$('#userGroups').multiSelect('deselect_all');
 				return false;
 			});

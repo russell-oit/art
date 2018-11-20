@@ -76,7 +76,7 @@ Report groups configuration page
 
 				var table = oTable.api();
 
-				$('#deleteRecords').click(function () {
+				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -122,7 +122,7 @@ Report groups configuration page
 					}
 				});
 
-				$('#exportRecords').click(function () {
+				$('#exportRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {

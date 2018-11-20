@@ -198,7 +198,7 @@
 
 				$('#name').trigger("focus");
 
-				$('#describeSchedule').click(function () {
+				$('#describeSchedule').on("click", function () {
 					var second = $('#scheduleSecond').val();
 					var minute = $('#scheduleMinute').val();
 					var hour = $('#scheduleHour').val();
@@ -228,7 +228,7 @@
 					});
 				});
 
-				$('#getSchedule').click(function () {
+				$('#getSchedule').on("click", function () {
 					var recordId = $('#schedules option:selected').val();
 
 					$.ajax({

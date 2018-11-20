@@ -24,13 +24,13 @@ Display section to allow selecting of report parameters and initiate running of 
 
 <script type="text/javascript">
 	$(document).ready(function () {
-		$("#schedule").click(function (e) {
+		$("#schedule").on("click", function (e) {
 			e.preventDefault();
 			var url = "${pageContext.request.contextPath}/addJob";
 			$('#parametersForm').attr('action', url).submit();
 		});
 
-		$("#emailReportSubmit").click(function (e) {
+		$("#emailReportSubmit").on("click", function (e) {
 			e.preventDefault();
 
 			//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
@@ -57,14 +57,14 @@ Display section to allow selecting of report parameters and initiate running of 
 			});
 		});
 
-		$("#runInNewPage").click(function () {
+		$("#runInNewPage").on("click", function () {
 			$("#showInline").val("false");
 			//need to explicitly set. if click on schedule, then back then run in new page - goes to schedule again
 			var url = "${pageContext.request.contextPath}/runReport";
 			$('#parametersForm').attr('action', url).submit();
 		});
 
-		$("#runInline").click(function (e) {
+		$("#runInline").on("click", function (e) {
 			e.preventDefault();
 
 			$("#showInline").val("true");
@@ -88,7 +88,7 @@ Display section to allow selecting of report parameters and initiate running of 
 			});
 		});
 
-		$("#saveParameterSelection").click(function (e) {
+		$("#saveParameterSelection").on("click", function (e) {
 			e.preventDefault();
 
 			$.ajax({
@@ -109,7 +109,7 @@ Display section to allow selecting of report parameters and initiate running of 
 			});
 		});
 
-		$("#clearSavedParameterSelection").click(function (e) {
+		$("#clearSavedParameterSelection").on("click", function (e) {
 			e.preventDefault();
 
 			var reportId = parseInt($('input[name="reportId"]').val(), 10);

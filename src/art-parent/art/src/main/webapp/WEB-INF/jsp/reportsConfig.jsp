@@ -222,7 +222,7 @@ Reports configuration page
 					}); //end bootbox confirm
 				});
 
-				$('#deleteRecords').click(function () {
+				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -268,7 +268,7 @@ Reports configuration page
 					}
 				});
 
-				$('#editRecords').click(function () {
+				$('#editRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -281,7 +281,7 @@ Reports configuration page
 					}
 				});
 
-				$('#exportRecords').click(function () {
+				$('#exportRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -294,7 +294,7 @@ Reports configuration page
 					}
 				});
 
-				$("#refreshRecords").click(function () {
+				$("#refreshRecords").on("click", function () {
 					table.ajax.reload();
 				});
 

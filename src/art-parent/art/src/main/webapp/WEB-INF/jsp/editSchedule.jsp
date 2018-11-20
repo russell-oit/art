@@ -103,7 +103,7 @@ Edit schedule page
 
 				$('#name').trigger("focus");
 
-				$('#describeSchedule').click(function () {
+				$('#describeSchedule').on("click", function () {
 					var second = $('#second').val();
 					var minute = $('#minute').val();
 					var hour = $('#hour').val();

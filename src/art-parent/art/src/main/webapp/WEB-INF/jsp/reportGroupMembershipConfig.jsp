@@ -121,20 +121,20 @@
 				}); //end ajax
 			}
 
-			$('#select-all-reports').click(function() {
+			$('#select-all-reports').on("click", function() {
 				$('#reports').multiSelect('select_all');
 				return false;
 			});
-			$('#deselect-all-reports').click(function() {
+			$('#deselect-all-reports').on("click", function() {
 				$('#reports').multiSelect('deselect_all');
 				return false;
 			});
 
-			$('#select-all-reportGroups').click(function() {
+			$('#select-all-reportGroups').on("click", function() {
 				$('#reportGroups').multiSelect('select_all');
 				return false;
 			});
-			$('#deselect-all-reportGroups').click(function() {
+			$('#deselect-all-reportGroups').on("click", function() {
 				$('#reportGroups').multiSelect('deselect_all');
 				return false;
 			});

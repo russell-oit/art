@@ -84,7 +84,7 @@ Settings configuration page
 					delay: 100
 				});
 
-				$('#updateEncryptionKey').click(function () {
+				$('#updateEncryptionKey').on("click", function () {
 					bootbox.confirm({
 						message: "${updateEncryptionKeyText}",
 						buttons: {
