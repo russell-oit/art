@@ -47,7 +47,7 @@ public class HtmlFancyOutput extends StandardOutput {
 		}
 
 		if (!pageHeaderLoaded) {
-			out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
+			out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.7/css/bootstrap.min.css'>");
 		}
 	}
 
