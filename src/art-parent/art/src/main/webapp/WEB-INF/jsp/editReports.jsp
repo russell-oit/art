@@ -58,25 +58,25 @@
 					offText: '${noText}'
 				});
 
-				$('#activeUnchanged').change(function () {
+				$('#activeUnchanged').on("change", function () {
 					toggleActiveEnabled();
 				});
 
 				toggleActiveEnabled();
 
-				$('#hiddenUnchanged').change(function () {
+				$('#hiddenUnchanged').on("change", function () {
 					toggleHiddenEnabled();
 				});
 
 				toggleHiddenEnabled();
 
-				$('#reportGroupsUnchanged').change(function () {
+				$('#reportGroupsUnchanged').on("change", function () {
 					toggleReportGroupsEnabled();
 				});
 
 				toggleReportGroupsEnabled();
 
-				$('#omitTitleRowUnchanged').change(function () {
+				$('#omitTitleRowUnchanged').on("change", function () {
 					toggleOmitTitleRowEnabled();
 				});
 

@@ -64,25 +64,25 @@
 					offText: '${noText}'
 				});
 
-				$('#activeUnchanged').change(function () {
+				$('#activeUnchanged').on("change", function () {
 					toggleActiveEnabled();
 				});
 
 				toggleActiveEnabled();
 
-				$('#canChangePasswordUnchanged').change(function () {
+				$('#canChangePasswordUnchanged').on("change", function () {
 					toggleCanChangePasswordEnabled();
 				});
 
 				toggleCanChangePasswordEnabled();
 
-				$('#accessLevelUnchanged').change(function () {
+				$('#accessLevelUnchanged').on("change", function () {
 					toggleAccessLevelEnabled();
 				});
 
 				toggleAccessLevelEnabled();
 
-				$('#userGroupsUnchanged').change(function () {
+				$('#userGroupsUnchanged').on("change", function () {
 					toggleUserGroupsEnabled();
 				});
 

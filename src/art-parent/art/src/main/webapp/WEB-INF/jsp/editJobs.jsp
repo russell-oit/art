@@ -50,7 +50,7 @@
 					offText: '${noText}'
 				});
 
-				$('#activeUnchanged').change(function () {
+				$('#activeUnchanged').on("change", function () {
 					toggleActiveEnabled();
 				});
 

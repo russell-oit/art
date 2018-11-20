@@ -146,7 +146,7 @@ Edit report page
 					offText: '${noText}'
 				});
 
-				$("#reportTypeId").change(function () {
+				$("#reportTypeId").on("change", function () {
 					toggleVisibleFields();
 				});
 

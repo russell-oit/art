@@ -113,7 +113,7 @@ Edit datasource page
 					offText: '${noText}'
 				});
 
-				$("#datasourceType").change(function () {
+				$("#datasourceType").on("change", function () {
 					toggleVisibleFields();
 				});
 

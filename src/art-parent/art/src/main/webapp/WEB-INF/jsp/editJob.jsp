@@ -188,7 +188,7 @@
 					offText: '${noText}'
 				});
 
-				$("#jobType").change(function () {
+				$("#jobType").on("change", function () {
 					toggleVisibleFields();
 					populateOutputFormatField();
 				});

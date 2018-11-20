@@ -72,7 +72,7 @@
 					offText: '${noText}'
 				});
 
-				$("#encryptorType").change(function () {
+				$("#encryptorType").on("change", function () {
 					toggleVisibleFields();
 				});
 

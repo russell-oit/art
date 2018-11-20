@@ -46,7 +46,7 @@ Settings configuration page
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
-//				$('#useSmtpAuthentication').change(function () {
+//				$('#useSmtpAuthentication').on("change", function () {
 //					toggleSmtpUsernameEnabled();
 //				});
 
@@ -54,7 +54,7 @@ Settings configuration page
 					toggleSmtpUsernameEnabled();
 				});
 
-//				$('#useLdapAnonymousBind').change(function () {
+//				$('#useLdapAnonymousBind').on("change", function () {
 //					toggleLdapBindDnEnabled();
 //				});
 

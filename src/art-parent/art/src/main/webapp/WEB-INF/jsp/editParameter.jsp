@@ -94,7 +94,7 @@ Edit parameter definition
 					options.val(jsonEditor.getSession().getValue());
 				});
 
-				$("#dataType").change(function () {
+				$("#dataType").on("change", function () {
 					toggleVisibleFields();
 				});
 

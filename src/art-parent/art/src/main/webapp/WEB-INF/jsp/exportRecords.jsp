@@ -50,7 +50,7 @@
 					delay: 100
 				});
 
-				$("input[name='location']").change(function () {
+				$("input[name='location']").on("change", function () {
 					toggleVisibleFields();
 				});
 

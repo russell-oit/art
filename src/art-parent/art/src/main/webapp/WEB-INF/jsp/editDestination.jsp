@@ -124,7 +124,7 @@
 
 				$('#name').trigger("focus");
 
-				$("#destinationType").change(function () {
+				$("#destinationType").on("change", function () {
 					toggleVisibleFields();
 				});
 

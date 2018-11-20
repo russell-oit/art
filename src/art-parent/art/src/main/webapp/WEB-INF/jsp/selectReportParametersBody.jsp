@@ -137,7 +137,7 @@ Display section to allow selecting of report parameters and initiate running of 
 		});
 
 
-		$("#reportFormat").change(function () {
+		$("#reportFormat").on("change", function () {
 			toggleVisibleButtons();
 		});
 
