@@ -63,7 +63,7 @@
 			},
 			initComplete: function () {
 				if (!isMobile()) {
-					$('div.dataTables_filter input').focus();
+					$('div.dataTables_filter input').trigger("focus");
 				}
 			}
 		};
