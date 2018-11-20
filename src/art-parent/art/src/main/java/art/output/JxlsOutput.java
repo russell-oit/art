@@ -146,8 +146,8 @@ public class JxlsOutput {
 	 * @throws java.security.GeneralSecurityException
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
-			String outputFileName)
-			throws SQLException, IOException, InvalidFormatException, GeneralSecurityException {
+			String outputFileName) throws SQLException, IOException,
+			InvalidFormatException, GeneralSecurityException {
 
 		logger.debug("Entering generateReport");
 
