@@ -55,14 +55,14 @@ Access rights configuration
 						that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
 								.on('keydown', function (e) {
 									if (e.which === 40) {
-										that.$selectableUl.focus();
+										that.$selectableUl.trigger("focus");
 										return false;
 									}
 								});
 						that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
 								.on('keydown', function (e) {
 									if (e.which === 40) {
-										that.$selectionUl.focus();
+										that.$selectionUl.trigger("focus");
 										return false;
 									}
 								});
