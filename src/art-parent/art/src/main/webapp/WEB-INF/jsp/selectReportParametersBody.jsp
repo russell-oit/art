@@ -143,15 +143,6 @@ Display section to allow selecting of report parameters and initiate running of 
 
 		toggleVisibleButtons(); //show/hide on page load
 
-		//Enable Bootstrap-Select
-//		$('.selectpicker').selectpicker();
-
-		//activate dropdown-hover. to make bootstrap-select open on hover
-		//must come after bootstrap-select initialization
-//		$('button.dropdown-toggle').dropdownHover({
-//			delay: 100
-//		});
-
 		//{container: 'body'} needed if tooltips shown on input-group element or button
 		$("[data-toggle='tooltip']").tooltip({container: 'body'});
 

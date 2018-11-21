@@ -52,12 +52,6 @@
 					deselectAllText: '${deselectAllText}'
 				});
 
-//				//activate dropdown-hover. to make bootstrap-select open on hover
-//				//must come after bootstrap-select initialization
-//				$('button.dropdown-toggle').dropdownHover({
-//					delay: 100
-//				});
-
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
