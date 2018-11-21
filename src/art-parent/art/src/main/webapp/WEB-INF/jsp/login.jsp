@@ -34,8 +34,7 @@ Login page
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script src="https://code.jquery.com/jquery-3.0.0.js"></script>
-		<script src="https://code.jquery.com/jquery-migrate-3.0.1.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
