@@ -16,9 +16,7 @@ Display application language selection page
 
 <spring:message code="page.title.language" var="pageTitle"/>
 
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 

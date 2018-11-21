@@ -19,9 +19,7 @@ Login page
 
 <spring:message code="page.title.login" var="pageTitle"/>
 
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
 <t:genericPage title="ART - ${pageTitle}">
 	<jsp:attribute name="metaContent">
@@ -33,11 +31,31 @@ Login page
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</jsp:attribute>
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
-		
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-dropdown-hover-4.2.0/jquery.bootstrap-dropdown-hover.min.js"></script>
+
 		<script type="text/javascript">
 			$(document).ready(function () {
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneResultsText: '${noResultsMatchText}'
+				});
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				$('button.dropdown-toggle').bootstrapDropdownHover({
+					hideTimeout: 100
+				});
+
 				$('#username').trigger("focus");
 			});
 		</script>
@@ -62,7 +80,7 @@ Login page
 								<spring:message code="login.message.invalidAutoLoginUser" arguments="${autoLoginUser}"/>
 							</div>
 						</c:if>
-								 
+
 						<c:if test="${invalidCasLogin != null}">
 							<div class="alert alert-danger alert-dismissable">
 								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
@@ -109,7 +127,7 @@ Login page
 									<spring:message code="login.label.domain"/>
 								</label>
 								<div class="col-md-10">
-									<select name="windowsDomain" id="windowsDomain" class="form-control">
+									<select name="windowsDomain" id="windowsDomain" class="form-control selectpicker">
 										<c:forTokens var="domain" items='${domains}' delims=",">
 											<option value="${fn:escapeXml(domain)}"
 													${domain == selectedDomain ? "selected" : ""}>
@@ -145,7 +163,7 @@ Login page
 							<div class="col-md-10">
 								<%-- select must have name of "lang" as per configuration in dispatcher-servlet.xml --%>
 								<c:set var="localeCode" value="${pageContext.response.locale}"/>
-								<select name="lang" id="lang" class="form-control">
+								<select name="lang" id="lang" class="form-control selectpicker">
 									<c:forEach var="language" items="${languages}">
 										<option value="${encode:forHtmlAttribute(language.value)}" ${localeCode == language.value ? "selected" : ""}>${encode:forHtmlContent(language.key)}</option>
 									</c:forEach>
