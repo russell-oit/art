@@ -149,3 +149,8 @@ body {
   margin: 10px 0 20px;
   border-bottom: 1px solid #eee;
 }
+
+/* add bottom margin to datatables length select when using bootstrap-select */
+.dataTables_length {
+	margin-bottom: 10px;
+}

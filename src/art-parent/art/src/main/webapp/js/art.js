@@ -395,21 +395,19 @@ function isMobile() {
  * Actions to perform when datatables completes initializing a table
  */
 function datatablesInitComplete() {
-	$('div.dataTables_filter input').trigger("focus");
-
-//	$('.dataTables_length select').addClass('selectpicker');
-////	$('.dataTables_length select').attr({'data-toggle': 'dropdown', 'data-hover': 'dropdown'});
-////	$('.dataTables_length select').attr('data-hover','dropdown');
-//
-//	//Enable Bootstrap-Select
-//	$('.selectpicker').selectpicker({
-//		iconBase: 'fa',
-//		tickIcon: 'fa-check-square'
-//	});
-//	
-//	$('button.dropdown-toggle').dropdownHover({
-//		delay: 100
-//	});
+	if (!isMobile()) {
+		$('div.dataTables_filter input').trigger("focus");
+	}
+	
+	//https://datatables.net/forums/discussion/49138/how-to-put-space-between-buttons-and-show-x-entries
+	//https://developer.snapappointments.com/bootstrap-select/examples/#width
+	$('.dataTables_length select').selectpicker({
+		width: '100px'
+	});
+	
+	$('button.dropdown-toggle').bootstrapDropdownHover({
+		hideTimeout: 100
+	});
 }
 
 /**

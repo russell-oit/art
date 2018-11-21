@@ -46,6 +46,9 @@
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.1.4/papaparse.min.js"></script>
 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+
 <script type="text/javascript">
 	//https://stackoverflow.com/questions/27380390/jquery-datatables-format-numbers
 	//https://softwareengineering.stackexchange.com/questions/160732/function-declaration-as-var-instead-of-function
@@ -192,8 +195,9 @@
 	}
 
 	function afterTableInitialization(settings) {
+		//https://datatables.net/reference/option/initComplete
 		//https://datatables.net/forums/discussion/34352/passing-datatable-object-to-initcomplete-callback
-		$('div.dataTables_filter input').trigger("focus");
+		datatablesInitComplete();
 
 		if (showColumnFilters) {
 			var table = settings.oInstance.api();
