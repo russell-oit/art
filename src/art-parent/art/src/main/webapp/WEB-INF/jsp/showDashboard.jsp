@@ -28,13 +28,10 @@
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-dropdown-hover-4.2.0/jquery.bootstrap-dropdown-hover.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		
 	</head>
 	<body>
 		<div id="wrap">
@@ -73,5 +70,14 @@
 		</div>
 
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
+		
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-dropdown-hover-4.2.0/jquery.bootstrap-dropdown-hover.min.js"></script>
+		<script>
+			$(function () {
+				$('[data-toggle="dropdown"]').bootstrapDropdownHover({
+					hideTimeout: 100
+				});
+			});
+		</script>
 	</body>
 </html>
