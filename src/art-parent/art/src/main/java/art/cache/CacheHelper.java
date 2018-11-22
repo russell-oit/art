@@ -19,7 +19,6 @@ package art.cache;
 
 import art.servlets.Config;
 import art.settings.SettingsHelper;
-import art.settings.SettingsService;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -47,9 +46,6 @@ public class CacheHelper {
 
 	@Autowired
 	private ServletContext servletContext;
-
-	@Autowired
-	private SettingsService settingsService;
 
 	/**
 	 * Clears mondrian caches used by jpivot
