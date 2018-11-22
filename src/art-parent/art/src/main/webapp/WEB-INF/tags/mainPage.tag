@@ -58,7 +58,7 @@ bootstrap js, jquery js, datatables css, datatables js
 			});
 
 			$(function () {
-				$('[data-toggle="dropdown"]').bootstrapDropdownHover({
+				$('[data-hover="dropdown"]').bootstrapDropdownHover({
 					hideTimeout: 100
 				});
 			});
