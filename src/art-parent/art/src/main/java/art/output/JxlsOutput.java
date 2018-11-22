@@ -326,6 +326,8 @@ public class JxlsOutput {
 //					xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
 //				}
 				xlsArea.processFormulas();
+				//https://bitbucket.org/leonate/jxls/issues/123/error-with-xml-config-and-multiple-sheets
+				transformer.resetTargetCellRefs();
 			}
 			transformer.write();
 		}
