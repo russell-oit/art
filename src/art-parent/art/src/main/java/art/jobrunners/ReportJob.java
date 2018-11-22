@@ -72,14 +72,6 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
-import com.backblaze.b2.client.B2StorageClient;
-import com.backblaze.b2.client.contentSources.B2ContentSource;
-import com.backblaze.b2.client.contentSources.B2ContentTypes;
-import com.backblaze.b2.client.contentSources.B2FileContentSource;
-import com.backblaze.b2.client.exceptions.B2Exception;
-import com.backblaze.b2.client.structures.B2FileVersion;
-import com.backblaze.b2.client.structures.B2UploadFileRequest;
-import com.backblaze.b2.client.webApiHttpClient.B2StorageHttpClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sardine.Sardine;
 import com.github.sardine.SardineFactory;
@@ -561,47 +553,14 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Copies the generated file to backblaze b2 storage using the b2 sdk
+	 * Copies the generated file to backblaze b2 storage
 	 *
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
 	private void sendFileToB2(Destination destination, String fullLocalFileName) {
-		logger.debug("Entering sendFileToB2: destination={},"
-				+ " fullLocalFileName='{}'", destination, fullLocalFileName);
-
-		try {
-			String accountId = destination.getUser();
-			String applicationKey = destination.getPassword();
-
-			//https://github.com/Backblaze/b2-sdk-java/blob/master/httpclient/src/main/java/com/backblaze/b2/client/webApiHttpClient/B2StorageHttpClientBuilder.java
-			//https://stackoverflow.com/questions/14664156/real-world-user-agents-what-are-they-how-to-set-them-java
-			//https://stackoverflow.com/questions/2529682/setting-user-agent-of-a-java-urlconnection
-			final String USER_AGENT = "art";
-
-			try (B2StorageClient client = B2StorageHttpClientBuilder.builder(accountId,
-					applicationKey, USER_AGENT).build();) {
-
-				String destinationSubDirectory = destination.getSubDirectory();
-				String jobSubDirectory = job.getSubDirectory();
-
-				String directorySeparator = "/";
-				String finalPath = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
-
-				String remoteFileName = finalPath + fileName;
-				File localFile = new File(fullLocalFileName);
-				final B2ContentSource source = B2FileContentSource.build(localFile);
-				String bucketId = destination.getPath();
-
-				B2UploadFileRequest request = B2UploadFileRequest
-						.builder(bucketId, remoteFileName, B2ContentTypes.B2_AUTO, source)
-						.build();
-				B2FileVersion fileVersion = client.uploadSmallFile(request);
-				logger.debug("Uploaded '{}'. fileVersion={}. Job Id {}", remoteFileName, fileVersion, jobId);
-			}
-		} catch (B2Exception ex) {
-			logErrorAndSetDetails(ex);
-		}
+		String provider = "b2";
+		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
 
 	/**
@@ -928,7 +887,7 @@ public class ReportJob implements org.quartz.Job {
 	private void sendFileToBlobStorage(String provider, Destination destination,
 			String fullLocalFileName) {
 
-		logger.debug("Entering sendFileToS3: provider='{}' destination={},"
+		logger.debug("Entering sendFileToBlobStorage: provider='{}' destination={},"
 				+ " fullLocalFileName='{}'", provider, destination, fullLocalFileName);
 
 		//https://www.ashishpaliwal.com/blog/2012/04/playing-with-jclouds-transient-blobstore/
@@ -1006,11 +965,12 @@ public class ReportJob implements org.quartz.Job {
 			ByteSource payload = Files.asByteSource(localFile);
 			PayloadBlobBuilder blobBuilder = blobStore.blobBuilder(remoteFileName)
 					.payload(payload)
+					.contentType(mimeType)
 					.contentLength(payload.size());
 
 			if (!StringUtils.equals(provider, "b2")) {
-				blobBuilder.contentDisposition(fileName)
-						.contentType(mimeType);
+				//Content-Disposition header is not supported or allowed by b2 storage service
+				blobBuilder.contentDisposition(fileName);
 			}
 
 			Blob blob = blobBuilder.build();
@@ -1020,7 +980,12 @@ public class ReportJob implements org.quartz.Job {
 			// Upload the Blob
 			//https://stackoverflow.com/questions/49078140/jclouds-multipart-upload-to-google-cloud-storage-failing-with-400-bad-request
 			//https://issues.apache.org/jira/browse/JCLOUDS-1389
-			String eTag = blobStore.putBlob(containerName, blob, multipart());
+			String eTag;
+			if (StringUtils.equals(provider, "b2")) {
+				eTag = blobStore.putBlob(containerName, blob);
+			} else {
+				eTag = blobStore.putBlob(containerName, blob, multipart());
+			}
 			logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", fileName, eTag, jobId);
 		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);

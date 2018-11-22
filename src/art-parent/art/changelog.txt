@@ -1,7 +1,7 @@
 ART 4.0
 * Fix for legends always off for charts in dashboards
 * Allow querying from InfluxDB database
-* Replaced synapticloop b2 api with backblaze b2 sdk
+* Replaced synapticloop b2 api with jclouds. B2 destination bucket ids need to be replaced with bucket names.
 * Fix for gridstack dashboard not showing properly inline in chrome
 * Updated jdbc drivers and other libraries
 * Requires Java 8
