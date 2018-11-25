@@ -25,23 +25,7 @@ Display application language selection page
 			$(document).ready(function () {
 				$('a[href*="language"]').parent().addClass('active');
 
-				//Enable Bootstrap-Select
-				$('.selectpicker').selectpicker({
-					liveSearch: true,
-					noneResultsText: '${noResultsMatchText}'
-				});
-				
-				//activate dropdown-hover. to make bootstrap-select open on hover
-				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').bootstrapDropdownHover({
-					hideTimeout: 100
-				});
-
-				//https://github.com/snapappointments/bootstrap-select/issues/1212
-				//https://github.com/snapappointments/bootstrap-select/issues/1692
-				$('#lang').data('selectpicker').$button.focus();
-
-				//$('#lang').trigger("focus");
+				$('#lang').trigger("focus");
 			});
 		</script>
 	</jsp:attribute>
@@ -57,7 +41,7 @@ Display application language selection page
 					<div class="col-md-10">
 						<%-- select must have name of "lang" as per configuration in dispatcher-servlet.xml --%>
 						<c:set var="localeCode" value="${pageContext.response.locale}"/>
-						<select name="lang" id="lang" class="form-control selectpicker">
+						<select name="lang" id="lang" class="form-control">
 							<c:forEach var="language" items="${languages}">
 								<option value="${encode:forHtmlAttribute(language.value)}" ${localeCode == language.value ? "selected" : ""}>${encode:forHtmlContent(language.key)}</option>
 							</c:forEach>
