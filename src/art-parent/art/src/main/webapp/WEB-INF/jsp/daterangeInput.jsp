@@ -38,7 +38,7 @@
 	   value="">
 
 <script>
-	var locale = '${requestContext.locale}';
+	var locale = '${locale}';
 	moment.locale(locale);
 
 	function rangeUpdated(start, end) {

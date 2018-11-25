@@ -47,16 +47,16 @@
 		<input type="hidden"
 			   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 			   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-			   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(requestContext.locale))}">
+			   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(locale))}">
 	</c:if>
 
 	<c:if test="${reportParam.parameter.forDisplay}">
 		<div class="form-group">
 			<label class="control-label ${labelColClass}" for="${encode:forHtmlAttribute(reportParam.htmlElementName)}">
-				${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(pageContext.response.locale))}
+				${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(locale))}
 			</label>
 			<div class="${inputColClass}">
-				<c:set var="help" value="${reportParam.parameter.getLocalizedHelpText(requestContext.locale)}"/>
+				<c:set var="help" value="${reportParam.parameter.getLocalizedHelpText(locale)}"/>
 				<c:if test="${not empty fn:trim(help)}">
 					<div class="input-group">
 					</c:if>

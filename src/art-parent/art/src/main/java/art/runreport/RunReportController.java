@@ -159,6 +159,8 @@ public class RunReportController {
 				return errorPage;
 			}
 
+			request.setAttribute("locale", locale);
+			
 			reportName = report.getLocalizedName(locale);
 
 			//check if user has permission to run report

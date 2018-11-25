@@ -15,16 +15,16 @@ Display input for date and datetime parameters
 
 <div id="div-${encode:forHtmlAttribute(reportParam.htmlElementName)}" class='input-group date'>
 	<input type='text' class="form-control"
-		   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(requestContext.locale))}"
+		   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(locale))}"
 		   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-		   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(requestContext.locale))}">
+		   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(locale))}">
 	<span class="input-group-addon">
 		<span class="glyphicon glyphicon-calendar"></span>
 	</span>
 </div>
 
-<t:addDatePicker reportParam="${reportParam}" locale="${requestContext.locale}"
+<t:addDatePicker reportParam="${reportParam}" locale="${locale}"
 				 defaultFormat="YYYY-MM-DD"/>
 
 <c:if test="${not empty reportParam.parameter.template}">
