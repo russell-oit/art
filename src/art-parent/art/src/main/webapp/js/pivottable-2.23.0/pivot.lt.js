@@ -115,7 +115,8 @@
 				"Sritinė diagrama Plotly": plr["Area Chart"],
 				"Plotly Horizontal Bar Chart": plr["Horizontal Bar Chart"],
 				"Plotly Horizontal Stacked Bar Chart": plr["Horizontal Stacked Bar Chart"],
-				"Taškinė diagrama Plotly": plr["Scatter Chart"]
+				"Taškinė diagrama Plotly": plr["Scatter Chart"],
+				"Plotly Multiple Pie Chart": plr["Multiple Pie Chart"]
 			};
 		}
 		if (er) {

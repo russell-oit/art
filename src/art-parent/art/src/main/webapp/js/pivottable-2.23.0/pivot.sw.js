@@ -115,7 +115,8 @@
 		"Chati eneo Plotly": plr["Area Chart"],
 		"Chati pau mlalo Plotly": plr["Horizontal Bar Chart"],
 		"Upau mpororo mlalo Plotly": plr["Horizontal Stacked Bar Chart"],
-		"Chati tawanya Plotly": plr["Scatter Chart"]
+		"Chati tawanya Plotly": plr["Scatter Chart"],
+		"Chati duara kadhaa Plotly": plr["Multiple Pie Chart"]
       };
     }
 	if (er) {
