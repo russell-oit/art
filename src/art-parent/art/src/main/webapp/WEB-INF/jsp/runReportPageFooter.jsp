@@ -27,7 +27,7 @@ Html page footer fragment when displaying report output in a new page
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-dropdown-hover-4.2.0/jquery.bootstrap-dropdown-hover.min.js"></script>
 <script>
 	$(function () {
-		$('[data-toggle="dropdown"]').bootstrapDropdownHover({
+		$('[data-hover="dropdown"]').bootstrapDropdownHover({
 			hideTimeout: 100
 		});
 	});
