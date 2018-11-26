@@ -15,8 +15,8 @@
 
 </div>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/OpenLayers-4.0.1/ol.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/OpenLayers-4.0.1/ol.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/OpenLayers-5.3.0/ol.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/OpenLayers-5.3.0/ol.js"></script>
 
 <c:if test="${not empty options.cssFile}">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(options.cssFile)}">
