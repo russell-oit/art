@@ -45,7 +45,7 @@ Edit schedule page
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="headContent">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
 
 		<script>
 			//put obtaining of server offset in head to reduce difference between server and client time

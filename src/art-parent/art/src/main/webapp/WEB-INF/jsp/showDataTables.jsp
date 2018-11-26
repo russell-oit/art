@@ -45,7 +45,7 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.css"/>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.js"></script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.6.2/papaparse.min.js"></script>

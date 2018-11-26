@@ -47,7 +47,7 @@ Display user jobs and jobs configuration
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.js"></script>
 
 		<script>
