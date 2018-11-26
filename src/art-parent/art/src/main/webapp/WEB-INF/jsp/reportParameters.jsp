@@ -37,7 +37,7 @@
 </c:if>
 
 <c:if test="${hasRobinHerbotsMask}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/Inputmask-4.0.2/min/jquery.inputmask.bundle.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/Inputmask-4.0.3/min/jquery.inputmask.bundle.min.js"></script>
 </c:if>
 
 <c:forEach var="reportParameter" items="${reportParams}">
