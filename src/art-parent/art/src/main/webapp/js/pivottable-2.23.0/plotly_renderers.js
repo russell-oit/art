@@ -31,7 +31,12 @@
             by: "by"
           },
           plotly: {},
-          plotlyConfig: {}
+		  //Timothy Anyona 20181126. Remove edit in chart studio and produced with plotly toolbar items
+          //plotlyConfig: {}
+		  plotlyConfig: {
+			modeBarButtonsToRemove: ['sendDataToCloud'],
+			displaylogo: false
+		  }
         };
         opts = $.extend(true, {}, defaults, opts);
         rowKeys = pivotData.getRowKeys();
@@ -134,7 +139,12 @@
             by: "by"
           },
           plotly: {},
-          plotlyConfig: {}
+		  //Timothy Anyona 20181126. Remove edit in chart studio and produced with plotly toolbar items
+          //plotlyConfig: {}
+		  plotlyConfig: {
+			modeBarButtonsToRemove: ['sendDataToCloud'],
+			displaylogo: false
+		  }
         };
         opts = $.extend(true, {}, defaults, opts);
         rowKeys = pivotData.getRowKeys();
