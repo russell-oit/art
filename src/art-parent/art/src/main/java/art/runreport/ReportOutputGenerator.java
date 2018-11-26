@@ -1008,7 +1008,7 @@ public class ReportOutputGenerator {
 
 		String languageFilePath = Config.getAppPath() + File.separator
 				+ "js" + File.separator
-				+ "pivottable-2.20.0" + File.separator
+				+ "pivottable-2.23.0" + File.separator
 				+ languageFileName;
 
 		File languageFile = new File(languageFilePath);
