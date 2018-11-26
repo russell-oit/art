@@ -65,20 +65,20 @@ Edit report page
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload-ui.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/css/jquery.fileupload.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/css/jquery.fileupload-ui.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/vendor/jquery.ui.widget.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.iframe-transport.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-process.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/vendor/jquery.ui.widget.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/jquery.iframe-transport.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/jquery.fileupload.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/jquery.fileupload-process.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/jquery.fileupload-validate.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/jquery.fileupload-ui.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.4.2/ace.js" charset="utf-8"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
