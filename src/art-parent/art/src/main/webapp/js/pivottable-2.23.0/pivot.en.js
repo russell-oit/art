@@ -113,6 +113,7 @@
         "Plotly Line Chart": plr["Line Chart"],
         "Plotly Bar Chart": plr["Bar Chart"],
         "Plotly Stacked Bar Chart": plr["Stacked Bar Chart"],
+		"Plotly Area Chart": plr["Area Chart"],
 		"Plotly Horizontal Bar Chart": plr["Horizontal Bar Chart"],
 		"Plotly Horizontal Stacked Bar Chart": plr["Horizontal Stacked Bar Chart"],
 		"Plotly Scatter Chart": plr["Scatter Chart"]

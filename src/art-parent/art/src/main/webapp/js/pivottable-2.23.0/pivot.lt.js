@@ -112,6 +112,7 @@
 				"Linijinė diagrama Plotly": plr["Line Chart"],
 				"Juostinė diagrama Plotly": plr["Bar Chart"],
 				"Sudurtinė juostinė diagrama Plotly": plr["Stacked Bar Chart"],
+				"Sritinė diagrama Plotly": plr["Area Chart"],
 				"Plotly Horizontal Bar Chart": plr["Horizontal Bar Chart"],
 				"Plotly Horizontal Stacked Bar Chart": plr["Horizontal Stacked Bar Chart"],
 				"Taškinė diagrama Plotly": plr["Scatter Chart"]
