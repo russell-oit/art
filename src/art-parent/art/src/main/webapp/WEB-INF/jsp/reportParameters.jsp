@@ -14,7 +14,7 @@
 <%-- moment.js needs to be loaded before eonasdan datepicker --%>
 <c:if test="${hasDateParam || hasDateRangeParam}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser-1.2.1/moment-jdateformatparser.min.js"></script>
 </c:if>
 
 <c:if test="${hasDateParam}">
