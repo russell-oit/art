@@ -49,6 +49,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jxls.area.Area;
 import org.jxls.builder.AreaBuilder;
 import org.jxls.builder.xml.XmlAreaBuilder;
+import org.jxls.common.CellRef;
 import org.jxls.common.Context;
 import org.jxls.transform.Transformer;
 import org.jxls.util.JxlsHelper;
@@ -231,7 +232,7 @@ public class JxlsOutput {
 				}
 			}
 
-			process(fullTemplateFileName, outputFileName, context, fullAreaConfigFilename, jxlsOptions);
+			process(fullTemplateFileName, outputFileName, context, fullAreaConfigFilename);
 
 			String extension = FilenameUtils.getExtension(templateFileName);
 			if (!StringUtils.equalsIgnoreCase(extension, "xls")) {
@@ -276,24 +277,19 @@ public class JxlsOutput {
 	 * @param context the context
 	 * @param fullAreaConfigFilename the full path of the area config file. null
 	 * if not using xml config
-	 * @param options jxls options
 	 * @throws IOException
 	 */
 	private void process(String fullTemplateFileName, String outputFileName,
-			Context context, String fullAreaConfigFilename,
-			JxlsOptions options) throws IOException {
+			Context context, String fullAreaConfigFilename) throws IOException {
 
 		try (InputStream is = new FileInputStream(fullTemplateFileName)) {
 			try (OutputStream os = new FileOutputStream(outputFileName)) {
 				if (StringUtils.isBlank(fullAreaConfigFilename)) {
 					//http://jxls.sourceforge.net/samples/multi_sheet_markup_demo.html
 					JxlsHelper jxlsHelper = JxlsHelper.getInstance();
-//					if (options.isUseStandardFormulaProcessor()) {
-//						jxlsHelper.setUseFastFormulaProcessor(false);
-//					}
 					jxlsHelper.processTemplate(is, os, context);
 				} else {
-					processUsingXmlConfig(fullAreaConfigFilename, is, os, context, options);
+					processUsingXmlConfig(fullAreaConfigFilename, is, os, context);
 				}
 			}
 		}
@@ -307,27 +303,22 @@ public class JxlsOutput {
 	 * @param is source template input stream
 	 * @param os target file output stream
 	 * @param context context
-	 * @param options jxls options
 	 * @throws IOException
 	 */
 	private void processUsingXmlConfig(String fullAreaConfigFilename,
-			final InputStream is, final OutputStream os, Context context,
-			JxlsOptions options) throws IOException {
+			final InputStream is, final OutputStream os, Context context) throws IOException {
 
 		//http://jxls.sourceforge.net/samples/object_collection_xmlbuilder.html
 		Transformer transformer = TransformerFactory.createTransformer(is, os);
 		try (InputStream configInputStream = new FileInputStream(fullAreaConfigFilename)) {
 			AreaBuilder areaBuilder = new XmlAreaBuilder(configInputStream, transformer);
-			List<Area> xlsAreaList = areaBuilder.build();
-			for (Area xlsArea : xlsAreaList) {
-				xlsArea.applyAt(xlsArea.getStartCellRef(), context);
-				//http://jxls.sourceforge.net/reference/formulas.html
-//				if (options.isUseStandardFormulaProcessor()) {
-//					xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
-//				}
-				xlsArea.processFormulas();
-				//https://bitbucket.org/leonate/jxls/issues/123/error-with-xml-config-and-multiple-sheets
-				transformer.resetTargetCellRefs();
+			List<Area> areaList = areaBuilder.build();
+			//https://bitbucket.org/leonate/jxls/issues/123/error-with-xml-config-and-multiple-sheets
+			for (Area area : areaList) {
+				area.applyAt(new CellRef(area.getStartCellRef().getCellName()), context);
+			}
+			for (Area area : areaList) {
+				area.processFormulas();
 			}
 			transformer.write();
 		}
