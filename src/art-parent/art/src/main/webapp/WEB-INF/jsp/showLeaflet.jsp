@@ -15,8 +15,8 @@
 
 </div>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/leaflet-1.0.3/leaflet.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/leaflet-1.0.3/leaflet.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/Leaflet-1.3.4/leaflet.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/Leaflet-1.3.4/leaflet.js"></script>
 
 <c:if test="${not empty options.cssFile}">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(options.cssFile)}">

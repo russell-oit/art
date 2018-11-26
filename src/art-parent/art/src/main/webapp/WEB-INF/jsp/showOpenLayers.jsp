@@ -45,7 +45,7 @@
 	mapId = '${mapId}';
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = JSON.parse(dataString);
-	var markerUrl = "${pageContext.request.contextPath}/js/leaflet-1.0.3/images/marker-icon.png";
+	var markerUrl = "${pageContext.request.contextPath}/js/Leaflet-1.3.4/images/marker-icon.png";
 
 	var dataFileUrl = null;
 	<c:if test="${not empty options.dataFile}">
