@@ -25,8 +25,8 @@
 	</tr>
 </table>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dygraphs-2.0.0/dygraph.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/dygraphs-2.0.0/dygraph.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dygraphs-2.1.0/dygraph.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/dygraphs-2.1.0/dygraph.min.js"></script>
 
 <script type="text/javascript">
 	//http://dygraphs.com/options.html
