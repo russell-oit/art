@@ -220,38 +220,7 @@ Display section to allow selecting of report parameters and initiate running of 
 <c:if test="${enableEmail}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
 	<script type="text/javascript">
-	tinymce.init({
-		selector: "textarea.editor",
-		plugins: [
-			"advlist autolink lists link image charmap print preview hr anchor pagebreak",
-			"searchreplace visualblocks visualchars code",
-			"nonbreaking table contextmenu directionality",
-			"paste textcolor"
-		],
-		toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
-		toolbar2: "print preview | forecolor backcolor | link image | code",
-		image_advtab: true,
-		//https://stackoverflow.com/questions/44133697/how-do-i-remove-the-branding-from-tinymce-where-it-says-powered-by-tinymce
-		//https://www.tiny.cloud/docs/configure/editor-appearance/
-		branding: false,
-		//https://codepen.io/nirajmchauhan/pen/EjQLpV
-		paste_data_images: true,
-		file_picker_callback: function (callback, value, meta) {
-			if (meta.filetype == 'image') {
-				$('#upload').trigger('click');
-				$('#upload').on('change', function () {
-					var file = this.files[0];
-					var reader = new FileReader();
-					reader.onload = function (e) {
-						callback(e.target.result, {
-							alt: ''
-						});
-					};
-					reader.readAsDataURL(file);
-				});
-			}
-		}
-	});
+	tinymce.init(tinymceConfig);
 	</script>
 </c:if>
 
@@ -484,6 +453,7 @@ Display section to allow selecting of report parameters and initiate running of 
 						<div class="form-group">
 							<div class="col-md-12">
 								<textarea id="mailMessage" name="mailMessage" rows="5" cols="60" class="form-control editor"></textarea>
+								<input name="image" type="file" id="upload" style="display:none;" onchange="">
 							</div>
 						</div>
 					</div>
