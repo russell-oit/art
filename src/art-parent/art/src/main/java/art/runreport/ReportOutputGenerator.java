@@ -1022,7 +1022,7 @@ public class ReportOutputGenerator {
 		String plotlyLanguageFileName = "plotly-locale-" + plotlyLocaleString + ".js";
 
 		String plotlyLanguageFilePath = Config.getJsPath()
-				+ "plotly.js-1.36.0" + File.separator
+				+ "plotly.js-1.42.5" + File.separator
 				+ plotlyLanguageFileName;
 
 		File plotlyLanguageFile = new File(plotlyLanguageFilePath);
@@ -2686,7 +2686,7 @@ public class ReportOutputGenerator {
 		String languageFileName = "plotly-locale-" + localeString + ".js";
 
 		String languageFilePath = Config.getJsPath()
-				+ "plotly.js-1.36.0" + File.separator
+				+ "plotly.js-1.42.5" + File.separator
 				+ languageFileName;
 
 		File languageFile = new File(languageFilePath);

@@ -65,7 +65,7 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/subtotal-1.10.0/subtotal.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/subtotal-1.10.0/subtotal.min.js"></script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-basic.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.42.5/plotly-basic.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/plotly_renderers.js"></script>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">
@@ -168,7 +168,7 @@
 </c:if>
 
 <c:if test="${not empty plotlyLocaleFileName}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/${plotlyLocaleFileName}"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.42.5/${plotlyLocaleFileName}"></script>
 </c:if>
 
 <script>
