@@ -19,7 +19,7 @@ Display section to allow selecting of report parameters and initiate running of 
 <spring:message code="reports.message.parametersCleared" var="parametersClearedText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/notifyjs-0.4.2/notify.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 <script type="text/javascript">
