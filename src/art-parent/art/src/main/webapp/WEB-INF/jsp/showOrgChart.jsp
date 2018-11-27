@@ -127,7 +127,7 @@
 
 <script type="text/javascript">
 	$(document).ready(function () {
-		$('.orgchart div.title').tooltipster({
+		$('.orgchart div.title').not('.tooltipstered').tooltipster({
 			delay: 0,
 			animationDuration: 0
 		});
