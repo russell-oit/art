@@ -52,8 +52,8 @@ Display a chart report
 	</cewolf:img>
 </div>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster-4.2.6/css/tooltipster.bundle.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster-4.2.6/js/tooltipster.bundle.min.js"></script>
 
 <script type="text/javascript">
 	//https://github.com/iamceege/tooltipster/issues/527

@@ -122,8 +122,8 @@
 	$('#${containerId}').orgchart(orgChartSettings);
 </script>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster-4.2.6/css/tooltipster.bundle.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster-4.2.6/js/tooltipster.bundle.min.js"></script>
 
 <script type="text/javascript">
 	$(document).ready(function () {
