@@ -9,4 +9,4 @@ Displays text report output
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
-<p>${reportSource}</p>
+${reportSource}
