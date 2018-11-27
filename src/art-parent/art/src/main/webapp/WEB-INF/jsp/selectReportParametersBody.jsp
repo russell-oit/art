@@ -218,7 +218,7 @@ Display section to allow selecting of report parameters and initiate running of 
 </script>
 
 <c:if test="${enableEmail}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
 	<script type="text/javascript">
 	tinymce.init({
 		selector: "textarea.editor",
