@@ -94,6 +94,9 @@ Edit report page
 				toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
 				toolbar2: "print preview | forecolor backcolor | link image | code",
 				image_advtab: true,
+				//https://stackoverflow.com/questions/44133697/how-do-i-remove-the-branding-from-tinymce-where-it-says-powered-by-tinymce
+				//https://www.tiny.cloud/docs/configure/editor-appearance/
+				branding: false,
 				//https://codepen.io/nirajmchauhan/pen/EjQLpV
 				paste_data_images: true,
 				file_picker_callback: function (callback, value, meta) {
