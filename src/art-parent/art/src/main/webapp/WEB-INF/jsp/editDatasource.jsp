@@ -113,12 +113,12 @@ Edit datasource page
 
 				$("#datasourceType").on("change", function () {
 					toggleVisibleFields();
+					setMongoDBHint();
 				});
 
 				toggleVisibleFields(); //show/hide on page load
 
 				$('#name').trigger("focus");
-
 			});
 		</script>
 
@@ -126,14 +126,39 @@ Edit datasource page
 			function toggleVisibleFields() {
 				var datasourceType = $('#datasourceType option:selected').val();
 
-				if (datasourceType === 'JDBC') {
-					$("#jndiDiv").show();
-					$("#testSqlDiv").show();
-					$("#connectionPoolTimeoutDiv").show();
-				} else {
-					$("#jndiDiv").hide();
-					$("#testSqlDiv").hide();
-					$("#connectionPoolTimeoutDiv").hide();
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#jndiDiv").show();
+						$("#testSqlDiv").show();
+						$("#connectionPoolTimeoutDiv").show();
+						break;
+					default:
+						$("#jndiDiv").hide();
+						$("#testSqlDiv").hide();
+						$("#connectionPoolTimeoutDiv").hide();
+				}
+
+				switch (datasourceType) {
+					case 'MongoDB':
+						$("#databaseTypeDiv").hide();
+						$("#driverDiv").hide();
+						break;
+					default:
+						$("#databaseTypeDiv").show();
+						$("#driverDiv").show();
+				}
+			}
+			
+			function setMongoDBHint() {
+				var datasourceType = $('#datasourceType option:selected').val();
+				
+				switch (datasourceType) {
+					case 'MongoDB':
+						$("#driver").val('');
+						$("#url").val('mongodb://<server>');
+						$("#testSql").val('');
+					default:
+						break;
 				}
 			}
 		</script>

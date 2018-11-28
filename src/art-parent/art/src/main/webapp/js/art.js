@@ -267,10 +267,6 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.couchbase.jdbc.CBDriver";
 		urlElement.value = "jdbc:couchbase://<server>:8093";
 		testSqlElement.value = "";
-	} else if (dbType === "mongodb") {
-		driverElement.value = "";
-		urlElement.value = "mongodb://<server>";
-		testSqlElement.value = "";
 	} else if (dbType === "drill") {
 		//https://stackoverflow.com/questions/31654658/apache-drill-connection-to-drill-in-embedded-mode-java/33442630
 		driverElement.value = "org.apache.drill.jdbc.Driver";

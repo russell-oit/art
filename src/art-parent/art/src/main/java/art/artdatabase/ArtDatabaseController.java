@@ -75,7 +75,6 @@ public class ArtDatabaseController {
 		databaseTypes.remove("olap4j-mondrian");
 		databaseTypes.remove("olap4j-xmla");
 		databaseTypes.remove("couchbase");
-		databaseTypes.remove("mongodb");
 		databaseTypes.remove("drill");
 		databaseTypes.remove("monetdb");
 		databaseTypes.remove("vertica");
