@@ -62,9 +62,7 @@ Edit user group page
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').bootstrapDropdownHover({
-					hideTimeout: 100
-				});
+				initializeSelectHover();
 
 				$('#name').trigger("focus");
 

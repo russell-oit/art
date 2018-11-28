@@ -373,6 +373,32 @@ function escapeDoubleQuotes(str) {
 }
 
 /**
+ * Initializes dropdown hover where a button is used for the drop down
+ * 
+ * @returns {undefined}
+ */
+function initializeButtonHover() {
+	$('button.dropdown-toggle').bootstrapDropdownHover({
+		hideTimeout: 100
+	});
+}
+
+/**
+ * Initializes dropdown hover for bootstrap-selects
+ * 
+ * @returns {undefined}
+ */
+function initializeSelectHover() {
+	//activate dropdown-hover. to make bootstrap-select open on hover
+	//must come after bootstrap-select initialization
+	initializeButtonHover();
+	
+	//refresh needed when using bootstrap-dropdown-hover js to avoid console error
+	//not needed when using bootstrap-hover-dropdown js
+	$('.selectpicker').selectpicker('refresh');
+}
+
+/**
  * Create column filter input boxes
  * 
  * @param {jQuery} tbl - table to work with
@@ -439,9 +465,7 @@ function datatablesInitComplete() {
 		width: '100px'
 	});
 	
-	$('button.dropdown-toggle').bootstrapDropdownHover({
-		hideTimeout: 100
-	});
+	initializeButtonHover();
 }
 
 /**

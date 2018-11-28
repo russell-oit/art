@@ -140,9 +140,7 @@ Reports configuration page
 						$(row).attr('data-name', data.name);
 					},
 					drawCallback: function () {
-						$('button.dropdown-toggle').bootstrapDropdownHover({
-							hideTimeout: 100
-						});
+						initializeButtonHover();
 					},
 					initComplete: function () {
 						datatablesInitComplete();
