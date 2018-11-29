@@ -378,8 +378,14 @@ function escapeDoubleQuotes(str) {
  * @returns {undefined}
  */
 function initializeButtonHover() {
-	$('button.dropdown-toggle').bootstrapDropdownHover({
-		hideTimeout: 100
+	//bootstrap-dropdown-hover
+//	$('button.dropdown-toggle').bootstrapDropdownHover({
+//		hideTimeout: 100
+//	});
+	
+	//bootstrap-hover-dropdown
+	$('button.dropdown-toggle').dropdownHover({
+		delay: 100
 	});
 }
 
@@ -393,9 +399,11 @@ function initializeSelectHover() {
 	//must come after bootstrap-select initialization
 	initializeButtonHover();
 	
-	//refresh needed when using bootstrap-dropdown-hover js to avoid console error
-	//not needed when using bootstrap-hover-dropdown js
-	$('.selectpicker').selectpicker('refresh');
+	//refresh needed when using bootstrap-dropdown-hover to avoid console error
+	//not needed when using bootstrap-hover-dropdown with bootstrap-select 1.10.0
+	//always needed with bootstrap-select 1.13
+	//bootstrap-select 1.13 with hover causes dropdowns to open upwards
+	//$('.selectpicker').selectpicker('refresh');
 }
 
 /**

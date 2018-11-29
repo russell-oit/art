@@ -25,7 +25,7 @@ bootstrap js, jquery js, datatables css, datatables js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-dropdown-hover-4.2.0/jquery.bootstrap-dropdown-hover.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
 		<meta name="_csrf" content="${_csrf.token}"/>
 		<meta name="_csrf_header" content="${_csrf.headerName}"/>
@@ -55,12 +55,6 @@ bootstrap js, jquery js, datatables css, datatables js
 				if (header) {
 					xhr.setRequestHeader(header, token);
 				}
-			});
-
-			$(function () {
-				$('[data-hover="dropdown"]').bootstrapDropdownHover({
-					hideTimeout: 100
-				});
 			});
 		</script>
 
