@@ -402,7 +402,7 @@ function initializeSelectHover() {
 	//refresh needed when using bootstrap-dropdown-hover to avoid console error
 	//not needed when using bootstrap-hover-dropdown with bootstrap-select 1.10.0
 	//always needed with bootstrap-select 1.13
-	//bootstrap-select 1.13 with hover causes dropdowns to open upwards
+	//bootstrap-select 1.13 with hover causes dropdowns to open upwards. set dropupAuto to false?
 	//$('.selectpicker').selectpicker('refresh');
 }
 
