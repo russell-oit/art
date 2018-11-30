@@ -1008,8 +1008,8 @@ public class ReportRunner {
 		DatabaseMetaData dmd = connQuery.getMetaData();
 		logger.debug("dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE) = {}", dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE));
 		if (!dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
-			if (reportType == ReportType.Group) {
-				throw new IllegalStateException("Database doesn't support scrollable resultsets. Group reports require a scrollable resultset.");
+			if (reportType.requiresScrollableResultSet()) {
+				throw new IllegalStateException("Report type requires scrollable resultset but database doesn't support this");
 			}
 			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 		}
