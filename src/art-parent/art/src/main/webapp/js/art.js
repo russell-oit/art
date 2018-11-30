@@ -375,16 +375,26 @@ function escapeDoubleQuotes(str) {
 /**
  * Initializes dropdown hover where a button is used for the drop down
  * 
+ * @param {string} ancestor - an optional ancestor of the button dropdown toggle
  * @returns {undefined}
  */
-function initializeButtonHover() {
+function initializeButtonHover(ancestor) {
+	//https://api.jquery.com/descendant-selector/
+	var selector;
+	if(ancestor === undefined) {
+		selector = '';
+	} else {
+		selector = ancestor + ' ';
+	}
+	selector += 'button.dropdown-toggle';
+	
 	//bootstrap-dropdown-hover
-//	$('button.dropdown-toggle').bootstrapDropdownHover({
+//	$(selector).bootstrapDropdownHover({
 //		hideTimeout: 100
 //	});
 	
 	//bootstrap-hover-dropdown
-	$('button.dropdown-toggle').dropdownHover({
+	$(selector).dropdownHover({
 		delay: 100
 	});
 }
@@ -473,7 +483,8 @@ function datatablesInitComplete() {
 		width: '100px'
 	});
 	
-	initializeButtonHover();
+	var ancestor = '.dataTables_length';
+	initializeButtonHover(ancestor);
 }
 
 /**
