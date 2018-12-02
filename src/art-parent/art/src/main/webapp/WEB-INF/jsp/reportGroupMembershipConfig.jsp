@@ -23,11 +23,12 @@
 <spring:message code="page.text.selected" var="selectedText"/>
 <spring:message code="page.text.search" var="searchText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3"
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasNotify="true">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/multi-select-0.9.12/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/multiSelect.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
@@ -40,6 +41,7 @@
 				$('a[href*="reportGroupMembershipConfig"]').parent().addClass('active');
 
 				$('.multi-select').multiSelect({
+					cssClass: 'wide-multi-select',
 					selectableHeader: "<div>${availableText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
 					selectionHeader: "<div>${selectedText}</div>\n\
@@ -161,10 +163,10 @@
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-md-3" for="reports">
+					<label class="control-label col-md-2" for="reports">
 						<spring:message code="page.text.reports"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="reports" id="reports" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="report" items="${reports}">
 								<option value="${report.reportId}">
@@ -177,10 +179,10 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="reportGroups">
+					<label class="control-label col-md-2" for="reportGroups">
 						<spring:message code="page.text.reportGroups"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="reportGroups" id="reportGroups" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="reportGroup" items="${reportGroups}">
 								<option value="${reportGroup.reportGroupId}">

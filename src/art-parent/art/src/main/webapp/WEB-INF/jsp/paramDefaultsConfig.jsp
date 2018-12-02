@@ -28,6 +28,7 @@
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/multi-select-0.9.12/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/multiSelect.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
@@ -40,6 +41,7 @@
 				$('a[href*="paramDefaultsConfig"]').parent().addClass('active');
 
 				$('.multi-select').multiSelect({
+					cssClass: 'wide-multi-select',
 					selectableHeader: "<div>${availableText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
 					selectionHeader: "<div>${selectedText}</div>\n\

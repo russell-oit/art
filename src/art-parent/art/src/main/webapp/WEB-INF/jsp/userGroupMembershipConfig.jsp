@@ -25,11 +25,12 @@ User group membership configuration
 <spring:message code="page.text.selected" var="selectedText"/>
 <spring:message code="page.text.search" var="searchText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3"
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasNotify="true">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/multi-select-0.9.12/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/multiSelect.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
@@ -42,6 +43,7 @@ User group membership configuration
 				$('a[href*="userGroupMembershipConfig"]').parent().addClass('active');
 
 				$('.multi-select').multiSelect({
+					cssClass: 'wide-multi-select',
 					selectableHeader: "<div>${availableText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
 					selectionHeader: "<div>${selectedText}</div>\n\
@@ -163,10 +165,10 @@ User group membership configuration
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-md-3" for="users">
+					<label class="control-label col-md-2" for="users">
 						<spring:message code="page.text.users"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="users" id="users" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="user" items="${users}">
 								<option value="${user.userId}-${encode:forHtmlAttribute(user.username)}">
@@ -179,10 +181,10 @@ User group membership configuration
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="userGroups">
+					<label class="control-label col-md-2" for="userGroups">
 						<spring:message code="page.text.userGroups"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="userGroups" id="userGroups" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="userGroup" items="${userGroups}">
 								<option value="${userGroup.userGroupId}">

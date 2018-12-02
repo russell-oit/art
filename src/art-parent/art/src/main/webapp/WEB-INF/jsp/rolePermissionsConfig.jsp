@@ -28,6 +28,7 @@
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/multi-select-0.9.12/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/multiSelect.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
@@ -40,6 +41,7 @@
 				$('a[href*="rolePermissionsConfig"]').parent().addClass('active');
 
 				$('.multi-select').multiSelect({
+					cssClass: 'wide-multi-select',
 					selectableHeader: "<div>${availableText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
 					selectionHeader: "<div>${selectedText}</div>\n\
@@ -161,10 +163,10 @@
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-md-3" for="roles">
+					<label class="control-label col-md-2" for="roles">
 						<spring:message code="page.text.roles"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="roles" id="roles" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="role" items="${roles}">
 								<option value="${role.roleId}">
@@ -177,10 +179,10 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="permissions">
+					<label class="control-label col-md-2" for="permissions">
 						<spring:message code="page.text.permissions"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="permissions" id="permissions" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="permission" items="${permissions}">
 								<option value="${permission.permissionId}">
