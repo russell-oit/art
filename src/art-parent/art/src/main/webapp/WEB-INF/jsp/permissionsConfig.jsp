@@ -27,11 +27,12 @@
 					 hasNotify="true">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/multi-select-0.9.12/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/multiSelect.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/multi-select-0.9.12/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
 		
 		<script type="text/javascript">
@@ -40,6 +41,7 @@
 				$('a[href*="permissionsConfig"]').parent().addClass('active');
 					
 				$('.multi-select').multiSelect({
+					cssClass: 'wide-multi-select',
 					selectableHeader: "<div>${availableText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
 					selectionHeader: "<div>${selectedText}</div>\n\
@@ -53,14 +55,14 @@
 						that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
 								.on('keydown', function (e) {
 									if (e.which === 40) {
-										that.$selectableUl.focus();
+										that.$selectableUl.trigger("focus");
 										return false;
 									}
 								});
 						that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
 								.on('keydown', function (e) {
 									if (e.which === 40) {
-										that.$selectionUl.focus();
+										that.$selectionUl.trigger("focus");
 										return false;
 									}
 								});
@@ -147,10 +149,10 @@
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-md-3" for="users">
+					<label class="control-label col-md-2" for="users">
 						<spring:message code="page.text.users"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="users" id="users" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="user" items="${users}">
 								<option value="${user.userId}">
@@ -163,10 +165,10 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="userGroups">
+					<label class="control-label col-md-2" for="userGroups">
 						<spring:message code="page.text.userGroups"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="userGroups" id="userGroups" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="userGroup" items="${userGroups}">
 								<option value="${userGroup.userGroupId}">
@@ -179,10 +181,10 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="roles">
+					<label class="control-label col-md-2" for="roles">
 						<spring:message code="page.text.roles"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="roles" id="roles" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="role" items="${roles}">
 								<option value="${role.roleId}">
@@ -195,10 +197,10 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="permissions">
+					<label class="control-label col-md-2" for="permissions">
 						<spring:message code="page.text.permissions"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="permissions" id="permissions" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="permission" items="${permissions}">
 								<option value="${permission.permissionId}">

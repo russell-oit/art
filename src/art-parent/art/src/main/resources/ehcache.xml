@@ -56,4 +56,7 @@
 	<cache name="roles"
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
+	<cache name="drilldowns"
+		   eternal="true" maxEntriesLocalHeap="10" />
+	
 </ehcache>

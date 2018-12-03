@@ -183,7 +183,11 @@ public class ReportService {
 			report.setReportGroups(reportGroups);
 
 			//decrypt open and modify passwords
-			report.decryptPasswords();
+			try {
+				report.decryptPasswords();
+			} catch (Exception ex) {
+				logger.error("Error. {}", report, ex);
+			}
 
 			setChartOptions(report);
 
@@ -194,14 +198,14 @@ public class ReportService {
 					CloneOptions cloneOptions = mapper.readValue(options, CloneOptions.class);
 					report.setCloneOptions(cloneOptions);
 				} catch (IOException ex) {
-					logger.error("Error. Report Id {}", report.getReportId(), ex);
+					logger.error("Error. {}", report, ex);
 				}
 			}
 
 			try {
 				report.loadGeneralOptions();
 			} catch (IOException ex) {
-				logger.error("Error. Report Id {}", report.getReportId(), ex);
+				logger.error("Error. {}", report, ex);
 			}
 
 			return type.cast(report);
@@ -215,6 +219,7 @@ public class ReportService {
 		private void setChartOptions(Report report) {
 
 			ChartOptions chartOptions = new ChartOptions();
+			chartOptions.initializeBooleansToFalse();
 
 			String optionsString;
 			boolean usingShortDescription;
@@ -405,7 +410,7 @@ public class ReportService {
 
 		return getAccessibleReportsWithoutReportTypes(userId, excludedReportTypes);
 	}
-	
+
 	/**
 	 * Returns the reports that a user can add to a self service dashboard
 	 *
@@ -741,10 +746,27 @@ public class ReportService {
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
 	public void updateReport(Report report, User actionUser) throws SQLException {
-		logger.debug("Entering updateReport: report={}, actionUser={}", report, actionUser);
+		Connection conn = null;
+		updateReport(report, actionUser, conn);
+	}
+
+	/**
+	 * Updates an existing report
+	 *
+	 * @param report the updated report
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public void updateReport(Report report, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering updateReport: report={}, actionUser={}",
+				report, actionUser);
 
 		Integer newRecordId = null;
-		saveReport(report, newRecordId, actionUser);
+		saveReport(report, newRecordId, actionUser, conn);
 	}
 
 	/**
@@ -1266,7 +1288,7 @@ public class ReportService {
 	 * @return drilldown reports
 	 * @throws SQLException
 	 */
-	@Cacheable(value = "reports")
+	//@Cacheable(value = "reports") //if you make this cacheable, you'll need to cacheevict "reports" in ParameterService
 	public List<Report> getDrilldownReports() throws SQLException {
 		logger.debug("Entering getDrilldownReports");
 
@@ -1314,7 +1336,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
 	}
-	
+
 	/**
 	 * Returns gridstack dashboard reports
 	 *

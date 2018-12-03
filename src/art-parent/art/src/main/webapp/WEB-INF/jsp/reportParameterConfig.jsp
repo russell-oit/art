@@ -35,7 +35,7 @@
 		</script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-row-reordering-1.2.3/jquery.dataTables.rowReordering.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -101,7 +101,7 @@
 
 				var table = oTable.api();
 
-				$('#deleteRecords').click(function () {
+				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {

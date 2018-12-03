@@ -19,7 +19,6 @@ package art.servlets;
 
 import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
-import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionPoolLibrary;
 import art.jobrunners.CleanJob;
@@ -28,6 +27,7 @@ import art.logback.OnLevelEvaluator;
 import art.saiku.SaikuConnectionManager;
 import art.saiku.SaikuConnectionProvider;
 import art.settings.CustomSettings;
+import art.settings.EncryptionPassword;
 import art.settings.Settings;
 import art.settings.SettingsService;
 import art.utils.ArtUtils;
@@ -42,7 +42,6 @@ import ch.qos.logback.core.db.DataSourceConnectionSource;
 import com.eclecticlogic.whisper.logback.WhisperAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
-import com.mysql.jdbc.AbandonedConnectionCleanupThread;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 import java.io.File;
@@ -151,8 +150,11 @@ public class Config extends HttpServlet {
 		//https://www.ralph-schuster.eu/2014/07/09/solution-to-tomcat-cant-stop-an-abandoned-connection-cleanup-thread/
 		//https://stackoverflow.com/questions/25699985/the-web-application-appears-to-have-started-a-thread-named-abandoned-connect
 		//https://dev.mysql.com/doc/relnotes/connector-j/5.1/en/news-5-1-41.html
-		AbandonedConnectionCleanupThread.checkedShutdown();
-
+		//https://stackoverflow.com/questions/45055122/tomcat-7-memory-leak-on-stop-redeploy-spring-data-jpa-hibernate-mysql
+		//https://stackoverflow.com/questions/11872316/tomcat-guice-jdbc-memory-leak/19027873#19027873
+		//https://stackoverflow.com/questions/53187716/abandoned-connection-cleanup-in-mariadb-compared-to-mysql
+		//https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-api-changes.html
+		//AbandonedConnectionCleanupThread.checkedShutdown();
 		//deregister jdbc drivers
 		deregisterJdbcDrivers();
 
@@ -219,12 +221,10 @@ public class Config extends HttpServlet {
 			appPath = appPath + File.separator;
 		}
 
-		//set web-inf path
 		webinfPath = appPath + "WEB-INF" + File.separator;
 		logger.debug("webinfPath='{}'", webinfPath);
 
-		//load custom settings
-		loadCustomSettings(ctx);
+		initializeCustomSettings(ctx);
 
 		createDefaultThymeleafTemplateEngine(ctx);
 
@@ -309,7 +309,7 @@ public class Config extends HttpServlet {
 	 */
 	private static void createFreemarkerConfiguration() {
 		freemarkerConfig = null;
-		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_26);
+		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_28);
 
 		try {
 			freemarkerConfig.setDirectoryForTemplateLoading(new File(getTemplatesPath()));
@@ -538,9 +538,24 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Loads art database configuration from the art-database file
+	 * Loads art database configuration from the art-database.json file
 	 */
 	private static void loadArtDatabaseConfiguration() {
+		String encryptionKey = null;
+		EncryptionPassword encryptionPassword = null;
+		loadArtDatabaseConfiguration(encryptionKey, encryptionPassword);
+	}
+
+	/**
+	 * Loads art database configuration from the art-database.json file
+	 *
+	 * @param encryptionKey the encryption key to use. null if to use current.
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
+	 */
+	private static void loadArtDatabaseConfiguration(String encryptionKey,
+			EncryptionPassword encryptionPassword) {
+
 		ArtDatabase artDatabase = null;
 
 		try {
@@ -549,17 +564,13 @@ public class Config extends HttpServlet {
 				ObjectMapper mapper = new ObjectMapper();
 				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
 
-				//decrypt password field
-				String encryptedPassword = artDatabase.getPassword();
-				String decryptedPassword = AesEncryptor.decrypt(encryptedPassword);
-				artDatabase.setPassword(decryptedPassword);
-
+				artDatabase.decryptPassword(encryptionKey, encryptionPassword);
 				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
 			} else {
 				logger.info("ART Database configuration file not found: '{}'", artDatabaseFilePath);
 			}
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
 
@@ -576,21 +587,41 @@ public class Config extends HttpServlet {
 	 * Saves art database configuration to file
 	 *
 	 * @param artDatabase the art database configuration
-	 * @throws java.io.IOException
+	 * @throws Exception
 	 */
 	public static void saveArtDatabaseConfiguration(ArtDatabase artDatabase)
-			throws IOException {
+			throws Exception {
+
+		String encryptionKey = null;
+		EncryptionPassword encryptionPassword = null;
+		saveArtDatabaseConfiguration(artDatabase, encryptionKey, encryptionPassword);
+	}
+
+	/**
+	 * Saves art database configuration to file
+	 *
+	 * @param artDatabase the art database configuration
+	 * @param encryptionKey the encryption key to use. null if to use current.
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
+	 * @throws Exception
+	 */
+	public static void saveArtDatabaseConfiguration(ArtDatabase artDatabase,
+			String encryptionKey, EncryptionPassword encryptionPassword) throws Exception {
 
 		//encrypt password field for storing
-		String encryptedPassword = AesEncryptor.encrypt(artDatabase.getPassword());
-		artDatabase.setPassword(encryptedPassword);
+		String originalPassword = artDatabase.getPassword();
+		artDatabase.encryptPassword(encryptionKey, encryptionPassword);
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabase);
 
+		//restore unencrypted password to object
+		artDatabase.setPassword(originalPassword);
+
 		//refresh configuration and set defaults for invalid values
-		loadArtDatabaseConfiguration();
+		loadArtDatabaseConfiguration(encryptionKey, encryptionPassword);
 	}
 
 	/**
@@ -643,7 +674,7 @@ public class Config extends HttpServlet {
 		if (StringUtils.isNotBlank(driver)) {
 			try {
 				Class.forName(driver).newInstance();
-				logger.info("Database Authentication JDBC Driver Registered: {}", driver);
+				logger.debug("Database Authentication JDBC Driver Registered: {}", driver);
 			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 				logger.error("Error while registering Database Authentication JDBC Driver: {}", driver, e);
 			}
@@ -750,21 +781,33 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Loads custom settings
+	 * Returns custom settings from the custom settings file
 	 *
-	 * @param ctx the servlet context
+	 * @return custom settings from the custom settings file
+	 * @throws IOException
 	 */
-	public static void loadCustomSettings(ServletContext ctx) {
+	public static CustomSettings getCustomSettingsFromFile() throws IOException {
+		CustomSettings fileCustomSettings = null;
+
+		String customSettingsFilePath = webinfPath + "art-custom-settings.json";
+		logger.debug("customSettingsFilePath='{}'", customSettingsFilePath);
+		File customSettingsFile = new File(customSettingsFilePath);
+		if (customSettingsFile.exists()) {
+			ObjectMapper mapper = new ObjectMapper();
+			fileCustomSettings = mapper.readValue(customSettingsFile, CustomSettings.class);
+		}
+
+		return fileCustomSettings;
+	}
+
+	/**
+	 * Loads custom settings from file
+	 */
+	public static void loadCustomSettings() {
 		CustomSettings newCustomSettings = null;
 
 		try {
-			String customSettingsFilePath = webinfPath + "art-custom-settings.json";
-			logger.debug("customSettingsFilePath='{}'", customSettingsFilePath);
-			File customSettingsFile = new File(customSettingsFilePath);
-			if (customSettingsFile.exists()) {
-				ObjectMapper mapper = new ObjectMapper();
-				newCustomSettings = mapper.readValue(customSettingsFile, CustomSettings.class);
-			}
+			newCustomSettings = getCustomSettingsFromFile();
 		} catch (IOException ex) {
 			logger.error("Error", ex);
 		}
@@ -776,6 +819,15 @@ public class Config extends HttpServlet {
 
 		customSettings = null;
 		customSettings = newCustomSettings;
+	}
+
+	/**
+	 * Initializes custom settings and variables dependent on custom settings
+	 *
+	 * @param ctx the servlet context
+	 */
+	public static void initializeCustomSettings(ServletContext ctx) {
+		loadCustomSettings();
 
 		//set show errors custom setting
 		ctx.setAttribute("showErrors", customSettings.isShowErrors());

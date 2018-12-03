@@ -106,9 +106,9 @@ public class RunReportController {
 		runningReportsCount++;
 
 		//check if output is being displayed within the show report page (inline) or in a new page
-		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
+		boolean showInline = BooleanUtils.toBoolean(request.getParameter("showInline"));
 		//check if the html code should be rendered as an html fragment (without <html> and </html> tags) e.g. in a dashboard section
-		boolean isFragment = Boolean.parseBoolean(request.getParameter("isFragment"));
+		boolean isFragment = BooleanUtils.toBoolean(request.getParameter("isFragment"));
 
 		//set appropriate error page to use
 		String errorPage;
@@ -159,6 +159,8 @@ public class RunReportController {
 				return errorPage;
 			}
 
+			request.setAttribute("locale", locale);
+			
 			reportName = report.getLocalizedName(locale);
 
 			//check if user has permission to run report
@@ -321,7 +323,7 @@ public class RunReportController {
 				request.setAttribute("title", reportName);
 				request.setAttribute("reportFormat", reportFormat.getValue());
 
-				boolean allowSelectParameters = Boolean.parseBoolean(request.getParameter("allowSelectParameters"));
+				boolean allowSelectParameters = BooleanUtils.toBoolean(request.getParameter("allowSelectParameters"));
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
 					runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
@@ -341,8 +343,9 @@ public class RunReportController {
 				//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
 				String reportSource = report.getReportSource();
 				//https://github.com/jhy/jsoup/issues/511#issuecomment-94978302
-				Whitelist whitelist = Whitelist.relaxed();
-				whitelist.addProtocols("img", "src", "data"); //for base64 encoded images
+				Whitelist whitelist = Whitelist.relaxed()
+						.addTags("hr")
+						.addProtocols("img", "src", "data"); //for base64 encoded images
 				String cleanSource = Jsoup.clean(reportSource, whitelist);
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showTextReport.jsp").include(request, response);
@@ -367,6 +370,7 @@ public class RunReportController {
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				paramProcessor.setSuppliedReport(report);
+				paramProcessor.setIsFragment(isFragment);
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
@@ -415,8 +419,6 @@ public class RunReportController {
 					DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
 					String startTimeString = df.format(new Date(overallStartTime));
 
-//					String reportInfo = "<b>" + reportName + "</b>"
-//							+ description + " :: " + startTimeString;
 					String reportInfo = "<h4>" + Encode.forHtmlContent(reportName) + "<small>"
 							+ Encode.forHtmlContent(description) + " :: "
 							+ Encode.forHtmlContent(startTimeString) + "</small></h4>";

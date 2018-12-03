@@ -23,7 +23,7 @@
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="paramDefaultsConfig"]').parent().addClass('active');
 
-				$('#value').focus();
+				$('#value').trigger("focus");
 
 			});
 		</script>

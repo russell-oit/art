@@ -27,10 +27,10 @@
 
 </div>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-${bundle}.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.42.5/plotly-${bundle}.min.js"></script>
 
 <c:if test="${not empty localeFileName}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/${localeFileName}"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.42.5/${localeFileName}"></script>
 </c:if>
 
 

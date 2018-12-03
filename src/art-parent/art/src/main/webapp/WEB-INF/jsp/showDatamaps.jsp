@@ -16,7 +16,7 @@
 </div>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/d3-3.5.17/d3.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/topojson-2.2.0/topojson.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/topojson-3.0.2/topojson.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(options.datamapsJsFile)}"></script>
 
 <c:if test="${not empty options.cssFile}">

@@ -102,7 +102,11 @@ public class EncryptorService {
 			encryptor.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			//decrypt passwords
-			encryptor.decryptPasswords();
+			try {
+				encryptor.decryptPasswords();
+			} catch (Exception ex) {
+				logger.error("Error. {}", encryptor, ex);
+			}
 
 			return type.cast(encryptor);
 		}
@@ -268,10 +272,27 @@ public class EncryptorService {
 	 */
 	@CacheEvict(value = {"encryptors", "reports"}, allEntries = true)
 	public void updateEncryptor(Encryptor encryptor, User actionUser) throws SQLException {
-		logger.debug("Entering updateEncryptor: encryptor={}, actionUser={}", encryptor, actionUser);
+		Connection conn = null;
+		updateEncryptor(encryptor, actionUser, conn);
+	}
+
+	/**
+	 * Updates an encryptor
+	 *
+	 * @param encryptor the updated encryptor
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"encryptors", "reports"}, allEntries = true)
+	public void updateEncryptor(Encryptor encryptor, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering updateEncryptor: encryptor={}, actionUser={}",
+				encryptor, actionUser);
 
 		Integer newRecordId = null;
-		saveEncryptor(encryptor, newRecordId, actionUser);
+		saveEncryptor(encryptor, newRecordId, actionUser, conn);
 	}
 
 	/**

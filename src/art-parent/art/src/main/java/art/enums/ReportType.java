@@ -61,6 +61,24 @@ public enum ReportType {
 	}
 
 	/**
+	 * Returns <code>true</code> if this report type requires a scrollable
+	 * resultset in order to run properly
+	 *
+	 * @return <code>true</code> if this report type requires a scrollable
+	 * resultset in order to run properly
+	 */
+	public boolean requiresScrollableResultSet() {
+		switch (this) {
+			case Group:
+			case ReportEngine:
+			case ReportEngineFile:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
 	 * Returns <code>true</code> if this report type stores templates in the
 	 * js-templates directory
 	 *

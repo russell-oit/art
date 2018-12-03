@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.Calendar;
@@ -40,15 +41,30 @@ public class JobUtils {
 
 	/**
 	 * Returns the next fire time of a group of triggers
-	 * 
+	 *
 	 * @param triggers the triggers
 	 * @param scheduler the quartz scheduler, not null
 	 * @return the next fire time of a group of triggers
-	 * @throws SchedulerException 
+	 * @throws SchedulerException
+	 */
+	public static Date getNextFireTime(Set<Trigger> triggers, Scheduler scheduler)
+			throws SchedulerException {
+
+		List<Trigger> triggersList = new ArrayList<>(triggers);
+		return getNextFireTime(triggersList, scheduler);
+	}
+
+	/**
+	 * Returns the next fire time of a group of triggers
+	 *
+	 * @param triggers the triggers
+	 * @param scheduler the quartz scheduler, not null
+	 * @return the next fire time of a group of triggers
+	 * @throws SchedulerException
 	 */
 	public static Date getNextFireTime(List<Trigger> triggers, Scheduler scheduler)
 			throws SchedulerException {
-		
+
 		if (CollectionUtils.isEmpty(triggers)) {
 			return null;
 		}
@@ -82,7 +98,7 @@ public class JobUtils {
 		if (CollectionUtils.isNotEmpty(nextRunDates)) {
 			nextRunDate = Collections.min(nextRunDates);
 		}
-		
+
 		return nextRunDate;
 	}
 

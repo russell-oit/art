@@ -13,13 +13,13 @@
 
 <%-- moment.js needs to be loaded before eonasdan datepicker --%>
 <c:if test="${hasDateParam || hasDateRangeParam}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser/moment-jdateformatparser.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-jdateformatparser-1.2.1/moment-jdateformatparser.min.js"></script>
 </c:if>
 
 <c:if test="${hasDateParam}">
-	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/css/bootstrap-datetimepicker.min.css">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 </c:if>
 
 <c:if test="${hasDateRangeParam}">
@@ -37,7 +37,7 @@
 </c:if>
 
 <c:if test="${hasRobinHerbotsMask}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/Inputmask-4.0.2/min/jquery.inputmask.bundle.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/Inputmask-4.0.3/min/jquery.inputmask.bundle.min.js"></script>
 </c:if>
 
 <c:forEach var="reportParameter" items="${reportParams}">
@@ -47,16 +47,16 @@
 		<input type="hidden"
 			   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 			   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-			   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(requestContext.locale))}">
+			   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(locale))}">
 	</c:if>
 
 	<c:if test="${reportParam.parameter.forDisplay}">
 		<div class="form-group">
 			<label class="control-label ${labelColClass}" for="${encode:forHtmlAttribute(reportParam.htmlElementName)}">
-				${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(pageContext.response.locale))}
+				${encode:forHtmlContent(reportParam.parameter.getLocalizedLabel(locale))}
 			</label>
 			<div class="${inputColClass}">
-				<c:set var="help" value="${reportParam.parameter.getLocalizedHelpText(requestContext.locale)}"/>
+				<c:set var="help" value="${reportParam.parameter.getLocalizedHelpText(locale)}"/>
 				<c:if test="${not empty fn:trim(help)}">
 					<div class="input-group">
 					</c:if>

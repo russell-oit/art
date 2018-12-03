@@ -218,7 +218,7 @@ public class SmtpServerController {
 			String recordName = smtpServer.getName() + " (" + smtpServer.getSmtpServerId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/smtpServers";
-		} catch (SQLException | RuntimeException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -288,9 +288,9 @@ public class SmtpServerController {
 	 * @param action "add or "edit"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
-	 * @throws SQLException
+	 * @throws Exception
 	 */
-	private String setPassword(SmtpServer smtpServer, String action) throws SQLException {
+	private String setPassword(SmtpServer smtpServer, String action) throws Exception {
 		logger.debug("Entering setPassword: smtpServer={}, action='{}'", smtpServer, action);
 
 		boolean useCurrentPassword = false;

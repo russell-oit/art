@@ -40,6 +40,7 @@ import art.reportrule.ReportRule;
 import art.ruleValue.UserGroupRuleValue;
 import art.ruleValue.UserRuleValue;
 import art.servlets.Config;
+import art.settings.EncryptionPassword;
 import art.utils.ArtUtils;
 import art.utils.XmlParser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -1510,7 +1511,7 @@ public class Report implements Serializable {
 
 	/**
 	 * Returns report group names, html encoded
-	 * 
+	 *
 	 * @return report group names, html encoded
 	 */
 	public String getReportGroupNamesHtml() {
@@ -1524,24 +1525,57 @@ public class Report implements Serializable {
 
 	/**
 	 * Decrypts password fields
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void decryptPasswords() {
+	public void decryptPasswords() throws Exception {
 		openPassword = AesEncryptor.decrypt(openPassword);
 		modifyPassword = AesEncryptor.decrypt(modifyPassword);
 	}
 
 	/**
 	 * Encrypts password fields
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void encryptPasswords() {
-		openPassword = AesEncryptor.encrypt(openPassword);
-		modifyPassword = AesEncryptor.encrypt(modifyPassword);
+	public void encryptPasswords() throws Exception {
+		String key = null;
+		EncryptionPassword encryptionPassword = null;
+		encryptPasswords(key, encryptionPassword);
+	}
+
+	/**
+	 * Encrypts password fields
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption configuration to use. null if to
+	 * use current.
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPasswords(String key, EncryptionPassword encryptionPassword) throws Exception {
+		openPassword = AesEncryptor.encrypt(openPassword, key, encryptionPassword);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword, key, encryptionPassword);
+	}
+
+	/**
+	 * Returns <code>true</code> if all password fields are null
+	 *
+	 * @return <code>true</code> if all password fields are null
+	 */
+	public boolean hasNullPasswords() {
+		if (openPassword == null && modifyPassword == null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
 	 * Encrypts all passwords fields in the report including for datasources etc
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void encryptAllPasswords() {
+	public void encryptAllPasswords() throws Exception {
 		encryptPasswords();
 
 		if (datasource != null) {
@@ -1563,8 +1597,10 @@ public class Report implements Serializable {
 	/**
 	 * Encrypts all passwords fields in the report including for datasources etc
 	 * where the respective clearTextPassword field is true
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void encryptAllClearTextPasswords() {
+	public void encryptAllClearTextPasswords() throws Exception {
 		if (clearTextPasswords) {
 			encryptPasswords();
 		}

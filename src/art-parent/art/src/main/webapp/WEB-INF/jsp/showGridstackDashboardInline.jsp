@@ -27,26 +27,16 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" /> 
 
-<c:if test="${!ajax}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
-	<script type="text/javascript">
-		$(document).ajaxStart(function () {
-			$('#spinner').show();
-		}).ajaxStop(function () {
-			$('#spinner').hide();
-		});
-	</script>
-</c:if>
-
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/lodash-3.5.0/lodash.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/notifyjs-0.4.2/notify.js"></script>
 
 <c:if test="${not empty cssFileName}">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(cssFileName)}">
@@ -382,16 +372,21 @@
 <script type="text/javascript">
 	//https://blogs.msdn.microsoft.com/ukadc/2010/02/12/handling-errors-with-jquery-load/
 	$(document).ajaxError(function (event, xhr, options) {
-		bootbox.alert({
-			title: '${errorOccurredText}',
-			message: xhr.responseText
-		});
+		showUserAjaxError(xhr, '${errorOccurredText}');
 	});
 
 	var token = $("meta[name='_csrf']").attr("content");
 	var header = $("meta[name='_csrf_header']").attr("content");
 	$(document).ajaxSend(function (e, xhr, options) {
-		xhr.setRequestHeader(header, token);
+		if (header) {
+			xhr.setRequestHeader(header, token);
+		}
+	});
+	
+	$(document).ajaxStart(function () {
+		$('#spinner').show();
+	}).ajaxStop(function () {
+		$('#spinner').hide();
 	});
 </script>
 
@@ -505,10 +500,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				} //end if result
@@ -519,7 +511,7 @@
 		//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
 		dialog.on("shown.bs.modal", function () {
 			dialog.attr("id", "saveDashboardDialog");
-			dialog.find('#name').focus();
+			dialog.find('#name').trigger("focus");
 		});
 	});
 
@@ -562,10 +554,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				} //end if result

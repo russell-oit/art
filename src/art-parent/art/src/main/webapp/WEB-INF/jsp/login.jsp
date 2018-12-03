@@ -19,9 +19,7 @@ Login page
 
 <spring:message code="page.title.login" var="pageTitle"/>
 
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
 <t:genericPage title="ART - ${pageTitle}">
 	<jsp:attribute name="metaContent">
@@ -38,7 +36,7 @@ Login page
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
-				$('#username').focus();
+				$('#username').trigger("focus");
 			});
 		</script>
 	</jsp:attribute>

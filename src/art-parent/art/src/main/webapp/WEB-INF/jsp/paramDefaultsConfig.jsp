@@ -27,13 +27,12 @@
 					 hasNotify="true">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/css/multi-select.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/multi-select-0.9.12/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/multiSelect.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/multi-select-0.9.12/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
 
 		<script type="text/javascript">
@@ -42,6 +41,7 @@
 				$('a[href*="paramDefaultsConfig"]').parent().addClass('active');
 
 				$('.multi-select').multiSelect({
+					cssClass: 'wide-multi-select',
 					selectableHeader: "<div>${availableText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
 					selectionHeader: "<div>${selectedText}</div>\n\
@@ -55,14 +55,14 @@
 						that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
 								.on('keydown', function (e) {
 									if (e.which === 40) {
-										that.$selectableUl.focus();
+										that.$selectableUl.trigger("focus");
 										return false;
 									}
 								});
 						that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
 								.on('keydown', function (e) {
 									if (e.which === 40) {
-										that.$selectionUl.focus();
+										that.$selectionUl.trigger("focus");
 										return false;
 									}
 								});
@@ -85,9 +85,7 @@
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
-				});
+				initializeSelectHover();
 
 				$('#actionsDiv').on('click', '.updateDefaults', function () {
 					var action = $(this).data('action');

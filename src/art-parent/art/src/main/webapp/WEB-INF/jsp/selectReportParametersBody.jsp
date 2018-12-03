@@ -19,18 +19,18 @@ Display section to allow selecting of report parameters and initiate running of 
 <spring:message code="reports.message.parametersCleared" var="parametersClearedText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/notifyjs-0.4.2/notify.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 <script type="text/javascript">
 	$(document).ready(function () {
-		$("#schedule").click(function (e) {
+		$("#schedule").on("click", function (e) {
 			e.preventDefault();
 			var url = "${pageContext.request.contextPath}/addJob";
 			$('#parametersForm').attr('action', url).submit();
 		});
 
-		$("#emailReportSubmit").click(function (e) {
+		$("#emailReportSubmit").on("click", function (e) {
 			e.preventDefault();
 
 			//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
@@ -52,22 +52,19 @@ Display section to allow selecting of report parameters and initiate running of 
 					}
 				},
 				error: function (xhr) {
-					bootbox.alert({
-						title: '${errorOccurredText}',
-						message: xhr.responseText
-					});
+					showUserAjaxError(xhr, '${errorOccurredText}');
 				}
 			});
 		});
 
-		$("#runInNewPage").click(function () {
+		$("#runInNewPage").on("click", function () {
 			$("#showInline").val("false");
 			//need to explicitly set. if click on schedule, then back then run in new page - goes to schedule again
 			var url = "${pageContext.request.contextPath}/runReport";
 			$('#parametersForm').attr('action', url).submit();
 		});
 
-		$("#runInline").click(function (e) {
+		$("#runInline").on("click", function (e) {
 			e.preventDefault();
 
 			$("#showInline").val("true");
@@ -85,16 +82,13 @@ Display section to allow selecting of report parameters and initiate running of 
 				},
 				error: function (xhr) {
 					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
-					bootbox.alert({
-						title: '${errorOccurredText}',
-						message: xhr.responseText
-					});
+					showUserAjaxError(xhr, '${errorOccurredText}');
 					$('.action').prop('disabled', false);
 				}
 			});
 		});
 
-		$("#saveParameterSelection").click(function (e) {
+		$("#saveParameterSelection").on("click", function (e) {
 			e.preventDefault();
 
 			$.ajax({
@@ -110,15 +104,12 @@ Display section to allow selecting of report parameters and initiate running of 
 					}
 				},
 				error: function (xhr) {
-					bootbox.alert({
-						title: '${errorOccurredText}',
-						message: xhr.responseText
-					});
+					showUserAjaxError(xhr, '${errorOccurredText}');
 				}
 			});
 		});
 
-		$("#clearSavedParameterSelection").click(function (e) {
+		$("#clearSavedParameterSelection").on("click", function (e) {
 			e.preventDefault();
 
 			var reportId = parseInt($('input[name="reportId"]').val(), 10);
@@ -136,10 +127,7 @@ Display section to allow selecting of report parameters and initiate running of 
 					}
 				},
 				error: function (xhr) {
-					bootbox.alert({
-						title: '${errorOccurredText}',
-						message: xhr.responseText
-					});
+					showUserAjaxError(xhr, '${errorOccurredText}');
 				}
 			});
 		});
@@ -149,20 +137,11 @@ Display section to allow selecting of report parameters and initiate running of 
 		});
 
 
-		$("#reportFormat").change(function () {
+		$("#reportFormat").on("change", function () {
 			toggleVisibleButtons();
 		});
 
 		toggleVisibleButtons(); //show/hide on page load
-
-		//Enable Bootstrap-Select
-//		$('.selectpicker').selectpicker();
-
-		//activate dropdown-hover. to make bootstrap-select open on hover
-		//must come after bootstrap-select initialization
-//		$('button.dropdown-toggle').dropdownHover({
-//			delay: 100
-//		});
 
 		//{container: 'body'} needed if tooltips shown on input-group element or button
 		$("[data-toggle='tooltip']").tooltip({container: 'body'});
@@ -183,8 +162,8 @@ Display section to allow selecting of report parameters and initiate running of 
 
 	function Popup(data)
 	{
-		var mywindow = window.open('', '${encode:forJavaScript(report.getLocalizedName(pageContext.response.locale))}', 'height=400,width=600');
-		mywindow.document.write('<html><head><title>${encode:forJavaScript(report.getLocalizedName(pageContext.response.locale))}</title>');
+		var mywindow = window.open('', '${encode:forJavaScript(report.getLocalizedName(locale))}', 'height=400,width=600');
+		mywindow.document.write('<html><head><title>${encode:forJavaScript(report.getLocalizedName(locale))}</title>');
 		/*optional stylesheet*/ //mywindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
 		mywindow.document.write('</head><body>');
 		mywindow.document.write(data);
@@ -239,20 +218,9 @@ Display section to allow selecting of report parameters and initiate running of 
 </script>
 
 <c:if test="${enableEmail}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
 	<script type="text/javascript">
-	tinymce.init({
-		selector: "textarea.editor",
-		plugins: [
-			"advlist autolink lists link image charmap print preview hr anchor pagebreak",
-			"searchreplace visualblocks visualchars code",
-			"nonbreaking table contextmenu directionality",
-			"paste textcolor"
-		],
-		toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
-		toolbar2: "print preview | forecolor backcolor | link image | code",
-		image_advtab: true
-	});
+	tinymce.init(tinymceConfig);
 	</script>
 </c:if>
 
@@ -268,7 +236,7 @@ Display section to allow selecting of report parameters and initiate running of 
 
 <div class="row reportName">
     <div class="col-md-9">
-        <h3>${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}</h3>
+        <h3>${encode:forHtmlContent(report.getLocalizedName(locale))}</h3>
     </div>
 	<div class="col-md-3">
 		<h3 class="text-right">
@@ -485,6 +453,7 @@ Display section to allow selecting of report parameters and initiate running of 
 						<div class="form-group">
 							<div class="col-md-12">
 								<textarea id="mailMessage" name="mailMessage" rows="5" cols="60" class="form-control editor"></textarea>
+								<input name="image" type="file" id="upload" style="display:none;" onchange="">
 							</div>
 						</div>
 					</div>

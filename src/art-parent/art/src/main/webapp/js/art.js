@@ -38,6 +38,44 @@ var alertCloseButton = '<button type="button" class="close" data-dismiss="alert"
  */
 var reusableAlertCloseButton = '<button type="button" class="close" aria-hidden="true">x</button>';
 
+/**
+ * TinyMCE init configuration
+ * 
+ * @type String
+ */
+var tinymceConfig = {
+	selector: "textarea.editor",
+	plugins: [
+		"advlist autolink lists link image charmap print preview hr anchor pagebreak",
+		"searchreplace visualblocks visualchars code",
+		"nonbreaking table contextmenu directionality",
+		"paste textcolor"
+	],
+	toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
+	toolbar2: "print preview | forecolor backcolor | link image | code",
+	image_advtab: true,
+	//https://stackoverflow.com/questions/44133697/how-do-i-remove-the-branding-from-tinymce-where-it-says-powered-by-tinymce
+	//https://www.tiny.cloud/docs/configure/editor-appearance/
+	branding: false,
+	//https://codepen.io/nirajmchauhan/pen/EjQLpV
+	paste_data_images: true,
+	file_picker_callback: function (callback, value, meta) {
+		if (meta.filetype === 'image') {
+			$('#upload').trigger('click');
+			$('#upload').on('change', function () {
+				var file = this.files[0];
+				var reader = new FileReader();
+				reader.onload = function (e) {
+					callback(e.target.result, {
+						alt: ''
+					});
+				};
+				reader.readAsDataURL(file);
+			});
+		}
+	}
+};
+
 
 //functions
 
@@ -94,53 +132,81 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 
 	if (dbType === "oracle") {
 		driverElement.value = "oracle.jdbc.OracleDriver";
-		urlElement.value = "jdbc:oracle:thin:@<server_name>:1521:<sid>";
+		urlElement.value = "jdbc:oracle:thin:@<server>:1521:<sid>";
 		testSqlElement.value = "select 1 from dual";
 	} else if (dbType === "mysql") {
+		//https://mariadb.com/kb/en/library/about-mariadb-connector-j/
 		driverElement.value = "com.mysql.jdbc.Driver";
-		urlElement.value = "jdbc:mysql://<server_name>/<database_name>";
+		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "memsql") {
+		driverElement.value = "com.mysql.jdbc.Driver";
+		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "mariadb") {
 		driverElement.value = "org.mariadb.jdbc.Driver";
-		urlElement.value = "jdbc:mariadb://<server_name>/<database_name>";
+		urlElement.value = "jdbc:mariadb://<server>/<database>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "aurora-mysql-mariadb") {
+		//https://mariadb.com/kb/en/library/failover-and-high-availability-with-mariadb-connector-j/#specifics-for-amazon-aurora
+		//https://stackoverflow.com/questions/44020489/db-connections-increase-after-setting-aurora-in-mariadb-connector
+		//https://stackoverflow.com/questions/31250975/what-database-driver-should-be-used-to-access-aws-aurora
+		driverElement.value = "org.mariadb.jdbc.Driver";
+		urlElement.value = "jdbc:mariadb:aurora://<cluster_end_point>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "postgresql") {
 		driverElement.value = "org.postgresql.Driver";
-		urlElement.value = "jdbc:postgresql://<server_name>/<database_name>";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "citus") {
+		driverElement.value = "org.postgresql.Driver";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "aurora-postgresql-postgresql") {
+		driverElement.value = "org.postgresql.Driver";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "greenplum") {
+		driverElement.value = "org.postgresql.Driver";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "timescaledb") {
+		driverElement.value = "org.postgresql.Driver";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "hsqldb-standalone") {
-		driverElement.value = "org.hsqldb.jdbcDriver";
+		driverElement.value = "org.hsqldb.jdbc.JDBCDriver";
 		urlElement.value = "jdbc:hsqldb:file:<file_path>;shutdown=true;hsqldb.write_delay=false";
+		testSqlElement.value = "values 1";
+	} else if (dbType === "hsqldb-server") {
+		driverElement.value = "org.hsqldb.jdbc.JDBCDriver";
+		urlElement.value = "jdbc:hsqldb:hsql://<server>:9001/<database_alias>";
 		testSqlElement.value = "values 1";
 	} else if (dbType === "sqlserver-ms") {
 		driverElement.value = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-		urlElement.value = "jdbc:sqlserver://<server_name>;databaseName=<database_name>";
+		urlElement.value = "jdbc:sqlserver://<server>;databaseName=<database>";
+		testSqlElement.value = "select 1";
+	} else if (dbType === "sqlserver-jtds") {
+		driverElement.value = "net.sourceforge.jtds.jdbc.Driver";
+		urlElement.value = "jdbc:jtds:sqlserver://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "cubrid") {
 		driverElement.value = "cubrid.jdbc.driver.CUBRIDDriver";
-		urlElement.value = "jdbc:cubrid:<server_name>:33000:<database_name>:::";
+		urlElement.value = "jdbc:cubrid:<server>:33000:<database>:::";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "other") {
 		driverElement.value = "";
 		urlElement.value = "";
 		testSqlElement.value = "";
-	} else if (dbType === "hsqldb-server") {
-		driverElement.value = "org.hsqldb.jdbcDriver";
-		urlElement.value = "jdbc:hsqldb:hsql://<server_name>:9001/<database_alias>";
-		testSqlElement.value = "values 1";
-	} else if (dbType === "sqlserver-jtds") {
-		driverElement.value = "net.sourceforge.jtds.jdbc.Driver";
-		urlElement.value = "jdbc:jtds:sqlserver://<server_name>/<database_name>";
-		testSqlElement.value = "select 1";
 	} else if (dbType === "sql-logging") {
 		driverElement.value = "net.sf.log4jdbc.sql.jdbcapi.DriverSpy";
 		urlElement.value = "jdbc:log4" + urlElement.value;
 		testSqlElement.value = "";
 	} else if (dbType === "db2") {
 		driverElement.value = "com.ibm.db2.jcc.DB2Driver";
-		urlElement.value = "jdbc:db2://<server_name>:<port>/<database_name>";
+		urlElement.value = "jdbc:db2://<server>:<port>/<database>";
 		testSqlElement.value = "select 1 from sysibm.sysdummy1";
-	} else if (dbType === "generic-odbc") {
+	} else if (dbType === "odbc-sun") {
 		driverElement.value = "sun.jdbc.odbc.JdbcOdbcDriver";
 		urlElement.value = "jdbc:odbc:<dsn_name>";
 		testSqlElement.value = "";
@@ -155,7 +221,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		}
 	} else if (dbType === "hbase-phoenix") {
 		driverElement.value = "org.apache.phoenix.jdbc.PhoenixDriver";
-		urlElement.value = "jdbc:phoenix:<server_name>";
+		urlElement.value = "jdbc:phoenix:<server>";
 		testSqlElement.value = "";
 	} else if (dbType === "msaccess-ucanaccess") {
 		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
@@ -180,7 +246,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "h2-server") {
 		driverElement.value = "org.h2.Driver";
-		urlElement.value = "jdbc:h2://<server_name>/<database_name>";
+		urlElement.value = "jdbc:h2://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "h2-embedded") {
 		driverElement.value = "org.h2.Driver";
@@ -199,16 +265,12 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "";
 	} else if (dbType === "couchbase") {
 		driverElement.value = "com.couchbase.jdbc.CBDriver";
-		urlElement.value = "jdbc:couchbase://<server_name>:8093";
-		testSqlElement.value = "";
-	} else if (dbType === "mongodb") {
-		driverElement.value = "";
-		urlElement.value = "mongodb://<server_name>";
+		urlElement.value = "jdbc:couchbase://<server>:8093";
 		testSqlElement.value = "";
 	} else if (dbType === "drill") {
 		//https://stackoverflow.com/questions/31654658/apache-drill-connection-to-drill-in-embedded-mode-java/33442630
 		driverElement.value = "org.apache.drill.jdbc.Driver";
-		urlElement.value = "jdbc:drill:drillbit=<server_name>";
+		urlElement.value = "jdbc:drill:drillbit=<server>";
 		testSqlElement.value = "select 1 from sys.version";
 	} else if (dbType === "firebird") {
 		//https://gist.github.com/mariuz/1043473
@@ -217,60 +279,64 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		//https://www.firebirdsql.org/file/documentation/drivers_documentation/java/faq.html#how-can-i-solve-the-error-connection-rejected-no-connection-character-set-specified
 		//http://www.firebirdfaq.org/faq30/
 		driverElement.value = "org.firebirdsql.jdbc.FBDriver";
-		urlElement.value = "jdbc:firebirdsql://<server_name>/<file_path or database_alias>?encoding=UTF8";
+		urlElement.value = "jdbc:firebirdsql://<server>/<file_path or database_alias>?encoding=UTF8";
 		testSqlElement.value = "select 1 from RDB$DATABASE";
 	} else if (dbType === "monetdb") {
 		//https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Select_queries/Select_without_tables
 		driverElement.value = "nl.cwi.monetdb.jdbc.MonetDriver";
-		urlElement.value = "jdbc:monetdb://<server_name>/<database_name>";
+		urlElement.value = "jdbc:monetdb://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "vertica") {
 		//https://my.vertica.com/docs/7.1.x/HTML/Content/Authoring/ConnectingToHPVertica/ClientJDBC/CreatingAndConfiguringAConnection.htm
 		driverElement.value = "com.vertica.jdbc.Driver";
-		urlElement.value = "jdbc:vertica://<server_name>/<database_name>";
+		urlElement.value = "jdbc:vertica://<server>/<database>";
 		testSqlElement.value = "select 1 from dual";
 	} else if (dbType === "informix") {
 		//https://gist.github.com/ikenna/5706366
 		driverElement.value = "com.informix.jdbc.IfxDriver";
-		urlElement.value = "jdbc:informix-sqli://<server_name>:<port>/<database_name>";
+		urlElement.value = "jdbc:informix-sqli://<server>:<port>/<database>";
 		testSqlElement.value = "select 1 from systables where tabid=1";
 	} else if (dbType === "cassandra-adejanovski") {
 		//https://datastax-oss.atlassian.net/browse/JAVA-975
 		//http://docs.datastax.com/en/cql/3.1/cql/cql_using/use_query_system_c.html
 		//https://stackoverflow.com/questions/34055752/select-contant-value-is-cassandra
 		driverElement.value = "com.github.adejanovski.cassandra.jdbc.CassandraDriver";
-		urlElement.value = "jdbc:cassandra://<server_name>/<keyspace>";
+		urlElement.value = "jdbc:cassandra://<server>/<keyspace>";
 		testSqlElement.value = "select release_version from system.local";
 	} else if (dbType === "neo4j") {
 		driverElement.value = "org.neo4j.jdbc.Driver";
-		urlElement.value = "jdbc:neo4j:bolt://<server_name>";
+		urlElement.value = "jdbc:neo4j:bolt://<server>";
 		testSqlElement.value = "";
 	} else if (dbType === "exasol") {
 		driverElement.value = "com.exasol.jdbc.EXADriver";
-		urlElement.value = "jdbc:exa://<server_name>;schema=<database_name>";
+		urlElement.value = "jdbc:exa://<server>;schema=<database>";
 		testSqlElement.value = "";
 	} else if (dbType === "redshift") {
 		driverElement.value = "com.amazon.redshift.jdbc.Driver";
-		urlElement.value = "jdbc:redshift://<server_name>/<database_name>";
+		urlElement.value = "jdbc:redshift://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "teradata") {
 		driverElement.value = "com.teradata.jdbc.TeraDriver";
-		urlElement.value = "jdbc:teradata://<server_name>/DATABASE=<database_name>";
+		urlElement.value = "jdbc:teradata://<server>/DATABASE=<database>";
 		testSqlElement.value = "";
 	} else if (dbType === "snowflake1-us-west") {
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
-		urlElement.value = "jdbc:snowflake://<account_name>.snowflakecomputing.com/?warehouse=<warehouse_name>&db=<database_name>&schema=<schema_name>";
+		urlElement.value = "jdbc:snowflake://<account_name>.snowflakecomputing.com/?warehouse=<warehouse>&db=<database>&schema=<schema>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "snowflake2-other") {
 		//https://docs.snowflake.net/manuals/user-guide/jdbc-configure.html
 		//https://docs.snowflake.net/manuals/user-guide/intro-regions.html
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
-		urlElement.value = "jdbc:snowflake://<account_name>.<region_id>.snowflakecomputing.com/?warehouse=<warehouse_name>&db=<database_name>&schema=<schema_name>";
+		urlElement.value = "jdbc:snowflake://<account_name>.<region_id>.snowflakecomputing.com/?warehouse=<warehouse>&db=<database>&schema=<schema>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "presto") {
 		driverElement.value = "com.facebook.presto.jdbc.PrestoDriver";
-		urlElement.value = "jdbc:presto://<server_name>:<port>/<catalog_name>/<schema_name>";
+		urlElement.value = "jdbc:presto://<server>:<port>/<catalog>/<schema>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "kdb") {
+		driverElement.value = "jdbc";
+		urlElement.value = "jdbc:q:<server>:<port>";
+		testSqlElement.value = "";
 	}
 }
 
@@ -304,6 +370,50 @@ function escapeHtmlAttribute(s) {
 //https://gist.github.com/getify/3667624
 function escapeDoubleQuotes(str) {
 	return str.replace(/\\([\s\S])|(")/g, "\\$1$2");
+}
+
+/**
+ * Initializes dropdown hover where a button is used for the drop down
+ * 
+ * @param {string} ancestor - an optional ancestor of the button dropdown toggle
+ * @returns {undefined}
+ */
+function initializeButtonHover(ancestor) {
+	//https://api.jquery.com/descendant-selector/
+	var selector;
+	if(ancestor === undefined) {
+		selector = '';
+	} else {
+		selector = ancestor + ' ';
+	}
+	selector += 'button.dropdown-toggle';
+	
+	//bootstrap-dropdown-hover
+//	$(selector).bootstrapDropdownHover({
+//		hideTimeout: 100
+//	});
+	
+	//bootstrap-hover-dropdown
+	$(selector).dropdownHover({
+		delay: 100
+	});
+}
+
+/**
+ * Initializes dropdown hover for bootstrap-selects
+ * 
+ * @returns {undefined}
+ */
+function initializeSelectHover() {
+	//activate dropdown-hover. to make bootstrap-select open on hover
+	//must come after bootstrap-select initialization
+	initializeButtonHover();
+	
+	//refresh needed when using bootstrap-dropdown-hover to avoid console error
+	//not needed when using bootstrap-hover-dropdown with bootstrap-select 1.10.0
+	//always needed with bootstrap-select 1.13
+	//bootstrap-select 1.13 with hover causes dropdowns to open upwards. set dropupAuto to false?
+	//$('.selectpicker').selectpicker('refresh');
 }
 
 /**
@@ -363,21 +473,18 @@ function isMobile() {
  * Actions to perform when datatables completes initializing a table
  */
 function datatablesInitComplete() {
-	$('div.dataTables_filter input').focus();
-
-//	$('.dataTables_length select').addClass('selectpicker');
-////	$('.dataTables_length select').attr({'data-toggle': 'dropdown', 'data-hover': 'dropdown'});
-////	$('.dataTables_length select').attr('data-hover','dropdown');
-//
-//	//Enable Bootstrap-Select
-//	$('.selectpicker').selectpicker({
-//		iconBase: 'fa',
-//		tickIcon: 'fa-check-square'
-//	});
-//	
-//	$('button.dropdown-toggle').dropdownHover({
-//		delay: 100
-//	});
+	if (!isMobile()) {
+		$('div.dataTables_filter input').trigger("focus");
+	}
+	
+	//https://datatables.net/forums/discussion/49138/how-to-put-space-between-buttons-and-show-x-entries
+	//https://developer.snapappointments.com/bootstrap-select/examples/#width
+	$('.dataTables_length select').selectpicker({
+		width: '100px'
+	});
+	
+	var ancestor = '.dataTables_length';
+	initializeButtonHover(ancestor);
 }
 
 /**
@@ -493,9 +600,46 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
  * Error handler for http errors after ajax calls
  * 
  * @param {jqXHR} xhr
+ * @param {string} status
+ * @param {string} error
  */
-function ajaxErrorHandler(xhr) {
-	bootbox.alert(xhr.responseText);
+function ajaxErrorHandler(xhr, status, error) {
+	//https://api.jquery.com/jquery.ajax/
+	var message = getAjaxErrorMessage(xhr);
+	bootbox.alert(message);
+}
+
+/**
+ * Show http errors after ajax calls by non-admin users
+ * 
+ * @param {jqXHR} xhr
+ * @param {string} errorOccurredText - optional alert title
+ */
+function showUserAjaxError(xhr, errorOccurredText) {
+	var message = getAjaxErrorMessage(xhr);
+	bootbox.alert({
+		title: errorOccurredText, //can be empty for alerts. if empty, alert won't have title
+		message: message //must not be empty
+	});
+}
+
+/**
+ * Gets the message to display for an ajax call error
+ * 
+ * @param {jqXHR} xhr
+ * @returns {String}
+ */
+function getAjaxErrorMessage(xhr) {
+	var message;
+	
+	var responseText = xhr.responseText; //can be undefined e.g. if request header name is empty string
+	if (responseText) {
+		message = responseText;
+	} else {
+		message = xhr.status + " " + xhr.statusText;
+	}
+	
+	return message;
 }
 
 /**
@@ -841,13 +985,13 @@ function initConfigPage(tbl, pageLength, showAllRowsText, contextPath,
  */
 function addSelectDeselectAllHandler() {
 	//handle select all/deselect all
-	$('.select-all').click(function (e) {
+	$('.select-all').on("click", function (e) {
 		//http://fuelyourcoding.com/jquery-events-stop-misusing-return-false/
 		e.preventDefault();
 		var item = $(this).data('item');
 		$(item).multiSelect('select_all');
 	});
-	$('.deselect-all').click(function (e) {
+	$('.deselect-all').on("click", function (e) {
 		e.preventDefault();
 		var item = $(this).data('item');
 		$(item).multiSelect('deselect_all');

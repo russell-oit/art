@@ -41,14 +41,14 @@ Display user jobs and jobs configuration
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/css/bootstrap-datetimepicker.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.css"/>
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yadcf.css"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.js"></script>
 
 		<script>
 			//put obtaining of server offset in head to reduce difference between server and client time
@@ -72,7 +72,7 @@ Display user jobs and jobs configuration
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -218,7 +218,7 @@ Display user jobs and jobs configuration
 					$('#runLaterModal').modal('show');
 				});
 
-				$("#runLaterSubmit").click(function (e) {
+				$("#runLaterSubmit").on("click", function (e) {
 					e.preventDefault();
 
 					var recordName = $('#runLaterJobName').val();
@@ -289,7 +289,7 @@ Display user jobs and jobs configuration
 					});
 				});
 
-				$('#deleteRecords').click(function () {
+				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -333,7 +333,7 @@ Display user jobs and jobs configuration
 					}
 				});
 
-				$('#editRecords').click(function () {
+				$('#editRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -346,7 +346,7 @@ Display user jobs and jobs configuration
 					}
 				});
 
-				$('#runSingle').click(function () {
+				$('#runSingle').on("click", function () {
 					var item = $(this);
 					var recordName = escapeHtmlContent(item.data("name"));
 					var recordId = item.data("id");
@@ -367,7 +367,7 @@ Display user jobs and jobs configuration
 					});
 				});
 
-				$('#runLaterSingle').click(function () {
+				$('#runLaterSingle').on("click", function () {
 					var item = $(this);
 					var recordName = escapeHtmlContent(item.data("name"));
 					var recordId = item.data("id");

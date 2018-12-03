@@ -18,13 +18,10 @@
 package art.cache;
 
 import art.servlets.Config;
-import art.settings.Settings;
 import art.settings.SettingsHelper;
-import art.settings.SettingsService;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -49,9 +46,6 @@ public class CacheHelper {
 
 	@Autowired
 	private ServletContext servletContext;
-
-	@Autowired
-	private SettingsService settingsService;
 
 	/**
 	 * Clears mondrian caches used by jpivot
@@ -102,22 +96,15 @@ public class CacheHelper {
 	public void clearSettings(HttpSession session) {
 		logger.debug("Entering clearSettings");
 
-		try {
-			Settings settings = settingsService.getSettings();
-			if (settings != null) {
-				SettingsHelper settingsHelper = new SettingsHelper();
-				settingsHelper.refreshSettings(settings, session, servletContext);
-			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-		}
+		SettingsHelper settingsHelper = new SettingsHelper();
+		settingsHelper.refreshSettings(session, servletContext);
 	}
 
 	/**
 	 * Refreshes custom settings
 	 */
 	public void clearCustomSettings() {
-		Config.loadCustomSettings(servletContext);
+		Config.initializeCustomSettings(servletContext);
 	}
 
 	/**
@@ -241,6 +228,14 @@ public class CacheHelper {
 	}
 
 	/**
+	 * Clears the drilldowns cache
+	 */
+	@CacheEvict(value = "drilldowns", allEntries = true)
+	public void clearDrilldowns() {
+		logger.debug("Entering clearDrilldowns");
+	}
+
+	/**
 	 * Clears all caches
 	 *
 	 * @param session the http session
@@ -248,7 +243,7 @@ public class CacheHelper {
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
 		"datasources", "schedules", "jobs", "rules", "parameters",
 		"encryptors", "holidays", "destinations", "smtpServers", "roles",
-		"permissions"}, allEntries = true)
+		"permissions", "drilldowns"}, allEntries = true)
 	public void clearAll(HttpSession session) {
 		logger.debug("Entering clearAll");
 

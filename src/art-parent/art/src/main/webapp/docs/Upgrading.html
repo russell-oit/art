@@ -35,25 +35,22 @@
     <li>Download the latest ART version</li> 
     <li>Extract the zip package to a temporary location</li> 
     <li>Review the <strong>changelog.txt</strong> file to see what has changed</li> 
-    <li>Backup the ART directory contained on the application server </li> 
+    <li>Unzip the <strong>art.war</strong> file to a directory e.g. one named <code>art</code>. You can use any zip/unzip utility as a .war file is a normal zip file.</li> 
+    <li>Stop the application server</li> 
     <li>Backup the ART database</li> 
     <li>Connect to the ART database and run any database upgrade scripts included in the download package to bring the ART database up to date</li> 
-    <li>Deploy the new <strong>art.war</strong> file to the application server. There are a number of ways to do this. You can do the following if using Apache Tomcat. 
-     <ul> 
-      <li>Stop Tomcat</li> 
-      <li>Delete the art directory and art.war file in the <strong>TOMCAT_HOME\webapps</strong> directory</li> 
-      <li>Delete ART's Tomcat cache by deleting the art directory in the <strong>TOMCAT_HOME\work\Catalina\localhost</strong> directory</li> 
-      <li>Copy the new art.war file to the webapps directory</li> 
-      <li>Start Tomcat </li> 
-     </ul> </li> 
+    <li>Backup the art directory on the application server</li> 
+    <li>Delete the art directory and any art.war file in the webapps directory of the application server</li> 
+    <li>If using Tomcat, delete ART's Tomcat cache by deleting the art directory in the <strong>TOMCAT_HOME\work\Catalina\localhost</strong> directory</li> 
+    <li>Copy the new version art directory (from the unzipped art.war) to the webapps directory of the application server</li> 
     <li>Copy the contents of the backup <strong>art\WEB-INF\work</strong> directory to the new version's directory</li> 
     <li>Copy the contents of the backup <strong>art\WEB-INF\thymeleaf\jobs</strong> directory to the new version's directory</li> 
     <li>Copy the contents of the backup <strong>art\js-templates</strong> directory to the new version's directory</li> 
-    <li>If you had modified the <strong>art\WEB-INF\art-custom-settings.json</strong> file, copy the file from the backup directory to the new version's directory</li> 
-    <li>If you had modified the <strong>art\WEB-INF\groovy-whitelist.txt</strong> file, copy the file from the backup directory to the new version's directory</li> 
+    <li>If you had modified the <strong>art\WEB-INF\art-custom-settings.json</strong> file, review the structure of the new version's file and copy appropriate details to the appropriate sections. New sections may have been added in a new version.</li> 
+    <li>If you had modified the <strong>art\WEB-INF\groovy-whitelist.txt</strong> file, copy the file to the new version's directory</li> 
     <li>If you were using the demo HSQLDB database, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="" href="https://sourceforge.net/p/art/wiki/Tips/">Tips</a> documentation to see how you can upgrade an HSQLDB database.</li> 
     <li>If you had put any <strong>JDBC drivers</strong> in the <strong>art\WEB-INF\lib</strong> directory, copy these drivers from the backup lib directory to the new version's lib directory.</li> 
-    <li>Restart Tomcat</li> 
+    <li>Start the application server</li> 
     <li>Clear your browser's cache e.g. for Firefox, use the History | Clear Recent History menu</li> 
    </ul> 
    <p>The upgrade is complete. All users, reports, scheduled jobs etc should continue to work as before.</p> 
@@ -83,7 +80,7 @@
      </tr> 
      <tr> 
       <td><strong>Internet Explorer</strong></td> 
-      <td>If using Internet Explorer, you will need to use version 8 at a minimum. Some features may not work with Internet Explorer 8 so it is recommended, if using Internet Explorer, to use the latest version.</td> 
+      <td>If using Internet Explorer, you will need to use version 8 at a minimum. Some features may not work with Internet Explorer 8 so it is recommended, if using Internet Explorer, to use version 11.</td> 
      </tr> 
      <tr> 
       <td><strong>Java</strong></td> 
@@ -99,7 +96,7 @@
      </tr> 
      <tr> 
       <td><strong>Jxls templates</strong></td> 
-      <td>Jxls templates need to be recreated. Review the sample templates located in the <strong>ART_HOME\WEB-INF\work\templates</strong> directory, or the Jxls website, <a href="http://jxls.sourceforge.net/">http://jxls.sourceforge.net/</a>, to see the new template structure.</td> 
+      <td>Jxls templates need to be recreated. Review the sample templates located in the <strong>ART_HOME\WEB-INF\work\templates</strong> directory, or the <a class="" href="http://jxls.sourceforge.net/">Jxls website</a> to see the new template structure.</td> 
      </tr> 
      <tr> 
       <td><strong>Chained parameters</strong></td> 
@@ -110,7 +107,7 @@
       <td>The templates directory has been moved to <strong>ART_HOME\WEB-INF\work\templates</strong>. The export directory has been moved to <strong>ART_HOME\WEB-INF\work\export</strong>.</td> 
      </tr> 
      <tr> 
-      <td><strong>XMLA Repors</strong></td> 
+      <td><strong>XMLA Reports</strong></td> 
       <td>For Mondrian XMLA and Microsoft XMLA reports, the url, username and password fields have been removed from the report definition page and instead a datasource needs to be created from the Datasource Configuration page and then used by selecting the Datasource field in the report definition.</td> 
      </tr> 
      <tr> 
@@ -127,7 +124,7 @@
      </tr> 
      <tr> 
       <td><strong>Non-labelled multi parameters</strong></td> 
-      <td>For reports that use multi parameters where the parameter name is not included in the sql source e.g. <code>... IN(#param#)</code>, the reports will need to be updated to include the parameter placeholder in the sql source.</td> 
+      <td>For reports that use multi parameters where the parameter name is not included in the sql source, the reports will need to be updated to include the parameter placeholder in the sql source.</td> 
      </tr> 
      <tr> 
       <td><strong>Non-labelled rules</strong></td> 
@@ -139,7 +136,7 @@
      </tr> 
      <tr> 
       <td><strong>defaultAutoCommit</strong></td> 
-      <td>If using JNDI for the ART Database, make sure the <strong>defaultAutoCommit</strong> setting is set to <strong>true</strong> if you were previously using false. This setting is for Tomcat but a similar change would be needed for different application servers.</td> 
+      <td>If using JNDI for the ART Database, make sure the <strong>defaultAutoCommit</strong> setting is set to <strong>true</strong>. This setting is for Tomcat but a similar change would be needed for other application servers.</td> 
      </tr> 
     </tbody> 
    </table> 

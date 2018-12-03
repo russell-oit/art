@@ -18,7 +18,9 @@
 package art.artdatabase;
 
 import art.datasource.DatasourceInfo;
+import art.encryption.AesEncryptor;
 import art.enums.ConnectionPoolLibrary;
+import art.settings.EncryptionPassword;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 
@@ -62,6 +64,51 @@ public class ArtDatabase extends DatasourceInfo implements Serializable {
 	 */
 	public void setConnectionPoolLibrary(ConnectionPoolLibrary connectionPoolLibrary) {
 		this.connectionPoolLibrary = connectionPoolLibrary;
+	}
+
+	/**
+	 * Decrypts the password field
+	 *
+	 * @throws java.lang.Exception
+	 */
+	public void decryptPassword() throws Exception {
+		String key = null;
+		EncryptionPassword encryptionPassword = null;
+		decryptPassword(key, encryptionPassword);
+	}
+
+	/**
+	 * Decrypts the password field
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption password configuration. null if to use current.
+	 * @throws java.lang.Exception
+	 */
+	public void decryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
+		password = AesEncryptor.decrypt(password, key, encryptionPassword);
+	}
+
+	/**
+	 * Encrypts the password field
+	 *
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPassword() throws Exception {
+		String key = null;
+		EncryptionPassword encryptionPassword = null;
+		encryptPassword(key, encryptionPassword);
+	}
+
+	/**
+	 * Encrypts the password field
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
+		password = AesEncryptor.encrypt(password, key, encryptionPassword);
 	}
 
 }

@@ -25,7 +25,7 @@ Edit user group rule value
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="ruleValuesConfig"]').parent().addClass('active');
 
-				$('#ruleValue').focus();
+				$('#ruleValue').trigger("focus");
 
 			});
 		</script>

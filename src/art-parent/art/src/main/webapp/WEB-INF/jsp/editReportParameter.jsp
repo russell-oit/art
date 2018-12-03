@@ -26,13 +26,7 @@
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
-	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
-	</jsp:attribute>
-
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -49,9 +43,7 @@
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
-				});
+				initializeSelectHover();
 
 			});
 		</script>

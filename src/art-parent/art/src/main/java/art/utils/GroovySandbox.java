@@ -63,10 +63,9 @@ public class GroovySandbox extends GroovyValueFilter {
 			try {
 				List<String> lines = FileUtils.readLines(whitelistFile, "UTF-8");
 				for (String line : lines) {
-					if (StringUtils.isBlank(line) || StringUtils.startsWith(line, "#")) {
-						//do nothing
-					} else {
+					if (StringUtils.isNotBlank(line) && !StringUtils.startsWith(line, "#")) {
 						try {
+							//https://stackoverflow.com/questions/3442090/java-what-is-this-ljava-lang-object
 							allowedTypes.add(Class.forName(line));
 						} catch (ClassNotFoundException ex) {
 							logger.error("Error", ex);

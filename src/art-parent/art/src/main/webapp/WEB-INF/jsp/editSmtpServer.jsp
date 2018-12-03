@@ -83,7 +83,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert(xhr.responseText);
+							ajaxErrorHandler(xhr);
 						}
 					});
 				});
@@ -105,7 +105,7 @@
 					offText: '${noText}'
 				});
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 			});
 

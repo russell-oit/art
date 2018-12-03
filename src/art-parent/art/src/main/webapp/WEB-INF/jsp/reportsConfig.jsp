@@ -42,12 +42,12 @@ Reports configuration page
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.css"/>
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yadcf.css"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -140,12 +140,10 @@ Reports configuration page
 						$(row).attr('data-name', data.name);
 					},
 					drawCallback: function () {
-						$('button.dropdown-toggle').dropdownHover({
-							delay: 100
-						});
+						initializeButtonHover();
 					},
 					initComplete: function () {
-						$('div.dataTables_filter input').focus();
+						datatablesInitComplete();
 					}
 				});
 
@@ -222,7 +220,7 @@ Reports configuration page
 					}); //end bootbox confirm
 				});
 
-				$('#deleteRecords').click(function () {
+				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -268,7 +266,7 @@ Reports configuration page
 					}
 				});
 
-				$('#editRecords').click(function () {
+				$('#editRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -281,7 +279,7 @@ Reports configuration page
 					}
 				});
 
-				$('#exportRecords').click(function () {
+				$('#exportRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
@@ -294,7 +292,7 @@ Reports configuration page
 					}
 				});
 
-				$("#refreshRecords").click(function () {
+				$("#refreshRecords").on("click", function () {
 					table.ajax.reload();
 				});
 

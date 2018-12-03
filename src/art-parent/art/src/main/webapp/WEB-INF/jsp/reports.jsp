@@ -25,18 +25,18 @@ Reports page. Also main/home page
 					 hasTable="true">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.css"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.2/jquery.dataTables.yadcf.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[href*="reports"]').parent().addClass('active');
 
 				var tbl = $('#reports');
-				
+
 //				var columnFilterRow = createColumnFilters(tbl);
 
 				var oTable = tbl.dataTable({
@@ -64,16 +64,16 @@ Reports page. Also main/home page
 						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: function () {
-						$('div.dataTables_filter input').focus();
+						datatablesInitComplete();
 					}
 				});
-				
+
 //				//move column filter row after heading row
 //				columnFilterRow.insertAfter(columnFilterRow.next());
 
 				//get datatables api object
 				var table = oTable.api();
-				
+
 //				// Apply the column filter
 //				applyColumnFilters(tbl, table);
 
@@ -86,7 +86,7 @@ Reports page. Also main/home page
 				}
 				var filterRow = '<tr>' + cols + '</tr>';
 				headingRow.after(filterRow);
-				
+
 				yadcf.init(table,
 						[
 							{

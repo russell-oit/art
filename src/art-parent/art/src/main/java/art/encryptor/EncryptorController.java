@@ -216,7 +216,7 @@ public class EncryptorController {
 			String recordName = encryptor.getName() + " (" + encryptor.getEncryptorId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/encryptors";
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -285,9 +285,9 @@ public class EncryptorController {
 	 * @param action "add or "edit"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
-	 * @throws SQLException
+	 * @throws Exception
 	 */
-	private String setPasswords(Encryptor encryptor, String action) throws SQLException {
+	private String setPasswords(Encryptor encryptor, String action) throws Exception {
 		logger.debug("Entering setPasswords: encryptor={}, action='{}'", encryptor, action);
 
 		//set the aes crypt password

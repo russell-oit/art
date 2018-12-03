@@ -25,15 +25,16 @@ Admin rights configuration page
 <spring:message code="page.text.selected" var="selectedText"/>
 <spring:message code="page.text.search" var="searchText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3"
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasNotify="true">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/multi-select-0.9.12/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/multiSelect.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/multi-select-0.9.12/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
 		
 		<script type="text/javascript">
@@ -42,6 +43,7 @@ Admin rights configuration page
 				$('a[href*="adminRightsConfig"]').parent().addClass('active');
 
 				$('.multi-select').multiSelect({
+					cssClass: 'wide-multi-select',
 					selectableHeader: "<div>${availableText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
 					selectionHeader: "<div>${selectedText}</div>\n\
@@ -56,7 +58,7 @@ Admin rights configuration page
 						that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
 								.on('keydown', function(e) {
 									if (e.which === 40) {
-										that.$selectableUl.focus();
+										that.$selectableUl.trigger("focus");
 										return false;
 									}
 								});
@@ -64,7 +66,7 @@ Admin rights configuration page
 						that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
 								.on('keydown', function(e) {
 									if (e.which === 40) {
-										that.$selectionUl.focus();
+										that.$selectionUl.trigger("focus");
 										return false;
 									}
 								});
@@ -150,10 +152,10 @@ Admin rights configuration page
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-md-3" for="admins">
+					<label class="control-label col-md-2" for="admins">
 						<spring:message code="adminRights.text.admins"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="admins" id="admins" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="admin" items="${admins}">
 								<option value="${admin.userId}-${encode:forHtmlAttribute(admin.username)}">
@@ -166,10 +168,10 @@ Admin rights configuration page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="datasources">
+					<label class="control-label col-md-2" for="datasources">
 						<spring:message code="adminRights.text.datasources"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="datasources" id="datasources" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="datasource" items="${datasources}">
 								<option value="${datasource.datasourceId}">
@@ -182,10 +184,10 @@ Admin rights configuration page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="reportGroups">
+					<label class="control-label col-md-2" for="reportGroups">
 						<spring:message code="page.text.reportGroups"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="reportGroups" id="reportGroups" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="reportGroup" items="${reportGroups}">
 								<option value="${reportGroup.reportGroupId}">

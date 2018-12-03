@@ -26,13 +26,7 @@
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
-	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
-	</jsp:attribute>
-
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-
 		<script type="text/javascript">
 			$(document).ready(function () {
 				//{container: 'body'} needed if tooltips shown on input-group element or button
@@ -46,11 +40,9 @@
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
-				});
+				initializeSelectHover();
 
-				$("input[name='location']").change(function () {
+				$("input[name='location']").on("change", function () {
 					toggleVisibleFields();
 				});
 

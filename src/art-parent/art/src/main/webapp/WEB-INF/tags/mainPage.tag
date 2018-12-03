@@ -23,7 +23,7 @@ bootstrap js, jquery js, datatables css, datatables js
 <t:genericPage title="ART - ${title}">
 	<jsp:attribute name="headContent">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
@@ -34,10 +34,12 @@ bootstrap js, jquery js, datatables css, datatables js
 	</jsp:attribute>
 
 	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 
 		<script type="text/javascript">
@@ -46,11 +48,13 @@ bootstrap js, jquery js, datatables css, datatables js
 			}).ajaxStop(function () {
 				$('#spinner').hide();
 			});
-			
+
 			var token = $("meta[name='_csrf']").attr("content");
 			var header = $("meta[name='_csrf_header']").attr("content");
 			$(document).ajaxSend(function (e, xhr, options) {
-				xhr.setRequestHeader(header, token);
+				if (header) {
+					xhr.setRequestHeader(header, token);
+				}
 			});
 		</script>
 

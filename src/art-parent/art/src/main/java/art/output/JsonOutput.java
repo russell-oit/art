@@ -25,7 +25,6 @@ import art.utils.ArtUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -176,10 +175,10 @@ public class JsonOutput {
 	 * @param report the report being run
 	 * @return an object containing the json string representation of the data
 	 * and the number of rows in the resultset
-	 * @throws JsonProcessingException
+	 * @throws Exception
 	 */
 	public JsonOutputResult generateOutput(Object data, Report report)
-			throws JsonProcessingException, IOException {
+			throws Exception {
 
 		logger.debug("Entering generateOutput");
 

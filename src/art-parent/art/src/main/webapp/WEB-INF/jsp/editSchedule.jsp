@@ -45,7 +45,7 @@ Edit schedule page
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="headContent">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
 
 		<script>
 			//put obtaining of server offset in head to reduce difference between server and client time
@@ -67,13 +67,7 @@ Edit schedule page
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
-	</jsp:attribute>
-
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -97,13 +91,11 @@ Edit schedule page
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
-				});
+				initializeSelectHover();
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
-				$('#describeSchedule').click(function () {
+				$('#describeSchedule').on("click", function () {
 					var second = $('#second').val();
 					var minute = $('#minute').val();
 					var hour = $('#hour').val();
@@ -132,7 +124,7 @@ Edit schedule page
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert(xhr.responseText);
+							ajaxErrorHandler(xhr);
 						}
 					});
 				});

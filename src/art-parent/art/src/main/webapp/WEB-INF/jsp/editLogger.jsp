@@ -37,7 +37,7 @@ Edit logger page
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="loggers"]').parent().addClass('active');
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 			});
 		</script>

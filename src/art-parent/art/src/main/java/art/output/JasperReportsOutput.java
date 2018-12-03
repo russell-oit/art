@@ -32,7 +32,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -136,13 +135,10 @@ public class JasperReportsOutput {
 	 * @param reportParams the report parameters to use, not null
 	 * @param reportFormat the report format to use, not null
 	 * @param outputFileName the full path of the output file to use, not null
-	 * @throws java.io.IOException
-	 * @throws java.sql.SQLException
-	 * @throws net.sf.jasperreports.engine.JRException
+	 * @throws java.lang.Exception
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
-			ReportFormat reportFormat, String outputFileName)
-			throws IOException, SQLException, JRException {
+			ReportFormat reportFormat, String outputFileName) throws Exception {
 
 		logger.debug("Entering generateReport");
 
@@ -189,10 +185,9 @@ public class JasperReportsOutput {
 			JasperPrint jasperPrint;
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JasperReportsTemplate) {
-				// What kind of a datasource are we using?
-				Datasource ds = report.getDatasource();
-				if (ds.getDatasourceType() == DatasourceType.MongoDB) {
-					try (MongoDbConnection conn = new MongoDbConnection(ds.getUrl(), ds.getUsername(), ds.getPassword())) {
+				Datasource datasource = report.getDatasource();
+				if (datasource.getDatasourceType() == DatasourceType.MongoDB) {
+					try (MongoDbConnection conn = new MongoDbConnection(datasource.getUrl(), datasource.getUsername(), datasource.getPassword())) {
 						jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, conn);
 					}
 				} else {

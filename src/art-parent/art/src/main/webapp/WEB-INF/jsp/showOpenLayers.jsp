@@ -15,8 +15,8 @@
 
 </div>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/OpenLayers-4.0.1/ol.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/OpenLayers-4.0.1/ol.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/OpenLayers-5.3.0/ol.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/OpenLayers-5.3.0/ol.js"></script>
 
 <c:if test="${not empty options.cssFile}">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(options.cssFile)}">
@@ -45,7 +45,7 @@
 	mapId = '${mapId}';
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = JSON.parse(dataString);
-	var markerUrl = "${pageContext.request.contextPath}/js/leaflet-1.0.3/images/marker-icon.png";
+	var markerUrl = "${pageContext.request.contextPath}/js/Leaflet-1.3.4/images/marker-icon.png";
 
 	var dataFileUrl = null;
 	<c:if test="${not empty options.dataFile}">

@@ -161,8 +161,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import synapticloop.b2.B2ApiClient;
-import synapticloop.b2.exception.B2ApiException;
 
 /**
  * Runs report jobs
@@ -555,47 +553,14 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Copies the generated file to backblaze b2 storage using the synapticloop
-	 * library
+	 * Copies the generated file to backblaze b2 storage
 	 *
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
 	private void sendFileToB2(Destination destination, String fullLocalFileName) {
-		logger.debug("Entering sendFileToB2: destination={},"
-				+ " fullLocalFileName='{}'", destination, fullLocalFileName);
-		
-		B2ApiClient b2ApiClient = new B2ApiClient();
-		
-		try {
-			String accountId = destination.getUser();
-			String applicationKey = destination.getPassword();
-			
-			b2ApiClient.authenticate(accountId, applicationKey);
-			
-			String destinationSubDirectory = destination.getSubDirectory();
-			String jobSubDirectory = job.getSubDirectory();
-
-			String directorySeparator = "/";
-			String finalPath = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
-
-			String remoteFileName = finalPath + fileName;
-
-			File localFile = new File(fullLocalFileName);
-			
-			String bucketId = destination.getPath();
-			
-			b2ApiClient.uploadFile(bucketId, remoteFileName, localFile);
-			logger.debug("Uploaded '{}'. Job Id {}", remoteFileName, jobId);
-		} catch (B2ApiException | IOException ex) {
-			logErrorAndSetDetails(ex);
-		} finally {
-			try {
-				b2ApiClient.close();
-			} catch (IOException ex) {
-				logError(ex);
-			}
-		}
+		String provider = "b2";
+		sendFileToBlobStorage(provider, destination, fullLocalFileName);
 	}
 
 	/**
@@ -922,7 +887,7 @@ public class ReportJob implements org.quartz.Job {
 	private void sendFileToBlobStorage(String provider, Destination destination,
 			String fullLocalFileName) {
 
-		logger.debug("Entering sendFileToS3: provider='{}' destination={},"
+		logger.debug("Entering sendFileToBlobStorage: provider='{}' destination={},"
 				+ " fullLocalFileName='{}'", provider, destination, fullLocalFileName);
 
 		//https://www.ashishpaliwal.com/blog/2012/04/playing-with-jclouds-transient-blobstore/
@@ -1000,11 +965,12 @@ public class ReportJob implements org.quartz.Job {
 			ByteSource payload = Files.asByteSource(localFile);
 			PayloadBlobBuilder blobBuilder = blobStore.blobBuilder(remoteFileName)
 					.payload(payload)
+					.contentType(mimeType)
 					.contentLength(payload.size());
 
 			if (!StringUtils.equals(provider, "b2")) {
-				blobBuilder.contentDisposition(fileName)
-						.contentType(mimeType);
+				//Content-Disposition header is not supported or allowed by b2 storage service
+				blobBuilder.contentDisposition(fileName);
 			}
 
 			Blob blob = blobBuilder.build();
@@ -1041,8 +1007,6 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering sendFileToNetworkShare: destination={}, fullLocalFileName='{}'",
 				destination, fullLocalFileName);
 
-		com.hierynomus.smbj.connection.Connection connection = null;
-
 		try {
 			NetworkShareOptions networkShareOptions;
 			String options = destination.getOptions();
@@ -1074,97 +1038,91 @@ public class ReportJob implements org.quartz.Job {
 
 			SmbConfig config = configBuilder.build();
 
-			SMBClient client = new SMBClient(config);
-
-			String server = destination.getServer();
-			int port = destination.getPort();
-
-			if (port > 0) {
-				connection = client.connect(server, port);
-			} else {
-				connection = client.connect(server);
-			}
-
-			String username = destination.getUser();
-			if (username == null) {
-				username = "";
-			}
-
-			String password = destination.getPassword();
-			if (password == null) {
-				password = "";
-			}
-
-			String domain = destination.getDomain();
-
-			AuthenticationContext ac;
-			if (networkShareOptions.isAnonymousUser()) {
-				ac = AuthenticationContext.anonymous();
-			} else if (networkShareOptions.isGuestUser()) {
-				ac = AuthenticationContext.guest();
-			} else {
-				ac = new AuthenticationContext(username, password.toCharArray(), domain);
-			}
-
-			com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
-
-			String destinationSubDirectory = destination.getSubDirectory();
-			destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
-
-			String jobSubDirectory = job.getSubDirectory();
-			jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
-
-			//linux shares can use either "\" or "/" as a directory separator
-			//windows shares can only use "\" as a directory separator
-			String directorySeparator;
-			if (StringUtils.contains(destinationSubDirectory, "/")
-					|| StringUtils.contains(jobSubDirectory, "/")) {
-				directorySeparator = "/";
-			} else {
-				directorySeparator = "\\";
-			}
-
-			String finalSubDirectory = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
-
-			// Connect to Share
-			String path = destination.getPath();
-			try (DiskShare share = (DiskShare) session.connectShare(path)) {
-				//https://stackoverflow.com/questions/44634892/java-smb-file-share-without-smb-1-0-cifs-compatibility-enabled
-				// if file is in folder(s), create them first
-				if (StringUtils.isNotBlank(finalSubDirectory)
-						&& destination.isCreateDirectories()) {
-					//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
-					String[] folders = StringUtils.split(finalSubDirectory, directorySeparator);
-					//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
-					List<String> subFolders = new ArrayList<>();
-					for (String folder : folders) {
-						subFolders.add(folder);
-						String partialPath = StringUtils.join(subFolders, directorySeparator);
-						try {
-							if (!share.folderExists(partialPath)) {
-								share.mkdir(partialPath);
-							}
-						} catch (SMBApiException ex) {
-							logError(ex);
-						}
-					}
+			try (SMBClient client = new SMBClient(config)) {
+				String server = destination.getServer();
+				int portSetting = destination.getPort();
+				int finalPort;
+				if (portSetting > 0) {
+					finalPort = portSetting;
+				} else {
+					finalPort = SMBClient.DEFAULT_PORT;
 				}
 
-				File file = new File(fullLocalFileName);
-				String destPath = finalSubDirectory + fileName;
-				boolean overwrite = true;
-				SmbFiles.copy(file, share, destPath, overwrite);
+				try (com.hierynomus.smbj.connection.Connection connection = client.connect(server, finalPort)) {
+					String username = destination.getUser();
+					if (username == null) {
+						username = "";
+					}
+
+					String password = destination.getPassword();
+					if (password == null) {
+						password = "";
+					}
+
+					String domain = destination.getDomain();
+
+					AuthenticationContext ac;
+					if (networkShareOptions.isAnonymousUser()) {
+						ac = AuthenticationContext.anonymous();
+					} else if (networkShareOptions.isGuestUser()) {
+						ac = AuthenticationContext.guest();
+					} else {
+						ac = new AuthenticationContext(username, password.toCharArray(), domain);
+					}
+
+					com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
+
+					String destinationSubDirectory = destination.getSubDirectory();
+					destinationSubDirectory = StringUtils.trimToEmpty(destinationSubDirectory);
+
+					String jobSubDirectory = job.getSubDirectory();
+					jobSubDirectory = StringUtils.trimToEmpty(jobSubDirectory);
+
+					//linux shares can use either "\" or "/" as a directory separator
+					//windows shares can only use "\" as a directory separator
+					String directorySeparator;
+					if (StringUtils.contains(destinationSubDirectory, "/")
+							|| StringUtils.contains(jobSubDirectory, "/")) {
+						directorySeparator = "/";
+					} else {
+						directorySeparator = "\\";
+					}
+
+					String finalSubDirectory = combineDirectoryPaths(directorySeparator, destinationSubDirectory, jobSubDirectory);
+
+					// Connect to Share
+					String path = destination.getPath();
+					try (DiskShare share = (DiskShare) session.connectShare(path)) {
+						//https://stackoverflow.com/questions/44634892/java-smb-file-share-without-smb-1-0-cifs-compatibility-enabled
+						// if file is in folder(s), create them first
+						if (StringUtils.isNotBlank(finalSubDirectory)
+								&& destination.isCreateDirectories()) {
+							//can't create directory hierarchy in one go. throws an error. create sub-directories one at a time
+							String[] folders = StringUtils.split(finalSubDirectory, directorySeparator);
+							//https://stackoverflow.com/questions/4078642/create-a-folder-hierarchy-through-ftp-in-java
+							List<String> subFolders = new ArrayList<>();
+							for (String folder : folders) {
+								subFolders.add(folder);
+								String partialPath = StringUtils.join(subFolders, directorySeparator);
+								try {
+									if (!share.folderExists(partialPath)) {
+										share.mkdir(partialPath);
+									}
+								} catch (SMBApiException ex) {
+									logError(ex);
+								}
+							}
+						}
+
+						File file = new File(fullLocalFileName);
+						String destPath = finalSubDirectory + fileName;
+						boolean overwrite = true;
+						SmbFiles.copy(file, share, destPath, overwrite);
+					}
+				}
 			}
 		} catch (IOException | SMBApiException ex) {
 			logErrorAndSetDetails(ex);
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception ex2) {
-					logError(ex2);
-				}
-			}
 		}
 	}
 
@@ -2356,7 +2314,7 @@ public class ReportJob implements org.quartz.Job {
 
 			//jobs don't show record count so generally no need for scrollable resultsets
 			int resultSetType;
-			if (reportType == ReportType.Group) {
+			if (reportType.requiresScrollableResultSet()) {
 				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 			} else {
 				resultSetType = ResultSet.TYPE_FORWARD_ONLY;

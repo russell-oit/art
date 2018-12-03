@@ -36,13 +36,11 @@
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
 
@@ -62,9 +60,7 @@
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
-				});
+				initializeSelectHover();
 
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
@@ -72,13 +68,13 @@
 					offText: '${noText}'
 				});
 
-				$("#encryptorType").change(function () {
+				$("#encryptorType").on("change", function () {
 					toggleVisibleFields();
 				});
 
 				toggleVisibleFields(); //show/hide on page load
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 			});
 		</script>

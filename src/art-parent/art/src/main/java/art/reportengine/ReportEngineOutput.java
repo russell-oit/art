@@ -34,7 +34,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -200,12 +199,9 @@ public class ReportEngineOutput extends AbstractReportOutput {
 	 * Generates tabular output
 	 *
 	 * @param reportType the report type
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	public void generateTabularOutput(ReportType reportType)
-			throws SQLException, IOException {
-
+	public void generateTabularOutput(ReportType reportType) throws Exception {
 		Objects.requireNonNull(reportType, "reportType must not be null");
 
 		MessageSource messageSource = so.getMessageSource();
@@ -415,12 +411,9 @@ public class ReportEngineOutput extends AbstractReportOutput {
 	 * Generates pivot output
 	 *
 	 * @param reportType the report type
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	public void generatePivotOutput(ReportType reportType)
-			throws SQLException, IOException {
-
+	public void generatePivotOutput(ReportType reportType) throws Exception {
 		MessageSource messageSource = so.getMessageSource();
 		Locale locale = so.getLocale();
 

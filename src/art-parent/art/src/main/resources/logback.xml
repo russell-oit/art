@@ -16,7 +16,6 @@
 	
 	<logger name="org.quartz" level="info"/>
 	<logger name="art" level="info"/>
-	<logger name="synapticloop.b2.response.B2AuthorizeAccountResponse" level="error"/>
 	
 	<root level="warn">
 		<appender-ref ref="stdout"/>

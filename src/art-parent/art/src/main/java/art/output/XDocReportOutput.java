@@ -30,7 +30,6 @@ import art.utils.ArtUtils;
 import fr.opensagres.xdocreport.converter.ConverterTypeTo;
 import fr.opensagres.xdocreport.converter.ConverterTypeVia;
 import fr.opensagres.xdocreport.converter.Options;
-import fr.opensagres.xdocreport.core.XDocReportException;
 import fr.opensagres.xdocreport.document.IXDocReport;
 import fr.opensagres.xdocreport.document.registry.XDocReportRegistry;
 import fr.opensagres.xdocreport.template.IContext;
@@ -39,12 +38,10 @@ import fr.opensagres.xdocreport.template.formatter.FieldsMetadata;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -151,11 +148,10 @@ public class XDocReportOutput {
 	 * report
 	 * @throws java.sql.SQLException
 	 * @throws fr.opensagres.xdocreport.core.XDocReportException
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
-			ReportFormat reportFormat, String outputFileName)
-			throws SQLException, XDocReportException, IOException {
+			ReportFormat reportFormat, String outputFileName) throws Exception {
 
 		logger.debug("Entering generateReport");
 

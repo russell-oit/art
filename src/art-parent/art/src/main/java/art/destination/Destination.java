@@ -19,6 +19,7 @@ package art.destination;
 
 import art.encryption.AesEncryptor;
 import art.enums.DestinationType;
+import art.settings.EncryptionPassword;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
@@ -412,16 +413,47 @@ public class Destination implements Serializable {
 
 	/**
 	 * Decrypts the password field
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void decryptPassword() {
+	public void decryptPassword() throws Exception {
 		password = AesEncryptor.decrypt(password);
 	}
 
 	/**
 	 * Encrypts the password field
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void encryptPassword() {
-		password = AesEncryptor.encrypt(password);
+	public void encryptPassword() throws Exception {
+		String key = null;
+		EncryptionPassword encryptionPassword = null;
+		encryptPassword(key, encryptionPassword);
+	}
+
+	/**
+	 * Encrypts the password field
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
+		password = AesEncryptor.encrypt(password, key, encryptionPassword);
+	}
+	
+	/**
+	 * Returns <code>true</code> if the password field is null
+	 *
+	 * @return <code>true</code> if the password field is null
+	 */
+	public boolean hasNullPassword() {
+		if (password == null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

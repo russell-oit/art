@@ -249,7 +249,7 @@ public class DatasourceController {
 			String recordName = datasource.getName() + " (" + datasource.getDatasourceId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/datasources";
-		} catch (SQLException | RuntimeException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -403,20 +403,8 @@ public class DatasourceController {
 		logger.debug("datasource.isActive()={}", datasource.isActive());
 		if (datasource.isActive()) {
 			testConnection(jndi, driver, url, username, password);
-
-			DatasourceType datasourceType = datasource.getDatasourceType();
-			logger.debug("datasourceType={}", datasourceType);
-			switch (datasourceType) {
-				case JDBC:
-					ArtDatabase artDbConfig = Config.getArtDbConfig();
-					DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
-					break;
-				case MongoDB:
-					DbConnections.createMongodbConnectionPool(datasource);
-					break;
-				default:
-				//do nothing
-			}
+			ArtDatabase artDbConfig = Config.getArtDbConfig();
+			DbConnections.createDatasourceConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 		} else {
 			DbConnections.removeConnectionPool(datasource.getDatasourceId());
 		}
@@ -463,9 +451,8 @@ public class DatasourceController {
 					}
 				} else {
 					if (StringUtils.isNotBlank(driver)) {
-						//use newInstance because of neo4j driver
+						//use newInstance for buggy drivers e.g. neo4j driver
 						//https://github.com/neo4j-contrib/neo4j-jdbc/issues/104
-						//Class.forName(driver);
 						Class.forName(driver).newInstance();
 					}
 					//use ends with instead of equals to cater for net.sf.mondrianart.mondrian.olap4j.MondrianOlap4jDriver
@@ -516,9 +503,9 @@ public class DatasourceController {
 	 * @param action "add", "edit" or "copy"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
-	 * @throws SQLException
+	 * @throws Exception
 	 */
-	private String setPassword(Datasource datasource, String action) throws SQLException {
+	private String setPassword(Datasource datasource, String action) throws Exception {
 		logger.debug("Entering setPassword: datasource={}, action='{}'", datasource, action);
 
 		boolean useCurrentPassword = false;

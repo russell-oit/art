@@ -31,6 +31,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 		String urlUsername = request.getParameter("username");
 		String urlPassword = request.getParameter("password");
-		boolean publicSession = Boolean.parseBoolean(request.getParameter("public"));
+		boolean publicSession = BooleanUtils.toBoolean(request.getParameter("public"));
 		String urlUser = request.getParameter("user");
 		String publicUsername;
 		if (urlUser == null) {
@@ -334,8 +335,9 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasAnyPermission("save_reports", "self_service_dashboards")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equalsAny(page, "selfServiceDashboards", "getDashboardCandidateReports",
-				"getEditDashboardReports", "getDashboardDetails")) {
+		} else if (StringUtils.equalsAny(page, "selfServiceDashboards",
+				"getDashboardCandidateReports", "getEditDashboardReports",
+				"getDashboardDetails")) {
 			if (user.hasPermission("self_service_dashboards")) {
 				authorised = true;
 			}
@@ -367,7 +369,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("configure_art_database")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "settings")) {
+		} else if (StringUtils.equalsAny(page, "settings", "updateEncryptionKey")) {
 			if (user.hasPermission("configure_settings")) {
 				authorised = true;
 			}

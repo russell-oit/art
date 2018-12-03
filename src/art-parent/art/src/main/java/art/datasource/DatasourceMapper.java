@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.dbutils.BasicRowProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maps resultset to a Datasource object. Use public class in its own file for
@@ -31,6 +33,8 @@ import org.apache.commons.dbutils.BasicRowProcessor;
  * @author Timothy Anyona
  */
 public class DatasourceMapper extends BasicRowProcessor {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DatasourceMapper.class);
 
 	@Override
 	public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
@@ -63,8 +67,11 @@ public class DatasourceMapper extends BasicRowProcessor {
 		datasource.setCreatedBy(rs.getString("CREATED_BY"));
 		datasource.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-		//decrypt password
-		datasource.decryptPassword();
+		try {
+			datasource.decryptPassword();
+		} catch (Exception ex) {
+			logger.error("Error. {}", datasource, ex);
+		}
 
 		return type.cast(datasource);
 	}

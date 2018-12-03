@@ -19,6 +19,7 @@ package art.encryptor;
 
 import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
+import art.settings.EncryptionPassword;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
@@ -379,22 +380,54 @@ public class Encryptor implements Serializable {
 
 	/**
 	 * Decrypts password fields
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void decryptPasswords() {
+	public void decryptPasswords() throws Exception {
 		aesCryptPassword = AesEncryptor.decrypt(aesCryptPassword);
 		openPgpSigningKeyPassphrase = AesEncryptor.decrypt(openPgpSigningKeyPassphrase);
 		openPassword = AesEncryptor.decrypt(openPassword);
 		modifyPassword = AesEncryptor.decrypt(modifyPassword);
 	}
-	
+
 	/**
 	 * Encrypts password fields
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void encryptPasswords(){
-		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword);
-		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase);
-		openPassword = AesEncryptor.encrypt(openPassword);
-		modifyPassword = AesEncryptor.encrypt(modifyPassword);
+	public void encryptPasswords() throws Exception {
+		String key = null;
+		EncryptionPassword encryptionPassword = null;
+		encryptPasswords(key, encryptionPassword);
+	}
+
+	/**
+	 * Encrypts password fields
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPasswords(String key, EncryptionPassword encryptionPassword) throws Exception {
+		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword, key, encryptionPassword);
+		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase, key, encryptionPassword);
+		openPassword = AesEncryptor.encrypt(openPassword, key, encryptionPassword);
+		modifyPassword = AesEncryptor.encrypt(modifyPassword, key, encryptionPassword);
+	}
+
+	/**
+	 * Returns <code>true</code> if all the password fields are null
+	 *
+	 * @return <code>true</code> if all the password fields are null
+	 */
+	public boolean hasNullPasswords() {
+		if (aesCryptPassword == null && openPgpSigningKeyPassphrase == null
+				&& openPassword == null && modifyPassword == null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

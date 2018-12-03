@@ -42,12 +42,10 @@ Edit datasource page
 					 mainColumnClass="col-md-8 col-md-offset-2" hasNotify="true">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 
 		<script type="text/javascript">
@@ -86,7 +84,7 @@ Edit datasource page
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert(xhr.responseText);
+							ajaxErrorHandler(xhr);
 						}
 					});
 				});
@@ -103,9 +101,7 @@ Edit datasource page
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
-				});
+				initializeSelectHover();
 
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
@@ -113,14 +109,14 @@ Edit datasource page
 					offText: '${noText}'
 				});
 
-				$("#datasourceType").change(function () {
+				$("#datasourceType").on("change", function () {
 					toggleVisibleFields();
+					setMongoDBHint();
 				});
 
 				toggleVisibleFields(); //show/hide on page load
 
-				$('#name').focus();
-
+				$('#name').trigger("focus");
 			});
 		</script>
 
@@ -128,14 +124,39 @@ Edit datasource page
 			function toggleVisibleFields() {
 				var datasourceType = $('#datasourceType option:selected').val();
 
-				if (datasourceType === 'JDBC') {
-					$("#jndiDiv").show();
-					$("#testSqlDiv").show();
-					$("#connectionPoolTimeoutDiv").show();
-				} else {
-					$("#jndiDiv").hide();
-					$("#testSqlDiv").hide();
-					$("#connectionPoolTimeoutDiv").hide();
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#jndiDiv").show();
+						$("#testSqlDiv").show();
+						$("#connectionPoolTimeoutDiv").show();
+						break;
+					default:
+						$("#jndiDiv").hide();
+						$("#testSqlDiv").hide();
+						$("#connectionPoolTimeoutDiv").hide();
+				}
+
+				switch (datasourceType) {
+					case 'MongoDB':
+						$("#databaseTypeDiv").hide();
+						$("#driverDiv").hide();
+						break;
+					default:
+						$("#databaseTypeDiv").show();
+						$("#driverDiv").show();
+				}
+			}
+			
+			function setMongoDBHint() {
+				var datasourceType = $('#datasourceType option:selected').val();
+				
+				switch (datasourceType) {
+					case 'MongoDB':
+						$("#driver").val('');
+						$("#url").val('mongodb://<server>');
+						$("#testSql").val('');
+					default:
+						break;
 				}
 			}
 		</script>

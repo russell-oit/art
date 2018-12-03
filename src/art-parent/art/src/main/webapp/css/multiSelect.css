@@ -1,0 +1,11 @@
+/* 
+    Created on : 02-Dec-2018, 12:37:07
+    Author     : Timothy Anyona
+
+Enable having a custom width for a jquery.multi-select component
+*/
+
+.wide-multi-select {
+	width: 100%;
+}
+

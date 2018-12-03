@@ -15,7 +15,7 @@ Display 500 error (internal server error)
         <meta charset='utf-8'>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>ART - Internal Server Error</title>
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
     </head>
     <body>

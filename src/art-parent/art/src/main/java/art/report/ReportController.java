@@ -431,7 +431,7 @@ public class ReportController {
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
 			return "redirect:/reportConfig?reportId=" + report.getReportId();
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -1045,9 +1045,9 @@ public class ReportController {
 	 * @param action the action
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
-	 * @throws SQLException
+	 * @throws Exception
 	 */
-	private String setPasswords(Report report, String action) throws SQLException {
+	private String setPasswords(Report report, String action) throws Exception {
 		logger.debug("Entering setPasswords: report={}, action='{}'", report, action);
 
 		//set open password
@@ -1194,7 +1194,7 @@ public class ReportController {
 				}
 				response.setSuccess(true);
 			}
-		} catch (SQLException | RuntimeException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.getMessage());
 		}
@@ -1333,7 +1333,7 @@ public class ReportController {
 				}
 				response.setSuccess(true);
 			}
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.getMessage());
 		}

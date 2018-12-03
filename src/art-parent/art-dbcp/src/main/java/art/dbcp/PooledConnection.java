@@ -548,7 +548,7 @@ public class PooledConnection implements Connection {
 		return conn.createStruct(typeName, attributes);
 	}
 
-	//--------------------------JDBC 4.1 (JDK 1.7, 1.8)-----------------------------
+	//--------------------------JDBC 4.1, 4.2 (JDK 1.7, 1.8)-----------------------------
 	@Override
 	public void abort(Executor executor) throws SQLException {
 		conn.abort(executor);

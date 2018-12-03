@@ -24,16 +24,13 @@ import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.BooleanUtils;
@@ -68,10 +65,8 @@ public class ArtDatabaseController {
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
 		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
-		//generic sun jdbc-odbc bridge driver not supported for the art database
-		//for the jdbc-odbc bridge, you can only read column values ONCE
-		//and in the ORDER they appear in the select. Adhering to this is brittle and cumbersome.
-//		databaseTypes.remove("generic-odbc"); //sun jdbc-odbc bridge is removed in Java 8
+		
+		databaseTypes.remove("odbc-sun");
 		databaseTypes.remove("hbase-phoenix");
 		databaseTypes.remove("msaccess-ucanaccess");
 		databaseTypes.remove("msaccess-ucanaccess-password");
@@ -80,7 +75,6 @@ public class ArtDatabaseController {
 		databaseTypes.remove("olap4j-mondrian");
 		databaseTypes.remove("olap4j-xmla");
 		databaseTypes.remove("couchbase");
-		databaseTypes.remove("mongodb");
 		databaseTypes.remove("drill");
 		databaseTypes.remove("monetdb");
 		databaseTypes.remove("vertica");
@@ -92,6 +86,13 @@ public class ArtDatabaseController {
 		databaseTypes.remove("snowflake1-us-west");
 		databaseTypes.remove("snowflake2-other");
 		databaseTypes.remove("presto");
+		databaseTypes.remove("memsql");
+		databaseTypes.remove("citus");
+		databaseTypes.remove("aurora-mysql-mariadb");
+		databaseTypes.remove("aurora-postgresql-postgresql");
+		databaseTypes.remove("greenplum");
+		databaseTypes.remove("timescaledb");
+		databaseTypes.remove("kdb");
 
 		return databaseTypes;
 	}
@@ -166,7 +167,22 @@ public class ArtDatabaseController {
 			if (StringUtils.equalsIgnoreCase(artDatabase.getUrl(), "demo")) {
 				usingDemoDatabase = true;
 
-				artDatabase.setDriver("org.hsqldb.jdbcDriver");
+				//org.hsqldb.jdbcDriver is for hsqldb 1.x, org.hsqldb.jdbc.JDBCDriver for hsqldb 2.x
+				//http://www.hsqldb.org/doc/1.8/src/org/hsqldb/jdbcDriver.html
+				//http://hsqldb.org/doc/src/org/hsqldb/jdbc/JDBCDriver.html
+				//need to use class.forName() in a web app if you'll use DriverManager
+				//https://stackoverflow.com/questions/1911253/the-infamous-java-sql-sqlexception-no-suitable-driver-found
+				//https://tomcat.apache.org/tomcat-8.0-doc/jndi-datasource-examples-howto.html#DriverManager,_the_service_provider_mechanism_and_memory_leaks
+				//https://stackoverflow.com/questions/5556664/how-to-fix-no-suitable-driver-found-for-jdbcmysql-localhost-dbname-error-w?noredirect=1&lq=1
+				//https://docs.oracle.com/javase/8/docs/api/java/sql/DriverManager.html
+				//https://github.com/brettwooldridge/HikariCP/issues/288
+				//https://stackoverflow.com/questions/14478870/dynamically-load-the-jdbc-driver
+				//https://stackoverflow.com/questions/50750789/java-drivermanager-does-not-load-mysql-driver
+				//https://github.com/brettwooldridge/HikariCP/blob/dev/src/main/java/com/zaxxer/hikari/util/DriverDataSource.java
+				//https://stackoverflow.com/questions/33703785/ucanaccess-driver-not-in-drivermanager-getdrivers-list-unless-class-forname
+				//https://coderanch.com/t/619163/databases/suitable-driver-Tomcat
+				//https://stackoverflow.com/questions/11377018/tomcat-error-java-sql-sqlexception-no-suitable-driver-found-for-jdbcsqlserver
+				artDatabase.setDriver("org.hsqldb.jdbc.JDBCDriver");
 				artDatabase.setUrl(demoDbUrl);
 
 				if (StringUtils.isBlank(username)) {
@@ -225,7 +241,7 @@ public class ArtDatabaseController {
 				//don't use hsqldbUrl which contains ; within it. ; is used as a separator in the mondrian url
 				//this means we can't effect the shutdown=true property and lock files will remain after the connections are closed
 				String mondrianJdbcUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "SampleDB";
-				String mondrianUrl = "jdbc:mondrian:Jdbc=" + mondrianJdbcUrl + ";JdbcDrivers=org.hsqldb.jdbcDriver";
+				String mondrianUrl = "jdbc:mondrian:Jdbc=" + mondrianJdbcUrl + ";JdbcDrivers=org.hsqldb.jdbc.JDBCDriver";
 				ps.setString(1, mondrianUrl);
 				ps.setInt(2, 3);
 				ps.addBatch();
@@ -262,7 +278,7 @@ public class ArtDatabaseController {
 			//doesn't resubmit the page (PRG pattern)
 			redirectAttributes.addFlashAttribute("message", "artDatabase.message.configurationSaved");
 			return "redirect:/success";
-		} catch (NamingException | RuntimeException | SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException | IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		} finally {

@@ -141,7 +141,7 @@ public class ParameterService {
 					}
 					parameter.setParameterOptions(parameterOptions);
 				} catch (IOException ex) {
-					logger.error("Error. Parameter Id {}", parameter.getParameterId(), ex);
+					logger.error("Error. {}", parameter, ex);
 				}
 			}
 
@@ -389,7 +389,7 @@ public class ParameterService {
 	 * @param actionUser the user performing the action
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"parameters", "reports"}, allEntries = true)
+	@CacheEvict(value = "parameters", allEntries = true)
 	public void updateParameter(Parameter parameter, User actionUser) throws SQLException {
 		logger.debug("Entering updateParameter: parameter={}, actionUser={}", parameter, actionUser);
 
@@ -404,11 +404,11 @@ public class ParameterService {
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
 	 * @param local whether the import is to the local/current art instance
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
 	public void importParameters(List<Parameter> parameters, User actionUser,
-			Connection conn, boolean local) throws SQLException {
+			Connection conn, boolean local) throws Exception {
 
 		logger.debug("Entering importParameters: actionUser={}, local={}",
 				actionUser, local);
@@ -443,7 +443,7 @@ public class ParameterService {
 				saveParameter(parameter, id, actionUser, conn);
 			}
 			conn.commit();
-		} catch (SQLException ex) {
+		} catch (Exception ex) {
 			conn.rollback();
 			throw ex;
 		} finally {

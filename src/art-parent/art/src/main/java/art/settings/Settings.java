@@ -1170,17 +1170,48 @@ public class Settings implements Serializable {
 
 	/**
 	 * Decrypt password fields
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void decryptPasswords() {
+	public void decryptPasswords() throws Exception {
 		smtpPassword = AesEncryptor.decrypt(smtpPassword);
 		ldapBindPassword = AesEncryptor.decrypt(ldapBindPassword);
 	}
-	
+
 	/**
 	 * Encrypt password fields
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public void encryptPasswords(){
-		smtpPassword = AesEncryptor.encrypt(smtpPassword);
-		ldapBindPassword = AesEncryptor.encrypt(ldapBindPassword);
+	public void encryptPasswords() throws Exception {
+		String key = null;
+		EncryptionPassword encryptionPassword = null;
+		encryptPasswords(key, encryptionPassword);
+	}
+
+	/**
+	 * Encrypt password fields
+	 *
+	 * @param key the key to use. If null, the current key will be used
+	 * @param encryptionPassword the encryption password configuration. null if
+	 * to use current.
+	 * @throws java.lang.Exception
+	 */
+	public void encryptPasswords(String key, EncryptionPassword encryptionPassword) throws Exception {
+		smtpPassword = AesEncryptor.encrypt(smtpPassword, key, encryptionPassword);
+		ldapBindPassword = AesEncryptor.encrypt(ldapBindPassword, key, encryptionPassword);
+	}
+
+	/**
+	 * Returns <code>true</code> if all password fields are null
+	 *
+	 * @return <code>true</code> if all password fields are null
+	 */
+	public boolean hasNullPasswords() {
+		if (smtpPassword == null && ldapBindPassword == null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

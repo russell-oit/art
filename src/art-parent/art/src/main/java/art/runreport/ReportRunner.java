@@ -20,6 +20,7 @@ package art.runreport;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
+import art.enums.DatasourceType;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.enums.ReportType;
@@ -39,6 +40,7 @@ import art.utils.ExpressionHelper;
 import art.utils.GroovySandbox;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
+import com.mongodb.MongoClient;
 import groovy.lang.Binding;
 import groovy.lang.GString;
 import groovy.lang.GroovyShell;
@@ -381,6 +383,13 @@ public class ReportRunner {
 			if (reportParamsMap != null) {
 				variables.putAll(reportParamsMap);
 			}
+
+			MongoClient mongoClient = null;
+			Datasource datasource = report.getDatasource();
+			if (datasource != null && datasource.getDatasourceType() == DatasourceType.MongoDB) {
+				mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
+			}
+			variables.put("mongoClient", mongoClient);
 
 			Binding binding = new Binding(variables);
 
@@ -999,8 +1008,8 @@ public class ReportRunner {
 		DatabaseMetaData dmd = connQuery.getMetaData();
 		logger.debug("dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE) = {}", dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE));
 		if (!dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
-			if (reportType == ReportType.Group) {
-				throw new IllegalStateException("Database doesn't support scrollable resultsets. Group reports require a scrollable resultset.");
+			if (reportType.requiresScrollableResultSet()) {
+				throw new IllegalStateException("Report type requires scrollable resultset but database doesn't support this");
 			}
 			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 		}
@@ -1507,7 +1516,7 @@ public class ReportRunner {
 		querySql = StringUtils.replaceIgnoreCase(querySql, ":time:", "'" + time + "'");
 
 		//replace :reportId:
-		querySql = StringUtils.replace(querySql,  ":reportId:", String.valueOf(report.getReportId()));
+		querySql = StringUtils.replace(querySql, ":reportId:", String.valueOf(report.getReportId()));
 
 		//replace :jobId:
 		if (job != null) {

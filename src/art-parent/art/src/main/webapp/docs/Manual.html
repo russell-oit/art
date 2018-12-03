@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="3.11"> 
+  <meta name="version" content="4.0"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -28,7 +28,15 @@
        <li><a href="#administration-overview">Administration Overview</a></li> 
       </ol></li> 
      <li><a href="#art-database">ART Database</a></li> 
-     <li><a href="#settings">Settings</a></li> 
+     <li><a href="#settings">Settings</a> 
+      <ol> 
+       <li><a href="#updating-the-encryption-key">Updating the encryption key</a> 
+        <ol> 
+         <li><a href="#using-an-encryption-key">Using an encryption key</a></li> 
+         <li><a href="#using-an-encryption-password">Using an encryption password</a></li> 
+         <li><a href="#testing-string-encryptiondecryption">Testing string encryption/decryption</a></li> 
+        </ol></li> 
+      </ol></li> 
      <li><a href="#custom-settings">Custom Settings</a></li> 
      <li><a href="#datasources">Datasources</a> 
       <ol> 
@@ -697,7 +705,7 @@
        </tr> 
        <tr> 
         <td><strong>Logs Datasource</strong></td> 
-        <td>A database to which application logs should be written. The script located in the <strong>ART_PACKAGE\database\dbappender</strong> directory needs to have been run on the database. See the <a class="" href="https://logback.qos.ch/manual/appenders.html#DBAppender" rel="nofollow">Logback DBAppender documentation</a> for more details. The demo database already has this script run on it.</td> 
+        <td>A database to which application logs should be written. The script located in the <strong>ART_PACKAGE\database\dbappender</strong> directory needs to have been run on the database. See the <a class="" href="https://logback.qos.ch/manual/appenders.html#DBAppender" rel="nofollow">Logback DBAppender</a> documentation for more details. The demo database already has this script run on it.</td> 
        </tr> 
        <tr> 
         <td><strong>JWT Token Expiry (Mins)</strong></td> 
@@ -706,6 +714,10 @@
        <tr> 
         <td><strong>Enable Direct Report Emailing</strong></td> 
         <td>Whether users can directly email generated report files</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Encryption Key</strong></td> 
+        <td>Used in updating the encryption key used by ART</td> 
        </tr> 
        <tr> 
         <td><strong>Error Notification To</strong></td> 
@@ -761,6 +773,26 @@
        </tr> 
       </tbody> 
      </table> 
+     <h2 id="updating-the-encryption-key">Updating the encryption key</h2> 
+     <p>ART uses symmetric encryption to store some fields e.g. datasource passwords. This requires the use of an encryption key, which is included in the <strong>WEB-INF\classes\art\encryption\AesEncryptor.java</strong> file. If you would like to change the key used to encrypt values within the application, take the following steps.</p> 
+     <h3 id="using-an-encryption-key">Using an encryption key</h3> 
+     <ul> 
+      <li>Backup the application files and the ART database. If something goes wrong, it may not be possible to decrypt password fields and so they may all need to be re-entered. This not only applies to datasources but also to reports which have open/modify passwords, destinations e.g. ftp servers among others.</li> 
+      <li>Login to ART. Ensure that no other users are using the appliction when embarking on an encryption key update.</li> 
+      <li>Once you have logged in and confirmed that the application is working OK, go to the file system and modify the <strong>WEB-INF\art-custom-settings.json</strong> file and set the <strong>encryptionKey</strong> field to the key to be used. This would use AES encryption and so the key would need to be either 128 bits (16 bytes), 192 bits (24 bytes) or 256 bits (32 bytes). If there was already a key set in this field, copy it somewhere in case something goes wrong and you need to replace it. Save the file. Do not stop the application or make this change while the application is not running. The application needs to be running already.</li> 
+      <li>Now go to the browser and on the Settings page, for the <strong>Encryption Key</strong> field, click on the <strong>Update</strong> button. If you get a success message, the update was successful. View the logs using the <strong>Logs</strong> menu to confirm that there were no errors or warnings. If there was an error, modify the <strong>art-custom-settings.json</strong> file and return the <strong>encryptionKey</strong> field the way it was before you attempted the update.</li> 
+      <li>If successful, in order to test/confirm, stop the application and then start it again. If you can run reports, the update should be successful.</li> 
+      <li>Once you have changed the encryption key, when you perform an upgrade of the application, you need to copy this key to the new version's <strong>art-custom-settings.json</strong> file before you first start the application. You can do this by unzipping the <strong>art.war</strong> file to a directory e.g. one named <code>art</code>. You can use any zip utility for this as a .war file in just a .zip file. Make the necessary change and then deploy the new directory e.g. <code>art</code> to your applicaiton server.</li> 
+      <li>In case you would like to go back to the default key, repeat this same process and set the <strong>encryptionKey</strong> field to the empty string <strong>""</strong> when updating.</li> 
+     </ul> 
+     <h3 id="using-an-encryption-password">Using an encryption password</h3> 
+     <p>Instead of specifying the encryption key directly, you can supply a password which will be used to generate the encryption key. Take the same steps as for using an encryption key but specify the password in the <strong>encryptionPassword.password</strong> field. Additionally, set the desired key length of the generated key in the <strong>encryptionPassword.keyLength</strong> field. The key length must be either 128, 192 or 256 as per the AES algorithm.</p> 
+     <h3 id="testing-string-encryptiondecryption">Testing string encryption/decryption</h3> 
+     <p>You can test or encrypt/decrypt strings used in the ART application by running the ART encryptor on the command line. To do this, open a command prompt window and navigate to the <strong>WEB-INF\classes</strong> folder. Use the command <code>java -cp "../lib/*;../etc/*;." art.encryption.AesEncryptor</code> on windows or <code>java -cp "../lib/*:../etc/*:." art.encryption.AesEncryptor</code> on linux. You can then supply a string to encrypt/decrypt together with appropriate parameters. An example of encrypting a string using a password may be <code>...AesEncryptor -e -t "clear text to be encrypted" -p "encryption password" -l 256</code>. You can use the help option to see available parameters e.g. <code>...AesEncryptor -h</code>.</p> 
+     <p><strong>Note:</strong></p> 
+     <ul> 
+      <li>If you change the ART Database and that database was based on a different encryption key, you will get errors. You would therefore need to remember which encryption keys were used with which database.</li> 
+     </ul> 
     </div> 
    </div> 
    <div> 
@@ -817,6 +849,21 @@
         <td>String</td> 
         <td>String used to sign JWT tokens used in API authentication. If blank, token based api authentication is disabled.</td> 
        </tr> 
+       <tr> 
+        <td><strong>encryptionKey</strong></td> 
+        <td>String</td> 
+        <td>Key used for encryption of fields in the application e.g. datasource passwords. Must be either 16 bytes (128 bits), 24 bytes (192 bits) or 32 bytes (256 bits) as per the AES algorithm. If not specified, a default is used.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>encryptionPassword.password</strong></td> 
+        <td>String</td> 
+        <td>Password used to generate the key for encryption of fields in the application. Can be any length. If specified, it will take precedence over the <strong>encryptionKey</strong> field.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>encryptionPassword.keyLength</strong></td> 
+        <td>Integer</td> 
+        <td>The desired key length when a password is used to generate the encryption key. Must be either 128, 192 or 256 as per the AES algorithm.</td> 
+       </tr> 
       </tbody> 
      </table> 
     </div> 
@@ -861,7 +908,7 @@
        </tr> 
        <tr> 
         <td><strong>Datasource Type</strong></td> 
-        <td>The type of datasource</td> 
+        <td>The type of datasource. For a <strong>MongoDB</strong> datasource, a MongoClient connection object will be available in the groovy script with the variable name <strong>mongoClient</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>Database Type</strong></td> 
@@ -905,48 +952,48 @@
      <h2 id="some-jdbc-drivers-and-urls">Some JDBC Drivers and URLs</h2> 
      <p>Database: <strong>CUBRID</strong></p> 
      <p>Driver Name: cubrid.jdbc.driver.CUBRIDDriver</p> 
-     <p>JDBC URL: <code>jdbc:cubrid:&lt;server_name&gt;:&lt;port&gt;:&lt;database_name&gt;[:?&lt;property1&gt;=&lt;value1&gt;[&amp;&lt;property2&gt;=&lt;value2&gt;][&amp;...]</code> (default port is 33000)</p> 
+     <p>JDBC URL: <code>jdbc:cubrid:&lt;server&gt;:&lt;port&gt;:&lt;database&gt;[:?&lt;property1&gt;=&lt;value1&gt;[&amp;&lt;property2&gt;=&lt;value2&gt;][&amp;...]</code> (default port is 33000)</p> 
      <p>Driver Available from: <a href="http://www.cubrid.org" rel="nofollow">http://www.cubrid.org</a><br> <br><br></p> 
      <p>Database: <strong>Oracle</strong></p> 
      <p>Driver Name: oracle.jdbc.OracleDriver</p> 
-     <p>JDBC URL: <code>jdbc:oracle:thin:@&lt;server_name&gt;:&lt;port&gt;:&lt;sid&gt;</code> (default port is 1521)</p> 
+     <p>JDBC URL: <code>jdbc:oracle:thin:@&lt;server&gt;:&lt;port&gt;:&lt;sid&gt;</code> (default port is 1521)</p> 
      <p>Driver Available from: <a href="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html" rel="nofollow">http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html</a><br> <br><br></p> 
      <p>Database: <strong>MySQL</strong></p> 
-     <p>Driver Name: com.mysql.jdbc.Driver</p> 
-     <p>JDBC URL: <code>jdbc:mysql://&lt;server_name&gt;[:port]/&lt;database_name&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 3306)</p> 
+     <p>Driver Name: com.mysql.jdbc.Driver (Connector/J 5.1), or com.mysql.cj.jdbc.Driver (Connector/J 8.0+)</p> 
+     <p>JDBC URL: <code>jdbc:mysql://&lt;server&gt;[:port]/&lt;database&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 3306)</p> 
      <p>Driver Available from: <a href="http://dev.mysql.com/downloads/connector/j/" rel="nofollow">http://dev.mysql.com/downloads/connector/j/</a><br> <br><br></p> 
      <p>Database: <strong>MariaDB</strong></p> 
      <p>Driver Name: org.mariadb.jdbc.Driver</p> 
-     <p>JDBC URL: <code>jdbc:mariadb://&lt;server_name&gt;[:port]/&lt;database_name&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 3306)</p> 
+     <p>JDBC URL: <code>jdbc:mariadb://&lt;server&gt;[:port]/&lt;database&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 3306)</p> 
      <p>Driver Available from: <a href="https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j/" rel="nofollow">https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j/</a></p> 
      <p><br><br></p> 
      <p>Database: <strong>PostgreSQL</strong></p> 
      <p>Driver Name: org.postgresql.Driver</p> 
-     <p>JDBC URL: <code>jdbc:postgresql://&lt;server_name&gt;[:port]/&lt;database_name&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 5432)</p> 
+     <p>JDBC URL: <code>jdbc:postgresql://&lt;server&gt;[:port]/&lt;database&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 5432)</p> 
      <p>Driver Available from: <a href="http://jdbc.postgresql.org/" rel="nofollow">http://jdbc.postgresql.org/</a><br> <br><br></p> 
      <p>Database: <strong>SQL Server (Microsoft driver)</strong></p> 
      <p>Driver Name: com.microsoft.sqlserver.jdbc.SQLServerDriver</p> 
-     <p>JDBC URL: <code>jdbc:sqlserver://&lt;server_name&gt;[:port];databaseName=&lt;database_name&gt;[;instanceName=&lt;instance_name&gt;][;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 1433)</p> 
+     <p>JDBC URL: <code>jdbc:sqlserver://&lt;server&gt;[:port];databaseName=&lt;database&gt;[;instanceName=&lt;instance&gt;][;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 1433)</p> 
      <p>Driver Available from: <a href="http://msdn.microsoft.com/en-us/data/aa937724.aspx" rel="nofollow">http://msdn.microsoft.com/en-us/data/aa937724.aspx</a><br> <br><br></p> 
      <p>Database: <strong>SQL Server (jTDS driver)</strong></p> 
      <p>Driver Name: net.sourceforge.jtds.jdbc.Driver</p> 
-     <p>JDBC URL: <code>jdbc:jtds:sqlserver://&lt;server_name&gt;[:port]/&lt;database_name&gt;[;instance=&lt;instance_name&gt;][;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 1433)</p> 
+     <p>JDBC URL: <code>jdbc:jtds:sqlserver://&lt;server&gt;[:port]/&lt;database&gt;[;instance=&lt;instance&gt;][;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 1433)</p> 
      <p>Driver Available from: <a href="http://jtds.sourceforge.net">http://jtds.sourceforge.net</a><br> <br><br></p> 
      <p>Database: <strong>HSQLDB (Standalone mode)</strong></p> 
-     <p>Driver Name: org.hsqldb.jdbcDriver</p> 
+     <p>Driver Name: org.hsqldb.jdbc.JDBCDriver (HSQLDB 2.x) or org.hsqldb.jdbcDriver (HSQLDB 1.x)</p> 
      <p>JDBC URL: <code>jdbc:hsqldb:file:&lt;file_path&gt;[;shutdown=true;hsqldb.write_delay=false;create=false][;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
      <p>Driver Available from: <a href="http://hsqldb.org/" rel="nofollow">http://hsqldb.org/</a><br> <br><br></p> 
      <p>Database: <strong>HSQLDB (Server mode)</strong></p> 
-     <p>Driver Name: org.hsqldb.jdbcDriver</p> 
-     <p>JDBC URL: <code>jdbc:hsqldb:hsql://&lt;server_name&gt;[:port]/&lt;database_alias&gt;[;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 9001)</p> 
+     <p>Driver Name: org.hsqldb.jdbc.JDBCDriver (HSQLDB 2.x) or org.hsqldb.jdbcDriver (HSQLDB 1.x)</p> 
+     <p>JDBC URL: <code>jdbc:hsqldb:hsql://&lt;server&gt;[:port]/&lt;database_alias&gt;[;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 9001)</p> 
      <p>Driver Available from: <a href="http://hsqldb.org/" rel="nofollow">http://hsqldb.org/</a><br> <br><br></p> 
      <p>Database: <strong>Db2 (IBM Data Server Driver for JDBC and SQLJ)</strong></p> 
      <p>Driver Name: com.ibm.db2.jcc.DB2Driver</p> 
-     <p>JDBC URL: <code>jdbc:db2://&lt;server_name&gt;[:port]/&lt;database_name&gt;[:&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is often either 446, 6789, or 50000)</p> 
+     <p>JDBC URL: <code>jdbc:db2://&lt;server&gt;[:port]/&lt;database&gt;[:&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is often either 446, 6789, or 50000)</p> 
      <p>Driver Available from: <a href="http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217" rel="nofollow">http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217</a> (registration required).<br> This driver can connect to a Db2 database on any platform i.e. iSeries, zSeries, or Intel-based machines with Linux or Windows. <br> <br><br></p> 
      <p>Database: <strong>Db2 for iSeries (Toolbox or JTOpen driver)</strong></p> 
      <p>Driver Name: com.ibm.as400.access.AS400JDBCDriver</p> 
-     <p>JDBC URL: <code>jdbc:as400://&lt;server_name&gt;;prompt=false;translate binary=true[;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
+     <p>JDBC URL: <code>jdbc:as400://&lt;server&gt;;prompt=false;translate binary=true[;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
      <p>Driver Available from: <a href="http://jt400.sourceforge.net/">http://jt400.sourceforge.net/</a><br> <br><br></p> 
     </div> 
    </div> 
@@ -1282,7 +1329,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Date Format</strong></td> 
-        <td>For tabular reports, the format that should be used for date columns. Leave blank to use the default. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat format</a>.</td> 
+        <td>For tabular reports, the format that should be used for date columns. Leave blank to use the default. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>Number Format</strong></td> 
@@ -1834,10 +1881,10 @@ FROM mytable
      </div> 
      <p>Additionally, a javascript template file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> 
      <h3 id="xdocreport-freemarker-engine-docx">XDocReport: FreeMarker engine - Docx</h3> 
-     <p>You can use MS Word (docx), LibreOffice Writer (odt) or MS PowerPoint (pptx) docments as a template for reports. You simply create the document as you would want it to appear and then insert fields that will be replaced with data at runtime. This uses the <a class="" href="https://github.com/opensagres/xdocreport" rel="nofollow">XDocReport</a> library. You can have a look at the XDocReport wiki, <a href="https://github.com/opensagres/xdocreport/wiki" rel="nofollow">https://github.com/opensagres/xdocreport/wiki</a>, for examples on how to create templates for different needs. The query results will be contained in a variable named <strong>results</strong> which can be used in the <a class="" href="http://freemarker.org/" rel="nofollow">FreeMarker</a> or <a class="" href="https://velocity.apache.org/" rel="nofollow">Velocity</a> expressions. You can also use an object named <strong>jdbc</strong> to run queries that you define within the template. This works the same way as with Jxls Template Query reports. See the <strong>Jxls Reports</strong> section for more details.</p> 
-     <p>Displays a report based on the selected docx template, which uses FreeMarker syntax - <a href="http://freemarker.org/docs/index.html" rel="nofollow">http://freemarker.org/docs/index.html</a> for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
+     <p>You can use MS Word (docx), LibreOffice Writer (odt) or MS PowerPoint (pptx) docments as a template for reports. You simply create the document as you would want it to appear and then insert fields that will be replaced with data at runtime. This uses the <a class="" href="https://github.com/opensagres/xdocreport" rel="nofollow">XDocReport</a> library. You can have a look at the <a class="" href="https://github.com/opensagres/xdocreport/wiki" rel="nofollow">XDocReport wiki</a> for examples on how to create templates for different needs. The query results will be contained in a variable named <strong>results</strong> which can be used in the <a class="" href="http://freemarker.org/" rel="nofollow">FreeMarker</a> or <a class="" href="https://velocity.apache.org/" rel="nofollow">Velocity</a> expressions. You can also use an object named <strong>jdbc</strong> to run queries that you define within the template. This works the same way as with Jxls Template Query reports. See the <strong>Jxls Reports</strong> section for more details.</p> 
+     <p>Displays a report based on the selected docx template, which uses <a class="" href="http://freemarker.org/docs/index.html" rel="nofollow">FreeMarker syntax</a> for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
      <h3 id="xdocreport-velocity-engine-docx">XDocReport: Velocity engine - Docx</h3> 
-     <p>Displays a report based on the selected docx template, which uses Velocity syntax - <a href="https://velocity.apache.org/engine/devel/user-guide.html" rel="nofollow">https://velocity.apache.org/engine/devel/user-guide.html</a> for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
+     <p>Displays a report based on the selected docx template, which uses <a class="" href="https://velocity.apache.org/engine/devel/user-guide.html" rel="nofollow">Velocity syntax</a> for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
      <p>For velocity templates you can use syntax like <strong>$!result.description</strong> in case a field may contain null values. Also for velocity templates, a <a class="" href="https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/NumberTool.html" rel="nofollow">NumberTool</a> object named <strong>numberTool</strong> is available for formatting numbers e.g. <strong>$numberTool.format('#,##0.00',$result.amount)</strong>. Similarly, a <a class="" href="https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/DateTool.html" rel="nofollow">DateTool</a> object named <strong>dateTool</strong> is available for formatting dates.</p> 
      <h3 id="xdocreport-freemarker-engine-odt">XDocReport: FreeMarker engine - ODT</h3> 
      <p>Displays a report based on the selected odt template, which uses FreeMarker syntax. The query as defined in the SQL source will be used to generate the results.</p> 
@@ -1899,13 +1946,13 @@ FROM mytable
         <td><strong>outputDateFormat</strong></td> 
         <td>String</td> 
         <td></td> 
-        <td>The format of output data for date columns. If blank, the data will be output as is. The format is as per the <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
+        <td>The format of output data for date columns. If blank, the data will be output as is. The format is as per the Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateTimeFormat</strong></td> 
         <td>String</td> 
         <td></td> 
-        <td>The format of output data for datetime columns. If blank, the data will be output as is. The format is as per the <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
+        <td>The format of output data for datetime columns. If blank, the data will be output as is. The format is as per the Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>showColumnFilters</strong></td> 
@@ -2778,25 +2825,25 @@ FROM mytable
         <td><strong>inputDateFormat</strong></td> 
         <td>String</td> 
         <td>yyyy-MM-dd</td> 
-        <td>The format of input data for columns with a <strong>date</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
+        <td>The format of input data for columns with a <strong>date</strong> specification. The format is as perJava <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateFormat</strong></td> 
         <td>String</td> 
         <td></td> 
-        <td>The format of output/displayed data for columns with a <strong>date</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
+        <td>The format of output/displayed data for columns with a <strong>date</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>inputDateTimeFormat</strong></td> 
         <td>String</td> 
         <td>yyyy-MM-dd HH:mm:ss.SSS</td> 
-        <td>The format of input data for columns with a <strong>datetime</strong> specification. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
+        <td>The format of input data for columns with a <strong>datetime</strong> specification. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateTimeFormat</strong></td> 
         <td>String</td> 
         <td></td> 
-        <td>The format of output/displayed data for columns with a <strong>datetime</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
+        <td>The format of output/displayed data for columns with a <strong>datetime</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>showColumnFilters</strong></td> 
@@ -2813,6 +2860,10 @@ FROM mytable
       </tbody> 
      </table> 
      <p>Another alternative for querying MongoDB is to install and use <a class="" href="https://drill.apache.org/" rel="nofollow">Apache Drill</a>. Drill allows you to use normal SQL to query a MongoDB database. When using drill, you wouldn't use the MongoDB datasource type or the MongoDB report type. You would use the JDBC datasource type with the drill driver, and then use any of the other report types e.g. Tabular etc. The drill jdbc driver can be obtained from the drill installation and copied to the ART_HOME\WEB-INF\lib directory.</p> 
+     <p><strong>Note:</strong></p> 
+     <ul> 
+      <li>Instead of using the MongoDB report type, one can specify any of the other report types e.g. Tabular, enable the <strong>Use Groovy</strong> option and use the kind of code as given above to generate the report. In this case, the <strong>columns</strong> and <strong>columnDataTypes</strong> options are not considered.</li> 
+     </ul> 
      <p><br></p> 
      <p><strong>Note:</strong></p> 
      <ul> 
@@ -2875,7 +2926,7 @@ FROM mytable
         <td><strong>keyLength</strong></td> 
         <td>Integer</td> 
         <td>128</td> 
-        <td>The encryption key length to be used. Can only be either 40, 128 or 256. If you set it to 256, you must have JCE unlimited strength jurisdiction policy files installed in the JVM.</td> 
+        <td>The encryption key length to be used. Can only be either 40, 128 or 256.</td> 
        </tr> 
        <tr> 
         <td><strong>preferAes</strong></td> 
@@ -2961,7 +3012,7 @@ FROM mytable
       </tbody> 
      </table> 
      <h2 id="running-a-report-via-url">Running a report via URL</h2> 
-     <p>It is possible to run a report directly via URL. The report format and parameters are included in the URL. The basic URL for running a report is something like <code>http://server_name:port/art/runReport?reportId=x&amp;other_parameters</code></p> 
+     <p>It is possible to run a report directly via URL. The report format and parameters are included in the URL. The basic URL for running a report is something like <code>http://server:port/art/runReport?reportId=x&amp;other_parameters</code></p> 
      <p>If direct URL access is needed without requiring the user to log in to ART beforehand, <strong>public=true</strong> must be included in the URL together with a <strong>user</strong> parameter indicating the username under whose permissions the report will be run. In addition, this user must have the <strong>Public User</strong> field set to <strong>Yes</strong>. e.g. <code>http://localhost:8080/art/runReport?reportId=1&amp;public=true&amp;user=test</code></p> 
      <h3 id="report-options">Report Options</h3> 
      <p>Some report options can be specified in the URL to determine how the run should be handled.</p> 
@@ -2992,7 +3043,7 @@ FROM mytable
        <tr> 
         <td><strong>public</strong></td> 
         <td>Boolean</td> 
-        <td>If present, determines that the user doesn't need to be logged in to ART to view the report results e.g. <code>public=true</code>. If authentication is required, don't include this parameter, even with a value of false.</td> 
+        <td>If present, determines that the user doesn't need to be logged in to ART to view the report results e.g. <code>public=true</code>. If authentication is required, don't include this parameter.</td> 
        </tr> 
        <tr> 
         <td><strong>showSelectedParameters</strong></td> 
@@ -3097,7 +3148,7 @@ FROM mytable
      <h3 id="examples">Examples</h3> 
      <p><strong>Example 1:</strong> (single-value parameters)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server:port/art/runReport?
     reportId=120&amp;reportFormat=html&amp;p-startdate=2006-04-04&amp;p-description=Desktop
 
     runs report 120 in html format.
@@ -3107,13 +3158,13 @@ FROM mytable
      </div> 
      <p><strong>Example 2:</strong> (chart)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server_name:port/art/runReport?
-    reportId=121&amp;p-date=2006-04-04
+      <pre><span></span>    http://server:port/art/runReport?
+    reportId=121&amp;p-date=2006-04-04&amp;showLegend=true
 </pre> 
      </div> 
      <p><strong>Example 3:</strong> (group)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server:port/art/runReport?
     reportId=122&amp;splitColumn=2&amp;p-param=abc
 
     runs report 122 in group on 2 columns mode (splitColumn parameter). 
@@ -3122,15 +3173,15 @@ FROM mytable
      </div> 
      <p><strong>Example 4:</strong> (pdf, public)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server_name:port/art/runReport?
-    reportId=123&amp;reportFormat=pdf&amp;public=true
+      <pre><span></span>    http://server:port/art/runReport?
+    reportId=123&amp;reportFormat=pdf&amp;public=true&amp;user=guest
 
     generates report as a pdf file without requiring the user to log in to ART
 </pre> 
      </div> 
      <p><strong>Example 5:</strong> (dashboard)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server:port/art/runReport?
     reportId=124&amp;p-param1=value1&amp;p-param2=value2
 
     runs report 124, setting values for parameters param1 and param2
@@ -3138,7 +3189,7 @@ FROM mytable
      </div> 
      <p><strong>Example 6:</strong> (show selected parameters)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server:port/art/runReport?
     reportId=125&amp;reportFormat=xls&amp;p-startdate=2006-04-04&amp;showSelectedParameters=true
 
     generates report and includes the parameter value used in the report output
@@ -3146,7 +3197,7 @@ FROM mytable
      </div> 
      <p><strong>Example 7:</strong> (multi-value parameters)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server:port/art/runReport?
     reportId=126&amp;reportFormat=xls&amp;p-category=Laptops&amp;p-category=Desktops&amp;p-category=Tablets
 
     the #category# multi-value parameter (p-category) has 3 values defined: 
@@ -3155,7 +3206,7 @@ FROM mytable
      </div> 
      <p><strong>Example 8:</strong> (default parameter values)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server_name:port/art/runReport?
+      <pre><span></span>    http://server:port/art/runReport?
     reportId=127
 
     generates report using default parameter values
@@ -3676,7 +3727,7 @@ FROM mytable
      <h3 id="dates">Dates</h3> 
      <p>You can substitute the current date by using the expression <code>f[date]f</code>. This will output the current date in <strong>yyyy-MM-dd</strong> format e.g. 2017-11-10. You can use the expression <code>f[datetime]f</code> to substitute the current date and time in <strong>yyyy-MM-dd HH:mm:ss.SSS</strong> format e.g. 2017-11-10 11:25:21.045. Both date and datetime field expressions can also specify a different date other that "now" and additionaly specify the output format, output format locale, input format and input format locale. These additional items are specified separated by <code>|</code> i.e <code>f[date field name|date specification|output format|output format locale|input format|input format locale]f</code>.</p> 
      <p>The date specification component can be the string "<strong>today</strong>" to specify today's date with the time component as zero, it can be the string "<strong>now</strong>" to specify the current date and time, or a date string in certain numeric formats e.g. <code>yyyy-MM-dd</code> or <code>yyyy-MM-dd HH:mm:ss</code>. In addition one can have simple date arithmetic by having a string starting with "<strong>add</strong>" and then specifying an offset from the current date e.g. <code>add days 1</code> or <code>add months -1</code>. The duration offsets that can be specified include <strong>days</strong>, <strong>weeks</strong>, <strong>months</strong>, <strong>years</strong>, <strong>hours</strong>, <strong>minutes</strong>, <strong>seconds</strong>, <strong>milliseconds</strong>.</p> 
-     <p>The output format component can be used to specify the desired output format of the resulting date using <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> syntax. Additionaly, a locale can be specified to define the locale which should be used with the given output format.</p> 
+     <p>The output format component can be used to specify the desired output format of the resulting date using Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> syntax. Additionaly, a locale can be specified to define the locale which should be used with the given output format.</p> 
      <p>If the date specification is not in one of the common numeric formats, the format it is in can be specified in the input format section, and if required, the input format locale can be specified.</p> 
      <h2 id="groovy-expressions">Groovy Expressions</h2> 
      <p>Groovy code can be used to provide dynamic text. Groovy expressions start with <code>g[</code> and end with <code>]g</code> e.g. <code>g[1+1]g</code>. You can have longer code which includes imports etc. Groovy code is by default passed through a sandbox so if a <strong>SecurityException</strong> is thrown, the relevant class needs to be added to the <strong>WEB-INF\groovy-whitelist.txt</strong> file, or alternatively, turn off the sandbox in the <strong>WEB-INF\art-custom-settings.json</strong> file.</p> 
@@ -4086,7 +4137,7 @@ WHERE CITY_ID = #cityId#
        </tr> 
        <tr> 
         <td><strong>Encryptor Type</strong></td> 
-        <td>Specifies the type of encryption to be used. The <strong>AES Crypt</strong> type will produce files that can be decrypted using the <a class="" href="https://www.aescrypt.com/" rel="nofollow">AES Crypt</a> program. This encryptor uses 256-bit keys therefore you must install JCE Unlimited Strength Jurisdiction Policy files in your JVM in order to use it. The <strong>OpenPGP</strong> type will produce files that can be decrypted using any OpenPGP-compliant program. <strong>Password</strong> encryptors are used to specify open and modify passwords for xlsx and pdf output.</td> 
+        <td>Specifies the type of encryption to be used. The <strong>AES Crypt</strong> type will produce files that can be decrypted using the <a class="" href="https://www.aescrypt.com/" rel="nofollow">AES Crypt</a> program. The AES Crypt encryptor uses 256-bit keys therefore your java version must support 256-bit encryption. For OpenJDK, this support is available by default. For Oracle Java, JCE Unlimited Strength Jurisdiction Policy files must be available in your JVM. These files are available and enabled by default from Oracle Java 8 u162. The <strong>OpenPGP</strong> type will produce files that can be decrypted using any OpenPGP-compliant program. <strong>Password</strong> encryptors are used to specify open and modify passwords for xlsx and pdf output.</td> 
        </tr> 
        <tr> 
         <td><strong>AES Crypt Password</strong></td> 
@@ -4106,7 +4157,7 @@ WHERE CITY_ID = #cityId#
        </tr> 
        <tr> 
         <td><strong>OpenPGP Signing Key Passphrase</strong></td> 
-        <td>For OpenPGP encryptors, if a signing key is used, the passphrase for that key.</td> 
+        <td>For OpenPGP encryptors, if a signing key is used, the passphrase for that key (not blank).</td> 
        </tr> 
        <tr> 
         <td><strong>Open Password</strong></td> 
@@ -4184,7 +4235,7 @@ where #rules#
      <!--NewPage--> 
      <h1 id="drill-down-reports">Drill Down Reports</h1> 
      <p>This functionality provides a main report with links from which a user can click to get to a different (drill down) report. For example, the main report can display summary information and a user can click on the drill down report link to display detailed information about a particular item.</p> 
-     <p>The main report can be a normal tabular query - displayed in one of the html view modes - or a chart. The drill down report can be of any type.</p> 
+     <p>The main report can be a tabular report displayed in one of the html report formats, or a chart. The drill down report can be of any type.</p> 
      <h2 id="defining-the-main-report">Defining the main report</h2> 
      <p>The main report is created like any other report. Once the report is saved, use the <strong>More | Drilldowns</strong> button to add or modify the drill down reports that will be available for that report.</p> 
      <h2 id="defining-the-drill-down-report">Defining the drill down report</h2> 
@@ -5374,7 +5425,7 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>Path</strong></td> 
-        <td>The location of the destination. For <strong>Network Share</strong> destinations, this is the share name. For <strong>FTP</strong> and <strong>SFTP</strong> destinations, this is an optional directory path where files should be copied. For <strong>Amazon S3</strong> and <strong>Google Cloud Storage</strong> destinations, this is the bucket name. For <strong>Microsoft Azure</strong> destinations, this is the container name. For <strong>WebDAV</strong> destinations, this is the URL of the WebDAV server e.g. <code>http://localhost</code>. For <strong>Website</strong> destinations, this is a URL that POSTs a form which includes a file field. For <strong>Backblaze B2</strong> destinations, this is the Bucket ID.</td> 
+        <td>The location of the destination. For <strong>Network Share</strong> destinations, this is the share name. For <strong>FTP</strong> and <strong>SFTP</strong> destinations, this is an optional directory path where files should be copied. For <strong>Amazon S3</strong>, <strong>BackBlaze B2</strong> and <strong>Google Cloud Storage</strong> destinations, this is the bucket name. For <strong>Microsoft Azure</strong> destinations, this is the container name. For <strong>WebDAV</strong> destinations, this is the URL of the WebDAV server e.g. <code>http://localhost</code>. For <strong>Website</strong> destinations, this is a URL that POSTs a form which includes a file field.</td> 
        </tr> 
        <tr> 
         <td><strong>Sub-Directory</strong></td> 

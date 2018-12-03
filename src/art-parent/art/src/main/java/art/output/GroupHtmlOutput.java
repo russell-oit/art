@@ -20,7 +20,6 @@ package art.output;
 import art.runreport.GroovyDataDetails;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -299,11 +298,10 @@ public class GroupHtmlOutput {
 	 * @param writer the writer to use
 	 * @param contextPath the application context path
 	 * @return number of rows output
-	 * @throws SQLException
-	 * @throws java.io.IOException
+	 * @throws Exception
 	 */
 	public int generateReport(Object data, int splitColumn, PrintWriter writer,
-			String contextPath) throws SQLException, IOException {
+			String contextPath) throws Exception {
 
 		logger.debug("Entering generateReport: splitColumn={}, contextPath='{}'",
 				splitColumn, contextPath);

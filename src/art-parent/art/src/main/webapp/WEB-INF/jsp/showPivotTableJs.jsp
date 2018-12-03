@@ -55,26 +55,26 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/c3_renderers.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/export_renderers.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.23.0/pivot.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/pivot.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/c3_renderers.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/export_renderers.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.1.4/papaparse.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.6.2/papaparse.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-subtotal-renderer-1.7.1/subtotal.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-subtotal-renderer-1.7.1/subtotal.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/subtotal-1.10.0/subtotal.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/subtotal-1.10.0/subtotal.min.js"></script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/plotly-basic.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/plotly_renderers.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.42.5/plotly-basic.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/plotly_renderers.js"></script>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/notifyjs-0.4.2/notify.js"></script>
 
 <c:if test="${not empty locale}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.20.0/pivot.${locale}.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/pivot.${locale}.js"></script>
 </c:if>
 
 <script type="text/javascript">
@@ -148,7 +148,10 @@
 		download: download,
 		skipEmptyLines: true,
 		error: function (e) {
-			bootbox.alert(e);
+			bootbox.alert({
+				title: '${errorOccurredText}',
+				message: e
+			});
 		},
 		complete: function (parsed) {
 			$("#${outputDivId}").pivotUI(parsed.data, options, overwrite, locale);
@@ -165,7 +168,7 @@
 </c:if>
 
 <c:if test="${not empty plotlyLocaleFileName}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.36.0/${plotlyLocaleFileName}"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.42.5/${plotlyLocaleFileName}"></script>
 </c:if>
 
 <script>
@@ -372,10 +375,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				} //end if result
@@ -386,7 +386,7 @@
 		//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
 		dialog.on("shown.bs.modal", function () {
 			dialog.attr("id", "dialog-${outputDivId}");
-			dialog.find('#name').focus();
+			dialog.find('#name').trigger("focus");
 		});
 	});
 
@@ -429,10 +429,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				} //end if result
@@ -443,7 +440,9 @@
 	var token = $("meta[name='_csrf']").attr("content");
 	var header = $("meta[name='_csrf_header']").attr("content");
 	$(document).ajaxSend(function (e, xhr, options) {
-		xhr.setRequestHeader(header, token);
+		if (header) {
+			xhr.setRequestHeader(header, token);
+		}
 	});
 
 	$(document).ajaxStart(function () {

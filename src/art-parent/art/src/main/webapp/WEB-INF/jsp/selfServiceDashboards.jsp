@@ -29,20 +29,18 @@
 <t:mainPage title="${pageTitle}">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" />
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" />
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lodash-3.5.0/lodash.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notifyjs-0.4.2/notify.js"></script>
 
 		<script>
 			$(document).ready(function () {
@@ -96,10 +94,7 @@
 								autosize(autoheight, autowidth, reportId);
 							},
 							error: function (xhr) {
-								bootbox.alert({
-									title: '${errorOccurredText}',
-									message: xhr.responseText
-								});
+								showUserAjaxError(xhr, '${errorOccurredText}');
 							}
 						});
 					} else {
@@ -154,7 +149,7 @@
 					}
 				}
 
-				$("#newDashboard").click(function () {
+				$("#newDashboard").on("click", function () {
 					resetAll();
 				});
 
@@ -180,10 +175,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				}
@@ -214,10 +206,7 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert({
-								title: '${errorOccurredText}',
-								message: xhr.responseText
-							});
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
 				}
@@ -265,10 +254,7 @@
 													$('#reports').selectpicker('refresh');
 												},
 												error: function (xhr) {
-													bootbox.alert({
-														title: '${errorOccurredText}',
-														message: xhr.responseText
-													});
+													showUserAjaxError(xhr, '${errorOccurredText}');
 												}
 											});
 										}
@@ -278,10 +264,7 @@
 								}
 							},
 							error: function (xhr) {
-								bootbox.alert({
-									title: '${errorOccurredText}',
-									message: xhr.responseText
-								});
+								showUserAjaxError(xhr, '${errorOccurredText}');
 							}
 						});
 					}
@@ -507,10 +490,7 @@
 									}
 								},
 								error: function (xhr) {
-									bootbox.alert({
-										title: '${errorOccurredText}',
-										message: xhr.responseText
-									});
+									showUserAjaxError(xhr, '${errorOccurredText}');
 								}
 							});
 						} //end if result
@@ -527,7 +507,7 @@
 					} else {
 						dialog.find("#overwrite").prop('checked', false);
 					}
-					dialog.find('#name').focus();
+					dialog.find('#name').trigger("focus");
 				});
 			});
 
@@ -539,7 +519,9 @@
 			var token = $("meta[name='_csrf']").attr("content");
 			var header = $("meta[name='_csrf_header']").attr("content");
 			$(document).ajaxSend(function (e, xhr, options) {
-				xhr.setRequestHeader(header, token);
+				if (header) {
+					xhr.setRequestHeader(header, token);
+				}
 			});
 
 			$("#deleteDashboard").on("click", function () {
@@ -578,10 +560,7 @@
 									}
 								},
 								error: function (xhr) {
-									bootbox.alert({
-										title: '${errorOccurredText}',
-										message: xhr.responseText
-									});
+									showUserAjaxError(xhr, '${errorOccurredText}');
 								}
 							});
 						} //end if result

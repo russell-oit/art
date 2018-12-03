@@ -37,7 +37,7 @@ Edit report group page
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="reportGroups"]').parent().addClass('active');
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
 			});
 		</script>

@@ -29,14 +29,14 @@ import javax.servlet.http.HttpSession;
 public class SettingsHelper {
 
 	/**
-	 * Refreshes some aspects of application settings
-	 * 
-	 * @param settings the updated settings
+	 * Refreshes application settings
+	 *
 	 * @param session the http session
 	 * @param servletContext the servlet context
 	 */
-	public void refreshSettings(Settings settings, HttpSession session,
-			ServletContext servletContext) {
+	public void refreshSettings(HttpSession session, ServletContext servletContext) {
+		Config.loadSettings();
+		Settings settings = Config.getSettings();
 
 		if (session != null) {
 			session.setAttribute("administratorEmail", settings.getAdministratorEmail());
@@ -47,8 +47,6 @@ public class SettingsHelper {
 			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
 			servletContext.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 		}
-
-		Config.loadSettings();
 	}
 
 }

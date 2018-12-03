@@ -55,7 +55,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -63,6 +62,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -187,10 +187,11 @@ public class RunReportHelper {
 
 		logger.debug("Entering setSelectReportParameterAttributes: report={}", report);
 
-		boolean startSelectParametersHidden = Boolean.parseBoolean(request.getParameter("startSelectParametersHidden"));
+		boolean startSelectParametersHidden = BooleanUtils.toBoolean(request.getParameter("startSelectParametersHidden"));
 		request.setAttribute("startSelectParametersHidden", startSelectParametersHidden);
 
 		request.setAttribute("report", report);
+		request.setAttribute("locale", locale);
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -691,8 +692,7 @@ public class RunReportHelper {
 	public int getResultSetType(ReportType reportType) {
 		//is scroll insensitive much slower than forward only?
 		int resultSetType;
-		if (reportType.isXDocReport()
-				|| reportType == ReportType.Group
+		if (reportType.requiresScrollableResultSet() || reportType.isXDocReport()
 				|| reportType == ReportType.JasperReportsArt
 				|| reportType == ReportType.JxlsArt
 				|| reportType == ReportType.FreeMarker
@@ -701,8 +701,7 @@ public class RunReportHelper {
 				|| reportType == ReportType.Dygraphs
 				|| reportType == ReportType.CSV
 				|| reportType == ReportType.FixedWidth) {
-			//need scrollable resultset in order to display record count
-			//need scrollable resultset in order to generate group report
+			//need scrollable resultset in order to run the report or in order to display record count
 			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 		} else {
 			//report types will determine the record count e.g. for standard output reports
@@ -782,9 +781,9 @@ public class RunReportHelper {
 	 *
 	 * @param data the data
 	 * @return data attributes
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
-	public static GroovyDataDetails getGroovyDataDetails(Object data) throws IOException {
+	public static GroovyDataDetails getGroovyDataDetails(Object data) throws Exception {
 		Report report = null;
 		return getGroovyDataDetails(data, report);
 	}
@@ -795,9 +794,10 @@ public class RunReportHelper {
 	 * @param data the data
 	 * @param report the report
 	 * @return data attributes
-	 * @throws java.io.IOException
+	 * @throws java.lang.Exception
 	 */
-	public static GroovyDataDetails getGroovyDataDetails(Object data, Report report) throws IOException {
+	@SuppressWarnings("rawtypes")
+	public static GroovyDataDetails getGroovyDataDetails(Object data, Report report) throws Exception {
 		Objects.requireNonNull(data, "data must not be null");
 
 		@SuppressWarnings("unchecked")
@@ -823,70 +823,48 @@ public class RunReportHelper {
 			Object sample = dataList.get(0);
 			if (sample instanceof GroovyRowResult) {
 				GroovyRowResult sampleResult = (GroovyRowResult) sample;
-				colCount = sampleResult.size();
 
-				@SuppressWarnings("rawtypes")
-				Set colNames = sampleResult.keySet();
-				@SuppressWarnings("unchecked")
-				List<String> tempColumnNames = new ArrayList<>(colNames);
-				dataColumnNames.addAll(tempColumnNames);
-
-				for (int i = 1; i <= colCount; i++) {
-					Object columnValue = sampleResult.getAt(i - 1);
-					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
-					if (columnValue instanceof Number) {
-						columnTypeDefinition.setColumnType(ColumnType.Numeric);
-					} else if (columnValue instanceof Date) {
-						columnTypeDefinition.setColumnType(ColumnType.Date);
-					} else {
-						columnTypeDefinition.setColumnType(ColumnType.String);
-					}
-					columnTypes.put(i, columnTypeDefinition);
+				for (Entry entry : sampleResult.entrySet()) {
+					colCount++;
+					String columnName = String.valueOf(entry.getKey());
+					dataColumnNames.add(columnName);
+					Object columnValue = entry.getValue();
+					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			} else if (sample instanceof DynaBean) {
 				DynaBean sampleBean = (DynaBean) sample;
 				DynaProperty[] columns = sampleBean.getDynaClass().getDynaProperties();
-				colCount = columns.length;
 
 				for (DynaProperty column : columns) {
+					colCount++;
 					String columnName = column.getName();
 					dataColumnNames.add(columnName);
-				}
-
-				for (int i = 1; i <= colCount; i++) {
-					String columnName = dataColumnNames.get(i - 1);
 					Object columnValue = sampleBean.get(columnName);
-					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
-					if (columnValue instanceof Number) {
-						columnTypeDefinition.setColumnType(ColumnType.Numeric);
-					} else if (columnValue instanceof Date) {
-						columnTypeDefinition.setColumnType(ColumnType.Date);
-					} else {
-						columnTypeDefinition.setColumnType(ColumnType.String);
-					}
-					columnTypes.put(i, columnTypeDefinition);
+					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			} else if (sample instanceof Map) {
 				@SuppressWarnings("unchecked")
 				Map<String, ? extends Object> sampleRow = (Map<String, ? extends Object>) sample;
-				colCount = sampleRow.size();
-				dataColumnNames.addAll(sampleRow.keySet());
 
-				for (int i = 1; i <= colCount; i++) {
-					String columnName = dataColumnNames.get(i - 1);
-					Object columnValue = sampleRow.get(columnName);
-					ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
-					if (columnValue instanceof Number) {
-						columnTypeDefinition.setColumnType(ColumnType.Numeric);
-					} else if (columnValue instanceof Date) {
-						columnTypeDefinition.setColumnType(ColumnType.Date);
-					} else {
-						columnTypeDefinition.setColumnType(ColumnType.String);
-					}
-					columnTypes.put(i, columnTypeDefinition);
+				for (Entry<String, ? extends Object> entry : sampleRow.entrySet()) {
+					colCount++;
+					String columnName = entry.getKey();
+					dataColumnNames.add(columnName);
+					Object columnValue = entry.getValue();
+					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			} else {
-				throw new IllegalArgumentException("Unexpected sample object: " + sample.getClass().getCanonicalName());
+				//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
+				//https://stackoverflow.com/questions/2638590/best-way-of-invoking-getter-by-reflection
+				Map<String, Object> sampleRow = ArtUtils.objectToMap(sample);
+
+				for (Entry<String, Object> entry : sampleRow.entrySet()) {
+					colCount++;
+					String columnName = entry.getKey();
+					dataColumnNames.add(columnName);
+					Object columnValue = entry.getValue();
+					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
+				}
 			}
 		}
 
@@ -959,6 +937,100 @@ public class RunReportHelper {
 		details.setResultSetColumns(resultSetColumns);
 
 		return details;
+	}
+
+	/**
+	 * Returns the column type definition to use for a column with a certain
+	 * column value
+	 *
+	 * @param columnValue the column value
+	 * @return the column type definition to use
+	 */
+	private static ColumnTypeDefinition getColumnTypeDefinition(Object columnValue) {
+		ColumnTypeDefinition columnTypeDefinition = new ColumnTypeDefinition();
+
+		if (columnValue instanceof Number) {
+			columnTypeDefinition.setColumnType(ColumnType.Numeric);
+		} else if (columnValue instanceof Date) {
+			columnTypeDefinition.setColumnType(ColumnType.Date);
+		} else {
+			columnTypeDefinition.setColumnType(ColumnType.String);
+		}
+
+		return columnTypeDefinition;
+	}
+
+	/**
+	 * Returns data used in report generation as a list of maps
+	 *
+	 * @param data the data
+	 * @return the data as a list of maps
+	 * @throws java.lang.Exception
+	 */
+	public static List<Map<String, ?>> getMapListData(Object data) throws Exception {
+		List<Map<String, ?>> finalData = new ArrayList<>();
+
+		@SuppressWarnings("unchecked")
+		List<? extends Object> dataList = (List<? extends Object>) data;
+		if (CollectionUtils.isNotEmpty(dataList)) {
+			Object sample = dataList.get(0);
+			if (sample instanceof GroovyRowResult) {
+				for (Object row : dataList) {
+					//https://6by9.wordpress.com/2012/10/13/groovyrowresult-as-a-hashmap/
+					GroovyRowResult rowResult = (GroovyRowResult) row;
+					Map<String, Object> rowMap = new LinkedHashMap<>();
+					for (Object columnName : rowResult.keySet()) {
+						rowMap.put(String.valueOf(columnName), rowResult.get(columnName));
+					}
+					finalData.add(rowMap);
+				}
+			} else if (sample instanceof DynaBean) {
+				for (Object row : dataList) {
+					DynaBean rowBean = (DynaBean) row;
+					DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
+					Map<String, Object> rowMap = new LinkedHashMap<>();
+					for (DynaProperty column : columns) {
+						String columnName = column.getName();
+						rowMap.put(columnName, rowBean.get(columnName));
+					}
+					finalData.add(rowMap);
+				}
+			} else if (sample instanceof Map) {
+				for (Object row : dataList) {
+					@SuppressWarnings("unchecked")
+					Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
+					finalData.add(rowMap);
+				}
+			} else {
+				for (Object row : dataList) {
+					Map<String, Object> rowMap = ArtUtils.objectToMap(row);
+					finalData.add(rowMap);
+				}
+			}
+		}
+
+		return finalData;
+	}
+
+	/**
+	 * Returns only the data component of data used for report generation
+	 *
+	 * @param data the data used for report generation
+	 * @return the data component of the data used for report generation
+	 * @throws java.lang.Exception
+	 */
+	public static List<List<Object>> getListData(Object data) throws Exception {
+		List<List<Object>> listData = new ArrayList<>();
+		List<Map<String, ?>> mapListData = getMapListData(data);
+		for (Map<String, ?> row : mapListData) {
+			List<Object> rowData = new ArrayList<>();
+			for (Object value : row.values()) {
+				rowData.add(value);
+			}
+			listData.add(rowData);
+		}
+
+		return listData;
 	}
 
 	/**
@@ -1222,81 +1294,6 @@ public class RunReportHelper {
 	 */
 	public static Object getRowValue(Map<Integer, Object> row, Integer columnIndex) {
 		return row.get(columnIndex);
-	}
-
-	/**
-	 * Returns data used in report generation as a list of maps
-	 *
-	 * @param data the data
-	 * @return the data as a list of maps
-	 */
-	public static List<Map<String, ?>> getMapListData(Object data) {
-		List<Map<String, ?>> finalData = new ArrayList<>();
-
-		@SuppressWarnings("unchecked")
-		List<? extends Object> dataList = (List<? extends Object>) data;
-		if (CollectionUtils.isNotEmpty(dataList)) {
-			Object sample = dataList.get(0);
-			if (sample instanceof GroovyRowResult) {
-				for (Object row : dataList) {
-					//https://6by9.wordpress.com/2012/10/13/groovyrowresult-as-a-hashmap/
-					GroovyRowResult rowResult = (GroovyRowResult) row;
-					Map<String, Object> rowMap = new LinkedHashMap<>();
-					for (Object columnName : rowResult.keySet()) {
-						rowMap.put(String.valueOf(columnName), rowResult.get(columnName));
-					}
-					finalData.add(rowMap);
-				}
-			} else if (sample instanceof DynaBean) {
-				List<String> columnNames = null;
-				for (Object row : dataList) {
-					DynaBean rowBean = (DynaBean) row;
-					if (columnNames == null) {
-						columnNames = new ArrayList<>();
-						DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
-						for (DynaProperty column : columns) {
-							String columnName = column.getName();
-							columnNames.add(columnName);
-						}
-					}
-					Map<String, Object> rowMap = new LinkedHashMap<>();
-					for (String columnName : columnNames) {
-						rowMap.put(columnName, rowBean.get(columnName));
-					}
-					finalData.add(rowMap);
-				}
-			} else if (sample instanceof Map) {
-				for (Object row : dataList) {
-					@SuppressWarnings("unchecked")
-					Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
-					finalData.add(rowMap);
-				}
-			} else {
-				throw new IllegalArgumentException("Unexpected sample object: " + sample.getClass().getCanonicalName());
-			}
-		}
-
-		return finalData;
-	}
-
-	/**
-	 * Returns only the data component of data used for report generation
-	 *
-	 * @param data the data used for report generation
-	 * @return the data component of the data used for report generation
-	 */
-	public static List<List<Object>> getListData(Object data) {
-		List<List<Object>> listData = new ArrayList<>();
-		List<Map<String, ?>> mapListData = getMapListData(data);
-		for (Map<String, ?> row : mapListData) {
-			List<Object> rowData = new ArrayList<>();
-			for (Object value : row.values()) {
-				rowData.add(value);
-			}
-			listData.add(rowData);
-		}
-
-		return listData;
 	}
 
 	/**

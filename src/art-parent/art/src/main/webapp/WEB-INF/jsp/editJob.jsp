@@ -70,14 +70,13 @@
 	</jsp:attribute>
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/css/bootstrap-datetimepicker.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
 
 		<script>
 			//put obtaining of server offset in head to reduce difference between server and client time
@@ -100,43 +99,14 @@
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.4.2/ace.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
-			tinymce.init({
-				selector: "textarea.editor",
-				plugins: [
-					"advlist autolink lists link image charmap print preview hr anchor pagebreak",
-					"searchreplace visualblocks visualchars code",
-					"nonbreaking table contextmenu directionality",
-					"paste textcolor"
-				],
-				toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
-				toolbar2: "print preview | forecolor backcolor | link image | code",
-				image_advtab: true,
-				//https://codepen.io/nirajmchauhan/pen/EjQLpV
-				paste_data_images: true,
-				file_picker_callback: function (callback, value, meta) {
-					if (meta.filetype == 'image') {
-						$('#upload').trigger('click');
-						$('#upload').on('change', function () {
-							var file = this.files[0];
-							var reader = new FileReader();
-							reader.onload = function (e) {
-								callback(e.target.result, {
-									alt: ''
-								});
-							};
-							reader.readAsDataURL(file);
-						});
-					}
-				}
-			});
+			tinymce.init(tinymceConfig);
 		</script>
 
 		<script type="text/javascript">
@@ -178,9 +148,7 @@
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
-				});
+				initializeSelectHover();
 
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
@@ -188,7 +156,7 @@
 					offText: '${noText}'
 				});
 
-				$("#jobType").change(function () {
+				$("#jobType").on("change", function () {
 					toggleVisibleFields();
 					populateOutputFormatField();
 				});
@@ -196,9 +164,9 @@
 				toggleVisibleFields(); //show/hide on page load
 				populateOutputFormatField();
 
-				$('#name').focus();
+				$('#name').trigger("focus");
 
-				$('#describeSchedule').click(function () {
+				$('#describeSchedule').on("click", function () {
 					var second = $('#scheduleSecond').val();
 					var minute = $('#scheduleMinute').val();
 					var hour = $('#scheduleHour').val();
@@ -223,12 +191,12 @@
 							}
 						},
 						error: function (xhr) {
-							bootbox.alert(xhr.responseText);
+							ajaxErrorHandler(xhr);
 						}
 					});
 				});
 
-				$('#getSchedule').click(function () {
+				$('#getSchedule').on("click", function () {
 					var recordId = $('#schedules option:selected').val();
 
 					$.ajax({
