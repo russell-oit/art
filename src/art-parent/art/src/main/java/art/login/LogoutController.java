@@ -43,7 +43,7 @@ public class LogoutController {
 	@Autowired
 	private LoginService loginService;
 
-	@RequestMapping(value = "/logout", method = RequestMethod.POST)
+	@RequestMapping(value = "/logout2", method = RequestMethod.POST)
 	public String logout(HttpSession session, Model model) {
 		logger.debug("Entering logout");
 
