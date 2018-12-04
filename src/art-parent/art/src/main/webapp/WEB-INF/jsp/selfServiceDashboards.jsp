@@ -364,6 +364,7 @@
 			</div>
 			<div class="col-md-4">
 				<select id="dashboardReports" class="form-control selectpicker">
+					<option value="0">--</option>
 				</select>
 			</div>
 		</div>
