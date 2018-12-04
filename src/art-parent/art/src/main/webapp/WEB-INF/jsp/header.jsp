@@ -314,7 +314,7 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<form method="POST" action="${pageContext.request.contextPath}/logout2">
+						<form method="POST" action="${pageContext.request.contextPath}/logout">
 							<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 							<button type="submit" class="btn btn-link navbar-btn">
 								<i class="fa fa-sign-out"></i> 
