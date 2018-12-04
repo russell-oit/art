@@ -81,3 +81,8 @@
   overflow: auto;
   padding: 4px;
 }
+
+.self-service-item-icon {
+	padding: 0px 2px;
+	cursor: pointer;
+}

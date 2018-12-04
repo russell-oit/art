@@ -82,21 +82,7 @@
 						var height = 3;
 						var autoPosition = true;
 						grid.addWidget(el, x, y, width, height, autoPosition);
-
-						$.ajax({
-							type: 'POST',
-							url: '${pageContext.request.contextPath}/runReport',
-							data: {reportId: reportId, isFragment: true},
-							success: function (data) {
-								$("#content_" + reportId).html(data);
-								var autoheight = false;
-								var autowidth = true;
-								autosize(autoheight, autowidth, reportId);
-							},
-							error: function (xhr) {
-								showUserAjaxError(xhr, '${errorOccurredText}');
-							}
-						});
+						runReport(reportId);
 					} else {
 						var contentDiv = $("#content_" + reportId);
 						var item = contentDiv.closest('.grid-stack-item');
@@ -108,6 +94,23 @@
 					var processedTemplate = $("#widgetTemplate").html().replace(/#reportId#/g, reportId).replace(/#reportName#/g, reportName);
 					return processedTemplate;
 				}
+				
+				function runReport(reportId) {
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/runReport',
+						data: {reportId: reportId, isFragment: true},
+						success: function (data) {
+							$("#content_" + reportId).html(data);
+							var autoheight = false;
+							var autowidth = true;
+							autosize(autoheight, autowidth, reportId);
+						},
+						error: function (xhr) {
+							showUserAjaxError(xhr, '${errorOccurredText}');
+						}
+					});
+				}
 
 				//https://stackoverflow.com/questions/31983495/gridstack-js-delete-widget-using-jquery
 				$('.grid-stack').on('click', '.removeWidget', function () {
@@ -117,6 +120,11 @@
 					var reportId = $(this).data("reportId");
 					$('#reports').find('[value=' + reportId + ']').prop('selected', false);
 					$('#reports').selectpicker('refresh');
+				});
+				
+				$('.grid-stack').on('click', '.refreshWidget', function () {
+					var reportId = $(this).data("reportId");
+					runReport(reportId);
 				});
 
 				function autosize(autoheight, autowidth, reportId) {
@@ -308,8 +316,8 @@
 			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#" data-report-id="#reportId#">
 			<div class="portletTitle">
 			<span><b>#reportName#</b></span>
-			<span class="fa fa-times removeWidget pull-right" style="cursor: pointer" data-report-id="#reportId#">					
-			</span>
+			<span class="fa fa-times removeWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
+			<span class="fa fa-refresh refreshWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
 			</div>				
 			<div id="content_#reportId#">
 			</div>
