@@ -346,39 +346,6 @@ Display user jobs and jobs configuration
 					}
 				});
 
-				$('#runSingle').on("click", function () {
-					var item = $(this);
-					var recordName = escapeHtmlContent(item.data("name"));
-					var recordId = item.data("id");
-
-					$.ajax({
-						type: 'POST',
-						url: '${pageContext.request.contextPath}/runJob',
-						dataType: 'json',
-						data: {id: recordId},
-						success: function (response) {
-							if (response.success) {
-								notifyActionSuccessReusable("${runningText}", recordName);
-							} else {
-								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-							}
-						},
-						error: ajaxErrorHandler
-					});
-				});
-
-				$('#runLaterSingle').on("click", function () {
-					var item = $(this);
-					var recordName = escapeHtmlContent(item.data("name"));
-					var recordId = item.data("id");
-
-					var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
-					$('#runLaterDate').val(currentTimeString);
-					$('#runLaterJobId').val(recordId);
-					$('#runLaterJobName').val(recordName);
-					$('#runLaterModal').modal('show');
-				});
-
 				$('.datetimepicker').datetimepicker({
 					format: 'YYYY-MM-DD HH:mm:ss',
 					locale: '${pageContext.response.locale}'
