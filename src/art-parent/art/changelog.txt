@@ -1,3 +1,6 @@
+ART 4.1
+* Added option not to run reports immediately when creating self service dashboards
+
 ART 4.0
 * Fix for legends always off for charts in dashboards
 * Allow querying from InfluxDB database

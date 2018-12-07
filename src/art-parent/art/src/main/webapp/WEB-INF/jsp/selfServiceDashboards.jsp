@@ -82,7 +82,11 @@
 						var height = 3;
 						var autoPosition = true;
 						grid.addWidget(el, x, y, width, height, autoPosition);
-						runReport(reportId);
+						
+						var runImmediately = $("#runImmediately").is(":checked");
+						if (runImmediately) {
+							runReport(reportId);
+						}
 					} else {
 						var contentDiv = $("#content_" + reportId);
 						var item = contentDiv.closest('.grid-stack-item');
@@ -349,6 +353,11 @@
 				<button class="btn btn-default" id="newDashboard">
 					<spring:message code="page.text.new"/>
 				</button>
+				&nbsp;
+				<label class="checkbox-inline">
+					<input type="checkbox" name="runImmediately" id="runImmediately" checked>
+					<spring:message code="selfService.checkbox.runImmediately"/>
+				</label>
 			</div>
 			<div class="col-md-8">
 				<span class="pull-right">
