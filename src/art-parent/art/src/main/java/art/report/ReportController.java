@@ -846,6 +846,7 @@ public class ReportController {
 		List<String> validExtensions = new ArrayList<>();
 		validExtensions.add("xml");
 		validExtensions.add("jrxml");
+		validExtensions.add("jasper");
 		validExtensions.add("xls");
 		validExtensions.add("xlsx");
 		validExtensions.add("xlsm");
