@@ -744,6 +744,9 @@ Edit report page
 					case 155: //org chart json
 					case 156: //org chart list
 					case 157: //org chart ajax
+					case 122: //freemarker
+					case 131: //thymeleaf
+					case 153: //velocity
 						$("#resourcesDiv").show();
 						break;
 					default:

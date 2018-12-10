@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -798,22 +799,6 @@ public class ReportController {
 	}
 
 	/**
-	 * Saves a file
-	 *
-	 * @param file the file to save
-	 * @param reportTypeId the reportTypeId for the report related to the file
-	 * @param overwrite whether to overwrite existing files
-	 * @param locale the locale
-	 * @return a problem description if there was a problem, otherwise null
-	 * @throws IOException
-	 */
-	private String saveFile(MultipartFile file, int reportTypeId, boolean overwrite,
-			Locale locale) throws IOException {
-
-		return saveFile(file, reportTypeId, overwrite, locale, null);
-	}
-
-	/**
 	 * Saves a file and updates the report template property with the file name
 	 *
 	 * @param file the file to save
@@ -827,7 +812,35 @@ public class ReportController {
 	private String saveFile(MultipartFile file, int reportTypeId, boolean overwrite,
 			Locale locale, Report report) throws IOException {
 
-		logger.debug("Entering saveFile: report={}", report);
+		ReportType reportType = ReportType.toEnum(reportTypeId);
+		String templatesPath;
+		if (reportType.isUseJsTemplatesPath()) {
+			templatesPath = Config.getJsTemplatesPath();
+		} else if (reportType == ReportType.JPivotMondrian) {
+			templatesPath = Config.getDefaultTemplatesPath();
+		} else {
+			templatesPath = Config.getTemplatesPath();
+		}
+
+		return saveFile(file, templatesPath, overwrite, locale, report);
+	}
+
+	/**
+	 * Saves a file and updates the report template property with the file name
+	 *
+	 * @param file the file to save
+	 * @param templatesPath the path where to save the file
+	 * @param overwrite whether to overwrite existing files
+	 * @param locale the locale
+	 * @param report the report to update, or null
+	 * @return a problem description if there was a problem, otherwise null
+	 * @throws IOException
+	 */
+	private String saveFile(MultipartFile file, String templatesPath, boolean overwrite,
+			Locale locale, Report report) throws IOException {
+
+		logger.debug("Entering saveFile: report={}, templatesPath='{}', overwrite={}",
+				report, templatesPath, overwrite);
 
 		logger.debug("file==null = {}", file == null);
 		if (file == null) {
@@ -860,7 +873,6 @@ public class ReportController {
 		validExtensions.add("docx");
 		validExtensions.add("odt");
 		validExtensions.add("pptx");
-		validExtensions.add("js"); //for react pivot templates
 		validExtensions.add("html"); //for thymeleaf reports
 		validExtensions.add("csv"); //for pivottable.js csv server reports (.csv)
 		validExtensions.add("txt"); //for pivottable.js csv server reports (.txt for other delimited files e.g. tab separated, pipe separated etc)
@@ -869,16 +881,6 @@ public class ReportController {
 		validExtensions.add("json"); //for datamaps optional data file
 
 		//save file
-		ReportType reportType = ReportType.toEnum(reportTypeId);
-		String templatesPath;
-		if (reportType.isUseJsTemplatesPath()) {
-			templatesPath = Config.getJsTemplatesPath();
-		} else if (reportType == ReportType.JPivotMondrian) {
-			templatesPath = Config.getDefaultTemplatesPath();
-		} else {
-			templatesPath = Config.getTemplatesPath();
-		}
-
 		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
 		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, overwrite);
 
@@ -1007,10 +1009,19 @@ public class ReportController {
 
 			logger.debug("filename = '{}'", filename);
 
+			String extension = FilenameUtils.getExtension(filename);
+
 			if (FinalFilenameValidator.isValid(filename)) {
 				try {
 					boolean overwrite = BooleanUtils.toBoolean(request.getParameter("overwriteFiles"));
-					String errorMessage = saveFile(file, reportTypeId, overwrite, locale);
+					String errorMessage;
+					Report report = null;
+					if (StringUtils.equalsAnyIgnoreCase(extension, "css", "js")) {
+						String templatesPath = Config.getJsTemplatesPath();
+						errorMessage = saveFile(file, templatesPath, overwrite, locale, report);
+					} else {
+						errorMessage = saveFile(file, reportTypeId, overwrite, locale, report);
+					}
 					if (errorMessage != null) {
 						fileDetails.setError(errorMessage);
 					}
