@@ -46,8 +46,10 @@ import art.reportgroup.ReportGroupService;
 import art.reportoptions.C3Options;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DatamapsOptions;
+import art.reportoptions.JasperReportsOptions;
 import art.reportoptions.JxlsOptions;
 import art.reportoptions.OrgChartOptions;
+import art.reportoptions.TemplateResultOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
@@ -1323,6 +1325,9 @@ public class ImportRecordsController {
 
 				String options = report.getOptions();
 				if (StringUtils.isNotBlank(options)) {
+					String jsTemplatesPath = Config.getJsTemplatesPath();
+					String templatesPath = Config.getTemplatesPath();
+
 					switch (reportType) {
 						case JxlsArt:
 						case JxlsTemplate:
@@ -1333,7 +1338,6 @@ public class ImportRecordsController {
 								File areaConfigFile = new File(areaConfigFilePath);
 								boolean unpacked = ZipUtil.unpackEntry(zipFile, areaConfigFilename, areaConfigFile);
 								if (unpacked) {
-									String templatesPath = Config.getTemplatesPath();
 									String destinationFilePath = templatesPath + areaConfigFilename;
 									File destinationFile = new File(destinationFilePath);
 									if (destinationFile.exists()) {
@@ -1355,7 +1359,6 @@ public class ImportRecordsController {
 								File dataFile = new File(dataFilePath);
 								boolean unpacked = ZipUtil.unpackEntry(zipFile, dataFileName, dataFile);
 								if (unpacked) {
-									String jsTemplatesPath = Config.getJsTemplatesPath();
 									String destinationFilePath = jsTemplatesPath + dataFileName;
 									File destinationFile = new File(destinationFilePath);
 									if (destinationFile.exists()) {
@@ -1375,7 +1378,6 @@ public class ImportRecordsController {
 								File cssFile = new File(cssFilePath);
 								boolean unpacked = ZipUtil.unpackEntry(zipFile, cssFileName, cssFile);
 								if (unpacked) {
-									String jsTemplatesPath = Config.getJsTemplatesPath();
 									String destinationFilePath = jsTemplatesPath + cssFileName;
 									File destinationFile = new File(destinationFilePath);
 									if (destinationFile.exists()) {
@@ -1390,7 +1392,6 @@ public class ImportRecordsController {
 						case Datamaps:
 						case DatamapsFile:
 							DatamapsOptions datamapsOptions = ArtUtils.jsonToObject(options, DatamapsOptions.class);
-							String jsTemplatesPath = Config.getJsTemplatesPath();
 
 							String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
 							if (StringUtils.isNotBlank(datamapsJsFileName)) {
@@ -1463,7 +1464,6 @@ public class ImportRecordsController {
 						case Leaflet:
 						case OpenLayers:
 							WebMapOptions webMapOptions = ArtUtils.jsonToObject(options, WebMapOptions.class);
-							jsTemplatesPath = Config.getJsTemplatesPath();
 
 							cssFileName = webMapOptions.getCssFile();
 							if (StringUtils.isNotBlank(cssFileName)) {
@@ -1546,7 +1546,6 @@ public class ImportRecordsController {
 						case OrgChartList:
 						case OrgChartAjax:
 							OrgChartOptions orgChartOptions = ArtUtils.jsonToObject(options, OrgChartOptions.class);
-							jsTemplatesPath = Config.getJsTemplatesPath();
 
 							cssFileName = orgChartOptions.getCssFile();
 							if (StringUtils.isNotBlank(cssFileName)) {
@@ -1562,6 +1561,78 @@ public class ImportRecordsController {
 										FileUtils.copyFile(cssFile, destinationFile);
 									}
 									cssFile.delete();
+								}
+							}
+							break;
+						case FreeMarker:
+						case Thymeleaf:
+						case Velocity:
+							TemplateResultOptions templateResultOptions = ArtUtils.jsonToObject(options, TemplateResultOptions.class);
+
+							List<String> fileNames = templateResultOptions.getFiles();
+							if (CollectionUtils.isNotEmpty(fileNames)) {
+								for (String fileName : fileNames) {
+									if (StringUtils.isNotBlank(fileName)) {
+										String filePath = sourcePath + fileName;
+										File file = new File(filePath);
+										boolean unpacked = ZipUtil.unpackEntry(zipFile, fileName, file);
+										if (unpacked) {
+											String destinationFilePath = jsTemplatesPath + fileName;
+											File destinationFile = new File(destinationFilePath);
+											if (destinationFile.exists()) {
+												logger.warn("File not overwritten: '{}'. {}", fileName, report);
+											} else {
+												FileUtils.copyFile(file, destinationFile);
+											}
+											file.delete();
+										}
+									}
+								}
+							}
+							break;
+						case JasperReportsArt:
+						case JasperReportsTemplate:
+							JasperReportsOptions jasperReportsOptions = ArtUtils.jsonToObject(options, JasperReportsOptions.class);
+
+							List<String> subreportFileNames = jasperReportsOptions.getSubreports();
+							if (CollectionUtils.isNotEmpty(subreportFileNames)) {
+								for (String subreportFileName : subreportFileNames) {
+									if (StringUtils.isNotBlank(subreportFileName)) {
+										String subreportFilePath = sourcePath + subreportFileName;
+										File subreportFile = new File(subreportFilePath);
+										boolean unpacked = ZipUtil.unpackEntry(zipFile, subreportFileName, subreportFile);
+										if (unpacked) {
+											String destinationFilePath = templatesPath + subreportFileName;
+											File destinationFile = new File(destinationFilePath);
+											if (destinationFile.exists()) {
+												logger.warn("File not overwritten: '{}'. {}", subreportFileName, report);
+											} else {
+												FileUtils.copyFile(subreportFile, destinationFile);
+											}
+											subreportFile.delete();
+										}
+									}
+								}
+							}
+
+							fileNames = jasperReportsOptions.getFiles();
+							if (CollectionUtils.isNotEmpty(fileNames)) {
+								for (String fileName : fileNames) {
+									if (StringUtils.isNotBlank(fileName)) {
+										String filePath = sourcePath + fileName;
+										File file = new File(filePath);
+										boolean unpacked = ZipUtil.unpackEntry(zipFile, fileName, file);
+										if (unpacked) {
+											String destinationFilePath = templatesPath + fileName;
+											File destinationFile = new File(destinationFilePath);
+											if (destinationFile.exists()) {
+												logger.warn("File not overwritten: '{}'. {}", fileName, report);
+											} else {
+												FileUtils.copyFile(file, destinationFile);
+											}
+											file.delete();
+										}
+									}
 								}
 							}
 							break;

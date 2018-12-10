@@ -1,6 +1,6 @@
 /*
  * ART. A Reporting Tool.
- * Copyright (C) 2017 Enrico Liboni <eliboni@users.sf.net>
+ * Copyright (C) 2018 Enrico Liboni <eliboni@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,44 +22,30 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Options for column naming for template reports
- *
+ * Options for jasper reports
+ * 
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TemplateResultOptions implements Serializable {
-
+public class JasperReportsOptions implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
-	private boolean useLowerCaseProperties = false;
-	private boolean useColumnLabels = true;
+	
+	private List<String> subreports;
 	private List<String> files;
 
 	/**
-	 * @return the useLowerCaseProperties
+	 * @return the subreports
 	 */
-	public boolean isUseLowerCaseProperties() {
-		return useLowerCaseProperties;
+	public List<String> getSubreports() {
+		return subreports;
 	}
 
 	/**
-	 * @param useLowerCaseProperties the useLowerCaseProperties to set
+	 * @param subreports the subreports to set
 	 */
-	public void setUseLowerCaseProperties(boolean useLowerCaseProperties) {
-		this.useLowerCaseProperties = useLowerCaseProperties;
-	}
-
-	/**
-	 * @return the useColumnLabels
-	 */
-	public boolean isUseColumnLabels() {
-		return useColumnLabels;
-	}
-
-	/**
-	 * @param useColumnLabels the useColumnLabels to set
-	 */
-	public void setUseColumnLabels(boolean useColumnLabels) {
-		this.useColumnLabels = useColumnLabels;
+	public void setSubreports(List<String> subreports) {
+		this.subreports = subreports;
 	}
 
 	/**
@@ -75,4 +61,5 @@ public class TemplateResultOptions implements Serializable {
 	public void setFiles(List<String> files) {
 		this.files = files;
 	}
+	
 }

@@ -48,8 +48,10 @@ import art.reportgroup.ReportGroupService;
 import art.reportoptions.C3Options;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DatamapsOptions;
+import art.reportoptions.JasperReportsOptions;
 import art.reportoptions.JxlsOptions;
 import art.reportoptions.OrgChartOptions;
+import art.reportoptions.TemplateResultOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
@@ -1354,13 +1356,15 @@ public class ExportRecordsController {
 
 				String options = report.getOptions();
 				if (StringUtils.isNotBlank(options)) {
+					String jsTemplatesPath = Config.getJsTemplatesPath();
+					String templatesPath = Config.getTemplatesPath();
+
 					switch (reportType) {
 						case JxlsArt:
 						case JxlsTemplate:
 							JxlsOptions jxlsOptions = ArtUtils.jsonToObject(options, JxlsOptions.class);
 							String areaConfigFilename = jxlsOptions.getAreaConfigFile();
 							if (StringUtils.isNotBlank(areaConfigFilename)) {
-								String templatesPath = Config.getTemplatesPath();
 								String fullAreaConfigFilename = templatesPath + areaConfigFilename;
 								File areaConfigFile = new File(fullAreaConfigFilename);
 								if (areaConfigFile.exists() && !filesToZip.contains(fullAreaConfigFilename)) {
@@ -1374,7 +1378,6 @@ public class ExportRecordsController {
 							CsvServerOptions csvServerOptions = ArtUtils.jsonToObject(options, CsvServerOptions.class);
 							String dataFileName = csvServerOptions.getDataFile();
 							if (StringUtils.isNotBlank(dataFileName)) {
-								String jsTemplatesPath = Config.getJsTemplatesPath();
 								String fullDataFileName = jsTemplatesPath + dataFileName;
 								File dataFile = new File(fullDataFileName);
 								if (dataFile.exists() && !filesToZip.contains(fullDataFileName)) {
@@ -1386,7 +1389,6 @@ public class ExportRecordsController {
 							C3Options c3Options = ArtUtils.jsonToObject(options, C3Options.class);
 							String cssFileName = c3Options.getCssFile();
 							if (StringUtils.isNotBlank(cssFileName)) {
-								String jsTemplatesPath = Config.getJsTemplatesPath();
 								String fullCssFileName = jsTemplatesPath + cssFileName;
 								File cssFile = new File(fullCssFileName);
 								if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
@@ -1397,7 +1399,6 @@ public class ExportRecordsController {
 						case Datamaps:
 						case DatamapsFile:
 							DatamapsOptions datamapsOptions = ArtUtils.jsonToObject(options, DatamapsOptions.class);
-							String jsTemplatesPath = Config.getJsTemplatesPath();
 
 							String datamapsJsFileName = datamapsOptions.getDatamapsJsFile();
 							if (StringUtils.isNotBlank(datamapsJsFileName)) {
@@ -1438,7 +1439,6 @@ public class ExportRecordsController {
 						case Leaflet:
 						case OpenLayers:
 							WebMapOptions webMapOptions = ArtUtils.jsonToObject(options, WebMapOptions.class);
-							jsTemplatesPath = Config.getJsTemplatesPath();
 
 							cssFileName = webMapOptions.getCssFile();
 							if (StringUtils.isNotBlank(cssFileName)) {
@@ -1489,14 +1489,59 @@ public class ExportRecordsController {
 						case OrgChartList:
 						case OrgChartAjax:
 							OrgChartOptions orgChartOptions = ArtUtils.jsonToObject(options, OrgChartOptions.class);
-							jsTemplatesPath = Config.getJsTemplatesPath();
-
 							cssFileName = orgChartOptions.getCssFile();
 							if (StringUtils.isNotBlank(cssFileName)) {
 								String fullCssFileName = jsTemplatesPath + cssFileName;
 								File cssFile = new File(fullCssFileName);
 								if (cssFile.exists() && !filesToZip.contains(fullCssFileName)) {
 									filesToZip.add(fullCssFileName);
+								}
+							}
+							break;
+						case FreeMarker:
+						case Thymeleaf:
+						case Velocity:
+							TemplateResultOptions templateResultOptions = ArtUtils.jsonToObject(options, TemplateResultOptions.class);
+							List<String> fileNames = templateResultOptions.getFiles();
+							if (CollectionUtils.isNotEmpty(fileNames)) {
+								for (String fileName : fileNames) {
+									if (StringUtils.isNotBlank(fileName)) {
+										String fullFileName = jsTemplatesPath + fileName;
+										File file = new File(fullFileName);
+										if (file.exists() && !filesToZip.contains(fullFileName)) {
+											filesToZip.add(fullFileName);
+										}
+									}
+								}
+							}
+							break;
+						case JasperReportsArt:
+						case JasperReportsTemplate:
+							JasperReportsOptions jasperReportsOptions = ArtUtils.jsonToObject(options, JasperReportsOptions.class);
+
+							List<String> subreportFileNames = jasperReportsOptions.getSubreports();
+							if (CollectionUtils.isNotEmpty(subreportFileNames)) {
+								for (String subreportFileName : subreportFileNames) {
+									if (StringUtils.isNotBlank(subreportFileName)) {
+										String fullSubreportFileName = templatesPath + subreportFileName;
+										File subreportFile = new File(fullSubreportFileName);
+										if (subreportFile.exists() && !filesToZip.contains(fullSubreportFileName)) {
+											filesToZip.add(fullSubreportFileName);
+										}
+									}
+								}
+							}
+
+							fileNames = jasperReportsOptions.getFiles();
+							if (CollectionUtils.isNotEmpty(fileNames)) {
+								for (String fileName : fileNames) {
+									if (StringUtils.isNotBlank(fileName)) {
+										String fullFileName = templatesPath + fileName;
+										File file = new File(fullFileName);
+										if (file.exists() && !filesToZip.contains(fullFileName)) {
+											filesToZip.add(fullFileName);
+										}
+									}
 								}
 							}
 							break;
