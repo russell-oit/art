@@ -88,7 +88,11 @@
 				<c:forEach var="report" items="${reports}">
 					<tr>
 						<td>${report.reportId}</td>
-						<td>${encode:forHtmlContent(report.name)}</td>
+						<td>
+							<a href="${pageContext.request.contextPath}/reportConfig?reportId=${report.reportId}">
+								${encode:forHtmlContent(report.name)}
+							</a>
+						</td>
 					</tr>
 				</c:forEach>
 			</tbody>
