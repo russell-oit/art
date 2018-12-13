@@ -694,7 +694,7 @@ public class ReportRunner {
 			}
 
 			String searchString = "#" + paramName + "#";
-			String replaceString = StringUtils.repeat(" ? ", ",", reportParam.getActualParameterValues().size());
+			String replaceString = StringUtils.repeat("?", ",", reportParam.getActualParameterValues().size());
 			querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 		}
 
