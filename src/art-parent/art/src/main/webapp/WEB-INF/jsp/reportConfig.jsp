@@ -14,7 +14,6 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:message code="page.title.reportConfiguration" var="panelTitle"/>
-
 <c:set var="pageTitle">
 	${panelTitle} - ${report.getLocalizedName(pageContext.response.locale)}
 </c:set>

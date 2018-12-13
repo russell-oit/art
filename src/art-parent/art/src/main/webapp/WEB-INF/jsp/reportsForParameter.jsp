@@ -12,11 +12,15 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.parameterUsage" var="pageTitle"/>
+<spring:message code="page.title.parameterUsage" var="panelTitle"/>
+<c:set var="pageTitle">
+	${panelTitle} - ${parameter.name} (${parameter.parameterId})
+</c:set>
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
+<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+					 mainColumnClass="col-md-8 col-md-offset-2"
 					 hasTable="true">
 
 	<jsp:attribute name="javascript">
