@@ -13,7 +13,11 @@
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<spring:message code="page.title.reportConfiguration" var="pageTitle"/>
+<spring:message code="page.title.reportConfiguration" var="panelTitle"/>
+
+<c:set var="pageTitle">
+	${panelTitle} - ${report.getLocalizedName(pageContext.response.locale)}
+</c:set>
 
 <t:mainPage title="${pageTitle}">
 
@@ -33,7 +37,7 @@
 				<div class="panel panel-success">
 					<div class="panel-heading">
 						<h4 class="panel-title text-center">
-							${pageTitle}
+							${panelTitle}
 						</h4>
 					</div>
 				</div>
