@@ -41,30 +41,12 @@
 	var locale = '${locale}';
 	moment.locale(locale);
 
-	function rangeUpdated(start, end) {
-		var fromParameterJson = '${encode:forJavaScript(reportParam.parameter.dateRangeFromParameterJson)}';
-		if (fromParameterJson) {
-			var fromParameter = JSON.parse(fromParameterJson);
-			var fromParameterName = fromParameter.name;
-			var fromParameterJavaFormat = fromParameter.format;
-			var fromParameterMomentFormat = moment().toMomentFormatString(fromParameterJavaFormat);
-			$('#p-' + fromParameterName).val(start.format(fromParameterMomentFormat));
-		}
-
-		var toParameterJson = '${encode:forJavaScript(reportParam.parameter.dateRangeToParameterJson)}';
-		if (toParameterJson) {
-			var toParameter = JSON.parse(toParameterJson);
-			var toParameterName = toParameter.name;
-			var toParameterJavaFormat = toParameter.format;
-			var toParameterMomentFormat = moment().toMomentFormatString(toParameterJavaFormat);
-			$('#p-' + toParameterName).val(end.format(toParameterMomentFormat));
-		}
-	}
-
 	var paramOptionsString = '${encode:forJavaScript(reportParam.parameter.options)}';
 	var paramOptions;
 	var dateRangeOptions;
 	var rangesOption;
+	var fromParameter;
+	var toParameter;
 
 	if (paramOptionsString) {
 		paramOptions = JSON.parse(paramOptionsString);
@@ -72,7 +54,33 @@
 			dateRangeOptions = paramOptions.dateRange;
 			if (dateRangeOptions) {
 				rangesOption = dateRangeOptions.ranges;
+				fromParameter = dateRangeOptions.fromParameter;
+				toParameter = dateRangeOptions.toParameter;
 			}
+		}
+	}
+
+	function rangeUpdated(start, end) {
+		var defaultParameterFormatJava = 'yyyy-MM-dd';
+
+		if (fromParameter) {
+			var fromParameterName = fromParameter.name;
+			var fromParameterJavaFormat = fromParameter.format;
+			if (!fromParameterJavaFormat) {
+				fromParameterJavaFormat = defaultParameterFormatJava;
+			}
+			var fromParameterMomentFormat = moment().toMomentFormatString(fromParameterJavaFormat);
+			$('#p-' + fromParameterName).val(start.format(fromParameterMomentFormat));
+		}
+
+		if (toParameter) {
+			var toParameterName = toParameter.name;
+			var toParameterJavaFormat = toParameter.format;
+			if (!toParameterJavaFormat) {
+				toParameterJavaFormat = defaultParameterFormatJava;
+			}
+			var toParameterMomentFormat = moment().toMomentFormatString(toParameterJavaFormat);
+			$('#p-' + toParameterName).val(end.format(toParameterMomentFormat));
 		}
 	}
 
@@ -160,8 +168,8 @@
 		});
 	}
 
-	var defaultJavaDateFormat = 'MMMM dd, yyyy';
-	var momentDateFormat = moment().toMomentFormatString(defaultJavaDateFormat);
+	var defaultInputDateFormatJava = 'MMMM dd, yyyy';
+	var momentDateFormat = moment().toMomentFormatString(defaultInputDateFormatJava);
 
 	//set default options
 	var options = {

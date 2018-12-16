@@ -127,18 +127,11 @@ public class ParameterService {
 			String options = parameter.getOptions();
 			if (StringUtils.isBlank(options)) {
 				ParameterOptions parameterOptions = new ParameterOptions();
-				DateRangeOptions dateRangeOptions = new DateRangeOptions();
-				parameterOptions.setDateRange(dateRangeOptions);
 				parameter.setParameterOptions(parameterOptions);
 			} else {
 				ObjectMapper mapper = new ObjectMapper();
 				try {
 					ParameterOptions parameterOptions = mapper.readValue(options, ParameterOptions.class);
-					DateRangeOptions dateRangeOptions = parameterOptions.getDateRange();
-					if (dateRangeOptions == null) {
-						dateRangeOptions = new DateRangeOptions();
-						parameterOptions.setDateRange(dateRangeOptions);
-					}
 					parameter.setParameterOptions(parameterOptions);
 				} catch (IOException ex) {
 					logger.error("Error. {}", parameter, ex);
