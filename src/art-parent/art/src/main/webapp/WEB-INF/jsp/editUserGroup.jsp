@@ -38,7 +38,7 @@ Edit user group page
 <spring:message code="select.text.selectAll" var="selectAllText"/>
 <spring:message code="select.text.deselectAll" var="deselectAllText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 	
 	<jsp:attribute name="javascript">

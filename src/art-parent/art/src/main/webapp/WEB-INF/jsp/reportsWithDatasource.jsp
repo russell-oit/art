@@ -19,7 +19,7 @@
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-8 col-md-offset-2"
 					 hasTable="true">
 

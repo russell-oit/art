@@ -35,7 +35,7 @@
 <spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="css">

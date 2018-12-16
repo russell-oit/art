@@ -34,7 +34,7 @@ Edit a rule
 
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 	
 	<jsp:attribute name="javascript">

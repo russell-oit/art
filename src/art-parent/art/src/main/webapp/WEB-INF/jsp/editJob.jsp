@@ -56,7 +56,7 @@
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="belowMainPanel">

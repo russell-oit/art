@@ -41,7 +41,7 @@ Edit schedule page
 <spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="headContent">

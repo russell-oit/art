@@ -24,7 +24,7 @@ Includes main page, plus a bootstrap panel where the contents go
 <%@attribute name="headContent" fragment="true" %>
 <%@attribute name="title" required="true" %>
 <%@attribute name="mainColumnClass" %>
-<%@attribute name="mainPanelTitle" %>
+<%@attribute name="panelTitle" %>
 <%@attribute name="hasTable" type="java.lang.Boolean" %>
 <%@attribute name="configPage" type="java.lang.Boolean" %>
 <%@attribute name="hasNotify" type="java.lang.Boolean" %>
@@ -34,8 +34,8 @@ Includes main page, plus a bootstrap panel where the contents go
 	<c:set var="mainColumnClass" value="col-md-12"/>
 </c:if>
 
-<c:if test="${empty mainPanelTitle}">
-	<c:set var="mainPanelTitle" value="${title}"/>
+<c:if test="${empty panelTitle}">
+	<c:set var="panelTitle" value="${title}"/>
 </c:if>
 
 <t:mainPage title="${title}">
@@ -97,7 +97,7 @@ Includes main page, plus a bootstrap panel where the contents go
 				<div class="panel panel-success">
 					<div class="panel-heading">
 						<h4 class="panel-title text-center">
-							${encode:forHtmlContent(mainPanelTitle)}
+							${encode:forHtmlContent(panelTitle)}
 						</h4>
 					</div>
 					<div class="panel-body">

@@ -51,7 +51,7 @@ Edit report page
 <spring:message code="page.action.delete" var="deleteText"/>
 <spring:message code="caches.action.clear" var="clearText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="belowMainPanel">
