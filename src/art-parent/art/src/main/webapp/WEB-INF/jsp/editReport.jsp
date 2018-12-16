@@ -1244,6 +1244,15 @@ Edit report page
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="col-md-4 control-label " for="comment">
+						<spring:message code="reports.label.comment"/>
+					</label>
+					<div class="col-md-8">
+						<form:textarea path="comment" rows="2" cols="40" class="form-control" maxlength="2000"/>
+						<form:errors path="comment" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="control-label col-md-4" for="contactPerson">
 						<spring:message code="reports.label.contactPerson"/>
 					</label>

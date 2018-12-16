@@ -126,6 +126,7 @@ public class ReportService {
 			report.setName(rs.getString("NAME"));
 			report.setShortDescription(rs.getString("SHORT_DESCRIPTION"));
 			report.setDescription(rs.getString("DESCRIPTION"));
+			report.setComment(rs.getString("DEVELOPER_COMMENT"));
 			report.setReportTypeId(rs.getInt("QUERY_TYPE"));
 			report.setReportType(ReportType.toEnum(rs.getInt("QUERY_TYPE")));
 			report.setGroupColumn(rs.getInt("GROUP_COLUMN"));
@@ -941,8 +942,10 @@ public class ReportService {
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
-					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
-					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATASOURCE_ID, CONTACT_PERSON, USES_RULES,"
+					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION,"
+					+ " DEVELOPER_COMMENT, QUERY_TYPE,"
+					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATASOURCE_ID,"
+					+ " CONTACT_PERSON, USES_RULES,"
 					+ " ACTIVE, HIDDEN, REPORT_SOURCE, PARAMETERS_IN_OUTPUT,"
 					+ " X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
@@ -954,13 +957,14 @@ public class ReportService {
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 45) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 46) + ")";
 
 			Object[] values = {
 				newRecordId,
 				report.getName(),
 				report.getShortDescription(),
 				report.getDescription(),
+				report.getComment(),
 				reportTypeId,
 				report.getGroupColumn(),
 				reportGroupId,
@@ -1011,7 +1015,8 @@ public class ReportService {
 			}
 		} else {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
-					+ " DESCRIPTION=?, QUERY_TYPE=?, GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
+					+ " DESCRIPTION=?, DEVELOPER_COMMENT=?, QUERY_TYPE=?,"
+					+ " GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
 					+ " DATASOURCE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
 					+ " HIDDEN=?, REPORT_SOURCE=?, PARAMETERS_IN_OUTPUT=?,"
 					+ " X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
@@ -1031,6 +1036,7 @@ public class ReportService {
 				report.getName(),
 				report.getShortDescription(),
 				report.getDescription(),
+				report.getComment(),
 				report.getReportTypeId(),
 				report.getGroupColumn(),
 				reportGroupId,

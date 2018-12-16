@@ -180,6 +180,8 @@ public class Report implements Serializable {
 	@Parsed
 	private String gridstackSavedOptions;
 	private String name2; //used for holding a processed report name e.g. in self service dashboard reports list
+	@Parsed
+	private String comment;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -198,6 +200,20 @@ public class Report implements Serializable {
 	private String reportGroupNamesHtml;
 	@JsonIgnore
 	private boolean overwriteFiles;
+
+	/**
+	 * @return the comment
+	 */
+	public String getComment() {
+		return comment;
+	}
+
+	/**
+	 * @param comment the comment to set
+	 */
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 
 	/**
 	 * @return the overwriteFiles
