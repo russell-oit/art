@@ -192,7 +192,7 @@ Access rights configuration
 						<select name="reports" id="reports" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="report" items="${reports}">
 								<option value="${report.reportId}">
-									<encode:forHtmlContent value="${report.getLocalizedName(pageContext.response.locale)}"/>
+									<encode:forHtmlContent value="${report.name}"/>
 								</option>
 							</c:forEach>
 						</select>

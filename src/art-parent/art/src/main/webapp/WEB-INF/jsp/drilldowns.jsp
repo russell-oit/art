@@ -252,14 +252,14 @@ Display report drilldowns
 			<tbody>
 				<c:forEach var="drilldown" items="${drilldowns}">
 					<tr data-id="${drilldown.drilldownId}" 
-						data-name="${encode:forHtmlAttribute(drilldown.drilldownReport.getLocalizedName(pageContext.response.locale))}"
+						data-name="${encode:forHtmlAttribute(drilldown.drilldownReport.name)}"
 						id="${drilldown.drilldownId}">
 
 						<td></td>
 						<td>${drilldown.position}</td>
 						<td>${drilldown.drilldownId}</td>
 						<td data-toggle="tooltip" title="${dragToReorderText}">
-							${encode:forHtmlContent(drilldown.drilldownReport.getLocalizedName(pageContext.response.locale))}
+							${encode:forHtmlContent(drilldown.drilldownReport.name)}
 						</td>
 						<td>
 							<div class="btn-group">

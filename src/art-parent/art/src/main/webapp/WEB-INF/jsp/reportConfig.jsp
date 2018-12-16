@@ -15,7 +15,7 @@
 
 <spring:message code="page.title.reportConfiguration" var="panelTitle"/>
 <c:set var="pageTitle">
-	${panelTitle} - ${report.getLocalizedName(pageContext.response.locale)}
+	${panelTitle} - ${report.name}
 </c:set>
 
 <t:mainPage title="${pageTitle}">
@@ -55,7 +55,7 @@
 				</c:if>
 				<div class="alert alert-success">
 					<c:if test="${not empty recordSavedMessage}"><spring:message code="${recordSavedMessage}"/>: </c:if>
-					${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))} (${report.reportId})
+					${encode:forHtmlContent(report.name)} (${report.reportId})
 					&nbsp;
 					<div class="btn-group">
 						<a class="btn btn-default" 

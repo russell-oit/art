@@ -57,9 +57,7 @@ public class DrilldownController {
 	private ReportService reportService;
 
 	@RequestMapping(value = "/drilldowns", method = RequestMethod.GET)
-	public String showDrilldowns(Model model, @RequestParam("reportId") Integer reportId,
-			Locale locale) {
-
+	public String showDrilldowns(Model model, @RequestParam("reportId") Integer reportId) {
 		logger.debug("Entering showDrilldowns: reportId={}", reportId);
 
 		try {
@@ -67,11 +65,11 @@ public class DrilldownController {
 			String parentReportName = "";
 			Report report = reportService.getReport(reportId);
 			if (report != null) {
-				parentReportName = report.getLocalizedName(locale);
+				parentReportName = report.getName();
 			}
 			model.addAttribute("parentReportName", parentReportName);
 			model.addAttribute("drilldowns", drilldownService.getDrilldowns(reportId));
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -117,20 +115,17 @@ public class DrilldownController {
 
 	@RequestMapping(value = "/addDrilldown", method = RequestMethod.GET)
 	public String addDrilldown(Model model,
-			@RequestParam("parent") Integer parent,
-			Locale locale) {
+			@RequestParam("parent") Integer parent) {
 
 		logger.debug("Entering addDrilldown: parent={}", parent);
 
 		model.addAttribute("drilldown", new Drilldown());
 
-		return showEditDrilldown("add", model, parent, locale);
+		return showEditDrilldown("add", model, parent);
 	}
 
 	@RequestMapping(value = "/editDrilldown", method = RequestMethod.GET)
-	public String editDrilldown(@RequestParam("id") Integer id, Model model,
-			Locale locale) {
-
+	public String editDrilldown(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editDrilldown: id={}", id);
 
 		int parentReportId = 0;
@@ -146,15 +141,14 @@ public class DrilldownController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditDrilldown("edit", model, parentReportId, locale);
+		return showEditDrilldown("edit", model, parentReportId);
 	}
 
 	@RequestMapping(value = "/saveDrilldown", method = RequestMethod.POST)
 	public String saveDrilldown(@ModelAttribute("drilldown") @Valid Drilldown drilldown,
 			@RequestParam("action") String action,
 			@RequestParam("parent") Integer parent,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			Locale locale) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		logger.debug("Entering saveDrilldown: drilldown={}, action='{}', parent={}",
 				drilldown, action, parent);
@@ -162,7 +156,7 @@ public class DrilldownController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditDrilldown(action, model, parent, locale);
+			return showEditDrilldown(action, model, parent);
 		}
 
 		try {
@@ -173,20 +167,20 @@ public class DrilldownController {
 				drilldownService.updateDrilldown(drilldown);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			
+
 			String reportName = "";
 			Report report = reportService.getReport(drilldown.getDrilldownReport().getReportId());
 			if (report != null) {
-				reportName = report.getLocalizedName(locale);
+				reportName = report.getName();
 			}
 			redirectAttributes.addFlashAttribute("recordName", reportName);
 			return "redirect:/drilldowns?reportId=" + parent;
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showEditDrilldown(action, model, parent, locale);
+		return showEditDrilldown(action, model, parent);
 	}
 
 	/**
@@ -195,26 +189,25 @@ public class DrilldownController {
 	 * @param action "add" or "edit"
 	 * @param model the spring model to populate
 	 * @param parentReportId the report id of the parent report
-	 * @param locale
 	 * @return the jsp file to display
 	 */
-	private String showEditDrilldown(String action, Model model, 
-			Integer parentReportId, Locale locale) {
-		
+	private String showEditDrilldown(String action, Model model,
+			Integer parentReportId) {
+
 		logger.debug("Entering showEditDrilldown: action='{}', parentReportId={}", action, parentReportId);
 
 		try {
 			String parentReportName = "";
 			Report report = reportService.getReport(parentReportId);
 			if (report != null) {
-				parentReportName = report.getLocalizedName(locale);
+				parentReportName = report.getName();
 			}
 			model.addAttribute("parentReportName", parentReportName);
-			
+
 			List<Report> drilldownReports = reportService.getDrilldownReports();
 			drilldownReports.addAll(reportService.getDashboardReports());
 			model.addAttribute("drilldownReports", drilldownReports);
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

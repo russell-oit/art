@@ -27,7 +27,7 @@ Edit report page
 	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editReport" var="panelTitle"/>
 		<c:set var="pageTitle">
-			${panelTitle} - ${report.getLocalizedName(pageContext.response.locale)}
+			${panelTitle} - ${report.name}
 		</c:set>
 	</c:when>
 </c:choose>

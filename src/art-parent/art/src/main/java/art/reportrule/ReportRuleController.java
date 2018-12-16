@@ -21,9 +21,7 @@ import art.report.Report;
 import art.rule.RuleService;
 import art.report.ReportService;
 import art.general.AjaxResponse;
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Locale;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,9 +57,7 @@ public class ReportRuleController {
 	private RuleService ruleService;
 
 	@RequestMapping(value = "/reportRules", method = RequestMethod.GET)
-	public String showReportRules(Model model, @RequestParam("reportId") Integer reportId,
-			Locale locale) {
-
+	public String showReportRules(Model model, @RequestParam("reportId") Integer reportId) {
 		logger.debug("Entering showReportRules");
 
 		try {
@@ -69,11 +65,11 @@ public class ReportRuleController {
 			String reportName = "";
 			Report report = reportService.getReport(reportId);
 			if (report != null) {
-				reportName = report.getLocalizedName(locale);
+				reportName = report.getName();
 			}
 			model.addAttribute("reportName", reportName);
 			model.addAttribute("reportRules", reportRuleService.getReportRules(reportId));
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -118,20 +114,16 @@ public class ReportRuleController {
 	}
 
 	@RequestMapping(value = "/addReportRule", method = RequestMethod.GET)
-	public String addReportRule(Model model, @RequestParam("reportId") Integer reportId,
-			Locale locale) {
-		
+	public String addReportRule(Model model, @RequestParam("reportId") Integer reportId) {
 		logger.debug("Entering addReportRule: reportId={}", reportId);
 
 		model.addAttribute("reportRule", new ReportRule());
-
-		return showEditReportRule("add", model, reportId, locale);
+		
+		return showEditReportRule("add", model, reportId);
 	}
 
 	@RequestMapping(value = "/editReportRule", method = RequestMethod.GET)
-	public String editReportRule(@RequestParam("id") Integer id, Model model,
-			Locale locale) {
-		
+	public String editReportRule(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editReportRule: id={}", id);
 
 		int reportId = 0;
@@ -147,22 +139,21 @@ public class ReportRuleController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReportRule("edit", model, reportId, locale);
+		return showEditReportRule("edit", model, reportId);
 	}
 
 	@RequestMapping(value = "/saveReportRule", method = RequestMethod.POST)
 	public String saveReportRule(@ModelAttribute("reportRule") @Valid ReportRule reportRule,
 			@RequestParam("action") String action,
 			@RequestParam("reportId") Integer reportId,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			Locale locale) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		logger.debug("Entering saveReportRule: reportRule={}, action='{}', reportId={}", reportRule, action, reportId);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditReportRule(action, model, reportId, locale);
+			return showEditReportRule(action, model, reportId);
 		}
 
 		try {
@@ -181,7 +172,7 @@ public class ReportRuleController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReportRule(action, model, reportId, locale);
+		return showEditReportRule(action, model, reportId);
 	}
 
 	/**
@@ -193,20 +184,18 @@ public class ReportRuleController {
 	 * @param locale the locale
 	 * @return the jsp file to display
 	 */
-	private String showEditReportRule(String action, Model model, Integer reportId,
-			Locale locale) {
-		
+	private String showEditReportRule(String action, Model model, Integer reportId) {
 		logger.debug("Entering showEditReportRule: action='{}', reportId={}", action, reportId);
 
 		try {
 			String reportName = "";
 			Report report = reportService.getReport(reportId);
 			if (report != null) {
-				reportName = report.getLocalizedName(locale);
+				reportName = report.getName();
 			}
 			model.addAttribute("reportName", reportName);
 			model.addAttribute("rules", ruleService.getAllRules());
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
