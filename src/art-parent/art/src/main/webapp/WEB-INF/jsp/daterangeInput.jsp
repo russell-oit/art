@@ -61,51 +61,54 @@
 		}
 	}
 
-	var javaDateFormat = '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.format)}';
-	var momentDateFormat = moment().toMomentFormatString(javaDateFormat);
-	
-	var separator = '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.separator)}';
+	var paramOptionsString = '${encode:forJavaScript(reportParam.parameter.options)}';
+	var paramOptions;
+	var dateRangeOptions;
+	var rangesOption;
 
-	var localeOptions = {
-		format: momentDateFormat,
-		applyLabel: '${applyText}',
-		cancelLabel: '${cancelText}',
-		customRangeLabel: '${customRangeText}',
-		direction: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.direction)}',
-		separator: separator
-	};
-
-	var todayText = '${todayText}';
-	var yesterdayText = '${yesterdayText}';
-	var last7DaysText = '${last7DaysText}';
-	var last30DaysText = '${last30DaysText}';
-	var thisMonthText = '${thisMonthText}';
-	var lastMonthText = '${lastMonthText}';
-	var thisQuarterText = '${thisQuarterText}';
-	var lastQuarterText = '${lastQuarterText}';
-	var thisYearText = '${thisYearText}';
-	var lastYearText = '${lastYearText}';
-	var toText = '${toText}';
-	var thisWeekText = '${thisWeekText}';
-	var lastWeekText = '${lastWeekText}';
-	var yearToDateText = '${yearToDateText}';
-	var monthToDateText = '${monthToDateText}';
-	var quarterToDateText = '${quarterToDateText}';
-	var weekToDateText = '${weekToDateText}';
-
-	//https://stackoverflow.com/questions/9840512/get-dates-for-last-quarter-and-this-quarter-through-javascript
-	var ranges = {};
-
-	var rangesJson = '${encode:forJavaScript(reportParam.parameter.dateRangeRangesJson)}';
-	if (rangesJson) {
-		var rangesArray = JSON.parse(rangesJson);
-		//https://stackoverflow.com/questions/6116474/how-to-find-if-an-array-contains-a-specific-string-in-javascript-jquery
-		if ($.inArray('default', rangesArray) > -1) {
-			rangesArray = ["today", "yesterday", "last7Days", "last30Days", "thisMonth", "lastMonth"];
+	if (paramOptionsString) {
+		paramOptions = JSON.parse(paramOptionsString);
+		if (paramOptions) {
+			dateRangeOptions = paramOptions.dateRange;
+			if (dateRangeOptions) {
+				rangesOption = dateRangeOptions.ranges;
+			}
 		}
-		$.each(rangesArray, function (index, value) {
+	}
+
+	var ranges = {};
+	if (rangesOption !== null) {
+		if (rangesOption === undefined) {
+			rangesOption = ['default'];
+		}
+
+		//https://stackoverflow.com/questions/6116474/how-to-find-if-an-array-contains-a-specific-string-in-javascript-jquery
+		if ($.inArray('default', rangesOption) > -1) {
+			rangesOption = ["today", "yesterday", "last7Days", "last30Days", "thisMonth", "lastMonth"];
+		}
+
+		var todayText = '${todayText}';
+		var yesterdayText = '${yesterdayText}';
+		var last7DaysText = '${last7DaysText}';
+		var last30DaysText = '${last30DaysText}';
+		var thisMonthText = '${thisMonthText}';
+		var lastMonthText = '${lastMonthText}';
+		var thisQuarterText = '${thisQuarterText}';
+		var lastQuarterText = '${lastQuarterText}';
+		var thisYearText = '${thisYearText}';
+		var lastYearText = '${lastYearText}';
+		var toText = '${toText}';
+		var thisWeekText = '${thisWeekText}';
+		var lastWeekText = '${lastWeekText}';
+		var yearToDateText = '${yearToDateText}';
+		var monthToDateText = '${monthToDateText}';
+		var quarterToDateText = '${quarterToDateText}';
+		var weekToDateText = '${weekToDateText}';
+
+		$.each(rangesOption, function (index, value) {
 			//https://stackoverflow.com/questions/14910760/switch-case-as-string
 			//https://api.jquery.com/jquery.each/
+			//https://stackoverflow.com/questions/9840512/get-dates-for-last-quarter-and-this-quarter-through-javascript
 			switch (value) {
 				case "today":
 					ranges[todayText] = [moment(), moment()];
@@ -161,30 +164,33 @@
 		});
 	}
 
-	var overallOptions = {
-		locale: localeOptions,
+	var defaultJavaDateFormat = 'MMMM dd, yyyy';
+	var momentDateFormat = moment().toMomentFormatString(defaultJavaDateFormat);
+
+	//set default options
+	var options = {
 		ranges: ranges,
-		autoApply: ${reportParam.parameter.parameterOptions.dateRange.autoApply},
-		showDropdowns: ${reportParam.parameter.parameterOptions.dateRange.showDropdowns},
-		showWeekNumbers: ${reportParam.parameter.parameterOptions.dateRange.showWeekNumbers},
-		showISOWeekNumbers: ${reportParam.parameter.parameterOptions.dateRange.showISOWeekNumbers},
-		showCustomRangeLabel: ${reportParam.parameter.parameterOptions.dateRange.showCustomRangeLabel},
-		timePicker: ${reportParam.parameter.parameterOptions.dateRange.timePicker},
-		timePicker24Hour: ${reportParam.parameter.parameterOptions.dateRange.timePicker24Hour},
-		timePickerIncrement: ${reportParam.parameter.parameterOptions.dateRange.timePickerIncrement},
-		timePickerSeconds: ${reportParam.parameter.parameterOptions.dateRange.timePickerSeconds},
-		linkedCalendars: ${reportParam.parameter.parameterOptions.dateRange.linkedCalendars},
-		autoUpdateInput: ${reportParam.parameter.parameterOptions.dateRange.autoUpdateInput},
-		alwaysShowCalendars: ${reportParam.parameter.parameterOptions.dateRange.alwaysShowCalendars},
-		opens: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.opens)}',
-		drops: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.drops)}',
-		buttonClasses: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.buttonClasses)}',
-		applyClass: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.applyClass)}',
-		cancelClass: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.cancelClass)}'
+		locale: {
+			format: momentDateFormat,
+			applyLabel: '${applyText}',
+			cancelLabel: '${cancelText}',
+			customRangeLabel: '${customRangeText}',
+			separator: ' - '
+		},
+		autoUpdateInput: false
 	};
 
+	if (dateRangeOptions) {
+		//https://stackoverflow.com/questions/208105/how-do-i-remove-a-property-from-a-javascript-object
+		delete dateRangeOptions.ranges;
+		$.extend(options, dateRangeOptions);
+	}
+
+	momentDateFormat = options.locale.format;
+	var separator = options.locale.separator;
+
 	var selector = '#${encode:forJavaScript(reportParam.htmlElementName)}';
-	
+
 	$(selector).on('apply.daterangepicker', function (ev, picker) {
 		$(this).val(picker.startDate.format(momentDateFormat) + separator + picker.endDate.format(momentDateFormat));
 	});
@@ -195,5 +201,5 @@
 </c:if>
 
 <script>
-	$(selector).daterangepicker(overallOptions, rangeUpdated);
+	$(selector).daterangepicker(options, rangeUpdated);
 </script>
