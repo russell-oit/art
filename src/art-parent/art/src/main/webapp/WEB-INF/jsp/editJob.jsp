@@ -59,7 +59,7 @@
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
-	<jsp:attribute name="belowMainPanel">
+	<jsp:attribute name="belowPanel">
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3">
 				<div class="alert alert-info">

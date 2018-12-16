@@ -54,7 +54,7 @@ Edit report page
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
-	<jsp:attribute name="belowMainPanel">
+	<jsp:attribute name="belowPanel">
 		<div class="row">
 			<div class="col-md-12">
 				<div id="reportOutput"></div>

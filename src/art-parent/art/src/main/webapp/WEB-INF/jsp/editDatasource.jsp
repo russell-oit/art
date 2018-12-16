@@ -170,7 +170,7 @@ Edit datasource page
 		</div>
 	</jsp:attribute>
 
-	<jsp:attribute name="belowMainPanel">
+	<jsp:attribute name="belowPanel">
 		<div class="col-md-8 col-md-offset-2">
 			<div class="alert alert-info">
 				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>

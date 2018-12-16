@@ -84,7 +84,7 @@ Display art database configuration page
 		</c:if>
 	</jsp:attribute>
 
-	<jsp:attribute name="belowMainPanel">
+	<jsp:attribute name="belowPanel">
 		<div class="${belowPanelClass}">
 			<div class="alert alert-info">
 				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>

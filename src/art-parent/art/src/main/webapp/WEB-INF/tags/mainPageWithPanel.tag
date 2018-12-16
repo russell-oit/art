@@ -18,7 +18,7 @@ Includes main page, plus a bootstrap panel where the contents go
 <%@attribute name="css" fragment="true" %>
 <%@attribute name="javascript" fragment="true" %>
 <%@attribute name="abovePanel" fragment="true" %>
-<%@attribute name="belowMainPanel" fragment="true" %>
+<%@attribute name="belowPanel" fragment="true" %>
 <%@attribute name="leftMainPanel" fragment="true" %>
 <%@attribute name="rightMainPanel" fragment="true" %>
 <%@attribute name="headContent" fragment="true" %>
@@ -109,6 +109,6 @@ Includes main page, plus a bootstrap panel where the contents go
 			<jsp:invoke fragment="rightMainPanel"/>
 		</div>
 
-		<jsp:invoke fragment="belowMainPanel"/>
+		<jsp:invoke fragment="belowPanel"/>
     </jsp:body>
 </t:mainPage>
