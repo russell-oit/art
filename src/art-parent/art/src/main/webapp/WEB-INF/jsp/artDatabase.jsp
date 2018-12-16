@@ -74,7 +74,7 @@ Display art database configuration page
 		</div>
 	</jsp:attribute>
 
-	<jsp:attribute name="leftMainPanel">
+	<jsp:attribute name="leftPanel">
 		<c:if test="${not empty initialSetup}">
 			<div class="col-md-4">
 				<div class="alert alert-info">
