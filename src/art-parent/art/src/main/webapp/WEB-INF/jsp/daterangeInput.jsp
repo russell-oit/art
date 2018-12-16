@@ -84,30 +84,30 @@
 		}
 	}
 
+	var todayText = '${todayText}';
+	var yesterdayText = '${yesterdayText}';
+	var last7DaysText = '${last7DaysText}';
+	var last30DaysText = '${last30DaysText}';
+	var thisMonthText = '${thisMonthText}';
+	var lastMonthText = '${lastMonthText}';
+	var thisQuarterText = '${thisQuarterText}';
+	var lastQuarterText = '${lastQuarterText}';
+	var thisYearText = '${thisYearText}';
+	var lastYearText = '${lastYearText}';
+	var toText = '${toText}';
+	var thisWeekText = '${thisWeekText}';
+	var lastWeekText = '${lastWeekText}';
+	var yearToDateText = '${yearToDateText}';
+	var monthToDateText = '${monthToDateText}';
+	var quarterToDateText = '${quarterToDateText}';
+	var weekToDateText = '${weekToDateText}';
+
 	var ranges = {};
 	if (rangesOption !== null) {
 		//https://stackoverflow.com/questions/6116474/how-to-find-if-an-array-contains-a-specific-string-in-javascript-jquery
 		if (rangesOption === undefined || $.inArray('default', rangesOption) > -1) {
 			rangesOption = ["today", "yesterday", "last7Days", "last30Days", "thisMonth", "lastMonth"];
 		}
-
-		var todayText = '${todayText}';
-		var yesterdayText = '${yesterdayText}';
-		var last7DaysText = '${last7DaysText}';
-		var last30DaysText = '${last30DaysText}';
-		var thisMonthText = '${thisMonthText}';
-		var lastMonthText = '${lastMonthText}';
-		var thisQuarterText = '${thisQuarterText}';
-		var lastQuarterText = '${lastQuarterText}';
-		var thisYearText = '${thisYearText}';
-		var lastYearText = '${lastYearText}';
-		var toText = '${toText}';
-		var thisWeekText = '${thisWeekText}';
-		var lastWeekText = '${lastWeekText}';
-		var yearToDateText = '${yearToDateText}';
-		var monthToDateText = '${monthToDateText}';
-		var quarterToDateText = '${quarterToDateText}';
-		var weekToDateText = '${weekToDateText}';
 
 		$.each(rangesOption, function (index, value) {
 			//https://stackoverflow.com/questions/14910760/switch-case-as-string
