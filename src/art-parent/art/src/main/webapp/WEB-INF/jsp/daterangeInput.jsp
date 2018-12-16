@@ -78,12 +78,8 @@
 
 	var ranges = {};
 	if (rangesOption !== null) {
-		if (rangesOption === undefined) {
-			rangesOption = ['default'];
-		}
-
 		//https://stackoverflow.com/questions/6116474/how-to-find-if-an-array-contains-a-specific-string-in-javascript-jquery
-		if ($.inArray('default', rangesOption) > -1) {
+		if (rangesOption === undefined || $.inArray('default', rangesOption) > -1) {
 			rangesOption = ["today", "yesterday", "last7Days", "last30Days", "thisMonth", "lastMonth"];
 		}
 
