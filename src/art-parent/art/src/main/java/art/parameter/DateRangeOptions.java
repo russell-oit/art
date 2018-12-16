@@ -47,7 +47,7 @@ public class DateRangeOptions implements Serializable {
 	private int timePickerIncrement = 1;
 	private boolean timePickerSeconds;
 	private boolean linkedCalendars = true;
-	private boolean autoUpdateInput = true;
+	private boolean autoUpdateInput = false;
 	private boolean alwaysShowCalendars;
 	private String opens = "right";
 	private String drops = "down";

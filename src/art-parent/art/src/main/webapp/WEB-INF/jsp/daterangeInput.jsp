@@ -63,6 +63,8 @@
 
 	var javaDateFormat = '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.format)}';
 	var momentDateFormat = moment().toMomentFormatString(javaDateFormat);
+	
+	var separator = '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.separator)}';
 
 	var localeOptions = {
 		format: momentDateFormat,
@@ -70,8 +72,7 @@
 		cancelLabel: '${cancelText}',
 		customRangeLabel: '${customRangeText}',
 		direction: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.direction)}',
-		separator: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.separator)}'
-
+		separator: separator
 	};
 
 	var todayText = '${todayText}';
@@ -160,7 +161,6 @@
 		});
 	}
 
-
 	var overallOptions = {
 		locale: localeOptions,
 		ranges: ranges,
@@ -182,6 +182,12 @@
 		applyClass: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.applyClass)}',
 		cancelClass: '${encode:forJavaScript(reportParam.parameter.parameterOptions.dateRange.cancelClass)}'
 	};
+
+	var selector = '#${encode:forJavaScript(reportParam.htmlElementName)}';
+	
+	$(selector).on('apply.daterangepicker', function (ev, picker) {
+		$(this).val(picker.startDate.format(momentDateFormat) + separator + picker.endDate.format(momentDateFormat));
+	});
 </script>
 
 <c:if test="${not empty reportParam.parameter.template}">
@@ -189,5 +195,5 @@
 </c:if>
 
 <script>
-	$('#${encode:forJavaScript(reportParam.htmlElementName)}').daterangepicker(overallOptions, rangeUpdated);
+	$(selector).daterangepicker(overallOptions, rangeUpdated);
 </script>
