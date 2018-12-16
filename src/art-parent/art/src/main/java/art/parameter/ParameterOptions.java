@@ -22,15 +22,14 @@ import java.io.Serializable;
 
 /**
  * Represents parameter options
- * 
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ParameterOptions implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private Parameteri18nOptions i18n;
-	private DateRangeOptions dateRange;
 
 	/**
 	 * @return the i18n
@@ -46,17 +45,4 @@ public class ParameterOptions implements Serializable {
 		this.i18n = i18n;
 	}
 
-	/**
-	 * @return the dateRange
-	 */
-	public DateRangeOptions getDateRange() {
-		return dateRange;
-	}
-
-	/**
-	 * @param dateRange the dateRange to set
-	 */
-	public void setDateRange(DateRangeOptions dateRange) {
-		this.dateRange = dateRange;
-	}
 }
