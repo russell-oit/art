@@ -20,7 +20,7 @@ Includes main page, plus a bootstrap panel where the contents go
 <%@attribute name="abovePanel" fragment="true" %>
 <%@attribute name="belowPanel" fragment="true" %>
 <%@attribute name="leftPanel" fragment="true" %>
-<%@attribute name="rightMainPanel" fragment="true" %>
+<%@attribute name="rightPanel" fragment="true" %>
 <%@attribute name="headContent" fragment="true" %>
 <%@attribute name="title" required="true" %>
 <%@attribute name="mainColumnClass" %>
@@ -106,7 +106,7 @@ Includes main page, plus a bootstrap panel where the contents go
 				</div>
 			</div>
 
-			<jsp:invoke fragment="rightMainPanel"/>
+			<jsp:invoke fragment="rightPanel"/>
 		</div>
 
 		<jsp:invoke fragment="belowPanel"/>
