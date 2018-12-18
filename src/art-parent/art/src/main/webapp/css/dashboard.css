@@ -86,3 +86,8 @@
 	padding: 0px 2px;
 	cursor: pointer;
 }
+
+.dashboard-column {
+	vertical-align: top;
+	padding: 10px;
+}
