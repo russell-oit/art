@@ -1284,7 +1284,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="groupColumn" maxlength="2" class="form-control"/>
+							<form:input type="number" path="groupColumn" maxlength="2" class="form-control"/>
 							<spring:message code="reports.help.groupColumn" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -1350,7 +1350,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="displayResultset" maxlength="2" class="form-control"/>
+							<form:input type="number" path="displayResultset" maxlength="2" class="form-control"/>
 							<spring:message code="reports.help.displayResultset" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -1491,7 +1491,7 @@ Edit report page
 						<spring:message code="reports.label.fetchSize"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="fetchSize" maxlength="5" class="form-control"/>
+						<form:input type="number" path="fetchSize" maxlength="5" class="form-control"/>
 						<form:errors path="fetchSize" cssClass="error"/>
 					</div>
 				</div>

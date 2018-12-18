@@ -399,7 +399,7 @@ Edit parameter definition
 						<spring:message code="parameters.label.drilldownColumnIndex"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="drilldownColumnIndex" maxlength="2" class="form-control"/>
+						<form:input type="number" path="drilldownColumnIndex" maxlength="2" class="form-control"/>
 						<form:errors path="drilldownColumnIndex" cssClass="error"/>
 					</div>
 				</div>

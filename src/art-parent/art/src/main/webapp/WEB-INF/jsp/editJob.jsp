@@ -663,7 +663,7 @@
 							<spring:message code="jobs.label.runsToArchive"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="runsToArchive" maxlength="3" class="form-control"/>
+							<form:input type="number" path="runsToArchive" maxlength="3" class="form-control"/>
 							<form:errors path="runsToArchive" cssClass="error"/>
 						</div>
 					</div>

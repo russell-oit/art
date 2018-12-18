@@ -216,7 +216,7 @@
 						<spring:message code="destinations.label.port"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="port" maxlength="6" class="form-control"/>
+						<form:input type="number" path="port" maxlength="6" class="form-control"/>
 						<form:errors path="port" cssClass="error"/>
 					</div>
 				</div>

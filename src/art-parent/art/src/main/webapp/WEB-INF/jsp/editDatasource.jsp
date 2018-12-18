@@ -388,7 +388,7 @@ Edit datasource page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="connectionPoolTimeoutMins" maxlength="5" class="form-control"/>
+							<form:input type="number" path="connectionPoolTimeoutMins" maxlength="5" class="form-control"/>
 							<spring:message code="page.help.connectionPoolTimeout" var="help" />
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
