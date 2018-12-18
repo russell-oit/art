@@ -39,7 +39,7 @@
 						<c:forEach var="column" items="${dashboard.columns}">
 							<td class="dashboard-column">
 								<c:forEach var="portlet" items="${column}">
-									<div id="portlet_${portlet.index}">
+									<div id="portlet_${portlet.index}" class="portlet">
 										<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Box">
 											<div class="portletTools"
 												 data-content-div-id="#portletContent_${portlet.index}"
@@ -83,7 +83,7 @@
 										<td class="dashboard-column">
 											<c:forEach var="portlet" items="${tab.items}">
 												<c:if test="${loop2.count == portlet.columnIndex}">
-													<div id="portlet_${portlet.index}">
+													<div id="portlet_${portlet.index}" class="portlet">
 														<div class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Box">
 															<div class="portletTools"
 																 data-content-div-id="#portletContent_${portlet.index}"
