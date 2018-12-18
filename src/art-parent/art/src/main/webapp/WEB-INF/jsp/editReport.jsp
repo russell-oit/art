@@ -136,7 +136,7 @@ Edit report page
 				$('#fileupload').fileupload({
 					url: '${pageContext.request.contextPath}/uploadResources',
 					fileInput: $('#fileuploadInput'),
-					acceptFileTypes: /(\.|\/)(jrxml|jasper|png|jpe?g|csv|txt|css|js|json|xml)$/i,
+					acceptFileTypes: /(\.|\/)(jrxml|jasper|png|jpe?g|csv|txt|css|js|json|xml|html|vm|ftl|ftlh|ftlx|docx|odt|pptx|xls|xlsx|xlsm)$/i,
 					maxFileSize: maxFileSizeBytes,
 					messages: {
 						acceptFileTypes: '${fileTypeNotAllowedText}',
