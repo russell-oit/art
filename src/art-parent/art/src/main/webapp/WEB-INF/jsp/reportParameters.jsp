@@ -88,6 +88,9 @@
 								<c:when test="${reportParam.parameter.dataType == 'DateRange'}">
 									<jsp:include page="daterangeInput.jsp" />
 								</c:when>
+								<c:when test="${reportParam.parameter.dataType.numeric}">
+									<jsp:include page="numberInput.jsp" />
+								</c:when>
 								<c:otherwise>
 									<jsp:include page="textInput.jsp"/>
 								</c:otherwise>
