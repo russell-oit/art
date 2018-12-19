@@ -1,6 +1,7 @@
 ART 4.1
 * Added option not to run reports immediately when creating self service dashboards
 * Modified setting of date range picker options
+* Fix for error when exporting report with parameters
 
 ART 4.0
 * Fix for legends always off for charts in dashboards
