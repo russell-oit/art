@@ -344,7 +344,7 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				mapper.writerWithDefaultPrettyPrinter().writeValue(file, settings);
 				break;
 			case Datasource:
@@ -383,7 +383,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, datasources);
 						break;
 					case csv:
@@ -429,7 +429,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, destinations);
 						break;
 					case csv:
@@ -486,7 +486,7 @@ public class ExportRecordsController {
 					case json:
 						encryptorsFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME;
 						encryptorsFile = new File(encryptorsFilePath);
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(encryptorsFile, encryptors);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(encryptorsFilePath);
@@ -550,7 +550,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, holidays);
 						break;
 					case csv:
@@ -594,7 +594,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, reportGroups);
 						break;
 					case csv:
@@ -640,7 +640,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, smtpServers);
 						break;
 					case csv:
@@ -688,7 +688,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, userGroups);
 						exportFilePath = recordsExportPath + "art-export-UserGroups.json";
 						break;
@@ -787,7 +787,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, schedules);
 						exportFilePath = recordsExportPath + "art-export-Schedules.json";
 						break;
@@ -859,7 +859,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, users);
 						exportFilePath = recordsExportPath + "art-export-Users.json";
 						break;
@@ -972,7 +972,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, rules);
 						break;
 					case csv:
@@ -1030,7 +1030,7 @@ public class ExportRecordsController {
 					case json:
 						parametersFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME;
 						parametersFile = new File(parametersFilePath);
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(parametersFile, parameters);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(parametersFilePath);
@@ -1557,7 +1557,7 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, roles);
 						exportFilePath = recordsExportPath + "art-export-Roles.json";
 						break;

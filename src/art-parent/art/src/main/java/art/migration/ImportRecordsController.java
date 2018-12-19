@@ -295,7 +295,7 @@ public class ImportRecordsController {
 
 		logger.debug("Entering importSettings: sessionUser={}", sessionUser);
 
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 		Settings settings = mapper.readValue(file, Settings.class);
 		if (settings.isClearTextPasswords()) {
 			settings.encryptPasswords();
@@ -326,7 +326,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				datasources = mapper.readValue(file, new TypeReference<List<Datasource>>() {
 				});
 				break;
@@ -373,7 +373,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				destinations = mapper.readValue(file, new TypeReference<List<Destination>>() {
 				});
 				break;
@@ -416,7 +416,7 @@ public class ImportRecordsController {
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
-					ObjectMapper mapper = new ObjectMapper();
+					ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 					encryptors = mapper.readValue(file, new TypeReference<List<Encryptor>>() {
 					});
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
@@ -424,7 +424,7 @@ public class ImportRecordsController {
 					File encryptorsFile = new File(encryptorsFilePath);
 					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME, encryptorsFile);
 					if (unpacked) {
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						encryptors = mapper.readValue(encryptorsFile, new TypeReference<List<Encryptor>>() {
 						});
 						encryptorsFile.delete();
@@ -486,7 +486,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				holidays = mapper.readValue(file, new TypeReference<List<Holiday>>() {
 				});
 				break;
@@ -519,7 +519,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				reportGroups = mapper.readValue(file, new TypeReference<List<ReportGroup>>() {
 				});
 				break;
@@ -552,7 +552,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				smtpServers = mapper.readValue(file, new TypeReference<List<SmtpServer>>() {
 				});
 				break;
@@ -591,7 +591,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				userGroups = mapper.readValue(file, new TypeReference<List<UserGroup>>() {
 				});
 				break;
@@ -690,7 +690,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				schedules = mapper.readValue(file, new TypeReference<List<Schedule>>() {
 				});
 				break;
@@ -766,7 +766,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				users = mapper.readValue(file, new TypeReference<List<User>>() {
 				});
 				break;
@@ -893,7 +893,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				rules = mapper.readValue(file, new TypeReference<List<Rule>>() {
 				});
 				break;
@@ -930,7 +930,7 @@ public class ImportRecordsController {
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
-					ObjectMapper mapper = new ObjectMapper();
+					ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 					parameters = mapper.readValue(file, new TypeReference<List<Parameter>>() {
 					});
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
@@ -938,7 +938,7 @@ public class ImportRecordsController {
 					File parametersFile = new File(parametersFilePath);
 					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME, parametersFile);
 					if (unpacked) {
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						parameters = mapper.readValue(parametersFile, new TypeReference<List<Parameter>>() {
 						});
 						parametersFile.delete();
@@ -1520,7 +1520,7 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = new ObjectMapper();
+				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 				roles = mapper.readValue(file, new TypeReference<List<Role>>() {
 				});
 				break;
