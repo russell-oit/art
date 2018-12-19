@@ -1239,7 +1239,7 @@ Edit report page
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:textarea path="description" rows="2" cols="40" class="form-control" maxlength="2000"/>
+						<form:textarea path="description" rows="3" cols="40" class="form-control" maxlength="2000"/>
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
@@ -1248,7 +1248,7 @@ Edit report page
 						<spring:message code="reports.label.comment"/>
 					</label>
 					<div class="col-md-8">
-						<form:textarea path="comment" rows="2" cols="40" class="form-control" maxlength="2000"/>
+						<form:textarea path="comment" rows="3" cols="40" class="form-control" maxlength="2000"/>
 						<form:errors path="comment" cssClass="error"/>
 					</div>
 				</div>
