@@ -17,6 +17,8 @@
  */
 package art.utils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -725,6 +727,26 @@ public class ArtUtils {
 			newFilename += "." + extension;
 		}
 		return newFilename;
+	}
+
+	/**
+	 * Returns a Jackson ObjectMapper that only considers properties when
+	 * serializing/deserializing and doesn't include get() or set() methods that
+	 * don't have properties attached to them
+	 *
+	 * @return a Jackson ObjectMapper that only considers properties when
+	 * serializing/deserializing
+	 */
+	public static ObjectMapper getPropertyOnlyObjectMapper() {
+		//https://stackoverflow.com/questions/7105745/how-to-specify-jackson-to-only-use-fields-preferably-globally
+		//https://www.baeldung.com/jackson-field-serializable-deserializable-or-not
+		//https://www.baeldung.com/jackson-annotations
+		//https://stackoverflow.com/questions/3907929/should-i-declare-jacksons-objectmapper-as-a-static-field
+		//https://stackoverflow.com/questions/18611565/how-do-i-correctly-reuse-jackson-objectmapper
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+		return mapper;
 	}
 
 }

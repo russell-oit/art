@@ -1010,7 +1010,7 @@ public class ImportRecordsController {
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
-					ObjectMapper mapper = new ObjectMapper();
+					ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 					reports = mapper.readValue(file, new TypeReference<List<Report>>() {
 					});
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
@@ -1018,7 +1018,7 @@ public class ImportRecordsController {
 					File reportsFile = new File(reportsFilePath);
 					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME, reportsFile);
 					if (unpacked) {
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						reports = mapper.readValue(reportsFile, new TypeReference<List<Report>>() {
 						});
 						reportsFile.delete();

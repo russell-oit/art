@@ -297,7 +297,6 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return actual parameter values in a formatted manner
 	 */
-	@JsonIgnore
 	public String getDisplayValues() {
 		boolean textOnly = false;
 		return getDisplayValuesWithTextOption(textOnly);
@@ -309,7 +308,6 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return actual parameter values in a formatted manner
 	 */
-	@JsonIgnore
 	public String getDisplayValuesTextOnly() {
 		boolean textOnly = true;
 		return getDisplayValuesWithTextOption(textOnly);
@@ -322,7 +320,6 @@ public class ReportParameter implements Serializable {
 	 * parameters
 	 * @return actual parameter values in a formatted manner
 	 */
-	@JsonIgnore
 	private String getDisplayValuesWithTextOption(boolean textOnly) {
 		List<String> paramDisplayStrings = new ArrayList<>();
 
@@ -369,7 +366,6 @@ public class ReportParameter implements Serializable {
 	 * @return the parameter name and actual parameter values in a formatted
 	 * manner
 	 */
-	@JsonIgnore
 	public String getNameAndDisplayValues() {
 		return parameter.getName() + ": " + getDisplayValues();
 	}
@@ -381,7 +377,6 @@ public class ReportParameter implements Serializable {
 	 * @return the parameter label and actual parameter values in a formatted
 	 * manner
 	 */
-	@JsonIgnore
 	public String getLabelAndDisplayValues() {
 		return parameter.getLabel() + ": " + getDisplayValues();
 	}
@@ -395,7 +390,6 @@ public class ReportParameter implements Serializable {
 	 * manner, parameter name being localized according to the given locale
 	 * @throws java.io.IOException
 	 */
-	@JsonIgnore
 	public String getLocalizedLabelAndDisplayValues(Locale locale) throws IOException {
 		return parameter.getLocalizedLabel(locale) + ": " + getDisplayValues();
 	}
@@ -406,7 +400,6 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return the effective actual parameter value
 	 */
-	@JsonIgnore
 	public Object getEffectiveActualParameterValue() {
 		if (parameter.getParameterType() == ParameterType.SingleValue) {
 			return actualParameterValues.get(0);
@@ -420,7 +413,6 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return the html element name to be used for this parameter
 	 */
-	@JsonIgnore
 	public String getHtmlElementName() {
 		return ArtUtils.PARAM_PREFIX + parameter.getName();
 	}
@@ -431,7 +423,6 @@ public class ReportParameter implements Serializable {
 	 * @return the html element value to be used for this parameter
 	 * @throws java.io.IOException
 	 */
-	@JsonIgnore
 	public String getHtmlValue() throws IOException {
 		Locale locale = null;
 		return getHtmlValueWithLocale(locale);
@@ -495,7 +486,6 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return the html element ids of chained parents elements
 	 */
-	@JsonIgnore
 	public String getChainedParentsHtmlIds() {
 		return getHtmlIds(chainedParents);
 	}
@@ -505,7 +495,6 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return the html element ids of chained depends elements
 	 */
-	@JsonIgnore
 	public String getChainedDependsHtmlIds() {
 		return getHtmlIds(chainedDepends);
 	}
@@ -516,7 +505,6 @@ public class ReportParameter implements Serializable {
 	 * @param ids the strings to use
 	 * @return html element ids to be used with the given strings
 	 */
-	@JsonIgnore
 	private String getHtmlIds(String ids) {
 		if (StringUtils.isBlank(ids)) {
 			return "";
@@ -538,7 +526,6 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return <code>true</code> if this parameter is chained
 	 */
-	@JsonIgnore
 	public boolean isChained() {
 		if (StringUtils.isBlank(chainedParents)) {
 			return false;
@@ -584,7 +571,6 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return effective actual parameter value
 	 */
-	@JsonIgnore
 	public Object getValue() {
 		//for use with jxls
 		return getEffectiveActualParameterValue();
@@ -596,7 +582,6 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return effective actual parameter value for use within an sql query
 	 */
-	@JsonIgnore
 	public Object getSqlValue() {
 		//for use with jxls
 		ParameterType parameterType = parameter.getParameterType();

@@ -1191,7 +1191,7 @@ public class ExportRecordsController {
 					case json:
 						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME;
 						reportsFile = new File(reportsFilePath);
-						ObjectMapper mapper = new ObjectMapper();
+						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(reportsFile, reports);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(reportsFilePath);
