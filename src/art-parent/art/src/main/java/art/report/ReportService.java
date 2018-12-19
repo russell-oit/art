@@ -28,13 +28,14 @@ import art.enums.AccessLevel;
 import art.enums.PageOrientation;
 import art.enums.ParameterType;
 import art.enums.ReportType;
+import art.general.ActionResult;
+import art.parameter.ParameterService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.reportoptions.CloneOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
-import art.general.ActionResult;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,6 +56,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
@@ -648,10 +650,6 @@ public class ReportService {
 		sql = "DELETE FROM ART_USER_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
-		//delete report parameters
-		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_ID=?";
-		dbService.update(sql, id);
-
 		//delete query-rule relationships
 		sql = "DELETE FROM ART_QUERY_RULES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
@@ -659,7 +657,6 @@ public class ReportService {
 		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
-		//delete drilldown queries
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
@@ -669,7 +666,21 @@ public class ReportService {
 		sql = "DELETE FROM ART_SAVED_PARAMETERS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
 
-		//lastly, delete query
+		//delete report parameters
+		//get non-shared parameters for later deleting
+		sql = "SELECT ARP.PARAMETER_ID"
+				+ " FROM ART_REPORT_PARAMETERS ARP"
+				+ " INNER JOIN ART_PARAMETERS AP"
+				+ " ON ARP.PARAMETER_ID=AP.PARAMETER_ID"
+				+ " WHERE ARP.REPORT_ID=?"
+				+ " AND AP.SHARED=0";
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("PARAMETER_ID");
+		List<Number> nonSharedParameterIds = dbService.query(sql, h, id);
+
+		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_ID=?";
+		dbService.update(sql, id);
+
+		//almost lastly, delete report
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID=?";
 		int affectedRows = dbService.update(sql, id);
 
@@ -677,6 +688,17 @@ public class ReportService {
 
 		if (affectedRows != 1) {
 			logger.warn("Problem with delete. affectedRows={}, id={}", affectedRows, id);
+		}
+
+		//delete non-shared parameters that the report used
+		if (CollectionUtils.isNotEmpty(nonSharedParameterIds)) {
+			List<Integer> deleteParameterIds = new ArrayList<>();
+			for (Number parameterIdNumber : nonSharedParameterIds) {
+				int parameterIdInt = parameterIdNumber.intValue();
+				deleteParameterIds.add(parameterIdInt);
+			}
+			ParameterService parameterService = new ParameterService();
+			parameterService.deleteParameters(deleteParameterIds.toArray(new Integer[0]));
 		}
 
 		result.setSuccess(true);
@@ -727,13 +749,30 @@ public class ReportService {
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
 	public synchronized int addReport(Report report, User actionUser) throws SQLException {
+		Connection conn = null;
+		return addReport(report, actionUser, conn);
+	}
+
+	/**
+	 * Adds a new report to the database
+	 *
+	 * @param report the report to add
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @return new record id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public synchronized int addReport(Report report, User actionUser,
+			Connection conn) throws SQLException {
+
 		logger.debug("Entering addReport: report={}, actionUser={}", report, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
 		int newId = dbService.getNewRecordId(sql);
 
-		saveReport(report, newId, actionUser);
+		saveReport(report, newId, actionUser, conn);
 
 		return newId;
 	}
@@ -873,22 +912,6 @@ public class ReportService {
 			saveReport(report, reportId, actionUser, conn);
 			reportGroupMembershipService2.recreateReportGroupMemberships(report);
 		}
-	}
-
-	/**
-	 * Saves a report
-	 *
-	 * @param report the report to save
-	 * @param newRecordId id of the new record or null if editing an existing
-	 * record
-	 * @param actionUser the user who is performing the save
-	 * @throws SQLException
-	 */
-	private void saveReport(Report report, Integer newRecordId,
-			User actionUser) throws SQLException {
-
-		Connection conn = null;
-		saveReport(report, newRecordId, actionUser, conn);
 	}
 
 	/**
@@ -1185,52 +1208,57 @@ public class ReportService {
 		logger.debug("Entering copyReport: report={}, originalReportId={}, actionUser={}",
 				report, originalReportId, actionUser);
 
-		//insert new report
-		int newId = addReport(report, actionUser);
+		Connection conn = DbConnections.getArtDbConnection();
+		boolean originalAutoCommit = true;
 
 		try {
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			//insert new report
+			int newId = addReport(report, actionUser, conn);
+
 			//copy parameters
-			copyTableRow("ART_REPORT_PARAMETERS", "REPORT_ID", originalReportId, newId, "REPORT_PARAMETER_ID");
+			copyTableRow(conn, "ART_REPORT_PARAMETERS", "REPORT_ID", originalReportId, newId, "REPORT_PARAMETER_ID");
 
 			//copy rules
-			copyTableRow("ART_QUERY_RULES", "QUERY_ID", originalReportId, newId, null);
+			copyTableRow(conn, "ART_QUERY_RULES", "QUERY_ID", originalReportId, newId, null);
 
 			//copy drilldown reports
-			copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId, null);
+			copyTableRow(conn, "ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId, null);
+
+			conn.commit();
 		} catch (SQLException ex) {
-			//if an error occurred when copying new report details, delete new report also
-			deleteReport(newId);
+			conn.rollback();
 			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+			DatabaseUtils.close(conn);
 		}
 	}
 
 	/**
 	 * Copies some aspect of a report
 	 *
+	 * @param conn the connection to use
 	 * @param tableName the name of the table to copy
 	 * @param keyColumnName the name of the key column
 	 * @param keyId the original value of the key column
 	 * @param newKeyId the new value of the key column
 	 * @param primaryKeyColumn the primary key of the table, that is to be
 	 * incremented by 1. null if this is not required
-	 * @return the number of records copied, 0 otherwise
+	 * @return the number of records copied
 	 * @throws SQLException
 	 * @throws IllegalStateException if connection to the art database is not
 	 * available
 	 */
-	private int copyTableRow(String tableName, String keyColumnName,
+	private int copyTableRow(Connection conn, String tableName, String keyColumnName,
 			int keyId, int newKeyId, String primaryKeyColumn) throws SQLException {
 
 		logger.debug("Entering copyTableRow: tableName='{}', keyColumnName='{}',"
 				+ " keyId={}, newKeyId={}", tableName, keyColumnName, keyId, newKeyId);
 
-		int count = 0; //number of records copied
-
-		Connection conn = DbConnections.getArtDbConnection();
-
-		if (conn == null) {
-			throw new IllegalStateException("Connection to the ART Database not available");
-		}
+		int recordsCopied = 0;
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -1246,6 +1274,9 @@ public class ReportService {
 			sql = "INSERT INTO " + tableName + " VALUES ("
 					+ StringUtils.repeat("?", ",", columnCount) + ")";
 
+			String sql2 = "SELECT MAX(" + primaryKeyColumn + ") FROM " + tableName;
+			int id = dbService.getMaxRecordId(conn, sql2);
+
 			while (rs.next()) {
 				//insert new record for each existing record
 				List<Object> columnValues = new ArrayList<>();
@@ -1254,22 +1285,21 @@ public class ReportService {
 						columnValues.add(newKeyId);
 					} else if (primaryKeyColumn != null && StringUtils.equalsIgnoreCase(rsmd.getColumnName(i + 1), primaryKeyColumn)) {
 						//generate new id
-						String sql2 = "SELECT MAX(" + primaryKeyColumn + ") FROM " + tableName;
-						int newId = dbService.getNewRecordId(sql2);
-						columnValues.add(newId);
+						id++;
+						columnValues.add(id);
 					} else {
 						columnValues.add(rs.getObject(i + 1));
 					}
 				}
 
-				dbService.update(sql, columnValues.toArray());
-				count++;
+				dbService.update(conn, sql, columnValues.toArray());
+				recordsCopied++;
 			}
 		} finally {
-			DatabaseUtils.close(rs, ps, conn);
+			DatabaseUtils.close(rs, ps);
 		}
 
-		return count;
+		return recordsCopied;
 	}
 
 	/**

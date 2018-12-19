@@ -350,8 +350,8 @@ public class ParameterService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
+		
 		return result;
-
 	}
 
 	/**
