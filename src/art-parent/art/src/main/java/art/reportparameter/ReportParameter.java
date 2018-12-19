@@ -65,6 +65,7 @@ public class ReportParameter implements Serializable {
 	private String chainedParents;
 	@Parsed
 	private String chainedDepends;
+	@JsonIgnore
 	private boolean chainedParent;
 	@JsonIgnore
 	private Map<String, String> lovValuesAsString;
