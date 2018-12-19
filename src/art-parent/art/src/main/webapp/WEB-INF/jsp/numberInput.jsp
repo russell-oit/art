@@ -9,8 +9,7 @@
 
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<input type='number' class="form-control"
-	   ${reportParam.parameter.dataType == 'Double' ? 'step="any"' : ""}
+<input type="number" step="any" class="form-control"
 	   placeholder="${encode:forHtmlAttribute(reportParam.parameter.getLocalizedPlaceholderText(locale))}"
 	   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 	   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
