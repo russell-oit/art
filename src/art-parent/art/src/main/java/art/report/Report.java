@@ -87,6 +87,7 @@ public class Report implements Serializable {
 	private String shortDescription;
 	@Parsed
 	private String description;
+	@JsonIgnore
 	private int reportTypeId;
 	@Parsed
 	private String contactPerson;
@@ -112,9 +113,11 @@ public class Report implements Serializable {
 	private Date updateDate;
 	@Parsed
 	private String reportSource;
+	@JsonIgnore
 	private boolean useBlankXmlaPassword;
 	@JsonIgnore
 	private ChartOptions chartOptions;
+	@JsonIgnore
 	private String reportSourceHtml; //used with text reports
 	private String createdBy;
 	private String updatedBy;
@@ -162,8 +165,11 @@ public class Report implements Serializable {
 	private String openPassword;
 	@Parsed
 	private String modifyPassword;
+	@JsonIgnore
 	private boolean useNoneOpenPassword; //only for use with ui
+	@JsonIgnore
 	private boolean useNoneModifyPassword; //only for use with ui
+	@JsonIgnore
 	private Report sourceReport;
 	@Parsed
 	private int sourceReportId;
@@ -172,6 +178,7 @@ public class Report implements Serializable {
 	private List<ReportGroup> reportGroups;
 	@Parsed
 	private boolean clearTextPasswords;
+	@JsonIgnore
 	private Boolean dummyBoolean; //used for the test report functionality
 	@Parsed
 	private boolean useGroovy;
