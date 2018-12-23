@@ -631,7 +631,7 @@ public class ReportService {
 	 * jobs which prevented the report from being deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "reports", allEntries = true)
+	@CacheEvict(value = {"reports", "parameters"}, allEntries = true)
 	public ActionResult deleteReport(int id) throws SQLException {
 		logger.debug("Entering deleteReport: id={}", id);
 
@@ -673,7 +673,9 @@ public class ReportService {
 				+ " INNER JOIN ART_PARAMETERS AP"
 				+ " ON ARP.PARAMETER_ID=AP.PARAMETER_ID"
 				+ " WHERE ARP.REPORT_ID=?"
-				+ " AND AP.SHARED=0";
+				+ " AND AP.SHARED=0"
+				+ " GROUP BY ARP.PARAMETER_ID"
+				+ " HAVING COUNT(*)=1";
 		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("PARAMETER_ID");
 		List<Number> nonSharedParameterIds = dbService.query(sql, h, id);
 
@@ -713,7 +715,7 @@ public class ReportService {
 	 * that were not deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "reports", allEntries = true)
+	@CacheEvict(value = {"reports", "parameters"}, allEntries = true)
 	public ActionResult deleteReports(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteReports: ids={}", (Object) ids);
 
