@@ -80,12 +80,28 @@ public class User implements Serializable {
 	private boolean clearTextPassword; //used to allow import with clear text passwords
 	@Parsed
 	private boolean publicUser;
+	@Parsed
+	private String description;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
 	private List<Role> roles;
 	private List<Permission> permissions;
 	@JsonIgnore
 	private List<String> flatPermissions = new ArrayList<>();
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 	/**
 	 * @return the publicUser

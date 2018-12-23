@@ -190,6 +190,15 @@ Display edit user page
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="col-md-4 control-label " for="description">
+						<spring:message code="page.text.description"/>
+					</label>
+					<div class="col-md-8">
+						<form:textarea path="description" rows="2" cols="40" class="form-control" maxlength="500"/>
+						<form:errors path="description" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="control-label col-md-4" for="active">
 						<spring:message code="page.label.active"/>
 					</label>

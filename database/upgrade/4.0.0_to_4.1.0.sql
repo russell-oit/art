@@ -4,6 +4,7 @@
 -- update database version
 -- add developer comment column
 -- set shared column to 0 where it's null
+-- add user description column
 
 
 -- ------------------------------------------------
@@ -17,3 +18,6 @@ ALTER TABLE ART_QUERIES ADD DEVELOPER_COMMENT VARCHAR(2000);
 
 -- set shared column to 0 where it's null
 UPDATE ART_PARAMETERS SET SHARED=0 WHERE SHARED IS NULL;
+
+-- add user description column
+ALTER TABLE ART_USERS ADD DESCRIPTION VARCHAR(500);

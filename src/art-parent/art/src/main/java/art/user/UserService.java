@@ -134,6 +134,7 @@ public class UserService {
 			user.setActive(rs.getBoolean("ACTIVE"));
 			user.setPassword(rs.getString("PASSWORD"));
 			user.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
+			user.setDescription(rs.getString("DESCRIPTION"));
 			user.setStartReport(rs.getString("START_QUERY"));
 			user.setUserId(rs.getInt("USER_ID"));
 			user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
@@ -752,10 +753,11 @@ public class UserService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_USERS"
 					+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
-					+ " FULL_NAME, EMAIL, ACCESS_LEVEL, DEFAULT_QUERY_GROUP,"
-					+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, PUBLIC_USER,"
+					+ " FULL_NAME, EMAIL, DESCRIPTION, ACCESS_LEVEL,"
+					+ " DEFAULT_QUERY_GROUP, START_QUERY, CAN_CHANGE_PASSWORD,"
+					+ " ACTIVE, PUBLIC_USER,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -764,6 +766,7 @@ public class UserService {
 				user.getPasswordAlgorithm(),
 				user.getFullName(),
 				user.getEmail(),
+				user.getDescription(),
 				accessLevel,
 				defaultReportGroupId,
 				user.getStartReport(),
@@ -782,8 +785,9 @@ public class UserService {
 		} else {
 			String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 					+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
-					+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-					+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, PUBLIC_USER=?,"
+					+ " DESCRIPTION=?, ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?,"
+					+ " START_QUERY=?, CAN_CHANGE_PASSWORD=?,"
+					+ " ACTIVE=?, PUBLIC_USER=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE USER_ID=?";
 
@@ -793,6 +797,7 @@ public class UserService {
 				user.getPasswordAlgorithm(),
 				user.getFullName(),
 				user.getEmail(),
+				user.getDescription(),
 				accessLevel,
 				defaultReportGroupId,
 				user.getStartReport(),
