@@ -66,12 +66,15 @@ public class User implements Serializable {
 	private Date creationDate;
 	private Date updateDate;
 	private List<UserGroup> userGroups;
+	@JsonIgnore
 	private String effectiveStartReport;
 	@JsonIgnore
 	private ReportGroup effectiveDefaultReportGroup;
+	@JsonIgnore
 	private boolean useBlankPassword; //only used for user interface logic
 	private String createdBy;
 	private String updatedBy;
+	@JsonIgnore
 	private boolean generateAndSend; //only used for user interface logic
 	@Parsed
 	private boolean clearTextPassword; //used to allow import with clear text passwords
