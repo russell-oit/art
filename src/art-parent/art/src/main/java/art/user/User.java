@@ -65,7 +65,6 @@ public class User implements Serializable {
 	private boolean canChangePassword = true;
 	private Date creationDate;
 	private Date updateDate;
-	private List<UserGroup> userGroups;
 	@JsonIgnore
 	private String effectiveStartReport;
 	@JsonIgnore
@@ -84,6 +83,7 @@ public class User implements Serializable {
 	private String description;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
+	private List<UserGroup> userGroups;
 	private List<Role> roles;
 	private List<Permission> permissions;
 	@JsonIgnore
