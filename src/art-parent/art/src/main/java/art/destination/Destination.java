@@ -59,6 +59,7 @@ public class Destination implements Serializable {
 	private String createdBy;
 	private Date updateDate;
 	private String updatedBy;
+	@JsonIgnore
 	private boolean useBlankPassword; //only used for user interface logic
 	@Parsed
 	private String domain;
