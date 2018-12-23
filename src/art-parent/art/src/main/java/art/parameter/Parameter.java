@@ -66,9 +66,11 @@ public class Parameter implements Serializable {
 	private boolean fixedValue;
 	@Parsed
 	private boolean useLov;
+	@JsonIgnore
 	private boolean useRulesInLov;
 	@Parsed
 	private int drilldownColumnIndex;
+	@JsonIgnore
 	private boolean useDirectSubstitution;
 	private Date creationDate;
 	private Date updateDate;
