@@ -43,7 +43,7 @@
 </c:if>
 
 
-<c:if test="${sessionUser.hasAnyPermissionCommaSeparated('save_reports,self_service_dashboards')}">
+<c:if test="${sessionUser.hasAnyPermissionCommaSeparated('save_reports, self_service_dashboards')}">
 	<div class="row form-inline" style="margin-right: 1px;">
 		<span class="pull-right">
 			<a class="btn btn-default" id="newDashboardLink" style="display: none"

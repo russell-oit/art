@@ -5,6 +5,8 @@
 -- add developer comment column
 -- set shared column to 0 where it's null
 -- add user description column
+-- add self service view report type
+-- add self service reports permission
 
 
 -- ------------------------------------------------
@@ -21,3 +23,9 @@ UPDATE ART_PARAMETERS SET SHARED=0 WHERE SHARED IS NULL;
 
 -- add user description column
 ALTER TABLE ART_USERS ADD DESCRIPTION VARCHAR(500);
+
+-- add self service view report type
+INSERT INTO ART_REPORT_TYPES VALUES (161,'Self Service View');
+
+-- add self service reports permission
+INSERT INTO ART_PERMISSIONS VALUES(30, 'self_service_reports');

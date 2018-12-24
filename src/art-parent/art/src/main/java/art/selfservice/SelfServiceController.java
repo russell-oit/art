@@ -171,5 +171,21 @@ public class SelfServiceController {
 
 		return response;
 	}
+	
+	@GetMapping("/selfServiceReports")
+	public String showSelfServiceReports(HttpSession session, Model model) {
+		logger.debug("Entering showSelfServiceReports");
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			List<ReportType> includedReportTypes = Arrays.asList(ReportType.SelfServiceView);
+			model.addAttribute("reports", reportService.getAccessibleReportsWithReportTypes(sessionUser.getUserId(), includedReportTypes));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "selfServiceReports";
+	}
 
 }

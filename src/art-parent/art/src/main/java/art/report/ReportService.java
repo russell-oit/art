@@ -409,7 +409,8 @@ public class ReportService {
 		logger.debug("Entering getDisplayReports: userId={}", userId);
 
 		List<ReportType> excludedReportTypes = Arrays.asList(ReportType.LovStatic,
-				ReportType.LovDynamic, ReportType.JobRecipients, ReportType.SaikuConnection);
+				ReportType.LovDynamic, ReportType.JobRecipients,
+				ReportType.SaikuConnection, ReportType.SelfServiceView);
 
 		return getAccessibleReportsWithoutReportTypes(userId, excludedReportTypes);
 	}
@@ -429,7 +430,8 @@ public class ReportService {
 				ReportType.LovDynamic, ReportType.JobRecipients, ReportType.SaikuConnection,
 				ReportType.Dashboard, ReportType.GridstackDashboard, ReportType.Update,
 				ReportType.JPivotMondrian, ReportType.JPivotMondrianXmla,
-				ReportType.JPivotSqlServerXmla, ReportType.SaikuReport);
+				ReportType.JPivotSqlServerXmla, ReportType.SaikuReport,
+				ReportType.SelfServiceView);
 
 		return getAccessibleReportsWithoutReportTypes(userId, excludedReportTypes);
 	}

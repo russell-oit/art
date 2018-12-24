@@ -664,11 +664,32 @@ public class User implements Serializable {
 	 * @return <code>true</code> if the user has any configure permission
 	 */
 	public boolean hasConfigurePermission() {
+		return hasStartsWithPermission("configure");
+	}
+	
+	/**
+	 * Returns <code>true</code> if the user has any self_service permission
+	 *
+	 * @return <code>true</code> if the user has any self_service permission
+	 */
+	public boolean hasSelfServicePermission() {
+		return hasStartsWithPermission("self_service");
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has any permission that starts with
+	 * the given text
+	 *
+	 * @param startsWith the permission starts with text
+	 * @return <code>true</code> if the user has any permission that starts with
+	 * the given text
+	 */
+	public boolean hasStartsWithPermission(String startsWith) {
 		boolean hasPermission = false;
 
 		if (CollectionUtils.isNotEmpty(flatPermissions)) {
 			for (String permission : flatPermissions) {
-				if (StringUtils.startsWith(permission, "configure")) {
+				if (StringUtils.startsWith(permission, startsWith)) {
 					hasPermission = true;
 					break;
 				}
