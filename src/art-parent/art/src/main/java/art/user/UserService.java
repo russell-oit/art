@@ -378,10 +378,10 @@ public class UserService {
 
 		sql = "DELETE FROM ART_USER_FIXED_PARAM_VAL WHERE USER_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_ROLE_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_PERMISSION_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
@@ -926,4 +926,5 @@ public class UserService {
 			return true;
 		}
 	}
+
 }
