@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -70,13 +69,15 @@ public class SelfServiceController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
+			List<Report> basicReports = new ArrayList<>();
 			List<Report> reports = reportService.getDashboardCandidateReports(sessionUser.getUserId());
 			for (Report report : reports) {
 				String name = report.getLocalizedName(locale);
 				name = Encode.forHtmlContent(name);
 				report.setName2(name);
+				basicReports.add(report.getBasicReport());
 			}
-			response.setData(reports);
+			response.setData(basicReports);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
@@ -95,6 +96,7 @@ public class SelfServiceController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
+			List<Report> basicReports = new ArrayList<>();
 			List<Report> reports = reportService.getAccessibleReportsWithReportTypes(sessionUser.getUserId(), Arrays.asList(ReportType.GridstackDashboard));
 
 			List<Report> finalReports = new ArrayList<>();
@@ -108,8 +110,9 @@ public class SelfServiceController {
 				String name = report.getLocalizedName(locale);
 				name = Encode.forHtmlContent(name);
 				report.setName2(name);
+				basicReports.add(report.getBasicReport());
 			}
-			response.setData(finalReports);
+			response.setData(basicReports);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
@@ -127,13 +130,15 @@ public class SelfServiceController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
+			List<Report> basicReports = new ArrayList<>();
 			List<Report> reports = reportService.getGridstackDashboardReports();
 			for (Report report : reports) {
 				String name = report.getLocalizedName(locale);
 				name = Encode.forHtmlContent(name);
 				report.setName2(name);
+				basicReports.add(report.getBasicReport());
 			}
-			response.setData(reports);
+			response.setData(basicReports);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
@@ -180,14 +185,16 @@ public class SelfServiceController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
+			List<Report> basicReports = new ArrayList<>();
 			List<ReportType> includedReportTypes = Arrays.asList(ReportType.View);
 			List<Report> views = reportService.getAccessibleReportsWithReportTypes(sessionUser.getUserId(), includedReportTypes);
 			for (Report report : views) {
 				String name = report.getLocalizedName(locale);
 				name = Encode.forHtmlContent(name);
 				report.setName2(name);
+				basicReports.add(report.getBasicReport());
 			}
-			response.setData(views);
+			response.setData(basicReports);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
