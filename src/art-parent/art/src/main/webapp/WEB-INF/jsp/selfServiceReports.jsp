@@ -80,6 +80,7 @@
 					if (reportId === '0') {
 						$('#multiselect').empty();
 						$('#multiselect_to').empty();
+						$("#whereDiv").hide();
 						resetOptions();
 					} else {
 						resetOptions();
@@ -98,6 +99,8 @@
 									var select = $("#multiselect");
 									select.empty();
 									select.append(options);
+									updateBuilder();
+									$("#whereDiv").show();
 								} else {
 									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 								}
@@ -119,8 +122,8 @@
 
 				$('#multiselect').multiselect({
 					search: {
-						left: '<input type="text" name="availableColumns" class="form-control" placeholder="${searchText}" />',
-						right: '<input type="text" name="selectedColumns" class="form-control" placeholder="${searchText}" />'
+						left: '<input type="text" class="form-control" placeholder="${searchText}" />',
+						right: '<input type="text" class="form-control" placeholder="${searchText}" />'
 					},
 					fireSearch: function (value) {
 						return value.length > 0;
@@ -151,15 +154,26 @@
 					});
 				});
 
-				//createBuilder();
+				initializeBuilder();
 
 			});
 
-			function createBuilder() {
-				var filters = createFilters();
+			function initializeBuilder() {
 				$('#builder').queryBuilder({
-					filters: filters
+					filters: [{
+							id: 'placeholder',
+							type: 'string'
+						}
+					],
+					lang_code: "${pageContext.response.locale}"
 				});
+			}
+
+			function updateBuilder() {
+				var filters = createFilters();
+				var force = true;
+				$('#builder').queryBuilder('setFilters', force, filters);
+				$('#builder').queryBuilder('reset');
 			}
 
 			function createFilters() {
@@ -254,7 +268,7 @@
 			</div>
 		</div>
 
-		<div class="row" style="margin-top: 20px">
+		<div class="row" id="whereDiv" style="margin-top: 20px; display: none">
 			<div class="col-md-12">
 				<div class="row">
 					<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="false">SQL</button>
