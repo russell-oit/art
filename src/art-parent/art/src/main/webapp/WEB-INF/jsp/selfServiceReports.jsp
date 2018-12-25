@@ -19,6 +19,8 @@
 <spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="multiselect.button.undo" var="undoText"/>
+<spring:message code="multiselect.button.redo" var="redoText"/>
 
 <t:mainPage title="${pageTitle}">
 
@@ -248,12 +250,12 @@
 			</div>
 
 			<div class="col-md-2">
-				<button type="button" id="multiselect_undo" class="btn btn-primary btn-block">undo</button>
+				<button type="button" id="multiselect_undo" class="btn btn-primary btn-block">${undoText}</button>
 				<button type="button" id="multiselect_rightAll" class="btn btn-block btn-default"><i class="glyphicon glyphicon-forward"></i></button>
 				<button type="button" id="multiselect_rightSelected" class="btn btn-block btn-default"><i class="glyphicon glyphicon-chevron-right"></i></button>
 				<button type="button" id="multiselect_leftSelected" class="btn btn-block btn-default"><i class="glyphicon glyphicon-chevron-left"></i></button>
 				<button type="button" id="multiselect_leftAll" class="btn btn-block btn-default"><i class="glyphicon glyphicon-backward"></i></button>
-				<button type="button" id="multiselect_redo" class="btn btn-warning btn-block">redo</button>
+				<button type="button" id="multiselect_redo" class="btn btn-warning btn-block">${redoText}</button>
 			</div>
 
 			<div class="col-md-5">
