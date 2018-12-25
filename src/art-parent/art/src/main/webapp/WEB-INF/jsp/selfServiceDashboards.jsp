@@ -329,7 +329,7 @@
 			</div>
 		</script>
 
-		<div class='row' id="errorsDiv">
+		<div class='row'>
 			<div class="col-md-12">
 				<c:if test="${error != null}">
 					<div class="alert alert-danger alert-dismissable">

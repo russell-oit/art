@@ -52,7 +52,7 @@ public enum ReportType {
 	C3(142), Plotly(160), ChartJs(143), Datamaps(144), DatamapsFile(145),
 	Leaflet(146), OpenLayers(147),
 	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157),
-	ReportEngine(158), ReportEngineFile(159), SelfServiceView(161);
+	ReportEngine(158), ReportEngineFile(159), View(161);
 
 	private final int value;
 
@@ -549,7 +549,7 @@ public enum ReportType {
 			case LovDynamic:
 			case JobRecipients:
 			case TabularHeatmap:
-			case SelfServiceView:
+			case View:
 				return true;
 			default:
 				return false;
@@ -775,8 +775,8 @@ public enum ReportType {
 				return "ReportEngine: File";
 			case Plotly:
 				return "Plotly.js";
-			case SelfServiceView:
-				return "Self Service View";
+			case View:
+				return "View";
 			default:
 				return this.name();
 		}

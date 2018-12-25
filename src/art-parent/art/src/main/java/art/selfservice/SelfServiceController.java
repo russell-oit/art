@@ -55,16 +55,8 @@ public class SelfServiceController {
 	private ReportService reportService;
 
 	@GetMapping("/selfServiceDashboards")
-	public String showSelfServiceDashboards(HttpSession session, Model model) {
+	public String showSelfServiceDashboards() {
 		logger.debug("Entering showSelfServiceDashboards");
-
-		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
-			model.addAttribute("reports", reportService.getDashboardCandidateReports(sessionUser.getUserId()));
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
 
 		return "selfServiceDashboards";
 	}
@@ -171,21 +163,38 @@ public class SelfServiceController {
 
 		return response;
 	}
-	
+
 	@GetMapping("/selfServiceReports")
-	public String showSelfServiceReports(HttpSession session, Model model) {
+	public String showSelfServiceReports() {
 		logger.debug("Entering showSelfServiceReports");
+
+		return "selfServiceReports";
+	}
+
+	@GetMapping("/getViews")
+	@ResponseBody
+	public AjaxResponse getViews(HttpSession session, Locale locale) {
+		logger.debug("Entering getViews");
+
+		AjaxResponse response = new AjaxResponse();
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			List<ReportType> includedReportTypes = Arrays.asList(ReportType.SelfServiceView);
-			model.addAttribute("reports", reportService.getAccessibleReportsWithReportTypes(sessionUser.getUserId(), includedReportTypes));
-		} catch (SQLException | RuntimeException ex) {
+			List<ReportType> includedReportTypes = Arrays.asList(ReportType.View);
+			List<Report> views = reportService.getAccessibleReportsWithReportTypes(sessionUser.getUserId(), includedReportTypes);
+			for (Report report : views) {
+				String name = report.getLocalizedName(locale);
+				name = Encode.forHtmlContent(name);
+				report.setName2(name);
+			}
+			response.setData(views);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
-			model.addAttribute("error", ex);
+			response.setErrorMessage(ex.toString());
 		}
 
-		return "selfServiceReports";
+		return response;
 	}
 
 }
