@@ -28,7 +28,7 @@ import java.util.List;
  */
 public enum SqlColumnType {
 
-	Numeric("numeric"), Date("date"), Time("time"), Timestamp("timestamp"),
+	Numeric("numeric"), Date("date"), Time("time"), DateTime("datetime"),
 	String("string"), Unhandled("unhandled");
 
 	private final String value;

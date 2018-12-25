@@ -336,7 +336,7 @@
 		if (inputDateFormat && outputDateFormat) {
 			columnDef["render"] = dateFormatter;
 		}
-	} else if (columnType === 'Timestamp') {
+	} else if (columnType === 'DateTime') {
 		if (inputDateTimeFormat && outputDateTimeFormat) {
 			columnDef["render"] = datetimeFormatter;
 		}

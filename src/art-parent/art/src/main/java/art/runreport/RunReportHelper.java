@@ -914,7 +914,7 @@ public class RunReportHelper {
 					resultSetColumnType = SqlColumnType.Numeric;
 					break;
 				case Date:
-					resultSetColumnType = SqlColumnType.Timestamp;
+					resultSetColumnType = SqlColumnType.DateTime;
 					break;
 				default:
 					resultSetColumnType = SqlColumnType.String;
