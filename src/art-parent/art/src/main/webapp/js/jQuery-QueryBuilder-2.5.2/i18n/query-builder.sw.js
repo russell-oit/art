@@ -34,9 +34,9 @@ QueryBuilder.regional['en'] = {
     "in": "mojawapo ya",
     "not_in": "sio mojawapo ya",
     "less": "isiyozidi",
-    "less_or_equal": "isiyozidi au inaambatana na",
+    "less_or_equal": "isiyozidi au ni sawa na",
     "greater": "inayozidi",
-    "greater_or_equal": "inayozidi au inaambatana na",
+    "greater_or_equal": "inayozidi au ni sawa na",
     "between": "kati ya",
     "not_between": "isiyo kati ya",
     "begins_with": "inaanza na",
@@ -73,7 +73,7 @@ QueryBuilder.regional['en'] = {
     "datetime_exceed_max": "Lazima iwe kabla ya {0}",
     "datetime_between_invalid": "Thamani batili, {0} ni baada ya {1}",
     "boolean_not_valid": "Sio buleani",
-    "operator_not_multiple": "Opereta \"{1}\" haikubali thamani mingi"
+    "operator_not_multiple": "Opereta \"{1}\" haikubali thamani nyingi"
   },
   "invert": "Pindua",
   "NOT": "SIO"
