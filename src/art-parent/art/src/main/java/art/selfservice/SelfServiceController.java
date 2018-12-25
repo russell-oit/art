@@ -27,7 +27,9 @@ import art.report.ReportService;
 import art.runreport.GroovyDataDetails;
 import art.runreport.ReportRunner;
 import art.runreport.RunReportHelper;
+import art.servlets.Config;
 import art.user.User;
+import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -43,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -177,8 +180,24 @@ public class SelfServiceController {
 	}
 
 	@GetMapping("/selfServiceReports")
-	public String showSelfServiceReports() {
+	public String showSelfServiceReports(Model model, Locale locale) {
 		logger.debug("Entering showSelfServiceReports");
+		
+		String languageTag = locale.toLanguageTag();
+
+		String languageFileName = "query-builder." + languageTag + ".js";
+
+		String languageFilePath = Config.getAppPath()
+				+ "js" + File.separator
+				+ "jQuery-QueryBuilder-2.5.2" + File.separator
+				+ "i18n" + File.separator
+				+ languageFileName;
+
+		File languageFile = new File(languageFilePath);
+
+		if (languageFile.exists()) {
+			model.addAttribute("languageFileName", languageFileName);
+		}
 
 		return "selfServiceReports";
 	}

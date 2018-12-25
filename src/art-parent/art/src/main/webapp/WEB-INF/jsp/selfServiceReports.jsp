@@ -28,6 +28,9 @@
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-QueryBuilder-2.5.2/js/query-builder.standalone.min.js"></script>
+		<c:if test="${not empty languageFileName}">
+			<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-QueryBuilder-2.5.2/i18n/${encode:forHtmlAttribute(languageFileName)}"></script>
+		</c:if>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/multiselect-2.5.5/js/multiselect.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
@@ -164,8 +167,7 @@
 							id: 'placeholder',
 							type: 'string'
 						}
-					],
-					lang_code: "${pageContext.response.locale}"
+					]
 				});
 			}
 
