@@ -176,7 +176,7 @@
 								var reports = response.data;
 								var options = "";
 								$.each(reports, function (index, report) {
-									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
+									options += "<option value='" + report.reportId + "'>" + report.name2 + "</option>";
 								});
 								var select = $("#reports");
 								select.empty();
@@ -207,7 +207,7 @@
 								var reports = response.data;
 								var options = "<option value='0'>--</option>";
 								$.each(reports, function (index, report) {
-									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
+									options += "<option value='" + report.reportId + "'>" + report.name2 + "</option>";
 								});
 								var select = $("#dashboardReports");
 								select.empty();

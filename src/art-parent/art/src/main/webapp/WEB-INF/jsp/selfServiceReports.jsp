@@ -35,14 +35,14 @@
 			$(function () {
 				$('a[id="selfService"]').parent().addClass('active');
 				$('a[href*="selfServiceReports"]').parent().addClass('active');
-				
+
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
 					noneSelectedText: '${nothingSelectedText}',
 					noneResultsText: '${noResultsMatchText}',
 					countSelectedText: '${selectedCountText}'
 				});
-				
+
 				loadViews();
 
 				function loadViews() {
@@ -70,6 +70,47 @@
 							showUserAjaxError(xhr, '${errorOccurredText}');
 						}
 					});
+				}
+
+				$("#views").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
+					var reportId = $(this).find('option').eq(clickedIndex).val();
+
+					//https://stackoverflow.com/questions/27347004/jquery-val-integer-datatype-comparison
+					if (reportId === '0') {
+						$('#multiselect').empty();
+						$('#multiselect_to').empty();
+						resetOptions();
+					} else {
+						resetOptions();
+
+						$.ajax({
+							type: 'GET',
+							url: '${pageContext.request.contextPath}/getViewDetails',
+							data: {reportId: reportId},
+							success: function (response) {
+								if (response.success) {
+									var columns = response.data;
+									var options = "";
+									$.each(columns, function (index, column) {
+										options += "<option value='" + column.name + "' data-type='" + column.type + "'>" + column.label + "</option>";
+									});
+									var select = $("#multiselect");
+									select.empty();
+									select.append(options);
+								} else {
+									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+								}
+							},
+							error: function (xhr) {
+								showUserAjaxError(xhr, '${errorOccurredText}');
+							}
+						});
+					}
+				});
+
+				function resetOptions() {
+
 				}
 
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
@@ -110,7 +151,7 @@
 					});
 				});
 
-				createBuilder();
+				//createBuilder();
 
 			});
 
@@ -175,7 +216,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="row" style="margin-bottom: 20px">
 			<div class="col-md-4">
 				<select id="views" class="form-control selectpicker">

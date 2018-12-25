@@ -342,7 +342,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "selfServiceReports",
-				"getViews")) {
+				"getViews", "getViewDetails")) {
 			if (user.hasPermission("self_service_reports")) {
 				authorised = true;
 			}
