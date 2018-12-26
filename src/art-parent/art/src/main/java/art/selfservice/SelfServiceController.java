@@ -41,8 +41,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
@@ -249,9 +249,15 @@ public class SelfServiceController {
 
 			GeneralReportOptions generalOptions = report.getGeneralOptions();
 			ViewOptions viewOptions = generalOptions.getView();
+
 			List<String> omitColumns = null;
+			List<Map<String, String>> columnLabels = null;
+			List<Map<String, String>> columnDescriptions = null;
+
 			if (viewOptions != null) {
 				omitColumns = viewOptions.getOmitColumns();
+				columnLabels = viewOptions.getColumnLabels();
+				columnDescriptions = viewOptions.getColumnDescriptions();
 			}
 
 			List<SelfServiceColumn> columns = new ArrayList<>();
@@ -270,13 +276,8 @@ public class SelfServiceController {
 					for (int i = 1; i <= columnCount; i++) {
 						SelfServiceColumn column = new SelfServiceColumn();
 
-						String name = rsmd.getColumnName(i);
-						String encodedName = Encode.forHtmlAttribute(name);
-						column.setName(encodedName);
-
-						String label = rsmd.getColumnLabel(i);
-						String encodedLabel = Encode.forHtmlContent(label);
-						column.setLabel(encodedLabel);
+						column.setName(rsmd.getColumnName(i));
+						column.setLabel(rsmd.getColumnLabel(i));
 
 						int sqlType = rsmd.getColumnType(i);
 
@@ -322,6 +323,41 @@ public class SelfServiceController {
 						//https://stackoverflow.com/questions/10431981/remove-elements-from-collection-while-iterating
 						columns.removeIf(column -> StringUtils.equalsIgnoreCase(columnName, column.getLabel()));
 					}
+				}
+
+				for (SelfServiceColumn column : columns) {
+					String label = column.getLabel();
+					String userLabel = null;
+					if (columnLabels != null) {
+						for (Map<String, String> labelDefinition : columnLabels) {
+							userLabel = labelDefinition.get(label);
+							if (userLabel != null) {
+								break;
+							}
+						}
+					}
+					if (userLabel == null) {
+						userLabel = label;
+					}
+					column.setUserLabel(userLabel);
+
+					String description = null;
+					if (columnDescriptions != null) {
+						for (Map<String, String> descriptionDefinition : columnDescriptions) {
+							description = descriptionDefinition.get(label);
+							if (description != null) {
+								break;
+							}
+						}
+					}
+					if (description == null) {
+						description = "";
+					}
+					column.setDescription(description);
+					
+					column.setLabel(Encode.forHtmlAttribute(column.getLabel()));
+					column.setUserLabel(Encode.forHtmlContent(column.getUserLabel()));
+					column.setDescription(Encode.forHtmlAttribute(column.getDescription()));
 				}
 			} finally {
 				DatabaseUtils.close(rs);

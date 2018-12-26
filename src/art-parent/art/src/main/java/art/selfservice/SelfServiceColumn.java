@@ -30,6 +30,36 @@ public class SelfServiceColumn implements Serializable {
 	private String name;
 	private String label;
 	private String type;
+	private String userLabel;
+	private String description;
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	/**
+	 * @return the userLabel
+	 */
+	public String getUserLabel() {
+		return userLabel;
+	}
+
+	/**
+	 * @param userLabel the userLabel to set
+	 */
+	public void setUserLabel(String userLabel) {
+		this.userLabel = userLabel;
+	}
 
 	/**
 	 * @return the name

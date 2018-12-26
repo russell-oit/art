@@ -20,6 +20,7 @@ package art.reportoptions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents report options for view reports
@@ -31,6 +32,36 @@ public class ViewOptions implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private List<String> omitColumns;
+	private List<Map<String, String>> columnLabels;
+	private List<Map<String, String>> columnDescriptions;
+
+	/**
+	 * @return the columnDescriptions
+	 */
+	public List<Map<String, String>> getColumnDescriptions() {
+		return columnDescriptions;
+	}
+
+	/**
+	 * @param columnDescriptions the columnDescriptions to set
+	 */
+	public void setColumnDescriptions(List<Map<String, String>> columnDescriptions) {
+		this.columnDescriptions = columnDescriptions;
+	}
+
+	/**
+	 * @return the columnLabels
+	 */
+	public List<Map<String, String>> getColumnLabels() {
+		return columnLabels;
+	}
+
+	/**
+	 * @param columnLabels the columnLabels to set
+	 */
+	public void setColumnLabels(List<Map<String, String>> columnLabels) {
+		this.columnLabels = columnLabels;
+	}
 
 	/**
 	 * @return the omitColumns

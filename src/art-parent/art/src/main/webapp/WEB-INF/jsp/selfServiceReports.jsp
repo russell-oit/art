@@ -99,7 +99,7 @@
 									var columns = response.data;
 									var options = "";
 									$.each(columns, function (index, column) {
-										options += "<option value='" + column.name + "' data-type='" + column.type + "'>" + column.label + "</option>";
+										options += "<option value='" + column.label + "' data-type='" + column.type + "' title='" + column.description + "'>" + column.userLabel + "</option>";
 									});
 									var select = $("#multiselect");
 									select.empty();
@@ -140,7 +140,7 @@
 					var result = $('#builder').queryBuilder('getSQL', $(this).data('stmt'));
 
 					if (result !== null && result.sql.length) {
-						//console.log(result);
+						console.log(result);
 						bootbox.alert({
 							title: $(this).text(),
 							message: '<pre class="code-popup">' + result.sql + (result.params ? '\n\n' + result.params : '') + '</pre>'
