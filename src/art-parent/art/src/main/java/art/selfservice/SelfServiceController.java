@@ -24,6 +24,8 @@ import art.enums.ReportType;
 import art.general.AjaxResponse;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.GeneralReportOptions;
+import art.reportoptions.ViewOptions;
 import art.runreport.GroovyDataDetails;
 import art.runreport.ReportRunner;
 import art.runreport.RunReportHelper;
@@ -40,6 +42,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +186,7 @@ public class SelfServiceController {
 	@GetMapping("/selfServiceReports")
 	public String showSelfServiceReports(Model model, Locale locale) {
 		logger.debug("Entering showSelfServiceReports");
-		
+
 		String languageTag = locale.toLanguageTag();
 
 		String languageFileName = "query-builder." + languageTag + ".js";
@@ -242,6 +246,16 @@ public class SelfServiceController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			Report report = reportService.getReport(reportId);
+
+			GeneralReportOptions generalOptions = report.getGeneralOptions();
+			ViewOptions viewOptions = generalOptions.getView();
+			List<String> omitColumns = null;
+			if (viewOptions != null) {
+				omitColumns = viewOptions.getOmitColumns();
+			}
+
+			List<SelfServiceColumn> columns = new ArrayList<>();
+
 			ReportRunner reportRunner = new ReportRunner();
 			ResultSet rs = null;
 			try {
@@ -250,8 +264,6 @@ public class SelfServiceController {
 				rs = reportRunner.executeQuery();
 				Object groovyData = reportRunner.getGroovyData();
 				if (groovyData == null) {
-					List<SelfServiceColumn> columns = new ArrayList<>();
-
 					ResultSetMetaData rsmd = rs.getMetaData();
 					int columnCount = rsmd.getColumnCount();
 
@@ -261,7 +273,7 @@ public class SelfServiceController {
 						String name = rsmd.getColumnName(i);
 						String encodedName = Encode.forHtmlAttribute(name);
 						column.setName(encodedName);
-						
+
 						String label = rsmd.getColumnLabel(i);
 						String encodedLabel = Encode.forHtmlContent(label);
 						column.setLabel(encodedLabel);
@@ -301,14 +313,21 @@ public class SelfServiceController {
 
 						columns.add(column);
 					}
-					response.setData(columns);
 				} else {
 					GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
+				}
+
+				if (omitColumns != null) {
+					for (String columnName : omitColumns) {
+						//https://stackoverflow.com/questions/10431981/remove-elements-from-collection-while-iterating
+						columns.removeIf(column -> StringUtils.equalsIgnoreCase(columnName, column.getLabel()));
+					}
 				}
 			} finally {
 				DatabaseUtils.close(rs);
 				reportRunner.close();
 			}
+			response.setData(columns);
 			response.setSuccess(true);
 		} catch (Exception ex) {
 			logger.error("Error", ex);

@@ -15,62 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.selfservice;
+package art.reportoptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.util.List;
 
 /**
- * Represents a column for selection in a self service report
- *
+ * Represents report options for view reports
+ * 
  * @author Timothy Anyona
  */
-public class SelfServiceColumn implements Serializable {
-
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ViewOptions implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
-	private String name;
-	private String label;
-	private String type;
+	private List<String> omitColumns;
 
 	/**
-	 * @return the name
+	 * @return the omitColumns
 	 */
-	public String getName() {
-		return name;
+	public List<String> getOmitColumns() {
+		return omitColumns;
 	}
 
 	/**
-	 * @param name the name to set
+	 * @param omitColumns the omitColumns to set
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public void setOmitColumns(List<String> omitColumns) {
+		this.omitColumns = omitColumns;
 	}
-
-	/**
-	 * @return the label
-	 */
-	public String getLabel() {
-		return label;
-	}
-
-	/**
-	 * @param label the label to set
-	 */
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	/**
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
-
-	/**
-	 * @param type the type to set
-	 */
-	public void setType(String type) {
-		this.type = type;
-	}
-
+	
 }
