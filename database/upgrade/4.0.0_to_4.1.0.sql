@@ -7,8 +7,18 @@
 -- add user description column
 -- add self service view report type
 -- add self service reports permission
+-- change report options column to clob
 
 
+-- NOTES:
+-- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
+-- for postgresql, replace the MODIFY keyword with ALTER COLUMN <column name> TYPE <data type>
+
+-- for sql server, replace CLOB with VARCHAR(MAX)
+-- for mysql, replace CLOB with LONGTEXT
+-- for postgresql, replace CLOB with TEXT
+-- for cubrid, replace CLOB with STRING
+-- for hsqldb, replace CLOB with LONGVARCHAR
 -- ------------------------------------------------
 
 
@@ -29,3 +39,6 @@ INSERT INTO ART_REPORT_TYPES VALUES (161,'View');
 
 -- add self service reports permission
 INSERT INTO ART_PERMISSIONS VALUES(30, 'self_service_reports');
+
+-- change report options column to clob
+ALTER TABLE ART_QUERIES MODIFY REPORT_OPTIONS CLOB;
