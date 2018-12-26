@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.lang3.StringUtils;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
@@ -330,7 +331,8 @@ public class SelfServiceController {
 					String userLabel = null;
 					if (columnLabels != null) {
 						for (Map<String, String> labelDefinition : columnLabels) {
-							userLabel = labelDefinition.get(label);
+							Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(labelDefinition);
+							userLabel = caseInsensitiveMap.get(label);
 							if (userLabel != null) {
 								break;
 							}
@@ -344,7 +346,8 @@ public class SelfServiceController {
 					String description = null;
 					if (columnDescriptions != null) {
 						for (Map<String, String> descriptionDefinition : columnDescriptions) {
-							description = descriptionDefinition.get(label);
+							Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(descriptionDefinition);
+							description = caseInsensitiveMap.get(label);
 							if (description != null) {
 								break;
 							}
@@ -354,7 +357,7 @@ public class SelfServiceController {
 						description = "";
 					}
 					column.setDescription(description);
-					
+
 					column.setLabel(Encode.forHtmlAttribute(column.getLabel()));
 					column.setUserLabel(Encode.forHtmlContent(column.getUserLabel()));
 					column.setDescription(Encode.forHtmlAttribute(column.getDescription()));
