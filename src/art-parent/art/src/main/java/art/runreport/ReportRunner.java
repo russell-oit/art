@@ -889,6 +889,11 @@ public class ReportRunner {
 		String querySql = querySb.toString();
 		querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", viewOptions.getColumns());
 
+		int limit = viewOptions.getLimit();
+		if (limit <= 0) {
+			querySql = StringUtils.removeIgnoreCase(querySql, "#limit#");
+		}
+
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
 	}
@@ -992,7 +997,7 @@ public class ReportRunner {
 			}
 		} else {
 			RunReportHelper runReportHelper = new RunReportHelper();
-			connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
+			connQuery = runReportHelper.getEffectiveReportConnection(report, reportParamsMap);
 		}
 
 		if (connQuery == null) {

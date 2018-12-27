@@ -85,7 +85,7 @@ public class RunReportHelper {
 	 * @return the connection to use for running the report
 	 * @throws SQLException
 	 */
-	public Connection getEffectiveReportDatasource(Report report,
+	public Connection getEffectiveReportConnection(Report report,
 			Map<String, ReportParameter> reportParamsMap) throws SQLException {
 
 		Collection<ReportParameter> reportParams = null;
@@ -93,7 +93,7 @@ public class RunReportHelper {
 			reportParams = reportParamsMap.values();
 		}
 
-		return getEffectiveReportDatasource(report, reportParams);
+		return getEffectiveReportConnection(report, reportParams);
 	}
 
 	/**
@@ -104,10 +104,10 @@ public class RunReportHelper {
 	 * @return the connection to use for running the report
 	 * @throws SQLException
 	 */
-	public Connection getEffectiveReportDatasource(Report report,
+	public Connection getEffectiveReportConnection(Report report,
 			Collection<ReportParameter> reportParams) throws SQLException {
 
-		logger.debug("Entering getEffectiveReportDatasource: report={}", report);
+		logger.debug("Entering getEffectiveReportConnection: report={}", report);
 
 		Connection conn = null;
 

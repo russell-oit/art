@@ -35,6 +35,36 @@ public class ViewOptions implements Serializable {
 	private List<Map<String, String>> columnLabels;
 	private List<Map<String, String>> columnDescriptions;
 	private String columns = "*";
+	private String limitClause;
+	private int limit = 10;
+
+	/**
+	 * @return the limitClause
+	 */
+	public String getLimitClause() {
+		return limitClause;
+	}
+
+	/**
+	 * @param limitClause the limitClause to set
+	 */
+	public void setLimitClause(String limitClause) {
+		this.limitClause = limitClause;
+	}
+
+	/**
+	 * @return the limit
+	 */
+	public int getLimit() {
+		return limit;
+	}
+
+	/**
+	 * @param limit the limit to set
+	 */
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
 
 	/**
 	 * @return the columns
