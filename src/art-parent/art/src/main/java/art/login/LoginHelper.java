@@ -53,17 +53,17 @@ public class LoginHelper {
 	private void log(ArtAuthenticationMethod loginMethod, boolean success,
 			String username, String ip, String failureMessage) {
 
-		String loginStatus;
-		String logMessage;
+		String logType;
+		String message;
 		if (success) {
-			loginStatus = "login";
-			logMessage = loginMethod.getValue();
+			logType = "login";
+			message = loginMethod.getValue();
 		} else {
-			loginStatus = "loginerr";
-			logMessage = loginMethod.getValue() + ", " + failureMessage;
+			logType = "loginerr";
+			message = loginMethod.getValue() + ", " + failureMessage;
 		}
 
-		ArtHelper.log(username, loginStatus, ip, logMessage);
+		ArtHelper.log(username, logType, ip, message);
 	}
 
 	/**
@@ -76,7 +76,9 @@ public class LoginHelper {
 	public void logSuccess(ArtAuthenticationMethod loginMethod,
 			String username, String ip) {
 
-		log(loginMethod, true, username, ip, "");
+		boolean success = true;
+		String message = "";
+		log(loginMethod, success, username, ip, message);
 	}
 
 	/**

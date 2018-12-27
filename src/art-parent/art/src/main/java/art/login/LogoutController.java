@@ -20,7 +20,9 @@ package art.login;
 import art.enums.ArtAuthenticationMethod;
 import art.servlets.Config;
 import art.user.User;
+import art.utils.ArtHelper;
 import java.sql.SQLException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +46,9 @@ public class LogoutController {
 	private LoginService loginService;
 
 	@RequestMapping(value = "/logout", method = RequestMethod.POST)
-	public String logout(HttpSession session, Model model) {
+	public String logout(HttpSession session, HttpServletRequest request,
+			Model model) {
+
 		logger.debug("Entering logout");
 
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
@@ -52,6 +56,10 @@ public class LogoutController {
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		if (sessionUser != null) { //can be null if this controller called twice
+			String logType = "logout";
+			String ip = request.getRemoteAddr();
+			ArtHelper.log(sessionUser.getUsername(), logType, ip);
+
 			try {
 				loginService.removeLoggedInUser(sessionUser);
 			} catch (SQLException | RuntimeException ex) {

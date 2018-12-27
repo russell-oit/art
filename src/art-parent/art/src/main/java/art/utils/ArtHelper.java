@@ -42,22 +42,34 @@ public class ArtHelper {
 	private static final Logger logger = LoggerFactory.getLogger(ArtHelper.class);
 
 	/**
-	 * Logs login attempts to the ART_LOGS table
+	 * Logs an event to the art_logs table
 	 *
 	 * @param user the username
-	 * @param type "login" if successful or "loginerr" if not
-	 * @param ip the ip address from which login was done or attempted
-	 * @param message the log message
+	 * @param logType type of event
+	 * @param ip the ip address from which event was done
 	 */
-	public static void log(String user, String type, String ip, String message) {
-		Integer reportId = null;
-		Integer totalTimeSeconds = null;
-		Integer fetchTimeSeconds = null;
-		log(user, type, ip, message, reportId, totalTimeSeconds, fetchTimeSeconds);
+	public static void log(String user, String logType, String ip) {
+		String message = null;
+		log(user, logType, ip, message);
 	}
 
 	/**
-	 * Logs an interactive report run in the ART_LOGS table
+	 * Logs an event to the art_logs table
+	 *
+	 * @param user the username
+	 * @param logType type of event
+	 * @param ip the ip address from which event was done
+	 * @param message the log message
+	 */
+	public static void log(String user, String logType, String ip, String message) {
+		Integer reportId = null;
+		Integer totalTimeSeconds = null;
+		Integer fetchTimeSeconds = null;
+		log(user, logType, ip, message, reportId, totalTimeSeconds, fetchTimeSeconds);
+	}
+
+	/**
+	 * Logs an interactive report run to the art_logs table
 	 *
 	 * @param sessionUser the session user
 	 * @param ip the ip address where the report is being run from
@@ -74,7 +86,7 @@ public class ArtHelper {
 	}
 
 	/**
-	 * Logs an interactive report run in the ART_LOGS table
+	 * Logs an interactive report run to the art_logs table
 	 *
 	 * @param sessionUser the session user
 	 * @param ip the ip address where the report is being run from
@@ -109,10 +121,10 @@ public class ArtHelper {
 	}
 
 	/**
-	 * Logs some action to the ART_LOGS table
+	 * Logs an event to the art_logs table
 	 *
 	 * @param user the username of user who executed the report
-	 * @param type the type of event
+	 * @param logType the type of event
 	 * @param ip the ip address from which report was run
 	 * @param message the log message
 	 * @param reportId the id of the report that was run
@@ -121,7 +133,7 @@ public class ArtHelper {
 	 * @param fetchTimeSeconds the time to fetch the results from the database
 	 * (in seconds)
 	 */
-	public static void log(String user, String type, String ip, String message,
+	public static void log(String user, String logType, String ip, String message,
 			Integer reportId, Integer totalTimeSeconds, Integer fetchTimeSeconds) {
 
 		try {
@@ -136,7 +148,7 @@ public class ArtHelper {
 			Object[] values = {
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				user,
-				type,
+				logType,
 				ip,
 				reportId,
 				totalTimeSeconds,
