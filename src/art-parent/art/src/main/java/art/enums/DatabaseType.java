@@ -27,7 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 public enum DatabaseType {
 
 	Unknown, MySQL, MariaDB, Oracle, CUBRID, Db2, HSQLDB, PostgreSQL,
-	SqlServer, Informix, Firebird;
+	SqlServer, Informix, Firebird, Access, SQLite, H2, Vertica, Redshift,
+	Teradata, Snowflake, Presto, Drill, MonetDB, Exasol, kdb, Phoenix;
 
 	/**
 	 * Returns the database type based on the jdbc url
@@ -54,8 +55,80 @@ public enum DatabaseType {
 			return Informix;
 		} else if (StringUtils.startsWithAny(url, "jdbc:firebirdsql", "jdbc:log4jdbc:firebirdsql")) {
 			return Firebird;
+		} else if (StringUtils.startsWithAny(url, "jdbc:mariadb", "jdbc:log4jdbc:mariadb")) {
+			return MariaDB;
+		} else if (StringUtils.startsWithAny(url, "jdbc:ucanaccess", "jdbc:log4jdbc:ucanaccess")) {
+			return Access;
+		} else if (StringUtils.startsWithAny(url, "jdbc:sqlite", "jdbc:log4jdbc:sqlite")) {
+			return SQLite;
+		} else if (StringUtils.startsWithAny(url, "jdbc:h2", "jdbc:log4jdbc:h2")) {
+			return H2;
+		} else if (StringUtils.startsWithAny(url, "jdbc:vertica", "jdbc:log4jdbc:vertica")) {
+			return Vertica;
+		} else if (StringUtils.startsWithAny(url, "jdbc:redshift", "jdbc:log4jdbc:redshift")) {
+			return Redshift;
+		} else if (StringUtils.startsWithAny(url, "jdbc:teradata", "jdbc:log4jdbc:teradata")) {
+			return Teradata;
+		} else if (StringUtils.startsWithAny(url, "jdbc:snowflake", "jdbc:log4jdbc:snowflake")) {
+			return Snowflake;
+		} else if (StringUtils.startsWithAny(url, "jdbc:presto", "jdbc:log4jdbc:presto")) {
+			return Presto;
+		} else if (StringUtils.startsWithAny(url, "jdbc:drill", "jdbc:log4jdbc:drill")) {
+			return Drill;
+		} else if (StringUtils.startsWithAny(url, "jdbc:monetdb", "jdbc:log4jdbc:monetdb")) {
+			return MonetDB;
+		} else if (StringUtils.startsWithAny(url, "jdbc:exa", "jdbc:log4jdbc:exa")) {
+			return Exasol;
+		} else if (StringUtils.startsWithAny(url, "jdbc:q", "jdbc:log4jdbc:q")) {
+			return kdb;
+		} else if (StringUtils.startsWithAny(url, "jdbc:phoenix", "jdbc:log4jdbc:phoenix")) {
+			return Phoenix;
 		} else {
 			return Unknown;
 		}
 	}
+
+	/**
+	 * Returns the limit clause to use for this database type
+	 *
+	 * @return the limit clause to use
+	 */
+	public String limitClause() {
+		//https://dba.stackexchange.com/questions/30452/ansi-iso-plans-for-limit-standardization
+		//https://stackoverflow.com/questions/1528604/how-universal-is-the-limit-statement-in-sql
+		//https://en.wikipedia.org/wiki/Select_(SQL)#FETCH_FIRST_clause
+		//http://troels.arvin.dk/db/rdbms/#select-limit
+		//https://docs.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql?view=sql-server-2017
+		//https://www.postgresql.org/docs/current/sql-select.html#SQL-LIMIT
+		//https://oracle-base.com/articles/12c/row-limiting-clause-for-top-n-queries-12cr1
+		//http://teradatasql.com/how-do-i-just-select-a-few-sample-records/
+		switch (this) {
+			case Informix:
+				return "first {0}";
+			case SqlServer:
+			case Access:
+			case Teradata:
+				return "top {0}";
+			case MySQL:
+			case MariaDB:
+			case SQLite:
+			case Vertica:
+			case Redshift:
+			case Presto:
+			case Drill:
+			case CUBRID:
+			case MonetDB:
+			case Exasol:
+			case Phoenix:
+				return "limit {0}";
+			case Firebird:
+				return "rows {0}";
+			case kdb:
+				return "[{0}]";
+			default:
+				//sql:2008 standard
+				return "fetch first {0} rows only";
+		}
+	}
+
 }
