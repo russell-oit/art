@@ -17,20 +17,16 @@
  */
 package art.utils;
 
-import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
+import art.dbutils.DbService;
 import art.enums.ReportType;
 import art.mail.Mailer;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.smtpserver.SmtpServer;
 import art.user.User;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,55 +40,6 @@ import org.slf4j.LoggerFactory;
 public class ArtHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtHelper.class);
-	private static final int MAX_LOG_MESSAGE_LENGTH = 500;
-
-	/**
-	 * Logs some action to the ART_LOGS table
-	 *
-	 * @param user the username of user who executed the report
-	 * @param type the type of event
-	 * @param ip the ip address from which report was run
-	 * @param reportId the id of the report that was run
-	 * @param totalTime the total time to run the report and display the results
-	 * @param fetchTime the time to fetch the results from the database
-	 * @param message the log message
-	 */
-	public static void log(String user, String type, String ip, int reportId, long totalTime,
-			long fetchTime, String message) {
-
-		if (StringUtils.length(message) > MAX_LOG_MESSAGE_LENGTH) {
-			message = message.substring(0, MAX_LOG_MESSAGE_LENGTH);
-		}
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		try {
-			conn = DbConnections.getArtDbConnection();
-			String sql = "INSERT INTO ART_LOGS"
-					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, QUERY_ID,"
-					+ " TOTAL_TIME, FETCH_TIME, MESSAGE) "
-					+ " VALUES (?,?,?,?,?,?,?,?) ";
-
-			ps = conn.prepareStatement(sql);
-
-			Timestamp now = new Timestamp(new Date().getTime());
-
-			ps.setTimestamp(1, now);
-			ps.setString(2, user);
-			ps.setString(3, type);
-			ps.setString(4, ip);
-			ps.setInt(5, reportId);
-			ps.setInt(6, (int) totalTime);
-			ps.setInt(7, (int) fetchTime);
-			ps.setString(8, message);
-
-			ps.executeUpdate();
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-		} finally {
-			DatabaseUtils.close(ps, conn);
-		}
-	}
 
 	/**
 	 * Logs login attempts to the ART_LOGS table
@@ -103,32 +50,10 @@ public class ArtHelper {
 	 * @param message the log message
 	 */
 	public static void log(String user, String type, String ip, String message) {
-		if (StringUtils.length(message) > MAX_LOG_MESSAGE_LENGTH) {
-			message = message.substring(0, MAX_LOG_MESSAGE_LENGTH);
-		}
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		try {
-			Timestamp now = new Timestamp(new Date().getTime());
-			conn = DbConnections.getArtDbConnection();
-			String sql = "INSERT INTO ART_LOGS"
-					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, MESSAGE) "
-					+ " VALUES (?,?,?,?,?) ";
-			ps = conn.prepareStatement(sql);
-
-			ps.setTimestamp(1, now);
-			ps.setString(2, user);
-			ps.setString(3, type);
-			ps.setString(4, ip);
-			ps.setString(5, message);
-
-			ps.executeUpdate();
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-		} finally {
-			DatabaseUtils.close(ps, conn);
-		}
+		Integer reportId = null;
+		Integer totalTimeSeconds = null;
+		Integer fetchTimeSeconds = null;
+		log(user, type, ip, message, reportId, totalTimeSeconds, fetchTimeSeconds);
 	}
 
 	/**
@@ -137,15 +62,32 @@ public class ArtHelper {
 	 * @param sessionUser the session user
 	 * @param ip the ip address where the report is being run from
 	 * @param reportId the report id of the report being run
-	 * @param totalTime the total time taken (in seconds) to fetch the report
-	 * data and display the results
-	 * @param fetchTime the total time taken (in seconds) to fetch the report
-	 * data
 	 * @param reportFormat the report format
 	 * @param reportParamsList the report parameters list
 	 */
 	public static void logInteractiveReportRun(User sessionUser, String ip, int reportId,
-			long totalTime, long fetchTime, String reportFormat,
+			String reportFormat, List<ReportParameter> reportParamsList) {
+
+		Integer totalTimeSeconds = null;
+		Integer fetchTimeSeconds = null;
+		logInteractiveReportRun(sessionUser, ip, reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat, reportParamsList);
+	}
+
+	/**
+	 * Logs an interactive report run in the ART_LOGS table
+	 *
+	 * @param sessionUser the session user
+	 * @param ip the ip address where the report is being run from
+	 * @param reportId the report id of the report being run
+	 * @param totalTimeSeconds the total time taken (in seconds) to fetch the
+	 * report data and display the results
+	 * @param fetchTimeSeconds the total time taken (in seconds) to fetch the
+	 * report data
+	 * @param reportFormat the report format
+	 * @param reportParamsList the report parameters list
+	 */
+	public static void logInteractiveReportRun(User sessionUser, String ip, int reportId,
+			Integer totalTimeSeconds, Integer fetchTimeSeconds, String reportFormat,
 			List<ReportParameter> reportParamsList) {
 
 		List<String> parameterValuesList = new ArrayList<>();
@@ -162,7 +104,51 @@ public class ArtHelper {
 		}
 
 		String username = sessionUser.getUsername();
-		log(username, "report", ip, reportId, totalTime, fetchTime, reportFormat + parameters);
+		String message = reportFormat + parameters;
+		log(username, "report", ip, message, reportId, totalTimeSeconds, fetchTimeSeconds);
+	}
+
+	/**
+	 * Logs some action to the ART_LOGS table
+	 *
+	 * @param user the username of user who executed the report
+	 * @param type the type of event
+	 * @param ip the ip address from which report was run
+	 * @param message the log message
+	 * @param reportId the id of the report that was run
+	 * @param totalTimeSeconds the total time to run the report and display the
+	 * results (in seconds)
+	 * @param fetchTimeSeconds the time to fetch the results from the database
+	 * (in seconds)
+	 */
+	public static void log(String user, String type, String ip, String message,
+			Integer reportId, Integer totalTimeSeconds, Integer fetchTimeSeconds) {
+
+		try {
+			String sql = "INSERT INTO ART_LOGS"
+					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, QUERY_ID,"
+					+ " TOTAL_TIME, FETCH_TIME, MESSAGE)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 8) + ")";
+
+			final int MAX_LOG_MESSAGE_LENGTH = 500;
+			message = StringUtils.left(message, MAX_LOG_MESSAGE_LENGTH);
+
+			Object[] values = {
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+				user,
+				type,
+				ip,
+				reportId,
+				totalTimeSeconds,
+				fetchTimeSeconds,
+				message
+			};
+
+			DbService dbService = new DbService();
+			dbService.update(sql, values);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 	}
 
 	/**

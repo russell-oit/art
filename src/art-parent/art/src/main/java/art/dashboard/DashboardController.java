@@ -46,6 +46,8 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -106,7 +108,8 @@ public class DashboardController {
 
 		logger.debug("Entering showDashboard: reportId={}", reportId);
 
-		long startTime = System.currentTimeMillis();
+		Date startTime = new Date();
+		Instant start = Instant.now();
 
 		boolean showInline = BooleanUtils.toBoolean(request.getParameter("showInline"));
 
@@ -128,7 +131,7 @@ public class DashboardController {
 
 		String description = "";
 		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
-		String startTimeString = df.format(new Date(startTime));
+		String startTimeString = df.format(startTime);
 
 		Report report;
 
@@ -242,15 +245,14 @@ public class DashboardController {
 			return errorPage;
 		}
 
-		final long NOT_APPLICABLE = -1;
-		long totalTimeSeconds = NOT_APPLICABLE;
-		long fetchTimeSeconds = NOT_APPLICABLE;
+		Integer totalTimeSeconds = null;
 
-		long endTime = System.currentTimeMillis();
+		Instant end = Instant.now();
+		Duration duration = Duration.between(start, end);
 
 		if (reportFormat == ReportFormat.pdf) {
-			totalTimeSeconds = (endTime - startTime) / (1000);
-			double preciseTotalTimeSeconds = (endTime - startTime) / (double) 1000;
+			totalTimeSeconds = (int) duration.getSeconds();
+			double preciseTotalTimeSeconds = duration.toMillis() / (double) 1000;
 			DecimalFormat df2 = (DecimalFormat) NumberFormat.getInstance(locale);
 			df2.applyPattern("#,##0.0##");
 			String formattedTotalTime = df2.format(preciseTotalTimeSeconds);
@@ -260,6 +262,7 @@ public class DashboardController {
 			request.setAttribute("startTimeString", startTimeString);
 		}
 
+		Integer fetchTimeSeconds = null;
 		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), report.getReportId(), totalTimeSeconds, fetchTimeSeconds, "dashboard", reportParamsList);
 
 		if (reportFormat == ReportFormat.pdf) {
