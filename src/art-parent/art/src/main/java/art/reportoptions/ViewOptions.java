@@ -24,16 +24,31 @@ import java.util.Map;
 
 /**
  * Represents report options for view reports
- * 
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ViewOptions implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private List<String> omitColumns;
 	private List<Map<String, String>> columnLabels;
 	private List<Map<String, String>> columnDescriptions;
+	private String columns = "*";
+
+	/**
+	 * @return the columns
+	 */
+	public String getColumns() {
+		return columns;
+	}
+
+	/**
+	 * @param columns the columns to set
+	 */
+	public void setColumns(String columns) {
+		this.columns = columns;
+	}
 
 	/**
 	 * @return the columnDescriptions
@@ -76,5 +91,5 @@ public class ViewOptions implements Serializable {
 	public void setOmitColumns(List<String> omitColumns) {
 		this.omitColumns = omitColumns;
 	}
-	
+
 }

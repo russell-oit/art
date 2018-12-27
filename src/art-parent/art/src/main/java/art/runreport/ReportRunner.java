@@ -27,6 +27,7 @@ import art.enums.ReportType;
 import art.job.Job;
 import art.report.Report;
 import art.reportoptions.GeneralReportOptions;
+import art.reportoptions.ViewOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
 import art.reportrule.ReportRuleService;
@@ -298,6 +299,7 @@ public class ReportRunner {
 		applyUsesGroovy();
 		applyParameterPlaceholders(); //question placeholder put here
 		applyDynamicRecipient();
+		applySelfServiceFields();
 
 		if (!report.getReportType().isJPivot()) {
 			applyRulesToQuery();
@@ -871,6 +873,26 @@ public class ReportRunner {
 		querySb.replace(0, querySb.length(), querySql);
 	}
 
+	private void applySelfServiceFields() {
+		logger.debug("Entering applySelfServiceFields");
+
+		ReportType reportType = report.getReportType();
+		if (reportType != ReportType.View) {
+			return;
+		}
+
+		ViewOptions viewOptions = report.getGeneralOptions().getView();
+		if (viewOptions == null) {
+			viewOptions = new ViewOptions();
+		}
+
+		String querySql = querySb.toString();
+		querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", viewOptions.getColumns());
+
+		//update querySb with new sql
+		querySb.replace(0, querySb.length(), querySql);
+	}
+
 	/**
 	 * Runs the report using a forward only cursor
 	 *
@@ -955,7 +977,7 @@ public class ReportRunner {
 			case GridstackDashboard:
 				return;
 			default:
-			//do nothing
+				break;
 		}
 
 		if (groovyData != null) {
