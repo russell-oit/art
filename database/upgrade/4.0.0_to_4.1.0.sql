@@ -7,7 +7,7 @@
 -- add user description column
 -- add self service view report type
 -- add self service reports permission
--- change report options column to clob
+-- change options columns to clob
 
 
 -- NOTES:
@@ -40,5 +40,7 @@ INSERT INTO ART_REPORT_TYPES VALUES (161,'View');
 -- add self service reports permission
 INSERT INTO ART_PERMISSIONS VALUES(30, 'self_service_reports');
 
--- change report options column to clob
+-- change options columns to clob
 ALTER TABLE ART_QUERIES MODIFY REPORT_OPTIONS CLOB;
+ALTER TABLE ART_PARAMETERS MODIFY PARAMETER_OPTIONS CLOB;
+ALTER TABLE ART_DESTINATIONS MODIFY DESTINATION_OPTIONS CLOB;
