@@ -224,7 +224,7 @@ Access rights configuration
 						<select name="jobs" id="jobs" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="job" items="${jobs}">
 								<option value="${job.jobId}">
-									<encode:forHtmlContent value="${job.name}"/>
+									${encode:forHtmlContent(job.name)} (${job.jobId})
 								</option>
 							</c:forEach>
 						</select>
