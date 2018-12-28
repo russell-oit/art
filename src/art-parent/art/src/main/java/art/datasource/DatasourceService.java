@@ -362,10 +362,11 @@ public class DatasourceService {
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_DATABASES"
-					+ " (DATABASE_ID, NAME, DESCRIPTION, DATASOURCE_TYPE, JNDI, DRIVER,"
-					+ " URL, USERNAME, PASSWORD, PASSWORD_ALGORITHM, POOL_TIMEOUT, TEST_SQL,"
-					+ " ACTIVE, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
+					+ " (DATABASE_ID, NAME, DESCRIPTION, DATASOURCE_TYPE,"
+					+ " JNDI, DRIVER, URL, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
+					+ " POOL_TIMEOUT, TEST_SQL, ACTIVE, DATASOURCE_OPTIONS,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -382,6 +383,7 @@ public class DatasourceService {
 				datasource.getConnectionPoolTimeoutMins(),
 				datasource.getTestSql(),
 				BooleanUtils.toInteger(datasource.isActive()),
+				datasource.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -392,9 +394,11 @@ public class DatasourceService {
 				affectedRows = dbService.update(conn, sql, values);
 			}
 		} else {
-			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, DATASOURCE_TYPE=?,"
-					+ " JNDI=?, DRIVER=?, URL=?, USERNAME=?, PASSWORD=?, PASSWORD_ALGORITHM=?,"
-					+ " POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
+			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?,"
+					+ " DATASOURCE_TYPE=?, JNDI=?, DRIVER=?, URL=?, USERNAME=?,"
+					+ " PASSWORD=?, PASSWORD_ALGORITHM=?, POOL_TIMEOUT=?,"
+					+ " TEST_SQL=?, ACTIVE=?, DATASOURCE_OPTIONS=?,"
+					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE DATABASE_ID=?";
 
 			Object[] values = {
@@ -410,6 +414,7 @@ public class DatasourceService {
 				datasource.getConnectionPoolTimeoutMins(),
 				datasource.getTestSql(),
 				BooleanUtils.toInteger(datasource.isActive()),
+				datasource.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				datasource.getDatasourceId()
