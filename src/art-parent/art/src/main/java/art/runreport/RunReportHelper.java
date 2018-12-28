@@ -1338,10 +1338,10 @@ public class RunReportHelper {
 
 		if (reportType.isJasperReports()) {
 			reportFormat = ReportFormat.pdf;
-		} else if (reportType.isChart() || reportType == ReportType.Group) {
-			reportFormat = ReportFormat.html;
-		} else {
+		} else if (reportType.isStandardOutput()) {
 			reportFormat = ReportFormat.htmlFancy;
+		} else {
+			reportFormat = ReportFormat.html;
 		}
 
 		return reportFormat;
