@@ -18,7 +18,8 @@
 package art.login;
 
 import art.enums.ArtAuthenticationMethod;
-import art.utils.ArtHelper;
+import art.utils.ArtLogsHelper;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Provides methods for logging success or failure of login attempts
@@ -42,6 +43,36 @@ public class LoginHelper {
 	}
 
 	/**
+	 * Logs a successful login attempt
+	 *
+	 * @param loginMethod the login method used
+	 * @param username the username used
+	 * @param ip the ip address from which the login was done
+	 */
+	public void logSuccess(ArtAuthenticationMethod loginMethod,
+			String username, String ip) {
+
+		boolean success = true;
+		String failureMessage = null;
+		log(loginMethod, success, username, ip, failureMessage);
+	}
+
+	/**
+	 * Logs a failed login attempt
+	 *
+	 * @param loginMethod the login method used
+	 * @param username the username used
+	 * @param ip the ip address from which the login was done
+	 * @param failureMessage the message accompanying the failed login attempt
+	 */
+	public void logFailure(ArtAuthenticationMethod loginMethod,
+			String username, String ip, String failureMessage) {
+
+		boolean success = false;
+		log(loginMethod, success, username, ip, failureMessage);
+	}
+
+	/**
 	 * Logs login attempts
 	 *
 	 * @param loginMethod the login method
@@ -53,46 +84,18 @@ public class LoginHelper {
 	private void log(ArtAuthenticationMethod loginMethod, boolean success,
 			String username, String ip, String failureMessage) {
 
-		String logType;
+		String event;
 		String message;
 		if (success) {
-			logType = "login";
+			event = "login";
 			message = loginMethod.getValue();
 		} else {
-			logType = "loginerr";
-			message = loginMethod.getValue() + ", " + failureMessage;
+			event = "loginerr";
+			//https://stackoverflow.com/questions/21936503/get-empty-string-when-null
+			message = loginMethod.getValue() + ", " + StringUtils.defaultString(failureMessage);
 		}
 
-		ArtHelper.log(username, logType, ip, message);
-	}
-
-	/**
-	 * Logs a successful login attempt
-	 *
-	 * @param loginMethod the login method used
-	 * @param username the username used
-	 * @param ip the ip address from which the login was done
-	 */
-	public void logSuccess(ArtAuthenticationMethod loginMethod,
-			String username, String ip) {
-
-		boolean success = true;
-		String message = "";
-		log(loginMethod, success, username, ip, message);
-	}
-
-	/**
-	 * Logs a failed login attempt
-	 *
-	 * @param loginMethod the login method used
-	 * @param username the username used
-	 * @param ip the ip address from which the login was done
-	 * @param message the message accompanying the failed login attempt
-	 */
-	public void logFailure(ArtAuthenticationMethod loginMethod,
-			String username, String ip, String message) {
-
-		log(loginMethod, false, username, ip, message);
+		ArtLogsHelper.log(username, event, ip, message);
 	}
 
 	/**

@@ -17,18 +17,10 @@
  */
 package art.utils;
 
-import art.dbutils.DatabaseUtils;
-import art.dbutils.DbService;
 import art.enums.ReportType;
 import art.mail.Mailer;
-import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.smtpserver.SmtpServer;
-import art.user.User;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,128 +32,6 @@ import org.slf4j.LoggerFactory;
 public class ArtHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtHelper.class);
-
-	/**
-	 * Logs an event to the art_logs table
-	 *
-	 * @param user the username
-	 * @param logType type of event
-	 * @param ip the ip address from which event was done
-	 */
-	public static void log(String user, String logType, String ip) {
-		String message = null;
-		log(user, logType, ip, message);
-	}
-
-	/**
-	 * Logs an event to the art_logs table
-	 *
-	 * @param user the username
-	 * @param logType type of event
-	 * @param ip the ip address from which event was done
-	 * @param message the log message
-	 */
-	public static void log(String user, String logType, String ip, String message) {
-		Integer reportId = null;
-		Integer totalTimeSeconds = null;
-		Integer fetchTimeSeconds = null;
-		log(user, logType, ip, message, reportId, totalTimeSeconds, fetchTimeSeconds);
-	}
-
-	/**
-	 * Logs an interactive report run to the art_logs table
-	 *
-	 * @param sessionUser the session user
-	 * @param ip the ip address where the report is being run from
-	 * @param reportId the report id of the report being run
-	 * @param reportFormat the report format
-	 * @param reportParamsList the report parameters list
-	 */
-	public static void logInteractiveReportRun(User sessionUser, String ip, int reportId,
-			String reportFormat, List<ReportParameter> reportParamsList) {
-
-		Integer totalTimeSeconds = null;
-		Integer fetchTimeSeconds = null;
-		logInteractiveReportRun(sessionUser, ip, reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat, reportParamsList);
-	}
-
-	/**
-	 * Logs an interactive report run to the art_logs table
-	 *
-	 * @param sessionUser the session user
-	 * @param ip the ip address where the report is being run from
-	 * @param reportId the report id of the report being run
-	 * @param totalTimeSeconds the total time taken (in seconds) to fetch the
-	 * report data and display the results
-	 * @param fetchTimeSeconds the total time taken (in seconds) to fetch the
-	 * report data
-	 * @param reportFormat the report format
-	 * @param reportParamsList the report parameters list
-	 */
-	public static void logInteractiveReportRun(User sessionUser, String ip, int reportId,
-			Integer totalTimeSeconds, Integer fetchTimeSeconds, String reportFormat,
-			List<ReportParameter> reportParamsList) {
-
-		List<String> parameterValuesList = new ArrayList<>();
-		if (reportParamsList != null) {
-			for (ReportParameter reportParam : reportParamsList) {
-				String nameAndDisplayValues = reportParam.getNameAndDisplayValues();
-				parameterValuesList.add(nameAndDisplayValues);
-			}
-		}
-
-		String parameters = StringUtils.join(parameterValuesList, ",");
-		if (StringUtils.isNotBlank(parameters)) {
-			parameters = ", " + parameters;
-		}
-
-		String username = sessionUser.getUsername();
-		String message = reportFormat + parameters;
-		log(username, "report", ip, message, reportId, totalTimeSeconds, fetchTimeSeconds);
-	}
-
-	/**
-	 * Logs an event to the art_logs table
-	 *
-	 * @param user the username of user who executed the report
-	 * @param logType the type of event
-	 * @param ip the ip address from which report was run
-	 * @param message the log message
-	 * @param reportId the id of the report that was run
-	 * @param totalTimeSeconds the total time to run the report and display the
-	 * results (in seconds)
-	 * @param fetchTimeSeconds the time to fetch the results from the database
-	 * (in seconds)
-	 */
-	public static void log(String user, String logType, String ip, String message,
-			Integer reportId, Integer totalTimeSeconds, Integer fetchTimeSeconds) {
-
-		try {
-			String sql = "INSERT INTO ART_LOGS"
-					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, QUERY_ID,"
-					+ " TOTAL_TIME, FETCH_TIME, MESSAGE)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 8) + ")";
-
-			final int MAX_LOG_MESSAGE_LENGTH = 500;
-			message = StringUtils.left(message, MAX_LOG_MESSAGE_LENGTH);
-
-			Object[] values = {
-				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
-				user,
-				logType,
-				ip,
-				reportId,
-				totalTimeSeconds,
-				fetchTimeSeconds,
-				message
-			};
-
-			DbService dbService = new DbService();
-			dbService.update(sql, values);
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-		}
-	}
 
 	/**
 	 * Returns the default show legend option depending on the report type

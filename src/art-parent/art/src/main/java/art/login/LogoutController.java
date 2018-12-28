@@ -20,7 +20,7 @@ package art.login;
 import art.enums.ArtAuthenticationMethod;
 import art.servlets.Config;
 import art.user.User;
-import art.utils.ArtHelper;
+import art.utils.ArtLogsHelper;
 import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -56,9 +56,9 @@ public class LogoutController {
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		if (sessionUser != null) { //can be null if this controller called twice
-			String logType = "logout";
+			String event = "logout";
 			String ip = request.getRemoteAddr();
-			ArtHelper.log(sessionUser.getUsername(), logType, ip);
+			ArtLogsHelper.log(sessionUser.getUsername(), event, ip);
 
 			try {
 				loginService.removeLoggedInUser(sessionUser);

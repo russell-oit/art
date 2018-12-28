@@ -27,7 +27,7 @@ import art.reportoptions.TabularHeatmapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
-import art.utils.ArtHelper;
+import art.utils.ArtLogsHelper;
 import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -213,7 +213,8 @@ public class RunReportController {
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 
-				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, "jpivot", reportParamsList);
+				String reportFormat = "jpivot";
+				ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, reportFormat, reportParamsList);
 
 				//can't use addFlashAttribute() as flash attributes aren't included as part of request parameters
 				redirectAttributes.addAllAttributes(request.getParameterMap());
@@ -226,7 +227,8 @@ public class RunReportController {
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 
-				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, "saiku", reportParamsList);
+				String reportFormat = "saiku";
+				ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, reportFormat, reportParamsList);
 
 				List<String> parametersList = new ArrayList<>();
 				Map<String, String[]> requestParameters = request.getParameterMap();
@@ -536,7 +538,7 @@ public class RunReportController {
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
 			}
 
-			ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
+			ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
 		} catch (Exception ex) {
 			logger.error("Error. {}, {}", report, sessionUser, ex);
 			if (reportName != null) {

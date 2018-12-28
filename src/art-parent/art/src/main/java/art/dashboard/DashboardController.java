@@ -30,7 +30,7 @@ import art.runreport.ReportOptions;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
-import art.utils.ArtHelper;
+import art.utils.ArtLogsHelper;
 import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -263,7 +263,7 @@ public class DashboardController {
 		}
 
 		Integer fetchTimeSeconds = null;
-		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), report.getReportId(), totalTimeSeconds, fetchTimeSeconds, "dashboard", reportParamsList);
+		ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), report.getReportId(), totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
 
 		if (reportFormat == ReportFormat.pdf) {
 			if (showInline) {
