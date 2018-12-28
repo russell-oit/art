@@ -26,9 +26,7 @@ import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.ViewOptions;
-import art.runreport.GroovyDataDetails;
 import art.runreport.ReportRunner;
-import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
 import java.io.File;
@@ -269,54 +267,54 @@ public class SelfServiceController {
 				reportRunner.setUser(sessionUser);
 				reportRunner.setReport(report);
 				rs = reportRunner.executeQuery();
-				Object groovyData = reportRunner.getGroovyData();
-				if (groovyData == null) {
-					ResultSetMetaData rsmd = rs.getMetaData();
-					int columnCount = rsmd.getColumnCount();
 
-					for (int i = 1; i <= columnCount; i++) {
-						SelfServiceColumn column = new SelfServiceColumn();
+				if (rs == null) {
+					throw new RuntimeException("ResultSet is null");
+				}
+				
+				ResultSetMetaData rsmd = rs.getMetaData();
+				int columnCount = rsmd.getColumnCount();
 
-						column.setName(rsmd.getColumnName(i));
-						column.setLabel(rsmd.getColumnLabel(i));
+				for (int i = 1; i <= columnCount; i++) {
+					SelfServiceColumn column = new SelfServiceColumn();
 
-						int sqlType = rsmd.getColumnType(i);
+					column.setName(rsmd.getColumnName(i));
+					column.setLabel(rsmd.getColumnLabel(i));
 
-						String type;
+					int sqlType = rsmd.getColumnType(i);
 
-						switch (sqlType) {
-							case Types.INTEGER:
-							case Types.TINYINT:
-							case Types.SMALLINT:
-							case Types.BIGINT:
-								type = "integer";
-								break;
-							case Types.NUMERIC:
-							case Types.DECIMAL:
-							case Types.FLOAT:
-							case Types.REAL:
-							case Types.DOUBLE:
-								type = "double";
-								break;
-							case Types.DATE:
-								type = "date";
-								break;
-							case Types.TIME:
-								type = "time";
-								break;
-							case Types.TIMESTAMP:
-								type = "datetime";
-								break;
-							default:
-								type = "string";
-						}
+					String type;
 
-						column.setType(type);
-
-						columns.add(column);
+					switch (sqlType) {
+						case Types.INTEGER:
+						case Types.TINYINT:
+						case Types.SMALLINT:
+						case Types.BIGINT:
+							type = "integer";
+							break;
+						case Types.NUMERIC:
+						case Types.DECIMAL:
+						case Types.FLOAT:
+						case Types.REAL:
+						case Types.DOUBLE:
+							type = "double";
+							break;
+						case Types.DATE:
+							type = "date";
+							break;
+						case Types.TIME:
+							type = "time";
+							break;
+						case Types.TIMESTAMP:
+							type = "datetime";
+							break;
+						default:
+							type = "string";
 					}
-				} else {
-					GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
+
+					column.setType(type);
+
+					columns.add(column);
 				}
 
 				if (omitColumns != null) {
