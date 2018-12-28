@@ -195,6 +195,16 @@ public class RunReportController {
 
 			ReportType reportType = report.getReportType();
 
+			RunReportHelper runReportHelper = new RunReportHelper();
+
+			ReportFormat reportFormat;
+			String reportFormatString = request.getParameter("reportFormat");
+			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
+				reportFormat = runReportHelper.getDefaultReportFormat(reportType);
+			} else {
+				reportFormat = ReportFormat.toEnum(reportFormatString);
+			}
+
 			if (reportType.isDashboard()) {
 				//https://stackoverflow.com/questions/8585216/spring-forward-with-added-parameters
 				request.setAttribute("suppliedReport", report);
@@ -213,8 +223,7 @@ public class RunReportController {
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 
-				String reportFormat = "jpivot";
-				ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, reportFormat, reportParamsList);
+				ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, reportFormat.getValue(), reportParamsList);
 
 				//can't use addFlashAttribute() as flash attributes aren't included as part of request parameters
 				redirectAttributes.addAllAttributes(request.getParameterMap());
@@ -227,8 +236,7 @@ public class RunReportController {
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 
-				String reportFormat = "saiku";
-				ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, reportFormat, reportParamsList);
+				ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, reportFormat.getValue(), reportParamsList);
 
 				List<String> parametersList = new ArrayList<>();
 				Map<String, String[]> requestParameters = request.getParameterMap();
@@ -260,17 +268,6 @@ public class RunReportController {
 
 			Date overallStartTime = new Date();
 			Instant overallStart = Instant.now();
-
-			RunReportHelper runReportHelper = new RunReportHelper();
-
-			//get report format to use
-			ReportFormat reportFormat;
-			String reportFormatString = request.getParameter("reportFormat");
-			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
-				reportFormat = runReportHelper.getDefaultReportFormat(reportType);
-			} else {
-				reportFormat = ReportFormat.toEnum(reportFormatString);
-			}
 
 			//this will be initialized according to the content type of the report output
 			//setContentType() must be called before getWriter()
