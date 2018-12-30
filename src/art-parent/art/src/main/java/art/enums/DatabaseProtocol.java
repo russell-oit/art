@@ -37,51 +37,56 @@ public enum DatabaseProtocol {
 	 * @return the database type
 	 */
 	public static DatabaseProtocol fromUrl(String url) {
-		if (StringUtils.startsWithAny(url, "jdbc:oracle", "jdbc:log4jdbc:oracle")) {
+		final String LOG4JDBC_PREFIX = "jdbc:log4";
+		if (StringUtils.startsWith(url, LOG4JDBC_PREFIX)) {
+			url = StringUtils.substringAfter(url, LOG4JDBC_PREFIX);
+		}
+
+		if (StringUtils.startsWith(url, "jdbc:oracle")) {
 			return Oracle;
-		} else if (StringUtils.startsWithAny(url, "jdbc:db2", "jdbc:as400", "jdbc:log4jdbc:db2", "jdbc:log4jdbc:as400")) {
+		} else if (StringUtils.startsWithAny(url, "jdbc:db2", "jdbc:as400")) {
 			//db2 on LUW or db2 on ibm i (as/400, iseries, system i or power)
 			//https://en.wikipedia.org/wiki/IBM_System_i
 			return Db2;
-		} else if (StringUtils.startsWithAny(url, "jdbc:hsqldb", "jdbc:log4jdbc:hsqldb")) {
+		} else if (StringUtils.startsWith(url, "jdbc:hsqldb")) {
 			return HSQLDB;
-		} else if (StringUtils.startsWithAny(url, "jdbc:postgresql", "jdbc:log4jdbc:postgresql")) {
+		} else if (StringUtils.startsWith(url, "jdbc:postgresql")) {
 			return PostgreSQL;
-		} else if (StringUtils.startsWithAny(url, "jdbc:cubrid", "jdbc:log4jdbc:cubrid")) {
+		} else if (StringUtils.startsWith(url, "jdbc:cubrid")) {
 			return CUBRID;
-		} else if (StringUtils.startsWithAny(url, "jdbc:sqlserver", "jdbc:jtds", "jdbc:log4jdbc:sqlserver", "jdbc:log4jdbc:jtds")) {
+		} else if (StringUtils.startsWithAny(url, "jdbc:sqlserver", "jdbc:jtds")) {
 			return SqlServer;
-		} else if (StringUtils.startsWithAny(url, "jdbc:ids", "jdbc:informix-sqli", "jdbc:log4jdbc:ids", "jdbc:log4jdbc:informix-sqli")) {
+		} else if (StringUtils.startsWithAny(url, "jdbc:ids", "jdbc:informix-sqli")) {
 			return Informix;
-		} else if (StringUtils.startsWithAny(url, "jdbc:firebirdsql", "jdbc:log4jdbc:firebirdsql")) {
+		} else if (StringUtils.startsWith(url, "jdbc:firebirdsql")) {
 			return Firebird;
-		} else if (StringUtils.startsWithAny(url, "jdbc:mariadb", "jdbc:log4jdbc:mariadb")) {
+		} else if (StringUtils.startsWith(url, "jdbc:mariadb")) {
 			return MariaDB;
-		} else if (StringUtils.startsWithAny(url, "jdbc:ucanaccess", "jdbc:log4jdbc:ucanaccess")) {
+		} else if (StringUtils.startsWith(url, "jdbc:ucanaccess")) {
 			return Access;
-		} else if (StringUtils.startsWithAny(url, "jdbc:sqlite", "jdbc:log4jdbc:sqlite")) {
+		} else if (StringUtils.startsWith(url, "jdbc:sqlite")) {
 			return SQLite;
-		} else if (StringUtils.startsWithAny(url, "jdbc:h2", "jdbc:log4jdbc:h2")) {
+		} else if (StringUtils.startsWith(url, "jdbc:h2")) {
 			return H2;
-		} else if (StringUtils.startsWithAny(url, "jdbc:vertica", "jdbc:log4jdbc:vertica")) {
+		} else if (StringUtils.startsWith(url, "jdbc:vertica")) {
 			return Vertica;
-		} else if (StringUtils.startsWithAny(url, "jdbc:redshift", "jdbc:log4jdbc:redshift")) {
+		} else if (StringUtils.startsWith(url, "jdbc:redshift")) {
 			return Redshift;
-		} else if (StringUtils.startsWithAny(url, "jdbc:teradata", "jdbc:log4jdbc:teradata")) {
+		} else if (StringUtils.startsWith(url, "jdbc:teradata")) {
 			return Teradata;
-		} else if (StringUtils.startsWithAny(url, "jdbc:snowflake", "jdbc:log4jdbc:snowflake")) {
+		} else if (StringUtils.startsWith(url, "jdbc:snowflake")) {
 			return Snowflake;
-		} else if (StringUtils.startsWithAny(url, "jdbc:presto", "jdbc:log4jdbc:presto")) {
+		} else if (StringUtils.startsWith(url, "jdbc:presto")) {
 			return Presto;
-		} else if (StringUtils.startsWithAny(url, "jdbc:drill", "jdbc:log4jdbc:drill")) {
+		} else if (StringUtils.startsWith(url, "jdbc:drill")) {
 			return Drill;
-		} else if (StringUtils.startsWithAny(url, "jdbc:monetdb", "jdbc:log4jdbc:monetdb")) {
+		} else if (StringUtils.startsWith(url, "jdbc:monetdb")) {
 			return MonetDB;
-		} else if (StringUtils.startsWithAny(url, "jdbc:exa", "jdbc:log4jdbc:exa")) {
+		} else if (StringUtils.startsWith(url, "jdbc:exa")) {
 			return Exasol;
-		} else if (StringUtils.startsWithAny(url, "jdbc:q", "jdbc:log4jdbc:q")) {
+		} else if (StringUtils.startsWith(url, "jdbc:q")) {
 			return kdb;
-		} else if (StringUtils.startsWithAny(url, "jdbc:phoenix", "jdbc:log4jdbc:phoenix")) {
+		} else if (StringUtils.startsWith(url, "jdbc:phoenix")) {
 			return Phoenix;
 		} else {
 			return Unknown;
