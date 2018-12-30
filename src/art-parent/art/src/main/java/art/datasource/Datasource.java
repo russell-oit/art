@@ -75,7 +75,7 @@ public class Datasource implements Serializable {
 	private boolean clearTextPassword;
 	//https://github.com/uniVocity/univocity-parsers/issues/240
 	@EnumOptions(customElement = "toEnum")
-	@Parsed(defaultNullRead = "Other", defaultNullWrite = "Other")
+	@Parsed
 	private DatabaseProtocol databaseProtocol;
 
 	/**
