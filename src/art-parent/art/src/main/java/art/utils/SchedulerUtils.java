@@ -18,7 +18,7 @@
 package art.utils;
 
 import art.artdatabase.ArtDatabase;
-import art.enums.DatabaseType;
+import art.enums.DatabaseProtocol;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -205,8 +205,8 @@ public class SchedulerUtils {
 			}
 
 			//set properties that depend on the database type
-			DatabaseType databaseType = DatabaseType.fromUrl(url);
-			switch (databaseType) {
+			DatabaseProtocol databaseProtocol = DatabaseProtocol.fromUrl(url);
+			switch (databaseProtocol) {
 				case Oracle:
 					if (properties.getProperty(DRIVER_DELEGATE) == null) {
 						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate");

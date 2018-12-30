@@ -24,7 +24,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Timothy Anyona
  */
-public enum DatabaseType {
+public enum DatabaseProtocol {
 
 	Unknown, MySQL, MariaDB, Oracle, CUBRID, Db2, HSQLDB, PostgreSQL,
 	SqlServer, Informix, Firebird, Access, SQLite, H2, Vertica, Redshift,
@@ -36,7 +36,7 @@ public enum DatabaseType {
 	 * @param url the jdbc url
 	 * @return the database type
 	 */
-	public static DatabaseType fromUrl(String url) {
+	public static DatabaseProtocol fromUrl(String url) {
 		if (StringUtils.startsWithAny(url, "jdbc:oracle", "jdbc:log4jdbc:oracle")) {
 			return Oracle;
 		} else if (StringUtils.startsWithAny(url, "jdbc:db2", "jdbc:as400", "jdbc:log4jdbc:db2", "jdbc:log4jdbc:as400")) {
