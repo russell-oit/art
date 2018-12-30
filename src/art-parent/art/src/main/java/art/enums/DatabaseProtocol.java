@@ -84,7 +84,7 @@ public enum DatabaseProtocol {
 				return v;
 			}
 		}
-		return Other;
+		return null;
 	}
 
 	/**

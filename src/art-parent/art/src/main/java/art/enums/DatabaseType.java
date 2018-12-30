@@ -122,7 +122,7 @@ public enum DatabaseType {
 				return v;
 			}
 		}
-		return Other;
+		return null;
 	}
 
 	/**
