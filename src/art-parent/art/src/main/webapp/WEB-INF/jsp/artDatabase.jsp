@@ -141,7 +141,7 @@ Display art database configuration page
 							<option data-divider="true"></option>
 							<c:forEach var="databaseType" items="${databaseTypes}">
 								<form:option value="${databaseType}">
-									${databaseType.description} 
+									${encode:forHtmlContent(databaseType.description)} 
 								</form:option>
 							</c:forEach>
 						</form:select>
@@ -156,7 +156,7 @@ Display art database configuration page
 							<option value="">--</option>
 							<c:forEach var="databaseProtocol" items="${databaseProtocols}">
 								<form:option value="${databaseProtocol}">
-									${databaseProtocol.description} 
+									${encode:forHtmlContent(databaseProtocol.description)} 
 								</form:option>
 							</c:forEach>
 						</form:select>

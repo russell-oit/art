@@ -335,7 +335,7 @@
 						<form:select path="destinationType" class="form-control selectpicker">
 							<c:forEach var="destinationType" items="${destinationTypes}">
 								<form:option value="${destinationType}">
-									${destinationType.description} 
+									${encode:forHtmlContent(destinationType.description)} 
 								</form:option>
 							</c:forEach>
 						</form:select>
