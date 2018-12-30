@@ -367,14 +367,21 @@ public class DatasourceService {
 			databaseProtocol = datasource.getDatabaseProtocol().getValue();
 		}
 
+		String databaseType;
+		if (datasource.getDatabaseType() == null) {
+			databaseType = null;
+		} else {
+			databaseType = datasource.getDatabaseType().getValue();
+		}
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_DATABASES"
 					+ " (DATABASE_ID, NAME, DESCRIPTION, DATASOURCE_TYPE,"
-					+ " JNDI, DATABASE_PROTOCOL, DRIVER, URL, USERNAME,"
-					+ " PASSWORD, PASSWORD_ALGORITHM, POOL_TIMEOUT, TEST_SQL,"
-					+ " ACTIVE, DATASOURCE_OPTIONS,"
+					+ " JNDI, DATABASE_TYPE, DATABASE_PROTOCOL, DRIVER, URL,"
+					+ " USERNAME, PASSWORD, PASSWORD_ALGORITHM, POOL_TIMEOUT,"
+					+ " TEST_SQL, ACTIVE, DATASOURCE_OPTIONS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 17) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 18) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -383,6 +390,7 @@ public class DatasourceService {
 				datasource.getDatasourceType().getValue(),
 				//postgresql requires explicit cast from boolean to integer
 				BooleanUtils.toInteger(datasource.isJndi()),
+				databaseType,
 				databaseProtocol,
 				datasource.getDriver(),
 				datasource.getUrl(),
@@ -404,8 +412,8 @@ public class DatasourceService {
 			}
 		} else {
 			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?,"
-					+ " DATASOURCE_TYPE=?, JNDI=?, DATABASE_PROTOCOL=?,"
-					+ " DRIVER=?, URL=?, USERNAME=?,"
+					+ " DATASOURCE_TYPE=?, JNDI=?, DATABASE_TYPE=?,"
+					+ " DATABASE_PROTOCOL=?, DRIVER=?, URL=?, USERNAME=?,"
 					+ " PASSWORD=?, PASSWORD_ALGORITHM=?, POOL_TIMEOUT=?,"
 					+ " TEST_SQL=?, ACTIVE=?, DATASOURCE_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
@@ -416,6 +424,7 @@ public class DatasourceService {
 				datasource.getDescription(),
 				datasource.getDatasourceType().getValue(),
 				BooleanUtils.toInteger(datasource.isJndi()),
+				databaseType,
 				databaseProtocol,
 				datasource.getDriver(),
 				datasource.getUrl(),

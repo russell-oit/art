@@ -62,7 +62,7 @@ Display art database configuration page
 					onText: '${yesText}',
 					offText: '${noText}'
 				});
-				
+
 				$('#databaseType').on("change", function () {
 					setDatasourceFields(this.value, 'driver', 'url', 'testSql', 'databaseProtocol');
 				});
@@ -136,22 +136,15 @@ Display art database configuration page
 						<spring:message code="page.label.databaseType"/>
 					</label>
 					<div class="col-md-8">
-						<div class="input-group">
-							<select name="databaseType" id="databaseType" class="form-control selectpicker">
-								<option value="">--</option>
-								<option data-divider="true"></option>
-								<c:forEach var="databaseType" items="${databaseTypes}">
-									<option value="${encode:forHtmlAttribute(databaseType.key)}">${encode:forHtmlContent(databaseType.value)}</option>
-								</c:forEach>
-							</select>
-							<spring:message code="page.help.databaseType" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
+						<form:select path="databaseType" class="form-control selectpicker">
+							<option value="">--</option>
+							<option data-divider="true"></option>
+							<c:forEach var="databaseType" items="${databaseTypes}">
+								<form:option value="${databaseType}">
+									${databaseType.description} 
+								</form:option>
+							</c:forEach>
+						</form:select>
 					</div>
 				</div>
 				<div class="form-group">

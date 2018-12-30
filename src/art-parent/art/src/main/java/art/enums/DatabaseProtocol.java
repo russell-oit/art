@@ -17,8 +17,6 @@
  */
 package art.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +25,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Represents database types
+ * Represents database protocol types
  *
  * @author Timothy Anyona
  */
@@ -53,7 +51,6 @@ public enum DatabaseProtocol {
 	 *
 	 * @return this enum option's value
 	 */
-	@JsonValue
 	public String getValue() {
 		return value;
 	}
@@ -81,7 +78,6 @@ public enum DatabaseProtocol {
 	 * @param value the value to convert
 	 * @return the enum option that corresponds to the value
 	 */
-	@JsonCreator
 	public static DatabaseProtocol toEnum(String value) {
 		for (DatabaseProtocol v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {

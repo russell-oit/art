@@ -10,6 +10,7 @@
 -- change options columns to clob
 -- add datasource options field
 -- add database protocol column
+-- add database type column
 
 
 -- NOTES:
@@ -52,3 +53,6 @@ ALTER TABLE ART_DATABASES ADD DATASOURCE_OPTIONS CLOB;
 
 -- add database protocol column
 ALTER TABLE ART_DATABASES ADD DATABASE_PROTOCOL VARCHAR(50);
+
+-- add database type column
+ALTER TABLE ART_DATABASES ADD DATABASE_TYPE VARCHAR(100);

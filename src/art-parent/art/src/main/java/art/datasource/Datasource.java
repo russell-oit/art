@@ -20,10 +20,10 @@ package art.datasource;
 import art.encryption.AesEncryptor;
 import art.encryption.DesEncryptor;
 import art.enums.DatabaseProtocol;
+import art.enums.DatabaseType;
 import art.enums.DatasourceType;
 import art.settings.EncryptionPassword;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.univocity.parsers.annotations.EnumOptions;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -73,10 +73,24 @@ public class Datasource implements Serializable {
 	private String updatedBy;
 	@Parsed
 	private boolean clearTextPassword;
-	//https://github.com/uniVocity/univocity-parsers/issues/240
-	@EnumOptions(customElement = "toEnum")
 	@Parsed
 	private DatabaseProtocol databaseProtocol;
+	@Parsed
+	private DatabaseType databaseType;
+
+	/**
+	 * @return the databaseType
+	 */
+	public DatabaseType getDatabaseType() {
+		return databaseType;
+	}
+
+	/**
+	 * @param databaseType the databaseType to set
+	 */
+	public void setDatabaseType(DatabaseType databaseType) {
+		this.databaseType = databaseType;
+	}
 
 	/**
 	 * @return the databaseProtocol

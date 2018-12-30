@@ -21,6 +21,7 @@ import art.cache.CacheHelper;
 import art.dbutils.DatabaseUtils;
 import art.enums.ConnectionPoolLibrary;
 import art.enums.DatabaseProtocol;
+import art.enums.DatabaseType;
 import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
@@ -30,7 +31,6 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -64,38 +64,8 @@ public class ArtDatabaseController {
 	private UserService userService;
 
 	@ModelAttribute("databaseTypes")
-	public Map<String, String> addDatabaseTypes() {
-		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
-
-		databaseTypes.remove("odbc-sun");
-		databaseTypes.remove("hbase-phoenix");
-		databaseTypes.remove("msaccess-ucanaccess");
-		databaseTypes.remove("msaccess-ucanaccess-password");
-		databaseTypes.remove("sqlite-xerial");
-		databaseTypes.remove("csv-csvjdbc");
-		databaseTypes.remove("olap4j-mondrian");
-		databaseTypes.remove("olap4j-xmla");
-		databaseTypes.remove("couchbase");
-		databaseTypes.remove("drill");
-		databaseTypes.remove("monetdb");
-		databaseTypes.remove("vertica");
-		databaseTypes.remove("cassandra-adejanovski");
-		databaseTypes.remove("neo4j");
-		databaseTypes.remove("exasol");
-		databaseTypes.remove("redshift");
-		databaseTypes.remove("teradata");
-		databaseTypes.remove("snowflake1-us-west");
-		databaseTypes.remove("snowflake2-other");
-		databaseTypes.remove("presto");
-		databaseTypes.remove("memsql");
-		databaseTypes.remove("citus");
-		databaseTypes.remove("aurora-mysql-mariadb");
-		databaseTypes.remove("aurora-postgresql-postgresql");
-		databaseTypes.remove("greenplum");
-		databaseTypes.remove("timescaledb");
-		databaseTypes.remove("kdb");
-
-		return databaseTypes;
+	public List<DatabaseType> addDatabaseTypes() {
+		return DatabaseType.listForArtDatabase();
 	}
 
 	@ModelAttribute("connectionPoolLibraries")
