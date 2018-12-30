@@ -417,10 +417,10 @@ Edit datasource page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-12" style="text-align: center" for="options">
+					<label class="control-label col-md-8 col-md-offset-4" style="text-align: center" for="options">
 						<spring:message code="page.label.options"/>
 					</label>
-					<div class="col-md-12">
+					<div class="col-md-8 col-md-offset-4">
 						<form:hidden path="options"/>
 						<div id="jsonEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
