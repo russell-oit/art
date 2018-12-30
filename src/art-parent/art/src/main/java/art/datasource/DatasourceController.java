@@ -21,6 +21,7 @@ import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.encryption.AesEncryptor;
+import art.enums.DatabaseProtocol;
 import art.enums.DatasourceType;
 import art.report.ReportService;
 import art.servlets.Config;
@@ -316,6 +317,7 @@ public class DatasourceController {
 
 		model.addAttribute("databaseTypes", databaseTypes);
 		model.addAttribute("datasourceTypes", DatasourceType.list());
+		model.addAttribute("databaseProtocols", DatabaseProtocol.list());
 		model.addAttribute("action", action);
 
 		return "editDatasource";

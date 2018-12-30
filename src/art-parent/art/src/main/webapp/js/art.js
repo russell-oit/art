@@ -124,26 +124,36 @@ var tinymceConfig = {
  * @param {string} driverElementId
  * @param {string} urlElementId
  * @param {string} testSqlElementId
+ * @param {string} databaseProtocolElementId
  */
-function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlElementId) {
+function setDatasourceFields(dbType, driverElementId, urlElementId,
+		testSqlElementId, databaseProtocolElementId) {
+			
 	var driverElement = document.getElementById(driverElementId);
 	var urlElement = document.getElementById(urlElementId);
 	var testSqlElement = document.getElementById(testSqlElementId);
+	
+	//https://stackoverflow.com/questions/13343566/set-select-option-selected-by-value
+	var databaseProtocolSelector = "#" + databaseProtocolElementId;
 
 	if (dbType === "oracle") {
+		$(databaseProtocolSelector).val('Oracle');
 		driverElement.value = "oracle.jdbc.OracleDriver";
 		urlElement.value = "jdbc:oracle:thin:@<server>:1521:<sid>";
 		testSqlElement.value = "select 1 from dual";
 	} else if (dbType === "mysql") {
 		//https://mariadb.com/kb/en/library/about-mariadb-connector-j/
+		$(databaseProtocolSelector).val('MySQL');
 		driverElement.value = "com.mysql.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "memsql") {
+		$(databaseProtocolSelector).val('MySQL');
 		driverElement.value = "com.mysql.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "mariadb") {
+		$(databaseProtocolSelector).val('MariaDB');
 		driverElement.value = "org.mariadb.jdbc.Driver";
 		urlElement.value = "jdbc:mariadb://<server>/<database>";
 		testSqlElement.value = "select 1";
@@ -151,50 +161,62 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		//https://mariadb.com/kb/en/library/failover-and-high-availability-with-mariadb-connector-j/#specifics-for-amazon-aurora
 		//https://stackoverflow.com/questions/44020489/db-connections-increase-after-setting-aurora-in-mariadb-connector
 		//https://stackoverflow.com/questions/31250975/what-database-driver-should-be-used-to-access-aws-aurora
+		$(databaseProtocolSelector).val('MariaDB');
 		driverElement.value = "org.mariadb.jdbc.Driver";
 		urlElement.value = "jdbc:mariadb:aurora://<cluster_end_point>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "postgresql") {
+		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "citus") {
+		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "aurora-postgresql-postgresql") {
+		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "greenplum") {
+		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "timescaledb") {
+		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "hsqldb-standalone") {
+		$(databaseProtocolSelector).val('HSQLDB');
 		driverElement.value = "org.hsqldb.jdbc.JDBCDriver";
 		urlElement.value = "jdbc:hsqldb:file:<file_path>;shutdown=true;hsqldb.write_delay=false";
 		testSqlElement.value = "values 1";
 	} else if (dbType === "hsqldb-server") {
+		$(databaseProtocolSelector).val('HSQLDB');
 		driverElement.value = "org.hsqldb.jdbc.JDBCDriver";
 		urlElement.value = "jdbc:hsqldb:hsql://<server>:9001/<database_alias>";
 		testSqlElement.value = "values 1";
 	} else if (dbType === "sqlserver-ms") {
+		$(databaseProtocolSelector).val('SqlServer');
 		driverElement.value = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 		urlElement.value = "jdbc:sqlserver://<server>;databaseName=<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "sqlserver-jtds") {
+		$(databaseProtocolSelector).val('SqlServer');
 		driverElement.value = "net.sourceforge.jtds.jdbc.Driver";
 		urlElement.value = "jdbc:jtds:sqlserver://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "cubrid") {
+		$(databaseProtocolSelector).val('CUBRID');
 		driverElement.value = "cubrid.jdbc.driver.CUBRIDDriver";
 		urlElement.value = "jdbc:cubrid:<server>:33000:<database>:::";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "other") {
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "";
 		urlElement.value = "";
 		testSqlElement.value = "";
@@ -203,14 +225,17 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		urlElement.value = "jdbc:log4" + urlElement.value;
 		testSqlElement.value = "";
 	} else if (dbType === "db2") {
+		$(databaseProtocolSelector).val('Db2');
 		driverElement.value = "com.ibm.db2.jcc.DB2Driver";
 		urlElement.value = "jdbc:db2://<server>:<port>/<database>";
 		testSqlElement.value = "select 1 from sysibm.sysdummy1";
 	} else if (dbType === "odbc-sun") {
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "sun.jdbc.odbc.JdbcOdbcDriver";
 		urlElement.value = "jdbc:odbc:<dsn_name>";
 		testSqlElement.value = "";
 	} else if (dbType === "demo") {
+		$(databaseProtocolSelector).val('HSQLDB');
 		driverElement.value = "";
 		urlElement.value = "demo";
 		testSqlElement.value = "";
@@ -220,14 +245,17 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 			usernameElement.value = "";
 		}
 	} else if (dbType === "hbase-phoenix") {
+		$(databaseProtocolSelector).val('Phoenix');
 		driverElement.value = "org.apache.phoenix.jdbc.PhoenixDriver";
 		urlElement.value = "jdbc:phoenix:<server>";
 		testSqlElement.value = "";
 	} else if (dbType === "msaccess-ucanaccess") {
+		$(databaseProtocolSelector).val('Access');
 		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
 		urlElement.value = "jdbc:ucanaccess://<file_path>";
 		testSqlElement.value = "";
 	} else if (dbType === "msaccess-ucanaccess-password") {
+		$(databaseProtocolSelector).val('Access');
 		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
 		urlElement.value = "jdbc:ucanaccess://<file_path>;jackcessOpener=art.utils.CryptCodecOpener";
 		testSqlElement.value = "";
@@ -237,38 +265,46 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 			usernameElement.value = "";
 		}
 	} else if (dbType === "sqlite-xerial") {
+		$(databaseProtocolSelector).val('SQLite');
 		driverElement.value = "org.sqlite.JDBC";
 		urlElement.value = "jdbc:sqlite:<file_path>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "csv-csvjdbc") {
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.relique.jdbc.csv.CsvDriver";
 		urlElement.value = "jdbc:relique:csv:<directory_with_csvs>";
 		testSqlElement.value = "";
 	} else if (dbType === "h2-server") {
+		$(databaseProtocolSelector).val('H2');
 		driverElement.value = "org.h2.Driver";
 		urlElement.value = "jdbc:h2://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "h2-embedded") {
+		$(databaseProtocolSelector).val('H2');
 		driverElement.value = "org.h2.Driver";
 		urlElement.value = "jdbc:h2://<file_path>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "olap4j-mondrian") {
 		//http://forums.pentaho.com/showthread.php?70625-Mondrian-begining-with-olap4j
 		//http://mondrian.pentaho.com/api/mondrian/olap4j/MondrianOlap4jDriver.html
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "mondrian.olap4j.MondrianOlap4jDriver";
 		urlElement.value = "jdbc:mondrian:Jdbc=<jdbc_url>; Catalog=<schema_file_path>; JdbcDrivers=<jdbc_driver>";
 		testSqlElement.value = "";
 	} else if (dbType === "olap4j-xmla") {
 		//http://www.olap4j.org/api/org/olap4j/driver/xmla/XmlaOlap4jDriver.html
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.olap4j.driver.xmla.XmlaOlap4jDriver";
 		urlElement.value = "jdbc:xmla:Server=<xmla_url>";
 		testSqlElement.value = "";
 	} else if (dbType === "couchbase") {
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "com.couchbase.jdbc.CBDriver";
 		urlElement.value = "jdbc:couchbase://<server>:8093";
 		testSqlElement.value = "";
 	} else if (dbType === "drill") {
 		//https://stackoverflow.com/questions/31654658/apache-drill-connection-to-drill-in-embedded-mode-java/33442630
+		$(databaseProtocolSelector).val('Drill');
 		driverElement.value = "org.apache.drill.jdbc.Driver";
 		urlElement.value = "jdbc:drill:drillbit=<server>";
 		testSqlElement.value = "select 1 from sys.version";
@@ -278,21 +314,25 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		//https://stackoverflow.com/questions/37492890/incompatible-wire-encryption-levels-requested-on-client-and-server-with-firebird
 		//https://www.firebirdsql.org/file/documentation/drivers_documentation/java/faq.html#how-can-i-solve-the-error-connection-rejected-no-connection-character-set-specified
 		//http://www.firebirdfaq.org/faq30/
+		$(databaseProtocolSelector).val('Firebird');
 		driverElement.value = "org.firebirdsql.jdbc.FBDriver";
 		urlElement.value = "jdbc:firebirdsql://<server>/<file_path or database_alias>?encoding=UTF8";
 		testSqlElement.value = "select 1 from RDB$DATABASE";
 	} else if (dbType === "monetdb") {
 		//https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Select_queries/Select_without_tables
+		$(databaseProtocolSelector).val('MonetDB');
 		driverElement.value = "nl.cwi.monetdb.jdbc.MonetDriver";
 		urlElement.value = "jdbc:monetdb://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "vertica") {
 		//https://my.vertica.com/docs/7.1.x/HTML/Content/Authoring/ConnectingToHPVertica/ClientJDBC/CreatingAndConfiguringAConnection.htm
+		$(databaseProtocolSelector).val('Vertica');
 		driverElement.value = "com.vertica.jdbc.Driver";
 		urlElement.value = "jdbc:vertica://<server>/<database>";
 		testSqlElement.value = "select 1 from dual";
 	} else if (dbType === "informix") {
 		//https://gist.github.com/ikenna/5706366
+		$(databaseProtocolSelector).val('Informix');
 		driverElement.value = "com.informix.jdbc.IfxDriver";
 		urlElement.value = "jdbc:informix-sqli://<server>:<port>/<database>";
 		testSqlElement.value = "select 1 from systables where tabid=1";
@@ -300,40 +340,49 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		//https://datastax-oss.atlassian.net/browse/JAVA-975
 		//http://docs.datastax.com/en/cql/3.1/cql/cql_using/use_query_system_c.html
 		//https://stackoverflow.com/questions/34055752/select-contant-value-is-cassandra
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "com.github.adejanovski.cassandra.jdbc.CassandraDriver";
 		urlElement.value = "jdbc:cassandra://<server>/<keyspace>";
 		testSqlElement.value = "select release_version from system.local";
 	} else if (dbType === "neo4j") {
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.neo4j.jdbc.Driver";
 		urlElement.value = "jdbc:neo4j:bolt://<server>";
 		testSqlElement.value = "";
 	} else if (dbType === "exasol") {
+		$(databaseProtocolSelector).val('Exasol');
 		driverElement.value = "com.exasol.jdbc.EXADriver";
 		urlElement.value = "jdbc:exa://<server>;schema=<database>";
 		testSqlElement.value = "";
 	} else if (dbType === "redshift") {
+		$(databaseProtocolSelector).val('Redshift');
 		driverElement.value = "com.amazon.redshift.jdbc.Driver";
 		urlElement.value = "jdbc:redshift://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "teradata") {
+		$(databaseProtocolSelector).val('Teradata');
 		driverElement.value = "com.teradata.jdbc.TeraDriver";
 		urlElement.value = "jdbc:teradata://<server>/DATABASE=<database>";
 		testSqlElement.value = "";
 	} else if (dbType === "snowflake1-us-west") {
+		$(databaseProtocolSelector).val('Snowflake');
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
 		urlElement.value = "jdbc:snowflake://<account_name>.snowflakecomputing.com/?warehouse=<warehouse>&db=<database>&schema=<schema>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "snowflake2-other") {
 		//https://docs.snowflake.net/manuals/user-guide/jdbc-configure.html
 		//https://docs.snowflake.net/manuals/user-guide/intro-regions.html
+		$(databaseProtocolSelector).val('Snowflake');
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
 		urlElement.value = "jdbc:snowflake://<account_name>.<region_id>.snowflakecomputing.com/?warehouse=<warehouse>&db=<database>&schema=<schema>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "presto") {
+		$(databaseProtocolSelector).val("Presto");
 		driverElement.value = "com.facebook.presto.jdbc.PrestoDriver";
 		urlElement.value = "jdbc:presto://<server>:<port>/<catalog>/<schema>";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "kdb") {
+		$(databaseProtocolSelector).val("kdb");
 		driverElement.value = "jdbc";
 		urlElement.value = "jdbc:q:<server>:<port>";
 		testSqlElement.value = "";

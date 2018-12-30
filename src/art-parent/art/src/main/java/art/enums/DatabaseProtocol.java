@@ -17,6 +17,13 @@
  */
 package art.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -25,10 +32,64 @@ import org.apache.commons.lang3.StringUtils;
  * @author Timothy Anyona
  */
 public enum DatabaseProtocol {
+	//https://stackoverflow.com/questions/24157817/jackson-databind-enum-case-insensitive
 
-	Unknown, MySQL, MariaDB, Oracle, CUBRID, Db2, HSQLDB, PostgreSQL,
-	SqlServer, Informix, Firebird, Access, SQLite, H2, Vertica, Redshift,
-	Teradata, Snowflake, Presto, Drill, MonetDB, Exasol, kdb, Phoenix;
+	Other("Other"), MySQL("MySQL"), MariaDB("MariaDB"), Oracle("Oracle"),
+	CUBRID("CUBRID"), Db2("Db2"), HSQLDB("HSQLDB"), PostgreSQL("PostgreSQL"),
+	SqlServer("SQL Server"), Informix("Informix"), Firebird("Firebird"),
+	Access("MS Access"), SQLite("SQLite"), H2("H2"), Vertica("Vertica"),
+	Redshift("Redshift"), Teradata("Teradata"), Snowflake("Snowflake"),
+	Presto("Presto"), Drill("Drill"), MonetDB("MonetDB"), Exasol("Exasol"),
+	kdb("kdb+"), Phoenix("Phoenix");
+
+	private final String value;
+
+	private DatabaseProtocol(String value) {
+		this.value = value;
+	}
+
+	/**
+	 * Returns this enum option's value
+	 *
+	 * @return this enum option's value
+	 */
+	@JsonValue
+	public String getValue() {
+		return value;
+	}
+
+	/**
+	 * Returns all enum options
+	 *
+	 * @return all enum options
+	 */
+	public static List<DatabaseProtocol> list() {
+		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
+		List<DatabaseProtocol> items = new ArrayList<>();
+		items.addAll(Arrays.asList(values()));
+		//sort by value
+		//https://turreta.com/2017/09/27/java-sort-an-enum-type-by-its-properties/
+		//http://www.java2s.com/Tutorials/Java/Collection_How_to/List/Sort_List_on_object_fields_enum_constant_values.htm
+		Collections.sort(items, Comparator.comparing(DatabaseProtocol::getValue));
+		return items;
+	}
+
+	/**
+	 * Converts a value to an enum. If the value doesn't represent a known enum,
+	 * Unknown is returned.
+	 *
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
+	 */
+	@JsonCreator
+	public static DatabaseProtocol toEnum(String value) {
+		for (DatabaseProtocol v : values()) {
+			if (v.value.equalsIgnoreCase(value)) {
+				return v;
+			}
+		}
+		return Other;
+	}
 
 	/**
 	 * Returns the database type based on the jdbc url
@@ -89,7 +150,7 @@ public enum DatabaseProtocol {
 		} else if (StringUtils.startsWith(url, "jdbc:phoenix")) {
 			return Phoenix;
 		} else {
-			return Unknown;
+			return Other;
 		}
 	}
 
@@ -134,6 +195,15 @@ public enum DatabaseProtocol {
 				//sql:2008 standard
 				return "fetch first {0} rows only";
 		}
+	}
+
+	/**
+	 * Returns this enum option's description
+	 *
+	 * @return this enum option's description
+	 */
+	public String getDescription() {
+		return value;
 	}
 
 }

@@ -110,6 +110,10 @@ Edit datasource page
 					offText: '${noText}'
 				});
 				
+				$('#databaseType').on("change", function () {
+					setDatasourceFields(this.value, 'driver', 'url', 'testSql', 'databaseProtocol');
+				});
+
 				var jsonEditor = ace.edit("jsonEditor");
 				jsonEditor.getSession().setMode("ace/mode/json");
 				jsonEditor.setHighlightActiveLine(false);
@@ -162,10 +166,10 @@ Edit datasource page
 						$("#driverDiv").show();
 				}
 			}
-			
+
 			function setMongoDBHint() {
 				var datasourceType = $('#datasourceType option:selected').val();
-				
+
 				switch (datasourceType) {
 					case 'MongoDB':
 						$("#driver").val('');
@@ -292,12 +296,11 @@ Edit datasource page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<select name="databaseType" id="databaseType" class="form-control selectpicker"
-									onchange="setDatasourceFields(this.value, 'driver', 'url', 'testSql');">
+							<select name="databaseType" id="databaseType" class="form-control selectpicker">
 								<option value="">--</option>
 								<option data-divider="true"></option>
-								<c:forEach var="dbType" items="${databaseTypes}">
-									<option value="${encode:forHtmlAttribute(dbType.key)}">${encode:forHtmlContent(dbType.value)}</option>
+								<c:forEach var="databaseType" items="${databaseTypes}">
+									<option value="${encode:forHtmlAttribute(databaseType.key)}">${encode:forHtmlContent(databaseType.value)}</option>
 								</c:forEach>
 							</select>
 							<spring:message code="page.help.databaseType" var="help"/>
@@ -308,6 +311,22 @@ Edit datasource page
 								</button>
 							</span>
 						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="databaseProtocol">
+						<spring:message code="page.label.databaseProtocol"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="databaseProtocol" class="form-control">
+							<option value="">--</option>
+							<c:forEach var="databaseProtocol" items="${databaseProtocols}">
+								<form:option value="${databaseProtocol}">
+									${databaseProtocol.description} 
+								</form:option>
+							</c:forEach>
+						</form:select>
+						<form:errors path="databaseProtocol" cssClass="error"/>
 					</div>
 				</div>
 				<div id="jndiDiv" class="form-group">

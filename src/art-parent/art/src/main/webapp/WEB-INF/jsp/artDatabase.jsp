@@ -63,7 +63,11 @@ Display art database configuration page
 					offText: '${noText}'
 				});
 				
-								var jsonEditor = ace.edit("jsonEditor");
+				$('#databaseType').on("change", function () {
+					setDatasourceFields(this.value, 'driver', 'url', 'testSql', 'databaseProtocol');
+				});
+
+				var jsonEditor = ace.edit("jsonEditor");
 				jsonEditor.getSession().setMode("ace/mode/json");
 				jsonEditor.setHighlightActiveLine(false);
 				jsonEditor.setShowPrintMargin(false);
@@ -104,16 +108,6 @@ Display art database configuration page
 		<div class="${belowPanelClass}">
 			<div class="alert alert-info">
 				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>
-				<ul>
-					<li>
-						If using <b>JNDI</b>, the <b>WEB-INF\classes\quartz.properties</b> file will
-						need to have been modified beforehand to set appropriate quartz
-						values depending on the database type you are using for the ART Database.
-						See <a href="${pageContext.request.contextPath}/docs/Manual.html#quartz-properties">
-							${pageContext.request.contextPath}/docs/Manual.html#quartz-properties
-						</a>
-					</li>
-				</ul>
 			</div>
 		</div>
 	</jsp:attribute>
@@ -143,12 +137,11 @@ Display art database configuration page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<select name="databaseType" id="databaseType" class="form-control selectpicker"
-									onchange="setDatasourceFields(this.value, 'driver', 'url', 'testSql');">
+							<select name="databaseType" id="databaseType" class="form-control selectpicker">
 								<option value="">--</option>
 								<option data-divider="true"></option>
-								<c:forEach var="dbType" items="${databaseTypes}">
-									<option value="${encode:forHtmlAttribute(dbType.key)}">${encode:forHtmlContent(dbType.value)}</option>
+								<c:forEach var="databaseType" items="${databaseTypes}">
+									<option value="${encode:forHtmlAttribute(databaseType.key)}">${encode:forHtmlContent(databaseType.value)}</option>
 								</c:forEach>
 							</select>
 							<spring:message code="page.help.databaseType" var="help"/>
@@ -159,6 +152,21 @@ Display art database configuration page
 								</button>
 							</span>
 						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="databaseProtocol">
+						<spring:message code="page.label.databaseProtocol"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="databaseProtocol" class="form-control">
+							<option value="">--</option>
+							<c:forEach var="databaseProtocol" items="${databaseProtocols}">
+								<form:option value="${databaseProtocol}">
+									${databaseProtocol.description} 
+								</form:option>
+							</c:forEach>
+						</form:select>
 					</div>
 				</div>
 				<div class="form-group">

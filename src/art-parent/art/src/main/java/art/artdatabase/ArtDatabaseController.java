@@ -20,6 +20,7 @@ package art.artdatabase;
 import art.cache.CacheHelper;
 import art.dbutils.DatabaseUtils;
 import art.enums.ConnectionPoolLibrary;
+import art.enums.DatabaseProtocol;
 import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
@@ -65,7 +66,7 @@ public class ArtDatabaseController {
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
 		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
-		
+
 		databaseTypes.remove("odbc-sun");
 		databaseTypes.remove("hbase-phoenix");
 		databaseTypes.remove("msaccess-ucanaccess");
@@ -100,6 +101,11 @@ public class ArtDatabaseController {
 	@ModelAttribute("connectionPoolLibraries")
 	public List<ConnectionPoolLibrary> addConnectionPoolLibraries() {
 		return ConnectionPoolLibrary.list();
+	}
+
+	@ModelAttribute("databaseProtocols")
+	public List<DatabaseProtocol> addDatabaseProtocols() {
+		return DatabaseProtocol.list();
 	}
 
 	@RequestMapping(value = "/artDatabase", method = RequestMethod.GET)
@@ -233,7 +239,7 @@ public class ArtDatabaseController {
 				ps.setString(1, sampleDbUrl);
 				ps.setInt(2, 1);
 				ps.addBatch();
-				
+
 				ps.setString(1, demoDbUrl);
 				ps.setInt(2, 2);
 				ps.addBatch();
@@ -245,7 +251,7 @@ public class ArtDatabaseController {
 				ps.setString(1, mondrianUrl);
 				ps.setInt(2, 3);
 				ps.addBatch();
-				
+
 				String orgChartDbUrl = String.format(hsqldbUrl, "OrgChartDB");
 				ps.setString(1, orgChartDbUrl);
 				ps.setInt(2, 4);
@@ -257,7 +263,7 @@ public class ArtDatabaseController {
 			Config.saveArtDatabaseConfiguration(artDatabase);
 
 			Config.initializeArtDatabase();
-			
+
 			cacheHelper.clearAll(session);
 
 			//refresh session user credentials as per new database

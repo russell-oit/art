@@ -17,6 +17,7 @@
  */
 package art.datasource;
 
+import art.enums.DatabaseProtocol;
 import art.enums.DatasourceType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -54,6 +55,7 @@ public class DatasourceMapper extends BasicRowProcessor {
 		datasource.setDescription(rs.getString("DESCRIPTION"));
 		datasource.setDatasourceType(DatasourceType.toEnum(rs.getString("DATASOURCE_TYPE")));
 		datasource.setJndi(rs.getBoolean("JNDI"));
+		datasource.setDatabaseProtocol(DatabaseProtocol.toEnum(rs.getString("DATABASE_PROTOCOL")));
 		datasource.setDriver(rs.getString("DRIVER"));
 		datasource.setUrl(rs.getString("URL"));
 		datasource.setUsername(rs.getString("USERNAME"));

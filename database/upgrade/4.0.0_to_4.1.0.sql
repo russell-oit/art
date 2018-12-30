@@ -9,6 +9,7 @@
 -- add self service reports permission
 -- change options columns to clob
 -- add datasource options field
+-- add database protocol column
 
 
 -- NOTES:
@@ -48,3 +49,6 @@ ALTER TABLE ART_DESTINATIONS MODIFY DESTINATION_OPTIONS CLOB;
 
 -- add datasource options field
 ALTER TABLE ART_DATABASES ADD DATASOURCE_OPTIONS CLOB;
+
+-- add database protocol column
+ALTER TABLE ART_DATABASES ADD DATABASE_PROTOCOL VARCHAR(50);
