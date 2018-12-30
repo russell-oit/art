@@ -17,7 +17,7 @@
  */
 package art.connectionpool;
 
-import art.datasource.DatasourceInfo;
+import art.datasource.Datasource;
 import art.dbcp.ArtDBCPDataSource;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
@@ -37,25 +37,25 @@ public class ArtDBCPConnectionPool extends ConnectionPool {
 	private ArtDBCPDataSource artDbcpDataSource;
 
 	@Override
-	protected DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
+	protected DataSource createPool(Datasource datasource, int maxPoolSize) {
 		logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
 
-		long timeoutSeconds = TimeUnit.MINUTES.toSeconds(datasourceInfo.getConnectionPoolTimeoutMins());
+		long timeoutSeconds = TimeUnit.MINUTES.toSeconds(datasource.getConnectionPoolTimeoutMins());
 		artDbcpDataSource = new ArtDBCPDataSource(timeoutSeconds);
 
-		artDbcpDataSource.setPoolName(datasourceInfo.getName()); //use the datasoure name as the connection pool name
-		artDbcpDataSource.setUsername(datasourceInfo.getUsername());
-		artDbcpDataSource.setPassword(datasourceInfo.getPassword());
+		artDbcpDataSource.setPoolName(datasource.getName()); //use the datasoure name as the connection pool name
+		artDbcpDataSource.setUsername(datasource.getUsername());
+		artDbcpDataSource.setPassword(datasource.getPassword());
 		artDbcpDataSource.setMaxPoolSize(maxPoolSize);
-		artDbcpDataSource.setUrl(datasourceInfo.getUrl());
-		artDbcpDataSource.setDriverClassName(datasourceInfo.getDriver());
-		artDbcpDataSource.setTestSql(datasourceInfo.getTestSql());
+		artDbcpDataSource.setUrl(datasource.getUrl());
+		artDbcpDataSource.setDriverClassName(datasource.getDriver());
+		artDbcpDataSource.setTestSql(datasource.getTestSql());
 
 		//set application name connection property
-		artDbcpDataSource.setConnectionProperties(getAppNameProperty(datasourceInfo.getUrl(), datasourceInfo.getName()));
+		artDbcpDataSource.setConnectionProperties(getAppNameProperty(datasource.getUrl(), datasource.getName()));
 
 		//register driver so that connections are immediately usable
-		registerDriver(datasourceInfo.getDriver());
+		registerDriver(datasource.getDriver());
 
 		return artDbcpDataSource;
 	}

@@ -565,8 +565,6 @@ public class Config extends HttpServlet {
 				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
 
 				artDatabase.decryptPassword(encryptionKey, encryptionPassword);
-				artDatabase.setDatasourceId(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
-				artDatabase.setName(ArtDatabase.ART_DATABASE_DATASOURCE_NAME);
 			} else {
 				logger.info("ART Database configuration file not found: '{}'", artDatabaseFilePath);
 			}

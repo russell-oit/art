@@ -17,7 +17,7 @@
  */
 package art.connectionpool;
 
-import art.datasource.DatasourceInfo;
+import art.datasource.Datasource;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.concurrent.TimeUnit;
@@ -38,37 +38,37 @@ public class HikariCPConnectionPool extends ConnectionPool {
 	private HikariDataSource hikariDataSource;
 
 	@Override
-	protected DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
+	protected DataSource createPool(Datasource datasource, int maxPoolSize) {
 		logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
 
 		HikariConfig config = new HikariConfig();
 
-		config.setPoolName(datasourceInfo.getName());
-		config.setUsername(datasourceInfo.getUsername());
-		config.setPassword(datasourceInfo.getPassword());
+		config.setPoolName(datasource.getName());
+		config.setUsername(datasource.getUsername());
+		config.setPassword(datasource.getPassword());
 		//explicitly set minimum idle connection count to a low value to avoid
 		//"too many connection" errors where you have multiple report datasources using the same server
 		config.setMinimumIdle(1);
 		config.setMaximumPoolSize(maxPoolSize);
-		config.setJdbcUrl(datasourceInfo.getUrl());
+		config.setJdbcUrl(datasource.getUrl());
 		
-		String driver = datasourceInfo.getDriver();
+		String driver = datasource.getDriver();
 		if (StringUtils.isNotBlank(driver)) {
 			config.setDriverClassName(driver); //registers/loads the driver
 		}
 
-		if (StringUtils.isBlank(datasourceInfo.getTestSql())
-				|| StringUtils.equals(datasourceInfo.getTestSql(), "isValid")) {
+		if (StringUtils.isBlank(datasource.getTestSql())
+				|| StringUtils.equals(datasource.getTestSql(), "isValid")) {
 			//do nothing
 		} else {
-			config.setConnectionTestQuery(datasourceInfo.getTestSql());
+			config.setConnectionTestQuery(datasource.getTestSql());
 		}
 
-		long timeoutMillis = TimeUnit.MINUTES.toMillis(datasourceInfo.getConnectionPoolTimeoutMins());
+		long timeoutMillis = TimeUnit.MINUTES.toMillis(datasource.getConnectionPoolTimeoutMins());
 		config.setIdleTimeout(timeoutMillis);
 
 		//set application name connection property
-		config.setDataSourceProperties(getAppNameProperty(datasourceInfo.getUrl(), datasourceInfo.getName()));
+		config.setDataSourceProperties(getAppNameProperty(datasource.getUrl(), datasource.getName()));
 
 		hikariDataSource = new HikariDataSource(config);
 

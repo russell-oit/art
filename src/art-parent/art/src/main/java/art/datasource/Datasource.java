@@ -19,7 +19,9 @@ package art.datasource;
 
 import art.encryption.AesEncryptor;
 import art.encryption.DesEncryptor;
+import art.enums.DatasourceType;
 import art.settings.EncryptionPassword;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -30,9 +32,35 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Timothy Anyona
  */
-public class Datasource extends DatasourceInfo implements Serializable {
+public class Datasource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@Parsed
+	private int datasourceId;
+	@Parsed
+	private String name;
+	@Parsed
+	private String driver;
+	@Parsed
+	private String url;
+	@Parsed
+	private String username;
+	@Parsed
+	protected String password;
+	@JsonIgnore
+	private boolean useBlankPassword; //only used for user interface logic
+	@Parsed
+	private String testSql;
+	@Parsed
+	private int connectionPoolTimeoutMins;
+	@Parsed
+	private boolean jndi;
+	@Parsed
+	private String passwordAlgorithm;
+	@Parsed
+	private DatasourceType datasourceType;
+	@Parsed
+	private String options;
 	@Parsed
 	private boolean active;
 	private Date creationDate;
@@ -43,6 +71,220 @@ public class Datasource extends DatasourceInfo implements Serializable {
 	private String updatedBy;
 	@Parsed
 	private boolean clearTextPassword;
+
+	/**
+	 * @return the options
+	 */
+	public String getOptions() {
+		return options;
+	}
+
+	/**
+	 * @param options the options to set
+	 */
+	public void setOptions(String options) {
+		this.options = options;
+	}
+
+	/**
+	 * @return the datasourceType
+	 */
+	public DatasourceType getDatasourceType() {
+		return datasourceType;
+	}
+
+	/**
+	 * @param datasourceType the datasourceType to set
+	 */
+	public void setDatasourceType(DatasourceType datasourceType) {
+		this.datasourceType = datasourceType;
+	}
+
+	/**
+	 * @return the passwordAlgorithm
+	 */
+	public String getPasswordAlgorithm() {
+		return passwordAlgorithm;
+	}
+
+	/**
+	 * @param passwordAlgorithm the passwordAlgorithm to set
+	 */
+	public void setPasswordAlgorithm(String passwordAlgorithm) {
+		this.passwordAlgorithm = passwordAlgorithm;
+	}
+
+	/**
+	 * @return the datasourceId
+	 */
+	public int getDatasourceId() {
+		return datasourceId;
+	}
+
+	/**
+	 * @param datasourceId the datasourceId to set
+	 */
+	public void setDatasourceId(int datasourceId) {
+		this.datasourceId = datasourceId;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Get the value of jndi
+	 *
+	 * @return the value of jndi
+	 */
+	public boolean isJndi() {
+		return jndi;
+	}
+
+	/**
+	 * Set the value of jndi
+	 *
+	 * @param jndi new value of jndi
+	 */
+	public void setJndi(boolean jndi) {
+		this.jndi = jndi;
+	}
+
+	/**
+	 * Get the value of useBlankPassword. only used for user interface logic
+	 *
+	 * @return the value of useBlankPassword
+	 */
+	public boolean isUseBlankPassword() {
+		return useBlankPassword;
+	}
+
+	/**
+	 * Set the value of useBlankPassword. only used for user interface logic
+	 *
+	 * @param useBlankPassword new value of useBlankPassword
+	 */
+	public void setUseBlankPassword(boolean useBlankPassword) {
+		this.useBlankPassword = useBlankPassword;
+	}
+
+	/**
+	 * Get the value of testSql
+	 *
+	 * @return the value of testSql
+	 */
+	public String getTestSql() {
+		return testSql;
+	}
+
+	/**
+	 * Set the value of testSql
+	 *
+	 * @param testSql new value of testSql
+	 */
+	public void setTestSql(String testSql) {
+		this.testSql = testSql;
+	}
+
+	/**
+	 * Get the value of connectionPoolTimeoutMins
+	 *
+	 * @return the value of connectionPoolTimeoutMins
+	 */
+	public int getConnectionPoolTimeoutMins() {
+		return connectionPoolTimeoutMins;
+	}
+
+	/**
+	 * Set the value of connectionPoolTimeoutMins
+	 *
+	 * @param connectionPoolTimeoutMins new value of connectionPoolTimeoutMins
+	 */
+	public void setConnectionPoolTimeoutMins(int connectionPoolTimeoutMins) {
+		this.connectionPoolTimeoutMins = connectionPoolTimeoutMins;
+	}
+
+	/**
+	 * Get the value of password
+	 *
+	 * @return the value of password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * Set the value of password
+	 *
+	 * @param password new value of password
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * Get the value of username
+	 *
+	 * @return the value of username
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * Set the value of username
+	 *
+	 * @param username new value of username
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * Get the value of url
+	 *
+	 * @return the value of url
+	 */
+	public String getUrl() {
+		return url;
+	}
+
+	/**
+	 * Set the value of url
+	 *
+	 * @param url new value of url
+	 */
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	/**
+	 * Get the value of driver
+	 *
+	 * @return the value of driver
+	 */
+	public String getDriver() {
+		return driver;
+	}
+
+	/**
+	 * Set the value of driver
+	 *
+	 * @param driver new value of driver
+	 */
+	public void setDriver(String driver) {
+		this.driver = driver;
+	}
 
 	/**
 	 * @return the clearTextPassword
@@ -179,11 +421,12 @@ public class Datasource extends DatasourceInfo implements Serializable {
 	 * @throws java.lang.Exception
 	 */
 	public void decryptPassword() throws Exception {
-		if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "art")) {
+		//use getPasswordAlgorithm() as it's overriden by the ArtDatabase class
+		if (StringUtils.equalsIgnoreCase(getPasswordAlgorithm(), "art")) {
 			if (StringUtils.startsWith(password, "o:")) {
 				password = DesEncryptor.decrypt(password.substring(2));
 			}
-		} else if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "aes")) {
+		} else if (StringUtils.equalsIgnoreCase(getPasswordAlgorithm(), "aes")) {
 			password = AesEncryptor.decrypt(password);
 		}
 	}

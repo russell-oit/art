@@ -17,7 +17,7 @@
  */
 package art.artdatabase;
 
-import art.datasource.DatasourceInfo;
+import art.datasource.Datasource;
 import art.encryption.AesEncryptor;
 import art.enums.ConnectionPoolLibrary;
 import art.settings.EncryptionPassword;
@@ -30,7 +30,7 @@ import java.io.Serializable;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ArtDatabase extends DatasourceInfo implements Serializable {
+public class ArtDatabase extends Datasource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private int maxPoolConnections; //setting used by art database and all report datasources
@@ -66,49 +66,31 @@ public class ArtDatabase extends DatasourceInfo implements Serializable {
 		this.connectionPoolLibrary = connectionPoolLibrary;
 	}
 
-	/**
-	 * Decrypts the password field
-	 *
-	 * @throws java.lang.Exception
-	 */
-	public void decryptPassword() throws Exception {
-		String key = null;
-		EncryptionPassword encryptionPassword = null;
-		decryptPassword(key, encryptionPassword);
+	@Override
+	public int getDatasourceId() {
+		return ART_DATABASE_DATASOURCE_ID;
+	}
+
+	@Override
+	public String getName() {
+		return ART_DATABASE_DATASOURCE_NAME;
+	}
+
+	@Override
+	public String getPasswordAlgorithm() {
+		return "AES";
 	}
 
 	/**
 	 * Decrypts the password field
-	 *
-	 * @param key the key to use. If null, the current key will be used
-	 * @param encryptionPassword the encryption password configuration. null if to use current.
-	 * @throws java.lang.Exception
-	 */
-	public void decryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
-		password = AesEncryptor.decrypt(password, key, encryptionPassword);
-	}
-
-	/**
-	 * Encrypts the password field
-	 *
-	 * @throws java.lang.Exception
-	 */
-	public void encryptPassword() throws Exception {
-		String key = null;
-		EncryptionPassword encryptionPassword = null;
-		encryptPassword(key, encryptionPassword);
-	}
-
-	/**
-	 * Encrypts the password field
 	 *
 	 * @param key the key to use. If null, the current key will be used
 	 * @param encryptionPassword the encryption password configuration. null if
 	 * to use current.
 	 * @throws java.lang.Exception
 	 */
-	public void encryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
-		password = AesEncryptor.encrypt(password, key, encryptionPassword);
+	public void decryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
+		password = AesEncryptor.decrypt(password, key, encryptionPassword);
 	}
 
 }

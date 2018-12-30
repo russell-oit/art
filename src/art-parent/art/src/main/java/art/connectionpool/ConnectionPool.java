@@ -17,7 +17,7 @@
  */
 package art.connectionpool;
 
-import art.datasource.DatasourceInfo;
+import art.datasource.Datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
@@ -66,16 +66,16 @@ public abstract class ConnectionPool {
 		return maxSize;
 	}
 
-	public void create(DatasourceInfo datasourceInfo, int maxSize) {
-		Objects.requireNonNull(datasourceInfo, "datasourceInfo must not be null");
+	public void create(Datasource datasource, int maxSize) {
+		Objects.requireNonNull(datasource, "datasource must not be null");
 
-		pool = createPool(datasourceInfo, maxSize);
-		name = datasourceInfo.getName();
-		poolId = datasourceInfo.getDatasourceId();
+		pool = createPool(datasource, maxSize);
+		name = datasource.getName();
+		poolId = datasource.getDatasourceId();
 		this.maxSize = maxSize;
 	}
 
-	protected abstract DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize);
+	protected abstract DataSource createPool(Datasource datasource, int maxPoolSize);
 	
 	public void close() {
 		logger.debug("Entering close");
