@@ -1436,6 +1436,20 @@ public class ReportService {
 
 		return getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.SaikuConnection));
 	}
+	
+	/**
+	 * Returns view reports that a given user can access
+	 *
+	 * @param userId the id of the user
+	 * @return view reports that a given user can access
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAvailableViewReports(int userId) throws SQLException {
+		logger.debug("Entering getAvailableViewReports: userId={}", userId);
+
+		return getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.View));
+	}
 
 	/**
 	 * Returns dynamic recipient reports

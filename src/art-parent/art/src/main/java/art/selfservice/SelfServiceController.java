@@ -215,8 +215,7 @@ public class SelfServiceController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			List<Report> basicReports = new ArrayList<>();
-			List<ReportType> includedReportTypes = Arrays.asList(ReportType.View);
-			List<Report> views = reportService.getAccessibleReportsWithReportTypes(sessionUser.getUserId(), includedReportTypes);
+			List<Report> views = reportService.getAvailableViewReports(sessionUser.getUserId());
 			for (Report report : views) {
 				String name = report.getLocalizedName(locale);
 				String encodedName = Encode.forHtmlContent(name);
@@ -271,7 +270,7 @@ public class SelfServiceController {
 				if (rs == null) {
 					throw new RuntimeException("ResultSet is null");
 				}
-				
+
 				ResultSetMetaData rsmd = rs.getMetaData();
 				int columnCount = rsmd.getColumnCount();
 
