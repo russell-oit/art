@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -54,7 +55,7 @@ public enum DatabaseProtocol {
 	public String getValue() {
 		return value;
 	}
-
+	
 	/**
 	 * Returns all enum options
 	 *
@@ -67,7 +68,8 @@ public enum DatabaseProtocol {
 		//sort by value
 		//https://turreta.com/2017/09/27/java-sort-an-enum-type-by-its-properties/
 		//http://www.java2s.com/Tutorials/Java/Collection_How_to/List/Sort_List_on_object_fields_enum_constant_values.htm
-		Collections.sort(items, Comparator.comparing(DatabaseProtocol::getValue));
+		//https://stackoverflow.com/questions/38533338/comparator-comparing-of-a-nested-field
+		Collections.sort(items, Comparator.comparing(p -> p.getValue().toLowerCase(Locale.ENGLISH)));
 		return items;
 	}
 
