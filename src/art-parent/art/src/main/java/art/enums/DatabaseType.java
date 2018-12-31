@@ -76,11 +76,7 @@ public enum DatabaseType {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
 		List<DatabaseType> items = new ArrayList<>();
 		items.addAll(Arrays.asList(values()));
-		//sort by value
-		//https://turreta.com/2017/09/27/java-sort-an-enum-type-by-its-properties/
-		//http://www.java2s.com/Tutorials/Java/Collection_How_to/List/Sort_List_on_object_fields_enum_constant_values.htm
-		Collections.sort(items, Comparator.comparing(DatabaseType::getValue));
-		return items;
+		return sortByValue(items);
 	}
 
 	/**
@@ -105,6 +101,19 @@ public enum DatabaseType {
 				HsqldbStandAlone, HsqldbServer, Db2, SqlLogging,
 				H2Server, H2Embedded, Firebird, Informix);
 
+		return sortByValue(items);
+	}
+
+	/**
+	 * Sorts a given list of items by enum value
+	 *
+	 * @param items the items to sort
+	 * @return a sorted list of items
+	 */
+	private static List<DatabaseType> sortByValue(List<DatabaseType> items) {
+		//sort by value
+		//https://turreta.com/2017/09/27/java-sort-an-enum-type-by-its-properties/
+		//http://www.java2s.com/Tutorials/Java/Collection_How_to/List/Sort_List_on_object_fields_enum_constant_values.htm
 		Collections.sort(items, Comparator.comparing(DatabaseType::getValue));
 		return items;
 	}
