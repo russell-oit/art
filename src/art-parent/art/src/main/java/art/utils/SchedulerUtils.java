@@ -181,15 +181,10 @@ public class SchedulerUtils {
 		String url = artDbConfig.getUrl();
 
 		if (artDbConfig.isJndi()) {
-			//jndi datasource
-			if (properties.getProperty(DRIVER_DELEGATE) == null) {
-				properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
-			}
 			if (properties.getProperty(JNDI_URL) == null) {
 				properties.setProperty(JNDI_URL, url);
 			}
 		} else {
-			//jdbc datasource
 			if (properties.getProperty(DRIVER) == null) {
 				properties.setProperty(DRIVER, artDbConfig.getDriver());
 			}
@@ -202,84 +197,84 @@ public class SchedulerUtils {
 			if (properties.getProperty(PASSWORD) == null) {
 				properties.setProperty(PASSWORD, artDbConfig.getPassword());
 			}
+		}
 
-			//set properties that depend on the database type
-			DatabaseProtocol databaseProtocol = DatabaseProtocol.fromUrl(url);
-			switch (databaseProtocol) {
-				case Oracle:
-					if (properties.getProperty(DRIVER_DELEGATE) == null) {
-						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate");
-					}
-					if (properties.getProperty(VALIDATION_QUERY) == null) {
-						properties.setProperty(VALIDATION_QUERY, "select 1 from dual");
-					}
-					break;
-				case Db2:
-					if (properties.getProperty(DRIVER_DELEGATE) == null) {
-						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
-					}
-					if (properties.getProperty(VALIDATION_QUERY) == null) {
-						properties.setProperty(VALIDATION_QUERY, "select 1 from sysibm.sysdummy1");
-					}
-					break;
-				case HSQLDB:
-					if (properties.getProperty(DRIVER_DELEGATE) == null) {
-						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.HSQLDBDelegate");
-					}
-					if (properties.getProperty(VALIDATION_QUERY) == null) {
-						properties.setProperty(VALIDATION_QUERY, "values 1");
-					}
-					break;
-				case PostgreSQL:
-					if (properties.getProperty(DRIVER_DELEGATE) == null) {
-						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
-					}
-					if (properties.getProperty(VALIDATION_QUERY) == null) {
-						properties.setProperty(VALIDATION_QUERY, "select 1");
-					}
-					break;
-				case CUBRID:
-					if (properties.getProperty(DRIVER_DELEGATE) == null) {
-						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.CUBRIDDelegate");
-					}
-					if (properties.getProperty(VALIDATION_QUERY) == null) {
-						properties.setProperty(VALIDATION_QUERY, "select 1");
-					}
-					break;
-				case SqlServer:
-					if (properties.getProperty(DRIVER_DELEGATE) == null) {
-						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.MSSQLDelegate");
-					}
-					if (properties.getProperty(VALIDATION_QUERY) == null) {
-						properties.setProperty(VALIDATION_QUERY, "select 1");
-					}
-					break;
-				case Informix:
-					if (properties.getProperty(DRIVER_DELEGATE) == null) {
-						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
-					}
-					if (properties.getProperty(VALIDATION_QUERY) == null) {
-						properties.setProperty(VALIDATION_QUERY, "select 1 from systables where tabid = 1");
-					}
-					break;
-				case Firebird:
-					if (properties.getProperty(DRIVER_DELEGATE) == null) {
-						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
-					}
-					if (properties.getProperty(VALIDATION_QUERY) == null) {
-						properties.setProperty(VALIDATION_QUERY, "select 1 from RDB$DATABASE");
-					}
-					break;
-				default:
-					//MySQL and any other databases that use the standard jdbc delegate
-					//and have "select 1" as a valid query
-					if (properties.getProperty(DRIVER_DELEGATE) == null) {
-						properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
-					}
-					if (properties.getProperty(VALIDATION_QUERY) == null) {
-						properties.setProperty(VALIDATION_QUERY, "select 1");
-					}
-			}
+		//set properties that depend on the database type
+		DatabaseProtocol databaseProtocol = artDbConfig.getEffectiveDatabaseProtocol();
+		switch (databaseProtocol) {
+			case Oracle:
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1 from dual");
+				}
+				break;
+			case Db2:
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1 from sysibm.sysdummy1");
+				}
+				break;
+			case HSQLDB:
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.HSQLDBDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "values 1");
+				}
+				break;
+			case PostgreSQL:
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1");
+				}
+				break;
+			case CUBRID:
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.CUBRIDDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1");
+				}
+				break;
+			case SqlServer:
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.MSSQLDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1");
+				}
+				break;
+			case Informix:
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1 from systables where tabid = 1");
+				}
+				break;
+			case Firebird:
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1 from RDB$DATABASE");
+				}
+				break;
+			default:
+				//MySQL and any other databases that use the standard jdbc delegate
+				//and have "select 1" as a valid query
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+				}
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1");
+				}
 		}
 
 		return properties;

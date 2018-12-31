@@ -501,4 +501,20 @@ public class Datasource implements Serializable {
 			return false;
 		}
 	}
+
+	/**
+	 * Returns the effective database protocol, either from the url, or the
+	 * explicit protocol definition
+	 *
+	 * @return the effective database protocol
+	 */
+	@JsonIgnore
+	public DatabaseProtocol getEffectiveDatabaseProtocol() {
+		//check url first. protocol field is optional and may not be defined in art pre 4.1
+		DatabaseProtocol protocol = DatabaseProtocol.fromUrl(url);
+		if (protocol == DatabaseProtocol.Other && databaseProtocol != null) {
+			protocol = databaseProtocol;
+		}
+		return protocol;
+	}
 }
