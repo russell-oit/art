@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -457,12 +458,48 @@ public class ArtUtils {
 	 * @param <T> the type of the object to populate
 	 * @param jsonString the json string
 	 * @param clazz the class of the object to populate
-	 * @return an object populated according to a json string
+	 * @return an object populated according to a json string or null if the
+	 * string is null or blank
 	 * @throws IOException
 	 */
 	public static <T> T jsonToObject(String jsonString, Class<T> clazz) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readValue(jsonString, clazz);
+		//https://stackoverflow.com/questions/34296761/objectmapper-readvalue-can-return-null-value
+		if (StringUtils.isBlank(jsonString)) {
+			return null;
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			return mapper.readValue(jsonString, clazz);
+		}
+	}
+
+	/**
+	 * Returns an object populated according to a json string
+	 *
+	 * @param <T> the type of the object to populate
+	 * @param jsonString the json string
+	 * @param clazz the class of the object to populate
+	 * @return an object populated according to a json string or a new object if
+	 * the string is null or blank. The object needs to have an accessible zero
+	 * argument constructor in the latter case.
+	 * @throws IOException
+	 * @throws java.lang.InstantiationException
+	 * @throws java.lang.IllegalAccessException
+	 * @throws java.lang.NoSuchMethodException
+	 * @throws java.lang.reflect.InvocationTargetException
+	 */
+	public static <T> T jsonToNewObject(String jsonString, Class<T> clazz)
+			throws IOException, InstantiationException, IllegalAccessException,
+			NoSuchMethodException, InvocationTargetException {
+
+		if (StringUtils.isBlank(jsonString)) {
+			//https://stackoverflow.com/questions/75175/create-instance-of-generic-type-in-java
+			//https://stackoverflow.com/questions/46393863/what-to-use-instead-of-class-newinstance
+			Constructor<T> constructor = clazz.getConstructor();
+			return constructor.newInstance();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			return mapper.readValue(jsonString, clazz);
+		}
 	}
 
 	/**

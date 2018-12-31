@@ -36,7 +36,7 @@ public class ViewOptions implements Serializable {
 	private List<Map<String, String>> columnDescriptions;
 	private String columns = "*";
 	private String limitClause;
-	private int limit = 10;
+	private Integer defaultLimit;
 
 	/**
 	 * @return the limitClause
@@ -53,17 +53,17 @@ public class ViewOptions implements Serializable {
 	}
 
 	/**
-	 * @return the limit
+	 * @return the defaultLimit
 	 */
-	public int getLimit() {
-		return limit;
+	public Integer getDefaultLimit() {
+		return defaultLimit;
 	}
 
 	/**
-	 * @param limit the limit to set
+	 * @param defaultLimit the defaultLimit to set
 	 */
-	public void setLimit(int limit) {
-		this.limit = limit;
+	public void setDefaultLimit(Integer defaultLimit) {
+		this.defaultLimit = defaultLimit;
 	}
 
 	/**

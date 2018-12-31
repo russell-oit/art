@@ -22,14 +22,15 @@ import java.io.Serializable;
 
 /**
  * Represents datasource options
- * 
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatasourceOptions implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private String limitClause;
+	private Integer defaultLimit = 10;
 
 	/**
 	 * @return the limitClause
@@ -43,5 +44,19 @@ public class DatasourceOptions implements Serializable {
 	 */
 	public void setLimitClause(String limitClause) {
 		this.limitClause = limitClause;
+	}
+
+	/**
+	 * @return the defaultLimit
+	 */
+	public Integer getDefaultLimit() {
+		return defaultLimit;
+	}
+
+	/**
+	 * @param defaultLimit the defaultLimit to set
+	 */
+	public void setDefaultLimit(Integer defaultLimit) {
+		this.defaultLimit = defaultLimit;
 	}
 }

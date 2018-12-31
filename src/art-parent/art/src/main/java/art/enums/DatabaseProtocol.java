@@ -55,7 +55,7 @@ public enum DatabaseProtocol {
 	public String getValue() {
 		return value;
 	}
-	
+
 	/**
 	 * Returns all enum options
 	 *
@@ -119,6 +119,8 @@ public enum DatabaseProtocol {
 			return Informix;
 		} else if (StringUtils.startsWith(url, "jdbc:firebirdsql")) {
 			return Firebird;
+		} else if (StringUtils.startsWith(url, "jdbc:mysql")) {
+			return MySQL;
 		} else if (StringUtils.startsWith(url, "jdbc:mariadb")) {
 			return MariaDB;
 		} else if (StringUtils.startsWith(url, "jdbc:ucanaccess")) {

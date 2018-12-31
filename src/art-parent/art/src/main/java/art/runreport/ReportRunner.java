@@ -19,7 +19,9 @@ package art.runreport;
 
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
+import art.datasource.DatasourceOptions;
 import art.dbutils.DatabaseUtils;
+import art.enums.DatabaseProtocol;
 import art.enums.DatasourceType;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
@@ -45,6 +47,7 @@ import com.mongodb.MongoClient;
 import groovy.lang.Binding;
 import groovy.lang.GString;
 import groovy.lang.GroovyShell;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -873,29 +876,77 @@ public class ReportRunner {
 		querySb.replace(0, querySb.length(), querySql);
 	}
 
-	private void applySelfServiceFields() {
+	/**
+	 * Applies self service fields
+	 * 
+	 * @throws SQLException 
+	 */
+	private void applySelfServiceFields() throws SQLException {
 		logger.debug("Entering applySelfServiceFields");
 
-		ReportType reportType = report.getReportType();
-		if (reportType != ReportType.View) {
-			return;
+		try {
+			ReportType reportType = report.getReportType();
+			if (reportType != ReportType.View) {
+				return;
+			}
+
+			ViewOptions viewOptions = report.getGeneralOptions().getView();
+			if (viewOptions == null) {
+				viewOptions = new ViewOptions();
+			}
+
+			String querySql = querySb.toString();
+			querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", viewOptions.getColumns());
+
+			Datasource datasource = report.getDatasource();
+			if (datasource == null) {
+				throw new RuntimeException("Datasource not specified");
+			}
+			String options = datasource.getOptions();
+			DatasourceOptions datasourceOptions;
+			if (StringUtils.isBlank(options)) {
+				datasourceOptions = new DatasourceOptions();
+			} else {
+				datasourceOptions = ArtUtils.jsonToObject(options, DatasourceOptions.class);
+			}
+			DatabaseProtocol databaseProtocol = datasource.getEffectiveDatabaseProtocol();
+
+			String reportLimitClause = viewOptions.getLimitClause();
+			String datasourceLimitClause = datasourceOptions.getLimitClause();
+			String databaseLimitClause = databaseProtocol.limitClause();
+			String limitClause = reportLimitClause;
+			if (StringUtils.isBlank(limitClause)) {
+				limitClause = datasourceLimitClause;
+			}
+			if (StringUtils.isBlank(limitClause)) {
+				limitClause = databaseLimitClause;
+			}
+
+			Integer reportLimit = viewOptions.getDefaultLimit();
+			Integer datasourceLimit = datasourceOptions.getDefaultLimit();
+			Integer limit = reportLimit;
+			if (limit == null) {
+				limit = datasourceLimit;
+			}
+
+			if (limit == null) {
+				final Integer DEFAULT_LIMIT = 10;
+				limit = DEFAULT_LIMIT;
+			}
+
+			final String LIMIT_PLACEHOLDER = "#limitClause#";
+			if (limit <= 0) {
+				querySql = StringUtils.removeIgnoreCase(querySql, LIMIT_PLACEHOLDER);
+			} else {
+				String finalLimitClause = StringUtils.replace(limitClause, "{0}", String.valueOf(limit));
+				querySql = StringUtils.replaceIgnoreCase(querySql, LIMIT_PLACEHOLDER, finalLimitClause);
+			}
+
+			//update querySb with new sql
+			querySb.replace(0, querySb.length(), querySql);
+		} catch (IOException ex) {
+			throw new SQLException(ex);
 		}
-
-		ViewOptions viewOptions = report.getGeneralOptions().getView();
-		if (viewOptions == null) {
-			viewOptions = new ViewOptions();
-		}
-
-		String querySql = querySb.toString();
-		querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", viewOptions.getColumns());
-
-		int limit = viewOptions.getLimit();
-		if (limit <= 0) {
-			querySql = StringUtils.removeIgnoreCase(querySql, "#limit#");
-		}
-
-		//update querySb with new sql
-		querySb.replace(0, querySb.length(), querySql);
 	}
 
 	/**
