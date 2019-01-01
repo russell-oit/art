@@ -878,8 +878,8 @@ public class ReportRunner {
 
 	/**
 	 * Applies self service fields
-	 * 
-	 * @throws SQLException 
+	 *
+	 * @throws SQLException
 	 */
 	private void applySelfServiceFields() throws SQLException {
 		logger.debug("Entering applySelfServiceFields");
@@ -897,6 +897,11 @@ public class ReportRunner {
 
 			String querySql = querySb.toString();
 			querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", viewOptions.getColumns());
+
+			final String CONDITION_PLACEHOLDER = "#condition#";
+			if (reportType == ReportType.View) {
+				querySql = StringUtils.replaceIgnoreCase(querySql, CONDITION_PLACEHOLDER, "1=1");
+			}
 
 			Datasource datasource = report.getDatasource();
 			if (datasource == null) {
