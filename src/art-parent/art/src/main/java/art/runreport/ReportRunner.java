@@ -922,8 +922,8 @@ public class ReportRunner {
 				limitClause = databaseLimitClause;
 			}
 
-			Integer reportLimit = viewOptions.getDefaultLimit();
-			Integer datasourceLimit = datasourceOptions.getDefaultLimit();
+			Integer reportLimit = viewOptions.getLimit();
+			Integer datasourceLimit = datasourceOptions.getViewLimit();
 			Integer limit = reportLimit;
 			if (limit == null) {
 				limit = datasourceLimit;

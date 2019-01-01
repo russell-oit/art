@@ -30,7 +30,7 @@ public class DatasourceOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String limitClause;
-	private Integer defaultLimit = 10;
+	private Integer viewLimit;
 
 	/**
 	 * @return the limitClause
@@ -47,16 +47,16 @@ public class DatasourceOptions implements Serializable {
 	}
 
 	/**
-	 * @return the defaultLimit
+	 * @return the viewLimit
 	 */
-	public Integer getDefaultLimit() {
-		return defaultLimit;
+	public Integer getViewLimit() {
+		return viewLimit;
 	}
 
 	/**
-	 * @param defaultLimit the defaultLimit to set
+	 * @param viewLimit the viewLimit to set
 	 */
-	public void setDefaultLimit(Integer defaultLimit) {
-		this.defaultLimit = defaultLimit;
+	public void setViewLimit(Integer viewLimit) {
+		this.viewLimit = viewLimit;
 	}
 }
