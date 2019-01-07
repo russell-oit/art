@@ -11,6 +11,7 @@
 -- add datasource options field
 -- add database protocol column
 -- add database type column
+-- add view report id column
 
 
 -- NOTES:
@@ -56,3 +57,6 @@ ALTER TABLE ART_DATABASES ADD DATABASE_PROTOCOL VARCHAR(50);
 
 -- add database type column
 ALTER TABLE ART_DATABASES ADD DATABASE_TYPE VARCHAR(100);
+
+-- add view report id column
+ALTER TABLE ART_QUERIES ADD VIEW_REPORT_ID INTEGER;

@@ -25,6 +25,7 @@ import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.TabularHeatmapOptions;
 import art.reportparameter.ReportParameter;
+import art.selfservice.SelfServiceColumn;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtLogsHelper;
@@ -53,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.owasp.encoder.Encode;
@@ -96,13 +98,12 @@ public class RunReportController {
 	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST})
 	public String runReport(@RequestParam("reportId") Integer reportId,
 			@ModelAttribute("report") Report testReport,
-			@RequestParam(value = "testData", required = false) Boolean testData,
 			HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, Model model, Locale locale,
 			RedirectAttributes redirectAttributes) throws IOException {
 
 		Report report = null;
-		User sessionUser = null;
+		User sessionUser = (User) session.getAttribute("sessionUser");
 		ReportRunner reportRunner = null;
 
 		runningReportsCount++;
@@ -144,7 +145,30 @@ public class RunReportController {
 					testReport = originalReportCopy;
 				}
 
-				if (BooleanUtils.isTrue(testData)) {
+				boolean basicReport2 = BooleanUtils.toBoolean(request.getParameter("basicReport2"));
+				if (basicReport2) {
+					Report originalReport = reportService.getReport(reportId);
+					Cloner cloner = new Cloner();
+					Report originalReportCopy = cloner.deepClone(originalReport);
+					testReport = originalReportCopy;
+
+					boolean selfServicePreview = BooleanUtils.toBoolean(request.getParameter("selfServicePreview"));
+					String selfServiceOptions = request.getParameter("selfServiceOptions");
+					int limit = NumberUtils.toInt(request.getParameter("limit"));
+
+					testReport.setSelfServicePreview(selfServicePreview);
+					testReport.setSelfServiceOptions(selfServiceOptions);
+					testReport.setLimit(limit);
+					testReport.setViewReportId(reportId);
+					testReport.setViewReport(originalReport);
+
+					RunReportHelper runReportHelper = new RunReportHelper();
+					List<SelfServiceColumn> selfServiceColumns = runReportHelper.getSelfServiceColumns(originalReport, sessionUser);
+					testReport.setSelfServiceColumns(selfServiceColumns);
+				}
+
+				boolean testData = BooleanUtils.toBoolean(request.getParameter("testData"));
+				if (testData) {
 					testReport.setReportType(ReportType.Tabular);
 				} else {
 					testReport.setReportType(ReportType.toEnum(testReport.getReportTypeId()));

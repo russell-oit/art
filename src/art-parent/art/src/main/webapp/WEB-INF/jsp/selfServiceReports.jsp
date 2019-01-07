@@ -81,15 +81,14 @@
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var reportId = $(this).find('option').eq(clickedIndex).val();
 
+					$("#reportOutput").empty();
+
 					//https://stackoverflow.com/questions/27347004/jquery-val-integer-datatype-comparison
 					if (reportId === '0') {
 						$('#multiselect').empty();
 						$('#multiselect_to').empty();
 						$("#whereDiv").hide();
-						resetOptions();
 					} else {
-						resetOptions();
-
 						$.ajax({
 							type: 'GET',
 							url: '${pageContext.request.contextPath}/getViewDetails',
@@ -116,10 +115,6 @@
 						});
 					}
 				});
-
-				function resetOptions() {
-
-				}
 
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
 					$(this).parent().hide();
@@ -156,6 +151,51 @@
 
 					bootbox.alert({
 						message: '<pre class="code-popup">' + values + '</pre>'
+					});
+				});
+
+				$('#preview').on('click', function () {
+					$('#preview').prop('disabled', true);
+
+					var viewId = $("#views").val();
+					var limit = $("#limit").val();
+					if (!limit) {
+						limit = "0";
+					}
+
+					var selectedColumns = $("#multiselect_to option").map(function () {
+						return $(this).val();
+					}).get();
+
+					if (!selectedColumns.length === 0) {
+						selectedColumns = $("#multiselect option").map(function () {
+							return $(this).val();
+						}).get();
+					}
+
+					var selfServiceOptions = {};
+					selfServiceOptions.columns = selectedColumns;
+
+					var selfServiceOptionsString = JSON.stringify(selfServiceOptions);
+
+					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
+					$.ajax({
+						type: "POST",
+						url: "${pageContext.request.contextPath}/runReport",
+						data: {selfServicePreview: true, reportFormat: "htmlDataTable",
+							dummyBoolean: true, reportId: viewId,
+							selfServiceOptions: selfServiceOptionsString,
+							basicReport2: true, showInline: true, limit: limit},
+						success: function (data) {
+							$("#reportOutput").html(data);
+						},
+						error: function (xhr) {
+							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
+							ajaxErrorHandler(xhr);
+						},
+						complete: function () {
+							$('#preview').prop('disabled', false);
+						}
 					});
 				});
 
@@ -275,17 +315,32 @@
 		<div class="row" id="whereDiv" style="margin-top: 20px; display: none">
 			<div class="col-md-12">
 				<div class="row">
-					<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="false">SQL</button>
-					<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="question_mark">SQL statement
-						(?)
-					</button>
-					<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="named">SQL statement (named)
-					</button>
-					<button class="btn btn-default" id="selected">Selected</button>
+					<div class="col-md-12">
+						<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="false">SQL</button>
+						<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="question_mark">SQL statement
+							(?)
+						</button>
+						<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="named">SQL statement (named)
+						</button>
+						<button class="btn btn-default" id="selected">Selected</button>
+						<spring:message code="selfService.text.limit"/>&nbsp;
+						<input id="limit" type="number" value="10">
+						<button id="preview" class="btn btn-default">
+							<spring:message code="reports.action.preview"/>
+						</button>
+					</div>
 				</div>
 				<div class="row">
-					<div id="builder"></div>
+					<div class="col-md-12">
+						<div id="builder"></div>
+					</div>
 				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+				<div id="reportOutput"></div>
 			</div>
 		</div>
 	</jsp:body>

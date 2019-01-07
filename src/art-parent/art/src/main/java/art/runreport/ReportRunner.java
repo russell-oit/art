@@ -35,6 +35,8 @@ import art.reportrule.ReportRule;
 import art.reportrule.ReportRuleService;
 import art.rule.Rule;
 import art.ruleValue.RuleValueService;
+import art.selfservice.SelfServiceColumn;
+import art.selfservice.SelfServiceOptions;
 import art.servlets.Config;
 import art.user.User;
 import art.usergroup.UserGroup;
@@ -69,6 +71,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -890,13 +893,48 @@ public class ReportRunner {
 				return;
 			}
 
-			ViewOptions viewOptions = report.getGeneralOptions().getView();
-			if (viewOptions == null) {
-				viewOptions = new ViewOptions();
+			Report viewReport = report.getViewReport();
+			ViewOptions viewOptions;
+			String columnsString = null;
+			if (viewReport == null) {
+				viewOptions = report.getGeneralOptions().getView();
+				if (viewOptions == null) {
+					viewOptions = new ViewOptions();
+				}
+				columnsString = viewOptions.getColumns();
+			} else {
+				viewOptions = viewReport.getGeneralOptions().getView();
+				String selfServiceOptionsString = report.getSelfServiceOptions();
+				if (StringUtils.isNotBlank(selfServiceOptionsString)) {
+					SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObject(selfServiceOptionsString, SelfServiceOptions.class);
+					List<String> columns = selfServiceOptions.getColumns();
+					List<SelfServiceColumn> selfServiceColumns = report.getSelfServiceColumns();
+					List<String> chosenColumns = new ArrayList<>();
+					if (CollectionUtils.isEmpty(columns)) {
+						for (SelfServiceColumn referenceColumn : selfServiceColumns) {
+							String columnSpecification = referenceColumn.getLabel();
+							chosenColumns.add(columnSpecification);
+						}
+					} else {
+						for (String column : columns) {
+							SelfServiceColumn referenceColumn = selfServiceColumns.stream()
+									.filter(c -> c.getLabel().equals(column))
+									.findAny()
+									.orElseThrow(() -> new RuntimeException("Invalid column: " + column));
+							String columnSpecification = referenceColumn.getLabel();
+							chosenColumns.add(columnSpecification);
+						}
+					}
+					columnsString = StringUtils.join(chosenColumns, ",");
+				}
+			}
+
+			if (columnsString == null) {
+				columnsString = "*";
 			}
 
 			String querySql = querySb.toString();
-			querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", viewOptions.getColumns());
+			querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", columnsString);
 
 			final String CONDITION_PLACEHOLDER = "#condition#";
 			if (reportType == ReportType.View) {
@@ -929,14 +967,21 @@ public class ReportRunner {
 
 			Integer reportLimit = viewOptions.getLimit();
 			Integer datasourceLimit = datasourceOptions.getViewLimit();
-			Integer limit = reportLimit;
-			if (limit == null) {
-				limit = datasourceLimit;
-			}
+			int previewLimit = report.getLimit();
 
-			if (limit == null) {
-				final Integer DEFAULT_LIMIT = 10;
-				limit = DEFAULT_LIMIT;
+			Integer limit;
+			if (report.getViewReportId() > 0) {
+				limit = previewLimit;
+			} else {
+				limit = reportLimit;
+				if (limit == null) {
+					limit = datasourceLimit;
+				}
+
+				if (limit == null) {
+					final Integer DEFAULT_LIMIT = 10;
+					limit = DEFAULT_LIMIT;
+				}
 			}
 
 			final String LIMIT_PLACEHOLDER = "#limitClause#";

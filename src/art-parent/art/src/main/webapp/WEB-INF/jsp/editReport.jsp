@@ -225,11 +225,12 @@ Edit report page
 						data: $('#fileupload').serialize(),
 						success: function (data) {
 							$("#reportOutput").html(data);
-							$('.action').prop('disabled', false);
 						},
 						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 							ajaxErrorHandler(xhr);
+						},
+						complete: function () {
 							$('.action').prop('disabled', false);
 						}
 					});
@@ -246,11 +247,12 @@ Edit report page
 						data: $('#fileupload').serialize() + "&testData=true&reportFormat=htmlDataTable",
 						success: function (data) {
 							$("#reportOutput").html(data);
-							$('.action').prop('disabled', false);
 						},
 						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 							ajaxErrorHandler(xhr);
+						},
+						complete: function () {
 							$('.action').prop('disabled', false);
 						}
 					});
@@ -1846,6 +1848,15 @@ Edit report page
 					<div class="col-md-8">
 						<form:input path="sourceReportId" maxlength="10" class="form-control"/>
 						<form:errors path="sourceReportId" cssClass="error"/>
+					</div>
+				</div>
+				<div id="viewReportIdDiv" class="form-group">
+					<label class="control-label col-md-4" for="viewReportId">
+						<spring:message code="reports.label.viewReport"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="viewReportId" maxlength="10" class="form-control"/>
+						<form:errors path="viewReportId" cssClass="error"/>
 					</div>
 				</div>
 				<div id="useGroovyDiv" class="form-group">

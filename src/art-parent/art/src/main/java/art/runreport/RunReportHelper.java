@@ -19,6 +19,7 @@ package art.runreport;
 
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
+import art.dbutils.DatabaseUtils;
 import art.encryptor.Encryptor;
 import art.enums.ColumnType;
 import art.enums.EncryptorType;
@@ -31,8 +32,11 @@ import art.output.ResultSetColumn;
 import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.report.Report;
+import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.GroovyOptions;
+import art.reportoptions.ViewOptions;
 import art.reportparameter.ReportParameter;
+import art.selfservice.SelfServiceColumn;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
@@ -43,7 +47,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,9 +68,11 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1345,6 +1353,127 @@ public class RunReportHelper {
 		}
 
 		return reportFormat;
+	}
+
+	public List<SelfServiceColumn> getSelfServiceColumns(Report report, User user)
+			throws SQLException {
+
+		GeneralReportOptions generalOptions = report.getGeneralOptions();
+		ViewOptions viewOptions = generalOptions.getView();
+
+		List<String> omitColumns = null;
+		List<Map<String, String>> columnLabels = null;
+		List<Map<String, String>> columnDescriptions = null;
+
+		if (viewOptions != null) {
+			omitColumns = viewOptions.getOmitColumns();
+			columnLabels = viewOptions.getColumnLabels();
+			columnDescriptions = viewOptions.getColumnDescriptions();
+		}
+
+		List<SelfServiceColumn> columns = new ArrayList<>();
+
+		ReportRunner reportRunner = new ReportRunner();
+		ResultSet rs = null;
+		try {
+			reportRunner.setUser(user);
+			reportRunner.setReport(report);
+			rs = reportRunner.executeQuery();
+
+			if (rs == null) {
+				throw new RuntimeException("ResultSet is null");
+			}
+
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+
+			for (int i = 1; i <= columnCount; i++) {
+				SelfServiceColumn column = new SelfServiceColumn();
+
+				column.setName(rsmd.getColumnName(i));
+				column.setLabel(rsmd.getColumnLabel(i));
+
+				int sqlType = rsmd.getColumnType(i);
+
+				String type;
+
+				switch (sqlType) {
+					case Types.INTEGER:
+					case Types.TINYINT:
+					case Types.SMALLINT:
+					case Types.BIGINT:
+						type = "integer";
+						break;
+					case Types.NUMERIC:
+					case Types.DECIMAL:
+					case Types.FLOAT:
+					case Types.REAL:
+					case Types.DOUBLE:
+						type = "double";
+						break;
+					case Types.DATE:
+						type = "date";
+						break;
+					case Types.TIME:
+						type = "time";
+						break;
+					case Types.TIMESTAMP:
+						type = "datetime";
+						break;
+					default:
+						type = "string";
+				}
+
+				column.setType(type);
+
+				columns.add(column);
+			}
+
+			if (omitColumns != null) {
+				for (String columnName : omitColumns) {
+					//https://stackoverflow.com/questions/10431981/remove-elements-from-collection-while-iterating
+					columns.removeIf(column -> StringUtils.equalsIgnoreCase(columnName, column.getLabel()));
+				}
+			}
+
+			for (SelfServiceColumn column : columns) {
+				String label = column.getLabel();
+				String userLabel = null;
+				if (columnLabels != null) {
+					for (Map<String, String> labelDefinition : columnLabels) {
+						Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(labelDefinition);
+						userLabel = caseInsensitiveMap.get(label);
+						if (userLabel != null) {
+							break;
+						}
+					}
+				}
+				if (userLabel == null) {
+					userLabel = label;
+				}
+				column.setUserLabel(userLabel);
+
+				String description = null;
+				if (columnDescriptions != null) {
+					for (Map<String, String> descriptionDefinition : columnDescriptions) {
+						Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(descriptionDefinition);
+						description = caseInsensitiveMap.get(label);
+						if (description != null) {
+							break;
+						}
+					}
+				}
+				if (description == null) {
+					description = "";
+				}
+				column.setDescription(description);
+			}
+		} finally {
+			DatabaseUtils.close(rs);
+			reportRunner.close();
+		}
+
+		return columns;
 	}
 
 }

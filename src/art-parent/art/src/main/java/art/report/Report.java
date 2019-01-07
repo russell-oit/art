@@ -39,6 +39,7 @@ import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
 import art.ruleValue.UserGroupRuleValue;
 import art.ruleValue.UserRuleValue;
+import art.selfservice.SelfServiceColumn;
 import art.servlets.Config;
 import art.settings.EncryptionPassword;
 import art.utils.ArtUtils;
@@ -189,6 +190,10 @@ public class Report implements Serializable {
 	private String name2; //used for holding a processed report name e.g. in self service dashboard reports list
 	@Parsed
 	private String comment;
+	@Parsed
+	private int viewReportId;
+	@JsonIgnore
+	private Report viewReport;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -207,6 +212,98 @@ public class Report implements Serializable {
 	private String reportGroupNamesHtml;
 	@JsonIgnore
 	private boolean overwriteFiles;
+	@JsonIgnore
+	private boolean selfServicePreview;
+	private String selfServiceOptions;
+	@JsonIgnore
+	private int limit;
+	@JsonIgnore
+	private List<SelfServiceColumn> selfServiceColumns;
+
+	/**
+	 * @return the selfServiceColumns
+	 */
+	public List<SelfServiceColumn> getSelfServiceColumns() {
+		return selfServiceColumns;
+	}
+
+	/**
+	 * @param selfServiceColumns the selfServiceColumns to set
+	 */
+	public void setSelfServiceColumns(List<SelfServiceColumn> selfServiceColumns) {
+		this.selfServiceColumns = selfServiceColumns;
+	}
+
+	/**
+	 * @return the limit
+	 */
+	public int getLimit() {
+		return limit;
+	}
+
+	/**
+	 * @param limit the limit to set
+	 */
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
+	
+
+	/**
+	 * @return the viewReportId
+	 */
+	public int getViewReportId() {
+		return viewReportId;
+	}
+
+	/**
+	 * @param viewReportId the viewReportId to set
+	 */
+	public void setViewReportId(int viewReportId) {
+		this.viewReportId = viewReportId;
+	}
+
+	/**
+	 * @return the viewReport
+	 */
+	public Report getViewReport() {
+		return viewReport;
+	}
+
+	/**
+	 * @param viewReport the viewReport to set
+	 */
+	public void setViewReport(Report viewReport) {
+		this.viewReport = viewReport;
+	}
+
+	/**
+	 * @return the selfServiceOptions
+	 */
+	public String getSelfServiceOptions() {
+		return selfServiceOptions;
+	}
+
+	/**
+	 * @param selfServiceOptions the selfServiceOptions to set
+	 */
+	public void setSelfServiceOptions(String selfServiceOptions) {
+		this.selfServiceOptions = selfServiceOptions;
+	}
+
+	/**
+	 * @return the selfServicePreview
+	 */
+	public boolean isSelfServicePreview() {
+		return selfServicePreview;
+	}
+
+	/**
+	 * @param selfServicePreview the selfServicePreview to set
+	 */
+	public void setSelfServicePreview(boolean selfServicePreview) {
+		this.selfServicePreview = selfServicePreview;
+	}
 
 	/**
 	 * @return the comment

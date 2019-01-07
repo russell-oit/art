@@ -166,6 +166,7 @@ public class ReportService {
 			report.setUseGroovy(rs.getBoolean("USE_GROOVY"));
 			report.setPivotTableJsSavedOptions(rs.getString("PIVOTTABLEJS_SAVED_OPTIONS"));
 			report.setGridstackSavedOptions(rs.getString("GRIDSTACK_SAVED_OPTIONS"));
+			report.setViewReportId(rs.getInt("VIEW_REPORT_ID"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -983,8 +984,9 @@ public class ReportService {
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
+					+ " VIEW_REPORT_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 46) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 47) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -1031,6 +1033,7 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isUseGroovy()),
 				report.getPivotTableJsSavedOptions(),
 				report.getGridstackSavedOptions(),
+				report.getViewReportId(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -1055,7 +1058,7 @@ public class ReportService {
 					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
 					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
 					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?, PIVOTTABLEJS_SAVED_OPTIONS=?,"
-					+ " GRIDSTACK_SAVED_OPTIONS=?,"
+					+ " GRIDSTACK_SAVED_OPTIONS=?, VIEW_REPORT_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -1103,6 +1106,7 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isUseGroovy()),
 				report.getPivotTableJsSavedOptions(),
 				report.getGridstackSavedOptions(),
+				report.getViewReportId(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()
