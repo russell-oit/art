@@ -167,6 +167,7 @@
 						return $(this).val();
 					}).get();
 
+					//https://stackoverflow.com/questions/24403732/check-if-array-is-empty-or-does-not-exist-js
 					if (!selectedColumns.length === 0) {
 						selectedColumns = $("#multiselect option").map(function () {
 							return $(this).val();
