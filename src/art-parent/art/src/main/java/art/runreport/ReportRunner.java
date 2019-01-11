@@ -893,6 +893,19 @@ public class ReportRunner {
 				return;
 			}
 
+			Datasource datasource = report.getDatasource();
+			if (datasource == null) {
+				throw new RuntimeException("Datasource not specified");
+			}
+			String options = datasource.getOptions();
+			DatasourceOptions datasourceOptions;
+			if (StringUtils.isBlank(options)) {
+				datasourceOptions = new DatasourceOptions();
+			} else {
+				datasourceOptions = ArtUtils.jsonToObject(options, DatasourceOptions.class);
+			}
+			DatabaseProtocol databaseProtocol = datasource.getEffectiveDatabaseProtocol();
+
 			Report viewReport = report.getViewReport();
 			ViewOptions viewOptions;
 			String columnsString = null;
@@ -916,12 +929,44 @@ public class ReportRunner {
 							chosenColumns.add(columnSpecification);
 						}
 					} else {
+						String startEnclose;
+						String endEnclose;
+						String reportEnclose = viewOptions.getEnclose();
+						String reportStartEnclose = viewOptions.getStartEnclose();
+						String reportEndEnclose = viewOptions.getEndEnclose();
+						String datasourceEnclose = datasourceOptions.getEnclose();
+						String datasourceStartEnclose = datasourceOptions.getStartEnclose();
+						String datasourceEndEnclose = datasourceOptions.getEndEnclose();
+						String databaseEnclose = databaseProtocol.enclose();
+						String databaseStartEnclose = databaseProtocol.startEnclose();
+						String databaseEndEnclose = databaseProtocol.endEnclose();
+						if (reportEnclose == null) {
+							startEnclose = reportStartEnclose;
+							endEnclose = reportEndEnclose;
+						} else {
+							startEnclose = reportEnclose;
+							endEnclose = reportEnclose;
+						}
+						if ((startEnclose == null && endEnclose == null) && datasourceEnclose == null) {
+							startEnclose = datasourceStartEnclose;
+							endEnclose = datasourceEndEnclose;
+						} else {
+							startEnclose = datasourceEnclose;
+							endEnclose = datasourceEnclose;
+						}
+						if ((startEnclose == null && endEnclose == null) && databaseEnclose == null) {
+							startEnclose = databaseStartEnclose;
+							endEnclose = databaseEndEnclose;
+						} else {
+							startEnclose = databaseEnclose;
+							endEnclose = databaseEnclose;
+						}
 						for (String column : columns) {
 							SelfServiceColumn referenceColumn = selfServiceColumns.stream()
 									.filter(c -> c.getLabel().equals(column))
 									.findAny()
 									.orElseThrow(() -> new RuntimeException("Invalid column: " + column));
-							String columnSpecification = referenceColumn.getLabel();
+							String columnSpecification = referenceColumn.getLabel() + " as " + startEnclose + referenceColumn.getUserLabel() + endEnclose;
 							chosenColumns.add(columnSpecification);
 						}
 					}
@@ -941,19 +986,6 @@ public class ReportRunner {
 				querySql = StringUtils.replaceIgnoreCase(querySql, CONDITION_PLACEHOLDER, "1=1");
 			}
 
-			Datasource datasource = report.getDatasource();
-			if (datasource == null) {
-				throw new RuntimeException("Datasource not specified");
-			}
-			String options = datasource.getOptions();
-			DatasourceOptions datasourceOptions;
-			if (StringUtils.isBlank(options)) {
-				datasourceOptions = new DatasourceOptions();
-			} else {
-				datasourceOptions = ArtUtils.jsonToObject(options, DatasourceOptions.class);
-			}
-			DatabaseProtocol databaseProtocol = datasource.getEffectiveDatabaseProtocol();
-
 			String reportLimitClause = viewOptions.getLimitClause();
 			String datasourceLimitClause = datasourceOptions.getLimitClause();
 			String databaseLimitClause = databaseProtocol.limitClause();
@@ -966,7 +998,7 @@ public class ReportRunner {
 			}
 
 			Integer reportLimit = viewOptions.getLimit();
-			Integer datasourceLimit = datasourceOptions.getViewLimit();
+			Integer datasourceLimit = datasourceOptions.getLimit();
 			int previewLimit = report.getLimit();
 
 			Integer limit;

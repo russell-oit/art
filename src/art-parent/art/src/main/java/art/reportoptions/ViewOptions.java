@@ -17,6 +17,7 @@
  */
 package art.reportoptions;
 
+import art.datasource.DatasourceOptions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.List;
@@ -28,43 +29,13 @@ import java.util.Map;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ViewOptions implements Serializable {
+public class ViewOptions extends DatasourceOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private List<String> omitColumns;
 	private List<Map<String, String>> columnLabels;
 	private List<Map<String, String>> columnDescriptions;
 	private String columns = "*";
-	private String limitClause;
-	private Integer limit;
-
-	/**
-	 * @return the limitClause
-	 */
-	public String getLimitClause() {
-		return limitClause;
-	}
-
-	/**
-	 * @param limitClause the limitClause to set
-	 */
-	public void setLimitClause(String limitClause) {
-		this.limitClause = limitClause;
-	}
-
-	/**
-	 * @return the limit
-	 */
-	public Integer getLimit() {
-		return limit;
-	}
-
-	/**
-	 * @param limit the limit to set
-	 */
-	public void setLimit(Integer limit) {
-		this.limit = limit;
-	}
 
 	/**
 	 * @return the columns
