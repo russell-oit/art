@@ -87,7 +87,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private static final Logger logger = LoggerFactory.getLogger(Chart.class);
 
 	private static final long serialVersionUID = 1L;
-	private String backgroundColor = ArtUtils.WHITE_HEX_COLOR_CODE;
 	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
 	private Dataset dataset;
 	private ChartOptions chartOptions;
@@ -334,20 +333,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	public void setChartOptions(ChartOptions chartOptions) {
 		this.chartOptions = chartOptions;
-	}
-
-	/**
-	 * @return the backgroundColor
-	 */
-	public String getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * @param backgroundColor the backgroundColor to set
-	 */
-	public void setBackgroundColor(String backgroundColor) {
-		this.backgroundColor = backgroundColor;
 	}
 
 	/**
@@ -741,7 +726,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		logger.debug("Entering getFinalChart");
 
 		//use cewolf to generate chart in order to achieve similar look as with interactive/browser display
-		setBackgroundPaint(Color.decode(backgroundColor));
+		setBackgroundPaint(Color.decode(chartOptions.getBackgroundColor()));
 
 		//use cewolf AbstractChartDefinition.getChart() to generate chart
 		//with additional processing like antialising and running external post processors

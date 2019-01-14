@@ -798,8 +798,7 @@ public class ReportOutputGenerator {
 			backgroundColor = reportChartOptions.getBackgroundColor();
 		}
 		if (StringUtils.isBlank(backgroundColor)) {
-			final String DEFAULT_BACKGROUND_COLOR = ArtUtils.WHITE_HEX_COLOR_CODE;
-			effectiveChartOptions.setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
+			effectiveChartOptions.setBackgroundColor(ArtUtils.WHITE_HEX_COLOR_CODE);
 		} else {
 			effectiveChartOptions.setBackgroundColor(backgroundColor);
 		}

@@ -23,7 +23,7 @@ Display a chart report
 		yaxislabel="${encode:forHtmlAttribute(chart.yAxisLabel)}"
 		showlegend="${chart.chartOptions.showLegend}">
 
-		<cewolf:colorpaint color="${encode:forHtmlAttribute(chart.backgroundColor)}"/>
+		<cewolf:colorpaint color="${encode:forHtmlAttribute(chart.chartOptions.backgroundColor)}"/>
 
 		<cewolf:data>
 			<cewolf:producer id="chart"/>

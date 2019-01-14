@@ -2,6 +2,7 @@ ART 4.1
 * Added option not to run reports immediately when creating self service dashboards
 * Modified specifying of date range picker options
 * Fix for error when exporting report with parameters
+* Fix for chart background colour not being effected
 * Added self service reports
 * Added self_service_reports permission
 
