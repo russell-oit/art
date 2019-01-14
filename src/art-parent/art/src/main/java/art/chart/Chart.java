@@ -25,7 +25,6 @@ import art.report.ChartOptions;
 import art.report.Report;
 import art.reportoptions.JFreeChartOptions;
 import art.reportparameter.ReportParameter;
-import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
 import art.runreport.GroovyDataDetails;
 import art.runreport.RunReportHelper;
