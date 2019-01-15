@@ -194,6 +194,8 @@ public class Report implements Serializable {
 	private int viewReportId;
 	@JsonIgnore
 	private Report viewReport;
+	@Parsed
+	private String selfServiceOptions;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -214,7 +216,6 @@ public class Report implements Serializable {
 	private boolean overwriteFiles;
 	@JsonIgnore
 	private boolean selfServicePreview;
-	private String selfServiceOptions;
 	@JsonIgnore
 	private int limit;
 	@JsonIgnore

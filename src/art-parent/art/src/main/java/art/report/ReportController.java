@@ -273,7 +273,7 @@ public class ReportController {
 		return ajaxResponse;
 	}
 
-	@RequestMapping(value = "/deleteReport", method = RequestMethod.POST)
+	@RequestMapping(value = {"/deleteReport", "/deleteGridstack", "/deleteSelfService"}, method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReport(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteReport: id={}", id);
@@ -1247,14 +1247,43 @@ public class ReportController {
 			@RequestParam("description") String description,
 			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
 			@RequestParam(value = "saveSelectedParameters", defaultValue = "false") Boolean saveSelectedParameters,
-			@RequestParam(value = "selfService", defaultValue = "false") Boolean selfService,
+			@RequestParam(value = "selfServiceDashboard", defaultValue = "false") Boolean selfServiceDashboard,
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
 				+ " name='{}', description='{}', overwrite={},"
-				+ " saveSelectedParameters={}, selfService={}",
+				+ " saveSelectedParameters={}, selfServiceDashboard={}",
 				reportId, config, name, description, overwrite,
-				saveSelectedParameters, selfService);
+				saveSelectedParameters, selfServiceDashboard);
+
+		return saveAdHoc(ReportType.GridstackDashboard, reportId, config, name, description, overwrite, saveSelectedParameters, selfServiceDashboard, session, request, locale);
+	}
+
+	@PostMapping("/saveSelfService")
+	public @ResponseBody
+	AjaxResponse saveSelfService(@RequestParam(value = "reportId", required = false) Integer reportId,
+			@RequestParam("config") String config, @RequestParam("name") String name,
+			@RequestParam("description") String description,
+			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
+			HttpSession session, HttpServletRequest request, Locale locale) {
+
+		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
+				+ " name='{}', description='{}', overwrite={}",
+				reportId, config, name, description, overwrite);
+
+		boolean saveSelectedParameters = false;
+		boolean selfServiceDashboard = false;
+		return saveAdHoc(ReportType.Tabular, reportId, config, name, description, overwrite, saveSelectedParameters, selfServiceDashboard, session, request, locale);
+	}
+
+	private AjaxResponse saveAdHoc(ReportType reportType,
+			Integer reportId,
+			String config, String name,
+			String description,
+			Boolean overwrite,
+			Boolean saveSelectedParameters,
+			Boolean selfServiceDashboard,
+			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -1262,7 +1291,7 @@ public class ReportController {
 			Report report;
 			if (reportId == null) {
 				report = new Report();
-				report.setReportType(ReportType.GridstackDashboard);
+				report.setReportType(reportType);
 			} else {
 				report = reportService.getReport(reportId);
 				report.encryptPasswords();
@@ -1270,7 +1299,6 @@ public class ReportController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			report.setGridstackSavedOptions(config);
 			if (StringUtils.isNotBlank(description)) {
 				report.setDescription(description);
 			}
@@ -1296,34 +1324,39 @@ public class ReportController {
 				String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
 				response.setErrorMessage(message);
 			} else {
-				if (selfService) {
-					//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
-					//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
-					ObjectMapper mapper = new ObjectMapper();
-					List<GridstackItemOptions> itemOptions = mapper.readValue(config, new TypeReference<List<GridstackItemOptions>>() {
-					});
-					if (CollectionUtils.isEmpty(itemOptions)) {
-						String message = messageSource.getMessage("reports.message.nothingToSave", null, locale);
-						response.setErrorMessage(message);
-						return response;
-					} else {
-						StringBuilder sb = new StringBuilder();
-						sb.append("<DASHBOARD>");
-						for (GridstackItemOptions itemOption : itemOptions) {
-							int itemReportId = itemOption.getReportId();
-							String reportName = reportService.getReportName(itemReportId);
-							sb.append("<ITEM>")
-									.append("<TITLE>")
-									.append(reportName)
-									.append("</TITLE>")
-									.append("<REPORTID>")
-									.append(String.valueOf(itemReportId))
-									.append("</REPORTID>")
-									.append("</ITEM>");
+				if (reportType == ReportType.GridstackDashboard) {
+					report.setGridstackSavedOptions(config);
+					if (selfServiceDashboard) {
+						//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
+						//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
+						ObjectMapper mapper = new ObjectMapper();
+						List<GridstackItemOptions> itemOptions = mapper.readValue(config, new TypeReference<List<GridstackItemOptions>>() {
+						});
+						if (CollectionUtils.isEmpty(itemOptions)) {
+							String message = messageSource.getMessage("reports.message.nothingToSave", null, locale);
+							response.setErrorMessage(message);
+							return response;
+						} else {
+							StringBuilder sb = new StringBuilder();
+							sb.append("<DASHBOARD>");
+							for (GridstackItemOptions itemOption : itemOptions) {
+								int itemReportId = itemOption.getReportId();
+								String reportName = reportService.getReportName(itemReportId);
+								sb.append("<ITEM>")
+										.append("<TITLE>")
+										.append(reportName)
+										.append("</TITLE>")
+										.append("<REPORTID>")
+										.append(String.valueOf(itemReportId))
+										.append("</REPORTID>")
+										.append("</ITEM>");
+							}
+							sb.append("</DASHBOARD>");
+							report.setReportSource(sb.toString());
 						}
-						sb.append("</DASHBOARD>");
-						report.setReportSource(sb.toString());
 					}
+				} else {
+					report.setSelfServiceOptions(config);
 				}
 
 				if (overwrite) {
@@ -1346,32 +1379,6 @@ public class ReportController {
 				response.setSuccess(true);
 			}
 		} catch (Exception ex) {
-			logger.error("Error", ex);
-			response.setErrorMessage(ex.getMessage());
-		}
-
-		return response;
-	}
-
-	@PostMapping("/deleteGridstack")
-	public @ResponseBody
-	AjaxResponse deleteGridstack(@RequestParam("id") Integer id) {
-		logger.debug("Entering deleteGridstack: id={}", id);
-
-		AjaxResponse response = new AjaxResponse();
-
-		try {
-			ActionResult deleteResult = reportService.deleteReport(id);
-
-			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
-			if (deleteResult.isSuccess()) {
-				response.setSuccess(true);
-			} else {
-				//report not deleted because of linked jobs
-				List<String> cleanedData = deleteResult.cleanData();
-				response.setData(cleanedData);
-			}
-		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.getMessage());
 		}

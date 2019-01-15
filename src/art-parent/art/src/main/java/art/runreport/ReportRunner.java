@@ -295,6 +295,9 @@ public class ReportRunner {
 
 		//update querySb with report sql
 		String reportSource = report.getReportSource();
+		if (reportSource == null) {
+			throw new RuntimeException("Report source not available");
+		}
 		querySb.replace(0, querySb.length(), reportSource);
 
 		applyTags();

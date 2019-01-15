@@ -21,6 +21,13 @@
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
 <spring:message code="multiselect.button.undo" var="undoText"/>
 <spring:message code="multiselect.button.redo" var="redoText"/>
+<spring:message code="dialog.button.cancel" var="cancelText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="reports.message.reportSaved" var="reportSavedText"/>
+<spring:message code="reports.message.reportDeleted" var="reportDeletedText"/>
+<spring:message code="dialog.title.saveReport" var="saveReportText"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
+<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
 
 <t:mainPage title="${pageTitle}">
 
@@ -35,6 +42,7 @@
 		</c:if>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/multiselect-2.5.5/js/multiselect.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notifyjs-0.4.2/notify.js"></script>
 
 		<script>
 			$(function () {
@@ -88,6 +96,7 @@
 						$('#multiselect').empty();
 						$('#multiselect_to').empty();
 						$("#whereDiv").hide();
+						$("#newReportLink").hide();
 					} else {
 						$.ajax({
 							type: 'GET',
@@ -163,21 +172,7 @@
 						limit = "0";
 					}
 
-					var selectedColumns = $("#multiselect_to option").map(function () {
-						return $(this).val();
-					}).get();
-
-					//https://stackoverflow.com/questions/24403732/check-if-array-is-empty-or-does-not-exist-js
-					if (!selectedColumns.length === 0) {
-						selectedColumns = $("#multiselect option").map(function () {
-							return $(this).val();
-						}).get();
-					}
-
-					var selfServiceOptions = {};
-					selfServiceOptions.columns = selectedColumns;
-
-					var selfServiceOptionsString = JSON.stringify(selfServiceOptions);
+					var selfServiceOptionsString = getSelfServiceOptionsString();
 
 					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
 					$.ajax({
@@ -203,6 +198,25 @@
 				initializeBuilder();
 
 			});
+
+			function getSelfServiceOptionsString() {
+				var selectedColumns = $("#multiselect_to option").map(function () {
+					return $(this).val();
+				}).get();
+
+				//https://stackoverflow.com/questions/24403732/check-if-array-is-empty-or-does-not-exist-js
+				if (selectedColumns.length === 0) {
+					selectedColumns = $("#multiselect option").map(function () {
+						return $(this).val();
+					}).get();
+				}
+
+				var selfServiceOptions = {};
+				selfServiceOptions.columns = selectedColumns;
+
+				var selfServiceOptionsString = JSON.stringify(selfServiceOptions);
+				return selfServiceOptionsString;
+			}
 
 			function initializeBuilder() {
 				$('#builder').queryBuilder({
@@ -329,6 +343,13 @@
 						<button id="preview" class="btn btn-default">
 							<spring:message code="reports.action.preview"/>
 						</button>
+						<button id="saveReport" class="btn btn-primary">
+							<spring:message code="page.button.save"/>
+						</button>
+						<a class="btn btn-default" id="newReportLink" style="display: none"
+						   href="">
+							<spring:message code="reports.link.newReport"/>
+						</a>
 					</div>
 				</div>
 				<div class="row">
@@ -344,5 +365,183 @@
 				<div id="reportOutput"></div>
 			</div>
 		</div>
+
+		<div id="saveReportDialogDiv" style="display:none;">
+			<form id="saveReportForm" class="form-horizontal" role="form">
+				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+				<input type="hidden" name="reportId" id="reportId" value="">
+				<input type="hidden" id="config" name="config" value="">
+				<div class="form-group">
+					<label class="control-label col-md-4" for="name">
+						<spring:message code="page.text.name"/>
+					</label>
+					<div class="col-md-8">
+						<input type="text" id="name" name="name" maxlength="50" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="description">
+						<spring:message code="page.text.description"/>
+					</label>
+					<div class="col-md-8">
+						<textarea id="description" name="description" class="form-control" rows="2" maxlength="200"></textarea>
+					</div>
+				</div>
+				<div class="form-group" id="overwriteDiv">
+					<label class="control-label col-md-4" for="overwrite">
+						<spring:message code="reports.text.overwrite"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" name="overwrite" id="overwrite">
+							</label>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<script>
+			//https://github.com/gridstack/gridstack.js/issues/50
+			//https://github.com/gridstack/gridstack.js/issues/575
+			$("#saveReport").on("click", function () {
+				var config = getSelfServiceOptionsString();
+				$("#config").val(config);
+
+				var reportId = $("#reportId").val();
+				if (reportId) {
+					//setting checked property here doesn't work with bootbox dialog
+					//$('#overwrite').prop('checked', true);
+					$("#overwriteDiv").show();
+				} else {
+					$("#overwriteDiv").hide();
+				}
+
+				var dialog = bootbox.confirm({
+					title: "${saveReportText}",
+					message: $("#saveReportDialogDiv").html(),
+					buttons: {
+						cancel: {
+							label: "${cancelText}"
+						},
+						confirm: {
+							label: "${okText}"
+						}
+					},
+					callback: function (result) {
+						if (result) {
+							//https://github.com/makeusabrew/bootbox/issues/572
+							var form = dialog.find('#saveReportForm');
+							var data = form.serialize();
+							var reportName = dialog.find('#name').val();
+							reportName = escapeHtml(reportName);
+
+							$.ajax({
+								type: 'POST',
+								url: '${pageContext.request.contextPath}/saveSelfService',
+								dataType: 'json',
+								data: data,
+								success: function (response) {
+									if (response.success) {
+										$.notify("${reportSavedText}", "success");
+										var newReportId = response.data;
+										if (newReportId) {
+											var newUrl = "${pageContext.request.contextPath}/selectReportParameters?reportId=" + newReportId;
+											$("#newReportLink").attr("href", newUrl);
+											$("#newReportLink").show();
+//											$('#dashboardReports').append("<option value='" + newReportId + "'>" + reportName + "</option>");
+//											$('#dashboardReports').find('[value=' + newReportId + ']').prop('selected', true);
+//											$("#dashboardReports").selectpicker('refresh');
+//											showDeleteReport(reportName, newReportId);
+//											$("#reportId").val(newReportId);
+										} else if (reportName) {
+//											$('#dashboardReports').find('[value=' + reportId + ']').text(reportName);
+//											$("#dashboardReports").selectpicker('refresh');
+//											$("#deleteReport").attr("data-report-name", reportName);
+										}
+									} else {
+										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+									}
+								},
+								error: function (xhr) {
+									showUserAjaxError(xhr, '${errorOccurredText}');
+								}
+							});
+						} //end if result
+					} //end callback
+				}); //end bootbox confirm
+
+				//https://github.com/makeusabrew/bootbox/issues/411
+				//https://blog.shinychang.net/2014/06/05/Input%20autofocus%20in%20the%20bootbox%20dialog%20with%20buttons/
+				dialog.on("shown.bs.modal", function () {
+					dialog.attr("id", "saveReportDialog");
+					var reportId = dialog.find("#reportId").val();
+					if (reportId) {
+						dialog.find('#overwrite').prop('checked', true);
+					} else {
+						dialog.find("#overwrite").prop('checked', false);
+					}
+					dialog.find('#name').trigger("focus");
+				});
+			});
+
+			$(document).on("submit", "#saveReportForm", function (e) {
+				e.preventDefault();
+				$("#saveReportDialog .btn-primary").click();
+			});
+
+			var token = $("meta[name='_csrf']").attr("content");
+			var header = $("meta[name='_csrf_header']").attr("content");
+			$(document).ajaxSend(function (e, xhr, options) {
+				if (header) {
+					xhr.setRequestHeader(header, token);
+				}
+			});
+
+			$("#deleteDashboard").on("click", function () {
+				var reportName = $(this).attr("data-report-name");
+				reportName = escapeHtmlContent(reportName);
+				var reportId = $(this).attr("data-report-id");
+
+				bootbox.confirm({
+					message: "${deleteRecordText}: <b>" + reportName + "</b>",
+					buttons: {
+						cancel: {
+							label: "${cancelText}"
+						},
+						confirm: {
+							label: "${okText}"
+						}
+					},
+					callback: function (result) {
+						if (result) {
+							//user confirmed delete. make delete request
+							$.ajax({
+								type: "POST",
+								dataType: "json",
+								url: "${pageContext.request.contextPath}/deleteGridstack",
+								data: {id: reportId},
+								success: function (response) {
+									var nonDeletedRecords = response.data;
+									if (response.success) {
+										$("#dashboardReports option[value='" + reportId + "']").remove();
+										resetAll();
+										$.notify("${reportDeletedText}", "success");
+									} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+										$.notify("${cannotDeleteReportText}", "error");
+									} else {
+										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+									}
+								},
+								error: function (xhr) {
+									showUserAjaxError(xhr, '${errorOccurredText}');
+								}
+							});
+						} //end if result
+					} //end callback
+				}); //end bootbox confirm
+			});
+		</script>
 	</jsp:body>
 </t:mainPage>

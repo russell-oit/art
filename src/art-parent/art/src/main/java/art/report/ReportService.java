@@ -167,6 +167,7 @@ public class ReportService {
 			report.setPivotTableJsSavedOptions(rs.getString("PIVOTTABLEJS_SAVED_OPTIONS"));
 			report.setGridstackSavedOptions(rs.getString("GRIDSTACK_SAVED_OPTIONS"));
 			report.setViewReportId(rs.getInt("VIEW_REPORT_ID"));
+			report.setSelfServiceOptions(rs.getString("SELF_SERVICE_OPTIONS"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -984,9 +985,9 @@ public class ReportService {
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
-					+ " VIEW_REPORT_ID,"
+					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 47) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 48) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -1034,6 +1035,7 @@ public class ReportService {
 				report.getPivotTableJsSavedOptions(),
 				report.getGridstackSavedOptions(),
 				report.getViewReportId(),
+				report.getSelfServiceOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -1059,6 +1061,7 @@ public class ReportService {
 					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
 					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?, PIVOTTABLEJS_SAVED_OPTIONS=?,"
 					+ " GRIDSTACK_SAVED_OPTIONS=?, VIEW_REPORT_ID=?,"
+					+ " SELF_SERVICE_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -1107,6 +1110,7 @@ public class ReportService {
 				report.getPivotTableJsSavedOptions(),
 				report.getGridstackSavedOptions(),
 				report.getViewReportId(),
+				report.getSelfServiceOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

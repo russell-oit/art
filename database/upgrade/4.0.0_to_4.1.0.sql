@@ -12,6 +12,7 @@
 -- add database protocol column
 -- add database type column
 -- add view report id column
+-- add self service options field
 
 
 -- NOTES:
@@ -60,3 +61,6 @@ ALTER TABLE ART_DATABASES ADD DATABASE_TYPE VARCHAR(100);
 
 -- add view report id column
 ALTER TABLE ART_QUERIES ADD VIEW_REPORT_ID INTEGER;
+
+-- add self service options field
+ALTER TABLE ART_QUERIES ADD SELF_SERVICE_OPTIONS CLOB;

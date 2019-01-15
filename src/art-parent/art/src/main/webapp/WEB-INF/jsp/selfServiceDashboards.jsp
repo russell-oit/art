@@ -396,7 +396,7 @@
 				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 				<input type="hidden" name="reportId" id="reportId" value="">
 				<input type="hidden" id="config" name="config" value="">
-				<input type="hidden" name="selfService" value="true">
+				<input type="hidden" name="selfServiceDashboard" value="true">
 				<div class="form-group">
 					<label class="control-label col-md-4" for="name">
 						<spring:message code="page.text.name"/>
