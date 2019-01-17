@@ -160,11 +160,6 @@ public class RunReportController {
 					testReport.setSelfServiceOptions(selfServiceOptions);
 					testReport.setLimit(limit);
 					testReport.setViewReportId(reportId);
-					testReport.setViewReport(originalReport);
-
-					RunReportHelper runReportHelper = new RunReportHelper();
-					List<SelfServiceColumn> selfServiceColumns = runReportHelper.getSelfServiceColumns(originalReport, sessionUser);
-					testReport.setSelfServiceColumns(selfServiceColumns);
 				}
 
 				boolean testData = BooleanUtils.toBoolean(request.getParameter("testData"));
@@ -385,6 +380,17 @@ public class RunReportController {
 
 				reportRunner = new ReportRunner();
 				reportRunner.setUser(sessionUser);
+
+				if (report.isSelfService()) {
+					Cloner cloner = new Cloner();
+					Report viewReport = cloner.deepClone(report);
+					viewReport.setReportType(ReportType.View);
+					viewReport.setViewReportId(0);
+					viewReport.setSelfServiceOptions(null);
+					List<SelfServiceColumn> selfServiceColumns = runReportHelper.getSelfServiceColumns(viewReport, sessionUser);
+					report.setSelfServiceColumns(selfServiceColumns);
+				}
+
 				reportRunner.setReport(report);
 
 				//prepare report parameters

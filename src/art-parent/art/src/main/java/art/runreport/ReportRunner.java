@@ -892,7 +892,7 @@ public class ReportRunner {
 
 		try {
 			ReportType reportType = report.getReportType();
-			if (reportType != ReportType.View) {
+			if (reportType != ReportType.View && !report.isSelfService()) {
 				return;
 			}
 
@@ -909,72 +909,68 @@ public class ReportRunner {
 			}
 			DatabaseProtocol databaseProtocol = datasource.getEffectiveDatabaseProtocol();
 
-			Report viewReport = report.getViewReport();
-			ViewOptions viewOptions;
-			String columnsString = null;
-			if (viewReport == null) {
-				viewOptions = report.getGeneralOptions().getView();
-				if (viewOptions == null) {
-					viewOptions = new ViewOptions();
-				}
+			ViewOptions viewOptions = report.getGeneralOptions().getView();
+			if (viewOptions == null) {
+				viewOptions = new ViewOptions();
+			}
+
+			String columnsString;
+			String selfServiceOptionsString = report.getSelfServiceOptions();
+			if (StringUtils.isBlank(selfServiceOptionsString)) {
 				columnsString = viewOptions.getColumns();
 			} else {
-				viewOptions = viewReport.getGeneralOptions().getView();
-				String selfServiceOptionsString = report.getSelfServiceOptions();
-				if (StringUtils.isNotBlank(selfServiceOptionsString)) {
-					SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObject(selfServiceOptionsString, SelfServiceOptions.class);
-					List<String> columns = selfServiceOptions.getColumns();
-					List<SelfServiceColumn> selfServiceColumns = report.getSelfServiceColumns();
-					List<String> chosenColumns = new ArrayList<>();
-					if (CollectionUtils.isEmpty(columns)) {
-						for (SelfServiceColumn referenceColumn : selfServiceColumns) {
-							String columnSpecification = referenceColumn.getLabel();
-							chosenColumns.add(columnSpecification);
-						}
-					} else {
-						String startEnclose;
-						String endEnclose;
-						String reportEnclose = viewOptions.getEnclose();
-						String reportStartEnclose = viewOptions.getStartEnclose();
-						String reportEndEnclose = viewOptions.getEndEnclose();
-						String datasourceEnclose = datasourceOptions.getEnclose();
-						String datasourceStartEnclose = datasourceOptions.getStartEnclose();
-						String datasourceEndEnclose = datasourceOptions.getEndEnclose();
-						String databaseEnclose = databaseProtocol.enclose();
-						String databaseStartEnclose = databaseProtocol.startEnclose();
-						String databaseEndEnclose = databaseProtocol.endEnclose();
-						if (reportEnclose == null) {
-							startEnclose = reportStartEnclose;
-							endEnclose = reportEndEnclose;
-						} else {
-							startEnclose = reportEnclose;
-							endEnclose = reportEnclose;
-						}
-						if ((startEnclose == null && endEnclose == null) && datasourceEnclose == null) {
-							startEnclose = datasourceStartEnclose;
-							endEnclose = datasourceEndEnclose;
-						} else {
-							startEnclose = datasourceEnclose;
-							endEnclose = datasourceEnclose;
-						}
-						if ((startEnclose == null && endEnclose == null) && databaseEnclose == null) {
-							startEnclose = databaseStartEnclose;
-							endEnclose = databaseEndEnclose;
-						} else {
-							startEnclose = databaseEnclose;
-							endEnclose = databaseEnclose;
-						}
-						for (String column : columns) {
-							SelfServiceColumn referenceColumn = selfServiceColumns.stream()
-									.filter(c -> c.getLabel().equals(column))
-									.findAny()
-									.orElseThrow(() -> new RuntimeException("Invalid column: " + column));
-							String columnSpecification = referenceColumn.getLabel() + " as " + startEnclose + referenceColumn.getUserLabel() + endEnclose;
-							chosenColumns.add(columnSpecification);
-						}
+				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObject(selfServiceOptionsString, SelfServiceOptions.class);
+				List<String> columns = selfServiceOptions.getColumns();
+				List<SelfServiceColumn> selfServiceColumns = report.getSelfServiceColumns();
+				List<String> chosenColumns = new ArrayList<>();
+				if (CollectionUtils.isEmpty(columns)) {
+					for (SelfServiceColumn referenceColumn : selfServiceColumns) {
+						String columnSpecification = referenceColumn.getLabel();
+						chosenColumns.add(columnSpecification);
 					}
-					columnsString = StringUtils.join(chosenColumns, ",");
+				} else {
+					String startEnclose;
+					String endEnclose;
+					String reportEnclose = viewOptions.getEnclose();
+					String reportStartEnclose = viewOptions.getStartEnclose();
+					String reportEndEnclose = viewOptions.getEndEnclose();
+					String datasourceEnclose = datasourceOptions.getEnclose();
+					String datasourceStartEnclose = datasourceOptions.getStartEnclose();
+					String datasourceEndEnclose = datasourceOptions.getEndEnclose();
+					String databaseEnclose = databaseProtocol.enclose();
+					String databaseStartEnclose = databaseProtocol.startEnclose();
+					String databaseEndEnclose = databaseProtocol.endEnclose();
+					if (reportEnclose == null) {
+						startEnclose = reportStartEnclose;
+						endEnclose = reportEndEnclose;
+					} else {
+						startEnclose = reportEnclose;
+						endEnclose = reportEnclose;
+					}
+					if ((startEnclose == null && endEnclose == null) && datasourceEnclose == null) {
+						startEnclose = datasourceStartEnclose;
+						endEnclose = datasourceEndEnclose;
+					} else {
+						startEnclose = datasourceEnclose;
+						endEnclose = datasourceEnclose;
+					}
+					if ((startEnclose == null && endEnclose == null) && databaseEnclose == null) {
+						startEnclose = databaseStartEnclose;
+						endEnclose = databaseEndEnclose;
+					} else {
+						startEnclose = databaseEnclose;
+						endEnclose = databaseEnclose;
+					}
+					for (String column : columns) {
+						SelfServiceColumn referenceColumn = selfServiceColumns.stream()
+								.filter(c -> c.getLabel().equals(column))
+								.findAny()
+								.orElseThrow(() -> new RuntimeException("Invalid column: " + column));
+						String columnSpecification = referenceColumn.getLabel() + " as " + startEnclose + referenceColumn.getUserLabel() + endEnclose;
+						chosenColumns.add(columnSpecification);
+					}
 				}
+				columnsString = StringUtils.join(chosenColumns, ",");
 			}
 
 			if (columnsString == null) {
@@ -1002,11 +998,10 @@ public class ReportRunner {
 
 			Integer reportLimit = viewOptions.getLimit();
 			Integer datasourceLimit = datasourceOptions.getLimit();
-			int previewLimit = report.getLimit();
 
 			Integer limit;
-			if (report.getViewReportId() > 0) {
-				limit = previewLimit;
+			if (report.isSelfService()) {
+				limit = report.getLimit();
 			} else {
 				limit = reportLimit;
 				if (limit == null) {

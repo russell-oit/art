@@ -90,6 +90,7 @@
 					var reportId = $(this).find('option').eq(clickedIndex).val();
 
 					$("#reportOutput").empty();
+					$("#viewReportId").val(reportId);
 
 					//https://stackoverflow.com/questions/27347004/jquery-val-integer-datatype-comparison
 					if (reportId === '0') {
@@ -370,6 +371,7 @@
 			<form id="saveReportForm" class="form-horizontal" role="form">
 				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 				<input type="hidden" name="reportId" id="reportId" value="">
+				<input type="hidden" name="viewReportId" id="viewReportId" value="">
 				<input type="hidden" id="config" name="config" value="">
 				<div class="form-group">
 					<label class="control-label col-md-4" for="name">

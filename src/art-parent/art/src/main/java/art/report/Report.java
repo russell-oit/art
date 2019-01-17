@@ -248,7 +248,6 @@ public class Report implements Serializable {
 	public void setLimit(int limit) {
 		this.limit = limit;
 	}
-	
 
 	/**
 	 * @return the viewReportId
@@ -1763,6 +1762,20 @@ public class Report implements Serializable {
 	public String getDtRowId() {
 		dtRowId = "row-" + reportId;
 		return dtRowId;
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a self service report
+	 *
+	 * @return <code>true</code> if this is a self service report
+	 */
+	@JsonIgnore
+	public boolean isSelfService() {
+		if (viewReportId > 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

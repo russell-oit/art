@@ -43,6 +43,7 @@ import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rits.cloning.Cloner;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -1256,7 +1257,8 @@ public class ReportController {
 				reportId, config, name, description, overwrite,
 				saveSelectedParameters, selfServiceDashboard);
 
-		return saveAdHoc(ReportType.GridstackDashboard, reportId, config, name, description, overwrite, saveSelectedParameters, selfServiceDashboard, session, request, locale);
+		Integer viewReportId = null;
+		return saveAdHoc(ReportType.GridstackDashboard, reportId, config, name, description, overwrite, saveSelectedParameters, selfServiceDashboard, session, request, locale, viewReportId);
 	}
 
 	@PostMapping("/saveSelfService")
@@ -1265,6 +1267,7 @@ public class ReportController {
 			@RequestParam("config") String config, @RequestParam("name") String name,
 			@RequestParam("description") String description,
 			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
+			@RequestParam(value = "viewReportId", required = false) Integer viewReportId,
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
@@ -1273,7 +1276,7 @@ public class ReportController {
 
 		boolean saveSelectedParameters = false;
 		boolean selfServiceDashboard = false;
-		return saveAdHoc(ReportType.Tabular, reportId, config, name, description, overwrite, saveSelectedParameters, selfServiceDashboard, session, request, locale);
+		return saveAdHoc(ReportType.Tabular, reportId, config, name, description, overwrite, saveSelectedParameters, selfServiceDashboard, session, request, locale, viewReportId);
 	}
 
 	private AjaxResponse saveAdHoc(ReportType reportType,
@@ -1283,15 +1286,24 @@ public class ReportController {
 			Boolean overwrite,
 			Boolean saveSelectedParameters,
 			Boolean selfServiceDashboard,
-			HttpSession session, HttpServletRequest request, Locale locale) {
+			HttpSession session, HttpServletRequest request, Locale locale,
+			Integer viewReportId) {
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
 			Report report;
 			if (reportId == null) {
-				report = new Report();
-				report.setReportType(reportType);
+				if (reportType == ReportType.GridstackDashboard) {
+					report = new Report();
+					report.setReportType(reportType);
+				} else {
+					Report viewReport = reportService.getReport(viewReportId);
+					Cloner cloner = new Cloner();
+					report = cloner.deepClone(viewReport);
+					report.setViewReportId(viewReportId);
+					report.setReportType(ReportType.Tabular);
+				}
 			} else {
 				report = reportService.getReport(reportId);
 				report.encryptPasswords();

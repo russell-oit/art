@@ -2357,7 +2357,7 @@ public class ReportOutputGenerator {
 							}
 							row.put(columnName, finalValue);
 						}
-						
+
 						finalResultList.add(row);
 					}
 
