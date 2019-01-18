@@ -977,7 +977,7 @@
 		<dependency>
 			<groupId>net.sf.reportengine</groupId>
 			<artifactId>reportengine</artifactId>
-			<version>0.13.2</version>
+			<version>art</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
