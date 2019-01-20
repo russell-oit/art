@@ -392,11 +392,14 @@ public class RunReportController {
 				}
 
 				reportRunner.setReport(report);
+				
+				boolean isDrilldown = BooleanUtils.toBoolean(request.getParameter("drilldown"));
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				paramProcessor.setSuppliedReport(report);
 				paramProcessor.setIsFragment(isFragment);
+				paramProcessor.setIsDrilldown(isDrilldown);
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();

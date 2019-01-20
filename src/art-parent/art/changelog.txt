@@ -5,6 +5,7 @@ ART 4.1
 * Fix for errors with sql scripts
 * Fix for chart background colour not being effected
 * Corrected reportengine dependency
+* Fix for drilldown charts not using report show legend setting
 * Added self service reports
 * Added self_service_reports permission
 * Downgraded mysql driver to 5.1.42
