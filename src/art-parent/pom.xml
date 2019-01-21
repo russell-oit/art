@@ -21,6 +21,7 @@
 		<module>mondrian-art</module>
 		<module>jpivot-art</module>
 		<module>couchbase-jdbc-art</module>
+		<module>reportengine-art</module>
 		<module>art</module>
 	</modules>
 

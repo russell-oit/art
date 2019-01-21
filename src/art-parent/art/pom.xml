@@ -272,6 +272,11 @@
 			<version>4.1-SNAPSHOT</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.art</groupId>
+			<artifactId>reportengine-art</artifactId>
+			<version>4.1-SNAPSHOT</version>
+		</dependency>
 		<!-- add jstl 1.2.1 -->
 		<!-- https://stackoverflow.com/questions/24262223/standard-way-of-adding-jslt-1-2-1-in-a-maven-project -->
 		<dependency>
@@ -973,11 +978,6 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.reportengine</groupId>
-			<artifactId>reportengine</artifactId>
-			<version>art</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
