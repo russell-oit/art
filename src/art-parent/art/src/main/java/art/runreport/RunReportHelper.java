@@ -1551,7 +1551,12 @@ public class RunReportHelper {
 							.filter(c -> c.getLabel().equals(column))
 							.findAny()
 							.orElseThrow(() -> new RuntimeException("Invalid column: " + column));
-					String columnSpecification = referenceColumn.getLabel() + " as " + startEnclose + referenceColumn.getUserLabel() + endEnclose;
+					String columnSpecification;
+					if (StringUtils.equals(referenceColumn.getLabel(), referenceColumn.getUserLabel())) {
+						columnSpecification = referenceColumn.getLabel();
+					} else {
+						columnSpecification = referenceColumn.getLabel() + " as " + startEnclose + referenceColumn.getUserLabel() + endEnclose;
+					}
 					chosenColumns.add(columnSpecification);
 				}
 			}
