@@ -1302,6 +1302,7 @@ public class ReportController {
 					Cloner cloner = new Cloner();
 					report = cloner.deepClone(viewReport);
 					report.setViewReportId(viewReportId);
+					report.setViewReport(viewReport);
 					report.setReportType(ReportType.Tabular);
 				}
 			} else {
@@ -1369,6 +1370,8 @@ public class ReportController {
 					}
 				} else {
 					report.setSelfServiceOptions(config);
+					RunReportHelper runReportHelper = new RunReportHelper();
+					runReportHelper.applySelfServiceFields(report, sessionUser);
 				}
 
 				if (overwrite) {

@@ -914,63 +914,10 @@ public class ReportRunner {
 				viewOptions = new ViewOptions();
 			}
 
-			String columnsString;
+			String columnsString = null;
 			String selfServiceOptionsString = report.getSelfServiceOptions();
 			if (StringUtils.isBlank(selfServiceOptionsString)) {
 				columnsString = viewOptions.getColumns();
-			} else {
-				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObject(selfServiceOptionsString, SelfServiceOptions.class);
-				List<String> columns = selfServiceOptions.getColumns();
-				List<SelfServiceColumn> selfServiceColumns = report.getSelfServiceColumns();
-				List<String> chosenColumns = new ArrayList<>();
-				if (CollectionUtils.isEmpty(columns)) {
-					for (SelfServiceColumn referenceColumn : selfServiceColumns) {
-						String columnSpecification = referenceColumn.getLabel();
-						chosenColumns.add(columnSpecification);
-					}
-				} else {
-					String startEnclose;
-					String endEnclose;
-					String reportEnclose = viewOptions.getEnclose();
-					String reportStartEnclose = viewOptions.getStartEnclose();
-					String reportEndEnclose = viewOptions.getEndEnclose();
-					String datasourceEnclose = datasourceOptions.getEnclose();
-					String datasourceStartEnclose = datasourceOptions.getStartEnclose();
-					String datasourceEndEnclose = datasourceOptions.getEndEnclose();
-					String databaseEnclose = databaseProtocol.enclose();
-					String databaseStartEnclose = databaseProtocol.startEnclose();
-					String databaseEndEnclose = databaseProtocol.endEnclose();
-					if (reportEnclose == null) {
-						startEnclose = reportStartEnclose;
-						endEnclose = reportEndEnclose;
-					} else {
-						startEnclose = reportEnclose;
-						endEnclose = reportEnclose;
-					}
-					if ((startEnclose == null && endEnclose == null) && datasourceEnclose == null) {
-						startEnclose = datasourceStartEnclose;
-						endEnclose = datasourceEndEnclose;
-					} else {
-						startEnclose = datasourceEnclose;
-						endEnclose = datasourceEnclose;
-					}
-					if ((startEnclose == null && endEnclose == null) && databaseEnclose == null) {
-						startEnclose = databaseStartEnclose;
-						endEnclose = databaseEndEnclose;
-					} else {
-						startEnclose = databaseEnclose;
-						endEnclose = databaseEnclose;
-					}
-					for (String column : columns) {
-						SelfServiceColumn referenceColumn = selfServiceColumns.stream()
-								.filter(c -> c.getLabel().equals(column))
-								.findAny()
-								.orElseThrow(() -> new RuntimeException("Invalid column: " + column));
-						String columnSpecification = referenceColumn.getLabel() + " as " + startEnclose + referenceColumn.getUserLabel() + endEnclose;
-						chosenColumns.add(columnSpecification);
-					}
-				}
-				columnsString = StringUtils.join(chosenColumns, ",");
 			}
 
 			if (columnsString == null) {
@@ -1000,9 +947,7 @@ public class ReportRunner {
 			Integer datasourceLimit = datasourceOptions.getLimit();
 
 			Integer limit;
-			if (report.isSelfService()) {
-				limit = report.getLimit();
-			} else {
+			if (reportType == ReportType.View) {
 				limit = reportLimit;
 				if (limit == null) {
 					limit = datasourceLimit;
@@ -1012,6 +957,8 @@ public class ReportRunner {
 					final Integer DEFAULT_LIMIT = 10;
 					limit = DEFAULT_LIMIT;
 				}
+			} else {
+				limit = report.getLimit();
 			}
 
 			final String LIMIT_PLACEHOLDER = "#limitClause#";
