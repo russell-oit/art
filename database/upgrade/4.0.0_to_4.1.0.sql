@@ -13,6 +13,7 @@
 -- add database type column
 -- add view report id column
 -- add self service options field
+-- increase size of report name field
 
 
 -- NOTES:
@@ -64,3 +65,7 @@ ALTER TABLE ART_QUERIES ADD VIEW_REPORT_ID INTEGER;
 
 -- add self service options field
 ALTER TABLE ART_QUERIES ADD SELF_SERVICE_OPTIONS CLOB;
+
+-- increase size of report name field
+ALTER TABLE ART_QUERIES MODIFY NAME VARCHAR(100);
+ALTER TABLE ART_JOBS MODIFY JOB_NAME VARCHAR(100);

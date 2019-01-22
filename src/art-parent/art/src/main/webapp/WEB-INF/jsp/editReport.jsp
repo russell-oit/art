@@ -1185,7 +1185,7 @@ Edit report page
 						<spring:message code="page.text.name"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="name" maxlength="50" class="form-control"/>
+						<form:input path="name" maxlength="100" class="form-control"/>
 						<form:errors path="name" cssClass="error"/>
 					</div>
 				</div>
