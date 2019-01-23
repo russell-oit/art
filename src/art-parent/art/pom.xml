@@ -201,6 +201,12 @@
 				<artifactId>commons-lang</artifactId>
 				<version>2.6</version>
 			</dependency>
+			<!-- querybuilder causes recent versions to be used -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.7.9.1</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -359,7 +365,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.7.9.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -1009,6 +1014,11 @@
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
 			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itfsw</groupId>
+			<artifactId>QueryBuilder</artifactId>
+			<version>1.0.4</version>
 		</dependency>
 	</dependencies>
 </project>

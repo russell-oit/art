@@ -25,7 +25,6 @@ import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.TabularHeatmapOptions;
 import art.reportparameter.ReportParameter;
-import art.selfservice.SelfServiceColumn;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtLogsHelper;

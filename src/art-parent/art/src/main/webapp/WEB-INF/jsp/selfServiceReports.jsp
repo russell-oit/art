@@ -215,6 +215,9 @@
 				var selfServiceOptions = {};
 				selfServiceOptions.columns = selectedColumns;
 
+				var result = $('#builder').queryBuilder('getSQL', 'question_mark');
+				selfServiceOptions.condition = result;
+
 				var selfServiceOptionsString = JSON.stringify(selfServiceOptions);
 				return selfServiceOptionsString;
 			}
