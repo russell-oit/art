@@ -520,7 +520,9 @@ public class QueryController {
 		CollectionType ct
 				= mapper.getTypeFactory().constructCollectionType(ArrayList.class, String.class);
 
-		JavaType st = mapper.getTypeFactory().uncheckedSimpleType(String.class);
+		//https://github.com/FasterXML/jackson-databind/issues/1222
+		//https://fasterxml.github.io/jackson-databind/javadoc/2.8/com/fasterxml/jackson/databind/type/TypeFactory.html
+		JavaType st = mapper.constructType(String.class);
 
 		Map<String, List<String>> levels = mapper.readValue(returns, mapper.getTypeFactory().constructMapType(Map.class, st, ct));
 		ThinQuery query = thinQueryService.drillacross(queryName, cellPosition, levels);
