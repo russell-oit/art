@@ -18,6 +18,7 @@
 package art.selfservice;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.itfsw.query.builder.support.model.JsonRule;
 import java.io.Serializable;
 import java.util.List;
 
@@ -31,6 +32,21 @@ public class SelfServiceOptions implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private List<String> columns;
+	private JsonRule rules;
+
+	/**
+	 * @return the rules
+	 */
+	public JsonRule getRules() {
+		return rules;
+	}
+
+	/**
+	 * @param rules the rules to set
+	 */
+	public void setRules(JsonRule rules) {
+		this.rules = rules;
+	}
 
 	/**
 	 * @return the columns

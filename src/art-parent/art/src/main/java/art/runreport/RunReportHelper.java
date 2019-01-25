@@ -43,7 +43,12 @@ import art.selfservice.SelfServiceOptions;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itfsw.query.builder.SqlQueryBuilderFactory;
+import com.itfsw.query.builder.support.builder.SqlBuilder;
+import com.itfsw.query.builder.support.model.JsonRule;
+import com.itfsw.query.builder.support.model.result.SqlQueryResult;
 import groovy.sql.GroovyRowResult;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -1503,7 +1508,23 @@ public class RunReportHelper {
 		if (StringUtils.isBlank(selfServiceOptionsString)) {
 			columnsString = viewOptions.getColumns();
 		} else {
-			SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObject(selfServiceOptionsString, SelfServiceOptions.class);
+			//https://stackoverflow.com/questions/5455014/ignoring-new-fields-on-json-objects-using-jackson
+			//https://gist.github.com/jonikarppinen/9b7f3872257bce27f8e2
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			SelfServiceOptions selfServiceOptions = mapper.readValue(selfServiceOptionsString, SelfServiceOptions.class);
+			//SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObject(selfServiceOptionsString, SelfServiceOptions.class);
+			JsonRule outerRule = selfServiceOptions.getRules();
+			if (outerRule != null) {
+				String rulesString = ArtUtils.objectToJson(outerRule);
+				SqlQueryBuilderFactory sqlQueryBuilderFactory = new SqlQueryBuilderFactory();
+				SqlBuilder sqlBuilder = sqlQueryBuilderFactory.builder();
+
+				// build query
+				SqlQueryResult sqlQueryResult = sqlBuilder.build(rulesString);
+				String condition = sqlQueryResult.getQuery();
+				System.out.println(condition);
+			}
 			List<String> columns = selfServiceOptions.getColumns();
 			Report viewReport = report.getViewReport();
 			List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(viewReport, user);

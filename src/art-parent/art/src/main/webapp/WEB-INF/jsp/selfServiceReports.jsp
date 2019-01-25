@@ -215,8 +215,11 @@
 				var selfServiceOptions = {};
 				selfServiceOptions.columns = selectedColumns;
 
-				var result = $('#builder').queryBuilder('getSQL', 'question_mark');
-				selfServiceOptions.condition = result;
+				//var result = $('#builder').queryBuilder('getSQL', 'question_mark');
+				//selfServiceOptions.condition = result;
+				
+				var rules = $('#builder').queryBuilder('getRules');
+				selfServiceOptions.rules = rules;
 
 				var selfServiceOptionsString = JSON.stringify(selfServiceOptions);
 				return selfServiceOptionsString;
