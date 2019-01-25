@@ -114,7 +114,7 @@ public class SelfServiceController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			List<Report> basicReports = new ArrayList<>();
-			List<Report> reports = reportService.getAccessibleReportsWithReportTypes(sessionUser.getUserId(), Arrays.asList(ReportType.GridstackDashboard));
+			List<Report> reports = reportService.getAvailableGridstackDashboardReports(sessionUser.getUserId());
 
 			List<Report> finalReports = new ArrayList<>();
 			for (Report report : reports) {
@@ -370,6 +370,41 @@ public class SelfServiceController {
 			response.setData(columns);
 			response.setSuccess(true);
 		} catch (Exception ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+	
+	@GetMapping("/getEditSelfService")
+	@ResponseBody
+	public AjaxResponse getEditSelfService(HttpSession session, Locale locale) {
+		logger.debug("Entering getEditSelfService");
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			List<Report> basicReports = new ArrayList<>();
+			List<Report> reports = reportService.getAvailableSelfServiceReports(sessionUser.getUserId());
+
+			List<Report> finalReports = new ArrayList<>();
+			for (Report report : reports) {
+				if (reportService.hasExclusiveAccess(sessionUser, report.getReportId())) {
+					finalReports.add(report);
+				}
+			}
+
+			for (Report report : finalReports) {
+				String name = report.getLocalizedName(locale);
+				String encodedName = Encode.forHtmlContent(name);
+				report.setName2(encodedName);
+				basicReports.add(report.getBasicReport());
+			}
+			response.setData(basicReports);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

@@ -57,6 +57,7 @@
 				});
 
 				loadViews();
+				loadSelfServiceReports();
 
 				function loadViews() {
 					$.ajax({
@@ -139,7 +140,7 @@
 								$.each(reports, function (index, report) {
 									options += "<option value='" + report.reportId + "'>" + report.name2 + "</option>";
 								});
-								var select = $("#dashboardReports");
+								var select = $("#selfServiceReports");
 								select.empty();
 								select.append(options);
 								select.selectpicker('refresh');

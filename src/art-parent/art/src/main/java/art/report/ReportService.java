@@ -320,8 +320,26 @@ public class ReportService {
 	 */
 	@Cacheable(value = "reports")
 	public List<Report> getAccessibleReports(int userId,
-			List<ReportType> includedReportTypes, List<ReportType> excludedReportTypes)
-			throws SQLException {
+			List<ReportType> includedReportTypes,
+			List<ReportType> excludedReportTypes) throws SQLException {
+
+		String extraContidion = null;
+		return getAccessibleReports(userId, includedReportTypes, excludedReportTypes, extraContidion);
+	}
+
+	/**
+	 * Returns the reports that a user can access. Excludes disabled reports.
+	 *
+	 * @param userId the user id
+	 * @param includedReportTypes report types that should be included
+	 * @param excludedReportTypes report types that should be excluded
+	 * @param extraCondition an extra condition to be applied
+	 * @return accessible reports
+	 * @throws SQLException
+	 */
+	private List<Report> getAccessibleReports(int userId,
+			List<ReportType> includedReportTypes, List<ReportType> excludedReportTypes,
+			String extraCondition) throws SQLException {
 
 		logger.debug("Entering getAccessibleReports: userId={}", userId);
 
@@ -351,11 +369,18 @@ public class ReportService {
 			excludedReportTypesCondition = " AND AQ.QUERY_TYPE NOT IN(" + sb.toString() + ") ";
 		}
 
+		if (extraCondition == null) {
+			extraCondition = "";
+		} else {
+			extraCondition = " " + extraCondition;
+		}
+
 		String sql = SQL_SELECT_ALL
 				//only show active reports
 				+ " WHERE AQ.ACTIVE=1"
 				//don't show hidden reports
 				+ " AND AQ.HIDDEN<>1"
+				+ extraCondition
 				+ includedReportTypesCondition
 				+ excludedReportTypesCondition
 				+ " AND("
@@ -1416,7 +1441,7 @@ public class ReportService {
 
 		logger.debug("Entering getAvailableSaikuReports: userId={}", userId);
 
-		List<SaikuReport> saikuReports = new ArrayList<>();
+		List<SaikuReport> finalSaikuReports = new ArrayList<>();
 		List<Report> availableSaikuReports = getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.SaikuReport));
 
 		for (Report report : availableSaikuReports) {
@@ -1425,10 +1450,10 @@ public class ReportService {
 			saikuReport.setName(report.getLocalizedName(locale));
 			saikuReport.setShortDescription(report.getLocalizedShortDescription(locale));
 			saikuReport.setDescription(report.getLocalizedDescription(locale));
-			saikuReports.add(saikuReport);
+			finalSaikuReports.add(saikuReport);
 		}
 
-		return saikuReports;
+		return finalSaikuReports;
 	}
 
 	/**
@@ -1444,7 +1469,7 @@ public class ReportService {
 
 		return getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.SaikuConnection));
 	}
-	
+
 	/**
 	 * Returns view reports that a given user can access
 	 *
@@ -1457,6 +1482,38 @@ public class ReportService {
 		logger.debug("Entering getAvailableViewReports: userId={}", userId);
 
 		return getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.View));
+	}
+
+	/**
+	 * Returns gridstack dashboard reports that a given user can access
+	 *
+	 * @param userId the id of the user
+	 * @return gridstack dashboard reports that a given user can access
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAvailableGridstackDashboardReports(int userId) throws SQLException {
+		logger.debug("Entering getAvailableGridstackDashboardReports: userId={}", userId);
+
+		return getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.GridstackDashboard));
+	}
+
+	/**
+	 * Returns self service reports that a given user can access
+	 *
+	 * @param userId the id of the user
+	 * @return self service reports that a given user can access
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAvailableSelfServiceReports(int userId) throws SQLException {
+		logger.debug("Entering getAvailableSelfServiceReports: userId={}", userId);
+
+		List<ReportType> includedReportTypes = Arrays.asList(ReportType.Tabular);
+		List<ReportType> excludedReportTypes = null;
+		String extraCondition = "AND AQ.VIEW_REPORT_ID>0";
+
+		return getAccessibleReports(userId, includedReportTypes, excludedReportTypes, extraCondition);
 	}
 
 	/**
@@ -1590,52 +1647,71 @@ public class ReportService {
 	public boolean hasExclusiveAccess(User user, int reportId) throws SQLException {
 		logger.debug("Entering hasExclusiveAccess: user={}, reportId={}", user, reportId);
 
+		boolean owner;
 		boolean exclusive = false;
 
-		String sql;
-		int userAccessCount = 0;
-		boolean userHasAccess = false;
-		boolean assignedToGroup = false;
+		//check if user is the owner of the report
+		String sql = "SELECT COUNT(*) FROM ART_QUERIES"
+				+ " WHERE QUERY_ID=? AND CREATED_BY=?";
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCount = dbService.query(sql, h, reportId, user.getUsername());
 
-		sql = "SELECT USER_GROUP_ID FROM ART_USER_GROUP_QUERIES "
-				+ " WHERE QUERY_ID = ?";
-
-		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
-		List<Map<String, Object>> userGroupsList = dbService.query(sql, h, reportId);
-
-		if (!userGroupsList.isEmpty()) {
-			//query granted to a group. user doesn't have exclusive access
-			assignedToGroup = true;
+		if (recordCount == null || recordCount.longValue() == 0) {
+			owner = false;
+		} else {
+			owner = true;
 		}
 
-		if (!assignedToGroup) {
-			sql = "SELECT USERNAME FROM ART_USER_QUERIES "
-					+ " WHERE QUERY_ID = ?";
+		if (!owner) {
+			//check if user has exclusive access
+			int userAccessCount = 0;
+			boolean userHasAccess = false;
+			boolean assignedToGroup = false;
+
+			sql = "SELECT USER_GROUP_ID FROM ART_USER_GROUP_QUERIES "
+					+ " WHERE QUERY_ID=?";
 
 			ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
-			List<Map<String, Object>> usersList = dbService.query(sql, h2, reportId);
+			List<Map<String, Object>> userGroupsList = dbService.query(sql, h2, reportId);
 
-			String username = user.getUsername();
-			for (Map<String, Object> userRecord : usersList) {
-				userAccessCount++;
-				if (userAccessCount >= 2) {
-					//more than one user has access
-					break;
+			if (!userGroupsList.isEmpty()) {
+				//report granted to a group. user doesn't have exclusive access
+				assignedToGroup = true;
+			}
+
+			if (!assignedToGroup) {
+				sql = "SELECT USERNAME FROM ART_USER_QUERIES "
+						+ " WHERE QUERY_ID=?";
+
+				ResultSetHandler<List<Map<String, Object>>> h3 = new MapListHandler();
+				List<Map<String, Object>> usersList = dbService.query(sql, h3, reportId);
+
+				String username = user.getUsername();
+				for (Map<String, Object> userRecord : usersList) {
+					userAccessCount++;
+					if (userAccessCount >= 2) {
+						//more than one user has access
+						break;
+					}
+					//map list handler uses a case insensitive map, so case of column names doesn't matter
+					String usernameValue = (String) userRecord.get("USERNAME");
+					if (StringUtils.equals(username, usernameValue)) {
+						userHasAccess = true;
+					}
 				}
-				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				String usernameValue = (String) userRecord.get("USERNAME");
-				if (StringUtils.equals(username, usernameValue)) {
-					userHasAccess = true;
-				}
+			}
+
+			if (!assignedToGroup && userHasAccess && userAccessCount == 1) {
+				//only one user has explicit access
+				exclusive = true;
 			}
 		}
 
-		if (!assignedToGroup && userHasAccess && userAccessCount == 1) {
-			//only one user has explicit access
-			exclusive = true;
+		if (owner || exclusive) {
+			return true;
+		} else {
+			return false;
 		}
-
-		return exclusive;
 	}
 
 	/**
@@ -1723,7 +1799,6 @@ public class ReportService {
 
 		String sql = "SELECT COUNT(*) FROM ART_QUERIES"
 				+ " WHERE NAME=?";
-
 		ResultSetHandler<Number> h = new ScalarHandler<>();
 		Number recordCount = dbService.query(sql, h, reportName);
 
