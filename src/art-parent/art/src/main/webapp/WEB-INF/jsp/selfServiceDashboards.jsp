@@ -169,7 +169,7 @@
 					$.ajax({
 						type: 'GET',
 						dataType: "json",
-						url: '${pageContext.request.contextPath}/getDashboardCandidateReports',
+						url: '${pageContext.request.contextPath}/getDashboardCandidates',
 						success: function (response) {
 							if (response.success) {
 								//https://github.com/silviomoreto/bootstrap-select/issues/1151
@@ -200,7 +200,7 @@
 					$.ajax({
 						type: 'GET',
 						dataType: "json",
-						url: '${pageContext.request.contextPath}/getEditDashboardReports',
+						url: '${pageContext.request.contextPath}/getEditDashboards',
 						success: function (response) {
 							if (response.success) {
 								//https://github.com/silviomoreto/bootstrap-select/issues/1151

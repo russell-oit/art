@@ -126,6 +126,33 @@
 					}
 				});
 
+				function loadSelfServiceReports() {
+					$.ajax({
+						type: 'GET',
+						dataType: "json",
+						url: '${pageContext.request.contextPath}/getEditSelfService',
+						success: function (response) {
+							if (response.success) {
+								//https://github.com/silviomoreto/bootstrap-select/issues/1151
+								var reports = response.data;
+								var options = "<option value='0'>--</option>";
+								$.each(reports, function (index, report) {
+									options += "<option value='" + report.reportId + "'>" + report.name2 + "</option>";
+								});
+								var select = $("#dashboardReports");
+								select.empty();
+								select.append(options);
+								select.selectpicker('refresh');
+							} else {
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+							}
+						},
+						error: function (xhr) {
+							showUserAjaxError(xhr, '${errorOccurredText}');
+						}
+					});
+				}
+
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
 					$(this).parent().hide();
 				});
@@ -215,11 +242,8 @@
 				var selfServiceOptions = {};
 				selfServiceOptions.columns = selectedColumns;
 
-				//var result = $('#builder').queryBuilder('getSQL', 'question_mark');
-				//selfServiceOptions.condition = result;
-				
 				var rules = $('#builder').queryBuilder('getRules');
-				selfServiceOptions.rules = rules;
+				selfServiceOptions.rule = rules;
 
 				var selfServiceOptionsString = JSON.stringify(selfServiceOptions);
 				return selfServiceOptionsString;
@@ -300,6 +324,11 @@
 		<div class="row" style="margin-bottom: 20px">
 			<div class="col-md-4">
 				<select id="views" class="form-control selectpicker">
+					<option value="0">--</option>
+				</select>
+			</div>
+			<div class="col-md-4">
+				<select id="selfServiceReports" class="form-control selectpicker">
 					<option value="0">--</option>
 				</select>
 			</div>

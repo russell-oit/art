@@ -77,10 +77,10 @@ public class SelfServiceController {
 		return "selfServiceDashboards";
 	}
 
-	@GetMapping("/getDashboardCandidateReports")
+	@GetMapping("/getDashboardCandidates")
 	@ResponseBody
-	public AjaxResponse getDashboardCandidateReports(HttpSession session, Locale locale) {
-		logger.debug("Entering getDashboardCandidateReports");
+	public AjaxResponse getDashboardCandidates(HttpSession session, Locale locale) {
+		logger.debug("Entering getDashboardCandidates");
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -104,10 +104,10 @@ public class SelfServiceController {
 		return response;
 	}
 
-	@GetMapping("/getEditDashboardReports")
+	@GetMapping("/getEditDashboards")
 	@ResponseBody
-	public AjaxResponse getEditDashboardReports(HttpSession session, Locale locale) {
-		logger.debug("Entering getEditDashboardReports");
+	public AjaxResponse getEditDashboards(HttpSession session, Locale locale) {
+		logger.debug("Entering getEditDashboards");
 
 		AjaxResponse response = new AjaxResponse();
 

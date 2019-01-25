@@ -1514,7 +1514,7 @@ public class RunReportHelper {
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			SelfServiceOptions selfServiceOptions = mapper.readValue(selfServiceOptionsString, SelfServiceOptions.class);
 			//SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObject(selfServiceOptionsString, SelfServiceOptions.class);
-			JsonRule outerRule = selfServiceOptions.getRules();
+			JsonRule outerRule = selfServiceOptions.getRule();
 			if (outerRule != null) {
 				String rulesString = ArtUtils.objectToJson(outerRule);
 				SqlQueryBuilderFactory sqlQueryBuilderFactory = new SqlQueryBuilderFactory();
@@ -1523,7 +1523,6 @@ public class RunReportHelper {
 				// build query
 				SqlQueryResult sqlQueryResult = sqlBuilder.build(rulesString);
 				String condition = sqlQueryResult.getQuery();
-				System.out.println(condition);
 			}
 			List<String> columns = selfServiceOptions.getColumns();
 			Report viewReport = report.getViewReport();
