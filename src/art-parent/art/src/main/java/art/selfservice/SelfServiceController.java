@@ -139,10 +139,10 @@ public class SelfServiceController {
 		return response;
 	}
 
-	@GetMapping("/getEditAllDashboardReports")
+	@GetMapping("/getEditAllDashboards")
 	@ResponseBody
-	public AjaxResponse getEditAllDashboardReports(Locale locale) {
-		logger.debug("Entering getEditAllDashboardReports");
+	public AjaxResponse getEditAllDashboards(Locale locale) {
+		logger.debug("Entering getEditAllDashboards");
 
 		AjaxResponse response = new AjaxResponse();
 
