@@ -1425,6 +1425,22 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
 	}
+	
+	/**
+	 * Returns self service reports
+	 *
+	 * @return self service reports
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getSelfServiceReports() throws SQLException {
+		logger.debug("Entering getSelfServiceReports");
+
+		String sql = SQL_SELECT_ALL + " WHERE VIEW_REPORT_ID>0";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h);
+	}
 
 	/**
 	 * Returns saiku reports that a given user can access
@@ -1637,15 +1653,15 @@ public class ReportService {
 
 	/**
 	 * Returns <code>true</code> if a report is only directly allocated to a
-	 * single user
+	 * single user or if the user is the owner of the report
 	 *
 	 * @param user the user
 	 * @param reportId the id of the report
 	 * @return <code>true</code> if user has exclusive access to the report
 	 * @throws java.sql.SQLException
 	 */
-	public boolean hasExclusiveAccess(User user, int reportId) throws SQLException {
-		logger.debug("Entering hasExclusiveAccess: user={}, reportId={}", user, reportId);
+	public boolean hasExclusiveOrOwnerAccess(User user, int reportId) throws SQLException {
+		logger.debug("Entering hasExclusiveOrOwnerAccess: user={}, reportId={}", user, reportId);
 
 		boolean owner;
 		boolean exclusive = false;

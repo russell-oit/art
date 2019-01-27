@@ -118,7 +118,7 @@ public class SelfServiceController {
 
 			List<Report> finalReports = new ArrayList<>();
 			for (Report report : reports) {
-				if (reportService.hasExclusiveAccess(sessionUser, report.getReportId())) {
+				if (reportService.hasExclusiveOrOwnerAccess(sessionUser, report.getReportId())) {
 					finalReports.add(report);
 				}
 			}
@@ -387,11 +387,11 @@ public class SelfServiceController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			List<Report> basicReports = new ArrayList<>();
-			List<Report> reports = reportService.getAvailableSelfServiceReports(sessionUser.getUserId());
+			List<Report> reports = reportService.getSelfServiceReports();
 
 			List<Report> finalReports = new ArrayList<>();
 			for (Report report : reports) {
-				if (reportService.hasExclusiveAccess(sessionUser, report.getReportId())) {
+				if (reportService.hasExclusiveOrOwnerAccess(sessionUser, report.getReportId())) {
 					finalReports.add(report);
 				}
 			}
