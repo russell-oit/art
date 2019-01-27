@@ -87,16 +87,14 @@
 				}
 
 				$("#views").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
-					$("#selfServiceReports").val('0');
-					$("#selfServiceReports").selectpicker('refresh');
+					$("#selfServiceReports").val('0').selectpicker('refresh');
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var option = $(this).find('option').eq(clickedIndex);
 					populateDetails(option);
 				});
 
 				$("#selfServiceReports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
-					$("#views").val('0');
-					$("#views").selectpicker('refresh');
+					$("#views").val('0').selectpicker('refresh');
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var option = $(this).find('option').eq(clickedIndex);
 					populateDetails(option);
