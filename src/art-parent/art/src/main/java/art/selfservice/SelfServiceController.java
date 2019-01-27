@@ -387,17 +387,17 @@ public class SelfServiceController {
 			if (StringUtils.isBlank(selfServiceOptionsString)) {
 				result.put("fromColumns", columns);
 			} else {
-				List<SelfServiceColumn> toColumns = new ArrayList<>();
-
 				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
 				List<String> selfServiceColumns = selfServiceOptions.getColumns();
 				//iterate based on the self service options to maintain saved columns order
+				List<SelfServiceColumn> toColumns = new ArrayList<>();
 				for (String selfServiceColumn : selfServiceColumns) {
-					SelfServiceColumn column = columns.stream()
-							.filter(c -> StringUtils.equalsIgnoreCase(selfServiceColumn, c.getLabel()))
-							.findAny()
-							.orElse(null);
-					toColumns.add(column);
+					for(SelfServiceColumn column : columns){
+						if(StringUtils.equalsIgnoreCase(selfServiceColumn, column.getLabel())){
+							toColumns.add(column);
+							break;
+						}
+					}
 				}
 
 				//https://www.mkyong.com/java8/java-8-streams-filter-examples/
