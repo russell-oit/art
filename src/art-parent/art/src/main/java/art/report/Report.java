@@ -1750,6 +1750,8 @@ public class Report implements Serializable {
 		basic.setDtActiveStatus(dtActiveStatus);
 		basic.setDtAction(dtAction);
 		basic.setReportGroups(reportGroups);
+		basic.setViewReportId(viewReportId);
+		basic.setSelfServiceOptions(selfServiceOptions);
 
 		return basic;
 	}

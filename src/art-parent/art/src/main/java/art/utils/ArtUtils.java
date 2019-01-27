@@ -20,6 +20,7 @@ package art.utils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.awt.Color;
@@ -467,6 +468,28 @@ public class ArtUtils {
 			return null;
 		} else {
 			ObjectMapper mapper = new ObjectMapper();
+			return mapper.readValue(jsonString, clazz);
+		}
+	}
+
+	/**
+	 * Returns an object populated according to a json string without throwing
+	 * an error if unknown properties are encountered in the object hierarchy
+	 *
+	 * @param <T> the type of the object to populate
+	 * @param jsonString the json string
+	 * @param clazz the class of the object to populate
+	 * @return an object populated according to a json string or null if the
+	 * string is null or blank
+	 * @throws IOException
+	 */
+	public static <T> T jsonToObjectIgnoreUnknown(String jsonString, Class<T> clazz) throws IOException {
+		//https://stackoverflow.com/questions/34296761/objectmapper-readvalue-can-return-null-value
+		if (StringUtils.isBlank(jsonString)) {
+			return null;
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			return mapper.readValue(jsonString, clazz);
 		}
 	}

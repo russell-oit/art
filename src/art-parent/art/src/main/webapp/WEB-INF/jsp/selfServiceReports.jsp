@@ -88,7 +88,19 @@
 
 				$("#views").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
-					var reportId = $(this).find('option').eq(clickedIndex).val();
+					var option = $(this).find('option').eq(clickedIndex);
+					populateDetails(option);
+				});
+
+				$("#selfServiceReports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
+					var option = $(this).find('option').eq(clickedIndex);
+					populateDetails(option);
+				});
+
+				function populateDetails(option) {
+					var reportId = option.val();
+					var viewReportId = option.data("viewReportId");
 
 					$("#reportOutput").empty();
 					$("#viewReportId").val(reportId);
@@ -103,17 +115,33 @@
 						$.ajax({
 							type: 'GET',
 							url: '${pageContext.request.contextPath}/getViewDetails',
-							data: {reportId: reportId},
+							data: {reportId: reportId, viewReportId: viewReportId},
 							success: function (response) {
 								if (response.success) {
-									var columns = response.data;
-									var options = "";
-									$.each(columns, function (index, column) {
-										options += "<option value='" + column.label + "' data-type='" + column.type + "' title='" + column.description + "'>" + column.userLabel + "</option>";
+									var result = response.data;
+									var allcolumns = result.allcolumns;
+									var fromColumns = result.fromColumns;
+									var toColumns = result.toColumns;
+
+									var fromOptions = "";
+									var toOptions = "";
+
+									$.each(fromColumns, function (index, column) {
+										fromOptions += createOptionForColumn(column);
 									});
-									var select = $("#multiselect");
-									select.empty();
-									select.append(options);
+									
+									var fromSelect = $("#multiselect");
+									fromSelect.empty();
+									fromSelect.append(fromOptions);
+
+									$.each(toColumns, function (index, column) {
+										toOptions += createOptionForColumn(column);
+									});
+									
+									var toSelect = $("#multiselect_to");
+									toSelect.empty();
+									toSelect.append(toOptions);
+
 									updateBuilder();
 									$("#whereDiv").show();
 								} else {
@@ -125,7 +153,15 @@
 							}
 						});
 					}
-				});
+				}
+
+				function createOptionForColumn(column) {
+					return "<option value='" + column.label
+							+ "' data-type='" + column.type
+							+ "' title='" + column.description + "'>"
+							+ column.userLabel
+							+ "</option>";
+				}
 
 				function loadSelfServiceReports() {
 					$.ajax({
@@ -138,7 +174,10 @@
 								var reports = response.data;
 								var options = "<option value='0'>--</option>";
 								$.each(reports, function (index, report) {
-									options += "<option value='" + report.reportId + "'>" + report.name2 + "</option>";
+									options += "<option value='" + report.reportId
+											+ "' data-view-report-id='" + report.viewReportId + "'>"
+											+ report.name2
+											+ "</option>";
 								});
 								var select = $("#selfServiceReports");
 								select.empty();

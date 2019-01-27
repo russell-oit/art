@@ -20,7 +20,6 @@ package art.selfservice;
 import art.dashboard.DashboardHelper;
 import art.dashboard.GridstackDashboard;
 import art.dbutils.DatabaseUtils;
-import art.enums.ReportType;
 import art.general.AjaxResponse;
 import art.report.Report;
 import art.report.ReportService;
@@ -29,6 +28,7 @@ import art.reportoptions.ViewOptions;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.user.User;
+import art.utils.ArtUtils;
 import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -36,10 +36,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.lang3.StringUtils;
@@ -66,7 +67,7 @@ public class SelfServiceController {
 
 	@Autowired
 	private ReportService reportService;
-	
+
 	@Autowired
 	private MessageSource messageSource;
 
@@ -239,6 +240,7 @@ public class SelfServiceController {
 	@GetMapping("/getViewDetails")
 	@ResponseBody
 	public AjaxResponse getViewDetails(@RequestParam("reportId") Integer reportId,
+			@RequestParam(value = "viewReportId", defaultValue = "0") Integer viewReportId,
 			HttpSession session) {
 
 		logger.debug("Entering getViewDetails: reportId={}", reportId);
@@ -247,7 +249,19 @@ public class SelfServiceController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			Report report = reportService.getReport(reportId);
+
+			Report report;
+			String selfServiceOptionsString = null;
+			if (viewReportId > 0) {
+				report = reportService.getReport(viewReportId);
+				if (report == null) {
+					throw new RuntimeException("View report not available");
+				}
+				Report selfServiceReport = reportService.getReport(reportId);
+				selfServiceOptionsString = selfServiceReport.getSelfServiceOptions();
+			} else {
+				report = reportService.getReport(reportId);
+			}
 
 			GeneralReportOptions generalOptions = report.getGeneralOptions();
 			ViewOptions viewOptions = generalOptions.getView();
@@ -367,7 +381,27 @@ public class SelfServiceController {
 				DatabaseUtils.close(rs);
 				reportRunner.close();
 			}
-			response.setData(columns);
+
+			Map<String, Object> result = new HashMap<>();
+			result.put("allColumns", columns);
+			if (StringUtils.isBlank(selfServiceOptionsString)) {
+				result.put("fromColumns", columns);
+				//result.put("toColumns", null);
+			} else {
+				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
+				List<String> selfServiceColumns = selfServiceOptions.getColumns();
+				//https://stackoverflow.com/questions/46958023/java-stream-divide-into-two-lists-by-boolean-predicate
+				Map<Boolean, List<SelfServiceColumn>> partitioned
+						= columns.stream().collect(
+								Collectors.partitioningBy(c -> ArtUtils.containsIgnoreCase(selfServiceColumns, c.getLabel())));
+				List<SelfServiceColumn> toColumns = partitioned.get(true);
+				List<SelfServiceColumn> fromColumns = partitioned.get(false);
+
+				result.put("fromColumns", fromColumns);
+				result.put("toColumns", toColumns);
+			}
+
+			response.setData(result);
 			response.setSuccess(true);
 		} catch (Exception ex) {
 			logger.error("Error", ex);
@@ -376,7 +410,7 @@ public class SelfServiceController {
 
 		return response;
 	}
-	
+
 	@GetMapping("/getEditSelfService")
 	@ResponseBody
 	public AjaxResponse getEditSelfService(HttpSession session, Locale locale) {
