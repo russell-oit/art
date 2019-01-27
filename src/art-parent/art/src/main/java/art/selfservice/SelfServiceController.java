@@ -386,17 +386,25 @@ public class SelfServiceController {
 			result.put("allColumns", columns);
 			if (StringUtils.isBlank(selfServiceOptionsString)) {
 				result.put("fromColumns", columns);
-				//result.put("toColumns", null);
 			} else {
+				List<SelfServiceColumn> toColumns = new ArrayList<>();
+
 				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
 				List<String> selfServiceColumns = selfServiceOptions.getColumns();
-				//https://stackoverflow.com/questions/46958023/java-stream-divide-into-two-lists-by-boolean-predicate
-				Map<Boolean, List<SelfServiceColumn>> partitioned
-						= columns.stream().collect(
-								Collectors.partitioningBy(c -> ArtUtils.containsIgnoreCase(selfServiceColumns, c.getLabel())));
-				List<SelfServiceColumn> toColumns = partitioned.get(true);
-				List<SelfServiceColumn> fromColumns = partitioned.get(false);
+				//iterate based on the self service options to maintain saved columns order
+				for (String selfServiceColumn : selfServiceColumns) {
+					SelfServiceColumn column = columns.stream()
+							.filter(c -> StringUtils.equalsIgnoreCase(selfServiceColumn, c.getLabel()))
+							.findAny()
+							.orElse(null);
+					toColumns.add(column);
+				}
 
+				//https://www.mkyong.com/java8/java-8-streams-filter-examples/
+				List<SelfServiceColumn> fromColumns = columns.stream()
+						.filter(c -> !ArtUtils.containsIgnoreCase(selfServiceColumns, c.getLabel()))
+						.collect(Collectors.toList());
+				
 				result.put("fromColumns", fromColumns);
 				result.put("toColumns", toColumns);
 			}
