@@ -488,6 +488,8 @@ public class ArtUtils {
 		if (StringUtils.isBlank(jsonString)) {
 			return null;
 		} else {
+			//https://stackoverflow.com/questions/5455014/ignoring-new-fields-on-json-objects-using-jackson
+			//https://gist.github.com/jonikarppinen/9b7f3872257bce27f8e2
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			return mapper.readValue(jsonString, clazz);

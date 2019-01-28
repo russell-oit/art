@@ -35,6 +35,7 @@ import art.reportrule.ReportRule;
 import art.reportrule.ReportRuleService;
 import art.rule.Rule;
 import art.ruleValue.RuleValueService;
+import art.selfservice.SelfServiceOptions;
 import art.servlets.Config;
 import art.user.User;
 import art.usergroup.UserGroup;
@@ -915,6 +916,9 @@ public class ReportRunner {
 			String selfServiceOptionsString = report.getSelfServiceOptions();
 			if (StringUtils.isBlank(selfServiceOptionsString)) {
 				columnsString = viewOptions.getColumns();
+			} else {
+				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
+				columnsString = selfServiceOptions.getColumnsString();
 			}
 
 			if (columnsString == null) {

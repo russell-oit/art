@@ -1484,112 +1484,100 @@ public class RunReportHelper {
 	}
 
 	public void applySelfServiceFields(Report report, User user) throws IOException, SQLException {
-
-		Datasource datasource = report.getDatasource();
-		if (datasource == null) {
-			throw new RuntimeException("Datasource not specified");
-		}
-		String options = datasource.getOptions();
-		DatasourceOptions datasourceOptions;
-		if (StringUtils.isBlank(options)) {
-			datasourceOptions = new DatasourceOptions();
-		} else {
-			datasourceOptions = ArtUtils.jsonToObject(options, DatasourceOptions.class);
-		}
-		DatabaseProtocol databaseProtocol = datasource.getEffectiveDatabaseProtocol();
-
-		ViewOptions viewOptions = report.getGeneralOptions().getView();
-		if (viewOptions == null) {
-			viewOptions = new ViewOptions();
-		}
-
-		String columnsString;
 		String selfServiceOptionsString = report.getSelfServiceOptions();
 		if (StringUtils.isBlank(selfServiceOptionsString)) {
-			columnsString = viewOptions.getColumns();
+			return;
+		}
+
+		SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
+		JsonRule outerRule = selfServiceOptions.getRule();
+		if (outerRule != null) {
+			String rulesString = ArtUtils.objectToJson(outerRule);
+			SqlQueryBuilderFactory sqlQueryBuilderFactory = new SqlQueryBuilderFactory();
+			SqlBuilder sqlBuilder = sqlQueryBuilderFactory.builder();
+
+			// build query
+			SqlQueryResult sqlQueryResult = sqlBuilder.build(rulesString);
+			String condition = sqlQueryResult.getQuery();
+		}
+		List<String> columns = selfServiceOptions.getColumns();
+		Report viewReport = report.getViewReport();
+		List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(viewReport, user);
+		List<String> chosenColumns = new ArrayList<>();
+		if (CollectionUtils.isEmpty(columns)) {
+			for (SelfServiceColumn referenceColumn : selfServiceColumns) {
+				String columnSpecification = referenceColumn.getLabel();
+				chosenColumns.add(columnSpecification);
+			}
 		} else {
-			//https://stackoverflow.com/questions/5455014/ignoring-new-fields-on-json-objects-using-jackson
-			//https://gist.github.com/jonikarppinen/9b7f3872257bce27f8e2
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			SelfServiceOptions selfServiceOptions = mapper.readValue(selfServiceOptionsString, SelfServiceOptions.class);
-			//SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObject(selfServiceOptionsString, SelfServiceOptions.class);
-			JsonRule outerRule = selfServiceOptions.getRule();
-			if (outerRule != null) {
-				String rulesString = ArtUtils.objectToJson(outerRule);
-				SqlQueryBuilderFactory sqlQueryBuilderFactory = new SqlQueryBuilderFactory();
-				SqlBuilder sqlBuilder = sqlQueryBuilderFactory.builder();
-
-				// build query
-				SqlQueryResult sqlQueryResult = sqlBuilder.build(rulesString);
-				String condition = sqlQueryResult.getQuery();
+			Datasource datasource = report.getDatasource();
+			if (datasource == null) {
+				throw new RuntimeException("Datasource not specified");
 			}
-			List<String> columns = selfServiceOptions.getColumns();
-			Report viewReport = report.getViewReport();
-			List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(viewReport, user);
-			List<String> chosenColumns = new ArrayList<>();
-			if (CollectionUtils.isEmpty(columns)) {
-				for (SelfServiceColumn referenceColumn : selfServiceColumns) {
-					String columnSpecification = referenceColumn.getLabel();
-					chosenColumns.add(columnSpecification);
-				}
+			String options = datasource.getOptions();
+			DatasourceOptions datasourceOptions;
+			if (StringUtils.isBlank(options)) {
+				datasourceOptions = new DatasourceOptions();
 			} else {
-				String startEnclose;
-				String endEnclose;
-				String reportEnclose = viewOptions.getEnclose();
-				String reportStartEnclose = viewOptions.getStartEnclose();
-				String reportEndEnclose = viewOptions.getEndEnclose();
-				String datasourceEnclose = datasourceOptions.getEnclose();
-				String datasourceStartEnclose = datasourceOptions.getStartEnclose();
-				String datasourceEndEnclose = datasourceOptions.getEndEnclose();
-				String databaseEnclose = databaseProtocol.enclose();
-				String databaseStartEnclose = databaseProtocol.startEnclose();
-				String databaseEndEnclose = databaseProtocol.endEnclose();
-				if (reportEnclose == null) {
-					startEnclose = reportStartEnclose;
-					endEnclose = reportEndEnclose;
-				} else {
-					startEnclose = reportEnclose;
-					endEnclose = reportEnclose;
-				}
-				if ((startEnclose == null && endEnclose == null) && datasourceEnclose == null) {
-					startEnclose = datasourceStartEnclose;
-					endEnclose = datasourceEndEnclose;
-				} else {
-					startEnclose = datasourceEnclose;
-					endEnclose = datasourceEnclose;
-				}
-				if ((startEnclose == null && endEnclose == null) && databaseEnclose == null) {
-					startEnclose = databaseStartEnclose;
-					endEnclose = databaseEndEnclose;
-				} else {
-					startEnclose = databaseEnclose;
-					endEnclose = databaseEnclose;
-				}
-				for (String column : columns) {
-					SelfServiceColumn referenceColumn = selfServiceColumns.stream()
-							.filter(c -> c.getLabel().equals(column))
-							.findAny()
-							.orElseThrow(() -> new RuntimeException("Invalid column: " + column));
-					String columnSpecification;
-					if (StringUtils.equals(referenceColumn.getLabel(), referenceColumn.getUserLabel())) {
-						columnSpecification = referenceColumn.getLabel();
-					} else {
-						columnSpecification = referenceColumn.getLabel() + " as " + startEnclose + referenceColumn.getUserLabel() + endEnclose;
-					}
-					chosenColumns.add(columnSpecification);
-				}
+				datasourceOptions = ArtUtils.jsonToObject(options, DatasourceOptions.class);
 			}
-			columnsString = StringUtils.join(chosenColumns, ", ");
-		}
+			DatabaseProtocol databaseProtocol = datasource.getEffectiveDatabaseProtocol();
 
-		if (columnsString == null) {
-			columnsString = "*";
-		}
+			ViewOptions viewOptions = report.getGeneralOptions().getView();
+			if (viewOptions == null) {
+				viewOptions = new ViewOptions();
+			}
 
-		String querySql = report.getReportSource();
-		querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", columnsString);
-		report.setReportSource(querySql);
+			String startEnclose;
+			String endEnclose;
+			String reportEnclose = viewOptions.getEnclose();
+			String reportStartEnclose = viewOptions.getStartEnclose();
+			String reportEndEnclose = viewOptions.getEndEnclose();
+			String datasourceEnclose = datasourceOptions.getEnclose();
+			String datasourceStartEnclose = datasourceOptions.getStartEnclose();
+			String datasourceEndEnclose = datasourceOptions.getEndEnclose();
+			String databaseEnclose = databaseProtocol.enclose();
+			String databaseStartEnclose = databaseProtocol.startEnclose();
+			String databaseEndEnclose = databaseProtocol.endEnclose();
+			if (reportEnclose == null) {
+				startEnclose = reportStartEnclose;
+				endEnclose = reportEndEnclose;
+			} else {
+				startEnclose = reportEnclose;
+				endEnclose = reportEnclose;
+			}
+			if ((startEnclose == null && endEnclose == null) && datasourceEnclose == null) {
+				startEnclose = datasourceStartEnclose;
+				endEnclose = datasourceEndEnclose;
+			} else {
+				startEnclose = datasourceEnclose;
+				endEnclose = datasourceEnclose;
+			}
+			if ((startEnclose == null && endEnclose == null) && databaseEnclose == null) {
+				startEnclose = databaseStartEnclose;
+				endEnclose = databaseEndEnclose;
+			} else {
+				startEnclose = databaseEnclose;
+				endEnclose = databaseEnclose;
+			}
+			for (String column : columns) {
+				SelfServiceColumn referenceColumn = selfServiceColumns.stream()
+						.filter(c -> c.getLabel().equals(column))
+						.findAny()
+						.orElseThrow(() -> new RuntimeException("Invalid column: " + column));
+				String columnSpecification;
+				if (StringUtils.equals(referenceColumn.getLabel(), referenceColumn.getUserLabel())) {
+					columnSpecification = referenceColumn.getLabel();
+				} else {
+					columnSpecification = referenceColumn.getLabel() + " as " + startEnclose + referenceColumn.getUserLabel() + endEnclose;
+				}
+				chosenColumns.add(columnSpecification);
+			}
+		}
+		String columnsString = StringUtils.join(chosenColumns, ", ");
+		selfServiceOptions.setColumnsString(columnsString);
+		selfServiceOptionsString = ArtUtils.objectToJson(selfServiceOptions);
+		report.setSelfServiceOptions(selfServiceOptionsString);
 	}
 
 }

@@ -33,6 +33,21 @@ public class SelfServiceOptions implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private List<String> columns;
 	private JsonRule rule;
+	private String columnsString;
+
+	/**
+	 * @return the columnsString
+	 */
+	public String getColumnsString() {
+		return columnsString;
+	}
+
+	/**
+	 * @param columnsString the columnsString to set
+	 */
+	public void setColumnsString(String columnsString) {
+		this.columnsString = columnsString;
+	}
 
 	/**
 	 * @return the rule
