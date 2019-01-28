@@ -94,6 +94,7 @@
 
 					$("#newReportLink").hide();
 					$("#deleteReport").hide();
+					$("#reportId").val('');
 				});
 
 				$("#selfServiceReports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
@@ -108,6 +109,7 @@
 					$("#deleteReport").attr("data-report-name", reportName);
 					$("#deleteReport").attr("data-report-id", reportId);
 					$("#deleteReport").show();
+					$("#reportId").val(reportId);
 				});
 
 				function populateDetails(option) {
@@ -585,15 +587,18 @@
 											var newUrl = "${pageContext.request.contextPath}/selectReportParameters?reportId=" + newReportId;
 											$("#newReportLink").attr("href", newUrl);
 											$("#newReportLink").show();
-//											$('#dashboardReports').append("<option value='" + newReportId + "'>" + reportName + "</option>");
-//											$('#dashboardReports').find('[value=' + newReportId + ']').prop('selected', true);
-//											$("#dashboardReports").selectpicker('refresh');
-//											showDeleteReport(reportName, newReportId);
-//											$("#reportId").val(newReportId);
+											$('#selfServiceReports').append("<option value='" + newReportId + "'>" + reportName + "</option>");
+											$('#selfServiceReports').find('[value=' + newReportId + ']').prop('selected', true);
+											$("#selfServiceReports").selectpicker('refresh');
+											$("#deleteReport").attr("data-report-name", reportName);
+											$("#deleteReport").attr("data-report-id", newReportId);
+											$("#deleteReport").show();
+											$("#reportId").val(newReportId);
+											$("#views").val('0').selectpicker('refresh');
 										} else if (reportName) {
-//											$('#dashboardReports').find('[value=' + reportId + ']').text(reportName);
-//											$("#dashboardReports").selectpicker('refresh');
-//											$("#deleteReport").attr("data-report-name", reportName);
+											$('#selfServiceReports').find('[value=' + reportId + ']').text(reportName);
+											$("#selfServiceReports").selectpicker('refresh');
+											$("#deleteReport").attr("data-report-name", reportName);
 										}
 									} else {
 										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
