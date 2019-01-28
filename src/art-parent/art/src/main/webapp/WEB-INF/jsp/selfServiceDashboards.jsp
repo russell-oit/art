@@ -349,12 +349,6 @@
 				var grid = $('.grid-stack').data('gridstack');
 				grid.removeAll();
 			}
-
-			function showDeleteDashboard(reportName, reportId) {
-				$("#deleteDashboard").attr("data-report-name", reportName);
-				$("#deleteDashboard").attr("data-report-id", reportId);
-				$("#deleteDashboard").show();
-			}
 		</script>
 	</jsp:attribute>
 
@@ -540,7 +534,9 @@
 											$('#dashboardReports').append("<option value='" + newReportId + "'>" + reportName + "</option>");
 											$('#dashboardReports').find('[value=' + newReportId + ']').prop('selected', true);
 											$("#dashboardReports").selectpicker('refresh');
-											showDeleteDashboard(reportName, newReportId);
+											$("#deleteDashboard").attr("data-report-name", reportName);
+											$("#deleteDashboard").attr("data-report-id", newReportId);
+											$("#deleteDashboard").show();
 											$("#reportId").val(newReportId);
 										} else if (reportName) {
 											$('#dashboardReports').find('[value=' + reportId + ']').text(reportName);

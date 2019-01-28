@@ -1308,6 +1308,11 @@ public class ReportController {
 			} else {
 				report = reportService.getReport(reportId);
 				report.encryptPasswords();
+				
+				if (report.isSelfService()) {
+					Report viewReport = reportService.getReport(report.getViewReportId());
+					report.setViewReport(viewReport);
+				}
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
