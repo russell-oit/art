@@ -91,6 +91,9 @@
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var option = $(this).find('option').eq(clickedIndex);
 					populateDetails(option);
+
+					$("#newReportLink").hide();
+					$("#deleteReport").hide();
 				});
 
 				$("#selfServiceReports").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
@@ -98,6 +101,13 @@
 					//https://stackoverflow.com/questions/36944647/bootstrap-select-on-click-get-clicked-value
 					var option = $(this).find('option').eq(clickedIndex);
 					populateDetails(option);
+
+					var reportId = option.val();
+					var reportName = option.text();
+
+					$("#deleteReport").attr("data-report-name", reportName);
+					$("#deleteReport").attr("data-report-id", reportId);
+					$("#deleteReport").show();
 				});
 
 				function populateDetails(option) {
@@ -121,7 +131,7 @@
 							success: function (response) {
 								if (response.success) {
 									var result = response.data;
-									var allcolumns = result.allcolumns;
+									var allColumns = result.allColumns;
 									var fromColumns = result.fromColumns;
 									var toColumns = result.toColumns;
 
@@ -131,7 +141,7 @@
 									$.each(fromColumns, function (index, column) {
 										fromOptions += createOptionForColumn(column);
 									});
-									
+
 									var fromSelect = $("#multiselect");
 									fromSelect.empty();
 									fromSelect.append(fromOptions);
@@ -139,12 +149,12 @@
 									$.each(toColumns, function (index, column) {
 										toOptions += createOptionForColumn(column);
 									});
-									
+
 									var toSelect = $("#multiselect_to");
 									toSelect.empty();
 									toSelect.append(toOptions);
 
-									updateBuilder();
+									updateBuilder(allColumns);
 									$("#whereDiv").show();
 								} else {
 									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
@@ -265,9 +275,67 @@
 					});
 				});
 
+				$("#deleteReport").on("click", function () {
+					var reportName = $(this).attr("data-report-name");
+					reportName = escapeHtmlContent(reportName);
+					var reportId = $(this).attr("data-report-id");
+
+					bootbox.confirm({
+						message: "${deleteRecordText}: <b>" + reportName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/deleteSelfService",
+									data: {id: reportId},
+									success: function (response) {
+										var nonDeletedRecords = response.data;
+										if (response.success) {
+											$("#selfServiceReports option[value='" + reportId + "']").remove();
+											resetAll();
+											$.notify("${reportDeletedText}", "success");
+										} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+											$.notify("${cannotDeleteReportText}", "error");
+										} else {
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+										}
+									},
+									error: function (xhr) {
+										showUserAjaxError(xhr, '${errorOccurredText}');
+									}
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
+
 				initializeBuilder();
 
 			});
+
+			function resetAll() {
+				reset();
+				$("#views").val('0').selectpicker('refresh');
+				$("#selfServiceReports").val('0').selectpicker('refresh');
+				$("#deleteReport").hide();
+			}
+
+			function reset() {
+				$('#multiselect').empty();
+				$('#multiselect_to').empty();
+				$("#whereDiv").hide();
+				$("#newReportLink").hide();
+			}
 
 			function getSelfServiceOptionsString() {
 				var selectedColumns = $("#multiselect_to option").map(function () {
@@ -301,38 +369,30 @@
 				});
 			}
 
-			function updateBuilder() {
-				var filters = createFilters();
+			function updateBuilder(allColumns) {
+				var filters = createFilters(allColumns);
 				var force = true;
 				$('#builder').queryBuilder('setFilters', force, filters);
 				$('#builder').queryBuilder('reset');
 			}
 
-			function createFilters() {
+			function createFilters(allColumns) {
 				var filters = [];
 				var ids = [];
 
-				$('#multiselect option').each(function (index, element) {
-					//console.log(index);
-					//console.log(element.value);
-					//console.log(element.text);
-					var value = element.value;
-					var text = element.text;
-					var fieldType = $(element).data("type");
-					if (fieldType === undefined) {
-						fieldType = 'string';
+				$.each(allColumns, function (index, column) {
+					var id = column.label;
+
+					if ($.inArray(id, ids) !== -1) {
+						id += index;
 					}
 
-					if ($.inArray(value, ids) !== -1) {
-						value += index;
-					}
-
-					ids.push(value);
+					ids.push(id);
 
 					var filter = {
-						id: value,
-						label: text,
-						type: fieldType
+						id: id,
+						label: column.userLabel,
+						type: column.type
 					};
 
 					filters.push(filter);
@@ -408,14 +468,7 @@
 		<div class="row" id="whereDiv" style="margin-top: 20px; display: none">
 			<div class="col-md-12">
 				<div class="row">
-					<div class="col-md-12">
-						<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="false">SQL</button>
-						<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="question_mark">SQL statement
-							(?)
-						</button>
-						<button class="btn btn-primary parse-sql" data-target="import_export" data-stmt="named">SQL statement (named)
-						</button>
-						<button class="btn btn-default" id="selected">Selected</button>
+					<div class="col-md-12" style="text-align: center">
 						<spring:message code="selfService.text.limit"/>&nbsp;
 						<input id="limit" type="number" value="10">
 						<button id="preview" class="btn btn-default">
@@ -423,6 +476,9 @@
 						</button>
 						<button id="saveReport" class="btn btn-primary">
 							<spring:message code="page.button.save"/>
+						</button>
+						<button class="btn btn-default" id="deleteReport" style="display: none">
+							<spring:message code="page.action.delete"/>
 						</button>
 						<a class="btn btn-default" id="newReportLink" style="display: none"
 						   href="">
@@ -576,50 +632,6 @@
 				if (header) {
 					xhr.setRequestHeader(header, token);
 				}
-			});
-
-			$("#deleteDashboard").on("click", function () {
-				var reportName = $(this).attr("data-report-name");
-				reportName = escapeHtmlContent(reportName);
-				var reportId = $(this).attr("data-report-id");
-
-				bootbox.confirm({
-					message: "${deleteRecordText}: <b>" + reportName + "</b>",
-					buttons: {
-						cancel: {
-							label: "${cancelText}"
-						},
-						confirm: {
-							label: "${okText}"
-						}
-					},
-					callback: function (result) {
-						if (result) {
-							//user confirmed delete. make delete request
-							$.ajax({
-								type: "POST",
-								dataType: "json",
-								url: "${pageContext.request.contextPath}/deleteGridstack",
-								data: {id: reportId},
-								success: function (response) {
-									var nonDeletedRecords = response.data;
-									if (response.success) {
-										$("#dashboardReports option[value='" + reportId + "']").remove();
-										resetAll();
-										$.notify("${reportDeletedText}", "success");
-									} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-										$.notify("${cannotDeleteReportText}", "error");
-									} else {
-										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-									}
-								},
-								error: function (xhr) {
-									showUserAjaxError(xhr, '${errorOccurredText}');
-								}
-							});
-						} //end if result
-					} //end callback
-				}); //end bootbox confirm
 			});
 		</script>
 	</jsp:body>

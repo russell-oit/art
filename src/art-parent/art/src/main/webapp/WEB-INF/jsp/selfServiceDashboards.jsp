@@ -82,7 +82,7 @@
 						var height = 3;
 						var autoPosition = true;
 						grid.addWidget(el, x, y, width, height, autoPosition);
-						
+
 						var runImmediately = $("#runImmediately").is(":checked");
 						if (runImmediately) {
 							runReport(reportId);
@@ -98,7 +98,7 @@
 					var processedTemplate = $("#widgetTemplate").html().replace(/#reportId#/g, reportId).replace(/#reportName#/g, reportName);
 					return processedTemplate;
 				}
-				
+
 				function runReport(reportId) {
 					$.ajax({
 						type: 'POST',
@@ -125,7 +125,7 @@
 					$('#reports').find('[value=' + reportId + ']').prop('selected', false);
 					$('#reports').selectpicker('refresh');
 				});
-				
+
 				$('.grid-stack').on('click', '.refreshWidget', function () {
 					var reportId = $(this).data("reportId");
 					runReport(reportId);
@@ -280,6 +280,50 @@
 							}
 						});
 					}
+				});
+
+				$("#deleteDashboard").on("click", function () {
+					var reportName = $(this).attr("data-report-name");
+					reportName = escapeHtmlContent(reportName);
+					var reportId = $(this).attr("data-report-id");
+
+					bootbox.confirm({
+						message: "${deleteRecordText}: <b>" + reportName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/deleteGridstack",
+									data: {id: reportId},
+									success: function (response) {
+										var nonDeletedRecords = response.data;
+										if (response.success) {
+											$("#dashboardReports option[value='" + reportId + "']").remove();
+											resetAll();
+											$.notify("${reportDeletedText}", "success");
+										} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+											$.notify("${cannotDeleteReportText}", "error");
+										} else {
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+										}
+									},
+									error: function (xhr) {
+										showUserAjaxError(xhr, '${errorOccurredText}');
+									}
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
 				});
 
 			});
@@ -540,50 +584,6 @@
 				if (header) {
 					xhr.setRequestHeader(header, token);
 				}
-			});
-
-			$("#deleteDashboard").on("click", function () {
-				var reportName = $(this).attr("data-report-name");
-				reportName = escapeHtmlContent(reportName);
-				var reportId = $(this).attr("data-report-id");
-
-				bootbox.confirm({
-					message: "${deleteRecordText}: <b>" + reportName + "</b>",
-					buttons: {
-						cancel: {
-							label: "${cancelText}"
-						},
-						confirm: {
-							label: "${okText}"
-						}
-					},
-					callback: function (result) {
-						if (result) {
-							//user confirmed delete. make delete request
-							$.ajax({
-								type: "POST",
-								dataType: "json",
-								url: "${pageContext.request.contextPath}/deleteGridstack",
-								data: {id: reportId},
-								success: function (response) {
-									var nonDeletedRecords = response.data;
-									if (response.success) {
-										$("#dashboardReports option[value='" + reportId + "']").remove();
-										resetAll();
-										$.notify("${reportDeletedText}", "success");
-									} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-										$.notify("${cannotDeleteReportText}", "error");
-									} else {
-										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-									}
-								},
-								error: function (xhr) {
-									showUserAjaxError(xhr, '${errorOccurredText}');
-								}
-							});
-						} //end if result
-					} //end callback
-				}); //end bootbox confirm
 			});
 		</script>
 	</jsp:body>
