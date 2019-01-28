@@ -158,20 +158,26 @@ public class RunReportController {
 					testReport.setSelfServicePreview(selfServicePreview);
 					testReport.setSelfServiceOptions(selfServiceOptions);
 					testReport.setLimit(limit);
-					testReport.setViewReportId(reportId);
-					testReport.setViewReport(originalReport);
+					if (testReport.isSelfService()) {
+						Report viewReport = reportService.getReport(testReport.getViewReportId());
+						testReport.setViewReport(viewReport);
+					} else {
+						testReport.setReportType(ReportType.Tabular);
+						testReport.setViewReportId(reportId);
+						testReport.setViewReport(originalReport);
+					}
 
 					RunReportHelper runReportHelper = new RunReportHelper();
 					runReportHelper.applySelfServiceFields(testReport, sessionUser);
-				}
-
-				boolean testData = BooleanUtils.toBoolean(request.getParameter("testData"));
-				if (testData) {
-					testReport.setReportType(ReportType.Tabular);
 				} else {
-					testReport.setReportType(ReportType.toEnum(testReport.getReportTypeId()));
-					if (testReport.getReportType() == ReportType.Text) {
-						testReport.setReportSource(testReport.getReportSourceHtml());
+					boolean testData = BooleanUtils.toBoolean(request.getParameter("testData"));
+					if (testData) {
+						testReport.setReportType(ReportType.Tabular);
+					} else {
+						testReport.setReportType(ReportType.toEnum(testReport.getReportTypeId()));
+						if (testReport.getReportType() == ReportType.Text) {
+							testReport.setReportSource(testReport.getReportSourceHtml());
+						}
 					}
 				}
 				testReport.loadGeneralOptions();

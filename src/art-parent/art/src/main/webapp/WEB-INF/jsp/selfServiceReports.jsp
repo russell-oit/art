@@ -249,6 +249,14 @@
 					$('#preview').prop('disabled', true);
 
 					var viewId = $("#views").val();
+					var selfServiceReportId = $("#selfServiceReports").val();
+					var reportId;
+					if (viewId === '0') {
+						reportId = selfServiceReportId;
+					} else {
+						reportId = viewId;
+					}
+					
 					var limit = $("#limit").val();
 					if (!limit) {
 						limit = "0";
@@ -261,7 +269,7 @@
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
 						data: {selfServicePreview: true, reportFormat: "htmlDataTable",
-							dummyBoolean: true, reportId: viewId,
+							dummyBoolean: true, reportId: reportId,
 							selfServiceOptions: selfServiceOptionsString,
 							basicReport2: true, showInline: true, limit: limit},
 						success: function (data) {
