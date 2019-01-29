@@ -408,6 +408,7 @@ public class SelfServiceController {
 				result.put("fromColumns", fromColumns);
 				result.put("toColumns", toColumns);
 			}
+			result.put("options", selfServiceOptionsString);
 
 			response.setData(result);
 			response.setSuccess(true);

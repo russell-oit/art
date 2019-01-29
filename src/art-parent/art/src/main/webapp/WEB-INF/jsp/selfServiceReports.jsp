@@ -136,6 +136,7 @@
 									var allColumns = result.allColumns;
 									var fromColumns = result.fromColumns;
 									var toColumns = result.toColumns;
+									var optionsString = result.options;
 
 									var fromOptions = "";
 									var toOptions = "";
@@ -156,7 +157,13 @@
 									toSelect.empty();
 									toSelect.append(toOptions);
 
-									updateBuilder(allColumns);
+									var ruleObject;
+									if (optionsString) {
+										var options = JSON.parse(optionsString);
+										ruleObject = options.jqueryRule;
+									}
+
+									updateBuilder(allColumns, ruleObject);
 									$("#whereDiv").show();
 								} else {
 									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
@@ -362,8 +369,8 @@
 				var selfServiceOptions = {};
 				selfServiceOptions.columns = selectedColumns;
 
-				var rules = $('#builder').queryBuilder('getRules');
-				selfServiceOptions.rule = rules;
+				var ruleObject = $('#builder').queryBuilder('getRules');
+				selfServiceOptions.jqueryRule = ruleObject;
 
 				var selfServiceOptionsString = JSON.stringify(selfServiceOptions);
 				return selfServiceOptionsString;
@@ -379,11 +386,14 @@
 				});
 			}
 
-			function updateBuilder(allColumns) {
+			function updateBuilder(allColumns, rules) {
 				var filters = createFilters(allColumns);
 				var force = true;
 				$('#builder').queryBuilder('setFilters', force, filters);
 				$('#builder').queryBuilder('reset');
+				if (rules) {
+					$('#builder').queryBuilder('setRules', rules);
+				}
 			}
 
 			function createFilters(allColumns) {

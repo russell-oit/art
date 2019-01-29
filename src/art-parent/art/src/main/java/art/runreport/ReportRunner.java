@@ -928,12 +928,12 @@ public class ReportRunner {
 				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
 				columnsString = selfServiceOptions.getColumnsString();
 
-				JsonRule outerRule = selfServiceOptions.getRule();
-				if (outerRule != null && StringUtils.containsIgnoreCase(querySql, CONDITION_PLACEHOLDER)) {
-					String rulesString = ArtUtils.objectToJson(outerRule);
+				Object jqueryRule = selfServiceOptions.getJqueryRule();
+				if (jqueryRule != null && StringUtils.containsIgnoreCase(querySql, CONDITION_PLACEHOLDER)) {
 					SqlQueryBuilderFactory sqlQueryBuilderFactory = new SqlQueryBuilderFactory();
 					SqlBuilder sqlBuilder = sqlQueryBuilderFactory.builder();
-					SqlQueryResult sqlQueryResult = sqlBuilder.build(rulesString);
+					String jqueryRuleString = ArtUtils.objectToJson(jqueryRule);
+					SqlQueryResult sqlQueryResult = sqlBuilder.build(jqueryRuleString);
 					conditionString = sqlQueryResult.getQuery();
 					List<Object> values = sqlQueryResult.getParams();
 					for (Object value : values) {

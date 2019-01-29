@@ -17,23 +17,41 @@
  */
 package art.selfservice;
 
+import art.utils.ArtUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.itfsw.query.builder.support.model.JsonRule;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * Represents self service options
- * 
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SelfServiceOptions implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private List<String> columns;
-	private JsonRule rule;
 	private String columnsString;
+	private Object jqueryRule;
+
+	/**
+	 * @return the jqueryRule
+	 */
+	public Object getJqueryRule() {
+		return jqueryRule;
+	}
+
+	/**
+	 * @param jqueryRule the jqueryRule to set
+	 */
+	public void setJqueryRule(Object jqueryRule) {
+		this.jqueryRule = jqueryRule;
+	}
 
 	/**
 	 * @return the columnsString
@@ -50,20 +68,6 @@ public class SelfServiceOptions implements Serializable {
 	}
 
 	/**
-	 * @return the rule
-	 */
-	public JsonRule getRule() {
-		return rule;
-	}
-
-	/**
-	 * @param rule the rule to set
-	 */
-	public void setRule(JsonRule rule) {
-		this.rule = rule;
-	}
-
-	/**
 	 * @return the columns
 	 */
 	public List<String> getColumns() {
@@ -76,5 +80,32 @@ public class SelfServiceOptions implements Serializable {
 	public void setColumns(List<String> columns) {
 		this.columns = columns;
 	}
-	
+
+	/**
+	 * Returns the itfsw querybuilder rule object for the current jquery
+	 * querybuilder rule object
+	 *
+	 * @return the itfsw querybuilder rule object
+	 * @throws java.io.IOException
+	 */
+	@JsonIgnore
+	public JsonRule getJavaRule() throws IOException {
+		String jqueryRuleString = ArtUtils.objectToJson(jqueryRule);
+		JsonRule javaRule = ArtUtils.jsonToObjectIgnoreUnknown(jqueryRuleString, JsonRule.class);
+		return javaRule;
+	}
+
+	/**
+	 * Returns the json representation of the current jquery querybuilder rule
+	 * object
+	 *
+	 * @return the json representation of the current jquery querybuilder rule
+	 * @throws JsonProcessingException
+	 */
+	@JsonIgnore
+	public String getJqueryRuleString() throws JsonProcessingException {
+		String jqueryRuleString = ArtUtils.objectToJson(jqueryRule);
+		return jqueryRuleString;
+	}
+
 }

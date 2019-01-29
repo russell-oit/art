@@ -1495,9 +1495,9 @@ public class RunReportHelper {
 		List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(viewReport, user);
 
 		SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
-		JsonRule outerRule = selfServiceOptions.getRule();
-		if (outerRule != null) {
-			for (JsonRule rule : outerRule.getRules()) {
+		JsonRule javaRule = selfServiceOptions.getJavaRule();
+		if (javaRule != null) {
+			for (JsonRule rule : javaRule.getRules()) {
 				String field = rule.getField();
 				boolean found = false;
 				for (SelfServiceColumn selfServiceColumn : selfServiceColumns) {
