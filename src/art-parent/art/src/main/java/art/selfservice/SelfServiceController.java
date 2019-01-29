@@ -386,6 +386,7 @@ public class SelfServiceController {
 
 			Map<String, Object> result = new HashMap<>();
 			result.put("allColumns", columns);
+			
 			if (StringUtils.isBlank(selfServiceOptionsString)) {
 				result.put("fromColumns", columns);
 			} else {
