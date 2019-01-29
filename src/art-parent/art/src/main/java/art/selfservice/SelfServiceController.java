@@ -251,7 +251,7 @@ public class SelfServiceController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			Report report;
-			String selfServiceOptionsString = null;
+			String selfServiceOptionsString;
 			if (viewReportId > 0) {
 				report = reportService.getReport(viewReportId);
 				if (report == null) {
@@ -261,6 +261,7 @@ public class SelfServiceController {
 				selfServiceOptionsString = selfServiceReport.getSelfServiceOptions();
 			} else {
 				report = reportService.getReport(reportId);
+				selfServiceOptionsString = report.getSelfServiceOptions();
 			}
 
 			GeneralReportOptions generalOptions = report.getGeneralOptions();
@@ -296,7 +297,12 @@ public class SelfServiceController {
 					SelfServiceColumn column = new SelfServiceColumn();
 
 					column.setName(rsmd.getColumnName(i));
-					column.setLabel(rsmd.getColumnLabel(i));
+					
+					if (report.isSelfService()) {
+						column.setLabel(rsmd.getColumnName(i));
+					} else {
+						column.setLabel(rsmd.getColumnLabel(i));
+					}
 
 					int sqlType = rsmd.getColumnType(i);
 
@@ -372,10 +378,6 @@ public class SelfServiceController {
 						description = "";
 					}
 					column.setDescription(description);
-
-					column.setLabel(Encode.forHtmlAttribute(column.getLabel()));
-					column.setUserLabel(Encode.forHtmlContent(column.getUserLabel()));
-					column.setDescription(Encode.forHtmlAttribute(column.getDescription()));
 				}
 			} finally {
 				DatabaseUtils.close(rs);
@@ -392,8 +394,8 @@ public class SelfServiceController {
 				//iterate based on the self service options to maintain saved columns order
 				List<SelfServiceColumn> toColumns = new ArrayList<>();
 				for (String selfServiceColumn : selfServiceColumns) {
-					for(SelfServiceColumn column : columns){
-						if(StringUtils.equalsIgnoreCase(selfServiceColumn, column.getLabel())){
+					for (SelfServiceColumn column : columns) {
+						if (StringUtils.equalsIgnoreCase(selfServiceColumn, column.getLabel())) {
 							toColumns.add(column);
 							break;
 						}
@@ -404,7 +406,7 @@ public class SelfServiceController {
 				List<SelfServiceColumn> fromColumns = columns.stream()
 						.filter(c -> !ArtUtils.containsIgnoreCase(selfServiceColumns, c.getLabel()))
 						.collect(Collectors.toList());
-				
+
 				result.put("fromColumns", fromColumns);
 				result.put("toColumns", toColumns);
 			}

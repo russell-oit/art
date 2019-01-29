@@ -177,10 +177,14 @@
 				}
 
 				function createOptionForColumn(column) {
-					return "<option value='" + column.label
+					var label = escapeHtmlContent(column.label);
+					var description = escapeHtmlContent(column.description);
+					var userLabel = escapeHtmlContent(column.userLabel);
+
+					return "<option value='" + label
 							+ "' data-type='" + column.type
-							+ "' title='" + column.description + "'>"
-							+ column.userLabel
+							+ "' title='" + description + "'>"
+							+ userLabel
 							+ "</option>";
 				}
 
