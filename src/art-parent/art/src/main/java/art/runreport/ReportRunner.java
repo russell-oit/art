@@ -44,6 +44,10 @@ import art.utils.ExpressionHelper;
 import art.utils.GroovySandbox;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
+import com.itfsw.query.builder.SqlQueryBuilderFactory;
+import com.itfsw.query.builder.support.builder.SqlBuilder;
+import com.itfsw.query.builder.support.model.JsonRule;
+import com.itfsw.query.builder.support.model.result.SqlQueryResult;
 import com.mongodb.MongoClient;
 import groovy.lang.Binding;
 import groovy.lang.GString;
@@ -306,7 +310,7 @@ public class ReportRunner {
 		applyUsesGroovy();
 		applyParameterPlaceholders(); //question placeholder put here
 		applyDynamicRecipient();
-		applySelfServiceFields();
+		applySelfServiceFields(); //must come after applyParameterPlaceholders()
 
 		if (!report.getReportType().isJPivot()) {
 			applyRulesToQuery();
@@ -912,26 +916,42 @@ public class ReportRunner {
 				viewOptions = new ViewOptions();
 			}
 
-			String columnsString = null;
+			final String CONDITION_PLACEHOLDER = "#condition#";
+			String querySql = querySb.toString();
+
+			String columnsString;
+			String conditionString = null;
 			String selfServiceOptionsString = report.getSelfServiceOptions();
 			if (StringUtils.isBlank(selfServiceOptionsString)) {
 				columnsString = viewOptions.getColumns();
 			} else {
 				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
 				columnsString = selfServiceOptions.getColumnsString();
+
+				JsonRule outerRule = selfServiceOptions.getRule();
+				if (outerRule != null && StringUtils.containsIgnoreCase(querySql, CONDITION_PLACEHOLDER)) {
+					String rulesString = ArtUtils.objectToJson(outerRule);
+					SqlQueryBuilderFactory sqlQueryBuilderFactory = new SqlQueryBuilderFactory();
+					SqlBuilder sqlBuilder = sqlQueryBuilderFactory.builder();
+					SqlQueryResult sqlQueryResult = sqlBuilder.build(rulesString);
+					conditionString = sqlQueryResult.getQuery();
+					List<Object> values = sqlQueryResult.getParams();
+					for (Object value : values) {
+						jdbcParams.add(value);
+					}
+				}
 			}
 
 			if (columnsString == null) {
 				columnsString = "*";
 			}
 
-			String querySql = querySb.toString();
 			querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", columnsString);
 
-			final String CONDITION_PLACEHOLDER = "#condition#";
-			if (reportType == ReportType.View) {
-				querySql = StringUtils.replaceIgnoreCase(querySql, CONDITION_PLACEHOLDER, "1=1");
+			if (conditionString == null) {
+				conditionString = "1=1";
 			}
+			querySql = StringUtils.replaceIgnoreCase(querySql, CONDITION_PLACEHOLDER, conditionString);
 
 			String reportLimitClause = viewOptions.getLimitClause();
 			String datasourceLimitClause = datasourceOptions.getLimitClause();

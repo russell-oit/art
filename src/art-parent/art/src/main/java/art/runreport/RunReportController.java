@@ -147,6 +147,9 @@ public class RunReportController {
 				boolean basicReport2 = BooleanUtils.toBoolean(request.getParameter("basicReport2"));
 				if (basicReport2) {
 					Report originalReport = reportService.getReport(reportId);
+					if (originalReport == null) {
+						throw new RuntimeException("Report not found: " + reportId);
+					}
 					Cloner cloner = new Cloner();
 					Report originalReportCopy = cloner.deepClone(originalReport);
 					testReport = originalReportCopy;
@@ -159,7 +162,11 @@ public class RunReportController {
 					testReport.setSelfServiceOptions(selfServiceOptions);
 					testReport.setLimit(limit);
 					if (testReport.isSelfService()) {
-						Report viewReport = reportService.getReport(testReport.getViewReportId());
+						int viewReportId = testReport.getViewReportId();
+						Report viewReport = reportService.getReport(viewReportId);
+						if (viewReport == null) {
+							throw new RuntimeException("View report not found: " + viewReportId);
+						}
 						testReport.setViewReport(viewReport);
 					} else {
 						testReport.setReportType(ReportType.Tabular);

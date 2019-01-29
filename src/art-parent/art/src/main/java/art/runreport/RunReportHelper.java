@@ -1362,8 +1362,10 @@ public class RunReportHelper {
 		return reportFormat;
 	}
 
-	public List<SelfServiceColumn> getSelfServiceColumns(Report report, User user)
-			throws SQLException {
+	public List<SelfServiceColumn> getSelfServiceColumns(Report report,
+			User user) throws SQLException {
+
+		Objects.requireNonNull(report, "report must not be null");
 
 		GeneralReportOptions generalOptions = report.getGeneralOptions();
 		ViewOptions viewOptions = generalOptions.getView();
@@ -1489,21 +1491,29 @@ public class RunReportHelper {
 			return;
 		}
 
+		Report viewReport = report.getViewReport();
+		List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(viewReport, user);
+
 		SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
 		JsonRule outerRule = selfServiceOptions.getRule();
 		if (outerRule != null) {
-			String rulesString = ArtUtils.objectToJson(outerRule);
-			SqlQueryBuilderFactory sqlQueryBuilderFactory = new SqlQueryBuilderFactory();
-			SqlBuilder sqlBuilder = sqlQueryBuilderFactory.builder();
-
-			// build query
-			SqlQueryResult sqlQueryResult = sqlBuilder.build(rulesString);
-			String condition = sqlQueryResult.getQuery();
+			for (JsonRule rule : outerRule.getRules()) {
+				String field = rule.getField();
+				boolean found = false;
+				for (SelfServiceColumn selfServiceColumn : selfServiceColumns) {
+					if (StringUtils.equalsIgnoreCase(field, selfServiceColumn.getLabel())) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					throw new RuntimeException("Field not found: " + field);
+				}
+			}
 		}
-		List<String> columns = selfServiceOptions.getColumns();
-		Report viewReport = report.getViewReport();
-		List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(viewReport, user);
+
 		List<String> chosenColumns = new ArrayList<>();
+		List<String> columns = selfServiceOptions.getColumns();
 		if (CollectionUtils.isEmpty(columns)) {
 			for (SelfServiceColumn referenceColumn : selfServiceColumns) {
 				String columnSpecification = referenceColumn.getLabel();
