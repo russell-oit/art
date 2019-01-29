@@ -256,7 +256,7 @@
 					} else {
 						reportId = viewId;
 					}
-					
+
 					var limit = $("#limit").val();
 					if (!limit) {
 						limit = "0";
@@ -388,19 +388,13 @@
 
 			function createFilters(allColumns) {
 				var filters = [];
-				var ids = [];
 
 				$.each(allColumns, function (index, column) {
-					var id = column.label;
-
-					if ($.inArray(id, ids) !== -1) {
-						id += index;
-					}
-
-					ids.push(id);
+					var id = "filter" + index;
 
 					var filter = {
 						id: id,
+						field: column.label,
 						label: column.userLabel,
 						type: column.type
 					};
