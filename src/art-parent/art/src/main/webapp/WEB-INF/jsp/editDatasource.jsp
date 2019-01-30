@@ -143,29 +143,68 @@ Edit datasource page
 		<script type="text/javascript">
 			function toggleVisibleFields() {
 				var datasourceType = $('#datasourceType option:selected').val();
-
-				//show/hide jndi, test sql, pool timeout
-				switch (datasourceType) {
-					case 'JDBC':
-						$("#jndiDiv").show();
-						$("#testSqlDiv").show();
-						$("#connectionPoolTimeoutDiv").show();
-						break;
-					default:
-						$("#jndiDiv").hide();
-						$("#testSqlDiv").hide();
-						$("#connectionPoolTimeoutDiv").hide();
-				}
-
-				//show/hide database type, driver
+				
+				//show/hide database type
 				switch (datasourceType) {
 					case 'MongoDB':
 						$("#databaseTypeDiv").hide();
-						$("#driverDiv").hide();
 						break;
 					default:
 						$("#databaseTypeDiv").show();
+				}
+				
+				//show/hide jndi
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#jndiDiv").show();
+						break;
+					default:
+						$("#jndiDiv").hide();
+				}
+				
+				//show/hide database protocol
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#protocolDiv").show();
+						break;
+					default:
+						$("#protocolDiv").hide();
+				}
+				
+				//show/hide driver
+				switch (datasourceType) {
+					case 'MongoDB':
+						$("#driverDiv").hide();
+						break;
+					default:
 						$("#driverDiv").show();
+				}
+				
+				//show/hide test sql
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#testSqlDiv").show();
+						break;
+					default:
+						$("#testSqlDiv").hide();
+				}
+				
+				//show/hide connection pool timeout
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#connectionPoolTimeoutDiv").show();
+						break;
+					default:
+						$("#connectionPoolTimeoutDiv").hide();
+				}
+				
+				//show/hide options
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#optionsDiv").show();
+						break;
+					default:
+						$("#optionsDiv").hide();
 				}
 			}
 
@@ -319,7 +358,7 @@ Edit datasource page
 						</div>
 					</div>
 				</div>
-				<div class="form-group">
+				<div id="protocolDiv" class="form-group">
 					<label class="control-label col-md-4" for="databaseProtocol">
 						<spring:message code="page.label.databaseProtocol"/>
 					</label>
@@ -431,7 +470,7 @@ Edit datasource page
 						<form:errors path="connectionPoolTimeoutMins" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
+				<div id="optionsDiv" class="form-group">
 					<label class="control-label col-md-8 col-md-offset-4" style="text-align: center" for="options">
 						<spring:message code="page.label.options"/>
 					</label>
