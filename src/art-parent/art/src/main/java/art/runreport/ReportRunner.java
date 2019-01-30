@@ -46,7 +46,6 @@ import art.utils.XmlInfo;
 import art.utils.XmlParser;
 import com.itfsw.query.builder.SqlQueryBuilderFactory;
 import com.itfsw.query.builder.support.builder.SqlBuilder;
-import com.itfsw.query.builder.support.model.JsonRule;
 import com.itfsw.query.builder.support.model.result.SqlQueryResult;
 import com.mongodb.MongoClient;
 import groovy.lang.Binding;

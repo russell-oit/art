@@ -205,47 +205,92 @@ public enum DatabaseProtocol {
 	public String getDescription() {
 		return value;
 	}
-	
+
 	/**
 	 * Returns the character to use to enclose/escape column names
-	 * 
+	 *
 	 * @return the character to use to enclose/escape column names
 	 */
-	public String enclose(){
-		switch(this){
+	public String enclose() {
+		switch (this) {
 			case SqlServer:
 				return null;
 			default:
 				return "\"";
 		}
 	}
-	
+
 	/**
 	 * Returns the beginning character to use when escaping column names
-	 * 
+	 *
 	 * @return the beginning character to use when escaping column names
 	 */
-	public String startEnclose(){
-		switch(this){
+	public String startEnclose() {
+		switch (this) {
 			case SqlServer:
 				return "[";
 			default:
 				return null;
 		}
 	}
-	
+
 	/**
 	 * Returns the ending character to use when escaping column names
-	 * 
+	 *
 	 * @return the ending character to use when escaping column names
 	 */
-	public String endEnclose(){
-		switch(this){
+	public String endEnclose() {
+		switch (this) {
 			case SqlServer:
 				return "]";
 			default:
 				return null;
 		}
+	}
+
+	/**
+	 * Returns the test sql to use for this database type
+	 *
+	 * @return the test sql to use
+	 */
+	public String testSql() {
+		switch (this) {
+			case Oracle:
+				return "select 1 from dual";
+			case Db2:
+				return "select 1 from sysibm.sysdummy1";
+			case HSQLDB:
+				return "values 1";
+			case Informix:
+				return "select 1 from systables where tabid = 1";
+			case Firebird:
+				return "select 1 from RDB$DATABASE";
+			default:
+				return "select 1";
+		}
+	}
+
+	/**
+	 * Returns the quartz job store delegate to use for this database type
+	 *
+	 * @return the quartz job store delegate to use
+	 */
+	public String quartzJobStoreDelegate() {
+		switch (this) {
+			case Oracle:
+				return "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate";
+			case HSQLDB:
+				return "org.quartz.impl.jdbcjobstore.HSQLDBDelegate";
+			case PostgreSQL:
+				return "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate";
+			case CUBRID:
+				return "org.quartz.impl.jdbcjobstore.CUBRIDDelegate";
+			case SqlServer:
+				return "org.quartz.impl.jdbcjobstore.MSSQLDelegate";
+			default:
+				return "org.quartz.impl.jdbcjobstore.StdJDBCDelegate";
+		}
+
 	}
 
 }

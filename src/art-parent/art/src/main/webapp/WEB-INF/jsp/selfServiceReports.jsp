@@ -233,29 +233,6 @@
 					sort: false
 				});
 
-				$('.parse-sql').on('click', function () {
-					var result = $('#builder').queryBuilder('getSQL', $(this).data('stmt'));
-
-					if (result !== null && result.sql.length) {
-						console.log(result);
-						bootbox.alert({
-							title: $(this).text(),
-							message: '<pre class="code-popup">' + result.sql + (result.params ? '\n\n' + result.params : '') + '</pre>'
-						});
-					}
-				});
-
-				$('#selected').on('click', function () {
-					var values = '';
-					$('#multiselect_to option').each(function (index, element) {
-						values += element.value + ' - ' + element.text + '\n';
-					});
-
-					bootbox.alert({
-						message: '<pre class="code-popup">' + values + '</pre>'
-					});
-				});
-
 				$('#preview').on('click', function () {
 					$('#preview').prop('disabled', true);
 
@@ -390,13 +367,13 @@
 				});
 			}
 
-			function updateBuilder(allColumns, rules) {
+			function updateBuilder(allColumns, ruleObject) {
 				var filters = createFilters(allColumns);
 				var force = true;
 				$('#builder').queryBuilder('setFilters', force, filters);
 				$('#builder').queryBuilder('reset');
-				if (rules) {
-					$('#builder').queryBuilder('setRules', rules);
+				if (ruleObject) {
+					$('#builder').queryBuilder('setRules', ruleObject);
 				}
 			}
 

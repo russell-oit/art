@@ -148,6 +148,16 @@ Display art database configuration page
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="control-label col-md-4" for="jndi">
+						<spring:message code="page.label.jndi"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="jndi" id="jndi" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="control-label col-md-4" for="databaseProtocol">
 						<spring:message code="page.label.databaseProtocol"/>
 					</label>
@@ -160,16 +170,6 @@ Display art database configuration page
 								</form:option>
 							</c:forEach>
 						</form:select>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="jndi">
-						<spring:message code="page.label.jndi"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="jndi" id="jndi" class="switch-yes-no"/>
-						</div>
 					</div>
 				</div>
 				<div class="form-group">

@@ -144,6 +144,7 @@ Edit datasource page
 			function toggleVisibleFields() {
 				var datasourceType = $('#datasourceType option:selected').val();
 
+				//show/hide jndi, test sql, pool timeout
 				switch (datasourceType) {
 					case 'JDBC':
 						$("#jndiDiv").show();
@@ -156,6 +157,7 @@ Edit datasource page
 						$("#connectionPoolTimeoutDiv").hide();
 				}
 
+				//show/hide database type, driver
 				switch (datasourceType) {
 					case 'MongoDB':
 						$("#databaseTypeDiv").hide();
@@ -307,6 +309,16 @@ Edit datasource page
 						<form:errors path="databaseType" cssClass="error"/>
 					</div>
 				</div>
+				<div id="jndiDiv" class="form-group">
+					<label class="control-label col-md-4" for="jndi">
+						<spring:message code="page.label.jndi"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="jndi" id="jndi" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
 				<div class="form-group">
 					<label class="control-label col-md-4" for="databaseProtocol">
 						<spring:message code="page.label.databaseProtocol"/>
@@ -321,16 +333,6 @@ Edit datasource page
 							</c:forEach>
 						</form:select>
 						<form:errors path="databaseProtocol" cssClass="error"/>
-					</div>
-				</div>
-				<div id="jndiDiv" class="form-group">
-					<label class="control-label col-md-4" for="jndi">
-						<spring:message code="page.label.jndi"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="jndi" id="jndi" class="switch-yes-no"/>
-						</div>
 					</div>
 				</div>
 				<div id="driverDiv" class="form-group">
