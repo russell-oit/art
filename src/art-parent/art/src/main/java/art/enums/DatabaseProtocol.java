@@ -175,25 +175,16 @@ public enum DatabaseProtocol {
 			case Access:
 			case Teradata:
 				return "top {0}";
-			case MySQL:
-			case MariaDB:
-			case SQLite:
-			case Vertica:
-			case Redshift:
-			case Presto:
-			case Drill:
-			case CUBRID:
-			case MonetDB:
-			case Exasol:
-			case Phoenix:
-				return "limit {0}";
 			case Firebird:
 				return "rows {0}";
 			case kdb:
 				return "[{0}]";
-			default:
+			case Oracle:
+			case Db2:
 				//sql:2008 standard
 				return "fetch first {0} rows only";
+			default:
+				return "limit {0}";
 		}
 	}
 
