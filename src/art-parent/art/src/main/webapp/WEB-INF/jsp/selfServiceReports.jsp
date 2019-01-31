@@ -118,10 +118,7 @@
 
 					//https://stackoverflow.com/questions/27347004/jquery-val-integer-datatype-comparison
 					if (reportId === '0') {
-						$('#multiselect').empty();
-						$('#multiselect_to').empty();
-						$("#whereDiv").hide();
-						$("#newReportLink").hide();
+						reset();
 					} else {
 						$.ajax({
 							type: 'GET',
@@ -262,7 +259,7 @@
 						},
 						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
-							ajaxErrorHandler(xhr);
+							showUserAjaxError(xhr, '${errorOccurredText}');
 						},
 						complete: function () {
 							$('#preview').prop('disabled', false);
