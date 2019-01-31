@@ -126,8 +126,8 @@ public class RunReportController {
 			if (testReport.getTestRun() == null) {
 				report = reportService.getReport(reportId);
 			} else {
-				boolean basicReport2 = BooleanUtils.toBoolean(request.getParameter("basicReport2"));
-				if (basicReport2) {
+				boolean selfServicePreview = BooleanUtils.toBoolean(request.getParameter("selfServicePreview"));
+				if (selfServicePreview) {
 					Report originalReport = reportService.getReport(reportId);
 					if (originalReport == null) {
 						throw new RuntimeException("Report not found: " + reportId);
@@ -136,13 +136,12 @@ public class RunReportController {
 					Report originalReportCopy = cloner.deepClone(originalReport);
 					testReport = originalReportCopy;
 
-					boolean selfServicePreview = BooleanUtils.toBoolean(request.getParameter("selfServicePreview"));
 					String selfServiceOptions = request.getParameter("selfServiceOptions");
 					int limit = NumberUtils.toInt(request.getParameter("limit"));
 
-					testReport.setSelfServicePreview(selfServicePreview);
 					testReport.setSelfServiceOptions(selfServiceOptions);
 					testReport.setLimit(limit);
+					
 					if (testReport.isSelfService()) {
 						int viewReportId = testReport.getViewReportId();
 						Report viewReport = reportService.getReport(viewReportId);

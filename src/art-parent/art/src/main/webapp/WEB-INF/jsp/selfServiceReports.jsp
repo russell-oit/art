@@ -253,7 +253,7 @@
 						data: {selfServicePreview: true, reportFormat: "htmlDataTable",
 							testRun: true, reportId: reportId,
 							selfServiceOptions: selfServiceOptionsString,
-							basicReport2: true, showInline: true, limit: limit},
+							showInline: true, limit: limit},
 						success: function (data) {
 							$("#reportOutput").html(data);
 						},

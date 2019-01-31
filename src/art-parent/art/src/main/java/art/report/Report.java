@@ -215,8 +215,6 @@ public class Report implements Serializable {
 	@JsonIgnore
 	private boolean overwriteFiles;
 	@JsonIgnore
-	private boolean selfServicePreview;
-	@JsonIgnore
 	private Integer limit;
 	@JsonIgnore
 	private List<SelfServiceColumn> selfServiceColumns;
@@ -289,20 +287,6 @@ public class Report implements Serializable {
 	 */
 	public void setSelfServiceOptions(String selfServiceOptions) {
 		this.selfServiceOptions = selfServiceOptions;
-	}
-
-	/**
-	 * @return the selfServicePreview
-	 */
-	public boolean isSelfServicePreview() {
-		return selfServicePreview;
-	}
-
-	/**
-	 * @param selfServicePreview the selfServicePreview to set
-	 */
-	public void setSelfServicePreview(boolean selfServicePreview) {
-		this.selfServicePreview = selfServicePreview;
 	}
 
 	/**
