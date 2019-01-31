@@ -106,10 +106,7 @@
 					var reportId = option.val();
 					var reportName = option.text();
 
-					$("#deleteReport").attr("data-report-name", reportName);
-					$("#deleteReport").attr("data-report-id", reportId);
-					$("#deleteReport").show();
-					$("#reportId").val(reportId);
+					showDeleteReport(reportName, reportId);
 				});
 
 				function populateDetails(option) {
@@ -395,6 +392,13 @@
 
 				return filters;
 			}
+
+			function showDeleteReport(reportName, reportId) {
+				$("#deleteReport").attr("data-report-name", reportName);
+				$("#deleteReport").attr("data-report-id", reportId);
+				$("#deleteReport").show();
+				$("#reportId").val(reportId);
+			}
 		</script>
 	</jsp:attribute>
 
@@ -583,10 +587,7 @@
 											$('#selfServiceReports').append("<option value='" + newReportId + "'>" + reportName + "</option>");
 											$('#selfServiceReports').find('[value=' + newReportId + ']').prop('selected', true);
 											$("#selfServiceReports").selectpicker('refresh');
-											$("#deleteReport").attr("data-report-name", reportName);
-											$("#deleteReport").attr("data-report-id", newReportId);
-											$("#deleteReport").show();
-											$("#reportId").val(newReportId);
+											showDeleteReport(reportName, newReportId);
 											$("#views").val('0').selectpicker('refresh');
 										} else if (reportName) {
 											$('#selfServiceReports').find('[value=' + reportId + ']').text(reportName);
