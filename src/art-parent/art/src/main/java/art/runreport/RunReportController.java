@@ -140,8 +140,7 @@ public class RunReportController {
 					String limitString = request.getParameter("limit");
 					Integer limit;
 					if (limitString == null) {
-						final int RETURN_ALL_ROWS = -1; //a negative number will return all rows
-						limit = RETURN_ALL_ROWS;
+						limit = ReportRunner.RETURN_ALL_RECORDS;
 					} else {
 						limit = NumberUtils.toInt(limitString);
 					}

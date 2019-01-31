@@ -1356,10 +1356,56 @@ public class RunReportHelper {
 		return reportFormat;
 	}
 
-	public List<SelfServiceColumn> getSelfServiceColumns(Report report,
+	/**
+	 * Returns basic self service column information for a report
+	 *
+	 * @param report the report
+	 * @param user the user
+	 * @return self service columns
+	 * @throws SQLException
+	 */
+	private List<SelfServiceColumn> getSelfServiceColumns(Report report,
 			User user) throws SQLException {
 
+		boolean nameAsLabel = false;
+		boolean setType = false;
+		return getSelfServiceColumns(report, user, nameAsLabel, setType);
+	}
+
+	/**
+	 * Returns self service columns for use within the self service reports user
+	 * interface
+	 *
+	 * @param report the report
+	 * @param user the current user
+	 * @return self service columns
+	 * @throws SQLException
+	 */
+	public List<SelfServiceColumn> getSelfServiceColumnsForView(Report report,
+			User user) throws SQLException {
+
+		boolean nameAsLabel = true;
+		boolean setType = true;
+		return getSelfServiceColumns(report, user, nameAsLabel, setType);
+	}
+
+	/**
+	 * Returns self service columns based on the report configuration
+	 *
+	 * @param report the report
+	 * @param user the current user
+	 * @param nameAsLabel whether name should be used for the label for self
+	 * service reports
+	 * @param setType whether the type field should be set
+	 * @return self service columns
+	 * @throws SQLException
+	 */
+	private List<SelfServiceColumn> getSelfServiceColumns(Report report,
+			User user, boolean nameAsLabel, boolean setType) throws SQLException {
+		
 		Objects.requireNonNull(report, "report must not be null");
+
+		List<SelfServiceColumn> columns = new ArrayList<>();
 
 		GeneralReportOptions generalOptions = report.getGeneralOptions();
 		ViewOptions viewOptions = generalOptions.getView();
@@ -1374,16 +1420,14 @@ public class RunReportHelper {
 			columnDescriptions = viewOptions.getColumnDescriptions();
 		}
 
-		List<SelfServiceColumn> columns = new ArrayList<>();
-
 		ReportRunner reportRunner = new ReportRunner();
 		ResultSet rs = null;
 		try {
-			final int RECORDS_TO_RETURN = 0;
-			reportRunner.setLimit(RECORDS_TO_RETURN);
+			reportRunner.setLimit(ReportRunner.RETURN_ZERO_RECORDS);
 			reportRunner.setUseViewColumns(true);
 			reportRunner.setUser(user);
 			reportRunner.setReport(report);
+
 			rs = reportRunner.executeQuery();
 
 			if (rs == null) {
@@ -1397,40 +1441,47 @@ public class RunReportHelper {
 				SelfServiceColumn column = new SelfServiceColumn();
 
 				column.setName(rsmd.getColumnName(i));
-				column.setLabel(rsmd.getColumnLabel(i));
 
-				int sqlType = rsmd.getColumnType(i);
-
-				String type;
-
-				switch (sqlType) {
-					case Types.INTEGER:
-					case Types.TINYINT:
-					case Types.SMALLINT:
-					case Types.BIGINT:
-						type = "integer";
-						break;
-					case Types.NUMERIC:
-					case Types.DECIMAL:
-					case Types.FLOAT:
-					case Types.REAL:
-					case Types.DOUBLE:
-						type = "double";
-						break;
-					case Types.DATE:
-						type = "date";
-						break;
-					case Types.TIME:
-						type = "time";
-						break;
-					case Types.TIMESTAMP:
-						type = "datetime";
-						break;
-					default:
-						type = "string";
+				if (report.isSelfService() && nameAsLabel) {
+					column.setLabel(rsmd.getColumnName(i));
+				} else {
+					column.setLabel(rsmd.getColumnLabel(i));
 				}
 
-				column.setType(type);
+				if (setType) {
+					int sqlType = rsmd.getColumnType(i);
+
+					String type;
+
+					switch (sqlType) {
+						case Types.INTEGER:
+						case Types.TINYINT:
+						case Types.SMALLINT:
+						case Types.BIGINT:
+							type = "integer";
+							break;
+						case Types.NUMERIC:
+						case Types.DECIMAL:
+						case Types.FLOAT:
+						case Types.REAL:
+						case Types.DOUBLE:
+							type = "double";
+							break;
+						case Types.DATE:
+							type = "date";
+							break;
+						case Types.TIME:
+							type = "time";
+							break;
+						case Types.TIMESTAMP:
+							type = "datetime";
+							break;
+						default:
+							type = "string";
+					}
+
+					column.setType(type);
+				}
 
 				columns.add(column);
 			}
@@ -1482,7 +1533,18 @@ public class RunReportHelper {
 		return columns;
 	}
 
+	/**
+	 * Verifies the selected self service columns and sets the final columns
+	 * string to use
+	 *
+	 * @param report the report
+	 * @param user the current user
+	 * @throws IOException
+	 * @throws SQLException
+	 */
 	public void applySelfServiceFields(Report report, User user) throws IOException, SQLException {
+		Objects.requireNonNull(report, "report must not be null");
+		
 		String selfServiceOptionsString = report.getSelfServiceOptions();
 		if (StringUtils.isBlank(selfServiceOptionsString)) {
 			return;
@@ -1532,6 +1594,7 @@ public class RunReportHelper {
 				chosenColumns.add(columnSpecification);
 			}
 		}
+
 		String columnsString = StringUtils.join(chosenColumns, ", ");
 		selfServiceOptions.setColumnsString(columnsString);
 		selfServiceOptionsString = ArtUtils.objectToJson(selfServiceOptions);

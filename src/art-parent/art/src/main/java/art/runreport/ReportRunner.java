@@ -114,6 +114,8 @@ public class ReportRunner {
 	private Job job;
 	private Integer limit;
 	private boolean useViewColumns;
+	public static final int RETURN_ALL_RECORDS = -1;
+	public static final int RETURN_ZERO_RECORDS = 0;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb

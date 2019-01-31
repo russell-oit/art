@@ -26,6 +26,7 @@ import art.report.ReportService;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.ViewOptions;
 import art.runreport.ReportRunner;
+import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
@@ -260,129 +261,12 @@ public class SelfServiceController {
 				selfServiceOptionsString = report.getSelfServiceOptions();
 			}
 
-			GeneralReportOptions generalOptions = report.getGeneralOptions();
-			ViewOptions viewOptions = generalOptions.getView();
-
-			List<String> omitColumns = null;
-			List<Map<String, String>> columnLabels = null;
-			List<Map<String, String>> columnDescriptions = null;
-
-			if (viewOptions != null) {
-				omitColumns = viewOptions.getOmitColumns();
-				columnLabels = viewOptions.getColumnLabels();
-				columnDescriptions = viewOptions.getColumnDescriptions();
-			}
-
-			List<SelfServiceColumn> columns = new ArrayList<>();
-
-			ReportRunner reportRunner = new ReportRunner();
-			ResultSet rs = null;
-			try {
-				reportRunner.setUser(sessionUser);
-				reportRunner.setReport(report);
-				rs = reportRunner.executeQuery();
-
-				if (rs == null) {
-					throw new RuntimeException("ResultSet is null");
-				}
-
-				ResultSetMetaData rsmd = rs.getMetaData();
-				int columnCount = rsmd.getColumnCount();
-
-				for (int i = 1; i <= columnCount; i++) {
-					SelfServiceColumn column = new SelfServiceColumn();
-
-					column.setName(rsmd.getColumnName(i));
-					
-					if (report.isSelfService()) {
-						column.setLabel(rsmd.getColumnName(i));
-					} else {
-						column.setLabel(rsmd.getColumnLabel(i));
-					}
-
-					int sqlType = rsmd.getColumnType(i);
-
-					String type;
-
-					switch (sqlType) {
-						case Types.INTEGER:
-						case Types.TINYINT:
-						case Types.SMALLINT:
-						case Types.BIGINT:
-							type = "integer";
-							break;
-						case Types.NUMERIC:
-						case Types.DECIMAL:
-						case Types.FLOAT:
-						case Types.REAL:
-						case Types.DOUBLE:
-							type = "double";
-							break;
-						case Types.DATE:
-							type = "date";
-							break;
-						case Types.TIME:
-							type = "time";
-							break;
-						case Types.TIMESTAMP:
-							type = "datetime";
-							break;
-						default:
-							type = "string";
-					}
-
-					column.setType(type);
-
-					columns.add(column);
-				}
-
-				if (omitColumns != null) {
-					for (String columnName : omitColumns) {
-						//https://stackoverflow.com/questions/10431981/remove-elements-from-collection-while-iterating
-						columns.removeIf(column -> StringUtils.equalsIgnoreCase(columnName, column.getLabel()));
-					}
-				}
-
-				for (SelfServiceColumn column : columns) {
-					String label = column.getLabel();
-					String userLabel = null;
-					if (columnLabels != null) {
-						for (Map<String, String> labelDefinition : columnLabels) {
-							Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(labelDefinition);
-							userLabel = caseInsensitiveMap.get(label);
-							if (userLabel != null) {
-								break;
-							}
-						}
-					}
-					if (userLabel == null) {
-						userLabel = label;
-					}
-					column.setUserLabel(userLabel);
-
-					String description = null;
-					if (columnDescriptions != null) {
-						for (Map<String, String> descriptionDefinition : columnDescriptions) {
-							Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(descriptionDefinition);
-							description = caseInsensitiveMap.get(label);
-							if (description != null) {
-								break;
-							}
-						}
-					}
-					if (description == null) {
-						description = "";
-					}
-					column.setDescription(description);
-				}
-			} finally {
-				DatabaseUtils.close(rs);
-				reportRunner.close();
-			}
+			RunReportHelper runReportHelper = new RunReportHelper();
+			List<SelfServiceColumn> columns = runReportHelper.getSelfServiceColumnsForView(report, sessionUser);
 
 			Map<String, Object> result = new HashMap<>();
 			result.put("allColumns", columns);
-			
+
 			if (StringUtils.isBlank(selfServiceOptionsString)) {
 				result.put("fromColumns", columns);
 			} else {
