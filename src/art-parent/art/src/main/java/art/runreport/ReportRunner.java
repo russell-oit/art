@@ -112,9 +112,24 @@ public class ReportRunner {
 	private final String QUESTION_PLACEHOLDER = "[ART_QUESTION_MARK_PLACEHOLDER]";
 	private Object groovyData;
 	private Job job;
+	private Integer limit;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the limit
+	 */
+	public Integer getLimit() {
+		return limit;
+	}
+
+	/**
+	 * @param limit the limit to set
+	 */
+	public void setLimit(Integer limit) {
+		this.limit = limit;
 	}
 
 	/**
@@ -966,26 +981,30 @@ public class ReportRunner {
 			Integer reportLimit = viewOptions.getLimit();
 			Integer datasourceLimit = datasourceOptions.getLimit();
 
-			Integer limit;
-			if (reportType == ReportType.View) {
-				limit = reportLimit;
-				if (limit == null) {
-					limit = datasourceLimit;
-				}
+			Integer finalLimit;
+			if (limit == null) {
+				if (reportType == ReportType.View) {
+					finalLimit = reportLimit;
+					if (finalLimit == null) {
+						finalLimit = datasourceLimit;
+					}
 
-				if (limit == null) {
-					final Integer DEFAULT_LIMIT = 10;
-					limit = DEFAULT_LIMIT;
+					if (finalLimit == null) {
+						final Integer DEFAULT_VIEW_LIMIT = 10;
+						finalLimit = DEFAULT_VIEW_LIMIT;
+					}
+				} else {
+					finalLimit = report.getLimit();
 				}
 			} else {
-				limit = report.getLimit();
+				finalLimit = limit;
 			}
 
 			final String LIMIT_PLACEHOLDER = "#limitClause#";
-			if (limit <= 0) {
+			if (finalLimit == null || finalLimit < 0) {
 				querySql = StringUtils.removeIgnoreCase(querySql, LIMIT_PLACEHOLDER);
 			} else {
-				String finalLimitClause = StringUtils.replace(limitClause, "{0}", String.valueOf(limit));
+				String finalLimitClause = StringUtils.replace(limitClause, "{0}", String.valueOf(finalLimit));
 				querySql = StringUtils.replaceIgnoreCase(querySql, LIMIT_PLACEHOLDER, finalLimitClause);
 			}
 

@@ -217,7 +217,7 @@ public class Report implements Serializable {
 	@JsonIgnore
 	private boolean selfServicePreview;
 	@JsonIgnore
-	private int limit;
+	private Integer limit;
 	@JsonIgnore
 	private List<SelfServiceColumn> selfServiceColumns;
 
@@ -238,14 +238,14 @@ public class Report implements Serializable {
 	/**
 	 * @return the limit
 	 */
-	public int getLimit() {
+	public Integer getLimit() {
 		return limit;
 	}
 
 	/**
 	 * @param limit the limit to set
 	 */
-	public void setLimit(int limit) {
+	public void setLimit(Integer limit) {
 		this.limit = limit;
 	}
 

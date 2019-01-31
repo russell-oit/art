@@ -1379,6 +1379,8 @@ public class RunReportHelper {
 		ReportRunner reportRunner = new ReportRunner();
 		ResultSet rs = null;
 		try {
+			final int RECORDS_TO_RETURN = 0;
+			reportRunner.setLimit(RECORDS_TO_RETURN);
 			reportRunner.setUser(user);
 			reportRunner.setReport(report);
 			rs = reportRunner.executeQuery();

@@ -241,7 +241,7 @@
 
 					var limit = $("#limit").val();
 					if (!limit) {
-						limit = "0";
+						limit = "-1"; //negative value returns all records. 0 returns 0 records.
 					}
 
 					var selfServiceOptionsString = getSelfServiceOptionsString();
