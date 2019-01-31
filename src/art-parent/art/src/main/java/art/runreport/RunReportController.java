@@ -137,11 +137,17 @@ public class RunReportController {
 					testReport = originalReportCopy;
 
 					String selfServiceOptions = request.getParameter("selfServiceOptions");
-					int limit = NumberUtils.toInt(request.getParameter("limit"));
+					String limitString = request.getParameter("limit");
+					Integer limit;
+					if (limitString == null) {
+						limit = null; //null will return all rows
+					} else {
+						limit = NumberUtils.toInt(limitString);
+					}
 
 					testReport.setSelfServiceOptions(selfServiceOptions);
 					testReport.setLimit(limit);
-					
+
 					RunReportHelper runReportHelper = new RunReportHelper();
 					runReportHelper.applySelfServiceFields(testReport, sessionUser);
 				} else {

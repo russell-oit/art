@@ -239,21 +239,24 @@
 						reportId = viewId;
 					}
 
-					var limit = $("#limit").val();
-					if (!limit) {
-						limit = "-1"; //negative value returns all records. 0 returns 0 records.
-					}
-
 					var selfServiceOptionsString = getSelfServiceOptionsString();
+
+					var data = {testRun: true, reportId: reportId,
+						selfServicePreview: true, reportFormat: "htmlDataTable",
+						selfServiceOptions: selfServiceOptionsString,
+						showInline: true
+					};
+
+					var limit = $("#limit").val();
+					if (limit) {
+						data.limit = limit;
+					}
 
 					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
 					$.ajax({
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
-						data: {selfServicePreview: true, reportFormat: "htmlDataTable",
-							testRun: true, reportId: reportId,
-							selfServiceOptions: selfServiceOptionsString,
-							showInline: true, limit: limit},
+						data: data,
 						success: function (data) {
 							$("#reportOutput").html(data);
 						},
