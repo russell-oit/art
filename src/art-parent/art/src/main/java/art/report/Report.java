@@ -192,8 +192,6 @@ public class Report implements Serializable {
 	private String comment;
 	@Parsed
 	private int viewReportId;
-	@JsonIgnore
-	private Report viewReport;
 	@Parsed
 	private String selfServiceOptions;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
@@ -259,20 +257,6 @@ public class Report implements Serializable {
 	 */
 	public void setViewReportId(int viewReportId) {
 		this.viewReportId = viewReportId;
-	}
-
-	/**
-	 * @return the viewReport
-	 */
-	public Report getViewReport() {
-		return viewReport;
-	}
-
-	/**
-	 * @param viewReport the viewReport to set
-	 */
-	public void setViewReport(Report viewReport) {
-		this.viewReport = viewReport;
 	}
 
 	/**

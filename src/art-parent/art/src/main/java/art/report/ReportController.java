@@ -1302,17 +1302,11 @@ public class ReportController {
 					Cloner cloner = new Cloner();
 					report = cloner.deepClone(viewReport);
 					report.setViewReportId(viewReportId);
-					report.setViewReport(viewReport);
 					report.setReportType(ReportType.Tabular);
 				}
 			} else {
 				report = reportService.getReport(reportId);
 				report.encryptPasswords();
-				
-				if (report.isSelfService()) {
-					Report viewReport = reportService.getReport(report.getViewReportId());
-					report.setViewReport(viewReport);
-				}
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");

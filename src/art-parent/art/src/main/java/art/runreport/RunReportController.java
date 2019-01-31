@@ -142,19 +142,6 @@ public class RunReportController {
 					testReport.setSelfServiceOptions(selfServiceOptions);
 					testReport.setLimit(limit);
 					
-					if (testReport.isSelfService()) {
-						int viewReportId = testReport.getViewReportId();
-						Report viewReport = reportService.getReport(viewReportId);
-						if (viewReport == null) {
-							throw new RuntimeException("View report not found: " + viewReportId);
-						}
-						testReport.setViewReport(viewReport);
-					} else {
-						testReport.setReportType(ReportType.Tabular);
-						testReport.setViewReportId(reportId);
-						testReport.setViewReport(originalReport);
-					}
-
 					RunReportHelper runReportHelper = new RunReportHelper();
 					runReportHelper.applySelfServiceFields(testReport, sessionUser);
 				} else {

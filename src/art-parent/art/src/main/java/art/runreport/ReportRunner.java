@@ -113,9 +113,24 @@ public class ReportRunner {
 	private Object groovyData;
 	private Job job;
 	private Integer limit;
+	private boolean useViewColumns;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the useViewColumns
+	 */
+	public boolean isUseViewColumns() {
+		return useViewColumns;
+	}
+
+	/**
+	 * @param useViewColumns the useViewColumns to set
+	 */
+	public void setUseViewColumns(boolean useViewColumns) {
+		this.useViewColumns = useViewColumns;
 	}
 
 	/**
@@ -936,7 +951,7 @@ public class ReportRunner {
 			String columnsString;
 			String conditionString = null;
 			String selfServiceOptionsString = report.getSelfServiceOptions();
-			if (StringUtils.isBlank(selfServiceOptionsString)) {
+			if (StringUtils.isBlank(selfServiceOptionsString) || useViewColumns) {
 				columnsString = viewOptions.getColumns();
 			} else {
 				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
@@ -980,21 +995,24 @@ public class ReportRunner {
 
 			Integer reportLimit = viewOptions.getLimit();
 			Integer datasourceLimit = datasourceOptions.getLimit();
+			Integer runLimit = report.getLimit();
 
-			Integer finalLimit;
+			Integer finalLimit = null;
 			if (limit == null) {
-				if (reportType == ReportType.View) {
-					finalLimit = reportLimit;
-					if (finalLimit == null) {
-						finalLimit = datasourceLimit;
-					}
+				if (runLimit == null) {
+					if (reportType == ReportType.View) {
+						finalLimit = reportLimit;
+						if (finalLimit == null) {
+							finalLimit = datasourceLimit;
+						}
 
-					if (finalLimit == null) {
-						final Integer DEFAULT_VIEW_LIMIT = 10;
-						finalLimit = DEFAULT_VIEW_LIMIT;
+						if (finalLimit == null) {
+							final Integer DEFAULT_VIEW_LIMIT = 10;
+							finalLimit = DEFAULT_VIEW_LIMIT;
+						}
 					}
 				} else {
-					finalLimit = report.getLimit();
+					finalLimit = runLimit;
 				}
 			} else {
 				finalLimit = limit;

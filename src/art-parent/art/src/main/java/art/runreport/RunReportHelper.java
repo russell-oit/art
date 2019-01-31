@@ -1381,6 +1381,7 @@ public class RunReportHelper {
 		try {
 			final int RECORDS_TO_RETURN = 0;
 			reportRunner.setLimit(RECORDS_TO_RETURN);
+			reportRunner.setUseViewColumns(true);
 			reportRunner.setUser(user);
 			reportRunner.setReport(report);
 			rs = reportRunner.executeQuery();
@@ -1487,8 +1488,7 @@ public class RunReportHelper {
 			return;
 		}
 
-		Report viewReport = report.getViewReport();
-		List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(viewReport, user);
+		List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(report, user);
 
 		SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
 		JsonRule javaRule = selfServiceOptions.getJavaRule();
