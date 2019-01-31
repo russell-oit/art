@@ -37,7 +37,6 @@ Display art database configuration page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.4.2/ace.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -65,21 +64,6 @@ Display art database configuration page
 
 				$('#databaseType').on("change", function () {
 					setDatasourceFields(this.value, 'driver', 'url', 'testSql', 'databaseProtocol');
-				});
-
-				var jsonEditor = ace.edit("jsonEditor");
-				jsonEditor.getSession().setMode("ace/mode/json");
-				jsonEditor.setHighlightActiveLine(false);
-				jsonEditor.setShowPrintMargin(false);
-				jsonEditor.setOption("showLineNumbers", false);
-				jsonEditor.setOption("maxLines", 20);
-				jsonEditor.setOption("minLines", 7);
-				document.getElementById('jsonEditor').style.fontSize = '14px';
-
-				var options = $('#options');
-				jsonEditor.getSession().setValue(options.val());
-				jsonEditor.getSession().on('change', function () {
-					options.val(jsonEditor.getSession().getValue());
 				});
 
 			});
@@ -300,15 +284,6 @@ Display art database configuration page
 							</label>
 						</c:forEach>
 						<form:errors path="connectionPoolLibrary" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-8 col-md-offset-4" style="text-align: center" for="options">
-						<spring:message code="page.label.options"/>
-					</label>
-					<div class="col-md-8 col-md-offset-4">
-						<form:hidden path="options"/>
-						<div id="jsonEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 				<div class="form-group">
