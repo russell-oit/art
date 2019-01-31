@@ -39,7 +39,6 @@ import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
 import art.ruleValue.UserGroupRuleValue;
 import art.ruleValue.UserRuleValue;
-import art.selfservice.SelfServiceColumn;
 import art.servlets.Config;
 import art.settings.EncryptionPassword;
 import art.utils.ArtUtils;
@@ -214,22 +213,6 @@ public class Report implements Serializable {
 	private boolean overwriteFiles;
 	@JsonIgnore
 	private Integer limit;
-	@JsonIgnore
-	private List<SelfServiceColumn> selfServiceColumns;
-
-	/**
-	 * @return the selfServiceColumns
-	 */
-	public List<SelfServiceColumn> getSelfServiceColumns() {
-		return selfServiceColumns;
-	}
-
-	/**
-	 * @param selfServiceColumns the selfServiceColumns to set
-	 */
-	public void setSelfServiceColumns(List<SelfServiceColumn> selfServiceColumns) {
-		this.selfServiceColumns = selfServiceColumns;
-	}
 
 	/**
 	 * @return the limit
