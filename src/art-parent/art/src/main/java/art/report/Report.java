@@ -180,7 +180,7 @@ public class Report implements Serializable {
 	@Parsed
 	private boolean clearTextPasswords;
 	@JsonIgnore
-	private Boolean dummyBoolean; //used for the test report functionality
+	private Boolean testRun; //used for the test report functionality
 	@Parsed
 	private boolean useGroovy;
 	@Parsed
@@ -418,17 +418,17 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the dummyBoolean
+	 * @return the testRun
 	 */
-	public Boolean getDummyBoolean() {
-		return dummyBoolean;
+	public Boolean getTestRun() {
+		return testRun;
 	}
 
 	/**
-	 * @param dummyBoolean the dummyBoolean to set
+	 * @param testRun the testRun to set
 	 */
-	public void setDummyBoolean(Boolean dummyBoolean) {
-		this.dummyBoolean = dummyBoolean;
+	public void setTestRun(Boolean testRun) {
+		this.testRun = testRun;
 	}
 
 	/**

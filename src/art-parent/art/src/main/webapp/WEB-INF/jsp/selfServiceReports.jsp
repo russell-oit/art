@@ -251,7 +251,7 @@
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
 						data: {selfServicePreview: true, reportFormat: "htmlDataTable",
-							dummyBoolean: true, reportId: reportId,
+							testRun: true, reportId: reportId,
 							selfServiceOptions: selfServiceOptionsString,
 							basicReport2: true, showInline: true, limit: limit},
 						success: function (data) {

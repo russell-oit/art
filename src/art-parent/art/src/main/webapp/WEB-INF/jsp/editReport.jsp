@@ -1161,7 +1161,7 @@ Edit report page
 				<input type="hidden" name="showInline" id="showInline" value="true">
 				<input type="hidden" name="action" value="${action}">
 				
-				<form:hidden path="dummyBoolean" value="true"/>
+				<form:hidden path="testRun" value="true"/>
 				<form:hidden path="viewReportId"/>
 				<form:hidden path="selfServiceOptions"/>
 				

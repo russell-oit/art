@@ -123,27 +123,9 @@ public class RunReportController {
 		String reportName = null;
 
 		try {
-			if (testReport.getDummyBoolean() == null) {
+			if (testReport.getTestRun() == null) {
 				report = reportService.getReport(reportId);
 			} else {
-				boolean basicReport = BooleanUtils.toBoolean(request.getParameter("basicReport"));
-				if (basicReport) {
-					Report originalReport = reportService.getReport(reportId);
-					//don't modify original object from reportService. will be cached and reused so property changes will be reflected in later uses of the object
-					Cloner cloner = new Cloner();
-					Report originalReportCopy = cloner.deepClone(originalReport);
-					originalReportCopy.setName(testReport.getName());
-					originalReportCopy.setDescription(testReport.getDescription());
-					originalReportCopy.setDatasource(testReport.getDatasource());
-					originalReportCopy.setUseGroovy(testReport.isUseGroovy());
-					originalReportCopy.setPivotTableJsSavedOptions(testReport.getPivotTableJsSavedOptions());
-					originalReportCopy.setGridstackSavedOptions(testReport.getGridstackSavedOptions());
-					originalReportCopy.setOptions(testReport.getOptions());
-					originalReportCopy.setReportSource(testReport.getReportSource());
-					originalReportCopy.setReportSourceHtml(testReport.getReportSourceHtml());
-					testReport = originalReportCopy;
-				}
-
 				boolean basicReport2 = BooleanUtils.toBoolean(request.getParameter("basicReport2"));
 				if (basicReport2) {
 					Report originalReport = reportService.getReport(reportId);
