@@ -19,11 +19,9 @@ package art.runreport;
 
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
-import art.datasource.DatasourceOptions;
 import art.dbutils.DatabaseUtils;
 import art.encryptor.Encryptor;
 import art.enums.ColumnType;
-import art.enums.DatabaseProtocol;
 import art.enums.EncryptorType;
 import art.enums.ParameterDataType;
 import art.enums.ReportFormat;
@@ -1516,56 +1514,6 @@ public class RunReportHelper {
 				chosenColumns.add(columnSpecification);
 			}
 		} else {
-			Datasource datasource = report.getDatasource();
-			if (datasource == null) {
-				throw new RuntimeException("Datasource not specified");
-			}
-			String options = datasource.getOptions();
-			DatasourceOptions datasourceOptions;
-			if (StringUtils.isBlank(options)) {
-				datasourceOptions = new DatasourceOptions();
-			} else {
-				datasourceOptions = ArtUtils.jsonToObject(options, DatasourceOptions.class);
-			}
-			DatabaseProtocol databaseProtocol = datasource.getEffectiveDatabaseProtocol();
-
-			ViewOptions viewOptions = report.getGeneralOptions().getView();
-			if (viewOptions == null) {
-				viewOptions = new ViewOptions();
-			}
-
-			String startEnclose;
-			String endEnclose;
-			String reportEnclose = viewOptions.getEnclose();
-			String reportStartEnclose = viewOptions.getStartEnclose();
-			String reportEndEnclose = viewOptions.getEndEnclose();
-			String datasourceEnclose = datasourceOptions.getEnclose();
-			String datasourceStartEnclose = datasourceOptions.getStartEnclose();
-			String datasourceEndEnclose = datasourceOptions.getEndEnclose();
-			String databaseEnclose = databaseProtocol.enclose();
-			String databaseStartEnclose = databaseProtocol.startEnclose();
-			String databaseEndEnclose = databaseProtocol.endEnclose();
-			if (reportEnclose == null) {
-				startEnclose = reportStartEnclose;
-				endEnclose = reportEndEnclose;
-			} else {
-				startEnclose = reportEnclose;
-				endEnclose = reportEnclose;
-			}
-			if ((startEnclose == null && endEnclose == null) && datasourceEnclose == null) {
-				startEnclose = datasourceStartEnclose;
-				endEnclose = datasourceEndEnclose;
-			} else {
-				startEnclose = datasourceEnclose;
-				endEnclose = datasourceEnclose;
-			}
-			if ((startEnclose == null && endEnclose == null) && databaseEnclose == null) {
-				startEnclose = databaseStartEnclose;
-				endEnclose = databaseEndEnclose;
-			} else {
-				startEnclose = databaseEnclose;
-				endEnclose = databaseEnclose;
-			}
 			for (String column : columns) {
 				SelfServiceColumn referenceColumn = selfServiceColumns.stream()
 						.filter(c -> c.getLabel().equals(column))
@@ -1575,7 +1523,9 @@ public class RunReportHelper {
 				if (StringUtils.equals(referenceColumn.getLabel(), referenceColumn.getUserLabel())) {
 					columnSpecification = referenceColumn.getLabel();
 				} else {
-					columnSpecification = referenceColumn.getLabel() + " as " + startEnclose + referenceColumn.getUserLabel() + endEnclose;
+					//https://stackoverflow.com/questions/19657101/what-is-the-difference-between-square-brackets-and-single-quotes-for-aliasing-in
+					String cleanUserLabel = StringUtils.remove(referenceColumn.getUserLabel(), "\"");
+					columnSpecification = referenceColumn.getLabel() + " as \"" + cleanUserLabel + "\"";
 				}
 				chosenColumns.add(columnSpecification);
 			}

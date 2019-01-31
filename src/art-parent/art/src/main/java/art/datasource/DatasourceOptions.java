@@ -31,51 +31,6 @@ public class DatasourceOptions implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String limitClause;
 	private Integer limit;
-	private String enclose;
-	private String startEnclose;
-	private String endEnclose;
-
-	/**
-	 * @return the enclose
-	 */
-	public String getEnclose() {
-		return enclose;
-	}
-
-	/**
-	 * @param enclose the enclose to set
-	 */
-	public void setEnclose(String enclose) {
-		this.enclose = enclose;
-	}
-
-	/**
-	 * @return the startEnclose
-	 */
-	public String getStartEnclose() {
-		return startEnclose;
-	}
-
-	/**
-	 * @param startEnclose the startEnclose to set
-	 */
-	public void setStartEnclose(String startEnclose) {
-		this.startEnclose = startEnclose;
-	}
-
-	/**
-	 * @return the endEnclose
-	 */
-	public String getEndEnclose() {
-		return endEnclose;
-	}
-
-	/**
-	 * @param endEnclose the endEnclose to set
-	 */
-	public void setEndEnclose(String endEnclose) {
-		this.endEnclose = endEnclose;
-	}
 
 	/**
 	 * @return the limitClause
