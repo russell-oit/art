@@ -236,10 +236,7 @@
 						resetDashboard();
 					} else {
 						resetDashboard();
-						$("#deleteDashboard").attr("data-report-name", reportName);
-						$("#deleteDashboard").attr("data-report-id", reportId);
-						$("#deleteDashboard").show();
-						$("#reportId").val(reportId);
+						showDeleteDashboard(reportName, reportId);
 
 						$.ajax({
 							type: 'GET',
@@ -348,6 +345,13 @@
 			function clearGrid() {
 				var grid = $('.grid-stack').data('gridstack');
 				grid.removeAll();
+			}
+			
+			function showDeleteDashboard(reportName, reportId) {
+				$("#deleteDashboard").attr("data-report-name", reportName);
+				$("#deleteDashboard").attr("data-report-id", reportId);
+				$("#deleteDashboard").show();
+				$("#reportId").val(reportId);
 			}
 		</script>
 	</jsp:attribute>
@@ -534,10 +538,7 @@
 											$('#dashboardReports').append("<option value='" + newReportId + "'>" + reportName + "</option>");
 											$('#dashboardReports').find('[value=' + newReportId + ']').prop('selected', true);
 											$("#dashboardReports").selectpicker('refresh');
-											$("#deleteDashboard").attr("data-report-name", reportName);
-											$("#deleteDashboard").attr("data-report-id", newReportId);
-											$("#deleteDashboard").show();
-											$("#reportId").val(newReportId);
+											showDeleteDashboard(reportName, newReportId);
 										} else if (reportName) {
 											$('#dashboardReports').find('[value=' + reportId + ']').text(reportName);
 											$("#dashboardReports").selectpicker('refresh');
