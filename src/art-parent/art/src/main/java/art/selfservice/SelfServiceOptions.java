@@ -90,6 +90,7 @@ public class SelfServiceOptions implements Serializable {
 	 */
 	@JsonIgnore
 	public JsonRule getJavaRule() throws IOException {
+		//https://github.com/itfsw/QueryBuilder/blob/master/src/main/java/com/itfsw/query/builder/support/builder/AbstractBuilder.java
 		String jqueryRuleString = ArtUtils.objectToJson(jqueryRule);
 		JsonRule javaRule = ArtUtils.jsonToObjectIgnoreUnknown(jqueryRuleString, JsonRule.class);
 		return javaRule;
