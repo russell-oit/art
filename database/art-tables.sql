@@ -673,9 +673,7 @@ CREATE TABLE ART_JOBS_AUDIT
 -- ART_LOGS
 -- Stores log information e.g. logins and report execution
 
--- LOG_TYPE: login = successful login, loginerr = unsuccessful login attempt
--- report = interactive report execution, upload = template file uploaded when
--- creating query that uses a template file
+-- LOG_TYPE: the type of event
 -- TOTAL_TIME: total execution time in secs, including fetch time and display time
 -- FETCH_TIME: time elapsed from when the query is submitted to when the
 -- database returns 1st row
@@ -689,7 +687,7 @@ CREATE TABLE ART_LOGS
 	QUERY_ID INTEGER,
 	TOTAL_TIME INTEGER, 
 	FETCH_TIME INTEGER, 
-	MESSAGE VARCHAR(500) 
+	MESSAGE VARCHAR(1000) 
 );
 
 

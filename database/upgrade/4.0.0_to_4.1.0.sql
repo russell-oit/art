@@ -14,6 +14,7 @@
 -- add view report id column
 -- add self service options field
 -- increase size of report name field
+-- increase length of message column
 
 
 -- NOTES:
@@ -69,3 +70,6 @@ ALTER TABLE ART_QUERIES ADD SELF_SERVICE_OPTIONS CLOB;
 -- increase size of report name field
 ALTER TABLE ART_QUERIES MODIFY NAME VARCHAR(100);
 ALTER TABLE ART_JOBS MODIFY JOB_NAME VARCHAR(100);
+
+-- increase length of message column
+ALTER TABLE ART_LOGS MODIFY MESSAGE VARCHAR(1000);

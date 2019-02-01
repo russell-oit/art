@@ -140,8 +140,8 @@ public class ArtLogsHelper {
 					+ " TOTAL_TIME, FETCH_TIME, MESSAGE)"
 					+ " VALUES(" + StringUtils.repeat("?", ",", 8) + ")";
 
-			final int MAX_LOG_MESSAGE_LENGTH = 500;
-			message = StringUtils.left(message, MAX_LOG_MESSAGE_LENGTH);
+			final int MAX_MESSAGE_LENGTH = 1000;
+			message = StringUtils.left(message, MAX_MESSAGE_LENGTH);
 
 			Object[] values = {
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
