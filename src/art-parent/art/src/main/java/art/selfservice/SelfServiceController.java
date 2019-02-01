@@ -237,7 +237,6 @@ public class SelfServiceController {
 	@GetMapping("/getViewDetails")
 	@ResponseBody
 	public AjaxResponse getViewDetails(@RequestParam("reportId") Integer reportId,
-			@RequestParam(value = "viewReportId", defaultValue = "0") Integer viewReportId,
 			HttpSession session) {
 
 		logger.debug("Entering getViewDetails: reportId={}", reportId);
@@ -247,19 +246,8 @@ public class SelfServiceController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			Report report;
-			String selfServiceOptionsString;
-			if (viewReportId > 0) {
-				report = reportService.getReport(viewReportId);
-				if (report == null) {
-					throw new RuntimeException("View report not available");
-				}
-				Report selfServiceReport = reportService.getReport(reportId);
-				selfServiceOptionsString = selfServiceReport.getSelfServiceOptions();
-			} else {
-				report = reportService.getReport(reportId);
-				selfServiceOptionsString = report.getSelfServiceOptions();
-			}
+			Report report = reportService.getReport(reportId);
+			String selfServiceOptionsString = report.getSelfServiceOptions();
 
 			RunReportHelper runReportHelper = new RunReportHelper();
 			List<SelfServiceColumn> columns = runReportHelper.getSelfServiceColumnsForView(report, sessionUser);

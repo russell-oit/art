@@ -110,10 +110,9 @@
 				});
 
 				function populateDetails(option) {
-					var reportId = option.val();
-					var viewReportId = option.data("viewReportId");
-
 					$("#reportOutput").empty();
+
+					var reportId = option.val();
 					$("#viewReportId").val(reportId);
 
 					//https://stackoverflow.com/questions/27347004/jquery-val-integer-datatype-comparison
@@ -123,7 +122,7 @@
 						$.ajax({
 							type: 'GET',
 							url: '${pageContext.request.contextPath}/getViewDetails',
-							data: {reportId: reportId, viewReportId: viewReportId},
+							data: {reportId: reportId},
 							success: function (response) {
 								if (response.success) {
 									var result = response.data;
@@ -241,22 +240,16 @@
 
 					var selfServiceOptionsString = getSelfServiceOptionsString();
 
-					var data = {testRun: true, reportId: reportId,
-						selfServicePreview: true, reportFormat: "htmlDataTable",
-						selfServiceOptions: selfServiceOptionsString,
-						showInline: true
-					};
-
 					var limit = $("#limit").val();
-					if (limit) {
-						data.limit = limit;
-					}
 
 					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
 					$.ajax({
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
-						data: data,
+						data: {testRun: true, reportId: reportId,
+							selfServicePreview: true, reportFormat: "htmlDataTable",
+							selfServiceOptions: selfServiceOptionsString,
+							showInline: true, limit: limit},
 						success: function (data) {
 							$("#reportOutput").html(data);
 						},

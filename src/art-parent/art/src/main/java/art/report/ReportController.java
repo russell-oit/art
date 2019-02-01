@@ -1271,21 +1271,36 @@ public class ReportController {
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
-				+ " name='{}', description='{}', overwrite={}",
-				reportId, config, name, description, overwrite);
+				+ " name='{}', description='{}', overwrite={}, viewReportId={}",
+				reportId, config, name, description, overwrite, viewReportId);
 
 		boolean saveSelectedParameters = false;
 		boolean selfServiceDashboard = false;
 		return saveAdHoc(ReportType.Tabular, reportId, config, name, description, overwrite, saveSelectedParameters, selfServiceDashboard, session, request, locale, viewReportId);
 	}
 
-	private AjaxResponse saveAdHoc(ReportType reportType,
-			Integer reportId,
-			String config, String name,
-			String description,
-			Boolean overwrite,
-			Boolean saveSelectedParameters,
-			Boolean selfServiceDashboard,
+	/**
+	 * Saves an ad hoc or self service report or dashboard
+	 *
+	 * @param reportType the report type
+	 * @param reportId the report id to edit or null if it's a new report
+	 * @param config configuration for the report
+	 * @param name the report name
+	 * @param description the report description
+	 * @param overwrite whether to overwrite the existing report
+	 * @param saveSelectedParameters whether to save selected parameters
+	 * @param selfServiceDashboard whether this is from the self service
+	 * dashboards page
+	 * @param session the http session
+	 * @param request the http request
+	 * @param locale the locale
+	 * @param viewReportId the view report id when creating/saving self service
+	 * reports
+	 * @return the action result
+	 */
+	private AjaxResponse saveAdHoc(ReportType reportType, Integer reportId,
+			String config, String name, String description, Boolean overwrite,
+			Boolean saveSelectedParameters, Boolean selfServiceDashboard,
 			HttpSession session, HttpServletRequest request, Locale locale,
 			Integer viewReportId) {
 

@@ -139,7 +139,7 @@ public class RunReportController {
 					String selfServiceOptions = request.getParameter("selfServiceOptions");
 					String limitString = request.getParameter("limit");
 					Integer limit;
-					if (limitString == null) {
+					if (StringUtils.isBlank(limitString)) {
 						limit = ReportRunner.RETURN_ALL_RECORDS;
 					} else {
 						limit = NumberUtils.toInt(limitString);
