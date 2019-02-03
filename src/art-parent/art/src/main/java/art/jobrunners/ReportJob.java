@@ -241,14 +241,14 @@ public class ReportJob implements org.quartz.Job {
 
 			Report report = job.getReport();
 			if (report == null) {
-				logger.warn("Job report not found: Job Id {}", jobId);
+				logger.warn("Job report not found. Job Id {}", jobId);
 				jobLogAndClose("Job report not found");
 				return;
 			}
 
 			User user = job.getUser();
 			if (user == null) {
-				logger.warn("Job user not found: Job Id {}", jobId);
+				logger.warn("Job user not found. Job Id {}", jobId);
 				jobLogAndClose("Job user not found");
 				return;
 			}
@@ -1211,7 +1211,7 @@ public class ReportJob implements org.quartz.Job {
 				doSftp(destination, fullLocalFileName, remoteFileName, finalPath);
 				break;
 			default:
-				logger.warn("Unexpected ftp destination type: " + destinationType);
+				logger.warn("Unexpected ftp destination type: {}. Job Id {}", destinationType, jobId);
 		}
 	}
 
@@ -1875,7 +1875,7 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("from='{}'", from);
 
 		if (StringUtils.isBlank(from)) {
-			logger.warn("From email address not available: Job Id {}", jobId);
+			logger.warn("From email address not available. Job Id {}", jobId);
 		}
 
 		return from;
@@ -2495,7 +2495,8 @@ public class ReportJob implements org.quartz.Job {
 					String msg = "Error when sending some emails."
 							+ " \n" + ex.toString()
 							+ " \n To: " + emails;
-					logger.warn(msg);
+					
+					logger.warn("Job Id {}. " + msg, jobId);
 
 					if (recipientFilterPresent) {
 						progressLogger.warn("'{}'. {}", emails, msg);
@@ -2513,7 +2514,7 @@ public class ReportJob implements org.quartz.Job {
 				File f = new File(outputFileName);
 				boolean deleted = f.delete();
 				if (!deleted) {
-					logger.warn("Email attachment file not deleted: {}", outputFileName);
+					logger.warn("Email attachment file not deleted: '{}'. Job Id {}", outputFileName, jobId);
 				}
 			}
 		}
@@ -2549,8 +2550,8 @@ public class ReportJob implements org.quartz.Job {
 				String msg = "Error when sending some emails."
 						+ " \n" + ex.toString()
 						+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
-				logger.warn(msg);
-
+				
+				logger.warn("Job Id {}. " + msg, jobId);
 				progressLogger.warn(msg);
 			}
 		}
@@ -2618,7 +2619,7 @@ public class ReportJob implements org.quartz.Job {
 				if (fixedFile.exists()) {
 					boolean fileDeleted = fixedFile.delete();
 					if (!fileDeleted) {
-						logger.warn("Could not delete fixed file: '{}'", fullFixedFileName);
+						logger.warn("Could not delete fixed file: '{}'. Job Id {}", fullFixedFileName, jobId);
 					}
 				}
 			}
