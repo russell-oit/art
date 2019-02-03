@@ -349,6 +349,7 @@
 
 			function initializeBuilder() {
 				$('#builder').queryBuilder({
+					plugins: ['bt-tooltip-errors', 'not-group'],
 					filters: [{
 							id: 'placeholder',
 							type: 'string'
