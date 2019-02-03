@@ -33,6 +33,7 @@
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jQuery-QueryBuilder-2.5.2/css/query-builder.default.min.css" /> 
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/css/bootstrap-datetimepicker.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
@@ -43,6 +44,8 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/multiselect-2.5.5/js/multiselect.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notifyjs-0.4.2/notify.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 
 		<script>
 			$(function () {
@@ -380,6 +383,29 @@
 						label: column.userLabel,
 						type: column.type
 					};
+
+					if (column.type === 'date' || column.type === 'datetime'
+							|| column.type === 'time') {
+
+						var datePickerConfig = {
+							locale: '${pageContext.response.locale}',
+							keepInvalid: true,
+							useStrict: true
+						};
+
+						//https://github.com/itfsw/QueryBuilder/blob/master/src/main/java/com/itfsw/query/builder/support/filter/DatetimeConvertFilter.java
+						if (column.type === 'date') {
+							datePickerConfig.format = 'YYYY-MM-DD';
+						} else if (column.type === 'datetime') {
+							datePickerConfig.format = 'YYYY-MM-DD HH:mm:ss';
+						} else if (column.type === 'time') {
+							datePickerConfig.format = 'HH:mm:ss';
+						}
+						
+						filter.plugin = 'datetimepicker';
+						filter.input_event = 'dp.change';
+						filter.plugin_config = datePickerConfig;
+					}
 
 					filters.push(filter);
 				});
