@@ -301,7 +301,7 @@ public class SelfServiceController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			List<Report> basicReports = new ArrayList<>();
-			List<Report> reports = reportService.getSelfServiceReports();
+			List<Report> reports = reportService.getAvailableSelfServiceReports(sessionUser.getUserId());
 
 			List<Report> finalReports = new ArrayList<>();
 			for (Report report : reports) {
