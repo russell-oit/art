@@ -1259,10 +1259,10 @@ public class ReportService {
 			copyTableRow(conn, "ART_REPORT_PARAMETERS", "REPORT_ID", originalReportId, newId, "REPORT_PARAMETER_ID");
 
 			//copy rules
-			copyTableRow(conn, "ART_QUERY_RULES", "QUERY_ID", originalReportId, newId, null);
+			copyTableRow(conn, "ART_QUERY_RULES", "QUERY_ID", originalReportId, newId, "QUERY_RULE_ID");
 
 			//copy drilldown reports
-			copyTableRow(conn, "ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId, null);
+			copyTableRow(conn, "ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId, "DRILLDOWN_ID");
 
 			conn.commit();
 		} catch (SQLException ex) {
@@ -1293,7 +1293,8 @@ public class ReportService {
 			int keyId, int newKeyId, String primaryKeyColumn) throws SQLException {
 
 		logger.debug("Entering copyTableRow: tableName='{}', keyColumnName='{}',"
-				+ " keyId={}, newKeyId={}", tableName, keyColumnName, keyId, newKeyId);
+				+ " keyId={}, newKeyId={}, primaryKeyColumn='{}'",
+				tableName, keyColumnName, keyId, newKeyId, primaryKeyColumn);
 
 		int recordsCopied = 0;
 
@@ -1311,8 +1312,11 @@ public class ReportService {
 			sql = "INSERT INTO " + tableName + " VALUES ("
 					+ StringUtils.repeat("?", ",", columnCount) + ")";
 
-			String sql2 = "SELECT MAX(" + primaryKeyColumn + ") FROM " + tableName;
-			int id = dbService.getMaxRecordId(conn, sql2);
+			int id = 0;
+			if (primaryKeyColumn != null) {
+				String sql2 = "SELECT MAX(" + primaryKeyColumn + ") FROM " + tableName;
+				id = dbService.getMaxRecordId(conn, sql2);
+			}
 
 			while (rs.next()) {
 				//insert new record for each existing record
@@ -1425,7 +1429,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
 	}
-	
+
 	/**
 	 * Returns self service reports
 	 *
