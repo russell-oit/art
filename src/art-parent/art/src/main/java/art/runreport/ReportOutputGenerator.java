@@ -1037,7 +1037,7 @@ public class ReportOutputGenerator {
 		request.setAttribute("savedConfigJson", savedConfigJson);
 
 		ReportService reportService = new ReportService();
-		boolean exclusiveAccess = reportService.hasExclusiveOrOwnerAccess(user, report.getReportId());
+		boolean exclusiveAccess = reportService.hasOwnerAccess(user, report.getReportId());
 		request.setAttribute("exclusiveAccess", exclusiveAccess);
 
 		String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);

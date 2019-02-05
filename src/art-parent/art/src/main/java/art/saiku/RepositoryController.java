@@ -86,7 +86,7 @@ public class RepositoryController {
 			//editing/overwriting existing report
 			//check if this is the only user who has access. if so, he can overwrite the report
 			int reportId = report.getReportId();
-			boolean exclusiveAccess = reportService.hasExclusiveOrOwnerAccess(sessionUser, reportId);
+			boolean exclusiveAccess = reportService.hasOwnerAccess(sessionUser, reportId);
 			boolean canOverwrite;
 
 			if (exclusiveAccess || sessionUser.isAdminUser()) {
@@ -125,7 +125,7 @@ public class RepositoryController {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		//check if this is the only user who has access. if so, he can delete the report
-		boolean exclusiveAccess = reportService.hasExclusiveOrOwnerAccess(sessionUser, reportId);
+		boolean exclusiveAccess = reportService.hasOwnerAccess(sessionUser, reportId);
 		boolean canDelete;
 
 		if (exclusiveAccess || sessionUser.isAdminUser()) {

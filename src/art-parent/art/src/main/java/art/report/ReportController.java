@@ -166,7 +166,7 @@ public class ReportController {
 				return "reportError";
 			} else {
 				User sessionUser = (User) session.getAttribute("sessionUser");
-				if (reportService.hasExclusiveOrOwnerAccess(sessionUser, report.getReportId())) {
+				if (reportService.hasOwnerAccess(sessionUser, report.getReportId())) {
 					List<User> users = userService.getActiveUsers();
 					users.removeIf(user -> StringUtils.isBlank(user.getFullName()));
 					List<UserGroup> userGroups = userGroupService.getAllUserGroups();

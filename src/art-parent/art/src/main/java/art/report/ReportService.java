@@ -1652,81 +1652,25 @@ public class ReportService {
 	}
 
 	/**
-	 * Returns <code>true</code> if a report is only directly allocated to a
-	 * single user or if the user is the owner of the report
+	 * Returns <code>true</code> if the user is the owner of the report
 	 *
 	 * @param user the user
-	 * @param reportId the id of the report
-	 * @return <code>true</code> if user has exclusive access to the report
+	 * @param reportId the report id
+	 * @return <code>true</code> if the user is the owner of the report
 	 * @throws java.sql.SQLException
 	 */
-	public boolean hasExclusiveOrOwnerAccess(User user, int reportId) throws SQLException {
-		logger.debug("Entering hasExclusiveOrOwnerAccess: user={}, reportId={}", user, reportId);
+	public boolean hasOwnerAccess(User user, int reportId) throws SQLException {
+		logger.debug("Entering hasOwnerAccess: user={}, reportId={}", user, reportId);
 
-		boolean owner;
-		boolean exclusive = false;
-
-		//check if user is the owner of the report
 		String sql = "SELECT COUNT(*) FROM ART_QUERIES"
 				+ " WHERE QUERY_ID=? AND CREATED_BY=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
 		Number recordCount = dbService.query(sql, h, reportId, user.getUsername());
 
 		if (recordCount == null || recordCount.longValue() == 0) {
-			owner = false;
-		} else {
-			owner = true;
-		}
-
-		if (!owner) {
-			//check if user has exclusive access
-			int userAccessCount = 0;
-			boolean userHasAccess = false;
-			boolean assignedToGroup = false;
-
-			sql = "SELECT USER_GROUP_ID FROM ART_USER_GROUP_QUERIES "
-					+ " WHERE QUERY_ID=?";
-
-			ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
-			List<Map<String, Object>> userGroupsList = dbService.query(sql, h2, reportId);
-
-			if (!userGroupsList.isEmpty()) {
-				//report granted to a group. user doesn't have exclusive access
-				assignedToGroup = true;
-			}
-
-			if (!assignedToGroup) {
-				sql = "SELECT USERNAME FROM ART_USER_QUERIES "
-						+ " WHERE QUERY_ID=?";
-
-				ResultSetHandler<List<Map<String, Object>>> h3 = new MapListHandler();
-				List<Map<String, Object>> usersList = dbService.query(sql, h3, reportId);
-
-				String username = user.getUsername();
-				for (Map<String, Object> userRecord : usersList) {
-					userAccessCount++;
-					if (userAccessCount >= 2) {
-						//more than one user has access
-						break;
-					}
-					//map list handler uses a case insensitive map, so case of column names doesn't matter
-					String usernameValue = (String) userRecord.get("USERNAME");
-					if (StringUtils.equals(username, usernameValue)) {
-						userHasAccess = true;
-					}
-				}
-			}
-
-			if (!assignedToGroup && userHasAccess && userAccessCount == 1) {
-				//only one user has explicit access
-				exclusive = true;
-			}
-		}
-
-		if (owner || exclusive) {
-			return true;
-		} else {
 			return false;
+		} else {
+			return true;
 		}
 	}
 

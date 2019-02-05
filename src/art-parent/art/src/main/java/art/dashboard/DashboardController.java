@@ -209,7 +209,7 @@ public class DashboardController {
 					GridstackDashboard dashboard = buildGridstackDashboard(report, request, locale, reportParamsMap);
 					model.addAttribute("dashboard", dashboard);
 
-					boolean exclusiveAccess = reportService.hasExclusiveOrOwnerAccess(sessionUser, report.getReportId());
+					boolean exclusiveAccess = reportService.hasOwnerAccess(sessionUser, report.getReportId());
 					request.setAttribute("exclusiveAccess", exclusiveAccess);
 					request.setAttribute("report", report);
 
