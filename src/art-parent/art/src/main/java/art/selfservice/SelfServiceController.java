@@ -129,32 +129,6 @@ public class SelfServiceController {
 		return response;
 	}
 
-	@GetMapping("/getEditAllDashboards")
-	@ResponseBody
-	public AjaxResponse getEditAllDashboards(Locale locale) {
-		logger.debug("Entering getEditAllDashboards");
-
-		AjaxResponse response = new AjaxResponse();
-
-		try {
-			List<Report> basicReports = new ArrayList<>();
-			List<Report> reports = reportService.getGridstackDashboardReports();
-			for (Report report : reports) {
-				String name = report.getLocalizedName(locale);
-				String encodedName = Encode.forHtmlContent(name);
-				report.setName2(encodedName);
-				basicReports.add(report.getBasicReport());
-			}
-			response.setData(basicReports);
-			response.setSuccess(true);
-		} catch (SQLException | RuntimeException | IOException ex) {
-			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
-		}
-
-		return response;
-	}
-
 	@GetMapping("/getDashboardDetails")
 	@ResponseBody
 	public AjaxResponse getDashboardDetails(@RequestParam("reportId") Integer reportId) {
