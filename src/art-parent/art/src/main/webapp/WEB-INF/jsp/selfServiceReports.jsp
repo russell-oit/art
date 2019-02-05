@@ -557,8 +557,6 @@
 		</div>
 
 		<script>
-			//https://github.com/gridstack/gridstack.js/issues/50
-			//https://github.com/gridstack/gridstack.js/issues/575
 			$("#saveReport").on("click", function () {
 				var config = getSelfServiceOptionsString();
 				$("#config").val(config);

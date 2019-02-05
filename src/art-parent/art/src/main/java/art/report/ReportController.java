@@ -17,6 +17,7 @@
  */
 package art.report;
 
+import art.accessright.AccessRightService;
 import art.datasource.DatasourceService;
 import art.encryption.AesEncryptor;
 import art.encryptor.EncryptorService;
@@ -38,6 +39,9 @@ import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportRunner;
 import art.savedparameter.SavedParameter;
 import art.savedparameter.SavedParameterService;
+import art.user.UserService;
+import art.usergroup.UserGroup;
+import art.usergroup.UserGroupService;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
@@ -54,6 +58,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.mail.MessagingException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -123,6 +128,15 @@ public class ReportController {
 	@Autowired
 	private ServletContext servletContext;
 
+	@Autowired
+	private AccessRightService accessRightService;
+
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private UserGroupService userGroupService;
+
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, Model model) {
 		logger.debug("Entering showReports");
@@ -151,6 +165,17 @@ public class ReportController {
 				model.addAttribute("message", "reports.message.reportNotFound");
 				return "reportError";
 			} else {
+				User sessionUser = (User) session.getAttribute("sessionUser");
+				if (reportService.hasExclusiveOrOwnerAccess(sessionUser, report.getReportId())) {
+					List<User> users = userService.getActiveUsers();
+					users.removeIf(user -> StringUtils.isBlank(user.getFullName()));
+					List<UserGroup> userGroups = userGroupService.getAllUserGroups();
+					
+					request.setAttribute("users", users);
+					request.setAttribute("userGroups", userGroups);
+					request.setAttribute("enableShare", true);
+				}
+
 				RunReportHelper runReportHelper = new RunReportHelper();
 				runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
 			}
@@ -1456,6 +1481,40 @@ public class ReportController {
 		}
 
 		return list;
+	}
+
+	@PostMapping("/shareReport")
+	public @ResponseBody
+	AjaxResponse shareReport(@RequestParam("reportId") Integer reportId,
+			@RequestParam(value = "users[]", required = false) Integer[] users,
+			@RequestParam(value = "userGroups[]", required = false) Integer[] userGroups,
+			@RequestParam("action") String action) {
+
+		logger.debug("Entering shareReport: reportId={}, action='{}'", reportId, action);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Integer[] reports = {reportId};
+			Integer[] reportGroups = null;
+			Integer[] jobs = null;
+
+			List<String> finalUsers = new ArrayList<>();
+			Map<Integer, String> userDetails = userService.getUsernames(users);
+			for (Entry<Integer, String> entry : userDetails.entrySet()) {
+				Integer userId = entry.getKey();
+				String username = entry.getValue();
+				String userSpecification = String.valueOf(userId) + "-" + username;
+				finalUsers.add(userSpecification);
+			}
+			accessRightService.updateAccessRights(action, finalUsers.toArray(new String[0]), userGroups, reports, reportGroups, jobs);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
 	}
 
 }

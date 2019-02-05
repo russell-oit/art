@@ -38,6 +38,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
@@ -925,6 +926,54 @@ public class UserService {
 		} else {
 			return true;
 		}
+	}
+
+	/**
+	 * Returns the username for a given user id
+	 *
+	 * @param userId the user id
+	 * @return the username for the given user id
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public String getUsername(int userId) throws SQLException {
+		logger.debug("Entering getUsername: userId={}", userId);
+
+		String sql = "SELECT USERNAME FROM ART_USERS"
+				+ " WHERE USER_ID=?";
+
+		ResultSetHandler<String> h = new ScalarHandler<>();
+		return dbService.query(sql, h, userId);
+	}
+
+	/**
+	 * Returns the usernames for the given user ids
+	 *
+	 * @param ids the user ids
+	 * @return the usernames for the given user ids
+	 * @throws SQLException
+	 */
+	public Map<Integer, String> getUsernames(Integer[] ids) throws SQLException {
+		logger.debug("Entering getUsernames");
+
+		if (ids == null || ids.length == 0) {
+			return new HashMap<>();
+		}
+
+		String sql = "SELECT USER_ID, USERNAME FROM ART_USERS"
+				+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> rows = dbService.query(sql, h, (Object[]) ids);
+
+		Map<Integer, String> details = new LinkedHashMap<>();
+		for (Map<String, Object> row : rows) {
+			Integer userId = (Integer) row.get("USER_ID");
+			String username = (String) row.get("USERNAME");
+			details.put(userId, username);
+		}
+
+		return details;
 	}
 
 }
