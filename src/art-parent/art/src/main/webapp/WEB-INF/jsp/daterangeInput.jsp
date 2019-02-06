@@ -208,15 +208,6 @@
 		delete dateRangeOptions.ranges;
 		$.extend(options, dateRangeOptions);
 	}
-
-	momentDateFormat = options.locale.format;
-	var separator = options.locale.separator;
-
-	var selector = '#${encode:forJavaScript(reportParam.htmlElementName)}';
-
-	$(selector).on('apply.daterangepicker', function (ev, picker) {
-		$(this).val(picker.startDate.format(momentDateFormat) + separator + picker.endDate.format(momentDateFormat));
-	});
 </script>
 
 <c:if test="${not empty reportParam.parameter.template}">
@@ -224,6 +215,7 @@
 </c:if>
 
 <script>
+	var selector = '#${encode:forJavaScript(reportParam.htmlElementName)}';
 	$(selector).daterangepicker(options, rangeUpdated);
 </script>
 
