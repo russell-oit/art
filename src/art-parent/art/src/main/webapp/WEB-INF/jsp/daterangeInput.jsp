@@ -60,27 +60,40 @@
 		}
 	}
 
-	function rangeUpdated(start, end) {
-		var defaultParameterFormatJava = 'yyyy-MM-dd';
+	var fromParameterSelector;
+	var fromParameterMomentFormat;
+	var toParameterSelector;
+	var toParameterMomentFormat;
+	var defaultParameterFormatJava = 'yyyy-MM-dd';
 
+	if (fromParameter) {
+		var fromParameterName = fromParameter.name;
+		var fromParameterJavaFormat = fromParameter.format;
+		if (!fromParameterJavaFormat) {
+			fromParameterJavaFormat = defaultParameterFormatJava;
+		}
+		fromParameterMomentFormat = moment().toMomentFormatString(fromParameterJavaFormat);
+		fromParameterSelector = '#p-' + fromParameterName;
+	}
+
+	if (toParameter) {
+		var toParameterName = toParameter.name;
+		var toParameterJavaFormat = toParameter.format;
+		if (!toParameterJavaFormat) {
+			toParameterJavaFormat = defaultParameterFormatJava;
+		}
+		toParameterMomentFormat = moment().toMomentFormatString(toParameterJavaFormat);
+		toParameterSelector = '#p-' + toParameterName;
+	}
+
+
+	function rangeUpdated(start, end) {
 		if (fromParameter) {
-			var fromParameterName = fromParameter.name;
-			var fromParameterJavaFormat = fromParameter.format;
-			if (!fromParameterJavaFormat) {
-				fromParameterJavaFormat = defaultParameterFormatJava;
-			}
-			var fromParameterMomentFormat = moment().toMomentFormatString(fromParameterJavaFormat);
-			$('#p-' + fromParameterName).val(start.format(fromParameterMomentFormat));
+			$(fromParameterSelector).val(start.format(fromParameterMomentFormat));
 		}
 
 		if (toParameter) {
-			var toParameterName = toParameter.name;
-			var toParameterJavaFormat = toParameter.format;
-			if (!toParameterJavaFormat) {
-				toParameterJavaFormat = defaultParameterFormatJava;
-			}
-			var toParameterMomentFormat = moment().toMomentFormatString(toParameterJavaFormat);
-			$('#p-' + toParameterName).val(end.format(toParameterMomentFormat));
+			$(toParameterSelector).val(end.format(toParameterMomentFormat));
 		}
 	}
 
@@ -187,8 +200,7 @@
 			cancelLabel: '${cancelText}',
 			customRangeLabel: '${customRangeText}',
 			separator: ' - '
-		},
-		autoUpdateInput: false
+		}
 	};
 
 	if (dateRangeOptions) {
@@ -213,4 +225,13 @@
 
 <script>
 	$(selector).daterangepicker(options, rangeUpdated);
+</script>
+
+<script>
+	$(function () {
+		//https://stackoverflow.com/questions/19651943/getting-the-value-of-daterangepicker-bootstrap
+		var startDate = $(selector).data('daterangepicker').startDate;
+		var endDate = $(selector).data('daterangepicker').endDate;
+		rangeUpdated(startDate, endDate);
+	});
 </script>
