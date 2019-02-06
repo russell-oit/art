@@ -151,6 +151,7 @@ public enum ReportType {
 			case OrgChartList:
 			case OrgChartAjax:
 			case Plotly:
+			case View:
 				return false;
 			default:
 				return true;
