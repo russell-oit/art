@@ -121,6 +121,7 @@ public class RunReportController {
 		}
 
 		String reportName = null;
+		RunReportHelper runReportHelper = new RunReportHelper();
 
 		try {
 			if (testReport.getTestRun() == null) {
@@ -157,13 +158,14 @@ public class RunReportController {
 							testReport.setReportSource(testReport.getReportSourceHtml());
 						}
 					}
-					
+
 					testReport.loadGeneralOptions();
 				}
 
-				RunReportHelper runReportHelper = new RunReportHelper();
-				runReportHelper.applySelfServiceFields(testReport, sessionUser);
-				
+				if (testReport.getReportType() != ReportType.View) {
+					runReportHelper.applySelfServiceFields(testReport, sessionUser);
+				}
+
 				report = testReport;
 			}
 
@@ -206,7 +208,9 @@ public class RunReportController {
 
 			ReportType reportType = report.getReportType();
 
-			RunReportHelper runReportHelper = new RunReportHelper();
+			if (reportType == ReportType.View) {
+				runReportHelper.applySelfServiceFields(report, sessionUser);
+			}
 
 			ReportFormat reportFormat;
 			String reportFormatString = request.getParameter("reportFormat");
