@@ -147,9 +147,6 @@ public class RunReportController {
 
 					testReport.setSelfServiceOptions(selfServiceOptions);
 					testReport.setLimit(limit);
-
-					RunReportHelper runReportHelper = new RunReportHelper();
-					runReportHelper.applySelfServiceFields(testReport, sessionUser);
 				} else {
 					boolean testData = BooleanUtils.toBoolean(request.getParameter("testData"));
 					if (testData) {
@@ -161,6 +158,10 @@ public class RunReportController {
 						}
 					}
 				}
+
+				RunReportHelper runReportHelper = new RunReportHelper();
+				runReportHelper.applySelfServiceFields(testReport, sessionUser);
+
 				testReport.loadGeneralOptions();
 				report = testReport;
 			}

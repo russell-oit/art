@@ -1730,4 +1730,20 @@ public class Report implements Serializable {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if this is a view or self service report
+	 * 
+	 * @return <code>true</code> if this is a view or self service report
+	 */
+	@JsonIgnore
+	public boolean isViewOrSelfService() {
+		if (reportType != null && reportType == ReportType.View) {
+			return true;
+		} else if (isSelfService()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 }

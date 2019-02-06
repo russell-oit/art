@@ -1545,14 +1545,20 @@ public class RunReportHelper {
 	public void applySelfServiceFields(Report report, User user) throws IOException, SQLException {
 		Objects.requireNonNull(report, "report must not be null");
 
-		String selfServiceOptionsString = report.getSelfServiceOptions();
-		if (StringUtils.isBlank(selfServiceOptionsString)) {
+		if (!report.isViewOrSelfService()) {
 			return;
 		}
 
 		List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(report, user);
 
-		SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
+		SelfServiceOptions selfServiceOptions;
+		String selfServiceOptionsString = report.getSelfServiceOptions();
+		if (StringUtils.isBlank(selfServiceOptionsString)) {
+			selfServiceOptions = new SelfServiceOptions();
+		} else {
+			selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
+		}
+
 		JsonRule javaRule = selfServiceOptions.getJavaRule();
 		if (javaRule != null) {
 			for (JsonRule rule : javaRule.getRules()) {
@@ -1589,8 +1595,10 @@ public class RunReportHelper {
 		}
 
 		String columnsString = StringUtils.join(chosenColumns, ", ");
+		
 		selfServiceOptions.setColumnsString(columnsString);
 		selfServiceOptionsString = ArtUtils.objectToJson(selfServiceOptions);
+		
 		report.setSelfServiceOptions(selfServiceOptionsString);
 	}
 

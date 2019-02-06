@@ -924,8 +924,7 @@ public class ReportRunner {
 		logger.debug("Entering applySelfServiceFields");
 
 		try {
-			ReportType reportType = report.getReportType();
-			if (reportType != ReportType.View && !report.isSelfService()) {
+			if (!report.isViewOrSelfService()) {
 				return;
 			}
 
@@ -1014,7 +1013,7 @@ public class ReportRunner {
 			Integer finalLimit = null;
 			if (limit == null) {
 				if (runLimit == null) {
-					if (reportType == ReportType.View) {
+					if (report.getReportType() == ReportType.View) {
 						finalLimit = reportLimit;
 						if (finalLimit == null) {
 							finalLimit = datasourceLimit;
