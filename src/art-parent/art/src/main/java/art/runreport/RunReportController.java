@@ -157,12 +157,13 @@ public class RunReportController {
 							testReport.setReportSource(testReport.getReportSourceHtml());
 						}
 					}
+					
+					testReport.loadGeneralOptions();
 				}
 
 				RunReportHelper runReportHelper = new RunReportHelper();
 				runReportHelper.applySelfServiceFields(testReport, sessionUser);
-
-				testReport.loadGeneralOptions();
+				
 				report = testReport;
 			}
 
