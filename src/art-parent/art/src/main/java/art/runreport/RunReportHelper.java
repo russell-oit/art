@@ -1402,7 +1402,7 @@ public class RunReportHelper {
 	 */
 	private List<SelfServiceColumn> getSelfServiceColumns(Report report,
 			User user, boolean nameAsLabel, boolean setType) throws SQLException {
-		
+
 		Objects.requireNonNull(report, "report must not be null");
 
 		List<SelfServiceColumn> columns = new ArrayList<>();
@@ -1544,7 +1544,7 @@ public class RunReportHelper {
 	 */
 	public void applySelfServiceFields(Report report, User user) throws IOException, SQLException {
 		Objects.requireNonNull(report, "report must not be null");
-		
+
 		String selfServiceOptionsString = report.getSelfServiceOptions();
 		if (StringUtils.isBlank(selfServiceOptionsString)) {
 			return;
@@ -1574,7 +1574,7 @@ public class RunReportHelper {
 		List<String> columns = selfServiceOptions.getColumns();
 		if (CollectionUtils.isEmpty(columns)) {
 			for (SelfServiceColumn referenceColumn : selfServiceColumns) {
-				String columnSpecification = referenceColumn.getLabel();
+				String columnSpecification = getColumnSpecification(referenceColumn);
 				chosenColumns.add(columnSpecification);
 			}
 		} else {
@@ -1583,14 +1583,7 @@ public class RunReportHelper {
 						.filter(c -> c.getLabel().equals(column))
 						.findAny()
 						.orElseThrow(() -> new RuntimeException("Invalid column: " + column));
-				String columnSpecification;
-				if (StringUtils.equals(referenceColumn.getLabel(), referenceColumn.getUserLabel())) {
-					columnSpecification = referenceColumn.getLabel();
-				} else {
-					//https://stackoverflow.com/questions/19657101/what-is-the-difference-between-square-brackets-and-single-quotes-for-aliasing-in
-					String cleanUserLabel = StringUtils.remove(referenceColumn.getUserLabel(), "\"");
-					columnSpecification = referenceColumn.getLabel() + " as \"" + cleanUserLabel + "\"";
-				}
+				String columnSpecification = getColumnSpecification(referenceColumn);
 				chosenColumns.add(columnSpecification);
 			}
 		}
@@ -1599,6 +1592,26 @@ public class RunReportHelper {
 		selfServiceOptions.setColumnsString(columnsString);
 		selfServiceOptionsString = ArtUtils.objectToJson(selfServiceOptions);
 		report.setSelfServiceOptions(selfServiceOptionsString);
+	}
+
+	/**
+	 * Returns the column specification to use for a self service column i.e.
+	 * column name alone or column name and alias
+	 *
+	 * @param column the self service column
+	 * @return the column specification to use
+	 */
+	private String getColumnSpecification(SelfServiceColumn column) {
+		String columnSpecification;
+		if (StringUtils.equals(column.getLabel(), column.getUserLabel())) {
+			columnSpecification = column.getLabel();
+		} else {
+			//https://stackoverflow.com/questions/19657101/what-is-the-difference-between-square-brackets-and-single-quotes-for-aliasing-in
+			String cleanUserLabel = StringUtils.remove(column.getUserLabel(), "\"");
+			columnSpecification = column.getLabel() + " as \"" + cleanUserLabel + "\"";
+		}
+
+		return columnSpecification;
 	}
 
 }
