@@ -1107,6 +1107,7 @@ Edit report page
 					case 156: //org chart list
 					case 157: //org chart ajax
 					case 159: //report engine file
+					case 161: //view
 						$("#testReportData").hide();
 						break;
 					default:
