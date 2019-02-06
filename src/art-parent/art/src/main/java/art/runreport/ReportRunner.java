@@ -933,6 +933,7 @@ public class ReportRunner {
 			if (datasource == null) {
 				throw new RuntimeException("Datasource not specified");
 			}
+
 			String options = datasource.getOptions();
 			DatasourceOptions datasourceOptions;
 			if (StringUtils.isBlank(options)) {
@@ -947,8 +948,19 @@ public class ReportRunner {
 				viewOptions = new ViewOptions();
 			}
 
+			final String COLUMNS_PLACEHOLDER = "#columns#";
 			final String CONDITION_PLACEHOLDER = "#condition#";
+			final String LIMIT_PLACEHOLDER = "#limitClause#";
+
 			String querySql = querySb.toString();
+
+			if (!StringUtils.containsIgnoreCase(querySql, COLUMNS_PLACEHOLDER)) {
+				throw new RuntimeException(COLUMNS_PLACEHOLDER + " placeholder not found");
+			} else if (!StringUtils.containsIgnoreCase(querySql, CONDITION_PLACEHOLDER)) {
+				throw new RuntimeException(CONDITION_PLACEHOLDER + " placeholder not found");
+			} else if (!StringUtils.containsIgnoreCase(querySql, LIMIT_PLACEHOLDER)) {
+				throw new RuntimeException(LIMIT_PLACEHOLDER + " placeholder not found");
+			}
 
 			String columnsString;
 			String conditionString = null;
@@ -977,7 +989,7 @@ public class ReportRunner {
 				columnsString = "*";
 			}
 
-			querySql = StringUtils.replaceIgnoreCase(querySql, "#columns#", columnsString);
+			querySql = StringUtils.replaceIgnoreCase(querySql, COLUMNS_PLACEHOLDER, columnsString);
 
 			if (conditionString == null) {
 				conditionString = "1=1";
@@ -1020,7 +1032,6 @@ public class ReportRunner {
 				finalLimit = limit;
 			}
 
-			final String LIMIT_PLACEHOLDER = "#limitClause#";
 			if (finalLimit == null || finalLimit < 0) {
 				querySql = StringUtils.removeIgnoreCase(querySql, LIMIT_PLACEHOLDER);
 			} else {
