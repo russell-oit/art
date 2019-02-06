@@ -600,3 +600,13 @@ Display section to allow selecting of report parameters and initiate running of 
 		</div>
 	</div>
 </div>
+
+<script>
+	var token = $("meta[name='_csrf']").attr("content");
+	var header = $("meta[name='_csrf_header']").attr("content");
+	$(document).ajaxSend(function (e, xhr, options) {
+		if (header) {
+			xhr.setRequestHeader(header, token);
+		}
+	});
+</script>
