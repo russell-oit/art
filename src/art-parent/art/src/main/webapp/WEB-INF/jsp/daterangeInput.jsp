@@ -168,8 +168,15 @@
 		});
 	}
 
-	var defaultInputDateFormatJava = 'MMMM dd, yyyy';
-	var momentDateFormat = moment().toMomentFormatString(defaultInputDateFormatJava);
+	var inputDateFormatJava;
+	if (dateRangeOptions) {
+		inputDateFormatJava = dateRangeOptions.format;
+	}
+	if (!inputDateFormatJava) {
+		var defaultInputDateFormatJava = 'MMMM dd, yyyy';
+		inputDateFormatJava = defaultInputDateFormatJava;
+	}
+	var momentDateFormat = moment().toMomentFormatString(inputDateFormatJava);
 
 	//set default options
 	var options = {
