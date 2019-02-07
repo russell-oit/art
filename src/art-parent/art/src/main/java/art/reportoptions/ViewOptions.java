@@ -36,6 +36,36 @@ public class ViewOptions extends DatasourceOptions implements Serializable {
 	private List<Map<String, String>> columnLabels;
 	private List<Map<String, String>> columnDescriptions;
 	private String columns = "*";
+	private List<String> conditionColumns;
+	private List<String> omitConditionColumns;
+
+	/**
+	 * @return the conditionColumns
+	 */
+	public List<String> getConditionColumns() {
+		return conditionColumns;
+	}
+
+	/**
+	 * @param conditionColumns the conditionColumns to set
+	 */
+	public void setConditionColumns(List<String> conditionColumns) {
+		this.conditionColumns = conditionColumns;
+	}
+
+	/**
+	 * @return the omitConditionColumns
+	 */
+	public List<String> getOmitConditionColumns() {
+		return omitConditionColumns;
+	}
+
+	/**
+	 * @param omitConditionColumns the omitConditionColumns to set
+	 */
+	public void setOmitConditionColumns(List<String> omitConditionColumns) {
+		this.omitConditionColumns = omitConditionColumns;
+	}
 
 	/**
 	 * @return the columns

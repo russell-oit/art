@@ -22,6 +22,8 @@ import art.dashboard.GridstackDashboard;
 import art.general.AjaxResponse;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.GeneralReportOptions;
+import art.reportoptions.ViewOptions;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
@@ -218,8 +220,40 @@ public class SelfServiceController {
 			RunReportHelper runReportHelper = new RunReportHelper();
 			List<SelfServiceColumn> columns = runReportHelper.getSelfServiceColumnsForView(report, sessionUser);
 
+			GeneralReportOptions generalOptions = report.getGeneralOptions();
+			ViewOptions viewOptions = generalOptions.getView();
+
+			List<String> conditionColumns = null;
+			List<String> omitConditionColumns = null;
+			if (viewOptions != null) {
+				conditionColumns = viewOptions.getConditionColumns();
+				omitConditionColumns = viewOptions.getOmitConditionColumns();
+			}
+
+			List<SelfServiceColumn> includedConditionColumns;
+			if (conditionColumns == null || conditionColumns.isEmpty()) {
+				includedConditionColumns = new ArrayList<>(columns);
+			} else {
+				//can't use contidionColumns variable directly in lamda
+				//https://stackoverflow.com/questions/27592379/local-variables-referenced-from-a-lambda-expression-must-be-final-or-effectively
+				List<String> tempConditionColumns = conditionColumns;
+				includedConditionColumns = columns.stream()
+						.filter(c -> ArtUtils.containsIgnoreCase(tempConditionColumns, c.getLabel()))
+						.collect(Collectors.toList());
+			}
+
+			List<SelfServiceColumn> finalConditionColumns;
+			if (omitConditionColumns == null) {
+				finalConditionColumns = includedConditionColumns;
+			} else {
+				List<String> tempOmitConditionColumns = omitConditionColumns;
+				finalConditionColumns = includedConditionColumns.stream()
+						.filter(c -> !ArtUtils.containsIgnoreCase(tempOmitConditionColumns, c.getLabel()))
+						.collect(Collectors.toList());
+			}
+
 			Map<String, Object> result = new HashMap<>();
-			result.put("allColumns", columns);
+			result.put("conditionColumns", finalConditionColumns);
 
 			if (StringUtils.isBlank(selfServiceOptionsString)) {
 				result.put("fromColumns", columns);

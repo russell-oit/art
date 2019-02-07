@@ -129,7 +129,7 @@
 							success: function (response) {
 								if (response.success) {
 									var result = response.data;
-									var allColumns = result.allColumns;
+									var conditionColumns = result.conditionColumns;
 									var fromColumns = result.fromColumns;
 									var toColumns = result.toColumns;
 									var optionsString = result.options;
@@ -159,8 +159,7 @@
 										ruleObject = options.jqueryRule;
 									}
 
-									updateBuilder(allColumns, ruleObject);
-									$("#whereDiv").show();
+									updateBuilder(conditionColumns, ruleObject);
 								} else {
 									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 								}
@@ -350,31 +349,45 @@
 				return selfServiceOptionsString;
 			}
 
+			var dummyFilter = [
+				{
+					id: 'placeholder',
+					type: 'string'
+				}
+			];
+
 			function initializeBuilder() {
 				$('#builder').queryBuilder({
 					plugins: ['bt-tooltip-errors', 'not-group'],
-					filters: [{
-							id: 'placeholder',
-							type: 'string'
-						}
-					]
+					filters: dummyFilter
 				});
 			}
 
-			function updateBuilder(allColumns, ruleObject) {
-				var filters = createFilters(allColumns);
+			function updateBuilder(conditionColumns, ruleObject) {
+				if (conditionColumns && conditionColumns.length > 0) {
+					var filters = createFilters(conditionColumns);
+					updateFilters(filters);
+					if (ruleObject) {
+						$('#builder').queryBuilder('setRules', ruleObject);
+					}
+					$("#builderDiv").show();
+				} else {
+					updateFilters(dummyFilter);
+					$("#builderDiv").hide();
+				}
+				$("#whereDiv").show();
+			}
+
+			function updateFilters(filters) {
 				var force = true;
 				$('#builder').queryBuilder('setFilters', force, filters);
 				$('#builder').queryBuilder('reset');
-				if (ruleObject) {
-					$('#builder').queryBuilder('setRules', ruleObject);
-				}
 			}
 
-			function createFilters(allColumns) {
+			function createFilters(conditionColumns) {
 				var filters = [];
 
-				$.each(allColumns, function (index, column) {
+				$.each(conditionColumns, function (index, column) {
 					var id = "filter" + index;
 
 					var filter = {
@@ -401,7 +414,7 @@
 						} else if (column.type === 'time') {
 							datePickerConfig.format = 'HH:mm:ss';
 						}
-						
+
 						filter.plugin = 'datetimepicker';
 						filter.input_event = 'dp.change';
 						filter.plugin_config = datePickerConfig;
@@ -505,7 +518,7 @@
 						</a>
 					</div>
 				</div>
-				<div class="row">
+				<div class="row" id="builderDiv">
 					<div class="col-md-12">
 						<div id="builder"></div>
 					</div>
