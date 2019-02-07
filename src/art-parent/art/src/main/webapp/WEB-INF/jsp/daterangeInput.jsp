@@ -41,7 +41,7 @@
 	var locale = '${locale}';
 	moment.locale(locale);
 
-	var paramOptionsString = '${encode:forJavaScript(reportParam.parameter.options)}';
+	var paramOptionsString = '${encode:forJavaScript(reportParam.parameter.getDateRangeOptions(locale))}';
 	var paramOptions;
 	var dateRangeOptions;
 	var rangesOption;
