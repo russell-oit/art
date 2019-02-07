@@ -789,7 +789,7 @@ public class Parameter implements Serializable {
 		if (dateRange != null) {
 			String format = (String) dateRange.get("format");
 			if (StringUtils.isBlank(format)) {
-				final String DEFAULT_FORMAT = "MMMM dd, yyyy";
+				final String DEFAULT_FORMAT = "yyyy-MM-dd";
 				format = DEFAULT_FORMAT;
 			}
 

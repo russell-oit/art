@@ -186,7 +186,7 @@
 		inputDateFormatJava = dateRangeOptions.format;
 	}
 	if (!inputDateFormatJava) {
-		var defaultInputDateFormatJava = 'MMMM dd, yyyy';
+		var defaultInputDateFormatJava = 'yyyy-MM-dd';
 		inputDateFormatJava = defaultInputDateFormatJava;
 	}
 	var momentDateFormat = moment().toMomentFormatString(inputDateFormatJava);
