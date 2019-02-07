@@ -208,6 +208,8 @@
 		delete dateRangeOptions.ranges;
 		$.extend(options, dateRangeOptions);
 	}
+	
+	var selector = '#${encode:forJavaScript(reportParam.htmlElementName)}';
 </script>
 
 <c:if test="${not empty reportParam.parameter.template}">
@@ -215,7 +217,6 @@
 </c:if>
 
 <script>
-	var selector = '#${encode:forJavaScript(reportParam.htmlElementName)}';
 	$(selector).daterangepicker(options, rangeUpdated);
 </script>
 
