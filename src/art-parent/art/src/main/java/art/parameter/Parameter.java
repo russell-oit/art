@@ -785,6 +785,7 @@ public class Parameter implements Serializable {
 		Map<String, Object> map = mapper.readValue(options, new TypeReference<Map<String, Object>>() {
 		});
 
+		@SuppressWarnings("unchecked")
 		Map<String, Object> dateRange = (Map<String, Object>) map.get("dateRange");
 		if (dateRange != null) {
 			String format = (String) dateRange.get("format");
