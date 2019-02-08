@@ -788,9 +788,9 @@ public class JobService {
 		//non-split jobs. no entries for them in the art_user_jobs table
 		sql = SQL_SELECT_ALL + " INNER JOIN ART_USER_GROUP_JOBS AUGJ"
 				+ " ON AJ.JOB_ID=AUGJ.JOB_ID"
-				+ " WHERE AJ.USER_ID <> ? AND EXISTS "
-				+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USER_ID = ? "
-				+ " AND AUGA.USER_GROUP_ID=AUGJ.USER_GROUP_ID)";
+				+ " WHERE AJ.USER_ID <> ? AND EXISTS"
+				+ " (SELECT * FROM ART_USER_USERGROUP_MAP AUUGM WHERE AUUGM.USER_ID=?"
+				+ " AND AUUGM.USER_GROUP_ID=AUGJ.USER_GROUP_ID)";
 		ResultSetHandler<List<SharedJob>> h = new BeanListHandler<>(SharedJob.class, new SharedJobMapper());
 		jobs.addAll(dbService.query(sql, h, userId, userId));
 

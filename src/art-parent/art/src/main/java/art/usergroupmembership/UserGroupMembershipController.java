@@ -130,8 +130,9 @@ public class UserGroupMembershipController {
 
 	@RequestMapping(value = "/updateUserGroupMembership", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse updateUserGroupMembership(Model model, @RequestParam("action") String action,
-			@RequestParam("users[]") String[] users,
+	AjaxResponse updateUserGroupMembership(Model model,
+			@RequestParam("action") String action,
+			@RequestParam("users[]") Integer[] users,
 			@RequestParam("userGroups[]") Integer[] userGroups) {
 
 		//jquery ajax post appends [] to parameter name where data is an array

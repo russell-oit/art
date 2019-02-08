@@ -61,7 +61,7 @@ public class UserGroupMembershipService {
 		userGroupService = new UserGroupService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUP_ASSIGNMENT";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_USERGROUP_MAP";
 
 	/**
 	 * Maps a resultset to an object

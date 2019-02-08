@@ -392,9 +392,9 @@ public class ReportService {
 				//user can run report if he belongs to a user group which has direct access to the report
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_QUERIES AUGQ"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " ON AUGQ.USER_GROUP_ID=AUGA.USER_GROUP_ID"
-				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AUGQ.USER_GROUP_ID=AUUGM.USER_GROUP_ID"
+				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUUGM.USER_ID=?)"
 				+ " OR"
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
@@ -405,11 +405,11 @@ public class ReportService {
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_GROUPS AUGG"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AUGG.USER_GROUP_ID=AUUGM.USER_GROUP_ID"
 				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
 				+ " ON AUGG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
-				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUUGM.USER_ID=?)"
 				+ ")";
 
 		Object[] values = {
@@ -1585,9 +1585,9 @@ public class ReportService {
 				//user can run report if he belongs to a user group which has direct access to the report
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_QUERIES AUGQ"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " ON AUGQ.USER_GROUP_ID=AUGA.USER_GROUP_ID"
-				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AUGQ.USER_GROUP_ID=AUUGM.USER_GROUP_ID"
+				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUUGM.USER_ID=?)"
 				+ " OR"
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
@@ -1599,11 +1599,11 @@ public class ReportService {
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_GROUPS AUGG"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AUGG.USER_GROUP_ID=AUUGM.USER_GROUP_ID"
 				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
 				+ " ON AUGG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
-				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUUGM.USER_ID=?)"
 				+ ")";
 
 		Object[] values = {

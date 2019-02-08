@@ -362,7 +362,7 @@ public class UserService {
 		sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=?";
 		dbService.update(sql, id);
 
-		sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
+		sql = "DELETE FROM ART_USER_USERGROUP_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_JOB_ARCHIVES WHERE USER_ID=?";

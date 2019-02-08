@@ -210,9 +210,9 @@ public class UserGroupService {
 		logger.debug("Entering getUserGroupsForUser: userId={}", userId);
 
 		String sql = SQL_SELECT_ALL
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA "
-				+ " ON AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID"
-				+ " WHERE AUGA.USER_ID=?"
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AUUGM.USER_GROUP_ID=AUG.USER_GROUP_ID"
+				+ " WHERE AUUGM.USER_ID=?"
 				+ " ORDER BY AUG.USER_GROUP_ID"; //have order by so that effective values are deterministic
 		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(sql, h, userId);
@@ -248,7 +248,7 @@ public class UserGroupService {
 		sql = "DELETE FROM ART_USER_JOBS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
 
-		sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_GROUP_ID=?";
+		sql = "DELETE FROM ART_USER_USERGROUP_MAP WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE USER_GROUP_ID=?";
@@ -559,9 +559,9 @@ public class UserGroupService {
 
 		String sql = "SELECT AU.USERNAME"
 				+ " FROM ART_USERS AU"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " ON AU.USER_ID=AUGA.USER_ID"
-				+ " WHERE AUGA.USER_GROUP_ID=?";
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AU.USER_ID=AUUGM.USER_ID"
+				+ " WHERE AUUGM.USER_GROUP_ID=?";
 
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("USERNAME");
 		return dbService.query(sql, h, userGroupId);

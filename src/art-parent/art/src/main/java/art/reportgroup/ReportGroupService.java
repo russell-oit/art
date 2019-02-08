@@ -98,13 +98,13 @@ public class ReportGroupService {
 	/**
 	 * Returns report groups that are available for a given user
 	 *
-	 * @param username the user's username
+	 * @param userId the user's id
 	 * @return available report groups
 	 * @throws SQLException
 	 */
 	@Cacheable("reportGroups")
-	public List<ReportGroup> getAvailableReportGroups(String username) throws SQLException {
-		logger.debug("Entering getAvailableReportGroups: username='{}'", username);
+	public List<ReportGroup> getAvailableReportGroups(String userId) throws SQLException {
+		logger.debug("Entering getAvailableReportGroups: userId='{}'", userId);
 
 		//union will return distinct results
 		//get groups that user has explicit rights to see
@@ -117,8 +117,8 @@ public class ReportGroupService {
 				+ " SELECT AQG.* "
 				+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERY_GROUPS AQG"
 				+ " WHERE AUGG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID"
-				+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " WHERE AUGA.USERNAME = ? AND AUGA.QUERY_GROUP_ID = AUGG.QUERY_GROUP_ID)"
+				+ " AND EXISTS (SELECT * FROM ART_USER_USERGROUP_MAP AUUGM"
+				+ " WHERE AUUGM.USER_ID = ? AND AUUGM.USER_GROUP_ID = AUGG.USER_GROUP_ID)"
 				+ " UNION "
 				//add groups where user has right to query but not to group
 				+ " SELECT AQG.* "
@@ -138,10 +138,10 @@ public class ReportGroupService {
 				+ " AND AQ.QUERY_ID=ARRG.REPORT_ID"
 				+ " AND ARRG.REPORT_GROUP_ID=AQG.QUERY_GROUP_ID"
 				+ " AND AQG.QUERY_GROUP_ID<>0 AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120"
-				+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " WHERE AUGA.USERNAME = ? AND AUGA.QUERY_GROUP_ID = AUGQ.QUERY_GROUP_ID)";
+				+ " AND EXISTS (SELECT * FROM ART_USER_USERGROUP_MAP AUUGM"
+				+ " WHERE AUUGM.USER_ID = ? AND AUUGM.USER_GROUP_ID = AUGQ.USER_GROUP_ID)";
 
-		Object[] values = {username, username, username, username};
+		Object[] values = {userId, userId, userId, userId};
 
 		ResultSetHandler<List<ReportGroup>> h = new BeanListHandler<>(ReportGroup.class, new ReportGroupMapper());
 		return dbService.query(sql, h, values);

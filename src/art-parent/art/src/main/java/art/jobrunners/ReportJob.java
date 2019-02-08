@@ -2192,9 +2192,9 @@ public class ReportJob implements org.quartz.Job {
 		String sql;
 
 		//get users who should have access to the job through group membership but don't already have it
-		sql = "SELECT AU.USERNAME, AUGA.USER_GROUP_ID"
-				+ " FROM ART_USERS AU, ART_USER_GROUP_ASSIGNMENT AUGA, ART_USER_GROUP_JOBS AUGJ"
-				+ " WHERE AU.USERNAME = AUGA.USERNAME AND AUGA.USER_GROUP_ID = AUGJ.USER_GROUP_ID"
+		sql = "SELECT AU.USERNAME, AUUGM.USER_GROUP_ID"
+				+ " FROM ART_USERS AU, ART_USER_USERGROUP_MAP AUUGM, ART_USER_GROUP_JOBS AUGJ"
+				+ " WHERE AU.USERNAME = AUUGM.USER_ID AND AUUGM.USER_GROUP_ID = AUGJ.USER_GROUP_ID"
 				+ " AND AUGJ.JOB_ID = ?"
 				+ " AND NOT EXISTS"
 				+ " (SELECT * FROM ART_USER_JOBS AUJ"
