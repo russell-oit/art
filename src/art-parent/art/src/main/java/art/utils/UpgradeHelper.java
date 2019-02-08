@@ -127,6 +127,7 @@ public class UpgradeHelper {
 			upgradeDatabaseTo30(templatesPath);
 			upgradeDatabaseTo31();
 			upgradeDatabaseTo38();
+			upgradeDatabaseTo41();
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
@@ -138,6 +139,8 @@ public class UpgradeHelper {
 	 * @param templatesPath the path to the templates directory
 	 */
 	private void upgradeDatabaseTo30(String templatesPath) throws Exception {
+		logger.debug("Entering upgradeDatabaseTo30: templatesPath='{}'", templatesPath);
+		
 		String databaseVersionString = "3.0";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -172,6 +175,8 @@ public class UpgradeHelper {
 	 *
 	 */
 	private void upgradeDatabaseTo31() throws SQLException {
+		logger.debug("Entering upgradeDatabaseTo31");
+		
 		String databaseVersionString = "3.1";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -803,6 +808,8 @@ public class UpgradeHelper {
 	 *
 	 */
 	private void upgradeDatabaseTo38() throws SQLException {
+		logger.debug("Entering upgradeDatabaseTo38");
+		
 		String databaseVersionString = "3.8";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -862,6 +869,8 @@ public class UpgradeHelper {
 	 *
 	 */
 	private void upgradeDatabaseTo41() throws SQLException {
+		logger.debug("Entering upgradeDatabaseTo41");
+		
 		String databaseVersionString = "4.1";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
