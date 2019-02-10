@@ -171,6 +171,7 @@ public class ReportService {
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
+			report.setCreatedById(rs.getInt("CREATED_BY_ID"));
 			report.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			ReportType reportType = report.getReportType();
@@ -1011,8 +1012,8 @@ public class ReportService {
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
 					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS,"
-					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 48) + ")";
+					+ " CREATION_DATE, CREATED_BY, CREATED_BY_ID)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 49) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -1062,7 +1063,8 @@ public class ReportService {
 				report.getViewReportId(),
 				report.getSelfServiceOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
-				actionUser.getUsername()
+				actionUser.getUsername(),
+				actionUser.getUserId()
 			};
 
 			if (conn == null) {

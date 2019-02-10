@@ -120,6 +120,7 @@ public class Report implements Serializable {
 	@JsonIgnore
 	private String reportSourceHtml; //used with text reports
 	private String createdBy;
+	private int createdById;
 	private String updatedBy;
 	@Parsed
 	private ReportType reportType;
@@ -213,6 +214,20 @@ public class Report implements Serializable {
 	private boolean overwriteFiles;
 	@JsonIgnore
 	private Integer limit;
+
+	/**
+	 * @return the createdById
+	 */
+	public int getCreatedById() {
+		return createdById;
+	}
+
+	/**
+	 * @param createdById the createdById to set
+	 */
+	public void setCreatedById(int createdById) {
+		this.createdById = createdById;
+	}
 
 	/**
 	 * @return the limit
