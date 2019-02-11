@@ -448,57 +448,6 @@ CREATE TABLE ART_REPORT_PARAMETERS
 );
 
 
--- ART_QUERY_FIELDS
--- Stores query parameters
-
--- FIELD_POSITION is the order the parameter is displayed to users
--- FIELD_CLASS stores the data type of the parameter
--- PARAM_TYPE: M for MULTI param, I for INLINE param 
--- PARAM_LABEL stores the column name for non-labelled MULTI params
--- or the parameter label for INLINE params or labelled multi params
--- USE_LOV is set to Y if the param values are provided by an LOV query
--- CHAINED_PARAM_POSITION is the position of the chained param 
--- CHAINED_VALUE_POSITION - allow chained parameter value to come from
--- a different parameter from the previous one in the chained parameter sequence
--- DRILLDOWN_COLUMN - if used in a drill down report, refers to the column in
--- the parent report on which the parameter will be applied 
-
-CREATE TABLE ART_QUERY_FIELDS
-(	
-	QUERY_ID                INTEGER     NOT NULL,
-	FIELD_POSITION          INTEGER     NOT NULL, 
-	NAME                    VARCHAR(25),
-	SHORT_DESCRIPTION       VARCHAR(40),
-	DESCRIPTION             VARCHAR(120),
-	PARAM_TYPE VARCHAR(1) NOT NULL,           
-	PARAM_LABEL     VARCHAR(55),  
-	PARAM_DATA_TYPE         VARCHAR(15) NOT NULL,
-	DEFAULT_VALUE           VARCHAR(80),	        
-	USE_LOV       VARCHAR(1), 		
-	APPLY_RULES_TO_LOV        VARCHAR(1),
-	LOV_QUERY_ID  INTEGER,
-	CHAINED_PARAM_POSITION  INTEGER,              
-	CHAINED_VALUE_POSITION INTEGER,
-	DRILLDOWN_COLUMN INTEGER,
-	DIRECT_SUBSTITUTION VARCHAR(1),
-	MIGRATED INTEGER,
-	UPDATE_DATE TIMESTAMP,	
-	CONSTRAINT aqf_pk PRIMARY KEY(QUERY_ID, FIELD_POSITION)	
-);
-
-
--- ART_ALL_SOURCES
--- Stores source code for queries (sql, mdx, xml, html, text)
-
-CREATE TABLE ART_ALL_SOURCES
-(
-	OBJECT_ID              INTEGER      NOT NULL,	
-	LINE_NUMBER            INTEGER      NOT NULL,
-	SOURCE_INFO              VARCHAR(4000),
-	CONSTRAINT aas_pk PRIMARY KEY(OBJECT_ID, LINE_NUMBER)	
-);
-
-
 -- ART_RULES
 -- Stores Rule definitions
  
@@ -826,31 +775,6 @@ CREATE TABLE ART_LOGGED_IN_USERS
 	CONSTRAINT alu_pk PRIMARY KEY(LOGGED_IN_USERS_ID)
 );
 
-
--- ART_FTP_SERVERS
--- Stores configurations for ftp servers
-
--- ACTIVE: boolean
-
-CREATE TABLE ART_FTP_SERVERS
-(
-	FTP_SERVER_ID INTEGER NOT NULL,
-	NAME VARCHAR(50),
-	DESCRIPTION VARCHAR(200),
-	ACTIVE INTEGER,
-	CONNECTION_TYPE VARCHAR(20),
-	SERVER VARCHAR(100),
-	PORT INTEGER,
-	FTP_USER VARCHAR(50),
-	PASSWORD VARCHAR(100),
-	REMOTE_DIRECTORY VARCHAR(200),
-	CREATION_DATE TIMESTAMP,
-	CREATED_BY VARCHAR(50),
-	UPDATE_DATE TIMESTAMP,
-	UPDATED_BY VARCHAR(50),
-	CONSTRAINT afs_pk PRIMARY KEY(FTP_SERVER_ID),
-	CONSTRAINT afs_name_uq UNIQUE(NAME)
-);
 
 -- ART_ENCRYPTORS
 -- Stores configurations for file encryptors
