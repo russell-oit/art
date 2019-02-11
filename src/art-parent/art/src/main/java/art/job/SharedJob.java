@@ -31,7 +31,7 @@ public class SharedJob extends Job {
 	@Override
 	public Date getLastEndDate() {
 		if (isSplitJob()) {
-			//split job. get value from the art_user_jobs table
+			//split job. get value from the art_user_job_map table
 			return sharedLastEndDate;
 		} else {
 			//non-split job. get value from jobs table
@@ -42,7 +42,7 @@ public class SharedJob extends Job {
 	@Override
 	public String getLastFileName() {
 		if (isSplitJob()) {
-			//split job. get value from the art_user_jobs table
+			//split job. get value from the art_user_job_map table
 			return sharedLastFileName;
 		} else {
 			//non-split job. get value from jobs table
@@ -53,7 +53,7 @@ public class SharedJob extends Job {
 	@Override
 	public String getLastRunDetails() {
 		if (isSplitJob()) {
-			//split job. get value from the art_user_jobs table
+			//split job. get value from the art_user_job_map table
 			return sharedLastRunDetails;
 		} else {
 			//non-split job. get value from jobs table

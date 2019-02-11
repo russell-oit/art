@@ -358,7 +358,7 @@ public class UserService {
 		dbService.update(sql, id);
 
 		//delete user-shared job relationships
-		sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=?";
+		sql = "DELETE FROM ART_USER_JOB_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_USER_USERGROUP_MAP WHERE USER_ID=?";

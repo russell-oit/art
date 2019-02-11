@@ -634,6 +634,29 @@ CREATE TABLE ART_JOBS
 );
 
 
+-- ART_USER_JOB_MAP
+-- Stores users who have been given access to a job's output
+
+-- USER_GROUP_ID: used to indicate if job was shared via user group. To enable
+-- deletion of split job records where access was granted via user group,
+-- when a user is removed from a group.
+-- LAST_FILE_NAME: contains file name for individualized output (split job),
+-- or NULL if file name to use comes from ART_JOBS table
+
+CREATE TABLE ART_USER_JOB_MAP
+(	
+	USER_ID INTEGER NOT NULL,	
+	JOB_ID INTEGER NOT NULL,
+	USER_GROUP_ID INTEGER,
+	LAST_FILE_NAME VARCHAR(4000),
+	LAST_RUN_MESSAGE VARCHAR(100),
+	LAST_RUN_DETAILS VARCHAR(4000),
+	LAST_START_DATE TIMESTAMP NULL,
+	LAST_END_DATE TIMESTAMP NULL,
+	CONSTRAINT art_ujm_pk PRIMARY KEY(USER_ID, JOB_ID)
+);
+
+
 -- ART_JOBS_PARAMETERS
 -- store jobs parameters
 
@@ -686,30 +709,6 @@ CREATE TABLE ART_LOGS
 	TOTAL_TIME INTEGER, 
 	FETCH_TIME INTEGER, 
 	MESSAGE VARCHAR(500) 
-);
-
-
--- ART_USER_JOBS
--- Stores users who have been given access to a job's output
-
--- USER_GROUP_ID: used to indicate if job was shared via user group. To enable
--- deletion of split job records where access was granted via user group,
--- when a user is removed from a group.
--- LAST_FILE_NAME: contains file name for individualized output (split job),
--- or NULL if file name to use comes from ART_JOBS table
-
-CREATE TABLE ART_USER_JOBS
-(
-	JOB_ID INTEGER NOT NULL,
-	USER_ID INTEGER,
-	USERNAME VARCHAR(50) NOT NULL,
-	USER_GROUP_ID INTEGER,
-	LAST_FILE_NAME VARCHAR(4000),
-	LAST_RUN_MESSAGE VARCHAR(100),
-	LAST_RUN_DETAILS VARCHAR(4000),
-	LAST_START_DATE TIMESTAMP NULL,
-	LAST_END_DATE TIMESTAMP NULL,
-	CONSTRAINT auj_pk PRIMARY KEY(JOB_ID, USERNAME)	
 );
 
 

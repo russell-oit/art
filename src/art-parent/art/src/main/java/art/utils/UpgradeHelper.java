@@ -140,7 +140,7 @@ public class UpgradeHelper {
 	 */
 	private void upgradeDatabaseTo30(String templatesPath) throws Exception {
 		logger.debug("Entering upgradeDatabaseTo30: templatesPath='{}'", templatesPath);
-		
+
 		String databaseVersionString = "3.0";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -176,7 +176,7 @@ public class UpgradeHelper {
 	 */
 	private void upgradeDatabaseTo31() throws SQLException {
 		logger.debug("Entering upgradeDatabaseTo31");
-		
+
 		String databaseVersionString = "3.1";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -809,7 +809,7 @@ public class UpgradeHelper {
 	 */
 	private void upgradeDatabaseTo38() throws SQLException {
 		logger.debug("Entering upgradeDatabaseTo38");
-		
+
 		String databaseVersionString = "3.8";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -870,7 +870,7 @@ public class UpgradeHelper {
 	 */
 	private void upgradeDatabaseTo41() throws SQLException {
 		logger.debug("Entering upgradeDatabaseTo41");
-		
+
 		String databaseVersionString = "4.1";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -900,6 +900,7 @@ public class UpgradeHelper {
 		recreateUserGroupAssignment();
 		recreateUserQueries();
 		recreateUserQueryGroups();
+		recreateUserJobs();
 	}
 
 	/**
@@ -937,10 +938,9 @@ public class UpgradeHelper {
 			}
 		}
 	}
-	
+
 	/**
-	 * Recreates the user queries table. To remove the username
-	 * field.
+	 * Recreates the user queries table. To remove the username field.
 	 *
 	 * @throws SQLException
 	 */
@@ -971,10 +971,9 @@ public class UpgradeHelper {
 			}
 		}
 	}
-	
+
 	/**
-	 * Recreates the user query groups table. To remove the username
-	 * field.
+	 * Recreates the user query groups table. To remove the username field.
 	 *
 	 * @throws SQLException
 	 */
@@ -1004,6 +1003,39 @@ public class UpgradeHelper {
 				dbService.update(sql, userId, reportGroupId);
 			}
 		}
+	}
+
+	/**
+	 * Recreates the user jobs table. To remove the username field.
+	 *
+	 * @throws SQLException
+	 */
+	private void recreateUserJobs() throws SQLException {
+		logger.debug("Entering recreateUserJobs");
+
+		String sql;
+
+		sql = "SELECT COUNT(*) FROM ART_USER_JOBS";
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCount = dbService.query(sql, h);
+		logger.debug("recordCount={}", recordCount);
+		if (recordCount == null || recordCount.intValue() == 0) {
+			return;
+		}
+
+		logger.info("Updating user - job assignment");
+
+		sql = "DELETE FROM ART_USER_JOB_MAP";
+		dbService.update(sql);
+
+		String columns = "USER_ID, JOB_ID, USER_GROUP_ID, LAST_FILE_NAME,"
+				+ " LAST_RUN_MESSAGE, LAST_RUN_DETAILS, LAST_START_DATE,"
+				+ " LAST_END_DATE";
+
+		sql = "INSERT INTO ART_USER_JOB_MAP (" + columns + ")"
+				+ " SELECT " + columns + " FROM ART_USER_JOBS";
+
+		dbService.update(sql);
 	}
 
 }

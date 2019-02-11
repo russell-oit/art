@@ -2122,15 +2122,15 @@ public class ReportJob implements org.quartz.Job {
 				if (job.isSplitJob()) {
 					//generate individualized output for all shared users
 
-					//update art_user_jobs table with users who have access through group membership. so that users newly added to a group can get their own output
+					//update art_user_job_map table with users who have access through group membership. so that users newly added to a group can get their own output
 					addSharedJobUsers();
 
 					//get users to generate output for
-					String usersSql = "SELECT AUJ.USERNAME, AUJ.USER_ID, AU.EMAIL"
-							+ " FROM ART_USER_JOBS AUJ"
+					String usersSql = "SELECT AUJM.USERNAME, AUJM.USER_ID, AU.EMAIL"
+							+ " FROM ART_USER_JOB_MAP AUJM"
 							+ " INNER JOIN ART_USERS AU ON"
-							+ " AUJ.USER_ID = AU.USER_ID"
-							+ " WHERE AUJ.JOB_ID=? AND AU.ACTIVE=1";
+							+ " AUJM.USER_ID = AU.USER_ID"
+							+ " WHERE AUJM.JOB_ID=? AND AU.ACTIVE=1";
 
 					ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
 					List<Map<String, Object>> records = dbService.query(usersSql, h, jobId);
@@ -2181,7 +2181,7 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Adds records to the art_user_jobs table so that the users can have access
+	 * Adds records to the art_user_job_map table so that the users can have access
 	 * to the job
 	 *
 	 * @throws SQLException
@@ -2192,28 +2192,28 @@ public class ReportJob implements org.quartz.Job {
 		String sql;
 
 		//get users who should have access to the job through group membership but don't already have it
-		sql = "SELECT AU.USERNAME, AUUGM.USER_GROUP_ID"
+		sql = "SELECT AU.USER_ID, AUUGM.USER_GROUP_ID"
 				+ " FROM ART_USERS AU, ART_USER_USERGROUP_MAP AUUGM, ART_USER_GROUP_JOBS AUGJ"
-				+ " WHERE AU.USERNAME = AUUGM.USER_ID AND AUUGM.USER_GROUP_ID = AUGJ.USER_GROUP_ID"
+				+ " WHERE AU.USER_ID = AUUGM.USER_ID AND AUUGM.USER_GROUP_ID = AUGJ.USER_GROUP_ID"
 				+ " AND AUGJ.JOB_ID = ?"
 				+ " AND NOT EXISTS"
-				+ " (SELECT * FROM ART_USER_JOBS AUJ"
-				+ " WHERE AUJ.USERNAME = AU.USERNAME AND AUJ.JOB_ID = ?)";
+				+ " (SELECT * FROM ART_USER_JOB_MAP AUJM"
+				+ " WHERE AUJM.USER_ID = AU.USER_ID AND AUJM.JOB_ID = ?)";
 
 		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
 		List<Map<String, Object>> records = dbService.query(sql, h, jobId, jobId);
 
-		sql = "INSERT INTO ART_USER_JOBS (JOB_ID, USERNAME, USER_GROUP_ID) VALUES (?,?,?)";
+		sql = "INSERT INTO ART_USER_JOB_MAP (USER_ID, JOB_ID, USER_GROUP_ID) VALUES (?,?,?)";
 
 		for (Map<String, Object> record : records) {
 			//map list handler uses a case insensitive map, so case of column names doesn't matter
-			String username = (String) record.get("USERNAME");
+			Integer userId = (Integer) record.get("USER_ID");
 			Integer userGroupId = (Integer) record.get("USER_GROUP_ID");
 
-			//insert records into the art_user_jobs table so that the users can have access to the job
+			//insert records into the art_user_job_map table so that the users can have access to the job
 			Object[] values = {
+				userId,
 				jobId,
-				username,
 				userGroupId
 			};
 
@@ -3131,7 +3131,7 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Updates the ART_USER_JOBS table. If Audit Flag is set, a new row is added
+	 * Updates the ART_USER_JOB_MAP table. If Audit Flag is set, a new row is added
 	 * to the ART_JOBS_AUDIT table
 	 */
 	private void afterExecution(boolean splitJob, User user) throws SQLException {
@@ -3166,7 +3166,7 @@ public class ReportJob implements org.quartz.Job {
 		//update job details
 		//no need to update jobs table if non-split job. aftercompletion will do the final update to the jobs table
 		if (splitJob) {
-			sql = "UPDATE ART_USER_JOBS SET LAST_FILE_NAME = ?,"
+			sql = "UPDATE ART_USER_JOB_MAP SET LAST_FILE_NAME = ?,"
 					+ " LAST_RUN_DETAILS=?, LAST_RUN_MESSAGE=?,"
 					+ " LAST_START_DATE = ?, LAST_END_DATE = ? "
 					+ " WHERE JOB_ID = ? AND USER_ID = ?";

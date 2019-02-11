@@ -76,11 +76,11 @@ public class AccessRightService {
 
 	private final String SQL_SELECT_ALL_USER_JOB_RIGHTS
 			= "SELECT AU.USER_ID, AU.USERNAME, AJ.JOB_ID, AJ.JOB_NAME"
-			+ " FROM ART_USER_JOBS AUJ"
+			+ " FROM ART_USER_JOB_MAP AUJM"
 			+ " INNER JOIN ART_USERS AU ON"
-			+ " AUJ.USER_ID=AU.USER_ID"
+			+ " AUJM.USER_ID=AU.USER_ID"
 			+ " INNER JOIN ART_JOBS AJ ON"
-			+ " AUJ.JOB_ID=AJ.JOB_ID";
+			+ " AUJM.JOB_ID=AJ.JOB_ID";
 
 	private final String SQL_SELECT_ALL_USER_GROUP_REPORT_RIGHTS
 			= "SELECT AUG.USER_GROUP_ID, AUG.NAME AS USER_GROUP_NAME, AQ.QUERY_ID, AQ.NAME AS REPORT_NAME"
@@ -627,7 +627,7 @@ public class AccessRightService {
 
 		String sql;
 
-		sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=? AND JOB_ID=?";
+		sql = "DELETE FROM ART_USER_JOB_MAP WHERE USER_ID=? AND JOB_ID=?";
 		dbService.update(sql, userId, jobId);
 	}
 
@@ -715,16 +715,16 @@ public class AccessRightService {
 			if (grant) {
 				sqlUserReport = "INSERT INTO ART_USER_REPORT_MAP (USER_ID, REPORT_ID) VALUES (?,?)";
 				sqlUserReportGroup = "INSERT INTO ART_USER_REPORTGROUP_MAP (USER_ID, REPORT_GROUP_ID) VALUES (?,?)";
-				sqlUserJob = "INSERT INTO ART_USER_JOBS (USER_ID, USERNAME, JOB_ID) VALUES (?, ?, ?)";
+				sqlUserJob = "INSERT INTO ART_USER_JOB_MAP (USER_ID, JOB_ID) VALUES (?,?)";
 			} else {
 				sqlUserReport = "DELETE FROM ART_USER_REPORT_MAP WHERE USER_ID=? AND REPORT_ID=?";
 				sqlUserReportGroup = "DELETE FROM ART_USER_REPORTGROUP_MAP WHERE USER_ID=? AND REPORT_GROUP_ID=?";
-				sqlUserJob = "DELETE FROM ART_USER_JOBS WHERE USER_ID=? AND USERNAME=? AND JOB_ID=?";
+				sqlUserJob = "DELETE FROM ART_USER_JOB_MAP WHERE USER_ID=? AND JOB_ID=?";
 			}
 
 			String sqlTestUserReport = "UPDATE ART_USER_REPORT_MAP SET USER_ID=? WHERE USER_ID=? AND REPORT_ID=?";
 			String sqlTestUserReportGroup = "UPDATE ART_USER_REPORTGROUP_MAP SET USER_ID=? WHERE USER_ID=? AND REPORT_GROUP_ID=?";
-			String sqlTestUserJob = "UPDATE ART_USER_JOBS SET USER_ID=? WHERE USER_ID=? AND USERNAME=? AND JOB_ID=?";
+			String sqlTestUserJob = "UPDATE ART_USER_JOB_MAP SET USER_ID=? WHERE USER_ID=? AND JOB_ID=?";
 
 			for (Integer userId : users) {
 				//update report rights
