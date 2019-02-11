@@ -560,7 +560,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void sendFileToB2(Destination destination, String fullLocalFileName) {
 		String provider = "b2";
-		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+		sendFileToBlobStorageUsingJclouds(provider, destination, fullLocalFileName);
 	}
 
 	/**
@@ -749,7 +749,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void sendFileToAzure(Destination destination, String fullLocalFileName) {
 		String provider = "azureblob";
-		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+		sendFileToBlobStorageUsingJclouds(provider, destination, fullLocalFileName);
 	}
 
 	/**
@@ -760,7 +760,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void sendFileToGoogleCloudStorage(Destination destination, String fullLocalFileName) {
 		String provider = "google-cloud-storage";
-		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+		sendFileToBlobStorageUsingJclouds(provider, destination, fullLocalFileName);
 	}
 
 	/**
@@ -872,11 +872,12 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void sendFileToS3jclouds(Destination destination, String fullLocalFileName) {
 		String provider = "aws-s3";
-		sendFileToBlobStorage(provider, destination, fullLocalFileName);
+		sendFileToBlobStorageUsingJclouds(provider, destination, fullLocalFileName);
 	}
 
 	/**
-	 * Copies the generated file to a cloud blob storage provider
+	 * Copies the generated file to a cloud blob storage provider using the
+	 * jclouds library
 	 *
 	 * @param provider a string representing the cloud storage provider as per
 	 * the jclouds library.
@@ -884,11 +885,12 @@ public class ReportJob implements org.quartz.Job {
 	 * @param destination the destination object
 	 * @param fullLocalFileName the path of the file to copy
 	 */
-	private void sendFileToBlobStorage(String provider, Destination destination,
+	private void sendFileToBlobStorageUsingJclouds(String provider, Destination destination,
 			String fullLocalFileName) {
 
-		logger.debug("Entering sendFileToBlobStorage: provider='{}' destination={},"
-				+ " fullLocalFileName='{}'", provider, destination, fullLocalFileName);
+		logger.debug("Entering sendFileToBlobStorageUsingJclouds: provider='{}',"
+				+ " destination={}, fullLocalFileName='{}'", provider,
+				destination, fullLocalFileName);
 
 		//https://www.ashishpaliwal.com/blog/2012/04/playing-with-jclouds-transient-blobstore/
 		//https://jclouds.apache.org/start/blobstore/
@@ -974,18 +976,9 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			Blob blob = blobBuilder.build();
-
 			String containerName = destination.getPath();
-
-			// Upload the Blob
-			//https://stackoverflow.com/questions/49078140/jclouds-multipart-upload-to-google-cloud-storage-failing-with-400-bad-request
-			//https://issues.apache.org/jira/browse/JCLOUDS-1389
-			String eTag;
-			if (StringUtils.equals(provider, "b2")) {
-				eTag = blobStore.putBlob(containerName, blob);
-			} else {
-				eTag = blobStore.putBlob(containerName, blob, multipart());
-			}
+			
+			String eTag = blobStore.putBlob(containerName, blob, multipart());
 			logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", fileName, eTag, jobId);
 		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
@@ -2181,8 +2174,8 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Adds records to the art_user_job_map table so that the users can have access
-	 * to the job
+	 * Adds records to the art_user_job_map table so that the users can have
+	 * access to the job
 	 *
 	 * @throws SQLException
 	 */
@@ -2495,7 +2488,7 @@ public class ReportJob implements org.quartz.Job {
 					String msg = "Error when sending some emails."
 							+ " \n" + ex.toString()
 							+ " \n To: " + emails;
-					
+
 					logger.warn("Job Id {}. " + msg, jobId);
 
 					if (recipientFilterPresent) {
@@ -2550,7 +2543,7 @@ public class ReportJob implements org.quartz.Job {
 				String msg = "Error when sending some emails."
 						+ " \n" + ex.toString()
 						+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
-				
+
 				logger.warn("Job Id {}. " + msg, jobId);
 				progressLogger.warn(msg);
 			}
@@ -3131,8 +3124,8 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Updates the ART_USER_JOB_MAP table. If Audit Flag is set, a new row is added
-	 * to the ART_JOBS_AUDIT table
+	 * Updates the ART_USER_JOB_MAP table. If Audit Flag is set, a new row is
+	 * added to the ART_JOBS_AUDIT table
 	 */
 	private void afterExecution(boolean splitJob, User user) throws SQLException {
 		logger.debug("Entering afterExecution: splitJob={}, user={}", splitJob, user);
