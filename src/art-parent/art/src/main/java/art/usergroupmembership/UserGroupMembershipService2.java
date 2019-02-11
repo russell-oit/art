@@ -130,7 +130,7 @@ public class UserGroupMembershipService2 {
 	 * @param userGroups user group ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
+	@CacheEvict(value = {"users", "userGroups", "reports"}, allEntries = true)
 	public void updateUserGroupMembership(String action, Integer[] users,
 			Integer[] userGroups) throws SQLException {
 		
