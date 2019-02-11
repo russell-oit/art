@@ -17,6 +17,8 @@
 
 
 -- NOTES:
+-- for sql server, mysql replace TIMESTAMP with DATETIME
+
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
 -- for postgresql, replace the MODIFY keyword with ALTER COLUMN <column name> TYPE <data type>
 
