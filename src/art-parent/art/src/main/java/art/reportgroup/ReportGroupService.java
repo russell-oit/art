@@ -109,9 +109,9 @@ public class ReportGroupService {
 		//union will return distinct results
 		//get groups that user has explicit rights to see
 		String sql = "SELECT AQG.* "
-				+ " FROM ART_USER_QUERY_GROUPS AUQG , ART_QUERY_GROUPS AQG"
-				+ " WHERE AUQG.USERNAME=?"
-				+ " AND AUQG.QUERY_GROUP_ID = AQG.QUERY_GROUP_ID"
+				+ " FROM ART_USER_REPORTGROUP_MAP AURGM, ART_QUERY_GROUPS AQG"
+				+ " WHERE AURGM.USER_ID=?"
+				+ " AND AURGM.REPORT_GROUP_ID = AQG.QUERY_GROUP_ID"
 				+ " UNION "
 				//add groups to which the user has access through his user group 
 				+ " SELECT AQG.* "
@@ -268,7 +268,7 @@ public class ReportGroupService {
 		String sql;
 
 		//delete foreign key records
-		sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE QUERY_GROUP_ID=?";
+		sql = "DELETE FROM ART_USER_REPORTGROUP_MAP WHERE REPORT_GROUP_ID=?";
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_USER_GROUP_GROUPS WHERE QUERY_GROUP_ID=?";

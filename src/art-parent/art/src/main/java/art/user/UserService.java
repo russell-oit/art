@@ -350,8 +350,7 @@ public class UserService {
 		sql = "DELETE FROM ART_USER_REPORT_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
-		//delete user-report user relationships
-		sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=?";
+		sql = "DELETE FROM ART_USER_REPORTGROUP_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
 		//delete user-rules relationships

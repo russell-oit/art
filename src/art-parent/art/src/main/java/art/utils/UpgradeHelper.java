@@ -899,6 +899,7 @@ public class UpgradeHelper {
 
 		recreateUserGroupAssignment();
 		recreateUserQueries();
+		recreateUserQueryGroups();
 	}
 
 	/**
@@ -967,6 +968,40 @@ public class UpgradeHelper {
 				Integer userId = (Integer) membership.get("USER_ID");
 				Integer reportId = (Integer) membership.get("QUERY_ID");
 				dbService.update(sql, userId, reportId);
+			}
+		}
+	}
+	
+	/**
+	 * Recreates the user query groups table. To remove the username
+	 * field.
+	 *
+	 * @throws SQLException
+	 */
+	private void recreateUserQueryGroups() throws SQLException {
+		logger.debug("Entering recreateUserQueryGroups");
+
+		String sql;
+
+		sql = "SELECT USER_ID, QUERY_GROUP_ID"
+				+ " FROM ART_USER_QUERY_GROUPS";
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> memberships = dbService.query(sql, h);
+
+		logger.debug("memberships.isEmpty()={}", memberships.isEmpty());
+		if (!memberships.isEmpty()) {
+			logger.info("Updating user - report group assignment");
+
+			sql = "DELETE FROM ART_USER_REPORTGROUP_MAP";
+			dbService.update(sql);
+
+			sql = "INSERT INTO ART_USER_REPORTGROUP_MAP (USER_ID, REPORT_GROUP_ID)"
+					+ " VALUES(?,?)";
+
+			for (Map<String, Object> membership : memberships) {
+				Integer userId = (Integer) membership.get("USER_ID");
+				Integer reportGroupId = (Integer) membership.get("QUERY_GROUP_ID");
+				dbService.update(sql, userId, reportGroupId);
 			}
 		}
 	}

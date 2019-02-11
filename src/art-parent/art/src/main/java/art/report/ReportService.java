@@ -399,9 +399,9 @@ public class ReportService {
 				+ " OR"
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERY_GROUPS AUQG, ART_REPORT_REPORT_GROUPS ARRG"
-				+ " WHERE AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
-				+ " AND ARRG.REPORT_ID=AQ.QUERY_ID AND AUQG.USER_ID=?)"
+				+ " FROM ART_USER_REPORTGROUP_MAP AURGM, ART_REPORT_REPORT_GROUPS ARRG"
+				+ " WHERE AURGM.REPORT_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " AND ARRG.REPORT_ID=AQ.QUERY_ID AND AURGM.USER_ID=?)"
 				+ " OR"
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
@@ -1593,10 +1593,10 @@ public class ReportService {
 				+ " OR"
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERY_GROUPS AUQG"
+				+ " FROM ART_USER_REPORTGROUP_MAP AURGM"
 				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
-				+ " ON AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
-				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUQG.USER_ID=?)"
+				+ " ON AURGM.REPORT_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AURGM.USER_ID=?)"
 				+ " OR"
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
