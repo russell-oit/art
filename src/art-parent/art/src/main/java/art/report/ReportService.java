@@ -387,8 +387,8 @@ public class ReportService {
 				+ " AND("
 				//user can run report if he has direct access to it
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERIES AUQ"
-				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AUQ.USER_ID=?)"
+				+ " FROM ART_USER_REPORT_MAP AURM"
+				+ " WHERE AURM.REPORT_ID=AQ.QUERY_ID AND AURM.USER_ID=?)"
 				+ " OR"
 				//user can run report if he belongs to a user group which has direct access to the report
 				+ " EXISTS (SELECT *"
@@ -676,8 +676,8 @@ public class ReportService {
 
 		String sql;
 
-		//delete query-user relationships
-		sql = "DELETE FROM ART_USER_QUERIES WHERE QUERY_ID=?";
+		//delete report-user relationships
+		sql = "DELETE FROM ART_USER_REPORT_MAP WHERE REPORT_ID=?";
 		dbService.update(sql, id);
 
 		//delete query-rule relationships
@@ -1581,8 +1581,8 @@ public class ReportService {
 				+ " OR"
 				//user can run report if he has direct access to it
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERIES AUQ"
-				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AUQ.USER_ID=?)"
+				+ " FROM ART_USER_REPORT_MAP AURM"
+				+ " WHERE AURM.REPORT_ID=AQ.QUERY_ID AND AURM.USER_ID=?)"
 				+ " OR"
 				//user can run report if he belongs to a user group which has direct access to the report
 				+ " EXISTS (SELECT *"
@@ -1645,11 +1645,10 @@ public class ReportService {
 	public void grantAccess(Report report, User user) throws SQLException {
 		logger.debug("Entering grantAccess: report={}, user={}", report, user);
 
-		String sql = "INSERT INTO ART_USER_QUERIES (USERNAME, USER_ID, QUERY_ID)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 3) + ")";
+		String sql = "INSERT INTO ART_USER_REPORT_MAP (USER_ID, REPORT_ID)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 2) + ")";
 
 		Object[] values = {
-			user.getUsername(),
 			user.getUserId(),
 			report.getReportId()
 		};

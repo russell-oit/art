@@ -347,7 +347,7 @@ public class UserService {
 		sql = "DELETE FROM ART_ADMIN_PRIVILEGES WHERE USER_ID=?";
 		dbService.update(sql, id);
 
-		sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=?";
+		sql = "DELETE FROM ART_USER_REPORT_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
 		//delete user-report user relationships

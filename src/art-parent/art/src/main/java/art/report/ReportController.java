@@ -58,7 +58,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.mail.MessagingException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -133,7 +132,7 @@ public class ReportController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private UserGroupService userGroupService;
 
@@ -170,7 +169,7 @@ public class ReportController {
 					List<User> users = userService.getActiveUsers();
 					users.removeIf(user -> StringUtils.isBlank(user.getFullName()));
 					List<UserGroup> userGroups = userGroupService.getAllUserGroups();
-					
+
 					request.setAttribute("users", users);
 					request.setAttribute("userGroups", userGroups);
 					request.setAttribute("enableShare", true);
@@ -1499,15 +1498,7 @@ public class ReportController {
 			Integer[] reportGroups = null;
 			Integer[] jobs = null;
 
-			List<String> finalUsers = new ArrayList<>();
-			Map<Integer, String> userDetails = userService.getUsernames(users);
-			for (Entry<Integer, String> entry : userDetails.entrySet()) {
-				Integer userId = entry.getKey();
-				String username = entry.getValue();
-				String userSpecification = String.valueOf(userId) + "-" + username;
-				finalUsers.add(userSpecification);
-			}
-			accessRightService.updateAccessRights(action, finalUsers.toArray(new String[0]), userGroups, reports, reportGroups, jobs);
+			accessRightService.updateAccessRights(action, users, userGroups, reports, reportGroups, jobs);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

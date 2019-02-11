@@ -144,7 +144,7 @@ public class AccessRightController {
 	@RequestMapping(value = "/updateAccessRight", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse updateAccessRight(Model model, @RequestParam("action") String action,
-			@RequestParam(value = "users[]", required = false) String[] users,
+			@RequestParam(value = "users[]", required = false) Integer[] users,
 			@RequestParam(value = "userGroups[]", required = false) Integer[] userGroups,
 			@RequestParam(value = "reports[]", required = false) Integer[] reports,
 			@RequestParam(value = "reportGroups[]", required = false) Integer[] reportGroups,

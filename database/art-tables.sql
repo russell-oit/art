@@ -232,6 +232,17 @@ CREATE TABLE ART_QUERIES
 );
 
 
+-- ART_USER_REPORT_MAP
+-- Stores the reports a user can run
+
+CREATE TABLE ART_USER_REPORT_MAP
+(
+	USER_ID INTEGER NOT NULL,	
+	REPORT_ID INTEGER NOT NULL,
+	CONSTRAINT art_urm_pk PRIMARY KEY(USER_ID, REPORT_ID)	
+);
+
+
 -- ART_REPORT_TYPES
 -- Reference table for report types
 
@@ -321,7 +332,7 @@ INSERT INTO ART_REPORT_TYPES VALUES (-17,'Chart: Stacked Horizontal Bar 2D');
 
 
 -- ART_QUERY_GROUPS
--- Stores name and description of report groups
+-- Stores report group definitions
 
 CREATE TABLE ART_QUERY_GROUPS
 (
@@ -363,18 +374,6 @@ CREATE TABLE ART_ADMIN_PRIVILEGES
 	PRIVILEGE   VARCHAR(4) NOT NULL,
 	VALUE_ID    INTEGER NOT NULL,
 	CONSTRAINT aap_pk PRIMARY KEY(USERNAME, PRIVILEGE, VALUE_ID)	
-);
-
-
--- ART_USER_QUERIES
--- Stores the queries a user can execute
-
-CREATE TABLE ART_USER_QUERIES
-(
-	USER_ID INTEGER,
-	USERNAME    VARCHAR(50) NOT NULL,
-	QUERY_ID    INTEGER     NOT NULL,	 
-	CONSTRAINT auq_pk PRIMARY KEY(USERNAME, QUERY_ID)	
 );
 
 

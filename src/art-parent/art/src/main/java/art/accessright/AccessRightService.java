@@ -60,11 +60,11 @@ public class AccessRightService {
 
 	private final String SQL_SELECT_ALL_USER_REPORT_RIGHTS
 			= "SELECT AU.USER_ID, AU.USERNAME, AQ.QUERY_ID, AQ.NAME AS REPORT_NAME"
-			+ " FROM ART_USER_QUERIES AUQ"
+			+ " FROM ART_USER_REPORT_MAP AURM"
 			+ " INNER JOIN ART_USERS AU ON"
-			+ " AUQ.USER_ID=AU.USER_ID"
+			+ " AURM.USER_ID=AU.USER_ID"
 			+ " INNER JOIN ART_QUERIES AQ ON"
-			+ " AUQ.QUERY_ID=AQ.QUERY_ID";
+			+ " AURM.REPORT_ID=AQ.QUERY_ID";
 
 	private final String SQL_SELECT_ALL_USER_REPORT_GROUP_RIGHTS
 			= "SELECT AU.USER_ID, AU.USERNAME, AQG.QUERY_GROUP_ID, AQG.NAME AS GROUP_NAME"
@@ -594,7 +594,7 @@ public class AccessRightService {
 
 		String sql;
 
-		sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=? AND QUERY_ID=?";
+		sql = "DELETE FROM ART_USER_REPORT_MAP WHERE USER_ID=? AND REPORT_ID=?";
 		dbService.update(sql, userId, reportId);
 	}
 
@@ -686,7 +686,7 @@ public class AccessRightService {
 	 *
 	 * @param action "grant" or "revoke". anything else will be treated as
 	 * revoke
-	 * @param users the relevant user identifiers in the format user id-username
+	 * @param users the relevant user ids
 	 * @param userGroups the relevant user group ids
 	 * @param reports the relevant report ids
 	 * @param reportGroups the relevant report group ids
@@ -694,7 +694,7 @@ public class AccessRightService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true) //clear reports cache so that reports available to users are updated
-	public void updateAccessRights(String action, String[] users, Integer[] userGroups,
+	public void updateAccessRights(String action, Integer[] users, Integer[] userGroups,
 			Integer[] reports, Integer[] reportGroups, Integer[] jobs) throws SQLException {
 
 		logger.debug("Entering updateAccessRights: action='{}'", action);
@@ -713,44 +713,36 @@ public class AccessRightService {
 			String sqlUserJob;
 
 			if (grant) {
-				sqlUserReport = "INSERT INTO ART_USER_QUERIES (USER_ID, USERNAME, QUERY_ID) VALUES (?, ?, ?)";
+				sqlUserReport = "INSERT INTO ART_USER_REPORT_MAP (USER_ID, REPORT_ID) VALUES (?,?)";
 				sqlUserReportGroup = "INSERT INTO ART_USER_QUERY_GROUPS (USER_ID, USERNAME, QUERY_GROUP_ID) VALUES (?, ?, ?)";
 				sqlUserJob = "INSERT INTO ART_USER_JOBS (USER_ID, USERNAME, JOB_ID) VALUES (?, ?, ?)";
 			} else {
-				sqlUserReport = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=? AND USERNAME=? AND QUERY_ID=?";
+				sqlUserReport = "DELETE FROM ART_USER_REPORT_MAP WHERE USER_ID=? AND REPORT_ID=?";
 				sqlUserReportGroup = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=? AND USERNAME=? AND QUERY_GROUP_ID=?";
 				sqlUserJob = "DELETE FROM ART_USER_JOBS WHERE USER_ID=? AND USERNAME=? AND JOB_ID=?";
 			}
 
-			String sqlTestUserReport = "UPDATE ART_USER_QUERIES SET USER_ID=? WHERE USER_ID=? AND USERNAME=? AND QUERY_ID=?";
+			String sqlTestUserReport = "UPDATE ART_USER_REPORT_MAP SET USER_ID=? WHERE USER_ID=? AND REPORT_ID=?";
 			String sqlTestUserReportGroup = "UPDATE ART_USER_QUERY_GROUPS SET USER_ID=? WHERE USER_ID=? AND USERNAME=? AND QUERY_GROUP_ID=?";
 			String sqlTestUserJob = "UPDATE ART_USER_JOBS SET USER_ID=? WHERE USER_ID=? AND USERNAME=? AND JOB_ID=?";
 
-			int affectedRows;
-			boolean updateRight;
-
-			for (String user : users) {
-				Integer userId = Integer.valueOf(StringUtils.substringBefore(user, "-"));
-				//username won't be needed once user id columns completely replace username in foreign keys
-				String username = StringUtils.substringAfter(user, "-");
-
+			for (Integer userId : users) {
 				//update report rights
 				if (reports != null) {
 					for (Integer reportId : reports) {
 						//if you use a batch update, some drivers e.g. oracle will
 						//stop after the first error. we should continue in the event of an integrity constraint error (access already granted)
-
-						updateRight = true;
+						boolean updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							affectedRows = dbService.update(sqlTestUserReport, userId, userId, username, reportId);
+							int affectedRows = dbService.update(sqlTestUserReport, userId, userId, reportId);
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
 								updateRight = false;
 							}
 						}
 						if (updateRight) {
-							dbService.update(sqlUserReport, userId, username, reportId);
+							dbService.update(sqlUserReport, userId, reportId);
 						}
 					}
 				}
@@ -758,17 +750,17 @@ public class AccessRightService {
 				//update report group rights
 				if (reportGroups != null) {
 					for (Integer reportGroupId : reportGroups) {
-						updateRight = true;
+						boolean updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							affectedRows = dbService.update(sqlTestUserReportGroup, userId, userId, username, reportGroupId);
+							int affectedRows = dbService.update(sqlTestUserReportGroup, userId, userId, reportGroupId);
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
 								updateRight = false;
 							}
 						}
 						if (updateRight) {
-							dbService.update(sqlUserReportGroup, userId, username, reportGroupId);
+							dbService.update(sqlUserReportGroup, userId, reportGroupId);
 						}
 					}
 				}
@@ -776,17 +768,17 @@ public class AccessRightService {
 				//update job rights
 				if (jobs != null) {
 					for (Integer jobId : jobs) {
-						updateRight = true;
+						boolean updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							affectedRows = dbService.update(sqlTestUserJob, userId, userId, username, jobId);
+							int affectedRows = dbService.update(sqlTestUserJob, userId, userId, jobId);
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
 								updateRight = false;
 							}
 						}
 						if (updateRight) {
-							dbService.update(sqlUserJob, userId, username, jobId);
+							dbService.update(sqlUserJob, userId, jobId);
 						}
 					}
 				}
