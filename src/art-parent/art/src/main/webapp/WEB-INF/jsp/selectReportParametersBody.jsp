@@ -57,11 +57,12 @@ Display section to allow selecting of report parameters and initiate running of 
 				data: $('#parametersForm').serialize(),
 				success: function (data) {
 					$("#reportOutput").html(data);
-					$('.action').prop('disabled', false);
 				},
 				error: function (xhr) {
 					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 					showUserAjaxError(xhr, '${errorOccurredText}');
+				},
+				complete: function () {
 					$('.action').prop('disabled', false);
 				}
 			});
