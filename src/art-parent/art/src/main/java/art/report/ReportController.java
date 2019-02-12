@@ -1485,17 +1485,17 @@ public class ReportController {
 
 	@PostMapping("/shareReport")
 	public @ResponseBody
-	AjaxResponse shareReport(@RequestParam("reportId") Integer reportId,
+	AjaxResponse shareReport(@RequestParam("shareReportId") Integer shareReportId,
 			@RequestParam(value = "users[]", required = false) Integer[] users,
 			@RequestParam(value = "userGroups[]", required = false) Integer[] userGroups,
 			@RequestParam("action") String action) {
 
-		logger.debug("Entering shareReport: reportId={}, action='{}'", reportId, action);
+		logger.debug("Entering shareReport: shareReportId={}, action='{}'", shareReportId, action);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			Integer[] reports = {reportId};
+			Integer[] reports = {shareReportId};
 			Integer[] reportGroups = null;
 			Integer[] jobs = null;
 

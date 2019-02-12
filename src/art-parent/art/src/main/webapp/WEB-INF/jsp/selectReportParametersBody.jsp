@@ -373,7 +373,7 @@ Display section to allow selecting of report parameters and initiate running of 
 			<div class="modal-content">
 				<form id="shareReportForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/shareReport">
 					<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-					<input type="hidden" name="reportId" id="reportId" value="${report.reportId}">
+					<input type="hidden" name="shareReportId" value="${report.reportId}">
 					<!-- Modal Header -->
 					<div class="modal-header">
 						<button type="button" class="close" 
