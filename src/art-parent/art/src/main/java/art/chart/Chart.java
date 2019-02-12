@@ -626,15 +626,14 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		logger.debug("Entering processLabels");
 
 		Plot plot = chart.getPlot();
-		
+
 		boolean showLabels = BooleanUtils.toBoolean(chartOptions.getShowLabels());
 		String labelFormat = chartOptions.getLabelFormat(); //either "off" or a format string e.g. {2}
-		
+
 		if (plot instanceof PiePlot) {
 			PiePlot piePlot = (PiePlot) plot;
 
-			if (!showLabels
-					|| (labelFormat != null && StringUtils.equalsIgnoreCase(labelFormat, "off"))) {
+			if (!showLabels || StringUtils.equalsIgnoreCase(labelFormat, "off")) {
 				piePlot.setLabelGenerator(null);
 			} else {
 				piePlot.setLabelGenerator(new StandardPieSectionLabelGenerator(labelFormat));
@@ -643,8 +642,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			CategoryPlot categoryPlot = (CategoryPlot) plot;
 
 			CategoryItemRenderer renderer = categoryPlot.getRenderer(); //could be a version of BarRenderer or LineAndShapeRenderer for line graphs
-			if (!showLabels
-					|| (labelFormat != null && StringUtils.equalsIgnoreCase(labelFormat, "off"))) {
+			if (!showLabels || StringUtils.equalsIgnoreCase(labelFormat, "off")) {
 				renderer.setBaseItemLabelGenerator(null);
 				renderer.setBaseItemLabelsVisible(false);
 			} else {
