@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Objects;
 import net.sf.cewolfart.cpp.SeriesPaintProcessor;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -625,12 +626,14 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		logger.debug("Entering processLabels");
 
 		Plot plot = chart.getPlot();
-
+		
+		boolean showLabels = BooleanUtils.toBoolean(chartOptions.getShowLabels());
 		String labelFormat = chartOptions.getLabelFormat(); //either "off" or a format string e.g. {2}
+		
 		if (plot instanceof PiePlot) {
 			PiePlot piePlot = (PiePlot) plot;
 
-			if (!chartOptions.getShowLabels()
+			if (!showLabels
 					|| (labelFormat != null && StringUtils.equalsIgnoreCase(labelFormat, "off"))) {
 				piePlot.setLabelGenerator(null);
 			} else {
@@ -640,7 +643,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			CategoryPlot categoryPlot = (CategoryPlot) plot;
 
 			CategoryItemRenderer renderer = categoryPlot.getRenderer(); //could be a version of BarRenderer or LineAndShapeRenderer for line graphs
-			if (!chartOptions.getShowLabels()
+			if (!showLabels
 					|| (labelFormat != null && StringUtils.equalsIgnoreCase(labelFormat, "off"))) {
 				renderer.setBaseItemLabelGenerator(null);
 				renderer.setBaseItemLabelsVisible(false);
@@ -668,7 +671,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	@Override
 	protected JFreeChart produceChart() throws DatasetProduceException, ChartValidationException {
-		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, chartOptions.getShowLegend());
+		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, BooleanUtils.toBoolean(chartOptions.getShowLegend()));
 	}
 
 	/**
@@ -743,7 +746,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		//with additional processing like antialising and running external post processors
 		//in order to achieve similar look as with interactive/browser display using <cewolf> tags
 		//alternative is to duplicate the code
-		showLegend = chartOptions.getShowLegend();
+		showLegend = BooleanUtils.toBoolean(chartOptions.getShowLegend());
 		JFreeChart chart = getChart();
 
 		//run internal post processor
@@ -776,7 +779,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 		LineRendererProcessor pointsProcessor = new LineRendererProcessor();
 		Map<String, String> lineOptions = new HashMap<>();
-		lineOptions.put("shapes", String.valueOf(chartOptions.getShowPoints()));
+		lineOptions.put("shapes", String.valueOf(BooleanUtils.toBoolean(chartOptions.getShowPoints())));
 		pointsProcessor.processChart(chart, lineOptions);
 	}
 
@@ -830,12 +833,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			return;
 		}
 
-		boolean showPoints;
-		if (chartOptions != null && chartOptions.getShowPoints()) {
-			showPoints = true;
-		} else {
-			showPoints = false;
-		}
+		//https://stackoverflow.com/questions/11005286/check-if-null-boolean-is-true-results-in-exception
+		boolean showPoints = BooleanUtils.toBoolean(chartOptions.getShowPoints());
 
 		int count = 0;
 		for (Chart secondaryChart : secondaryCharts) {

@@ -964,20 +964,21 @@ public class ReportController {
 		String showPoints = "";
 		String showData = "";
 
-		logger.debug("report.getChartOptions().isShowLegend() = {}", report.getChartOptions().getShowLegend());
-		if (report.getChartOptions().getShowLegend()) {
+		//https://stackoverflow.com/questions/11005286/check-if-null-boolean-is-true-results-in-exception
+		logger.debug("report.getChartOptions().getShowLegend() = {}", report.getChartOptions().getShowLegend());
+		if (BooleanUtils.isTrue(report.getChartOptions().getShowLegend())) {
 			showLegend = "showLegend";
 		}
-		logger.debug("report.getChartOptions().isShowLabels() = {}", report.getChartOptions().getShowLabels());
-		if (report.getChartOptions().getShowLabels()) {
+		logger.debug("report.getChartOptions().getShowLabels() = {}", report.getChartOptions().getShowLabels());
+		if (BooleanUtils.isTrue(report.getChartOptions().getShowLabels())) {
 			showLabels = "showLabels";
 		}
-		logger.debug("report.getChartOptions().isShowPoints() = {}", report.getChartOptions().getShowPoints());
-		if (report.getChartOptions().getShowPoints()) {
+		logger.debug("report.getChartOptions().getShowPoints() = {}", report.getChartOptions().getShowPoints());
+		if (BooleanUtils.isTrue(report.getChartOptions().getShowPoints())) {
 			showPoints = "showPoints";
 		}
-		logger.debug("report.getChartOptions().isShowData() = {}", report.getChartOptions().getShowData());
-		if (report.getChartOptions().getShowData()) {
+		logger.debug("report.getChartOptions().getShowData() = {}", report.getChartOptions().getShowData());
+		if (BooleanUtils.isTrue(report.getChartOptions().getShowData())) {
 			showData = "showData";
 		}
 

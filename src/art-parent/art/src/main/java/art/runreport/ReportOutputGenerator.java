@@ -1268,8 +1268,7 @@ public class ReportOutputGenerator {
 	 * @throws Exception
 	 */
 	private void generateChartReport() throws Exception {
-
-		logger.debug("Entering generateStandardChart");
+		logger.debug("Entering generateChartReport");
 
 		rs = reportRunner.getResultSet();
 

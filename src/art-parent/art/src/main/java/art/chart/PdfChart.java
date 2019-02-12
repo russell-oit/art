@@ -53,9 +53,8 @@ public class PdfChart {
 	 *
 	 * @param chart the chart object, not null
 	 * @param filename the full file path to use, not null
-	 * @param title the chart title, or null, or blank
-	 * @param reportParamsList the report parameters to be displayed, or null or
-	 * empty
+	 * @param title the chart title, or null
+	 * @param reportParamsList the report parameters to be displayed, or null
 	 * @param report the report for the chart, not null
 	 * @param pdfPageNumbers whether page numbers should be included in pdf
 	 * @param groovyData the groovy data to be displayed with the chart image
