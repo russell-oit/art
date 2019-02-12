@@ -27,6 +27,7 @@ import art.reportoptions.JFreeChartOptions;
 import art.reportparameter.ReportParameter;
 import art.drilldown.DrilldownLinkHelper;
 import art.runreport.GroovyDataDetails;
+import art.runreport.ReportOptions;
 import art.runreport.RunReportHelper;
 import net.sf.cewolfart.ChartPostProcessor;
 import net.sf.cewolfart.ChartValidationException;
@@ -109,6 +110,21 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	protected int resultSetRecordCount;
 	protected boolean includeDataInOutput;
 	private Map<String, String[]> reportRequestParameters;
+	private ReportOptions reportOptions;
+
+	/**
+	 * @return the reportOptions
+	 */
+	public ReportOptions getReportOptions() {
+		return reportOptions;
+	}
+
+	/**
+	 * @param reportOptions the reportOptions to set
+	 */
+	public void setReportOptions(ReportOptions reportOptions) {
+		this.reportOptions = reportOptions;
+	}
 
 	/**
 	 * @return the reportRequestParameters
@@ -479,7 +495,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)
 				|| StringUtils.equals(secondColumnName, HYPERLINKS_COLUMN_NAME)) {
 			setHasHyperLinks(true);
-			setHyperLinks(new HashMap<String, String>());
+			setHyperLinks(new HashMap<>());
 		}
 
 	}
@@ -493,7 +509,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)
 				|| StringUtils.equals(secondColumnName, HYPERLINKS_COLUMN_NAME)) {
 			setHasHyperLinks(true);
-			setHyperLinks(new HashMap<String, String>());
+			setHyperLinks(new HashMap<>());
 		}
 
 	}
@@ -566,10 +582,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	protected void processYAxisRange(JFreeChart chart) {
 		logger.debug("Entering processYAxisRange");
 
-		if (chartOptions == null) {
-			return;
-		}
-
 		Plot plot = chart.getPlot();
 
 		//set y axis range if required
@@ -611,10 +623,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	private void processLabels(JFreeChart chart) {
 		logger.debug("Entering processLabels");
-
-		if (chartOptions == null) {
-			return;
-		}
 
 		Plot plot = chart.getPlot();
 
@@ -685,8 +693,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			Object groovyData, boolean showResultSetData) throws Exception {
 
 		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}', "
-				+ "report={}, pdfPageNumbers={}, showResultSetData={}", reportFormat,
-				outputFileName, report, pdfPageNumbers, showResultSetData);
+				+ "report={}, pdfPageNumbers={}, showResultSetData={},",
+				reportFormat, outputFileName, report, pdfPageNumbers, showResultSetData);
 
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
@@ -704,7 +712,11 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 					outputColumnNames = resultSetColumnNames;
 					outputData = resultSetData;
 				}
-				PdfChart.generatePdf(chart, outputFileName, title, reportParamsList, report, pdfPageNumbers, groovyData, outputColumnNames, outputData);
+				List<ReportParameter> finalParamsList = null;
+				if (reportOptions.isShowSelectedParameters()) {
+					finalParamsList = reportParamsList;
+				}
+				PdfChart.generatePdf(chart, outputFileName, title, finalParamsList, report, pdfPageNumbers, groovyData, outputColumnNames, outputData);
 				PdfHelper pdfHelper = new PdfHelper();
 				pdfHelper.addProtections(report, outputFileName, dynamicOpenPassword, dynamicModifyPassword);
 				break;
@@ -762,10 +774,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private void showPoints(JFreeChart chart) {
 		logger.debug("Entering showPoints");
 
-		if (chartOptions == null) {
-			return;
-		}
-
 		LineRendererProcessor pointsProcessor = new LineRendererProcessor();
 		Map<String, String> lineOptions = new HashMap<>();
 		lineOptions.put("shapes", String.valueOf(chartOptions.getShowPoints()));
@@ -779,10 +787,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	private void rotateLabels(JFreeChart chart) {
 		logger.debug("Entering rotateLabels");
-
-		if (chartOptions == null) {
-			return;
-		}
 
 		//display x-axis labels vertically if too many categories present
 		RotatedAxisLabels rotateProcessor = new RotatedAxisLabels();

@@ -465,6 +465,7 @@ public class ReportOutputGenerator {
 		chart.setSwapAxes(swapAxes);
 		chart.setIncludeDataInOutput(includeDataInOutput);
 		chart.setReportRequestParameters(reportRequestParameters);
+		chart.setReportOptions(reportOptions);
 
 		String optionsString = outputReport.getOptions();
 		JFreeChartOptions options;
