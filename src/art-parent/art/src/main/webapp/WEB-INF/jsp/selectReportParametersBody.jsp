@@ -467,7 +467,7 @@ Display section to allow selecting of report parameters and initiate running of 
 		<h3 class="text-right">
 			<small>
 				<c:if test="${enableShare}">
-					<button type="button" id="shareReport" class="btn btn-sm btn-default"
+					<button type="button" id="shareReport" class="btn btn-sm btn-default action"
 							data-toggle="modal" data-target="#shareReportModal">
 						<spring:message code="reports.button.share"/>
 					</button>
