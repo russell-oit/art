@@ -36,33 +36,6 @@ Display section to allow selecting of report parameters and initiate running of 
 			$('#parametersForm').attr('action', url).submit();
 		});
 
-		$("#emailReportSubmit").on("click", function (e) {
-			e.preventDefault();
-
-			//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
-			tinyMCE.triggerSave();
-
-			$.ajax({
-				type: 'POST',
-				url: '${pageContext.request.contextPath}/emailReport',
-				dataType: 'json',
-				data: $('#emailReportForm').serialize(),
-				success: function (response) //on recieve of reply
-				{
-					$("#emailReportModal").modal('hide');
-//					 $(':input','#emailReportForm').val("");
-					if (response.success) {
-						$.notify("${fileSentText}", "success");
-					} else {
-						notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-					}
-				},
-				error: function (xhr) {
-					showUserAjaxError(xhr, '${errorOccurredText}');
-				}
-			});
-		});
-
 		$("#runInNewPage").on("click", function () {
 			$("#showInline").val("false");
 			//need to explicitly set. if click on schedule, then back then run in new page - goes to schedule again
@@ -222,6 +195,258 @@ Display section to allow selecting of report parameters and initiate running of 
 		}
 	}
 </script>
+
+<c:if test="${enableEmail}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
+	<script type="text/javascript">
+	tinymce.init(tinymceConfig);
+	</script>
+
+	<script>
+		$(function () {
+			$("#emailReportSubmit").on("click", function (e) {
+				e.preventDefault();
+
+				//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
+				tinyMCE.triggerSave();
+
+				$.ajax({
+					type: 'POST',
+					url: '${pageContext.request.contextPath}/emailReport',
+					dataType: 'json',
+					data: $('#emailReportForm').serialize(),
+					success: function (response) //on recieve of reply
+					{
+						$("#emailReportModal").modal('hide');
+//					 $(':input','#emailReportForm').val("");
+						if (response.success) {
+							$.notify("${fileSentText}", "success");
+						} else {
+							notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+						}
+					},
+					error: function (xhr) {
+						showUserAjaxError(xhr, '${errorOccurredText}');
+					}
+				});
+			});
+		});
+	</script>
+
+	<div id="emailReportModal" class="modal fade" role="dialog" 
+		 aria-labelledby="emailReportLabel" aria-hidden="true" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+
+				<form id="emailReportForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/emailReport">
+					<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+					<!-- Modal Header -->
+					<div class="modal-header">
+						<button type="button" class="close" 
+								data-dismiss="modal">
+							<span aria-hidden="true">&times;</span>
+							<span class="sr-only">Close</span>
+						</button>
+						<h4 class="modal-title" id="emailReportLabel">
+							<spring:message code="reports.text.emailReport"/>
+						</h4>
+					</div>
+
+					<!-- Modal Body -->
+					<div class="modal-body">
+						<div class="form-group">
+							<label class="control-label col-md-4" for="mailFrom">
+								<spring:message code="jobs.label.mailFrom"/>
+							</label>
+							<div class="col-md-8">
+								<input type="text" id="mailFrom" name="mailFrom"
+									   readonly class="form-control" value="${encode:forHtmlAttribute(sessionUser.email)}"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="mailTo">
+								<spring:message code="jobs.label.mailTo"/>
+							</label>
+							<div class="col-md-8">
+								<input type="text" id="mailTo" name="mailTo" class="form-control"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="mailCc">
+								<spring:message code="jobs.label.mailCc"/>
+							</label>
+							<div class="col-md-8">
+								<input type="text" id="mailCc" name="mailCc" class="form-control"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="mailBcc">
+								<spring:message code="jobs.label.mailBcc"/>
+							</label>
+							<div class="col-md-8">
+								<input type="text" id="mailBcc" name="mailBcc" class="form-control"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="mailSubject">
+								<spring:message code="jobs.label.mailSubject"/>
+							</label>
+							<div class="col-md-8">
+								<input type="text" id="mailSubject" name="mailSubject" class="form-control"/>
+							</div>
+						</div>
+						<div>
+							<label class="col-md-12 control-label" style="text-align: center">
+								<spring:message code="jobs.label.mailMessage"/>
+							</label>
+							<div class="form-group">
+								<div class="col-md-12">
+									<textarea id="mailMessage" name="mailMessage" rows="5" cols="60" class="form-control editor"></textarea>
+									<input name="image" type="file" id="upload" style="display:none;" onchange="">
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Modal Footer -->
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default"
+								data-dismiss="modal">
+							<spring:message code="dialog.button.cancel"/>
+						</button>
+						<button type="submit" id="emailReportSubmit" class="btn btn-primary">
+							<spring:message code="dialog.button.ok"/>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</c:if>
+
+<c:if test="${enableShare}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+
+	<script>
+		$(function () {
+			$('.share').selectpicker({
+				liveSearch: true,
+				noneSelectedText: '${nothingSelectedText}',
+				noneResultsText: '${noResultsMatchText}',
+				countSelectedText: '${selectedCountText}',
+				actionsBox: true,
+				selectAllText: '${selectAllText}',
+				deselectAllText: '${deselectAllText}'
+			});
+
+			$("#shareReportSubmit").on("click", function (e) {
+				e.preventDefault();
+
+				$.ajax({
+					type: 'POST',
+					url: '${pageContext.request.contextPath}/shareReport',
+					dataType: 'json',
+					data: $('#shareReportForm').serialize(),
+					success: function (response) {
+						$("#shareReportModal").modal('hide');
+						$("#shareReportModal option:selected").prop("selected", false);
+						$('.share').selectpicker('refresh');
+						if (response.success) {
+							$.notify("${accessUpdatedText}", "success");
+						} else {
+							notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+						}
+					},
+					error: function (xhr) {
+						showUserAjaxError(xhr, '${errorOccurredText}');
+					}
+				});
+			});
+		});
+	</script>
+
+	<div id="shareReportModal" class="modal fade" role="dialog" 
+		 aria-labelledby="shareReportLabel" aria-hidden="true" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form id="shareReportForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/shareReport">
+					<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+					<input type="hidden" name="reportId" id="reportId" value="${report.reportId}">
+					<!-- Modal Header -->
+					<div class="modal-header">
+						<button type="button" class="close" 
+								data-dismiss="modal">
+							<span aria-hidden="true">&times;</span>
+							<span class="sr-only">Close</span>
+						</button>
+						<h4 class="modal-title" id="shareReportLabel">
+							<spring:message code="dialog.title.shareReport"/>
+						</h4>
+					</div>
+
+					<!-- Modal Body -->
+					<div class="modal-body" style="overflow: visible;">
+						<div class="form-group">
+							<label class="control-label col-md-4" for="name">
+								<spring:message code="page.text.name"/>
+							</label>
+							<div class="col-md-8">
+								<input type="text" id="name" name="name" value="${encode:forHtmlAttribute(report.getLocalizedName(locale))}" readonly class="form-control"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="users">
+								<spring:message code="page.text.users"/>
+							</label>
+							<div class="col-md-8">
+								<select id="users" name="users[]" class="form-control share" multiple>
+									<c:forEach var="user" items="${users}">
+										<option value="${user.userId}">${encode:forHtmlContent(user.fullName)}</option>
+									</c:forEach>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="userGroups">
+								<spring:message code="page.text.userGroups"/>
+							</label>
+							<div class="col-md-8">
+								<select id="userGroups" name="userGroups[]" class="form-control share" multiple>
+									<c:forEach var="userGroup" items="${userGroups}">
+										<option value="${userGroup.userGroupId}">${encode:forHtmlContent(userGroup.name)}</option>
+									</c:forEach>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="action">
+								<spring:message code="page.text.action"/>
+							</label>
+							<div class="col-md-8">
+								<select id="action" name="action" class="form-control">
+									<option value="grant"><spring:message code="page.action.grant"/></option>
+									<option value="revoke"><spring:message code="page.action.revoke"/></option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<!-- Modal Footer -->
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default"
+								data-dismiss="modal">
+							<spring:message code="dialog.button.cancel"/>
+						</button>
+						<button type="submit" id="shareReportSubmit" class="btn btn-primary">
+							<spring:message code="dialog.button.ok"/>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</c:if>
 
 <c:if test="${error != null}">
 	<div class="alert alert-danger alert-dismissable">
@@ -388,100 +613,3 @@ Display section to allow selecting of report parameters and initiate running of 
 		</div>
 	</div>
 </div>
-
-<c:if test="${enableEmail}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
-	<script type="text/javascript">
-												tinymce.init(tinymceConfig);
-	</script>
-	
-	<div id="emailReportModal" class="modal fade" role="dialog" 
-		 aria-labelledby="emailReportLabel" aria-hidden="true" tabindex="-1">
-		<div class="modal-dialog">
-			<div class="modal-content">
-
-				<form id="emailReportForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/emailReport">
-					<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-					<!-- Modal Header -->
-					<div class="modal-header">
-						<button type="button" class="close" 
-								data-dismiss="modal">
-							<span aria-hidden="true">&times;</span>
-							<span class="sr-only">Close</span>
-						</button>
-						<h4 class="modal-title" id="emailReportLabel">
-							<spring:message code="reports.text.emailReport"/>
-						</h4>
-					</div>
-
-					<!-- Modal Body -->
-					<div class="modal-body">
-						<div class="form-group">
-							<label class="control-label col-md-4" for="mailFrom">
-								<spring:message code="jobs.label.mailFrom"/>
-							</label>
-							<div class="col-md-8">
-								<input type="text" id="mailFrom" name="mailFrom"
-									   readonly class="form-control" value="${encode:forHtmlAttribute(sessionUser.email)}"/>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="control-label col-md-4" for="mailTo">
-								<spring:message code="jobs.label.mailTo"/>
-							</label>
-							<div class="col-md-8">
-								<input type="text" id="mailTo" name="mailTo" class="form-control"/>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="control-label col-md-4" for="mailCc">
-								<spring:message code="jobs.label.mailCc"/>
-							</label>
-							<div class="col-md-8">
-								<input type="text" id="mailCc" name="mailCc" class="form-control"/>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="control-label col-md-4" for="mailBcc">
-								<spring:message code="jobs.label.mailBcc"/>
-							</label>
-							<div class="col-md-8">
-								<input type="text" id="mailBcc" name="mailBcc" class="form-control"/>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="control-label col-md-4" for="mailSubject">
-								<spring:message code="jobs.label.mailSubject"/>
-							</label>
-							<div class="col-md-8">
-								<input type="text" id="mailSubject" name="mailSubject" class="form-control"/>
-							</div>
-						</div>
-						<div>
-							<label class="col-md-12 control-label" style="text-align: center">
-								<spring:message code="jobs.label.mailMessage"/>
-							</label>
-							<div class="form-group">
-								<div class="col-md-12">
-									<textarea id="mailMessage" name="mailMessage" rows="5" cols="60" class="form-control editor"></textarea>
-									<input name="image" type="file" id="upload" style="display:none;" onchange="">
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Modal Footer -->
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default"
-								data-dismiss="modal">
-							<spring:message code="dialog.button.cancel"/>
-						</button>
-						<button type="submit" id="emailReportSubmit" class="btn btn-primary">
-							<spring:message code="dialog.button.ok"/>
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-</c:if>
