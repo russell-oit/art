@@ -97,7 +97,7 @@
 
 	function dateFormatter(data, type, full, meta) {
 		//https://stackoverflow.com/questions/25319193/jquery-datatables-column-rendering-and-sorting
-		if (type === "display") {
+		if (type === "display" || type === 'filter') {
 			var formattedDate;
 			if (data === null) {
 				formattedDate = '';
@@ -112,7 +112,7 @@
 
 	function datetimeFormatter(data, type, full, meta) {
 		//https://stackoverflow.com/questions/25319193/jquery-datatables-column-rendering-and-sorting
-		if (type === "display") {
+		if (type === "display" || type === 'filter') {
 			var formattedDate;
 			if (data === null) {
 				formattedDate = '';
@@ -129,7 +129,7 @@
 	}
 
 	function twoDecimals(data, type, full, meta) {
-		if (type === "display") {
+		if (type === "display" || type === 'filter') {
 			if (data === null) {
 				return '';
 			} else {
@@ -143,7 +143,7 @@
 	}
 
 	function defaultFormatter(data, type, full, meta) {
-		if (type === "display") {
+		if (type === "display" || type === 'filter') {
 			if (data === null) {
 				return '';
 			} else {
@@ -155,7 +155,7 @@
 	}
 
 	function numberFormatter(data, type, full, meta) {
-		if (type === "display") {
+		if (type === "display" || type === 'filter') {
 			var formattedNumber;
 			if (data === null) {
 				formattedNumber = '';
