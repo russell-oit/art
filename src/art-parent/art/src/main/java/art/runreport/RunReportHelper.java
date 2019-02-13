@@ -607,9 +607,9 @@ public class RunReportHelper {
 					formats.add("pdf");
 					break;
 				case TabularHeatmap:
+					formats.add("htmlDataTable");
 					formats.add("htmlFancy");
 					formats.add("htmlPlain");
-					formats.add("htmlDataTable");
 					break;
 				case FixedWidth:
 					formats.add("html");

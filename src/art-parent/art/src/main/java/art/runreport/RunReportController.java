@@ -482,20 +482,7 @@ public class RunReportController {
 					reportOutputGenerator.setRequest(request);
 					reportOutputGenerator.setResponse(response);
 					reportOutputGenerator.setServletContext(servletContext);
-
-					ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
-							reportFormat, locale, paramProcessorResult, writer, outputFileName, sessionUser, messageSource);
-
-					if (outputResult.isSuccess()) {
-						rowsRetrieved = outputResult.getRowCount();
-					} else {
-						model.addAttribute("message", outputResult.getMessage());
-						return errorPage;
-					}
-
-					//encrypt file if applicable
-					report.encryptFile(outputFileName);
-
+					
 					if (reportType == ReportType.TabularHeatmap) {
 						TabularHeatmapOptions options;
 
@@ -510,6 +497,19 @@ public class RunReportController {
 						request.setAttribute("options", options);
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/activateTabularHeatmap.jsp").include(request, response);
 					}
+
+					ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
+							reportFormat, locale, paramProcessorResult, writer, outputFileName, sessionUser, messageSource);
+
+					if (outputResult.isSuccess()) {
+						rowsRetrieved = outputResult.getRowCount();
+					} else {
+						model.addAttribute("message", outputResult.getMessage());
+						return errorPage;
+					}
+
+					//encrypt file if applicable
+					report.encryptFile(outputFileName);
 				}
 
 				// Print the "working" time elapsed
