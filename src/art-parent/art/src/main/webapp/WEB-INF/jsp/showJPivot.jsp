@@ -195,11 +195,11 @@
 												<td>
 													<spring:message code="page.text.name"/>
 												</td>
-												<td>
+												<td style="padding-bottom: 5px">
 													<input type="text" name="newPivotName" value="" size="20" maxlength="50" />
 													<c:if test="${exclusiveAccess}">
-														<input type="checkbox" name="overwrite" /><spring:message code="reports.text.overwrite"/> &nbsp;
-														<input type="checkbox" name="delete" /><spring:message code="page.action.delete"/> &nbsp;
+														<input type="checkbox" name="overwrite" />&nbsp;<spring:message code="reports.text.overwrite"/>&nbsp;
+														<input type="checkbox" name="delete" />&nbsp;<spring:message code="page.action.delete"/>&nbsp;
 													</c:if>
 													<button type="submit" id="save" class="btn btn-default action">
 														<spring:message code="page.button.save"/>
@@ -208,7 +208,7 @@
 											</tr>
 											<tr>
 												<td>
-													<spring:message code="page.text.description"/>
+													<spring:message code="page.text.description"/>&nbsp;
 												</td>
 												<td>
 													<input type="text" name="newPivotDescription" value="" size="45" maxlength="2000">
