@@ -38,6 +38,21 @@ public class ViewOptions extends DatasourceOptions implements Serializable {
 	private String columns = "*";
 	private List<String> conditionColumns;
 	private List<String> omitConditionColumns;
+	private boolean sortColumns = true;
+
+	/**
+	 * @return the sortColumns
+	 */
+	public boolean isSortColumns() {
+		return sortColumns;
+	}
+
+	/**
+	 * @param sortColumns the sortColumns to set
+	 */
+	public void setSortColumns(boolean sortColumns) {
+		this.sortColumns = sortColumns;
+	}
 
 	/**
 	 * @return the conditionColumns

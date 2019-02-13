@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -223,22 +225,19 @@ public class SelfServiceController {
 			GeneralReportOptions generalOptions = report.getGeneralOptions();
 			ViewOptions viewOptions = generalOptions.getView();
 
-			List<String> conditionColumns = null;
-			List<String> omitConditionColumns = null;
-			if (viewOptions != null) {
-				conditionColumns = viewOptions.getConditionColumns();
-				omitConditionColumns = viewOptions.getOmitConditionColumns();
+			if (viewOptions == null) {
+				viewOptions = new ViewOptions();
 			}
+
+			List<String> conditionColumns = viewOptions.getConditionColumns();
+			List<String> omitConditionColumns = viewOptions.getOmitConditionColumns();
 
 			List<SelfServiceColumn> includedConditionColumns;
 			if (conditionColumns == null || conditionColumns.isEmpty()) {
 				includedConditionColumns = new ArrayList<>(columns);
 			} else {
-				//can't use contidionColumns variable directly in lamda
-				//https://stackoverflow.com/questions/27592379/local-variables-referenced-from-a-lambda-expression-must-be-final-or-effectively
-				List<String> tempConditionColumns = conditionColumns;
 				includedConditionColumns = columns.stream()
-						.filter(c -> ArtUtils.containsIgnoreCase(tempConditionColumns, c.getLabel()))
+						.filter(c -> ArtUtils.containsIgnoreCase(conditionColumns, c.getLabel()))
 						.collect(Collectors.toList());
 			}
 
@@ -246,22 +245,21 @@ public class SelfServiceController {
 			if (omitConditionColumns == null) {
 				finalConditionColumns = includedConditionColumns;
 			} else {
-				List<String> tempOmitConditionColumns = omitConditionColumns;
 				finalConditionColumns = includedConditionColumns.stream()
-						.filter(c -> !ArtUtils.containsIgnoreCase(tempOmitConditionColumns, c.getLabel()))
+						.filter(c -> !ArtUtils.containsIgnoreCase(omitConditionColumns, c.getLabel()))
 						.collect(Collectors.toList());
 			}
 
-			Map<String, Object> result = new HashMap<>();
-			result.put("conditionColumns", finalConditionColumns);
-
+			List<SelfServiceColumn> fromColumns;
+			List<SelfServiceColumn> toColumns;
 			if (StringUtils.isBlank(selfServiceOptionsString)) {
-				result.put("fromColumns", columns);
+				fromColumns = columns;
+				toColumns = new ArrayList<>();
 			} else {
 				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
 				List<String> selfServiceColumns = selfServiceOptions.getColumns();
 				//iterate based on the self service options to maintain saved columns order
-				List<SelfServiceColumn> toColumns = new ArrayList<>();
+				toColumns = new ArrayList<>();
 				for (String selfServiceColumn : selfServiceColumns) {
 					for (SelfServiceColumn column : columns) {
 						if (StringUtils.equalsIgnoreCase(selfServiceColumn, column.getLabel())) {
@@ -272,13 +270,20 @@ public class SelfServiceController {
 				}
 
 				//https://www.mkyong.com/java8/java-8-streams-filter-examples/
-				List<SelfServiceColumn> fromColumns = columns.stream()
+				fromColumns = columns.stream()
 						.filter(c -> !ArtUtils.containsIgnoreCase(selfServiceColumns, c.getLabel()))
 						.collect(Collectors.toList());
-
-				result.put("fromColumns", fromColumns);
-				result.put("toColumns", toColumns);
 			}
+
+			Map<String, Object> result = new HashMap<>();
+
+			if (viewOptions.isSortColumns()) {
+				Collections.sort(finalConditionColumns, Comparator.comparing(c -> StringUtils.lowerCase(c.getUserLabel(), Locale.ENGLISH)));
+				Collections.sort(fromColumns, Comparator.comparing(c -> StringUtils.lowerCase(c.getUserLabel(), Locale.ENGLISH)));
+			}
+			result.put("conditionColumns", finalConditionColumns);
+			result.put("fromColumns", fromColumns);
+			result.put("toColumns", toColumns);
 			result.put("options", selfServiceOptionsString);
 
 			response.setData(result);
