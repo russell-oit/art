@@ -25,7 +25,7 @@ Configure rule value
 <spring:message code="page.text.search" var="searchText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3"
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasNotify="true">
 
 	<jsp:attribute name="css">
@@ -157,14 +157,14 @@ Configure rule value
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-md-3" for="users">
+					<label class="control-label col-md-2" for="users">
 						<spring:message code="page.text.users"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="users" id="users" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="user" items="${users}">
 								<option value="${user.userId}-${encode:forHtmlAttribute(user.username)}">
-									<encode:forHtmlContent value="${user.username}"/>
+									${encode:forHtmlContent(user.username)} ${empty user.fullName? "": " (".concat(encode:forHtmlContent(user.fullName)).concat(")")}
 								</option>
 							</c:forEach>
 						</select>
@@ -173,10 +173,10 @@ Configure rule value
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="userGroups">
+					<label class="control-label col-md-2" for="userGroups">
 						<spring:message code="page.text.userGroups"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="userGroups" id="userGroups" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="userGroup" items="${userGroups}">
 								<option value="${userGroup.userGroupId}">
@@ -189,10 +189,10 @@ Configure rule value
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="rule">
+					<label class="control-label col-md-6" for="rule">
 						<spring:message code="page.text.rule"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-6">
 						<select name="rule" id="rule" class="form-control selectpicker">
 							<c:forEach var="rule" items="${rules}">
 								<option value="${rule.ruleId}-${encode:forHtmlAttribute(rule.name)}">
@@ -203,10 +203,10 @@ Configure rule value
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="ruleValue">
+					<label class="control-label col-md-6" for="ruleValue">
 						<spring:message code="page.text.value"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-6">
 						<input type="text" name="ruleValue" id="ruleValue"
 							   maxlength="100" class="form-control">
 					</div>
