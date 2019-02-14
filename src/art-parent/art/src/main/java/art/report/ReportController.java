@@ -1351,14 +1351,6 @@ public class ReportController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			if (StringUtils.isNotBlank(description)) {
-				report.setDescription(description);
-			}
-			if (StringUtils.isNotBlank(name)) {
-				report.setName(name);
-				report.setShortDescription(name);
-			}
-
 			boolean reportNameNotProvided = false;
 			boolean reportNameExists = false;
 			if (StringUtils.isBlank(name)) {
@@ -1414,8 +1406,24 @@ public class ReportController {
 				}
 
 				if (overwrite) {
+					if (StringUtils.isNotEmpty(description)) {
+						report.setDescription(description);
+					}
+					if (StringUtils.isNotBlank(name)) {
+						report.setName(name);
+						if (reportType == ReportType.GridstackDashboard) {
+							report.setShortDescription(name);
+						}
+					}
+
 					reportService.updateReport(report, sessionUser);
 				} else {
+					report.setDescription(description);
+					report.setName(name);
+					if (reportType == ReportType.GridstackDashboard) {
+						report.setShortDescription(name);
+					}
+
 					if (reportId == null) {
 						reportService.addReport(report, sessionUser);
 					} else {
