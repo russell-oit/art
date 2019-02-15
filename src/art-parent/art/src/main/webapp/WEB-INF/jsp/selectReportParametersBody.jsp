@@ -255,20 +255,23 @@ Display section to allow selecting of report parameters and initiate running of 
 
 	<script>
 		$(function () {
-			$('.share').selectpicker({
-				liveSearch: true,
-				noneSelectedText: '${nothingSelectedText}',
-				noneResultsText: '${noResultsMatchText}',
-				countSelectedText: '${selectedCountText}',
-				actionsBox: true,
-				selectAllText: '${selectAllText}',
-				deselectAllText: '${deselectAllText}'
-			});
-
 			//https://stackoverflow.com/questions/26863003/how-to-reset-the-bootstrap-modal-when-it-gets-closed-and-open-it-fresh-again
 			$('#shareReportModal').on('hidden.bs.modal', function () {
 				$(this).find('form').trigger('reset');
-				$('.share').selectpicker('refresh');
+				$('.share').selectpicker('destroy');
+			});
+
+			//https://github.com/snapappointments/bootstrap-select/issues/1358
+			$('#shareReportModal').on('show.bs.modal', function () {
+				$('.share').selectpicker({
+					liveSearch: true,
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}',
+					actionsBox: true,
+					selectAllText: '${selectAllText}',
+					deselectAllText: '${deselectAllText}'
+				});
 			});
 
 			$("#shareReportSubmit").on("click", function (e) {

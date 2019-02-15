@@ -30,6 +30,9 @@
 	<script src="${pageContext.request.contextPath}/js/JSONLoop.js"></script>
 </c:if>
 
+<%-- include bootstrap select.js after jquery and bootstrap.js for proper functioning of share dialog after run report inline --%>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+
 <c:if test="${not empty options.cssFile}">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(options.cssFile)}">
 </c:if>
