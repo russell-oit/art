@@ -502,7 +502,9 @@
 			<div class="col-md-12">
 				<div class="row">
 					<div class="col-md-12" style="text-align: center">
-						<spring:message code="selfService.text.limit"/>&nbsp;
+						<label for="limit">
+							<spring:message code="selfService.text.limit"/>
+						</label>
 						<input id="limit" type="number" value="10">
 						<button id="preview" class="btn btn-default">
 							<spring:message code="reports.action.preview"/>
