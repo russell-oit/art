@@ -244,14 +244,20 @@
 
 					var limit = $("#limit").val();
 
+					var data = {testRun: true, reportId: reportId,
+						selfServicePreview: true, reportFormat: "htmlDataTable",
+						selfServiceOptions: selfServiceOptionsString,
+						showInline: true, limit: limit};
+
+					if ($('#showSql').is(':checked')) {
+						data.showSql = true;
+					}
+
 					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
 					$.ajax({
 						type: "POST",
 						url: "${pageContext.request.contextPath}/runReport",
-						data: {testRun: true, reportId: reportId,
-							selfServicePreview: true, reportFormat: "htmlDataTable",
-							selfServiceOptions: selfServiceOptionsString,
-							showInline: true, limit: limit},
+						data: data,
 						success: function (data) {
 							$("#reportOutput").html(data);
 						},
@@ -521,7 +527,17 @@
 						</a>
 					</div>
 				</div>
-				<div class="row" id="builderDiv">
+				<c:if test="${sessionUser.hasPermission('configure_reports')}">
+					<div class="row" style="padding-top:15px">
+						<div class="col-md-12" style="text-align: center">
+							<label for="showSql">
+								<spring:message code="reports.label.showSql"/>
+							</label>
+							<input type="checkbox" name="showSql" id="showSql" value="">
+						</div>
+					</div>
+				</c:if>
+				<div class="row" style="padding-top:5px" id="builderDiv">
 					<div class="col-md-12">
 						<div id="builder"></div>
 					</div>
