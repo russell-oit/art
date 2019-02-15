@@ -51,19 +51,8 @@ Display section to allow selecting of report parameters and initiate running of 
 			//disable buttons
 			$('.action').prop('disabled', true);
 
-			//some report types interfere with share modal selectpicker. Because they include bootstrap.js?
-			var reportId = ${report.reportTypeId};
-			switch (reportId) {
-				case 129: //gridstack dashboard
-				case 138: //datatables
-				case 132: //pivottable.js
-				case 133: //pivottable.js csv local
-				case 134: //pivottable.js csv server
-					$('#shareReport').hide();
-					break;
-				default:
-					break;
-			}
+			//some report types interfere with share modal selectpicker when run inline. Because they include bootstrap.js or jquery?
+			$('#shareReport').hide();
 
 			$.ajax({
 				type: "POST",
