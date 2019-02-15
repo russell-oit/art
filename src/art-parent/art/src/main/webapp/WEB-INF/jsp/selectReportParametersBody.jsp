@@ -284,8 +284,6 @@ Display section to allow selecting of report parameters and initiate running of 
 					data: $('#shareReportForm').serialize(),
 					success: function (response) {
 						$("#shareReportModal").modal('hide');
-						$("#shareReportModal option:selected").prop("selected", false);
-						$('.share').selectpicker('refresh');
 						if (response.success) {
 							$.notify("${accessUpdatedText}", "success");
 						} else {
