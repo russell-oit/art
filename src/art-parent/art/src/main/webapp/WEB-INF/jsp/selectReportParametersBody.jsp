@@ -51,6 +51,20 @@ Display section to allow selecting of report parameters and initiate running of 
 			//disable buttons
 			$('.action').prop('disabled', true);
 
+			//some report types interfere with share modal selectpicker. Because they include bootstrap.js?
+			var reportId = ${report.reportTypeId};
+			switch (reportId) {
+				case 129: //gridstack dashboard
+				case 138: //datatables
+				case 132: //pivottable.js
+				case 133: //pivottable.js csv local
+				case 134: //pivottable.js csv server
+					$('#shareReport').hide();
+					break;
+				default:
+					break;
+			}
+
 			$.ajax({
 				type: "POST",
 				url: "${pageContext.request.contextPath}/runReport",
@@ -251,6 +265,12 @@ Display section to allow selecting of report parameters and initiate running of 
 				deselectAllText: '${deselectAllText}'
 			});
 
+			//https://stackoverflow.com/questions/26863003/how-to-reset-the-bootstrap-modal-when-it-gets-closed-and-open-it-fresh-again
+			$('#shareReportModal').on('hidden.bs.modal', function () {
+				$(this).find('form').trigger('reset');
+				$('.share').selectpicker('refresh');
+			});
+
 			$("#shareReportSubmit").on("click", function (e) {
 				e.preventDefault();
 
@@ -296,7 +316,7 @@ Display section to allow selecting of report parameters and initiate running of 
 		<h3 class="text-right">
 			<small>
 				<c:if test="${enableShare}">
-					<button type="button" id="shareReport" class="btn btn-sm btn-default action"
+					<button type="button" id="shareReport" class="btn btn-sm btn-default"
 							data-toggle="modal" data-target="#shareReportModal">
 						<spring:message code="reports.button.share"/>
 					</button>
