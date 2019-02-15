@@ -318,6 +318,7 @@
 				$("#views").val('0').selectpicker('refresh');
 				$("#selfServiceReports").val('0').selectpicker('refresh');
 				$("#deleteReport").hide();
+				$("#reportOutput").empty();
 			}
 
 			function reset() {
