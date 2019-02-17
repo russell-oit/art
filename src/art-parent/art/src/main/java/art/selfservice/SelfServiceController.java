@@ -284,7 +284,9 @@ public class SelfServiceController {
 			result.put("conditionColumns", finalConditionColumns);
 			result.put("fromColumns", fromColumns);
 			result.put("toColumns", toColumns);
-			result.put("options", selfServiceOptionsString);
+			result.put("selfServiceOptions", selfServiceOptionsString);
+			result.put("valueSeparator", viewOptions.getValueSeparator());
+			result.put("reportOptions", report.getOptions());
 
 			response.setData(result);
 			response.setSuccess(true);

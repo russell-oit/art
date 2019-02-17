@@ -132,7 +132,9 @@
 									var conditionColumns = result.conditionColumns;
 									var fromColumns = result.fromColumns;
 									var toColumns = result.toColumns;
-									var optionsString = result.options;
+									var selfServiceOptionsString = result.selfServiceOptions;
+									var reportOptionsString = result.reportOptions;
+									var valueSeparator = result.valueSeparator;
 
 									var fromOptions = "";
 									var toOptions = "";
@@ -154,12 +156,12 @@
 									toSelect.append(toOptions);
 
 									var ruleObject;
-									if (optionsString) {
-										var options = JSON.parse(optionsString);
-										ruleObject = options.jqueryRule;
+									if (selfServiceOptionsString) {
+										var selfServiceOptions = JSON.parse(selfServiceOptionsString);
+										ruleObject = selfServiceOptions.jqueryRule;
 									}
 
-									updateBuilder(conditionColumns, ruleObject);
+									updateBuilder(conditionColumns, ruleObject, valueSeparator);
 								} else {
 									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 								}
@@ -370,9 +372,9 @@
 				});
 			}
 
-			function updateBuilder(conditionColumns, ruleObject) {
+			function updateBuilder(conditionColumns, ruleObject, valueSeparator) {
 				if (conditionColumns && conditionColumns.length > 0) {
-					var filters = createFilters(conditionColumns);
+					var filters = createFilters(conditionColumns, valueSeparator);
 					updateFilters(filters);
 					if (ruleObject) {
 						$('#builder').queryBuilder('setRules', ruleObject);
@@ -391,7 +393,7 @@
 				$('#builder').queryBuilder('reset');
 			}
 
-			function createFilters(conditionColumns) {
+			function createFilters(conditionColumns, valueSeparator) {
 				var filters = [];
 
 				$.each(conditionColumns, function (index, column) {
@@ -403,6 +405,15 @@
 						label: column.userLabel,
 						type: column.type
 					};
+
+					//https://github.com/mistic100/jQuery-QueryBuilder/issues/418
+					if (valueSeparator) {
+						filter.input = 'text';
+						filter.value_separator = valueSeparator;
+					} else {
+						//explicitly specify value separator for itfsw query builder
+						filter.value_separator = ',';
+					}
 
 					if (column.type === 'date' || column.type === 'datetime'
 							|| column.type === 'time') {
