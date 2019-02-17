@@ -450,7 +450,7 @@
 					//https://stackoverflow.com/questions/7364150/find-object-by-id-in-an-array-of-javascript-objects
 					if (filterOptions) {
 						var result = $.grep(filterOptions, function (option) {
-							return option.column === column.label;
+							return option.column === column.label || option.column === 'allColumns';
 						});
 						
 						if (result.length > 0) {
