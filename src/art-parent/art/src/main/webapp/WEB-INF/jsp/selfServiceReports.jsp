@@ -400,6 +400,7 @@
 
 			function createFilters(conditionColumns, viewOptions) {
 				var filters = [];
+				var ids = [];
 
 				var valueSeparator;
 				var filterOptions;
@@ -420,7 +421,15 @@
 				}
 
 				$.each(conditionColumns, function (index, column) {
-					var id = "filter" + index;
+					//use label as id rather than arbitrary value
+					//filter id in rules must match that of the condition columns and condition columns sort order may change
+					var id = column.label;
+					
+					if ($.inArray(id, ids) !== -1) {
+						id += index;
+					}
+
+					ids.push(id);
 
 					var filter = {
 						id: id,
@@ -471,7 +480,7 @@
 							$.extend(filter, result[0].options);
 						}
 					}
-
+					
 					filters.push(filter);
 				});
 
