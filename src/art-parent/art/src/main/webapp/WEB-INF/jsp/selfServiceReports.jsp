@@ -134,7 +134,6 @@
 									var toColumns = result.toColumns;
 									var selfServiceOptionsString = result.selfServiceOptions;
 									var reportOptionsString = result.reportOptions;
-									var valueSeparator = result.valueSeparator;
 
 									var fromOptions = "";
 									var toOptions = "";
@@ -161,16 +160,13 @@
 										ruleObject = selfServiceOptions.jqueryRule;
 									}
 
-									var filterOptions;
+									var viewOptions;
 									if (reportOptionsString) {
 										var reportOptions = JSON.parse(reportOptionsString);
 										var viewOptions = reportOptions.view;
-										if (viewOptions) {
-											filterOptions = viewOptions.filterOptions;
-										}
 									}
 
-									updateBuilder(conditionColumns, ruleObject, valueSeparator, filterOptions);
+									updateBuilder(conditionColumns, ruleObject, viewOptions);
 								} else {
 									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 								}
@@ -381,9 +377,9 @@
 				});
 			}
 
-			function updateBuilder(conditionColumns, ruleObject, valueSeparator, filterOptions) {
+			function updateBuilder(conditionColumns, ruleObject, viewOptions) {
 				if (conditionColumns && conditionColumns.length > 0) {
-					var filters = createFilters(conditionColumns, valueSeparator, filterOptions);
+					var filters = createFilters(conditionColumns, viewOptions);
 					updateFilters(filters);
 					if (ruleObject) {
 						$('#builder').queryBuilder('setRules', ruleObject);
@@ -402,8 +398,26 @@
 				$('#builder').queryBuilder('reset');
 			}
 
-			function createFilters(conditionColumns, valueSeparator, filterOptions) {
+			function createFilters(conditionColumns, viewOptions) {
 				var filters = [];
+
+				var valueSeparator;
+				var filterOptions;
+				var allColumnName;
+				
+				if (viewOptions) {
+					valueSeparator = viewOptions.valueSeparator;
+					filterOptions = viewOptions.filterOptions;
+					allColumnName = viewOptions.allColumnName;
+				}
+
+				if (valueSeparator === undefined) {
+					valueSeparator = ",";
+				}
+
+				if (allColumnName === undefined) {
+					allColumnName = "all";
+				}
 
 				$.each(conditionColumns, function (index, column) {
 					var id = "filter" + index;
@@ -450,9 +464,9 @@
 					//https://stackoverflow.com/questions/7364150/find-object-by-id-in-an-array-of-javascript-objects
 					if (filterOptions) {
 						var result = $.grep(filterOptions, function (option) {
-							return option.column === column.label || option.column === 'allColumns';
+							return option.column === column.label || option.column === allColumnName;
 						});
-						
+
 						if (result.length > 0) {
 							$.extend(filter, result[0].options);
 						}
