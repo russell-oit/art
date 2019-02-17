@@ -354,6 +354,22 @@ Edit report page
 				gridstackSavedOptionsEditor.getSession().on('change', function () {
 					gridstackSavedOptions.val(gridstackSavedOptionsEditor.getSession().getValue());
 				});
+				
+				var selfServiceOptionsEditor = ace.edit("selfServiceOptionsEditor");
+				selfServiceOptionsEditor.$blockScrolling = Infinity;
+				selfServiceOptionsEditor.getSession().setMode("ace/mode/json");
+				selfServiceOptionsEditor.setHighlightActiveLine(false);
+				selfServiceOptionsEditor.setShowPrintMargin(false);
+				selfServiceOptionsEditor.setOption("showLineNumbers", false);
+				selfServiceOptionsEditor.setOption("maxLines", 20);
+				selfServiceOptionsEditor.setOption("minLines", 3);
+				document.getElementById('selfServiceOptionsEditor').style.fontSize = '14px';
+
+				var selfServiceOptions = $('#selfServiceOptions');
+				selfServiceOptionsEditor.getSession().setValue(selfServiceOptions.val());
+				selfServiceOptionsEditor.getSession().on('change', function () {
+					selfServiceOptions.val(selfServiceOptionsEditor.getSession().getValue());
+				});
 
 				var jsonEditor = ace.edit("jsonEditor");
 				jsonEditor.$blockScrolling = Infinity;
@@ -1055,7 +1071,16 @@ Edit report page
 					default:
 						$("#gridstackSavedOptionsDiv").hide();
 				}
-
+				
+				//show/hide self service options field
+				if(${report.selfService}){
+					$("#selfServiceOptionsDiv").show();
+					$("#viewReportIdDiv").show();
+				} else {
+					$("#selfServiceOptionsDiv").hide();
+					$("#viewReportIdDiv").hide();
+				}
+				
 				//show/hide apply button
 				switch (reportTypeId) {
 					case 129: //gridstack dashboard
@@ -1161,11 +1186,9 @@ Edit report page
 
 				<input type="hidden" name="showInline" id="showInline" value="true">
 				<input type="hidden" name="action" value="${action}">
-				
+
 				<form:hidden path="testRun" value="true"/>
-				<form:hidden path="viewReportId"/>
-				<form:hidden path="selfServiceOptions"/>
-				
+
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
@@ -1893,6 +1916,16 @@ Edit report page
 					<div class="col-md-12">
 						<form:hidden path="gridstackSavedOptions"/>
 						<div id="gridstackSavedOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
+					</div>
+				</div>
+
+				<div id="selfServiceOptionsDiv" class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="selfServiceOptions">
+						<spring:message code="reports.label.savedOptions"/>
+					</label>
+					<div class="col-md-12">
+						<form:hidden path="selfServiceOptions"/>
+						<div id="selfServiceOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 
