@@ -161,7 +161,16 @@
 										ruleObject = selfServiceOptions.jqueryRule;
 									}
 
-									updateBuilder(conditionColumns, ruleObject, valueSeparator);
+									var filterOptions;
+									if (reportOptionsString) {
+										var reportOptions = JSON.parse(reportOptionsString);
+										var viewOptions = reportOptions.view;
+										if (viewOptions) {
+											filterOptions = viewOptions.filterOptions;
+										}
+									}
+
+									updateBuilder(conditionColumns, ruleObject, valueSeparator, filterOptions);
 								} else {
 									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 								}
@@ -372,9 +381,9 @@
 				});
 			}
 
-			function updateBuilder(conditionColumns, ruleObject, valueSeparator) {
+			function updateBuilder(conditionColumns, ruleObject, valueSeparator, filterOptions) {
 				if (conditionColumns && conditionColumns.length > 0) {
-					var filters = createFilters(conditionColumns, valueSeparator);
+					var filters = createFilters(conditionColumns, valueSeparator, filterOptions);
 					updateFilters(filters);
 					if (ruleObject) {
 						$('#builder').queryBuilder('setRules', ruleObject);
@@ -393,7 +402,7 @@
 				$('#builder').queryBuilder('reset');
 			}
 
-			function createFilters(conditionColumns, valueSeparator) {
+			function createFilters(conditionColumns, valueSeparator, filterOptions) {
 				var filters = [];
 
 				$.each(conditionColumns, function (index, column) {
@@ -436,6 +445,17 @@
 						filter.plugin = 'datetimepicker';
 						filter.input_event = 'dp.change';
 						filter.plugin_config = datePickerConfig;
+					}
+
+					//https://stackoverflow.com/questions/7364150/find-object-by-id-in-an-array-of-javascript-objects
+					if (filterOptions) {
+						var result = $.grep(filterOptions, function (option) {
+							return option.column === column.label;
+						});
+						
+						if (result.length > 0) {
+							$.extend(filter, result[0].options);
+						}
 					}
 
 					filters.push(filter);
