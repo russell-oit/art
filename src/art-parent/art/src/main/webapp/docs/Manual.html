@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.0"> 
+  <meta name="version" content="4.1"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -41,6 +41,7 @@
      <li><a href="#datasources">Datasources</a> 
       <ol> 
        <li><a href="#creating-a-new-datasource">Creating a new datasource</a></li> 
+       <li><a href="#options">Options</a></li> 
        <li><a href="#some-jdbc-drivers-and-urls">Some JDBC Drivers and URLs</a></li> 
       </ol></li> 
      <li><a href="#users">Users</a> 
@@ -139,6 +140,7 @@
          <li><a href="#reportengine">ReportEngine</a></li> 
          <li><a href="#reportengine-file">ReportEngine: File</a></li> 
          <li><a href="#mongodb">MongoDB</a></li> 
+         <li><a href="#view">View</a></li> 
         </ol></li> 
        <li><a href="#general-report-options">General Report Options</a> 
         <ol> 
@@ -489,6 +491,10 @@
        <tr> 
         <td><strong>JNDI</strong></td> 
         <td>Whether the ART database is a JNDI datasource</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Database Protocol</strong></td> 
+        <td>An indication of the kind of syntax the database uses. This is especially important to set if using a JNDI datasource.</td> 
        </tr> 
        <tr> 
         <td><strong>JDBC Driver</strong></td> 
@@ -919,6 +925,10 @@
         <td>Whether the datasource is a JNDI datasource</td> 
        </tr> 
        <tr> 
+        <td><strong>Database Protocol</strong></td> 
+        <td>An indication of the kind of syntax the database uses. This is especially important to set if using a JNDI datasource.</td> 
+       </tr> 
+       <tr> 
         <td><strong>JDBC Driver</strong></td> 
         <td>The JDBC driver name</td> 
        </tr> 
@@ -942,11 +952,37 @@
         <td><strong>Connection Pool Timeout (Mins)</strong></td> 
         <td>How long in minutes an idle connection should be maintained in the connection pool before being closed</td> 
        </tr> 
+       <tr> 
+        <td><strong>Options</strong></td> 
+        <td>Options for the datasource. The options are specified in JSON format.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h2 id="options">Options</h2> 
+     <p>A number of options can be specified in the <strong>Options</strong> field. These are defined in JSON format with the following possibilities.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>limitClause</strong></td> 
+        <td>String</td> 
+        <td>The syntax of a "LIMIT" clause in an SQL statement e.g. "limit {0}". This would be used when the datasource is used in a view report. The "{0}" would be replaced with the limit value at run time. This option doesn't need to be specified if the <strong>Database Protocol</strong> field is set.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>limit</strong></td> 
+        <td>Integer</td> 
+        <td>The default limit to use when the datasource is used in a view report</td> 
+       </tr> 
       </tbody> 
      </table> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li>The Database Type field is not saved. It is only there as a guide to help fill the JDBC Driver and URL fields.</li> 
       <li>Connections do not always close gracefully - for example if a network outage occurs a broken connection might stay in the pool and would throw an error when used. The <strong>Test SQL</strong> query is used every <strong>Timeout</strong> minutes to validate the connection. If it does not run successfully, the connection is closed and removed from the pool.</li> 
      </ul> 
      <h2 id="some-jdbc-drivers-and-urls">Some JDBC Drivers and URLs</h2> 
@@ -1042,6 +1078,10 @@
        <tr> 
         <td><strong>Email</strong></td> 
         <td>The user's email address</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Description</strong></td> 
+        <td>A description for the user</td> 
        </tr> 
        <tr> 
         <td><strong>Active</strong></td> 
@@ -1281,11 +1321,15 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Short Description</strong></td> 
-        <td>Short description for the report. For charts, this will appear as the title of the chart.</td> 
+        <td>Short description of the report. For charts, this will appear as the title of the chart.</td> 
        </tr> 
        <tr> 
         <td><strong>Description</strong></td> 
-        <td>Longer description for the report</td> 
+        <td>Longer description of the report for the benefit of users</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Comment</strong></td> 
+        <td>Developer comment</td> 
        </tr> 
        <tr> 
         <td><strong>Contact Person</strong></td> 
@@ -1554,13 +1598,13 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       <tbody> 
        <tr> 
         <td><strong>columns</strong></td> 
-        <td>Array of integers</td> 
+        <td>Integer[]</td> 
         <td></td> 
-        <td>The columns that should be coloured. If not specified, all columns are included in the colouring. If any cell in the applicable columns contains a non-numeric value, no colouring will be done. An error will be displayed in the javascript console for the web browser indicating that <strong>hex is undefined</strong>.</td> 
+        <td>Indexes of the columns that should be coloured, with the first column having an index of 1. If not specified, all columns are included in the colouring. If any cell in the applicable columns contains a non-numeric value, a javascript error will result, and will be indicated in the browser console.</td> 
        </tr> 
        <tr> 
         <td><strong>colors</strong></td> 
-        <td>Array of strings</td> 
+        <td>String[]</td> 
         <td></td> 
         <td>Colours that should be applied, beginning with colours for the lower values going up. The colour strings are specified in hex format e.g. <code>#ffffff</code>. For example for a two colour scheme in a red range, one can specify the setting as <code>"colors": ["#ffffff", "#ff4a53"]</code></td> 
        </tr> 
@@ -1846,7 +1890,7 @@ FROM mytable
        </tr> 
       </tbody> 
      </table> 
-     <p>If the report contains a subreport, set the <strong>Subreport Expression</strong> property of the subreport object to the file name of the subreport with a .jasper extension e.g. <strong>"subreport1.jasper"</strong> (include the quotes). When creating the report in ART, upload the main report's .jrxml file using the main template field and upload the subreport's .jrxml file using the resources field. If there are multiple subreports, you can select multiple files and upload all of them at once using the <strong>Start upload</strong> button. You can also select files by dragging from the file explorer and dropping to the browser page.</p> 
+     <p>If the report contains a subreport, set the <strong>Subreport Expression</strong> property of the subreport object to the file name of the subreport with a .jasper extension e.g. <strong>"subreport1.jasper"</strong> (include the quotes). When creating the report in ART, upload the main report's .jrxml file using the main template field and upload the subreport's .jrxml file using the resources field. If there are multiple subreports, you can select multiple files and upload all of them at once using the <strong>Start upload</strong> button. You can also select files by dragging from the file explorer and dropping to the browser page. Once you have uploaded the subreports, also specify the file names in the <strong>Options</strong> field using the <strong>subreports</strong> property that takes a list of strings e.g. <code>{"subreports": ["subreport1.jrxml", "subreport2.jrxml"]}</code>.</p> 
      <h3 id="jasperreports-art-query">JasperReports: ART Query</h3> 
      <p>Displays a jasper report based on the selected jrxml template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</p> 
      <h3 id="jpivot-mondrian">JPivot: Mondrian</h3> 
@@ -1993,13 +2037,13 @@ FROM mytable
       <tbody> 
        <tr> 
         <td><strong>fieldLengths</strong></td> 
-        <td>Array of integers. <strong>required</strong></td> 
+        <td>Integer[]. <strong>required</strong></td> 
         <td></td> 
         <td>Used to define the field lengths of the output e.g. <code>[5,6]</code> means that the first field will have a length of 5 and the second field will have a length of 6</td> 
        </tr> 
        <tr> 
         <td><strong>fieldLengthsByName</strong></td> 
-        <td>Array of objects. <strong>required</strong></td> 
+        <td>Object[]. <strong>required</strong></td> 
         <td></td> 
         <td>Each object specifies the field name and the field length e.g. <code>[{"order_id": 8}, {"order_date": 14}]</code> means the <code>order_id</code> field will have a length of 8 and the <code>order_date</code> field will have a length of 14. You must specify either the <strong>fieldLengths</strong> or the <strong>fieldLengthsByName</strong> property.</td> 
        </tr> 
@@ -2047,37 +2091,37 @@ FROM mytable
        </tr> 
        <tr> 
         <td><strong>fieldDateFormats</strong></td> 
-        <td>Array of objects</td> 
+        <td>Object[]</td> 
         <td></td> 
         <td>Each object specifies the date format and an array of fields that should use that format e.g. <code>[{"dd/MM/yyyy": ["order_date", "due_date"]}, {"dd-MMM-yyyy": ["payment_date"]}]</code></td> 
        </tr> 
        <tr> 
         <td><strong>fieldNumberFormats</strong></td> 
-        <td>Array of objects</td> 
+        <td>Object[]</td> 
         <td></td> 
         <td>Each object specifies the number format and an array of fields that should use that format e.g. <code>[{"0.00": ["amount"]}, {"#,##0.#": ["volume"]}]</code></td> 
        </tr> 
        <tr> 
         <td><strong>fieldAlignmentByName</strong></td> 
-        <td>Array of objects</td> 
+        <td>Object[]</td> 
         <td></td> 
         <td>Each object specifies the alignment to be used and an array of field names that should use that alignment e.g. <code>[{"right": ["amount", "volume"]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldAlignmentByPosition</strong></td> 
-        <td>Array of objects</td> 
+        <td>Object[]</td> 
         <td></td> 
         <td>Each object specifies the alignment to be used and an array of field positions that should use that alignment e.g. <code>[{"right": [2, 5]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>. The first field in the output is marked as position 0.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldPaddingByName</strong></td> 
-        <td>Array of objects</td> 
+        <td>Object[]</td> 
         <td></td> 
         <td>Each object specifies the padding to be used and an array of field names that should use that padding e.g. <code>[{"_": ["amount", "volume"]}]</code>. The padding should be a single character.</td> 
        </tr> 
        <tr> 
         <td><strong>fieldPaddingByPosition</strong></td> 
-        <td>Array of objects</td> 
+        <td>Object[]</td> 
         <td></td> 
         <td>Each object specifies the padding to be used and an array of field positions that should use that padding e.g. <code>[{"_": [2, 5]}]</code>. The padding should be a single character. The first field in the output is marked as position 0.</td> 
        </tr> 
@@ -2490,13 +2534,13 @@ FROM mytable
        </tr> 
        <tr> 
         <td><strong>jsFiles</strong></td> 
-        <td>Array of strings</td> 
+        <td>String[]</td> 
         <td></td> 
         <td>File names of javascript files that need to be incorporated for the map display e.g. leaflet plugins. The files can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
        <tr> 
         <td><strong>cssFiles</strong></td> 
-        <td>Array of strings</td> 
+        <td>String[]</td> 
         <td></td> 
         <td>File names of additional css files to be used with the display. The files can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
@@ -2811,13 +2855,13 @@ FROM mytable
       <tbody> 
        <tr> 
         <td><strong>columns</strong></td> 
-        <td>Array of strings</td> 
+        <td>String[]</td> 
         <td></td> 
         <td>Names of columns that should be included in the tabular output. This may be useful when querying documents that may have different attributes. If not specified, ART will use the first document retrieved to determine the columns that will be included in the output.</td> 
        </tr> 
        <tr> 
         <td><strong>columnDataTypes</strong></td> 
-        <td>Array of objects</td> 
+        <td>Object[]</td> 
         <td></td> 
         <td>Each object specifies a column name and the data type that is to be used for that column e.g. <code>[{"col1": "numeric"}]</code>. The possible data types are <strong>string</strong>, <strong>numeric</strong>, <strong>date</strong> and <strong>datetime</strong>. The default is <code>string</code> so if a column is to be treated as a general string, it doesn't need to be specified.</td> 
        </tr> 
@@ -2864,6 +2908,113 @@ FROM mytable
      <ul> 
       <li>Instead of using the MongoDB report type, one can specify any of the other report types e.g. Tabular, enable the <strong>Use Groovy</strong> option and use the kind of code as given above to generate the report. In this case, the <strong>columns</strong> and <strong>columnDataTypes</strong> options are not considered.</li> 
      </ul> 
+     <h3 id="view">View</h3> 
+     <p>Used as a basis for creating self service reports. The view report will define the columns that should be available for selection and the joins and basic conditions for the reports. The report source will contain placeholders to be replaced when the view or self service reports are run. Examples are given below.</p> 
+     <p><strong>Example with a MySQL datasource</strong></p> 
+     <div class="codehilite"> 
+      <pre><span></span>    select #columns#
+    from my_table
+    where #condition#
+    #limitClause#
+</pre> 
+     </div> 
+     <p><strong>Example with an SQL Server datasource</strong></p> 
+     <div class="codehilite"> 
+      <pre><span></span>    select #limitClause# #columns#
+    from my_table
+    where #condition#
+</pre> 
+     </div> 
+     <p><strong>Example with the use of a join</strong></p> 
+     <div class="codehilite"> 
+      <pre><span></span>    select #columns#
+    from my_table a
+    inner join my_other_table b
+    on a.id=b.id
+    where #condition#
+    #limitClause#
+</pre> 
+     </div> 
+     <p>The <strong>#columns#</strong> placeholder will be replaced with the selected columns. The <strong>#condition#</strong> placeholder will be replaced by the selected report conditions. The <strong>#limitClause#</strong> placeholder will be replaced by the number of records to display when previewing the view or self service report and needs to be placed in the appropriate place according to the database in use.</p> 
+     <p>A number of options can be configured in the <strong>Options</strong> field. This would be specified under a property named <strong>view</strong> in the JSON definition.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>columns</strong></td> 
+        <td>String</td> 
+        <td>*</td> 
+        <td>The specification of the columns to be made available for selection e.g. <code>col1, col2</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>omitColumns</strong></td> 
+        <td>String[]</td> 
+        <td></td> 
+        <td>Column names that should be omitted from the list of available columns</td> 
+       </tr> 
+       <tr> 
+        <td><strong>columnLabels</strong></td> 
+        <td>Object[]</td> 
+        <td></td> 
+        <td>Specification of column labels. Each object specifies a column name as the property and the column label as the value.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>columnDescriptions</strong></td> 
+        <td>Object[]</td> 
+        <td></td> 
+        <td>Specification of column descriptions. Each object specifies a column name as the property and the column description as the value. The column description is displayed as a tooltip when selecting columns.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>conditionColumns</strong></td> 
+        <td>String[]</td> 
+        <td></td> 
+        <td>Column names that should be included in the list of condition columns. If not specified, all available columns will be included in the conditions list.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>omitConditionColumns</strong></td> 
+        <td>String[]</td> 
+        <td></td> 
+        <td>Column names that should be omitted from the list of condition columns</td> 
+       </tr> 
+       <tr> 
+        <td><strong>sortColumns</strong></td> 
+        <td>Boolean</td> 
+        <td>true</td> 
+        <td>Whether the available columns and condition columns should be sorted</td> 
+       </tr> 
+       <tr> 
+        <td><strong>valueSeparator</strong></td> 
+        <td>String</td> 
+        <td>,</td> 
+        <td>The character used to separate multiple values in conditions where multiple values may be specified e.g. when using the <strong>in</strong> operator.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>filterOptions</strong></td> 
+        <td>Object<code>[]</code></td> 
+        <td></td> 
+        <td>Specification of filter options for particular condition columns as per the <a class="" href="https://querybuilder.js.org/#filters" rel="nofollow">jQuery QueryBuilder Filters</a> documentation. Each object would have a <strong>column</strong> property which would specify the name of the column and an <strong>options</strong> property which would be an object as per the jQuery QueryBuilder documentation e.g. <code>"filterOptions":[{"column": "myid", "options": {"input": "number"}}]</code>. You can use the column name <strong>all</strong> to specify options that should be applied to all filters.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>limitClause</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The syntax of the limit clause e.g. <code>limit {0}</code>. The placeholer "{0}" will be replaced with the configured limit value. This option can be specified on the datasource so that it doesn't need to be repeated for every view. It is also not necessary to specify it for common databases.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>limit</strong></td> 
+        <td>Integer</td> 
+        <td></td> 
+        <td>The number of records to return when testing/running the view. The view report is not intended to be used as an actual report and so if this option is not defined, the view report will return a maximum of 10 records when you test/run it. This limit is not applied to the self service reports that will be created, but is only applicable for the view report.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <p><br></p> 
      <p><strong>Note:</strong></p> 
      <ul> 
@@ -2975,7 +3126,7 @@ FROM mytable
       <tbody> 
        <tr> 
         <td><strong>imageColumns</strong></td> 
-        <td>Array of strings</td> 
+        <td>String[]</td> 
         <td>An indication of the column indices or column names for blob columns that contain images. The first column has an index of 1. e.g. <code>["2"]</code> or <code>["image"]</code> or <code>["3", "image"]</code>. A note that ods and odt report formats will not display images.</td> 
        </tr> 
        <tr> 
@@ -3512,7 +3663,7 @@ FROM mytable
      <ul> 
       <li>When editing report parameters from the <strong>Report Parameters</strong> page, clicking on the link with the parameter name enables you to edit core parameter definition attributes, while clicking on the Edit button allows you to edit extra attributes specifically related to that report parameter.</li> 
       <li>The same parameter (<code>#parameter_name#</code>) can be used several times in the same query. All occurrences will be substituted with the same value.</li> 
-      <li>Avoid using the special labels <strong>#rules#</strong> or <strong>#recipient#</strong>. These labels are used for the rules and dynamic job recipients functionality respectively, and using them for your parameters may result in your query not working as expected.</li> 
+      <li>Avoid using the names <strong>rules</strong>, <strong>recipient</strong>, <strong>columns</strong>, <strong>condition</strong>, <strong>limitClause</strong>. These are used for diverse functionality, and using them for your parameters may result in your query not working as expected.</li> 
       <li>There is a slight difference between <code>Varchar</code> and <code>Text</code> parameters. <code>Varchar</code> parameters provide a text box for input of a few characters while <code>Text</code> parameters provide a text area for input of much longer strings.</li> 
       <li>For <code>Date</code> and <code>DateTime</code> parameters, the following values can be used</li> 
      </ul> 
@@ -3627,7 +3778,7 @@ FROM mytable
      </table> 
      <p>A sample <strong>i18n</strong> configuration may be <code>"i18n": { "label": [{"en, sw": "Test Label"}, {"pt": "Another Label"}], "helpText": [{"lt": "Sample help text"}] }</code></p> 
      <h3 id="date-range-options">Date Range Options</h3> 
-     <p>For <strong>DateRange</strong> parameters, options can be specified in a <strong>dateRange</strong> object with the properties below. ART uses the <a class="" href="http://www.daterangepicker.com/" rel="nofollow">Date Range Picker</a> library to provide the date range picker.</p> 
+     <p>For <strong>DateRange</strong> parameters, options can be specified in a <strong>dateRange</strong> object with the properties below. ART uses the <a class="" href="http://www.daterangepicker.com/" rel="nofollow">Date Range Picker</a> library to provide the date range picker. Some of the options are given below. Others are available as per the Date Range Picker documentation.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -3653,20 +3804,8 @@ FROM mytable
        <tr> 
         <td><strong>format</strong></td> 
         <td>String</td> 
-        <td>MMMM dd, yyyy</td> 
-        <td>The format of dates displayed in the date range picker text input. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
-       </tr> 
-       <tr> 
-        <td><strong>separator</strong></td> 
-        <td>String</td> 
-        <td>-</td> 
-        <td>String that separates the "from" and "to" dates in the date range picker text input</td> 
-       </tr> 
-       <tr> 
-        <td><strong>autoApply</strong></td> 
-        <td>Boolean</td> 
-        <td>false</td> 
-        <td>Whether to automatically apply a date range as soon as two dates are selected, or require the <strong>Apply</strong> button to be clicked</td> 
+        <td>yyyy-MM-dd</td> 
+        <td>The format of dates displayed in the date range picker text input. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format. If you use the <strong>locale.format</strong> property, that will need to be in <a class="" href="https://momentjs.com/" rel="nofollow">Moment.js</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>ranges</strong></td> 
@@ -3675,16 +3814,16 @@ FROM mytable
         <td>Pre-defined, custom date ranges available for selection. Can be set to <strong>null</strong> if custom ranges are not required. Possible values include <strong>today</strong>, <strong>yesterday</strong>, <strong>last7Days</strong>, <strong>last30Days</strong>, <strong>thisMonth</strong>, <strong>lastMonth</strong>, <strong>thisQuarter</strong>, <strong>lastQuarter</strong>, <strong>thisYear</strong>, <strong>lastYear</strong>, <strong>thisWeek</strong>, <strong>lastWeek</strong>, <strong>yearToDate</strong>, <strong>monthToDate</strong>, <strong>quarterToDate</strong>, <strong>weekToDate</strong>.</td> 
        </tr> 
        <tr> 
-        <td><strong>alwaysShowCalendars</strong></td> 
-        <td>Boolean</td> 
-        <td>false</td> 
-        <td>When using custom ranges, whether the calendars are always displayed or only displayed after clicking on the <strong>Custom Range</strong> button.</td> 
+        <td><strong>startDate</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>A specification of the start date when the date range picker is first displayed. You can use syntax like "add days -1", "add months 2" etc to specify a date in the past or future. In this case the resulting date is as per the <strong>format</strong> option.</td> 
        </tr> 
        <tr> 
-        <td><strong>linkedCalendars</strong></td> 
-        <td>Boolean</td> 
-        <td>true</td> 
-        <td>When enabled, the two calendars displayed will always be for two sequential months (e.g. January and February), and both will be advanced when clicking the left or right arrows above the calendars. When disabled, the two calendars can be individually advanced and display any month/year.</td> 
+        <td><strong>endDate</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>A specification of the end date when the date range picker is first displayed. Similar to <strong>startDate</strong>.</td> 
        </tr> 
       </tbody> 
      </table> 
