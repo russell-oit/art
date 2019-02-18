@@ -22,12 +22,15 @@ import art.enums.ParameterType;
 import art.migration.PrefixTransformer;
 import art.report.Report;
 import art.utils.ArtUtils;
+import art.utils.ExpressionHelper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -67,9 +70,11 @@ public class Parameter implements Serializable {
 	private boolean fixedValue;
 	@Parsed
 	private boolean useLov;
+	@JsonIgnore
 	private boolean useRulesInLov;
 	@Parsed
 	private int drilldownColumnIndex;
+	@JsonIgnore
 	private boolean useDirectSubstitution;
 	private Date creationDate;
 	private Date updateDate;
@@ -719,61 +724,9 @@ public class Parameter implements Serializable {
 	}
 
 	/**
-	 * Returns the json string representation of the date range from parameter
-	 * option
-	 *
-	 * @return the json string representation of the date range from parameter
-	 * option
-	 * @throws JsonProcessingException
-	 */
-	@JsonIgnore
-	public String getDateRangeFromParameterJson() throws JsonProcessingException {
-		String json = null;
-		DateRangeDestination fromParameter = parameterOptions.getDateRange().getFromParameter();
-		if (fromParameter != null) {
-			json = ArtUtils.objectToJson(fromParameter);
-		}
-		return json;
-	}
-
-	/**
-	 * Returns the json string representation of the date range to parameter
-	 * option
-	 *
-	 * @return the json string representation of the date range to parameter
-	 * option
-	 * @throws JsonProcessingException
-	 */
-	@JsonIgnore
-	public String getDateRangeToParameterJson() throws JsonProcessingException {
-		String json = null;
-		DateRangeDestination toParameter = parameterOptions.getDateRange().getToParameter();
-		if (toParameter != null) {
-			json = ArtUtils.objectToJson(toParameter);
-		}
-		return json;
-	}
-
-	/**
-	 * Returns the json string representation of the date range ranges option
-	 *
-	 * @return the json string representation of the date range ranges option
-	 * @throws JsonProcessingException
-	 */
-	@JsonIgnore
-	public String getDateRangeRangesJson() throws JsonProcessingException {
-		String json = null;
-		List<String> ranges = parameterOptions.getDateRange().getRanges();
-		if (ranges != null) {
-			json = ArtUtils.objectToJson(ranges);
-		}
-		return json;
-	}
-
-	/**
 	 * Encrypts all passwords fields in the parameter members including e.g. for
 	 * lov reports etc
-	 * 
+	 *
 	 * @throws java.lang.Exception
 	 */
 	public void encryptAllPasswords() throws Exception {
@@ -810,5 +763,58 @@ public class Parameter implements Serializable {
 	 */
 	public boolean hasRobinHerbotsMask() {
 		return StringUtils.contains(options, "\"mask1\"");
+	}
+
+	/**
+	 * Returns the string to use for date range parameter options, performing
+	 * additional processing for startDate and endDate options
+	 *
+	 * @param locale the locale in use
+	 * @return the string to use for date range parameter options
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	@JsonIgnore
+	public String getDateRangeOptions(Locale locale) throws IOException, ParseException {
+		if (StringUtils.isBlank(options) || !StringUtils.containsAny(options, "startDate", "endDate")) {
+			return options;
+		}
+
+		//http://tutorials.jenkov.com/java-json/jackson-objectmapper.html#read-map-from-json-string
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> map = mapper.readValue(options, new TypeReference<Map<String, Object>>() {
+		});
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> dateRange = (Map<String, Object>) map.get("dateRange");
+		if (dateRange != null) {
+			String format = (String) dateRange.get("format");
+			if (StringUtils.isBlank(format)) {
+				final String DEFAULT_FORMAT = "yyyy-MM-dd";
+				format = DEFAULT_FORMAT;
+			}
+
+			boolean changesMade = false;
+			ExpressionHelper expressionHelper = new ExpressionHelper();
+			String startDate = (String) dateRange.get("startDate");
+			if (StringUtils.startsWithIgnoreCase(startDate, "add")) {
+				startDate = expressionHelper.processDateString(startDate, format, locale);
+				dateRange.put("startDate", startDate);
+				changesMade = true;
+			}
+
+			String endDate = (String) dateRange.get("endDate");
+			if (StringUtils.startsWithIgnoreCase(endDate, "add")) {
+				endDate = expressionHelper.processDateString(endDate, format, locale);
+				dateRange.put("endDate", endDate);
+				changesMade = true;
+			}
+
+			if (changesMade) {
+				return ArtUtils.objectToJson(map);
+			}
+		}
+
+		return options;
 	}
 }

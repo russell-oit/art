@@ -59,3 +59,7 @@ src/art-parent/couchbase-jdbc-art/target/
 src/art-parent/couchbase-jdbc-art/.classpath
 src/art-parent/couchbase-jdbc-art/.project
 src/art-parent/couchbase-jdbc-art/.settings/
+src/art-parent/reportengine-art/target/
+src/art-parent/reportengine-art/.settings/
+src/art-parent/reportengine-art/.project
+src/art-parent/reportengine-art/.classpath

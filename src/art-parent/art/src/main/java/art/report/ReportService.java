@@ -28,13 +28,14 @@ import art.enums.AccessLevel;
 import art.enums.PageOrientation;
 import art.enums.ParameterType;
 import art.enums.ReportType;
+import art.general.ActionResult;
+import art.parameter.ParameterService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.reportoptions.CloneOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
-import art.general.ActionResult;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,6 +56,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
@@ -126,6 +128,7 @@ public class ReportService {
 			report.setName(rs.getString("NAME"));
 			report.setShortDescription(rs.getString("SHORT_DESCRIPTION"));
 			report.setDescription(rs.getString("DESCRIPTION"));
+			report.setComment(rs.getString("DEVELOPER_COMMENT"));
 			report.setReportTypeId(rs.getInt("QUERY_TYPE"));
 			report.setReportType(ReportType.toEnum(rs.getInt("QUERY_TYPE")));
 			report.setGroupColumn(rs.getInt("GROUP_COLUMN"));
@@ -163,9 +166,12 @@ public class ReportService {
 			report.setUseGroovy(rs.getBoolean("USE_GROOVY"));
 			report.setPivotTableJsSavedOptions(rs.getString("PIVOTTABLEJS_SAVED_OPTIONS"));
 			report.setGridstackSavedOptions(rs.getString("GRIDSTACK_SAVED_OPTIONS"));
+			report.setViewReportId(rs.getInt("VIEW_REPORT_ID"));
+			report.setSelfServiceOptions(rs.getString("SELF_SERVICE_OPTIONS"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
+			report.setCreatedById(rs.getInt("CREATED_BY_ID"));
 			report.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			ReportType reportType = report.getReportType();
@@ -315,8 +321,26 @@ public class ReportService {
 	 */
 	@Cacheable(value = "reports")
 	public List<Report> getAccessibleReports(int userId,
-			List<ReportType> includedReportTypes, List<ReportType> excludedReportTypes)
-			throws SQLException {
+			List<ReportType> includedReportTypes,
+			List<ReportType> excludedReportTypes) throws SQLException {
+
+		String extraContidion = null;
+		return getAccessibleReports(userId, includedReportTypes, excludedReportTypes, extraContidion);
+	}
+
+	/**
+	 * Returns the reports that a user can access. Excludes disabled reports.
+	 *
+	 * @param userId the user id
+	 * @param includedReportTypes report types that should be included
+	 * @param excludedReportTypes report types that should be excluded
+	 * @param extraCondition an extra condition to be applied
+	 * @return accessible reports
+	 * @throws SQLException
+	 */
+	private List<Report> getAccessibleReports(int userId,
+			List<ReportType> includedReportTypes, List<ReportType> excludedReportTypes,
+			String extraCondition) throws SQLException {
 
 		logger.debug("Entering getAccessibleReports: userId={}", userId);
 
@@ -346,40 +370,47 @@ public class ReportService {
 			excludedReportTypesCondition = " AND AQ.QUERY_TYPE NOT IN(" + sb.toString() + ") ";
 		}
 
+		if (extraCondition == null) {
+			extraCondition = "";
+		} else {
+			extraCondition = " " + extraCondition;
+		}
+
 		String sql = SQL_SELECT_ALL
 				//only show active reports
 				+ " WHERE AQ.ACTIVE=1"
 				//don't show hidden reports
 				+ " AND AQ.HIDDEN<>1"
+				+ extraCondition
 				+ includedReportTypesCondition
 				+ excludedReportTypesCondition
 				+ " AND("
 				//user can run report if he has direct access to it
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERIES AUQ"
-				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AUQ.USER_ID=?)"
+				+ " FROM ART_USER_REPORT_MAP AURM"
+				+ " WHERE AURM.REPORT_ID=AQ.QUERY_ID AND AURM.USER_ID=?)"
 				+ " OR"
 				//user can run report if he belongs to a user group which has direct access to the report
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_QUERIES AUGQ"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " ON AUGQ.USER_GROUP_ID=AUGA.USER_GROUP_ID"
-				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AUGQ.USER_GROUP_ID=AUUGM.USER_GROUP_ID"
+				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUUGM.USER_ID=?)"
 				+ " OR"
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERY_GROUPS AUQG, ART_REPORT_REPORT_GROUPS ARRG"
-				+ " WHERE AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
-				+ " AND ARRG.REPORT_ID=AQ.QUERY_ID AND AUQG.USER_ID=?)"
+				+ " FROM ART_USER_REPORTGROUP_MAP AURGM, ART_REPORT_REPORT_GROUPS ARRG"
+				+ " WHERE AURGM.REPORT_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " AND ARRG.REPORT_ID=AQ.QUERY_ID AND AURGM.USER_ID=?)"
 				+ " OR"
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_GROUPS AUGG"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AUGG.USER_GROUP_ID=AUUGM.USER_GROUP_ID"
 				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
 				+ " ON AUGG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
-				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUUGM.USER_ID=?)"
 				+ ")";
 
 		Object[] values = {
@@ -406,7 +437,8 @@ public class ReportService {
 		logger.debug("Entering getDisplayReports: userId={}", userId);
 
 		List<ReportType> excludedReportTypes = Arrays.asList(ReportType.LovStatic,
-				ReportType.LovDynamic, ReportType.JobRecipients, ReportType.SaikuConnection);
+				ReportType.LovDynamic, ReportType.JobRecipients,
+				ReportType.SaikuConnection, ReportType.View);
 
 		return getAccessibleReportsWithoutReportTypes(userId, excludedReportTypes);
 	}
@@ -426,7 +458,8 @@ public class ReportService {
 				ReportType.LovDynamic, ReportType.JobRecipients, ReportType.SaikuConnection,
 				ReportType.Dashboard, ReportType.GridstackDashboard, ReportType.Update,
 				ReportType.JPivotMondrian, ReportType.JPivotMondrianXmla,
-				ReportType.JPivotSqlServerXmla, ReportType.SaikuReport);
+				ReportType.JPivotSqlServerXmla, ReportType.SaikuReport,
+				ReportType.View);
 
 		return getAccessibleReportsWithoutReportTypes(userId, excludedReportTypes);
 	}
@@ -628,7 +661,7 @@ public class ReportService {
 	 * jobs which prevented the report from being deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "reports", allEntries = true)
+	@CacheEvict(value = {"reports", "parameters"}, allEntries = true)
 	public ActionResult deleteReport(int id) throws SQLException {
 		logger.debug("Entering deleteReport: id={}", id);
 
@@ -643,12 +676,8 @@ public class ReportService {
 
 		String sql;
 
-		//delete query-user relationships
-		sql = "DELETE FROM ART_USER_QUERIES WHERE QUERY_ID=?";
-		dbService.update(sql, id);
-
-		//delete report parameters
-		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_ID=?";
+		//delete report-user relationships
+		sql = "DELETE FROM ART_USER_REPORT_MAP WHERE REPORT_ID=?";
 		dbService.update(sql, id);
 
 		//delete query-rule relationships
@@ -658,9 +687,8 @@ public class ReportService {
 		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
-		//delete drilldown queries
-		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID=?";
-		dbService.update(sql, id);
+		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID=? OR DRILLDOWN_QUERY_ID=?";
+		dbService.update(sql, id, id);
 
 		sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
@@ -668,7 +696,23 @@ public class ReportService {
 		sql = "DELETE FROM ART_SAVED_PARAMETERS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
 
-		//lastly, delete query
+		//delete report parameters
+		//get non-shared parameters for later deleting
+		sql = "SELECT ARP.PARAMETER_ID"
+				+ " FROM ART_REPORT_PARAMETERS ARP"
+				+ " INNER JOIN ART_PARAMETERS AP"
+				+ " ON ARP.PARAMETER_ID=AP.PARAMETER_ID"
+				+ " WHERE ARP.REPORT_ID=?"
+				+ " AND AP.SHARED=0"
+				+ " GROUP BY ARP.PARAMETER_ID"
+				+ " HAVING COUNT(*)=1";
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("PARAMETER_ID");
+		List<Number> nonSharedParameterIds = dbService.query(sql, h, id);
+
+		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_ID=?";
+		dbService.update(sql, id);
+
+		//almost lastly, delete report
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID=?";
 		int affectedRows = dbService.update(sql, id);
 
@@ -676,6 +720,17 @@ public class ReportService {
 
 		if (affectedRows != 1) {
 			logger.warn("Problem with delete. affectedRows={}, id={}", affectedRows, id);
+		}
+
+		//delete non-shared parameters that the report used
+		if (CollectionUtils.isNotEmpty(nonSharedParameterIds)) {
+			List<Integer> deleteParameterIds = new ArrayList<>();
+			for (Number parameterIdNumber : nonSharedParameterIds) {
+				int parameterIdInt = parameterIdNumber.intValue();
+				deleteParameterIds.add(parameterIdInt);
+			}
+			ParameterService parameterService = new ParameterService();
+			parameterService.deleteParameters(deleteParameterIds.toArray(new Integer[0]));
 		}
 
 		result.setSuccess(true);
@@ -690,7 +745,7 @@ public class ReportService {
 	 * that were not deleted
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "reports", allEntries = true)
+	@CacheEvict(value = {"reports", "parameters"}, allEntries = true)
 	public ActionResult deleteReports(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteReports: ids={}", (Object) ids);
 
@@ -726,13 +781,30 @@ public class ReportService {
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
 	public synchronized int addReport(Report report, User actionUser) throws SQLException {
+		Connection conn = null;
+		return addReport(report, actionUser, conn);
+	}
+
+	/**
+	 * Adds a new report to the database
+	 *
+	 * @param report the report to add
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @return new record id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public synchronized int addReport(Report report, User actionUser,
+			Connection conn) throws SQLException {
+
 		logger.debug("Entering addReport: report={}, actionUser={}", report, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
 		int newId = dbService.getNewRecordId(sql);
 
-		saveReport(report, newId, actionUser);
+		saveReport(report, newId, actionUser, conn);
 
 		return newId;
 	}
@@ -880,22 +952,6 @@ public class ReportService {
 	 * @param report the report to save
 	 * @param newRecordId id of the new record or null if editing an existing
 	 * record
-	 * @param actionUser the user who is performing the save
-	 * @throws SQLException
-	 */
-	private void saveReport(Report report, Integer newRecordId,
-			User actionUser) throws SQLException {
-
-		Connection conn = null;
-		saveReport(report, newRecordId, actionUser, conn);
-	}
-
-	/**
-	 * Saves a report
-	 *
-	 * @param report the report to save
-	 * @param newRecordId id of the new record or null if editing an existing
-	 * record
 	 * @param actionUser the user who is performing the action
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
@@ -941,8 +997,10 @@ public class ReportService {
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
-					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
-					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATASOURCE_ID, CONTACT_PERSON, USES_RULES,"
+					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION,"
+					+ " DEVELOPER_COMMENT, QUERY_TYPE,"
+					+ " GROUP_COLUMN, QUERY_GROUP_ID, DATASOURCE_ID,"
+					+ " CONTACT_PERSON, USES_RULES,"
 					+ " ACTIVE, HIDDEN, REPORT_SOURCE, PARAMETERS_IN_OUTPUT,"
 					+ " X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
@@ -953,14 +1011,16 @@ public class ReportService {
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
-					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 45) + ")";
+					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS,"
+					+ " CREATION_DATE, CREATED_BY, CREATED_BY_ID)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 49) + ")";
 
 			Object[] values = {
 				newRecordId,
 				report.getName(),
 				report.getShortDescription(),
 				report.getDescription(),
+				report.getComment(),
 				reportTypeId,
 				report.getGroupColumn(),
 				reportGroupId,
@@ -1000,8 +1060,11 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isUseGroovy()),
 				report.getPivotTableJsSavedOptions(),
 				report.getGridstackSavedOptions(),
+				report.getViewReportId(),
+				report.getSelfServiceOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
-				actionUser.getUsername()
+				actionUser.getUsername(),
+				actionUser.getUserId()
 			};
 
 			if (conn == null) {
@@ -1011,7 +1074,8 @@ public class ReportService {
 			}
 		} else {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
-					+ " DESCRIPTION=?, QUERY_TYPE=?, GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
+					+ " DESCRIPTION=?, DEVELOPER_COMMENT=?, QUERY_TYPE=?,"
+					+ " GROUP_COLUMN=?, QUERY_GROUP_ID=?,"
 					+ " DATASOURCE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
 					+ " HIDDEN=?, REPORT_SOURCE=?, PARAMETERS_IN_OUTPUT=?,"
 					+ " X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
@@ -1023,7 +1087,8 @@ public class ReportService {
 					+ " REPORT_OPTIONS=?, PAGE_ORIENTATION=?, LOV_USE_DYNAMIC_DATASOURCE=?,"
 					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
 					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?, PIVOTTABLEJS_SAVED_OPTIONS=?,"
-					+ " GRIDSTACK_SAVED_OPTIONS=?,"
+					+ " GRIDSTACK_SAVED_OPTIONS=?, VIEW_REPORT_ID=?,"
+					+ " SELF_SERVICE_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -1031,6 +1096,7 @@ public class ReportService {
 				report.getName(),
 				report.getShortDescription(),
 				report.getDescription(),
+				report.getComment(),
 				report.getReportTypeId(),
 				report.getGroupColumn(),
 				reportGroupId,
@@ -1070,6 +1136,8 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isUseGroovy()),
 				report.getPivotTableJsSavedOptions(),
 				report.getGridstackSavedOptions(),
+				report.getViewReportId(),
+				report.getSelfServiceOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()
@@ -1179,52 +1247,58 @@ public class ReportService {
 		logger.debug("Entering copyReport: report={}, originalReportId={}, actionUser={}",
 				report, originalReportId, actionUser);
 
-		//insert new report
-		int newId = addReport(report, actionUser);
+		Connection conn = DbConnections.getArtDbConnection();
+		boolean originalAutoCommit = true;
 
 		try {
+			originalAutoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			//insert new report
+			int newId = addReport(report, actionUser, conn);
+
 			//copy parameters
-			copyTableRow("ART_REPORT_PARAMETERS", "REPORT_ID", originalReportId, newId, "REPORT_PARAMETER_ID");
+			copyTableRow(conn, "ART_REPORT_PARAMETERS", "REPORT_ID", originalReportId, newId, "REPORT_PARAMETER_ID");
 
 			//copy rules
-			copyTableRow("ART_QUERY_RULES", "QUERY_ID", originalReportId, newId, null);
+			copyTableRow(conn, "ART_QUERY_RULES", "QUERY_ID", originalReportId, newId, "QUERY_RULE_ID");
 
 			//copy drilldown reports
-			copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId, null);
+			copyTableRow(conn, "ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId, "DRILLDOWN_ID");
+
+			conn.commit();
 		} catch (SQLException ex) {
-			//if an error occurred when copying new report details, delete new report also
-			deleteReport(newId);
+			conn.rollback();
 			throw ex;
+		} finally {
+			conn.setAutoCommit(originalAutoCommit);
+			DatabaseUtils.close(conn);
 		}
 	}
 
 	/**
 	 * Copies some aspect of a report
 	 *
+	 * @param conn the connection to use
 	 * @param tableName the name of the table to copy
 	 * @param keyColumnName the name of the key column
 	 * @param keyId the original value of the key column
 	 * @param newKeyId the new value of the key column
 	 * @param primaryKeyColumn the primary key of the table, that is to be
 	 * incremented by 1. null if this is not required
-	 * @return the number of records copied, 0 otherwise
+	 * @return the number of records copied
 	 * @throws SQLException
 	 * @throws IllegalStateException if connection to the art database is not
 	 * available
 	 */
-	private int copyTableRow(String tableName, String keyColumnName,
+	private int copyTableRow(Connection conn, String tableName, String keyColumnName,
 			int keyId, int newKeyId, String primaryKeyColumn) throws SQLException {
 
 		logger.debug("Entering copyTableRow: tableName='{}', keyColumnName='{}',"
-				+ " keyId={}, newKeyId={}", tableName, keyColumnName, keyId, newKeyId);
+				+ " keyId={}, newKeyId={}, primaryKeyColumn='{}'",
+				tableName, keyColumnName, keyId, newKeyId, primaryKeyColumn);
 
-		int count = 0; //number of records copied
-
-		Connection conn = DbConnections.getArtDbConnection();
-
-		if (conn == null) {
-			throw new IllegalStateException("Connection to the ART Database not available");
-		}
+		int recordsCopied = 0;
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -1240,6 +1314,12 @@ public class ReportService {
 			sql = "INSERT INTO " + tableName + " VALUES ("
 					+ StringUtils.repeat("?", ",", columnCount) + ")";
 
+			int id = 0;
+			if (primaryKeyColumn != null) {
+				String sql2 = "SELECT MAX(" + primaryKeyColumn + ") FROM " + tableName;
+				id = dbService.getMaxRecordId(conn, sql2);
+			}
+
 			while (rs.next()) {
 				//insert new record for each existing record
 				List<Object> columnValues = new ArrayList<>();
@@ -1248,22 +1328,21 @@ public class ReportService {
 						columnValues.add(newKeyId);
 					} else if (primaryKeyColumn != null && StringUtils.equalsIgnoreCase(rsmd.getColumnName(i + 1), primaryKeyColumn)) {
 						//generate new id
-						String sql2 = "SELECT MAX(" + primaryKeyColumn + ") FROM " + tableName;
-						int newId = dbService.getNewRecordId(sql2);
-						columnValues.add(newId);
+						id++;
+						columnValues.add(id);
 					} else {
 						columnValues.add(rs.getObject(i + 1));
 					}
 				}
 
-				dbService.update(sql, columnValues.toArray());
-				count++;
+				dbService.update(conn, sql, columnValues.toArray());
+				recordsCopied++;
 			}
 		} finally {
-			DatabaseUtils.close(rs, ps, conn);
+			DatabaseUtils.close(rs, ps);
 		}
 
-		return count;
+		return recordsCopied;
 	}
 
 	/**
@@ -1354,6 +1433,22 @@ public class ReportService {
 	}
 
 	/**
+	 * Returns self service reports
+	 *
+	 * @return self service reports
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getSelfServiceReports() throws SQLException {
+		logger.debug("Entering getSelfServiceReports");
+
+		String sql = SQL_SELECT_ALL + " WHERE VIEW_REPORT_ID>0";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h);
+	}
+
+	/**
 	 * Returns saiku reports that a given user can access
 	 *
 	 * @param userId the id of the user
@@ -1368,7 +1463,7 @@ public class ReportService {
 
 		logger.debug("Entering getAvailableSaikuReports: userId={}", userId);
 
-		List<SaikuReport> saikuReports = new ArrayList<>();
+		List<SaikuReport> finalSaikuReports = new ArrayList<>();
 		List<Report> availableSaikuReports = getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.SaikuReport));
 
 		for (Report report : availableSaikuReports) {
@@ -1377,10 +1472,10 @@ public class ReportService {
 			saikuReport.setName(report.getLocalizedName(locale));
 			saikuReport.setShortDescription(report.getLocalizedShortDescription(locale));
 			saikuReport.setDescription(report.getLocalizedDescription(locale));
-			saikuReports.add(saikuReport);
+			finalSaikuReports.add(saikuReport);
 		}
 
-		return saikuReports;
+		return finalSaikuReports;
 	}
 
 	/**
@@ -1395,6 +1490,52 @@ public class ReportService {
 		logger.debug("Entering getAvailableSaikuConnectionReports: userId={}", userId);
 
 		return getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.SaikuConnection));
+	}
+
+	/**
+	 * Returns view reports that a given user can access
+	 *
+	 * @param userId the id of the user
+	 * @return view reports that a given user can access
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAvailableViewReports(int userId) throws SQLException {
+		logger.debug("Entering getAvailableViewReports: userId={}", userId);
+
+		return getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.View));
+	}
+
+	/**
+	 * Returns gridstack dashboard reports that a given user can access
+	 *
+	 * @param userId the id of the user
+	 * @return gridstack dashboard reports that a given user can access
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAvailableGridstackDashboardReports(int userId) throws SQLException {
+		logger.debug("Entering getAvailableGridstackDashboardReports: userId={}", userId);
+
+		return getAccessibleReportsWithReportTypes(userId, Arrays.asList(ReportType.GridstackDashboard));
+	}
+
+	/**
+	 * Returns self service reports that a given user can access
+	 *
+	 * @param userId the id of the user
+	 * @return self service reports that a given user can access
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAvailableSelfServiceReports(int userId) throws SQLException {
+		logger.debug("Entering getAvailableSelfServiceReports: userId={}", userId);
+
+		List<ReportType> includedReportTypes = Arrays.asList(ReportType.Tabular);
+		List<ReportType> excludedReportTypes = null;
+		String extraCondition = "AND AQ.VIEW_REPORT_ID>0";
+
+		return getAccessibleReports(userId, includedReportTypes, excludedReportTypes, extraCondition);
 	}
 
 	/**
@@ -1440,31 +1581,31 @@ public class ReportService {
 				+ " OR"
 				//user can run report if he has direct access to it
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERIES AUQ"
-				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AUQ.USER_ID=?)"
+				+ " FROM ART_USER_REPORT_MAP AURM"
+				+ " WHERE AURM.REPORT_ID=AQ.QUERY_ID AND AURM.USER_ID=?)"
 				+ " OR"
 				//user can run report if he belongs to a user group which has direct access to the report
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_QUERIES AUGQ"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " ON AUGQ.USER_GROUP_ID=AUGA.USER_GROUP_ID"
-				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AUGQ.USER_GROUP_ID=AUUGM.USER_GROUP_ID"
+				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUUGM.USER_ID=?)"
 				+ " OR"
 				//user can run report if he has access to the report's group
 				+ " EXISTS (SELECT *"
-				+ " FROM ART_USER_QUERY_GROUPS AUQG"
+				+ " FROM ART_USER_REPORTGROUP_MAP AURGM"
 				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
-				+ " ON AUQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
-				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUQG.USER_ID=?)"
+				+ " ON AURGM.REPORT_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AURGM.USER_ID=?)"
 				+ " OR"
 				//user can run report if his user group has access to the report's group
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_GROUP_GROUPS AUGG"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
-				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
+				+ " INNER JOIN ART_USER_USERGROUP_MAP AUUGM"
+				+ " ON AUGG.USER_GROUP_ID=AUUGM.USER_GROUP_ID"
 				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
 				+ " ON AUGG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
-				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " WHERE ARRG.REPORT_ID=AQ.QUERY_ID AND AUUGM.USER_ID=?)"
 				+ ")";
 
 		Object[] values = {
@@ -1504,11 +1645,10 @@ public class ReportService {
 	public void grantAccess(Report report, User user) throws SQLException {
 		logger.debug("Entering grantAccess: report={}, user={}", report, user);
 
-		String sql = "INSERT INTO ART_USER_QUERIES (USERNAME, USER_ID, QUERY_ID)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 3) + ")";
+		String sql = "INSERT INTO ART_USER_REPORT_MAP (USER_ID, REPORT_ID)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 2) + ")";
 
 		Object[] values = {
-			user.getUsername(),
 			user.getUserId(),
 			report.getReportId()
 		};
@@ -1517,63 +1657,26 @@ public class ReportService {
 	}
 
 	/**
-	 * Returns <code>true</code> if a report is only directly allocated to a
-	 * single user
+	 * Returns <code>true</code> if the user is the owner of the report
 	 *
 	 * @param user the user
-	 * @param reportId the id of the report
-	 * @return <code>true</code> if user has exclusive access to the report
+	 * @param reportId the report id
+	 * @return <code>true</code> if the user is the owner of the report
 	 * @throws java.sql.SQLException
 	 */
-	public boolean hasExclusiveAccess(User user, int reportId) throws SQLException {
-		logger.debug("Entering hasExclusiveAccess: user={}, reportId={}", user, reportId);
+	public boolean hasOwnerAccess(User user, int reportId) throws SQLException {
+		logger.debug("Entering hasOwnerAccess: user={}, reportId={}", user, reportId);
 
-		boolean exclusive = false;
+		String sql = "SELECT COUNT(*) FROM ART_QUERIES"
+				+ " WHERE QUERY_ID=? AND CREATED_BY=?";
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCount = dbService.query(sql, h, reportId, user.getUsername());
 
-		String sql;
-		int userAccessCount = 0;
-		boolean userHasAccess = false;
-		boolean assignedToGroup = false;
-
-		sql = "SELECT USER_GROUP_ID FROM ART_USER_GROUP_QUERIES "
-				+ " WHERE QUERY_ID = ?";
-
-		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
-		List<Map<String, Object>> userGroupsList = dbService.query(sql, h, reportId);
-
-		if (!userGroupsList.isEmpty()) {
-			//query granted to a group. user doesn't have exclusive access
-			assignedToGroup = true;
+		if (recordCount == null || recordCount.longValue() == 0) {
+			return false;
+		} else {
+			return true;
 		}
-
-		if (!assignedToGroup) {
-			sql = "SELECT USERNAME FROM ART_USER_QUERIES "
-					+ " WHERE QUERY_ID = ?";
-
-			ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
-			List<Map<String, Object>> usersList = dbService.query(sql, h2, reportId);
-
-			String username = user.getUsername();
-			for (Map<String, Object> userRecord : usersList) {
-				userAccessCount++;
-				if (userAccessCount >= 2) {
-					//more than one user has access
-					break;
-				}
-				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				String usernameValue = (String) userRecord.get("USERNAME");
-				if (StringUtils.equals(username, usernameValue)) {
-					userHasAccess = true;
-				}
-			}
-		}
-
-		if (!assignedToGroup && userHasAccess && userAccessCount == 1) {
-			//only one user has explicit access
-			exclusive = true;
-		}
-
-		return exclusive;
 	}
 
 	/**
@@ -1661,7 +1764,6 @@ public class ReportService {
 
 		String sql = "SELECT COUNT(*) FROM ART_QUERIES"
 				+ " WHERE NAME=?";
-
 		ResultSetHandler<Number> h = new ScalarHandler<>();
 		Number recordCount = dbService.query(sql, h, reportName);
 

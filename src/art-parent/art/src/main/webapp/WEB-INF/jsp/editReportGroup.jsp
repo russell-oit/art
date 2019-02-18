@@ -28,7 +28,7 @@ Edit report group page
 	</c:when>
 </c:choose>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
@@ -43,7 +43,7 @@ Edit report group page
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#report-groups">
 				<spring:message code="page.link.help"/>

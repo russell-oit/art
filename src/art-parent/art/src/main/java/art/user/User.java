@@ -65,24 +65,43 @@ public class User implements Serializable {
 	private boolean canChangePassword = true;
 	private Date creationDate;
 	private Date updateDate;
-	private List<UserGroup> userGroups;
+	@JsonIgnore
 	private String effectiveStartReport;
 	@JsonIgnore
 	private ReportGroup effectiveDefaultReportGroup;
+	@JsonIgnore
 	private boolean useBlankPassword; //only used for user interface logic
 	private String createdBy;
 	private String updatedBy;
+	@JsonIgnore
 	private boolean generateAndSend; //only used for user interface logic
 	@Parsed
 	private boolean clearTextPassword; //used to allow import with clear text passwords
 	@Parsed
 	private boolean publicUser;
+	@Parsed
+	private String description;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
+	private List<UserGroup> userGroups;
 	private List<Role> roles;
 	private List<Permission> permissions;
 	@JsonIgnore
 	private List<String> flatPermissions = new ArrayList<>();
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 	/**
 	 * @return the publicUser
@@ -645,11 +664,32 @@ public class User implements Serializable {
 	 * @return <code>true</code> if the user has any configure permission
 	 */
 	public boolean hasConfigurePermission() {
+		return hasStartsWithPermission("configure");
+	}
+	
+	/**
+	 * Returns <code>true</code> if the user has any self_service permission
+	 *
+	 * @return <code>true</code> if the user has any self_service permission
+	 */
+	public boolean hasSelfServicePermission() {
+		return hasStartsWithPermission("self_service");
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has any permission that starts with
+	 * the given text
+	 *
+	 * @param startsWith the permission starts with text
+	 * @return <code>true</code> if the user has any permission that starts with
+	 * the given text
+	 */
+	public boolean hasStartsWithPermission(String startsWith) {
 		boolean hasPermission = false;
 
 		if (CollectionUtils.isNotEmpty(flatPermissions)) {
 			for (String permission : flatPermissions) {
-				if (StringUtils.startsWith(permission, "configure")) {
+				if (StringUtils.startsWith(permission, startsWith)) {
 					hasPermission = true;
 					break;
 				}

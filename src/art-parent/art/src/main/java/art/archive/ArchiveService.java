@@ -112,14 +112,14 @@ public class ArchiveService {
 				+ " AND AJA.USER_ID=?" //user owns job or individualized output
 				+ " UNION"
 				+ " SELECT AJA.*"
-				+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ, ART_USER_JOBS AUJ"
-				+ " WHERE AJA.JOB_ID=AJ.JOB_ID AND AJ.JOB_ID=AUJ.JOB_ID"
-				+ " AND AJA.USER_ID<>? AND AJA.JOB_SHARED='Y' AND AUJ.USER_ID=?" //job shared with user
+				+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ, ART_USER_JOB_MAP AUJM"
+				+ " WHERE AJA.JOB_ID=AJ.JOB_ID AND AJ.JOB_ID=AUJM.JOB_ID"
+				+ " AND AJA.USER_ID<>? AND AJA.JOB_SHARED='Y' AND AUJM.USER_ID=?" //job shared with user
 				+ " UNION"
 				+ " SELECT AJA.*"
-				+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ, ART_USER_GROUP_JOBS AUGJ, ART_USER_GROUP_ASSIGNMENT AUGA"
+				+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ, ART_USER_GROUP_JOBS AUGJ, ART_USER_USERGROUP_MAP AUUGM"
 				+ " WHERE AJA.JOB_ID=AJ.JOB_ID AND AJ.JOB_ID=AUGJ.JOB_ID"
-				+ " AND AUGJ.USER_GROUP_ID=AUGA.USER_GROUP_ID AND AUGA.USER_ID=?"
+				+ " AND AUGJ.USER_GROUP_ID=AUUGM.USER_GROUP_ID AND AUUGM.USER_ID=?"
 				+ " AND AJA.USER_ID<>? AND AJA.JOB_SHARED='Y'"; //job shared with user group
 
 		ResultSetHandler<List<Archive>> h = new BeanListHandler<>(Archive.class, new ArchiveMapper());

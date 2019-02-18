@@ -38,7 +38,7 @@
 <spring:message code="reports.text.selectFile" var="selectFileText"/>
 <spring:message code="reports.text.change" var="changeText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="css">
@@ -238,7 +238,7 @@
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#destinations">
 				<spring:message code="page.link.help"/>
@@ -335,7 +335,7 @@
 						<form:select path="destinationType" class="form-control selectpicker">
 							<c:forEach var="destinationType" items="${destinationTypes}">
 								<form:option value="${destinationType}">
-									${destinationType.description} 
+									${encode:forHtmlContent(destinationType.description)} 
 								</form:option>
 							</c:forEach>
 						</form:select>
@@ -357,7 +357,7 @@
 							<spring:message code="destinations.label.port"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="port" maxlength="8" class="form-control"/>
+							<form:input type="number" path="port" maxlength="8" class="form-control"/>
 							<form:errors path="port" cssClass="error"/>
 						</div>
 					</div>

@@ -360,12 +360,28 @@ public class DatasourceService {
 			newRecord = true;
 		}
 
+		String databaseProtocol;
+		if (datasource.getDatabaseProtocol() == null) {
+			databaseProtocol = null;
+		} else {
+			databaseProtocol = datasource.getDatabaseProtocol().getValue();
+		}
+
+		String databaseType;
+		if (datasource.getDatabaseType() == null) {
+			databaseType = null;
+		} else {
+			databaseType = datasource.getDatabaseType().getValue();
+		}
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_DATABASES"
-					+ " (DATABASE_ID, NAME, DESCRIPTION, DATASOURCE_TYPE, JNDI, DRIVER,"
-					+ " URL, USERNAME, PASSWORD, PASSWORD_ALGORITHM, POOL_TIMEOUT, TEST_SQL,"
-					+ " ACTIVE, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
+					+ " (DATABASE_ID, NAME, DESCRIPTION, DATASOURCE_TYPE,"
+					+ " JNDI, DATABASE_TYPE, DATABASE_PROTOCOL, DRIVER, URL,"
+					+ " USERNAME, PASSWORD, PASSWORD_ALGORITHM, POOL_TIMEOUT,"
+					+ " TEST_SQL, ACTIVE, DATASOURCE_OPTIONS,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 18) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -374,6 +390,8 @@ public class DatasourceService {
 				datasource.getDatasourceType().getValue(),
 				//postgresql requires explicit cast from boolean to integer
 				BooleanUtils.toInteger(datasource.isJndi()),
+				databaseType,
+				databaseProtocol,
 				datasource.getDriver(),
 				datasource.getUrl(),
 				datasource.getUsername(),
@@ -382,6 +400,7 @@ public class DatasourceService {
 				datasource.getConnectionPoolTimeoutMins(),
 				datasource.getTestSql(),
 				BooleanUtils.toInteger(datasource.isActive()),
+				datasource.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -392,9 +411,12 @@ public class DatasourceService {
 				affectedRows = dbService.update(conn, sql, values);
 			}
 		} else {
-			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, DATASOURCE_TYPE=?,"
-					+ " JNDI=?, DRIVER=?, URL=?, USERNAME=?, PASSWORD=?, PASSWORD_ALGORITHM=?,"
-					+ " POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
+			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?,"
+					+ " DATASOURCE_TYPE=?, JNDI=?, DATABASE_TYPE=?,"
+					+ " DATABASE_PROTOCOL=?, DRIVER=?, URL=?, USERNAME=?,"
+					+ " PASSWORD=?, PASSWORD_ALGORITHM=?, POOL_TIMEOUT=?,"
+					+ " TEST_SQL=?, ACTIVE=?, DATASOURCE_OPTIONS=?,"
+					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE DATABASE_ID=?";
 
 			Object[] values = {
@@ -402,6 +424,8 @@ public class DatasourceService {
 				datasource.getDescription(),
 				datasource.getDatasourceType().getValue(),
 				BooleanUtils.toInteger(datasource.isJndi()),
+				databaseType,
+				databaseProtocol,
 				datasource.getDriver(),
 				datasource.getUrl(),
 				datasource.getUsername(),
@@ -410,6 +434,7 @@ public class DatasourceService {
 				datasource.getConnectionPoolTimeoutMins(),
 				datasource.getTestSql(),
 				BooleanUtils.toInteger(datasource.isActive()),
+				datasource.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				datasource.getDatasourceId()

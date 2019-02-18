@@ -56,10 +56,10 @@
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
-	<jsp:attribute name="belowMainPanel">
+	<jsp:attribute name="belowPanel">
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3">
 				<div class="alert alert-info">
@@ -455,7 +455,7 @@
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#scheduling">
 				<spring:message code="page.link.help"/>
@@ -577,7 +577,7 @@
 							<spring:message code="page.text.name"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="name" maxlength="50" class="form-control"/>
+							<form:input path="name" maxlength="100" class="form-control"/>
 							<form:errors path="name" cssClass="error"/>
 						</div>
 					</div>
@@ -663,7 +663,7 @@
 							<spring:message code="jobs.label.runsToArchive"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="runsToArchive" maxlength="3" class="form-control"/>
+							<form:input type="number" path="runsToArchive" maxlength="3" class="form-control"/>
 							<form:errors path="runsToArchive" cssClass="error"/>
 						</div>
 					</div>

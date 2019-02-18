@@ -20,7 +20,10 @@ package art.rolepermission;
 import art.general.AjaxResponse;
 import art.permission.PermissionService;
 import art.role.RoleService;
+import art.user.User;
+import art.user.UserService;
 import java.sql.SQLException;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -52,6 +55,9 @@ public class RolePermissionController {
 	@Autowired
 	private RolePermissionService rolePermissionService;
 
+	@Autowired
+	private UserService userService;
+
 	@RequestMapping(value = "/rolePermissionsConfig", method = RequestMethod.GET)
 	public String showRolePermissionsConfig(Model model) {
 		logger.debug("Entering showRolePermissionsConfig");
@@ -69,7 +75,8 @@ public class RolePermissionController {
 
 	@RequestMapping(value = "/updateRolePermissions", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse updateRolePermissions(Model model, @RequestParam("action") String action,
+	AjaxResponse updateRolePermissions(Model model, HttpSession session,
+			@RequestParam("action") String action,
 			@RequestParam("roles[]") Integer[] roles,
 			@RequestParam("permissions[]") Integer[] permissions) {
 
@@ -79,6 +86,12 @@ public class RolePermissionController {
 
 		try {
 			rolePermissionService.updateRolePermissions(action, roles, permissions);
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			User updatedSessionUser = userService.getUser(sessionUser.getUserId());
+			if (updatedSessionUser != null) {
+				//may be null in case of art db user or initial setup user
+				session.setAttribute("sessionUser", updatedSessionUser);
+			}
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -87,10 +100,12 @@ public class RolePermissionController {
 
 		return response;
 	}
-	
+
 	@RequestMapping(value = "/deleteRolePermission", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteRolePermission(@RequestParam("id") String id) {
+	AjaxResponse deleteRolePermission(@RequestParam("id") String id,
+			HttpSession session) {
+
 		logger.debug("Entering deleteRolePermission: id='{}'", id);
 
 		AjaxResponse response = new AjaxResponse();
@@ -100,6 +115,11 @@ public class RolePermissionController {
 
 		try {
 			rolePermissionService.deleteRolePermission(NumberUtils.toInt(values[0]), NumberUtils.toInt(values[1]));
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			User updatedSessionUser = userService.getUser(sessionUser.getUserId());
+			if (updatedSessionUser != null) {
+				session.setAttribute("sessionUser", updatedSessionUser);
+			}
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

@@ -34,6 +34,21 @@ public class GeneralReportOptions implements Serializable {
 	private C3Options c3;
 	private PlotlyOptions plotly;
 	private PivotTableJsOptions pivotTableJs;
+	private ViewOptions view;
+
+	/**
+	 * @return the view
+	 */
+	public ViewOptions getView() {
+		return view;
+	}
+
+	/**
+	 * @param view the view to set
+	 */
+	public void setView(ViewOptions view) {
+		this.view = view;
+	}
 
 	/**
 	 * @return the pivotTableJs

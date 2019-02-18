@@ -27,7 +27,7 @@ Edit report page
 	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editReport" var="panelTitle"/>
 		<c:set var="pageTitle">
-			${panelTitle} - ${report.getLocalizedName(pageContext.response.locale)}
+			${panelTitle} - ${report.name}
 		</c:set>
 	</c:when>
 </c:choose>
@@ -51,10 +51,10 @@ Edit report page
 <spring:message code="page.action.delete" var="deleteText"/>
 <spring:message code="caches.action.clear" var="clearText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
-	<jsp:attribute name="belowMainPanel">
+	<jsp:attribute name="belowPanel">
 		<div class="row">
 			<div class="col-md-12">
 				<div id="reportOutput"></div>
@@ -136,7 +136,7 @@ Edit report page
 				$('#fileupload').fileupload({
 					url: '${pageContext.request.contextPath}/uploadResources',
 					fileInput: $('#fileuploadInput'),
-					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g|csv|txt|css|js|json|xml)$/i,
+					acceptFileTypes: /(\.|\/)(jrxml|jasper|png|jpe?g|csv|txt|css|js|json|xml|html|vm|ftl|ftlh|ftlx|docx|odt|pptx|xls|xlsx|xlsm)$/i,
 					maxFileSize: maxFileSizeBytes,
 					messages: {
 						acceptFileTypes: '${fileTypeNotAllowedText}',
@@ -225,11 +225,12 @@ Edit report page
 						data: $('#fileupload').serialize(),
 						success: function (data) {
 							$("#reportOutput").html(data);
-							$('.action').prop('disabled', false);
 						},
 						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 							ajaxErrorHandler(xhr);
+						},
+						complete: function () {
 							$('.action').prop('disabled', false);
 						}
 					});
@@ -246,11 +247,12 @@ Edit report page
 						data: $('#fileupload').serialize() + "&testData=true&reportFormat=htmlDataTable",
 						success: function (data) {
 							$("#reportOutput").html(data);
-							$('.action').prop('disabled', false);
 						},
 						error: function (xhr) {
 							//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 							ajaxErrorHandler(xhr);
+						},
+						complete: function () {
 							$('.action').prop('disabled', false);
 						}
 					});
@@ -351,6 +353,22 @@ Edit report page
 				gridstackSavedOptionsEditor.getSession().setValue(gridstackSavedOptions.val());
 				gridstackSavedOptionsEditor.getSession().on('change', function () {
 					gridstackSavedOptions.val(gridstackSavedOptionsEditor.getSession().getValue());
+				});
+				
+				var selfServiceOptionsEditor = ace.edit("selfServiceOptionsEditor");
+				selfServiceOptionsEditor.$blockScrolling = Infinity;
+				selfServiceOptionsEditor.getSession().setMode("ace/mode/json");
+				selfServiceOptionsEditor.setHighlightActiveLine(false);
+				selfServiceOptionsEditor.setShowPrintMargin(false);
+				selfServiceOptionsEditor.setOption("showLineNumbers", false);
+				selfServiceOptionsEditor.setOption("maxLines", 20);
+				selfServiceOptionsEditor.setOption("minLines", 3);
+				document.getElementById('selfServiceOptionsEditor').style.fontSize = '14px';
+
+				var selfServiceOptions = $('#selfServiceOptions');
+				selfServiceOptionsEditor.getSession().setValue(selfServiceOptions.val());
+				selfServiceOptionsEditor.getSession().on('change', function () {
+					selfServiceOptions.val(selfServiceOptionsEditor.getSession().getValue());
 				});
 
 				var jsonEditor = ace.edit("jsonEditor");
@@ -744,6 +762,9 @@ Edit report page
 					case 155: //org chart json
 					case 156: //org chart list
 					case 157: //org chart ajax
+					case 122: //freemarker
+					case 131: //thymeleaf
+					case 153: //velocity
 						$("#resourcesDiv").show();
 						break;
 					default:
@@ -1050,7 +1071,16 @@ Edit report page
 					default:
 						$("#gridstackSavedOptionsDiv").hide();
 				}
-
+				
+				//show/hide self service options field
+				if(${report.selfService}){
+					$("#selfServiceOptionsDiv").show();
+					$("#viewReportIdDiv").show();
+				} else {
+					$("#selfServiceOptionsDiv").hide();
+					$("#viewReportIdDiv").hide();
+				}
+				
 				//show/hide apply button
 				switch (reportTypeId) {
 					case 129: //gridstack dashboard
@@ -1102,6 +1132,7 @@ Edit report page
 					case 156: //org chart list
 					case 157: //org chart ajax
 					case 159: //report engine file
+					case 161: //view
 						$("#testReportData").hide();
 						break;
 					default:
@@ -1112,7 +1143,7 @@ Edit report page
 
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#reports">
 				<spring:message code="page.link.help"/>
@@ -1155,7 +1186,9 @@ Edit report page
 
 				<input type="hidden" name="showInline" id="showInline" value="true">
 				<input type="hidden" name="action" value="${action}">
-				<form:hidden path="dummyBoolean" value="true"/>
+
+				<form:hidden path="testRun" value="true"/>
+
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
@@ -1176,7 +1209,7 @@ Edit report page
 						<spring:message code="page.text.name"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="name" maxlength="50" class="form-control"/>
+						<form:input path="name" maxlength="100" class="form-control"/>
 						<form:errors path="name" cssClass="error"/>
 					</div>
 				</div>
@@ -1236,8 +1269,17 @@ Edit report page
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:textarea path="description" rows="2" cols="40" class="form-control" maxlength="2000"/>
+						<form:textarea path="description" rows="3" cols="40" class="form-control" maxlength="2000"/>
 						<form:errors path="description" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="comment">
+						<spring:message code="reports.label.comment"/>
+					</label>
+					<div class="col-md-8">
+						<form:textarea path="comment" rows="3" cols="40" class="form-control" maxlength="2000"/>
+						<form:errors path="comment" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -1272,7 +1314,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="groupColumn" maxlength="2" class="form-control"/>
+							<form:input type="number" path="groupColumn" maxlength="2" class="form-control"/>
 							<spring:message code="reports.help.groupColumn" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -1338,7 +1380,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="displayResultset" maxlength="2" class="form-control"/>
+							<form:input type="number" path="displayResultset" maxlength="2" class="form-control"/>
 							<spring:message code="reports.help.displayResultset" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -1479,7 +1521,7 @@ Edit report page
 						<spring:message code="reports.label.fetchSize"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="fetchSize" maxlength="5" class="form-control"/>
+						<form:input type="number" path="fetchSize" maxlength="5" class="form-control"/>
 						<form:errors path="fetchSize" cssClass="error"/>
 					</div>
 				</div>
@@ -1836,6 +1878,15 @@ Edit report page
 						<form:errors path="sourceReportId" cssClass="error"/>
 					</div>
 				</div>
+				<div id="viewReportIdDiv" class="form-group">
+					<label class="control-label col-md-4" for="viewReportId">
+						<spring:message code="reports.label.viewReport"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="viewReportId" maxlength="10" class="form-control"/>
+						<form:errors path="viewReportId" cssClass="error"/>
+					</div>
+				</div>
 				<div id="useGroovyDiv" class="form-group">
 					<label class="control-label col-md-4" for="useGroovy">
 						<spring:message code="reports.label.useGroovy"/>
@@ -1865,6 +1916,16 @@ Edit report page
 					<div class="col-md-12">
 						<form:hidden path="gridstackSavedOptions"/>
 						<div id="gridstackSavedOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
+					</div>
+				</div>
+
+				<div id="selfServiceOptionsDiv" class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="selfServiceOptions">
+						<spring:message code="reports.label.savedOptions"/>
+					</label>
+					<div class="col-md-12">
+						<form:hidden path="selfServiceOptions"/>
+						<div id="selfServiceOptionsEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 

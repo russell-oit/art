@@ -347,7 +347,7 @@ public class JobService {
 		sql = "DELETE FROM ART_JOBS_PARAMETERS WHERE JOB_ID=?";
 		dbService.update(sql, id);
 
-		sql = "DELETE FROM ART_USER_JOBS WHERE JOB_ID=?";
+		sql = "DELETE FROM ART_USER_JOB_MAP WHERE JOB_ID=?";
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_USER_GROUP_JOBS WHERE JOB_ID=?";
@@ -785,20 +785,20 @@ public class JobService {
 		String sql;
 
 		//get shared jobs user has access to via job membership. 
-		//non-split jobs. no entries for them in the art_user_jobs table
+		//non-split jobs. no entries for them in the art_user_job_map table
 		sql = SQL_SELECT_ALL + " INNER JOIN ART_USER_GROUP_JOBS AUGJ"
 				+ " ON AJ.JOB_ID=AUGJ.JOB_ID"
-				+ " WHERE AJ.USER_ID <> ? AND EXISTS "
-				+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USER_ID = ? "
-				+ " AND AUGA.USER_GROUP_ID=AUGJ.USER_GROUP_ID)";
+				+ " WHERE AJ.USER_ID <> ? AND EXISTS"
+				+ " (SELECT * FROM ART_USER_USERGROUP_MAP AUUGM WHERE AUUGM.USER_ID=?"
+				+ " AND AUUGM.USER_GROUP_ID=AUGJ.USER_GROUP_ID)";
 		ResultSetHandler<List<SharedJob>> h = new BeanListHandler<>(SharedJob.class, new SharedJobMapper());
 		jobs.addAll(dbService.query(sql, h, userId, userId));
 
 		//get shared jobs user has direct access to, but doesn't own. both split and non-split jobs
-		//stored in the art_user_jobs table
-		sql = SQL_SELECT_ALL + " INNER JOIN ART_USER_JOBS AUJ"
-				+ " ON AJ.JOB_ID=AUJ.JOB_ID"
-				+ " WHERE AJ.USER_ID<>? AND AUJ.USER_ID=?";
+		//stored in the art_user_job_map table
+		sql = SQL_SELECT_ALL + " INNER JOIN ART_USER_JOB_MAP AUJM"
+				+ " ON AJ.JOB_ID=AUJM.JOB_ID"
+				+ " WHERE AJ.USER_ID<>? AND AUJM.USER_ID=?";
 		jobs.addAll(dbService.query(sql, h, userId, userId));
 
 		return jobs;

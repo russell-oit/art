@@ -65,7 +65,7 @@ Edit a drilldown
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#drill-down-reports">
 				<spring:message code="page.link.help"/>
@@ -121,7 +121,7 @@ Edit a drilldown
 					<div class="col-md-8">
 						<form:select path="drilldownReport.reportId" class="form-control selectpicker">
 							<c:forEach var="drilldownReport" items="${drilldownReports}">
-								<form:option value="${drilldownReport.reportId}">${drilldownReport.getLocalizedName(pageContext.response.locale)}</form:option>
+								<form:option value="${drilldownReport.reportId}">${drilldownReport.name}</form:option>
 							</c:forEach>
 						</form:select>
 						<form:errors path="drilldownReport.reportId" cssClass="error"/>

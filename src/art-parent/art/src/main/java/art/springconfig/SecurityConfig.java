@@ -48,7 +48,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				//.headers().disable() //uncomment to disable all spring secrity added response headers
 				.csrf().ignoringAntMatchers("/saiku2/**", "/api/**")
 				.and()
-				.csrf().disable() //uncomment to disable csrf
+				.csrf().disable()
+				//disable default spring security logout handling. takes over /logout mapping
+				.logout().disable()
 				.authorizeRequests()
 				.anyRequest().permitAll();
 	}

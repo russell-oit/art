@@ -165,7 +165,7 @@ public class RolePermissionService {
 	 * @param role the role
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
 	public void recreateRolePermissions(Role role) throws SQLException {
 		logger.debug("Entering recreateRolePermissions: role={}", role);
 

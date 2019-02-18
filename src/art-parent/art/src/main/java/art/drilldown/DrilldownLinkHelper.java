@@ -94,7 +94,8 @@ public class DrilldownLinkHelper implements Serializable {
 			sb.append("runReport?reportId=").append(drilldownReportId)
 					.append("&reportFormat=").append(drilldownReportFormat)
 					.append("&allowSelectParameters=true")
-					.append("&startSelectParametersHidden=true");
+					.append("&startSelectParametersHidden=true")
+					.append("&drilldown=true");
 		}
 	}
 

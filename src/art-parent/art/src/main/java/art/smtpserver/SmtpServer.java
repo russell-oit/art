@@ -19,6 +19,7 @@ package art.smtpserver;
 
 import art.encryption.AesEncryptor;
 import art.settings.EncryptionPassword;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
@@ -51,6 +52,7 @@ public class SmtpServer implements Serializable {
 	private String username;
 	@Parsed
 	private String password;
+	@JsonIgnore
 	private boolean useBlankPassword; //only used for username interface logic
 	@Parsed
 	private String from;

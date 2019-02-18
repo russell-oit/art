@@ -115,7 +115,7 @@ public class JsonOutput {
 					columnType = SqlColumnType.Time;
 					break;
 				case Types.TIMESTAMP:
-					columnType = SqlColumnType.Timestamp;
+					columnType = SqlColumnType.DateTime;
 					break;
 				case Types.CHAR:
 				case Types.VARCHAR:

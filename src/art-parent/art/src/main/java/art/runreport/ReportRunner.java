@@ -19,7 +19,9 @@ package art.runreport;
 
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
+import art.datasource.DatasourceOptions;
 import art.dbutils.DatabaseUtils;
+import art.enums.DatabaseProtocol;
 import art.enums.DatasourceType;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
@@ -27,11 +29,13 @@ import art.enums.ReportType;
 import art.job.Job;
 import art.report.Report;
 import art.reportoptions.GeneralReportOptions;
+import art.reportoptions.ViewOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
 import art.reportrule.ReportRuleService;
 import art.rule.Rule;
 import art.ruleValue.RuleValueService;
+import art.selfservice.SelfServiceOptions;
 import art.servlets.Config;
 import art.user.User;
 import art.usergroup.UserGroup;
@@ -40,10 +44,14 @@ import art.utils.ExpressionHelper;
 import art.utils.GroovySandbox;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
+import com.itfsw.query.builder.SqlQueryBuilderFactory;
+import com.itfsw.query.builder.support.builder.SqlBuilder;
+import com.itfsw.query.builder.support.model.result.SqlQueryResult;
 import com.mongodb.MongoClient;
 import groovy.lang.Binding;
 import groovy.lang.GString;
 import groovy.lang.GroovyShell;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -104,9 +112,41 @@ public class ReportRunner {
 	private final String QUESTION_PLACEHOLDER = "[ART_QUESTION_MARK_PLACEHOLDER]";
 	private Object groovyData;
 	private Job job;
+	private Integer limit;
+	private boolean useViewColumns;
+	public static final int RETURN_ALL_RECORDS = -1;
+	public static final int RETURN_ZERO_RECORDS = 0;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the useViewColumns
+	 */
+	public boolean isUseViewColumns() {
+		return useViewColumns;
+	}
+
+	/**
+	 * @param useViewColumns the useViewColumns to set
+	 */
+	public void setUseViewColumns(boolean useViewColumns) {
+		this.useViewColumns = useViewColumns;
+	}
+
+	/**
+	 * @return the limit
+	 */
+	public Integer getLimit() {
+		return limit;
+	}
+
+	/**
+	 * @param limit the limit to set
+	 */
+	public void setLimit(Integer limit) {
+		this.limit = limit;
 	}
 
 	/**
@@ -288,6 +328,9 @@ public class ReportRunner {
 
 		//update querySb with report sql
 		String reportSource = report.getReportSource();
+		if (reportSource == null) {
+			throw new RuntimeException("Report source not available");
+		}
 		querySb.replace(0, querySb.length(), reportSource);
 
 		applyTags();
@@ -298,6 +341,7 @@ public class ReportRunner {
 		applyUsesGroovy();
 		applyParameterPlaceholders(); //question placeholder put here
 		applyDynamicRecipient();
+		applySelfServiceFields(); //must come after applyParameterPlaceholders()
 
 		if (!report.getReportType().isJPivot()) {
 			applyRulesToQuery();
@@ -694,7 +738,7 @@ public class ReportRunner {
 			}
 
 			String searchString = "#" + paramName + "#";
-			String replaceString = StringUtils.repeat(" ? ", ",", reportParam.getActualParameterValues().size());
+			String replaceString = StringUtils.repeat("?", ",", reportParam.getActualParameterValues().size());
 			querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 		}
 
@@ -872,6 +916,136 @@ public class ReportRunner {
 	}
 
 	/**
+	 * Applies self service fields
+	 *
+	 * @throws SQLException
+	 */
+	private void applySelfServiceFields() throws SQLException {
+		logger.debug("Entering applySelfServiceFields");
+
+		try {
+			if (!report.isViewOrSelfService()) {
+				return;
+			}
+
+			Datasource datasource = report.getDatasource();
+			if (datasource == null) {
+				throw new RuntimeException("Datasource not specified");
+			}
+
+			String options = datasource.getOptions();
+			DatasourceOptions datasourceOptions;
+			if (StringUtils.isBlank(options)) {
+				datasourceOptions = new DatasourceOptions();
+			} else {
+				datasourceOptions = ArtUtils.jsonToObject(options, DatasourceOptions.class);
+			}
+			DatabaseProtocol databaseProtocol = datasource.getEffectiveDatabaseProtocol();
+
+			ViewOptions viewOptions = report.getGeneralOptions().getView();
+			if (viewOptions == null) {
+				viewOptions = new ViewOptions();
+			}
+
+			final String COLUMNS_PLACEHOLDER = "#columns#";
+			final String CONDITION_PLACEHOLDER = "#condition#";
+			final String LIMIT_PLACEHOLDER = "#limitClause#";
+
+			String querySql = querySb.toString();
+
+			if (!StringUtils.containsIgnoreCase(querySql, COLUMNS_PLACEHOLDER)) {
+				throw new RuntimeException(COLUMNS_PLACEHOLDER + " placeholder not found");
+			} else if (!StringUtils.containsIgnoreCase(querySql, CONDITION_PLACEHOLDER)) {
+				throw new RuntimeException(CONDITION_PLACEHOLDER + " placeholder not found");
+			} else if (!StringUtils.containsIgnoreCase(querySql, LIMIT_PLACEHOLDER)) {
+				throw new RuntimeException(LIMIT_PLACEHOLDER + " placeholder not found");
+			}
+
+			String columnsString;
+			String conditionString = null;
+			String selfServiceOptionsString = report.getSelfServiceOptions();
+			if (StringUtils.isBlank(selfServiceOptionsString) || useViewColumns) {
+				columnsString = viewOptions.getColumns();
+			} else {
+				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
+				columnsString = selfServiceOptions.getColumnsString();
+
+				Object jqueryRule = selfServiceOptions.getJqueryRule();
+				if (jqueryRule != null && StringUtils.containsIgnoreCase(querySql, CONDITION_PLACEHOLDER)) {
+					SqlQueryBuilderFactory sqlQueryBuilderFactory = new SqlQueryBuilderFactory();
+					SqlBuilder sqlBuilder = sqlQueryBuilderFactory.builder();
+					String jqueryRuleString = ArtUtils.objectToJson(jqueryRule);
+					SqlQueryResult sqlQueryResult = sqlBuilder.build(jqueryRuleString);
+					conditionString = sqlQueryResult.getQuery();
+					List<Object> values = sqlQueryResult.getParams();
+					for (Object value : values) {
+						jdbcParams.add(value);
+					}
+				}
+			}
+
+			if (columnsString == null) {
+				columnsString = "*";
+			}
+
+			querySql = StringUtils.replaceIgnoreCase(querySql, COLUMNS_PLACEHOLDER, columnsString);
+
+			if (conditionString == null) {
+				conditionString = "1=1";
+			}
+			querySql = StringUtils.replaceIgnoreCase(querySql, CONDITION_PLACEHOLDER, conditionString);
+
+			String reportLimitClause = viewOptions.getLimitClause();
+			String datasourceLimitClause = datasourceOptions.getLimitClause();
+			String databaseLimitClause = databaseProtocol.limitClause();
+			String limitClause = reportLimitClause;
+			if (StringUtils.isBlank(limitClause)) {
+				limitClause = datasourceLimitClause;
+			}
+			if (StringUtils.isBlank(limitClause)) {
+				limitClause = databaseLimitClause;
+			}
+
+			Integer reportLimit = viewOptions.getLimit();
+			Integer datasourceLimit = datasourceOptions.getLimit();
+			Integer runLimit = report.getLimit();
+
+			Integer finalLimit = null;
+			if (limit == null) {
+				if (runLimit == null) {
+					if (report.getReportType() == ReportType.View) {
+						finalLimit = reportLimit;
+						if (finalLimit == null) {
+							finalLimit = datasourceLimit;
+						}
+
+						if (finalLimit == null) {
+							final Integer DEFAULT_VIEW_LIMIT = 10;
+							finalLimit = DEFAULT_VIEW_LIMIT;
+						}
+					}
+				} else {
+					finalLimit = runLimit;
+				}
+			} else {
+				finalLimit = limit;
+			}
+
+			if (finalLimit == null || finalLimit < 0) {
+				querySql = StringUtils.removeIgnoreCase(querySql, LIMIT_PLACEHOLDER);
+			} else {
+				String finalLimitClause = StringUtils.replace(limitClause, "{0}", String.valueOf(finalLimit));
+				querySql = StringUtils.replaceIgnoreCase(querySql, LIMIT_PLACEHOLDER, finalLimitClause);
+			}
+
+			//update querySb with new sql
+			querySb.replace(0, querySb.length(), querySql);
+		} catch (IOException ex) {
+			throw new SQLException(ex);
+		}
+	}
+
+	/**
 	 * Runs the report using a forward only cursor
 	 *
 	 * @throws java.sql.SQLException
@@ -955,7 +1129,7 @@ public class ReportRunner {
 			case GridstackDashboard:
 				return;
 			default:
-			//do nothing
+				break;
 		}
 
 		if (groovyData != null) {
@@ -970,7 +1144,7 @@ public class ReportRunner {
 			}
 		} else {
 			RunReportHelper runReportHelper = new RunReportHelper();
-			connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
+			connQuery = runReportHelper.getEffectiveReportConnection(report, reportParamsMap);
 		}
 
 		if (connQuery == null) {

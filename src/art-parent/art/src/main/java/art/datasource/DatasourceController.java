@@ -21,6 +21,8 @@ import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.encryption.AesEncryptor;
+import art.enums.DatabaseProtocol;
+import art.enums.DatabaseType;
 import art.enums.DatasourceType;
 import art.report.ReportService;
 import art.servlets.Config;
@@ -38,7 +40,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -311,11 +312,9 @@ public class DatasourceController {
 	private String showEditDatasource(String action, Model model) {
 		logger.debug("Entering showEditDatasource: action='{}'", action);
 
-		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
-		databaseTypes.remove("demo");
-
-		model.addAttribute("databaseTypes", databaseTypes);
+		model.addAttribute("databaseTypes", DatabaseType.listWithoutDemo());
 		model.addAttribute("datasourceTypes", DatasourceType.list());
+		model.addAttribute("databaseProtocols", DatabaseProtocol.list());
 		model.addAttribute("action", action);
 
 		return "editDatasource";

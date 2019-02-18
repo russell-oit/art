@@ -22,12 +22,11 @@
 
 <script>
 	var javaDateFormat = '${encode:forJavaScript(reportParam.parameter.dateFormat)}';
-	var finalDateFormat;
+	var momentDateFormat;
 	if (javaDateFormat) {
-		var momentDateFormat = moment().toMomentFormatString(javaDateFormat);
-		finalDateFormat = momentDateFormat;
+		momentDateFormat = moment().toMomentFormatString(javaDateFormat);
 	} else {
-		finalDateFormat = '${defaultFormat}';
+		momentDateFormat = '${defaultFormat}';
 	}
 
 	//must use useStrict in addition to keepInvalid if using the format property
@@ -36,7 +35,7 @@
 	//https://eonasdan.github.io/bootstrap-datetimepicker/Options/
 	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').datetimepicker({
 		locale: '${locale}',
-		format: finalDateFormat,
+		format: momentDateFormat,
 		keepInvalid: true,
 		useStrict: true
 	});

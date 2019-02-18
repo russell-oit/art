@@ -38,7 +38,7 @@ Edit datasource page
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-8 col-md-offset-2" hasNotify="true">
 
 	<jsp:attribute name="css">
@@ -47,6 +47,7 @@ Edit datasource page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.4.2/ace.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -109,6 +110,25 @@ Edit datasource page
 					offText: '${noText}'
 				});
 
+				$('#databaseType').on("change", function () {
+					setDatasourceFields(this.value, 'driver', 'url', 'testSql', 'databaseProtocol');
+				});
+
+				var jsonEditor = ace.edit("jsonEditor");
+				jsonEditor.getSession().setMode("ace/mode/json");
+				jsonEditor.setHighlightActiveLine(false);
+				jsonEditor.setShowPrintMargin(false);
+				jsonEditor.setOption("showLineNumbers", false);
+				jsonEditor.setOption("maxLines", 20);
+				jsonEditor.setOption("minLines", 7);
+				document.getElementById('jsonEditor').style.fontSize = '14px';
+
+				var options = $('#options');
+				jsonEditor.getSession().setValue(options.val());
+				jsonEditor.getSession().on('change', function () {
+					options.val(jsonEditor.getSession().getValue());
+				});
+
 				$("#datasourceType").on("change", function () {
 					toggleVisibleFields();
 					setMongoDBHint();
@@ -123,33 +143,74 @@ Edit datasource page
 		<script type="text/javascript">
 			function toggleVisibleFields() {
 				var datasourceType = $('#datasourceType option:selected').val();
-
-				switch (datasourceType) {
-					case 'JDBC':
-						$("#jndiDiv").show();
-						$("#testSqlDiv").show();
-						$("#connectionPoolTimeoutDiv").show();
-						break;
-					default:
-						$("#jndiDiv").hide();
-						$("#testSqlDiv").hide();
-						$("#connectionPoolTimeoutDiv").hide();
-				}
-
+				
+				//show/hide database type
 				switch (datasourceType) {
 					case 'MongoDB':
 						$("#databaseTypeDiv").hide();
-						$("#driverDiv").hide();
 						break;
 					default:
 						$("#databaseTypeDiv").show();
+				}
+				
+				//show/hide jndi
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#jndiDiv").show();
+						break;
+					default:
+						$("#jndiDiv").hide();
+				}
+				
+				//show/hide database protocol
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#protocolDiv").show();
+						break;
+					default:
+						$("#protocolDiv").hide();
+				}
+				
+				//show/hide driver
+				switch (datasourceType) {
+					case 'MongoDB':
+						$("#driverDiv").hide();
+						break;
+					default:
 						$("#driverDiv").show();
 				}
+				
+				//show/hide test sql
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#testSqlDiv").show();
+						break;
+					default:
+						$("#testSqlDiv").hide();
+				}
+				
+				//show/hide connection pool timeout
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#connectionPoolTimeoutDiv").show();
+						break;
+					default:
+						$("#connectionPoolTimeoutDiv").hide();
+				}
+				
+				//show/hide options
+				switch (datasourceType) {
+					case 'JDBC':
+						$("#optionsDiv").show();
+						break;
+					default:
+						$("#optionsDiv").hide();
+				}
 			}
-			
+
 			function setMongoDBHint() {
 				var datasourceType = $('#datasourceType option:selected').val();
-				
+
 				switch (datasourceType) {
 					case 'MongoDB':
 						$("#driver").val('');
@@ -162,7 +223,7 @@ Edit datasource page
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#datasources">
 				<spring:message code="page.link.help"/>
@@ -170,7 +231,7 @@ Edit datasource page
 		</div>
 	</jsp:attribute>
 
-	<jsp:attribute name="belowMainPanel">
+	<jsp:attribute name="belowPanel">
 		<div class="col-md-8 col-md-offset-2">
 			<div class="alert alert-info">
 				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>
@@ -275,23 +336,16 @@ Edit datasource page
 						<spring:message code="page.label.databaseType"/>
 					</label>
 					<div class="col-md-8">
-						<div class="input-group">
-							<select name="databaseType" id="databaseType" class="form-control selectpicker"
-									onchange="setDatasourceFields(this.value, 'driver', 'url', 'testSql');">
-								<option value="">--</option>
-								<option data-divider="true"></option>
-								<c:forEach var="dbType" items="${databaseTypes}">
-									<option value="${encode:forHtmlAttribute(dbType.key)}">${encode:forHtmlContent(dbType.value)}</option>
-								</c:forEach>
-							</select>
-							<spring:message code="page.help.databaseType" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
+						<form:select path="databaseType" class="form-control selectpicker">
+							<option value="">--</option>
+							<option data-divider="true"></option>
+							<c:forEach var="databaseType" items="${databaseTypes}">
+								<form:option value="${databaseType}">
+									${encode:forHtmlContent(databaseType.description)} 
+								</form:option>
+							</c:forEach>
+						</form:select>
+						<form:errors path="databaseType" cssClass="error"/>
 					</div>
 				</div>
 				<div id="jndiDiv" class="form-group">
@@ -302,6 +356,22 @@ Edit datasource page
 						<div class="checkbox">
 							<form:checkbox path="jndi" id="jndi" class="switch-yes-no"/>
 						</div>
+					</div>
+				</div>
+				<div id="protocolDiv" class="form-group">
+					<label class="control-label col-md-4" for="databaseProtocol">
+						<spring:message code="page.label.databaseProtocol"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="databaseProtocol" class="form-control">
+							<option value="">--</option>
+							<c:forEach var="databaseProtocol" items="${databaseProtocols}">
+								<form:option value="${databaseProtocol}">
+									${encode:forHtmlContent(databaseProtocol.description)} 
+								</form:option>
+							</c:forEach>
+						</form:select>
+						<form:errors path="databaseProtocol" cssClass="error"/>
 					</div>
 				</div>
 				<div id="driverDiv" class="form-group">
@@ -388,7 +458,7 @@ Edit datasource page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="connectionPoolTimeoutMins" maxlength="5" class="form-control"/>
+							<form:input type="number" path="connectionPoolTimeoutMins" maxlength="5" class="form-control"/>
 							<spring:message code="page.help.connectionPoolTimeout" var="help" />
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -398,6 +468,15 @@ Edit datasource page
 							</span>
 						</div>
 						<form:errors path="connectionPoolTimeoutMins" cssClass="error"/>
+					</div>
+				</div>
+				<div id="optionsDiv" class="form-group">
+					<label class="control-label col-md-8 col-md-offset-4" style="text-align: center" for="options">
+						<spring:message code="page.label.options"/>
+					</label>
+					<div class="col-md-8 col-md-offset-4">
+						<form:hidden path="options"/>
+						<div id="jsonEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 				<div class="form-group">

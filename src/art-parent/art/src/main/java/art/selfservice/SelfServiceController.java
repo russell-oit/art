@@ -19,18 +19,28 @@ package art.selfservice;
 
 import art.dashboard.DashboardHelper;
 import art.dashboard.GridstackDashboard;
-import art.enums.ReportType;
 import art.general.AjaxResponse;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.GeneralReportOptions;
+import art.reportoptions.ViewOptions;
+import art.runreport.RunReportHelper;
+import art.servlets.Config;
 import art.user.User;
+import art.utils.ArtUtils;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang3.StringUtils;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,36 +65,30 @@ public class SelfServiceController {
 	private ReportService reportService;
 
 	@GetMapping("/selfServiceDashboards")
-	public String showSelfServiceDashboards(HttpSession session, Model model) {
+	public String showSelfServiceDashboards() {
 		logger.debug("Entering showSelfServiceDashboards");
-
-		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
-			model.addAttribute("reports", reportService.getDashboardCandidateReports(sessionUser.getUserId()));
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
 
 		return "selfServiceDashboards";
 	}
 
-	@GetMapping("/getDashboardCandidateReports")
+	@GetMapping("/getDashboardCandidates")
 	@ResponseBody
-	public AjaxResponse getDashboardCandidateReports(HttpSession session, Locale locale) {
-		logger.debug("Entering getDashboardCandidateReports");
+	public AjaxResponse getDashboardCandidates(HttpSession session, Locale locale) {
+		logger.debug("Entering getDashboardCandidates");
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
+			List<Report> basicReports = new ArrayList<>();
 			List<Report> reports = reportService.getDashboardCandidateReports(sessionUser.getUserId());
 			for (Report report : reports) {
 				String name = report.getLocalizedName(locale);
-				name = Encode.forHtmlContent(name);
-				report.setName2(name);
+				String encodedName = Encode.forHtmlContent(name);
+				report.setName2(encodedName);
+				basicReports.add(report.getBasicReport());
 			}
-			response.setData(reports);
+			response.setData(basicReports);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
@@ -94,54 +98,32 @@ public class SelfServiceController {
 		return response;
 	}
 
-	@GetMapping("/getEditDashboardReports")
+	@GetMapping("/getEditDashboards")
 	@ResponseBody
-	public AjaxResponse getEditDashboardReports(HttpSession session, Locale locale) {
-		logger.debug("Entering getEditDashboardReports");
+	public AjaxResponse getEditDashboards(HttpSession session, Locale locale) {
+		logger.debug("Entering getEditDashboards");
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			List<Report> reports = reportService.getAccessibleReportsWithReportTypes(sessionUser.getUserId(), Arrays.asList(ReportType.GridstackDashboard));
+			List<Report> basicReports = new ArrayList<>();
+			List<Report> reports = reportService.getAvailableGridstackDashboardReports(sessionUser.getUserId());
 
 			List<Report> finalReports = new ArrayList<>();
 			for (Report report : reports) {
-				if (reportService.hasExclusiveAccess(sessionUser, report.getReportId())) {
+				if (reportService.hasOwnerAccess(sessionUser, report.getReportId())) {
 					finalReports.add(report);
 				}
 			}
 
 			for (Report report : finalReports) {
 				String name = report.getLocalizedName(locale);
-				name = Encode.forHtmlContent(name);
-				report.setName2(name);
+				String encodedName = Encode.forHtmlContent(name);
+				report.setName2(encodedName);
+				basicReports.add(report.getBasicReport());
 			}
-			response.setData(finalReports);
-			response.setSuccess(true);
-		} catch (SQLException | RuntimeException | IOException ex) {
-			logger.error("Error", ex);
-			response.setErrorMessage(ex.toString());
-		}
-
-		return response;
-	}
-
-	@GetMapping("/getEditAllDashboardReports")
-	@ResponseBody
-	public AjaxResponse getEditAllDashboardReports(Locale locale) {
-		logger.debug("Entering getEditAllDashboardReports");
-
-		AjaxResponse response = new AjaxResponse();
-
-		try {
-			List<Report> reports = reportService.getGridstackDashboardReports();
-			for (Report report : reports) {
-				String name = report.getLocalizedName(locale);
-				name = Encode.forHtmlContent(name);
-				report.setName2(name);
-			}
-			response.setData(reports);
+			response.setData(basicReports);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
@@ -165,6 +147,184 @@ public class SelfServiceController {
 			response.setData(dashboard);
 			response.setSuccess(true);
 		} catch (Exception ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@GetMapping("/selfServiceReports")
+	public String showSelfServiceReports(Model model, Locale locale) {
+		logger.debug("Entering showSelfServiceReports");
+
+		String languageTag = locale.toLanguageTag();
+
+		String languageFileName = "query-builder." + languageTag + ".js";
+
+		String languageFilePath = Config.getAppPath()
+				+ "js" + File.separator
+				+ "jQuery-QueryBuilder-2.5.2" + File.separator
+				+ "i18n" + File.separator
+				+ languageFileName;
+
+		File languageFile = new File(languageFilePath);
+
+		if (languageFile.exists()) {
+			model.addAttribute("languageFileName", languageFileName);
+		}
+
+		return "selfServiceReports";
+	}
+
+	@GetMapping("/getViews")
+	@ResponseBody
+	public AjaxResponse getViews(HttpSession session, Locale locale) {
+		logger.debug("Entering getViews");
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			List<Report> basicReports = new ArrayList<>();
+			List<Report> views = reportService.getAvailableViewReports(sessionUser.getUserId());
+			for (Report report : views) {
+				String name = report.getLocalizedName(locale);
+				String encodedName = Encode.forHtmlContent(name);
+				report.setName2(encodedName);
+				basicReports.add(report.getBasicReport());
+			}
+			response.setData(basicReports);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException | IOException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@GetMapping("/getViewDetails")
+	@ResponseBody
+	public AjaxResponse getViewDetails(@RequestParam("reportId") Integer reportId,
+			HttpSession session) {
+
+		logger.debug("Entering getViewDetails: reportId={}", reportId);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			Report report = reportService.getReport(reportId);
+			String selfServiceOptionsString = report.getSelfServiceOptions();
+
+			RunReportHelper runReportHelper = new RunReportHelper();
+			List<SelfServiceColumn> columns = runReportHelper.getSelfServiceColumnsForView(report, sessionUser);
+
+			GeneralReportOptions generalOptions = report.getGeneralOptions();
+			ViewOptions viewOptions = generalOptions.getView();
+
+			if (viewOptions == null) {
+				viewOptions = new ViewOptions();
+			}
+
+			List<String> conditionColumns = viewOptions.getConditionColumns();
+			List<String> omitConditionColumns = viewOptions.getOmitConditionColumns();
+
+			List<SelfServiceColumn> includedConditionColumns;
+			if (conditionColumns == null || conditionColumns.isEmpty()) {
+				includedConditionColumns = new ArrayList<>(columns);
+			} else {
+				includedConditionColumns = columns.stream()
+						.filter(c -> ArtUtils.containsIgnoreCase(conditionColumns, c.getLabel()))
+						.collect(Collectors.toList());
+			}
+
+			List<SelfServiceColumn> finalConditionColumns;
+			if (omitConditionColumns == null) {
+				finalConditionColumns = includedConditionColumns;
+			} else {
+				finalConditionColumns = includedConditionColumns.stream()
+						.filter(c -> !ArtUtils.containsIgnoreCase(omitConditionColumns, c.getLabel()))
+						.collect(Collectors.toList());
+			}
+
+			List<SelfServiceColumn> fromColumns;
+			List<SelfServiceColumn> toColumns;
+			if (StringUtils.isBlank(selfServiceOptionsString)) {
+				fromColumns = columns;
+				toColumns = new ArrayList<>();
+			} else {
+				SelfServiceOptions selfServiceOptions = ArtUtils.jsonToObjectIgnoreUnknown(selfServiceOptionsString, SelfServiceOptions.class);
+				List<String> selfServiceColumns = selfServiceOptions.getColumns();
+				//iterate based on the self service options to maintain saved columns order
+				toColumns = new ArrayList<>();
+				for (String selfServiceColumn : selfServiceColumns) {
+					for (SelfServiceColumn column : columns) {
+						if (StringUtils.equalsIgnoreCase(selfServiceColumn, column.getLabel())) {
+							toColumns.add(column);
+							break;
+						}
+					}
+				}
+
+				//https://www.mkyong.com/java8/java-8-streams-filter-examples/
+				fromColumns = columns.stream()
+						.filter(c -> !ArtUtils.containsIgnoreCase(selfServiceColumns, c.getLabel()))
+						.collect(Collectors.toList());
+			}
+
+			Map<String, Object> result = new HashMap<>();
+
+			if (viewOptions.isSortColumns()) {
+				Collections.sort(finalConditionColumns, Comparator.comparing(c -> StringUtils.lowerCase(c.getUserLabel(), Locale.ENGLISH)));
+				Collections.sort(fromColumns, Comparator.comparing(c -> StringUtils.lowerCase(c.getUserLabel(), Locale.ENGLISH)));
+			}
+			result.put("conditionColumns", finalConditionColumns);
+			result.put("fromColumns", fromColumns);
+			result.put("toColumns", toColumns);
+			result.put("selfServiceOptions", selfServiceOptionsString);
+			result.put("reportOptions", report.getOptions());
+
+			response.setData(result);
+			response.setSuccess(true);
+		} catch (Exception ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@GetMapping("/getEditSelfService")
+	@ResponseBody
+	public AjaxResponse getEditSelfService(HttpSession session, Locale locale) {
+		logger.debug("Entering getEditSelfService");
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			List<Report> basicReports = new ArrayList<>();
+			List<Report> reports = reportService.getAvailableSelfServiceReports(sessionUser.getUserId());
+
+			List<Report> finalReports = new ArrayList<>();
+			for (Report report : reports) {
+				if (reportService.hasOwnerAccess(sessionUser, report.getReportId())) {
+					finalReports.add(report);
+				}
+			}
+
+			for (Report report : finalReports) {
+				String name = report.getLocalizedName(locale);
+				String encodedName = Encode.forHtmlContent(name);
+				report.setName2(encodedName);
+				basicReports.add(report.getBasicReport());
+			}
+			response.setData(basicReports);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

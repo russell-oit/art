@@ -159,7 +159,7 @@ Admin rights configuration page
 						<select name="admins" id="admins" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="admin" items="${admins}">
 								<option value="${admin.userId}-${encode:forHtmlAttribute(admin.username)}">
-									<encode:forHtmlContent value="${admin.username}"/>
+									${encode:forHtmlContent(admin.username)} ${empty admin.fullName? "": " (".concat(encode:forHtmlContent(admin.fullName)).concat(")")}
 								</option>
 							</c:forEach>
 						</select>

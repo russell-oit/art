@@ -38,7 +38,7 @@ Edit parameter definition
 <spring:message code="reports.text.selectFile" var="selectFileText"/>
 <spring:message code="reports.text.change" var="changeText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
@@ -118,7 +118,7 @@ Edit parameter definition
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#parameters">
 				<spring:message code="page.link.help"/>
@@ -161,6 +161,7 @@ Edit parameter definition
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="reportId" value="${reportId}">
 				<input type="hidden" name="returnReportId" value="${returnReportId}">
+				<input type="hidden" name="reportParameterId" value="${reportParameterId}">
 
 				<div class="form-group">
 					<label class="control-label col-md-4">
@@ -399,7 +400,7 @@ Edit parameter definition
 						<spring:message code="parameters.label.drilldownColumnIndex"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="drilldownColumnIndex" maxlength="2" class="form-control"/>
+						<form:input type="number" path="drilldownColumnIndex" maxlength="2" class="form-control"/>
 						<form:errors path="drilldownColumnIndex" cssClass="error"/>
 					</div>
 				</div>

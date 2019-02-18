@@ -25,7 +25,7 @@
 <spring:message code="reports.text.selectFile" var="selectFileText"/>
 <spring:message code="reports.text.change" var="changeText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">

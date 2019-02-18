@@ -87,7 +87,7 @@ public class UpgradeHelper {
 
 			int nonQuartzJobCount = 0;
 			int successfulMigrationCount = 0;
-			
+
 			JobService jobService = new JobService();
 
 			List<Job> nonQuartzJobs = jobService.getNonQuartzJobs();
@@ -97,7 +97,7 @@ public class UpgradeHelper {
 				if (nonQuartzJobCount == 1) {
 					logger.info("Migrating jobs to quartz...");
 				}
-				
+
 				int jobId = job.getJobId();
 
 				try {
@@ -127,6 +127,7 @@ public class UpgradeHelper {
 			upgradeDatabaseTo30(templatesPath);
 			upgradeDatabaseTo31();
 			upgradeDatabaseTo38();
+			upgradeDatabaseTo41();
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
@@ -138,6 +139,8 @@ public class UpgradeHelper {
 	 * @param templatesPath the path to the templates directory
 	 */
 	private void upgradeDatabaseTo30(String templatesPath) throws Exception {
+		logger.debug("Entering upgradeDatabaseTo30: templatesPath='{}'", templatesPath);
+
 		String databaseVersionString = "3.0";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -172,6 +175,8 @@ public class UpgradeHelper {
 	 *
 	 */
 	private void upgradeDatabaseTo31() throws SQLException {
+		logger.debug("Entering upgradeDatabaseTo31");
+
 		String databaseVersionString = "3.1";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -803,6 +808,8 @@ public class UpgradeHelper {
 	 *
 	 */
 	private void upgradeDatabaseTo38() throws SQLException {
+		logger.debug("Entering upgradeDatabaseTo38");
+
 		String databaseVersionString = "3.8";
 		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
@@ -854,6 +861,180 @@ public class UpgradeHelper {
 		dbService.update(sql);
 
 		sql = "UPDATE ART_USER_ROLE_MAP SET ROLE_ID=7 WHERE ROLE_ID=100";
+		dbService.update(sql);
+	}
+
+	/**
+	 * Upgrades the database to 4.1
+	 *
+	 */
+	private void upgradeDatabaseTo41() throws SQLException {
+		logger.debug("Entering upgradeDatabaseTo41");
+
+		String databaseVersionString = "4.1";
+		String sql = "SELECT UPGRADED FROM ART_CUSTOM_UPGRADES WHERE DATABASE_VERSION=?";
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number upgradedValue = dbService.query(sql, h, databaseVersionString);
+		if (upgradedValue == null || upgradedValue.intValue() == 1) {
+			return;
+		}
+
+		logger.info("Performing {} upgrade steps", databaseVersionString);
+
+		removeUsernames41();
+
+		sql = "UPDATE ART_CUSTOM_UPGRADES SET UPGRADED=1 WHERE DATABASE_VERSION=?";
+		dbService.update(sql, databaseVersionString);
+
+		logger.info("Done performing {} upgrade steps", databaseVersionString);
+	}
+
+	/**
+	 * Removes some username fields used in foreign tables
+	 *
+	 * @throws SQLException
+	 */
+	private void removeUsernames41() throws SQLException {
+		logger.debug("Entering removeUsernames41");
+
+		recreateUserGroupAssignment();
+		recreateUserQueries();
+		recreateUserQueryGroups();
+		recreateUserJobs();
+	}
+
+	/**
+	 * Recreates the user - user group assignment table. To remove the username
+	 * field. Some databases require to know the constraint name in order to
+	 * drop a primary key so doing it from an upgrade script may be problematic.
+	 *
+	 * @throws SQLException
+	 */
+	private void recreateUserGroupAssignment() throws SQLException {
+		logger.debug("Entering recreateUserGroupAssignment");
+
+		String sql;
+
+		sql = "SELECT USER_ID, USER_GROUP_ID"
+				+ " FROM ART_USER_GROUP_ASSIGNMENT";
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> memberships = dbService.query(sql, h);
+
+		logger.debug("memberships.isEmpty()={}", memberships.isEmpty());
+		if (!memberships.isEmpty()) {
+			logger.info("Updating user - user group assignment");
+
+			sql = "DELETE FROM ART_USER_USERGROUP_MAP";
+			dbService.update(sql);
+
+			sql = "INSERT INTO ART_USER_USERGROUP_MAP (USER_ID, USER_GROUP_ID)"
+					+ " VALUES(?,?)";
+
+			for (Map<String, Object> membership : memberships) {
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				Integer userId = (Integer) membership.get("USER_ID");
+				Integer userGroupId = (Integer) membership.get("USER_GROUP_ID");
+				dbService.update(sql, userId, userGroupId);
+			}
+		}
+	}
+
+	/**
+	 * Recreates the user queries table. To remove the username field.
+	 *
+	 * @throws SQLException
+	 */
+	private void recreateUserQueries() throws SQLException {
+		logger.debug("Entering recreateUserQueries");
+
+		String sql;
+
+		sql = "SELECT USER_ID, QUERY_ID"
+				+ " FROM ART_USER_QUERIES";
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> memberships = dbService.query(sql, h);
+
+		logger.debug("memberships.isEmpty()={}", memberships.isEmpty());
+		if (!memberships.isEmpty()) {
+			logger.info("Updating user - report assignment");
+
+			sql = "DELETE FROM ART_USER_REPORT_MAP";
+			dbService.update(sql);
+
+			sql = "INSERT INTO ART_USER_REPORT_MAP (USER_ID, REPORT_ID)"
+					+ " VALUES(?,?)";
+
+			for (Map<String, Object> membership : memberships) {
+				Integer userId = (Integer) membership.get("USER_ID");
+				Integer reportId = (Integer) membership.get("QUERY_ID");
+				dbService.update(sql, userId, reportId);
+			}
+		}
+	}
+
+	/**
+	 * Recreates the user query groups table. To remove the username field.
+	 *
+	 * @throws SQLException
+	 */
+	private void recreateUserQueryGroups() throws SQLException {
+		logger.debug("Entering recreateUserQueryGroups");
+
+		String sql;
+
+		sql = "SELECT USER_ID, QUERY_GROUP_ID"
+				+ " FROM ART_USER_QUERY_GROUPS";
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> memberships = dbService.query(sql, h);
+
+		logger.debug("memberships.isEmpty()={}", memberships.isEmpty());
+		if (!memberships.isEmpty()) {
+			logger.info("Updating user - report group assignment");
+
+			sql = "DELETE FROM ART_USER_REPORTGROUP_MAP";
+			dbService.update(sql);
+
+			sql = "INSERT INTO ART_USER_REPORTGROUP_MAP (USER_ID, REPORT_GROUP_ID)"
+					+ " VALUES(?,?)";
+
+			for (Map<String, Object> membership : memberships) {
+				Integer userId = (Integer) membership.get("USER_ID");
+				Integer reportGroupId = (Integer) membership.get("QUERY_GROUP_ID");
+				dbService.update(sql, userId, reportGroupId);
+			}
+		}
+	}
+
+	/**
+	 * Recreates the user jobs table. To remove the username field.
+	 *
+	 * @throws SQLException
+	 */
+	private void recreateUserJobs() throws SQLException {
+		logger.debug("Entering recreateUserJobs");
+
+		String sql;
+
+		sql = "SELECT COUNT(*) FROM ART_USER_JOBS";
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCount = dbService.query(sql, h);
+		logger.debug("recordCount={}", recordCount);
+		if (recordCount == null || recordCount.intValue() == 0) {
+			return;
+		}
+
+		logger.info("Updating user - job assignment");
+
+		sql = "DELETE FROM ART_USER_JOB_MAP";
+		dbService.update(sql);
+
+		String columns = "USER_ID, JOB_ID, USER_GROUP_ID, LAST_FILE_NAME,"
+				+ " LAST_RUN_MESSAGE, LAST_RUN_DETAILS, LAST_START_DATE,"
+				+ " LAST_END_DATE";
+
+		sql = "INSERT INTO ART_USER_JOB_MAP (" + columns + ")"
+				+ " SELECT " + columns + " FROM ART_USER_JOBS";
+
 		dbService.update(sql);
 	}
 

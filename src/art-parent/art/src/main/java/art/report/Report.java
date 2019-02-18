@@ -87,6 +87,7 @@ public class Report implements Serializable {
 	private String shortDescription;
 	@Parsed
 	private String description;
+	@JsonIgnore
 	private int reportTypeId;
 	@Parsed
 	private String contactPerson;
@@ -112,11 +113,14 @@ public class Report implements Serializable {
 	private Date updateDate;
 	@Parsed
 	private String reportSource;
+	@JsonIgnore
 	private boolean useBlankXmlaPassword;
 	@JsonIgnore
 	private ChartOptions chartOptions;
+	@JsonIgnore
 	private String reportSourceHtml; //used with text reports
 	private String createdBy;
+	private int createdById;
 	private String updatedBy;
 	@Parsed
 	private ReportType reportType;
@@ -162,8 +166,11 @@ public class Report implements Serializable {
 	private String openPassword;
 	@Parsed
 	private String modifyPassword;
+	@JsonIgnore
 	private boolean useNoneOpenPassword; //only for use with ui
+	@JsonIgnore
 	private boolean useNoneModifyPassword; //only for use with ui
+	@JsonIgnore
 	private Report sourceReport;
 	@Parsed
 	private int sourceReportId;
@@ -172,7 +179,8 @@ public class Report implements Serializable {
 	private List<ReportGroup> reportGroups;
 	@Parsed
 	private boolean clearTextPasswords;
-	private Boolean dummyBoolean; //used for the test report functionality
+	@JsonIgnore
+	private Boolean testRun; //used for the test report functionality
 	@Parsed
 	private boolean useGroovy;
 	@Parsed
@@ -180,6 +188,12 @@ public class Report implements Serializable {
 	@Parsed
 	private String gridstackSavedOptions;
 	private String name2; //used for holding a processed report name e.g. in self service dashboard reports list
+	@Parsed
+	private String comment;
+	@Parsed
+	private int viewReportId;
+	@Parsed
+	private String selfServiceOptions;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
@@ -198,6 +212,78 @@ public class Report implements Serializable {
 	private String reportGroupNamesHtml;
 	@JsonIgnore
 	private boolean overwriteFiles;
+	@JsonIgnore
+	private Integer limit;
+
+	/**
+	 * @return the createdById
+	 */
+	public int getCreatedById() {
+		return createdById;
+	}
+
+	/**
+	 * @param createdById the createdById to set
+	 */
+	public void setCreatedById(int createdById) {
+		this.createdById = createdById;
+	}
+
+	/**
+	 * @return the limit
+	 */
+	public Integer getLimit() {
+		return limit;
+	}
+
+	/**
+	 * @param limit the limit to set
+	 */
+	public void setLimit(Integer limit) {
+		this.limit = limit;
+	}
+
+	/**
+	 * @return the viewReportId
+	 */
+	public int getViewReportId() {
+		return viewReportId;
+	}
+
+	/**
+	 * @param viewReportId the viewReportId to set
+	 */
+	public void setViewReportId(int viewReportId) {
+		this.viewReportId = viewReportId;
+	}
+
+	/**
+	 * @return the selfServiceOptions
+	 */
+	public String getSelfServiceOptions() {
+		return selfServiceOptions;
+	}
+
+	/**
+	 * @param selfServiceOptions the selfServiceOptions to set
+	 */
+	public void setSelfServiceOptions(String selfServiceOptions) {
+		this.selfServiceOptions = selfServiceOptions;
+	}
+
+	/**
+	 * @return the comment
+	 */
+	public String getComment() {
+		return comment;
+	}
+
+	/**
+	 * @param comment the comment to set
+	 */
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 
 	/**
 	 * @return the overwriteFiles
@@ -298,17 +384,17 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the dummyBoolean
+	 * @return the testRun
 	 */
-	public Boolean getDummyBoolean() {
-		return dummyBoolean;
+	public Boolean getTestRun() {
+		return testRun;
 	}
 
 	/**
-	 * @param dummyBoolean the dummyBoolean to set
+	 * @param testRun the testRun to set
 	 */
-	public void setDummyBoolean(Boolean dummyBoolean) {
-		this.dummyBoolean = dummyBoolean;
+	public void setTestRun(Boolean testRun) {
+		this.testRun = testRun;
 	}
 
 	/**
@@ -1630,6 +1716,7 @@ public class Report implements Serializable {
 		basic.setDtActiveStatus(dtActiveStatus);
 		basic.setDtAction(dtAction);
 		basic.setReportGroups(reportGroups);
+		basic.setViewReportId(viewReportId);
 
 		return basic;
 	}
@@ -1642,6 +1729,36 @@ public class Report implements Serializable {
 	public String getDtRowId() {
 		dtRowId = "row-" + reportId;
 		return dtRowId;
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a self service report
+	 *
+	 * @return <code>true</code> if this is a self service report
+	 */
+	@JsonIgnore
+	public boolean isSelfService() {
+		if (viewReportId > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a view or self service report
+	 * 
+	 * @return <code>true</code> if this is a view or self service report
+	 */
+	@JsonIgnore
+	public boolean isViewOrSelfService() {
+		if (reportType != null && reportType == ReportType.View) {
+			return true;
+		} else if (isSelfService()) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

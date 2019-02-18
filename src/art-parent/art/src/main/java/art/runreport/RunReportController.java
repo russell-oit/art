@@ -27,7 +27,7 @@ import art.reportoptions.TabularHeatmapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
-import art.utils.ArtHelper;
+import art.utils.ArtLogsHelper;
 import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +38,8 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,6 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.owasp.encoder.Encode;
@@ -94,13 +97,12 @@ public class RunReportController {
 	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST})
 	public String runReport(@RequestParam("reportId") Integer reportId,
 			@ModelAttribute("report") Report testReport,
-			@RequestParam(value = "testData", required = false) Boolean testData,
 			HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, Model model, Locale locale,
 			RedirectAttributes redirectAttributes) throws IOException {
 
 		Report report = null;
-		User sessionUser = null;
+		User sessionUser = (User) session.getAttribute("sessionUser");
 		ReportRunner reportRunner = null;
 
 		runningReportsCount++;
@@ -119,38 +121,51 @@ public class RunReportController {
 		}
 
 		String reportName = null;
+		RunReportHelper runReportHelper = new RunReportHelper();
 
 		try {
-			if (testReport.getDummyBoolean() == null) {
+			if (testReport.getTestRun() == null) {
 				report = reportService.getReport(reportId);
 			} else {
-				boolean basicReport = BooleanUtils.toBoolean(request.getParameter("basicReport"));
-				if (basicReport) {
+				boolean selfServicePreview = BooleanUtils.toBoolean(request.getParameter("selfServicePreview"));
+				if (selfServicePreview) {
 					Report originalReport = reportService.getReport(reportId);
-					//don't modify original object from reportService. will be cached and reused so property changes will be reflected in later uses of the object
+					if (originalReport == null) {
+						throw new RuntimeException("Report not found: " + reportId);
+					}
 					Cloner cloner = new Cloner();
 					Report originalReportCopy = cloner.deepClone(originalReport);
-					originalReportCopy.setName(testReport.getName());
-					originalReportCopy.setDescription(testReport.getDescription());
-					originalReportCopy.setDatasource(testReport.getDatasource());
-					originalReportCopy.setUseGroovy(testReport.isUseGroovy());
-					originalReportCopy.setPivotTableJsSavedOptions(testReport.getPivotTableJsSavedOptions());
-					originalReportCopy.setGridstackSavedOptions(testReport.getGridstackSavedOptions());
-					originalReportCopy.setOptions(testReport.getOptions());
-					originalReportCopy.setReportSource(testReport.getReportSource());
-					originalReportCopy.setReportSourceHtml(testReport.getReportSourceHtml());
 					testReport = originalReportCopy;
+
+					String selfServiceOptions = request.getParameter("selfServiceOptions");
+					String limitString = request.getParameter("limit");
+					Integer limit;
+					if (StringUtils.isBlank(limitString)) {
+						limit = ReportRunner.RETURN_ALL_RECORDS;
+					} else {
+						limit = NumberUtils.toInt(limitString);
+					}
+
+					testReport.setSelfServiceOptions(selfServiceOptions);
+					testReport.setLimit(limit);
+				} else {
+					boolean testData = BooleanUtils.toBoolean(request.getParameter("testData"));
+					if (testData) {
+						testReport.setReportType(ReportType.Tabular);
+					} else {
+						testReport.setReportType(ReportType.toEnum(testReport.getReportTypeId()));
+						if (testReport.getReportType() == ReportType.Text) {
+							testReport.setReportSource(testReport.getReportSourceHtml());
+						}
+					}
+
+					testReport.loadGeneralOptions();
 				}
 
-				if (BooleanUtils.isTrue(testData)) {
-					testReport.setReportType(ReportType.Tabular);
-				} else {
-					testReport.setReportType(ReportType.toEnum(testReport.getReportTypeId()));
-					if (testReport.getReportType() == ReportType.Text) {
-						testReport.setReportSource(testReport.getReportSourceHtml());
-					}
+				if (testReport.getReportType() != ReportType.View) {
+					runReportHelper.applySelfServiceFields(testReport, sessionUser);
 				}
-				testReport.loadGeneralOptions();
+
 				report = testReport;
 			}
 
@@ -160,7 +175,7 @@ public class RunReportController {
 			}
 
 			request.setAttribute("locale", locale);
-			
+
 			reportName = report.getLocalizedName(locale);
 
 			//check if user has permission to run report
@@ -193,6 +208,18 @@ public class RunReportController {
 
 			ReportType reportType = report.getReportType();
 
+			if (reportType == ReportType.View) {
+				runReportHelper.applySelfServiceFields(report, sessionUser);
+			}
+
+			ReportFormat reportFormat;
+			String reportFormatString = request.getParameter("reportFormat");
+			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
+				reportFormat = runReportHelper.getDefaultReportFormat(reportType);
+			} else {
+				reportFormat = ReportFormat.toEnum(reportFormatString);
+			}
+
 			if (reportType.isDashboard()) {
 				//https://stackoverflow.com/questions/8585216/spring-forward-with-added-parameters
 				request.setAttribute("suppliedReport", report);
@@ -207,14 +234,11 @@ public class RunReportController {
 //					model.addAttribute(paramName, paramValue);
 //				}
 
-				final int NOT_APPLICABLE = -1;
-				int totalTime = NOT_APPLICABLE;
-				int fetchTime = NOT_APPLICABLE;
-
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "jpivot", reportParamsList);
+
+				ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, reportFormat.getValue(), reportParamsList);
 
 				//can't use addFlashAttribute() as flash attributes aren't included as part of request parameters
 				redirectAttributes.addAllAttributes(request.getParameterMap());
@@ -223,14 +247,11 @@ public class RunReportController {
 				//so use redirect
 				return "redirect:/showJPivot";
 			} else if (reportType == ReportType.SaikuReport) {
-				final int NOT_APPLICABLE = -1;
-				int totalTime = NOT_APPLICABLE;
-				int fetchTime = NOT_APPLICABLE;
-
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "saiku", reportParamsList);
+
+				ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, reportFormat.getValue(), reportParamsList);
 
 				List<String> parametersList = new ArrayList<>();
 				Map<String, String[]> requestParameters = request.getParameterMap();
@@ -257,21 +278,11 @@ public class RunReportController {
 				return "redirect:/saiku3/" + parametersString + "#query/open/" + reportId;
 			}
 
-			long totalTimeSeconds = 0;
-			long fetchTimeSeconds = 0;
+			Integer totalTimeSeconds = null;
+			Integer fetchTimeSeconds = null;
 
-			long overallStartTime = System.currentTimeMillis(); //overall start time
-
-			RunReportHelper runReportHelper = new RunReportHelper();
-
-			//get report format to use
-			ReportFormat reportFormat;
-			String reportFormatString = request.getParameter("reportFormat");
-			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
-				reportFormat = runReportHelper.getDefaultReportFormat(reportType);
-			} else {
-				reportFormat = ReportFormat.toEnum(reportFormatString);
-			}
+			Date overallStartTime = new Date();
+			Instant overallStart = Instant.now();
 
 			//this will be initialized according to the content type of the report output
 			//setContentType() must be called before getWriter()
@@ -365,12 +376,16 @@ public class RunReportController {
 
 				reportRunner = new ReportRunner();
 				reportRunner.setUser(sessionUser);
+
 				reportRunner.setReport(report);
+
+				boolean isDrilldown = BooleanUtils.toBoolean(request.getParameter("drilldown"));
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				paramProcessor.setSuppliedReport(report);
 				paramProcessor.setIsFragment(isFragment);
+				paramProcessor.setIsDrilldown(isDrilldown);
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, locale);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
@@ -398,13 +413,14 @@ public class RunReportController {
 					displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
 				}
 
-				//get resultset type to use
 				int resultSetType = runReportHelper.getResultSetType(reportType);
 
 				//run query
-				long queryStartTime = System.currentTimeMillis();
+				Instant queryStart = Instant.now();
+
 				reportRunner.execute(resultSetType);
-				long queryEndTime = System.currentTimeMillis();
+
+				Instant queryEnd = Instant.now();
 
 				// display status information, parameters and final sql
 				if (showReportHeaderAndFooter) {
@@ -417,7 +433,7 @@ public class RunReportController {
 					}
 
 					DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
-					String startTimeString = df.format(new Date(overallStartTime));
+					String startTimeString = df.format(overallStartTime);
 
 					String reportInfo = "<h4>" + Encode.forHtmlContent(reportName) + "<small>"
 							+ Encode.forHtmlContent(description) + " :: "
@@ -466,20 +482,7 @@ public class RunReportController {
 					reportOutputGenerator.setRequest(request);
 					reportOutputGenerator.setResponse(response);
 					reportOutputGenerator.setServletContext(servletContext);
-
-					ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
-							reportFormat, locale, paramProcessorResult, writer, outputFileName, sessionUser, messageSource);
-
-					if (outputResult.isSuccess()) {
-						rowsRetrieved = outputResult.getRowCount();
-					} else {
-						model.addAttribute("message", outputResult.getMessage());
-						return errorPage;
-					}
-
-					//encrypt file if applicable
-					report.encryptFile(outputFileName);
-
+					
 					if (reportType == ReportType.TabularHeatmap) {
 						TabularHeatmapOptions options;
 
@@ -494,16 +497,34 @@ public class RunReportController {
 						request.setAttribute("options", options);
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/activateTabularHeatmap.jsp").include(request, response);
 					}
+
+					ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
+							reportFormat, locale, paramProcessorResult, writer, outputFileName, sessionUser, messageSource);
+
+					if (outputResult.isSuccess()) {
+						rowsRetrieved = outputResult.getRowCount();
+					} else {
+						model.addAttribute("message", outputResult.getMessage());
+						return errorPage;
+					}
+
+					//encrypt file if applicable
+					report.encryptFile(outputFileName);
 				}
 
 				// Print the "working" time elapsed
 				// The time elapsed from a user perspective can be bigger because the servlet output
 				// is "cached and transmitted" over the network by the servlet engine.
-				long overallEndTime = System.currentTimeMillis();
+				//https://www.baeldung.com/java-measure-elapsed-time
+				//http://tutorials.jenkov.com/java-date-time/duration.html
+				Instant overallEnd = Instant.now();
+				Duration overallDuration = Duration.between(overallStart, overallEnd);
+				Duration queryDuration = Duration.between(queryStart, queryEnd);
 
-				totalTimeSeconds = (overallEndTime - overallStartTime) / (1000);
-				fetchTimeSeconds = (queryEndTime - queryStartTime) / (1000);
-				double preciseTotalTimeSeconds = (overallEndTime - overallStartTime) / (double) 1000;
+				totalTimeSeconds = (int) overallDuration.getSeconds();
+				fetchTimeSeconds = (int) queryDuration.getSeconds();
+
+				double preciseTotalTimeSeconds = overallDuration.toMillis() / (double) 1000;
 				DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(request.getLocale());
 				df.applyPattern("#,##0.0##");
 
@@ -533,7 +554,7 @@ public class RunReportController {
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
 			}
 
-			ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
+			ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
 		} catch (Exception ex) {
 			logger.error("Error. {}, {}", report, sessionUser, ex);
 			if (reportName != null) {

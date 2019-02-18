@@ -159,8 +159,8 @@ Access rights configuration
 					<div class="col-md-10">
 						<select name="users" id="users" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="user" items="${users}">
-								<option value="${user.userId}-${encode:forHtmlAttribute(user.username)}">
-									<encode:forHtmlContent value="${user.username}"/>
+								<option value="${user.userId}">
+									${encode:forHtmlContent(user.username)} ${empty user.fullName? "": " (".concat(encode:forHtmlContent(user.fullName)).concat(")")}
 								</option>
 							</c:forEach>
 						</select>
@@ -192,7 +192,7 @@ Access rights configuration
 						<select name="reports" id="reports" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="report" items="${reports}">
 								<option value="${report.reportId}">
-									<encode:forHtmlContent value="${report.getLocalizedName(pageContext.response.locale)}"/>
+									<encode:forHtmlContent value="${report.name}"/>
 								</option>
 							</c:forEach>
 						</select>
@@ -224,7 +224,7 @@ Access rights configuration
 						<select name="jobs" id="jobs" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="job" items="${jobs}">
 								<option value="${job.jobId}">
-									<encode:forHtmlContent value="${job.name}"/>
+									${encode:forHtmlContent(job.name)} (${job.jobId})
 								</option>
 							</c:forEach>
 						</select>

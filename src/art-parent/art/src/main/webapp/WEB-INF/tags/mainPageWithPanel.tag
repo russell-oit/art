@@ -17,14 +17,14 @@ Includes main page, plus a bootstrap panel where the contents go
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="css" fragment="true" %>
 <%@attribute name="javascript" fragment="true" %>
-<%@attribute name="aboveMainPanel" fragment="true" %>
-<%@attribute name="belowMainPanel" fragment="true" %>
-<%@attribute name="leftMainPanel" fragment="true" %>
-<%@attribute name="rightMainPanel" fragment="true" %>
+<%@attribute name="abovePanel" fragment="true" %>
+<%@attribute name="belowPanel" fragment="true" %>
+<%@attribute name="leftPanel" fragment="true" %>
+<%@attribute name="rightPanel" fragment="true" %>
 <%@attribute name="headContent" fragment="true" %>
 <%@attribute name="title" required="true" %>
 <%@attribute name="mainColumnClass" %>
-<%@attribute name="mainPanelTitle" %>
+<%@attribute name="panelTitle" %>
 <%@attribute name="hasTable" type="java.lang.Boolean" %>
 <%@attribute name="configPage" type="java.lang.Boolean" %>
 <%@attribute name="hasNotify" type="java.lang.Boolean" %>
@@ -34,8 +34,8 @@ Includes main page, plus a bootstrap panel where the contents go
 	<c:set var="mainColumnClass" value="col-md-12"/>
 </c:if>
 
-<c:if test="${empty mainPanelTitle}">
-	<c:set var="mainPanelTitle" value="${title}"/>
+<c:if test="${empty panelTitle}">
+	<c:set var="panelTitle" value="${title}"/>
 </c:if>
 
 <t:mainPage title="${title}">
@@ -48,7 +48,7 @@ Includes main page, plus a bootstrap panel where the contents go
 			<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Select-1.2.6/css/select.bootstrap.min.css"/>
 			<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/css/buttons.dataTables.min.css"/>
 			<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/css/buttons.bootstrap.min.css"/>
-			<!--<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Responsive-2.0.2/css/responsive.bootstrap.min.css"/>-->
+			<!--<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/Responsive-2.2.2/css/responsive.bootstrap.min.css"/>-->
 		</c:if>
 
 		<jsp:invoke fragment="css"/>
@@ -70,8 +70,8 @@ Includes main page, plus a bootstrap panel where the contents go
 			<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.html5.min.js"></script>
 			<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.print.min.js"></script>
 			<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.colVis.min.js"></script>
-	<!--		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Responsive-2.0.2/js/dataTables.responsive.min.js"></script>
-			<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Responsive-2.0.2/js/responsive.bootstrap.min.js"></script>-->
+	<!--		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Responsive-2.2.2/js/dataTables.responsive.min.js"></script>
+			<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Responsive-2.2.2/js/responsive.bootstrap.min.js"></script>-->
 
 		</c:if>
 			
@@ -88,16 +88,16 @@ Includes main page, plus a bootstrap panel where the contents go
 	</jsp:attribute>
 
 	<jsp:body>
-		<jsp:invoke fragment="aboveMainPanel"/>
+		<jsp:invoke fragment="abovePanel"/>
 
 		<div class="row">
-			<jsp:invoke fragment="leftMainPanel"/>
+			<jsp:invoke fragment="leftPanel"/>
 
 			<div class="${encode:forHtmlAttribute(mainColumnClass)}">
 				<div class="panel panel-success">
 					<div class="panel-heading">
 						<h4 class="panel-title text-center">
-							${encode:forHtmlContent(mainPanelTitle)}
+							${encode:forHtmlContent(panelTitle)}
 						</h4>
 					</div>
 					<div class="panel-body">
@@ -106,9 +106,9 @@ Includes main page, plus a bootstrap panel where the contents go
 				</div>
 			</div>
 
-			<jsp:invoke fragment="rightMainPanel"/>
+			<jsp:invoke fragment="rightPanel"/>
 		</div>
 
-		<jsp:invoke fragment="belowMainPanel"/>
+		<jsp:invoke fragment="belowPanel"/>
     </jsp:body>
 </t:mainPage>

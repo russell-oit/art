@@ -53,7 +53,7 @@ public class UserGroupMembershipService2 {
 	public UserGroupMembershipService2() {
 		dbService = new DbService();
 	}
-	
+
 	/**
 	 * Deletes a user group membership
 	 *
@@ -63,12 +63,12 @@ public class UserGroupMembershipService2 {
 	 */
 	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
 	public void deleteUserGroupMembership(int userId, int userGroupId) throws SQLException {
-		logger.debug("Entering deleteUserGroupMembership: userId={}, userGroupId={}",
-				userId, userGroupId);
+		logger.debug("Entering deleteUserGroupMembership: userId={},"
+				+ " userGroupId={}", userId, userGroupId);
 
 		String sql;
 
-		sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=? AND USER_GROUP_ID=?";
+		sql = "DELETE FROM ART_USER_USERGROUP_MAP WHERE USER_ID=? AND USER_GROUP_ID=?";
 		dbService.update(sql, userId, userGroupId);
 	}
 
@@ -95,7 +95,7 @@ public class UserGroupMembershipService2 {
 	private void deleteAllUserGroupMembershipsForUser(int userId) throws SQLException {
 		logger.debug("Entering deleteAllUserGroupMembershipsForUser: userId={}", userId);
 
-		String sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
+		String sql = "DELETE FROM ART_USER_USERGROUP_MAP WHERE USER_ID=?";
 		dbService.update(sql, userId);
 	}
 
@@ -117,7 +117,7 @@ public class UserGroupMembershipService2 {
 		for (UserGroup userGroup : userGroups) {
 			userGroupIds.add(userGroup.getUserGroupId());
 		}
-		String[] users = {user.getUserId() + "-" + user.getUsername()};
+		Integer[] users = {user.getUserId()};
 		String action = "add";
 		updateUserGroupMembership(action, users, userGroupIds.toArray(new Integer[0]));
 	}
@@ -126,18 +126,19 @@ public class UserGroupMembershipService2 {
 	 * Adds or removes user group memberships
 	 *
 	 * @param action "add" or "remove". anything else will be treated as remove
-	 * @param users user identifiers in the format user id-username
+	 * @param users user ids
 	 * @param userGroups user group ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
-	public void updateUserGroupMembership(String action, String[] users, Integer[] userGroups) throws SQLException {
+	@CacheEvict(value = {"users", "userGroups", "reports"}, allEntries = true)
+	public void updateUserGroupMembership(String action, Integer[] users,
+			Integer[] userGroups) throws SQLException {
+		
 		logger.debug("Entering updateUserGroupMemberships: action='{}'", action);
 
 		logger.debug("(users == null) = {}", users == null);
 		logger.debug("(userGroups == null) = {}", userGroups == null);
 		if (users == null || userGroups == null) {
-			logger.warn("Update not performed. users or userGroups is null.");
 			return;
 		}
 
@@ -151,32 +152,26 @@ public class UserGroupMembershipService2 {
 		String sql;
 
 		if (add) {
-			sql = "INSERT INTO ART_USER_GROUP_ASSIGNMENT (USER_ID, USERNAME, USER_GROUP_ID) VALUES (?, ?, ?)";
+			sql = "INSERT INTO ART_USER_USERGROUP_MAP (USER_ID, USER_GROUP_ID) VALUES (?,?)";
 		} else {
-			sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=? AND USERNAME=? AND USER_GROUP_ID=?";
+			sql = "DELETE FROM ART_USER_USERGROUP_MAP WHERE USER_ID=? AND USER_GROUP_ID=?";
 		}
+		
+		String sqlTest = "UPDATE ART_USER_USERGROUP_MAP SET USER_ID=? WHERE USER_ID=? AND USER_GROUP_ID=?";
 
-		String sqlTest = "UPDATE ART_USER_GROUP_ASSIGNMENT SET USER_ID=? WHERE USER_ID=? AND USERNAME=? AND USER_GROUP_ID=?";
-		int affectedRows;
-		boolean updateRight;
-
-		for (String user : users) {
-			Integer userId = Integer.valueOf(StringUtils.substringBefore(user, "-"));
-			//username won't be needed once user id columns completely replace username in foreign keys
-			String username = StringUtils.substringAfter(user, "-");
-
+		for (Integer userId : users) {
 			for (Integer userGroupId : userGroups) {
-				updateRight = true;
+				boolean updateRight = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					affectedRows = dbService.update(sqlTest, userId, userId, username, userGroupId);
+					int affectedRows = dbService.update(sqlTest, userId, userId, userGroupId);
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
 						updateRight = false;
 					}
 				}
 				if (updateRight) {
-					dbService.update(sql, userId, username, userGroupId);
+					dbService.update(sql, userId, userGroupId);
 				}
 			}
 		}

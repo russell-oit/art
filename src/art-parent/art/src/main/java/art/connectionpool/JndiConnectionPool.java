@@ -17,7 +17,7 @@
  */
 package art.connectionpool;
 
-import art.datasource.DatasourceInfo;
+import art.datasource.Datasource;
 import art.utils.ArtUtils;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -34,14 +34,14 @@ public class JndiConnectionPool extends ConnectionPool {
 	private static final Logger logger = LoggerFactory.getLogger(JndiConnectionPool.class);
 
 	@Override
-	protected DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
+	protected DataSource createPool(Datasource datasource, int maxPoolSize) {
 		logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
 		
 		DataSource dataSource = null;
 		
 		try {
 			//for jndi datasources, the url contains the jndi name/resource reference
-			dataSource = ArtUtils.getJndiDataSource(datasourceInfo.getUrl());
+			dataSource = ArtUtils.getJndiDataSource(datasource.getUrl());
 		} catch (NamingException ex) {
 			logger.error("Error", ex);
 		}

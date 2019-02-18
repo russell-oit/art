@@ -23,8 +23,8 @@
 </c:if>
 
 <c:if test="${hasDateRangeParam}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-daterangepicker-2.1.27/daterangepicker.js"></script>
-	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-daterangepicker-2.1.27/daterangepicker.css">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/daterangepicker-3.0.3/daterangepicker.js"></script>
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/daterangepicker-3.0.3/daterangepicker.css">
 </c:if>
 
 <c:if test="${hasLovParam}">
@@ -87,6 +87,9 @@
 								</c:when>
 								<c:when test="${reportParam.parameter.dataType == 'DateRange'}">
 									<jsp:include page="daterangeInput.jsp" />
+								</c:when>
+								<c:when test="${reportParam.parameter.dataType.numeric}">
+									<jsp:include page="numberInput.jsp" />
 								</c:when>
 								<c:otherwise>
 									<jsp:include page="textInput.jsp"/>

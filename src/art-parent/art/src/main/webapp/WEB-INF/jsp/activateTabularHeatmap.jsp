@@ -12,67 +12,67 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-hottie-0.1.3/jquery.hottie.js"></script>
 
 <script>
-	var indexes = [];
+	$(function () {
+		var indexes = [];
 	<c:if test="${not empty options.columns}">
-	indexes =${options.columns};
+		indexes = ${options.columns};
 	</c:if>
 
-	var colors = [];
+		var colors = [];
 	<c:forEach var="color" items="${options.colors}">
-	//https://stackoverflow.com/questions/16931350/how-to-pass-array-from-java-to-javascript
-	var colorString = '${color}';
-	colors[colors.length] = colorString;
+		//https://stackoverflow.com/questions/16931350/how-to-pass-array-from-java-to-javascript
+		var colorString = '${color}';
+		colors[colors.length] = colorString;
 	</c:forEach>
 
-	var nullColor = '${options.nullColor}';
+		var nullColor = '${options.nullColor}';
 
-	var settings = {
-		readValue: function (e) {
-			return $(e).attr("data-value");
+		var settings = {
+			readValue: function (e) {
+				return $(e).attr("data-value");
+			}
+		};
+
+		if (colors.length > 0) {
+			$.extend(settings, {
+				colorArray: colors
+			});
 		}
-	};
 
-	if (colors.length > 0) {
-		$.extend(settings, {
-			colorArray: colors
-		});
-	}
-	
-	if(nullColor){
-		$.extend(settings, {
-			nullColor: nullColor
-		});
-	}
+		if (nullColor) {
+			$.extend(settings, {
+				nullColor: nullColor
+			});
+		}
 
 	<c:choose>
 		<c:when test="${options.perColumn}">
-	if (indexes.length === 0) {
-		//https://stackoverflow.com/questions/6683882/jquery-how-to-count-table-columns
-		var columnCount = $("table.heatmap > tbody > tr:first > td").length;
-		for (var i = 1; i <= columnCount; i++) {
-			var selector = 'table.heatmap tbody td:nth-child(' + i + ')';
-			$(selector).hottie(settings);
+		if (indexes.length === 0) {
+			//https://stackoverflow.com/questions/6683882/jquery-how-to-count-table-columns
+			var columnCount = $("table.heatmap > tbody > tr:first > td").length;
+			for (var i = 1; i <= columnCount; i++) {
+				var selector = 'table.heatmap tbody td:nth-child(' + i + ')';
+				$(selector).hottie(settings);
+			}
+		} else {
+			for (var i = 0; i < indexes.length; i++) {
+				var selector = 'table.heatmap tbody td:nth-child(' + indexes[i] + ')';
+				$(selector).hottie(settings);
+			}
 		}
-	} else {
-		for (var i = 0; i < indexes.length; i++) {
-			var selector = 'table.heatmap tbody td:nth-child(' + indexes[i] + ')';
-			$(selector).hottie(settings);
-		}
-	}
 		</c:when>
 		<c:otherwise>
-	if (indexes.length === 0) {
-		$('table.heatmap tbody td').hottie(settings);
-	} else {
-		for (var i = 0; i < indexes.length; i++) {
-			var selector = 'table.heatmap tbody td:nth-child(' + indexes[i] + ')';
-			$(selector).addClass('heatmapData');
-		}
+		if (indexes.length === 0) {
+			$('table.heatmap tbody td').hottie(settings);
+		} else {
+			for (var i = 0; i < indexes.length; i++) {
+				var selector = 'table.heatmap tbody td:nth-child(' + indexes[i] + ')';
+				$(selector).addClass('heatmapData');
+			}
 
-		$("table.heatmap tbody td.heatmapData").hottie(settings);
-	}
+			$("table.heatmap tbody td.heatmapData").hottie(settings);
+		}
 		</c:otherwise>
 	</c:choose>
-
-
+	});
 </script>

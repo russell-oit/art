@@ -25,9 +25,9 @@ import art.report.ChartOptions;
 import art.report.Report;
 import art.reportoptions.JFreeChartOptions;
 import art.reportparameter.ReportParameter;
-import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
 import art.runreport.GroovyDataDetails;
+import art.runreport.ReportOptions;
 import art.runreport.RunReportHelper;
 import net.sf.cewolfart.ChartPostProcessor;
 import net.sf.cewolfart.ChartValidationException;
@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Objects;
 import net.sf.cewolfart.cpp.SeriesPaintProcessor;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -87,7 +88,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private static final Logger logger = LoggerFactory.getLogger(Chart.class);
 
 	private static final long serialVersionUID = 1L;
-	private String backgroundColor = ArtUtils.WHITE_HEX_COLOR_CODE;
 	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
 	private Dataset dataset;
 	private ChartOptions chartOptions;
@@ -111,6 +111,21 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	protected int resultSetRecordCount;
 	protected boolean includeDataInOutput;
 	private Map<String, String[]> reportRequestParameters;
+	private ReportOptions reportOptions;
+
+	/**
+	 * @return the reportOptions
+	 */
+	public ReportOptions getReportOptions() {
+		return reportOptions;
+	}
+
+	/**
+	 * @param reportOptions the reportOptions to set
+	 */
+	public void setReportOptions(ReportOptions reportOptions) {
+		this.reportOptions = reportOptions;
+	}
 
 	/**
 	 * @return the reportRequestParameters
@@ -337,20 +352,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	}
 
 	/**
-	 * @return the backgroundColor
-	 */
-	public String getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * @param backgroundColor the backgroundColor to set
-	 */
-	public void setBackgroundColor(String backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	/**
 	 * @param dataset the dataset to set
 	 */
 	public void setDataset(Dataset dataset) {
@@ -495,7 +496,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)
 				|| StringUtils.equals(secondColumnName, HYPERLINKS_COLUMN_NAME)) {
 			setHasHyperLinks(true);
-			setHyperLinks(new HashMap<String, String>());
+			setHyperLinks(new HashMap<>());
 		}
 
 	}
@@ -509,7 +510,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)
 				|| StringUtils.equals(secondColumnName, HYPERLINKS_COLUMN_NAME)) {
 			setHasHyperLinks(true);
-			setHyperLinks(new HashMap<String, String>());
+			setHyperLinks(new HashMap<>());
 		}
 
 	}
@@ -582,10 +583,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	protected void processYAxisRange(JFreeChart chart) {
 		logger.debug("Entering processYAxisRange");
 
-		if (chartOptions == null) {
-			return;
-		}
-
 		Plot plot = chart.getPlot();
 
 		//set y axis range if required
@@ -628,18 +625,15 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private void processLabels(JFreeChart chart) {
 		logger.debug("Entering processLabels");
 
-		if (chartOptions == null) {
-			return;
-		}
-
 		Plot plot = chart.getPlot();
 
+		boolean showLabels = BooleanUtils.toBoolean(chartOptions.getShowLabels());
 		String labelFormat = chartOptions.getLabelFormat(); //either "off" or a format string e.g. {2}
+
 		if (plot instanceof PiePlot) {
 			PiePlot piePlot = (PiePlot) plot;
 
-			if (!chartOptions.getShowLabels()
-					|| (labelFormat != null && StringUtils.equalsIgnoreCase(labelFormat, "off"))) {
+			if (!showLabels || StringUtils.equalsIgnoreCase(labelFormat, "off")) {
 				piePlot.setLabelGenerator(null);
 			} else {
 				piePlot.setLabelGenerator(new StandardPieSectionLabelGenerator(labelFormat));
@@ -648,8 +642,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			CategoryPlot categoryPlot = (CategoryPlot) plot;
 
 			CategoryItemRenderer renderer = categoryPlot.getRenderer(); //could be a version of BarRenderer or LineAndShapeRenderer for line graphs
-			if (!chartOptions.getShowLabels()
-					|| (labelFormat != null && StringUtils.equalsIgnoreCase(labelFormat, "off"))) {
+			if (!showLabels || StringUtils.equalsIgnoreCase(labelFormat, "off")) {
 				renderer.setBaseItemLabelGenerator(null);
 				renderer.setBaseItemLabelsVisible(false);
 			} else {
@@ -676,7 +669,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	@Override
 	protected JFreeChart produceChart() throws DatasetProduceException, ChartValidationException {
-		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, chartOptions.getShowLegend());
+		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, BooleanUtils.toBoolean(chartOptions.getShowLegend()));
 	}
 
 	/**
@@ -701,8 +694,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			Object groovyData, boolean showResultSetData) throws Exception {
 
 		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}', "
-				+ "report={}, pdfPageNumbers={}, showResultSetData={}", reportFormat,
-				outputFileName, report, pdfPageNumbers, showResultSetData);
+				+ "report={}, pdfPageNumbers={}, showResultSetData={},",
+				reportFormat, outputFileName, report, pdfPageNumbers, showResultSetData);
 
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
@@ -720,7 +713,11 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 					outputColumnNames = resultSetColumnNames;
 					outputData = resultSetData;
 				}
-				PdfChart.generatePdf(chart, outputFileName, title, reportParamsList, report, pdfPageNumbers, groovyData, outputColumnNames, outputData);
+				List<ReportParameter> finalParamsList = null;
+				if (reportOptions.isShowSelectedParameters()) {
+					finalParamsList = reportParamsList;
+				}
+				PdfChart.generatePdf(chart, outputFileName, title, finalParamsList, report, pdfPageNumbers, groovyData, outputColumnNames, outputData);
 				PdfHelper pdfHelper = new PdfHelper();
 				pdfHelper.addProtections(report, outputFileName, dynamicOpenPassword, dynamicModifyPassword);
 				break;
@@ -741,13 +738,13 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		logger.debug("Entering getFinalChart");
 
 		//use cewolf to generate chart in order to achieve similar look as with interactive/browser display
-		setBackgroundPaint(Color.decode(backgroundColor));
+		setBackgroundPaint(Color.decode(chartOptions.getBackgroundColor()));
 
 		//use cewolf AbstractChartDefinition.getChart() to generate chart
 		//with additional processing like antialising and running external post processors
 		//in order to achieve similar look as with interactive/browser display using <cewolf> tags
 		//alternative is to duplicate the code
-		showLegend = chartOptions.getShowLegend();
+		showLegend = BooleanUtils.toBoolean(chartOptions.getShowLegend());
 		JFreeChart chart = getChart();
 
 		//run internal post processor
@@ -778,13 +775,9 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private void showPoints(JFreeChart chart) {
 		logger.debug("Entering showPoints");
 
-		if (chartOptions == null) {
-			return;
-		}
-
 		LineRendererProcessor pointsProcessor = new LineRendererProcessor();
 		Map<String, String> lineOptions = new HashMap<>();
-		lineOptions.put("shapes", String.valueOf(chartOptions.getShowPoints()));
+		lineOptions.put("shapes", String.valueOf(BooleanUtils.toBoolean(chartOptions.getShowPoints())));
 		pointsProcessor.processChart(chart, lineOptions);
 	}
 
@@ -795,10 +788,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	private void rotateLabels(JFreeChart chart) {
 		logger.debug("Entering rotateLabels");
-
-		if (chartOptions == null) {
-			return;
-		}
 
 		//display x-axis labels vertically if too many categories present
 		RotatedAxisLabels rotateProcessor = new RotatedAxisLabels();
@@ -842,12 +831,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			return;
 		}
 
-		boolean showPoints;
-		if (chartOptions != null && chartOptions.getShowPoints()) {
-			showPoints = true;
-		} else {
-			showPoints = false;
-		}
+		//https://stackoverflow.com/questions/11005286/check-if-null-boolean-is-true-results-in-exception
+		boolean showPoints = BooleanUtils.toBoolean(chartOptions.getShowPoints());
 
 		int count = 0;
 		for (Chart secondaryChart : secondaryCharts) {

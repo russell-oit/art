@@ -61,7 +61,9 @@ public class Encryptor implements Serializable {
 	private String openPassword;
 	@Parsed
 	private String modifyPassword;
+	@JsonIgnore
 	private boolean useNoneOpenPassword; //only for use with ui
+	@JsonIgnore
 	private boolean useNoneModifyPassword; //only for use with ui
 	@Parsed
 	private boolean clearTextPasswords;

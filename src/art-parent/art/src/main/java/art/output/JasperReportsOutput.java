@@ -194,7 +194,7 @@ public class JasperReportsOutput {
 					Connection conn = null;
 					try {
 						RunReportHelper runReportHelper = new RunReportHelper();
-						conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
+						conn = runReportHelper.getEffectiveReportConnection(report, reportParams);
 						jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, conn);
 					} finally {
 						DatabaseUtils.close(conn);

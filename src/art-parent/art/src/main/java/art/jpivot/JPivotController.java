@@ -269,7 +269,7 @@ public class JPivotController {
 			}
 
 			//check if this is the only user who has access. if so, he can overwrite the pivot table view with a different view
-			boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, reportId);
+			boolean exclusiveAccess = reportService.hasOwnerAccess(sessionUser, reportId);
 
 			//save status in the session. will be lost as navigation is done on the pivot table
 			session.setAttribute("pivotExclusiveAccess" + reportId, exclusiveAccess);

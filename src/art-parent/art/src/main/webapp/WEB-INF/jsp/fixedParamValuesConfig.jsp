@@ -23,7 +23,7 @@
 <spring:message code="page.text.search" var="searchText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3"
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasNotify="true">
 
 	<jsp:attribute name="css">
@@ -155,14 +155,14 @@
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-md-3" for="users">
+					<label class="control-label col-md-2" for="users">
 						<spring:message code="page.text.users"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="users" id="users" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="user" items="${users}">
 								<option value="${user.userId}">
-									<encode:forHtmlContent value="${user.username}"/>
+									${encode:forHtmlContent(user.username)} ${empty user.fullName? "": " (".concat(encode:forHtmlContent(user.fullName)).concat(")")}
 								</option>
 							</c:forEach>
 						</select>
@@ -171,10 +171,10 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="userGroups">
+					<label class="control-label col-md-2" for="userGroups">
 						<spring:message code="page.text.userGroups"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-10">
 						<select name="userGroups" id="userGroups" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="userGroup" items="${userGroups}">
 								<option value="${userGroup.userGroupId}">
@@ -187,10 +187,10 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="parameter">
+					<label class="control-label col-md-6" for="parameter">
 						<spring:message code="page.text.parameter"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-6">
 						<select name="parameter" id="parameter" class="form-control selectpicker">
 							<c:forEach var="parameter" items="${parameters}">
 								<option value="${parameter.parameterId}">
@@ -201,10 +201,10 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="value">
+					<label class="control-label col-md-6" for="value">
 						<spring:message code="page.text.value"/>
 					</label>
-					<div class="col-md-9">
+					<div class="col-md-6">
 						<textarea rows="4" class="form-control"
 								  name="value" id="value"></textarea>
 					</div>

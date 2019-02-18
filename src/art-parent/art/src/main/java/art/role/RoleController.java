@@ -22,6 +22,7 @@ import art.general.AjaxResponse;
 import art.permission.PermissionService;
 import art.rolepermission.RolePermissionService;
 import art.user.User;
+import art.user.UserService;
 import art.usergrouprole.UserGroupRoleService;
 import art.userrole.UserRoleService;
 import java.sql.SQLException;
@@ -60,12 +61,15 @@ public class RoleController {
 
 	@Autowired
 	private RolePermissionService rolePermissionService;
-	
+
 	@Autowired
 	private UserRoleService userRoleService;
-	
+
 	@Autowired
 	private UserGroupRoleService userGroupRoleService;
+
+	@Autowired
+	private UserService userService;
 
 	@RequestMapping(value = "/roles", method = RequestMethod.GET)
 	public String showRoles(Model model) {
@@ -90,7 +94,7 @@ public class RoleController {
 
 		try {
 			ActionResult deleteResult = roleService.deleteRole(id);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -116,7 +120,7 @@ public class RoleController {
 
 		try {
 			ActionResult deleteResult = roleService.deleteRoles(ids);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -201,6 +205,11 @@ public class RoleController {
 
 			try {
 				rolePermissionService.recreateRolePermissions(role);
+				User updatedSessionUser = userService.getUser(sessionUser.getUserId());
+				if (updatedSessionUser != null) {
+					//may be null in case of art db user or initial setup user
+					session.setAttribute("sessionUser", updatedSessionUser);
+				}
 			} catch (SQLException | RuntimeException ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
@@ -236,7 +245,7 @@ public class RoleController {
 
 		return "editRole";
 	}
-	
+
 	@RequestMapping(value = "/roleUsage", method = RequestMethod.GET)
 	public String showRoleUsage(Model model,
 			@RequestParam("roleId") Integer roleId) {
@@ -254,5 +263,5 @@ public class RoleController {
 
 		return "roleUsage";
 	}
-	
+
 }

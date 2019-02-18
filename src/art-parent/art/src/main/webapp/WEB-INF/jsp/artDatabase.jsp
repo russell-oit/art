@@ -62,11 +62,15 @@ Display art database configuration page
 					offText: '${noText}'
 				});
 
+				$('#databaseType').on("change", function () {
+					setDatasourceFields(this.value, 'driver', 'url', 'testSql', 'databaseProtocol');
+				});
+
 			});
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#art-database">
 				<spring:message code="page.link.help"/>
@@ -74,7 +78,7 @@ Display art database configuration page
 		</div>
 	</jsp:attribute>
 
-	<jsp:attribute name="leftMainPanel">
+	<jsp:attribute name="leftPanel">
 		<c:if test="${not empty initialSetup}">
 			<div class="col-md-4">
 				<div class="alert alert-info">
@@ -84,20 +88,10 @@ Display art database configuration page
 		</c:if>
 	</jsp:attribute>
 
-	<jsp:attribute name="belowMainPanel">
+	<jsp:attribute name="belowPanel">
 		<div class="${belowPanelClass}">
 			<div class="alert alert-info">
 				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>
-				<ul>
-					<li>
-						If using <b>JNDI</b>, the <b>WEB-INF\classes\quartz.properties</b> file will
-						need to have been modified beforehand to set appropriate quartz
-						values depending on the database type you are using for the ART Database.
-						See <a href="${pageContext.request.contextPath}/docs/Manual.html#quartz-properties">
-							${pageContext.request.contextPath}/docs/Manual.html#quartz-properties
-						</a>
-					</li>
-				</ul>
 			</div>
 		</div>
 	</jsp:attribute>
@@ -126,23 +120,15 @@ Display art database configuration page
 						<spring:message code="page.label.databaseType"/>
 					</label>
 					<div class="col-md-8">
-						<div class="input-group">
-							<select name="databaseType" id="databaseType" class="form-control selectpicker"
-									onchange="setDatasourceFields(this.value, 'driver', 'url', 'testSql');">
-								<option value="">--</option>
-								<option data-divider="true"></option>
-								<c:forEach var="dbType" items="${databaseTypes}">
-									<option value="${encode:forHtmlAttribute(dbType.key)}">${encode:forHtmlContent(dbType.value)}</option>
-								</c:forEach>
-							</select>
-							<spring:message code="page.help.databaseType" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
+						<form:select path="databaseType" class="form-control selectpicker">
+							<option value="">--</option>
+							<option data-divider="true"></option>
+							<c:forEach var="databaseType" items="${databaseTypes}">
+								<form:option value="${databaseType}">
+									${encode:forHtmlContent(databaseType.description)} 
+								</form:option>
+							</c:forEach>
+						</form:select>
 					</div>
 				</div>
 				<div class="form-group">
@@ -153,6 +139,21 @@ Display art database configuration page
 						<div class="checkbox">
 							<form:checkbox path="jndi" id="jndi" class="switch-yes-no"/>
 						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="databaseProtocol">
+						<spring:message code="page.label.databaseProtocol"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="databaseProtocol" class="form-control">
+							<option value="">--</option>
+							<c:forEach var="databaseProtocol" items="${databaseProtocols}">
+								<form:option value="${databaseProtocol}">
+									${encode:forHtmlContent(databaseProtocol.description)} 
+								</form:option>
+							</c:forEach>
+						</form:select>
 					</div>
 				</div>
 				<div class="form-group">
@@ -240,7 +241,7 @@ Display art database configuration page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="connectionPoolTimeoutMins" maxlength="5" class="form-control"/>
+							<form:input type="number" path="connectionPoolTimeoutMins" maxlength="5" class="form-control"/>
 							<spring:message code="page.help.connectionPoolTimeout"
 											var="help" />
 							<span class="input-group-btn" >
@@ -259,7 +260,7 @@ Display art database configuration page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="maxPoolConnections" maxlength="3" class="form-control"/>
+							<form:input type="number" path="maxPoolConnections" maxlength="3" class="form-control"/>
 							<spring:message code="artDatabase.help.maxPoolConnections" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"

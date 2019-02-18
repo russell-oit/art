@@ -17,6 +17,7 @@
  */
 package art.report;
 
+import art.accessright.AccessRightService;
 import art.datasource.DatasourceService;
 import art.encryption.AesEncryptor;
 import art.encryptor.EncryptorService;
@@ -38,11 +39,15 @@ import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportRunner;
 import art.savedparameter.SavedParameter;
 import art.savedparameter.SavedParameterService;
+import art.user.UserService;
+import art.usergroup.UserGroup;
+import art.usergroup.UserGroupService;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rits.cloning.Cloner;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -60,6 +65,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -121,6 +127,15 @@ public class ReportController {
 	@Autowired
 	private ServletContext servletContext;
 
+	@Autowired
+	private AccessRightService accessRightService;
+
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private UserGroupService userGroupService;
+
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, Model model) {
 		logger.debug("Entering showReports");
@@ -149,6 +164,17 @@ public class ReportController {
 				model.addAttribute("message", "reports.message.reportNotFound");
 				return "reportError";
 			} else {
+				User sessionUser = (User) session.getAttribute("sessionUser");
+				if (reportService.hasOwnerAccess(sessionUser, report.getReportId())) {
+					List<User> users = userService.getActiveUsers();
+					users.removeIf(user -> StringUtils.isBlank(user.getFullName()));
+					List<UserGroup> userGroups = userGroupService.getAllUserGroups();
+
+					request.setAttribute("users", users);
+					request.setAttribute("userGroups", userGroups);
+					request.setAttribute("enableShare", true);
+				}
+
 				RunReportHelper runReportHelper = new RunReportHelper();
 				runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
 			}
@@ -272,7 +298,7 @@ public class ReportController {
 		return ajaxResponse;
 	}
 
-	@RequestMapping(value = "/deleteReport", method = RequestMethod.POST)
+	@RequestMapping(value = {"/deleteReport", "/deleteGridstack", "/deleteSelfService"}, method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReport(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteReport: id={}", id);
@@ -798,22 +824,6 @@ public class ReportController {
 	}
 
 	/**
-	 * Saves a file
-	 *
-	 * @param file the file to save
-	 * @param reportTypeId the reportTypeId for the report related to the file
-	 * @param overwrite whether to overwrite existing files
-	 * @param locale the locale
-	 * @return a problem description if there was a problem, otherwise null
-	 * @throws IOException
-	 */
-	private String saveFile(MultipartFile file, int reportTypeId, boolean overwrite,
-			Locale locale) throws IOException {
-
-		return saveFile(file, reportTypeId, overwrite, locale, null);
-	}
-
-	/**
 	 * Saves a file and updates the report template property with the file name
 	 *
 	 * @param file the file to save
@@ -827,7 +837,35 @@ public class ReportController {
 	private String saveFile(MultipartFile file, int reportTypeId, boolean overwrite,
 			Locale locale, Report report) throws IOException {
 
-		logger.debug("Entering saveFile: report={}", report);
+		ReportType reportType = ReportType.toEnum(reportTypeId);
+		String templatesPath;
+		if (reportType.isUseJsTemplatesPath()) {
+			templatesPath = Config.getJsTemplatesPath();
+		} else if (reportType == ReportType.JPivotMondrian) {
+			templatesPath = Config.getDefaultTemplatesPath();
+		} else {
+			templatesPath = Config.getTemplatesPath();
+		}
+
+		return saveFile(file, templatesPath, overwrite, locale, report);
+	}
+
+	/**
+	 * Saves a file and updates the report template property with the file name
+	 *
+	 * @param file the file to save
+	 * @param templatesPath the path where to save the file
+	 * @param overwrite whether to overwrite existing files
+	 * @param locale the locale
+	 * @param report the report to update, or null
+	 * @return a problem description if there was a problem, otherwise null
+	 * @throws IOException
+	 */
+	private String saveFile(MultipartFile file, String templatesPath, boolean overwrite,
+			Locale locale, Report report) throws IOException {
+
+		logger.debug("Entering saveFile: report={}, templatesPath='{}', overwrite={}",
+				report, templatesPath, overwrite);
 
 		logger.debug("file==null = {}", file == null);
 		if (file == null) {
@@ -846,6 +884,7 @@ public class ReportController {
 		List<String> validExtensions = new ArrayList<>();
 		validExtensions.add("xml");
 		validExtensions.add("jrxml");
+		validExtensions.add("jasper");
 		validExtensions.add("xls");
 		validExtensions.add("xlsx");
 		validExtensions.add("xlsm");
@@ -859,7 +898,6 @@ public class ReportController {
 		validExtensions.add("docx");
 		validExtensions.add("odt");
 		validExtensions.add("pptx");
-		validExtensions.add("js"); //for react pivot templates
 		validExtensions.add("html"); //for thymeleaf reports
 		validExtensions.add("csv"); //for pivottable.js csv server reports (.csv)
 		validExtensions.add("txt"); //for pivottable.js csv server reports (.txt for other delimited files e.g. tab separated, pipe separated etc)
@@ -868,16 +906,6 @@ public class ReportController {
 		validExtensions.add("json"); //for datamaps optional data file
 
 		//save file
-		ReportType reportType = ReportType.toEnum(reportTypeId);
-		String templatesPath;
-		if (reportType.isUseJsTemplatesPath()) {
-			templatesPath = Config.getJsTemplatesPath();
-		} else if (reportType == ReportType.JPivotMondrian) {
-			templatesPath = Config.getDefaultTemplatesPath();
-		} else {
-			templatesPath = Config.getTemplatesPath();
-		}
-
 		UploadHelper uploadHelper = new UploadHelper(messageSource, locale);
 		String message = uploadHelper.saveFile(file, templatesPath, validExtensions, overwrite);
 
@@ -936,20 +964,21 @@ public class ReportController {
 		String showPoints = "";
 		String showData = "";
 
-		logger.debug("report.getChartOptions().isShowLegend() = {}", report.getChartOptions().getShowLegend());
-		if (report.getChartOptions().getShowLegend()) {
+		//https://stackoverflow.com/questions/11005286/check-if-null-boolean-is-true-results-in-exception
+		logger.debug("report.getChartOptions().getShowLegend() = {}", report.getChartOptions().getShowLegend());
+		if (BooleanUtils.isTrue(report.getChartOptions().getShowLegend())) {
 			showLegend = "showLegend";
 		}
-		logger.debug("report.getChartOptions().isShowLabels() = {}", report.getChartOptions().getShowLabels());
-		if (report.getChartOptions().getShowLabels()) {
+		logger.debug("report.getChartOptions().getShowLabels() = {}", report.getChartOptions().getShowLabels());
+		if (BooleanUtils.isTrue(report.getChartOptions().getShowLabels())) {
 			showLabels = "showLabels";
 		}
-		logger.debug("report.getChartOptions().isShowPoints() = {}", report.getChartOptions().getShowPoints());
-		if (report.getChartOptions().getShowPoints()) {
+		logger.debug("report.getChartOptions().getShowPoints() = {}", report.getChartOptions().getShowPoints());
+		if (BooleanUtils.isTrue(report.getChartOptions().getShowPoints())) {
 			showPoints = "showPoints";
 		}
-		logger.debug("report.getChartOptions().isShowData() = {}", report.getChartOptions().getShowData());
-		if (report.getChartOptions().getShowData()) {
+		logger.debug("report.getChartOptions().getShowData() = {}", report.getChartOptions().getShowData());
+		if (BooleanUtils.isTrue(report.getChartOptions().getShowData())) {
 			showData = "showData";
 		}
 
@@ -1006,10 +1035,19 @@ public class ReportController {
 
 			logger.debug("filename = '{}'", filename);
 
+			String extension = FilenameUtils.getExtension(filename);
+
 			if (FinalFilenameValidator.isValid(filename)) {
 				try {
 					boolean overwrite = BooleanUtils.toBoolean(request.getParameter("overwriteFiles"));
-					String errorMessage = saveFile(file, reportTypeId, overwrite, locale);
+					String errorMessage;
+					Report report = null;
+					if (StringUtils.equalsAnyIgnoreCase(extension, "css", "js")) {
+						String templatesPath = Config.getJsTemplatesPath();
+						errorMessage = saveFile(file, templatesPath, overwrite, locale, report);
+					} else {
+						errorMessage = saveFile(file, reportTypeId, overwrite, locale, report);
+					}
 					if (errorMessage != null) {
 						fileDetails.setError(errorMessage);
 					}
@@ -1235,37 +1273,83 @@ public class ReportController {
 			@RequestParam("description") String description,
 			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
 			@RequestParam(value = "saveSelectedParameters", defaultValue = "false") Boolean saveSelectedParameters,
-			@RequestParam(value = "selfService", defaultValue = "false") Boolean selfService,
+			@RequestParam(value = "selfServiceDashboard", defaultValue = "false") Boolean selfServiceDashboard,
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
 				+ " name='{}', description='{}', overwrite={},"
-				+ " saveSelectedParameters={}, selfService={}",
+				+ " saveSelectedParameters={}, selfServiceDashboard={}",
 				reportId, config, name, description, overwrite,
-				saveSelectedParameters, selfService);
+				saveSelectedParameters, selfServiceDashboard);
+
+		Integer viewReportId = null;
+		return saveAdHoc(ReportType.GridstackDashboard, reportId, config, name, description, overwrite, saveSelectedParameters, selfServiceDashboard, session, request, locale, viewReportId);
+	}
+
+	@PostMapping("/saveSelfService")
+	public @ResponseBody
+	AjaxResponse saveSelfService(@RequestParam(value = "reportId", required = false) Integer reportId,
+			@RequestParam("config") String config, @RequestParam("name") String name,
+			@RequestParam("description") String description,
+			@RequestParam(value = "overwrite", defaultValue = "false") Boolean overwrite,
+			@RequestParam(value = "viewReportId", required = false) Integer viewReportId,
+			HttpSession session, HttpServletRequest request, Locale locale) {
+
+		logger.debug("Entering saveGridstack: reportId={}, config='{}',"
+				+ " name='{}', description='{}', overwrite={}, viewReportId={}",
+				reportId, config, name, description, overwrite, viewReportId);
+
+		boolean saveSelectedParameters = false;
+		boolean selfServiceDashboard = false;
+		return saveAdHoc(ReportType.Tabular, reportId, config, name, description, overwrite, saveSelectedParameters, selfServiceDashboard, session, request, locale, viewReportId);
+	}
+
+	/**
+	 * Saves an ad hoc or self service report or dashboard
+	 *
+	 * @param reportType the report type
+	 * @param reportId the report id to edit or null if it's a new report
+	 * @param config configuration for the report
+	 * @param name the report name
+	 * @param description the report description
+	 * @param overwrite whether to overwrite the existing report
+	 * @param saveSelectedParameters whether to save selected parameters
+	 * @param selfServiceDashboard whether this is from the self service
+	 * dashboards page
+	 * @param session the http session
+	 * @param request the http request
+	 * @param locale the locale
+	 * @param viewReportId the view report id when creating/saving self service
+	 * reports
+	 * @return the action result
+	 */
+	private AjaxResponse saveAdHoc(ReportType reportType, Integer reportId,
+			String config, String name, String description, Boolean overwrite,
+			Boolean saveSelectedParameters, Boolean selfServiceDashboard,
+			HttpSession session, HttpServletRequest request, Locale locale,
+			Integer viewReportId) {
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
 			Report report;
 			if (reportId == null) {
-				report = new Report();
-				report.setReportType(ReportType.GridstackDashboard);
+				if (reportType == ReportType.GridstackDashboard) {
+					report = new Report();
+					report.setReportType(reportType);
+				} else {
+					Report viewReport = reportService.getReport(viewReportId);
+					Cloner cloner = new Cloner();
+					report = cloner.deepClone(viewReport);
+					report.setViewReportId(viewReportId);
+					report.setReportType(ReportType.Tabular);
+				}
 			} else {
 				report = reportService.getReport(reportId);
 				report.encryptPasswords();
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
-
-			report.setGridstackSavedOptions(config);
-			if (StringUtils.isNotBlank(description)) {
-				report.setDescription(description);
-			}
-			if (StringUtils.isNotBlank(name)) {
-				report.setName(name);
-				report.setShortDescription(name);
-			}
 
 			boolean reportNameNotProvided = false;
 			boolean reportNameExists = false;
@@ -1284,39 +1368,62 @@ public class ReportController {
 				String message = messageSource.getMessage("reports.message.reportNameExists", null, locale);
 				response.setErrorMessage(message);
 			} else {
-				if (selfService) {
-					//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
-					//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
-					ObjectMapper mapper = new ObjectMapper();
-					List<GridstackItemOptions> itemOptions = mapper.readValue(config, new TypeReference<List<GridstackItemOptions>>() {
-					});
-					if (CollectionUtils.isEmpty(itemOptions)) {
-						String message = messageSource.getMessage("reports.message.nothingToSave", null, locale);
-						response.setErrorMessage(message);
-						return response;
-					} else {
-						StringBuilder sb = new StringBuilder();
-						sb.append("<DASHBOARD>");
-						for (GridstackItemOptions itemOption : itemOptions) {
-							int itemReportId = itemOption.getReportId();
-							String reportName = reportService.getReportName(itemReportId);
-							sb.append("<ITEM>")
-									.append("<TITLE>")
-									.append(reportName)
-									.append("</TITLE>")
-									.append("<REPORTID>")
-									.append(String.valueOf(itemReportId))
-									.append("</REPORTID>")
-									.append("</ITEM>");
+				if (reportType == ReportType.GridstackDashboard) {
+					report.setGridstackSavedOptions(config);
+					if (selfServiceDashboard) {
+						//https://stackoverflow.com/questions/11664894/jackson-deserialize-using-generic-class
+						//https://stackoverflow.com/questions/8263008/how-to-deserialize-json-file-starting-with-an-array-in-jackson
+						ObjectMapper mapper = new ObjectMapper();
+						List<GridstackItemOptions> itemOptions = mapper.readValue(config, new TypeReference<List<GridstackItemOptions>>() {
+						});
+						if (CollectionUtils.isEmpty(itemOptions)) {
+							String message = messageSource.getMessage("reports.message.nothingToSave", null, locale);
+							response.setErrorMessage(message);
+							return response;
+						} else {
+							StringBuilder sb = new StringBuilder();
+							sb.append("<DASHBOARD>");
+							for (GridstackItemOptions itemOption : itemOptions) {
+								int itemReportId = itemOption.getReportId();
+								String reportName = reportService.getReportName(itemReportId);
+								sb.append("<ITEM>")
+										.append("<TITLE>")
+										.append(reportName)
+										.append("</TITLE>")
+										.append("<REPORTID>")
+										.append(String.valueOf(itemReportId))
+										.append("</REPORTID>")
+										.append("</ITEM>");
+							}
+							sb.append("</DASHBOARD>");
+							report.setReportSource(sb.toString());
 						}
-						sb.append("</DASHBOARD>");
-						report.setReportSource(sb.toString());
 					}
+				} else {
+					report.setSelfServiceOptions(config);
+					RunReportHelper runReportHelper = new RunReportHelper();
+					runReportHelper.applySelfServiceFields(report, sessionUser);
 				}
 
 				if (overwrite) {
+					if (StringUtils.isNotEmpty(description)) {
+						report.setDescription(description);
+					}
+					if (StringUtils.isNotBlank(name)) {
+						report.setName(name);
+						if (reportType == ReportType.GridstackDashboard) {
+							report.setShortDescription(name);
+						}
+					}
+
 					reportService.updateReport(report, sessionUser);
 				} else {
+					report.setDescription(description);
+					report.setName(name);
+					if (reportType == ReportType.GridstackDashboard) {
+						report.setShortDescription(name);
+					}
+
 					if (reportId == null) {
 						reportService.addReport(report, sessionUser);
 					} else {
@@ -1334,32 +1441,6 @@ public class ReportController {
 				response.setSuccess(true);
 			}
 		} catch (Exception ex) {
-			logger.error("Error", ex);
-			response.setErrorMessage(ex.getMessage());
-		}
-
-		return response;
-	}
-
-	@PostMapping("/deleteGridstack")
-	public @ResponseBody
-	AjaxResponse deleteGridstack(@RequestParam("id") Integer id) {
-		logger.debug("Entering deleteGridstack: id={}", id);
-
-		AjaxResponse response = new AjaxResponse();
-
-		try {
-			ActionResult deleteResult = reportService.deleteReport(id);
-
-			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
-			if (deleteResult.isSuccess()) {
-				response.setSuccess(true);
-			} else {
-				//report not deleted because of linked jobs
-				List<String> cleanedData = deleteResult.cleanData();
-				response.setData(cleanedData);
-			}
-		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.getMessage());
 		}
@@ -1408,6 +1489,32 @@ public class ReportController {
 		}
 
 		return list;
+	}
+
+	@PostMapping("/shareReport")
+	public @ResponseBody
+	AjaxResponse shareReport(@RequestParam("shareReportId") Integer shareReportId,
+			@RequestParam(value = "users[]", required = false) Integer[] users,
+			@RequestParam(value = "userGroups[]", required = false) Integer[] userGroups,
+			@RequestParam("action") String action) {
+
+		logger.debug("Entering shareReport: shareReportId={}, action='{}'", shareReportId, action);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Integer[] reports = {shareReportId};
+			Integer[] reportGroups = null;
+			Integer[] jobs = null;
+
+			accessRightService.updateAccessRights(action, users, userGroups, reports, reportGroups, jobs);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
 	}
 
 }

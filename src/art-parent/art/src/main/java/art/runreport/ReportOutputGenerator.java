@@ -465,6 +465,7 @@ public class ReportOutputGenerator {
 		chart.setSwapAxes(swapAxes);
 		chart.setIncludeDataInOutput(includeDataInOutput);
 		chart.setReportRequestParameters(reportRequestParameters);
+		chart.setReportOptions(reportOptions);
 
 		String optionsString = outputReport.getOptions();
 		JFreeChartOptions options;
@@ -798,8 +799,7 @@ public class ReportOutputGenerator {
 			backgroundColor = reportChartOptions.getBackgroundColor();
 		}
 		if (StringUtils.isBlank(backgroundColor)) {
-			final String DEFAULT_BACKGROUND_COLOR = ArtUtils.WHITE_HEX_COLOR_CODE;
-			effectiveChartOptions.setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
+			effectiveChartOptions.setBackgroundColor(ArtUtils.WHITE_HEX_COLOR_CODE);
 		} else {
 			effectiveChartOptions.setBackgroundColor(backgroundColor);
 		}
@@ -1038,7 +1038,7 @@ public class ReportOutputGenerator {
 		request.setAttribute("savedConfigJson", savedConfigJson);
 
 		ReportService reportService = new ReportService();
-		boolean exclusiveAccess = reportService.hasExclusiveAccess(user, report.getReportId());
+		boolean exclusiveAccess = reportService.hasOwnerAccess(user, report.getReportId());
 		request.setAttribute("exclusiveAccess", exclusiveAccess);
 
 		String outputDivId = "pivotTableJsOutput-" + RandomStringUtils.randomAlphanumeric(5);
@@ -1268,8 +1268,7 @@ public class ReportOutputGenerator {
 	 * @throws Exception
 	 */
 	private void generateChartReport() throws Exception {
-
-		logger.debug("Entering generateStandardChart");
+		logger.debug("Entering generateChartReport");
 
 		rs = reportRunner.getResultSet();
 
@@ -2358,7 +2357,7 @@ public class ReportOutputGenerator {
 							}
 							row.put(columnName, finalValue);
 						}
-						
+
 						finalResultList.add(row);
 					}
 

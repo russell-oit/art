@@ -468,11 +468,10 @@ public class ReportServiceHelper {
 
 			for (UserReportRight userReportRight : allUserReportRights) {
 				User user = userReportRight.getUser();
-				String userKey = user.getUserId() + "-" + user.getUsername();
 				Report report = userReportRight.getReport();
 				int tempReportId = report.getReportId();
 				String action = "grant";
-				String users[] = {userKey};
+				Integer users[] = {user.getUserId()};
 				Integer[] userGroups = null;
 				Integer[] tempReports = {tempReportId};
 				Integer[] reportGroups = null;
@@ -486,7 +485,7 @@ public class ReportServiceHelper {
 				Report report = userGroupReportRight.getReport();
 				int tempReportId = report.getReportId();
 				String action = "grant";
-				String users[] = null;
+				Integer users[] = null;
 				Integer[] userGroups = {tempUserGroupId};
 				Integer[] tempReports = {tempReportId};
 				Integer[] reportGroups = null;

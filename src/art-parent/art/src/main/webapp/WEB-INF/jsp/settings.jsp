@@ -136,7 +136,7 @@ Settings configuration page
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#settings">
 				<spring:message code="page.link.help"/>
@@ -196,7 +196,7 @@ Settings configuration page
 							<spring:message code="settings.label.smtpPort"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="smtpPort" maxlength="6" class="form-control"/>
+							<form:input type="number" path="smtpPort" maxlength="6" class="form-control"/>
 							<form:errors path="smtpPort" cssClass="error"/>
 						</div>
 					</div>
@@ -371,7 +371,7 @@ Settings configuration page
 							<spring:message code="settings.label.ldapPort"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="ldapPort" maxlength="6" class="form-control" />
+							<form:input type="number" path="ldapPort" maxlength="6" class="form-control" />
 							<form:errors path="ldapPort" cssClass="error" />
 						</div>
 					</div>
@@ -550,7 +550,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-8">
 							<div class="input-group">
-								<form:input path="maxRowsDefault" maxlength="6" class="form-control"/>
+								<form:input type="number" path="maxRowsDefault" maxlength="6" class="form-control"/>
 								<spring:message code="settings.help.maxRowsDefault" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -757,7 +757,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-8">
 							<div class="input-group">
-								<form:input path="maxRunningReports" maxlength="6" class="form-control"/>
+								<form:input type="number" path="maxRunningReports" maxlength="6" class="form-control"/>
 								<spring:message code="settings.help.maxRunningReports" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -785,7 +785,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-8">
 							<div class="input-group">
-								<form:input path="mondrianCacheExpiryPeriod" maxlength="6" class="form-control"/>
+								<form:input type="number" path="mondrianCacheExpiryPeriod" maxlength="6" class="form-control"/>
 								<spring:message code="settings.help.mondrianCacheExpiryPeriod" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -831,7 +831,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-8">
 							<div class="input-group">
-								<form:input path="maxFileUploadSizeMB" maxlength="2" class="form-control"/>
+								<form:input type="number" path="maxFileUploadSizeMB" maxlength="3" class="form-control"/>
 								<spring:message code="settings.help.maxFileUploadSizeMB" var="help"/>
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -898,7 +898,7 @@ Settings configuration page
 							<spring:message code="settings.label.jwtTokenExpiryMins"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="jwtTokenExpiryMins" maxlength="6" class="form-control"/>
+							<form:input type="number" path="jwtTokenExpiryMins" maxlength="6" class="form-control"/>
 							<form:errors path="jwtTokenExpiryMins" cssClass="error"/>
 						</div>
 					</div>
@@ -1012,7 +1012,7 @@ Settings configuration page
 							<spring:message code="settings.label.passwordMinLength"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="passwordMinLength" maxlength="2" class="form-control"/>
+							<form:input type="number" path="passwordMinLength" maxlength="2" class="form-control"/>
 							<form:errors path="passwordMinLength" cssClass="error"/>
 						</div>
 					</div>
@@ -1021,7 +1021,7 @@ Settings configuration page
 							<spring:message code="settings.label.passwordMinLowercase"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="passwordMinLowercase" maxlength="2" class="form-control"/>
+							<form:input type="number" path="passwordMinLowercase" maxlength="2" class="form-control"/>
 							<form:errors path="passwordMinLowercase" cssClass="error"/>
 						</div>
 					</div>
@@ -1030,7 +1030,7 @@ Settings configuration page
 							<spring:message code="settings.label.passwordMinUppercase"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="passwordMinUppercase" maxlength="2" class="form-control"/>
+							<form:input type="number" path="passwordMinUppercase" maxlength="2" class="form-control"/>
 							<form:errors path="passwordMinUppercase" cssClass="error"/>
 						</div>
 					</div>
@@ -1039,7 +1039,7 @@ Settings configuration page
 							<spring:message code="settings.label.passwordMinNumeric"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="passwordMinNumeric" maxlength="2" class="form-control"/>
+							<form:input type="number" path="passwordMinNumeric" maxlength="2" class="form-control"/>
 							<form:errors path="passwordMinNumeric" cssClass="error"/>
 						</div>
 					</div>
@@ -1048,7 +1048,7 @@ Settings configuration page
 							<spring:message code="settings.label.passwordMinSpecial"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="passwordMinSpecial" maxlength="2" class="form-control"/>
+							<form:input type="number" path="passwordMinSpecial" maxlength="2" class="form-control"/>
 							<form:errors path="passwordMinSpecial" cssClass="error"/>
 						</div>
 					</div>

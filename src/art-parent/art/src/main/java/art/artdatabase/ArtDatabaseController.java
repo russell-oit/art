@@ -20,6 +20,8 @@ package art.artdatabase;
 import art.cache.CacheHelper;
 import art.dbutils.DatabaseUtils;
 import art.enums.ConnectionPoolLibrary;
+import art.enums.DatabaseProtocol;
+import art.enums.DatabaseType;
 import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
@@ -29,7 +31,6 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -63,43 +64,18 @@ public class ArtDatabaseController {
 	private UserService userService;
 
 	@ModelAttribute("databaseTypes")
-	public Map<String, String> addDatabaseTypes() {
-		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
-		
-		databaseTypes.remove("odbc-sun");
-		databaseTypes.remove("hbase-phoenix");
-		databaseTypes.remove("msaccess-ucanaccess");
-		databaseTypes.remove("msaccess-ucanaccess-password");
-		databaseTypes.remove("sqlite-xerial");
-		databaseTypes.remove("csv-csvjdbc");
-		databaseTypes.remove("olap4j-mondrian");
-		databaseTypes.remove("olap4j-xmla");
-		databaseTypes.remove("couchbase");
-		databaseTypes.remove("drill");
-		databaseTypes.remove("monetdb");
-		databaseTypes.remove("vertica");
-		databaseTypes.remove("cassandra-adejanovski");
-		databaseTypes.remove("neo4j");
-		databaseTypes.remove("exasol");
-		databaseTypes.remove("redshift");
-		databaseTypes.remove("teradata");
-		databaseTypes.remove("snowflake1-us-west");
-		databaseTypes.remove("snowflake2-other");
-		databaseTypes.remove("presto");
-		databaseTypes.remove("memsql");
-		databaseTypes.remove("citus");
-		databaseTypes.remove("aurora-mysql-mariadb");
-		databaseTypes.remove("aurora-postgresql-postgresql");
-		databaseTypes.remove("greenplum");
-		databaseTypes.remove("timescaledb");
-		databaseTypes.remove("kdb");
-
-		return databaseTypes;
+	public List<DatabaseType> addDatabaseTypes() {
+		return DatabaseType.listForArtDatabase();
 	}
 
 	@ModelAttribute("connectionPoolLibraries")
 	public List<ConnectionPoolLibrary> addConnectionPoolLibraries() {
 		return ConnectionPoolLibrary.list();
+	}
+
+	@ModelAttribute("databaseProtocols")
+	public List<DatabaseProtocol> addDatabaseProtocols() {
+		return DatabaseProtocol.list();
 	}
 
 	@RequestMapping(value = "/artDatabase", method = RequestMethod.GET)
@@ -233,7 +209,7 @@ public class ArtDatabaseController {
 				ps.setString(1, sampleDbUrl);
 				ps.setInt(2, 1);
 				ps.addBatch();
-				
+
 				ps.setString(1, demoDbUrl);
 				ps.setInt(2, 2);
 				ps.addBatch();
@@ -245,7 +221,7 @@ public class ArtDatabaseController {
 				ps.setString(1, mondrianUrl);
 				ps.setInt(2, 3);
 				ps.addBatch();
-				
+
 				String orgChartDbUrl = String.format(hsqldbUrl, "OrgChartDB");
 				ps.setString(1, orgChartDbUrl);
 				ps.setInt(2, 4);
@@ -257,7 +233,7 @@ public class ArtDatabaseController {
 			Config.saveArtDatabaseConfiguration(artDatabase);
 
 			Config.initializeArtDatabase();
-			
+
 			cacheHelper.clearAll(session);
 
 			//refresh session user credentials as per new database

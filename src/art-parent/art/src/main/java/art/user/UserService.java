@@ -38,6 +38,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
@@ -134,6 +135,7 @@ public class UserService {
 			user.setActive(rs.getBoolean("ACTIVE"));
 			user.setPassword(rs.getString("PASSWORD"));
 			user.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
+			user.setDescription(rs.getString("DESCRIPTION"));
 			user.setStartReport(rs.getString("START_QUERY"));
 			user.setUserId(rs.getInt("USER_ID"));
 			user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
@@ -345,11 +347,10 @@ public class UserService {
 		sql = "DELETE FROM ART_ADMIN_PRIVILEGES WHERE USER_ID=?";
 		dbService.update(sql, id);
 
-		sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=?";
+		sql = "DELETE FROM ART_USER_REPORT_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
-		//delete user-report user relationships
-		sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=?";
+		sql = "DELETE FROM ART_USER_REPORTGROUP_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
 		//delete user-rules relationships
@@ -357,10 +358,10 @@ public class UserService {
 		dbService.update(sql, id);
 
 		//delete user-shared job relationships
-		sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=?";
+		sql = "DELETE FROM ART_USER_JOB_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
-		sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
+		sql = "DELETE FROM ART_USER_USERGROUP_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
 		sql = "DELETE FROM ART_JOB_ARCHIVES WHERE USER_ID=?";
@@ -377,10 +378,10 @@ public class UserService {
 
 		sql = "DELETE FROM ART_USER_FIXED_PARAM_VAL WHERE USER_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_ROLE_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_PERMISSION_MAP WHERE USER_ID=?";
 		dbService.update(sql, id);
 
@@ -752,10 +753,11 @@ public class UserService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_USERS"
 					+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
-					+ " FULL_NAME, EMAIL, ACCESS_LEVEL, DEFAULT_QUERY_GROUP,"
-					+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, PUBLIC_USER,"
+					+ " FULL_NAME, EMAIL, DESCRIPTION, ACCESS_LEVEL,"
+					+ " DEFAULT_QUERY_GROUP, START_QUERY, CAN_CHANGE_PASSWORD,"
+					+ " ACTIVE, PUBLIC_USER,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -764,6 +766,7 @@ public class UserService {
 				user.getPasswordAlgorithm(),
 				user.getFullName(),
 				user.getEmail(),
+				user.getDescription(),
 				accessLevel,
 				defaultReportGroupId,
 				user.getStartReport(),
@@ -782,8 +785,9 @@ public class UserService {
 		} else {
 			String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 					+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
-					+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-					+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, PUBLIC_USER=?,"
+					+ " DESCRIPTION=?, ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?,"
+					+ " START_QUERY=?, CAN_CHANGE_PASSWORD=?,"
+					+ " ACTIVE=?, PUBLIC_USER=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE USER_ID=?";
 
@@ -793,6 +797,7 @@ public class UserService {
 				user.getPasswordAlgorithm(),
 				user.getFullName(),
 				user.getEmail(),
+				user.getDescription(),
 				accessLevel,
 				defaultReportGroupId,
 				user.getStartReport(),
@@ -921,4 +926,53 @@ public class UserService {
 			return true;
 		}
 	}
+
+	/**
+	 * Returns the username for a given user id
+	 *
+	 * @param userId the user id
+	 * @return the username for the given user id
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public String getUsername(int userId) throws SQLException {
+		logger.debug("Entering getUsername: userId={}", userId);
+
+		String sql = "SELECT USERNAME FROM ART_USERS"
+				+ " WHERE USER_ID=?";
+
+		ResultSetHandler<String> h = new ScalarHandler<>();
+		return dbService.query(sql, h, userId);
+	}
+
+	/**
+	 * Returns the usernames for the given user ids
+	 *
+	 * @param ids the user ids
+	 * @return the usernames for the given user ids
+	 * @throws SQLException
+	 */
+	public Map<Integer, String> getUsernames(Integer[] ids) throws SQLException {
+		logger.debug("Entering getUsernames");
+
+		if (ids == null || ids.length == 0) {
+			return new HashMap<>();
+		}
+
+		String sql = "SELECT USER_ID, USERNAME FROM ART_USERS"
+				+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> rows = dbService.query(sql, h, (Object[]) ids);
+
+		Map<Integer, String> details = new LinkedHashMap<>();
+		for (Map<String, Object> row : rows) {
+			Integer userId = (Integer) row.get("USER_ID");
+			String username = (String) row.get("USERNAME");
+			details.put(userId, username);
+		}
+
+		return details;
+	}
+
 }

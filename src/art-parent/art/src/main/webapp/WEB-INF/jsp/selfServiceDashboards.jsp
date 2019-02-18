@@ -83,20 +83,10 @@
 						var autoPosition = true;
 						grid.addWidget(el, x, y, width, height, autoPosition);
 
-						$.ajax({
-							type: 'POST',
-							url: '${pageContext.request.contextPath}/runReport',
-							data: {reportId: reportId, isFragment: true},
-							success: function (data) {
-								$("#content_" + reportId).html(data);
-								var autoheight = false;
-								var autowidth = true;
-								autosize(autoheight, autowidth, reportId);
-							},
-							error: function (xhr) {
-								showUserAjaxError(xhr, '${errorOccurredText}');
-							}
-						});
+						var runImmediately = $("#runImmediately").is(":checked");
+						if (runImmediately) {
+							runReport(reportId);
+						}
 					} else {
 						var contentDiv = $("#content_" + reportId);
 						var item = contentDiv.closest('.grid-stack-item');
@@ -109,6 +99,23 @@
 					return processedTemplate;
 				}
 
+				function runReport(reportId) {
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/runReport',
+						data: {reportId: reportId, isFragment: true},
+						success: function (data) {
+							$("#content_" + reportId).html(data);
+							var autoheight = false;
+							var autowidth = true;
+							autosize(autoheight, autowidth, reportId);
+						},
+						error: function (xhr) {
+							showUserAjaxError(xhr, '${errorOccurredText}');
+						}
+					});
+				}
+
 				//https://stackoverflow.com/questions/31983495/gridstack-js-delete-widget-using-jquery
 				$('.grid-stack').on('click', '.removeWidget', function () {
 					var grid = $('.grid-stack').data('gridstack');
@@ -117,6 +124,11 @@
 					var reportId = $(this).data("reportId");
 					$('#reports').find('[value=' + reportId + ']').prop('selected', false);
 					$('#reports').selectpicker('refresh');
+				});
+
+				$('.grid-stack').on('click', '.refreshWidget', function () {
+					var reportId = $(this).data("reportId");
+					runReport(reportId);
 				});
 
 				function autosize(autoheight, autowidth, reportId) {
@@ -157,14 +169,14 @@
 					$.ajax({
 						type: 'GET',
 						dataType: "json",
-						url: '${pageContext.request.contextPath}/getDashboardCandidateReports',
+						url: '${pageContext.request.contextPath}/getDashboardCandidates',
 						success: function (response) {
 							if (response.success) {
 								//https://github.com/silviomoreto/bootstrap-select/issues/1151
 								var reports = response.data;
 								var options = "";
 								$.each(reports, function (index, report) {
-									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
+									options += "<option value='" + report.reportId + "'>" + report.name2 + "</option>";
 								});
 								var select = $("#reports");
 								select.empty();
@@ -188,14 +200,14 @@
 					$.ajax({
 						type: 'GET',
 						dataType: "json",
-						url: '${pageContext.request.contextPath}/getEditDashboardReports',
+						url: '${pageContext.request.contextPath}/getEditDashboards',
 						success: function (response) {
 							if (response.success) {
 								//https://github.com/silviomoreto/bootstrap-select/issues/1151
 								var reports = response.data;
 								var options = "<option value='0'>--</option>";
 								$.each(reports, function (index, report) {
-									options += "<option value=" + report.reportId + ">" + report.name2 + "</option>";
+									options += "<option value='" + report.reportId + "'>" + report.name2 + "</option>";
 								});
 								var select = $("#dashboardReports");
 								select.empty();
@@ -224,10 +236,7 @@
 						resetDashboard();
 					} else {
 						resetDashboard();
-						$("#deleteDashboard").attr("data-report-name", reportName);
-						$("#deleteDashboard").attr("data-report-id", reportId);
-						$("#deleteDashboard").show();
-						$("#reportId").val(reportId);
+						showDeleteDashboard(reportName, reportId);
 
 						$.ajax({
 							type: 'GET',
@@ -270,6 +279,50 @@
 					}
 				});
 
+				$("#deleteDashboard").on("click", function () {
+					var reportName = $(this).attr("data-report-name");
+					reportName = escapeHtmlContent(reportName);
+					var reportId = $(this).attr("data-report-id");
+
+					bootbox.confirm({
+						message: "${deleteRecordText}: <b>" + reportName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/deleteGridstack",
+									data: {id: reportId},
+									success: function (response) {
+										var nonDeletedRecords = response.data;
+										if (response.success) {
+											$("#dashboardReports option[value='" + reportId + "']").remove();
+											resetAll();
+											$.notify("${reportDeletedText}", "success");
+										} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+											$.notify("${cannotDeleteReportText}", "error");
+										} else {
+											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+										}
+									},
+									error: function (xhr) {
+										showUserAjaxError(xhr, '${errorOccurredText}');
+									}
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
+
 			});
 
 			function resetAll() {
@@ -293,11 +346,12 @@
 				var grid = $('.grid-stack').data('gridstack');
 				grid.removeAll();
 			}
-
+			
 			function showDeleteDashboard(reportName, reportId) {
 				$("#deleteDashboard").attr("data-report-name", reportName);
 				$("#deleteDashboard").attr("data-report-id", reportId);
 				$("#deleteDashboard").show();
+				$("#reportId").val(reportId);
 			}
 		</script>
 	</jsp:attribute>
@@ -308,8 +362,8 @@
 			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#" data-report-id="#reportId#">
 			<div class="portletTitle">
 			<span><b>#reportName#</b></span>
-			<span class="fa fa-times removeWidget pull-right" style="cursor: pointer" data-report-id="#reportId#">					
-			</span>
+			<span class="fa fa-times removeWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
+			<span class="fa fa-refresh refreshWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
 			</div>				
 			<div id="content_#reportId#">
 			</div>
@@ -317,7 +371,7 @@
 			</div>
 		</script>
 
-		<div class='row' id="errorsDiv">
+		<div class='row'>
 			<div class="col-md-12">
 				<c:if test="${error != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -341,6 +395,11 @@
 				<button class="btn btn-default" id="newDashboard">
 					<spring:message code="page.text.new"/>
 				</button>
+				&nbsp;
+				<label class="checkbox-inline">
+					<input type="checkbox" name="runImmediately" id="runImmediately" checked>
+					<spring:message code="selfService.checkbox.runImmediately"/>
+				</label>
 			</div>
 			<div class="col-md-8">
 				<span class="pull-right">
@@ -364,6 +423,7 @@
 			</div>
 			<div class="col-md-4">
 				<select id="dashboardReports" class="form-control selectpicker">
+					<option value="0">--</option>
 				</select>
 			</div>
 		</div>
@@ -378,7 +438,7 @@
 				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 				<input type="hidden" name="reportId" id="reportId" value="">
 				<input type="hidden" id="config" name="config" value="">
-				<input type="hidden" name="selfService" value="true">
+				<input type="hidden" name="selfServiceDashboard" value="true">
 				<div class="form-group">
 					<label class="control-label col-md-4" for="name">
 						<spring:message code="page.text.name"/>
@@ -479,7 +539,6 @@
 											$('#dashboardReports').find('[value=' + newReportId + ']').prop('selected', true);
 											$("#dashboardReports").selectpicker('refresh');
 											showDeleteDashboard(reportName, newReportId);
-											$("#reportId").val(newReportId);
 										} else if (reportName) {
 											$('#dashboardReports').find('[value=' + reportId + ']').text(reportName);
 											$("#dashboardReports").selectpicker('refresh');
@@ -522,50 +581,6 @@
 				if (header) {
 					xhr.setRequestHeader(header, token);
 				}
-			});
-
-			$("#deleteDashboard").on("click", function () {
-				var reportName = $(this).attr("data-report-name");
-				reportName = escapeHtmlContent(reportName);
-				var reportId = $(this).attr("data-report-id");
-
-				bootbox.confirm({
-					message: "${deleteRecordText}: <b>" + reportName + "</b>",
-					buttons: {
-						cancel: {
-							label: "${cancelText}"
-						},
-						confirm: {
-							label: "${okText}"
-						}
-					},
-					callback: function (result) {
-						if (result) {
-							//user confirmed delete. make delete request
-							$.ajax({
-								type: "POST",
-								dataType: "json",
-								url: "${pageContext.request.contextPath}/deleteGridstack",
-								data: {id: reportId},
-								success: function (response) {
-									var nonDeletedRecords = response.data;
-									if (response.success) {
-										$("#dashboardReports option[value='" + reportId + "']").remove();
-										resetAll();
-										$.notify("${reportDeletedText}", "success");
-									} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-										$.notify("${cannotDeleteReportText}", "error");
-									} else {
-										notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-									}
-								},
-								error: function (xhr) {
-									showUserAjaxError(xhr, '${errorOccurredText}');
-								}
-							});
-						} //end if result
-					} //end callback
-				}); //end bootbox confirm
 			});
 		</script>
 	</jsp:body>

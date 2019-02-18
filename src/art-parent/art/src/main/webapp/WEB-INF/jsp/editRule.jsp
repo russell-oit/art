@@ -34,7 +34,7 @@ Edit a rule
 
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 	
 	<jsp:attribute name="javascript">
@@ -62,7 +62,7 @@ Edit a rule
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#rules">
 				<spring:message code="page.link.help"/>

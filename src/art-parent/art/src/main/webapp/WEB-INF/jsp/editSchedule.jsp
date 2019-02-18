@@ -41,7 +41,7 @@ Edit schedule page
 <spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="headContent">
@@ -137,7 +137,7 @@ Edit schedule page
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#saved-schedules">
 				<spring:message code="page.link.help"/>
@@ -145,7 +145,7 @@ Edit schedule page
 		</div>
 	</jsp:attribute>
 
-	<jsp:attribute name="belowMainPanel">
+	<jsp:attribute name="belowPanel">
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3">
 				<div class="alert alert-info">

@@ -336,13 +336,20 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "selfServiceDashboards",
-				"getDashboardCandidateReports", "getEditDashboardReports",
+				"getDashboardCandidates", "getEditDashboards",
 				"getDashboardDetails")) {
 			if (user.hasPermission("self_service_dashboards")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "getEditAllDashboardReports")) {
-			if (user.hasPermission("configure_reports")) {
+		} else if (StringUtils.equalsAny(page, "selfServiceReports",
+				"getViews", "getViewDetails", "saveSelfService", "deleteSelfService",
+				"getEditSelfService")) {
+			if (user.hasPermission("self_service_reports")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "shareReport")) {
+			if (user.hasAnyPermission("save_reports", "self_service_dashboards",
+					"self_service_reports")) {
 				authorised = true;
 			}
 		} else if (StringUtils.startsWith(pathMinusContext, "/export/")) {

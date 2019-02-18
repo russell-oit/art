@@ -72,6 +72,21 @@ public class ParameterProcessor {
 	private boolean parameterSelection = false;
 	private Map<String, String[]> reportRequestParameters;
 	private Boolean isFragment = false;
+	private Boolean isDrilldown = false;
+
+	/**
+	 * @return the isDrilldown
+	 */
+	public Boolean getIsDrilldown() {
+		return isDrilldown;
+	}
+
+	/**
+	 * @param isDrilldown the isDrilldown to set
+	 */
+	public void setIsDrilldown(Boolean isDrilldown) {
+		this.isDrilldown = isDrilldown;
+	}
 
 	/**
 	 * @return the isFragment
@@ -611,7 +626,7 @@ public class ParameterProcessor {
 		logger.debug("Entering processChartOptions");
 
 		ChartOptions chartOptions = new ChartOptions();
-		if (!parameterSelection && !getIsFragment()) {
+		if (!parameterSelection && !getIsFragment() && !isDrilldown) {
 			chartOptions.initializeBooleansToFalse();
 		}
 

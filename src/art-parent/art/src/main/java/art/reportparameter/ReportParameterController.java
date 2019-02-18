@@ -22,11 +22,9 @@ import art.parameter.ParameterService;
 import art.report.Report;
 import art.report.ReportService;
 import art.general.AjaxResponse;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -63,8 +61,8 @@ public class ReportParameterController {
 
 	@RequestMapping(value = "/reportParameterConfig", method = RequestMethod.GET)
 	public String showReportParameterConfig(Model model,
-			@RequestParam("reportId") Integer reportId, Locale locale) {
-		
+			@RequestParam("reportId") Integer reportId) {
+
 		logger.debug("Entering showReportParameterConfig: reportId={}", reportId);
 
 		try {
@@ -72,11 +70,11 @@ public class ReportParameterController {
 			String reportName = "";
 			Report report = reportService.getReport(reportId);
 			if (report != null) {
-				reportName = report.getLocalizedName(locale);
+				reportName = report.getName();
 			}
 			model.addAttribute("reportName", reportName);
 			model.addAttribute("reportParameters", reportParameterService.getReportParameters(reportId));
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -94,14 +92,14 @@ public class ReportParameterController {
 		try {
 			ReportParameter reportParameter = reportParameterService.getReportParameter(id);
 			Parameter parameter = reportParameter.getParameter();
-			
+
 			reportParameterService.deleteReportParameter(id);
-			
+
 			//also delete parameter if not shared
 			if (!parameter.isShared()) {
 				parameterService.deleteParameter(parameter.getParameterId());
 			}
-			
+
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -124,15 +122,15 @@ public class ReportParameterController {
 				ReportParameter reportParameter = reportParameterService.getReportParameter(id);
 				parameters.add(reportParameter.getParameter());
 			}
-			
+
 			reportParameterService.deleteReportParameters(ids);
-			
+
 			for (Parameter parameter : parameters) {
 				if (!parameter.isShared()) {
 					parameterService.deleteParameter(parameter.getParameterId());
 				}
 			}
-			
+
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -143,20 +141,16 @@ public class ReportParameterController {
 	}
 
 	@RequestMapping(value = "/addReportParameter", method = RequestMethod.GET)
-	public String addReportParameter(Model model, @RequestParam("reportId") Integer reportId,
-			Locale locale) {
-		
+	public String addReportParameter(Model model, @RequestParam("reportId") Integer reportId) {
 		logger.debug("Entering addReportParameter: reportId={}", reportId);
 
 		model.addAttribute("reportParameter", new ReportParameter());
 
-		return showEditReportParameter("add", model, reportId, locale);
+		return showEditReportParameter("add", model, reportId);
 	}
 
 	@RequestMapping(value = "/editReportParameter", method = RequestMethod.GET)
-	public String editReportParameter(@RequestParam("id") Integer id, Model model,
-			Locale locale) {
-		
+	public String editReportParameter(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editReportParameter: id={}", id);
 
 		int reportId = 0;
@@ -172,15 +166,14 @@ public class ReportParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReportParameter("edit", model, reportId, locale);
+		return showEditReportParameter("edit", model, reportId);
 	}
 
 	@RequestMapping(value = "/saveReportParameter", method = RequestMethod.POST)
 	public String saveReportParameter(@ModelAttribute("reportParameter") @Valid ReportParameter reportParameter,
 			@RequestParam("action") String action,
 			@RequestParam("reportId") Integer reportId,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			Locale locale) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		logger.debug("Entering saveReportParameter: reportParameter={}, action='{}', "
 				+ "reportId={}", reportParameter, action, reportId);
@@ -188,7 +181,7 @@ public class ReportParameterController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditReportParameter(action, model, reportId, locale);
+			return showEditReportParameter(action, model, reportId);
 		}
 
 		try {
@@ -212,7 +205,7 @@ public class ReportParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReportParameter(action, model, reportId, locale);
+		return showEditReportParameter(action, model, reportId);
 	}
 
 	/**
@@ -221,26 +214,25 @@ public class ReportParameterController {
 	 * @param action the action to take
 	 * @param model the model to use
 	 * @param reportId the report id
-	 * @param locale the current locale
 	 * @return the jsp file to display
 	 */
 	private String showEditReportParameter(String action, Model model,
-			Integer reportId, Locale locale) {
-		
+			Integer reportId) {
+
 		logger.debug("Entering showEditReportParameter: action='{}', reportId={}", action, reportId);
 
 		try {
 			String reportName = "";
 			Report report = reportService.getReport(reportId);
 			if (report != null) {
-				reportName = report.getLocalizedName(locale);
+				reportName = report.getName();
 			}
 			model.addAttribute("reportName", reportName);
 
 			if (StringUtils.equals(action, "add")) {
 				model.addAttribute("parameters", parameterService.getSharedParameters());
 			}
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

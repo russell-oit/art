@@ -243,6 +243,11 @@
 									<i class="fa fa-copy"></i>
 									<spring:message code="page.action.copy"/>
 								</a>
+								<a class="btn btn-default" 
+								   href="${pageContext.request.contextPath}/copyParameter?id=${reportParameter.parameter.parameterId}&reportId=${reportParameter.report.reportId}&reportParameterId=${reportParameter.reportParameterId}">
+									<i class="fa fa-copy"></i>
+									<spring:message code="parameters.action.replace"/>
+								</a>
 							</div>
 						</td>
 					</tr>

@@ -153,7 +153,8 @@ public class ParameterController {
 		model.addAttribute("parameter", param);
 
 		Integer returnReportId = null;
-		return showEditParameter("add", model, reportId, returnReportId);
+		Integer reportParameterId = null;
+		return showEditParameter("add", model, reportId, returnReportId, reportParameterId);
 	}
 
 	@RequestMapping(value = "/editParameter", method = RequestMethod.GET)
@@ -170,15 +171,18 @@ public class ParameterController {
 		}
 
 		Integer reportId = null;
-		return showEditParameter("edit", model, reportId, returnReportId);
+		Integer reportParameterId = null;
+		return showEditParameter("edit", model, reportId, returnReportId, reportParameterId);
 	}
 
 	@RequestMapping(value = "/copyParameter", method = RequestMethod.GET)
 	public String copyParameter(@RequestParam("id") Integer id, Model model,
 			@RequestParam(value = "reportId", required = false) Integer reportId,
+			@RequestParam(value = "reportParameterId", required = false) Integer reportParameterId,
 			HttpSession session) {
 
-		logger.debug("Entering copyParameter: id={}, reportId={}", id, reportId);
+		logger.debug("Entering copyParameter: id={}, reportId={},"
+				+ " reportParameterId={}", id, reportId, reportParameterId);
 
 		try {
 			model.addAttribute("parameter", parameterService.getParameter(id));
@@ -188,24 +192,26 @@ public class ParameterController {
 		}
 
 		Integer returnReportId = null;
-		return showEditParameter("copy", model, reportId, returnReportId);
+		return showEditParameter("copy", model, reportId, returnReportId, reportParameterId);
 	}
 
 	@RequestMapping(value = "/saveParameter", method = RequestMethod.POST)
 	public String saveParameter(@ModelAttribute("parameter") @Valid Parameter parameter,
 			@RequestParam("action") String action, @RequestParam("reportId") Integer reportId,
 			@RequestParam("returnReportId") Integer returnReportId,
+			@RequestParam("reportParameterId") Integer reportParameterId,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam(value = "templateFile", required = false) MultipartFile templateFile,
 			HttpSession session, Locale locale) {
 
 		logger.debug("Entering saveParameter: parameter={}, action='{}',"
-				+ " reportId={}, returnReportId={}", parameter, action, reportId, returnReportId);
+				+ " reportId={}, returnReportId={}, reportParameterId={}",
+				parameter, action, reportId, returnReportId, reportParameterId);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditParameter(action, model, reportId, returnReportId);
+			return showEditParameter(action, model, reportId, returnReportId, reportParameterId);
 		}
 
 		try {
@@ -214,16 +220,22 @@ public class ParameterController {
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
 				model.addAttribute("plainMessage", saveFileMessage);
-				return showEditParameter(action, model, reportId, returnReportId);
+				return showEditParameter(action, model, reportId, returnReportId, reportParameterId);
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equalsAny(action, "add", "copy")) {
 				parameterService.addParameter(parameter, sessionUser);
 				if (reportId != null && reportId != 0) {
-					ReportParameter reportParameter = new ReportParameter();
-					reportParameter.setParameter(parameter);
-					reportParameterService.addReportParameter(reportParameter, reportId);
+					if (reportParameterId != null && reportParameterId != 0) {
+						ReportParameter reportParameter = reportParameterService.getReportParameter(reportParameterId);
+						reportParameter.setParameter(parameter);
+						reportParameterService.updateReportParameter(reportParameter);
+					} else {
+						ReportParameter reportParameter = new ReportParameter();
+						reportParameter.setParameter(parameter);
+						reportParameterService.addReportParameter(reportParameter, reportId);
+					}
 				}
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
@@ -251,7 +263,7 @@ public class ParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditParameter(action, model, reportId, returnReportId);
+		return showEditParameter(action, model, reportId, returnReportId, reportParameterId);
 	}
 
 	/**
@@ -264,13 +276,16 @@ public class ParameterController {
 	 * @param returnReportId the report id to display in the
 	 * reportParameterConfig page after saving the report, null if not
 	 * applicable
+	 * @param reportParameterId the id of the report parameter to replace with
+	 * this parameter
 	 * @return the jsp file to display
 	 */
 	private String showEditParameter(String action, Model model, Integer reportId,
-			Integer returnReportId) {
+			Integer returnReportId, Integer reportParameterId) {
 
 		logger.debug("Entering showEditParameter: action='{}', reportId={},"
-				+ " returnReportId={}", action, reportId, returnReportId);
+				+ " returnReportId={}, reportParameterId={}",
+				action, reportId, returnReportId, reportParameterId);
 
 		try {
 			model.addAttribute("lovReports", reportService.getLovReports());
@@ -288,6 +303,7 @@ public class ParameterController {
 		model.addAttribute("action", action);
 		model.addAttribute("reportId", reportId);
 		model.addAttribute("returnReportId", returnReportId);
+		model.addAttribute("reportParameterId", reportParameterId);
 
 		return "editParameter";
 	}

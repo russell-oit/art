@@ -16,7 +16,7 @@ Reports page. Also main/home page
 
 <spring:message code="page.title.reports" var="pageTitle"/>
 
-<spring:message code="page.text.reports" var="mainPanelTitle"/>
+<spring:message code="page.text.reports" var="panelTitle"/>
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.text.description" var="descriptionText"/>
 <spring:message code="reports.text.selectValue" var="selectValueText"/>
@@ -147,7 +147,7 @@ Reports page. Also main/home page
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<c:if test="${error != null}">
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>

@@ -191,7 +191,8 @@ public class ReportParameterService {
 		}
 
 		String sql = SQL_SELECT_ALL
-				+ " WHERE REPORT_ID IN(" + StringUtils.repeat("?", ",", reportIds.size()) + ")";
+				+ " WHERE REPORT_ID IN(" + StringUtils.repeat("?", ",", reportIds.size()) + ")"
+				+ " ORDER BY REPORT_ID, PARAMETER_POSITION";
 
 		ResultSetHandler<List<ReportParameter>> h = new BeanListHandler<>(ReportParameter.class, new ReportParameterMapper());
 		return dbService.query(sql, h, reportIds.toArray());

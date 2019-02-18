@@ -19,7 +19,6 @@ package art.connectionpool;
 
 import art.artdatabase.ArtDatabase;
 import art.datasource.Datasource;
-import art.datasource.DatasourceInfo;
 import art.datasource.DatasourceMapper;
 import art.enums.ConnectionPoolLibrary;
 import art.enums.DatasourceType;
@@ -153,22 +152,22 @@ public class DbConnections {
 	/**
 	 * Creates a connection pool for the given jdbc datasource
 	 *
-	 * @param datasourceInfo the datasource details
+	 * @param datasource the datasource details
 	 * @param maxPoolSize the maximum pool size
 	 * @param connectionPoolLibrary the connection pool library
 	 */
-	private static void createJdbcConnectionPool(DatasourceInfo datasourceInfo,
+	private static void createJdbcConnectionPool(Datasource datasource,
 			int maxPoolSize, ConnectionPoolLibrary connectionPoolLibrary) {
 
 		logger.debug("Entering createJdbcConnectionPool");
 
 		//remove any existing connection pool for this datasource
-		removeConnectionPool(datasourceInfo.getDatasourceId());
+		removeConnectionPool(datasource.getDatasourceId());
 
-		logger.debug("datasourceInfo.isJndi()={}", datasourceInfo.isJndi());
+		logger.debug("datasourceInfo.isJndi()={}", datasource.isJndi());
 
 		ConnectionPool pool;
-		if (datasourceInfo.isJndi()) {
+		if (datasource.isJndi()) {
 			//for jndi datasources, the url contains the jndi name/resource reference
 			pool = new JndiConnectionPool();
 		} else if (connectionPoolLibrary == ConnectionPoolLibrary.HikariCP) {
@@ -179,7 +178,7 @@ public class DbConnections {
 			throw new IllegalArgumentException("Unexpected connection pool library: " + connectionPoolLibrary);
 		}
 
-		pool.create(datasourceInfo, maxPoolSize);
+		pool.create(datasource, maxPoolSize);
 		DataSource dataSource = pool.getPool();
 		if (dataSource != null) {
 			//may be null if jndi connection and there was an error

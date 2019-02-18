@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -453,6 +454,35 @@ public class ExpressionHelper {
 		}
 
 		return dateValue;
+	}
+
+	/**
+	 * Converts a date representation that includes simple arithmetic like "add
+	 * days 1" to a proper date string
+	 *
+	 * @param dateString the date representation
+	 * @param format the format of the output date string
+	 * @param locale the locale in use
+	 * @return the proper, formatted date string
+	 * @throws ParseException
+	 */
+	public String processDateString(String dateString, String format,
+			Locale locale) throws ParseException {
+		
+		logger.debug("Entering processDateString: dateString='{}',"
+				+ " format='{}', locale={}", dateString, format, locale);
+		
+		Objects.requireNonNull(format, "format must not be null");
+		
+		if (locale == null) {
+			locale = Locale.getDefault();
+		}
+
+		Date date = convertStringToDate(dateString, format, locale);
+		SimpleDateFormat dateFormatter = new SimpleDateFormat(format, locale);
+		String finalString = dateFormatter.format(date);
+
+		return finalString;
 	}
 
 	/**

@@ -218,7 +218,7 @@ public class JxlsOutput {
 			RunReportHelper runReportHelper = new RunReportHelper();
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
-				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
+				conn = runReportHelper.getEffectiveReportConnection(report, reportParams);
 				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn, templateResultOptions);
 				context.putVar("jdbc", jdbcHelper);
 			} else {

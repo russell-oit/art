@@ -9,13 +9,10 @@
 
 <ul>
 	<li>
-		If using <b>Oracle</b>, note that ART doesn't come with the Oracle JDBC driver.
-		The driver (<b>ojdbc.jar</b>) needs to be manually
+		Note that some JDBC drivers are not included with ART.
+		Where a driver is not included, it needs to be manually
 		downloaded and copied to the <b>WEB-INF\lib</b> directory.
-		The application will then need to be restarted. The driver can be downloaded from 
-		<a href="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html">
-			http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html
-		</a>
+		The application will then need to be restarted.
 	</li>
 	<li>
 		The <b>SQL Server (Microsoft driver)</b> included with ART 

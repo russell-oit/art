@@ -12,11 +12,15 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.parameterUsage" var="pageTitle"/>
+<spring:message code="page.title.parameterUsage" var="panelTitle"/>
+<c:set var="pageTitle">
+	${panelTitle} - ${parameter.name} (${parameter.parameterId})
+</c:set>
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
+					 mainColumnClass="col-md-8 col-md-offset-2"
 					 hasTable="true">
 
 	<jsp:attribute name="javascript">
@@ -60,7 +64,7 @@
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
 				<c:if test="${showErrors}">
-					<p><encode:forHtmlContent value="${error}"/></p>
+					<p>${encode:forHtmlContent(error)}</p>
 				</c:if>
 			</div>
 		</c:if>
@@ -88,7 +92,11 @@
 				<c:forEach var="report" items="${reports}">
 					<tr>
 						<td>${report.reportId}</td>
-						<td>${encode:forHtmlContent(report.name)}</td>
+						<td>
+							<a href="${pageContext.request.contextPath}/reportConfig?reportId=${report.reportId}">
+								${encode:forHtmlContent(report.name)}
+							</a>
+						</td>
 					</tr>
 				</c:forEach>
 			</tbody>

@@ -19,6 +19,7 @@ package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Options for column naming for template reports
@@ -31,6 +32,7 @@ public class TemplateResultOptions implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private boolean useLowerCaseProperties = false;
 	private boolean useColumnLabels = true;
+	private List<String> files;
 
 	/**
 	 * @return the useLowerCaseProperties
@@ -58,5 +60,19 @@ public class TemplateResultOptions implements Serializable {
 	 */
 	public void setUseColumnLabels(boolean useColumnLabels) {
 		this.useColumnLabels = useColumnLabels;
+	}
+
+	/**
+	 * @return the files
+	 */
+	public List<String> getFiles() {
+		return files;
+	}
+
+	/**
+	 * @param files the files to set
+	 */
+	public void setFiles(List<String> files) {
+		this.files = files;
 	}
 }

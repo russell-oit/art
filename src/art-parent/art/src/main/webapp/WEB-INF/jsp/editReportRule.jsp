@@ -51,7 +51,7 @@ Edit report rule page
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#rules">
 				<spring:message code="page.link.help"/>

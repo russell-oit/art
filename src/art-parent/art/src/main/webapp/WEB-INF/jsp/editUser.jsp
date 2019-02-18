@@ -40,7 +40,7 @@ Display edit user page
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
@@ -84,7 +84,7 @@ Display edit user page
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#users">
 				<spring:message code="page.link.help"/>
@@ -187,6 +187,15 @@ Display edit user page
 					<div class="col-md-8">
 						<form:input path="email" maxlength="100" class="form-control"/>
 						<form:errors path="email" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="description">
+						<spring:message code="page.text.description"/>
+					</label>
+					<div class="col-md-8">
+						<form:textarea path="description" rows="2" cols="40" class="form-control" maxlength="500"/>
+						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

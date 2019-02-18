@@ -254,7 +254,7 @@ public class XDocReportOutput {
 			}
 
 			RunReportHelper runReportHelper = new RunReportHelper();
-			conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
+			conn = runReportHelper.getEffectiveReportConnection(report, reportParams);
 			ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn, templateResultOptions);
 			context.put("jdbc", jdbcHelper);
 

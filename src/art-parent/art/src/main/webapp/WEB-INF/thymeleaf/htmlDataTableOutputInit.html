@@ -1,85 +1,92 @@
-<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/css/htmlDataTableOutput.css'}"/>
-<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/bootstrap-3.3.7/css/bootstrap.min.css'}"/>
-<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/DataTables-1.10.18/css/dataTables.bootstrap.min.css'}"/>
-<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/css/buttons.dataTables.min.css'}"/>
-<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/css/buttons.bootstrap.min.css'}"/>
-<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css'}"/>
+<!--/*
+http://lukasgrygar.com/thymeleaf/thymeleaf-tips-and-tricks/
+https://stackoverflow.com/questions/42217214/springboot-with-thymeleaf-showing-error-but-working/42219002
+*/-->
+<th:block xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/css/htmlDataTableOutput.css'}"/>
+	<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/bootstrap-3.3.7/css/bootstrap.min.css'}"/>
+	<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/DataTables-1.10.18/css/dataTables.bootstrap.min.css'}"/>
+	<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/css/buttons.dataTables.min.css'}"/>
+	<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/css/buttons.bootstrap.min.css'}"/>
+	<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css'}"/>
 
-<th:block th:if='${!ajax && !pageHeaderLoaded}'>
-	<script th:src="${contextPath} + ${'/js/jquery-1.12.4.min.js'}"></script>
+	<th:block th:if='${!ajax && !pageHeaderLoaded}'>
+		<script th:src="${contextPath} + ${'/js/jquery-1.12.4.min.js'}"></script>
+	</th:block>
+
+	<script th:src="${contextPath} + ${'/js/dataTables/DataTables-1.10.18/js/jquery.dataTables.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/dataTables/DataTables-1.10.18/js/dataTables.bootstrap.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/dataTables.buttons.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.bootstrap.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/dataTables/JSZip-2.5.0/jszip.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/pdfmake.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/vfs_fonts.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.html5.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.print.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.colVis.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/art.js'}"></script>
+	<script th:src="${contextPath} + ${'/js/bootstrap-hover-dropdown-2.0.3.min.js'}"></script>
+
+	<script th:inline="javascript">
+		$(document).ready(function () {
+
+			var tableId = /*[[${tableId}]]*/ "table";
+			var showAllRowsText = /*[[#{dataTables.text.showAllRows}]]*/ "All";
+
+			//http://forum.thymeleaf.org/Expressions-vs-substitutions-newbie-question-td4025767.html
+			//https://www.concretepage.com/thymeleaf/thymeleaf-javascript-inline-example-with-variable
+			//https://stackoverflow.com/questions/20995687/thymeleaf-configure-mail-subject-in-template
+			var url = /*[[${contextPath} + ${'/js/dataTables/i18n/dataTables_'} + ${language} + ${'.json'}]]*/ "";
+
+			var options = {
+				orderClasses: false,
+				order: [],
+				pagingType: 'full_numbers',
+				lengthMenu: [
+					[20, 50, 100, -1], [20, 50, 100, showAllRowsText]
+				], // must have space between first brackets to prevent thymeleaf from processing this 
+				pageLength: 50,
+				dom: 'lBfrtip',
+				buttons: [
+					{
+						extend: 'colvis',
+						postfixButtons: ['colvisRestore']
+					},
+					{
+						extend: 'excel',
+						exportOptions: {columns: ':visible'}
+					},
+					{
+						extend: 'pdf',
+						exportOptions: {columns: ':visible'}
+					},
+					{
+						extend: 'print',
+						exportOptions: {columns: ':visible'}
+					}
+				],
+				language: {
+					url: url
+				},
+				initComplete: function () {
+					datatablesInitComplete();
+				}
+			};
+
+			var reportOptionsString = /*[[${options}]]*/ "";
+			if (reportOptionsString) {
+				var reportOptions = JSON.parse(reportOptionsString);
+				if (reportOptions) {
+					var dtOptions = reportOptions.dtOptions;
+					if (dtOptions) {
+						$.extend(options, dtOptions);
+					}
+				}
+			}
+
+			//http://www.datatables.net/reference
+			$('#' + tableId).dataTable(options);
+		});
+	</script>
 </th:block>
-
-<script th:src="${contextPath} + ${'/js/dataTables/DataTables-1.10.18/js/jquery.dataTables.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/dataTables/DataTables-1.10.18/js/dataTables.bootstrap.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/dataTables.buttons.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.bootstrap.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/dataTables/JSZip-2.5.0/jszip.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/pdfmake.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/vfs_fonts.js'}"></script>
-<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.html5.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.print.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.colVis.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js'}"></script>
-<script th:src="${contextPath} + ${'/js/art.js'}"></script>
-
-<script th:inline="javascript">
-	$(document).ready(function () {
-		
-		var tableId = /*[[${tableId}]]*/ "table";
-		var showAllRowsText = /*[[#{dataTables.text.showAllRows}]]*/ "All";
-		
-		//http://forum.thymeleaf.org/Expressions-vs-substitutions-newbie-question-td4025767.html
-		//https://www.concretepage.com/thymeleaf/thymeleaf-javascript-inline-example-with-variable
-		//https://stackoverflow.com/questions/20995687/thymeleaf-configure-mail-subject-in-template
-		var url = /*[[${contextPath} + ${'/js/dataTables/i18n/dataTables_'} + ${language} + ${'.json'}]]*/ "";
-		
-		var options = {
-			orderClasses: false,
-			order: [],
-			pagingType: 'full_numbers',
-			lengthMenu: [
-				[20, 50, 100, -1], [20, 50, 100, showAllRowsText]
-			], // must have space between first brackets to prevent thymeleaf from processing this 
-			pageLength: 50,
-			dom: 'lBfrtip',
-			buttons: [
-				{
-					extend: 'colvis',
-					postfixButtons: ['colvisRestore']
-				},
-				{
-					extend: 'excel',
-					exportOptions: {columns: ':visible'}
-				},
-				{
-					extend: 'pdf',
-					exportOptions: {columns: ':visible'}
-				},
-				{
-					extend: 'print',
-					exportOptions: {columns: ':visible'}
-				}
-			],
-			language: {
-				url: url
-			},
-			initComplete: function () {
-				datatablesInitComplete();
-			}
-		};
-		
-		var reportOptionsString = /*[[${options}]]*/ "";
-		if (reportOptionsString) {
-			var reportOptions = JSON.parse(reportOptionsString);
-			if (reportOptions) {
-				var dtOptions = reportOptions.dtOptions;
-				if (dtOptions) {
-					$.extend(options, dtOptions);
-				}
-			}
-		}
-
-		//http://www.datatables.net/reference
-		$('#' + tableId).dataTable(options);
-	});
-</script>

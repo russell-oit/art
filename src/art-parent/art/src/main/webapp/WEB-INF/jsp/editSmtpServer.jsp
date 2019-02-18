@@ -35,7 +35,7 @@
 <spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+<t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
 
 	<jsp:attribute name="css">
@@ -119,7 +119,7 @@
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
+	<jsp:attribute name="abovePanel">
 		<div class="text-right">
 			<a href="${pageContext.request.contextPath}/docs/Manual.html#smtp-servers">
 				<spring:message code="page.link.help"/>
@@ -216,7 +216,7 @@
 						<spring:message code="destinations.label.port"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="port" maxlength="6" class="form-control"/>
+						<form:input type="number" path="port" maxlength="6" class="form-control"/>
 						<form:errors path="port" cssClass="error"/>
 					</div>
 				</div>

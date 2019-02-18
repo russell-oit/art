@@ -17,7 +17,10 @@
  */
 package art.utils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.awt.Color;
@@ -48,7 +51,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.naming.InitialContext;
@@ -262,63 +264,6 @@ public class ArtUtils {
 	}
 
 	/**
-	 * Get database types to be displayed when defining a database connection
-	 *
-	 * @return map with database types. key=database type identifier,
-	 * value=database name
-	 */
-	public static Map<String, String> getDatabaseTypes() {
-		Map<String, String> databaseTypes = new TreeMap<>();
-
-		databaseTypes.put("demo", "Demo");
-		databaseTypes.put("cubrid", "CUBRID");
-		databaseTypes.put("oracle", "Oracle - driver not included"); //license doesn't allow redistribution?
-		databaseTypes.put("mysql", "MySQL");
-		databaseTypes.put("mariadb", "MariaDB");
-		databaseTypes.put("postgresql", "PostgreSQL");
-		databaseTypes.put("sqlserver-ms", "SQL Server (Microsoft driver)");
-		databaseTypes.put("sqlserver-jtds", "SQL Server (jTDS driver)");
-		databaseTypes.put("hsqldb-standalone", "HSQLDB Standalone");
-		databaseTypes.put("hsqldb-server", "HSQLDB Server");
-		databaseTypes.put("db2", "Db2 - driver not included"); //license restrictions? must register to download.
-		databaseTypes.put("odbc-sun", "ODBC (Sun driver) - driver not included");
-		databaseTypes.put("sql-logging", "SQL Logging");
-		databaseTypes.put("other", "Other");
-		databaseTypes.put("hbase-phoenix", "HBase (Phoenix driver) - driver not included"); //adds 50MB
-		databaseTypes.put("msaccess-ucanaccess", "MS Access (UCanAccess driver)");
-		databaseTypes.put("msaccess-ucanaccess-password", "MS Access with password (UCanAccess driver)");
-		databaseTypes.put("sqlite-xerial", "SQLite (Xerial driver)");
-		databaseTypes.put("csv-csvjdbc", "CSV (CsvJdbc driver)");
-		databaseTypes.put("h2-server", "H2 Server");
-		databaseTypes.put("h2-embedded", "H2 Embedded");
-		databaseTypes.put("olap4j-mondrian", "Olap4j Mondrian");
-		databaseTypes.put("olap4j-xmla", "Olap4j XMLA");
-		databaseTypes.put("couchbase", "Couchbase");
-		databaseTypes.put("drill", "Drill - driver not included"); //adds 20MB
-		databaseTypes.put("firebird", "Firebird");
-		databaseTypes.put("monetdb", "MonetDB");
-		databaseTypes.put("vertica", "Vertica - driver not included"); //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
-		databaseTypes.put("informix", "Informix");
-		databaseTypes.put("cassandra-adejanovski", "Cassandra (adejanovski driver)");
-		databaseTypes.put("neo4j", "Neo4j - driver not included"); //causes issues when in a VM. https://sourceforge.net/p/art/discussion/352129/thread/aa8e9973/
-		databaseTypes.put("exasol", "EXASOL - driver not included"); //license doesn't allow distribution without consent from exasol (details inside jar file)
-		databaseTypes.put("redshift", "Redshift - driver not included"); //license issues. https://docs.aws.amazon.com/redshift/latest/mgmt/configure-jdbc-connection-with-maven.html
-		databaseTypes.put("teradata", "Teradata - driver not included"); //license issues. https://downloads.teradata.com/download/license?destination=download/files/7424/187200/1/TeraJDBC__indep_indep.14.10.00.39.zip&message=License%2520Agreement
-		databaseTypes.put("snowflake1-us-west", "Snowflake (US West Region)");
-		databaseTypes.put("snowflake2-other", "Snowflake (Other Regions)");
-		databaseTypes.put("presto", "Presto");
-		databaseTypes.put("memsql", "MemSQL (MySQL driver)");
-		databaseTypes.put("citus", "Citus (PostgreSQL driver)");
-		databaseTypes.put("aurora-mysql-mariadb", "Amazon Aurora MySQL (MariaDB driver)");
-		databaseTypes.put("aurora-postgresql-postgresql", "Amazon Aurora PostgreSQL (PostgreSQL driver)");
-		databaseTypes.put("greenplum", "Greenplum (PostgreSQL driver)");
-		databaseTypes.put("timescaledb", "TimescaleDB (PostgreSQL driver)");
-		databaseTypes.put("kdb", "kdb+");
-
-		return databaseTypes;
-	}
-
-	/**
 	 * Return number of days between two dates
 	 *
 	 * @param before earlier date
@@ -455,12 +400,42 @@ public class ArtUtils {
 	 * @param <T> the type of the object to populate
 	 * @param jsonString the json string
 	 * @param clazz the class of the object to populate
-	 * @return an object populated according to a json string
+	 * @return an object populated according to a json string or null if the
+	 * string is null or blank
 	 * @throws IOException
 	 */
 	public static <T> T jsonToObject(String jsonString, Class<T> clazz) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readValue(jsonString, clazz);
+		//https://stackoverflow.com/questions/34296761/objectmapper-readvalue-can-return-null-value
+		if (StringUtils.isBlank(jsonString)) {
+			return null;
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			return mapper.readValue(jsonString, clazz);
+		}
+	}
+
+	/**
+	 * Returns an object populated according to a json string without throwing
+	 * an error if unknown properties are encountered in the object hierarchy
+	 *
+	 * @param <T> the type of the object to populate
+	 * @param jsonString the json string
+	 * @param clazz the class of the object to populate
+	 * @return an object populated according to a json string or null if the
+	 * string is null or blank
+	 * @throws IOException
+	 */
+	public static <T> T jsonToObjectIgnoreUnknown(String jsonString, Class<T> clazz) throws IOException {
+		//https://stackoverflow.com/questions/34296761/objectmapper-readvalue-can-return-null-value
+		if (StringUtils.isBlank(jsonString)) {
+			return null;
+		} else {
+			//https://stackoverflow.com/questions/5455014/ignoring-new-fields-on-json-objects-using-jackson
+			//https://gist.github.com/jonikarppinen/9b7f3872257bce27f8e2
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			return mapper.readValue(jsonString, clazz);
+		}
 	}
 
 	/**
@@ -725,6 +700,26 @@ public class ArtUtils {
 			newFilename += "." + extension;
 		}
 		return newFilename;
+	}
+
+	/**
+	 * Returns a Jackson ObjectMapper that only considers properties when
+	 * serializing/deserializing and doesn't include get() or set() methods that
+	 * don't have properties attached to them
+	 *
+	 * @return a Jackson ObjectMapper that only considers properties when
+	 * serializing/deserializing
+	 */
+	public static ObjectMapper getPropertyOnlyObjectMapper() {
+		//https://stackoverflow.com/questions/7105745/how-to-specify-jackson-to-only-use-fields-preferably-globally
+		//https://www.baeldung.com/jackson-field-serializable-deserializable-or-not
+		//https://www.baeldung.com/jackson-annotations
+		//https://stackoverflow.com/questions/3907929/should-i-declare-jacksons-objectmapper-as-a-static-field
+		//https://stackoverflow.com/questions/18611565/how-do-i-correctly-reuse-jackson-objectmapper
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+		return mapper;
 	}
 
 }

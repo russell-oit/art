@@ -18,6 +18,12 @@ Display section to allow selecting of report parameters and initiate running of 
 <spring:message code="reports.message.parametersSaved" var="parametersSavedText"/>
 <spring:message code="reports.message.parametersCleared" var="parametersClearedText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="reports.message.accessUpdated" var="accessUpdatedText"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="select.text.selectAll" var="selectAllText"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText"/>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/notifyjs-0.4.2/notify.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
@@ -28,33 +34,6 @@ Display section to allow selecting of report parameters and initiate running of 
 			e.preventDefault();
 			var url = "${pageContext.request.contextPath}/addJob";
 			$('#parametersForm').attr('action', url).submit();
-		});
-
-		$("#emailReportSubmit").on("click", function (e) {
-			e.preventDefault();
-
-			//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
-			tinyMCE.triggerSave();
-
-			$.ajax({
-				type: 'POST',
-				url: '${pageContext.request.contextPath}/emailReport',
-				dataType: 'json',
-				data: $('#emailReportForm').serialize(),
-				success: function (response) //on recieve of reply
-				{
-					$("#emailReportModal").modal('hide');
-//					 $(':input','#emailReportForm').val("");
-					if (response.success) {
-						$.notify("${fileSentText}", "success");
-					} else {
-						notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-					}
-				},
-				error: function (xhr) {
-					showUserAjaxError(xhr, '${errorOccurredText}');
-				}
-			});
 		});
 
 		$("#runInNewPage").on("click", function () {
@@ -72,17 +51,21 @@ Display section to allow selecting of report parameters and initiate running of 
 			//disable buttons
 			$('.action').prop('disabled', true);
 
+			//some report types interfere with share modal selectpicker when run inline. Because they include bootstrap.js or jquery?
+			$('#shareReport').hide();
+
 			$.ajax({
 				type: "POST",
 				url: "${pageContext.request.contextPath}/runReport",
 				data: $('#parametersForm').serialize(),
 				success: function (data) {
 					$("#reportOutput").html(data);
-					$('.action').prop('disabled', false);
 				},
 				error: function (xhr) {
 					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
 					showUserAjaxError(xhr, '${errorOccurredText}');
+				},
+				complete: function () {
 					$('.action').prop('disabled', false);
 				}
 			});
@@ -222,6 +205,87 @@ Display section to allow selecting of report parameters and initiate running of 
 	<script type="text/javascript">
 	tinymce.init(tinymceConfig);
 	</script>
+
+	<script>
+		$(function () {
+			$("#emailReportSubmit").on("click", function (e) {
+				e.preventDefault();
+
+				//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
+				tinyMCE.triggerSave();
+
+				$.ajax({
+					type: 'POST',
+					url: '${pageContext.request.contextPath}/emailReport',
+					dataType: 'json',
+					data: $('#emailReportForm').serialize(),
+					success: function (response) //on recieve of reply
+					{
+						$("#emailReportModal").modal('hide');
+//					 $(':input','#emailReportForm').val("");
+						if (response.success) {
+							$.notify("${fileSentText}", "success");
+						} else {
+							notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+						}
+					},
+					error: function (xhr) {
+						showUserAjaxError(xhr, '${errorOccurredText}');
+					}
+				});
+			});
+		});
+	</script>
+</c:if>
+
+<c:if test="${enableShare}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+
+	<script>
+		$(function () {
+			//https://stackoverflow.com/questions/26863003/how-to-reset-the-bootstrap-modal-when-it-gets-closed-and-open-it-fresh-again
+			$('#shareReportModal').on('hidden.bs.modal', function () {
+				$(this).find('form').trigger('reset');
+				$('.share').selectpicker('destroy');
+			});
+
+			//https://github.com/snapappointments/bootstrap-select/issues/1358
+			$('#shareReportModal').on('show.bs.modal', function () {
+				$('.share').selectpicker({
+					liveSearch: true,
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}',
+					actionsBox: true,
+					selectAllText: '${selectAllText}',
+					deselectAllText: '${deselectAllText}'
+				});
+			});
+
+			$("#shareReportSubmit").on("click", function (e) {
+				e.preventDefault();
+
+				$.ajax({
+					type: 'POST',
+					url: '${pageContext.request.contextPath}/shareReport',
+					dataType: 'json',
+					data: $('#shareReportForm').serialize(),
+					success: function (response) {
+						$("#shareReportModal").modal('hide');
+						if (response.success) {
+							$.notify("${accessUpdatedText}", "success");
+						} else {
+							notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+						}
+					},
+					error: function (xhr) {
+						showUserAjaxError(xhr, '${errorOccurredText}');
+					}
+				});
+			});
+		});
+	</script>
 </c:if>
 
 <c:if test="${error != null}">
@@ -241,6 +305,12 @@ Display section to allow selecting of report parameters and initiate running of 
 	<div class="col-md-3">
 		<h3 class="text-right">
 			<small>
+				<c:if test="${enableShare}">
+					<button type="button" id="shareReport" class="btn btn-sm btn-default"
+							data-toggle="modal" data-target="#shareReportModal">
+						<spring:message code="reports.button.share"/>
+					</button>
+				</c:if>
 				<c:if test="${sessionUser.hasPermission('configure_reports')}">
 					<a class="btn btn-sm btn-default" href="${pageContext.request.contextPath}/reportConfig?reportId=${report.reportId}">
 						<spring:message code="page.text.report"/>
@@ -466,6 +536,87 @@ Display section to allow selecting of report parameters and initiate running of 
 						<spring:message code="dialog.button.cancel"/>
 					</button>
 					<button type="submit" id="emailReportSubmit" class="btn btn-primary">
+						<spring:message code="dialog.button.ok"/>
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div id="shareReportModal" class="modal fade" role="dialog" 
+	 aria-labelledby="shareReportLabel" aria-hidden="true" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form id="shareReportForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/shareReport">
+				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+				<input type="hidden" name="shareReportId" value="${report.reportId}">
+				<!-- Modal Header -->
+				<div class="modal-header">
+					<button type="button" class="close" 
+							data-dismiss="modal">
+						<span aria-hidden="true">&times;</span>
+						<span class="sr-only">Close</span>
+					</button>
+					<h4 class="modal-title" id="shareReportLabel">
+						<spring:message code="dialog.title.shareReport"/>
+					</h4>
+				</div>
+
+				<!-- Modal Body -->
+				<div class="modal-body" style="overflow: visible;">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="name">
+							<spring:message code="page.text.name"/>
+						</label>
+						<div class="col-md-8">
+							<input type="text" id="name" name="name" value="${encode:forHtmlAttribute(report.getLocalizedName(locale))}" readonly class="form-control"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="users">
+							<spring:message code="page.text.users"/>
+						</label>
+						<div class="col-md-8">
+							<select id="users" name="users[]" class="form-control share" multiple>
+								<c:forEach var="user" items="${users}">
+									<option value="${user.userId}">${encode:forHtmlContent(user.fullName)}</option>
+								</c:forEach>
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="userGroups">
+							<spring:message code="page.text.userGroups"/>
+						</label>
+						<div class="col-md-8">
+							<select id="userGroups" name="userGroups[]" class="form-control share" multiple>
+								<c:forEach var="userGroup" items="${userGroups}">
+									<option value="${userGroup.userGroupId}">${encode:forHtmlContent(userGroup.name)}</option>
+								</c:forEach>
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="action">
+							<spring:message code="page.text.action"/>
+						</label>
+						<div class="col-md-8">
+							<select id="action" name="action" class="form-control">
+								<option value="grant"><spring:message code="page.action.grant"/></option>
+								<option value="revoke"><spring:message code="page.action.revoke"/></option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<!-- Modal Footer -->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default"
+							data-dismiss="modal">
+						<spring:message code="dialog.button.cancel"/>
+					</button>
+					<button type="submit" id="shareReportSubmit" class="btn btn-primary">
 						<spring:message code="dialog.button.ok"/>
 					</button>
 				</div>

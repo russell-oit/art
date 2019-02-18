@@ -171,8 +171,8 @@ User group membership configuration
 					<div class="col-md-10">
 						<select name="users" id="users" multiple="multiple" class="form-control multi-select">
 							<c:forEach var="user" items="${users}">
-								<option value="${user.userId}-${encode:forHtmlAttribute(user.username)}">
-									<encode:forHtmlContent value="${user.username}"/>
+								<option value="${user.userId}">
+									${encode:forHtmlContent(user.username)} ${empty user.fullName? "": " (".concat(encode:forHtmlContent(user.fullName)).concat(")")}
 								</option>
 							</c:forEach>
 						</select>
