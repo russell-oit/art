@@ -555,6 +555,21 @@ public class User implements Serializable {
 	}
 
 	/**
+	 * Returns <code>true</code> if user has access level of standard admin and
+	 * above
+	 *
+	 * @return <code>true</code> if user has access level of standard admin and
+	 * above
+	 */
+	public boolean hasStandardAdminAndAboveAccessLevel() {
+		if (accessLevel != null && accessLevel.getValue() >= AccessLevel.StandardAdmin.getValue()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Encrypts the password field
 	 */
 	public void encryptPassword() {

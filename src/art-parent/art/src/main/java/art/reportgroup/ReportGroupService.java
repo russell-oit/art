@@ -199,7 +199,7 @@ public class ReportGroupService {
 		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());
 
 		ResultSetHandler<List<ReportGroup>> h = new BeanListHandler<>(ReportGroup.class, new ReportGroupMapper());
-		if (user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
+		if (user.hasStandardAdminAndAboveAccessLevel()) {
 			//standard admins and above can work with everything
 			return dbService.query(SQL_SELECT_ALL, h);
 		} else {

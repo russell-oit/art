@@ -495,14 +495,14 @@ public class DatasourceService {
 		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());
 
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
-		if (user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
+		if (user.hasStandardAdminAndAboveAccessLevel()) {
 			//standard admins and above can work with everything
 			return dbService.query(SQL_SELECT_ALL, h);
 		} else {
 			String sql = "SELECT AD.*"
-					+ " FROM ART_DATABASES AD, ART_ADMIN_PRIVILEGES AAP "
-					+ " WHERE AD.DATABASE_ID = AAP.VALUE_ID "
-					+ " AND AAP.PRIVILEGE = 'DB' "
+					+ " FROM ART_DATABASES AD, ART_ADMIN_PRIVILEGES AAP"
+					+ " WHERE AD.DATABASE_ID = AAP.VALUE_ID"
+					+ " AND AAP.PRIVILEGE = 'DB'"
 					+ " AND AAP.USER_ID = ?";
 			return dbService.query(sql, h, user.getUserId());
 		}
