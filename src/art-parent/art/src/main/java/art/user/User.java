@@ -43,6 +43,10 @@ import org.apache.commons.lang3.StringUtils;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@JsonIgnore
+	private static final int INITIAL_SETUP_USER_ID = -1;
+	@JsonIgnore
+	private static final int REPOSITORY_USER_ID = -2;
 	@Parsed
 	private int userId;
 	@Parsed
@@ -746,6 +750,63 @@ public class User implements Serializable {
 	 */
 	public boolean hasConfigureReportsPermission() {
 		return hasPermission("configure_reports");
+	}
+
+	/**
+	 * Creates the initial setup user
+	 *
+	 * @return the initial setup user
+	 */
+	public static User createInitialSetupUser() {
+		User user = createSetupUser();
+
+		user.setUserId(INITIAL_SETUP_USER_ID);
+		user.setUsername("initial setup");
+
+		return user;
+	}
+
+	/**
+	 * Creates the initial setup user
+	 *
+	 * @return the initial setup user
+	 */
+	public static User createRepositoryUser() {
+		User user = createSetupUser();
+
+		user.setUserId(REPOSITORY_USER_ID);
+		user.setUsername("art db");
+
+		return user;
+	}
+
+	/**
+	 * Creates the initial setup user
+	 *
+	 * @return the initial setup user
+	 */
+	private static User createSetupUser() {
+		User user = new User();
+
+		user.setAccessLevel(AccessLevel.RepositoryUser);
+		user.buildSetupUserPermissions();
+
+		return user;
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a setup user i.e either the
+	 * initial setup user or the art db/repository user
+	 *
+	 * @return <code>true</code> if this is a setup user
+	 */
+	@JsonIgnore
+	public boolean isSetupUser() {
+		if (userId == INITIAL_SETUP_USER_ID || userId == REPOSITORY_USER_ID) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

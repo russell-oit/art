@@ -470,9 +470,9 @@ public class UserController {
 
 		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
 		logger.debug("editUser.getAccessLevel().getValue()={}", editUser.getAccessLevel().getValue());
-		if (sessionUser.getAccessLevel().getValue() > editUser.getAccessLevel().getValue()
+		if (sessionUser.isSetupUser()
 				|| sessionUser.getAccessLevel() == AccessLevel.SuperAdmin
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
+				|| sessionUser.getAccessLevel().getValue() > editUser.getAccessLevel().getValue()) {
 			return true;
 		} else {
 			return false;
@@ -625,15 +625,14 @@ public class UserController {
 		levels.add(AccessLevel.MidAdmin);
 		levels.add(AccessLevel.StandardAdmin);
 
-		//only standard admins and above and the repository user can edit users
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
-		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SeniorAdmin.getValue()
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
+		if (sessionUser.isSetupUser()
+				|| sessionUser.getAccessLevel().getValue() >= AccessLevel.SeniorAdmin.getValue()) {
 			levels.add(AccessLevel.SeniorAdmin);
 		}
-		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SuperAdmin.getValue()
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
+		if (sessionUser.isSetupUser()
+				|| sessionUser.getAccessLevel().getValue() >= AccessLevel.SuperAdmin.getValue()) {
 			levels.add(AccessLevel.SuperAdmin);
 		}
 
