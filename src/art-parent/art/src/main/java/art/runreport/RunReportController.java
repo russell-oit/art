@@ -182,7 +182,7 @@ public class RunReportController {
 			//admins can run all reports, even disabled ones. only check for non admin users
 			sessionUser = (User) session.getAttribute("sessionUser");
 
-			if (!sessionUser.isAdminUser()) {
+			if (!sessionUser.hasConfigureReportsPermission()) {
 				if (!report.isActive()) {
 					model.addAttribute("message", "reports.message.reportDisabled");
 					return errorPage;
@@ -450,8 +450,7 @@ public class RunReportController {
 					}
 
 					//display final sql. only admins can see sql
-					//determine if final sql should be shown. only admins can see sql
-					if (reportOptions.isShowSql() && sessionUser.isAdminUser()) {
+					if (reportOptions.isShowSql() && sessionUser.hasConfigureReportsPermission()) {
 						//get estimate final sql with parameter placeholders replaced with parameter values
 						String finalSql = reportRunner.getFinalSql();
 						request.setAttribute("finalSql", finalSql);

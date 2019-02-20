@@ -666,7 +666,7 @@ public class User implements Serializable {
 	public boolean hasConfigurePermission() {
 		return hasStartsWithPermission("configure");
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the user has any self_service permission
 	 *
@@ -722,6 +722,15 @@ public class User implements Serializable {
 		} else {
 			return canChangePassword;
 		}
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has "configure_reports" permission
+	 *
+	 * @return <code>true</code> if the user has "configure_reports" permission
+	 */
+	public boolean hasConfigureReportsPermission() {
+		return hasPermission("configure_reports");
 	}
 
 }
