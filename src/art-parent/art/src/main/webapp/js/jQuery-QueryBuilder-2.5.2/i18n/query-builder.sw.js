@@ -17,7 +17,7 @@
 
 var QueryBuilder = $.fn.queryBuilder;
 
-QueryBuilder.regional['en'] = {
+QueryBuilder.regional['sw'] = {
   "__locale": "Swahili (sw)",
   "__author": "Timothy Anyona",
   "add_rule": "Ongeza kanuni",
