@@ -156,7 +156,7 @@ public class DashboardController {
 					return errorPage;
 				}
 
-				if (!reportService.canUserRunReport(sessionUser.getUserId(), report.getReportId())) {
+				if (!reportService.canUserRunReport(sessionUser, report.getReportId())) {
 					model.addAttribute("message", "reports.message.noPermission");
 					return errorPage;
 				}

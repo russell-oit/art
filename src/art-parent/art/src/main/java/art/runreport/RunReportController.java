@@ -188,7 +188,7 @@ public class RunReportController {
 					return errorPage;
 				}
 
-				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
+				if (!reportService.canUserRunReport(sessionUser, reportId)) {
 					model.addAttribute("message", "reports.message.noPermission");
 					return errorPage;
 				}

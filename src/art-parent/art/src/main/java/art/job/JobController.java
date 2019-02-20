@@ -321,7 +321,7 @@ public class JobController {
 			String reportIdString = request.getParameter("reportId");
 			if (reportIdString != null) {
 				int reportId = Integer.parseInt(reportIdString);
-				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
+				if (!reportService.canUserRunReport(sessionUser, reportId)) {
 					return "redirect:/accessDenied";
 				}
 				Report report = reportService.getReport(reportId);

@@ -128,7 +128,7 @@ public class ExportController {
 			ReportService reportService = new ReportService();
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			try {
-				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
+				if (!reportService.canUserRunReport(sessionUser, reportId)) {
 					request.getRequestDispatcher("/accessDenied").forward(request, response);
 					return;
 				}

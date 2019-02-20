@@ -372,7 +372,7 @@ public class ReportJob implements org.quartz.Job {
 			User jobUser = job.getUser();
 			if (report == null) {
 				throw new IllegalArgumentException("Pre/Post run report not found: " + reportId);
-			} else if (!reportService.canUserRunReport(jobUser.getUserId(), reportId)) {
+			} else if (!reportService.canUserRunReport(jobUser, reportId)) {
 				throw new IllegalStateException("Job owner doesn't have access to pre/post run report: " + jobUser.getUsername() + " - " + reportId);
 			}
 			ReportRunner reportRunner = prepareReportRunner(jobUser, report);

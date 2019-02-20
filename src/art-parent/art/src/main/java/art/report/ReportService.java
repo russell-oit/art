@@ -24,7 +24,6 @@ import art.connectionpool.DbConnections;
 import art.datasource.DatasourceService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
-import art.enums.AccessLevel;
 import art.enums.PageOrientation;
 import art.enums.ParameterType;
 import art.enums.ReportType;
@@ -1558,14 +1557,20 @@ public class ReportService {
 	/**
 	 * Returns <code>true</code> if a user can run a report
 	 *
-	 * @param userId the user id
+	 * @param user the user
 	 * @param reportId the report id
 	 * @return <code>true</code> if a user can run a report
 	 * @throws SQLException
 	 */
 //	@Cacheable(value = "reports") 
-	public boolean canUserRunReport(int userId, int reportId) throws SQLException {
-		logger.debug("Entering canUserRunReport: userId={}, reportId={}", userId, reportId);
+	public boolean canUserRunReport(User user, int reportId) throws SQLException {
+		logger.debug("Entering canUserRunReport: user={}, reportId={}", user, reportId);
+
+		if (user.hasConfigureReportsPermission()) {
+			return true;
+		}
+
+		int userId = user.getUserId();
 
 		String sql = "SELECT COUNT(*)"
 				+ " FROM ART_QUERIES AQ"
@@ -1573,11 +1578,6 @@ public class ReportService {
 				+ " AND("
 				//everyone can run lov report
 				+ " QUERY_TYPE IN(?,?)"
-				+ " OR"
-				//admins can run all reports
-				+ " EXISTS (SELECT *"
-				+ " FROM ART_USERS"
-				+ " WHERE USER_ID=? AND ACCESS_LEVEL>=?)"
 				+ " OR"
 				//user can run report if he has direct access to it
 				+ " EXISTS (SELECT *"
@@ -1612,8 +1612,6 @@ public class ReportService {
 			reportId,
 			ReportType.LovDynamic.getValue(), //lov reports
 			ReportType.LovStatic.getValue(),
-			userId, //admin user
-			AccessLevel.JuniorAdmin.getValue(),
 			userId, //user access to report
 			userId, //user group access to report
 			userId, //user access to report group
