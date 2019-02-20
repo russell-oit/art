@@ -391,7 +391,7 @@ public class RunReportHelper {
 				enableShowSelectedParameters = false;
 				break;
 			default:
-				if (sessionUser.hasPermission("configure_reports")) {
+				if (sessionUser.hasConfigureReportsPermission()) {
 					enableShowSql = true;
 				} else {
 					enableShowSql = false;

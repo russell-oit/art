@@ -311,7 +311,7 @@ Display section to allow selecting of report parameters and initiate running of 
 						<spring:message code="reports.button.share"/>
 					</button>
 				</c:if>
-				<c:if test="${sessionUser.hasPermission('configure_reports')}">
+				<c:if test="${sessionUser.hasConfigureReportsPermission()}">
 					<a class="btn btn-sm btn-default" href="${pageContext.request.contextPath}/reportConfig?reportId=${report.reportId}">
 						<spring:message code="page.text.report"/>
 					</a>
