@@ -57,10 +57,8 @@ public class LoginRestController {
 			if (StringUtils.isNotBlank(jwtSecret)) {
 				LoginResult loginResult = InternalLogin.authenticate(username, password);
 				User user = loginResult.getUser();
-				if (loginResult.isAuthenticated()
-						&& user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
+				if (loginResult.isAuthenticated() && user.hasPermission("use_api")) {
 					String jwt = generateToken(username, jwtSecret);
-
 					JwtResponseData jwtResponseData = new JwtResponseData();
 					jwtResponseData.setAccessToken(jwt);
 					return ApiHelper.getOkResponseEntity(jwtResponseData);
