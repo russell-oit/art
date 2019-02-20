@@ -17,7 +17,6 @@
  */
 package art.login;
 
-import art.enums.AccessLevel;
 import art.general.JwtResponseData;
 import art.servlets.Config;
 import art.user.User;

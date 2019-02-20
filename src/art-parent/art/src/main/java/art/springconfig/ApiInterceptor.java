@@ -17,7 +17,6 @@
  */
 package art.springconfig;
 
-import art.enums.AccessLevel;
 import art.enums.ApiStatus;
 import art.general.ApiResponse;
 import art.login.InternalLogin;

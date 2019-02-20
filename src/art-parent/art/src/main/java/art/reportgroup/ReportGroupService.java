@@ -19,7 +19,6 @@ package art.reportgroup;
 
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
-import art.enums.AccessLevel;
 import art.user.User;
 import art.general.ActionResult;
 import art.utils.ArtUtils;
