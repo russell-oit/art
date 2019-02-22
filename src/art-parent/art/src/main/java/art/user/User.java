@@ -43,9 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@JsonIgnore
 	private static final int INITIAL_SETUP_USER_ID = -1;
-	@JsonIgnore
 	private static final int REPOSITORY_USER_ID = -2;
 	@Parsed
 	private int userId;
