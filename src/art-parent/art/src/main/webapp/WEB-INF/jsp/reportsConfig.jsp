@@ -56,96 +56,37 @@ Reports configuration page
 
 				var tbl = $('#reports');
 
-				var oTable = tbl.dataTable({
-					orderClasses: false,
-					order: [[1, 'asc']],
-					deferRender: true,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, '${showAllRowsText}']],
-					pageLength: 10,
-					ajax: {
-						type: "GET",
-						dataType: "json",
-						url: "${pageContext.request.contextPath}/getConfigReports",
-						dataSrc: function (response) {
-							//https://stackoverflow.com/questions/35475964/datatables-ajax-call-error-handle
-							if (response.success) {
-								return response.data;
-							} else {
-								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-								return "";
-							}
-						},
-						error: ajaxErrorHandler
-					},
-					columns: [
-						{"data": null, defaultContent: ""},
-						{"data": "reportId"},
-						{"data": "name2"},
-						{"data": "reportGroupNamesHtml"},
-						{"data": "description"},
-						{"data": "dtActiveStatus"},
-						{"data": "dtAction", width: '370px'}
-					],
-					//https://datatables.net/reference/option/rowId
-					rowId: "dtRowId",
-					autoWidth: false,
-					columnDefs: [
-						{
-							targets: 0,
-							orderable: false,
-							className: 'select-checkbox'
-						},
-						{
-							targets: "dtHidden", //target name matches class name of th.
-							visible: false
-						}
-					],
-					dom: 'lBfrtip',
-					buttons: [
-						'selectAll',
-						'selectNone',
-						{
-							extend: 'colvis',
-							postfixButtons: ['colvisRestore']
-						},
-						{
-							extend: 'excel',
-							exportOptions: {
-								columns: ':visible'
-							}
-						},
-						{
-							extend: 'pdf',
-							exportOptions: {
-								columns: ':visible'
-							}
-						},
-						{
-							extend: 'print',
-							exportOptions: {
-								columns: ':visible'
-							}
-						}
-					],
-					select: {
-						style: 'multi',
-						selector: 'td:first-child'
-					},
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					createdRow: function (row, data, dataIndex) {
-						$(row).attr('data-id', data.reportId);
-						$(row).attr('data-name', data.name);
-					},
-					drawCallback: function () {
-						initializeButtonHover();
-					},
-					initComplete: function () {
-						datatablesInitComplete();
-					}
-				});
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var dataUrl = "getConfigReports";
+				var errorOccurredText = "${errorOccurredText}";
+				var showErrors = ${showErrors};
+				var columnDefs = undefined;
+
+				var columns = [
+					{"data": null, defaultContent: ""},
+					{"data": "reportId"},
+					{"data": "name2"},
+					{"data": "reportGroupNamesHtml"},
+					{"data": "description"},
+					{"data": "dtActiveStatus"},
+					{"data": "dtAction", width: '370px'}
+				];
+
+				//initialize datatable and process delete action
+				var oTable = initAjaxTable(tbl,
+						pageLength,
+						showAllRowsText,
+						contextPath,
+						localeCode,
+						dataUrl,
+						errorOccurredText,
+						showErrors,
+						columnDefs,
+						columns
+						);
 
 				var table = oTable.api();
 
@@ -185,7 +126,7 @@ Reports configuration page
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.data("name"));
+					var recordName = escapeHtmlContent(row.attr("data-name"));
 					var recordId = row.data("id");
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + recordName + "</b>",

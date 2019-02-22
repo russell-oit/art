@@ -207,8 +207,9 @@ public class Report implements Serializable {
 	private List<Drilldown> drilldowns; //used in import/export
 	private String dtActiveStatus;
 	private String dtAction;
-	private String dtRowId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 	private String reportGroupNames; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
+	private int dtId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class. also import ObjectMapper can specify to only use properties.
+	private String dtName; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 	private String reportGroupNamesHtml;
 	@JsonIgnore
 	private boolean overwriteFiles;
@@ -1722,13 +1723,21 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Returns the string to use as the record's datatable rowid
+	 * Returns the id of the report for use with table actions
 	 *
-	 * @return the string to use as the record's datatable rowid
+	 * @return the report id
 	 */
-	public String getDtRowId() {
-		dtRowId = "row-" + reportId;
-		return dtRowId;
+	public int getDtId() {
+		return reportId;
+	}
+	
+	/**
+	 * Returns the name of the report for use with table actions
+	 *
+	 * @return the report name
+	 */
+	public String getDtName() {
+		return name;
 	}
 
 	/**
@@ -1747,7 +1756,7 @@ public class Report implements Serializable {
 
 	/**
 	 * Returns <code>true</code> if this is a view or self service report
-	 * 
+	 *
 	 * @return <code>true</code> if this is a view or self service report
 	 */
 	@JsonIgnore

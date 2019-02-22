@@ -537,34 +537,22 @@ function datatablesInitComplete() {
 }
 
 /**
- * Initialise datatable used in configuration pages
+ * Get basic options used for datatables used in configuration pages
  * 
- * @param {jQuery} tbl
  * @param {number} pageLength
  * @param {string} showAllRowsText
  * @param {string} contextPath
  * @param {string} localeCode
- * @param {boolean} addColumnFilters
  * @param {array} columnDefs - column definitions
  * @returns {jQuery} datatables jquery object
  */
-function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
-		addColumnFilters, columnDefs) {
-
+function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
+		localeCode, columnDefs) {
+			
 	if (pageLength === undefined || isNaN(pageLength)) {
 		pageLength = 20;
 	}
 
-	if (addColumnFilters === undefined) {
-		addColumnFilters = true;
-	}
-
-	/** @type {jQuery} */
-	var columnFilterRow = null;
-	if (addColumnFilters) {
-		columnFilterRow = createColumnFilters(tbl);
-	}
-	
 	var defaultColumnDefs = [
 		{
 			targets: 0,
@@ -584,10 +572,9 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		finalColumnDefs = defaultColumnDefs.concat(columnDefs);
 	}
 
-	//use initialization that returns a jquery object. to be able to use plugins
-	/** @type {jQuery} */
-	var oTable = tbl.dataTable({
+	var options = {
 		orderClasses: false,
+		order: [[1, 'asc']],
 		pagingType: "full_numbers",
 		lengthMenu: [[10, 20, 50, -1], [10, 20, 50, showAllRowsText]],
 		pageLength: pageLength,
@@ -623,12 +610,46 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 			style: 'multi',
 			selector: 'td:first-child'
 		},
-		order: [[1, 'asc']],
 		language: {
 			url: contextPath + "/js/dataTables/i18n/dataTables_" + localeCode + ".json"
 		},
 		initComplete: datatablesInitComplete
-	});
+	};
+	
+	return options;
+}
+
+/**
+ * Initialise datatable used in configuration pages
+ * 
+ * @param {jQuery} tbl
+ * @param {number} pageLength
+ * @param {string} showAllRowsText
+ * @param {string} contextPath
+ * @param {string} localeCode
+ * @param {boolean} addColumnFilters
+ * @param {array} columnDefs - column definitions
+ * @returns {jQuery} datatables jquery object
+ */
+function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		addColumnFilters, columnDefs) {
+
+	if (addColumnFilters === undefined) {
+		addColumnFilters = true;
+	}
+
+	/** @type {jQuery} */
+	var columnFilterRow = null;
+	if (addColumnFilters) {
+		columnFilterRow = createColumnFilters(tbl);
+	}
+	
+	var options = getBasicConfigTableOptions(pageLength, showAllRowsText,
+			contextPath, localeCode, columnDefs);
+
+	//use initialization that returns a jquery object. to be able to use plugins
+	/** @type {jQuery} */
+	var oTable = tbl.dataTable(options);
 
 	if (columnFilterRow !== null) {
 		//move column filter row after heading row
@@ -642,6 +663,47 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		applyColumnFilters(tbl, table);
 	}
 
+	return oTable;
+}
+
+function initAjaxTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		dataUrl, errorOccurredText, showErrors, columnDefs, columns) {
+			
+	var options = getBasicConfigTableOptions(pageLength, showAllRowsText,
+			contextPath, localeCode, columnDefs);
+			
+	$.extend(options,{
+		deferRender: true,
+		ajax: {
+			type: "GET",
+			dataType: "json",
+			url: contextPath + "/" + dataUrl,
+			dataSrc: function (response) {
+				//https://stackoverflow.com/questions/35475964/datatables-ajax-call-error-handle
+				if (response.success) {
+					return response.data;
+				} else {
+					notifyActionErrorReusable(errorOccurredText, response.errorMessage, showErrors);
+					return "";
+				}
+			},
+			error: ajaxErrorHandler
+		},
+		columns: columns,
+		autoWidth: false,
+		drawCallback: function () {
+			initializeButtonHover();
+		},
+		createdRow: function (row, data, dataIndex) {
+			$(row).attr('data-id', data.dtId);
+			$(row).attr('data-name', data.dtName);
+		}
+	});
+
+	//use initialization that returns a jquery object. to be able to use plugins
+	/** @type {jQuery} */
+	var oTable = tbl.dataTable(options);
+	
 	return oTable;
 }
 

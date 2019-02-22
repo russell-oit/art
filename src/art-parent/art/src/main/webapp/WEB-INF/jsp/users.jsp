@@ -32,8 +32,15 @@ Display user configuration page
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
+	
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yadcf.css"/>
+	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.js"></script>
+		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
