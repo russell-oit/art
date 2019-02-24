@@ -197,7 +197,7 @@ Display report filters
 
 		<div class="text-center">
 			<p>
-				<b><spring:message code="page.text.report"/>:</b> ${reportName}
+				<b><spring:message code="page.text.report"/>:</b> ${encode:forHtmlContent(reportName)}
 			</p>
 		</div>
 		<div style="margin-bottom: 10px;">
