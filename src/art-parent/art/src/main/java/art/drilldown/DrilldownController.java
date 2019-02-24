@@ -222,7 +222,7 @@ public class DrilldownController {
 
 	@RequestMapping(value = "/moveDrilldown", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse moveDrilldown(Model model, Locale locale,
+	AjaxResponse moveDrilldown(Model model, 
 			@RequestParam("id") Integer id,
 			@RequestParam("fromPosition") Integer fromPosition,
 			@RequestParam("toPosition") Integer toPosition,
@@ -240,9 +240,9 @@ public class DrilldownController {
 			} else {
 				drilldownService.moveDrilldown(id, fromPosition, toPosition, direction, drilldown.getParentReportId());
 				response.setSuccess(true);
-				response.setData(drilldown.getDrilldownReport().getLocalizedName(locale));
+				response.setData(drilldown.getDrilldownReport().getName());
 			}
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
