@@ -88,8 +88,53 @@ public class User implements Serializable {
 	private List<UserGroup> userGroups;
 	private List<Role> roles;
 	private List<Permission> permissions;
+	private String username2; //used for holding a processed username
+	private String dtActiveStatus;
+	private String dtAction;
 	@JsonIgnore
 	private List<String> flatPermissions = new ArrayList<>();
+
+	/**
+	 * @return the dtActiveStatus
+	 */
+	public String getDtActiveStatus() {
+		return dtActiveStatus;
+	}
+
+	/**
+	 * @param dtActiveStatus the dtActiveStatus to set
+	 */
+	public void setDtActiveStatus(String dtActiveStatus) {
+		this.dtActiveStatus = dtActiveStatus;
+	}
+
+	/**
+	 * @return the dtAction
+	 */
+	public String getDtAction() {
+		return dtAction;
+	}
+
+	/**
+	 * @param dtAction the dtAction to set
+	 */
+	public void setDtAction(String dtAction) {
+		this.dtAction = dtAction;
+	}
+
+	/**
+	 * @return the username2
+	 */
+	public String getUsername2() {
+		return username2;
+	}
+
+	/**
+	 * @param username2 the username2 to set
+	 */
+	public void setUsername2(String username2) {
+		this.username2 = username2;
+	}
 
 	/**
 	 * @return the description
@@ -805,6 +850,43 @@ public class User implements Serializable {
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * Returns a copy of this user with only some fields filled
+	 *
+	 * @return a copy of this user with only some fields filled
+	 */
+	@JsonIgnore
+	public User getBasicUser(){
+		User user = new User();
+		
+		user.setUserId(userId);
+		user.setUsername(username);
+		user.setFullName(fullName);
+		user.setUsername2(username2);
+		user.setDtActiveStatus(dtActiveStatus);
+		user.setDtAction(dtAction);
+		
+		return user;
+	}
+	
+	/**
+	 * Returns the id of the report for use with table actions
+	 *
+	 * @return the report id
+	 */
+	public int getDtId() {
+		return userId;
+	}
+	
+	/**
+	 * Returns the name of the report for use with table actions
+	 *
+	 * @return the report name
+	 */
+	public String getDtName() {
+		return username;
 	}
 
 }

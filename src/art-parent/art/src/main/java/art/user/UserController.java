@@ -29,16 +29,21 @@ import art.general.AjaxResponse;
 import art.role.RoleService;
 import art.userrole.UserRoleService;
 import art.utils.ArtHelper;
+import art.utils.ArtUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.mail.MessagingException;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +51,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -54,6 +60,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.context.WebContext;
 
 /**
  * Controller for the user configuration process
@@ -89,18 +96,85 @@ public class UserController {
 	@Autowired
 	private UserRoleService userRoleService;
 
+	@Autowired
+	private ServletContext servletContext;
+
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
 		logger.debug("Entering showUsers");
 
+		return "users";
+	}
+
+	@GetMapping("/getUsers")
+	public @ResponseBody
+	AjaxResponse getUsers(Locale locale, HttpServletRequest request,
+			HttpServletResponse httpResponse, HttpSession session)
+			throws SQLException, IOException {
+
+		logger.debug("Entering getUsers");
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
 		try {
-			model.addAttribute("users", userService.getAllUsers());
+			List<User> users = userService.getAllUsersBasic();
+
+			String newText = messageSource.getMessage("page.text.new", null, locale);
+			String updatedText = messageSource.getMessage("page.text.updated", null, locale);
+			String newSpan = "<span class='label label-success'>" + newText + "</span>";
+			String updatedSpan = "<span class='label label-success'>" + updatedText + "</span>";
+
+			String activeText = messageSource.getMessage("activeStatus.option.active", null, locale);
+			String disabledText = messageSource.getMessage("activeStatus.option.disabled", null, locale);
+			String activeSpan = "<span class='label label-success'>" + activeText + "</span>";
+			String disabledSpan = "<span class='label label-danger'>" + disabledText + "</span>";
+
+			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
+
+			List<User> basicUsers = new ArrayList<>();
+
+			for (User user : users) {
+				String encodedUsername = Encode.forHtml(user.getUsername());
+
+				final int NEW_UPDATED_LIMIT = 7;
+				if (ArtUtils.daysUntilToday(user.getCreationDate()) <= NEW_UPDATED_LIMIT) {
+					encodedUsername += " " + newSpan;
+				}
+				if (ArtUtils.daysUntilToday(user.getUpdateDate()) <= NEW_UPDATED_LIMIT) {
+					encodedUsername += " " + updatedSpan;
+				}
+				user.setUsername2(encodedUsername);
+
+				if (StringUtils.isNotBlank(user.getFullName())) {
+					user.setFullName(Encode.forHtml(user.getFullName()));
+				}
+
+				String activeStatus;
+				if (user.isActive()) {
+					activeStatus = activeSpan;
+				} else {
+					activeStatus = disabledSpan;
+				}
+				user.setDtActiveStatus(activeStatus);
+
+				User sessionUser = (User) session.getAttribute("sessionUser");
+
+				ctx.setVariable("user", user);
+				ctx.setVariable("sessionUser", sessionUser);
+				String emailTemplateName = "usersAction";
+				String dtAction = defaultTemplateEngine.process(emailTemplateName, ctx);
+				user.setDtAction(dtAction);
+
+				basicUsers.add(user.getBasicUser());
+			}
+			ajaxResponse.setData(basicUsers);
+			ajaxResponse.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			model.addAttribute("error", ex);
+			ajaxResponse.setErrorMessage(ex.toString());
 		}
 
-		return "users";
+		return ajaxResponse;
 	}
 
 	@RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
