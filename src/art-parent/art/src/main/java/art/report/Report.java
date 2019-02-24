@@ -208,8 +208,6 @@ public class Report implements Serializable {
 	private String dtActiveStatus;
 	private String dtAction;
 	private String reportGroupNames; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
-	private int dtId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class. also import ObjectMapper can specify to only use properties.
-	private String dtName; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 	private String reportGroupNamesHtml;
 	@JsonIgnore
 	private boolean overwriteFiles;
