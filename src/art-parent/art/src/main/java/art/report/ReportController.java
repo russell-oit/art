@@ -257,17 +257,16 @@ public class ReportController {
 			List<Report> basicReports = new ArrayList<>();
 
 			for (Report report : reports) {
-				String name = Encode.forHtml(report.getName());
-				report.setName(name);
+				String encodedName = Encode.forHtml(report.getName());
 
 				final int NEW_UPDATED_LIMIT = 7;
 				if (ArtUtils.daysUntilToday(report.getCreationDate()) <= NEW_UPDATED_LIMIT) {
-					name += " " + newSpan;
+					encodedName += " " + newSpan;
 				}
 				if (ArtUtils.daysUntilToday(report.getUpdateDate()) <= NEW_UPDATED_LIMIT) {
-					name += " " + updatedSpan;
+					encodedName += " " + updatedSpan;
 				}
-				report.setName2(name);
+				report.setName2(encodedName);
 
 				if (StringUtils.isNotBlank(report.getDescription())) {
 					report.setDescription(Encode.forHtml(report.getDescription()));
