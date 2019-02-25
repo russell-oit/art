@@ -105,39 +105,24 @@ public class ParameterController {
 		try {
 			List<Parameter> parameters = parameterService.getAllParametersBasic();
 
-			String sharedText = messageSource.getMessage("parameters.label.shared", null, locale);
-			String sharedSpan = "<span class='label label-success'>" + sharedText + "</span>";
-
 			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
 			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
 
-			List<Parameter> basicParameters = new ArrayList<>();
+			List<Parameter> finalParameters = new ArrayList<>();
 
 			for (Parameter parameter : parameters) {
 				String enhancedName = ajaxTableHelper.processName(parameter.getName(), parameter.getCreationDate(), parameter.getUpdateDate());
 				parameter.setName2(enhancedName);
-
-				String description = parameter.getDescription();
-				if (description == null) {
-					description = "";
-				} else {
-					description = Encode.forHtml(description);
-				}
-
-				if (parameter.isShared()) {
-					description += " " + sharedSpan;
-				}
-				parameter.setDescription2(description);
 
 				ctx.setVariable("parameter", parameter);
 				String emailTemplateName = "parametersAction";
 				String dtAction = defaultTemplateEngine.process(emailTemplateName, ctx);
 				parameter.setDtAction(dtAction);
 
-				basicParameters.add(parameter.getBasicParameter());
+				finalParameters.add(parameter.getBasicParameter());
 			}
 
-			ajaxResponse.setData(basicParameters);
+			ajaxResponse.setData(finalParameters);
 			ajaxResponse.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

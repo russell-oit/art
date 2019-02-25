@@ -28,6 +28,7 @@ Display parameters
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
+<spring:message code="parameters.label.shared" var="sharedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
@@ -55,11 +56,23 @@ Display parameters
 				var showErrors = ${showErrors};
 				var columnDefs = undefined;
 
+				var sharedSpan = "<span class='label label-success'>${sharedText}</span>";
 				var columns = [
 					{"data": null, defaultContent: ""},
 					{"data": "parameterId"},
 					{"data": "name2"},
-					{"data": "description2"},
+					{"data": function (row, type, val, meta) {
+							//https://datatables.net/reference/option/columns.data
+							var description = escapeHtmlContent(row.description);
+							if (row.shared) {
+								if (description === null) {
+									description = "";
+								}
+								description += " " + sharedSpan;
+							}
+							return description;
+						}
+					},
 					{"data": "dtAction", width: '370px'}
 				];
 
@@ -196,7 +209,7 @@ Display parameters
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 				$("#refreshRecords").on("click", function () {
 					table.ajax.reload();
 				});
@@ -264,7 +277,7 @@ Display parameters
 					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/><p></p></th>
 					<th><spring:message code="page.text.name"/><p></p></th>
-					<th><spring:message code="page.text.description"/><p></p></th>
+					<th class="descriptionCol"><spring:message code="page.text.description"/><p></p></th>
 					<th class="noFilter"><spring:message code="page.text.action"/><p></p></th>
 				</tr>
 			</thead>

@@ -1715,7 +1715,8 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Returns a copy of this report with only some fields filled
+	 * Returns a copy of this report with only some fields filled to avoid
+	 * exposing passwords
 	 *
 	 * @return a copy of this report with only some fields filled
 	 */
@@ -1744,7 +1745,7 @@ public class Report implements Serializable {
 	public int getDtId() {
 		return reportId;
 	}
-	
+
 	/**
 	 * Returns the name of the report for use with table actions
 	 *

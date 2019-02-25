@@ -853,8 +853,8 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Returns <code>true</code> if this is a setup user i.e either the
-	 * initial setup user or the art db/repository user
+	 * Returns <code>true</code> if this is a setup user i.e either the initial
+	 * setup user or the art db/repository user
 	 *
 	 * @return <code>true</code> if this is a setup user
 	 */
@@ -866,26 +866,27 @@ public class User implements Serializable {
 			return false;
 		}
 	}
-	
+
 	/**
-	 * Returns a copy of this user with only some fields filled
+	 * Returns a copy of this user with only some fields filled to avoid
+	 * exposing passwords
 	 *
 	 * @return a copy of this user with only some fields filled
 	 */
 	@JsonIgnore
-	public User getBasicUser(){
+	public User getBasicUser() {
 		User user = new User();
-		
+
 		user.setUserId(userId);
 		user.setUsername(username);
 		user.setUsername2(username2);
 		user.setFullName2(fullName2);
 		user.setDtActiveStatus(dtActiveStatus);
 		user.setDtAction(dtAction);
-		
+
 		return user;
 	}
-	
+
 	/**
 	 * Returns the id of the user for use with table actions
 	 *
@@ -894,7 +895,7 @@ public class User implements Serializable {
 	public int getDtId() {
 		return userId;
 	}
-	
+
 	/**
 	 * Returns the name of the user for use with table actions
 	 *

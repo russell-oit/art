@@ -398,18 +398,27 @@ var MAP = {'&': '&amp;',
 	"'": '&#39;'};
 
 function escapeHtml(s, forAttribute) {
+	if(s === null || s === undefined){
+		return s;
+	}
 	return s.replace(forAttribute ? /[&<>'"]/g : /[&<>]/g, function (c) {
 		return MAP[c];
 	});
 }
 
 function escapeHtmlContent(s) {
+	if(s === null || s === undefined){
+		return s;
+	}
 	return s.replace(/[&<>]/g, function (c) {
 		return MAP[c];
 	});
 }
 
 function escapeHtmlAttribute(s) {
+	if(s === null || s === undefined){
+		return s;
+	}
 	return s.replace(/[&<>'"]/g, function (c) {
 		return MAP[c];
 	});
@@ -417,8 +426,11 @@ function escapeHtmlAttribute(s) {
 //END code for escaping html content
 
 //https://gist.github.com/getify/3667624
-function escapeDoubleQuotes(str) {
-	return str.replace(/\\([\s\S])|(")/g, "\\$1$2");
+function escapeDoubleQuotes(s) {
+	if(s === null || s === undefined){
+		return s;
+	}
+	return s.replace(/\\([\s\S])|(")/g, "\\$1$2");
 }
 
 /**
