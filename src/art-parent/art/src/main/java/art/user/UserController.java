@@ -43,7 +43,6 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,20 +126,6 @@ public class UserController {
 			for (User user : users) {
 				String encodedUsername = ajaxTableHelper.processName(user.getUsername(), user.getCreationDate(), user.getUpdateDate());
 				user.setUsername2(encodedUsername);
-
-				String fullName = user.getFullName();
-				if (StringUtils.isNotBlank(fullName)) {
-					fullName = Encode.forHtml(fullName);
-				}
-				user.setFullName2(fullName);
-
-				String activeStatus;
-				if (user.isActive()) {
-					activeStatus = ajaxTableHelper.getActiveSpan();
-				} else {
-					activeStatus = ajaxTableHelper.getDisabledSpan();
-				}
-				user.setDtActiveStatus(activeStatus);
 
 				User sessionUser = (User) session.getAttribute("sessionUser");
 

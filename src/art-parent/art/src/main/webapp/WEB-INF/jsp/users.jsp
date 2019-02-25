@@ -23,14 +23,14 @@ Display user configuration page
 <spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
-<spring:message code="users.activeStatus.active" var="activeText"/>
-<spring:message code="users.activeStatus.disabled" var="disabledText"/>
 <spring:message code="users.message.linkedJobsExist" var="linkedJobsExistText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 <spring:message code="reports.text.selectValue" var="selectValueText"/>
+<spring:message code="activeStatus.option.active" var="activeText"/>
+<spring:message code="activeStatus.option.disabled" var="disabledText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
@@ -58,12 +58,24 @@ Display user configuration page
 				var showErrors = ${showErrors};
 				var columnDefs = undefined;
 
+				var activeSpan = "<span class='label label-success'>${activeText}</span>";
+				var disabledSpan = "<span class='label label-danger'>${disabledText}</span>";
 				var columns = [
 					{"data": null, defaultContent: ""},
 					{"data": "userId"},
 					{"data": "username2"},
-					{"data": "fullName2"},
-					{"data": "dtActiveStatus"},
+					{"data": function (row, type, val, meta) {
+							return escapeHtmlContent(row.fullName);
+						}
+					},
+					{"data": function (row, type, val, meta) {
+							if (row.active) {
+								return activeSpan;
+							} else {
+								return disabledSpan;
+							}
+						}
+					},
 					{"data": "dtAction", width: '370px'}
 				];
 
@@ -105,8 +117,8 @@ Display user configuration page
 							{
 								column_number: 4,
 								filter_default_label: '${selectValueText}',
-								column_data_type: "html",
-								html_data_type: "text"
+								//https://github.com/vedmack/yadcf/issues/95
+								column_data_type: "rendered_html"
 							}
 						]
 						);
