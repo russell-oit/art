@@ -96,8 +96,38 @@ public class Parameter implements Serializable {
 	private Report defaultValueReport;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "lovReport")
 	private Report lovReport;
+	private String name2; //used for holding a processed name
+	private String dtAction;
 	@JsonIgnore
 	private boolean overwriteFiles;
+
+	/**
+	 * @return the name2
+	 */
+	public String getName2() {
+		return name2;
+	}
+
+	/**
+	 * @param name2 the name2 to set
+	 */
+	public void setName2(String name2) {
+		this.name2 = name2;
+	}
+
+	/**
+	 * @return the dtAction
+	 */
+	public String getDtAction() {
+		return dtAction;
+	}
+
+	/**
+	 * @param dtAction the dtAction to set
+	 */
+	public void setDtAction(String dtAction) {
+		this.dtAction = dtAction;
+	}
 
 	/**
 	 * @return the overwriteFiles
@@ -817,4 +847,41 @@ public class Parameter implements Serializable {
 
 		return options;
 	}
+
+	/**
+	 * Returns a copy of this parameter with only some fields filled
+	 *
+	 * @return a copy of this parameter with only some fields filled
+	 */
+	@JsonIgnore
+	public Parameter getBasicParameter() {
+		Parameter parameter = new Parameter();
+
+		parameter.setParameterId(parameterId);
+		parameter.setName(name);
+		parameter.setName2(name2);
+		parameter.setDescription(description);
+		parameter.setDtAction(dtAction);
+
+		return parameter;
+	}
+
+	/**
+	 * Returns the id of the parameter for use with table actions
+	 *
+	 * @return the report id
+	 */
+	public int getDtId() {
+		return parameterId;
+	}
+
+	/**
+	 * Returns the name of the parameter for use with table actions
+	 *
+	 * @return the report name
+	 */
+	public String getDtName() {
+		return name + " (" + parameterId + ")";
+	}
+
 }

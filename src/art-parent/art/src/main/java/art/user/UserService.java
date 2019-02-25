@@ -154,13 +154,12 @@ public class UserService {
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 			User user = loadBasicUser(rs);
-
 			return type.cast(user);
 		}
 	}
 
 	/**
-	 * Returns a user object with basic properties loaded from a resultset
+	 * Returns an object with basic properties loaded from a resultset
 	 * 
 	 * @param rs the resultset
 	 * @return the loaded object
@@ -206,7 +205,7 @@ public class UserService {
 	/**
 	 * Returns all users with only basic properties filled
 	 *
-	 * @return all users
+	 * @return all users with only basic properties filled
 	 * @throws SQLException
 	 */
 	@Cacheable("users")

@@ -150,6 +150,7 @@ public class UserController {
 
 				basicUsers.add(user.getBasicUser());
 			}
+			
 			ajaxResponse.setData(basicUsers);
 			ajaxResponse.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {

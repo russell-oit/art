@@ -863,8 +863,8 @@ public class User implements Serializable {
 		
 		user.setUserId(userId);
 		user.setUsername(username);
-		user.setFullName(fullName);
 		user.setUsername2(username2);
+		user.setFullName(fullName);
 		user.setDtActiveStatus(dtActiveStatus);
 		user.setDtAction(dtAction);
 		
@@ -872,7 +872,7 @@ public class User implements Serializable {
 	}
 	
 	/**
-	 * Returns the id of the report for use with table actions
+	 * Returns the id of the user for use with table actions
 	 *
 	 * @return the report id
 	 */
@@ -881,7 +881,7 @@ public class User implements Serializable {
 	}
 	
 	/**
-	 * Returns the name of the report for use with table actions
+	 * Returns the name of the user for use with table actions
 	 *
 	 * @return the report name
 	 */

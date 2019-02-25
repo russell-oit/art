@@ -27,14 +27,19 @@ import art.general.ActionResult;
 import art.general.AjaxResponse;
 import art.report.UploadHelper;
 import art.servlets.Config;
+import art.utils.AjaxTableHelper;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +47,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -49,6 +55,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
 
 /**
  * Controller for parameter configuration
@@ -72,18 +80,71 @@ public class ParameterController {
 	@Autowired
 	private MessageSource messageSource;
 
+	@Autowired
+	private ServletContext servletContext;
+
+	@Autowired
+	private TemplateEngine defaultTemplateEngine;
+
 	@RequestMapping(value = "/parameters", method = RequestMethod.GET)
 	public String showParameters(Model model) {
 		logger.debug("Entering showParameters");
 
+		return "parameters";
+	}
+
+	@GetMapping("/getParameters")
+	public @ResponseBody
+	AjaxResponse getParameters(Locale locale, HttpServletRequest request,
+			HttpServletResponse httpResponse) throws SQLException, IOException {
+
+		logger.debug("Entering getParameters");
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
 		try {
-			model.addAttribute("parameters", parameterService.getAllParameters());
+			List<Parameter> parameters = parameterService.getAllParametersBasic();
+
+			String sharedText = messageSource.getMessage("parameters.label.shared", null, locale);
+			String sharedSpan = "<span class='label label-success'>" + sharedText + "</span>";
+
+			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
+			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
+
+			List<Parameter> basicParameters = new ArrayList<>();
+
+			for (Parameter parameter : parameters) {
+				String enhancedName = ajaxTableHelper.processName(parameter.getName(), parameter.getCreationDate(), parameter.getUpdateDate());
+				parameter.setName2(enhancedName);
+
+				String description = parameter.getDescription();
+				if (description == null) {
+					description = "";
+				} else {
+					description = Encode.forHtml(description);
+				}
+
+				if (parameter.isShared()) {
+					description += " " + sharedSpan;
+				}
+				parameter.setDescription(description);
+
+				ctx.setVariable("parameter", parameter);
+				String emailTemplateName = "parametersAction";
+				String dtAction = defaultTemplateEngine.process(emailTemplateName, ctx);
+				parameter.setDtAction(dtAction);
+
+				basicParameters.add(parameter.getBasicParameter());
+			}
+
+			ajaxResponse.setData(basicParameters);
+			ajaxResponse.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			model.addAttribute("error", ex);
+			ajaxResponse.setErrorMessage(ex.toString());
 		}
 
-		return "parameters";
+		return ajaxResponse;
 	}
 
 	@RequestMapping(value = "/deleteParameter", method = RequestMethod.POST)

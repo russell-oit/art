@@ -75,7 +75,7 @@ Reports configuration page
 					{"data": "dtAction", width: '370px'}
 				];
 
-				//initialize datatable and process delete action
+				//initialize datatable
 				var oTable = initAjaxTable(tbl,
 						pageLength,
 						showAllRowsText,

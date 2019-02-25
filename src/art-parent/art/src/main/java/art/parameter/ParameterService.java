@@ -91,33 +91,8 @@ public class ParameterService {
 
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
-			Parameter parameter = new Parameter();
-
-			parameter.setParameterId(rs.getInt("PARAMETER_ID"));
-			parameter.setName(rs.getString("NAME"));
-			parameter.setDescription(rs.getString("DESCRIPTION"));
-			parameter.setParameterType(ParameterType.toEnum(rs.getString("PARAMETER_TYPE")));
-			parameter.setLabel(rs.getString("PARAMETER_LABEL"));
-			parameter.setHelpText(rs.getString("HELP_TEXT"));
-			parameter.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
-			parameter.setDefaultValue(rs.getString("DEFAULT_VALUE"));
-			parameter.setHidden(rs.getBoolean("HIDDEN"));
-			parameter.setFixedValue(rs.getBoolean("FIXED_VALUE"));
-			parameter.setShared(rs.getBoolean("SHARED"));
-			parameter.setUseLov(rs.getBoolean("USE_LOV"));
-			parameter.setUseRulesInLov(rs.getBoolean("USE_RULES_IN_LOV"));
-			parameter.setDrilldownColumnIndex(rs.getInt("DRILLDOWN_COLUMN_INDEX"));
-			parameter.setUseDirectSubstitution(rs.getBoolean("USE_DIRECT_SUBSTITUTION"));
-			parameter.setOptions(rs.getString("PARAMETER_OPTIONS"));
-			parameter.setDateFormat(rs.getString("PARAMETER_DATE_FORMAT"));
-			parameter.setPlaceholderText(rs.getString("PLACEHOLDER_TEXT"));
-			parameter.setUseDefaultValueInJobs(rs.getBoolean("USE_DEFAULT_VALUE_IN_JOBS"));
-			parameter.setTemplate(rs.getString("TEMPLATE"));
-			parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-			parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
-			parameter.setCreatedBy(rs.getString("CREATED_BY"));
-			parameter.setUpdatedBy(rs.getString("UPDATED_BY"));
-
+			Parameter parameter = loadBasicParameter(rs);
+			
 			Report defaultValueReport = reportService.getReport(rs.getInt("DEFAULT_VALUE_REPORT_ID"));
 			parameter.setDefaultValueReport(defaultValueReport);
 
@@ -141,6 +116,56 @@ public class ParameterService {
 			return type.cast(parameter);
 		}
 	}
+	
+	/**
+	 * Maps a resultset to an object
+	 */
+	private class BasicParameterMapper extends ParameterMapper {
+		
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			Parameter parameter = loadBasicParameter(rs);
+			return type.cast(parameter);
+		}
+	}
+
+	/**
+	 * Returns an object with basic properties loaded from a resultset
+	 * 
+	 * @param rs the resultset
+	 * @return the loaded object
+	 * @throws SQLException 
+	 */
+	private Parameter loadBasicParameter(ResultSet rs) throws SQLException {
+		Parameter parameter = new Parameter();
+
+		parameter.setParameterId(rs.getInt("PARAMETER_ID"));
+		parameter.setName(rs.getString("NAME"));
+		parameter.setDescription(rs.getString("DESCRIPTION"));
+		parameter.setParameterType(ParameterType.toEnum(rs.getString("PARAMETER_TYPE")));
+		parameter.setLabel(rs.getString("PARAMETER_LABEL"));
+		parameter.setHelpText(rs.getString("HELP_TEXT"));
+		parameter.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
+		parameter.setDefaultValue(rs.getString("DEFAULT_VALUE"));
+		parameter.setHidden(rs.getBoolean("HIDDEN"));
+		parameter.setFixedValue(rs.getBoolean("FIXED_VALUE"));
+		parameter.setShared(rs.getBoolean("SHARED"));
+		parameter.setUseLov(rs.getBoolean("USE_LOV"));
+		parameter.setUseRulesInLov(rs.getBoolean("USE_RULES_IN_LOV"));
+		parameter.setDrilldownColumnIndex(rs.getInt("DRILLDOWN_COLUMN_INDEX"));
+		parameter.setUseDirectSubstitution(rs.getBoolean("USE_DIRECT_SUBSTITUTION"));
+		parameter.setOptions(rs.getString("PARAMETER_OPTIONS"));
+		parameter.setDateFormat(rs.getString("PARAMETER_DATE_FORMAT"));
+		parameter.setPlaceholderText(rs.getString("PLACEHOLDER_TEXT"));
+		parameter.setUseDefaultValueInJobs(rs.getBoolean("USE_DEFAULT_VALUE_IN_JOBS"));
+		parameter.setTemplate(rs.getString("TEMPLATE"));
+		parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+		parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+		parameter.setCreatedBy(rs.getString("CREATED_BY"));
+		parameter.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+		return parameter;
+	}
 
 	/**
 	 * Returns all parameters
@@ -153,6 +178,20 @@ public class ParameterService {
 		logger.debug("Entering getAllParameters");
 
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
+		return dbService.query(SQL_SELECT_ALL, h);
+	}
+	
+	/**
+	 * Returns all parameters with only basic properties filled
+	 *
+	 * @return all parameters with only basic properties filled
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public List<Parameter> getAllParametersBasic() throws SQLException {
+		logger.debug("Entering getAllParametersBasic");
+
+		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new BasicParameterMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
 
@@ -350,7 +389,7 @@ public class ParameterService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
-		
+
 		return result;
 	}
 
