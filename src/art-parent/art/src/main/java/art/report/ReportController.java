@@ -252,9 +252,11 @@ public class ReportController {
 				String encodedName = ajaxTableHelper.processName(report.getName(), report.getCreationDate(), report.getUpdateDate());
 				report.setName2(encodedName);
 
-				if (StringUtils.isNotBlank(report.getDescription())) {
-					report.setDescription(Encode.forHtml(report.getDescription()));
+				String description = report.getDescription();
+				if (StringUtils.isNotBlank(description)) {
+					description = Encode.forHtml(description);
 				}
+				report.setDescription2(description);
 
 				String activeStatus;
 				if (report.isActive()) {

@@ -97,9 +97,24 @@ public class Parameter implements Serializable {
 	@Nested(headerTransformer = PrefixTransformer.class, args = "lovReport")
 	private Report lovReport;
 	private String name2; //used for holding a processed name
+	private String description2; //used for holding a processed description
 	private String dtAction;
 	@JsonIgnore
 	private boolean overwriteFiles;
+
+	/**
+	 * @return the description2
+	 */
+	public String getDescription2() {
+		return description2;
+	}
+
+	/**
+	 * @param description2 the description2 to set
+	 */
+	public void setDescription2(String description2) {
+		this.description2 = description2;
+	}
 
 	/**
 	 * @return the name2
@@ -860,7 +875,7 @@ public class Parameter implements Serializable {
 		parameter.setParameterId(parameterId);
 		parameter.setName(name);
 		parameter.setName2(name2);
-		parameter.setDescription(description);
+		parameter.setDescription2(description2);
 		parameter.setDtAction(dtAction);
 
 		return parameter;

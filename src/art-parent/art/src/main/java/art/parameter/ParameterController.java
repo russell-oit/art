@@ -127,7 +127,7 @@ public class ParameterController {
 				if (parameter.isShared()) {
 					description += " " + sharedSpan;
 				}
-				parameter.setDescription(description);
+				parameter.setDescription2(description);
 
 				ctx.setVariable("parameter", parameter);
 				String emailTemplateName = "parametersAction";

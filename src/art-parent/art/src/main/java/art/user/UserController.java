@@ -128,9 +128,11 @@ public class UserController {
 				String encodedUsername = ajaxTableHelper.processName(user.getUsername(), user.getCreationDate(), user.getUpdateDate());
 				user.setUsername2(encodedUsername);
 
-				if (StringUtils.isNotBlank(user.getFullName())) {
-					user.setFullName(Encode.forHtml(user.getFullName()));
+				String fullName = user.getFullName();
+				if (StringUtils.isNotBlank(fullName)) {
+					fullName = Encode.forHtml(fullName);
 				}
+				user.setFullName2(fullName);
 
 				String activeStatus;
 				if (user.isActive()) {
@@ -150,7 +152,7 @@ public class UserController {
 
 				basicUsers.add(user.getBasicUser());
 			}
-			
+
 			ajaxResponse.setData(basicUsers);
 			ajaxResponse.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {

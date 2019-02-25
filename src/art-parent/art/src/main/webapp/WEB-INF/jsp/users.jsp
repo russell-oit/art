@@ -62,7 +62,7 @@ Display user configuration page
 					{"data": null, defaultContent: ""},
 					{"data": "userId"},
 					{"data": "username2"},
-					{"data": "fullName"},
+					{"data": "fullName2"},
 					{"data": "dtActiveStatus"},
 					{"data": "dtAction", width: '370px'}
 				];

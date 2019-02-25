@@ -205,6 +205,7 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
+	private String description2; //used for holding a processed description
 	private String dtActiveStatus;
 	private String dtAction;
 	private String reportGroupNames; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
@@ -213,6 +214,20 @@ public class Report implements Serializable {
 	private boolean overwriteFiles;
 	@JsonIgnore
 	private Integer limit;
+
+	/**
+	 * @return the description2
+	 */
+	public String getDescription2() {
+		return description2;
+	}
+
+	/**
+	 * @param description2 the description2 to set
+	 */
+	public void setDescription2(String description2) {
+		this.description2 = description2;
+	}
 
 	/**
 	 * @return the createdById
@@ -1712,6 +1727,7 @@ public class Report implements Serializable {
 		basic.setName(name);
 		basic.setName2(name2);
 		basic.setDescription(description);
+		basic.setDescription2(description2);
 		basic.setDtActiveStatus(dtActiveStatus);
 		basic.setDtAction(dtAction);
 		basic.setReportGroups(reportGroups);

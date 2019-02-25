@@ -70,7 +70,7 @@ Reports configuration page
 					{"data": "reportId"},
 					{"data": "name2"},
 					{"data": "reportGroupNamesHtml"},
-					{"data": "description"},
+					{"data": "description2"},
 					{"data": "dtActiveStatus"},
 					{"data": "dtAction", width: '370px'}
 				];

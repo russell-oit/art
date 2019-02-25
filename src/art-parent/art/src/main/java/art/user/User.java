@@ -89,10 +89,25 @@ public class User implements Serializable {
 	private List<Role> roles;
 	private List<Permission> permissions;
 	private String username2; //used for holding a processed username
+	private String fullName2; //used for holding a processed full name
 	private String dtActiveStatus;
 	private String dtAction;
 	@JsonIgnore
 	private List<String> flatPermissions = new ArrayList<>();
+
+	/**
+	 * @return the fullName2
+	 */
+	public String getFullName2() {
+		return fullName2;
+	}
+
+	/**
+	 * @param fullName2 the fullName2 to set
+	 */
+	public void setFullName2(String fullName2) {
+		this.fullName2 = fullName2;
+	}
 
 	/**
 	 * @return the dtActiveStatus
@@ -864,7 +879,7 @@ public class User implements Serializable {
 		user.setUserId(userId);
 		user.setUsername(username);
 		user.setUsername2(username2);
-		user.setFullName(fullName);
+		user.setFullName2(fullName2);
 		user.setDtActiveStatus(dtActiveStatus);
 		user.setDtAction(dtAction);
 		

@@ -59,7 +59,7 @@ Display parameters
 					{"data": null, defaultContent: ""},
 					{"data": "parameterId"},
 					{"data": "name2"},
-					{"data": "description"},
+					{"data": "description2"},
 					{"data": "dtAction", width: '370px'}
 				];
 
