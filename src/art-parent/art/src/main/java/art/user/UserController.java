@@ -28,8 +28,8 @@ import art.general.ActionResult;
 import art.general.AjaxResponse;
 import art.role.RoleService;
 import art.userrole.UserRoleService;
+import art.utils.AjaxTableHelper;
 import art.utils.ArtHelper;
-import art.utils.ArtUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -119,30 +119,13 @@ public class UserController {
 		try {
 			List<User> users = userService.getAllUsersBasic();
 
-			String newText = messageSource.getMessage("page.text.new", null, locale);
-			String updatedText = messageSource.getMessage("page.text.updated", null, locale);
-			String newSpan = "<span class='label label-success'>" + newText + "</span>";
-			String updatedSpan = "<span class='label label-success'>" + updatedText + "</span>";
-
-			String activeText = messageSource.getMessage("activeStatus.option.active", null, locale);
-			String disabledText = messageSource.getMessage("activeStatus.option.disabled", null, locale);
-			String activeSpan = "<span class='label label-success'>" + activeText + "</span>";
-			String disabledSpan = "<span class='label label-danger'>" + disabledText + "</span>";
-
 			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
+			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
 
 			List<User> basicUsers = new ArrayList<>();
 
 			for (User user : users) {
-				String encodedUsername = Encode.forHtml(user.getUsername());
-
-				final int NEW_UPDATED_LIMIT = 7;
-				if (ArtUtils.daysUntilToday(user.getCreationDate()) <= NEW_UPDATED_LIMIT) {
-					encodedUsername += " " + newSpan;
-				}
-				if (ArtUtils.daysUntilToday(user.getUpdateDate()) <= NEW_UPDATED_LIMIT) {
-					encodedUsername += " " + updatedSpan;
-				}
+				String encodedUsername = ajaxTableHelper.processName(user.getUsername(), user.getCreationDate(), user.getUpdateDate());
 				user.setUsername2(encodedUsername);
 
 				if (StringUtils.isNotBlank(user.getFullName())) {
@@ -151,9 +134,9 @@ public class UserController {
 
 				String activeStatus;
 				if (user.isActive()) {
-					activeStatus = activeSpan;
+					activeStatus = ajaxTableHelper.getActiveSpan();
 				} else {
-					activeStatus = disabledSpan;
+					activeStatus = ajaxTableHelper.getDisabledSpan();
 				}
 				user.setDtActiveStatus(activeStatus);
 

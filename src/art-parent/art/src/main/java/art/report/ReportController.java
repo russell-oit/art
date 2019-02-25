@@ -42,6 +42,7 @@ import art.savedparameter.SavedParameterService;
 import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
+import art.utils.AjaxTableHelper;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
@@ -242,30 +243,13 @@ public class ReportController {
 		try {
 			List<Report> reports = reportService.getAllReports();
 
-			String newText = messageSource.getMessage("page.text.new", null, locale);
-			String updatedText = messageSource.getMessage("page.text.updated", null, locale);
-			String newSpan = "<span class='label label-success'>" + newText + "</span>";
-			String updatedSpan = "<span class='label label-success'>" + updatedText + "</span>";
-
-			String activeText = messageSource.getMessage("activeStatus.option.active", null, locale);
-			String disabledText = messageSource.getMessage("activeStatus.option.disabled", null, locale);
-			String activeSpan = "<span class='label label-success'>" + activeText + "</span>";
-			String disabledSpan = "<span class='label label-danger'>" + disabledText + "</span>";
-
 			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
+			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
 
 			List<Report> basicReports = new ArrayList<>();
 
 			for (Report report : reports) {
-				String encodedName = Encode.forHtml(report.getName());
-
-				final int NEW_UPDATED_LIMIT = 7;
-				if (ArtUtils.daysUntilToday(report.getCreationDate()) <= NEW_UPDATED_LIMIT) {
-					encodedName += " " + newSpan;
-				}
-				if (ArtUtils.daysUntilToday(report.getUpdateDate()) <= NEW_UPDATED_LIMIT) {
-					encodedName += " " + updatedSpan;
-				}
+				String encodedName = ajaxTableHelper.processName(report.getName(), report.getCreationDate(), report.getUpdateDate());
 				report.setName2(encodedName);
 
 				if (StringUtils.isNotBlank(report.getDescription())) {
@@ -274,9 +258,9 @@ public class ReportController {
 
 				String activeStatus;
 				if (report.isActive()) {
-					activeStatus = activeSpan;
+					activeStatus = ajaxTableHelper.getActiveSpan();
 				} else {
-					activeStatus = disabledSpan;
+					activeStatus = ajaxTableHelper.getDisabledSpan();
 				}
 				report.setDtActiveStatus(activeStatus);
 
