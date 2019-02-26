@@ -241,22 +241,29 @@ public class ReportController {
 		AjaxResponse ajaxResponse = new AjaxResponse();
 
 		try {
-			List<Report> reports = reportService.getAllReports();
+			List<Report> reports = reportService.getAllReportsBasic();
 
 			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
 			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
 
-			List<Report> basicReports = new ArrayList<>();
+			List<BasicReport> finalReports = new ArrayList<>();
 
 			for (Report report : reports) {
+				ctx.setVariable("report", report);
+				String templateName = "reportsConfigAction";
+				String dtAction = defaultTemplateEngine.process(templateName, ctx);
+
+				BasicReport basicReport = new BasicReport(report);
+				basicReport.setDtAction(dtAction);
+
 				String encodedName = ajaxTableHelper.processName(report.getName(), report.getCreationDate(), report.getUpdateDate());
-				report.setName2(encodedName);
+				basicReport.setName2(encodedName);
 
 				String description = report.getDescription();
 				if (StringUtils.isNotBlank(description)) {
 					description = Encode.forHtml(description);
 				}
-				report.setDescription2(description);
+				basicReport.setDescription2(description);
 
 				String activeStatus;
 				if (report.isActive()) {
@@ -264,16 +271,12 @@ public class ReportController {
 				} else {
 					activeStatus = ajaxTableHelper.getDisabledSpan();
 				}
-				report.setDtActiveStatus(activeStatus);
+				basicReport.setDtActiveStatus(activeStatus);
 
-				ctx.setVariable("report", report);
-				String emailTemplateName = "reportsConfigAction";
-				String dtAction = defaultTemplateEngine.process(emailTemplateName, ctx);
-				report.setDtAction(dtAction);
-
-				basicReports.add(report.getBasicReport());
+				finalReports.add(basicReport);
 			}
-			ajaxResponse.setData(basicReports);
+
+			ajaxResponse.setData(finalReports);
 			ajaxResponse.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

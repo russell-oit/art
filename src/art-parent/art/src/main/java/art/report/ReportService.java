@@ -121,57 +121,7 @@ public class ReportService {
 
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
-			Report report = new Report();
-
-			report.setReportId(rs.getInt("QUERY_ID"));
-			report.setName(rs.getString("NAME"));
-			report.setShortDescription(rs.getString("SHORT_DESCRIPTION"));
-			report.setDescription(rs.getString("DESCRIPTION"));
-			report.setComment(rs.getString("DEVELOPER_COMMENT"));
-			report.setReportTypeId(rs.getInt("QUERY_TYPE"));
-			report.setReportType(ReportType.toEnum(rs.getInt("QUERY_TYPE")));
-			report.setGroupColumn(rs.getInt("GROUP_COLUMN"));
-			report.setContactPerson(rs.getString("CONTACT_PERSON"));
-			report.setUsesRules(rs.getBoolean("USES_RULES"));
-			report.setActive(rs.getBoolean("ACTIVE"));
-			report.setHidden(rs.getBoolean("HIDDEN"));
-			report.setReportSource(rs.getString("REPORT_SOURCE"));
-			report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
-			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
-			report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));
-			report.setChartOptionsSetting(rs.getString("GRAPH_OPTIONS"));
-			report.setSecondaryCharts(rs.getString("SECONDARY_CHARTS"));
-			report.setTemplate(rs.getString("TEMPLATE"));
-			report.setDisplayResultset(rs.getInt("DISPLAY_RESULTSET"));
-			report.setXmlaDatasource(rs.getString("XMLA_DATASOURCE"));
-			report.setXmlaCatalog(rs.getString("XMLA_CATALOG"));
-			report.setDefaultReportFormat(rs.getString("DEFAULT_REPORT_FORMAT"));
-			report.setOmitTitleRow(rs.getBoolean("OMIT_TITLE_ROW"));
-			report.setHiddenColumns(rs.getString("HIDDEN_COLUMNS"));
-			report.setTotalColumns(rs.getString("TOTAL_COLUMNS"));
-			report.setDateFormat(rs.getString("DATE_COLUMN_FORMAT"));
-			report.setNumberFormat(rs.getString("NUMBER_COLUMN_FORMAT"));
-			report.setColumnFormats(rs.getString("COLUMN_FORMATS"));
-			report.setLocale(rs.getString("LOCALE"));
-			report.setNullNumberDisplay(rs.getString("NULL_NUMBER_DISPLAY"));
-			report.setNullStringDisplay(rs.getString("NULL_STRING_DISPLAY"));
-			report.setFetchSize(rs.getInt("FETCH_SIZE"));
-			report.setOptions(rs.getString("REPORT_OPTIONS"));
-			report.setPageOrientation(PageOrientation.toEnum(rs.getString("PAGE_ORIENTATION"), PageOrientation.Portrait));
-			report.setLovUseDynamicDatasource(rs.getBoolean("LOV_USE_DYNAMIC_DATASOURCE"));
-			report.setOpenPassword(rs.getString("OPEN_PASSWORD"));
-			report.setModifyPassword(rs.getString("MODIFY_PASSWORD"));
-			report.setSourceReportId(rs.getInt("SOURCE_REPORT_ID"));
-			report.setUseGroovy(rs.getBoolean("USE_GROOVY"));
-			report.setPivotTableJsSavedOptions(rs.getString("PIVOTTABLEJS_SAVED_OPTIONS"));
-			report.setGridstackSavedOptions(rs.getString("GRIDSTACK_SAVED_OPTIONS"));
-			report.setViewReportId(rs.getInt("VIEW_REPORT_ID"));
-			report.setSelfServiceOptions(rs.getString("SELF_SERVICE_OPTIONS"));
-			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
-			report.setCreatedBy(rs.getString("CREATED_BY"));
-			report.setCreatedById(rs.getInt("CREATED_BY_ID"));
-			report.setUpdatedBy(rs.getString("UPDATED_BY"));
+			Report report = loadBasicReport(rs);
 
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.Text) {
@@ -183,9 +133,6 @@ public class ReportService {
 
 			Encryptor encryptor = encryptorService.getEncryptor(rs.getInt("ENCRYPTOR_ID"));
 			report.setEncryptor(encryptor);
-
-			List<ReportGroup> reportGroups = reportGroupService.getReportGroupsForReport(report.getReportId());
-			report.setReportGroups(reportGroups);
 
 			//decrypt open and modify passwords
 			try {
@@ -275,6 +222,112 @@ public class ReportService {
 
 			report.setChartOptions(chartOptions);
 		}
+	}
+	
+	/**
+	 * Maps a resultset to an object
+	 */
+	private class BasicReportMapper extends ReportMapper {
+		
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			Report report=loadBasicReport(rs);
+			return type.cast(report);
+		}
+	}
+
+	/**
+	 * Returns an object with basic properties loaded from a resultset
+	 * 
+	 * @param rs the resultset
+	 * @return the loaded object
+	 * @throws SQLException 
+	 */
+	private Report loadBasicReport(ResultSet rs) throws SQLException {
+		Report report = new Report();
+
+		report.setReportId(rs.getInt("QUERY_ID"));
+		report.setName(rs.getString("NAME"));
+		report.setShortDescription(rs.getString("SHORT_DESCRIPTION"));
+		report.setDescription(rs.getString("DESCRIPTION"));
+		report.setComment(rs.getString("DEVELOPER_COMMENT"));
+		report.setReportTypeId(rs.getInt("QUERY_TYPE"));
+		report.setReportType(ReportType.toEnum(rs.getInt("QUERY_TYPE")));
+		report.setGroupColumn(rs.getInt("GROUP_COLUMN"));
+		report.setContactPerson(rs.getString("CONTACT_PERSON"));
+		report.setUsesRules(rs.getBoolean("USES_RULES"));
+		report.setActive(rs.getBoolean("ACTIVE"));
+		report.setHidden(rs.getBoolean("HIDDEN"));
+		report.setReportSource(rs.getString("REPORT_SOURCE"));
+		report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
+		report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
+		report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));
+		report.setChartOptionsSetting(rs.getString("GRAPH_OPTIONS"));
+		report.setSecondaryCharts(rs.getString("SECONDARY_CHARTS"));
+		report.setTemplate(rs.getString("TEMPLATE"));
+		report.setDisplayResultset(rs.getInt("DISPLAY_RESULTSET"));
+		report.setXmlaDatasource(rs.getString("XMLA_DATASOURCE"));
+		report.setXmlaCatalog(rs.getString("XMLA_CATALOG"));
+		report.setDefaultReportFormat(rs.getString("DEFAULT_REPORT_FORMAT"));
+		report.setOmitTitleRow(rs.getBoolean("OMIT_TITLE_ROW"));
+		report.setHiddenColumns(rs.getString("HIDDEN_COLUMNS"));
+		report.setTotalColumns(rs.getString("TOTAL_COLUMNS"));
+		report.setDateFormat(rs.getString("DATE_COLUMN_FORMAT"));
+		report.setNumberFormat(rs.getString("NUMBER_COLUMN_FORMAT"));
+		report.setColumnFormats(rs.getString("COLUMN_FORMATS"));
+		report.setLocale(rs.getString("LOCALE"));
+		report.setNullNumberDisplay(rs.getString("NULL_NUMBER_DISPLAY"));
+		report.setNullStringDisplay(rs.getString("NULL_STRING_DISPLAY"));
+		report.setFetchSize(rs.getInt("FETCH_SIZE"));
+		report.setOptions(rs.getString("REPORT_OPTIONS"));
+		report.setPageOrientation(PageOrientation.toEnum(rs.getString("PAGE_ORIENTATION"), PageOrientation.Portrait));
+		report.setLovUseDynamicDatasource(rs.getBoolean("LOV_USE_DYNAMIC_DATASOURCE"));
+		report.setOpenPassword(rs.getString("OPEN_PASSWORD"));
+		report.setModifyPassword(rs.getString("MODIFY_PASSWORD"));
+		report.setSourceReportId(rs.getInt("SOURCE_REPORT_ID"));
+		report.setUseGroovy(rs.getBoolean("USE_GROOVY"));
+		report.setPivotTableJsSavedOptions(rs.getString("PIVOTTABLEJS_SAVED_OPTIONS"));
+		report.setGridstackSavedOptions(rs.getString("GRIDSTACK_SAVED_OPTIONS"));
+		report.setViewReportId(rs.getInt("VIEW_REPORT_ID"));
+		report.setSelfServiceOptions(rs.getString("SELF_SERVICE_OPTIONS"));
+		report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+		report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+		report.setCreatedBy(rs.getString("CREATED_BY"));
+		report.setCreatedById(rs.getInt("CREATED_BY_ID"));
+		report.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+		List<ReportGroup> reportGroups = reportGroupService.getReportGroupsForReport(report.getReportId());
+		report.setReportGroups(reportGroups);
+
+		return report;
+	}
+
+	/**
+	 * Returns all reports
+	 *
+	 * @return all reports
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAllReports() throws SQLException {
+		logger.debug("Entering getAllReports");
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(SQL_SELECT_ALL, h);
+	}
+	
+	/**
+	 * Returns all reports with only basic properties filled
+	 *
+	 * @return all reports with only basic properties filled
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAllReportsBasic() throws SQLException {
+		logger.debug("Entering getAllReportsBasic");
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new BasicReportMapper());
+		return dbService.query(SQL_SELECT_ALL, h);
 	}
 
 	/**
@@ -461,20 +514,6 @@ public class ReportService {
 				ReportType.View);
 
 		return getAccessibleReportsWithoutReportTypes(userId, excludedReportTypes);
-	}
-
-	/**
-	 * Returns all reports
-	 *
-	 * @return all reports
-	 * @throws SQLException
-	 */
-	@Cacheable(value = "reports")
-	public List<Report> getAllReports() throws SQLException {
-		logger.debug("Entering getAllReports");
-
-		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
-		return dbService.query(SQL_SELECT_ALL, h);
 	}
 
 	/**
