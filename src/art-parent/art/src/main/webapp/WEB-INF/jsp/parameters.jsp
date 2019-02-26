@@ -277,7 +277,7 @@ Display parameters
 					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/><p></p></th>
 					<th><spring:message code="page.text.name"/><p></p></th>
-					<th class="descriptionCol"><spring:message code="page.text.description"/><p></p></th>
+					<th><spring:message code="page.text.description"/><p></p></th>
 					<th class="noFilter"><spring:message code="page.text.action"/><p></p></th>
 				</tr>
 			</thead>
