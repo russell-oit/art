@@ -114,8 +114,8 @@ public class ParameterController {
 				parameter.setName2(enhancedName);
 
 				ctx.setVariable("parameter", parameter);
-				String emailTemplateName = "parametersAction";
-				String dtAction = defaultTemplateEngine.process(emailTemplateName, ctx);
+				String templateName = "parametersAction";
+				String dtAction = defaultTemplateEngine.process(templateName, ctx);
 				parameter.setDtAction(dtAction);
 
 				finalParameters.add(parameter.getBasicParameter());

@@ -131,8 +131,8 @@ public class UserController {
 
 				ctx.setVariable("user", user);
 				ctx.setVariable("sessionUser", sessionUser);
-				String emailTemplateName = "usersAction";
-				String dtAction = defaultTemplateEngine.process(emailTemplateName, ctx);
+				String templateName = "usersAction";
+				String dtAction = defaultTemplateEngine.process(templateName, ctx);
 				user.setDtAction(dtAction);
 
 				basicUsers.add(user.getBasicUser());
