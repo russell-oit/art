@@ -109,6 +109,7 @@ Reports configuration page
 								filter_default_label: '${selectValueText}',
 								text_data_delimiter: ",",
 								//https://github.com/vedmack/yadcf/issues/324
+								//https://stackoverflow.com/questions/42022835/is-possible-to-filter-blank-fields-on-multi-select
 								data: [' '],
 								append_data_to_table_data: 'before',
 								filter_match_mode: 'exact'
