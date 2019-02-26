@@ -191,6 +191,7 @@ public class BasicReport implements Serializable {
 	 * @param reportGroups the report groups list
 	 */
 	private void initializeReportGroupNames(List<ReportGroup> reportGroups) {
+		reportGroupNames2 = "";
 		if (CollectionUtils.isEmpty(reportGroups)) {
 			return;
 		}

@@ -107,7 +107,11 @@ Reports configuration page
 							{
 								column_number: 3,
 								filter_default_label: '${selectValueText}',
-								text_data_delimiter: ","
+								text_data_delimiter: ",",
+								//https://github.com/vedmack/yadcf/issues/324
+								data: [' '],
+								append_data_to_table_data: 'before',
+								filter_match_mode: 'exact'
 							},
 							{
 								column_number: 4,
