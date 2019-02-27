@@ -69,7 +69,18 @@ Reports configuration page
 					{"data": null, defaultContent: ""},
 					{"data": "reportId"},
 					{"data": "name2"},
-					{"data": "reportGroupNames2"},
+					{"data": function (row, type, val, meta) {
+							//https://datatables.net/reference/option/columns.data
+							var reportGroupNames2 = escapeHtmlContent(row.reportGroupNames2);
+							if (type === "filter") {
+								if (row.reportGroupNames2 === '') {
+									reportGroupNames2 = "~";
+								}
+							}
+
+							return reportGroupNames2;
+						}
+					},
 					{"data": "description2"},
 					{"data": "dtActiveStatus"},
 					{"data": "dtAction", width: '370px'}
@@ -107,12 +118,7 @@ Reports configuration page
 							{
 								column_number: 3,
 								filter_default_label: '${selectValueText}',
-								text_data_delimiter: ",",
-								//https://github.com/vedmack/yadcf/issues/324
-								//https://stackoverflow.com/questions/42022835/is-possible-to-filter-blank-fields-on-multi-select
-								data: [' '],
-								append_data_to_table_data: 'before',
-								filter_match_mode: 'exact'
+								text_data_delimiter: ", "
 							},
 							{
 								column_number: 4,

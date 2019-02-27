@@ -191,17 +191,16 @@ public class BasicReport implements Serializable {
 	 * @param reportGroups the report groups list
 	 */
 	private void initializeReportGroupNames(List<ReportGroup> reportGroups) {
-		reportGroupNames2 = "";
 		if (CollectionUtils.isEmpty(reportGroups)) {
-			return;
-		}
+			reportGroupNames2 = "";
+		} else {
+			List<String> names = new ArrayList<>();
+			for (ReportGroup reportGroup : reportGroups) {
+				names.add(reportGroup.getName());
+			}
 
-		List<String> names = new ArrayList<>();
-		for (ReportGroup reportGroup : reportGroups) {
-			names.add(reportGroup.getName());
+			String reportGroupNames = StringUtils.join(names, ", ");
+			reportGroupNames2 = Encode.forHtml(reportGroupNames);
 		}
-
-		String reportGroupNames = StringUtils.join(names, ", ");
-		reportGroupNames2 = Encode.forHtml(reportGroupNames);
 	}
 }
