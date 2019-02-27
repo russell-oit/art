@@ -38,7 +38,6 @@ public class BasicReport implements Serializable {
 	private String name;
 	private String name2;
 	private String description2;
-	private int viewReportId;
 	private String dtActiveStatus;
 	private String dtAction;
 	private String reportGroupNames2;
@@ -50,7 +49,6 @@ public class BasicReport implements Serializable {
 
 		reportId = report.getReportId();
 		name = report.getName();
-		viewReportId = report.getViewReportId();
 
 		initializeReportGroupNames(report.getReportGroups());
 	}
@@ -109,20 +107,6 @@ public class BasicReport implements Serializable {
 	 */
 	public void setDescription2(String description2) {
 		this.description2 = description2;
-	}
-
-	/**
-	 * @return the viewReportId
-	 */
-	public int getViewReportId() {
-		return viewReportId;
-	}
-
-	/**
-	 * @param viewReportId the viewReportId to set
-	 */
-	public void setViewReportId(int viewReportId) {
-		this.viewReportId = viewReportId;
 	}
 
 	/**
