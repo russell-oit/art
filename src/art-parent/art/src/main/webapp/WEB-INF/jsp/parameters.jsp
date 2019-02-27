@@ -102,14 +102,12 @@ Display parameters
 							{
 								column_number: 2,
 								filter_type: 'text',
-								filter_default_label: "",
-								style_class: "yadcf-report-name-filter"
+								filter_default_label: ""
 							},
 							{
 								column_number: 3,
 								filter_type: 'text',
-								filter_default_label: "",
-								style_class: "yadcf-report-description-filter"
+								filter_default_label: ""
 							}
 						]
 						);
