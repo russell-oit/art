@@ -187,4 +187,17 @@ public class BasicReport implements Serializable {
 			reportGroupNames2 = Encode.forHtml(reportGroupNames);
 		}
 	}
+
+	/**
+	 * Returns the string to be used for filtering report groups
+	 * 
+	 * @return the string to be used for filtering report groups
+	 */
+	public String getReportGroupNamesFilter() {
+		if (StringUtils.isEmpty(reportGroupNames2)) {
+			return "~";
+		} else {
+			return reportGroupNames2;
+		}
+	}
 }

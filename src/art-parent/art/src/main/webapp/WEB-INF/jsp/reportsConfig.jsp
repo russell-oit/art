@@ -69,16 +69,9 @@ Reports configuration page
 					{"data": null, defaultContent: ""},
 					{"data": "reportId"},
 					{"data": "name2"},
-					{"data": function (row, type, val, meta) {
-							//https://datatables.net/reference/option/columns.data
-							var reportGroupNames2 = escapeHtmlContent(row.reportGroupNames2);
-							if (type === "filter") {
-								if (row.reportGroupNames2 === '') {
-									reportGroupNames2 = "~";
-								}
-							}
-
-							return reportGroupNames2;
+					{"data": {
+							_: "reportGroupNames2",
+							filter: "reportGroupNamesFilter"
 						}
 					},
 					{"data": "description2"},

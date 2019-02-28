@@ -141,15 +141,59 @@ public class ReportController {
 	public String showReports(HttpSession session, Model model) {
 		logger.debug("Entering showReports");
 
+		return "reports";
+	}
+
+	@RequestMapping(value = "/getAvailableReports", method = RequestMethod.GET)
+	public @ResponseBody
+	AjaxResponse getAvailableReports(HttpSession session, Locale locale,
+			HttpServletRequest request) {
+		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
+		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
+
+		logger.debug("Entering getAvailableReports");
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			model.addAttribute("reports", reportService.getDisplayReports(sessionUser.getUserId()));
-		} catch (SQLException | RuntimeException ex) {
+
+			List<Report> reports = reportService.getDisplayReports(sessionUser.getUserId());
+
+			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
+
+			List<BasicReport> finalReports = new ArrayList<>();
+
+			for (Report report : reports) {
+				BasicReport basicReport = new BasicReport(report);
+
+				String name = report.getLocalizedName(locale);
+				String encodedName = Encode.forHtmlContent(name);
+
+				String link = "<a href='" + request.getContextPath()
+						+ "/selectReportParameters?reportId="
+						+ report.getReportId() + "'>" + encodedName + "</a>&nbsp;";
+
+				String label = ajaxTableHelper.processName("", report.getCreationDate(), report.getUpdateDate());
+				basicReport.setName2(link + label);
+
+				String description = report.getLocalizedDescription(locale);
+				if (StringUtils.isNotBlank(description)) {
+					description = Encode.forHtml(description);
+				}
+				basicReport.setDescription2(description);
+
+				finalReports.add(basicReport);
+			}
+
+			ajaxResponse.setData(finalReports);
+			ajaxResponse.setSuccess(true);
+		} catch (SQLException | IOException | RuntimeException ex) {
 			logger.error("Error", ex);
-			model.addAttribute("error", ex);
+			ajaxResponse.setErrorMessage(ex.toString());
 		}
 
-		return "reports";
+		return ajaxResponse;
 	}
 
 	@RequestMapping(value = "/selectReportParameters", method = RequestMethod.GET)
@@ -185,27 +229,6 @@ public class ReportController {
 		}
 
 		return "selectReportParameters";
-	}
-
-	@RequestMapping(value = "/getReports", method = RequestMethod.GET)
-	public @ResponseBody
-	List<Report> getReports(HttpSession session) {
-		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
-		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
-
-		logger.debug("Entering getReports");
-
-		User sessionUser = (User) session.getAttribute("sessionUser");
-
-		List<Report> reports = null;
-
-		try {
-			reports = reportService.getDisplayReports(sessionUser.getUserId());
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-		}
-
-		return reports;
 	}
 
 	@RequestMapping(value = "/reportsConfig", method = RequestMethod.GET)

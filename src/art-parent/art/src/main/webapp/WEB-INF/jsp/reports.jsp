@@ -20,6 +20,7 @@ Reports page. Also main/home page
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.text.description" var="descriptionText"/>
 <spring:message code="reports.text.selectValue" var="selectValueText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1"
 					 hasTable="true">
@@ -37,24 +38,36 @@ Reports page. Also main/home page
 
 				var tbl = $('#reports');
 
-//				var columnFilterRow = createColumnFilters(tbl);
+				var columnDefs = [
+					{
+						targets: "detailsCol",
+						orderable: false,
+						searchable: false
+					},
+					{
+						targets: ["descriptionCol"], //target name matches class name of th.
+						visible: false
+					},
+					{
+						targets: ["reportIdCol"], //target name matches class name of th.
+						visible: false
+					}
+				];
+
+				var columns = [
+					{"data": null, defaultContent: "", className: "details-control"},
+					{"data": {
+							_: "reportGroupNames2",
+							filter: "reportGroupNamesFilter"
+						}
+					},
+					{"data": "description2"},
+					{"data": "name2"},
+					{"data": "reportId"}
+				];
 
 				var oTable = tbl.dataTable({
-					columnDefs: [
-						{
-							targets: "detailsCol",
-							orderable: false,
-							searchable: false
-						},
-						{
-							targets: ["descriptionCol"], //target name matches class name of th.
-							visible: false
-						},
-						{
-							targets: ["reportIdCol"], //target name matches class name of th.
-							visible: false
-						}
-					],
+					columnDefs: columnDefs,
 					orderClasses: false,
 					order: [3, "asc"], //sort by report name. 0 is the details column
 					pagingType: "full_numbers",
@@ -65,17 +78,34 @@ Reports page. Also main/home page
 					},
 					initComplete: function () {
 						datatablesInitComplete();
+					},
+					deferRender: true,
+					ajax: {
+						type: "GET",
+						dataType: "json",
+						url: "${pageContext.request.contextPath}/getAvailableReports",
+						dataSrc: function (response) {
+							//https://stackoverflow.com/questions/35475964/datatables-ajax-call-error-handle
+							if (response.success) {
+								return response.data;
+							} else {
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+								return "";
+							}
+						},
+						error: function (xhr) {
+							showUserAjaxError(xhr, '${errorOccurredText}');
+						}
+					},
+					columns: columns,
+					autoWidth: false,
+					drawCallback: function () {
+						initializeButtonHover();
 					}
 				});
 
-//				//move column filter row after heading row
-//				columnFilterRow.insertAfter(columnFilterRow.next());
-
 				//get datatables api object
 				var table = oTable.api();
-
-//				// Apply the column filter
-//				applyColumnFilters(tbl, table);
 
 				//add thead row with yadcf filters
 				var headingRow = tbl.find('thead tr:first');
@@ -135,19 +165,26 @@ Reports page. Also main/home page
 					}
 				});
 
+				$("#refreshRecords").on("click", function () {
+					table.ajax.reload();
+				});
+
+				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+					$(this).parent().hide();
+				});
+
 			});
 
 			/* Formating function for row details */
 			function formatDetails(data) {
 				var descriptionText = "${descriptionText}";
 				return '<div class="details">' + descriptionText + ': '
-						+ data[2] + '</div>';
+						+ data.description2 + '</div>';
 			}
-
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="abovePanel">
+	<jsp:body>
 		<c:if test="${error != null}">
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
@@ -157,9 +194,19 @@ Reports page. Also main/home page
 				</c:if>
 			</div>
 		</c:if>
-	</jsp:attribute>
 
-	<jsp:body>
+		<div id="ajaxResponseContainer">
+			<div id="ajaxResponse">
+			</div>
+		</div>
+
+		<div style="margin-bottom: 10px; text-align: right">
+			<button type="button" id="refreshRecords" class="btn btn-default">
+				<i class="fa fa-refresh"></i>
+				<spring:message code="page.action.refresh"/>
+			</button>
+		</div>
+
 		<table id="reports" class="expandable table table-bordered">
 			<thead>
 				<tr>
@@ -170,23 +217,6 @@ Reports page. Also main/home page
 					<th class="reportIdCol noFilter"></th> <%-- report id column. hidden --%>
 				</tr>
 			</thead>
-			<tbody>
-				<c:forEach var="report" items="${reports}">
-					<tr>
-						<td class="details-control"></td> <%-- details control column --%>
-						<td>${encode:forHtmlContent(report.reportGroupNames)}</td>
-						<td>${encode:forHtmlContent(report.getLocalizedDescription(pageContext.response.locale))}</td>
-						<td>
-							<a href="${pageContext.request.contextPath}/selectReportParameters?reportId=${report.reportId}">
-								${encode:forHtmlContent(report.getLocalizedName(pageContext.response.locale))}
-							</a> &nbsp;
-							<t:displayNewLabel creationDate="${report.creationDate}"
-											   updateDate="${report.updateDate}"/>
-						</td>
-						<td><encode:forHtmlContent value="${report.reportId}"/></td>
-					</tr>
-				</c:forEach>
-			</tbody>
 		</table>
 	</jsp:body>
 </t:mainPageWithPanel>

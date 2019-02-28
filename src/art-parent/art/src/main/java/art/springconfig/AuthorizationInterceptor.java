@@ -314,7 +314,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		if (StringUtils.equalsAny(page, "", "reports", "selectReportParameters",
 				"showDashboard", "getLovValues", "runReport", "emailReport",
 				"showJPivot", "jpivotBusy", "jpivotError", "saiku3",
-				"saveParameterSelection", "clearSavedParameterSelection")) {
+				"saveParameterSelection", "clearSavedParameterSelection",
+				"getAvailableReports")) {
 			if (user.hasPermission("view_reports")) {
 				authorised = true;
 			}
