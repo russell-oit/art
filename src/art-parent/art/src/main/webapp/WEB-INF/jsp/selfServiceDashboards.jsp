@@ -25,7 +25,7 @@
 <spring:message code="dialog.title.saveReport" var="saveReportText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
-<spring:message code="selfService.text.title" var="titleText"/>
+<spring:message code="dialog.text.title" var="titleText"/>
 
 <t:mainPage title="${pageTitle}">
 
