@@ -25,6 +25,7 @@
 <spring:message code="dialog.title.saveReport" var="saveReportText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
+<spring:message code="selfService.text.title" var="titleText"/>
 
 <t:mainPage title="${pageTitle}">
 
@@ -129,6 +130,26 @@
 				$('.grid-stack').on('click', '.refreshWidget', function () {
 					var reportId = $(this).data("reportId");
 					runReport(reportId);
+				});
+
+				$('.grid-stack').on('click', '.editWidgetTitle', function () {
+					var content = $(this).closest('.grid-stack-item-content');
+					bootbox.prompt({
+						title: "${titleText}",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								content.find('.reportTitle').text(result);
+							}
+						}
+					});
 				});
 
 				function autosize(autoheight, autowidth, reportId) {
@@ -346,7 +367,7 @@
 				var grid = $('.grid-stack').data('gridstack');
 				grid.removeAll();
 			}
-			
+
 			function showDeleteDashboard(reportName, reportId) {
 				$("#deleteDashboard").attr("data-report-name", reportName);
 				$("#deleteDashboard").attr("data-report-id", reportId);
@@ -364,6 +385,7 @@
 			<span><b class="reportTitle">#reportName#</b></span>
 			<span class="fa fa-times removeWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
 			<span class="fa fa-refresh refreshWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
+			<span class="fa fa-pencil editWidgetTitle pull-right self-service-item-icon"></span>
 			</div>				
 			<div id="content_#reportId#">
 			</div>
