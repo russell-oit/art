@@ -2484,7 +2484,6 @@ if (!Object.entries) {
 								col_inner_elements = (col_inner_elements + '').split(columnObj.text_data_delimiter);
 							}
 						}
-						//
 						for (k = 0; k < col_inner_elements.length; k++) {
 							col_inner_data = col_inner_elements[k];
 							if ($.trim(col_inner_data) !== '' && !(col_filter_array.hasOwnProperty(col_inner_data))) {

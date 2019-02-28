@@ -1372,14 +1372,12 @@ public class ReportController {
 							StringBuilder sb = new StringBuilder();
 							sb.append("<DASHBOARD>");
 							for (GridstackItemOptions itemOption : itemOptions) {
-								int itemReportId = itemOption.getReportId();
-								String reportName = reportService.getReportName(itemReportId);
 								sb.append("<ITEM>")
 										.append("<TITLE>")
-										.append(reportName)
+										.append(itemOption.getTitle())
 										.append("</TITLE>")
 										.append("<REPORTID>")
-										.append(String.valueOf(itemReportId))
+										.append(itemOption.getReportId())
 										.append("</REPORTID>")
 										.append("</ITEM>");
 							}

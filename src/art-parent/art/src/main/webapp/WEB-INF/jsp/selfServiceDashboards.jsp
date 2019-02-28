@@ -361,7 +361,7 @@
 			<div>
 			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#" data-report-id="#reportId#">
 			<div class="portletTitle">
-			<span><b>#reportName#</b></span>
+			<span><b class="reportTitle">#reportName#</b></span>
 			<span class="fa fa-times removeWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
 			<span class="fa fa-refresh refreshWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
 			</div>				
@@ -481,10 +481,12 @@
 					var content = $(this).find('.grid-stack-item-content');
 					//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
 					var reportId = content.data("reportId");
+					var title = content.find('.reportTitle').text();
 
 					items.push({
 						index: index + 1,
 						reportId: reportId,
+						title: title,
 						x: parseInt($this.attr('data-gs-x'), 10),
 						y: parseInt($this.attr('data-gs-y'), 10),
 						width: parseInt($this.attr('data-gs-width'), 10),
