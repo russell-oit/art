@@ -48,8 +48,24 @@ public class Drilldown implements Serializable {
 	private String reportFormat;
 	@Parsed
 	private boolean openInNewWindow;
+	@Parsed
+	private boolean allowSelectParameters;
 	@Nested(headerTransformer = PrefixTransformer.class, args = "drilldownReport")
 	private Report drilldownReport;
+
+	/**
+	 * @return the allowSelectParameters
+	 */
+	public boolean isAllowSelectParameters() {
+		return allowSelectParameters;
+	}
+
+	/**
+	 * @param allowSelectParameters the allowSelectParameters to set
+	 */
+	public void setAllowSelectParameters(boolean allowSelectParameters) {
+		this.allowSelectParameters = allowSelectParameters;
+	}
 
 	/**
 	 * @return the parentId

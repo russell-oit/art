@@ -191,6 +191,16 @@ Edit a drilldown
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="control-label col-md-4" for="allowSelectParameters">
+						<spring:message code="drilldowns.label.allowSelectParameters"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="allowSelectParameters" id="allowSelectParameters" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">
 							<spring:message code="page.button.save"/>
