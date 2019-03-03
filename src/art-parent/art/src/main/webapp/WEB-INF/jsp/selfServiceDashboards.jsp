@@ -274,19 +274,22 @@
 											var autoPosition = false;
 											grid.addWidget(el, item.xPosition, item.yPosition, item.width, item.height, autoPosition);
 
-											$.ajax({
-												type: 'POST',
-												url: '${pageContext.request.contextPath}/runReport',
-												data: {reportId: itemReportId, isFragment: true},
-												success: function (data) {
-													$("#content_" + itemReportId).html(data);
-													$('#reports').find('[value=' + itemReportId + ']').prop('selected', true);
-													$('#reports').selectpicker('refresh');
-												},
-												error: function (xhr) {
-													showUserAjaxError(xhr, '${errorOccurredText}');
-												}
-											});
+											var runImmediately = $("#runImmediately").is(":checked");
+											if (runImmediately) {
+												$.ajax({
+													type: 'POST',
+													url: '${pageContext.request.contextPath}/runReport',
+													data: {reportId: itemReportId, isFragment: true},
+													success: function (data) {
+														$("#content_" + itemReportId).html(data);
+														$('#reports').find('[value=' + itemReportId + ']').prop('selected', true);
+														$('#reports').selectpicker('refresh');
+													},
+													error: function (xhr) {
+														showUserAjaxError(xhr, '${errorOccurredText}');
+													}
+												});
+											}
 										}
 									});
 								} else {
