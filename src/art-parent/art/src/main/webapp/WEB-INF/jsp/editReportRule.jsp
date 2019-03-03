@@ -84,7 +84,7 @@ Edit report rule page
 
 				<div class="form-group">
 					<div class="col-md-12 text-center">
-						<b><spring:message code="page.text.report"/>:</b> ${reportName}
+						<b><spring:message code="page.text.report"/>:</b> ${encode:forHtmlContent(reportName)}
 					</div>
 				</div>
 
