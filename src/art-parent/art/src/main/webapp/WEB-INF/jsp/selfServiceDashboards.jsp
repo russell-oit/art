@@ -267,6 +267,8 @@
 								if (response.success) {
 									var grid = $('.grid-stack').data('gridstack');
 									var dashboard = response.data;
+									
+									var runImmediately = $("#runImmediately").is(":checked");
 									$.each(dashboard.items, function (index, item) {
 										var itemReportId = item.reportId;
 										if (itemReportId > 0) {
@@ -274,7 +276,6 @@
 											var autoPosition = false;
 											grid.addWidget(el, item.xPosition, item.yPosition, item.width, item.height, autoPosition);
 
-											var runImmediately = $("#runImmediately").is(":checked");
 											if (runImmediately) {
 												$.ajax({
 													type: 'POST',
