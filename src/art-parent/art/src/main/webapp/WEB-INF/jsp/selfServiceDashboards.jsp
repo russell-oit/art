@@ -133,7 +133,7 @@
 				});
 
 				$('.grid-stack').on('click', '.editWidgetTitle', function () {
-					var content = $(this).closest('.grid-stack-item-content');
+					var titleDiv = $(this).closest('.portletTitle');
 					bootbox.prompt({
 						title: "${titleText}",
 						buttons: {
@@ -146,7 +146,7 @@
 						},
 						callback: function (result) {
 							if (result) {
-								content.find('.reportTitle').text(result);
+								titleDiv.find('.reportTitle').text(result);
 							}
 						}
 					});
@@ -503,7 +503,8 @@
 					var content = $(this).find('.grid-stack-item-content');
 					//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
 					var reportId = content.data("reportId");
-					var title = content.find('.reportTitle').text();
+					var titleDiv = content.find('.portletTitle');
+					var title = titleDiv.find('.reportTitle').text();
 
 					items.push({
 						index: index + 1,
