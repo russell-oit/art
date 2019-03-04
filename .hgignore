@@ -66,3 +66,4 @@ src/art-parent/reportengine-art/.classpath
 src/art-parent/art/src/main/webapp/WEB-INF/i18n/upload.bat
 src/art-parent/art/src/main/webapp/WEB-INF/i18n/download.bat
 src/art-parent/art/src/main/webapp/WEB-INF/i18n/crowdin.yml
+src/art-parent/art/src/main/webapp/WEB-INF/i18n/toascii.bat
