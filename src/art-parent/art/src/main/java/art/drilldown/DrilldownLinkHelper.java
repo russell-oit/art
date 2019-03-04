@@ -88,9 +88,6 @@ public class DrilldownLinkHelper implements Serializable {
 		if (drilldown != null) {
 			int drilldownReportId = drilldown.getDrilldownReport().getReportId();
 			String drilldownReportFormat = drilldown.getReportFormat();
-			if (drilldownReportFormat == null) {
-				drilldownReportFormat = "default";
-			}
 
 			sb.append("runReport?reportId=").append(drilldownReportId)
 					.append("&reportFormat=").append(drilldownReportFormat)
