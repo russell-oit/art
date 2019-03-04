@@ -63,3 +63,6 @@ src/art-parent/reportengine-art/target/
 src/art-parent/reportengine-art/.settings/
 src/art-parent/reportengine-art/.project
 src/art-parent/reportengine-art/.classpath
+src/art-parent/art/src/main/webapp/WEB-INF/i18n/upload.bat
+src/art-parent/art/src/main/webapp/WEB-INF/i18n/download.bat
+src/art-parent/art/src/main/webapp/WEB-INF/i18n/crowdin.yml
