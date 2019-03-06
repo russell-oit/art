@@ -1,56 +1,56 @@
 {
-    "sEmptyTable":     "Hakuna data",
-    "sInfo":           "Inaonyesha _START_ hadi _END_ ya matokeo _TOTAL_",
-    "sInfoEmpty":      "Inaonyesha 0 hadi 0 ya matokeo 0",
-    "sInfoFiltered":   "(chujo kutoka matokeo _MAX_)",
-    "sInfoPostFix":    "",
-    "sInfoThousands":  ",",
-    "sLengthMenu":     "Onyesha matokeo _MENU_",
+    "sEmptyTable": "Hakuna data",
+    "sInfo": "Inaonyesha _START_ hadi _END_ ya matokeo _TOTAL_",
+    "sInfoEmpty": "Inaonyesha 0 hadi 0 ya matokeo 0",
+    "sInfoFiltered": "(chujo kutoka matokeo _MAX_)",
+    "sInfoPostFix": "",
+    "sInfoThousands": ",",
+    "sLengthMenu": "Onyesha matokeo _MENU_",
     "sLoadingRecords": "Inapakia...",
-    "sProcessing":     "Inachakata...",
-    "sSearch":         "Tafuta:",
-    "sZeroRecords":    "Hakuna vifano",
+    "sProcessing": "Inachakata...",
+    "sSearch": "Tafuta:",
+    "sZeroRecords": "Hakuna vifano",
     "oPaginate": {
-        "sFirst":    "Mwanzo",
-        "sLast":     "Mwisho",
-        "sNext":     "Mbele",
+        "sFirst": "Mwanzo",
+        "sLast": "Mwisho",
+        "sNext": "Mbele",
         "sPrevious": "Nyuma"
     },
     "oAria": {
         "sSortAscending": ": amilisha kupanga safuwima ikipanda",
         "sSortDescending": ": amilisha kupanga safuwima ikishuka"
     },
-	"select": {
-		"rows": {
-			"_": "safu %d zimechaguliwa",
-			"0": "",
-			"1": "safu 1 imechaguliwa"
-		},
-		"columns": {
-			"_": "safu-wima %d zimechaguliwa",
-			"0": "",
-			"1": "safu-wima 1 imechaguliwa"
-		},
-		"cells": {
-			"_": "seli %d cells zimechaguliwa",
-			"0": "",
-			"1": "seli 1 cell imechaguliwa"
-		}
-	},
-	"buttons": {
-		"selected": "Zimechaguliwa",
-		"selectedSingle": "Imechaguliwa moja",
-		"selectAll": "Chagua yote",
-		"selectNone": "Toa yote",
-		"selectRows": "Chagua safu",
-		"selectColumns": "Chagua safu-wima",
-		"selectCells": "Chagua seli",
-		"colvis": "Safu-wima",
-		"colvisRestore": "Rejesha",
-		"print": "Chapisha",
-		"excel": "Excel",
-		"pdf": "PDF",
-		"csv": "CSV",
-		"copy": "Nakili"
-	}
+    "select": {
+        "rows": {
+            "_": "safu %d zimechaguliwa",
+            "0": "",
+            "1": "safu 1 imechaguliwa"
+        },
+        "columns": {
+            "_": "safu-wima %d zimechaguliwa",
+            "0": "",
+            "1": "safu-wima 1 imechaguliwa"
+        },
+        "cells": {
+            "_": "seli %d cells zimechaguliwa",
+            "0": "",
+            "1": "seli 1 cell imechaguliwa"
+        }
+    },
+    "buttons": {
+        "selected": "Zimechaguliwa",
+        "selectedSingle": "Imechaguliwa moja",
+        "selectAll": "Chagua yote",
+        "selectNone": "Toa yote",
+        "selectRows": "Chagua safu",
+        "selectColumns": "Chagua safu-wima",
+        "selectCells": "Chagua seli",
+        "colvis": "Safu-wima",
+        "colvisRestore": "Rejesha",
+        "print": "Chapisha",
+        "excel": "Excel",
+        "pdf": "PDF",
+        "csv": "CSV",
+        "copy": "Nakili"
+    }
 }
