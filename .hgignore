@@ -68,3 +68,4 @@ src/art-parent/art/src/main/webapp/WEB-INF/i18n/download.bat
 src/art-parent/art/src/main/webapp/WEB-INF/i18n/crowdin.yml
 src/art-parent/art/src/main/webapp/WEB-INF/i18n/toascii.bat
 src/art-parent/art/src/main/webapp/js/dataTables/i18n/crowdin.yml
+src/art-parent/art/crowdin.yml
