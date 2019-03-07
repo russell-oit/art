@@ -70,3 +70,4 @@ src/art-parent/art/src/main/webapp/WEB-INF/i18n/toascii.bat
 src/art-parent/art/src/main/webapp/js/dataTables/i18n/crowdin.yml
 src/art-parent/art/crowdin.yml
 src/art-parent/crowdin.yml
+src/art-parent/download.bat
