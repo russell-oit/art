@@ -1,56 +1,56 @@
 {
-    "sEmptyTable": "Aucune donnée disponible dans le tableau",
-    "sInfo": "Affichage de l'&eacute;lement _START_ &agrave; _END_ sur _TOTAL_ &eacute;l&eacute;ments",
-    "sInfoEmpty": "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
-    "sInfoFiltered": "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
-    "sInfoPostFix": "",
-    "sInfoThousands": ",",
-    "sLengthMenu": "Afficher _MENU_ &eacute;l&eacute;ments",
-    "sLoadingRecords": "Chargement en cours...",
-    "sProcessing": "Traitement en cours...",
-    "sSearch": "Rechercher&nbsp;:",
-    "sZeroRecords": "Aucun &eacute;l&eacute;ment &agrave; afficher",
-    "oPaginate": {
-        "sFirst": "Premier",
-        "sLast": "Dernier",
-        "sNext": "Suivant",
-        "sPrevious": "Pr&eacute;c&eacute;dent"
-    },
-    "oAria": {
-        "sSortAscending": ": activer pour trier la colonne par ordre croissant",
-        "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
-    },
-    "select": {
-        "rows": {
-            "_": "%d rows selected",
-            "0": "",
-            "1": "1 row selected"
-        },
-        "columns": {
-            "_": "%d columns selected",
-            "0": "",
-            "1": "1 column selected"
-        },
-        "cells": {
-            "_": "%d cells selected",
-            "0": "",
-            "1": "1 cell selected"
-        }
-    },
-    "buttons": {
-        "selected": "Selected",
-        "selectedSingle": "Selected single",
-        "selectAll": "Select all",
-        "selectNone": "Deselect all",
-        "selectRows": "Select rows",
-        "selectColumns": "Select columns",
-        "selectCells": "Select cells",
-        "colvis": "Columns",
-        "colvisRestore": "Restore",
-        "print": "Print",
-        "excel": "Excel",
-        "pdf": "PDF",
-        "csv": "CSV",
-        "copy": "Copy"
-    }
+	"sEmptyTable": "Aucune donnée disponible dans le tableau",
+	"sInfo": "Affichage de l'&eacute;lement _START_ &agrave; _END_ sur _TOTAL_ &eacute;l&eacute;ments",
+	"sInfoEmpty": "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
+	"sInfoFiltered": "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
+	"sInfoPostFix": "",
+	"sInfoThousands": ",",
+	"sLengthMenu": "Afficher _MENU_ &eacute;l&eacute;ments",
+	"sLoadingRecords": "Chargement en cours...",
+	"sProcessing": "Traitement en cours...",
+	"sSearch": "Rechercher&nbsp;:",
+	"sZeroRecords": "Aucun &eacute;l&eacute;ment &agrave; afficher",
+	"oPaginate": {
+		"sFirst": "Premier",
+		"sLast": "Dernier",
+		"sNext": "Suivant",
+		"sPrevious": "Pr&eacute;c&eacute;dent"
+	},
+	"oAria": {
+		"sSortAscending": ": activer pour trier la colonne par ordre croissant",
+		"sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+	},
+	"select": {
+		"rows": {
+			"_": "%d rows selected",
+			"0": "",
+			"1": "1 row selected"
+		},
+		"columns": {
+			"_": "%d columns selected",
+			"0": "",
+			"1": "1 column selected"
+		},
+		"cells": {
+			"_": "%d cells selected",
+			"0": "",
+			"1": "1 cell selected"
+		}
+	},
+	"buttons": {
+		"selected": "Selected",
+		"selectedSingle": "Selected single",
+		"selectAll": "Select all",
+		"selectNone": "Deselect all",
+		"selectRows": "Select rows",
+		"selectColumns": "Select columns",
+		"selectCells": "Select cells",
+		"colvis": "Columns",
+		"colvisRestore": "Restore",
+		"print": "Print",
+		"excel": "Excel",
+		"pdf": "PDF",
+		"csv": "CSV",
+		"copy": "Copy"
+	}
 }
