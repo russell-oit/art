@@ -50,8 +50,8 @@
           apply: "Tekeleza",
           cancel: "Ghairi",
           totals: "Idadi",
-          vs: "vs",
-          by: "by"
+          vs: "na",
+          by: "kwa"
       },
       aggregators: {
 		"Idadi": tpl.count(frFmtInt),
@@ -78,8 +78,8 @@
         "Meza": r["Table"],
         "Meza yenye chati pau": r["Table Barchart"],
         "Ramani-rangi": r["Heatmap"],
-        "Ramani-rangi ya safu": r["Row Heatmap"],
-        "Ramani-rangi ya safu-wima": r["Col Heatmap"]
+        "Ramani-rangi safu": r["Row Heatmap"],
+        "Ramani-rangi safu-wima": r["Col Heatmap"]
       }
     };
     if (gcr) {
@@ -127,10 +127,10 @@
 	if (sr) {
 		$.pivotUtilities.locales.sw.subtotal_renderers = {
 			"Meza na Subtotal" : sr["Table With Subtotal"],
-			"Meza na Subtotal Bar Chart" : sr["Table With Subtotal Bar Chart"],
-			"Meza na Subtotal Heatmap" : sr["Table With Subtotal Heatmap"],
-			"Meza na Subtotal Row Heatmap" : sr["Table With Subtotal Row Heatmap"],
-			"Meza na Subtotal Col Heatmap" : sr["Table With Subtotal Col Heatmap"]
+			"Meza na Subtotal Chati pau" : sr["Table With Subtotal Bar Chart"],
+			"Meza na Subtotal Ramani-rangi" : sr["Table With Subtotal Heatmap"],
+			"Meza na Subtotal Ramani-rangi safu" : sr["Table With Subtotal Row Heatmap"],
+			"Meza na Subtotal Ramani-rangi safu-wima" : sr["Table With Subtotal Col Heatmap"]
 		};
 	}
     return $.pivotUtilities.locales.sw;
