@@ -594,29 +594,7 @@ function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
 		dom: 'lBfrtip',
 		buttons: [
 			'selectAll',
-			'selectNone',
-			{
-				extend: 'colvis',
-				postfixButtons: ['colvisRestore']
-			},
-			{
-				extend: 'excel',
-				exportOptions: {
-					columns: ':visible'
-				}
-			},
-			{
-				extend: 'pdf',
-				exportOptions: {
-					columns: ':visible'
-				}
-			},
-			{
-				extend: 'print',
-				exportOptions: {
-					columns: ':visible'
-				}
-			}
+			'selectNone'
 		],
 		select: {
 			style: 'multi',
