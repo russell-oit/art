@@ -123,7 +123,8 @@ public class FormatStringParser {
       if (cf == null) {
         // not there, create new
         try {
-          String className = resources.getString("cellfmt." + propValue);
+          //String className = resources.getString("cellfmt." + propValue);
+		  String className = "net.sf.jpivotart.jpivot.olap.model.impl.CF_hhhmmss";
           Class<?> clazz = Class.forName(className);
           Constructor ctor = clazz.getConstructor(new Class[0]);
           cf = (CellFormatter) ctor.newInstance(new Object[0]);
