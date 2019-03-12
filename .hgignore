@@ -72,3 +72,4 @@ src/art-parent/art/crowdin.yml
 src/art-parent/crowdin.yml
 src/art-parent/download.bat
 src/art-parent/upload.bat
+src/art-parent/upload-main.bat
