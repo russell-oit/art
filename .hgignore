@@ -75,3 +75,6 @@ src/art-parent/upload.bat
 src/art-parent/upload-main.bat
 src/art-parent/upload-all.bat
 src/art-parent/crowdin-main.yml
+src/art-parent/download-one.bat
+src/art-parent/upload-one.bat
+src/art-parent/crowdin-one.yml
