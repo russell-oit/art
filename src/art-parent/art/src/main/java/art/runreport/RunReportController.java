@@ -453,7 +453,15 @@ public class RunReportController {
 					if (reportOptions.isShowSql() && sessionUser.hasConfigureReportsPermission()) {
 						//get estimate final sql with parameter placeholders replaced with parameter values
 						String finalSql = reportRunner.getFinalSql();
+						Object groovyData = reportRunner.getGroovyData();
+						String codeClass;
+						if (groovyData == null) {
+							codeClass = "sql";
+						} else {
+							codeClass = "groovy";
+						}
 						request.setAttribute("finalSql", finalSql);
+						request.setAttribute("codeClass", codeClass);
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showFinalSql.jsp").include(request, response);
 					}
 
@@ -481,7 +489,7 @@ public class RunReportController {
 					reportOutputGenerator.setRequest(request);
 					reportOutputGenerator.setResponse(response);
 					reportOutputGenerator.setServletContext(servletContext);
-					
+
 					if (reportType == ReportType.TabularHeatmap) {
 						TabularHeatmapOptions options;
 

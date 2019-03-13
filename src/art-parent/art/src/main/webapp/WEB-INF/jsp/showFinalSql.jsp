@@ -14,7 +14,7 @@ Display the final sql used to generate a report
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/highlight-9.13.1/styles/magula.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/highlight-9.13.1/highlight.pack.js"></script>
 
-<pre><code class="sql">${encode:forHtmlContent(finalSql)}</code></pre>
+<pre><code class="${codeClass}">${encode:forHtmlContent(finalSql)}</code></pre>
 
 <script>
 	$("pre code").each(function (i, e) {
