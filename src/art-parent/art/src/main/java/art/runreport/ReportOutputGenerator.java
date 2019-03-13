@@ -2585,7 +2585,6 @@ public class ReportOutputGenerator {
 	 * @throws Exception
 	 */
 	private void generatePlotlyReport(PlotlyOptions plotlyOptions) throws Exception {
-
 		logger.debug("Entering generatePlotlyReport");
 
 		if (isJob) {
@@ -2692,6 +2691,7 @@ public class ReportOutputGenerator {
 
 		if (languageFile.exists()) {
 			request.setAttribute("localeFileName", languageFileName);
+			request.setAttribute("localeString", localeString);
 		}
 
 		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
