@@ -5,6 +5,8 @@
 //https://github.com/terser-js/terser/issues/106
 //https://github.com/plotly/plotly.js/blob/master/dist/translation-keys.txt
 //https://github.com/plotly/plotly.js/blob/master/src/locale-en.js
+//https://github.com/d3/d3-time-format
+//https://github.com/moment/moment/tree/develop/locale
 var options =
 {
 	ecma: 5,
