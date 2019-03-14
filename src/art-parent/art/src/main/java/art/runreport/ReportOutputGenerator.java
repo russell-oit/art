@@ -2189,7 +2189,6 @@ public class ReportOutputGenerator {
 	 * @throws Exception
 	 */
 	private void generateMongoDbReport() throws Exception {
-
 		logger.debug("Entering generateMongoDbReport");
 		//https://learnxinyminutes.com/docs/groovy/
 		//http://groovy-lang.org/index.html

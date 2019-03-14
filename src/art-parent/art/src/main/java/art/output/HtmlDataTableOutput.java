@@ -129,7 +129,6 @@ public class HtmlDataTableOutput extends StandardOutput {
 	@Override
 	public void endHeader() {
 		out.println("</tr></thead>");
-
 	}
 
 	@Override

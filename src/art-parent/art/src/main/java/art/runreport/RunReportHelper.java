@@ -939,7 +939,7 @@ public class RunReportHelper {
 		GroovyDataDetails details = new GroovyDataDetails();
 
 		details.setRowCount(rowCount);
-		details.setColCount(colCount);
+		details.setColCount(columnNames.size());
 		details.setColumnNames(columnNames);
 		details.setDataList(dataList);
 		details.setColumnTypes(columnTypes);
