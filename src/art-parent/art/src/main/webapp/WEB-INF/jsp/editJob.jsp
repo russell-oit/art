@@ -196,47 +196,68 @@
 					});
 				});
 
-				$('#getSchedule').on("click", function () {
-					var recordId = $('#schedules option:selected').val();
+				$("#schedules").on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+					var scheduleId = $(this).find('option').eq(clickedIndex).val();
 
-					$.ajax({
-						type: 'POST',
-						url: '${pageContext.request.contextPath}/getSchedule',
-						dataType: 'json',
-						data: {id: recordId},
-						success: function (response) {
-							var schedule = response.data;
+					if (scheduleId === '0') {
+						$('#scheduleSecond').val('');
+						$('#scheduleMinute').val('');
+						$('#scheduleHour').val('');
+						$('#scheduleDay').val('');
+						$('#scheduleMonth').val('');
+						$('#scheduleWeekday').val('');
+						$('#scheduleYear').val('');
+						$('#extraSchedules').val('');
+						$('#holidays').val('');
 
-							if (response.success) {
-								if (schedule !== null) {
-									$('#scheduleSecond').val(schedule.second);
-									$('#scheduleMinute').val(schedule.minute);
-									$('#scheduleHour').val(schedule.hour);
-									$('#scheduleDay').val(schedule.day);
-									$('#scheduleMonth').val(schedule.month);
-									$('#scheduleWeekday').val(schedule.weekday);
-									$('#scheduleYear').val(schedule.year);
-									$('#extraSchedules').val(schedule.extraSchedules);
-									$('#holidays').val(schedule.holidays);
-									$('#scheduleTimeZone').selectpicker('val', schedule.timeZone);
+						$("#scheduleTimeZone option").prop("selected", false);
+						$("#scheduleTimeZone").selectpicker('refresh');
 
-									//https://silviomoreto.github.io/bootstrap-select/methods/
-									//https://stackoverflow.com/questions/19543285/use-jquery-each-to-iterate-through-object
-									var sharedHolidayIds = [];
-									$.each(schedule.sharedHolidays, function (index, holiday) {
-										sharedHolidayIds.push(holiday.holidayId);
-									});
-									$('#sharedHolidays').selectpicker('val', sharedHolidayIds);
+						$("#sharedHolidays option").prop("selected", false);
+						$("#sharedHolidays").selectpicker('refresh');
 
-									$("#mainDescription").html("");
-									$("#mainNextRunDate").html("");
+						$("#mainDescription").html("");
+						$("#mainNextRunDate").html("");
+					} else {
+						$.ajax({
+							type: 'GET',
+							url: '${pageContext.request.contextPath}/getSchedule',
+							dataType: 'json',
+							data: {id: scheduleId},
+							success: function (response) {
+								var schedule = response.data;
+
+								if (response.success) {
+									if (schedule !== null) {
+										$('#scheduleSecond').val(schedule.second);
+										$('#scheduleMinute').val(schedule.minute);
+										$('#scheduleHour').val(schedule.hour);
+										$('#scheduleDay').val(schedule.day);
+										$('#scheduleMonth').val(schedule.month);
+										$('#scheduleWeekday').val(schedule.weekday);
+										$('#scheduleYear').val(schedule.year);
+										$('#extraSchedules').val(schedule.extraSchedules);
+										$('#holidays').val(schedule.holidays);
+										$('#scheduleTimeZone').selectpicker('val', schedule.timeZone);
+
+										//https://silviomoreto.github.io/bootstrap-select/methods/
+										//https://stackoverflow.com/questions/19543285/use-jquery-each-to-iterate-through-object
+										var sharedHolidayIds = [];
+										$.each(schedule.sharedHolidays, function (index, holiday) {
+											sharedHolidayIds.push(holiday.holidayId);
+										});
+										$('#sharedHolidays').selectpicker('val', sharedHolidayIds);
+
+										$("#mainDescription").html("");
+										$("#mainNextRunDate").html("");
+									}
+								} else {
+									notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 								}
-							} else {
-								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-							}
-						},
-						error: ajaxErrorHandler
-					});
+							},
+							error: ajaxErrorHandler
+						});
+					}
 				});
 
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
@@ -914,11 +935,6 @@
 										<option value="${schedule.scheduleId}">${encode:forHtmlContent(schedule.name)}</option>
 									</c:forEach>
 								</select>
-							</p>
-							<p>
-								<button type="button" id="getSchedule" class="btn btn-default">
-									<spring:message code="jobs.button.getSchedule"/>
-								</button>
 							</p>
 							<input type="text" id="clock" readonly class="form-control"/>
 						</div>
