@@ -935,6 +935,11 @@ public class RunReportHelper {
 
 			resultSetColumns.add(resultSetColumn);
 		}
+		
+		//https://stackoverflow.com/questions/30611870/how-can-i-get-a-list-from-some-class-properties-with-java-8-stream/30611899
+//		List<String> columnLabels = resultSetColumns.stream()
+//				.map(ResultSetColumn::getLabel)
+//				.collect(Collectors.toList());
 
 		GroovyDataDetails details = new GroovyDataDetails();
 
