@@ -326,9 +326,10 @@
 			<c:forEach var="column" items="${columns}">
 	i++;
 	var columnName = "${encode:forJavaScript(column.name)}";
+	var columnLabel = "${encode:forJavaScript(column.label)}";
 	var columnDef = {
 		data: columnName,
-		title: columnName
+		title: columnLabel
 	};
 	var columnType = '${encode:forJavaScript(column.type)}';
 	if (columnType === 'Numeric') {

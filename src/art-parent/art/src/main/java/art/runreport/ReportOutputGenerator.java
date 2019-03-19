@@ -114,6 +114,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -2267,6 +2268,7 @@ public class ReportOutputGenerator {
 				String optionsString = report.getOptions();
 				List<String> optionsColumnNames = null;
 				List<Map<String, String>> columnDataTypes = null;
+				List<Map<String, String>> columnLabels = null;
 				MongoDbOptions options;
 				if (StringUtils.isBlank(optionsString)) {
 					options = new MongoDbOptions();
@@ -2275,6 +2277,7 @@ public class ReportOutputGenerator {
 					options = mapper.readValue(optionsString, MongoDbOptions.class);
 					optionsColumnNames = options.getColumns();
 					columnDataTypes = options.getColumnDataTypes();
+					columnLabels = options.getColumnLabels();
 				}
 
 				@SuppressWarnings("unchecked")
@@ -2331,10 +2334,22 @@ public class ReportOutputGenerator {
 						}
 					}
 
-					List<String> finalColumnNames = new ArrayList<>();
 					for (ResultSetColumn column : columns) {
 						String columnName = column.getName();
-						finalColumnNames.add(columnName);
+						String columnLabel = null;
+						if (columnLabels != null) {
+							for (Map<String, String> labelDefinition : columnLabels) {
+								Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(labelDefinition);
+								columnLabel = caseInsensitiveMap.get(columnName);
+								if (columnLabel != null) {
+									break;
+								}
+							}
+						}
+						if (columnLabel == null) {
+							columnLabel = columnName;
+						}
+						column.setLabel(columnLabel);
 					}
 
 					//_id is a complex object so we have to iterate and replace it with the toString() representation
@@ -2343,7 +2358,8 @@ public class ReportOutputGenerator {
 					for (Object object : resultList) {
 						Map<String, Object> row = new LinkedHashMap<>();
 						Map<String, Object> map = ArtUtils.objectToMap(object);
-						for (String columnName : finalColumnNames) {
+						for (ResultSetColumn column : columns) {
+							String columnName = column.getName();
 							Object value = map.get(columnName);
 							Object finalValue;
 							if (value == null) {
