@@ -89,10 +89,8 @@ public class JsonOutput {
 		for (int i = 1; i <= columnCount; i++) {
 			ResultSetColumn column = new ResultSetColumn();
 
-			String columnName = rsmd.getColumnName(i);
-			String columnLabel = rsmd.getColumnLabel(i);
+			String columnName = rsmd.getColumnLabel(i);
 			column.setName(columnName);
-			column.setLabel(columnLabel);
 
 			int sqlType = rsmd.getColumnType(i);
 

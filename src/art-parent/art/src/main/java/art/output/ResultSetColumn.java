@@ -29,22 +29,7 @@ public class ResultSetColumn implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String name;
-	private String label;
 	private SqlColumnType type;
-
-	/**
-	 * @return the label
-	 */
-	public String getLabel() {
-		return label;
-	}
-
-	/**
-	 * @param label the label to set
-	 */
-	public void setLabel(String label) {
-		this.label = label;
-	}
 
 	/**
 	 * @return the name

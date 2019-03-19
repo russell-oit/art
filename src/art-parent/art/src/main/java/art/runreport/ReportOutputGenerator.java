@@ -114,7 +114,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -1623,7 +1622,6 @@ public class ReportOutputGenerator {
 
 		request.setAttribute("reportType", reportType);
 
-		boolean useLabelAsDataColumn = false;
 		if (reportType == ReportType.DataTables) {
 			rs = reportRunner.getResultSet();
 
@@ -1631,7 +1629,6 @@ public class ReportOutputGenerator {
 			JsonOutputResult jsonOutputResult;
 			if (groovyData == null) {
 				jsonOutputResult = jsonOutput.generateOutput(rs);
-				useLabelAsDataColumn = true;
 			} else {
 				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
 			}
@@ -1693,7 +1690,7 @@ public class ReportOutputGenerator {
 			request.setAttribute("dataFileName", dataFileName);
 		}
 
-		showDataTablesJsp(useLabelAsDataColumn);
+		showDataTablesJsp();
 	}
 
 	/**
@@ -1703,29 +1700,14 @@ public class ReportOutputGenerator {
 	 * @throws IOException
 	 */
 	private void showDataTablesJsp() throws ServletException, IOException {
-		boolean useLabelAsDataColumn = false;
-		showDataTablesJsp(useLabelAsDataColumn);
-	}
-
-	/**
-	 * Shows the showDataTables.jsp page
-	 *
-	 * @param useLabelAsDataColumn whether to use the label as the data column
-	 * @throws ServletException
-	 * @throws IOException
-	 */
-	private void showDataTablesJsp(boolean useLabelAsDataColumn) throws ServletException, IOException {
 		String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
 		String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
 		String languageTag = locale.toLanguageTag();
 		String localeString = locale.toString();
-
 		request.setAttribute("outputDivId", outputDivId);
 		request.setAttribute("tableId", tableId);
 		request.setAttribute("languageTag", languageTag);
 		request.setAttribute("locale", localeString);
-		request.setAttribute("useLabelAsDataColumn", useLabelAsDataColumn);
-
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 	}
 
@@ -2285,7 +2267,6 @@ public class ReportOutputGenerator {
 				String optionsString = report.getOptions();
 				List<String> optionsColumnNames = null;
 				List<Map<String, String>> columnDataTypes = null;
-				List<Map<String, String>> columnLabels = null;
 				MongoDbOptions options;
 				if (StringUtils.isBlank(optionsString)) {
 					options = new MongoDbOptions();
@@ -2294,7 +2275,6 @@ public class ReportOutputGenerator {
 					options = mapper.readValue(optionsString, MongoDbOptions.class);
 					optionsColumnNames = options.getColumns();
 					columnDataTypes = options.getColumnDataTypes();
-					columnLabels = options.getColumnLabels();
 				}
 
 				@SuppressWarnings("unchecked")
@@ -2351,22 +2331,10 @@ public class ReportOutputGenerator {
 						}
 					}
 
+					List<String> finalColumnNames = new ArrayList<>();
 					for (ResultSetColumn column : columns) {
 						String columnName = column.getName();
-						String columnLabel = null;
-						if (columnLabels != null) {
-							for (Map<String, String> labelDefinition : columnLabels) {
-								Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(labelDefinition);
-								columnLabel = caseInsensitiveMap.get(columnName);
-								if (columnLabel != null) {
-									break;
-								}
-							}
-						}
-						if (columnLabel == null) {
-							columnLabel = columnName;
-						}
-						column.setLabel(columnLabel);
+						finalColumnNames.add(columnName);
 					}
 
 					//_id is a complex object so we have to iterate and replace it with the toString() representation
@@ -2375,8 +2343,7 @@ public class ReportOutputGenerator {
 					for (Object object : resultList) {
 						Map<String, Object> row = new LinkedHashMap<>();
 						Map<String, Object> map = ArtUtils.objectToMap(object);
-						for (ResultSetColumn column : columns) {
-							String columnName = column.getName();
+						for (String columnName : finalColumnNames) {
 							Object value = map.get(columnName);
 							Object finalValue;
 							if (value == null) {
