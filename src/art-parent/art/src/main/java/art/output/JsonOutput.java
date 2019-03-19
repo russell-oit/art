@@ -142,7 +142,7 @@ public class JsonOutput {
 			rowCount++;
 			Map<String, Object> row = new LinkedHashMap<>();
 			for (int i = 1; i <= columnCount; ++i) {
-				String columnName = rsmd.getColumnName(i);
+				String columnName = rsmd.getColumnLabel(i);
 				Object columnData = rs.getObject(i);
 				row.put(columnName, columnData);
 			}

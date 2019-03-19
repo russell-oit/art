@@ -1623,6 +1623,7 @@ public class ReportOutputGenerator {
 
 		request.setAttribute("reportType", reportType);
 
+		boolean useLabelAsDataColumn = false;
 		if (reportType == ReportType.DataTables) {
 			rs = reportRunner.getResultSet();
 
@@ -1630,6 +1631,7 @@ public class ReportOutputGenerator {
 			JsonOutputResult jsonOutputResult;
 			if (groovyData == null) {
 				jsonOutputResult = jsonOutput.generateOutput(rs);
+				useLabelAsDataColumn = true;
 			} else {
 				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
 			}
@@ -1691,7 +1693,7 @@ public class ReportOutputGenerator {
 			request.setAttribute("dataFileName", dataFileName);
 		}
 
-		showDataTablesJsp();
+		showDataTablesJsp(useLabelAsDataColumn);
 	}
 
 	/**
@@ -1701,14 +1703,29 @@ public class ReportOutputGenerator {
 	 * @throws IOException
 	 */
 	private void showDataTablesJsp() throws ServletException, IOException {
+		boolean useLabelAsDataColumn = false;
+		showDataTablesJsp(useLabelAsDataColumn);
+	}
+
+	/**
+	 * Shows the showDataTables.jsp page
+	 *
+	 * @param useLabelAsDataColumn whether to use the label as the data column
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void showDataTablesJsp(boolean useLabelAsDataColumn) throws ServletException, IOException {
 		String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
 		String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
 		String languageTag = locale.toLanguageTag();
 		String localeString = locale.toString();
+
 		request.setAttribute("outputDivId", outputDivId);
 		request.setAttribute("tableId", tableId);
 		request.setAttribute("languageTag", languageTag);
 		request.setAttribute("locale", localeString);
+		request.setAttribute("useLabelAsDataColumn", useLabelAsDataColumn);
+
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 	}
 
