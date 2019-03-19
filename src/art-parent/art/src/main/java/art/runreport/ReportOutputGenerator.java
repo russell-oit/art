@@ -2331,19 +2331,14 @@ public class ReportOutputGenerator {
 						}
 					}
 
-					List<String> finalColumnNames = new ArrayList<>();
-					for (ResultSetColumn column : columns) {
-						String columnName = column.getName();
-						finalColumnNames.add(columnName);
-					}
-
 					//_id is a complex object so we have to iterate and replace it with the toString() representation
 					//also need to create a new list in case some columns are omitted in finalColumnNames
 					List<Map<String, Object>> finalResultList = new ArrayList<>();
 					for (Object object : resultList) {
 						Map<String, Object> row = new LinkedHashMap<>();
 						Map<String, Object> map = ArtUtils.objectToMap(object);
-						for (String columnName : finalColumnNames) {
+						for (ResultSetColumn column : columns) {
+							String columnName = column.getName();
 							Object value = map.get(columnName);
 							Object finalValue;
 							if (value == null) {
