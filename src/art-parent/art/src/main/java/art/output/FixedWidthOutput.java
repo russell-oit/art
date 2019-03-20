@@ -306,9 +306,9 @@ public class FixedWidthOutput {
 			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 				if (reportFormat == ReportFormat.txt) {
 					if (data == null) {
-						routines.write(resultSet, fout);
+						routines.write(resultSet, fout, "UTF-8");
 					} else {
-						FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(fout, writerSettings);
+						FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(fout, "UTF-8", writerSettings);
 						for (List<Object> row : listData) {
 							fixedWidthWriter.processRecord(row.toArray(new Object[0]));
 						}
@@ -320,9 +320,9 @@ public class FixedWidthOutput {
 					try (ZipOutputStream zout = new ZipOutputStream(fout)) {
 						zout.putNextEntry(ze);
 						if (data == null) {
-							routines.write(resultSet, zout);
+							routines.write(resultSet, zout, "UTF-8");
 						} else {
-							FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(zout, writerSettings);
+							FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(zout, "UTF-8", writerSettings);
 							for (List<Object> row : listData) {
 								fixedWidthWriter.processRecord(row.toArray(new Object[0]));
 							}

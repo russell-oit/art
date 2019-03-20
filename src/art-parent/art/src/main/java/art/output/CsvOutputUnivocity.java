@@ -226,9 +226,9 @@ public class CsvOutputUnivocity {
 				try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 					if (reportFormat == ReportFormat.csv) {
 						if (data == null) {
-							csvRoutines.write(resultSet, fout);
+							csvRoutines.write(resultSet, fout, "UTF-8");
 						} else {
-							CsvWriter csvWriter = new CsvWriter(fout, csvWriterSettings);
+							CsvWriter csvWriter = new CsvWriter(fout, "UTF-8", csvWriterSettings);
 							if (csvOptions.isIncludeHeaders()) {
 								csvWriter.writeHeaders(columnLabels);
 							}
@@ -246,9 +246,9 @@ public class CsvOutputUnivocity {
 						try (ZipOutputStream zout = new ZipOutputStream(fout)) {
 							zout.putNextEntry(ze);
 							if (data == null) {
-								csvRoutines.write(resultSet, zout);
+								csvRoutines.write(resultSet, zout, "UTF-8");
 							} else {
-								CsvWriter csvWriter = new CsvWriter(zout, csvWriterSettings);
+								CsvWriter csvWriter = new CsvWriter(zout, "UTF-8", csvWriterSettings);
 								if (csvOptions.isIncludeHeaders()) {
 									csvWriter.writeHeaders(columnLabels);
 								}
