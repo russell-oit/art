@@ -156,12 +156,15 @@ public class PdfChart {
 			//display chart data below chart if so required
 			if (resultSetColumnNames != null || groovyData != null) {
 				java.util.List<String> columnNames;
+				java.util.List<String> columnLabels;
 				java.util.List<? extends Object> dataList = null;
 				if (resultSetColumnNames != null) {
 					columnNames = resultSetColumnNames;
+					columnLabels = columnNames;
 				} else {
 					GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
 					columnNames = dataDetails.getColumnNames();
+					columnLabels = dataDetails.getColumnLabels();
 					dataList = dataDetails.getDataList();
 				}
 
@@ -170,8 +173,8 @@ public class PdfChart {
 				table.setHeaderRows(1);
 
 				//output column headings
-				for (String columnName : columnNames) {
-					PdfPCell cell = new PdfPCell(new Paragraph(fsHeading.process(columnName + "")));
+				for (String columnLabel : columnLabels) {
+					PdfPCell cell = new PdfPCell(new Paragraph(fsHeading.process(columnLabel + "")));
 					cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 					cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
 					cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);

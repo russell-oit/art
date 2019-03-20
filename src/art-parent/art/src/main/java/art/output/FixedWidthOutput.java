@@ -128,12 +128,12 @@ public class FixedWidthOutput {
 		ResultSetMetaData rsmd = null;
 
 		List<List<Object>> listData = new ArrayList<>();
-		List<String> dataColumnNames = null;
+		List<String> columnLabels = null;
 		if (data == null) {
 			rsmd = resultSet.getMetaData();
 		} else {
 			GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
-			dataColumnNames = dataDetails.getColumnNames();
+			columnLabels = dataDetails.getColumnLabels();
 			List<Map<String, ?>> mapListData = RunReportHelper.getMapListData(data);
 			for (Map<String, ?> row : mapListData) {
 				List<Object> rowData = new ArrayList<>();
@@ -153,9 +153,9 @@ public class FixedWidthOutput {
 				for (int i = 1; i <= fieldLengthsArray.length; i++) {
 					columnNames.add(rsmd.getColumnLabel(i));
 				}
-			} else if (dataColumnNames != null) {
+			} else if (columnLabels != null) {
 				for (int i = 1; i <= fieldLengthsArray.length; i++) {
-					columnNames.add(dataColumnNames.get(i - 1));
+					columnNames.add(columnLabels.get(i - 1));
 				}
 			}
 
@@ -180,8 +180,8 @@ public class FixedWidthOutput {
 						}
 					}
 				}
-			} else if (dataColumnNames != null) {
-				for (String columnName : dataColumnNames) {
+			} else if (columnLabels != null) {
+				for (String columnName : columnLabels) {
 					for (Map<String, Integer> fieldLengthDefinition : fieldLengthsByName) {
 						//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
 						// Get the first entry that the iterator returns

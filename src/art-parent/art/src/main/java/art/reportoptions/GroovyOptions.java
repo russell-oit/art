@@ -24,15 +24,30 @@ import java.util.Map;
 
 /**
  * Represents report options for reports which use groovy
- * 
+ *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GroovyOptions implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private List<String> columns;
 	private List<Map<String, String>> columnDataTypes;
+	private List<Map<String, String>> columnLabels;
+
+	/**
+	 * @return the columnLabels
+	 */
+	public List<Map<String, String>> getColumnLabels() {
+		return columnLabels;
+	}
+
+	/**
+	 * @param columnLabels the columnLabels to set
+	 */
+	public void setColumnLabels(List<Map<String, String>> columnLabels) {
+		this.columnLabels = columnLabels;
+	}
 
 	/**
 	 * @return the columns
@@ -61,5 +76,5 @@ public class GroovyOptions implements Serializable {
 	public void setColumnDataTypes(List<Map<String, String>> columnDataTypes) {
 		this.columnDataTypes = columnDataTypes;
 	}
-	
+
 }

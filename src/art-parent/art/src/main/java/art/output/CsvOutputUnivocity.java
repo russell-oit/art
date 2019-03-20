@@ -185,10 +185,10 @@ public class CsvOutputUnivocity {
 		csvRoutines.setKeepResourcesOpen(true);
 
 		List<List<Object>> listData = null;
-		List<String> columnNames = null;
+		List<String> columnLabels = null;
 		if (data != null) {
 			GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
-			columnNames = dataDetails.getColumnNames();
+			columnLabels = dataDetails.getColumnLabels();
 			listData = RunReportHelper.getListData(data);
 		}
 
@@ -201,7 +201,7 @@ public class CsvOutputUnivocity {
 				//https://github.com/uniVocity/univocity-parsers/blob/master/src/main/java/com/univocity/parsers/common/AbstractWriter.java
 				CsvWriter csvWriter = new CsvWriter(writer, csvWriterSettings);
 				if (csvOptions.isIncludeHeaders()) {
-					csvWriter.writeHeaders(columnNames);
+					csvWriter.writeHeaders(columnLabels);
 				}
 				for (List<Object> row : listData) {
 					csvWriter.processRecord(row.toArray(new Object[0]));
@@ -215,7 +215,7 @@ public class CsvOutputUnivocity {
 				} else {
 					CsvWriter csvWriter = new CsvWriter(writer, csvWriterSettings);
 					if (csvOptions.isIncludeHeaders()) {
-						csvWriter.writeHeaders(columnNames);
+						csvWriter.writeHeaders(columnLabels);
 					}
 					for (List<Object> row : listData) {
 						csvWriter.processRecord(row.toArray(new Object[0]));
@@ -230,7 +230,7 @@ public class CsvOutputUnivocity {
 						} else {
 							CsvWriter csvWriter = new CsvWriter(fout, csvWriterSettings);
 							if (csvOptions.isIncludeHeaders()) {
-								csvWriter.writeHeaders(columnNames);
+								csvWriter.writeHeaders(columnLabels);
 							}
 							for (List<Object> row : listData) {
 								csvWriter.processRecord(row.toArray(new Object[0]));
@@ -250,7 +250,7 @@ public class CsvOutputUnivocity {
 							} else {
 								CsvWriter csvWriter = new CsvWriter(zout, csvWriterSettings);
 								if (csvOptions.isIncludeHeaders()) {
-									csvWriter.writeHeaders(columnNames);
+									csvWriter.writeHeaders(columnLabels);
 								}
 								for (List<Object> row : listData) {
 									csvWriter.processRecord(row.toArray(new Object[0]));

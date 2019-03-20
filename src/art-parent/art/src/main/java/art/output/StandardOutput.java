@@ -854,6 +854,7 @@ public abstract class StandardOutput {
 		List<String> columnNames = dataDetails.getColumnNames();
 		List<? extends Object> dataList = dataDetails.getDataList();
 		Map<Integer, ColumnTypeDefinition> columnTypes = dataDetails.getColumnTypes();
+		List<String> columnLabels = dataDetails.getColumnLabels();
 
 		int drilldownCount = 0;
 		if (drilldowns != null) {
@@ -883,7 +884,7 @@ public abstract class StandardOutput {
 		//begin header output
 		beginHeader();
 
-		List<String> localizedColumnNames = getLocalizedColumnNames(columnNames, report);
+		List<String> localizedColumnNames = getLocalizedColumnNames(columnLabels, report);
 
 		//output header columns for the result set columns
 		for (int i = 1; i <= resultSetColumnCount; i++) {
@@ -2435,6 +2436,7 @@ public abstract class StandardOutput {
 		List<String> columnNames = dataDetails.getColumnNames();
 		List<? extends Object> dataList = dataDetails.getDataList();
 		Map<Integer, ColumnTypeDefinition> columnTypes = dataDetails.getColumnTypes();
+		List<String> columnLabels = dataDetails.getColumnLabels();
 
 		if (resultSetColumnCount != 3 && resultSetColumnCount != 5) {
 			result.setMessage("reports.message.invalidCrosstab");
@@ -2466,7 +2468,7 @@ public abstract class StandardOutput {
 			alternateSort = false;
 		}
 
-		List<String> localizedColumnNames = getLocalizedColumnNames(columnNames, report);
+		List<String> localizedColumnNames = getLocalizedColumnNames(columnLabels, report);
 
 		HashMap<String, Object> values = new HashMap<>();
 		Object[] xa;

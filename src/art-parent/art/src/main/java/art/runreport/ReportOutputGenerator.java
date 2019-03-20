@@ -1316,15 +1316,18 @@ public class ReportOutputGenerator {
 
 		//store data for potential use in html and pdf output
 		List<String> dataColumnNames = null;
+		List<String> columnLabels = null;
 		Object chartGroovyData = null;
 		boolean showResultSetData = false;
 		if (showData) {
 			if (groovyData == null) {
 				showResultSetData = true;
 				dataColumnNames = chart.getResultSetColumnNames();
+				columnLabels = dataColumnNames;
 			} else {
 				GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
 				dataColumnNames = dataDetails.getColumnNames();
+				columnLabels = dataDetails.getColumnLabels();
 				chartGroovyData = groovyData;
 			}
 		}
@@ -1342,6 +1345,7 @@ public class ReportOutputGenerator {
 
 				if (dataColumnNames != null) {
 					request.setAttribute("columnNames", dataColumnNames);
+					request.setAttribute("columnLabels", columnLabels);
 					if (groovyData == null) {
 						request.setAttribute("data", chart.getResultSetData());
 					} else {

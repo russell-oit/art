@@ -20,6 +20,7 @@ package art.reportengine;
 import art.enums.ReportEngineCalculator;
 import art.enums.ReportType;
 import art.enums.SortOrder;
+import art.output.ResultSetColumn;
 import art.output.StandardOutput;
 import art.reportoptions.ReportEngineDataColumn;
 import art.reportoptions.ReportEngineGroupColumn;
@@ -234,9 +235,9 @@ public class ReportEngineOutput extends AbstractReportOutput {
 			} else {
 				GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, artReport);
 				columnCount = dataDetails.getColCount();
-				List<String> columnNames = dataDetails.getColumnNames();
+				List<ResultSetColumn> columns = dataDetails.getResultSetColumns();
 				List<List<Object>> listData = RunReportHelper.getListData(data);
-				ListTableInput listInput = new ListTableInput(listData, columnNames);
+				ListTableInput listInput = new ListTableInput(listData, columns);
 				flatTableBuilder = new ObjectFlatTableBuilder(listInput);
 				listInput.open();
 				columnMetadata = listInput.getColumnMetadata();
@@ -449,9 +450,9 @@ public class ReportEngineOutput extends AbstractReportOutput {
 			} else {
 				GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, artReport);
 				columnCount = dataDetails.getColCount();
-				List<String> columnNames = dataDetails.getColumnNames();
+				List<ResultSetColumn> columns = dataDetails.getResultSetColumns();
 				List<List<Object>> listData = RunReportHelper.getListData(data);
-				ListTableInput listInput = new ListTableInput(listData, columnNames);
+				ListTableInput listInput = new ListTableInput(listData, columns);
 				pivotTableBuilder = new PivotTableBuilder(listInput);
 				listInput.open();
 				columnMetadata = listInput.getColumnMetadata();
