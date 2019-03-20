@@ -30,6 +30,21 @@ public class MongoDbOptions extends DataTablesOptions {
 	private static final long serialVersionUID = 1L;
 	private List<String> columns;
 	private List<Map<String, String>> columnDataTypes;
+	private List<Map<String, String>> columnLabels;
+
+	/**
+	 * @return the columnLabels
+	 */
+	public List<Map<String, String>> getColumnLabels() {
+		return columnLabels;
+	}
+
+	/**
+	 * @param columnLabels the columnLabels to set
+	 */
+	public void setColumnLabels(List<Map<String, String>> columnLabels) {
+		this.columnLabels = columnLabels;
+	}
 
 	/**
 	 * @return the columns
