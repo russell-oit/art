@@ -829,7 +829,7 @@ public class RunReportHelper {
 
 		int colCount = 0;
 		List<String> dataColumnNames = new ArrayList<>();
-		Map<Integer, ColumnTypeDefinition> columnTypes = new HashMap<>();
+		Map<Integer, ColumnTypeDefinition> dataColumnTypes = new HashMap<>();
 		if (CollectionUtils.isNotEmpty(dataList)) {
 			Object sample = dataList.get(0);
 			if (sample instanceof GroovyRowResult) {
@@ -840,7 +840,7 @@ public class RunReportHelper {
 					String columnName = String.valueOf(entry.getKey());
 					dataColumnNames.add(columnName);
 					Object columnValue = entry.getValue();
-					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
+					dataColumnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			} else if (sample instanceof DynaBean) {
 				DynaBean sampleBean = (DynaBean) sample;
@@ -851,7 +851,7 @@ public class RunReportHelper {
 					String columnName = column.getName();
 					dataColumnNames.add(columnName);
 					Object columnValue = sampleBean.get(columnName);
-					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
+					dataColumnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			} else if (sample instanceof Map) {
 				@SuppressWarnings("unchecked")
@@ -862,7 +862,7 @@ public class RunReportHelper {
 					String columnName = entry.getKey();
 					dataColumnNames.add(columnName);
 					Object columnValue = entry.getValue();
-					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
+					dataColumnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			} else {
 				//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
@@ -874,14 +874,16 @@ public class RunReportHelper {
 					String columnName = entry.getKey();
 					dataColumnNames.add(columnName);
 					Object columnValue = entry.getValue();
-					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
+					dataColumnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			}
 		}
 
 		List<String> columnNames = new ArrayList<>();
+		Map<Integer, ColumnTypeDefinition> columnTypes = new HashMap<>();
 		if (CollectionUtils.isEmpty(optionsColumnNames)) {
 			columnNames.addAll(dataColumnNames);
+			columnTypes.putAll(dataColumnTypes);
 		} else {
 			columnNames.addAll(optionsColumnNames);
 		}
