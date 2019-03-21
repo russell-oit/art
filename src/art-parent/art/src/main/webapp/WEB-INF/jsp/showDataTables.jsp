@@ -99,46 +99,41 @@
 		outputDateTimeFormat = moment().toMomentFormatString(javaOutputDateTimeFormat);
 	}
 
+	if (reportType === 'MongoDB') {
+		inputDateFormat = 'DD-MMM-YYYY HH:mm:ss.SSS';
+		inputDateTimeFormat = inputDateFormat;
+	}
+
+	var sortDateFormat = 'YYYY-MM-DD HH:mm:ss.SSS';
+
 	var showColumnFilters = ${options.showColumnFilters};
 
 	moment.locale('${locale}');
 
 	function dateFormatter(data, type, full, meta) {
 		//https://stackoverflow.com/questions/25319193/jquery-datatables-column-rendering-and-sorting
-		if (type === "display" || type === 'filter') {
-			var formattedDate;
-			if (data) {
-				if (reportType === 'MongoDB') {
-					formattedDate = moment(data).format(outputDateFormat);
-				} else {
-					formattedDate = moment(data, inputDateFormat).format(outputDateFormat);
-				}
+		if (data) {
+			if (type === "display" || type === 'filter') {
+				return moment(data, inputDateFormat).format(outputDateFormat);
+			} else if (type === 'sort') {
+				return moment(data, inputDateFormat).format(sortDateFormat);
 			} else {
-				formattedDate = '';
+				return data;
 			}
-			return formattedDate;
 		} else {
 			return data;
 		}
 	}
 
 	function datetimeFormatter(data, type, full, meta) {
-		//https://stackoverflow.com/questions/25319193/jquery-datatables-column-rendering-and-sorting
-		if (type === "display" || type === 'filter') {
-			var formattedDate;
-			if (data) {
-				if (reportType === 'MongoDB') {
-					formattedDate = moment(data).format(outputDateTimeFormat);
-				} else {
-					//http://wiki.fasterxml.com/JacksonFAQDateHandling
-					//https://egkatzioura.wordpress.com/2013/01/22/spring-jackson-and-date-serialization/
-					//https://momentjs.com/docs/#/parsing/string/
-					formattedDate = moment(data, inputDateFormat).format(outputDateTimeFormat);
-				}
+		if (data) {
+			if (type === "display" || type === 'filter') {
+				return moment(data, inputDateTimeFormat).format(outputDateTimeFormat);
+			} else if (type === 'sort') {
+				return moment(data, inputDateTimeFormat).format(sortDateFormat);
 			} else {
-				formattedDate = '';
+				return data;
 			}
-			return formattedDate;
 		} else {
 			return data;
 		}

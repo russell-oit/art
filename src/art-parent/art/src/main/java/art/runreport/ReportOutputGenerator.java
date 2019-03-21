@@ -101,6 +101,7 @@ import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -2401,7 +2402,12 @@ public class ReportOutputGenerator {
 
 					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
 					//https://github.com/wnameless/json-flattener
-					resultString = ArtUtils.objectToJson(finalResultList);
+					//https://www.baeldung.com/jackson-serialize-dates
+					//https://stackoverflow.com/questions/12463049/date-format-mapping-to-json-jackson
+					ObjectMapper mapper = new ObjectMapper();
+					SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss.SSS");
+					mapper.setDateFormat(df);
+					resultString = mapper.writeValueAsString(finalResultList);
 				}
 
 				request.setAttribute("data", resultString);
