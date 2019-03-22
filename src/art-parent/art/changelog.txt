@@ -1,6 +1,7 @@
 ART 4.2
 * Added use_api permission
 * Better handle dates for MongoDB reports
+* Updated jasperreports
 
 ART 4.1
 * Added option not to run reports immediately when creating self service dashboards

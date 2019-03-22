@@ -155,7 +155,7 @@
 			<dependency>
 				<groupId>com.lowagie</groupId>
 				<artifactId>itext</artifactId>
-				<version>2.1.7.js5</version>
+				<version>2.1.7.js6</version>
 			</dependency>
 			<!-- specify explicit c3p0 version until quartz upgrades to 0.9.1.2+.
 			c3p0 0.9.1.1 has a problem with some jdbc drivers, e.g. sun jdbc-odbc bridge,
@@ -616,13 +616,7 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>6.4.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.olap4j</groupId>
-					<artifactId>olap4j</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>6.7.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jaspersoft.connectors.mongodb</groupId>
