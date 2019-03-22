@@ -35,8 +35,8 @@
 	"Table": "Lentelė",
 	"Table Barchart": "Lentelė su juostine diagrama",
 	"Heatmap": "Temperatūrų zonų žemėlapis",
-	"Row Heatmap": "Temperatūrų zonų žemėlapis linijomis",
-	"Col Heatmap": "Temperatūrų zonų žemėlapis stulpeliais",
+	"Row Heatmap": "Eilutės temperatūrų zonų žemėlapis",
+	"Col Heatmap": "Stulpelio temperatūrų zonų žemėlapis",
 	"C3 Line Chart": "C3 Linijinė diagrama",
 	"C3 Bar Chart": "C3 Juostinė diagrama",
 	"C3 Stacked Bar Chart": "C3 Sudurtinė juostinė diagrama",
@@ -53,9 +53,9 @@
 	"Plotly Scatter Chart": "„Plotly“ Taškinė diagrama",
 	"Plotly Multiple Pie Chart": "„Plotly“ Daugiaskritulinė diagrama",
 	"TSV Export": "TSV eksportas",
-	"Table With Subtotal": "Table With Subtotal",
-	"Table With Subtotal Bar Chart": "Table With Subtotal Bar Chart",
-	"Table With Subtotal Heatmap": "Table With Subtotal Heatmap",
-	"Table With Subtotal Row Heatmap": "Table With Subtotal Row Heatmap",
-	"Table With Subtotal Col Heatmap": "Table With Subtotal Col Heatmap"
+	"Table With Subtotal": "Lentelė su tarpine suma",
+	"Table With Subtotal Bar Chart": "Lentelė su tarpine juostine diagrama",
+	"Table With Subtotal Heatmap": "Lentelė su tarpiniu temperatūrų zonų žemėlapiu",
+	"Table With Subtotal Row Heatmap": "Lentelė su tarpiniu eilutės temperatūrų zonų žemėlapiu",
+	"Table With Subtotal Col Heatmap": "Lentelė su tarpiniu stulpelio temperatūrų zonų žemėlapiu"
 }

@@ -22,17 +22,17 @@
 	},
 	"select": {
 		"rows": {
-			"_": "%d eilutės(-ių) pažymėta",
+			"_": "%d eilutės (-ių) pažymėta",
 			"0": "",
 			"1": "1 eilutė pažymėta"
 		},
 		"columns": {
-			"_": "%d stulpeliai(-ių) pažymėta",
+			"_": "%d stulpeliai (-ių) pažymėta",
 			"0": "",
 			"1": "1 stulpelis pažymėtas"
 		},
 		"cells": {
-			"_": "%d langeliai(-ių) pažymėta",
+			"_": "%d langeliai (-ių) pažymėta",
 			"0": "",
 			"1": "1 langelis pažymėtas"
 		}

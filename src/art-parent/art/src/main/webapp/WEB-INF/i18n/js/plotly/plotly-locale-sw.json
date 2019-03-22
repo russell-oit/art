@@ -13,7 +13,7 @@
 		"Compare data on hover": "Linganisha data kwa kuelea kielekezi",
 		"Double-click on legend to isolate one trace": "Bonyeza mara mbili juu ya hadithi ili kutenganisha moja kwa moja",
 		"Double-click to zoom back out": "Bonyeza mara mbili ili kuvuta nje",
-		"Download plot": "Download plot",
+		"Download plot": "Pakua chati",
 		"Download plot as a png": "Pakua mpango kama png",
 		"Edit in Chart Studio": "Hariri katika Chart studio",
 		"IE only supports svg.  Changing format to svg.": "IE inatumia tu svg. Tunabadilisha muundo kuwa svg.",
@@ -38,7 +38,7 @@
 		"Zoom in": "Vuta nje",
 		"Zoom out": "Vuta ndani",
 		"close:": "funga:",
-		"concentration:": "concentration:",
+		"concentration:": "ukolezi:",
 		"high:": "juu:",
 		"incoming flow count:": "hesabu ya mtiririko unaokuja:",
 		"kde:": "kde:",
@@ -58,7 +58,7 @@
 		"q3:": "q3:",
 		"source:": "chanzo:",
 		"target:": "lengo:",
-		"trace": "fuatilia",
+		"trace": "fuatilio",
 		"upper fence:": "Fensi ya juu:"
 	},
 	"format": {
