@@ -78,8 +78,8 @@
 				"Lentelė": r["Table"],
 				"Lentelė su juostine diagrama": r["Table Barchart"],
 				"Temperatūrų zonų žemėlapis": r["Heatmap"],
-				"Temperatūrų zonų žemėlapis linijomis": r["Row Heatmap"],
-				"Temperatūrų zonų žemėlapis stulpeliais": r["Col Heatmap"]
+				"Eilutės temperatūrų zonų žemėlapis": r["Row Heatmap"],
+				"Stulpelio temperatūrų zonų žemėlapis": r["Col Heatmap"]
 			}
 		};
 		if (gcr) {
@@ -126,11 +126,11 @@
 		}
 		if (sr) {
 			$.pivotUtilities.locales.lt.subtotal_renderers = {
-				"Table With Subtotal" : sr["Table With Subtotal"],
-				"Table With Subtotal Bar Chart" : sr["Table With Subtotal Bar Chart"],
-				"Table With Subtotal Heatmap" : sr["Table With Subtotal Heatmap"],
-				"Table With Subtotal Row Heatmap" : sr["Table With Subtotal Row Heatmap"],
-				"Table With Subtotal Col Heatmap" : sr["Table With Subtotal Col Heatmap"]
+				"Lentelė su tarpine suma" : sr["Table With Subtotal"],
+				"Lentelė su tarpine juostine diagrama" : sr["Table With Subtotal Bar Chart"],
+				"Lentelė su tarpiniu temperatūrų zonų žemėlapiu" : sr["Table With Subtotal Heatmap"],
+				"Lentelė su tarpiniu eilutės temperatūrų zonų žemėlapiu" : sr["Table With Subtotal Row Heatmap"],
+				"Lentelė su tarpiniu stulpelio temperatūrų zonų žemėlapiu" : sr["Table With Subtotal Col Heatmap"]
 			};
 		}
 		return $.pivotUtilities.locales.lt;
