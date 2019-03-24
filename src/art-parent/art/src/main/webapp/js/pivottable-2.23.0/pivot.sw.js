@@ -126,11 +126,11 @@
 	}
 	if (sr) {
 		$.pivotUtilities.locales.sw.subtotal_renderers = {
-			"Meza na Subtotal" : sr["Table With Subtotal"],
-			"Meza na Subtotal Chati pau" : sr["Table With Subtotal Bar Chart"],
-			"Meza na Subtotal Ramani-rangi" : sr["Table With Subtotal Heatmap"],
-			"Meza na Subtotal Ramani-rangi safu" : sr["Table With Subtotal Row Heatmap"],
-			"Meza na Subtotal Ramani-rangi safu-wima" : sr["Table With Subtotal Col Heatmap"]
+			"Jedwali na Jumla-ndogo" : sr["Table With Subtotal"],
+			"Jedwali na Jumla-ndogo Chati pau" : sr["Table With Subtotal Bar Chart"],
+			"Jedwali na Jumla-ndogo Ramani-rangi" : sr["Table With Subtotal Heatmap"],
+			"Jedwali na Jumla-ndogo Ramani-rangi safu" : sr["Table With Subtotal Row Heatmap"],
+			"Jedwali na Jumla-ndogo Ramani-rangi safu-wima" : sr["Table With Subtotal Col Heatmap"]
 		};
 	}
     return $.pivotUtilities.locales.sw;
