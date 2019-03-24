@@ -53,9 +53,9 @@
 	"Plotly Scatter Chart": "Chati tawanya Plotly",
 	"Plotly Multiple Pie Chart": "Chati duara kadhaa Plotly",
 	"TSV Export": "Hamishia TSV",
-	"Table With Subtotal": "Meza na Subtotal",
-	"Table With Subtotal Bar Chart": "Meza na Subtotal Chati pau",
-	"Table With Subtotal Heatmap": "Meza na Subtotal Ramani-rangi",
-	"Table With Subtotal Row Heatmap": "Meza na Subtotal Ramani-rangi safu",
-	"Table With Subtotal Col Heatmap": "Meza na Subtotal Ramani-rangi safu-wima"
+	"Table With Subtotal": "Jedwali na Jumla-ndogo",
+	"Table With Subtotal Bar Chart": "Jedwali na Jumla-ndogo Chati pau",
+	"Table With Subtotal Heatmap": "Jedwali na Jumla-ndogo Ramani-rangi",
+	"Table With Subtotal Row Heatmap": "Jedwali na Jumla-ndogo Ramani-rangi safu",
+	"Table With Subtotal Col Heatmap": "Jedwali na Jumla-ndogo Ramani-rangi safu-wima"
 }
