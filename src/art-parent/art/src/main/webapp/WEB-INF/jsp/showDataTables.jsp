@@ -100,11 +100,9 @@
 	}
 
 	if (reportType === 'MongoDB') {
-		inputDateFormat = 'DD-MMM-YYYY HH:mm:ss.SSS';
+		inputDateFormat = 'YYYY-MM-DD HH:mm:ss.SSS';
 		inputDateTimeFormat = inputDateFormat;
 	}
-
-	var sortDateFormat = 'YYYY-MM-DD HH:mm:ss.SSS';
 
 	var showColumnFilters = ${options.showColumnFilters};
 
@@ -115,8 +113,6 @@
 		if (data) {
 			if (type === "display" || type === 'filter') {
 				return moment(data, inputDateFormat).format(outputDateFormat);
-			} else if (type === 'sort') {
-				return moment(data, inputDateFormat).format(sortDateFormat);
 			} else {
 				return data;
 			}
@@ -129,8 +125,6 @@
 		if (data) {
 			if (type === "display" || type === 'filter') {
 				return moment(data, inputDateTimeFormat).format(outputDateTimeFormat);
-			} else if (type === 'sort') {
-				return moment(data, inputDateTimeFormat).format(sortDateFormat);
 			} else {
 				return data;
 			}

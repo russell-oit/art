@@ -2405,7 +2405,7 @@ public class ReportOutputGenerator {
 					//https://www.baeldung.com/jackson-serialize-dates
 					//https://stackoverflow.com/questions/12463049/date-format-mapping-to-json-jackson
 					ObjectMapper mapper = new ObjectMapper();
-					SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss.SSS");
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 					mapper.setDateFormat(df);
 					resultString = mapper.writeValueAsString(finalResultList);
 				}
