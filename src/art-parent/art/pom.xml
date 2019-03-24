@@ -647,16 +647,16 @@
 			<artifactId>itext</artifactId>
 			<exclusions>
 				<exclusion>
-					<groupId>bouncycastle</groupId>
-					<artifactId>bcprov-jdk14</artifactId>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcprov-jdk15on</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>org.bouncycastle</groupId>
-					<artifactId>bctsp-jdk14</artifactId>
+					<artifactId>bcpkix-jdk15on</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>bouncycastle</groupId>
-					<artifactId>bcmail-jdk14</artifactId>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcmail-jdk15on</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
