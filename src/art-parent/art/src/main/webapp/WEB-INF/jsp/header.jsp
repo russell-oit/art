@@ -308,14 +308,6 @@ Header that appears at the top of all pages, except the login and logs pages
 							<spring:message code="header.link.documentation"/>
 						</a>
 					</li>
-					<c:if test="${authenticationMethod eq internalAuthentication && sessionUser.passwordChangeAllowed}">
-						<li>
-							<a href="${pageContext.request.contextPath}/password">
-								<i class="fa fa-lock"></i> 
-								<spring:message code="header.link.password"/>
-							</a>
-						</li>
-					</c:if>
 					<li>
 						<a href="${pageContext.request.contextPath}/language">
 							<i class="fa fa-comment"></i> 
@@ -326,15 +318,31 @@ Header that appears at the top of all pages, except the login and logs pages
 						<form method="POST" action="${pageContext.request.contextPath}/logout">
 							<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 							<button type="submit" class="btn btn-link navbar-btn">
-								<i class="fa fa-sign-out"></i> 
+								<i class="fa fa-sign-out"></i>
 								<spring:message code="header.link.logout"/>
 							</button>
 						</form>
 					</li>
 				</ul>
-				<div class="nav navbar-nav navbar-right navbar-text">
-					<i class="fa fa-user"></i> ${encode:forHtmlContent(sessionUser.username)} 
-				</div>
+				<ul class="nav navbar-nav navbar-right">
+					<li class="dropdown">
+						<a id="userNav" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
+							<i class="fa fa-user"></i> 
+							${encode:forHtmlContent(sessionUser.username)} 
+							<b class="caret"></b>
+						</a>
+						<ul class="dropdown-menu">
+							<c:if test="${authenticationMethod eq internalAuthentication && sessionUser.passwordChangeAllowed}">
+								<li>
+									<a href="${pageContext.request.contextPath}/password">
+										<i class="fa fa-lock"></i> 
+										<spring:message code="header.link.password"/>
+									</a>
+								</li>
+							</c:if>
+						</ul>
+					</li>
+				</ul>
 			</div><!--/.nav-collapse -->
 		</div>
 	</div>
