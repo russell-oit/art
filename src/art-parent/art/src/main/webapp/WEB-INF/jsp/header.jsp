@@ -294,19 +294,28 @@ Header that appears at the top of all pages, except the login and logs pages
 							</ul>
 						</li>
 					</c:if>
-					<c:if test="${sessionUser.hasPermission('view_logs')}">
-						<li>
-							<a href="${pageContext.request.contextPath}/logs">
-								<i class="fa fa-bars"></i> 
-								<spring:message code="header.link.logs"/>
-							</a>
-						</li>
-					</c:if>
-					<li>
-						<a href="${pageContext.request.contextPath}/docs/index.html">
-							<i class="fa fa-book"></i> 
-							<spring:message code="header.link.documentation"/>
+					<li class="dropdown">
+						<a id="adminNav" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
+							<i class="fa fa-user-circle"></i> 
+							<spring:message code="adminRights.text.admin"/>
+							<b class="caret"></b>
 						</a>
+						<ul class="dropdown-menu">
+							<li>
+								<a href="${pageContext.request.contextPath}/docs/index.html">
+									<i class="fa fa-book"></i> 
+									<spring:message code="header.link.documentation"/>
+								</a>
+							</li>
+							<c:if test="${sessionUser.hasPermission('view_logs')}">
+								<li>
+									<a href="${pageContext.request.contextPath}/logs">
+										<i class="fa fa-bars"></i> 
+										<spring:message code="header.link.logs"/>
+									</a>
+								</li>
+							</c:if>
+						</ul>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/language">
