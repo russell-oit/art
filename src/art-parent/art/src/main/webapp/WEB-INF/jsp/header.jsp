@@ -294,29 +294,31 @@ Header that appears at the top of all pages, except the login and logs pages
 							</ul>
 						</li>
 					</c:if>
-					<li class="dropdown">
-						<a id="viewNav" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
-							<i class="fa fa-desktop"></i>
-							<spring:message code="header.link.view"/>
-							<b class="caret"></b>
-						</a>
-						<ul class="dropdown-menu">
-							<li>
-								<a href="${pageContext.request.contextPath}/docs/index.html">
-									<i class="fa fa-book"></i> 
-									<spring:message code="header.link.documentation"/>
-								</a>
-							</li>
-							<c:if test="${sessionUser.hasPermission('view_logs')}">
+					<c:if test="${sessionUser.hasStandardAdminAndAboveAccessLevel() || sessionUser.hasPermission('view_logs')}">
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
+								<i class="fa fa-desktop"></i>
+								<spring:message code="header.link.view"/>
+								<b class="caret"></b>
+							</a>
+							<ul class="dropdown-menu">
 								<li>
-									<a href="${pageContext.request.contextPath}/logs">
-										<i class="fa fa-bars"></i> 
-										<spring:message code="header.link.logs"/>
+									<a href="${pageContext.request.contextPath}/docs/index.html">
+										<i class="fa fa-book"></i> 
+										<spring:message code="header.link.documentation"/>
 									</a>
 								</li>
-							</c:if>
-						</ul>
-					</li>
+								<c:if test="${sessionUser.hasPermission('view_logs')}">
+									<li>
+										<a href="${pageContext.request.contextPath}/logs">
+											<i class="fa fa-bars"></i> 
+											<spring:message code="header.link.logs"/>
+										</a>
+									</li>
+								</c:if>
+							</ul>
+						</li>
+					</c:if>
 					<li>
 						<a href="${pageContext.request.contextPath}/language">
 							<i class="fa fa-comment"></i> 
@@ -335,7 +337,7 @@ Header that appears at the top of all pages, except the login and logs pages
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li class="dropdown">
-						<a id="userNav" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
 							<i class="fa fa-user"></i> 
 							${encode:forHtmlContent(sessionUser.username)} 
 							<b class="caret"></b>
