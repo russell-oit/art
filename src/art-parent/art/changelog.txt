@@ -1,6 +1,7 @@
 ART 4.2
 * Added use_api permission
 * Better handle dates for MongoDB reports
+* Effect show header in public user session setting
 * Updated jasperreports
 
 ART 4.1

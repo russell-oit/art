@@ -186,6 +186,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 					session.setAttribute("authenticationMethod", loginMethod.getValue());
 					session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
 					session.setAttribute("casLogoutUrl", Config.getSettings().getCasLogoutUrl());
+					session.setAttribute("showHeaderInPublicUserSession", Config.getSettings().isShowHeaderInPublicUserSession());
 					loginHelper.logSuccess(loginMethod, username, ip);
 				}
 			}

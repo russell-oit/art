@@ -41,6 +41,7 @@ public class SettingsHelper {
 		if (session != null) {
 			session.setAttribute("administratorEmail", settings.getAdministratorEmail());
 			session.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
+			session.setAttribute("showHeaderInPublicUserSession", settings.isShowHeaderInPublicUserSession());
 		}
 
 		if (servletContext != null) {
