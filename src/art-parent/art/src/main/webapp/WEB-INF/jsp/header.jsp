@@ -341,7 +341,6 @@ Header that appears at the top of all pages, except the login and logs pages
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
 								<i class="fa fa-user"></i> 
 								${encode:forHtmlContent(sessionUser.username)} 
-								<b class="caret"></b>
 							</a>
 							<ul class="dropdown-menu">
 								<c:if test="${authenticationMethod eq internalAuthentication && sessionUser.passwordChangeAllowed}">
