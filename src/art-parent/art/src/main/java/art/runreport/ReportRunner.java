@@ -359,7 +359,7 @@ public class ReportRunner {
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
 
-		logger.debug("Sql query now is:\n{}", querySb.toString());
+		logger.debug("Sql query finally is: \n{}", querySb);
 
 		String processedSource = querySb.toString();
 
@@ -390,6 +390,8 @@ public class ReportRunner {
 
 		//update sb with new sql
 		querySb.replace(0, querySb.length(), querySql);
+		
+		logger.debug("Sql query now is: \n{}", querySb);
 	}
 
 	/**
@@ -446,6 +448,8 @@ public class ReportRunner {
 			}
 
 			String querySql = querySb.toString();
+			logger.debug("Groovy source before evaluation: \n{}", querySql);
+
 			Object result;
 			try {
 				result = shell.evaluate(querySql);
@@ -679,6 +683,8 @@ public class ReportRunner {
 
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
+		
+		logger.debug("Sql query now is: \n{}", querySb);
 	}
 
 	/**
@@ -1700,7 +1706,7 @@ public class ReportRunner {
 		//update querySb with new sql
 		querySb.replace(0, querySb.length(), querySql);
 
-		logger.debug("Sql query now is:\n{}", querySb);
+		logger.debug("Sql query now is: \n{}", querySb);
 	}
 
 	/**
