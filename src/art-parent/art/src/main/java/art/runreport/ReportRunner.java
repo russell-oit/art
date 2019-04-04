@@ -390,8 +390,6 @@ public class ReportRunner {
 
 		//update sb with new sql
 		querySb.replace(0, querySb.length(), querySql);
-		
-		logger.debug("Sql query now is: \n{}", querySb);
 	}
 
 	/**
