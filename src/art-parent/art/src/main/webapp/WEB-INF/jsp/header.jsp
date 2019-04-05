@@ -295,7 +295,7 @@ Header that appears at the top of all pages, except the login and logs pages
 								</ul>
 							</li>
 						</c:if>
-						<c:if test="${sessionUser.hasStandardAdminAndAboveAccessLevel() || sessionUser.hasPermission('view_logs')}">
+						<c:if test="${sessionUser.isAdminUser() || sessionUser.hasPermission('view_logs')}">
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
 									<i class="fa fa-desktop"></i>
