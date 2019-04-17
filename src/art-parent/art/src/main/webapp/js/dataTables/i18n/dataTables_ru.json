@@ -1,0 +1,56 @@
+{
+	"sEmptyTable": "В таблице отсутствуют данные",
+	"sInfo": "Записи с _START_ до _END_ из _TOTAL_ записей",
+	"sInfoEmpty": "Записи с 0 до 0 из 0 записей",
+	"sInfoFiltered": "(отфильтровано из _MAX_ записей)",
+	"sInfoPostFix": "",
+	"sInfoThousands": ",",
+	"sLengthMenu": "Показать _MENU_ записей",
+	"sLoadingRecords": "Загрузка записей...",
+	"sProcessing": "Подождите...",
+	"sSearch": "Поиск:",
+	"sZeroRecords": "Записи отсутствуют.",
+	"oPaginate": {
+		"sFirst": "Первая",
+		"sLast": "Последняя",
+		"sNext": "Следующая",
+		"sPrevious": "Предыдущая"
+	},
+	"oAria": {
+		"sSortAscending": ": активировать для сортировки столбца по возрастанию",
+		"sSortDescending": ": активировать для сортировки столбца по убыванию"
+	},
+	"select": {
+		"rows": {
+			"_": "%d rows selected",
+			"0": "",
+			"1": "1 row selected"
+		},
+		"columns": {
+			"_": "%d columns selected",
+			"0": "",
+			"1": "1 column selected"
+		},
+		"cells": {
+			"_": "%d cells selected",
+			"0": "",
+			"1": "1 cell selected"
+		}
+	},
+	"buttons": {
+		"selected": "Selected",
+		"selectedSingle": "Selected single",
+		"selectAll": "Select all",
+		"selectNone": "Deselect all",
+		"selectRows": "Select rows",
+		"selectColumns": "Select columns",
+		"selectCells": "Select cells",
+		"colvis": "Columns",
+		"colvisRestore": "Restore",
+		"print": "Print",
+		"excel": "Excel",
+		"pdf": "PDF",
+		"csv": "CSV",
+		"copy": "Copy"
+	}
+}
