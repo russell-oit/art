@@ -22,35 +22,35 @@
 	},
 	"select": {
 		"rows": {
-			"_": "%d rows selected",
+			"_": "%d строк выбрано",
 			"0": "",
-			"1": "1 row selected"
+			"1": "выбрана 1 строка"
 		},
 		"columns": {
-			"_": "%d columns selected",
+			"_": "%d строк выбрано",
 			"0": "",
-			"1": "1 column selected"
+			"1": "выбрана 1 строка"
 		},
 		"cells": {
-			"_": "%d cells selected",
+			"_": "выбрано %d ячеек",
 			"0": "",
-			"1": "1 cell selected"
+			"1": "выбрана 1 ячейка"
 		}
 	},
 	"buttons": {
-		"selected": "Selected",
-		"selectedSingle": "Selected single",
-		"selectAll": "Select all",
-		"selectNone": "Deselect all",
-		"selectRows": "Select rows",
-		"selectColumns": "Select columns",
-		"selectCells": "Select cells",
-		"colvis": "Columns",
-		"colvisRestore": "Restore",
-		"print": "Print",
+		"selected": "Выбрано",
+		"selectedSingle": "Выбран единственный",
+		"selectAll": "Выбрать все",
+		"selectNone": "Отменить весь выбор",
+		"selectRows": "Выберать строки",
+		"selectColumns": "Выбрать столбцы",
+		"selectCells": "Выбрать ячейки",
+		"colvis": "Колонки",
+		"colvisRestore": "Восстановить",
+		"print": "Печать",
 		"excel": "Excel",
 		"pdf": "PDF",
 		"csv": "CSV",
-		"copy": "Copy"
+		"copy": "Копировать"
 	}
 }
