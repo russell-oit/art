@@ -795,9 +795,9 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Creates the initial setup user
+	 * Creates the repository setup user
 	 *
-	 * @return the initial setup user
+	 * @return the repository setup user
 	 */
 	public static User createRepositoryUser() {
 		User user = createSetupUser();
