@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.1"> 
+  <meta name="version" content="4.2"> 
   <title>ART - Admin Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -141,6 +141,7 @@
          <li><a href="#reportengine-file">ReportEngine: File</a></li> 
          <li><a href="#mongodb">MongoDB</a></li> 
          <li><a href="#view">View</a></li> 
+         <li><a href="#file">File</a></li> 
         </ol></li> 
        <li><a href="#general-report-options">General Report Options</a> 
         <ol> 
@@ -206,8 +207,11 @@
      <li><a href="#drill-down-reports">Drill Down Reports</a> 
       <ol> 
        <li><a href="#defining-the-main-report">Defining the main report</a></li> 
-       <li><a href="#defining-the-drill-down-report">Defining the drill down report</a></li> 
-       <li><a href="#example">Example</a></li> 
+       <li><a href="#defining-the-drill-down-report">Defining the drill down report</a> 
+        <ol> 
+         <li><a href="#example">Example</a></li> 
+         <li><a href="#drilldown-definition">Drilldown definition</a></li> 
+        </ol></li> 
        <li><a href="#using-the-main-reports-parameters">Using the main report's parameters</a></li> 
       </ol></li> 
      <li><a href="#rss-feeds">RSS Feeds</a></li> 
@@ -329,47 +333,6 @@
        <li><a href="#changing-the-spnego-user">Changing the spnego user</a></li> 
       </ol></li> 
      <li><a href="#cas-authentication">CAS Authentication</a></li> 
-     <li><a href="#application-logs">Application Logs</a> 
-      <ol> 
-       <li><a href="#sql-logging">SQL Logging</a></li> 
-      </ol></li> 
-     <li><a href="#tomcat-configuration">Tomcat Configuration</a> 
-      <ol> 
-       <li><a href="#memory-options">Memory options</a> 
-        <ol> 
-         <li><a href="#windows">Windows</a></li> 
-         <li><a href="#linux">Linux</a></li> 
-        </ol></li> 
-       <li><a href="#accessing-tomcat-via-apache">Accessing Tomcat via Apache</a> 
-        <ol> 
-         <li><a href="#using-mod_proxy">Using mod_proxy</a></li> 
-         <li><a href="#using-mod_proxy_ajp">Using mod_proxy_ajp</a></li> 
-         <li><a href="#using-mod_jk">Using mod_jk</a></li> 
-        </ol></li> 
-      </ol></li> 
-     <li><a href="#customizing-art">Customizing ART</a> 
-      <ol> 
-       <li><a href="#using-live-files">Using live files</a> 
-        <ol> 
-         <li><a href="#setting-up-apache-ant">Setting up Apache Ant</a></li> 
-         <li><a href="#customizing-java-files">Customizing java files</a></li> 
-         <li><a href="#customizing-jsp-files">Customizing jsp files</a></li> 
-         <li><a href="#customizing-other-files">Customizing other files</a></li> 
-         <li><a href="#updating-jasperreports">Updating jasperreports</a></li> 
-        </ol></li> 
-       <li><a href="#using-ant">Using Ant</a> 
-        <ol> 
-         <li><a href="#using-ant-without-an-ide">Using Ant without an IDE</a></li> 
-         <li><a href="#using-ant-with-netbeans">Using Ant with NetBeans</a></li> 
-        </ol></li> 
-       <li><a href="#using-maven">Using Maven</a> 
-        <ol> 
-         <li><a href="#using-maven-without-an-ide">Using Maven without an IDE</a></li> 
-         <li><a href="#using-maven-with-netbeans">Using Maven with NetBeans</a></li> 
-         <li><a href="#using-maven-with-eclipse">Using Maven with Eclipse</a></li> 
-        </ol></li> 
-       <li><a href="#translating-art">Translating ART</a></li> 
-      </ol></li> 
      <li><a href="#api">API</a> 
       <ol> 
        <li><a href="#base-url">Base URL</a></li> 
@@ -425,6 +388,51 @@
            <li><a href="#request_7">Request</a></li> 
            <li><a href="#response_7">Response</a></li> 
           </ol></li> 
+        </ol></li> 
+      </ol></li> 
+     <li><a href="#application-logs">Application Logs</a> 
+      <ol> 
+       <li><a href="#sql-logging">SQL Logging</a></li> 
+      </ol></li> 
+     <li><a href="#tomcat-configuration">Tomcat Configuration</a> 
+      <ol> 
+       <li><a href="#memory-options">Memory options</a> 
+        <ol> 
+         <li><a href="#windows">Windows</a></li> 
+         <li><a href="#linux">Linux</a></li> 
+        </ol></li> 
+       <li><a href="#accessing-tomcat-via-apache">Accessing Tomcat via Apache</a> 
+        <ol> 
+         <li><a href="#using-mod_proxy">Using mod_proxy</a></li> 
+         <li><a href="#using-mod_proxy_ajp">Using mod_proxy_ajp</a></li> 
+         <li><a href="#using-mod_jk">Using mod_jk</a></li> 
+        </ol></li> 
+      </ol></li> 
+     <li><a href="#customizing-art">Customizing ART</a> 
+      <ol> 
+       <li><a href="#using-live-files">Using live files</a> 
+        <ol> 
+         <li><a href="#setting-up-apache-ant">Setting up Apache Ant</a></li> 
+         <li><a href="#customizing-java-files">Customizing java files</a></li> 
+         <li><a href="#customizing-jsp-files">Customizing jsp files</a></li> 
+         <li><a href="#customizing-other-files">Customizing other files</a></li> 
+         <li><a href="#updating-jasperreports">Updating jasperreports</a></li> 
+        </ol></li> 
+       <li><a href="#using-ant">Using Ant</a> 
+        <ol> 
+         <li><a href="#using-ant-without-an-ide">Using Ant without an IDE</a></li> 
+         <li><a href="#using-ant-with-netbeans">Using Ant with NetBeans</a></li> 
+        </ol></li> 
+       <li><a href="#using-maven">Using Maven</a> 
+        <ol> 
+         <li><a href="#using-maven-without-an-ide">Using Maven without an IDE</a></li> 
+         <li><a href="#using-maven-with-netbeans">Using Maven with NetBeans</a></li> 
+         <li><a href="#using-maven-with-eclipse">Using Maven with Eclipse</a></li> 
+        </ol></li> 
+       <li><a href="#translating-art">Translating ART</a> 
+        <ol> 
+         <li><a href="#online">Online</a></li> 
+         <li><a href="#offline">Offline</a></li> 
         </ol></li> 
       </ol></li> 
      <li><a href="#support">Support</a></li> 
@@ -786,7 +794,7 @@
       <li>Backup the application files and the ART database. If something goes wrong, it may not be possible to decrypt password fields and so they may all need to be re-entered. This not only applies to datasources but also to reports which have open/modify passwords, destinations e.g. ftp servers among others.</li> 
       <li>Login to ART. Ensure that no other users are using the appliction when embarking on an encryption key update.</li> 
       <li>Once you have logged in and confirmed that the application is working OK, go to the file system and modify the <strong>WEB-INF\art-custom-settings.json</strong> file and set the <strong>encryptionKey</strong> field to the key to be used. This would use AES encryption and so the key would need to be either 128 bits (16 bytes), 192 bits (24 bytes) or 256 bits (32 bytes). If there was already a key set in this field, copy it somewhere in case something goes wrong and you need to replace it. Save the file. Do not stop the application or make this change while the application is not running. The application needs to be running already.</li> 
-      <li>Now go to the browser and on the Settings page, for the <strong>Encryption Key</strong> field, click on the <strong>Update</strong> button. If you get a success message, the update was successful. View the logs using the <strong>Logs</strong> menu to confirm that there were no errors or warnings. If there was an error, modify the <strong>art-custom-settings.json</strong> file and return the <strong>encryptionKey</strong> field the way it was before you attempted the update.</li> 
+      <li>Now go to the browser and on the Settings page, for the <strong>Encryption Key</strong> field, click on the <strong>Update</strong> button. If you get a success message, the update was successful. View the logs using the <strong>View | Logs</strong> menu to confirm that there were no errors or warnings. If there was an error, modify the <strong>art-custom-settings.json</strong> file and return the <strong>encryptionKey</strong> field the way it was before you attempted the update.</li> 
       <li>If successful, in order to test/confirm, stop the application and then start it again. If you can run reports, the update should be successful.</li> 
       <li>Once you have changed the encryption key, when you perform an upgrade of the application, you need to copy this key to the new version's <strong>art-custom-settings.json</strong> file before you first start the application. You can do this by unzipping the <strong>art.war</strong> file to a directory e.g. one named <code>art</code>. You can use any zip utility for this as a .war file in just a .zip file. Make the necessary change and then deploy the new directory e.g. <code>art</code> to your applicaiton server.</li> 
       <li>In case you would like to go back to the default key, repeat this same process and set the <strong>encryptionKey</strong> field to the empty string <strong>""</strong> when updating.</li> 
@@ -805,7 +813,7 @@
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="custom-settings">Custom Settings</h1> 
-     <p>There are a number of settings that can be specified in the <strong>WEB-INF\art-custom-settings.json</strong> file. When settings in this file are changed, the application needs to be restarted for them to take effect.</p> 
+     <p>There are a number of settings that can be specified in the <strong>WEB-INF\art-custom-settings.json</strong> file. When settings in this file are changed, the Custom Settings cache needs to be cleared for them to take effect.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -1014,7 +1022,7 @@
      <p>Database: <strong>SQL Server (jTDS driver)</strong></p> 
      <p>Driver Name: net.sourceforge.jtds.jdbc.Driver</p> 
      <p>JDBC URL: <code>jdbc:jtds:sqlserver://&lt;server&gt;[:port]/&lt;database&gt;[;instance=&lt;instance&gt;][;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 1433)</p> 
-     <p>Driver Available from: <a href="http://jtds.sourceforge.net">http://jtds.sourceforge.net</a><br> <br><br></p> 
+     <p>Driver Available from: <a href="http://jtds.sourceforge.net" rel="nofollow">http://jtds.sourceforge.net</a><br> <br><br></p> 
      <p>Database: <strong>HSQLDB (Standalone mode)</strong></p> 
      <p>Driver Name: org.hsqldb.jdbc.JDBCDriver (HSQLDB 2.x) or org.hsqldb.jdbcDriver (HSQLDB 1.x)</p> 
      <p>JDBC URL: <code>jdbc:hsqldb:file:&lt;file_path&gt;[;shutdown=true;hsqldb.write_delay=false;create=false][;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
@@ -1030,7 +1038,7 @@
      <p>Database: <strong>Db2 for iSeries (Toolbox or JTOpen driver)</strong></p> 
      <p>Driver Name: com.ibm.as400.access.AS400JDBCDriver</p> 
      <p>JDBC URL: <code>jdbc:as400://&lt;server&gt;;prompt=false;translate binary=true[;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
-     <p>Driver Available from: <a href="http://jt400.sourceforge.net/">http://jt400.sourceforge.net/</a><br> <br><br></p> 
+     <p>Driver Available from: <a href="http://jt400.sourceforge.net/" rel="nofollow">http://jt400.sourceforge.net/</a><br> <br><br></p> 
     </div> 
    </div> 
    <div> 
@@ -1137,7 +1145,7 @@
        </tr> 
        <tr> 
         <td><strong>Junior Admin</strong></td> 
-        <td>Can run any report</td> 
+        <td></td> 
        </tr> 
        <tr> 
         <td><strong>Mid Admin</strong></td> 
@@ -1165,7 +1173,7 @@
      <h1 id="authentication">Authentication</h1> 
      <p>Use the <strong>Configure | Settings</strong> menu to define the authentication method to be used by ART.</p> 
      <h2 id="internal-authentication">Internal Authentication</h2> 
-     <p>Internal authentication authenticates users with a username and password combination defined and stored within ART. Users can change their passwords using the <strong>Password</strong> menu.</p> 
+     <p>Internal authentication authenticates users with a username and password combination defined and stored within ART. Users can change their passwords using the <strong>Password</strong> menu located under their username on the far right of the menu bar.</p> 
      <h2 id="windows-domain-authentication">Windows Domain Authentication</h2> 
      <p>If the users are in a windows domain environment, you can have them log in to ART using the usernames and passwords they use to log in to windows.</p> 
      <p>Do the following to configure ART to use windows domain authentication.</p> 
@@ -2675,7 +2683,7 @@ FROM mytable
      <h3 id="orgchart-ajax">OrgChart: Ajax</h3> 
      <p>Displays an organisation chart using data from a url specified in the report source section. The same options applicable with the <strong>OrgChart: Database</strong> report type are also applicable.</p> 
      <h3 id="reportengine">ReportEngine</h3> 
-     <p>Generates tabular or pivot table output using data from a database. It uses the <a class="" href="http://reportengine.sourceforge.net/">ReportEngine</a> library. A number of options can be specified in the <strong>Options</strong> field.</p> 
+     <p>Generates tabular or pivot table output using data from a database. It uses the <a class="" href="http://reportengine.sourceforge.net/" rel="nofollow">ReportEngine</a> library. A number of options can be specified in the <strong>Options</strong> field.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -2756,7 +2764,7 @@ FROM mytable
      </table> 
      <p>A note that pivot table output may not display correctly with pdf, docx, odt report formats.</p> 
      <h3 id="reportengine-file">ReportEngine: File</h3> 
-     <p>Generates tabular or pivot table output using data from a file. It uses the <a class="" href="http://reportengine.sourceforge.net/">ReportEngine</a> library. A number of options can be specified in the <strong>Options</strong> field, with the available options being similar to those available for the <strong>ReportEngine</strong> report type.</p> 
+     <p>Generates tabular or pivot table output using data from a file. It uses the <a class="" href="http://reportengine.sourceforge.net/" rel="nofollow">ReportEngine</a> library. A number of options can be specified in the <strong>Options</strong> field, with the available options being similar to those available for the <strong>ReportEngine</strong> report type.</p> 
      <h3 id="mongodb">MongoDB</h3> 
      <p>Allows you to query a MongoDB database. To use it, first create a datasource of type <strong>MongoDB</strong>. Set the URL as appropriate. Next, create the report, setting the report <strong>Type</strong> as <strong>MongoDB</strong> and selecting the mongodb datasource in the <strong>Datasource</strong> field. In the report source field, enter the groovy script that will be used to retrieve data from the mongodb database. The syntax of querying can either be that of the <a class="" href="https://mongodb.github.io/mongo-java-driver/" rel="nofollow">MongoDB Java Driver</a>, the <a class="" href="http://jongo.org/" rel="nofollow">Jongo</a> library or the <a class="" href="https://mongodb.github.io/morphia/" rel="nofollow">Morphia</a> library. ART passes a MongoClient connection object to the groovy script with the variable name <strong>mongoClient</strong>. This is the variable that is to be used as the connection to the mongodb server. ART also passes any report parameters specified using the parameter name as the variable name.</p> 
      <p>If it is required to display the returned results in a table, the groovy script must return a <code>List</code> of objects that are to be displayed. Also, the groovy script is run through a sandbox and only classes contained in the <strong>WEB-INF\groovy-whitelist.txt</strong> file will be allowed to be used within the script. If you use a class that is not contained in the whitelist, a <strong>SecurityException</strong> error will occur when you run the report. If you get such an error, add the class mentioned to the whitelist and run the report again.</p> 
@@ -2841,7 +2849,7 @@ FROM mytable
 <span class="k">return</span> <span class="n">records</span><span class="p">;</span>
 </pre> 
      </div> 
-     <p>For <strong>Morphia</strong> queries, you need to specify a package name for the groovy script. This package needs to be <strong>art.groovy</strong> in order not to get a security exception. The other alternative to not specifying this package name is to turn off the groovy sandbox within the <strong>WEB-INF\art-custom-settings.json</strong> file. Changes to this file require the application to be restarted in order to take effect.</p> 
+     <p>For <strong>Morphia</strong> queries, you need to specify a package name for the groovy script. This package needs to be <strong>art.groovy</strong> in order not to get a security exception. The other alternative to not specifying this package name is to turn off the groovy sandbox within the <strong>WEB-INF\art-custom-settings.json</strong> file. Changes to this file require the Custom Settings cache to be cleared in order to take effect.</p> 
      <p>In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> 
      <table border="1"> 
       <thead> 
@@ -2866,34 +2874,28 @@ FROM mytable
         <td>Each object specifies a column name and the data type that is to be used for that column e.g. <code>[{"col1": "numeric"}]</code>. The possible data types are <strong>string</strong>, <strong>numeric</strong>, <strong>date</strong> and <strong>datetime</strong>. The default is <code>string</code> so if a column is to be treated as a general string, it doesn't need to be specified.</td> 
        </tr> 
        <tr> 
-        <td><strong>inputDateFormat</strong></td> 
-        <td>String</td> 
-        <td>yyyy-MM-dd</td> 
-        <td>The format of input data for columns with a <strong>date</strong> specification. The format is as perJava <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
+        <td><strong>columnLabels</strong></td> 
+        <td>Object[]</td> 
+        <td></td> 
+        <td>Each object specifies a column name and the heading to be used for that column e.g. <code>[{"col1": "Column 1"}]</code>. If not specified, the column name is used as the heading.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateFormat</strong></td> 
         <td>String</td> 
-        <td></td> 
-        <td>The format of output/displayed data for columns with a <strong>date</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
-       </tr> 
-       <tr> 
-        <td><strong>inputDateTimeFormat</strong></td> 
-        <td>String</td> 
-        <td>yyyy-MM-dd HH:mm:ss.SSS</td> 
-        <td>The format of input data for columns with a <strong>datetime</strong> specification. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
+        <td>dd-MMM-yyyy</td> 
+        <td>The format of output for columns with a <strong>date</strong> specification. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>outputDateTimeFormat</strong></td> 
         <td>String</td> 
-        <td></td> 
-        <td>The format of output/displayed data for columns with a <strong>datetime</strong> specification. If it's blank, the data will be output/displayed as is and no formatting will be done. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
+        <td>dd-MMM-yyyy HH:mm:ss</td> 
+        <td>The format of output for columns with a <strong>datetime</strong> specification. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>showColumnFilters</strong></td> 
         <td>Boolean</td> 
         <td>true</td> 
-        <td>Determines if column filters will be displayed in the tabular output.</td> 
+        <td>Determines if column filters will be displayed in the output.</td> 
        </tr> 
        <tr> 
         <td><strong>dtOptions</strong></td> 
@@ -2906,7 +2908,7 @@ FROM mytable
      <p>Another alternative for querying MongoDB is to install and use <a class="" href="https://drill.apache.org/" rel="nofollow">Apache Drill</a>. Drill allows you to use normal SQL to query a MongoDB database. When using drill, you wouldn't use the MongoDB datasource type or the MongoDB report type. You would use the JDBC datasource type with the drill driver, and then use any of the other report types e.g. Tabular etc. The drill jdbc driver can be obtained from the drill installation and copied to the ART_HOME\WEB-INF\lib directory.</p> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li>Instead of using the MongoDB report type, one can specify any of the other report types e.g. Tabular, enable the <strong>Use Groovy</strong> option and use the kind of code as given above to generate the report. In this case, the <strong>columns</strong> and <strong>columnDataTypes</strong> options are not considered.</li> 
+      <li>Instead of using the MongoDB report type, one can specify any of the other report types e.g. Tabular, enable the <strong>Use Groovy</strong> option and use the kind of code as given above to generate the report.</li> 
      </ul> 
      <h3 id="view">View</h3> 
      <p>Used as a basis for creating self service reports. The view report will define the columns that should be available for selection and the joins and basic conditions for the reports. The report source will contain placeholders to be replaced when the view or self service reports are run. Examples are given below.</p> 
@@ -3012,6 +3014,26 @@ FROM mytable
         <td>Integer</td> 
         <td></td> 
         <td>The number of records to return when testing/running the view. The view report is not intended to be used as an actual report and so if this option is not defined, the view report will return a maximum of 10 records when you test/run it. This limit is not applied to the self service reports that will be created, but is only applicable for the view report.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="file">File</h3> 
+     <p>Outputs the contents of a query as it is e.g if using the "FOR XML" clause in SQL Server. A number of options can be specified in the <strong>Options</strong> field.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>extension</strong></td> 
+        <td>String</td> 
+        <td>txt</td> 
+        <td>The extension to use for generated file names</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -3879,7 +3901,33 @@ FROM mytable
      <p>It is possible to create dynamic SQL queries, allowing you to modify the structure of the query based on user parameters, possibly running different queries depending on the user input.</p> 
      <h2 id="using-groovy">Using Groovy</h2> 
      <p>You can use <a class="" href="http://groovy-lang.org/" rel="nofollow">groovy</a> in the SQL source section to achieve dynamic sql. Set the <strong>Use Groovy</strong> field of the report to specify that you are using groovy in the sql source. </p> 
-     <p>The groovy script may return a string that has the sql to be executed or it may return a java.util.List of Maps or GroovyRowResult objects that contain the data to be output.</p> 
+     <p>The groovy script may return a string that has the sql to be executed or it may return a <code>java.util.List</code> of <code>Map&lt;String, Object&gt;</code> or <a class="" href="http://docs.groovy-lang.org/latest/html/api/groovy/sql/GroovyRowResult.html" rel="nofollow">GroovyRowResult</a> objects that contain the data to be output. If returning a List of objects, the following options can be specified in the <strong>Options</strong> field of the report.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>columns</strong></td> 
+        <td>String[]</td> 
+        <td>Names of columns that should be included in the output. This is optional and may be useful to specify the order of columns to be displayed.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>columnDataTypes</strong></td> 
+        <td>Object[]</td> 
+        <td>Each object specifies a column name and the data type of that column e.g. <code>[{"col1": "numeric"}]</code>. The possible data types are <strong>string</strong>, <strong>numeric</strong>, <strong>date</strong> and <strong>datetime</strong>. The default is <code>string</code>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>columnLabels</strong></td> 
+        <td>Object[]</td> 
+        <td>Each object specifies a column name and the heading to be used for that column e.g. <code>[{"col1": "Column 1"}]</code>. If not specified, the column name is used as the heading.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <p>The groovy code is run through a sandbox and depending on the code in the script, you may need to specify additional classes in the <strong>WEB-INF\groovy-whitelist.txt</strong> file. If you get a security exception when running the report, add the indicated class to the groovy whitelist file and run the report again. You can also disable the sandbox completely by modifying the <strong>WEB-INF\art-custom-settings.json</strong> file and setting the <strong>enableGroovySandbox</strong> property to <strong>false</strong>. Modifications of the art-custom-settings.json file require clearing the Custom Settings cache in order to take effect.</p> 
      <h3 id="example">Example</h3> 
      <p>A trivial example is given below.</p> 
@@ -4379,7 +4427,7 @@ where #rules#
      <p>The main report is created like any other report. Once the report is saved, use the <strong>More | Drilldowns</strong> button to add or modify the drill down reports that will be available for that report.</p> 
      <h2 id="defining-the-drill-down-report">Defining the drill down report</h2> 
      <p>The drill down report is created like any other report. The only requirement is that it needs to have at least one single-value parameter defined, with this parameter having the <strong>Drilldown Column Index</strong> field with a value greater than or equal to 1. The Drill Down Column refers to the column in the main report that will provide the value for the parameter. If the value will come from the first field, the drill down column will have a value of 1 and so on.</p> 
-     <h2 id="example">Example</h2> 
+     <h3 id="example">Example</h3> 
      <ul> 
       <li> <p><strong>Sales Summary</strong> (Main report)</p> 
        <div class="codehilite"> 
@@ -4398,16 +4446,47 @@ WHERE REGION = #region#
      </ul> 
      <p>On the Drill Down report, when defining the <code>#region#</code> parameter, set the option <strong>Drilldown Column Index</strong> to 1. This means this parameter will match with the first column value on the Main Report i.e. "Region"</p> 
      <p>From now on this report will appear as an available Drill Down report.</p> 
-     <p>On the Main report, select the <strong>More | Drilldowns</strong> option</p> 
-     <p>Select <strong>Add</strong> and:</p> 
-     <ul> 
-      <li>Pick the Drill Down report from the list</li> 
-      <li>Specify the link column title (header) and link text </li> 
-      <li>Select which report format will be used to display the Drill Down Report results. Using the <strong>All</strong> option will enable the user to select the report format.</li> 
-      <li>Set if the result of the drill down report should be opened in a new window</li> 
-     </ul> 
-     <p>When running the Main Report, a new column will appear on the right:</p> 
-     <p>Click on it and the drill down report will be executed - the <code>#region#</code> parameter will match with the first column value</p> 
+     <p>On the Main report, select the <strong>More | Drilldowns</strong> option and select <strong>Add</strong> to create the Drilldown definition.</p> 
+     <p>When running the Main Report, a new column will appear on the right. Click on it and the drill down report will be executed - the <code>#region#</code> parameter will match with the first column value.</p> 
+     <h3 id="drilldown-definition">Drilldown definition</h3> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Field</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>An auto-generated ID used to identify the drilldown</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Drilldown Report</strong></td> 
+        <td>The Drill Down report</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Header Text</strong></td> 
+        <td>The column title/header of the drilldown link column</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Link Text</strong></td> 
+        <td>The text of the drilldown link</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Report Format</strong></td> 
+        <td>The report format that will be used to display the Drill Down Report results</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Open In New Window</strong></td> 
+        <td>Whether the result of the drill down report should be opened in a new window</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Allow Select Parameters</strong></td> 
+        <td>Whether the user will be provided with the parameters box to select/change parameters after the drill down report has run and possibly re-run the drill down report with the newly selected parameters.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <h2 id="using-the-main-reports-parameters">Using the main report's parameters</h2> 
      <p>In addition to using the main report's column values, a drill down report can also use the main report's parameter values. If in our example above the Main Report allowed the user to select a city, e.g.</p> 
      <div class="codehilite"> 
@@ -4971,7 +5050,7 @@ WHERE REGION = #region#
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="jxls-reports">Jxls Reports</h1> 
-     <p>ART uses the <a class="" href="http://jxls.sourceforge.net/">Jxls</a> library to provide support for reports based on pre-formatted MS Excel spreadsheets. For details on the syntax of these Jxls templates, see the documentation available on the Jxls website. Generally, you'll follow the following steps to create a Jxls report.</p> 
+     <p>ART uses the <a class="" href="http://jxls.sourceforge.net/" rel="nofollow">Jxls</a> library to provide support for reports based on pre-formatted MS Excel spreadsheets. For details on the syntax of these Jxls templates, see the documentation available on the Jxls website. Generally, you'll follow the following steps to create a Jxls report.</p> 
      <ul> 
       <li>Create an Excel file (either xls or xlsx) with any text, formulas and formatting that will be required in the final report. This is the Jxls template.</li> 
       <li>Insert Jxls syntax to define where the raw data should go</li> 
@@ -5013,7 +5092,7 @@ WHERE REGION = #region#
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="jpivot-reports">JPivot Reports</h1> 
-     <p>There are 3 report types that use the <a class="" href="http://jpivot.sourceforge.net/">JPivot</a> library to provide OLAP functionality.</p> 
+     <p>There are 3 report types that use the <a class="" href="http://jpivot.sourceforge.net/" rel="nofollow">JPivot</a> library to provide OLAP functionality.</p> 
      <h2 id="mondrian">Mondrian</h2> 
      <p>This report type uses ART's internal <a class="" href="http://mondrian.pentaho.com/" rel="nofollow">mondrian</a> engine to run OLAP queries. To use it, do the following.</p> 
      <h3 id="create-the-schema-xml-file">Create the schema xml file</h3> 
@@ -5416,7 +5495,7 @@ WHERE {#!saleTypes#}
      <h2 id="archives">Archives</h2> 
      <p>For publish and conditional publish jobs, you can specify that a certain number of job runs should be archived i.e. files generated from past runs should be available for viewing. This is done by setting the <strong>Number of Runs to Archive</strong> field when defining the job, and archived files are available from the <strong>Archives</strong> menu.</p> 
      <h2 id="saved-schedules">Saved Schedules</h2> 
-     <p>If a schedule is used frequently, it can be saved such that you don't need to enter all the details each time you create a job. To reuse a schedule, select it from the <strong>Schedules</strong> option and click on the <strong>Get</strong> button. The schedule details will be retrieved and filled in the appropriate job schedule fields. Administrators can create, modify or delete schedules using the <strong>Configure | Schedules</strong> menu.</p> 
+     <p>If a schedule is used frequently, it can be saved such that you don't need to enter all the details each time you create a job. To reuse a schedule, select it from the <strong>Schedules</strong> field. The schedule details will be retrieved and filled in the appropriate job schedule fields. Administrators can create, modify or delete schedules using the <strong>Configure | Schedules</strong> menu.</p> 
      <h2 id="shared-jobs">Shared Jobs</h2> 
      <p>By default, only the owner of a job has access to its output, particularly for published jobs. Shared jobs allow the output of a job to be shared with other users. To share a job's output, enable the <strong>Allow Sharing</strong> field and select the users or user groups with whom the output will be shared using the <strong>Configure | Access Rights</strong> menu. These users will be able to access the job's output from the Jobs menu.</p> 
      <h3 id="split-jobs">Split Jobs</h3> 
@@ -5424,12 +5503,12 @@ WHERE {#!saleTypes#}
      <h2 id="random-start-times">Random Start Times</h2> 
      <p>You may not care when exactly a job runs, as long as it runs in a certain window of time. If you leave the Hour and Minute fields blank when creating the job, the job will be assigned a random hour between 3-6 and a random minute between 0-59 in which it will run. This may be useful for jobs that your require to run at night. Additionally, you can specify an explicit time range in which the job should run. To do this, in the <strong>Hour</strong> field, define the required start time and end time separated by | e.g. 4|7, 4:30|6, 12:45|13:15. The job will then be assigned a random execution time in this range.</p> 
      <h2 id="quartz-properties">Quartz Properties</h2> 
-     <p>You can modify some aspects of the scheduler e.g. thread count by modifying the <strong>WEB-INF\classes\quartz.properties</strong> file. Documentation of configuration options can be found <a class="" href="http://www.quartz-scheduler.org/documentation/quartz-2.x/configuration/" rel="nofollow">here</a>. In particular, if you use JNDI for the ART Database, you may need to adjust the <strong>quartz.properties</strong> file to use the correct Quartz values for your database. The following are the minimum changes required.</p> 
+     <p>You can modify some aspects of the scheduler e.g. thread count by modifying the <strong>WEB-INF\classes\quartz.properties</strong> file. Documentation of configuration options can be found <a class="" href="http://www.quartz-scheduler.org/documentation/quartz-2.x/configuration/" rel="nofollow">here</a>. The following are example configurations.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
         <th>Database Type</th> 
-        <th>Required Quartz Configuration</th> 
+        <th>Quartz Configuration</th> 
        </tr> 
       </thead> 
       <tbody> 
@@ -5929,7 +6008,7 @@ WHERE {#!saleTypes#}
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="integrated-windows-authentication">Integrated Windows Authentication</h1> 
-     <p>ART uses the spnego library available at <a href="http://spnego.sourceforge.net/">http://spnego.sourceforge.net/</a> to provide Integrated Windows Authentication functionality. These instructions are largely based on the documentation found on that project's website.</p> 
+     <p>ART uses the spnego library available at <a href="http://spnego.sourceforge.net/" rel="nofollow">http://spnego.sourceforge.net/</a> to provide Integrated Windows Authentication functionality. These instructions are largely based on the documentation found on that project's website.</p> 
      <h2 id="prerequisites">Prerequisites</h2> 
      <p>You need to have at least 3 separate machines as follows</p> 
      <ul> 
@@ -6148,260 +6227,6 @@ spnego-server {
    <div> 
     <div class="markdown_content"> 
      <!--NewPage--> 
-     <h1 id="application-logs">Application Logs</h1> 
-     <p>ART uses the <a class="" href="http://logback.qos.ch/index.html" rel="nofollow">Logback</a> library for application logging. By default, application logging is done to standard output and includes logging on errors, warnings and information messages. The location of the logs or the amount of logging generated can be modified by making appropriate configuration changes to the <strong>WEB-INF\classes\logback.xml</strong> file. Changes made to the logging configuration e.g. changing certain logging levels from "info" to "debug" automatically take effect after the configured <strong>scanPeriod</strong>. Scan period values can be specified as milliseconds, seconds, minutes or hours. See <a href="http://logback.qos.ch/manual/configuration.html" rel="nofollow">http://logback.qos.ch/manual/configuration.html</a> for more details.</p> 
-     <p>In addition to being available on the application server's standard output log files, e.g stdout.log or catalina.log on Tomcat, application logs can also be viewed from within ART. This means that you don't need to have access to the application server machine in order to view application logs. </p> 
-     <p>Application logs can be viewed from the <strong>Logs</strong> menu. New logs are added to the bottom and you'll need to refresh the page to view them. Also note that this page doesn't display all the logs ever generated by the application, only the most recent ones.</p> 
-     <h2 id="sql-logging">SQL Logging</h2> 
-     <p>You can set up logging for the sql that is generated when reports are run, e.g. to see the final sql generated, or to see how long queries take to execute. ART uses the <a class="" href="http://log4jdbc.brunorozendo.com/" rel="nofollow">log4jdbc-log4j2</a> library to enable such logging. Take the following steps to configure sql logging.</p> 
-     <ul> 
-      <li>Select the <strong>Configure | Datasources</strong> menu and <strong>Edit</strong> the datasource you're interested in</li> 
-      <li>Select <strong>SQL Logging</strong> in the <code>Database Type</code> field. This will set the JDBC Driver and JDBC fields appropriately for sql logging. Alternatively, you can set the values manually as follows. Set the <code>JDBC Driver</code> field to <code>net.sf.log4jdbc.sql.jdbcapi.DriverSpy</code> and modify the <code>JDBC URL</code> field by prepending <strong>jdbc:log4</strong> to the existing url, e.g. resulting in a url like <code>jdbc:log4jdbc:mysql://localhost/mydb</code></li> 
-      <li><strong>Save</strong> the datasource details</li> 
-      <li> <p>Modify the <strong>WEB-INF\classes\logback.xml</strong> file and add loggers for the items you are interested in e.g.</p> 
-       <div class="codehilite"> 
-        <pre><span></span>&lt;logger name="jdbc.sqltiming" level="info"/&gt;
-</pre> 
-       </div> </li> 
-      <li> <p>The available loggers and what events they log can be found on the log4jdbc-log4j2 project home page, <a href="http://log4jdbc.brunorozendo.com/." rel="nofollow">http://log4jdbc.brunorozendo.com/.</a> ART uses the SLF4J configuration.</p> </li> 
-      <li>That's all. The logging information will now be included in the application logs when queries are run against that datasource.</li> 
-     </ul> 
-    </div> 
-   </div> 
-   <div> 
-    <div class="markdown_content"> 
-     <!--NewPage--> 
-     <h1 id="tomcat-configuration">Tomcat Configuration</h1> 
-     <h2 id="memory-options">Memory options</h2> 
-     <p>If you are using Tomcat as the application server, there are some configuration items you can set to improve performance. This is mainly setting Tomcat to run in server mode and increasing the amount of memory available to Tomcat e.g. so that jobs don't run out of memory.</p> 
-     <h3 id="windows">Windows</h3> 
-     <p>If Tomcat was installed as a service</p> 
-     <ul> 
-      <li>Run the TOMCAT_HOME\bin\tomcat8w.exe (or similar file for your Tomcat version). This may need to be run as administrator.</li> 
-      <li>In the Java tab, in the <strong>Java Virtual Machine</strong> section, set Tomcat to run in server mode by changing the jvm.dll to the one in the JDK e.g. C:\Program Files\Java\jre1.8.0_25\bin\server\jvm.dll</li> 
-      <li>Increase the amount of memory available to Tomcat by setting a value in the <strong>Maximum memory pool</strong> textbox e.g. 1024 (this value shouldn't be very large compared to the total amount of memory available on the machine, otherwise the operating system and other applications may be starved of RAM)</li> 
-     </ul> 
-     <p><strong>Note:</strong></p> 
-     <ul> 
-      <li>The "service user account" configured to start and stop the Tomcat service needs to have appropriate permissions, otherwise you may get errors when accessing ART. In particular, ART requires write access to the <code>ART_HOME\WEB-INF\work</code>, <code>ART_HOME\js-templates</code> and <code>ART_HOME\WEB-INF\thymeleaf</code> directories.</li> 
-     </ul> 
-     <p>If Tomcat is run from a batch file</p> 
-     <ul> 
-      <li> <p>Create a file named <strong>setenv.bat</strong> in the TOMCAT_HOME\bin directory (or edit it if it exists) and set the configuration options in the JAVA_OPTS environment variable e.g.</p> 
-       <div class="codehilite"> 
-        <pre><span></span>set JAVA_OPTS=-server -Xmx1024m
-</pre> 
-       </div> </li> 
-     </ul> 
-     <h3 id="linux">Linux</h3> 
-     <p>Create a file named <strong>setenv.sh</strong> in the TOMCAT_HOME/bin directory (or edit it if it exists) and set the configuration options in the JAVA_OPTS environment variable e.g.</p> 
-     <div class="codehilite"> 
-      <pre><span></span>    export JAVA_OPTS="-server -Xmx512m"
-</pre> 
-     </div> 
-     <p><br></p> 
-     <h2 id="accessing-tomcat-via-apache">Accessing Tomcat via Apache</h2> 
-     <p>You can use the Apache HTTP Server as a front end to your application that resides on Tomcat. This can be done for a number of reasons, including clustering or enabling access to the application from a more familiar url. </p> 
-     <p>There are a number of ways to run Tomcat behind Apache.</p> 
-     <h3 id="using-mod_proxy">Using mod_proxy</h3> 
-     <ul> 
-      <li> <p>Ensure the following lines in your Apache <strong>httpd.conf</strong> file are uncommented</p> 
-       <div class="codehilite"> 
-        <pre><span></span>LoadModule proxy_module modules/mod_proxy.so
-LoadModule proxy_http_module modules/mod_proxy_http.so
-</pre> 
-       </div> </li> 
-      <li> <p>Add an item at the end of the <strong>httpd.conf</strong> file to indicate how ART will be accessed by users and how Apache will communicate with Tomcat e.g</p> 
-       <div class="codehilite"> 
-        <pre><span></span>ProxyPass /art http://localhost:8080/art
-ProxyPassReverse /art http://localhost:8080/art
-</pre> 
-       </div> </li> 
-     </ul> 
-     <p>That's it. Start Apache and Tomcat (the order of starting and stopping doesn't matter), and now you can access ART from the url localhost/art (i.e <code>&lt;apache-server&gt;/art</code>).</p> 
-     <h3 id="using-mod_proxy_ajp">Using mod_proxy_ajp</h3> 
-     <p>If you have Apache 2.2 and above, you can use mod_proxy_ajp</p> 
-     <ul> 
-      <li> <p>Ensure the following lines in your Apache <strong>httpd.conf</strong> file are uncommented</p> 
-       <div class="codehilite"> 
-        <pre><span></span>LoadModule proxy_ajp_module modules/mod_proxy_ajp.so
-LoadModule proxy_module modules/mod_proxy.so
-LoadModule proxy_http_module modules/mod_proxy_http.so
-</pre> 
-       </div> </li> 
-      <li> <p>Ensure you have an AJP connector defined in the <strong>TOMCAT_HOME\conf\server.xml</strong> file e.g.</p> 
-       <div class="codehilite"> 
-        <pre><span></span>&lt;Connector port="8009" protocol="AJP/1.3" redirectPort="8443" /&gt;
-</pre> 
-       </div> </li> 
-      <li> <p>Add an item at the end of the <strong>httpd.conf</strong> file to indicate how ART will be accessed by users and how Apache will communicate with Tomcat e.g</p> 
-       <div class="codehilite"> 
-        <pre><span></span>ProxyPass /art ajp://localhost:8009/art
-ProxyPassReverse /art ajp://localhost:8009/art
-</pre> 
-       </div> </li> 
-      <li> <p>Note that this definition uses the ajp protocol and port 8009, which is the port defined for the AJP connector in Tomcat's server.xml</p> </li> 
-     </ul> 
-     <p>That's it. Start Apache and Tomcat (the order of starting and stopping doesn't matter), and now you can access ART from the url localhost/art (i.e <code>&lt;apache-server&gt;/art</code>).</p> 
-     <h3 id="using-mod_jk">Using mod_jk</h3> 
-     <p>If you need more powerful proxying features, you can download, configure and use the mod_jk connector. This is slightly more involving than the other two methods already mentioned and you can use the instructions available at <a href="http://www3.ntu.edu.sg/home/ehchua/programming/howto/ApachePlusTomcat_HowTo.html" rel="nofollow">http://www3.ntu.edu.sg/home/ehchua/programming/howto/ApachePlusTomcat_HowTo.html</a> to get it working.</p> 
-     <p><strong>Note:</strong></p> 
-     <ul> 
-      <li> <p>For Ubuntu/Debian, instead of using LoadModule to enable the modules, use a2enmod from the command line, e.g.</p> 
-       <div class="codehilite"> 
-        <pre><span></span>a2enmod proxy_ajp
-a2enmod proxy
-a2enmod proxy_http
-</pre> 
-       </div> </li> 
-      <li> <p>Also for Ubuntu/Debian, add the ProxyPass and ProxyPassReverse items to the <strong>apache2.conf</strong> file instead of httpd.conf.</p> </li> 
-     </ul> 
-    </div> 
-   </div> 
-   <div> 
-    <div class="markdown_content"> 
-     <!--NewPage--> 
-     <h1 id="customizing-art">Customizing ART</h1> 
-     <p>You can customize ART to fit your needs. </p> 
-     <h2 id="using-live-files">Using live files</h2> 
-     <p>You can customize or update ART files directly on the application server where ART is deployed. This may be especially useful for minor changes.</p> 
-     <h3 id="setting-up-apache-ant">Setting up Apache Ant</h3> 
-     <p>If you are going to customize the application source code, you may want to setup Apache Ant to make compiling your changes easier. To do this, take the following steps</p> 
-     <ul> 
-      <li>Download the Apache Ant zip package from <a href="http://ant.apache.org/" rel="nofollow">http://ant.apache.org/</a></li> 
-      <li>Extract the zip file to C:\, or other directory of your choice. A new directory will be created e.g. C:\apache-ant-1.8.1</li> 
-      <li>Add the Ant bin directory to the PATH environment variable e.g. <code>C:\apache-ant-1.8.1\bin</code></li> 
-     </ul> 
-     <h3 id="customizing-java-files">Customizing java files</h3> 
-     <p>Java source files are contained in sub directories under the <strong>ART_HOME\WEB-INF\classes\art</strong> directory. To make customizations to these files, take the following steps.</p> 
-     <ul> 
-      <li>Configure Ant as described above</li> 
-      <li>Make changes to the desired .java files</li> 
-      <li>Open a command prompt window and navigate to the <strong>TOMCAT_HOME\webapps\art</strong> directory</li> 
-      <li>Type the command <code>ant compile</code></li> 
-      <li>The modified .java files will be recompiled</li> 
-      <li>Reload the ART application using the Tomcat Application Manager, or restart tomcat </li> 
-      <li>The application will now use the modified source code</li> 
-     </ul> 
-     <h3 id="customizing-jsp-files">Customizing jsp files</h3> 
-     <p>JSP files can be modified and results immediately viewable when the relevant page is refreshed. If you don't see the expected changes when you refresh the page, the page displayed may be a cached copy. You may need to clear the application server cache and the browser cache to ensure the page is refreshed. If using Tomcat, you can clear the tomcat cache by deleting the <strong>TOMCAT_HOME\work\Catalina\localhost\art</strong> directory. If using Firefox, you can clear the browser cache from the History | Clear Recent History menu.</p> 
-     <h3 id="customizing-other-files">Customizing other files</h3> 
-     <p>Other files that affect how ART works can also be modified. Examples include</p> 
-     <ul> 
-      <li><strong>ART_HOME\WEB-INF\classes\quartz.properties</strong> - Change quartz configuration items e.g. number of threads</li> 
-      <li><strong>ART_HOME\WEB-INF\classes\logback.xml</strong> - Change logging level for quartz or ART classes</li> 
-     </ul> 
-     <h3 id="updating-jasperreports">Updating jasperreports</h3> 
-     <p>If you are using a version of Jaspersoft Studio that is different from the jasperreports version contained in ART, you may want to update the jasperreports version contained in ART to match your Jaspersoft Studio version. This may not be necessary, but would be useful if you encounter problems while running reports. Take the following steps to update the jasperreports library and template files.</p> 
-     <ul> 
-      <li>Download the required jasperreports .jar from the jasperreports sourceforge page, <a href="http://sourceforge.net/projects/jasperreports/files/jasperreports/">http://sourceforge.net/projects/jasperreports/files/jasperreports/</a> e.g download the file jasperreports-5.0.1.jar from the JasperReports 5.0.1 folder.</li> 
-      <li>Ensure Ant is set up as described above</li> 
-      <li>Stop Tomcat</li> 
-      <li>Backup the contents of the <strong>ART_HOME\WEB-INF\work\templates</strong> directory, where the jasperreport template files reside</li> 
-      <li>Delete the jasperreports .jar file contained in the <strong>ART_HOME\WEB-INF\lib</strong> directory</li> 
-      <li>Copy the just downloaded jasperreports .jar file to the <strong>ART_HOME\WEB-INF\lib</strong> directory</li> 
-      <li>Open a command prompt window and navigate to the ART_HOME directory</li> 
-      <li>Type the command <code>ant clean-jasperreports</code></li> 
-      <li>Type the command <code>ant compile-jasperreports</code></li> 
-      <li>Restart Tomcat</li> 
-     </ul> 
-     <p>Your reports should now work properly.</p> 
-     <h2 id="using-ant">Using Ant</h2> 
-     <p>If you don't wish to modify the live files, e.g. you want to test the changes on a test server first, you can modify the files in another location and create an application .war file to deploy on your test environment.</p> 
-     <h3 id="using-ant-without-an-ide">Using Ant without an IDE</h3> 
-     <ul> 
-      <li>Ensure Ant is set up as described above</li> 
-      <li>Unzip the <code>PACKAGE_PATH\art.war</code> e.g. unzip to a new directory <code>PACKAGE_PATH\art</code></li> 
-      <li>Using a text editor, make modifications to the required files</li> 
-      <li>Open a command prompt window and navigate to the <code>PACKAGE_PATH\art</code> directory</li> 
-      <li>Type the command <code>ant clean compile war</code></li> 
-      <li>A new file named art.war will be created in the <code>PACKAGE_PATH\art</code> directory. Deploy this file to your desired application server.</li> 
-     </ul> 
-     <h3 id="using-ant-with-netbeans">Using Ant with NetBeans</h3> 
-     <p>Instead of using a text editor to make changes and Ant to compile and package the changes, you can use an IDE to do this. The following are sample steps using NetBeans 7.2.1.</p> 
-     <ul> 
-      <li>Unzip the <code>PACKAGE_PATH\art.war</code> file e.g. unzip to a new directory <code>PACKAGE_PATH\art</code>. You can unzip the war file the same way as any zip file e.g. using 7zip.</li> 
-      <li>Create a directory to hold NetBeans project files e.g. <code>C:\MyNetBeansProjects\art</code></li> 
-      <li>Open NetBeans</li> 
-      <li>Select the <strong>File | New Project</strong> menu</li> 
-      <li>Select the <strong>Java Web</strong> category and <strong>Web Application with Existing Sources</strong> project and click on the <strong>Next</strong> button</li> 
-      <li>For the <strong>Location</strong> field, select the <code>PACKAGE_PATH\art</code> directory. For the Project Folder field, select the directory you created for this e.g. <code>C:\MyNetBeansProjects\art</code>. Click on the <strong>Next</strong> button.</li> 
-      <li>Select the Server to use e.g. Apache Tomcat and Java EE version e.g. Java EE 7 Web. Click on the <strong>Next</strong> button.</li> 
-      <li>The Existing Sources and Libaries dialog should be pre-populated correctly with the appropriate paths. Click on the <strong>Finish</strong> button. If prompted, choose to delete existing .class files.</li> 
-      <li>Make changes to the files as appropriate</li> 
-      <li>To test the changes, use the Run Project icon on the menu bar, or right click on the project in the Projects explorer and select Run.</li> 
-      <li>To debug the code, set breakpoints as appropriate by clicking on the edge of the editor at the desired line of code and use the Debug Project icon on the menu bar or right click on the project and select Debug. If the debug process doesn't start with NetBeans indicating that it is waiting for tomcat to stop, open Task Manager and kill the java.exe process.</li> 
-      <li>To generate a war file to deploy, right click on the project and select Clean and Build. The generated art.war file will be located in the <code>C:\MyNetBeansProjects\art\dist</code> directory. Deploy this file to your desired application server</li> 
-     </ul> 
-     <h2 id="using-maven">Using Maven</h2> 
-     <p>You can take the following steps to modify ART source code, using Apache Maven as the build tool. ART source files with a maven structure will be found in the <code>PACKAGE_PATH\src</code> directory.</p> 
-     <ul> 
-      <li>Install Maven</li> 
-      <li>(Optional) Install a maven repository manager e.g. <a class="" href="http://www.sonatype.org/nexus/" rel="nofollow">Sonatype Nexus</a>. A repository manager is optional but greatly increases productivity.</li> 
-     </ul> 
-     <h3 id="using-maven-without-an-ide">Using Maven without an IDE</h3> 
-     <ul> 
-      <li>Using a text editor, make modifications to the required files</li> 
-      <li>Open a command prompt window and navigate to the <code>PACKAGE_PATH\src\art-parent</code> directory</li> 
-      <li>Type the command <code>mvn clean package</code></li> 
-      <li>A new file named art.war will be created in the <code>PACKAGE_PATH\src\art-parent\art\target</code> directory. Deploy this file to your desired application server.</li> 
-     </ul> 
-     <h3 id="using-maven-with-netbeans">Using Maven with NetBeans</h3> 
-     <p>The following are sample steps using NetBeans 7.2.1.</p> 
-     <ul> 
-      <li>Open NetBeans</li> 
-      <li>Select the <strong>File | Open Project</strong> menu</li> 
-      <li>Select the <code>PACKAGE_PATH\src\art-parent</code> directory in the left hand panel, and click on the <strong>Open Required Projects</strong> box on the right hand panel. Click on the <strong>Open Project</strong> button.</li> 
-      <li>Make changes to the files as appropriate</li> 
-      <li>To test the changes, right click on the art project in the Projects explorer and select Run. Select the server on which to deploy the application and click on OK.</li> 
-      <li>To generate a war file to deploy, right click on the Parent project and select Clean and Build. The generated art.war file will be located in the <code>PACKAGE_PATH\src\art-parent\art\target</code> directory. Deploy this file to your desired application server</li> 
-     </ul> 
-     <h3 id="using-maven-with-eclipse">Using Maven with Eclipse</h3> 
-     <p>The following are sample steps using Eclipse Juno (4.2) SR2.</p> 
-     <ul> 
-      <li>Download the Eclipse IDE for Java EE developers package</li> 
-      <li>Unzip the package to your desired location e.g. C:\, to generate a C:\eclipse directory. Run the C:\eclipse\eclipse.exe file.</li> 
-      <li>Ensure you have an internet connection</li> 
-      <li>Select the <strong>Help | Eclipse Marketplace</strong> menu</li> 
-      <li>On the Search tab, in the Find field, type maven and hit enter</li> 
-      <li>Find the "Maven Integration for Eclipse" plugin (m2e by eclipse.org) and click on the Install button</li> 
-      <li>Once the plugin installs, go back to the Eclipse Marketplace and again type maven in the Find field and hit enter</li> 
-      <li>Find the "Maven Integration for Eclipse WTP" plugin (m2e-wtp by eclipse.org) and click on the Install button.</li> 
-      <li>Create a directory to hold eclipse workspace files e.g. <code>C:\MyEclipseWorkspaces\art</code></li> 
-      <li>In Eclipse, select the <strong>File | Switch Workspace | Other</strong> menu</li> 
-      <li>Select the workspace folder you created e.g. <code>C:\MyEclipseWorkspaces\art</code> and click on OK. Wait for Eclipse to restart</li> 
-      <li>Select the <strong>File | Import</strong> menu</li> 
-      <li>Open the Maven group, select the <strong>Existing Maven Projects</strong> option and click on Next.</li> 
-      <li>Set the <strong>Root Directory</strong> field to the <code>PACKAGE_PATH\src\art-parent</code> directory. This should list the art-parent project, with the artdbcp, artmail and art projects beneath it. If the projects aren't retrieved, try to hit the enter key after typing the path in the root directory field. Ensure all the projects are selected and click on Next.</li> 
-      <li>Click on Finish in the final screen.</li> 
-      <li>Click on the Restore icon in the left most panel to have the project windows displayed on the screen and close the welcome page.</li> 
-      <li>Make changes to the files as appropriate</li> 
-      <li>Ensure you have a JDK installed</li> 
-      <li>Select the <strong>Window | Preferences</strong> menu. Expand the <strong>Java</strong> group and select the <strong>Installed JREs</strong> option. In the right hand panel, select the default JRE and click on the Edit button. Set the <strong>JRE home</strong> field to a JDK folder e.g. <code>C:\Program Files\Java\jdk1.8.0_20</code>. Instead of editing the default JRE you can also use the Add button to add a new one and then check it as the default workspace JRE.</li> 
-      <li>Right click on the art-parent project and select the <strong>Run As | Run Configurations</strong> menu. Select the <strong>Maven Build</strong> option, and then click on the <strong>New launch configuration</strong> icon at the top of the list. Give a <strong>Name</strong> to the configuration e.g. package and set the <strong>Base directory</strong> to the <code>PACKAGE_PATH\src\art-parent</code> directory. In the <strong>Goals</strong> field, type <code>clean package</code>. In the JRE tab, ensure the JRE selected is the one defined earlier. Click on the Apply button. To generate a war file immediately, click on the Run button.</li> 
-      <li>To test changes, set up a server. See <a href="https://github.com/OneBusAway/onebusaway/wiki/Setting-Up-a-Tomcat-Server-in-Eclipse" rel="nofollow">https://github.com/OneBusAway/onebusaway/wiki/Setting-Up-a-Tomcat-Server-in-Eclipse</a> . Convert the art webapp project to a Dymanic Web Module and run the application. See <a href="https://wiki.base22.com/display/btg/How+to+create+a+Maven+web+app+and+deploy+to+Tomcat+-+fast" rel="nofollow">https://wiki.base22.com/display/btg/How+to+create+a+Maven+web+app+and+deploy+to+Tomcat+-+fast</a></li> 
-      <li>To generate a war file to deploy, click on the drop down on the <strong>Run As</strong> icon in the menu bar, and select the configuration you created e.g. package. The generated art.war file will be located in the <code>PACKAGE_PATH\src\art-parent\art\target</code> directory. Deploy this file to your desired application server</li> 
-     </ul> 
-     <h2 id="translating-art">Translating ART</h2> 
-     <p>You can translate ART so that the user interface is displayed in your own language. Follow the following steps to translate ART.</p> 
-     <ul> 
-      <li>Download the latest ART package, unzip it and unzip the <strong>art.war</strong> file using any zip/unzip software. Get the <strong>ArtMessages.properties</strong> file from the <strong>ART_HOME\WEB-INF\i18n</strong> directory and and make a copy of it, naming your new file in the format <strong>ArtMessages_xx.properties</strong>, where xx is the ISO 639-1 language code for your language. A List of these language codes can be found <a class="" href="http://www.mathguide.de/info/tools/languagecode.html" rel="nofollow">here</a>. An example would be ArtMessages_pt.properties for Portuguese. If your language is written differently in different countries you can add the 2 letter country specifier to the file name so that you have a file name like ArtMessages_pt_BR.properties for Brazilian Portuguese. You can find a list of country codes <a class="" href="http://www.immigration-usa.com/country_digraphs.html" rel="nofollow">here</a>.</li> 
-      <li>Change all the text in your new properties file after the = signs to your language </li> 
-      <li> <p>If your language uses a non ISO-8859 character set (e.g. chinese, arabic, russian etc) name the file ArtMessages_xx-UTF8.properties and then decode it to an ISO-8859 character set with UTF-8 escapes using the <strong>native2ascii</strong> tool that is available with your Java installation. An example command is as below.</p> 
-       <div class="codehilite"> 
-        <pre><span></span>native2ascii -encoding utf-8 ArtMessages_xx-UTF8.properties ArtMessages_xx.properties
-</pre> 
-       </div> </li> 
-      <li> <p>Once you have your translated properties file in the i18n folder, you can restart the application server to make the new translation available to the application, or wait for 1 hour after which the messages are refreshed.</p> </li> 
-      <li>Now you can log in to the application and include the <strong>lang=xx</strong> parameter in browser url to activate the new language e.g. <code>http://localhost:8080/art/reports?lang=de</code></li> 
-      <li>If you would like the new language to be listed for selection within the application e.g. on the login page, add the language code and the language name to the <strong>ART_HOME\WEB-INF\i18n\languages.properties</strong> file, save the file and restart the application server.</li> 
-      <li>If in addition you would like this new translation to be included in future ART versions, email the properties file to <strong>tanyona</strong> (at) <strong>users.sf.net</strong> or create a new post on the <a class="" href="https://sourceforge.net/p/art/discussion/352129/">Discussion forum</a> and attach the file there.</li> 
-     </ul> 
-    </div> 
-   </div> 
-   <div> 
-    <div class="markdown_content"> 
-     <!--NewPage--> 
      <h1 id="api">API</h1> 
      <p>A REST API is provided to facilitate interacting with some aspects of ART in a programmatic fashion, as opposed to using the browser.</p> 
      <h2 id="base-url">Base URL</h2> 
@@ -6499,7 +6324,7 @@ a2enmod proxy_http
        </tr> 
        <tr> 
         <td><strong>UNAUTHORIZED</strong></td> 
-        <td>The operation could not be perfomed because authorization is not available. This may mean that the user whose credentials have been supplied does not exist, is disabled or doesn't have an access level of <strong>Standard Admin</strong> and above. It may also mean that token based authentication is not configured i.e. the <strong>jwtSecret</strong> field in the <strong>WEB-INF\art-custom-settings.json</strong> file has not been set.</td> 
+        <td>The operation could not be perfomed because authorization is not available. This may mean that the user whose credentials have been supplied does not exist, is disabled or doesn't have the <strong>use_api</strong> permission. It may also mean that token based authentication is not configured i.e. the <strong>jwtSecret</strong> field in the <strong>WEB-INF\art-custom-settings.json</strong> file has not been set.</td> 
        </tr> 
        <tr> 
         <td><strong>RECORD_NOT_FOUND</strong></td> 
@@ -6545,7 +6370,7 @@ a2enmod proxy_http
     }
 </pre> 
      </div> 
-     <p>In case the <strong>jwtSecret</strong> is not set, or the user provided doesn't exist or is disabled or is not a <strong>Standard Admin</strong> and above, a 401 response like the following would be returned</p> 
+     <p>In case the <strong>jwtSecret</strong> is not set, or the user provided doesn't exist or is disabled or doesn't have the <strong>use_api</strong> permission, a 401 response like the following would be returned</p> 
      <div class="codehilite"> 
       <pre><span></span>    {
         "httpStatus": 401,
@@ -6790,6 +6615,263 @@ a2enmod proxy_http
     }
 </pre> 
      </div> 
+    </div> 
+   </div> 
+   <div> 
+    <div class="markdown_content"> 
+     <!--NewPage--> 
+     <h1 id="application-logs">Application Logs</h1> 
+     <p>ART uses the <a class="" href="http://logback.qos.ch/index.html" rel="nofollow">Logback</a> library for application logging. By default, application logging is done to standard output and includes logging on errors, warnings and information messages. The location of the logs or the amount of logging generated can be modified by making appropriate configuration changes to the <strong>WEB-INF\classes\logback.xml</strong> file. Changes made to the logging configuration e.g. changing certain logging levels from "info" to "debug" automatically take effect after the configured <strong>scanPeriod</strong>. Scan period values can be specified as milliseconds, seconds, minutes or hours. See <a href="http://logback.qos.ch/manual/configuration.html" rel="nofollow">http://logback.qos.ch/manual/configuration.html</a> for more details.</p> 
+     <p>In addition to being available on the application server's standard output log files, e.g stdout.log or catalina.log on Tomcat, application logs can also be viewed from within ART. This means that you don't need to have access to the application server machine in order to view application logs. </p> 
+     <p>Application logs can be viewed from the <strong>View | Logs</strong> menu. New logs are added to the bottom and you'll need to refresh the page to view them. Also note that this page doesn't display all the logs ever generated by the application, only the most recent ones.</p> 
+     <h2 id="sql-logging">SQL Logging</h2> 
+     <p>You can set up logging for the sql that is generated when reports are run, e.g. to see the final sql generated, or to see how long queries take to execute. ART uses the <a class="" href="http://log4jdbc.brunorozendo.com/" rel="nofollow">log4jdbc-log4j2</a> library to enable such logging. Take the following steps to configure sql logging.</p> 
+     <ul> 
+      <li>Select the <strong>Configure | Datasources</strong> menu and <strong>Edit</strong> the datasource you're interested in</li> 
+      <li>Select <strong>SQL Logging</strong> in the <code>Database Type</code> field. This will set the JDBC Driver and JDBC fields appropriately for sql logging. Alternatively, you can set the values manually as follows. Set the <code>JDBC Driver</code> field to <code>net.sf.log4jdbc.sql.jdbcapi.DriverSpy</code> and modify the <code>JDBC URL</code> field by prepending <strong>jdbc:log4</strong> to the existing url, e.g. resulting in a url like <code>jdbc:log4jdbc:mysql://localhost/mydb</code></li> 
+      <li><strong>Save</strong> the datasource details</li> 
+      <li> <p>Modify the <strong>WEB-INF\classes\logback.xml</strong> file and add loggers for the items you are interested in e.g.</p> 
+       <div class="codehilite"> 
+        <pre><span></span>&lt;logger name="jdbc.sqltiming" level="info"/&gt;
+</pre> 
+       </div> </li> 
+      <li> <p>The available loggers and what events they log can be found on the log4jdbc-log4j2 project home page, <a href="http://log4jdbc.brunorozendo.com/." rel="nofollow">http://log4jdbc.brunorozendo.com/.</a> ART uses the SLF4J configuration.</p> </li> 
+      <li>That's all. The logging information will now be included in the application logs when queries are run against that datasource.</li> 
+     </ul> 
+    </div> 
+   </div> 
+   <div> 
+    <div class="markdown_content"> 
+     <!--NewPage--> 
+     <h1 id="tomcat-configuration">Tomcat Configuration</h1> 
+     <h2 id="memory-options">Memory options</h2> 
+     <p>If you are using Tomcat as the application server, there are some configuration items you can set to improve performance. This is mainly setting Tomcat to run in server mode and increasing the amount of memory available to Tomcat e.g. so that jobs don't run out of memory.</p> 
+     <h3 id="windows">Windows</h3> 
+     <p>If Tomcat was installed as a service</p> 
+     <ul> 
+      <li>Run the TOMCAT_HOME\bin\tomcat8w.exe (or similar file for your Tomcat version). This may need to be run as administrator.</li> 
+      <li>In the Java tab, in the <strong>Java Virtual Machine</strong> section, set Tomcat to run in server mode by changing the jvm.dll to the one in the JDK e.g. C:\Program Files\Java\jre1.8.0_25\bin\server\jvm.dll</li> 
+      <li>Increase the amount of memory available to Tomcat by setting a value in the <strong>Maximum memory pool</strong> textbox e.g. 1024 (this value shouldn't be very large compared to the total amount of memory available on the machine, otherwise the operating system and other applications may be starved of RAM)</li> 
+     </ul> 
+     <p><strong>Note:</strong></p> 
+     <ul> 
+      <li>The "service user account" configured to start and stop the Tomcat service needs to have appropriate permissions, otherwise you may get errors when accessing ART. In particular, ART requires write access to the <code>ART_HOME\WEB-INF\work</code>, <code>ART_HOME\js-templates</code> and <code>ART_HOME\WEB-INF\thymeleaf</code> directories.</li> 
+     </ul> 
+     <p>If Tomcat is run from a batch file</p> 
+     <ul> 
+      <li> <p>Create a file named <strong>setenv.bat</strong> in the TOMCAT_HOME\bin directory (or edit it if it exists) and set the configuration options in the JAVA_OPTS environment variable e.g.</p> 
+       <div class="codehilite"> 
+        <pre><span></span>set JAVA_OPTS=-server -Xmx1024m
+</pre> 
+       </div> </li> 
+     </ul> 
+     <h3 id="linux">Linux</h3> 
+     <p>Create a file named <strong>setenv.sh</strong> in the TOMCAT_HOME/bin directory (or edit it if it exists) and set the configuration options in the JAVA_OPTS environment variable e.g.</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    export JAVA_OPTS="-server -Xmx512m"
+</pre> 
+     </div> 
+     <p><br></p> 
+     <h2 id="accessing-tomcat-via-apache">Accessing Tomcat via Apache</h2> 
+     <p>You can use the Apache HTTP Server as a front end to your application that resides on Tomcat. This can be done for a number of reasons, including clustering or enabling access to the application from a more familiar url. </p> 
+     <p>There are a number of ways to run Tomcat behind Apache.</p> 
+     <h3 id="using-mod_proxy">Using mod_proxy</h3> 
+     <ul> 
+      <li> <p>Ensure the following lines in your Apache <strong>httpd.conf</strong> file are uncommented</p> 
+       <div class="codehilite"> 
+        <pre><span></span>LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+</pre> 
+       </div> </li> 
+      <li> <p>Add an item at the end of the <strong>httpd.conf</strong> file to indicate how ART will be accessed by users and how Apache will communicate with Tomcat e.g</p> 
+       <div class="codehilite"> 
+        <pre><span></span>ProxyPass /art http://localhost:8080/art
+ProxyPassReverse /art http://localhost:8080/art
+</pre> 
+       </div> </li> 
+     </ul> 
+     <p>That's it. Start Apache and Tomcat (the order of starting and stopping doesn't matter), and now you can access ART from the url localhost/art (i.e <code>&lt;apache-server&gt;/art</code>).</p> 
+     <h3 id="using-mod_proxy_ajp">Using mod_proxy_ajp</h3> 
+     <p>If you have Apache 2.2 and above, you can use mod_proxy_ajp</p> 
+     <ul> 
+      <li> <p>Ensure the following lines in your Apache <strong>httpd.conf</strong> file are uncommented</p> 
+       <div class="codehilite"> 
+        <pre><span></span>LoadModule proxy_ajp_module modules/mod_proxy_ajp.so
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+</pre> 
+       </div> </li> 
+      <li> <p>Ensure you have an AJP connector defined in the <strong>TOMCAT_HOME\conf\server.xml</strong> file e.g.</p> 
+       <div class="codehilite"> 
+        <pre><span></span>&lt;Connector port="8009" protocol="AJP/1.3" redirectPort="8443" /&gt;
+</pre> 
+       </div> </li> 
+      <li> <p>Add an item at the end of the <strong>httpd.conf</strong> file to indicate how ART will be accessed by users and how Apache will communicate with Tomcat e.g</p> 
+       <div class="codehilite"> 
+        <pre><span></span>ProxyPass /art ajp://localhost:8009/art
+ProxyPassReverse /art ajp://localhost:8009/art
+</pre> 
+       </div> </li> 
+      <li> <p>Note that this definition uses the ajp protocol and port 8009, which is the port defined for the AJP connector in Tomcat's server.xml</p> </li> 
+     </ul> 
+     <p>That's it. Start Apache and Tomcat (the order of starting and stopping doesn't matter), and now you can access ART from the url localhost/art (i.e <code>&lt;apache-server&gt;/art</code>).</p> 
+     <h3 id="using-mod_jk">Using mod_jk</h3> 
+     <p>If you need more powerful proxying features, you can download, configure and use the mod_jk connector. This is slightly more involving than the other two methods already mentioned and you can use the instructions available at <a href="http://www3.ntu.edu.sg/home/ehchua/programming/howto/ApachePlusTomcat_HowTo.html" rel="nofollow">http://www3.ntu.edu.sg/home/ehchua/programming/howto/ApachePlusTomcat_HowTo.html</a> to get it working.</p> 
+     <p><strong>Note:</strong></p> 
+     <ul> 
+      <li> <p>For Ubuntu/Debian, instead of using LoadModule to enable the modules, use a2enmod from the command line, e.g.</p> 
+       <div class="codehilite"> 
+        <pre><span></span>a2enmod proxy_ajp
+a2enmod proxy
+a2enmod proxy_http
+</pre> 
+       </div> </li> 
+      <li> <p>Also for Ubuntu/Debian, add the ProxyPass and ProxyPassReverse items to the <strong>apache2.conf</strong> file instead of httpd.conf.</p> </li> 
+     </ul> 
+    </div> 
+   </div> 
+   <div> 
+    <div class="markdown_content"> 
+     <!--NewPage--> 
+     <h1 id="customizing-art">Customizing ART</h1> 
+     <p>You can customize ART to fit your needs. </p> 
+     <h2 id="using-live-files">Using live files</h2> 
+     <p>You can customize or update ART files directly on the application server where ART is deployed. This may be especially useful for minor changes.</p> 
+     <h3 id="setting-up-apache-ant">Setting up Apache Ant</h3> 
+     <p>If you are going to customize the application source code, you may want to setup Apache Ant to make compiling your changes easier. To do this, take the following steps</p> 
+     <ul> 
+      <li>Download the Apache Ant zip package from <a href="http://ant.apache.org/" rel="nofollow">http://ant.apache.org/</a></li> 
+      <li>Extract the zip file to C:\, or other directory of your choice. A new directory will be created e.g. C:\apache-ant-1.8.1</li> 
+      <li>Add the Ant bin directory to the PATH environment variable e.g. <code>C:\apache-ant-1.8.1\bin</code></li> 
+     </ul> 
+     <h3 id="customizing-java-files">Customizing java files</h3> 
+     <p>Java source files are contained in sub directories under the <strong>ART_HOME\WEB-INF\classes\art</strong> directory. To make customizations to these files, take the following steps.</p> 
+     <ul> 
+      <li>Configure Ant as described above</li> 
+      <li>Make changes to the desired .java files</li> 
+      <li>Open a command prompt window and navigate to the <strong>TOMCAT_HOME\webapps\art</strong> directory</li> 
+      <li>Type the command <code>ant compile</code></li> 
+      <li>The modified .java files will be recompiled</li> 
+      <li>Reload the ART application using the Tomcat Application Manager, or restart tomcat </li> 
+      <li>The application will now use the modified source code</li> 
+     </ul> 
+     <h3 id="customizing-jsp-files">Customizing jsp files</h3> 
+     <p>JSP files can be modified and results immediately viewable when the relevant page is refreshed. If you don't see the expected changes when you refresh the page, the page displayed may be a cached copy. You may need to clear the application server cache and the browser cache to ensure the page is refreshed. If using Tomcat, you can clear the tomcat cache by deleting the <strong>TOMCAT_HOME\work\Catalina\localhost\art</strong> directory. If using Firefox, you can clear the browser cache from the History | Clear Recent History menu.</p> 
+     <h3 id="customizing-other-files">Customizing other files</h3> 
+     <p>Other files that affect how ART works can also be modified. Examples include</p> 
+     <ul> 
+      <li><strong>ART_HOME\WEB-INF\classes\quartz.properties</strong> - Change quartz configuration items e.g. number of threads</li> 
+      <li><strong>ART_HOME\WEB-INF\classes\logback.xml</strong> - Change logging level for quartz or ART classes</li> 
+     </ul> 
+     <h3 id="updating-jasperreports">Updating jasperreports</h3> 
+     <p>If you are using a version of Jaspersoft Studio that is different from the jasperreports version contained in ART, you may want to update the jasperreports version contained in ART to match your Jaspersoft Studio version. This may not be necessary, but would be useful if you encounter problems while running reports. Take the following steps to update the jasperreports library and template files.</p> 
+     <ul> 
+      <li>Download the required jasperreports .jar from the jasperreports sourceforge page, <a href="http://sourceforge.net/projects/jasperreports/files/jasperreports/">http://sourceforge.net/projects/jasperreports/files/jasperreports/</a> e.g download the file jasperreports-5.0.1.jar from the JasperReports 5.0.1 folder.</li> 
+      <li>Ensure Ant is set up as described above</li> 
+      <li>Stop Tomcat</li> 
+      <li>Backup the contents of the <strong>ART_HOME\WEB-INF\work\templates</strong> directory, where the jasperreport template files reside</li> 
+      <li>Delete the jasperreports .jar file contained in the <strong>ART_HOME\WEB-INF\lib</strong> directory</li> 
+      <li>Copy the just downloaded jasperreports .jar file to the <strong>ART_HOME\WEB-INF\lib</strong> directory</li> 
+      <li>Open a command prompt window and navigate to the ART_HOME directory</li> 
+      <li>Type the command <code>ant clean-jasperreports</code></li> 
+      <li>Type the command <code>ant compile-jasperreports</code></li> 
+      <li>Restart Tomcat</li> 
+     </ul> 
+     <p>Your reports should now work properly.</p> 
+     <h2 id="using-ant">Using Ant</h2> 
+     <p>If you don't wish to modify the live files, e.g. you want to test the changes on a test server first, you can modify the files in another location and create an application .war file to deploy on your test environment.</p> 
+     <h3 id="using-ant-without-an-ide">Using Ant without an IDE</h3> 
+     <ul> 
+      <li>Ensure Ant is set up as described above</li> 
+      <li>Unzip the <code>PACKAGE_PATH\art.war</code> e.g. unzip to a new directory <code>PACKAGE_PATH\art</code></li> 
+      <li>Using a text editor, make modifications to the required files</li> 
+      <li>Open a command prompt window and navigate to the <code>PACKAGE_PATH\art</code> directory</li> 
+      <li>Type the command <code>ant clean compile war</code></li> 
+      <li>A new file named art.war will be created in the <code>PACKAGE_PATH\art</code> directory. Deploy this file to your desired application server.</li> 
+     </ul> 
+     <h3 id="using-ant-with-netbeans">Using Ant with NetBeans</h3> 
+     <p>Instead of using a text editor to make changes and Ant to compile and package the changes, you can use an IDE to do this. The following are sample steps using NetBeans 7.2.1.</p> 
+     <ul> 
+      <li>Unzip the <code>PACKAGE_PATH\art.war</code> file e.g. unzip to a new directory <code>PACKAGE_PATH\art</code>. You can unzip the war file the same way as any zip file e.g. using 7zip.</li> 
+      <li>Create a directory to hold NetBeans project files e.g. <code>C:\MyNetBeansProjects\art</code></li> 
+      <li>Open NetBeans</li> 
+      <li>Select the <strong>File | New Project</strong> menu</li> 
+      <li>Select the <strong>Java Web</strong> category and <strong>Web Application with Existing Sources</strong> project and click on the <strong>Next</strong> button</li> 
+      <li>For the <strong>Location</strong> field, select the <code>PACKAGE_PATH\art</code> directory. For the Project Folder field, select the directory you created for this e.g. <code>C:\MyNetBeansProjects\art</code>. Click on the <strong>Next</strong> button.</li> 
+      <li>Select the Server to use e.g. Apache Tomcat and Java EE version e.g. Java EE 7 Web. Click on the <strong>Next</strong> button.</li> 
+      <li>The Existing Sources and Libaries dialog should be pre-populated correctly with the appropriate paths. Click on the <strong>Finish</strong> button. If prompted, choose to delete existing .class files.</li> 
+      <li>Make changes to the files as appropriate</li> 
+      <li>To test the changes, use the Run Project icon on the menu bar, or right click on the project in the Projects explorer and select Run.</li> 
+      <li>To debug the code, set breakpoints as appropriate by clicking on the edge of the editor at the desired line of code and use the Debug Project icon on the menu bar or right click on the project and select Debug. If the debug process doesn't start with NetBeans indicating that it is waiting for tomcat to stop, open Task Manager and kill the java.exe process.</li> 
+      <li>To generate a war file to deploy, right click on the project and select Clean and Build. The generated art.war file will be located in the <code>C:\MyNetBeansProjects\art\dist</code> directory. Deploy this file to your desired application server</li> 
+     </ul> 
+     <h2 id="using-maven">Using Maven</h2> 
+     <p>You can take the following steps to modify ART source code, using Apache Maven as the build tool. ART source files with a maven structure will be found in the <code>PACKAGE_PATH\src</code> directory.</p> 
+     <ul> 
+      <li>Install Maven</li> 
+      <li>(Optional) Install a maven repository manager e.g. <a class="" href="http://www.sonatype.org/nexus/" rel="nofollow">Sonatype Nexus</a>. A repository manager is optional but greatly increases productivity.</li> 
+     </ul> 
+     <h3 id="using-maven-without-an-ide">Using Maven without an IDE</h3> 
+     <ul> 
+      <li>Using a text editor, make modifications to the required files</li> 
+      <li>Open a command prompt window and navigate to the <code>PACKAGE_PATH\src\art-parent</code> directory</li> 
+      <li>Type the command <code>mvn clean package</code></li> 
+      <li>A new file named art.war will be created in the <code>PACKAGE_PATH\src\art-parent\art\target</code> directory. Deploy this file to your desired application server.</li> 
+     </ul> 
+     <h3 id="using-maven-with-netbeans">Using Maven with NetBeans</h3> 
+     <p>The following are sample steps using NetBeans 7.2.1.</p> 
+     <ul> 
+      <li>Open NetBeans</li> 
+      <li>Select the <strong>File | Open Project</strong> menu</li> 
+      <li>Select the <code>PACKAGE_PATH\src\art-parent</code> directory in the left hand panel, and click on the <strong>Open Required Projects</strong> box on the right hand panel. Click on the <strong>Open Project</strong> button.</li> 
+      <li>Make changes to the files as appropriate</li> 
+      <li>To test the changes, right click on the art project in the Projects explorer and select Run. Select the server on which to deploy the application and click on OK.</li> 
+      <li>To generate a war file to deploy, right click on the Parent project and select Clean and Build. The generated art.war file will be located in the <code>PACKAGE_PATH\src\art-parent\art\target</code> directory. Deploy this file to your desired application server</li> 
+     </ul> 
+     <h3 id="using-maven-with-eclipse">Using Maven with Eclipse</h3> 
+     <p>The following are sample steps using Eclipse Juno (4.2) SR2.</p> 
+     <ul> 
+      <li>Download the Eclipse IDE for Java EE developers package</li> 
+      <li>Unzip the package to your desired location e.g. C:\, to generate a C:\eclipse directory. Run the C:\eclipse\eclipse.exe file.</li> 
+      <li>Ensure you have an internet connection</li> 
+      <li>Select the <strong>Help | Eclipse Marketplace</strong> menu</li> 
+      <li>On the Search tab, in the Find field, type maven and hit enter</li> 
+      <li>Find the "Maven Integration for Eclipse" plugin (m2e by eclipse.org) and click on the Install button</li> 
+      <li>Once the plugin installs, go back to the Eclipse Marketplace and again type maven in the Find field and hit enter</li> 
+      <li>Find the "Maven Integration for Eclipse WTP" plugin (m2e-wtp by eclipse.org) and click on the Install button.</li> 
+      <li>Create a directory to hold eclipse workspace files e.g. <code>C:\MyEclipseWorkspaces\art</code></li> 
+      <li>In Eclipse, select the <strong>File | Switch Workspace | Other</strong> menu</li> 
+      <li>Select the workspace folder you created e.g. <code>C:\MyEclipseWorkspaces\art</code> and click on OK. Wait for Eclipse to restart</li> 
+      <li>Select the <strong>File | Import</strong> menu</li> 
+      <li>Open the Maven group, select the <strong>Existing Maven Projects</strong> option and click on Next.</li> 
+      <li>Set the <strong>Root Directory</strong> field to the <code>PACKAGE_PATH\src\art-parent</code> directory. This should list the art-parent project, with the artdbcp, artmail and art projects beneath it. If the projects aren't retrieved, try to hit the enter key after typing the path in the root directory field. Ensure all the projects are selected and click on Next.</li> 
+      <li>Click on Finish in the final screen.</li> 
+      <li>Click on the Restore icon in the left most panel to have the project windows displayed on the screen and close the welcome page.</li> 
+      <li>Make changes to the files as appropriate</li> 
+      <li>Ensure you have a JDK installed</li> 
+      <li>Select the <strong>Window | Preferences</strong> menu. Expand the <strong>Java</strong> group and select the <strong>Installed JREs</strong> option. In the right hand panel, select the default JRE and click on the Edit button. Set the <strong>JRE home</strong> field to a JDK folder e.g. <code>C:\Program Files\Java\jdk1.8.0_20</code>. Instead of editing the default JRE you can also use the Add button to add a new one and then check it as the default workspace JRE.</li> 
+      <li>Right click on the art-parent project and select the <strong>Run As | Run Configurations</strong> menu. Select the <strong>Maven Build</strong> option, and then click on the <strong>New launch configuration</strong> icon at the top of the list. Give a <strong>Name</strong> to the configuration e.g. package and set the <strong>Base directory</strong> to the <code>PACKAGE_PATH\src\art-parent</code> directory. In the <strong>Goals</strong> field, type <code>clean package</code>. In the JRE tab, ensure the JRE selected is the one defined earlier. Click on the Apply button. To generate a war file immediately, click on the Run button.</li> 
+      <li>To test changes, set up a server. See <a href="https://github.com/OneBusAway/onebusaway/wiki/Setting-Up-a-Tomcat-Server-in-Eclipse" rel="nofollow">https://github.com/OneBusAway/onebusaway/wiki/Setting-Up-a-Tomcat-Server-in-Eclipse</a> . Convert the art webapp project to a Dymanic Web Module and run the application. See <a href="https://wiki.base22.com/display/btg/How+to+create+a+Maven+web+app+and+deploy+to+Tomcat+-+fast" rel="nofollow">https://wiki.base22.com/display/btg/How+to+create+a+Maven+web+app+and+deploy+to+Tomcat+-+fast</a></li> 
+      <li>To generate a war file to deploy, click on the drop down on the <strong>Run As</strong> icon in the menu bar, and select the configuration you created e.g. package. The generated art.war file will be located in the <code>PACKAGE_PATH\src\art-parent\art\target</code> directory. Deploy this file to your desired application server</li> 
+     </ul> 
+     <h2 id="translating-art">Translating ART</h2> 
+     <p>You can translate ART so that the user interface is displayed in your own language.</p> 
+     <h3 id="online">Online</h3> 
+     <p>ART has a translation project on the <a class="" href="https://crowdin.com/" rel="nofollow">Crowdin</a> platform. You can create an account on Crowdin and join the ART translation project at the following link. <a href="https://crowdin.com/project/artreporting." rel="nofollow">https://crowdin.com/project/artreporting.</a> You can then translate online.</p> 
+     <h3 id="offline">Offline</h3> 
+     <ul> 
+      <li>Download the latest ART package, unzip it and unzip the <strong>art.war</strong> file using any zip/unzip software. Get the <strong>ArtMessages.properties</strong> file from the <strong>ART_HOME\WEB-INF\i18n</strong> directory and and make a copy of it, naming your new file in the format <strong>ArtMessages_xx.properties</strong>, where xx is the ISO 639-1 language code for your language. A List of these language codes can be found <a class="" href="http://www.mathguide.de/info/tools/languagecode.html" rel="nofollow">here</a>. An example would be ArtMessages_pt.properties for Portuguese. If your language is written differently in different countries you can add the 2 letter country specifier to the file name so that you have a file name like ArtMessages_pt_BR.properties for Brazilian Portuguese. You can find a list of country codes <a class="" href="http://www.immigration-usa.com/country_digraphs.html" rel="nofollow">here</a>.</li> 
+      <li>Change all the text in your new properties file after the = signs to your language </li> 
+      <li> <p>If your language uses a non ISO-8859-1 (Latin-1) character set (e.g. chinese, arabic, russian etc) name the file ArtMessages_xx-UTF8.properties and then decode it to the ISO-8859-1 character set with UTF-8 escapes using the <strong>native2ascii</strong> tool that is available with your Java installation. An example command is as below.</p> 
+       <div class="codehilite"> 
+        <pre><span></span>native2ascii -encoding utf-8 ArtMessages_xx-UTF8.properties ArtMessages_xx.properties
+</pre> 
+       </div> </li> 
+      <li> <p>Once you have your translated properties file in the i18n folder, you can restart the application server to make the new translation available to the application, or wait for 1 hour after which the messages are refreshed.</p> </li> 
+      <li>Now you can log in to the application and include the <strong>lang=xx</strong> parameter in browser url to activate the new language e.g. <code>http://localhost:8080/art/reports?lang=de</code></li> 
+      <li>If you would like the new language to be listed for selection within the application e.g. on the login page, add the language code and the language name to the <strong>ART_HOME\WEB-INF\i18n\languages.properties</strong> file, save the file and restart the application server.</li> 
+      <li>If in addition you would like this new translation to be included in future ART versions, email the properties file to <strong>tanyona</strong> (at) <strong>users.sf.net</strong> or create a new post on the <a class="" href="https://sourceforge.net/p/art/discussion/352129/">Discussion forum</a> and attach the file there.</li> 
+     </ul> 
     </div> 
    </div> 
    <div> 
