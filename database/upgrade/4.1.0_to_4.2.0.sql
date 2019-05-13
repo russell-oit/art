@@ -11,7 +11,7 @@
 
 
 -- update database version
-UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='4.2-snapshot';
+UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='4.2';
 
 -- add use_api permission
 INSERT INTO ART_PERMISSIONS VALUES(31, 'use_api');
