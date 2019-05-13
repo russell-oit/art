@@ -2472,11 +2472,17 @@ if (!Object.entries) {
 
 				} else if (columnObj.column_data_type === "text") {
 					if (columnObj.text_data_delimiter !== undefined) {
-						if (columnObj.column_number_data === undefined) {
-							col_inner_elements = data[j]._aData[column_number_filter].split(columnObj.text_data_delimiter);
-						} else {
-							col_inner_elements = dot2obj(data[j]._aData, columnObj.column_number_data);
+						//Timothy Anyona 20190227. Fix for error when using ajax data object or function
+						if (data[j]._aFilterData !== undefined && data[j]._aFilterData !== null) {
+							col_inner_elements = data[j]._aFilterData[column_number_filter];
 							col_inner_elements = (col_inner_elements + '').split(columnObj.text_data_delimiter);
+						} else {
+							if (columnObj.column_number_data === undefined) {
+								col_inner_elements = data[j]._aData[column_number_filter].split(columnObj.text_data_delimiter);
+							} else {
+								col_inner_elements = dot2obj(data[j]._aData, columnObj.column_number_data);
+								col_inner_elements = (col_inner_elements + '').split(columnObj.text_data_delimiter);
+							}
 						}
 						for (k = 0; k < col_inner_elements.length; k++) {
 							col_inner_data = col_inner_elements[k];

@@ -18,7 +18,6 @@
 package art.login;
 
 import art.connectionpool.DbConnections;
-import art.enums.AccessLevel;
 import art.enums.ArtAuthenticationMethod;
 import art.servlets.Config;
 import art.user.User;
@@ -76,16 +75,9 @@ public class LoginController {
 		if (!Config.isArtDatabaseConfigured()) {
 			//we have most likely been redirected here from AuthorizationInterceptor
 			//or user explicitly tried using /login before art database configured
-			User user = new User();
-
-			user.setUserId(-1);
-			user.setUsername("initial setup");
-			user.setAccessLevel(AccessLevel.RepositoryUser);
-			user.buildSetupUserPermissions();
-
+			User user = User.createInitialSetupUser();
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("initialSetup", "true");
-
 			return "redirect:/artDatabase";
 		}
 
@@ -319,11 +311,7 @@ public class LoginController {
 			//allow login if credentials match the repository user
 			if (isValidRepositoryUser(username, password)) {
 				loginMethod = ArtAuthenticationMethod.Repository;
-				user = new User();
-				user.setUserId(-2);
-				user.setUsername("art db");
-				user.setAccessLevel(AccessLevel.RepositoryUser);
-				user.buildSetupUserPermissions();
+				user = User.createRepositoryUser();
 
 				result = new LoginResult();
 				result.setAuthenticated(true);
@@ -380,7 +368,7 @@ public class LoginController {
 		session.removeAttribute("nextPageAfterLogin");
 
 		if (nextPageAfterLogin == null) {
-			if (user.getAccessLevel() == AccessLevel.RepositoryUser) {
+			if (user.isSetupUser()) {
 				nextPageAfterLogin = "/users";
 			} else {
 				String startReport = user.getEffectiveStartReport();

@@ -15,9 +15,9 @@
 	<table style="width: 90%;" class="table table-bordered table-striped table-condensed">
 		<thead>
 			<tr>
-				<c:forEach var="columnName" items="${columnNames}">
+				<c:forEach var="columnLabel" items="${columnLabels}">
 					<th>
-						${encode:forHtmlContent(columnName)}
+						${encode:forHtmlContent(columnLabel)}
 					</th>
 				</c:forEach>
 			</tr>

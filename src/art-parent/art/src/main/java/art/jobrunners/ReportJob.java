@@ -372,7 +372,7 @@ public class ReportJob implements org.quartz.Job {
 			User jobUser = job.getUser();
 			if (report == null) {
 				throw new IllegalArgumentException("Pre/Post run report not found: " + reportId);
-			} else if (!reportService.canUserRunReport(jobUser.getUserId(), reportId)) {
+			} else if (!reportService.canUserRunReport(jobUser, reportId)) {
 				throw new IllegalStateException("Job owner doesn't have access to pre/post run report: " + jobUser.getUsername() + " - " + reportId);
 			}
 			ReportRunner reportRunner = prepareReportRunner(jobUser, report);
@@ -828,12 +828,10 @@ public class ReportJob implements org.quartz.Job {
 
 			File localFile = new File(fullLocalFileName);
 
-			String mimeType = "application/unknown";
 			Tika tika = new Tika();
-			try {
-				mimeType = tika.detect(localFile);
-			} catch (IOException ex) {
-				logError(ex);
+			String mimeType = tika.detect(localFile.getName());
+			if (StringUtils.equalsIgnoreCase(mimeType, "application/octet-stream")) {
+				mimeType = "application/unknown";
 			}
 
 			ByteSource payload = Files.asByteSource(localFile);
@@ -952,12 +950,10 @@ public class ReportJob implements org.quartz.Job {
 
 			File localFile = new File(fullLocalFileName);
 
-			String mimeType = "application/unknown"; //if contentType() is not specified, uploaded file has metadata content type of application/unknown
 			Tika tika = new Tika();
-			try {
-				mimeType = tika.detect(localFile);
-			} catch (IOException ex) {
-				logError(ex);
+			String mimeType = tika.detect(localFile.getName());
+			if (StringUtils.equalsIgnoreCase(mimeType, "application/octet-stream")) {
+				mimeType = "application/unknown"; //if contentType() is not specified, uploaded file has metadata content type of application/unknown
 			}
 
 			BlobStore blobStore = context.getBlobStore();
@@ -977,7 +973,7 @@ public class ReportJob implements org.quartz.Job {
 
 			Blob blob = blobBuilder.build();
 			String containerName = destination.getPath();
-			
+
 			String eTag = blobStore.putBlob(containerName, blob, multipart());
 			logger.debug("Uploaded '{}'. eTag='{}'. Job Id {}", fileName, eTag, jobId);
 		} catch (IOException | RuntimeException ex) {

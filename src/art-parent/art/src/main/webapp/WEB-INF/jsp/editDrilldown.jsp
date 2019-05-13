@@ -100,7 +100,7 @@ Edit a drilldown
 
 				<div class="form-group">
 					<div class="col-md-12 text-center">
-						<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${parentReportName}
+						<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${encode:forHtmlContent(parentReportName)}
 					</div>
 				</div>
 
@@ -187,6 +187,16 @@ Edit a drilldown
 					<div class="col-md-8">
 						<div class="checkbox">
 							<form:checkbox path="openInNewWindow" id="openInNewWindow" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="allowSelectParameters">
+						<spring:message code="drilldowns.label.allowSelectParameters"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="allowSelectParameters" id="allowSelectParameters" class="switch-yes-no"/>
 						</div>
 					</div>
 				</div>

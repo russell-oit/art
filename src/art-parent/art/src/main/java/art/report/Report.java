@@ -205,15 +205,29 @@ public class Report implements Serializable {
 	private List<UserReportRight> userReportRights; //used in import/export
 	private List<UserGroupReportRight> userGroupReportRights; //used in import/export
 	private List<Drilldown> drilldowns; //used in import/export
+	private String description2; //used for holding a processed description
 	private String dtActiveStatus;
 	private String dtAction;
-	private String dtRowId; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 	private String reportGroupNames; //used to prevent Unrecognized field error with json import. alternative is to use jsonignoreproperties on the class
 	private String reportGroupNamesHtml;
 	@JsonIgnore
 	private boolean overwriteFiles;
 	@JsonIgnore
 	private Integer limit;
+
+	/**
+	 * @return the description2
+	 */
+	public String getDescription2() {
+		return description2;
+	}
+
+	/**
+	 * @param description2 the description2 to set
+	 */
+	public void setDescription2(String description2) {
+		this.description2 = description2;
+	}
 
 	/**
 	 * @return the createdById
@@ -1701,7 +1715,8 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Returns a copy of this report with only some fields filled
+	 * Returns a copy of this report with only some fields filled to avoid
+	 * exposing passwords
 	 *
 	 * @return a copy of this report with only some fields filled
 	 */
@@ -1713,6 +1728,7 @@ public class Report implements Serializable {
 		basic.setName(name);
 		basic.setName2(name2);
 		basic.setDescription(description);
+		basic.setDescription2(description2);
 		basic.setDtActiveStatus(dtActiveStatus);
 		basic.setDtAction(dtAction);
 		basic.setReportGroups(reportGroups);
@@ -1722,13 +1738,21 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Returns the string to use as the record's datatable rowid
+	 * Returns the id of the report for use with table actions
 	 *
-	 * @return the string to use as the record's datatable rowid
+	 * @return the report id
 	 */
-	public String getDtRowId() {
-		dtRowId = "row-" + reportId;
-		return dtRowId;
+	public int getDtId() {
+		return reportId;
+	}
+
+	/**
+	 * Returns the name of the report for use with table actions
+	 *
+	 * @return the report name
+	 */
+	public String getDtName() {
+		return name;
 	}
 
 	/**
@@ -1747,7 +1771,7 @@ public class Report implements Serializable {
 
 	/**
 	 * Returns <code>true</code> if this is a view or self service report
-	 * 
+	 *
 	 * @return <code>true</code> if this is a view or self service report
 	 */
 	@JsonIgnore

@@ -126,24 +126,7 @@ public class UserService {
 
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
-			User user = new User();
-
-			user.setUsername(rs.getString("USERNAME"));
-			user.setEmail(rs.getString("EMAIL"));
-			user.setAccessLevel(AccessLevel.toEnum(rs.getInt("ACCESS_LEVEL")));
-			user.setFullName(rs.getString("FULL_NAME"));
-			user.setActive(rs.getBoolean("ACTIVE"));
-			user.setPassword(rs.getString("PASSWORD"));
-			user.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
-			user.setDescription(rs.getString("DESCRIPTION"));
-			user.setStartReport(rs.getString("START_QUERY"));
-			user.setUserId(rs.getInt("USER_ID"));
-			user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
-			user.setPublicUser(rs.getBoolean("PUBLIC_USER"));
-			user.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-			user.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
-			user.setCreatedBy(rs.getString("CREATED_BY"));
-			user.setUpdatedBy(rs.getString("UPDATED_BY"));
+			User user = loadBasicUser(rs);
 
 			ReportGroup defaultReportGroup = reportGroupService.getReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 			user.setDefaultReportGroup(defaultReportGroup);
@@ -164,6 +147,48 @@ public class UserService {
 	}
 
 	/**
+	 * Maps a resultset to an object
+	 */
+	private class BasicUserMapper extends UserMapper {
+
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			User user = loadBasicUser(rs);
+			return type.cast(user);
+		}
+	}
+
+	/**
+	 * Returns an object with basic properties loaded from a resultset
+	 * 
+	 * @param rs the resultset
+	 * @return the loaded object
+	 * @throws SQLException 
+	 */
+	private User loadBasicUser(ResultSet rs) throws SQLException {
+		User user = new User();
+
+		user.setUsername(rs.getString("USERNAME"));
+		user.setEmail(rs.getString("EMAIL"));
+		user.setAccessLevel(AccessLevel.toEnum(rs.getInt("ACCESS_LEVEL")));
+		user.setFullName(rs.getString("FULL_NAME"));
+		user.setActive(rs.getBoolean("ACTIVE"));
+		user.setPassword(rs.getString("PASSWORD"));
+		user.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
+		user.setDescription(rs.getString("DESCRIPTION"));
+		user.setStartReport(rs.getString("START_QUERY"));
+		user.setUserId(rs.getInt("USER_ID"));
+		user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
+		user.setPublicUser(rs.getBoolean("PUBLIC_USER"));
+		user.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+		user.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+		user.setCreatedBy(rs.getString("CREATED_BY"));
+		user.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+		return user;
+	}
+
+	/**
 	 * Returns all users
 	 *
 	 * @return all users
@@ -174,6 +199,20 @@ public class UserService {
 		logger.debug("Entering getAllUsers");
 
 		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
+		return dbService.query(SQL_SELECT_ALL, h);
+	}
+	
+	/**
+	 * Returns all users with only basic properties filled
+	 *
+	 * @return all users with only basic properties filled
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public List<User> getAllUsersBasic() throws SQLException {
+		logger.debug("Entering getAllUsersBasic");
+
+		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new BasicUserMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
 

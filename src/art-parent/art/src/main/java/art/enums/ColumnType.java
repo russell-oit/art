@@ -17,6 +17,8 @@
  */
 package art.enums;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Represents database column types used in report output generation
  *
@@ -37,6 +39,9 @@ public enum ColumnType {
 			if (v.toString().equalsIgnoreCase(value)) {
 				return v;
 			}
+		}
+		if (StringUtils.equalsIgnoreCase(value, "datetime")) {
+			return Date;
 		}
 		return String;
 	}

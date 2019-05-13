@@ -581,7 +581,7 @@
 						</a>
 					</div>
 				</div>
-				<c:if test="${sessionUser.hasPermission('configure_reports')}">
+				<c:if test="${sessionUser.hasConfigureReportsPermission()}">
 					<div class="row" style="padding-top:15px">
 						<div class="col-md-12" style="text-align: center">
 							<label for="showSql">

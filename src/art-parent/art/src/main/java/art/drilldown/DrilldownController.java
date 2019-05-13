@@ -21,10 +21,8 @@ import art.enums.ReportFormat;
 import art.report.Report;
 import art.report.ReportService;
 import art.general.AjaxResponse;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Locale;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -222,7 +220,7 @@ public class DrilldownController {
 
 	@RequestMapping(value = "/moveDrilldown", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse moveDrilldown(Model model, Locale locale,
+	AjaxResponse moveDrilldown(Model model, 
 			@RequestParam("id") Integer id,
 			@RequestParam("fromPosition") Integer fromPosition,
 			@RequestParam("toPosition") Integer toPosition,
@@ -240,9 +238,9 @@ public class DrilldownController {
 			} else {
 				drilldownService.moveDrilldown(id, fromPosition, toPosition, direction, drilldown.getParentReportId());
 				response.setSuccess(true);
-				response.setData(drilldown.getDrilldownReport().getLocalizedName(locale));
+				response.setData(drilldown.getDrilldownReport().getName());
 			}
-		} catch (SQLException | RuntimeException | IOException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

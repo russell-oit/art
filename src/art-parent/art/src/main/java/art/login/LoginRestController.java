@@ -17,7 +17,6 @@
  */
 package art.login;
 
-import art.enums.AccessLevel;
 import art.general.JwtResponseData;
 import art.servlets.Config;
 import art.user.User;
@@ -57,10 +56,8 @@ public class LoginRestController {
 			if (StringUtils.isNotBlank(jwtSecret)) {
 				LoginResult loginResult = InternalLogin.authenticate(username, password);
 				User user = loginResult.getUser();
-				if (loginResult.isAuthenticated()
-						&& user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
+				if (loginResult.isAuthenticated() && user.hasPermission("use_api")) {
 					String jwt = generateToken(username, jwtSecret);
-
 					JwtResponseData jwtResponseData = new JwtResponseData();
 					jwtResponseData.setAccessToken(jwt);
 					return ApiHelper.getOkResponseEntity(jwtResponseData);

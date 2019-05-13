@@ -28,60 +28,133 @@ Display parameters
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
+<spring:message code="parameters.label.shared" var="sharedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yadcf.css"/>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.js"></script>
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="parameters"]').parent().addClass('active');
 
 				var tbl = $('#parameters');
-				
+
 				var pageLength = undefined; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
-				var addColumnFilters = undefined; //pass undefined to use the default
-				var deleteButtonSelector = ".deleteRecord";
-				var deleteRecordText = "${deleteRecordText}";
-				var okText = "${okText}";
-				var cancelText = "${cancelText}";
-				var deleteUrl = "deleteParameter";
-				var recordDeletedText = "${recordDeletedText}";
+				var dataUrl = "getParameters";
 				var errorOccurredText = "${errorOccurredText}";
-				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
-				var linkedRecordsExistText = "${linkedReportsExistText}";
+				var showErrors = ${showErrors};
 				var columnDefs = undefined;
 
-				//initialize datatable and process delete action
-				var oTable = initConfigPage(tbl,
+				var sharedSpan = "<span class='label label-success'>${sharedText}</span>";
+				var columns = [
+					{"data": null, defaultContent: ""},
+					{"data": "parameterId"},
+					{"data": "name2"},
+					{"data": function (row, type, val, meta) {
+							//https://datatables.net/reference/option/columns.data
+							var description = escapeHtmlContent(row.description);
+							if (row.shared) {
+								if (description === null) {
+									description = "";
+								}
+								description += " " + sharedSpan;
+							}
+							return description;
+						}
+					},
+					{"data": "dtAction", width: '370px'}
+				];
+
+				//initialize datatable
+				var oTable = initAjaxTable(tbl,
 						pageLength,
 						showAllRowsText,
 						contextPath,
 						localeCode,
-						addColumnFilters,
-						deleteButtonSelector,
-						deleteRecordText,
-						okText,
-						cancelText,
-						deleteUrl,
-						recordDeletedText,
+						dataUrl,
 						errorOccurredText,
-						cannotDeleteRecordText,
-						linkedRecordsExistText,
-						columnDefs
+						showErrors,
+						columnDefs,
+						columns
 						);
 
 				var table = oTable.api();
+
+				yadcf.init(table,
+						[
+							{
+								column_number: 1,
+								filter_type: 'text',
+								filter_default_label: "",
+								style_class: "yadcf-id-filter"
+							},
+							{
+								column_number: 2,
+								filter_type: 'text',
+								filter_default_label: ""
+							},
+							{
+								column_number: 3,
+								filter_type: 'text',
+								filter_default_label: ""
+							}
+						]
+						);
+
+				tbl.find('tbody').on('click', '.deleteRecord', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.attr("data-name"));
+					var recordId = row.data("id");
+					bootbox.confirm({
+						message: "${deleteRecordText}: <b>" + recordName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/deleteParameter",
+									data: {id: recordId},
+									success: function (response) {
+										if (response.success) {
+											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
+											notifyActionSuccessReusable("${recordDeletedText}", recordName);
+										} else {
+											notifyActionErrorReusable("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+										}
+									},
+									error: ajaxErrorHandler
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
 
 				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[1];
+							return item.parameterId;
 						});
 						bootbox.confirm({
 							message: "${deleteRecordText}: <b>" + ids + "</b>",
@@ -127,12 +200,16 @@ Display parameters
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[1];
+							return item.parameterId;
 						});
 						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Parameters&ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
+				});
+
+				$("#refreshRecords").on("click", function () {
+					table.ajax.reload();
 				});
 
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
@@ -175,6 +252,10 @@ Display parameters
 					<i class="fa fa-trash-o"></i>
 					<spring:message code="page.action.delete"/>
 				</button>
+				<button type="button" id="refreshRecords" class="btn btn-default">
+					<i class="fa fa-refresh"></i>
+					<spring:message code="page.action.refresh"/>
+				</button>
 			</div>
 			<c:if test="${sessionUser.hasPermission('migrate_records')}">
 				<div class="btn-group">
@@ -192,82 +273,12 @@ Display parameters
 			<thead>
 				<tr>
 					<th class="noFilter"></th>
-					<th><spring:message code="page.text.id"/></th>
-					<th><spring:message code="page.text.name"/></th>
-					<th><spring:message code="page.text.description"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th><spring:message code="page.text.id"/><p></p></th>
+					<th><spring:message code="page.text.name"/><p></p></th>
+					<th><spring:message code="page.text.description"/><p></p></th>
+					<th class="noFilter"><spring:message code="page.text.action"/><p></p></th>
 				</tr>
 			</thead>
-			<tbody>
-				<c:forEach var="parameter" items="${parameters}">
-					<tr data-id="${parameter.parameterId}" 
-						data-name="${encode:forHtmlAttribute(parameter.name)} (${parameter.parameterId})">
-
-						<td></td>
-						<td>${parameter.parameterId}</td>
-						<td>${encode:forHtmlContent(parameter.name)} &nbsp;
-							<t:displayNewLabel creationDate="${parameter.creationDate}"
-											   updateDate="${parameter.updateDate}"/>
-						</td>
-						<td>${encode:forHtmlContent(parameter.description)}
-							<c:if test="${parameter.shared}">
-								&nbsp;
-								<span class="label label-success">
-									<spring:message code="parameters.label.shared"/>
-								</span>
-							</c:if>
-						</td>
-						<td>
-							<div class="btn-group">
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/editParameter?id=${parameter.parameterId}">
-									<i class="fa fa-pencil-square-o"></i>
-									<spring:message code="page.action.edit"/>
-								</a>
-								<button type="button" class="btn btn-default deleteRecord">
-									<i class="fa fa-trash-o"></i>
-									<spring:message code="page.action.delete"/>
-								</button>
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/copyParameter?id=${parameter.parameterId}">
-									<i class="fa fa-copy"></i>
-									<spring:message code="page.action.copy"/>
-								</a>
-							</div>
-							<div class="btn-group">
-								<button type="button" class="btn btn-default dropdown-toggle"
-										data-toggle="dropdown" data-hover="dropdown"
-										data-delay="100">
-									<spring:message code="reports.action.more"/>
-									<span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu">
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/reportsForParameter?parameterId=${parameter.parameterId}">
-											<spring:message code="page.text.usage"/>
-										</a>
-									</li>
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/parameterParamDefaults?parameterId=${parameter.parameterId}">
-											<spring:message code="parameters.text.defaults"/>
-										</a>
-									</li>
-									<c:if test="${parameter.fixedValue}">
-										<li>
-											<a 
-												href="${pageContext.request.contextPath}/parameterFixedParamValues?parameterId=${parameter.parameterId}">
-												<spring:message code="parameters.text.fixedValues"/>
-											</a>
-										</li>
-									</c:if>
-								</ul>
-							</div>
-						</td>
-					</tr>
-				</c:forEach>
-			</tbody>
 		</table>
 	</jsp:body>
 </t:mainPageWithPanel>

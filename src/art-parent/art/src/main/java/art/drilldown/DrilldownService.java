@@ -88,6 +88,7 @@ public class DrilldownService {
 			drilldown.setLinkText(rs.getString("DRILLDOWN_TEXT"));
 			drilldown.setReportFormat(rs.getString("OUTPUT_FORMAT"));
 			drilldown.setOpenInNewWindow(rs.getBoolean("OPEN_IN_NEW_WINDOW"));
+			drilldown.setAllowSelectParameters(rs.getBoolean("ALLOW_SELECT_PARAMETERS"));
 
 			drilldown.setParentReportId(rs.getInt("QUERY_ID"));
 
@@ -269,9 +270,11 @@ public class DrilldownService {
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_DRILLDOWN_QUERIES"
-					+ " (DRILLDOWN_ID, QUERY_ID, DRILLDOWN_QUERY_ID, DRILLDOWN_QUERY_POSITION,"
-					+ " DRILLDOWN_TITLE, DRILLDOWN_TEXT, OUTPUT_FORMAT, OPEN_IN_NEW_WINDOW)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 8) + ")";
+					+ " (DRILLDOWN_ID, QUERY_ID, DRILLDOWN_QUERY_ID,"
+					+ " DRILLDOWN_QUERY_POSITION, DRILLDOWN_TITLE,"
+					+ " DRILLDOWN_TEXT, OUTPUT_FORMAT,"
+					+ " OPEN_IN_NEW_WINDOW, ALLOW_SELECT_PARAMETERS)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 9) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -281,7 +284,8 @@ public class DrilldownService {
 				drilldown.getHeaderText(),
 				drilldown.getLinkText(),
 				drilldown.getReportFormat(),
-				BooleanUtils.toInteger(drilldown.isOpenInNewWindow())
+				BooleanUtils.toInteger(drilldown.isOpenInNewWindow()),
+				BooleanUtils.toInteger(drilldown.isAllowSelectParameters()),
 			};
 
 			if (conn == null) {
@@ -292,9 +296,9 @@ public class DrilldownService {
 		} else {
 			String sql = "UPDATE ART_DRILLDOWN_QUERIES SET DRILLDOWN_QUERY_ID=?,"
 					+ " DRILLDOWN_TITLE=?, DRILLDOWN_TEXT=?,"
-					+ " OUTPUT_FORMAT=?, OPEN_IN_NEW_WINDOW=?"
-					+ " WHERE DRILLDOWN_ID=?"
-					+ " AND QUERY_ID=? AND DRILLDOWN_QUERY_POSITION=?"; //primary key was query_id and position
+					+ " OUTPUT_FORMAT=?, OPEN_IN_NEW_WINDOW=?,"
+					+ " ALLOW_SELECT_PARAMETERS=?"
+					+ " WHERE DRILLDOWN_ID=?";
 
 			Object[] values = {
 				drilldown.getDrilldownReport().getReportId(),
@@ -302,9 +306,8 @@ public class DrilldownService {
 				drilldown.getLinkText(),
 				drilldown.getReportFormat(),
 				BooleanUtils.toInteger(drilldown.isOpenInNewWindow()),
-				drilldown.getDrilldownId(),
-				drilldown.getParentReportId(),
-				drilldown.getPosition()
+				BooleanUtils.toInteger(drilldown.isAllowSelectParameters()),
+				drilldown.getDrilldownId()
 			};
 
 			if (conn == null) {

@@ -63,10 +63,10 @@ public class UserRestController {
 
 		try {
 			List<User> users;
-			if (active != null) {
-				users = userService.getUsersByActiveStatus(active);
-			} else {
+			if (active == null) {
 				users = userService.getAllUsers();
+			} else {
+				users = userService.getUsersByActiveStatus(active);
 			}
 			return ApiHelper.getOkResponseEntity(users);
 		} catch (SQLException | RuntimeException ex) {
@@ -128,8 +128,8 @@ public class UserRestController {
 	}
 
 	@PostMapping
-	public ResponseEntity<ApiResponse> addUser(@RequestBody User user, HttpSession session,
-			UriComponentsBuilder b) {
+	public ResponseEntity<ApiResponse> addUser(@RequestBody User user,
+			HttpSession session, UriComponentsBuilder b) {
 
 		logger.debug("Entering addUser");
 
@@ -198,7 +198,7 @@ public class UserRestController {
 
 	@PostMapping("/{id}/enable")
 	public ResponseEntity<?> enableUser(@PathVariable("id") Integer id, HttpSession session) {
-		logger.debug("Entering disableUser: id={}", id);
+		logger.debug("Entering enableUser: id={}", id);
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");

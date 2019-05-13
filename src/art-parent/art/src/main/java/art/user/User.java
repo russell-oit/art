@@ -43,6 +43,8 @@ import org.apache.commons.lang3.StringUtils;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private static final int INITIAL_SETUP_USER_ID = -1;
+	private static final int REPOSITORY_USER_ID = -2;
 	@Parsed
 	private int userId;
 	@Parsed
@@ -86,8 +88,38 @@ public class User implements Serializable {
 	private List<UserGroup> userGroups;
 	private List<Role> roles;
 	private List<Permission> permissions;
+	private String username2; //used for holding a processed username
+	private String dtAction;
 	@JsonIgnore
 	private List<String> flatPermissions = new ArrayList<>();
+
+	/**
+	 * @return the dtAction
+	 */
+	public String getDtAction() {
+		return dtAction;
+	}
+
+	/**
+	 * @param dtAction the dtAction to set
+	 */
+	public void setDtAction(String dtAction) {
+		this.dtAction = dtAction;
+	}
+
+	/**
+	 * @return the username2
+	 */
+	public String getUsername2() {
+		return username2;
+	}
+
+	/**
+	 * @param username2 the username2 to set
+	 */
+	public void setUsername2(String username2) {
+		this.username2 = username2;
+	}
 
 	/**
 	 * @return the description
@@ -555,6 +587,21 @@ public class User implements Serializable {
 	}
 
 	/**
+	 * Returns <code>true</code> if user has access level of standard admin and
+	 * above
+	 *
+	 * @return <code>true</code> if user has access level of standard admin and
+	 * above
+	 */
+	public boolean hasStandardAdminAndAboveAccessLevel() {
+		if (accessLevel != null && accessLevel.getValue() >= AccessLevel.StandardAdmin.getValue()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Encrypts the password field
 	 */
 	public void encryptPassword() {
@@ -666,7 +713,7 @@ public class User implements Serializable {
 	public boolean hasConfigurePermission() {
 		return hasStartsWithPermission("configure");
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the user has any self_service permission
 	 *
@@ -722,6 +769,110 @@ public class User implements Serializable {
 		} else {
 			return canChangePassword;
 		}
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has "configure_reports" permission
+	 *
+	 * @return <code>true</code> if the user has "configure_reports" permission
+	 */
+	public boolean hasConfigureReportsPermission() {
+		return hasPermission("configure_reports");
+	}
+
+	/**
+	 * Creates the initial setup user
+	 *
+	 * @return the initial setup user
+	 */
+	public static User createInitialSetupUser() {
+		User user = createSetupUser();
+
+		user.setUserId(INITIAL_SETUP_USER_ID);
+		user.setUsername("initial setup");
+
+		return user;
+	}
+
+	/**
+	 * Creates the repository setup user
+	 *
+	 * @return the repository setup user
+	 */
+	public static User createRepositoryUser() {
+		User user = createSetupUser();
+
+		user.setUserId(REPOSITORY_USER_ID);
+		user.setUsername("art db");
+
+		return user;
+	}
+
+	/**
+	 * Creates the initial setup user
+	 *
+	 * @return the initial setup user
+	 */
+	private static User createSetupUser() {
+		User user = new User();
+
+		user.setAccessLevel(AccessLevel.RepositoryUser);
+		user.buildSetupUserPermissions();
+
+		return user;
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a setup user i.e either the initial
+	 * setup user or the art db/repository user
+	 *
+	 * @return <code>true</code> if this is a setup user
+	 */
+	@JsonIgnore
+	public boolean isSetupUser() {
+		if (userId == INITIAL_SETUP_USER_ID || userId == REPOSITORY_USER_ID) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns a copy of this user with only some fields filled to avoid
+	 * exposing passwords
+	 *
+	 * @return a copy of this user with only some fields filled
+	 */
+	@JsonIgnore
+	public User getBasicUser() {
+		User user = new User();
+
+		user.setUserId(userId);
+		user.setUsername(username);
+		user.setUsername2(username2);
+		user.setFullName(fullName);
+		user.setDtAction(dtAction);
+		user.setActive(active);
+
+		return user;
+	}
+
+	/**
+	 * Returns the id of the user for use with table actions
+	 *
+	 * @return the report id
+	 */
+	public int getDtId() {
+		return userId;
+	}
+
+	/**
+	 * Returns the name of the user for use with table actions
+	 *
+	 * @return the report name
+	 */
+	public String getDtName() {
+		return username;
 	}
 
 }

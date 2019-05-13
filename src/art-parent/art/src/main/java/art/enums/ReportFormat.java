@@ -35,7 +35,7 @@ public enum ReportFormat {
 	tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png"),
 	json("json"), jsonBrowser("jsonBrowser"), csv("csv"), csvZip("csvZip"),
 	txt("txt"), txtZip("txtZip"), pivotTableJs("pivotTableJs"), c3("c3"),
-	plotly("plotly");
+	plotly("plotly"), file("file"), fileZip("fileZip");
 
 	private final String value;
 
@@ -134,6 +134,7 @@ public enum ReportFormat {
 			case tsvZip:
 			case csvZip:
 			case txtZip:
+			case fileZip:
 				return "zip";
 			case rss20:
 				return "html";

@@ -144,10 +144,17 @@
 	//https://github.com/plotly/plotly.js/issues/316
 	//https://github.com/plotly/plotly.js/issues/185
 	//https://plot.ly/javascript/configuration-options/#always-display-the-modebar
+	//https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js?package=plotly&version=3.6.0
 	var config = {
 		modeBarButtonsToRemove: ['sendDataToCloud'],
 		displaylogo: false
-	};</script>
+	};
+
+	var localeString = '${localeString}';
+	if (localeString) {
+		config.locale = localeString;
+	}
+</script>
 
 <c:if test="${not empty templateFileName}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(templateFileName)}"></script>

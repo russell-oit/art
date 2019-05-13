@@ -23,72 +23,147 @@ Display user configuration page
 <spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
-<spring:message code="users.activeStatus.active" var="activeText"/>
-<spring:message code="users.activeStatus.disabled" var="disabledText"/>
 <spring:message code="users.message.linkedJobsExist" var="linkedJobsExistText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
+<spring:message code="reports.text.selectValue" var="selectValueText"/>
+<spring:message code="activeStatus.option.active" var="activeText"/>
+<spring:message code="activeStatus.option.disabled" var="disabledText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yadcf.css"/>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.js"></script>
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="users"]').parent().addClass('active');
 
 				var tbl = $('#users');
-				
+
 				var pageLength = undefined; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
-				var addColumnFilters = undefined; //pass undefined to use the default
-				var deleteButtonSelector = ".deleteRecord";
-				var deleteRecordText = "${deleteRecordText}";
-				var okText = "${okText}";
-				var cancelText = "${cancelText}";
-				var deleteUrl = "deleteUser";
-				var recordDeletedText = "${recordDeletedText}";
+				var dataUrl = "getUsers";
 				var errorOccurredText = "${errorOccurredText}";
-				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
-				var linkedRecordsExistText = "${linkedJobsExistText}";
-				var columnDefs = [
-					{
-						targets: "actionCol",
-						width: "375px"
-					}
+				var showErrors = ${showErrors};
+				var columnDefs = undefined;
+
+				var activeSpan = "<span class='label label-success'>${activeText}</span>";
+				var disabledSpan = "<span class='label label-danger'>${disabledText}</span>";
+				var columns = [
+					{"data": null, defaultContent: ""},
+					{"data": "userId"},
+					{"data": "username2"},
+					{"data": function (row, type, val, meta) {
+							return escapeHtmlContent(row.fullName);
+						}
+					},
+					{"data": function (row, type, val, meta) {
+							if (row.active) {
+								return activeSpan;
+							} else {
+								return disabledSpan;
+							}
+						}
+					},
+					{"data": "dtAction", width: '370px'}
 				];
 
-				//initialize datatable and process delete action
-				var oTable = initConfigPage(tbl,
+				//initialize datatable
+				var oTable = initAjaxTable(tbl,
 						pageLength,
 						showAllRowsText,
 						contextPath,
 						localeCode,
-						addColumnFilters,
-						deleteButtonSelector,
-						deleteRecordText,
-						okText,
-						cancelText,
-						deleteUrl,
-						recordDeletedText,
+						dataUrl,
 						errorOccurredText,
-						cannotDeleteRecordText,
-						linkedRecordsExistText,
-						columnDefs
+						showErrors,
+						columnDefs,
+						columns
 						);
 
 				var table = oTable.api();
+
+				yadcf.init(table,
+						[
+							{
+								column_number: 1,
+								filter_type: 'text',
+								filter_default_label: "",
+								style_class: "yadcf-id-filter"
+							},
+							{
+								column_number: 2,
+								filter_type: 'text',
+								filter_default_label: ""
+							},
+							{
+								column_number: 3,
+								filter_type: 'text',
+								filter_default_label: ""
+							},
+							{
+								column_number: 4,
+								filter_default_label: '${selectValueText}',
+								//https://github.com/vedmack/yadcf/issues/95
+								column_data_type: "rendered_html"
+							}
+						]
+						);
+
+				tbl.find('tbody').on('click', '.deleteRecord', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.attr("data-name"));
+					var recordId = row.data("id");
+					bootbox.confirm({
+						message: "${deleteRecordText}: <b>" + recordName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/deleteUser",
+									data: {id: recordId},
+									success: function (response) {
+										if (response.success) {
+											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
+											notifyActionSuccessReusable("${recordDeletedText}", recordName);
+										} else {
+											notifyActionErrorReusable("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+										}
+									},
+									error: ajaxErrorHandler
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
 
 				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[1];
+							return item.userId;
 						});
 						bootbox.confirm({
 							message: "${deleteRecordText}: <b>" + ids + "</b>",
@@ -134,7 +209,7 @@ Display user configuration page
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[1];
+							return item.userId;
 						});
 						window.location.href = '${pageContext.request.contextPath}/editUsers?ids=' + ids;
 					} else {
@@ -147,12 +222,16 @@ Display user configuration page
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[1];
+							return item.userId;
 						});
 						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Users&ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
+				});
+
+				$("#refreshRecords").on("click", function () {
+					table.ajax.reload();
 				});
 
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
@@ -199,6 +278,10 @@ Display user configuration page
 					<i class="fa fa-trash-o"></i>
 					<spring:message code="page.action.delete"/>
 				</button>
+				<button type="button" id="refreshRecords" class="btn btn-default">
+					<i class="fa fa-refresh"></i>
+					<spring:message code="page.action.refresh"/>
+				</button>
 			</div>
 			<c:if test="${sessionUser.hasPermission('migrate_records')}">
 				<div class="btn-group">
@@ -217,76 +300,13 @@ Display user configuration page
 			<thead>
 				<tr>
 					<th class="noFilter"></th>
-					<th><spring:message code="page.text.id"/></th>
-					<th><spring:message code="users.text.username"/></th>
-					<th><spring:message code="users.text.fullName"/></th>
-					<th><spring:message code="page.text.active"/></th>
-					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
+					<th><spring:message code="page.text.id"/><p></p></th>
+					<th><spring:message code="users.text.username"/><p></p></th>
+					<th><spring:message code="users.text.fullName"/><p></p></th>
+					<th><spring:message code="page.text.active"/><p></p></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/><p></p></th>
 				</tr>
 			</thead>
-			<tbody>
-				<c:forEach var="user" items="${users}">
-					<tr data-id="${user.userId}"
-						data-name="${encode:forHtmlAttribute(user.username)}">
-
-						<td></td>
-						<td>${user.userId}</td>
-						<td>${encode:forHtmlContent(user.username)} &nbsp;
-							<t:displayNewLabel creationDate="${user.creationDate}"
-											   updateDate="${user.updateDate}"/>
-						</td>
-						<td>${encode:forHtmlContent(user.fullName)}</td>
-						<td><t:displayActiveStatus active="${user.active}"
-											   activeText="${activeText}"
-											   disabledText="${disabledText}"/>
-						</td>
-						<td>
-							<div class="btn-group">
-								<a class="btn btn-default" href="${pageContext.request.contextPath}/editUser?id=${user.userId}">
-									<i class="fa fa-pencil-square-o"></i>
-									<spring:message code="page.action.edit"/>
-								</a>
-								<button type="button" class="btn btn-default deleteRecord">
-									<i class="fa fa-trash-o"></i>
-									<spring:message code="page.action.delete"/>
-								</button>
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/copyUser?id=${user.userId}">
-									<i class="fa fa-copy"></i>
-									<spring:message code="page.action.copy"/>
-								</a>
-							</div>
-							<div class="btn-group">
-								<button type="button" class="btn btn-default dropdown-toggle"
-										data-toggle="dropdown" data-hover="dropdown"
-										data-delay="100">
-									<spring:message code="reports.action.more"/>
-									<span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu">
-									<c:if test="${sessionUser.hasPermission('configure_access_rights')}">
-										<li>
-											<a 
-												href="${pageContext.request.contextPath}/userAccessRights?userId=${user.userId}">
-												<spring:message code="page.action.accessRights"/>
-											</a>
-										</li>
-									</c:if>
-									<c:if test="${sessionUser.hasPermission('configure_permissions')}">
-										<li>
-											<a 
-												href="${pageContext.request.contextPath}/userPermissions?userId=${user.userId}">
-												<spring:message code="page.text.permissions"/>
-											</a>
-										</li>
-									</c:if>
-								</ul>
-							</div>
-						</td>
-					</tr>
-				</c:forEach>
-			</tbody>
 		</table>
 	</jsp:body>
 </t:mainPageWithPanel>
-

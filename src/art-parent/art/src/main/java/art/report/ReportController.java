@@ -42,6 +42,7 @@ import art.savedparameter.SavedParameterService;
 import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
+import art.utils.AjaxTableHelper;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
@@ -140,15 +141,59 @@ public class ReportController {
 	public String showReports(HttpSession session, Model model) {
 		logger.debug("Entering showReports");
 
+		return "reports";
+	}
+
+	@RequestMapping(value = "/getAvailableReports", method = RequestMethod.GET)
+	public @ResponseBody
+	AjaxResponse getAvailableReports(HttpSession session, Locale locale,
+			HttpServletRequest request) {
+		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
+		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
+
+		logger.debug("Entering getAvailableReports");
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			model.addAttribute("reports", reportService.getDisplayReports(sessionUser.getUserId()));
-		} catch (SQLException | RuntimeException ex) {
+
+			List<Report> reports = reportService.getDisplayReports(sessionUser.getUserId());
+
+			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
+
+			List<BasicReport> finalReports = new ArrayList<>();
+
+			for (Report report : reports) {
+				BasicReport basicReport = new BasicReport(report);
+
+				String name = report.getLocalizedName(locale);
+				String encodedName = Encode.forHtmlContent(name);
+
+				String link = "<a href='" + request.getContextPath()
+						+ "/selectReportParameters?reportId="
+						+ report.getReportId() + "'>" + encodedName + "</a>&nbsp;";
+
+				String label = ajaxTableHelper.processName("", report.getCreationDate(), report.getUpdateDate());
+				basicReport.setName2(link + label);
+
+				String description = report.getLocalizedDescription(locale);
+				if (StringUtils.isNotBlank(description)) {
+					description = Encode.forHtml(description);
+				}
+				basicReport.setDescription2(description);
+
+				finalReports.add(basicReport);
+			}
+
+			ajaxResponse.setData(finalReports);
+			ajaxResponse.setSuccess(true);
+		} catch (SQLException | IOException | RuntimeException ex) {
 			logger.error("Error", ex);
-			model.addAttribute("error", ex);
+			ajaxResponse.setErrorMessage(ex.toString());
 		}
 
-		return "reports";
+		return ajaxResponse;
 	}
 
 	@RequestMapping(value = "/selectReportParameters", method = RequestMethod.GET)
@@ -186,27 +231,6 @@ public class ReportController {
 		return "selectReportParameters";
 	}
 
-	@RequestMapping(value = "/getReports", method = RequestMethod.GET)
-	public @ResponseBody
-	List<Report> getReports(HttpSession session) {
-		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
-		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
-
-		logger.debug("Entering getReports");
-
-		User sessionUser = (User) session.getAttribute("sessionUser");
-
-		List<Report> reports = null;
-
-		try {
-			reports = reportService.getDisplayReports(sessionUser.getUserId());
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-		}
-
-		return reports;
-	}
-
 	@RequestMapping(value = "/reportsConfig", method = RequestMethod.GET)
 	public String showReportsConfig() {
 		logger.debug("Entering showReportsConfig");
@@ -240,55 +264,42 @@ public class ReportController {
 		AjaxResponse ajaxResponse = new AjaxResponse();
 
 		try {
-			List<Report> reports = reportService.getAllReports();
-
-			String newText = messageSource.getMessage("page.text.new", null, locale);
-			String updatedText = messageSource.getMessage("page.text.updated", null, locale);
-			String newSpan = "<span class='label label-success'>" + newText + "</span>";
-			String updatedSpan = "<span class='label label-success'>" + updatedText + "</span>";
-
-			String activeText = messageSource.getMessage("activeStatus.option.active", null, locale);
-			String disabledText = messageSource.getMessage("activeStatus.option.disabled", null, locale);
-			String activeSpan = "<span class='label label-success'>" + activeText + "</span>";
-			String disabledSpan = "<span class='label label-danger'>" + disabledText + "</span>";
+			List<Report> reports = reportService.getAllReportsBasic();
 
 			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
+			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
 
-			List<Report> basicReports = new ArrayList<>();
+			List<BasicReport> finalReports = new ArrayList<>();
 
 			for (Report report : reports) {
-				String name = Encode.forHtml(report.getName());
-				report.setName(name);
+				ctx.setVariable("report", report);
+				String templateName = "reportsConfigAction";
+				String dtAction = defaultTemplateEngine.process(templateName, ctx);
 
-				final int NEW_UPDATED_LIMIT = 7;
-				if (ArtUtils.daysUntilToday(report.getCreationDate()) <= NEW_UPDATED_LIMIT) {
-					name += " " + newSpan;
-				}
-				if (ArtUtils.daysUntilToday(report.getUpdateDate()) <= NEW_UPDATED_LIMIT) {
-					name += " " + updatedSpan;
-				}
-				report.setName2(name);
+				BasicReport basicReport = new BasicReport(report);
+				basicReport.setDtAction(dtAction);
 
-				if (StringUtils.isNotBlank(report.getDescription())) {
-					report.setDescription(Encode.forHtml(report.getDescription()));
+				String encodedName = ajaxTableHelper.processName(report.getName(), report.getCreationDate(), report.getUpdateDate());
+				basicReport.setName2(encodedName);
+
+				String description = report.getDescription();
+				if (StringUtils.isNotBlank(description)) {
+					description = Encode.forHtml(description);
 				}
+				basicReport.setDescription2(description);
 
 				String activeStatus;
 				if (report.isActive()) {
-					activeStatus = activeSpan;
+					activeStatus = ajaxTableHelper.getActiveSpan();
 				} else {
-					activeStatus = disabledSpan;
+					activeStatus = ajaxTableHelper.getDisabledSpan();
 				}
-				report.setDtActiveStatus(activeStatus);
+				basicReport.setDtActiveStatus(activeStatus);
 
-				ctx.setVariable("report", report);
-				String emailTemplateName = "reportsConfigAction";
-				String dtAction = defaultTemplateEngine.process(emailTemplateName, ctx);
-				report.setDtAction(dtAction);
-
-				basicReports.add(report.getBasicReport());
+				finalReports.add(basicReport);
 			}
-			ajaxResponse.setData(basicReports);
+
+			ajaxResponse.setData(finalReports);
 			ajaxResponse.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -1384,14 +1395,12 @@ public class ReportController {
 							StringBuilder sb = new StringBuilder();
 							sb.append("<DASHBOARD>");
 							for (GridstackItemOptions itemOption : itemOptions) {
-								int itemReportId = itemOption.getReportId();
-								String reportName = reportService.getReportName(itemReportId);
 								sb.append("<ITEM>")
 										.append("<TITLE>")
-										.append(reportName)
+										.append(itemOption.getTitle())
 										.append("</TITLE>")
 										.append("<REPORTID>")
-										.append(String.valueOf(itemReportId))
+										.append(itemOption.getReportId())
 										.append("</REPORTID>")
 										.append("</ITEM>");
 							}

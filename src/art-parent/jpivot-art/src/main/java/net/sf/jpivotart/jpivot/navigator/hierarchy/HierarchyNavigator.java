@@ -217,16 +217,39 @@ public class HierarchyNavigator extends CategoryEditor implements ModelChangeLis
     for (int index = 0; index < axes.length; index++) {
       Axis axis = axes[index];
       String name = resources.getString("axis." + index + ".name");
-      String icon = resources.getString("axis." + index + ".icon");
+      //String icon = resources.getString("axis." + index + ".icon");
+	  String icon = getAxisIcon(index);
       AxisCategory axisCat = new AxisCategory(this, axis, name, icon);
       categories.add(axisCat);
     }
 
     // the rest is added to the slicer
     String name = resources.getString("slicer.name");
-    String icon = resources.getString("slicer.icon");
+    //String icon = resources.getString("slicer.icon");
+	String icon = "filter.png";
     slicerCategory = new SlicerCategory(this, name, icon);
     categories.add(slicerCategory);
+  }
+  
+  /**
+   * Returns the file name of the icon to be used for a given axis
+   * 
+   * @param index the axis index
+   * @return the file name of the icon to be used
+   */
+  private String getAxisIcon(int index){
+	switch(index) {
+		case 0:
+			return "column.png";
+		case 1:
+			return "row.png";
+		case 2:
+			return "pages.png";
+		case 3:
+			return "chapter.png";
+		default:
+			return null;
+	}
   }
 
   /**

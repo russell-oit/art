@@ -150,13 +150,13 @@ public class DashboardController {
 
 			//check if user has permission to run report
 			//admins can run all reports, even disabled ones. only check for non admin users
-			if (!sessionUser.isAdminUser()) {
+			if (!sessionUser.hasConfigureReportsPermission()) {
 				if (!report.isActive()) {
 					model.addAttribute("message", "reports.message.reportDisabled");
 					return errorPage;
 				}
 
-				if (!reportService.canUserRunReport(sessionUser.getUserId(), report.getReportId())) {
+				if (!reportService.canUserRunReport(sessionUser, report.getReportId())) {
 					model.addAttribute("message", "reports.message.noPermission");
 					return errorPage;
 				}

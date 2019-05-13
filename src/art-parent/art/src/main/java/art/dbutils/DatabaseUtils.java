@@ -43,8 +43,6 @@ public class DatabaseUtils {
 	 * @param rs the resultset to close
 	 */
 	public static void close(ResultSet rs) {
-		logger.debug("Entering close resultset");
-
 		if (rs != null) {
 			try {
 				rs.close();
@@ -60,8 +58,6 @@ public class DatabaseUtils {
 	 * @param st the statement to close
 	 */
 	public static void close(Statement st) {
-		logger.debug("Entering close statement");
-
 		if (st != null) {
 			try {
 				st.close();
@@ -77,8 +73,6 @@ public class DatabaseUtils {
 	 * @param conn the connection to close
 	 */
 	public static void close(Connection conn) {
-		logger.debug("Entering close connection");
-
 		if (conn != null) {
 			try {
 				conn.close();
@@ -141,11 +135,19 @@ public class DatabaseUtils {
 	 * PreparedStatement values.
 	 */
 	public static void setValues(PreparedStatement ps, Object... values) throws SQLException {
+		//https://stackoverflow.com/questions/39589879/printing-an-array-with-slf4j-only-prints-the-first-element
+		logger.debug("values = {}", (Object) values);
+
+		boolean nullValueExists = false;
 		for (int i = 0; i < values.length; i++) {
-//			if (values[i] == null) {
-//				logger.warn("non-typed null value passed. Driver may throw an exception");
-//			}
+			if (values[i] == null) {
+				nullValueExists = true;
+			}
 			ps.setObject(i + 1, values[i]);
+		}
+
+		if (nullValueExists) {
+			logger.debug("non-typed null value passed. Driver may throw an exception.");
 		}
 	}
 

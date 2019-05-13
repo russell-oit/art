@@ -66,7 +66,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/subtotal-1.10.0/subtotal.min.js"></script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/plotly.js-1.42.5/plotly-basic.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/plotly_renderers.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/plotly_renderers.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -122,10 +122,21 @@
 	} else {
 		$.extend(renderers, $.pivotUtilities.subtotal_renderers);
 	}
+	
+	//https://github.com/nicolaskruchten/pivottable/wiki/Optional-Extra-Renderers
+	//https://github.com/nicolaskruchten/pivottable/wiki/Renderers
+	//https://github.com/nicolaskruchten/pivottable/wiki/Parameters
+	var rendererOptions = {
+		plotlyConfig: {
+			modeBarButtonsToRemove: ['sendDataToCloud'],
+			displaylogo: false
+		}
+	};
 
 	var options = {
 		renderers: renderers,
-		dataClass: $.pivotUtilities.SubtotalPivotData
+		dataClass: $.pivotUtilities.SubtotalPivotData,
+		rendererOptions: rendererOptions
 	};
 
 	var configString = '${encode:forJavaScript(configJson)}';

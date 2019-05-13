@@ -19,7 +19,6 @@ package art.reportgroup;
 
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
-import art.enums.AccessLevel;
 import art.user.User;
 import art.general.ActionResult;
 import art.utils.ArtUtils;
@@ -199,7 +198,7 @@ public class ReportGroupService {
 		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());
 
 		ResultSetHandler<List<ReportGroup>> h = new BeanListHandler<>(ReportGroup.class, new ReportGroupMapper());
-		if (user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
+		if (user.hasStandardAdminAndAboveAccessLevel()) {
 			//standard admins and above can work with everything
 			return dbService.query(SQL_SELECT_ALL, h);
 		} else {

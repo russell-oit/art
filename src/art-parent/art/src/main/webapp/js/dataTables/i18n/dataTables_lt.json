@@ -1,40 +1,38 @@
 {
-	"sEmptyTable":      "Lentelėje nėra duomenų",
-	"sInfo":            "Rodoma nuo _START_ iki _END_ iš _TOTAL_ įrašų",
-	"sInfoEmpty":       "Rodoma nuo 0 iki 0 iš 0 įrašų",
-	"sInfoFiltered":    "(atrinkta iš _MAX_ įrašų)",
-	"sInfoPostFix":     "",
-	"sInfoThousands":   " ",
-	"sLengthMenu":      "Rodyti _MENU_ įrašus",
-	"sLoadingRecords":  "Įkeliama...",
-	"sProcessing":      "Apdorojama...",
-	"sSearch":          "Ieškoti:",
-	"sThousands":       " ",
-	"sUrl":             "",
-	"sZeroRecords":     "Nerasta kriterijus atitinkančių įrašų",
+	"sEmptyTable": "Lentelėje nėra duomenų",
+	"sInfo": "Rodoma nuo _START_ iki _END_ iš _TOTAL_ įrašų",
+	"sInfoEmpty": "Rodoma nuo 0 iki 0 iš 0 įrašų",
+	"sInfoFiltered": "(atrinkta iš _MAX_ įrašų)",
+	"sInfoPostFix": "",
+	"sInfoThousands": " ",
+	"sLengthMenu": "Rodyti _MENU_ įrašus",
+	"sLoadingRecords": "Įkeliama...",
+	"sProcessing": "Apdorojama...",
+	"sSearch": "Ieškoti:",
+	"sZeroRecords": "Nerasta kriterijus atitinkančių įrašų",
 	"oPaginate": {
 		"sFirst": "Pirmas",
-		"sPrevious": "Ankstesnis",
+		"sLast": "Paskutinis",
 		"sNext": "Kitas",
-		"sLast": "Paskutinis"
+		"sPrevious": "Ankstesnis"
 	},
 	"oAria": {
-		"sSortAscending":  ": įjungti stulpelio rūšiavimą didėjimo tvarka",
+		"sSortAscending": ": įjungti stulpelio rūšiavimą didėjimo tvarka",
 		"sSortDescending": ": įjungti stulpelio rūšiavimą mažėjimo tvarka"
 	},
 	"select": {
 		"rows": {
-			"_": "%d eilutės(-ių) pažymėta",
+			"_": "%d eilutės (-ių) pažymėta",
 			"0": "",
 			"1": "1 eilutė pažymėta"
 		},
 		"columns": {
-			"_": "%d stulpeliai(-ių) pažymėta",
+			"_": "%d stulpeliai (-ių) pažymėta",
 			"0": "",
 			"1": "1 stulpelis pažymėtas"
 		},
 		"cells": {
-			"_": "%d langeliai(-ių) pažymėta",
+			"_": "%d langeliai (-ių) pažymėta",
 			"0": "",
 			"1": "1 langelis pažymėtas"
 		}

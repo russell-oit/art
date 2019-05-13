@@ -88,14 +88,15 @@ public class DrilldownLinkHelper implements Serializable {
 		if (drilldown != null) {
 			int drilldownReportId = drilldown.getDrilldownReport().getReportId();
 			String drilldownReportFormat = drilldown.getReportFormat();
-			if (drilldownReportFormat == null || drilldownReportFormat.equalsIgnoreCase("all")) {
-				drilldownReportFormat = "default";
-			}
+
 			sb.append("runReport?reportId=").append(drilldownReportId)
 					.append("&reportFormat=").append(drilldownReportFormat)
-					.append("&allowSelectParameters=true")
-					.append("&startSelectParametersHidden=true")
 					.append("&drilldown=true");
+
+			if (drilldown.isAllowSelectParameters()) {
+				sb.append("&allowSelectParameters=true")
+						.append("&startSelectParametersHidden=true");
+			}
 		}
 	}
 

@@ -28,6 +28,7 @@ import art.general.ActionResult;
 import art.general.AjaxResponse;
 import art.role.RoleService;
 import art.userrole.UserRoleService;
+import art.utils.AjaxTableHelper;
 import art.utils.ArtHelper;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -35,6 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.mail.MessagingException;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -46,6 +50,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -54,6 +59,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.context.WebContext;
 
 /**
  * Controller for the user configuration process
@@ -89,18 +95,57 @@ public class UserController {
 	@Autowired
 	private UserRoleService userRoleService;
 
+	@Autowired
+	private ServletContext servletContext;
+
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
 		logger.debug("Entering showUsers");
 
+		return "users";
+	}
+
+	@GetMapping("/getUsers")
+	public @ResponseBody
+	AjaxResponse getUsers(Locale locale, HttpServletRequest request,
+			HttpServletResponse httpResponse, HttpSession session)
+			throws SQLException, IOException {
+
+		logger.debug("Entering getUsers");
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
 		try {
-			model.addAttribute("users", userService.getAllUsers());
+			List<User> users = userService.getAllUsersBasic();
+
+			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
+			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
+
+			List<User> basicUsers = new ArrayList<>();
+
+			for (User user : users) {
+				String encodedUsername = ajaxTableHelper.processName(user.getUsername(), user.getCreationDate(), user.getUpdateDate());
+				user.setUsername2(encodedUsername);
+
+				User sessionUser = (User) session.getAttribute("sessionUser");
+
+				ctx.setVariable("user", user);
+				ctx.setVariable("sessionUser", sessionUser);
+				String templateName = "usersAction";
+				String dtAction = defaultTemplateEngine.process(templateName, ctx);
+				user.setDtAction(dtAction);
+
+				basicUsers.add(user.getBasicUser());
+			}
+
+			ajaxResponse.setData(basicUsers);
+			ajaxResponse.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
-			model.addAttribute("error", ex);
+			ajaxResponse.setErrorMessage(ex.toString());
 		}
 
-		return "users";
+		return ajaxResponse;
 	}
 
 	@RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
@@ -470,9 +515,9 @@ public class UserController {
 
 		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
 		logger.debug("editUser.getAccessLevel().getValue()={}", editUser.getAccessLevel().getValue());
-		if (sessionUser.getAccessLevel().getValue() > editUser.getAccessLevel().getValue()
+		if (sessionUser.isSetupUser()
 				|| sessionUser.getAccessLevel() == AccessLevel.SuperAdmin
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
+				|| sessionUser.getAccessLevel().getValue() > editUser.getAccessLevel().getValue()) {
 			return true;
 		} else {
 			return false;
@@ -625,15 +670,14 @@ public class UserController {
 		levels.add(AccessLevel.MidAdmin);
 		levels.add(AccessLevel.StandardAdmin);
 
-		//only standard admins and above and the repository user can edit users
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
-		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SeniorAdmin.getValue()
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
+		if (sessionUser.isSetupUser()
+				|| sessionUser.getAccessLevel().getValue() >= AccessLevel.SeniorAdmin.getValue()) {
 			levels.add(AccessLevel.SeniorAdmin);
 		}
-		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SuperAdmin.getValue()
-				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
+		if (sessionUser.isSetupUser()
+				|| sessionUser.getAccessLevel().getValue() >= AccessLevel.SuperAdmin.getValue()) {
 			levels.add(AccessLevel.SuperAdmin);
 		}
 

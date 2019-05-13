@@ -17,6 +17,7 @@
  */
 package art.reportengine;
 
+import art.output.ResultSetColumn;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,14 +39,16 @@ public class ListTableInput extends AbstractTableInput implements ColumnMetadata
 	private final int rowCount;
 	private int currentRow;
 
-	public ListTableInput(List<List<Object>> data, List<String> columnNames) {
+	public ListTableInput(List<List<Object>> data, List<ResultSetColumn> columns) {
 		Objects.requireNonNull(data, "data must not be null");
-		Objects.requireNonNull(columnNames, "columnNames must not be null");
-		
+		Objects.requireNonNull(columns, "columns must not be null");
+
 		this.data = data;
 		rowCount = data.size();
-		for (String columnName : columnNames) {
-			columnMetadata.add(new ColumnMetadata(columnName, columnName));
+		for (ResultSetColumn column : columns) {
+			String columnName = column.getName();
+			String columnLabel = column.getLabel();
+			columnMetadata.add(new ColumnMetadata(columnName, columnLabel));
 		}
 	}
 

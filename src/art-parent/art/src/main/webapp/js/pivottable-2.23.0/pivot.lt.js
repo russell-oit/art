@@ -78,8 +78,8 @@
 				"Lentelė": r["Table"],
 				"Lentelė su juostine diagrama": r["Table Barchart"],
 				"Temperatūrų zonų žemėlapis": r["Heatmap"],
-				"Temperatūrų zonų žemėlapis linijomis": r["Row Heatmap"],
-				"Temperatūrų zonų žemėlapis stulpeliais": r["Col Heatmap"]
+				"Eilutės temperatūrų zonų žemėlapis": r["Row Heatmap"],
+				"Stulpelio temperatūrų zonų žemėlapis": r["Col Heatmap"]
 			}
 		};
 		if (gcr) {
@@ -98,39 +98,39 @@
 		}
 		if (c3r) {
 			$.pivotUtilities.locales.lt.c3_renderers = {
-				"Linijinė diagrama C3": c3r["Line Chart"],
-				"Juostinė diagrama C3": c3r["Bar Chart"],
-				"Sudurtinė juostinė diagrama C3": c3r["Stacked Bar Chart"],
-				"Sritinė diagrama C3": c3r["Area Chart"],
-				"C3 Horizontal Bar Chart": c3r["Horizontal Bar Chart"],
-				"C3 Horizontal Stacked Bar Chart": c3r["Horizontal Stacked Bar Chart"],
-				"Taškinė diagrama C3": c3r["Scatter Chart"]
+				"C3 Linijinė diagrama": c3r["Line Chart"],
+				"C3 Juostinė diagrama": c3r["Bar Chart"],
+				"C3 Sudurtinė juostinė diagrama": c3r["Stacked Bar Chart"],
+				"C3 Sritinė diagrama": c3r["Area Chart"],
+				"C3 Horizontali juostinė diagrama": c3r["Horizontal Bar Chart"],
+				"C3 Horizontali sudurtinė juostinė diagrama": c3r["Horizontal Stacked Bar Chart"],
+				"C3 Taškinė diagrama": c3r["Scatter Chart"]
 			};
 		}
 		if (plr) {
 			$.pivotUtilities.locales.lt.plotly_renderers = {
-				"Linijinė diagrama Plotly": plr["Line Chart"],
-				"Juostinė diagrama Plotly": plr["Bar Chart"],
-				"Sudurtinė juostinė diagrama Plotly": plr["Stacked Bar Chart"],
-				"Sritinė diagrama Plotly": plr["Area Chart"],
-				"Plotly Horizontal Bar Chart": plr["Horizontal Bar Chart"],
-				"Plotly Horizontal Stacked Bar Chart": plr["Horizontal Stacked Bar Chart"],
-				"Taškinė diagrama Plotly": plr["Scatter Chart"],
-				"Plotly Multiple Pie Chart": plr["Multiple Pie Chart"]
+				"„Plotly“ Linijinė diagrama": plr["Line Chart"],
+				"„Plotly“ Juostinė diagrama": plr["Bar Chart"],
+				"„Plotly“ Sudurtinė juostinė diagrama": plr["Stacked Bar Chart"],
+				"„Plotly“ Sritinė diagrama": plr["Area Chart"],
+				"„Plotly“ Horizontali juostinė diagrama": plr["Horizontal Bar Chart"],
+				"„Plotly“ Horizontali sudurtinė juostinė diagrama": plr["Horizontal Stacked Bar Chart"],
+				"„Plotly“ Taškinė diagrama": plr["Scatter Chart"],
+				"„Plotly“ Daugiaskritulinė diagrama": plr["Multiple Pie Chart"]
 			};
 		}
 		if (er) {
 			$.pivotUtilities.locales.lt.export_renderers = {
-				"TSV Export" : er["TSV Export"]
+				"TSV eksportas" : er["TSV Export"]
 			};
 		}
 		if (sr) {
 			$.pivotUtilities.locales.lt.subtotal_renderers = {
-				"Table With Subtotal" : sr["Table With Subtotal"],
-				"Table With Subtotal Bar Chart" : sr["Table With Subtotal Bar Chart"],
-				"Table With Subtotal Heatmap" : sr["Table With Subtotal Heatmap"],
-				"Table With Subtotal Row Heatmap" : sr["Table With Subtotal Row Heatmap"],
-				"Table With Subtotal Col Heatmap" : sr["Table With Subtotal Col Heatmap"]
+				"Lentelė su tarpine suma" : sr["Table With Subtotal"],
+				"Lentelė su tarpine juostine diagrama" : sr["Table With Subtotal Bar Chart"],
+				"Lentelė su tarpiniu temperatūrų zonų žemėlapiu" : sr["Table With Subtotal Heatmap"],
+				"Lentelė su tarpiniu eilutės temperatūrų zonų žemėlapiu" : sr["Table With Subtotal Row Heatmap"],
+				"Lentelė su tarpiniu stulpelio temperatūrų zonų žemėlapiu" : sr["Table With Subtotal Col Heatmap"]
 			};
 		}
 		return $.pivotUtilities.locales.lt;

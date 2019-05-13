@@ -186,6 +186,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 					session.setAttribute("authenticationMethod", loginMethod.getValue());
 					session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
 					session.setAttribute("casLogoutUrl", Config.getSettings().getCasLogoutUrl());
+					session.setAttribute("showHeaderInPublicUserSession", Config.getSettings().isShowHeaderInPublicUserSession());
 					loginHelper.logSuccess(loginMethod, username, ip);
 				}
 			}
@@ -314,7 +315,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		if (StringUtils.equalsAny(page, "", "reports", "selectReportParameters",
 				"showDashboard", "getLovValues", "runReport", "emailReport",
 				"showJPivot", "jpivotBusy", "jpivotError", "saiku3",
-				"saveParameterSelection", "clearSavedParameterSelection")) {
+				"saveParameterSelection", "clearSavedParameterSelection",
+				"getAvailableReports")) {
 			if (user.hasPermission("view_reports")) {
 				authorised = true;
 			}

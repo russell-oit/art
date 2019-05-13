@@ -38,6 +38,21 @@ public class GroovyDataDetails implements Serializable {
 	private List<? extends Object> dataList;
 	private Map<Integer, ColumnTypeDefinition> columnTypes;
 	private List<ResultSetColumn> resultSetColumns;
+	private List<String> columnLabels;
+
+	/**
+	 * @return the columnLabels
+	 */
+	public List<String> getColumnLabels() {
+		return columnLabels;
+	}
+
+	/**
+	 * @param columnLabels the columnLabels to set
+	 */
+	public void setColumnLabels(List<String> columnLabels) {
+		this.columnLabels = columnLabels;
+	}
 	
 	/**
 	 * @return the rowCount

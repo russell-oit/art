@@ -220,7 +220,7 @@ Display report drilldowns
 
 		<div class="text-center">
 			<p>
-				<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${parentReportName}
+				<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${encode:forHtmlContent(parentReportName)}
 			</p>
 		</div>
 		<div style="margin-bottom: 10px;">

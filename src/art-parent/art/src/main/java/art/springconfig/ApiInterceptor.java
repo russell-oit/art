@@ -17,7 +17,6 @@
  */
 package art.springconfig;
 
-import art.enums.AccessLevel;
 import art.enums.ApiStatus;
 import art.general.ApiResponse;
 import art.login.InternalLogin;
@@ -93,8 +92,7 @@ public class ApiInterceptor extends HandlerInterceptorAdapter {
 
 						LoginResult loginResult = InternalLogin.authenticate(username, password);
 						User user = loginResult.getUser();
-						if (loginResult.isAuthenticated()
-								&& user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
+						if (loginResult.isAuthenticated() && user.hasPermission("use_api")) {
 							HttpSession session = request.getSession();
 							session.setAttribute("sessionUser", user);
 							return true;
@@ -112,7 +110,7 @@ public class ApiInterceptor extends HandlerInterceptorAdapter {
 								String username = claims.getBody().getSubject();
 								User user = userService.getUser(username);
 								if (user != null && user.isActive()
-										&& user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
+										&& user.hasPermission("use_api")) {
 									HttpSession session = request.getSession();
 									session.setAttribute("sessionUser", user);
 									return true;

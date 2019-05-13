@@ -132,6 +132,11 @@ Display section to allow selecting of report parameters and initiate running of 
 		if (${startSelectParametersHidden}) {
 			$("#collapse1").collapse("hide");
 		}
+		
+		$("#showHideParameters").on("click", function () {
+			$("#collapse1").collapse("toggle");
+		});
+
 
 	}); //end document ready
 </script>
@@ -311,14 +316,14 @@ Display section to allow selecting of report parameters and initiate running of 
 						<spring:message code="reports.button.share"/>
 					</button>
 				</c:if>
-				<c:if test="${sessionUser.hasPermission('configure_reports')}">
+				<c:if test="${sessionUser.hasConfigureReportsPermission()}">
 					<a class="btn btn-sm btn-default" href="${pageContext.request.contextPath}/reportConfig?reportId=${report.reportId}">
 						<spring:message code="page.text.report"/>
 					</a>
 				</c:if>
-				<a data-toggle="collapse" href="#collapse1" class="btn btn-sm btn-default">
+				<button id="showHideParameters" class="btn btn-sm btn-default">
 					<spring:message code="jobs.text.parameters"/> <i class="fa fa-angle-down" aria-hidden="true"></i>
-				</a>
+				</button>
 				<label for="runInline" class="btn btn-primary btn-sm">
 					<spring:message code="page.action.run"/>
 				</label>

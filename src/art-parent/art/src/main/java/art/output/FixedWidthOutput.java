@@ -128,12 +128,12 @@ public class FixedWidthOutput {
 		ResultSetMetaData rsmd = null;
 
 		List<List<Object>> listData = new ArrayList<>();
-		List<String> dataColumnNames = null;
-		if (data == null) {
+		List<String> columnLabels = null;
+		if (resultSet != null) {
 			rsmd = resultSet.getMetaData();
-		} else {
+		} else if (data != null) {
 			GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
-			dataColumnNames = dataDetails.getColumnNames();
+			columnLabels = dataDetails.getColumnLabels();
 			List<Map<String, ?>> mapListData = RunReportHelper.getMapListData(data);
 			for (Map<String, ?> row : mapListData) {
 				List<Object> rowData = new ArrayList<>();
@@ -153,9 +153,9 @@ public class FixedWidthOutput {
 				for (int i = 1; i <= fieldLengthsArray.length; i++) {
 					columnNames.add(rsmd.getColumnLabel(i));
 				}
-			} else if (dataColumnNames != null) {
+			} else if (columnLabels != null) {
 				for (int i = 1; i <= fieldLengthsArray.length; i++) {
-					columnNames.add(dataColumnNames.get(i - 1));
+					columnNames.add(columnLabels.get(i - 1));
 				}
 			}
 
@@ -180,8 +180,8 @@ public class FixedWidthOutput {
 						}
 					}
 				}
-			} else if (dataColumnNames != null) {
-				for (String columnName : dataColumnNames) {
+			} else if (columnLabels != null) {
+				for (String columnName : columnLabels) {
 					for (Map<String, Integer> fieldLengthDefinition : fieldLengthsByName) {
 						//https://stackoverflow.com/questions/1509391/how-to-get-the-one-entry-from-hashmap-without-iterating
 						// Get the first entry that the iterator returns
@@ -293,7 +293,7 @@ public class FixedWidthOutput {
 
 		if (reportFormat.isHtml()) {
 			writer.println("<pre>");
-			if (data == null) {
+			if (resultSet != null) {
 				routines.write(resultSet, writer);
 			} else {
 				FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(writer, writerSettings);
@@ -305,10 +305,10 @@ public class FixedWidthOutput {
 		} else {
 			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 				if (reportFormat == ReportFormat.txt) {
-					if (data == null) {
-						routines.write(resultSet, fout);
+					if (resultSet != null) {
+						routines.write(resultSet, fout, "UTF-8");
 					} else {
-						FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(fout, writerSettings);
+						FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(fout, "UTF-8", writerSettings);
 						for (List<Object> row : listData) {
 							fixedWidthWriter.processRecord(row.toArray(new Object[0]));
 						}
@@ -319,10 +319,10 @@ public class FixedWidthOutput {
 					ZipEntry ze = new ZipEntry(filename + ".txt");
 					try (ZipOutputStream zout = new ZipOutputStream(fout)) {
 						zout.putNextEntry(ze);
-						if (data == null) {
-							routines.write(resultSet, zout);
+						if (resultSet != null) {
+							routines.write(resultSet, zout, "UTF-8");
 						} else {
-							FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(zout, writerSettings);
+							FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(zout, "UTF-8", writerSettings);
 							for (List<Object> row : listData) {
 								fixedWidthWriter.processRecord(row.toArray(new Object[0]));
 							}

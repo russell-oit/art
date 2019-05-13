@@ -38,6 +38,7 @@ import art.enums.ZipType;
 import art.output.CsvOutputArt;
 import art.output.CsvOutputUnivocity;
 import art.output.DocxOutput;
+import art.output.FileOutput;
 import art.output.FixedWidthOutput;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
@@ -101,6 +102,7 @@ import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -114,6 +116,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -417,6 +420,8 @@ public class ReportOutputGenerator {
 				generateReportEngineReport();
 			} else if (reportType == ReportType.Plotly) {
 				generatePlotlyReport();
+			} else if(reportType == ReportType.File){
+				generateFileReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
@@ -1315,15 +1320,18 @@ public class ReportOutputGenerator {
 
 		//store data for potential use in html and pdf output
 		List<String> dataColumnNames = null;
+		List<String> columnLabels = null;
 		Object chartGroovyData = null;
 		boolean showResultSetData = false;
 		if (showData) {
 			if (groovyData == null) {
 				showResultSetData = true;
 				dataColumnNames = chart.getResultSetColumnNames();
+				columnLabels = dataColumnNames;
 			} else {
 				GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
 				dataColumnNames = dataDetails.getColumnNames();
+				columnLabels = dataDetails.getColumnLabels();
 				chartGroovyData = groovyData;
 			}
 		}
@@ -1341,6 +1349,7 @@ public class ReportOutputGenerator {
 
 				if (dataColumnNames != null) {
 					request.setAttribute("columnNames", dataColumnNames);
+					request.setAttribute("columnLabels", columnLabels);
 					if (groovyData == null) {
 						request.setAttribute("data", chart.getResultSetData());
 					} else {
@@ -1622,6 +1631,7 @@ public class ReportOutputGenerator {
 
 		request.setAttribute("reportType", reportType);
 
+		boolean useLabelAsDataColumn = false;
 		if (reportType == ReportType.DataTables) {
 			rs = reportRunner.getResultSet();
 
@@ -1629,6 +1639,7 @@ public class ReportOutputGenerator {
 			JsonOutputResult jsonOutputResult;
 			if (groovyData == null) {
 				jsonOutputResult = jsonOutput.generateOutput(rs);
+				useLabelAsDataColumn = true;
 			} else {
 				jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
 			}
@@ -1690,7 +1701,7 @@ public class ReportOutputGenerator {
 			request.setAttribute("dataFileName", dataFileName);
 		}
 
-		showDataTablesJsp();
+		showDataTablesJsp(useLabelAsDataColumn);
 	}
 
 	/**
@@ -1700,14 +1711,29 @@ public class ReportOutputGenerator {
 	 * @throws IOException
 	 */
 	private void showDataTablesJsp() throws ServletException, IOException {
+		boolean useLabelAsDataColumn = false;
+		showDataTablesJsp(useLabelAsDataColumn);
+	}
+
+	/**
+	 * Shows the showDataTables.jsp page
+	 *
+	 * @param useLabelAsDataColumn whether to use the label as the data column
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void showDataTablesJsp(boolean useLabelAsDataColumn) throws ServletException, IOException {
 		String outputDivId = "dataTablesOutput-" + RandomStringUtils.randomAlphanumeric(5);
 		String tableId = "tableData-" + RandomStringUtils.randomAlphanumeric(5);
 		String languageTag = locale.toLanguageTag();
 		String localeString = locale.toString();
+
 		request.setAttribute("outputDivId", outputDivId);
 		request.setAttribute("tableId", tableId);
 		request.setAttribute("languageTag", languageTag);
 		request.setAttribute("locale", localeString);
+		request.setAttribute("useLabelAsDataColumn", useLabelAsDataColumn);
+
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 	}
 
@@ -1757,6 +1783,26 @@ public class ReportOutputGenerator {
 		} else {
 			rowsRetrieved = groovyDataSize;
 		}
+
+		if (!isJob && !reportFormat.isHtml()) {
+			displayFileLink(fileName);
+		}
+	}
+	
+	/**
+	 * Generates output for a file report
+	 *
+	 * @throws Exception
+	 */
+	private void generateFileReport() throws Exception {
+		logger.debug("Entering generateFileReport");
+
+		rs = reportRunner.getResultSet();
+
+		FileOutput fileOutput = new FileOutput();
+		fileOutput.setResultSet(rs);
+		fileOutput.setData(groovyData);
+		rowsRetrieved = fileOutput.generateOutput(writer, report, reportFormat, fullOutputFilename);
 
 		if (!isJob && !reportFormat.isHtml()) {
 			displayFileLink(fileName);
@@ -2189,7 +2235,6 @@ public class ReportOutputGenerator {
 	 * @throws Exception
 	 */
 	private void generateMongoDbReport() throws Exception {
-
 		logger.debug("Entering generateMongoDbReport");
 		//https://learnxinyminutes.com/docs/groovy/
 		//http://groovy-lang.org/index.html
@@ -2268,6 +2313,7 @@ public class ReportOutputGenerator {
 				String optionsString = report.getOptions();
 				List<String> optionsColumnNames = null;
 				List<Map<String, String>> columnDataTypes = null;
+				List<Map<String, String>> columnLabels = null;
 				MongoDbOptions options;
 				if (StringUtils.isBlank(optionsString)) {
 					options = new MongoDbOptions();
@@ -2276,6 +2322,7 @@ public class ReportOutputGenerator {
 					options = mapper.readValue(optionsString, MongoDbOptions.class);
 					optionsColumnNames = options.getColumns();
 					columnDataTypes = options.getColumnDataTypes();
+					columnLabels = options.getColumnLabels();
 				}
 
 				@SuppressWarnings("unchecked")
@@ -2332,10 +2379,22 @@ public class ReportOutputGenerator {
 						}
 					}
 
-					List<String> finalColumnNames = new ArrayList<>();
 					for (ResultSetColumn column : columns) {
 						String columnName = column.getName();
-						finalColumnNames.add(columnName);
+						String columnLabel = null;
+						if (columnLabels != null) {
+							for (Map<String, String> labelDefinition : columnLabels) {
+								Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(labelDefinition);
+								columnLabel = caseInsensitiveMap.get(columnName);
+								if (columnLabel != null) {
+									break;
+								}
+							}
+						}
+						if (columnLabel == null) {
+							columnLabel = columnName;
+						}
+						column.setLabel(columnLabel);
 					}
 
 					//_id is a complex object so we have to iterate and replace it with the toString() representation
@@ -2344,7 +2403,8 @@ public class ReportOutputGenerator {
 					for (Object object : resultList) {
 						Map<String, Object> row = new LinkedHashMap<>();
 						Map<String, Object> map = ArtUtils.objectToMap(object);
-						for (String columnName : finalColumnNames) {
+						for (ResultSetColumn column : columns) {
+							String columnName = column.getName();
 							Object value = map.get(columnName);
 							Object finalValue;
 							if (value == null) {
@@ -2365,7 +2425,12 @@ public class ReportOutputGenerator {
 
 					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
 					//https://github.com/wnameless/json-flattener
-					resultString = ArtUtils.objectToJson(finalResultList);
+					//https://www.baeldung.com/jackson-serialize-dates
+					//https://stackoverflow.com/questions/12463049/date-format-mapping-to-json-jackson
+					ObjectMapper mapper = new ObjectMapper();
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+					mapper.setDateFormat(df);
+					resultString = mapper.writeValueAsString(finalResultList);
 				}
 
 				request.setAttribute("data", resultString);
@@ -2585,7 +2650,6 @@ public class ReportOutputGenerator {
 	 * @throws Exception
 	 */
 	private void generatePlotlyReport(PlotlyOptions plotlyOptions) throws Exception {
-
 		logger.debug("Entering generatePlotlyReport");
 
 		if (isJob) {
@@ -2692,6 +2756,7 @@ public class ReportOutputGenerator {
 
 		if (languageFile.exists()) {
 			request.setAttribute("localeFileName", languageFileName);
+			request.setAttribute("localeString", localeString);
 		}
 
 		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);

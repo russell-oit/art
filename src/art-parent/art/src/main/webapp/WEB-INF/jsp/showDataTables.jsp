@@ -65,6 +65,8 @@
 	var formattedNumberColumns = [];
 	var customNumberFormats = [[]];
 
+	var reportType = '${encode:forJavaScript(reportType)}';
+
 	//https://stackoverflow.com/questions/35450227/how-to-parse-given-date-string-using-moment-js
 	//http://momentjs.com/docs/
 	var inputDateFormat = 'YYYY-MM-DD'; //moment format e.g. YYYY-MM-DD
@@ -73,7 +75,10 @@
 		inputDateFormat = moment().toMomentFormatString(javaInputDateFormat);
 	}
 
-	var outputDateFormat = ''; //moment format e.g. DD-MMM-YYYY
+	var outputDateFormat; //moment format e.g. DD-MMM-YYYY
+	if (reportType === 'MongoDB') {
+		outputDateFormat = 'DD-MMM-YYYY';
+	}
 	var javaOutputDateFormat = '${encode:forJavaScript(options.outputDateFormat)}';
 	if (javaOutputDateFormat) {
 		outputDateFormat = moment().toMomentFormatString(javaOutputDateFormat);
@@ -85,10 +90,18 @@
 		inputDateTimeFormat = moment().toMomentFormatString(javaInputDateTimeFormat);
 	}
 
-	var outputDateTimeFormat = ''; //moment format e.g. DD-MMM-YYYY HH:mm:ss
+	var outputDateTimeFormat; //moment format e.g. DD-MMM-YYYY HH:mm:ss
+	if (reportType === 'MongoDB') {
+		outputDateTimeFormat = 'DD-MMM-YYYY HH:mm:ss';
+	}
 	var javaOutputDateTimeFormat = '${encode:forJavaScript(options.outputDateTimeFormat)}';
 	if (javaOutputDateTimeFormat) {
 		outputDateTimeFormat = moment().toMomentFormatString(javaOutputDateTimeFormat);
+	}
+
+	if (reportType === 'MongoDB') {
+		inputDateFormat = 'YYYY-MM-DD HH:mm:ss.SSS';
+		inputDateTimeFormat = inputDateFormat;
 	}
 
 	var showColumnFilters = ${options.showColumnFilters};
@@ -97,32 +110,24 @@
 
 	function dateFormatter(data, type, full, meta) {
 		//https://stackoverflow.com/questions/25319193/jquery-datatables-column-rendering-and-sorting
-		if (type === "display" || type === 'filter') {
-			var formattedDate;
-			if (data === null) {
-				formattedDate = '';
+		if (data) {
+			if (type === "display" || type === 'filter') {
+				return moment(data, inputDateFormat).format(outputDateFormat);
 			} else {
-				formattedDate = moment(data, inputDateFormat).format(outputDateFormat);
+				return data;
 			}
-			return formattedDate;
 		} else {
 			return data;
 		}
 	}
 
 	function datetimeFormatter(data, type, full, meta) {
-		//https://stackoverflow.com/questions/25319193/jquery-datatables-column-rendering-and-sorting
-		if (type === "display" || type === 'filter') {
-			var formattedDate;
-			if (data === null) {
-				formattedDate = '';
+		if (data) {
+			if (type === "display" || type === 'filter') {
+				return moment(data, inputDateTimeFormat).format(outputDateTimeFormat);
 			} else {
-				//http://wiki.fasterxml.com/JacksonFAQDateHandling
-				//https://egkatzioura.wordpress.com/2013/01/22/spring-jackson-and-date-serialization/
-				//https://momentjs.com/docs/#/parsing/string/
-				formattedDate = moment(data, inputDateTimeFormat).format(outputDateTimeFormat);
+				return data;
 			}
-			return formattedDate;
 		} else {
 			return data;
 		}
@@ -130,12 +135,12 @@
 
 	function twoDecimals(data, type, full, meta) {
 		if (type === "display" || type === 'filter') {
-			if (data === null) {
-				return '';
-			} else {
+			if (data) {
 				//https://stackoverflow.com/questions/6134039/format-number-to-always-show-2-decimal-places
 				//https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat
 				return new Intl.NumberFormat('${languageTag}', {minimumFractionDigits: 2}).format(data);
+			} else {
+				return '';
 			}
 		} else {
 			return data;
@@ -157,10 +162,10 @@
 	function numberFormatter(data, type, full, meta) {
 		if (type === "display" || type === 'filter') {
 			var formattedNumber;
-			if (data === null) {
-				formattedNumber = '';
-			} else {
+			if (data) {
 				formattedNumber = data.toLocaleString('${languageTag}');
+			} else {
+				formattedNumber = '';
 			}
 			return formattedNumber;
 		} else {
@@ -234,7 +239,6 @@
 	}
 
 	var download;
-	var reportType = '${encode:forJavaScript(reportType)}';
 	if (reportType === 'DataTablesCsvServer') {
 		download = true;
 	} else {
@@ -310,11 +314,20 @@
 	var i = 0;
 			<c:forEach var="column" items="${columns}">
 	i++;
+
 	var columnName = "${encode:forJavaScript(column.name)}";
+	var columnLabel = "${encode:forJavaScript(column.label)}";
+	var dataColumn;
+	if (${useLabelAsDataColumn}) {
+		dataColumn = columnLabel;
+	} else {
+		dataColumn = columnName;
+	}
 	var columnDef = {
-		data: columnName,
-		title: columnName
+		data: dataColumn,
+		title: columnLabel
 	};
+
 	var columnType = '${encode:forJavaScript(column.type)}';
 	if (columnType === 'Numeric') {
 		if (formatAllNumbers || formattedNumberColumns.indexOf(i) !== -1) {

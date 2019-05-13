@@ -73,6 +73,7 @@ Display user jobs and jobs configuration
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.colVis.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -89,20 +90,6 @@ Display user jobs and jobs configuration
 
 				var tbl = $('#jobs');
 
-				var pageLength = undefined; //pass undefined to use the default
-				var showAllRowsText = "${showAllRowsText}";
-				var contextPath = "${pageContext.request.contextPath}";
-				var localeCode = "${pageContext.response.locale}";
-				var addColumnFilters = false; //pass undefined to use the default
-				var deleteButtonSelector = ".deleteRecord";
-				var deleteRecordText = "${deleteRecordText}";
-				var okText = "${okText}";
-				var cancelText = "${cancelText}";
-				var deleteUrl = "deleteJob";
-				var recordDeletedText = "${recordDeletedText}";
-				var errorOccurredText = "${errorOccurredText}";
-				var cannotDeleteRecordText = undefined;
-				var linkedRecordsExistText = undefined;
 				var columnDefs = [
 					{
 						targets: "idCol",
@@ -119,27 +106,45 @@ Display user jobs and jobs configuration
 					{
 						targets: "resultCol",
 						width: "400px"
+					},
+					{
+						targets: 0,
+						orderable: false,
+						className: 'select-checkbox'
+					},
+					{
+						targets: "dtHidden", //target name matches class name of th.
+						visible: false
 					}
 				];
 
-				//initialize datatable and process delete action
-				var oTable = initConfigPage(tbl,
-						pageLength,
-						showAllRowsText,
-						contextPath,
-						localeCode,
-						addColumnFilters,
-						deleteButtonSelector,
-						deleteRecordText,
-						okText,
-						cancelText,
-						deleteUrl,
-						recordDeletedText,
-						errorOccurredText,
-						cannotDeleteRecordText,
-						linkedRecordsExistText,
-						columnDefs
-						);
+				var oTable = tbl.dataTable({
+					orderClasses: false,
+					order: [1, "asc"],
+					pagingType: "full_numbers",
+					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
+					pageLength: 20,
+					columnDefs: columnDefs,
+					dom: 'lBfrtip',
+					buttons: [
+						'selectAll',
+						'selectNone',
+						{
+							extend: 'colvis',
+							postfixButtons: ['colvisRestore']
+						}
+					],
+					select: {
+						style: 'multi',
+						selector: 'td:first-child'
+					},
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+					},
+					initComplete: function () {
+						datatablesInitComplete();
+					}
+				});
 
 				var table = oTable.api();
 
@@ -184,6 +189,43 @@ Display user jobs and jobs configuration
 							}
 						]
 						);
+
+				tbl.find('tbody').on('click', '.deleteRecord', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.attr("data-name"));
+					var recordId = row.data("id");
+					bootbox.confirm({
+						message: "${deleteRecordText}: <b>" + recordName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/deleteJob",
+									data: {id: recordId},
+									success: function (response) {
+										if (response.success) {
+											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
+											notifyActionSuccessReusable("${recordDeletedText}", recordName);
+										} else {
+											notifyActionErrorReusable("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+										}
+									},
+									error: ajaxErrorHandler
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
 
 				tbl.find('tbody').on('click', '.run', function () {
 					var row = $(this).closest("tr"); //jquery object

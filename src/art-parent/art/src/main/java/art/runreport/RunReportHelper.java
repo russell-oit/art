@@ -391,7 +391,7 @@ public class RunReportHelper {
 				enableShowSelectedParameters = false;
 				break;
 			default:
-				if (sessionUser.hasPermission("configure_reports")) {
+				if (sessionUser.hasConfigureReportsPermission()) {
 					enableShowSql = true;
 				} else {
 					enableShowSql = false;
@@ -621,6 +621,11 @@ public class RunReportHelper {
 					formats.add("csv");
 					formats.add("csvZip");
 					break;
+				case File:
+					formats.add("html");
+					formats.add("file");
+					formats.add("fileZip");
+					break;
 				default:
 					//tabular, crosstab, lov dynamic, etc
 					formats = Config.getReportFormats();
@@ -815,6 +820,7 @@ public class RunReportHelper {
 
 		List<String> optionsColumnNames = null;
 		List<Map<String, String>> columnDataTypes = null;
+		List<Map<String, String>> optionsColumnLabels = null;
 		if (report != null) {
 			String options = report.getOptions();
 			if (StringUtils.isNotBlank(options)) {
@@ -822,12 +828,13 @@ public class RunReportHelper {
 				GroovyOptions groovyOptions = mapper.readValue(options, GroovyOptions.class);
 				optionsColumnNames = groovyOptions.getColumns();
 				columnDataTypes = groovyOptions.getColumnDataTypes();
+				optionsColumnLabels = groovyOptions.getColumnLabels();
 			}
 		}
 
 		int colCount = 0;
 		List<String> dataColumnNames = new ArrayList<>();
-		Map<Integer, ColumnTypeDefinition> columnTypes = new HashMap<>();
+		Map<Integer, ColumnTypeDefinition> dataColumnTypes = new HashMap<>();
 		if (CollectionUtils.isNotEmpty(dataList)) {
 			Object sample = dataList.get(0);
 			if (sample instanceof GroovyRowResult) {
@@ -838,7 +845,7 @@ public class RunReportHelper {
 					String columnName = String.valueOf(entry.getKey());
 					dataColumnNames.add(columnName);
 					Object columnValue = entry.getValue();
-					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
+					dataColumnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			} else if (sample instanceof DynaBean) {
 				DynaBean sampleBean = (DynaBean) sample;
@@ -849,7 +856,7 @@ public class RunReportHelper {
 					String columnName = column.getName();
 					dataColumnNames.add(columnName);
 					Object columnValue = sampleBean.get(columnName);
-					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
+					dataColumnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			} else if (sample instanceof Map) {
 				@SuppressWarnings("unchecked")
@@ -860,7 +867,7 @@ public class RunReportHelper {
 					String columnName = entry.getKey();
 					dataColumnNames.add(columnName);
 					Object columnValue = entry.getValue();
-					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
+					dataColumnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			} else {
 				//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
@@ -872,14 +879,16 @@ public class RunReportHelper {
 					String columnName = entry.getKey();
 					dataColumnNames.add(columnName);
 					Object columnValue = entry.getValue();
-					columnTypes.put(colCount, getColumnTypeDefinition(columnValue));
+					dataColumnTypes.put(colCount, getColumnTypeDefinition(columnValue));
 				}
 			}
 		}
 
 		List<String> columnNames = new ArrayList<>();
+		Map<Integer, ColumnTypeDefinition> columnTypes = new HashMap<>();
 		if (CollectionUtils.isEmpty(optionsColumnNames)) {
 			columnNames.addAll(dataColumnNames);
+			columnTypes.putAll(dataColumnTypes);
 		} else {
 			columnNames.addAll(optionsColumnNames);
 		}
@@ -912,6 +921,7 @@ public class RunReportHelper {
 		}
 
 		List<ResultSetColumn> resultSetColumns = new ArrayList<>();
+		List<String> columnLabels = new ArrayList<>();
 		for (int i = 1; i <= columnNames.size(); i++) {
 			String columnName = columnNames.get(i - 1);
 			ColumnTypeDefinition columnTypeDefinition = columnTypes.get(i);
@@ -933,17 +943,34 @@ public class RunReportHelper {
 			resultSetColumn.setName(columnName);
 			resultSetColumn.setType(resultSetColumnType);
 
+			String columnLabel = null;
+			if (optionsColumnLabels != null) {
+				for (Map<String, String> labelDefinition : optionsColumnLabels) {
+					Map<String, String> caseInsensitiveMap = new CaseInsensitiveMap<>(labelDefinition);
+					columnLabel = caseInsensitiveMap.get(columnName);
+					if (columnLabel != null) {
+						break;
+					}
+				}
+			}
+			if (columnLabel == null) {
+				columnLabel = columnName;
+			}
+			resultSetColumn.setLabel(columnLabel);
+			columnLabels.add(columnLabel);
+
 			resultSetColumns.add(resultSetColumn);
 		}
 
 		GroovyDataDetails details = new GroovyDataDetails();
 
 		details.setRowCount(rowCount);
-		details.setColCount(colCount);
+		details.setColCount(columnNames.size());
 		details.setColumnNames(columnNames);
 		details.setDataList(dataList);
 		details.setColumnTypes(columnTypes);
 		details.setResultSetColumns(resultSetColumns);
+		details.setColumnLabels(columnLabels);
 
 		return details;
 	}
@@ -1347,7 +1374,7 @@ public class RunReportHelper {
 
 		if (reportType.isJasperReports()) {
 			reportFormat = ReportFormat.pdf;
-		} else if (reportType.isStandardOutput()) {
+		} else if (reportType.isStandardOutput() || reportType.isReportEngine()) {
 			reportFormat = ReportFormat.htmlFancy;
 		} else {
 			reportFormat = ReportFormat.html;
@@ -1595,10 +1622,10 @@ public class RunReportHelper {
 		}
 
 		String columnsString = StringUtils.join(chosenColumns, ", ");
-		
+
 		selfServiceOptions.setColumnsString(columnsString);
 		selfServiceOptionsString = ArtUtils.objectToJson(selfServiceOptions);
-		
+
 		report.setSelfServiceOptions(selfServiceOptionsString);
 	}
 

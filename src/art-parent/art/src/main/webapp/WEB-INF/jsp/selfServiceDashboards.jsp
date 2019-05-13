@@ -25,6 +25,7 @@
 <spring:message code="dialog.title.saveReport" var="saveReportText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
+<spring:message code="dialog.text.title" var="titleText"/>
 
 <t:mainPage title="${pageTitle}">
 
@@ -129,6 +130,26 @@
 				$('.grid-stack').on('click', '.refreshWidget', function () {
 					var reportId = $(this).data("reportId");
 					runReport(reportId);
+				});
+
+				$('.grid-stack').on('click', '.editWidgetTitle', function () {
+					var titleDiv = $(this).closest('.portletTitle');
+					bootbox.prompt({
+						title: "${titleText}",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								titleDiv.find('.reportTitle').text(result);
+							}
+						}
+					});
 				});
 
 				function autosize(autoheight, autowidth, reportId) {
@@ -246,6 +267,8 @@
 								if (response.success) {
 									var grid = $('.grid-stack').data('gridstack');
 									var dashboard = response.data;
+									
+									var runImmediately = $("#runImmediately").is(":checked");
 									$.each(dashboard.items, function (index, item) {
 										var itemReportId = item.reportId;
 										if (itemReportId > 0) {
@@ -253,19 +276,21 @@
 											var autoPosition = false;
 											grid.addWidget(el, item.xPosition, item.yPosition, item.width, item.height, autoPosition);
 
-											$.ajax({
-												type: 'POST',
-												url: '${pageContext.request.contextPath}/runReport',
-												data: {reportId: itemReportId, isFragment: true},
-												success: function (data) {
-													$("#content_" + itemReportId).html(data);
-													$('#reports').find('[value=' + itemReportId + ']').prop('selected', true);
-													$('#reports').selectpicker('refresh');
-												},
-												error: function (xhr) {
-													showUserAjaxError(xhr, '${errorOccurredText}');
-												}
-											});
+											if (runImmediately) {
+												$.ajax({
+													type: 'POST',
+													url: '${pageContext.request.contextPath}/runReport',
+													data: {reportId: itemReportId, isFragment: true},
+													success: function (data) {
+														$("#content_" + itemReportId).html(data);
+														$('#reports').find('[value=' + itemReportId + ']').prop('selected', true);
+														$('#reports').selectpicker('refresh');
+													},
+													error: function (xhr) {
+														showUserAjaxError(xhr, '${errorOccurredText}');
+													}
+												});
+											}
 										}
 									});
 								} else {
@@ -346,7 +371,7 @@
 				var grid = $('.grid-stack').data('gridstack');
 				grid.removeAll();
 			}
-			
+
 			function showDeleteDashboard(reportName, reportId) {
 				$("#deleteDashboard").attr("data-report-name", reportName);
 				$("#deleteDashboard").attr("data-report-id", reportId);
@@ -361,9 +386,10 @@
 			<div>
 			<div class="grid-stack-item-content" style="border: 1px solid #ccc" id="itemContent_#reportId#" data-report-id="#reportId#">
 			<div class="portletTitle">
-			<span><b>#reportName#</b></span>
+			<span><b class="reportTitle">#reportName#</b></span>
 			<span class="fa fa-times removeWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
 			<span class="fa fa-refresh refreshWidget pull-right self-service-item-icon" data-report-id="#reportId#"></span>
+			<span class="fa fa-pencil editWidgetTitle pull-right self-service-item-icon"></span>
 			</div>				
 			<div id="content_#reportId#">
 			</div>
@@ -481,10 +507,13 @@
 					var content = $(this).find('.grid-stack-item-content');
 					//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
 					var reportId = content.data("reportId");
+					var titleDiv = content.find('.portletTitle');
+					var title = titleDiv.find('.reportTitle').text();
 
 					items.push({
 						index: index + 1,
 						reportId: reportId,
+						title: title,
 						x: parseInt($this.attr('data-gs-x'), 10),
 						y: parseInt($this.attr('data-gs-y'), 10),
 						width: parseInt($this.attr('data-gs-width'), 10),

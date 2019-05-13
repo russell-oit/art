@@ -1041,6 +1041,7 @@ Edit report page
 					case 141: //fixed width
 					case 158: //reportengine
 					case 159: //reportengine file
+					case 162: //file
 						$("#encryptorDiv").show();
 						break;
 					default:

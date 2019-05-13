@@ -128,7 +128,7 @@ public class ExportController {
 			ReportService reportService = new ReportService();
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			try {
-				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
+				if (!reportService.canUserRunReport(sessionUser, reportId)) {
 					request.getRequestDispatcher("/accessDenied").forward(request, response);
 					return;
 				}
@@ -162,13 +162,8 @@ public class ExportController {
 			//https://dzone.com/articles/determining-file-types-java
 			//http://www.rgagnon.com/javadetails/java-0487.html
 			//https://howtodoinjava.com/spring/spring-mvc/spring-mvc-download-file-controller-example/
-			String mimeType = "application/octet-stream";
 			Tika tika = new Tika();
-			try {
-				mimeType = tika.detect(file);
-			} catch (IOException ex) {
-				logger.error("Error", ex);
-			}
+			String mimeType = tika.detect(file.getName());
 
 			response.setContentType(mimeType);
 

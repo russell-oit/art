@@ -17,7 +17,6 @@
  */
 package art.reportoptions;
 
-import art.enums.ReportType;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +30,21 @@ public class MongoDbOptions extends DataTablesOptions {
 	private static final long serialVersionUID = 1L;
 	private List<String> columns;
 	private List<Map<String, String>> columnDataTypes;
-	private ReportType reportType = ReportType.DataTables;
+	private List<Map<String, String>> columnLabels;
+
+	/**
+	 * @return the columnLabels
+	 */
+	public List<Map<String, String>> getColumnLabels() {
+		return columnLabels;
+	}
+
+	/**
+	 * @param columnLabels the columnLabels to set
+	 */
+	public void setColumnLabels(List<Map<String, String>> columnLabels) {
+		this.columnLabels = columnLabels;
+	}
 
 	/**
 	 * @return the columns
@@ -61,17 +74,4 @@ public class MongoDbOptions extends DataTablesOptions {
 		this.columnDataTypes = columnDataTypes;
 	}
 
-	/**
-	 * @return the reportType
-	 */
-	public ReportType getReportType() {
-		return reportType;
-	}
-
-	/**
-	 * @param reportType the reportType to set
-	 */
-	public void setReportType(ReportType reportType) {
-		this.reportType = reportType;
-	}
 }

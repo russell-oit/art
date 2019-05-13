@@ -108,13 +108,13 @@ public class JPivotController {
 			//admins can run all reports, even disabled ones. only check for non admin users
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			if (!sessionUser.isAdminUser()) {
+			if (!sessionUser.hasConfigureReportsPermission()) {
 				if (!report.isActive()) {
 					model.addAttribute("message", "reports.message.reportDisabled");
 					return errorPage;
 				}
 
-				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
+				if (!reportService.canUserRunReport(sessionUser, reportId)) {
 					model.addAttribute("message", "reports.message.noPermission");
 					return errorPage;
 				}
