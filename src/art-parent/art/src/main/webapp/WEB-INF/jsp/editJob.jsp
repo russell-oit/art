@@ -46,6 +46,10 @@
 <spring:message code="reports.format.tsv" var="tsvText"/>
 <spring:message code="reports.format.txt" var="txtText"/>
 <spring:message code="reports.format.txtZip" var="txtZipText"/>
+<spring:message code="reports.format.csv" var="csvText"/>
+<spring:message code="reports.format.csvZip" var="csvZipText"/>
+<spring:message code="reports.format.file" var="fileText"/>
+<spring:message code="reports.format.fileZip" var="fileZipText"/>
 <spring:message code="reports.text.selectFile" var="selectFileText"/>
 <spring:message code="reports.text.change" var="changeText"/>
 <spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
@@ -335,8 +339,8 @@
 					list.append(new Option('${htmlText}', 'html'));
 				} else if (reportTypeId === 152) {
 					//csv
-					list.append(new Option('${txtText}', 'csv'));
-					list.append(new Option('${txtZipText}', 'csvZip'));
+					list.append(new Option('${csvText}', 'csv'));
+					list.append(new Option('${csvZipText}', 'csvZip'));
 					list.append(new Option('${htmlText}', 'html'));
 				} else if (reportTypeId === 110 || reportTypeId === 129) {
 					//dashboard
@@ -344,6 +348,11 @@
 				} else if (reportTypeId === 1) {
 					//group
 					list.append(new Option('${xlsxText}', 'xlsx'));
+				} else if (reportTypeId === 162) {
+					//file
+					list.append(new Option('${fileText}', 'file'));
+					list.append(new Option('${fileZipText}', 'fileZip'));
+					list.append(new Option('${htmlText}', 'html'));
 				} else {
 					//tabular
 					switch (jobType) {

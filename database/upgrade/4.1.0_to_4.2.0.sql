@@ -5,6 +5,7 @@
 -- add use_api permission
 -- add allow select parameters column
 -- update drilldown output format column
+-- insert new report type
 
 -- ------------------------------------------------
 
@@ -21,3 +22,6 @@ UPDATE ART_DRILLDOWN_QUERIES SET ALLOW_SELECT_PARAMETERS=1;
 
 -- update drilldown output format column
 UPDATE ART_DRILLDOWN_QUERIES SET OUTPUT_FORMAT='default' WHERE OUTPUT_FORMAT='ALL' or OUTPUT_FORMAT IS NULL;
+
+-- insert new report type
+INSERT INTO ART_REPORT_TYPES VALUES (162,'File');

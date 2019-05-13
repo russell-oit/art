@@ -91,7 +91,7 @@ public class CsvOutputUnivocity {
 	}
 
 	/**
-	 * Generates fixed width output for data in the given resultset
+	 * Generates csv output for data in the given resultset
 	 *
 	 * @param writer the writer to output to. If html report format is required,
 	 * a writer must be supplied
@@ -193,9 +193,9 @@ public class CsvOutputUnivocity {
 		}
 
 		if (writer instanceof StringWriter) {
-			if (data == null) {
+			if (resultSet != null) {
 				csvRoutines.write(resultSet, writer);
-			} else {
+			} else if (listData != null) {
 				//https://github.com/uniVocity/univocity-parsers/blob/master/src/test/java/com/univocity/parsers/examples/WriterExamples.java
 				//https://github.com/uniVocity/univocity-parsers/blob/master/src/main/java/com/univocity/parsers/common/routine/AbstractRoutines.java
 				//https://github.com/uniVocity/univocity-parsers/blob/master/src/main/java/com/univocity/parsers/common/AbstractWriter.java
@@ -210,9 +210,9 @@ public class CsvOutputUnivocity {
 		} else {
 			if (reportFormat.isHtml()) {
 				writer.write("<pre>");
-				if (data == null) {
+				if (resultSet != null) {
 					csvRoutines.write(resultSet, writer);
-				} else {
+				} else if (listData != null) {
 					CsvWriter csvWriter = new CsvWriter(writer, csvWriterSettings);
 					if (csvOptions.isIncludeHeaders()) {
 						csvWriter.writeHeaders(columnLabels);
@@ -225,9 +225,9 @@ public class CsvOutputUnivocity {
 			} else {
 				try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 					if (reportFormat == ReportFormat.csv) {
-						if (data == null) {
+						if (resultSet != null) {
 							csvRoutines.write(resultSet, fout, "UTF-8");
-						} else {
+						} else if (listData != null) {
 							CsvWriter csvWriter = new CsvWriter(fout, "UTF-8", csvWriterSettings);
 							if (csvOptions.isIncludeHeaders()) {
 								csvWriter.writeHeaders(columnLabels);
@@ -245,9 +245,9 @@ public class CsvOutputUnivocity {
 						ZipEntry ze = new ZipEntry(zipEntryFilename);
 						try (ZipOutputStream zout = new ZipOutputStream(fout)) {
 							zout.putNextEntry(ze);
-							if (data == null) {
+							if (resultSet != null) {
 								csvRoutines.write(resultSet, zout, "UTF-8");
-							} else {
+							} else if (listData != null) {
 								CsvWriter csvWriter = new CsvWriter(zout, "UTF-8", csvWriterSettings);
 								if (csvOptions.isIncludeHeaders()) {
 									csvWriter.writeHeaders(columnLabels);

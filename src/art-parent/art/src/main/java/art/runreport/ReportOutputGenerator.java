@@ -38,6 +38,7 @@ import art.enums.ZipType;
 import art.output.CsvOutputArt;
 import art.output.CsvOutputUnivocity;
 import art.output.DocxOutput;
+import art.output.FileOutput;
 import art.output.FixedWidthOutput;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
@@ -419,6 +420,8 @@ public class ReportOutputGenerator {
 				generateReportEngineReport();
 			} else if (reportType == ReportType.Plotly) {
 				generatePlotlyReport();
+			} else if(reportType == ReportType.File){
+				generateFileReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
@@ -1780,6 +1783,26 @@ public class ReportOutputGenerator {
 		} else {
 			rowsRetrieved = groovyDataSize;
 		}
+
+		if (!isJob && !reportFormat.isHtml()) {
+			displayFileLink(fileName);
+		}
+	}
+	
+	/**
+	 * Generates output for a file report
+	 *
+	 * @throws Exception
+	 */
+	private void generateFileReport() throws Exception {
+		logger.debug("Entering generateFileReport");
+
+		rs = reportRunner.getResultSet();
+
+		FileOutput fileOutput = new FileOutput();
+		fileOutput.setResultSet(rs);
+		fileOutput.setData(groovyData);
+		rowsRetrieved = fileOutput.generateOutput(writer, report, reportFormat, fullOutputFilename);
 
 		if (!isJob && !reportFormat.isHtml()) {
 			displayFileLink(fileName);

@@ -3,6 +3,7 @@ ART 4.2
 * Better handle dates for MongoDB reports
 * Effect show header in public user session setting
 * Added Russian translation (thanks to Galina Seliverstova and Pavel Alexeev)
+* Added File report type
 * Updated jasperreports
 
 ART 4.1

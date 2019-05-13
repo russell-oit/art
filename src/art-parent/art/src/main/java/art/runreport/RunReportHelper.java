@@ -621,6 +621,11 @@ public class RunReportHelper {
 					formats.add("csv");
 					formats.add("csvZip");
 					break;
+				case File:
+					formats.add("html");
+					formats.add("file");
+					formats.add("fileZip");
+					break;
 				default:
 					//tabular, crosstab, lov dynamic, etc
 					formats = Config.getReportFormats();

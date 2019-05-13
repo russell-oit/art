@@ -24,6 +24,7 @@ import art.enums.ReportType;
 import art.job.Job;
 import art.report.Report;
 import art.reportoptions.CsvOutputArtOptions;
+import art.reportoptions.FileOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Date;
@@ -155,6 +156,8 @@ public class FilenameHelper {
 			extension = FilenameUtils.getExtension(jxlsFilename);
 		} else if (reportFormat == ReportFormat.csv) {
 			extension = getCsvExtension(report);
+		} else if (reportFormat == ReportFormat.file) {
+			extension = getFileReportExtension(report);
 		} else {
 			extension = reportFormat.getFilenameExtension();
 		}
@@ -170,7 +173,7 @@ public class FilenameHelper {
 					extension = extension + ".gpg";
 					break;
 				default:
-					//do nothing
+					break;
 			}
 		}
 
@@ -181,8 +184,8 @@ public class FilenameHelper {
 	 * Returns the file name extension to use for a csv file. "csv" if delimited
 	 * is comma, "txt" otherwise
 	 *
-	 * @param report
-	 * @return
+	 * @param report the report object
+	 * @return the file name extension to use
 	 * @throws java.io.IOException
 	 */
 	public String getCsvExtension(Report report) throws IOException {
@@ -208,4 +211,34 @@ public class FilenameHelper {
 
 		return extension;
 	}
+
+	/**
+	 * Returns the file name extension to use for a file report
+	 *
+	 * @param report the report object
+	 * @return the file name extension to use
+	 * @throws java.io.IOException
+	 */
+	public String getFileReportExtension(Report report) throws IOException {
+		Objects.requireNonNull(report, "report must not be null");
+
+		String extension;
+
+		FileOptions fileOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			fileOptions = new FileOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			fileOptions = mapper.readValue(options, FileOptions.class);
+		}
+
+		extension = fileOptions.getExtension();
+		if (StringUtils.isBlank(extension)) {
+			extension = "txt";
+		}
+
+		return extension;
+	}
+
 }

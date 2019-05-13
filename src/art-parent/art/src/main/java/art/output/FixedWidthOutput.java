@@ -129,9 +129,9 @@ public class FixedWidthOutput {
 
 		List<List<Object>> listData = new ArrayList<>();
 		List<String> columnLabels = null;
-		if (data == null) {
+		if (resultSet != null) {
 			rsmd = resultSet.getMetaData();
-		} else {
+		} else if (data != null) {
 			GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(data, report);
 			columnLabels = dataDetails.getColumnLabels();
 			List<Map<String, ?>> mapListData = RunReportHelper.getMapListData(data);
@@ -293,7 +293,7 @@ public class FixedWidthOutput {
 
 		if (reportFormat.isHtml()) {
 			writer.println("<pre>");
-			if (data == null) {
+			if (resultSet != null) {
 				routines.write(resultSet, writer);
 			} else {
 				FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(writer, writerSettings);
@@ -305,7 +305,7 @@ public class FixedWidthOutput {
 		} else {
 			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 				if (reportFormat == ReportFormat.txt) {
-					if (data == null) {
+					if (resultSet != null) {
 						routines.write(resultSet, fout, "UTF-8");
 					} else {
 						FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(fout, "UTF-8", writerSettings);
@@ -319,7 +319,7 @@ public class FixedWidthOutput {
 					ZipEntry ze = new ZipEntry(filename + ".txt");
 					try (ZipOutputStream zout = new ZipOutputStream(fout)) {
 						zout.putNextEntry(ze);
-						if (data == null) {
+						if (resultSet != null) {
 							routines.write(resultSet, zout, "UTF-8");
 						} else {
 							FixedWidthWriter fixedWidthWriter = new FixedWidthWriter(zout, "UTF-8", writerSettings);
