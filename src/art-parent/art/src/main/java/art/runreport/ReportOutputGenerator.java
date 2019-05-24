@@ -1403,8 +1403,9 @@ public class ReportOutputGenerator {
 	 *
 	 * @throws SQLException
 	 * @throws IOException
+	 * @throws javax.servlet.ServletException
 	 */
-	private void generateThymeleafReport() throws SQLException, IOException {
+	private void generateThymeleafReport() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateThymeleafReport");
 
 		rs = reportRunner.getResultSet();
@@ -1417,12 +1418,16 @@ public class ReportOutputGenerator {
 		thymeleafOutput.setData(groovyData);
 		thymeleafOutput.setMessageSource(messageSource);
 
-		thymeleafOutput.generateOutput(report, writer, applicableReportParamsList);
+		thymeleafOutput.generateOutput(report, writer, applicableReportParamsList, reportFormat, fullOutputFilename);
 
 		if (groovyDataSize == null) {
 			rowsRetrieved = getResultSetRowCount(rs);
 		} else {
 			rowsRetrieved = groovyDataSize;
+		}
+		
+		if (!isJob && !reportFormat.isHtml()) {
+			displayFileLink(fileName);
 		}
 	}
 
