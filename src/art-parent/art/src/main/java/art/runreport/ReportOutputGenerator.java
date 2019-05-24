@@ -1431,8 +1431,9 @@ public class ReportOutputGenerator {
 	 *
 	 * @throws SQLException
 	 * @throws IOException
+	 * @throws javax.servlet.ServletException
 	 */
-	private void generateVelocityReport() throws SQLException, IOException {
+	private void generateVelocityReport() throws SQLException, IOException, ServletException {
 		logger.debug("Entering generateVelocityReport");
 
 		rs = reportRunner.getResultSet();
@@ -1442,12 +1443,16 @@ public class ReportOutputGenerator {
 		velocityOutput.setLocale(locale);
 		velocityOutput.setResultSet(rs);
 		velocityOutput.setData(groovyData);
-		velocityOutput.generateOutput(report, writer, applicableReportParamsList);
+		velocityOutput.generateOutput(report, writer, applicableReportParamsList, reportFormat, fullOutputFilename);
 
 		if (groovyDataSize == null) {
 			rowsRetrieved = getResultSetRowCount(rs);
 		} else {
 			rowsRetrieved = groovyDataSize;
+		}
+		
+		if (!isJob && !reportFormat.isHtml()) {
+			displayFileLink(fileName);
 		}
 	}
 

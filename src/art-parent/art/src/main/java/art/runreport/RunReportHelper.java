@@ -315,7 +315,6 @@ public class RunReportHelper {
 			case CrosstabHtml:
 			case JxlsArt:
 			case JxlsTemplate:
-			case Thymeleaf:
 			case ReactPivot:
 			case PivotTableJs:
 			case PivotTableJsCsvLocal:
@@ -335,7 +334,6 @@ public class RunReportHelper {
 			case SaikuReport:
 			case SaikuConnection:
 			case MongoDB:
-			case Velocity:
 			case OrgChartDatabase:
 			case OrgChartJson:
 			case OrgChartList:
@@ -626,6 +624,8 @@ public class RunReportHelper {
 					formats.add("fileZip");
 					break;
 				case FreeMarker:
+				case Velocity:
+				case Thymeleaf:
 					formats.add("html");
 					formats.add("htmlFancy");
 					formats.add("file");

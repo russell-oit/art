@@ -192,6 +192,24 @@ public class FreeMarkerOutput {
 
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		
+		String templateFileName = report.getTemplate();
+		String templatesPath = Config.getTemplatesPath();
+		String fullTemplateFileName = templatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		//check if template file exists
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + templateFileName);
+		}
 
 		if (variables == null) {
 			variables = new HashMap<>();
@@ -219,24 +237,6 @@ public class FreeMarkerOutput {
 		String artBaseUrl = Config.getSettings().getArtBaseUrl();
 		variables.put("artBaseUrl", artBaseUrl);
 		variables.put("locale", locale);
-
-		String templateFileName = report.getTemplate();
-		String templatesPath = Config.getTemplatesPath();
-		String fullTemplateFileName = templatesPath + templateFileName;
-
-		logger.debug("templateFileName='{}'", templateFileName);
-
-		//need to explicitly check if template file is empty string
-		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-		if (StringUtils.isBlank(templateFileName)) {
-			throw new IllegalArgumentException("Template file not specified");
-		}
-
-		//check if template file exists
-		File templateFile = new File(fullTemplateFileName);
-		if (!templateFile.exists()) {
-			throw new IllegalStateException("Template file not found: " + templateFileName);
-		}
 
 		Configuration cfg = Config.getFreemarkerConfig();
 		Template template = cfg.getTemplate(templateFileName);
