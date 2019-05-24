@@ -313,6 +313,8 @@
 				} else if (reportTypeId === 122) {
 					//freemarker
 					list.append(new Option('${htmlText}', 'html'));
+					list.append(new Option('${fileText}', 'file'));
+					list.append(new Option('${fileZipText}', 'fileZip'));
 				} else if (reportTypeId === 131) {
 					//thymeleaf
 					list.append(new Option('${htmlText}', 'html'));
@@ -452,10 +454,8 @@
 
 			function toggleOutputFormatVisibility(jobType, reportTypeId) {
 				//show/hide outputFormatDiv
-				if (reportTypeId === 122
-						|| reportTypeId === 131 || reportTypeId === 153
-						|| reportTypeId === 117 || reportTypeId === 118) {
-					//freemarker, thymeleaf, velocity, jxls
+				if (reportTypeId === 117 || reportTypeId === 118) {
+					//jxls
 					$("#outputFormatDiv").hide();
 				} else {
 					switch (jobType) {

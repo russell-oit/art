@@ -315,7 +315,6 @@ public class RunReportHelper {
 			case CrosstabHtml:
 			case JxlsArt:
 			case JxlsTemplate:
-			case FreeMarker:
 			case Thymeleaf:
 			case ReactPivot:
 			case PivotTableJs:
@@ -623,6 +622,12 @@ public class RunReportHelper {
 					break;
 				case File:
 					formats.add("html");
+					formats.add("file");
+					formats.add("fileZip");
+					break;
+				case FreeMarker:
+					formats.add("html");
+					formats.add("htmlFancy");
 					formats.add("file");
 					formats.add("fileZip");
 					break;

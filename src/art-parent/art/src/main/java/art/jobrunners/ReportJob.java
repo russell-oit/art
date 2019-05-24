@@ -1635,7 +1635,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer, int value,
 			Map<String, ReportParameter> reportParamsMap)
-			throws TemplateException, IOException, ParseException {
+			throws TemplateException, IOException, ParseException, SQLException {
 
 		Map<String, String> recipientColumns = null;
 		prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns, reportParamsMap);
@@ -1654,7 +1654,7 @@ public class ReportJob implements org.quartz.Job {
 	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer,
 			int value, Map<String, String> recipientColumns,
 			Map<String, ReportParameter> reportParamsMap)
-			throws TemplateException, IOException, ParseException {
+			throws TemplateException, IOException, ParseException, SQLException {
 
 		logger.debug("Entering prepareTemplateAlertMailer: reportType={}, "
 				+ "value={}", reportType, value);

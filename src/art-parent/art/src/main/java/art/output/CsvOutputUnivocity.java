@@ -128,10 +128,8 @@ public class CsvOutputUnivocity {
 	 * @param locale the locale that determines date format output
 	 * @throws java.lang.Exception
 	 */
-	public void generateOutput(StringWriter writer, CsvOutputUnivocityOptions csvOptions,
-			Locale locale) throws Exception {
-
-		logger.debug("Entering generateOutput");
+	public void generateOutput(StringWriter writer,
+			CsvOutputUnivocityOptions csvOptions, Locale locale) throws Exception {
 
 		ReportFormat reportFormat = null;
 		String fullOutputFileName = null;

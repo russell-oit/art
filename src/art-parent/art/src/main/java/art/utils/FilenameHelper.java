@@ -157,7 +157,7 @@ public class FilenameHelper {
 		} else if (reportFormat == ReportFormat.csv) {
 			extension = getCsvExtension(report);
 		} else if (reportFormat == ReportFormat.file) {
-			extension = getFileReportExtension(report);
+			extension = getFileReporFormatExtension(report);
 		} else {
 			extension = reportFormat.getFilenameExtension();
 		}
@@ -213,13 +213,13 @@ public class FilenameHelper {
 	}
 
 	/**
-	 * Returns the file name extension to use for a file report
+	 * Returns the file name extension to use with file report format
 	 *
 	 * @param report the report object
 	 * @return the file name extension to use
 	 * @throws java.io.IOException
 	 */
-	public String getFileReportExtension(Report report) throws IOException {
+	public String getFileReporFormatExtension(Report report) throws IOException {
 		Objects.requireNonNull(report, "report must not be null");
 
 		String extension;

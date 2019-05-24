@@ -420,7 +420,7 @@ public class ReportOutputGenerator {
 				generateReportEngineReport();
 			} else if (reportType == ReportType.Plotly) {
 				generatePlotlyReport();
-			} else if(reportType == ReportType.File){
+			} else if (reportType == ReportType.File) {
 				generateFileReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
@@ -1373,11 +1373,9 @@ public class ReportOutputGenerator {
 	/**
 	 * Generates output for a freemarker report
 	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 * @throws TemplateException
+	 * @throws Exception
 	 */
-	private void generateFreeMarkerOutput() throws SQLException, IOException, TemplateException {
+	private void generateFreeMarkerOutput() throws Exception {
 		logger.debug("Entering generateFreeMarkerOutput");
 
 		rs = reportRunner.getResultSet();
@@ -1387,12 +1385,16 @@ public class ReportOutputGenerator {
 		freemarkerOutput.setLocale(locale);
 		freemarkerOutput.setResultSet(rs);
 		freemarkerOutput.setData(groovyData);
-		freemarkerOutput.generateOutput(report, writer, applicableReportParamsList);
+		freemarkerOutput.generateOutput(report, writer, applicableReportParamsList, reportFormat, fullOutputFilename);
 
 		if (groovyDataSize == null) {
 			rowsRetrieved = getResultSetRowCount(rs);
 		} else {
 			rowsRetrieved = groovyDataSize;
+		}
+
+		if (!isJob && !reportFormat.isHtml()) {
+			displayFileLink(fileName);
 		}
 	}
 
@@ -1788,7 +1790,7 @@ public class ReportOutputGenerator {
 			displayFileLink(fileName);
 		}
 	}
-	
+
 	/**
 	 * Generates output for a file report
 	 *

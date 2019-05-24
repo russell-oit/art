@@ -143,7 +143,7 @@ public class FileOutput {
 				} else if (reportFormat == ReportFormat.fileZip) {
 					String filename = FilenameUtils.getBaseName(fullOutputFileName);
 					FilenameHelper filenameHelper = new FilenameHelper();
-					String zipEntryFilenameExtension = filenameHelper.getFileReportExtension(report);
+					String zipEntryFilenameExtension = filenameHelper.getFileReporFormatExtension(report);
 					String zipEntryFilename = filename + "." + zipEntryFilenameExtension;
 					ZipEntry ze = new ZipEntry(zipEntryFilename);
 					try (ZipOutputStream zout = new ZipOutputStream(fout)) {
