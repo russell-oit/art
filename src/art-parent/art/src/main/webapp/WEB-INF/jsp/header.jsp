@@ -305,14 +305,12 @@ Header that appears at the top of all pages, except the login and logs pages
 								<ul class="dropdown-menu">
 									<li>
 										<a href="${pageContext.request.contextPath}/docs/index.html">
-											<i class="fa fa-book"></i> 
 											<spring:message code="header.link.documentation"/>
 										</a>
 									</li>
 									<c:if test="${sessionUser.hasPermission('view_logs')}">
 										<li>
 											<a href="${pageContext.request.contextPath}/logs">
-												<i class="fa fa-bars"></i> 
 												<spring:message code="header.link.logs"/>
 											</a>
 										</li>
