@@ -148,6 +148,7 @@ public class RunReportController {
 
 					testReport.setSelfServiceOptions(selfServiceOptions);
 					testReport.setLimit(limit);
+					testReport.setSelfServicePreview(selfServicePreview);
 				} else {
 					boolean testData = BooleanUtils.toBoolean(request.getParameter("testData"));
 					if (testData) {

@@ -17,13 +17,19 @@
  */
 package art.output;
 
+import art.reportoptions.HtmlDataTableOutputOptions;
+import art.reportoptions.StandardOutputOptions;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.owasp.encoder.Encode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
@@ -34,6 +40,8 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
  * @author Timothy Anyona
  */
 public class HtmlDataTableOutput extends StandardOutput {
+
+	private static final Logger logger = LoggerFactory.getLogger(HtmlDataTableOutput.class);
 
 	private String tableId;
 	private int localRowCount; //use local variable for reportengine output
@@ -83,6 +91,8 @@ public class HtmlDataTableOutput extends StandardOutput {
 		ctx.setVariable("tableId", tableId);
 		ctx.setVariable("language", language);
 		ctx.setVariable("options", options);
+		ctx.setVariable("dtExtraOptions", getDtExtraOptions());
+		ctx.setVariable("selfServicePreview", report.isSelfServicePreview());
 
 		SpringTemplateEngine templateEngine = Config.getDefaultThymeleafTemplateEngine();
 		templateEngine.setMessageSource(messageSource);
@@ -90,6 +100,47 @@ public class HtmlDataTableOutput extends StandardOutput {
 		String templateName = "htmlDataTableOutputInit";
 		String initString = templateEngine.process(templateName, ctx);
 		out.println(initString);
+	}
+
+	/**
+	 * Returns the effective datatable extra options to use
+	 * 
+	 * @return the effective datatable extra options to use
+	 */
+	private HtmlDataTableOutputOptions getDtExtraOptions() {
+		HtmlDataTableOutputOptions finalDtExtraOptions = new HtmlDataTableOutputOptions();
+
+		try {
+			StandardOutputOptions settingsStandardOutputOptions = new StandardOutputOptions();
+			String settingsOptions = Config.getSettings().getJsonOptions();
+			if (StringUtils.isNotBlank(settingsOptions)) {
+				settingsStandardOutputOptions = ArtUtils.jsonToObject(settingsOptions, StandardOutputOptions.class);
+			}
+			HtmlDataTableOutputOptions settingsDtExtraOptions = settingsStandardOutputOptions.getDtExtraOptions();
+			if (settingsDtExtraOptions == null) {
+				settingsDtExtraOptions = new HtmlDataTableOutputOptions();
+			}
+
+			StandardOutputOptions reportStandardOutputOptions = new StandardOutputOptions();
+			String reportOptions = report.getOptions();
+			if (StringUtils.isNotBlank(reportOptions)) {
+				reportStandardOutputOptions = ArtUtils.jsonToObject(reportOptions, StandardOutputOptions.class);
+			}
+			HtmlDataTableOutputOptions reportDtExtraOptions = reportStandardOutputOptions.getDtExtraOptions();
+			if (reportDtExtraOptions == null) {
+				reportDtExtraOptions = new HtmlDataTableOutputOptions();
+			}
+
+			if (reportDtExtraOptions.getPdf() == null) {
+				finalDtExtraOptions.setPdf(settingsDtExtraOptions.getPdf());
+			} else {
+				finalDtExtraOptions.setPdf(reportDtExtraOptions.getPdf());
+			}
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+
+		return finalDtExtraOptions;
 	}
 
 	@Override
@@ -110,7 +161,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 		}
 		String encodedClassName = Encode.forHtmlAttribute(cleanClassName);
 		String finalClassName = "rcol-" + encodedClassName;
-		
+
 		out.println("<th class='" + finalClassName + "'>" + value + "</th>");
 	}
 

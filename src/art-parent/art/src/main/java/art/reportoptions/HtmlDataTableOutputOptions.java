@@ -1,6 +1,6 @@
 /*
  * ART. A Reporting Tool.
- * Copyright (C) 2017 Enrico Liboni <eliboni@users.sf.net>
+ * Copyright (C) 2019 Enrico Liboni <eliboni@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,47 +19,29 @@ package art.reportoptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
-import java.util.List;
 
 /**
- * Represents options for standard output report types - primarily tabular
- * reports
- *
+ * Extra options for htmlDataTable report format
+ * 
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StandardOutputOptions implements Serializable {
+public class HtmlDataTableOutputOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private List<String> imageColumns;
-	private HtmlDataTableOutputOptions dtExtraOptions;
+	private Boolean pdf;
 
 	/**
-	 * @return the imageColumns
+	 * @return the pdf
 	 */
-	public List<String> getImageColumns() {
-		return imageColumns;
+	public Boolean getPdf() {
+		return pdf;
 	}
 
 	/**
-	 * @param imageColumns the imageColumns to set
+	 * @param pdf the pdf to set
 	 */
-	public void setImageColumns(List<String> imageColumns) {
-		this.imageColumns = imageColumns;
+	public void setPdf(Boolean pdf) {
+		this.pdf = pdf;
 	}
-
-	/**
-	 * @return the dtExtraOptions
-	 */
-	public HtmlDataTableOutputOptions getDtExtraOptions() {
-		return dtExtraOptions;
-	}
-
-	/**
-	 * @param dtExtraOptions the dtExtraOptions to set
-	 */
-	public void setDtExtraOptions(HtmlDataTableOutputOptions dtExtraOptions) {
-		this.dtExtraOptions = dtExtraOptions;
-	}
-
 }

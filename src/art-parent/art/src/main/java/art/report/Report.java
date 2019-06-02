@@ -214,6 +214,22 @@ public class Report implements Serializable {
 	private boolean overwriteFiles;
 	@JsonIgnore
 	private Integer limit;
+	@JsonIgnore
+	private boolean selfServicePreview;
+
+	/**
+	 * @return the selfServicePreview
+	 */
+	public boolean isSelfServicePreview() {
+		return selfServicePreview;
+	}
+
+	/**
+	 * @param selfServicePreview the selfServicePreview to set
+	 */
+	public void setSelfServicePreview(boolean selfServicePreview) {
+		this.selfServicePreview = selfServicePreview;
+	}
 
 	/**
 	 * @return the description2

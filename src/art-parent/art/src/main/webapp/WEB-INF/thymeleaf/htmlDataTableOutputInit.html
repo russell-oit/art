@@ -19,8 +19,10 @@ https://stackoverflow.com/questions/42217214/springboot-with-thymeleaf-showing-e
 	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/dataTables.buttons.min.js'}"></script>
 	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.bootstrap.min.js'}"></script>
 	<script th:src="${contextPath} + ${'/js/dataTables/JSZip-2.5.0/jszip.min.js'}"></script>
-	<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/pdfmake.min.js'}"></script>
-	<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/vfs_fonts.js'}"></script>
+	<th:block th:if='${#bools.isTrue(dtExtraOptions.pdf) || selfServicePreview}'>
+		<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/pdfmake.min.js'}"></script>
+		<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/vfs_fonts.js'}"></script>
+	</th:block>
 	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.html5.min.js'}"></script>
 	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.print.min.js'}"></script>
 	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.colVis.min.js'}"></script>
@@ -39,6 +41,32 @@ https://stackoverflow.com/questions/42217214/springboot-with-thymeleaf-showing-e
 			//https://stackoverflow.com/questions/20995687/thymeleaf-configure-mail-subject-in-template
 			var url = /*[[${contextPath} + ${'/js/dataTables/i18n/dataTables_'} + ${language} + ${'.json'}]]*/ "";
 
+			var buttons = [
+				{
+					extend: 'colvis',
+					postfixButtons: ['colvisRestore']
+				},
+				{
+					extend: 'excel',
+					exportOptions: {columns: ':visible'}
+				}
+			];
+
+			var pdf = /*[[${dtExtraOptions.pdf}]]*/ false;
+			var selfServicePreview = /*[[${selfServicePreview}]]*/ false;
+
+			if (pdf || selfServicePreview) {
+				buttons.push({
+					extend: 'pdf',
+					exportOptions: {columns: ':visible'}
+				});
+			}
+
+			buttons.push({
+				extend: 'print',
+				exportOptions: {columns: ':visible'}
+			});
+
 			var options = {
 				orderClasses: false,
 				order: [],
@@ -48,24 +76,7 @@ https://stackoverflow.com/questions/42217214/springboot-with-thymeleaf-showing-e
 				], // must have space between first brackets to prevent thymeleaf from processing this 
 				pageLength: 50,
 				dom: 'lBfrtip',
-				buttons: [
-					{
-						extend: 'colvis',
-						postfixButtons: ['colvisRestore']
-					},
-					{
-						extend: 'excel',
-						exportOptions: {columns: ':visible'}
-					},
-					{
-						extend: 'pdf',
-						exportOptions: {columns: ':visible'}
-					},
-					{
-						extend: 'print',
-						exportOptions: {columns: ':visible'}
-					}
-				],
+				buttons: buttons,
 				language: {
 					url: url
 				},
