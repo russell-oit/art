@@ -16,7 +16,7 @@ Includes elements of a generic page plus a page footer
 <%@attribute name="title" required="true"%>
 
 <%-- any content can be specified here e.g.: --%>
-<t:genericPage title="ART - ${title}">
+<t:genericPage title="${title} - ART">
 	<jsp:attribute name="footer">
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</jsp:attribute>
