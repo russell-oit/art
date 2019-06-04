@@ -15,7 +15,7 @@
 	<description>Enabler for saiku ui</description>
 	
 	<properties>
-		<poi.version>3.17</poi.version>
+		<poi.version>4.1.0</poi.version>
 	</properties>
 	
 	<build>

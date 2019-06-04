@@ -1,6 +1,7 @@
 ART 4.3
 * Added file and fileZip report formats for FreeMarker, Velocity and Thymeleaf report types
 * Removed pdf export by default for htmlDataTable report format
+* Updated poi, jxls, jasperreports, xdocreports
 
 ART 4.2
 * Added use_api permission
