@@ -104,7 +104,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	/**
 	 * Returns the effective datatable extra options to use
-	 * 
+	 *
 	 * @return the effective datatable extra options to use
 	 */
 	private HtmlDataTableOutputOptions getDtExtraOptions() {
@@ -138,6 +138,10 @@ public class HtmlDataTableOutput extends StandardOutput {
 			}
 		} catch (IOException ex) {
 			logger.error("Error", ex);
+		}
+
+		if (finalDtExtraOptions.getPdf() == null) {
+			finalDtExtraOptions.setPdf(false);
 		}
 
 		return finalDtExtraOptions;

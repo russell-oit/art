@@ -19,7 +19,7 @@ https://stackoverflow.com/questions/42217214/springboot-with-thymeleaf-showing-e
 	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/dataTables.buttons.min.js'}"></script>
 	<script th:src="${contextPath} + ${'/js/dataTables/Buttons-1.5.4/js/buttons.bootstrap.min.js'}"></script>
 	<script th:src="${contextPath} + ${'/js/dataTables/JSZip-2.5.0/jszip.min.js'}"></script>
-	<th:block th:if='${#bools.isTrue(dtExtraOptions.pdf) || selfServicePreview}'>
+	<th:block th:if='${dtExtraOptions.pdf}'>
 		<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/pdfmake.min.js'}"></script>
 		<script th:src="${contextPath} + ${'/js/dataTables/pdfmake-0.1.36/vfs_fonts.js'}"></script>
 	</th:block>
@@ -53,9 +53,8 @@ https://stackoverflow.com/questions/42217214/springboot-with-thymeleaf-showing-e
 			];
 
 			var pdf = /*[[${dtExtraOptions.pdf}]]*/ false;
-			var selfServicePreview = /*[[${selfServicePreview}]]*/ false;
 
-			if (pdf || selfServicePreview) {
+			if (pdf) {
 				buttons.push({
 					extend: 'pdf',
 					exportOptions: {columns: ':visible'}
