@@ -339,6 +339,8 @@ public class RunReportHelper {
 			case OrgChartList:
 			case OrgChartAjax:
 			case Plotly:
+			case XDocReportFreeMarkerPptx:
+			case XDocReportVelocityPptx:
 				enableReportFormats = false;
 				break;
 			default:
@@ -593,10 +595,6 @@ public class RunReportHelper {
 					formats.add("odt");
 					formats.add("pdf");
 					formats.add("html");
-					break;
-				case XDocReportFreeMarkerPptx:
-				case XDocReportVelocityPptx:
-					formats.add("pptx");
 					break;
 				case Dashboard:
 				case GridstackDashboard:
@@ -1381,6 +1379,8 @@ public class RunReportHelper {
 			reportFormat = ReportFormat.pdf;
 		} else if (reportType.isStandardOutput() || reportType.isReportEngine()) {
 			reportFormat = ReportFormat.htmlFancy;
+		} else if (reportType.isXDocReportPptx()) {
+			reportFormat = ReportFormat.pptx;
 		} else {
 			reportFormat = ReportFormat.html;
 		}
