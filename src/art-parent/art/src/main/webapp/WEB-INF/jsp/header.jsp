@@ -109,6 +109,7 @@ Header that appears at the top of all pages, except the login and logs pages
 											</a>
 										</li>
 									</c:if>
+									<%-- https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_ref_js_dropdown_multilevel_css&stacked=h --%>
 									<c:if test="${sessionUser.hasPermission('configure_datasources')}">
 										<li>
 											<a href="${pageContext.request.contextPath}/datasources">
