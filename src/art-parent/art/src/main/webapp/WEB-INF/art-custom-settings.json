@@ -1,9 +1,9 @@
 {
-	"showErrors" : true,
-	"enableDirectParameterSubstitution" : true,
-	"exportDirectory" : "",
-	"workDirectory" : "",
-	"checkExportFileAccess" : false,
+	"showErrors": true,
+	"enableDirectParameterSubstitution": true,
+	"exportDirectory": "",
+	"workDirectory": "",
+	"checkExportFileAccess": false,
 	"enableGroovySandbox": true,
 	"enableEmailing": true,
 	"jwtSecret": "",
@@ -11,5 +11,6 @@
 	"encryptionPassword": {
 		"password": "",
 		"keyLength": 128
-	}
+	},
+	"allowRepositoryLogin": true
 }

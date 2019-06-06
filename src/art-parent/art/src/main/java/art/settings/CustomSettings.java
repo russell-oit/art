@@ -40,6 +40,21 @@ public class CustomSettings implements Serializable {
 	private String jwtSecret;
 	private String encryptionKey; //key for symmetric encryption within the application
 	private EncryptionPassword encryptionPassword;
+	private boolean allowRepositoryLogin = true;
+
+	/**
+	 * @return the allowRepositoryLogin
+	 */
+	public boolean isAllowRepositoryLogin() {
+		return allowRepositoryLogin;
+	}
+
+	/**
+	 * @param allowRepositoryLogin the allowRepositoryLogin to set
+	 */
+	public void setAllowRepositoryLogin(boolean allowRepositoryLogin) {
+		this.allowRepositoryLogin = allowRepositoryLogin;
+	}
 
 	/**
 	 * @return the encryptionPassword
