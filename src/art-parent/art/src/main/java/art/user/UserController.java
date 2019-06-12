@@ -29,7 +29,7 @@ import art.general.AjaxResponse;
 import art.role.RoleService;
 import art.userrole.UserRoleService;
 import art.utils.AjaxTableHelper;
-import art.utils.ArtHelper;
+import art.utils.MailService;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -97,6 +97,9 @@ public class UserController {
 
 	@Autowired
 	private ServletContext servletContext;
+
+	@Autowired
+	private MailService mailService;
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
@@ -617,8 +620,7 @@ public class UserController {
 		String to = user.getEmail();
 		logger.debug("to='{}'", to);
 
-		ArtHelper artHelper = new ArtHelper();
-		Mailer mailer = artHelper.getMailer();
+		Mailer mailer = mailService.getMailer();
 
 		mailer.setFrom(from);
 		mailer.setSubject(subject);

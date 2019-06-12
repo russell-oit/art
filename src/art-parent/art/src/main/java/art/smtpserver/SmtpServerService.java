@@ -17,17 +17,23 @@
  */
 package art.smtpserver;
 
+import art.cache.CacheHelper;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
+import art.encryption.AesEncryptor;
 import art.user.User;
 import art.general.ActionResult;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -35,6 +41,10 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.jsoup.Connection.Method;
+import org.jsoup.Connection.Response;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +62,9 @@ import org.springframework.stereotype.Service;
 public class SmtpServerService {
 
 	private static final Logger logger = LoggerFactory.getLogger(SmtpServerService.class);
+
+	@Autowired
+	private CacheHelper cacheHelper;
 
 	private final DbService dbService;
 
@@ -95,13 +108,19 @@ public class SmtpServerService {
 			smtpServer.setUsername(rs.getString("USERNAME"));
 			smtpServer.setPassword(rs.getString("PASSWORD"));
 			smtpServer.setFrom(rs.getString("SMTP_FROM"));
+			smtpServer.setUseOAuth2(rs.getBoolean("USE_GOOGLE_OAUTH_2"));
+			smtpServer.setOauthClientId(rs.getString("OAUTH_CLIENT_ID"));
+			smtpServer.setOauthClientSecret(rs.getString("OAUTH_CLIENT_SECRET"));
+			smtpServer.setOauthRefreshToken(rs.getString("OAUTH_REFRESH_TOKEN"));
+			smtpServer.setOauthAccessToken(rs.getString("OAUTH_ACCESS_TOKEN"));
+			smtpServer.setOauthAccessTokenExpiry(rs.getTimestamp("OAUTH_ACCESS_TOKEN_EXPIRY"));
 			smtpServer.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			smtpServer.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			smtpServer.setCreatedBy(rs.getString("CREATED_BY"));
 			smtpServer.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			try {
-				smtpServer.decryptPassword();
+				smtpServer.decryptPasswords();
 			} catch (Exception ex) {
 				logger.error("Error. {}", smtpServer, ex);
 			}
@@ -355,9 +374,11 @@ public class SmtpServerService {
 			String sql = "INSERT INTO ART_SMTP_SERVERS"
 					+ " (SMTP_SERVER_ID, NAME, DESCRIPTION, ACTIVE,"
 					+ " SERVER, PORT, USE_STARTTLS, USE_SMTP_AUTHENTICATION,"
-					+ " USERNAME, PASSWORD, SMTP_FROM,"
+					+ " USERNAME, PASSWORD, SMTP_FROM, USE_GOOGLE_OAUTH_2,"
+					+ " OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REFRESH_TOKEN,"
+					+ " OAUTH_ACCESS_TOKEN, OAUTH_ACCESS_TOKEN_EXPIRY,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 19) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -371,6 +392,12 @@ public class SmtpServerService {
 				smtpServer.getUsername(),
 				smtpServer.getPassword(),
 				smtpServer.getFrom(),
+				BooleanUtils.toInteger(smtpServer.isUseOAuth2()),
+				smtpServer.getOauthClientId(),
+				smtpServer.getOauthClientSecret(),
+				smtpServer.getOauthRefreshToken(),
+				smtpServer.getOauthAccessToken(),
+				DatabaseUtils.toSqlTimestamp(smtpServer.getOauthAccessTokenExpiry()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -384,7 +411,9 @@ public class SmtpServerService {
 			String sql = "UPDATE ART_SMTP_SERVERS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, SERVER=?, PORT=?, USE_STARTTLS=?,"
 					+ " USE_SMTP_AUTHENTICATION=?, USERNAME=?, PASSWORD=?,"
-					+ " SMTP_FROM=?,"
+					+ " SMTP_FROM=?, USE_GOOGLE_OAUTH_2=?, OAUTH_CLIENT_ID=?,"
+					+ " OAUTH_CLIENT_SECRET=?, OAUTH_REFRESH_TOKEN=?,"
+					+ " OAUTH_ACCESS_TOKEN=?, OAUTH_ACCESS_TOKEN_EXPIRY=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE SMTP_SERVER_ID=?";
 
@@ -399,6 +428,12 @@ public class SmtpServerService {
 				smtpServer.getUsername(),
 				smtpServer.getPassword(),
 				smtpServer.getFrom(),
+				BooleanUtils.toInteger(smtpServer.isUseOAuth2()),
+				smtpServer.getOauthClientId(),
+				smtpServer.getOauthClientSecret(),
+				smtpServer.getOauthRefreshToken(),
+				smtpServer.getOauthAccessToken(),
+				DatabaseUtils.toSqlTimestamp(smtpServer.getOauthAccessTokenExpiry()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				smtpServer.getSmtpServerId()
@@ -481,6 +516,126 @@ public class SmtpServerService {
 		}
 
 		return jobs;
+	}
+
+	/**
+	 * Updates the oauth access token if it has expired
+	 *
+	 * @param smtpServer the smtp server object
+	 * @throws Exception
+	 */
+	public void updateOAuthAccessToken(SmtpServer smtpServer) throws Exception {
+		boolean updateDatabase = true;
+		updateOAuthAccessToken(smtpServer, updateDatabase);
+	}
+
+	/**
+	 * Updates the oauth access token if it has expired
+	 *
+	 * @param smtpServer the smtp server object
+	 * @param updateDatabase whether to update the database with any newly
+	 * generated access token
+	 * @throws Exception
+	 */
+	public void updateOAuthAccessToken(SmtpServer smtpServer, boolean updateDatabase)
+			throws Exception {
+
+		logger.debug("Entering updateOAuthAccessToken: smtpServer={},"
+				+ " updateDatabase={}", smtpServer, updateDatabase);
+
+		if (!smtpServer.isUseOAuth2()) {
+			return;
+		}
+
+		Date expiry = smtpServer.getOauthAccessTokenExpiry();
+		if (expiry == null || expiry.before(new Date())) {
+			//https://stackoverflow.com/questions/6348633/reading-json-content
+			//https://stackoverflow.com/questions/7133118/jsoup-requesting-json-response
+			//https://stackoverflow.com/questions/39450438/jsoup-post-request-encoding/39457512
+			//https://medium.com/@pablo127/google-api-authentication-with-oauth-2-on-the-example-of-gmail-a103c897fd98
+			//https://developers.google.com/gmail/api/auth/scopes
+			//https://blog.timekit.io/google-oauth-invalid-grant-nightmare-and-how-to-fix-it-9f4efaf1da35?gi=995710255996
+			//https://developers.google.com/identity/protocols/OAuth2?csw=1
+			//https://stackoverflow.com/questions/32831174/how-to-send-mail-with-java-mail-by-using-gmail-smtp-with-oauth2-authentication
+			//https://www.themarketingtechnologist.co/google-oauth-2-enable-your-application-to-access-data-from-a-google-user/
+			//https://stackoverflow.com/questions/45550385/javamail-gmail-and-oauth2
+			//https://stackoverflow.com/questions/53836992/using-googles-oauth-2-0-revoke-endpoint-invalidates-all-other-tokens-for-user
+			//https://developers.google.com/identity/protocols/OAuth2WebServer
+			//https://www.oauth.com/oauth2-servers/client-registration/client-id-secret/
+			//https://developers.google.com/gmail/imap/xoauth2-protocol
+			//https://chariotsolutions.com/blog/post/sending-mail-via-gmail-javamail/
+			//https://github.com/google/gmail-oauth2-tools/wiki/OAuth2DotPyRunThrough
+			//https://security.stackexchange.com/questions/66025/what-are-the-dangers-of-allowing-less-secure-apps-to-access-my-google-account
+			//https://support.google.com/mail/answer/7126229?p=BadCredentials&visit_id=636955096563329495-1274740859&rd=2#cantsignin
+			//https://stackoverflow.com/questions/2965251/javamail-with-gmail-535-5-7-1-username-and-password-not-accepted?rq=1
+			String tokenUrl = "https://www.googleapis.com/oauth2/v4/token";
+			Response response = Jsoup.connect(tokenUrl)
+					.method(Method.POST)
+					.data("client_id", smtpServer.getOauthClientId())
+					.data("client_secret", smtpServer.getOauthClientSecret())
+					.data("refresh_token", smtpServer.getOauthRefreshToken())
+					.data("grant_type", "refresh_token")
+					.ignoreContentType(true)
+					.execute();
+
+			String responseBody = response.body();
+			int responseStatusCode = response.statusCode();
+			if (responseStatusCode == 200) {
+				ObjectMapper mapper = new ObjectMapper();
+				Map<String, Object> map = mapper.readValue(responseBody, new TypeReference<Map<String, Object>>() {
+				});
+				String accessToken = (String) map.get("access_token");
+				Integer expiresInSeconds = (Integer) map.get("expires_in");
+				final int GAP_MINUTES = 2; //set expiry to x minutes before actual expiry
+				int finalExpiresInSeconds = expiresInSeconds - (int) TimeUnit.MINUTES.toSeconds(GAP_MINUTES);
+				Date newExpiry = DateUtils.addSeconds(new Date(), finalExpiresInSeconds);
+				smtpServer.setOauthAccessToken(accessToken);
+				smtpServer.setOauthAccessTokenExpiry(newExpiry);
+				if (updateDatabase) {
+					updateDatabaseOAuthAccessToken(smtpServer);
+				}
+			} else {
+				StringBuilder sb = new StringBuilder();
+
+				sb.append("Refresh google oauth token failed. ")
+						.append(smtpServer)
+						.append("Response: Status Code=")
+						.append(responseStatusCode)
+						.append(", Content=")
+						.append(responseBody);
+
+				String message = sb.toString();
+
+				throw new RuntimeException(message);
+			}
+		}
+	}
+
+	/**
+	 * Updates the oath access token field in the database
+	 *
+	 * @param smtpServer the smtp server object with the updated access token
+	 * @throws Exception
+	 */
+	private void updateDatabaseOAuthAccessToken(SmtpServer smtpServer) throws Exception {
+		logger.debug("Entering updateDatabaseOAuthAccessToken: smtpServer={}", smtpServer);
+
+		String sql = "UPDATE ART_SMTP_SERVERS"
+				+ " SET OAUTH_ACCESS_TOKEN=?, OAUTH_ACCESS_TOKEN_EXPIRY=?"
+				+ " WHERE SMTP_SERVER_ID=?";
+
+		String encryptedAccessToken = AesEncryptor.encrypt(smtpServer.getOauthAccessToken());
+
+		Object[] values = {
+			encryptedAccessToken,
+			DatabaseUtils.toSqlTimestamp(smtpServer.getOauthAccessTokenExpiry()),
+			smtpServer.getSmtpServerId()
+		};
+
+		dbService.update(sql, values);
+
+		//note that cacheHelper will be null if SmtpServerService instantiated with new rather than @Autowired
+		cacheHelper.clearSmtpServers();
 	}
 
 }

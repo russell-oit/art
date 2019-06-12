@@ -43,9 +43,9 @@ import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.AjaxTableHelper;
-import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
+import art.utils.MailService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rits.cloning.Cloner;
@@ -136,6 +136,9 @@ public class ReportController {
 
 	@Autowired
 	private UserGroupService userGroupService;
+
+	@Autowired
+	private MailService mailService;
 
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, Model model) {
@@ -604,8 +607,7 @@ public class ReportController {
 			bccs = StringUtils.split(mailBcc, ";");
 		}
 
-		ArtHelper artHelper = new ArtHelper();
-		Mailer mailer = artHelper.getMailer();
+		Mailer mailer = mailService.getMailer();
 
 		mailer.setFrom(from);
 		mailer.setSubject(subject);

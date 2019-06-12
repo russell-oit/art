@@ -17,17 +17,15 @@
  */
 package art.smtpserver;
 
-import art.encryption.AesEncryptor;
 import art.job.JobService;
 import art.mail.Mailer;
 import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
-import art.utils.ArtHelper;
+import art.utils.MailService;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -63,6 +61,9 @@ public class SmtpServerController {
 
 	@Autowired
 	private MessageSource messageSource;
+
+	@Autowired
+	private MailService mailService;
 
 	@RequestMapping(value = "/smtpServers", method = RequestMethod.GET)
 	public String showSmtpServers(Model model) {
@@ -199,7 +200,7 @@ public class SmtpServerController {
 
 		try {
 			//set password as appropriate
-			String setPasswordMessage = setPassword(smtpServer, action);
+			String setPasswordMessage = setPasswords(smtpServer, action);
 			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
 			if (setPasswordMessage != null) {
 				model.addAttribute("message", setPasswordMessage);
@@ -282,7 +283,7 @@ public class SmtpServerController {
 	}
 
 	/**
-	 * Sets the password field of the smtp server
+	 * Sets password fields of the smtp server
 	 *
 	 * @param smtpServer the smtp server object to set
 	 * @param action "add or "edit"
@@ -290,8 +291,8 @@ public class SmtpServerController {
 	 * problem, null otherwise
 	 * @throws Exception
 	 */
-	private String setPassword(SmtpServer smtpServer, String action) throws Exception {
-		logger.debug("Entering setPassword: smtpServer={}, action='{}'", smtpServer, action);
+	private String setPasswords(SmtpServer smtpServer, String action) throws Exception {
+		logger.debug("Entering setPasswords: smtpServer={}, action='{}'", smtpServer, action);
 
 		boolean useCurrentPassword = false;
 		String newPassword = smtpServer.getPassword();
@@ -305,19 +306,34 @@ public class SmtpServerController {
 			}
 		}
 
-		if (useCurrentPassword) {
-			//password field blank. use current password
+		String oauthClientSecret = smtpServer.getOauthClientSecret();
+		String oauthRefreshToken = smtpServer.getOauthRefreshToken();
+
+		if (StringUtils.equalsAny(action, "edit", "copy")) {
 			SmtpServer currentSmtpServer = smtpServerService.getSmtpServer(smtpServer.getSmtpServerId());
 			if (currentSmtpServer == null) {
-				return "page.message.cannotUseCurrentPassword";
+				return "page.message.recordNotFound";
 			} else {
-				newPassword = currentSmtpServer.getPassword();
+				if (useCurrentPassword) {
+					newPassword = currentSmtpServer.getPassword();
+				}
+				if (StringUtils.isEmpty(oauthClientSecret)) {
+					oauthClientSecret = currentSmtpServer.getOauthClientSecret();
+				}
+				if (StringUtils.isEmpty(oauthRefreshToken)) {
+					oauthRefreshToken = currentSmtpServer.getOauthRefreshToken();
+					smtpServer.setOauthAccessToken(currentSmtpServer.getOauthAccessToken());
+					smtpServer.setOauthAccessTokenExpiry(currentSmtpServer.getOauthAccessTokenExpiry());
+				}
 			}
 		}
 
-		//encrypt new password
-		String encryptedPassword = AesEncryptor.encrypt(newPassword);
-		smtpServer.setPassword(encryptedPassword);
+		//encrypt password fields
+		smtpServer.setPassword(newPassword);
+		smtpServer.setOauthClientSecret(oauthClientSecret);
+		smtpServer.setOauthRefreshToken(oauthRefreshToken);
+
+		smtpServer.encryptPasswords();
 
 		return null;
 	}
@@ -339,67 +355,64 @@ public class SmtpServerController {
 
 	@RequestMapping(value = "/testSmtpServer", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse testSmtpServer(@RequestParam("id") Integer id,
-			@RequestParam("server") String server, @RequestParam("port") Integer port,
-			@RequestParam("useStartTls") Boolean useStartTls,
-			@RequestParam("useSmtpAuthentication") Boolean useSmtpAuthentication,
-			@RequestParam("username") String username, @RequestParam("password") String password,
-			@RequestParam("useBlankPassword") Boolean useBlankPassword,
-			@RequestParam("action") String action,
-			Locale locale) {
+	AjaxResponse testSmtpServer(@ModelAttribute("smtpServer") SmtpServer smtpServer,
+			@RequestParam("action") String action, Locale locale) {
 
-		logger.debug("Entering testSmtpServer: id={}, server='{}', port={},"
-				+ " useStartTls={}, useSmtpAuthentication={}, username='{}',"
-				+ " useBlankPassword={}, action='{}'", id, server, port,
-				useStartTls, useSmtpAuthentication, username, useBlankPassword, action);
+		logger.debug("Entering testSmtpServer: smtpServer={}, action='{}'",
+				smtpServer, action);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
 			//set password as appropriate
 			boolean useCurrentPassword = false;
-			if (useBlankPassword) {
+			String password = smtpServer.getPassword();
+			if (smtpServer.isUseBlankPassword()) {
 				password = "";
 			} else {
-				if (StringUtils.isEmpty(password)) {
+				if (StringUtils.isEmpty(password) && StringUtils.equalsAny(action, "edit", "copy")) {
 					//password field blank. use current password
 					useCurrentPassword = true;
 				}
 			}
 
-			if ((StringUtils.equalsAnyIgnoreCase(action, "edit", "copy"))
-					&& useCurrentPassword) {
-				//password field blank. use current password
-				SmtpServer currentSmtpServer = smtpServerService.getSmtpServer(id);
+			String oauthClientSecret = smtpServer.getOauthClientSecret();
+			String oauthRefreshToken = smtpServer.getOauthRefreshToken();
+
+			if (StringUtils.equalsAny(action, "edit", "copy")) {
+				SmtpServer currentSmtpServer = smtpServerService.getSmtpServer(smtpServer.getSmtpServerId());
 				logger.debug("currentSmtpServer={}", currentSmtpServer);
 				if (currentSmtpServer == null) {
-					response.setErrorMessage(messageSource.getMessage("page.message.cannotUseCurrentPassword", null, locale));
+					response.setErrorMessage(messageSource.getMessage("page.message.recordNotFound", null, locale));
 					return response;
 				} else {
-					password = currentSmtpServer.getPassword();
+					if (useCurrentPassword) {
+						//password field blank. use current password
+						password = currentSmtpServer.getPassword();
+					}
+					if (StringUtils.isEmpty(oauthClientSecret)) {
+						oauthClientSecret = currentSmtpServer.getOauthClientSecret();
+					}
+					if (StringUtils.isEmpty(oauthRefreshToken)) {
+						oauthRefreshToken = currentSmtpServer.getOauthRefreshToken();
+					}
 				}
 			}
 
+			smtpServer.setPassword(password);
+			smtpServer.setOauthClientSecret(oauthClientSecret);
+			smtpServer.setOauthRefreshToken(oauthRefreshToken);
+
 			//https://forum.avast.com/index.php?topic=179599.0
 			//https://stackoverflow.com/questions/16115453/javamail-could-not-convert-socket-to-tls-gmail
-			SmtpServer smtpServer = new SmtpServer();
-			smtpServer.setServer(server);
-			smtpServer.setPort(port);
-			smtpServer.setUseStartTls(useStartTls);
-			smtpServer.setUseSmtpAuthentication(useSmtpAuthentication);
-			smtpServer.setUsername(username);
-			smtpServer.setPassword(password);
-
-			ArtHelper artHelper = new ArtHelper();
-			Mailer mailer = artHelper.getMailer(smtpServer);
-
-			mailer.setDebug(logger.isDebugEnabled());
+			boolean updateDatabase = false;
+			Mailer mailer = mailService.getMailer(smtpServer, updateDatabase);
 
 			mailer.testConnection();
 
 			//if we are here, connection was successful
 			response.setSuccess(true);
-		} catch (SQLException | MessagingException | RuntimeException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

@@ -92,7 +92,6 @@ import art.utils.ArtUtils;
 import art.utils.GroovySandbox;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
-import freemarker.template.TemplateException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.io.File;

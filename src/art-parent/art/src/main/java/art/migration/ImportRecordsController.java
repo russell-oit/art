@@ -565,7 +565,7 @@ public class ImportRecordsController {
 
 		for (SmtpServer smtpServer : smtpServers) {
 			if (smtpServer.isClearTextPassword()) {
-				smtpServer.encryptPassword();
+				smtpServer.encryptPasswords();
 			}
 		}
 

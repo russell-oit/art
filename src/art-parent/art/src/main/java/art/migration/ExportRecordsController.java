@@ -631,7 +631,7 @@ public class ExportRecordsController {
 		String ids = exportRecords.getIds();
 		List<SmtpServer> smtpServers = smtpServerService.getSmtpServers(ids);
 		for (SmtpServer smtpServer : smtpServers) {
-			smtpServer.encryptPassword();
+			smtpServer.encryptPasswords();
 		}
 
 		MigrationLocation location = exportRecords.getLocation();

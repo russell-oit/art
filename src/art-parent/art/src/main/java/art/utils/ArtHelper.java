@@ -18,9 +18,6 @@
 package art.utils;
 
 import art.enums.ReportType;
-import art.mail.Mailer;
-import art.servlets.Config;
-import art.smtpserver.SmtpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,46 +58,4 @@ public class ArtHelper {
 		}
 	}
 
-	/**
-	 * Returns a mailer object that can be used to send emails, using
-	 * configuration defined in application settings
-	 *
-	 * @return a mailer object that can be used to send emails
-	 */
-	public Mailer getMailer() {
-		logger.debug("Entering getMailer");
-
-		Mailer mailer = new Mailer();
-
-		mailer.setHost(Config.getSettings().getSmtpServer());
-		mailer.setPort(Config.getSettings().getSmtpPort());
-		mailer.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
-		mailer.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
-		mailer.setUsername(Config.getSettings().getSmtpUsername());
-		mailer.setPassword(Config.getSettings().getSmtpPassword());
-
-		return mailer;
-	}
-
-	/**
-	 * Returns a mailer object that can be used to send emails, using
-	 * configuration defined in an smtp server object
-	 *
-	 * @param smtpServer the smtp server object
-	 * @return a mailer object that can be used to send emails
-	 */
-	public Mailer getMailer(SmtpServer smtpServer) {
-		logger.debug("Entering getMailer: smtpServer={}", smtpServer);
-
-		Mailer mailer = new Mailer();
-
-		mailer.setHost(smtpServer.getServer());
-		mailer.setPort(smtpServer.getPort());
-		mailer.setUseStartTls(smtpServer.isUseStartTls());
-		mailer.setUseAuthentication(smtpServer.isUseSmtpAuthentication());
-		mailer.setUsername(smtpServer.getUsername());
-		mailer.setPassword(smtpServer.getPassword());
-
-		return mailer;
-	}
 }

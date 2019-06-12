@@ -53,12 +53,12 @@ import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.smtpserver.SmtpServer;
 import art.user.User;
-import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.ExpressionHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
+import art.utils.MailService;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -206,6 +206,9 @@ public class ReportJob implements org.quartz.Job {
 
 	@Autowired
 	ReportService reportService;
+
+	@Autowired
+	private MailService mailService;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -402,9 +405,7 @@ public class ReportJob implements org.quartz.Job {
 			if (!Config.getCustomSettings().isEnableEmailing()) {
 				logger.info("Emailing disabled. Job Id {}", jobId);
 			} else {
-				ArtHelper artHelper = new ArtHelper();
-				Mailer mailer = artHelper.getMailer();
-				mailer.setDebug(logger.isDebugEnabled());
+				Mailer mailer = mailService.getMailer();
 
 				String[] emailsArray = separateEmails(errorNotificationTo);
 				String subject = "ART [Job Error]: " + job.getName() + " (" + jobId + ")";
@@ -2410,14 +2411,16 @@ public class ReportJob implements org.quartz.Job {
 	 * @param cc
 	 * @param bcc
 	 * @param reportParamsList the report parameters used to run the job
-	 * @throws IOException
+	 * @param reportParamsMap
+	 * @throws Exception
 	 */
 	private void processAndSendEmail(Map<String, Map<String, String>> recipientDetails,
 			String message, String outputFileName, boolean recipientFilterPresent,
 			boolean generateEmail, String[] tos, String[] ccs, String[] bccs,
 			String userEmail, String cc, String bcc,
 			List<ReportParameter> reportParamsList,
-			Map<String, ReportParameter> reportParamsMap) throws IOException, ParseException {
+			Map<String, ReportParameter> reportParamsMap)
+			throws Exception {
 
 		logger.debug("Entering processAndSendEmail");
 
@@ -2854,13 +2857,12 @@ public class ReportJob implements org.quartz.Job {
 	 * @param ccs
 	 * @param bccs
 	 * @param reportParamsMap map containing report parameters
-	 * @throws IOException
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private void runAlertJob(boolean generateEmail, Map<String, Map<String, String>> recipientDetails,
 			ReportRunner reportRunner, String message, boolean recipientFilterPresent,
 			String[] tos, String[] ccs, String[] bccs, Map<String, ReportParameter> reportParamsMap)
-			throws IOException, SQLException, TemplateException, ParseException {
+			throws Exception {
 		/*
 		 * ALERT if the resultset is not null and the first column is a
 		 * positive integer => send the alert email
@@ -3099,22 +3101,19 @@ public class ReportJob implements org.quartz.Job {
 	 * Returns a mailer object that can be used to send emails
 	 *
 	 * @return a mailer object that can be used to send emails
+	 * @throws java.lang.IOException
 	 */
-	private Mailer getMailer() {
+	private Mailer getMailer() throws Exception {
 		logger.debug("Entering getMailer");
 
 		Mailer mailer;
 
-		ArtHelper artHelper = new ArtHelper();
-
 		SmtpServer jobSmtpServer = job.getSmtpServer();
 		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
-			mailer = artHelper.getMailer(jobSmtpServer);
+			mailer = mailService.getMailer(jobSmtpServer);
 		} else {
-			mailer = artHelper.getMailer();
+			mailer = mailService.getMailer();
 		}
-
-		mailer.setDebug(logger.isDebugEnabled());
 
 		return mailer;
 	}

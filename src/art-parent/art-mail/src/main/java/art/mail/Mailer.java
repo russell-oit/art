@@ -54,6 +54,21 @@ public class Mailer {
 	private String messageType;
 	private boolean useAuthentication;
 	private static final String[] EMPTY_STRING_ARRAY = {};
+	private boolean useOAuth2;
+
+	/**
+	 * @return the useOAuth2
+	 */
+	public boolean isUseOAuth2() {
+		return useOAuth2;
+	}
+
+	/**
+	 * @param useOAuth2 the useOAuth2 to set
+	 */
+	public void setUseOAuth2(boolean useOAuth2) {
+		this.useOAuth2 = useOAuth2;
+	}
 
 	/**
 	 * @return the useAuthentication
@@ -435,7 +450,7 @@ public class Mailer {
 		logger.debug("useAuthentication={}", useAuthentication);
 		if (useAuthentication) {
 			logger.debug("username='{}'", username);
-			logger.debug("password==null = {}", password==null);
+			logger.debug("password==null = {}", password == null);
 			Transport.send(msg, username, password);
 		} else {
 			Transport.send(msg);
@@ -451,6 +466,8 @@ public class Mailer {
 		logger.debug("Entering getSession");
 
 		//set session properties
+		//https://javaee.github.io/javamail/docs/api/com/sun/mail/smtp/package-summary.html
+		//https://www.oracle.com/technetwork/java/sslnotes-150073.txt
 		Properties props = new Properties();
 
 		logger.debug("port={}", port);
@@ -468,8 +485,19 @@ public class Mailer {
 		logger.debug("sendPartial={}", sendPartial);
 		props.put("mail.smtp.sendpartial", sendPartial);
 
+		boolean loggerDebug = logger.isDebugEnabled();
 		logger.debug("debug={}", debug);
-		props.put("mail.debug", debug);
+		logger.debug("loggerDebug={}", loggerDebug);
+		if (debug || loggerDebug) {
+			props.put("mail.debug", true);
+		}
+
+		//https://javaee.github.io/javamail/OAuth2
+		//https://javaee.github.io/javamail/FAQ#gmail
+		logger.debug("useOAuth2={}", useOAuth2);
+		if (useOAuth2) {
+			props.put("mail.smtp.auth.mechanisms", "XOAUTH2");
+		}
 
 		//get Session            
 		Session session = Session.getInstance(props);
@@ -485,16 +513,15 @@ public class Mailer {
 	 */
 	public void testConnection() throws MessagingException {
 		Session session = getSession();
-		Transport transport = session.getTransport("smtp");
-		
-		logger.debug("useAuthentication={}", useAuthentication);
-		if (useAuthentication) {
-			logger.debug("username='{}'", username);
-			logger.debug("password==null = {}", password==null);
-			transport.connect(username, password);
-		} else {
-			transport.connect();
+		try (Transport transport = session.getTransport("smtp")) {
+			logger.debug("useAuthentication={}", useAuthentication);
+			if (useAuthentication) {
+				logger.debug("username='{}'", username);
+				logger.debug("password==null = {}", password == null);
+				transport.connect(username, password);
+			} else {
+				transport.connect();
+			}
 		}
-		transport.close();
 	}
 }
