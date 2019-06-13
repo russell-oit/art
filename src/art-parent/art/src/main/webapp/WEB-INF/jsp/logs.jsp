@@ -10,7 +10,6 @@ Display application logs
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
-<%@taglib uri="/WEB-INF/tlds/functions.tld" prefix="f" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
@@ -185,7 +184,7 @@ Display application logs
 						<tr class="${encode:forHtmlAttribute(log.level)}">
 							<td></td> <%-- details control column --%>
 							<td data-sort="${log.timeStamp}">
-								<fmt:formatDate value="${f:getDate(log.timeStamp)}" pattern="${dateDisplayPattern}"/>
+								<fmt:formatDate value="${log.date}" pattern="${dateDisplayPattern}"/>
 							</td>
 							<td>${encode:forHtmlContent(log.level)}</td>
 							<td>${encode:forHtmlContent(log.loggerName)}</td>

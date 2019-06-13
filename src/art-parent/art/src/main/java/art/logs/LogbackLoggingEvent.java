@@ -24,6 +24,7 @@ import ch.qos.logback.classic.spi.LoggerContextVO;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.spi.ThrowableProxyVO;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 import org.owasp.encoder.Encode;
 import org.slf4j.Marker;
@@ -61,6 +62,7 @@ public class LogbackLoggingEvent implements Serializable {
 	private Marker marker;
 	private Map<String, String> mdcPropertyMap;
 	private long timeStamp;
+	private Date date;
 
 	public static LogbackLoggingEvent build(ILoggingEvent le) {
 		LogbackLoggingEvent lle = new LogbackLoggingEvent();
@@ -79,6 +81,8 @@ public class LogbackLoggingEvent implements Serializable {
 		if (le.hasCallerData()) {
 			lle.callerDataArray = le.getCallerData();
 		}
+
+		lle.date = new Date(le.getTimeStamp());
 		return lle;
 	}
 
@@ -182,6 +186,10 @@ public class LogbackLoggingEvent implements Serializable {
 	 */
 	public void setCommonFramesOmittedText(String commonFramesOmittedText) {
 		this.commonFramesOmittedText = commonFramesOmittedText;
+	}
+	
+	public Date getDate(){
+		return date;
 	}
 
 	/**
