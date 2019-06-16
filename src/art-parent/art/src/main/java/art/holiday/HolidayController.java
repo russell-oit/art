@@ -30,14 +30,12 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
-import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
-import static org.quartz.TriggerBuilder.newTrigger;
-import static org.quartz.TriggerKey.triggerKey;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,10 +61,10 @@ public class HolidayController {
 
 	@Autowired
 	private HolidayService holidayService;
-	
+
 	@Autowired
 	private JobService jobService;
-	
+
 	@Autowired
 	private ScheduleService scheduleService;
 
@@ -93,7 +91,7 @@ public class HolidayController {
 
 		try {
 			ActionResult deleteResult = holidayService.deleteHoliday(id);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -119,7 +117,7 @@ public class HolidayController {
 
 		try {
 			ActionResult deleteResult = holidayService.deleteHolidays(ids);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -195,7 +193,7 @@ public class HolidayController {
 				holidayService.updateHoliday(holiday, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			
+
 			String recordName = holiday.getName() + " (" + holiday.getHolidayId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
@@ -227,15 +225,15 @@ public class HolidayController {
 		int holidayId = holiday.getHolidayId();
 		String runId = holidayId + "-" + ArtUtils.getUniqueId();
 
-		JobDetail tempJob = newJob(UpdateQuartzSchedulesJob.class)
-				.withIdentity(jobKey("updateHolidaysJob-" + runId, "updateHolidaysJobGroup"))
+		JobDetail tempJob = JobBuilder.newJob(UpdateQuartzSchedulesJob.class)
+				.withIdentity("updateHolidaysJob-" + runId, "updateHolidaysJobGroup")
 				.usingJobData("holidayId", holidayId)
 				.usingJobData("userId", actionUser.getUserId())
 				.build();
 
 		// create SimpleTrigger that will fire once, immediately		        
-		SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
-				.withIdentity(triggerKey("updateHolidaysTrigger-" + runId, "updateHolidaysTriggerGroup"))
+		SimpleTrigger tempTrigger = (SimpleTrigger) TriggerBuilder.newTrigger()
+				.withIdentity("updateHolidaysTrigger-" + runId, "updateHolidaysTriggerGroup")
 				.startNow()
 				.build();
 
@@ -257,7 +255,7 @@ public class HolidayController {
 
 		return "editHoliday";
 	}
-	
+
 	@RequestMapping(value = "/recordsWithHoliday", method = RequestMethod.GET)
 	public String showRecordsWithHoliday(@RequestParam("holidayId") Integer holidayId, Model model) {
 		logger.debug("Entering showRecordsWithHoliday: holidayId={}", holidayId);

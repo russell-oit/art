@@ -75,12 +75,12 @@ import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.logging.slf4j.SLF4JLoggerImplFactory;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import org.quartz.CronTrigger;
-import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import static org.quartz.TriggerBuilder.newTrigger;
+import org.quartz.TriggerBuilder;
 import static org.quartz.TriggerKey.triggerKey;
 import org.saiku.service.olap.OlapDiscoverService;
 import org.saiku.service.olap.ThinQueryService;
@@ -720,8 +720,8 @@ public class Config extends HttpServlet {
 			String triggerName = "clean";
 			String triggerGroup = "clean";
 
-			JobDetail quartzJob = newJob(CleanJob.class)
-					.withIdentity(jobKey(jobName, jobGroup))
+			JobDetail quartzJob = JobBuilder.newJob(CleanJob.class)
+					.withIdentity(jobName, jobGroup)
 					.build();
 
 			//build cron expression for the schedule
@@ -741,8 +741,8 @@ public class Config extends HttpServlet {
 			Date endDate = null; //no end
 
 			//create trigger that defines the schedule for the job
-			CronTrigger trigger = newTrigger()
-					.withIdentity(triggerKey(triggerName, triggerGroup))
+			CronTrigger trigger = TriggerBuilder.newTrigger()
+					.withIdentity(triggerName, triggerGroup)
 					.withSchedule(cronSchedule(cronString))
 					.startAt(startDate)
 					.endAt(endDate)

@@ -59,15 +59,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
-import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import static org.quartz.TriggerBuilder.newTrigger;
-import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -301,15 +298,15 @@ public class JobController {
 
 		String username = sessionUser.getUsername();
 
-		JobDetail tempJob = newJob(ReportJob.class)
-				.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
+		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
+				.withIdentity("tempJob-" + runId, "tempJobGroup")
 				.usingJobData("jobId", jobId)
 				.usingJobData("username", username)
 				.usingJobData("tempJob", Boolean.TRUE)
 				.build();
 
-		TriggerBuilder triggerBuilder = newTrigger()
-				.withIdentity(triggerKey("tempTrigger-" + runId, "tempTriggerGroup"));
+		TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
+				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup");
 
 		if (runDate == null) {
 			//create SimpleTrigger that will fire once, immediately

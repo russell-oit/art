@@ -18,8 +18,6 @@
 package art.utils;
 
 import art.enums.ReportType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides helper methods to be used within the application
@@ -27,8 +25,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class ArtHelper {
-
-	private static final Logger logger = LoggerFactory.getLogger(ArtHelper.class);
 
 	/**
 	 * Returns the default show legend option depending on the report type

@@ -39,14 +39,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
-import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
-import static org.quartz.TriggerBuilder.newTrigger;
-import static org.quartz.TriggerKey.triggerKey;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -271,15 +269,15 @@ public class ScheduleController {
 		int scheduleId = schedule.getScheduleId();
 		String runId = scheduleId + "-" + ArtUtils.getUniqueId();
 
-		JobDetail tempJob = newJob(UpdateQuartzSchedulesJob.class)
-				.withIdentity(jobKey("updateSchedulesJob-" + runId, "updateSchedulesJobGroup"))
+		JobDetail tempJob = JobBuilder.newJob(UpdateQuartzSchedulesJob.class)
+				.withIdentity("updateSchedulesJob-" + runId, "updateSchedulesJobGroup")
 				.usingJobData("scheduleId", scheduleId)
 				.usingJobData("userId", actionUser.getUserId())
 				.build();
 
 		// create SimpleTrigger that will fire once, immediately		        
-		SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
-				.withIdentity(triggerKey("updateSchedulesTrigger-" + runId, "updateSchedulesTriggerGroup"))
+		SimpleTrigger tempTrigger = (SimpleTrigger) TriggerBuilder.newTrigger()
+				.withIdentity("updateSchedulesTrigger-" + runId, "updateSchedulesTriggerGroup")
 				.startNow()
 				.build();
 
