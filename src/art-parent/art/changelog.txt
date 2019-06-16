@@ -2,6 +2,7 @@ ART 4.3
 * Added file and fileZip report formats for FreeMarker, Velocity and Thymeleaf report types
 * Removed pdf export by default for htmlDataTable report format
 * Enable use of oauth with gmail smtp server
+* Allow use of clear text password when loading art-database.json file
 * Updated poi, jxls, jasperreports, xdocreports
 
 ART 4.2

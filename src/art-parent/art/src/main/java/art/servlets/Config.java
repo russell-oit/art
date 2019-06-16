@@ -564,7 +564,9 @@ public class Config extends HttpServlet {
 				ObjectMapper mapper = new ObjectMapper();
 				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
 
-				artDatabase.decryptPassword(encryptionKey, encryptionPassword);
+				if (!artDatabase.isClearTextPassword()) {
+					artDatabase.decryptPassword(encryptionKey, encryptionPassword);
+				}
 			} else {
 				logger.info("ART Database configuration file not found: '{}'", artDatabaseFilePath);
 			}
@@ -609,7 +611,9 @@ public class Config extends HttpServlet {
 
 		//encrypt password field for storing
 		String originalPassword = artDatabase.getPassword();
-		artDatabase.encryptPassword(encryptionKey, encryptionPassword);
+		if (!artDatabase.isClearTextPassword()) {
+			artDatabase.encryptPassword(encryptionKey, encryptionPassword);
+		}
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
