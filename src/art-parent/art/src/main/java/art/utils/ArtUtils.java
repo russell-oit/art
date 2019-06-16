@@ -39,6 +39,10 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import static java.time.temporal.ChronoUnit.DAYS;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -63,8 +67,6 @@ import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -271,14 +273,15 @@ public class ArtUtils {
 	 * @return days in "civil" time rather than "mathematical" time e.g. Monday
 	 * 10pm to Tuesday 7am will return 1 day, not 0.
 	 */
-	public static int daysBetween(Date before, Date after) {
+	public static long daysBetween(Date before, Date after) {
 		if (before == null || after == null) {
-			return Integer.MAX_VALUE;
+			return Long.MAX_VALUE;
 		}
 
 		//consider "civil" days rather than "mathematical" days. so use LocalDate and not DateTime
 		//see https://stackoverflow.com/questions/3802893/number-of-days-between-two-dates-in-joda-time
-		return Days.daysBetween(new LocalDate(before.getTime()), new LocalDate(after.getTime())).getDays();
+		//https://stackoverflow.com/questions/27005861/calculate-days-between-two-dates-in-java-8
+		return DAYS.between(toLocalDate(before), toLocalDate(after));
 	}
 
 	/**
@@ -289,12 +292,44 @@ public class ArtUtils {
 	 * otherwise. days in "civil" time rather than "mathematical" time e.g.
 	 * Monday 10pm to Tuesday 7am will return 1 day, not 0.
 	 */
-	public static int daysUntilToday(Date date) {
+	public static long daysUntilToday(Date date) {
 		if (date == null) {
-			return Integer.MAX_VALUE;
+			return Long.MAX_VALUE;
 		}
 
-		return Days.daysBetween(new LocalDate(date.getTime()), new LocalDate()).getDays();
+		//https://stackoverflow.com/questions/27005861/calculate-days-between-two-dates-in-java-8
+		return DAYS.between(toLocalDate(date), LocalDate.now());
+	}
+
+	/**
+	 * Converts a java.util.Date to a java.time.LocalDate object using the
+	 * system default timezone
+	 *
+	 * @param date the java.util.Date object
+	 * @return the java.time.LocalDate equivalent
+	 */
+	public static LocalDate toLocalDate(Date date) {
+		if (date == null) {
+			return null;
+		} else {
+			//https://stackoverflow.com/questions/21242110/convert-java-util-date-to-java-time-localdate
+			return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		}
+	}
+
+	/**
+	 * Converts a java.util.Date to a java.time.LocalDateTime object using the
+	 * system default timezone
+	 *
+	 * @param date the java.util.Date object
+	 * @return the java.time.LocalDateTime equivalent
+	 */
+	public static LocalDateTime toLocalDateTime(Date date) {
+		if (date == null) {
+			return null;
+		} else {
+			return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+		}
 	}
 
 	/**
