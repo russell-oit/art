@@ -53,6 +53,7 @@ import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.smtpserver.SmtpServer;
 import art.user.User;
+import art.utils.ArtLogsHelper;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.ExpressionHelper;
@@ -110,6 +111,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -172,17 +175,16 @@ public class ReportJob implements org.quartz.Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportJob.class);
 
-	private String fileName;
+	private String fileName = "";
 	private String jobAuditKey;
 	private art.job.Job job;
 	private Timestamp jobStartDate;
 	private JobType jobType;
 	private int jobId;
-	private String runDetails;
-	private String runMessage;
+	private String runDetails = "";
+	private String runMessage = "";
 	private Locale locale;
 	private ch.qos.logback.classic.Logger progressLogger;
-	private long runStartTimeMillis;
 	private FileAppender<ILoggingEvent> progressFileAppender;
 	private JobOptions jobOptions;
 
@@ -215,10 +217,11 @@ public class ReportJob implements org.quartz.Job {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 
-		runStartTimeMillis = System.currentTimeMillis();
+		Instant start = Instant.now();
 
 		JobDataMap dataMap = context.getMergedJobDataMap();
 		jobId = dataMap.getInt("jobId");
+		String runUsername = dataMap.getString("username");
 
 		initializeProgressLogger();
 
@@ -257,10 +260,6 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			jobType = job.getJobType();
-
-			fileName = "";
-			runDetails = "";
-			runMessage = "";
 
 			String systemLocale = Config.getSettings().getSystemLocale();
 			logger.debug("systemLocale='{}'", systemLocale);
@@ -326,12 +325,22 @@ public class ReportJob implements org.quartz.Job {
 
 		sendErrorNotification();
 
-		long runEndTimeMillis = System.currentTimeMillis();
+		Instant end = Instant.now();
+		Duration duration = Duration.between(start, end);
+
+		String logMessage = runMessage + " " + runDetails + " " + fileName;
+		logMessage = StringUtils.trim(logMessage);
+
+		if (runUsername == null) {
+			runUsername = "scheduler";
+		}
+
+		ArtLogsHelper.logJobRun(runUsername, jobId, logMessage, (int) duration.getSeconds());
 
 		//https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/time/DurationFormatUtils.html
 		String durationFormat = "m':'s':'S";
-		String duration = DurationFormatUtils.formatPeriod(runStartTimeMillis, runEndTimeMillis, durationFormat);
-		progressLogger.info("Completed. Time taken - {}", duration);
+		String formattedDuration = DurationFormatUtils.formatDuration(duration.toMillis(), durationFormat);
+		progressLogger.info("Completed. Time taken - {}", formattedDuration);
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
 	}

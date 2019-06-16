@@ -645,6 +645,7 @@ CREATE TABLE ART_JOBS_AUDIT
 -- TOTAL_TIME: total report execution time in seconds, including fetch time and display time
 -- FETCH_TIME: time elapsed from when the query is submitted to when the
 -- database returns 1st row
+-- ITEM_ID: a report id for report runs, or job id for job runs
 
 CREATE TABLE ART_LOGS
 (
@@ -652,7 +653,7 @@ CREATE TABLE ART_LOGS
 	USERNAME VARCHAR(50) NOT NULL,
 	LOG_TYPE VARCHAR(50) NOT NULL, 
 	IP VARCHAR(50), 
-	QUERY_ID INTEGER,
+	ITEM_ID INTEGER,
 	TOTAL_TIME INTEGER, 
 	FETCH_TIME INTEGER, 
 	MESSAGE VARCHAR(500) 
