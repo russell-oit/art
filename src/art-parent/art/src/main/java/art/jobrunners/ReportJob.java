@@ -227,50 +227,13 @@ public class ReportJob implements org.quartz.Job {
 
 		progressLogger.info("Started");
 
-		try {
-			if (!Config.getSettings().isSchedulingEnabled()) {
-				jobLogAndClose("Scheduling not enabled");
-				return;
-			}
+		boolean runJob = true;
 
+		try {
 			try {
 				job = jobService.getJob(jobId);
 			} catch (SQLException ex) {
 				logError(ex);
-			}
-
-			if (job == null) {
-				logger.warn("Job not found: {}", jobId);
-				jobLogAndClose("Job not found");
-				return;
-			}
-
-			Report report = job.getReport();
-			if (report == null) {
-				logger.warn("Job report not found. Job Id {}", jobId);
-				jobLogAndClose("Job report not found");
-				return;
-			}
-
-			User user = job.getUser();
-			if (user == null) {
-				logger.warn("Job user not found. Job Id {}", jobId);
-				jobLogAndClose("Job user not found");
-				return;
-			}
-
-			jobType = job.getJobType();
-
-			String systemLocale = Config.getSettings().getSystemLocale();
-			logger.debug("systemLocale='{}'", systemLocale);
-
-			locale = ArtUtils.getLocaleFromString(systemLocale);
-
-			String options = job.getOptions();
-			if (StringUtils.isBlank(options)) {
-				jobOptions = new JobOptions();
-			} else {
-				jobOptions = ArtUtils.jsonToObject(options, JobOptions.class);
 			}
 
 			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
@@ -278,7 +241,9 @@ public class ReportJob implements org.quartz.Job {
 			Date nextRunDate = null;
 			if (tempJob) {
 				//temp job. use existing next run date
-				nextRunDate = job.getNextRunDate();
+				if (job != null) {
+					nextRunDate = job.getNextRunDate();
+				}
 			} else {
 				//not a temp job. set new next run date
 				//get least next run date as job may have multiple triggers
@@ -293,29 +258,73 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 
-			//set overall job start time in the jobs table
+			//set overall job start time and next run date in the jobs table
 			beforeExecution(nextRunDate);
 
-			if (!job.isActive()) {
-				runMessage = "jobs.message.jobDisabled";
-			} else if (!job.getReport().isActive()) {
-				runMessage = "jobs.message.reportDisabled";
-			} else if (!job.getUser().isActive()) {
-				runMessage = "jobs.message.ownerDisabled";
+			if (job == null) {
+				logger.warn("Job not found. Job Id {}", jobId);
+				runMessage = "jobs.message.jobNotFound";
+				progressLogger.info("Job not found");
+				runJob = false;
 			} else {
-				runPreRunReports();
-				if (job.getRecipientsReportId() > 0) {
-					//job has dynamic recipients
-					runDynamicRecipientsJob();
+				if (!Config.getSettings().isSchedulingEnabled()) {
+					logger.info("Scheduling disabled. Job Id {}", jobId);
+					runMessage = "jobs.message.schedulingDisabled";
+					progressLogger.info("Scheduling disabled");
+					runJob = false;
 				} else {
-					//job doesn't have dynamic recipients
-					runNormalJob();
+					Report report = job.getReport();
+					User user = job.getUser();
+					if (report == null) {
+						logger.warn("Job report not found. Job Id {}", jobId);
+						runMessage = "jobs.message.reportNotFound";
+						progressLogger.info("Job report not found");
+						runJob = false;
+					} else if (user == null) {
+						logger.warn("Job user not found. Job Id {}", jobId);
+						runMessage = "jobs.message.userNotFound";
+						progressLogger.info("Job user not found");
+						runJob = false;
+					}
 				}
 			}
 
-			sendFileToDestinations();
-			runBatchFile();
-			runPostRunReports();
+			if (runJob) {
+				jobType = job.getJobType();
+
+				String systemLocale = Config.getSettings().getSystemLocale();
+				logger.debug("systemLocale='{}'", systemLocale);
+
+				locale = ArtUtils.getLocaleFromString(systemLocale);
+
+				String options = job.getOptions();
+				if (StringUtils.isBlank(options)) {
+					jobOptions = new JobOptions();
+				} else {
+					jobOptions = ArtUtils.jsonToObject(options, JobOptions.class);
+				}
+
+				if (!job.isActive()) {
+					runMessage = "jobs.message.jobDisabled";
+				} else if (!job.getReport().isActive()) {
+					runMessage = "jobs.message.reportDisabled";
+				} else if (!job.getUser().isActive()) {
+					runMessage = "jobs.message.ownerDisabled";
+				} else {
+					runPreRunReports();
+					if (job.getRecipientsReportId() > 0) {
+						//job has dynamic recipients
+						runDynamicRecipientsJob();
+					} else {
+						//job doesn't have dynamic recipients
+						runNormalJob();
+					}
+				}
+
+				sendFileToDestinations();
+				runBatchFile();
+				runPostRunReports();
+			}
 		} catch (Exception ex) {
 			logErrorAndSetDetails(ex);
 		}
@@ -405,6 +414,10 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 */
 	private void sendErrorNotification() {
+		if (job == null) {
+			return;
+		}
+
 		String errorNotificationTo = job.getErrorNotificationTo();
 		if (StringUtils.isBlank(errorNotificationTo)) {
 			return;
@@ -438,20 +451,6 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Logs a message to the progress logger and closes the job log file
-	 * appender
-	 *
-	 * @param message the message to log
-	 */
-	private void jobLogAndClose(String message) {
-		runDetails = message;
-		progressLogger.info(runDetails);
-		progressLogger.detachAndStopAllAppenders();
-		progressLogger.setLevel(Level.OFF);
-		updateIncompleteRun();
 	}
 
 	/**
