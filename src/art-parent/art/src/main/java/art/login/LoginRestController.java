@@ -17,7 +17,6 @@
  */
 package art.login;
 
-import art.general.JwtResponseData;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ApiHelper;
@@ -58,9 +57,9 @@ public class LoginRestController {
 				User user = loginResult.getUser();
 				if (loginResult.isAuthenticated() && user.hasPermission("use_api")) {
 					String jwt = generateToken(username, jwtSecret);
-					JwtResponseData jwtResponseData = new JwtResponseData();
-					jwtResponseData.setAccessToken(jwt);
-					return ApiHelper.getOkResponseEntity(jwtResponseData);
+					LoginResponseData loginResponseData = new LoginResponseData();
+					loginResponseData.setAccessToken(jwt);
+					return ApiHelper.getOkResponseEntity(loginResponseData);
 				}
 			}
 
