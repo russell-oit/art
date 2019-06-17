@@ -17,6 +17,10 @@
  */
 package art.login;
 
+import art.login.method.LdapLogin;
+import art.login.method.WindowsDomainLogin;
+import art.login.method.InternalLogin;
+import art.login.method.DbLogin;
 import art.enums.ArtAuthenticationMethod;
 import art.utils.ArtLogsHelper;
 import org.apache.commons.lang3.StringUtils;

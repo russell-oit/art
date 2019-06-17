@@ -17,7 +17,7 @@
  */
 package art.login.rest;
 
-import art.login.InternalLogin;
+import art.login.method.InternalLogin;
 import art.login.LoginResult;
 import art.servlets.Config;
 import art.user.User;
@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/login")
 public class LoginRestController {
+	//https://stackoverflow.com/questions/3226282/are-there-best-practices-for-java-package-organization
 
 	private static final Logger logger = LoggerFactory.getLogger(LoginRestController.class);
 

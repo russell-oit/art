@@ -1768,6 +1768,8 @@ public class Report implements Serializable {
 	 */
 	@JsonIgnore
 	public Report getCleanReport() {
+		//https://stackoverflow.com/questions/45834393/hiding-sensitive-information-in-response
+		//https://www.baeldung.com/entity-to-and-from-dto-for-a-java-spring-application
 		Cloner cloner = new Cloner();
 		Report copy = cloner.deepClone(this);
 

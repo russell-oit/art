@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.login;
+package art.login.method;
 
 import art.servlets.Config;
 import art.dbutils.DatabaseUtils;
+import art.login.LoginResult;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;

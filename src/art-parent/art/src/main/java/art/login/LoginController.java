@@ -17,6 +17,7 @@
  */
 package art.login;
 
+import art.login.method.InternalLogin;
 import art.connectionpool.DbConnections;
 import art.enums.ArtAuthenticationMethod;
 import art.servlets.Config;

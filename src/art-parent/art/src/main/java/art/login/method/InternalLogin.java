@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package art.login;
+package art.login.method;
 
 import art.encryption.PasswordUtils;
+import art.login.LoginResult;
 import art.user.User;
 import art.user.UserService;
 import java.io.UnsupportedEncodingException;
