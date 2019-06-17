@@ -227,9 +227,9 @@ public class ReportJob implements org.quartz.Job {
 
 		progressLogger.info("Started");
 
-		boolean runJob = true;
-
 		try {
+			boolean runJob = true;
+
 			try {
 				job = jobService.getJob(jobId);
 			} catch (SQLException ex) {
@@ -414,29 +414,31 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 */
 	private void sendErrorNotification() {
-		if (job == null) {
-			return;
-		}
+		logger.debug("Entering sendErrorNotification");
 
-		String errorNotificationTo = job.getErrorNotificationTo();
-		if (StringUtils.isBlank(errorNotificationTo)) {
-			return;
-		}
+		try {
+			if (job == null) {
+				return;
+			}
 
-		if (StringUtils.startsWith(runDetails, "<b>Error:</b>")) {
-			if (!Config.getCustomSettings().isEnableEmailing()) {
-				logger.info("Emailing disabled. Job Id {}", jobId);
-			} else {
-				Mailer mailer = mailService.getMailer();
+			String errorNotificationTo = job.getErrorNotificationTo();
+			if (StringUtils.isBlank(errorNotificationTo)) {
+				return;
+			}
 
-				String[] emailsArray = separateEmails(errorNotificationTo);
-				String subject = "ART [Job Error]: " + job.getName() + " (" + jobId + ")";
+			if (StringUtils.startsWith(runDetails, "<b>Error:</b>")) {
+				if (!Config.getCustomSettings().isEnableEmailing()) {
+					logger.info("Emailing disabled. Job Id {}", jobId);
+				} else {
+					Mailer mailer = mailService.getMailer();
 
-				mailer.setTo(emailsArray);
-				mailer.setFrom(Config.getSettings().getErrorNotificationFrom());
-				mailer.setSubject(subject);
+					String[] emailsArray = separateEmails(errorNotificationTo);
+					String subject = "ART [Job Error]: " + job.getName() + " (" + jobId + ")";
 
-				try {
+					mailer.setTo(emailsArray);
+					mailer.setFrom(Config.getSettings().getErrorNotificationFrom());
+					mailer.setSubject(subject);
+
 					Context ctx = new Context(locale);
 					ctx.setVariable("error", runDetails);
 					ctx.setVariable("job", job);
@@ -446,10 +448,10 @@ public class ReportJob implements org.quartz.Job {
 					mailer.setMessage(message);
 
 					mailer.send();
-				} catch (IOException | MessagingException | RuntimeException ex) {
-					logError(ex);
 				}
 			}
+		} catch (IOException | MessagingException | RuntimeException ex) {
+			logError(ex);
 		}
 	}
 
